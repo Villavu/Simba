@@ -14,11 +14,11 @@ uses
   simba.mufasatypes, simba.target;
 
 type
-  TMouseTeleportEvent = procedure(Sender: Pointer; X, Y: Integer);
-  TMouseMovingEvent = function(Sender: Pointer; var X, Y: Double): Boolean;
-
   PSimbaInput = ^TSimbaInput;
   TSimbaInput = packed record
+  type
+    TMouseTeleportEvent = procedure(var Input: TSimbaInput; X, Y: Integer) of object;
+    TMouseMovingEvent = function(var Input: TSimbaInput; var X, Y: Double): Boolean of object;
   const
     DEFAULT_KEY_PRESS_MIN = 30;
     DEFAULT_KEY_PRESS_MAX = 140;
@@ -29,8 +29,11 @@ type
     DEFAULT_SPEED   = 12;
     DEFAULT_GRAVITY = 9;
     DEFAULT_WIND    = 6;
-  private
+  public
     FTarget: TSimbaTarget;
+
+    FTeleportingEvents: array of TMouseTeleportEvent;
+    FMovingEvents: array of TMouseMovingEvent;
 
     function GetRandomKeyPressTime: Integer;
     function GetRandomMouseClickTime: Integer;
@@ -38,6 +41,9 @@ type
     function GetSpeed: Integer;
     function GetGravity: Double;
     function GetWind: Double;
+
+    procedure CallOnTeleportEvents(X, Y: Integer);
+    procedure CallOnMovingEvents(var X, Y: Double);
   public
     KeyPressMin: Integer;
     KeyPressMax: Integer;
@@ -48,9 +54,6 @@ type
     Speed: Integer;
     Gravity: Double;
     Wind: Double;
-
-    OnTeleport: TMouseTeleportEvent;
-    OnMoving: TMouseMovingEvent;
 
     function IsTargetValid: Boolean;
     function IsFocused: Boolean;
@@ -73,6 +76,11 @@ type
     function KeyPressed(Key: KeyCode): Boolean;
 
     function CharToKeyCode(C: Char): KeyCode;
+
+    function AddOnMouseTeleport(Event: TMouseTeleportEvent): TMouseTeleportEvent;
+    function AddOnMouseMoving(Event: TMouseMovingEvent): TMouseMovingEvent;
+    procedure RemoveOnMouseTeleport(Event: TMouseTeleportEvent);
+    procedure RemoveOnMouseMoving(Event: TMouseMovingEvent);
 
     class operator Initialize(var Self: TSimbaInput);
   end;
@@ -164,8 +172,7 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
 
     while True do
     begin
-      if Assigned(OnMoving) and (not OnMoving(@Self, X, Y)) then
-        Exit;
+      CallOnMovingEvents(X, Y);
 
       traveledDistance := Hypot(x - xs, y - ys);
       remainingDistance := Hypot(x - xe, y - ye);
@@ -249,8 +256,8 @@ end;
 procedure TSimbaInput.MouseTeleport(P: TPoint);
 begin
   FTarget.MouseTeleport(P);
-  if Assigned(OnTeleport) then
-    OnTeleport(@Self, P.X, P.Y);
+
+  CallOnTeleportEvents(P.X, P.Y);
 end;
 
 procedure TSimbaInput.MouseTeleport(X, Y: Integer);
@@ -344,6 +351,54 @@ begin
     else
       Result := KeyCode.UNKNOWN;
   end;
+end;
+
+procedure TSimbaInput.CallOnTeleportEvents(X, Y: Integer);
+var
+  Event: TMouseTeleportEvent;
+begin
+  for Event in FTeleportingEvents do
+    Event(Self, X, Y);
+end;
+
+procedure TSimbaInput.CallOnMovingEvents(var X, Y: Double);
+var
+  Event: TMouseMovingEvent;
+begin
+  for Event in FMovingEvents do
+    Event(Self, X, Y);
+end;
+
+function TSimbaInput.AddOnMouseTeleport(Event: TMouseTeleportEvent): TMouseTeleportEvent;
+begin
+  Result := Event;
+
+  FTeleportingEvents += [Event];
+end;
+
+function TSimbaInput.AddOnMouseMoving(Event: TMouseMovingEvent): TMouseMovingEvent;
+begin
+  Result := Event;
+
+  FMovingEvents += [Event];
+end;
+
+procedure TSimbaInput.RemoveOnMouseTeleport(Event: TMouseTeleportEvent);
+var
+  I: Integer;
+begin
+  for I := High(FTeleportingEvents) downto 0 do
+    if (Event = FTeleportingEvents[I]) then
+      Delete(FTeleportingEvents, I, 1);
+end;
+
+procedure TSimbaInput.RemoveOnMouseMoving(Event: TMouseMovingEvent);
+var
+  I: Integer;
+begin
+  for I := High(FMovingEvents) downto 0 do
+    if (Event = FMovingEvents[I]) then
+      Delete(FMovingEvents, I, 1);
 end;
 
 class operator TSimbaInput.Initialize(var Self: TSimbaInput);

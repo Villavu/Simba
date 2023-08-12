@@ -371,23 +371,67 @@ begin
   PKeyCode(Result)^ := PSimbaInput(Params^[0])^.CharToKeyCode(PChar(Params^[1])^);
 end;
 
-procedure ImportInput(Compiler: TSimbaScript_Compiler);
+(*
+TInput.AddOnMouseTeleport
+~~~~~~~~~~~~~~~~~~~~~~~~~
+> function TInput.AddOnMouseTeleport(Event: TMouseTeleportEvent): TMouseTeleportEvent;
 
-  // If target field is default value, use global target variable.
-  function GetOverrideBody(Name, Params: lpString; isFunction: Boolean): String;
-  begin
-    Result := 'begin'                                                                                                 + LineEnding +
-              '  if Self.Target.IsDefault() then'                                                                     + LineEnding +
-              '    ' + BoolToStr(isFunction, 'Result := ', '') + 'Self.GetGlobalInput().' + Name + '(' + Params + ')' + LineEnding +
-              '  else'                                                                                                + LineEnding +
-              '    ' + BoolToStr(isFunction, 'Result := ', '') + 'inherited();'                                       + LineEnding +
-              'end;';
-  end;
+Add a event to be called everytime the mouse is teleported.
+*)
+procedure _LapeInput_AddOnMouseTeleport(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaInput.TMouseTeleportEvent(Result^) := PSimbaInput(Params^[0])^.AddOnMouseTeleport(TSimbaInput.TMouseTeleportEvent(Params^[1]^));
+end;
+
+(*
+TInput.AddOnMouseMoving
+~~~~~~~~~~~~~~~~~~~~~~~
+> function TInput.AddOnMouseMoving(Event: TMouseMovingEvent): TMouseTeleportEvent;
+
+Add a event to be called while the mouse is moving so that the destination can be changed.
+*)
+procedure _LapeInput_AddOnMouseMoving(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaInput.TMouseMovingEvent(Result^) := PSimbaInput(Params^[0])^.AddOnMouseMoving(TSimbaInput.TMouseMovingEvent(Params^[1]^));
+end;
+
+(*
+TInput.RemoveOnMouseTeleport
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> procedure TInput.RemoveOnMouseTeleport(Event: TMouseTeleportEvent);
+*)
+procedure _LapeInput_RemoveOnMouseTeleport(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaInput(Params^[0])^.RemoveOnMouseTeleport(TSimbaInput.TMouseTeleportEvent(Params^[1]^));
+end;
+
+(*
+TInput.RemoveOnMouseMoving
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+> procedure TInput.RemoveOnMouseMoving(Event: TMouseMovingEvent);
+*)
+procedure _LapeInput_RemoveOnMouseMoving(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaInput(Params^[0])^.RemoveOnMouseMoving(TSimbaInput.TMouseMovingEvent(Params^[1]^));
+end;
+
+procedure ImportInput(Compiler: TSimbaScript_Compiler);
 
   procedure addInputMethod(Header: lpString; Addr: Pointer);
   begin
     Compiler.addGlobalFunc(Header, Addr);
-    Compiler.addOverrideMethod(Header, @GetOverrideBody);
+    Compiler.addGlobalFuncOverride(Header, [
+      'begin',
+      '  if Self.Target.IsDefault() then',
+      '  try',
+      '    Self.Target := System.Target;',
+      '    {$IFDECL Result}Result:={$ENDIF}inherited();',
+      '  finally',
+      '    Self.Target := [];',
+      '  end else',
+      '    {$IFDECL Result}Result:={$ENDIF}inherited();',
+      'end;'
+    ]);
   end;
 
 begin
@@ -395,12 +439,13 @@ begin
   begin
     ImportingSection := 'Input';
 
-    addGlobalType('procedure(Sender: Pointer; X, Y: Integer)', 'TMouseTeleportEvent', FFI_DEFAULT_ABI);
-    addGlobalType('function(Sender: Pointer; var X, Y: Double): Boolean', 'TMouseMovingEvent', FFI_DEFAULT_ABI);
-
+    // Must equal TSimbaInput
     addGlobalType([
       'packed record',
       '  Target: TTarget;',
+      '',
+      '  TeleportingEvents: array of TMethod;',
+      '  MovingEvents: array of TMethod;',
       '',
       '  MinPressTime: Integer;',
       '  MaxPressTime: Integer;',
@@ -411,17 +456,17 @@ begin
       '  Speed: Integer;',
       '  Gravity: Double;',
       '  Wind: Double;',
-      '',
-      '  OnTeleport: TMouseTeleportEvent;',
-      '  OnMoving: TMouseMovingEvent;',
       'end;'],
       'TInput'
     );
-    if (getGlobalType('TInput').Size <> SizeOf(TSimbaInput)) then
-      raise Exception.Create('SizeOf(TInput) is wrong!');
 
     with addGlobalVar('TInput', '[]', 'Input') do
+    begin
+      if (VarType.Size <> SizeOf(TSimbaInput)) then
+        SimbaException('SizeOf(TInput) is wrong!');
+
       Used := duTrue;
+    end;
 
     addGlobalType([
       'enum(',
@@ -598,13 +643,14 @@ begin
       'KeyCode'
     );
 
-    addGlobalFunc(
-      'function TInput.GetGlobalInput: TInput;', [
-      'begin',
-      '  Result := Self;',
-      '  Result.Target := System.Target;',
-      'end;'
-    ]);
+    addGlobalType('procedure(var Input: TInput; X, Y: Integer) of object', 'TMouseTeleportEvent', FFI_DEFAULT_ABI);
+    addGlobalType('function(var Input: TInput; var X, Y: Double): Boolean of object', 'TMouseMovingEvent', FFI_DEFAULT_ABI);
+
+    // Dont need addInputMethod for these
+    addGlobalFunc('function TInput.AddOnMouseTeleportEvent(Event: TMouseTeleportEvent): TMouseTeleportEvent;', @_LapeInput_AddOnMouseTeleport);
+    addGlobalFunc('function TInput.AddOnMouseMovingEvent(Event: TMouseMovingEvent): TMouseTeleportEvent;', @_LapeInput_AddOnMouseMoving);
+    addGlobalFunc('procedure TInput.RemoveOnMouseTeleportEvent(Event: TMouseTeleportEvent);', @_LapeInput_RemoveOnMouseTeleport);
+    addGlobalFunc('procedure TInput.RemoveOnMouseMovingEvent(Event: TMouseMovingEvent);', @_LapeInput_RemoveOnMouseMoving);
 
     addInputMethod('function TInput.MousePressed(Button: MouseButton): Boolean', @_LapeInput_MousePressed);
     addInputMethod('function TInput.MousePosition: TPoint', @_LapeInput_MousePosition);
