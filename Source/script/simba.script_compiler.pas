@@ -15,12 +15,6 @@ uses
   simba.mufasatypes;
 
 type
-  TOverridingMethod = function(Name, Params: lpString; isFunction: Boolean): String is nested;
-
-  TSimbaScript_Compiler = class;
-  TSimbaImport = procedure(Compiler: TSimbaScript_Compiler);
-  TSimbaImportArray = array of TSimbaImport;
-
   TManagedImportClosure = class(TLapeDeclaration)
     Closure: TImportClosure;
   end;
@@ -37,8 +31,6 @@ type
   public
     function CurrentDir: String;
 
-    procedure addOverrideMethod(Header: lpString; GetBody: TOverridingMethod);
-
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
@@ -48,6 +40,8 @@ type
 
     function addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method; virtual; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
+    procedure addGlobalFuncOverride(Header: lpString; Body: TStringArray); virtual;
+
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
     function addGlobalType(Str: TStringArray; Name: String): TLapeType; virtual; overload;
 
@@ -66,57 +60,8 @@ implementation
 
 uses
   lpeval,
-  simba.script_imports, simba.paslex,
+  simba.script_imports,
   simba.script_compiler_waituntil, simba.script_compiler_rtti;
-
-procedure TSimbaScript_Compiler.addOverrideMethod(Header: lpString; GetBody: TOverridingMethod);
-var
-  isFunction: Boolean;
-  FuncName, Params, Body: lpString;
-begin
-  with TPasLexer.Create() do
-  try
-    Origin := PChar(Header);
-
-    Params := '';
-    FuncName := '';
-    isFunction := TokenID = tkFunction;
-    if isNext(tkDot) then
-    begin
-      NextNoJunk();
-      FuncName := Token;
-    end;
-
-    if isNext(tkRoundOpen) then
-    begin
-      while (TokenID <> tkNull) do
-      begin
-        case TokenID of
-          tkIdentifier:
-            begin
-              if (Params <> '') then
-                Params := Params + ', ';
-              Params := Params + Token;
-            end;
-          tkColon:
-            NextNoJunk();
-          tkRoundClose:
-            Break;
-        end;
-        NextNoJunk();
-      end;
-    end;
-
-    Header := Header.Replace('overload', '').Trim([' ', ';']);
-    Header := Header + '; override;';
-
-    Body := GetBody(FuncName, Params, isFunction);
-
-    addGlobalFunc(Header, [Body]);
-  finally
-    Free();
-  end;
-end;
 
 function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method;
 var
@@ -259,6 +204,12 @@ begin
   Result := '';
   if (Tokenizer <> nil) then
     Result := ExtractFileDir(Tokenizer.FileName);
+end;
+
+procedure TSimbaScript_Compiler.addGlobalFuncOverride(Header: lpString; Body: TStringArray);
+begin
+  Header := Header.Replace('; overload', '').Trim([' ', ';']) + '; override;';
+  addGlobalFunc(Header, Body);
 end;
 
 procedure TSimbaScript_Compiler.InitBaseDefinitions;

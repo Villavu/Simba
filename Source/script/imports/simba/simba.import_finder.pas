@@ -321,21 +321,21 @@ end;
 
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
 
-  // If target field is default value, use global target variable.
-  function GetOverrideBody(Name, Params: lpString; isFunction: Boolean): String;
-  begin
-    Result := 'begin'                                                                                                 + LineEnding +
-              '  if Self.Target.IsDefault() then'                                                                     + LineEnding +
-              '    ' + BoolToStr(isFunction, 'Result := ', '') + 'Self.GetGlobalFinder().' + Name + '(' + Params + ')' + LineEnding +
-              '  else'                                                                                                + LineEnding +
-              '    ' + BoolToStr(isFunction, 'Result := ', '') + 'inherited();'                                       + LineEnding +
-              'end;';
-  end;
-
-  procedure addInputMethod(Header: lpString; Addr: Pointer);
+  procedure addFinderMethod(Header: lpString; Addr: Pointer);
   begin
     Compiler.addGlobalFunc(Header, Addr);
-    Compiler.addOverrideMethod(Header, @GetOverrideBody);
+    Compiler.addGlobalFuncOverride(Header, [
+      'begin',
+      '  if Self.Target.IsDefault() then',
+      '  try',
+      '    Self.Target := System.Target;',
+      '    {$IFDECL Result}Result:={$ENDIF}inherited();',
+      '  finally',
+      '    Self.Target := [];',
+      '  end else',
+      '    {$IFDECL Result}Result:={$ENDIF}inherited();',
+      'end;'
+    ]);
   end;
 
 begin
@@ -374,58 +374,53 @@ begin
       'end;'],
       'TFinder'
     );
-    if (getGlobalType('TFinder').Size <> SizeOf(TSimbaFinder)) then
-      raise Exception.Create('SizeOf(TSimbaFinder) is wrong!');
 
     with addGlobalVar('TFinder', '[]', 'Finder') do
+    begin
+      if (VarType.Size <> SizeOf(TSimbaFinder)) then
+        SimbaException('SizeOf(TSimbaFinder) is wrong!');
+
       Used := duTrue;
+    end;
 
-    addGlobalFunc(
-      'function TFinder.GetGlobalFinder: TFinder;', [
-      'begin',
-      '  Result := Self;',
-      '  Result.Target := System.Target;',
-      'end;'
-    ]);
+    addFinderMethod('function TFinder.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindEdges1);
+    addFinderMethod('function TFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindEdges2);
 
-    addInputMethod('function TFinder.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindEdges1);
-    addInputMethod('function TFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindEdges2);
+    addFinderMethod('function TFinder.FindDTMEx(DTM: TDTM; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeFinder_FindDTMEx);
+    addFinderMethod('function TFinder.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeFinder_FindDTMRotatedEx);
 
-    addInputMethod('function TFinder.FindDTMEx(DTM: TDTM; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeFinder_FindDTMEx);
-    addInputMethod('function TFinder.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeFinder_FindDTMRotatedEx);
+    addFinderMethod('function TFinder.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeFinder_FindDTM);
+    addFinderMethod('function TFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeFinder_FindDTMRotated);
 
-    addInputMethod('function TFinder.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeFinder_FindDTM);
-    addInputMethod('function TFinder.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeFinder_FindDTMRotated);
+    addFinderMethod('function TFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindImageEx1);
+    addFinderMethod('function TFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindImageEx2);
+    addFinderMethod('function TFinder.FindImage(Bitmap: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeFinder_FindImage1);
+    addFinderMethod('function TFinder.FindImage(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeFinder_FindImage2);
 
-    addInputMethod('function TFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindImageEx1);
-    addInputMethod('function TFinder.FindImageEx(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindImageEx2);
-    addInputMethod('function TFinder.FindImage(Bitmap: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeFinder_FindImage1);
-    addInputMethod('function TFinder.FindImage(Bitmap: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeFinder_FindImage2);
+    addFinderMethod('function TFinder.FindTemplate(Bitmap: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeFinder_FindTemplate);
 
-    addInputMethod('function TFinder.FindTemplate(Bitmap: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeFinder_FindTemplate);
+    addFinderMethod('function TFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix', @_LapeFinder_MatchColor);
 
-    addInputMethod('function TFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix', @_LapeFinder_MatchColor);
+    addFinderMethod('function TFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindColor1);
+    addFinderMethod('function TFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindColor2);
+    addFinderMethod('function TFinder.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindColor3);
 
-    addInputMethod('function TFinder.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindColor1);
-    addInputMethod('function TFinder.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindColor2);
-    addInputMethod('function TFinder.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_FindColor3);
+    addFinderMethod('function TFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeFinder_CountColor1);
+    addFinderMethod('function TFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeFinder_CountColor2);
+    addFinderMethod('function TFinder.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeFinder_CountColor3);
 
-    addInputMethod('function TFinder.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeFinder_CountColor1);
-    addInputMethod('function TFinder.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeFinder_CountColor2);
-    addInputMethod('function TFinder.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeFinder_CountColor3);
+    addFinderMethod('function TFinder.GetColor(X, Y: Integer): TColor; overload', @_LapeFinder_GetColor1);
+    addFinderMethod('function TFinder.GetColor(P: TPoint): TColor; overload', @_LapeFinder_GetColor2);
+    addFinderMethod('function TFinder.GetColors(Points: TPointArray): TIntegerArray', @_LapeFinder_GetColors);
+    addFinderMethod('function TFinder.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix', @_LapeFinder_GetColorsMatrix);
 
-    addInputMethod('function TFinder.GetColor(X, Y: Integer): TColor; overload', @_LapeFinder_GetColor1);
-    addInputMethod('function TFinder.GetColor(P: TPoint): TColor; overload', @_LapeFinder_GetColor2);
-    addInputMethod('function TFinder.GetColors(Points: TPointArray): TIntegerArray', @_LapeFinder_GetColors);
-    addInputMethod('function TFinder.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix', @_LapeFinder_GetColorsMatrix);
+    addFinderMethod('function TFinder.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeFinder_GetPixelDifference1);
+    addFinderMethod('function TFinder.GetPixelDifference(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeFinder_GetPixelDifference2);
+    addFinderMethod('function TFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_GetPixelDifferenceTPA1);
+    addFinderMethod('function TFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_GetPixelDifferenceTPA2);
 
-    addInputMethod('function TFinder.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeFinder_GetPixelDifference1);
-    addInputMethod('function TFinder.GetPixelDifference(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeFinder_GetPixelDifference2);
-    addInputMethod('function TFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_GetPixelDifferenceTPA1);
-    addInputMethod('function TFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_GetPixelDifferenceTPA2);
-
-    addInputMethod('function TFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeFinder_AverageBrightness);
-    addInputMethod('function TFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeFinder_PeakBrightness);
+    addFinderMethod('function TFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeFinder_AverageBrightness);
+    addFinderMethod('function TFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeFinder_PeakBrightness);
 
     ImportingSection := 'Image';
 
