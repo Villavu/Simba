@@ -43,7 +43,7 @@ type
     function GetWind: Double;
 
     procedure CallOnTeleportEvents(X, Y: Integer);
-    procedure CallOnMovingEvents(var X, Y: Double);
+    function CallOnMovingEvents(var X, Y: Double): Boolean;
   public
     KeyPressMin: Integer;
     KeyPressMax: Integer;
@@ -170,10 +170,8 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
     x := xs;
     y := ys;
 
-    while True do
+    while CallOnMovingEvents(X, Y) do
     begin
-      CallOnMovingEvents(X, Y);
-
       traveledDistance := Hypot(x - xs, y - ys);
       remainingDistance := Hypot(x - xe, y - ye);
       if (remainingDistance <= 1) then
@@ -361,12 +359,18 @@ begin
     Event(Self, X, Y);
 end;
 
-procedure TSimbaInput.CallOnMovingEvents(var X, Y: Double);
+function TSimbaInput.CallOnMovingEvents(var X, Y: Double): Boolean;
 var
   Event: TMouseMovingEvent;
 begin
+  Result := True;
+
   for Event in FMovingEvents do
-    Event(Self, X, Y);
+    if not Event(Self, X, Y) then
+    begin
+      Result := False;
+      Exit;
+    end;
 end;
 
 function TSimbaInput.AddOnMouseTeleport(Event: TMouseTeleportEvent): TMouseTeleportEvent;

@@ -221,7 +221,7 @@ Set a custom client area within the bounds of the target.
 
 ```
 Target.SetCustomClientArea([100,100,600,600]);
-Input.MouseMove([1,1]); // Will move the mouse to [101,101]
+Input.MouseMove([1,1]); // Will move the mouse to [101,101] on the "real" bounds
 ```
 *)
 procedure _LapeTarget_SetCustomClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -264,9 +264,9 @@ TTarget.AddHandlerOnInvalidTarget
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 > function TTarget.AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent;
 *)
-procedure _LapeTarget_AddHandlerOnInvalidTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_AddOnInvalidTargetEvent(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  TSimbaTarget.PInvalidTargetEvent(Result)^ := PSimbaTarget(Params^[0])^.AddHandlerOnInvalidTarget(TSimbaTarget.PInvalidTargetEvent(Params^[1])^);
+  TSimbaTarget.TInvalidTargetEvent(Result^) := PSimbaTarget(Params^[0])^.AddOnInvalidTargetEvent(TSimbaTarget.TInvalidTargetEvent(Params^[1]^));
 end;
 
 (*
@@ -274,9 +274,9 @@ TTarget.RemoveHandlerOnInvalidTarget
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 > procedure TTarget.RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent);
 *)
-procedure _LapeTarget_RemoveHandlerOnInvalidTarget(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_RemoveOnInvalidTargetEvent(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaTarget(Params^[0])^.RemoveHandlerOnInvalidTarget(TSimbaTarget.PInvalidTargetEvent(Params^[1])^);
+  PSimbaTarget(Params^[0])^.RemoveOnInvalidTargetEvent(TSimbaTarget.TInvalidTargetEvent(Params^[1]^));
 end;
 
 procedure _LapeTarget_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -293,21 +293,25 @@ begin
     addGlobalType([
       'packed record',
       '  {%CODETOOLS OFF}',
-      '  InternalData: array[0..' + IntToStr(SizeOf(TSimbaTarget) - 1)  + '] of Byte;',
+      '  InternalData: array[1..' + IntToStr(SizeOf(TSimbaTarget) - LapeTypeSize[ltDynArray])  + '] of Byte;',
       '  {%CODETOOLS ON}',
+      '  InvalidTargetEvents: array of TMethod;',
       'end;'],
       'TTarget'
     );
-    if (getGlobalType('TTarget').Size <> SizeOf(TSimbaTarget)) then
-      raise Exception.Create('SizeOf(TTarget) is wrong!');
 
     with addGlobalVar('TTarget', '[]', 'Target') do
+    begin
       Used := duTrue;
+
+      if (Size <> SizeOf(TSimbaTarget)) then
+        SimbaException('SizeOf(TTarget) is wrong!');
+    end;
 
     addGlobalType('procedure(var Target: TTarget) of object', 'TInvalidTargetEvent', FFI_DEFAULT_ABI);
 
-    addGlobalFunc('function TTarget.AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent', @_LapeTarget_AddHandlerOnInvalidTarget);
-    addGlobalFunc('procedure TTarget.RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent)', @_LapeTarget_RemoveHandlerOnInvalidTarget);
+    addGlobalFunc('function TTarget.AddOnInvalidTargetEvent(Event: TInvalidTargetEvent): TInvalidTargetEvent', @_LapeTarget_AddOnInvalidTargetEvent);
+    addGlobalFunc('procedure TTarget.RemoveOnInvalidTargetEvent(Event: TInvalidTargetEvent)', @_LapeTarget_RemoveOnInvalidTargetEvent);
 
     addGlobalFunc('function TTarget.GetAutoFocus: Boolean', @_LapeTarget_GetAutoFocus);
     addGlobalFunc('procedure TTarget.SetAutoFocus(Value: Boolean)', @_LapeTarget_SetAutoFocus);

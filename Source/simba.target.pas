@@ -50,7 +50,6 @@ type
   TSimbaTarget = packed record
   public
   type
-    PInvalidTargetEvent = ^TInvalidTargetEvent;
     TInvalidTargetEvent = procedure(var Target: TSimbaTarget) of object;
   private
     FTargetType: ETargetType;
@@ -61,10 +60,11 @@ type
     FMethods: TTargetMethods; // Targets need to provide these. They are filled in SetWindow,SetEIOS etc.
     FCustomClientArea: TBox;
     FAutoSetFocus: Boolean;
-    FInvalidTargetHandlers: array[0..9] of TInvalidTargetEvent;
+    FInvalidTargetEvents: array of TInvalidTargetEvent;
 
     procedure ChangeTarget(TargetType: ETargetType);
     function HasMethod(Method: Pointer; Name: String): Boolean;
+    function CallInvalidTargetHandler: Boolean;
 
     procedure CheckInvalidTarget;
     procedure CheckAutoFocus;
@@ -111,8 +111,8 @@ type
     function GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
     procedure FreeImageData(var Data: PColorBGRA);
 
-    function AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent;
-    procedure RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent);
+    function AddOnInvalidTargetEvent(Event: TInvalidTargetEvent): TInvalidTargetEvent;
+    procedure RemoveOnInvalidTargetEvent(Event: TInvalidTargetEvent);
 
     procedure ClearCustomClientArea;
 
@@ -148,41 +148,32 @@ begin
   Result := True;
 end;
 
+function TSimbaTarget.CallInvalidTargetHandler: Boolean;
+var
+  I: Integer;
+begin
+  for I := 0 to High(FInvalidTargetEvents) do
+  begin
+    FInvalidTargetEvents[I](Self);
+
+    if IsValid() then
+    begin
+      Result := True;
+      Exit;
+    end;
+  end;
+
+  Result := False;
+end;
+
 procedure TSimbaTarget.CheckInvalidTarget;
-
-  function HasInvalidTargetHandler: Boolean;
-  var
-    I: Integer;
-  begin
-    Result := False;
-
-    for I := 0 to High(FInvalidTargetHandlers) do
-      if Assigned(FInvalidTargetHandlers[I]) then
-        Exit(True);
-  end;
-
-  function CallInvalidTargetHandler: Boolean;
-  var
-    I: Integer;
-  begin
-    Result := False;
-
-    for I := 0 to High(FInvalidTargetHandlers) do
-      if Assigned(FInvalidTargetHandlers[I]) then
-      begin
-        FInvalidTargetHandlers[I](Self);
-        if IsValid() then
-          Exit(True);
-      end;
-  end;
-
 var
   Attempt: Integer;
 begin
   if IsValid() then
     Exit;
 
-  if HasInvalidTargetHandler() then
+  if (Length(FInvalidTargetEvents) > 0) then
   begin
     for Attempt := 1 to 5 do
     begin
@@ -493,30 +484,20 @@ begin
     FreeMem(Data);
 end;
 
-function TSimbaTarget.AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent;
-var
-  I: Integer;
+function TSimbaTarget.AddOnInvalidTargetEvent(Event: TInvalidTargetEvent): TInvalidTargetEvent;
 begin
   Result := Event;
-  for I := 0 to High(FInvalidTargetHandlers) do
-    if (FInvalidTargetHandlers[I] = Event) then
-      Exit;
 
-  for I := 0 to High(FInvalidTargetHandlers) do
-    if (FInvalidTargetHandlers[I] = nil) then
-    begin
-      FInvalidTargetHandlers[I] := Event;
-      Exit;
-    end;
+  FInvalidTargetEvents += [Event];
 end;
 
-procedure TSimbaTarget.RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent);
+procedure TSimbaTarget.RemoveOnInvalidTargetEvent(Event: TInvalidTargetEvent);
 var
   I: Integer;
 begin
-  for I := 0 to High(FInvalidTargetHandlers) do
-    if (FInvalidTargetHandlers[I] = Event) then
-      FInvalidTargetHandlers[I] := nil;
+  for I := High(FInvalidTargetEvents) downto 0 do
+    if (Event = FInvalidTargetEvents[I]) then
+      Delete(FInvalidTargetEvents, I, 1);
 end;
 
 procedure TSimbaTarget.ClearCustomClientArea;
