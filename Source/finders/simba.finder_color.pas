@@ -40,9 +40,10 @@ function MatchColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
                              Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
 
 var
-  ColorFinderMT_Enabled:     Boolean = True;
-  ColorFinderMT_SliceHeight: Integer = 125;
-  ColorFinderMT_SliceWidth:  Integer = 250;
+  ColorFinderMultithreadOpts: record
+    Enabled: Boolean;
+    SliceWidth, SliceHeight: Integer;
+  end;
 
 implementation
 
@@ -56,10 +57,10 @@ var
 begin
   Result := 1;
 
-  if ColorFinderMT_Enabled and (SearchWidth >= ColorFinderMT_SliceWidth) and (SearchHeight >= (ColorFinderMT_SliceHeight * 2)) then // not worth
+  if ColorFinderMultithreadOpts.Enabled and (SearchWidth >= ColorFinderMultithreadOpts.SliceWidth) and (SearchHeight >= (ColorFinderMultithreadOpts.SliceHeight * 2)) then // not worth
   begin
     for I := SimbaThreadPool.ThreadCount - 1 downto 2 do
-      if (SearchHeight div I) > ColorFinderMT_SliceHeight then // Each slice is at leastColorFinderMT_SliceHeight` pixels
+      if (SearchHeight div I) > ColorFinderMultithreadOpts.SliceHeight then // Each slice is at leastColorFinderMT_SliceHeight` pixels
         Exit(I);
   end;
 
@@ -352,6 +353,9 @@ begin
   end;
 end;
 
+initialization
+  ColorFinderMultithreadOpts.Enabled     := True;
+  ColorFinderMultithreadOpts.SliceWidth  := 125;
+  ColorFinderMultithreadOpts.SliceHeight := 250;
+
 end.
-
-

@@ -72,9 +72,7 @@ begin
   begin
     ImportingSection := 'Match Template';
 
-    addGlobalVar(ltBoolean, @MatchTemplateMT_Enabled, 'MatchTemplateMT_Enabled');
-    addGlobalVar(ltInt32, @MatchTemplateMT_SliceHeight, 'MatchTemplateMT_SliceHeight');
-    addGlobalVar(ltInt32, @MatchTemplateMT_SliceWidth, 'MatchTemplateMT_SliceWidth');
+    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @MatchTemplateMultithreadOpts, 'MatchTemplateMultithreadOpts');
 
     addClass('TMatchTemplateCache');
     addGlobalType('(TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED)', 'ETMFormula');

@@ -46,11 +46,16 @@ type
     procedure addBaseDefine(Define: lpString; Value: lpString = ''); override;
 
     function addDelayedCode(ACode: lpString; AFileName: lpString = ''; AfterCompilation: Boolean = True; IsGlobal: Boolean = True): TLapeTree_Base; override;
+
     function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; override;
     function addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method; override;
+
     function addGlobalType(Typ: TLapeType; AName: lpString; ACopy: Boolean): TLapeType; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
+
     function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; override;
+    function addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; override;
+    function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; override;
 
     procedure DumpToFile(FileName: String);
   end;
@@ -211,6 +216,19 @@ end;
 function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Typ, Value, AName);
+  Result._DocPos.FileName := ImportingSection;
+end;
+
+function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
+begin
+  Result := inherited addGlobalVar(Typ, Value, AName);
+
+  AddCode('var ' + AName + ': ' + Typ);
+end;
+
+function TSimbaCompilerDump.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString): TLapeGlobalVar;
+begin
+  Result := inherited addGlobalVar(AVar, AName);
   Result._DocPos.FileName := ImportingSection;
 end;
 

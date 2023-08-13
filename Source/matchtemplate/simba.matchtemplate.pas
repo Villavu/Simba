@@ -56,9 +56,10 @@ type
 function Multithread(Image, Templ: TIntegerMatrix; MatchTemplate: TMatchTemplate; Normed: Boolean): TSingleMatrix;
 
 var
-  MatchTemplateMT_Enabled:     Boolean = True;
-  MatchTemplateMT_SliceHeight: Integer = 125;
-  MatchTemplateMT_SliceWidth:  Integer = 250;
+  MatchTemplateMultithreadOpts: record
+    Enabled: Boolean;
+    SliceWidth, SliceHeight: Integer;
+  end;
 
 implementation
 
@@ -74,10 +75,10 @@ var
 begin
   Result := 1;
 
-  if MatchTemplateMT_Enabled and (SearchWidth >= MatchTemplateMT_SliceWidth) and (SearchHeight >= (MatchTemplateMT_SliceHeight * 2)) then // not worth
+  if MatchTemplateMultithreadOpts.Enabled and (SearchWidth >= MatchTemplateMultithreadOpts.SliceWidth) and (SearchHeight >= (MatchTemplateMultithreadOpts.SliceHeight * 2)) then // not worth
   begin
     for I := SimbaThreadPool.ThreadCount - 1 downto 2 do
-      if (SearchHeight div I) > MatchTemplateMT_SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
+      if (SearchHeight div I) > MatchTemplateMultithreadOpts.SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
         Exit(I);
   end;
 
@@ -173,5 +174,10 @@ begin
     TM_CCORR_NORMED:  Result := MatchTemplate_CCORR(Image, Template, True);
   end;
 end;
+
+initialization
+  MatchTemplateMultithreadOpts.Enabled     := True;
+  MatchTemplateMultithreadOpts.SliceWidth  := 125;
+  MatchTemplateMultithreadOpts.SliceHeight := 250;
 
 end.
