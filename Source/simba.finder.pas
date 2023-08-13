@@ -61,9 +61,9 @@ type
     function GetColorsMatrix(Bounds: TBox): TIntegerMatrix;
 
     function GetPixelDifference(WaitTime: Integer; Area: TBox): Integer; overload;
-    function GetPixelDifference(WaitTime: Integer; Tolerance: Integer; Area: TBox): Integer; overload;
+    function GetPixelDifference(WaitTime: Integer; Tolerance: Single; Area: TBox): Integer; overload;
     function GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox): TPointArray; overload;
-    function GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Integer; Area: TBox): TPointArray; overload;
+    function GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Single; Area: TBox): TPointArray; overload;
 
     function AverageBrightness(Area: TBox): Integer;
     function PeakBrightness(Area: TBox): Integer;
@@ -294,7 +294,7 @@ begin
   end;
 end;
 
-function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Tolerance: Integer; Area: TBox): Integer;
+function TSimbaFinder.GetPixelDifference(WaitTime: Integer; Tolerance: Single; Area: TBox): Integer;
 var
   BitmapBefore, BitmapAfter: TSimbaImage;
 begin
@@ -338,7 +338,7 @@ begin
   end;
 end;
 
-function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Integer; Area: TBox): TPointArray;
+function TSimbaFinder.GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Single; Area: TBox): TPointArray;
 var
   BitmapBefore, BitmapAfter: TSimbaImage;
 begin

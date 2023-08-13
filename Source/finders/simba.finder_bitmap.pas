@@ -29,9 +29,10 @@ function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit;
                             SearchWidth, SearchHeight: Integer): TPointArray;
 
 var
-  BitmapFinderMT_Enabled:     Boolean = True;
-  BitmapFinderMT_SliceHeight: Integer = 125;
-  BitmapFinderMT_SliceWidth:  Integer = 250;
+  BitmapFinderMultithreadOpts: record
+    Enabled: Boolean;
+    SliceWidth, SliceHeight: Integer;
+  end;
 
 implementation
 
@@ -47,10 +48,10 @@ var
 begin
   Result := 1;
 
-  if BitmapFinderMT_Enabled and (SearchWidth >= BitmapFinderMT_SliceWidth) and (SearchHeight >= (BitmapFinderMT_SliceHeight * 2)) then // not worth
+  if BitmapFinderMultithreadOpts.Enabled and (SearchWidth >= BitmapFinderMultithreadOpts.SliceWidth) and (SearchHeight >= (BitmapFinderMultithreadOpts.SliceHeight * 2)) then // not worth
   begin
     for I := SimbaThreadPool.ThreadCount - 1 downto 2 do
-      if (SearchHeight div I) > BitmapFinderMT_SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
+      if (SearchHeight div I) > BitmapFinderMultithreadOpts.SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
         Exit(I);
   end;
 
@@ -273,6 +274,11 @@ begin
     FreeMem(BitmapColors);
   end;
 end;
+
+initialization
+  BitmapFinderMultithreadOpts.Enabled     := True;
+  BitmapFinderMultithreadOpts.SliceHeight := 125;
+  BitmapFinderMultithreadOpts.SliceWidth  := 250;
 
 end.
 

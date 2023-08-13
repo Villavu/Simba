@@ -36,8 +36,6 @@ type
 
     procedure addDelayedCode(Code: TStringArray; AFileName: lpString = ''); virtual; overload;
 
-    function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; override;
-
     function addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method; virtual; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
     procedure addGlobalFuncOverride(Header: lpString; Body: TStringArray); virtual;
@@ -234,12 +232,6 @@ end;
 procedure TSimbaScript_Compiler.addDelayedCode(Code: TStringArray; AFileName: lpString);
 begin
   addDelayedCode(LapeDelayedFlags + LineEnding.Join(Code), AFileName);
-end;
-
-function TSimbaScript_Compiler.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited;
-  Result._DocPos.FileName := ImportingSection;
 end;
 
 end.

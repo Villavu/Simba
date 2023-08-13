@@ -262,11 +262,11 @@ end;
 (*
 TFinder.GetPixelDifference
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TFinder.GetPixelDifference(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): Integer;
+> function TFinder.GetPixelDifference(WaitTime, Tolerance: Single; Area: TBox = [-1,-1,-1,-1]): Integer;
 *)
 procedure _LapeFinder_GetPixelDifference2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaFinder(Params^[0])^.GetPixelDifference(PInteger(Params^[1])^, PInteger(Params^[2])^, PBox(Params^[3])^);
+  PInteger(Result)^ := PSimbaFinder(Params^[0])^.GetPixelDifference(PInteger(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
 end;
 
 (*
@@ -282,11 +282,11 @@ end;
 (*
 TFinder.GetPixelDifferenceTPA
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray;
+> function TFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Single; Area: TBox = [-1,-1,-1,-1]): TPointArray;
 *)
 procedure _LapeFinder_GetPixelDifferenceTPA2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.GetPixelDifferenceTPA(PInteger(Params^[1])^, PInteger(Params^[2])^, PBox(Params^[3])^);
+  PPointArray(Result)^ := PSimbaFinder(Params^[0])^.GetPixelDifferenceTPA(PInteger(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
 end;
 
 (*
@@ -343,13 +343,8 @@ begin
   begin
     ImportingSection := 'Finder';
 
-    addGlobalVar(ltBoolean, @ColorFinderMT_Enabled,     'ColorFinderMT_Enabled');
-    addGlobalVar(ltInt32,   @ColorFinderMT_SliceHeight, 'ColorFinderMT_SliceHeight');
-    addGlobalVar(ltInt32,   @ColorFinderMT_SliceWidth,  'ColorFinderMT_SliceWidth');
-
-    addGlobalVar(ltBoolean, @BitmapFinderMT_Enabled,     'BitmapFinderMT_Enabled');
-    addGlobalVar(ltInt32,   @BitmapFinderMT_SliceHeight, 'BitmapFinderMT_SliceHeight');
-    addGlobalVar(ltInt32,   @BitmapFinderMT_SliceWidth,  'BitmapFinderMT_SliceWidth');
+    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @ColorFinderMultithreadOpts, 'ColorFinderMultithreadOpts');
+    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @BitmapFinderMultithreadOpts, 'BitmapFinderMultithreadOpts');
 
     addGlobalType([
       'record',
@@ -415,9 +410,9 @@ begin
     addFinderMethod('function TFinder.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix', @_LapeFinder_GetColorsMatrix);
 
     addFinderMethod('function TFinder.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeFinder_GetPixelDifference1);
-    addFinderMethod('function TFinder.GetPixelDifference(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeFinder_GetPixelDifference2);
+    addFinderMethod('function TFinder.GetPixelDifference(WaitTime: Integer; Tolerance: Single; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeFinder_GetPixelDifference2);
     addFinderMethod('function TFinder.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_GetPixelDifferenceTPA1);
-    addFinderMethod('function TFinder.GetPixelDifferenceTPA(WaitTime, Tolerance: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_GetPixelDifferenceTPA2);
+    addFinderMethod('function TFinder.GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Single; Area: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeFinder_GetPixelDifferenceTPA2);
 
     addFinderMethod('function TFinder.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeFinder_AverageBrightness);
     addFinderMethod('function TFinder.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer', @_LapeFinder_PeakBrightness);
