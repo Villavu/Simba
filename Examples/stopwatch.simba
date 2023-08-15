@@ -1,4 +1,4 @@
-program TimingExample;
+program StopWatchExample;
 
 procedure SomethingToTime;
 var
@@ -12,17 +12,17 @@ begin
 end;
 
 var
-  Timer: TSimbaTimer;
+  StopWatch: TStopWatch;
   Milliseconds: Integer;
   Formatted: String;
 begin
-  Timer.Start();
+  StopWatch.Start();
   SomethingToTime();
-  Timer.Stop();
+  StopWatch.Stop();
 
-  Milliseconds := Timer.Elapsed();
-  Formatted := Timer.ElapsedFmt('s');
+  Milliseconds := StopWatch.Elapsed();
+  Formatted := StopWatch.ElapsedFmt('s');
 
   WriteLn('Milliseconds: ', Milliseconds);
   WriteLN('Seconds: ', Formatted);
-end. 
+end.

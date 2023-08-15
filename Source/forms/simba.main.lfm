@@ -286,13 +286,13 @@ object SimbaForm: TSimbaForm
     end
     object MenuItemCloseTab: TMenuItem
       Caption = '&Close Tab'
-      ImageIndex = 52
+      ImageIndex = 51
       ShortCut = 16471
       OnClick = MenuCloseTabClick
     end
     object MenuItemCloseTabs: TMenuItem
       Caption = 'Close All Tabs'
-      ImageIndex = 53
+      ImageIndex = 52
       OnClick = MenuCloseAllTabsClick
     end
     object MenuItemDivider6: TMenuItem

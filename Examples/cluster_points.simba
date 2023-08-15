@@ -1,0 +1,15 @@
+var
+  TPA: TPointArray;
+  ATPA: T2DPointArray;
+  I: Integer;
+begin
+  // Create a random array to test on
+  TPA := RandomTPA(100, [100,100,300,300]);
+  TPA := TPA.Grow(3);
+
+  // Cluster by 10 distance, if a point is not within 10 distance of any other
+  // points in a group, add it to a new group.
+  ATPA := TPA.Cluster(20);
+
+  Show(ATPA);
+end;

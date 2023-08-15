@@ -77,8 +77,8 @@ procedure TSimbaOpenExampleForm.AddPackageExamples;
   end;
 
 var
-  I: Integer;
-  ParentNode: TTreeNode;
+  I, MaxWidth: Integer;
+  Node, ParentNode: TTreeNode;
   FileName: String;
   Files: TStringArray;
   Packages: TSimbaPackageArray;
@@ -106,6 +106,17 @@ begin
   FreePackages(Packages);
 
   TreeView.EndUpdate();
+
+  MaxWidth := 0;
+  Node := TreeView.Items.GetFirstNode();
+  while Assigned(Node) do
+  begin
+    MaxWidth := Max(MaxWidth, Node.DisplayTextRight);
+
+    Node := Node.GetNext();
+  end;
+
+  LeftPanel.Width := MaxWidth + TreeView.ScrollbarVert.Width+1;
 end;
 
 procedure TSimbaOpenExampleForm.FormShow(Sender: TObject);
@@ -185,12 +196,13 @@ begin
 
   SimbaNode := TExampleNode(TreeView.AddNode('Simba', IMG_PACKAGE));
 
-  AddNode('Array',     'EXAMPLE_ARRAY'    );
-  AddNode('Bitmap',    'EXAMPLE_BITMAP'   );
-  AddNode('Function',  'EXAMPLE_FUNCTION' );
-  AddNode('Loop',      'EXAMPLE_LOOP'     );
-  AddNode('Procedure', 'EXAMPLE_PROCEDURE');
-  AddNode('Timing',    'EXAMPLE_TIMING'   );
+  AddNode('Array',                'EXAMPLE_ARRAY'               );
+  AddNode('Image',                'EXAMPLE_IMAGE'               );
+  AddNode('Function',             'EXAMPLE_FUNCTION'            );
+  AddNode('Loop',                 'EXAMPLE_LOOP'                );
+  AddNode('Stopwatch',            'EXAMPLE_STOPWATCH'           );
+  AddNode('Point Cluster',        'EXAMPLE_CLUSTER_POINTS'      );
+  AddNode('Mouse Teleport Event', 'EXAMPLE_MOUSE_TELEPORT_EVENT');
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);

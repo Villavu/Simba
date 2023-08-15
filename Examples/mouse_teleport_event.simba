@@ -1,0 +1,21 @@
+var
+  TPA: TPointArray; // stores the teleport events so we can view at the end
+
+procedure MouseTeleportEvent(var Sender: TInput; X, Y: Integer);
+begin
+  WriteLn('Mouse teleported to: ', X, ', ', Y);
+  TPA += [X, Y];
+end;
+
+var
+  Event: TMouseTeleportEvent;
+begin
+  Event := Input.AddOnMouseTeleportEvent(@MouseTeleportEvent);
+  Input.MouseTeleport([200,200]);
+  Input.MouseMove([600,600]);
+  Input.RemoveOnMouseTeleportEvent(Event); // Remove the event
+
+  Input.MouseMove([200, 600]); // The event has been removed so this wont be "recorded" when we show the path
+
+  Show(TPA); // Now we can see what actually happened
+end;

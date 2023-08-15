@@ -152,6 +152,9 @@ end;
 
 procedure TSimbaCompilerDump.AddCode(Str: String);
 begin
+  if not Str.EndsWith(';') then
+    Str := Str + ';';
+
   Add(ImportingSection, Str);
 end;
 
@@ -223,7 +226,7 @@ function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: Pointer; AName: l
 begin
   Result := inherited addGlobalVar(Typ, Value, AName);
 
-  AddCode('var ' + AName + ': ' + Typ + ';');
+  AddCode('var ' + AName + ': ' + Typ);
 end;
 
 function TSimbaCompilerDump.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString): TLapeGlobalVar;
