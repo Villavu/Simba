@@ -1,22 +1,21 @@
 var
-  Arr: array of Integer;
-  Index, Value: Integer;
+  myArray: array of Int32;
 begin
-  Arr.SetLength(3);
-  Arr[0] := 200;
-  Arr[1] := 400;
-  Arr[2] := 600;
-  
-  WriteLn('Index of 400 is ', Arr.IndexOf(400));
+  myArray := [1,2,3,4,5,4,3,2,1];
+  WriteLn myArray;
 
-  Arr := [5,6,7,8];
-  Arr.Append(100);
+  // Length of array, or how many items it contains.
+  WriteLn Length(myArray);
 
-  WriteLn('For loop:');
-  for Index := 0 to Arr.Length() - 1 do
-    WriteLn('Arr[', Index, '] is ', Arr[Index]);
+  // Index of last item which is Length(myArray) - 1
+  WriteLn High(myArray);
 
-  WriteLn('For in loop')
-  for Value in Arr.Reversed() do
-    WriteLn(Value);
-end.
+  // access first element:
+  WriteLn myArray[0];
+
+  // access second element:
+  WriteLn myArray[1];
+
+  // access last item:
+  WriteLn myArray[High(myArray)];
+end;

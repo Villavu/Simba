@@ -117,6 +117,9 @@ type
     property ScrolledTop: Integer read GetScrolledTop write SetScrolledTop;
     property TopLevelCount: Integer read GetTopLevelCount;
 
+    property ScrollbarHorz: TSimbaScrollBar read FScrollbarHorz;
+    property ScrollbarVert: TSimbaScrollBar read FScrollbarVert;
+
     function AddNode(const NodeText: String; const ImageIndex: Integer = -1): TTreeNode; overload;
     function AddNode(const ParentNode: TTreeNode; const NodeText: String; const ImageIndex: Integer = -1): TTreeNode; overload;
   end;

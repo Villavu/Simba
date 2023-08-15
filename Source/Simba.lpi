@@ -15,13 +15,14 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="6">
+      <Resources Count="7">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
-        <Resource_1 FileName="..\Examples\bitmap.simba" Type="RCDATA" ResourceName="EXAMPLE_BITMAP"/>
-        <Resource_2 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
-        <Resource_3 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
-        <Resource_4 FileName="..\Examples\procedure.simba" Type="RCDATA" ResourceName="EXAMPLE_PROCEDURE"/>
-        <Resource_5 FileName="..\Examples\timing.simba" Type="RCDATA" ResourceName="EXAMPLE_TIMING"/>
+        <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
+        <Resource_2 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
+        <Resource_3 FileName="..\Examples\stopwatch.simba" Type="RCDATA" ResourceName="EXAMPLE_STOPWATCH"/>
+        <Resource_4 FileName="..\Examples\image.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE"/>
+        <Resource_5 FileName="..\Examples\cluster_points.simba" Type="RCDATA" ResourceName="EXAMPLE_CLUSTER_POINTS"/>
+        <Resource_6 FileName="..\Examples\mouse_teleport_event.simba" Type="RCDATA" ResourceName="EXAMPLE_MOUSE_TELEPORT_EVENT"/>
       </Resources>
     </General>
     <VersionInfo>
