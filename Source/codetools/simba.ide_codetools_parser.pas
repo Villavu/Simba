@@ -147,6 +147,8 @@ type
     constructor Create; reintroduce;
   end;
 
+  TDeclaration_Anchor = class(TDeclaration);
+
   TDeclaration_WithStatement = class(TDeclaration);
   TDeclaration_WithVariableList = class(TDeclaration);
   TDeclaration_WithVariable = class(TDeclaration);
@@ -348,6 +350,8 @@ type
     procedure ParseFile; override;
     procedure OnLibraryDirect(Sender: TmwBasePasLex); override;                 //Plugins
     procedure OnIncludeDirect(Sender: TmwBasePasLex); override;                 //Includes
+
+    procedure Anchor; override;
 
     procedure WithStatement; override;                                          //With
     procedure VariableList; override;                                           //With
@@ -1414,6 +1418,18 @@ begin
 
     PushLexer(TmwPasLex.CreateFromFile(Str));
   end;
+end;
+
+procedure TCodeParser.Anchor;
+var
+  Decl: TDeclaration_Anchor;
+begin
+  Decl := TDeclaration_Anchor.Create(Self, FRoot, FLexer.TokenPos, FLexer.TokenPos);
+  Decl.Name := Lexer.DirectiveParamOriginal;
+
+  FRoot.Items.Add(Decl);
+
+  inherited;
 end;
 
 procedure TCodeParser.WithStatement;

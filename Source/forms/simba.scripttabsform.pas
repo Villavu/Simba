@@ -376,7 +376,7 @@ begin
     Images := SimbaForm.Images;
     Parent := FindButtonPanel;
     Align := alLeft;
-    ImageINdex := 44;
+    ImageINdex := IMG_ARROW_DOWN;
     Hint := 'Find Next';
     ShowHint := True;
     BorderSpacing.Around := 5;
@@ -389,7 +389,7 @@ begin
     Images := SimbaForm.Images;
     Parent := FindButtonPanel;
     Align := alLeft;
-    ImageIndex := 43;
+    ImageIndex := IMG_ARROW_UP;
     Hint := 'Find Previous';
     ShowHint := True;
     BorderSpacing.Around := 5;

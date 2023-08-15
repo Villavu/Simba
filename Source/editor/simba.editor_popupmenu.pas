@@ -135,19 +135,19 @@ begin
 
   Images := SimbaForm.Images;
 
-  FindDeclaration     := Add('Find Declaration',     IMAGE_NONE,   ShortCut(VK_UNKNOWN, []),                True );
-  Undo                := Add('Redo',                 IMAGE_UNDO,   ShortCut(VK_Z,       [ssCtrl]),          False);
-  Redo                := Add('Undo',                 IMAGE_REDO,   ShortCut(VK_Z,       [ssShift, ssCtrl]), True );
-  Cut                 := Add('Cut',                  IMAGE_CUT,    ShortCut(VK_X,       [ssCtrl]),          False);
-  Copy                := Add('Copy',                 IMAGE_COPY,   ShortCut(VK_C,       [ssCtrl]),          False);
-  Paste               := Add('Paste',                IMAGE_PASTE,  ShortCut(VK_V,       [ssCtrl]),          False);
-  Delete              := Add('Delete',               IMAGE_NONE,   ShortCut(VK_UNKNOWN, []),                False);
-  SelectAll           := Add('Select All',           IMAGE_NONE,   ShortCut(VK_A,       [ssCtrl]),          True );
-  CopyFileName        := Add('Copy Filename',        IMAGE_NONE,   ShortCut(VK_UNKNOWN, []),                False);
-  OpenFileDir         := Add('Open Directory',       IMAGE_NONE,   ShortCut(VK_UNKNOWN, []),                True );
-  Find                := Add('Find',                 IMAGE_SEARCH, ShortCut(VK_F,       [ssCtrl]),          False);
-  Replace             := Add('Replace',              IMAGE_NONE,   ShortCut(VK_R,       [ssCtrl]),          True );
-  Documentation       := Add('Insert Documentation', IMAGE_FONT,   ShortCut(VK_D,       [ssCtrl]),          False);
+  FindDeclaration     := Add('Find Declaration',          IMG_NONE,       ShortCut(VK_UNKNOWN, []),                True );
+  Undo                := Add('Redo',                      IMG_UNDO,       ShortCut(VK_Z,       [ssCtrl]),          False);
+  Redo                := Add('Undo',                      IMG_REDO,       ShortCut(VK_Z,       [ssShift, ssCtrl]), True );
+  Cut                 := Add('Cut',                       IMG_CUT,        ShortCut(VK_X,       [ssCtrl]),          False);
+  Copy                := Add('Copy',                      IMG_COPY,       ShortCut(VK_C,       [ssCtrl]),          False);
+  Paste               := Add('Paste',                     IMG_PASTE,      ShortCut(VK_V,       [ssCtrl]),          False);
+  Delete              := Add('Delete',                    IMG_CLOSE,      ShortCut(VK_UNKNOWN, []),                False);
+  SelectAll           := Add('Select All',                IMG_SELECT_ALL, ShortCut(VK_A,       [ssCtrl]),          True );
+  CopyFileName        := Add('Copy Filename',             IMG_NONE,       ShortCut(VK_UNKNOWN, []),                False);
+  OpenFileDir         := Add('Open Directory',            IMG_NONE,       ShortCut(VK_UNKNOWN, []),                True );
+  Find                := Add('Find',                      IMG_FIND,       ShortCut(VK_F,       [ssCtrl]),          False);
+  Replace             := Add('Replace',                   IMG_REPLACE,    ShortCut(VK_R,       [ssCtrl]),          True );
+  Documentation       := Add('Add Documentation Comment', IMG_NONE,       ShortCut(VK_D,       [ssCtrl]),          False);
 end;
 
 end.

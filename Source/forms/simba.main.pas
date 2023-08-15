@@ -16,69 +16,58 @@ uses
   simba.scriptinstance, simba.component_menubar, simba.process;
 
 const
-  IMAGE_NONE                = -1;
-  IMAGE_COMPILE             = 0;
-  IMAGE_PACKAGE             = 1;
-  IMAGE_COPY                = 2;
-  IMAGE_CUT                 = 3;
-  IMAGE_OPEN                = 4;
-  IMAGE_PASTE               = 5;
-  IMAGE_SAVE                = 6;
-  IMAGE_TRASH               = 7;
-  IMAGE_CLOSE               = 8;
-  IMAGE_CLOSE_ALL           = 9;
-  IMAGE_POWER               = 10;
-  IMAGE_NEW_FILE            = 11;
-  IMAGE_PAUSE               = 12;
-  IMAGE_REDO                = 13;
-  IMAGE_PLAY                = 14;
-  IMAGE_SAVE_ALL            = 15;
-  IMAGE_STOP                = 16;
-  IMAGE_UNDO                = 17;
-  IMAGE_SEARCH              = 18;
-  IMAGE_COLOR_PICKER        = 19;
-  IMAGE_SELECT              = 20;
-  IMAGE_GEAR                = 21;
-  IMAGE_OPEN_RECENT         = 22;
-  IMAGE_PACKAGE_NOTIFCATION = 23;
-  IMAGE_WRITE_BUG           = 24;
-  IMAGE_MINUS               = 25;
-  IMAGE_PLUS                = 26;
-  IMAGE_DIRECTORY           = 27;
-  IMAGE_SIMBA               = 28;
-  IMAGE_BOOK                = 29;
-  IMAGE_FILE                = 30;
-  IMAGE_TYPE                = 31;
-  IMAGE_FUNCTION            = 32;
-  IMAGE_PROCEDURE           = 33;
-  IMAGE_GITHUB              = 34;
-  IMAGE_CONSTANT            = 35;
-  IMAGE_VARIABLE            = 36;
-  IMAGE_OPERATOR            = 39;
-  IMAGE_FONT                = 42;
-  IMAGE_PACKAGE_UPDATE      = 45;
-  IMAGE_ENUM                = 55;
-
-  IMG_TOOLBAR_PLAY    = 0;
-  IMG_TOOLBAR_PAUSE   = 1;
-  IMG_TOOLBAR_STOP    = 2;
-  IMG_TOOLBAR_POWER   = 3;
-  IMG_TOOLBAR_COMPILE = 4;
-  IMG_TOOLBAR_NEW     = 5;
-  IMG_TOOLBAR_OPEN    = 6;
-  IMG_TOOLBAR_SAVE    = 7;
-  IMG_TOOLBAR_SAVEALL = 8;
-  IMG_TOOLBAR_PIPETTE = 9;
-  IMG_TOOLBAR_AREA    = 10;
-  IMG_TOOLBAR_TARGET  = 11;
-  IMG_TOOLBAR_ERASER  = 12;
-  IMG_TOOLBAR_PACKAGE = 13;
+  IMG_NONE = -1;
+  IMG_COMPILE = 0;
+  IMG_PLAY = 1;
+  IMG_PAUSE = 2;
+  IMG_STOP = 3;
+  IMG_POWER = 4;
+  IMG_NEW = 5;
+  IMG_OPEN = 6;
+  IMG_OPEN_RECENT = 7;
+  IMG_SAVE = 8;
+  IMG_SAVE_ALL = 9;
+  IMG_PICK = 10;
+  IMG_TARGET = 11;
+  IMG_AREA = 12;
+  IMG_ERASER = 13;
+  IMG_PACKAGE = 14;
+  IMG_COPY = 25;
+  IMG_CUT = 26;
+  IMG_PASTE = 27;
+  IMG_FIND = 28;
+  IMG_FIND_NEXT = 29;
+  IMG_FIND_PREV = 30;
+  IMG_REPLACE = 31;
+  IMG_UNDO = 32;
+  IMG_REDO = 33;
+  IMG_OPTIONS = 34;
+  IMG_COLORS = 35;
+  IMG_SHAPE = 36;
+  IMG_GITHUB = 37;
+  IMG_BUG = 38;
+  IMG_WRITE_BUG = 39;
+  IMG_SIMBA = 40;
+  IMG_FILE = 41;
+  IMG_FOLDER = 42;
+  IMG_FUNC = 43;
+  IMG_PROC = 44;
+  IMG_TYPE = 45;
+  IMG_VAR = 46;
+  IMG_CONST = 47;
+  IMG_ENUM = 48;
+  IMG_ANCHOR = 49;
+  IMG_SELECT_ALL = 50;
+  IMG_CLOSE = 51;
+  IMG_CLOSE_ALL = 52;
+  IMG_ARROW_UP = 53;
+  IMG_ARROW_DOWN = 54;
 
 type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
+    Images: TImageList;
     RecentFilesPopup: TPopupMenu;
-    ToolbarImages: TImageList;
     MainMenuTools: TPopupMenu;
     MainMenuView: TPopupMenu;
     MainMenuHelp: TPopupMenu;
@@ -86,7 +75,6 @@ type
     MenuItemShapeBox: TMenuItem;
     MenuItemDocumentation: TMenuItem;
     MenuItemGithub: TMenuItem;
-    Images: TImageList;
     MenuEdit: TMenuItem;
     MenuFile: TMenuItem;
     MenuHelp: TMenuItem;
@@ -158,8 +146,8 @@ type
     MainMenuEdit: TPopupMenu;
     MainMenuScript: TPopupMenu;
     MainMenuPanel: TPanel;
-    StopButtonStop: TToolButton;
-    PackageMenuTimer: TTimer;
+    ToolbarButtonStop: TToolButton;
+    PackageUpdateTimer: TTimer;
     ToolBar: TToolBar;
     ToolbarButtonClearOutput: TToolButton;
     ToolbarButtonColorPicker: TToolButton;
@@ -547,8 +535,8 @@ begin
           ToolbarButtonPause.Enabled := False;
           ToolbarButtonCompile.Enabled := True;
 
-          StopButtonStop.Enabled := True;
-          StopButtonStop.ImageIndex := IMG_TOOLBAR_STOP;
+          ToolbarButtonStop.Enabled := True;
+          ToolbarButtonStop.ImageIndex := IMG_STOP;
         end;
 
       ESimbaScriptState.STATE_STOP:
@@ -557,8 +545,8 @@ begin
           ToolbarButtonPause.Enabled := False;
           ToolbarButtonCompile.Enabled := False;
 
-          StopButtonStop.Enabled := True;
-          StopButtonStop.ImageIndex := IMG_TOOLBAR_POWER;
+          ToolbarButtonStop.Enabled := True;
+          ToolbarButtonStop.ImageIndex := IMG_POWER;
         end;
 
       ESimbaScriptState.STATE_RUNNING:
@@ -567,8 +555,8 @@ begin
           ToolbarButtonPause.Enabled := True;
           ToolbarButtonCompile.Enabled := False;
 
-          StopButtonStop.Enabled := True;
-          StopButtonStop.ImageIndex := IMG_TOOLBAR_STOP;
+          ToolbarButtonStop.Enabled := True;
+          ToolbarButtonStop.ImageIndex := IMG_STOP;
         end;
 
       ESimbaScriptState.STATE_NONE:
@@ -577,8 +565,8 @@ begin
           ToolbarButtonPause.Enabled := False;
           ToolbarButtonCompile.Enabled := True;
 
-          StopButtonStop.Enabled := False;
-          StopButtonStop.ImageIndex := IMG_TOOLBAR_STOP;
+          ToolbarButtonStop.Enabled := False;
+          ToolbarButtonStop.ImageIndex := IMG_STOP;
         end;
      end
   else
@@ -587,8 +575,8 @@ begin
     ToolbarButtonPause.Enabled := False;
     ToolbarButtonCompile.Enabled := True;
 
-    StopButtonStop.Enabled := False;
-    StopButtonStop.ImageIndex := IMG_TOOLBAR_STOP;
+    ToolbarButtonStop.Enabled := False;
+    ToolbarButtonStop.ImageIndex := IMG_STOP;
   end;
 end;
 
@@ -767,7 +755,7 @@ type
     if (Sender = MenuItemCompile) or (Sender = ToolbarButtonCompile) then Exit(Compile);
     if (Sender = MenuItemRun)     or (Sender = ToolbarButtonRun)     then Exit(Run);
     if (Sender = MenuItemPause)   or (Sender = ToolbarButtonPause)   then Exit(Pause);
-    if (Sender = MenuItemStop)    or (Sender = StopButtonStop)       then Exit(Stop);
+    if (Sender = MenuItemStop)    or (Sender = ToolbarButtonStop)       then Exit(Stop);
 
     DebugLn('[TSimbaForm.MenuItemScriptStateClick]: Unknown component "' + Sender.ClassName + '"');
   end;
@@ -1328,7 +1316,7 @@ end;
 
 procedure TSimbaForm.SetupCompleted;
 begin
-  PackageMenuTimer.Enabled := True;
+  PackageUpdateTimer.Enabled := True;
 
   if SimbaSettings.FirstLaunch then
     MenuItemAssociateScripts.Click();

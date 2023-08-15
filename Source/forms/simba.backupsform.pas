@@ -109,7 +109,7 @@ end;
 
 procedure TSimbaBackupsForm.DoDoneStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
 begin
-  with TreeView.AddNode(CurrentNode, FormatDateTime('c', AItem.DateTime), IMAGE_FILE) as TBackupNode do
+  with TreeView.AddNode(CurrentNode, FormatDateTime('c', AItem.DateTime), IMG_FILE) as TBackupNode do
     Contents := TStringStream(AStream).DataString;
 
   AStream.Free();
@@ -122,7 +122,7 @@ var
 begin
   for FileName in TSimbaDir.DirSearch(SimbaEnv.BackupsPath, '*.zip') do
   begin
-    CurrentNode := TreeView.AddNode(TSimbaPath.PathExtractNameWithoutExt(FileName), IMAGE_DIRECTORY);
+    CurrentNode := TreeView.AddNode(TSimbaPath.PathExtractNameWithoutExt(FileName), IMG_FOLDER);
 
     UnZipper := TUnZipper.Create();
     try

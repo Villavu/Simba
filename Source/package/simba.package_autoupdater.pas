@@ -44,11 +44,11 @@ begin
   if (FUpdates.Count > 0) then
   begin
     SimbaForm.ToolbarButtonPackages.Hint       := 'Open packages' + LineEnding + FUpdates.Text;
-    SimbaForm.ToolbarButtonPackages.ImageIndex := IMG_TOOLBAR_PACKAGE + Min(FUpdates.Count, 9);
+    SimbaForm.ToolbarButtonPackages.ImageIndex := IMG_PACKAGE + Min(FUpdates.Count, 9);
   end else
   begin
     SimbaForm.ToolbarButtonPackages.Hint       := 'Open packages';
-    SimbaForm.ToolbarButtonPackages.ImageIndex := IMG_TOOLBAR_PACKAGE;
+    SimbaForm.ToolbarButtonPackages.ImageIndex := IMG_PACKAGE;
   end;
 end;
 

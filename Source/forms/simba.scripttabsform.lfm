@@ -14,7 +14,7 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove
   OnMouseUp = FormMouseUp
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '3.0.0.1'
   object FindPanel: TPanel
     Left = 0
     Height = 0
@@ -65,16 +65,16 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
     Top = 20
     object MenuItemNewTab: TMenuItem
       Caption = 'New Tab'
+      ImageIndex = 5
       OnClick = DoTabPopupClick
     end
     object MenuItemCloseTab: TMenuItem
       Caption = 'Close Tab'
-      ImageIndex = 8
+      ImageIndex = 52
       OnClick = DoTabPopupClick
     end
     object MenuItemCloseOtherTabs: TMenuItem
       Caption = 'Close All Other Tabs'
-      ImageIndex = 9
       OnClick = DoTabPopupClick
     end
   end

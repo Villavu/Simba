@@ -72,12 +72,12 @@ type
     FTokenID: TptTokenKind;
     fLinePos: Integer;
     fExID: TptTokenKind;
-    fOnCompDirect: TDirectiveEvent;
+    fOnCompilerDirective: TDirectiveEvent;
+    fOnIDEDirective: TDirectiveEvent;
     fOnElseDirect: TDirectiveEvent;
     fOnEndIfDirect: TDirectiveEvent;
     fOnIfDefDirect: TDirectiveEvent;
     fOnIfNDefDirect: TDirectiveEvent;
-    fOnResourceDirect: TDirectiveEvent;
     fOnIncludeDirect: TDirectiveEvent;
     fOnLibraryDirect: TDirectiveEvent;
     fOnDefineDirect: TDirectiveEvent;
@@ -96,6 +96,9 @@ type
 
     FIdentBuffer: PChar;
     FIdentBufferUpper: PtrUInt;
+
+    procedure MaybeHandleCompilerDirective(Name, Value: String);
+    procedure MaybeHandleIDEDirective(Name, Value: String);
 
     function getChar(const Pos: Integer): Char; inline;
 
@@ -139,32 +142,16 @@ type
     function GetTokenLen: Integer;
     function GetCompilerDirective: string;
     function GetDirectiveKind: TptTokenKind;
-    function GetIDEDirectiveKind: TptTokenKind;
     function GetDirectiveParam: string;
     function GetDirectiveParamOriginal: string;
     function GetDirectiveParamAsFileName: string;
     function GetIsJunk: Boolean;
     function GetIsSpace: Boolean;
-    function GetIsCompilerDirective: Boolean;
 
     procedure EnterDefineBlock(ADefined: Boolean);
     procedure ExitDefineBlock;
   protected
     procedure Error(Message: String); virtual;
-
-    procedure SetOnCompDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnDefineDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnElseDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnEndIfDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnIfDefDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnIfNDefDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnIfOptDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnIncludeDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnLibraryDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnResourceDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnUnDefDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnIfDirect(const Value: TDirectiveEvent); virtual;
-    procedure SetOnElseIfDirect(const Value: TDirectiveEvent); virtual;
   public
     OnErrorMessage: TErrorMessageEvent;
 
@@ -203,20 +190,20 @@ type
     property TokenPos: Integer read fTokenPos;
     property TokenID: TptTokenKind read FTokenID;
     property ExID: TptTokenKind read fExID;
-    property IsCompilerDirective: Boolean read GetIsCompilerDirective;
-    property OnCompDirect: TDirectiveEvent read fOnCompDirect write SetOnCompDirect;
-    property OnDefineDirect: TDirectiveEvent read fOnDefineDirect write SetOnDefineDirect;
-    property OnElseDirect: TDirectiveEvent read fOnElseDirect write SetOnElseDirect;
-    property OnEndIfDirect: TDirectiveEvent read fOnEndIfDirect write SetOnEndIfDirect;
-    property OnIfDefDirect: TDirectiveEvent read fOnIfDefDirect write SetOnIfDefDirect;
-    property OnIfNDefDirect: TDirectiveEvent read fOnIfNDefDirect write SetOnIfNDefDirect;
-    property OnIfOptDirect: TDirectiveEvent read fOnIfOptDirect write SetOnIfOptDirect;
-    property OnIncludeDirect: TDirectiveEvent read fOnIncludeDirect write SetOnIncludeDirect;
-    property OnLibraryDirect: TDirectiveEvent read fOnLibraryDirect write SetOnLibraryDirect;
-    property OnIfDirect: TDirectiveEvent read fOnIfDirect write SetOnIfDirect;
-    property OnElseIfDirect: TDirectiveEvent read fOnElseIfDirect write SetOnElseIfDirect;
-	  property OnResourceDirect: TDirectiveEvent read fOnResourceDirect write SetOnResourceDirect;
-	  property OnUnDefDirect: TDirectiveEvent read fOnUnDefDirect write SetOnUnDefDirect;
+
+    property OnCompilerDirective: TDirectiveEvent read fOnCompilerDirective write fOnCompilerDirective;
+    property OnIDEDirective: TDirectiveEvent read fOnIDEDirective write fOnIDEDirective;
+    property OnDefineDirect: TDirectiveEvent read fOnDefineDirect write fOnDefineDirect;
+    property OnElseDirect: TDirectiveEvent read fOnElseDirect write fOnElseDirect;
+    property OnEndIfDirect: TDirectiveEvent read fOnEndIfDirect write fOnEndIfDirect;
+    property OnIfDefDirect: TDirectiveEvent read fOnIfDefDirect write fOnIfDefDirect;
+    property OnIfNDefDirect: TDirectiveEvent read fOnIfNDefDirect write fOnIfNDefDirect;
+    property OnIfOptDirect: TDirectiveEvent read fOnIfOptDirect write fOnIfOptDirect;
+    property OnIncludeDirect: TDirectiveEvent read fOnIncludeDirect write fOnIncludeDirect;
+    property OnLibraryDirect: TDirectiveEvent read fOnLibraryDirect write fOnLibraryDirect;
+    property OnIfDirect: TDirectiveEvent read fOnIfDirect write fOnIfDirect;
+    property OnElseIfDirect: TDirectiveEvent read fOnElseIfDirect write fOnElseIfDirect;
+	  property OnUnDefDirect: TDirectiveEvent read fOnUnDefDirect write fOnUnDefDirect;
 
     property DirectiveParamOrigin: PAnsiChar read FDirectiveParamOrigin;
 
@@ -451,20 +438,43 @@ begin
   Error('Illegal character');
 end;
 
+procedure TmwBasePasLex.MaybeHandleCompilerDirective(Name, Value: String);
+begin
+  case Name of
+    'SCOPEDENUMS', 'S':
+      begin
+        if (Value = 'ON')  or (Value = '+') then AddDefine('!SCOPEDENUMS') else
+        if (Value = 'OFF') or (Value = '-') then RemoveDefine('!SCOPEDENUMS');
+      end;
+
+    'EXPLICTSELF':
+      begin
+        if (Value = 'ON')  then AddDefine('!EXPLICTSELF') else
+        if (Value = 'OFF') then RemoveDefine('!EXPLICTSELF');
+      end;
+  end;
+end;
+
+procedure TmwBasePasLex.MaybeHandleIDEDirective(Name, Value: String);
+begin
+  case Name of
+    'CODETOOLS':
+      begin
+        if (Value = 'OFF') then EnterDefineBlock(False) else
+        if (Value = 'ON')  then ExitDefineBlock();
+      end;
+  end;
+end;
+
 procedure TmwBasePasLex.BraceOpenProc;
 var
   Param, Def: string;
 begin
   case getChar(fRun + 1) of
-    '$':
+    '$', '%':
       begin
         BorProc(); // Skip comment
         fTokenID := GetDirectiveKind;
-      end;
-    '%':
-      begin
-        BorProc();
-        fTokenID := GetIDEDirectiveKind;
       end;
     else
       FCommentState := csBor;
@@ -473,42 +483,23 @@ begin
   if (fCommentState = csNo) then
   begin
     case fTokenID of
-      tokIDECodeTools:
+      tokIDEDirective:
         begin
-          if (not IsDefined('!IGNORECODETOOLS')) then
-          begin
-            if (DirectiveParam = 'OFF') then
-              EnterDefineBlock(False)
-            else
-            if (DirectiveParam = 'ON') then
-              ExitDefineBlock();
-          end;
+          MaybeHandleIDEDirective(CompilerDirective, DirectiveParam);
 
-          Next();
+          if Assigned(fOnIDEDirective) then
+            fOnIDEDirective(Self);
         end;
 
-      tokCompDirect:
+      tokCompilerDirective:
         begin
           if FUseDefines and (FDefineStack = 0) then
-          begin
-            Def := CompilerDirective;
-            Param := DirectiveParam;
+            MaybeHandleCompilerDirective(CompilerDirective, DirectiveParam);
 
-            if (Def = 'SCOPEDENUMS') or (Def = 'S') then
-            begin
-              if (Param = 'ON')  or (Param = '+') then AddDefine('!SCOPEDENUMS') else
-              if (Param = 'OFF') or (Param = '-') then RemoveDefine('!SCOPEDENUMS');
-            end else
-            if (Def = 'EXPLICTSELF') then
-            begin
-              if (Param = 'ON')  then AddDefine('!EXPLICTSELF') else
-              if (Param = 'OFF') then RemoveDefine('!EXPLICTSELF');
-            end;
-          end;
-
-          if Assigned(fOnCompDirect) and (FDefineStack = 0) then
-            fOnCompDirect(Self);
+          if Assigned(fOnCompilerDirective) and (FDefineStack = 0) then
+            fOnCompilerDirective(Self);
         end;
+
       tokDefineDirect:
         begin
           if FUseDefines and (FDefineStack = 0) then
@@ -605,11 +596,6 @@ begin
         begin
           if Assigned(fOnLibraryDirect) and (FDefineStack = 0) then
             fOnLibraryDirect(Self);
-        end;
-      tokResourceDirect:
-        begin
-          if Assigned(fOnResourceDirect) and (FDefineStack = 0) then
-            fOnResourceDirect(Self);
         end;
       tokUndefDirect:
         begin
@@ -1198,12 +1184,10 @@ function TmwBasePasLex.GetCompilerDirective: string;
 var
   StartPos, EndPos: Integer;
 begin
-  if (TokenID <> tokCompDirect) then
-    Result := ''
-  else
+  if (TokenID in [tokCompilerDirective, tokIDEDirective]) then
   begin
     StartPos := fTokenPos;
-    while (not (getChar(StartPos) in [#0, '$'])) do
+    while (not (getChar(StartPos) in [#0, '$', '%'])) do
       Inc(StartPos);
     StartPos := StartPos + 1;
     EndPos := StartPos;
@@ -1219,53 +1203,41 @@ var
   StartPos, EndPos: Integer;
   Directive: String;
 begin
-  Result := tokCompDirect;
-
   StartPos := fTokenPos;
-  while (not (getChar(StartPos) in [#0, '$'])) do
+  while (not (getChar(StartPos) in [#0, '$', '%'])) do
     Inc(StartPos);
-  StartPos := StartPos + 1;
-  EndPos := StartPos;
-  while (not (getChar(EndPos) in [#0, ' ', '}'])) do
-    Inc(EndPos);
 
-  Directive := UpperCase(Copy(fDoc, StartPos, EndPos - StartPos));
-  if (Length(Directive) > 0) then
-  begin
-    if (Directive = 'I')            then Result := tokIncludeDirect     else
-    if (Directive = 'IF')           then Result := tokIfDirect          else
-    if (Directive = 'IFDEF')        then Result := tokIfDefDirect       else
-    if (Directive = 'ENDIF')        then Result := tokEndIfDirect       else
-    if (Directive = 'ELSE')         then Result := tokElseDirect        else
-    if (Directive = 'DEFINE')       then Result := tokDefineDirect      else
-    if (Directive = 'IFNDEF')       then Result := tokIfNDefDirect      else
-    if (Directive = 'UNDEF')        then Result := tokUndefDirect       else
-    if (Directive = 'LOADLIB')      then Result := tokLibraryDirect     else
-    if (Directive = 'ELSEIF')       then Result := tokElseIfDirect      else
-    if (Directive = 'IFOPT')        then Result := tokIfOptDirect       else
-    if (Directive = 'INCLUDE')      then Result := tokIncludeDirect     else
-    if (Directive = 'INCLUDE_ONCE') then Result := tokIncludeOnceDirect;
+  case getChar(StartPos) of
+    '$': Result := tokCompilerDirective;
+    '%': Result := tokIDEDirective;
   end;
-end;
 
-function TmwBasePasLex.GetIDEDirectiveKind: TptTokenKind;
-var
-  StartPos, EndPos: Integer;
-  Directive: String;
-begin
-  StartPos := fTokenPos;
-  while (not (getChar(StartPos) in [#0, '%'])) do
-    Inc(StartPos);
   StartPos := StartPos + 1;
   EndPos := StartPos;
   while (not (getChar(EndPos) in [#0, ' ', '}'])) do
     Inc(EndPos);
 
-  Directive := UpperCase(Copy(fDoc, StartPos, EndPos - StartPos));
-  if (Directive = 'CODETOOLS') then
-    Result := tokIDECodeTools
-  else
-    Result := tokCompDirect;
+  if (Result = tokCompilerDirective) then
+  begin
+    Directive := UpperCase(Copy(fDoc, StartPos, EndPos - StartPos));
+
+    if (Length(Directive) > 0) then
+    begin
+      if (Directive = 'I')            then Result := tokIncludeDirect     else
+      if (Directive = 'IF')           then Result := tokIfDirect          else
+      if (Directive = 'IFDEF')        then Result := tokIfDefDirect       else
+      if (Directive = 'ENDIF')        then Result := tokEndIfDirect       else
+      if (Directive = 'ELSE')         then Result := tokElseDirect        else
+      if (Directive = 'DEFINE')       then Result := tokDefineDirect      else
+      if (Directive = 'IFNDEF')       then Result := tokIfNDefDirect      else
+      if (Directive = 'UNDEF')        then Result := tokUndefDirect       else
+      if (Directive = 'LOADLIB')      then Result := tokLibraryDirect     else
+      if (Directive = 'ELSEIF')       then Result := tokElseIfDirect      else
+      if (Directive = 'IFOPT')        then Result := tokIfOptDirect       else
+      if (Directive = 'INCLUDE')      then Result := tokIncludeDirect     else
+      if (Directive = 'INCLUDE_ONCE') then Result := tokIncludeOnceDirect;
+    end;
+  end;
 end;
 
 function TmwBasePasLex.GetDirectiveParamOriginal: string;
@@ -1273,14 +1245,18 @@ var
   StartPos, EndPos: Integer;
 begin
   StartPos := fTokenPos;
-  while (not (getChar(StartPos) in [#0, ' '])) do
+  while (not (getChar(StartPos) in [#0, ' ', '}'])) do
     Inc(StartPos);
 
-  EndPos := StartPos + 1;
-  while (not (getChar(EndPos) in [#0, '}'])) do
-    Inc(EndPos);
+  if (getChar(startPos) <> '}') then
+  begin
+    EndPos := StartPos + 1;
+    while (not (getChar(EndPos) in [#0, '}'])) do
+      Inc(EndPos);
 
-  Result := Copy(fDoc, StartPos + 1, (EndPos - StartPos) - 1);
+    Result := Copy(fDoc, StartPos + 1, (EndPos - StartPos) - 1);
+  end else
+    Result := '';
 end;
 
 function TmwBasePasLex.GetDirectiveParam: string;
@@ -1301,13 +1277,6 @@ begin
     if Result[i]='\' then
       Result[i]:='/';
     {$ENDIF}
-end;
-
-function TmwBasePasLex.GetIsCompilerDirective: Boolean;
-begin
-  Result := fTokenID in [tokCompDirect, tokDefineDirect, tokElseDirect,
-    tokEndIfDirect, tokIfDefDirect, tokIfNDefDirect, tokIfOptDirect,
-    tokIncludeDirect, tokIncludeOnceDirect, tokResourceDirect, tokUndefDirect, tokLibraryDirect];
 end;
 
 constructor TmwPasLex.Create(Doc: String; AFileName: String = '');
@@ -1350,71 +1319,6 @@ begin
   FAheadLex.CloneDefinesFrom(Self);
   while fAheadLex.IsJunk do
     fAheadLex.Next;
-end;
-
-procedure TmwBasePasLex.SetOnCompDirect(const Value: TDirectiveEvent);
-begin
-  fOnCompDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnDefineDirect(const Value: TDirectiveEvent);
-begin
-  fOnDefineDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnElseDirect(const Value: TDirectiveEvent);
-begin
-  fOnElseDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnElseIfDirect(const Value: TDirectiveEvent);
-begin
-  fOnElseIfDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnEndIfDirect(const Value: TDirectiveEvent);
-begin
-  fOnEndIfDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnIfDefDirect(const Value: TDirectiveEvent);
-begin
-  fOnIfDefDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnIfDirect(const Value: TDirectiveEvent);
-begin
-  FOnIfDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnIfNDefDirect(const Value: TDirectiveEvent);
-begin
-  fOnIfNDefDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnIfOptDirect(const Value: TDirectiveEvent);
-begin
-  fOnIfOptDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnIncludeDirect(const Value: TDirectiveEvent);
-begin
-  fOnIncludeDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnLibraryDirect(const Value: TDirectiveEvent);
-begin
-  fOnLibraryDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnResourceDirect(const Value: TDirectiveEvent);
-begin
-  fOnResourceDirect := Value;
-end;
-
-procedure TmwBasePasLex.SetOnUnDefDirect(const Value: TDirectiveEvent);
-begin
-  fOnUnDefDirect := Value;
 end;
 
 procedure TmwBasePasLex.StringDQProc;

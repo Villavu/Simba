@@ -72,7 +72,7 @@ procedure TSimbaOpenExampleForm.AddPackageExamples;
 
   procedure AddNode(const AParentNode: TTreeNode; const AFileName: String);
   begin
-    with TExampleNode(TreeView.AddNode(AParentNode, TSimbaPath.PathExtractNameWithoutExt(AFileName), IMAGE_SIMBA)) do
+    with TExampleNode(TreeView.AddNode(AParentNode, TSimbaPath.PathExtractNameWithoutExt(AFileName), IMG_SIMBA)) do
       FileName := AFileName;
   end;
 
@@ -99,7 +99,7 @@ begin
     while (Str.Count('/') > 1) do
       Str := Str.After('/');
 
-    ParentNode := TreeView.AddNode(Str, IMAGE_PACKAGE);
+    ParentNode := TreeView.AddNode(Str, IMG_PACKAGE);
     for FileName in Files do
       AddNode(ParentNode, FileName);
   end;
@@ -154,7 +154,7 @@ var
 
   procedure AddNode(const Name, ResourceName: String);
   begin
-    with TExampleNode(TreeView.AddNode(SimbaNode, Name, IMAGE_SIMBA)) do
+    with TExampleNode(TreeView.AddNode(SimbaNode, Name, IMG_SIMBA)) do
       Script := ReadResourceString(ResourceName);
   end;
 
@@ -183,7 +183,7 @@ begin
   ButtonPanel.Parent := Self;
   ButtonPanel.ButtonOk.OnClick := @DoButtonOkClick;
 
-  SimbaNode := TExampleNode(TreeView.AddNode('Simba', IMAGE_PACKAGE));
+  SimbaNode := TExampleNode(TreeView.AddNode('Simba', IMG_PACKAGE));
 
   AddNode('Array',     'EXAMPLE_ARRAY'    );
   AddNode('Bitmap',    'EXAMPLE_BITMAP'   );

@@ -132,10 +132,10 @@ begin
   if (Sender is TSimbaScriptInstance) and (TSimbaScriptInstance(Sender).OutputBox = FOutputBox) then
   begin
     case TSimbaScriptInstance(Sender).State of
-      ESimbaScriptState.STATE_RUNNING: ImageIndex := IMAGE_PLAY;
-      ESimbaScriptState.STATE_PAUSED:  ImageIndex := IMAGE_PAUSE;
-      ESimbaScriptState.STATE_STOP:    ImageIndex := IMAGE_STOP;
-      ESimbaScriptState.STATE_NONE:    ImageIndex := IMAGE_STOP;
+      ESimbaScriptState.STATE_RUNNING: ImageIndex := IMG_PLAY;
+      ESimbaScriptState.STATE_PAUSED:  ImageIndex := IMG_PAUSE;
+      ESimbaScriptState.STATE_STOP:    ImageIndex := IMG_STOP;
+      ESimbaScriptState.STATE_NONE:    ImageIndex := IMG_STOP;
     end;
   end;
 end;
@@ -493,7 +493,7 @@ var
   Tab: TSimbaOutputTab;
 begin
   Tab := FTabControl.AddTab('Simba') as TSimbaOutputTab;
-  Tab.ImageIndex := IMAGE_SIMBA;
+  Tab.ImageIndex := IMG_SIMBA;
 
   Result := Tab.OutputBox;
   Result.PopupMenu := ContextMenu;
