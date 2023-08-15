@@ -130,9 +130,9 @@ procedure TSimbaFileBrowserForm.DoPopluateTreeView(Sender: TObject);
       IsDirectory := AIsDirectory;
       IsSimbaScript := AIsSimbaScript;
 
-      if IsDirectory   then ImageIndex := IMAGE_DIRECTORY else
-      if IsSimbaScript then ImageIndex := IMAGE_SIMBA     else
-                            ImageIndex := IMAGE_FILE;
+      if IsDirectory   then ImageIndex := IMG_FOLDER else
+      if IsSimbaScript then ImageIndex := IMG_SIMBA  else
+                            ImageIndex := IMG_FILE;
 
       SelectedIndex := ImageIndex;
     end;

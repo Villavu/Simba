@@ -366,7 +366,7 @@ begin
   FEditor.UseSimbaColors := True;
 
   FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
-  FOutputBox.Tab.ImageIndex := IMAGE_STOP;
+  FOutputBox.Tab.ImageIndex := IMG_STOP;
 
   FSavedText := FEditor.Text;
 end;

@@ -66,22 +66,13 @@ type
     procedure OnErrorMessage(Sender: TmwBasePasLex; Message: String); virtual;
     procedure OnLibraryDirect(Sender: TmwBasePasLex); virtual;
     procedure OnIncludeDirect(Sender: TmwBasePasLex); virtual;
+    procedure OnCompilerDirective(Sender: TmwBasePasLex); virtual;
+    procedure OnIDEDirective(Sender: TmwBasePasLex); virtual;
 
     procedure Expected(Sym: TptTokenKind); virtual;
     procedure ExpectedEx(Sym: TptTokenKind); virtual;
-    procedure HandlePtCompDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtDefineDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtElseDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtEndIfDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtIfDefDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtIfNDefDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtIfOptDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtIncludeDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtResourceDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtUndefDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtIfDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtIfEndDirect(Sender: TmwBasePasLex); virtual;
-    procedure HandlePtElseIfDirect(Sender: TmwBasePasLex); virtual;
+
+    procedure Anchor; virtual;
     procedure NextToken; virtual;
     procedure SkipJunk; virtual;
     procedure SemiColon; virtual;
@@ -483,90 +474,9 @@ begin
     NextToken;
 end;
 
-procedure TmwSimplePasPar.HandlePtCompDirect(Sender: TmwBasePasLex);
+procedure TmwSimplePasPar.Anchor;
 begin
-  Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtDefineDirect(Sender: TmwBasePasLex);
-begin
-  Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtElseDirect(Sender: TmwBasePasLex);
-begin
-  if Sender = Lexer then
-    NextToken
-  else
-    Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtElseIfDirect(Sender: TmwBasePasLex);
-begin
-  if Sender = Lexer then
-    NextToken
-  else
-    Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtEndIfDirect(Sender: TmwBasePasLex);
-begin
-  if Sender = Lexer then
-    NextToken
-  else
-    Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtIfDefDirect(Sender: TmwBasePasLex);
-begin
-  if Sender = Lexer then
-    NextToken
-  else
-    Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtIfDirect(Sender: TmwBasePasLex);
-begin
-  if Sender = Lexer then
-    NextToken
-  else
-    Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtIfEndDirect(Sender: TmwBasePasLex);
-begin
-  if Sender = Lexer then
-    NextToken
-  else
-    Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtIfNDefDirect(Sender: TmwBasePasLex);
-begin
-  if Sender = Lexer then
-    NextToken
-  else
-    Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtIfOptDirect(Sender: TmwBasePasLex);
-begin
-  Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtIncludeDirect(Sender: TmwBasePasLex);
-begin
-  Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtResourceDirect(Sender: TmwBasePasLex);
-begin
-  Sender.Next;
-end;
-
-procedure TmwSimplePasPar.HandlePtUndefDirect(Sender: TmwBasePasLex);
-begin
-  Sender.Next;
+  Lexer.Next();
 end;
 
 procedure TmwSimplePasPar.NextToken;
@@ -881,7 +791,7 @@ end;
 procedure TmwSimplePasPar.Block;
 begin
   while (Lexer.TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokExports,
-    tokFunction, tokLabel, tokProcedure, tokResourceString, tokThreadVar, tokType,
+    tokFunction, tokLabel, tokProcedure, tokThreadVar, tokType,
     tokVar, tokSquareOpen]) do
   begin
     DeclarationSection;
@@ -919,10 +829,6 @@ begin
     tokLabel:
       begin
         LabelDeclarationSection;
-      end;
-    tokResourceString:
-      begin
-        ConstSection;
       end;
     tokType:
       begin
@@ -2206,7 +2112,7 @@ begin
             tokImplementation, tokIn, tokInitialization, tokInline,
             tokInterface, tokIs, tokLabel, tokLibrary, tokMod, tokNot, tokObject,
             tokOf, tokOr, tokOut, tokPacked, tokProcedure, tokProgram, tokProperty,
-            tokRaise, tokRecord, tokUnion, tokRepeat, tokResourceString, tokSealed, tokSet,
+            tokRaise, tokRecord, tokUnion, tokRepeat, tokSealed, tokSet,
             tokShl, tokShr, tokStatic, tokThen, tokThreadVar, tokTo, tokTry,
             tokType, tokUnit, tokUnsafe, tokUntil, tokUses, tokVar, tokWhile, tokWith,
             tokXor] then
@@ -4038,15 +3944,6 @@ begin
           end;
         end;
       end;
-    tokResourceString:
-      begin
-        NextToken;
-        while (Lexer.TokenID = tokIdentifier) do
-        begin
-          ResourceDeclaration;
-          SemiColon;
-        end;
-      end
   end;
 end;
 
@@ -4064,10 +3961,6 @@ begin
     tokProcedure:
       begin
         ExportedHeading;
-      end;
-    tokResourceString:
-      begin
-        ConstSection;
       end;
     tokType:
       begin
@@ -4181,7 +4074,7 @@ begin
     UsesClause;
   end;
   while Lexer.TokenID in [tokClass, tokConst, tokConstructor, tokDestructor, tokFunction,
-    tokLabel, tokProcedure, tokResourceString, tokThreadVar, tokType, tokVar,
+    tokLabel, tokProcedure, tokThreadVar, tokType, tokVar,
     tokExports, tokSquareOpen] do
   begin
     DeclarationSection;
@@ -4195,7 +4088,7 @@ begin
   begin
     UsesClause;
   end;
-  while Lexer.TokenID in [tokConst, tokFunction, tokResourceString, tokProcedure,
+  while Lexer.TokenID in [tokConst, tokFunction, tokProcedure,
     tokThreadVar, tokType, tokVar, tokExports, tokSquareOpen] do
   begin
     InterfaceDeclaration;
@@ -4296,10 +4189,6 @@ begin
       tokProcedure:
         begin
           ProcedureDeclarationSection;
-        end;
-      tokResourceString:
-        begin
-          ConstSection;
         end;
       tokType:
         begin
@@ -4427,6 +4316,8 @@ begin
   fLexer.OnIncludeDirect := @OnIncludeDirect;
   fLexer.OnLibraryDirect := @OnLibraryDirect;
   fLexer.OnErrorMessage := @OnErrorMessage;
+  fLexer.OnCompilerDirective := @OnCompilerDirective;
+  fLexer.OnIDEDirective := @OnIDEDirective;
 
   if (fLexerStack.Count > 1) then
     fLexer.Next();
@@ -4445,6 +4336,16 @@ end;
 
 procedure TmwSimplePasPar.OnIncludeDirect(Sender: TmwBasePasLex);
 begin
+end;
+
+procedure TmwSimplePasPar.OnCompilerDirective(Sender: TmwBasePasLex);
+begin
+end;
+
+procedure TmwSimplePasPar.OnIDEDirective(Sender: TmwBasePasLex);
+begin
+  if (Sender.CompilerDirective = 'ANCHOR') then
+    Anchor();
 end;
 
 procedure TmwSimplePasPar.GlobalAttributes;

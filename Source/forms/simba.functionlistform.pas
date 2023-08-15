@@ -91,13 +91,15 @@ uses
 
 function GetImage(const Decl: TDeclaration): Integer;
 begin
-  if (Decl is TDeclaration_Method) and Decl.isFunction       then Result := IMAGE_FUNCTION  else
-  if (Decl is TDeclaration_Method) and Decl.isProcedure      then Result := IMAGE_PROCEDURE else
-  if (Decl is TDeclaration_Method) and Decl.isOperatorMethod then Result := IMAGE_OPERATOR  else
-  if (Decl is TDeclaration_EnumElement)                      then Result := IMAGE_ENUM      else
-  if (Decl is TDeclaration_Type)                             then Result := IMAGE_TYPE      else
-  if (Decl is TDeclaration_Const)                            then Result := IMAGE_CONSTANT  else
-  if (Decl is TDeclaration_Var)                              then Result := IMAGE_VARIABLE  else Result := -1;
+  if (Decl is TDeclaration_Method) and Decl.isFunction       then Result := IMG_FUNC   else
+  if (Decl is TDeclaration_Method) and Decl.isProcedure      then Result := IMG_PROC   else
+  if (Decl is TDeclaration_Method) and Decl.isOperatorMethod then Result := IMG_FUNC   else
+  if (Decl is TDeclaration_EnumElement)                      then Result := IMG_ENUM   else
+  if (Decl is TDeclaration_Type)                             then Result := IMG_TYPE   else
+  if (Decl is TDeclaration_Const)                            then Result := IMG_CONST  else
+  if (Decl is TDeclaration_Var)                              then Result := IMG_VAR    else
+  if (Decl is TDeclaration_Anchor)                           then Result := IMG_ANCHOR else
+    Result := -1;
 end;
 
 function GetText(const Decl: TDeclaration): String;
@@ -110,10 +112,12 @@ end;
 
 function GetHint(const Decl: TDeclaration): String;
 begin
-  if (Decl is TDeclaration_Method) then Result := TDeclaration_Method(Decl).HeaderString                                                                else
-  if (Decl is TDeclaration_Type)   then Result := 'type '  + Decl.Name + ' = ' + Decl.TextNoCommentsSingleLine                                          else
-  if (Decl is TDeclaration_Const)  then Result := 'const ' + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
-  if (Decl is TDeclaration_Var)    then Result := 'var '   + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else Result := '';
+  if (Decl is TDeclaration_Method) then Result := TDeclaration_Method(Decl).HeaderString                                                                  else
+  if (Decl is TDeclaration_Type)   then Result := 'type '    + Decl.Name + ' = ' + Decl.TextNoCommentsSingleLine                                          else
+  if (Decl is TDeclaration_Const)  then Result := 'const '   + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
+  if (Decl is TDeclaration_Var)    then Result := 'var '     + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
+  if (Decl is TDeclaration_Anchor) then Result := 'Anchor "' + Decl.Name + '"'                                                                            else
+    Result := '';
 end;
 
 function GetURL(const Section: String): String;
@@ -376,7 +380,7 @@ begin
 
   if (PluginsNode = nil) and (Plugins.Count > 0) then // No? Build it
   begin
-    PluginsNode := FTreeView.AddNode('Plugins', IMAGE_DIRECTORY);
+    PluginsNode := FTreeView.AddNode('Plugins', IMG_FOLDER);
     with TSimbaFunctionListNode(PluginsNode) do
     begin
       NodeType := ntPlugins;
@@ -391,7 +395,7 @@ begin
 
     for I := 0 to Plugins.Count - 1 do
     begin
-      ParentNode := FTreeView.AddNode(PluginsNode, ChangeFileExt(ExtractFileName(Plugins[I].FileName), ''), IMAGE_FILE);
+      ParentNode := FTreeView.AddNode(PluginsNode, ChangeFileExt(ExtractFileName(Plugins[I].FileName), ''), IMG_FILE);
       with TSimbaFunctionListNode(ParentNode) do
       begin
         NodeType := ntPluginFile;
@@ -440,7 +444,7 @@ begin
 
   if (IncludesNode = nil) and (Includes.Count > 0) then // No? Build it
   begin
-    IncludesNode := FTreeView.AddNode('Includes', IMAGE_DIRECTORY);
+    IncludesNode := FTreeView.AddNode('Includes', IMG_FOLDER);
     with TSimbaFunctionListNode(IncludesNode) do
     begin
       NodeType := ntIncludes;
@@ -458,7 +462,7 @@ begin
         if (CurrentFile <> Decl.Lexer.FileName) then
         begin
           CurrentFile := Decl.Lexer.FileName;
-          CurrentNode := FTreeView.AddNode(IncludesNode, ChangeFileExt(ExtractFileName(CurrentFile), ''), IMAGE_FILE);
+          CurrentNode := FTreeView.AddNode(IncludesNode, ChangeFileExt(ExtractFileName(CurrentFile), ''), IMG_FILE);
 
           with TSimbaFunctionListNode(CurrentNode) do
           begin
@@ -518,8 +522,11 @@ begin
 end;
 
 function TSimbaFunctionListForm.AddDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
+var
+  I: Integer;
 begin
   Result := FTreeView.AddNode(ParentNode, Decl.Name);
+
   with TSimbaFunctionListNode(Result) do
   begin
     NodeType := ntDecl;
@@ -530,9 +537,14 @@ begin
     Line     := Decl.Line;
 
     Text := GetText(Decl);
-    Hint := GetHint(Decl);
     ImageIndex := GetImage(Decl);
     SelectedIndex := GetImage(Decl);
+
+    if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
+      for I := 0 to Decl.Items.Count - 1 do
+        AddDecl(Result, Decl.Items[I])
+    else
+      Hint := GetHint(Decl);
   end;
 end;
 
@@ -541,6 +553,7 @@ var
   I: Integer;
 begin
   Result := FTreeView.AddNode(ParentNode, Decl.Name);
+
   with TSimbaFunctionListNode(Result) do
   begin
     NodeType := ntSimbaDecl;
@@ -560,8 +573,11 @@ begin
 end;
 
 function TSimbaFunctionListForm.AddPluginDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
+var
+  I: Integer;
 begin
   Result := FTreeView.AddNode(ParentNode, Decl.Name);
+
   with TSimbaFunctionListNode(Result) do
   begin
     NodeType := ntPluginDecl;
@@ -569,9 +585,14 @@ begin
     FileName := Decl.Lexer.FileName;
 
     Text := GetText(Decl);
-    Hint := GetHint(Decl);
     ImageIndex := GetImage(Decl);
     SelectedIndex := GetImage(Decl);
+
+    if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
+      for I := 0 to Decl.Items.Count - 1 do
+        AddPluginDecl(Result, Decl.Items[I])
+    else
+      Hint := GetHint(Decl);
   end;
 end;
 
@@ -580,19 +601,19 @@ begin
   Result := NaturalCompareText(A.Text, B.Text);
 
   case A.ImageIndex of
-    IMAGE_TYPE:      Dec(Result, 2000);
-    IMAGE_CONSTANT:  Dec(Result, 1500);
-    IMAGE_VARIABLE:  Dec(Result, 1000);
-    IMAGE_PROCEDURE: Dec(Result, 500);
-    IMAGE_FUNCTION:  Dec(Result, 500);
+    IMG_TYPE:      Dec(Result, 2000);
+    IMG_CONST:  Dec(Result, 1500);
+    IMG_VAR:  Dec(Result, 1000);
+    IMG_PROC: Dec(Result, 500);
+    IMG_FUNC:  Dec(Result, 500);
   end;
 
   case B.ImageIndex of
-    IMAGE_TYPE:      Inc(Result, 2000);
-    IMAGE_CONSTANT:  Inc(Result, 1500);
-    IMAGE_VARIABLE:  Inc(Result, 1000);
-    IMAGE_PROCEDURE: Inc(Result, 500);
-    IMAGE_FUNCTION:  Inc(Result, 500);
+    IMG_TYPE:      Inc(Result, 2000);
+    IMG_CONST:  Inc(Result, 1500);
+    IMG_VAR:  Inc(Result, 1000);
+    IMG_PROC: Inc(Result, 500);
+    IMG_FUNC:  Inc(Result, 500);
   end;
 end;
 
@@ -611,7 +632,7 @@ begin
     if (Parser = nil) or (Parser.Items.Count = 0) or (Parser.FileName.StartsWith('!')) then
       Continue;
 
-    ParentNode := FTreeView.AddNode(FSimbaNode, Parser.FileName, IMAGE_FILE);
+    ParentNode := FTreeView.AddNode(FSimbaNode, Parser.FileName, IMG_FILE);
     with TSimbaFunctionListNode(ParentNode) do
     begin
       NodeType := ntSimbaSection;
@@ -658,8 +679,8 @@ begin
   FTreeView.OnGetNodeHint := @DoGetNodeHint;
   FTreeView.Loading := True;
 
-  FScriptNode := FTreeView.AddNode('Script', IMAGE_DIRECTORY);
-  FSimbaNode  := FTreeView.AddNode('Simba',  IMAGE_DIRECTORY);
+  FScriptNode := FTreeView.AddNode('Script', IMG_FOLDER);
+  FSimbaNode  := FTreeView.AddNode('Simba',  IMG_FOLDER);
 
   FCodeinsight := TCodeinsight.Create();
   FCodeinsight.ScriptParser.NoErrorMessages := True;

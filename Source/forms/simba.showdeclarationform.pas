@@ -69,9 +69,9 @@ begin
     if (Grid.Objects[aCol, aRow] is TDeclaration_Method) then
     begin
       if TDeclaration(Grid.Objects[aCol,aRow]).isFunction then
-        ImageIndex := IMAGE_FUNCTION
+        ImageIndex := IMG_FUNC
       else
-        ImageIndex := IMAGE_PROCEDURE;
+        ImageIndex := IMG_PROC;
     end;
   end;
 end;
