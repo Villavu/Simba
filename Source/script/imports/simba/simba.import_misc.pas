@@ -17,31 +17,69 @@ uses
   simba.nativeinterface,
   simba.settings, simba.compress, simba.encoding;
 
+(*
+Misc
+====
+Miscellaneous methods that dont go in any other sections.
+*)
+
+(*
+ClearSimbaOutput
+~~~~~~~~~~~~~~~~
+> procedure ClearSimbaOutput;
+
+Clear the scripts output box in Simba.
+*)
 procedure ClearSimbaOutput(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaDebugLn([EDebugLn.CLEAR], '');
 end;
 
+(*
+SetSimbaSetting
+~~~~~~~~~~~~~~~
+> function SetSimbaSetting(Name: String; DefValue: String = ""): String;
+*)
 procedure _LapeGetSimpleSetting(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := SimbaSettings.GetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
+(*
+GetSimbaSetting
+~~~~~~~~~~~~~~~
+> procedure GetSimbaSetting(Name, Value: String);
+*)
 procedure _LapeSetSimpleSetting(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaSettings.SetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
+(*
+PlaySound
+~~~~~~~~~
+> procedure PlaySound(Sound: String);
+*)
 procedure _LapePlaySound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaNativeInterface.PlaySound(PString(Params^[0])^);
 end;
 
+(*
+StopSound
+~~~~~~~~~
+> procedure StopSound;
+*)
 procedure _LapeStopSound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaNativeInterface.StopSound();
 end;
 
+(*
+Simba
+~~~~~
+> procedure Simba;
+*)
 procedure _LapeSimba(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   WriteLn(DecompressString(Base64Decode(
@@ -54,6 +92,13 @@ begin
     '+//1sR/NLyhCQ==')));
 end;
 
+(*
+SetClipBoard
+~~~~~~~~~~~~
+> procedure SetClipBoard(Data: string);
+
+Sets the current clipboard string.
+*)
 procedure _LapeSetClipBoard(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   try
@@ -62,6 +107,13 @@ begin
   end;
 end;
 
+(*
+GetClipBoard
+~~~~~~~~~~~~
+> function GetClipBoard: String;
+
+Returns the current clipboard string.
+*)
 procedure _LapeGetClipBoard(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   try
@@ -69,6 +121,42 @@ begin
   except
   end;
 end;
+
+(*
+SetSimbaTitle
+~~~~~~~~~~~~~~
+> procedure SetSimbaTitle(S: String)
+*)
+
+(*
+SetSimbaTitle
+~~~~~~~~~~~~~~
+> procedure SetSimbaStatus(S: String);
+*)
+
+(*
+GetSimbaPID
+~~~~~~~~~~~
+> function GetSimbaPID: TProcessID;
+
+Returns the Simba's PID this script is running in.
+*)
+
+(*
+GetSimbaTargetPID
+~~~~~~~~~~~~~~~~~~
+> function GetSimbaTargetPID: TProcessID;
+
+Returns the current Simba target PID (what is selected with the crosshair)
+*)
+
+(*
+GetSimbaTargetWindow
+~~~~~~~~~~~~~~~~~~~~
+> function GetSimbaTargetWindow: TWindowHandle;
+
+Returns the current Simba target window (what is selected with the crosshair)
+*)
 
 procedure ImportMisc(Compiler: TSimbaScript_Compiler);
 begin

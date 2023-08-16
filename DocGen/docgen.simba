@@ -11,29 +11,34 @@ var
   end;
 
 begin
-  SourceFiles += ['Source\script\imports\simba\simba.import_colormath.pas',    'Color Math'    ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_point.pas',        'TPoint'        ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_tpa.pas',          'TPointArray'   ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_atpa.pas',         'T2DPointArray' ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_box.pas',          'TBox'          ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_boxarray.pas',     'TBoxArray'     ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_quad.pas',         'TQuad'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_windowhandle.pas', 'TWindowHandle' ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_debugimage.pas',   'Debug Image'   ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_variant.pas',      'Variant'       ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_script.pas',       'Script'        ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_random.pas',       'Random'        ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_input.pas',        'Input'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_finder.pas',       'Finder'        ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_target.pas',       'Target'        ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_web.pas',          'Web'           ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_file.pas',         'File'          ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_encoding.pas',     'Encoding'      ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_timing.pas',       'Timing'        ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_colormath.pas',     'Color Math'     ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_point.pas',         'TPoint'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_tpa.pas',           'TPointArray'    ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_atpa.pas',          'T2DPointArray'  ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_box.pas',           'TBox'           ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_boxarray.pas',      'TBoxArray'      ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_quad.pas',          'TQuad'          ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_windowhandle.pas',  'TWindowHandle'  ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_debugimage.pas',    'Debug Image'    ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_variant.pas',       'Variant'        ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_script.pas',        'Script'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_random.pas',        'Random'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_input.pas',         'Input'          ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_finder.pas',        'Finder'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_target.pas',        'Target'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_web.pas',           'Web'            ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_file.pas',          'File'           ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_encoding.pas',      'Encoding'       ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_timing.pas',        'Timing'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_string.pas',        'String'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_process.pas',       'Process'        ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_math.pas',          'Math'           ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_matchtemplate.pas', 'Match Template' ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_misc.pas',          'Misc'           ];
 
-  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_json.pas',   'JSON'   ];
-  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_bitmap.pas', 'Image'  ];
-  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_dtm.pas',    'DTM'    ];
+  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_json.pas',   'JSON'     ];
+  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_bitmap.pas', 'Image'    ];
+  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_dtm.pas',    'DTM'      ];
 end;
 
 const
