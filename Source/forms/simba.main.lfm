@@ -80,7 +80,7 @@ object SimbaForm: TSimbaForm
       Hint = 'Color Picker'
       Top = 0
       Caption = 'ToolbarButtonColorPicker'
-      ImageIndex = 10
+      ImageIndex = 11
       OnClick = ToolbarButtonColorPickerClick
     end
     object ToolbarButtonTargetSelector: TToolButton
@@ -88,7 +88,7 @@ object SimbaForm: TSimbaForm
       Hint = 'Target Selector'
       Top = 0
       Caption = 'ToolbarButtonTargetSelector'
-      ImageIndex = 12
+      ImageIndex = 10
       OnMouseDown = ToolbarButtonSelectTargetClick
     end
     object ToolbarButtonOpen: TToolButton
@@ -138,7 +138,7 @@ object SimbaForm: TSimbaForm
       Left = 193
       Hint = 'Area Selector'
       Top = 0
-      ImageIndex = 11
+      ImageIndex = 12
       OnClick = ToolButtonAreaSelectorClick
       ShowCaption = False
     end

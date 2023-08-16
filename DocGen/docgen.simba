@@ -11,6 +11,7 @@ var
   end;
 
 begin
+  SourceFiles += ['Source\script\imports\simba\simba.import_colormath.pas',    'Color Math'    ];
   SourceFiles += ['Source\script\imports\simba\simba.import_point.pas',        'TPoint'        ];
   SourceFiles += ['Source\script\imports\simba\simba.import_tpa.pas',          'TPointArray'   ];
   SourceFiles += ['Source\script\imports\simba\simba.import_atpa.pas',         'T2DPointArray' ];
@@ -28,10 +29,11 @@ begin
   SourceFiles += ['Source\script\imports\simba\simba.import_web.pas',          'Web'           ];
   SourceFiles += ['Source\script\imports\simba\simba.import_file.pas',         'File'          ];
   SourceFiles += ['Source\script\imports\simba\simba.import_encoding.pas',     'Encoding'      ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_timing.pas',       'Timing'        ];
 
-  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_json.pas',   'JSON'  ];
-  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_bitmap.pas', 'Image' ];
-  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_dtm.pas',    'DTM'   ];
+  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_json.pas',   'JSON'   ];
+  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_bitmap.pas', 'Image'  ];
+  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_dtm.pas',    'DTM'    ];
 end;
 
 const

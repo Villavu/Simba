@@ -203,6 +203,7 @@ begin
   AddNode('Stopwatch',            'EXAMPLE_STOPWATCH'           );
   AddNode('Point Cluster',        'EXAMPLE_CLUSTER_POINTS'      );
   AddNode('Mouse Teleport Event', 'EXAMPLE_MOUSE_TELEPORT_EVENT');
+  AddNode('Static Method',        'EXAMPLE_STATIC_METHOD'       );
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);

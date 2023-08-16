@@ -1,0 +1,27 @@
+program StaticMethodExample;
+
+type
+  TSomeType = record
+    x,y,z: Integer;
+  end;
+
+// A static method behave completely like regular procedures or functions
+// They do not have a `Self` variable.
+// Their use is mainly to include the method in the namespace of the type.
+procedure TSomeType.Test; static;
+begin
+  // WriteLn(Self.X); // Will error as `Self` does not exist
+  WriteLn('Hello from static method');
+end;
+
+begin
+  TSomeType.Test();
+end;
+
+// Can also be called on a variable, but `Self` still wont exist.
+// It is suggested not to call it this way.
+var
+  TestVar: TSomeType;
+begin
+  TestVar.Test();
+end;
