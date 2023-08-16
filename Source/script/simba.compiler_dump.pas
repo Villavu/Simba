@@ -36,7 +36,7 @@ type
     procedure Add(Section, Str: String);
     procedure AddMethod(Str: String);
     procedure AddType(Name, Str: String);
-    procedure AddCode(Str: String);
+    procedure AddCode(Str: String; EnsureSemicolon: Boolean = True);
 
     procedure Move(Str, FromSection, ToSection: String);
   public
@@ -150,9 +150,9 @@ begin
   Add(ImportingSection, Str);
 end;
 
-procedure TSimbaCompilerDump.AddCode(Str: String);
+procedure TSimbaCompilerDump.AddCode(Str: String; EnsureSemicolon: Boolean);
 begin
-  if not Str.EndsWith(';') then
+  if EnsureSemicolon and (not Str.EndsWith(';')) then
     Str := Str + ';';
 
   Add(ImportingSection, Str);
@@ -177,7 +177,7 @@ procedure TSimbaCompilerDump.addBaseDefine(Define: lpString; Value: lpString);
 begin
   inherited addBaseDefine(Define, Value);
 
-  AddCode('{$DEFINE ' + Define + '}');
+  AddCode('{$DEFINE ' + Define + '}', False);
 end;
 
 function TSimbaCompilerDump.addDelayedCode(ACode: lpString; AFileName: lpString; AfterCompilation: Boolean; IsGlobal: Boolean): TLapeTree_Base;

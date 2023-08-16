@@ -1054,7 +1054,7 @@ begin
 
   if (Self <> '') then
   begin
-    Parser := TJSONParser.Create(Self, [joComments, joIgnoreTrailingComma]);
+    Parser := TJSONParser.Create(Self, [joUTF8, joComments, joIgnoreTrailingComma]);
     try
       Result := Parser.Parse();
     except

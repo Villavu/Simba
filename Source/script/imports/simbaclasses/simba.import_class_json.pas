@@ -217,6 +217,24 @@ end;
 TJSONParser.Create
 ~~~~~~~~~~~~~~~~~~
 > function TJSONParser.Create(Str: String = ''): TJSONParser; static;
+
+Create a JSON Parser. Optional `Str` parameter which will parse the string into the parser.
+
+- This needs to be free'd when finished.
+- This is a `static` method.
+
+Example:
+
+```
+var MyJsonParser: TJSONParser;
+begin
+  MyJsonParser := TJSONParser.Create();
+  MyJsonParser.AddValue('someString', 'HelloWorld');
+  MyJsonParser.AddValue('someInt', 1234);
+  WriteLn MyJsonParser.AsString();
+  MyJsonParser.Free();
+end;
+```
 *)
 procedure _LapeJSONParser_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -227,6 +245,22 @@ end;
 TJSONParser.CreateFromFile
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 > function TJSONParser.CreateFromFile(FileName: String): TJSONParser; static;
+
+Create a JSON parser from a json file.
+
+- This needs to be free'd when finished.
+- This is a `static` method.
+
+Example:
+
+```
+var MyJsonParser: TJSONParser;
+begin
+  MyJsonParser := TJSONParser.CreateFromFile('somefile.json');
+  WriteLn(MyJsonParser.Keys());
+  MyJsonParser.Free();
+end;
+```
 *)
 procedure _LapeJSONParser_CreateFromFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -377,7 +411,7 @@ procedure ImportJSON(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    ImportingSection := 'TJSONParser';
+    ImportingSection := 'JSON';
 
     addGlobalType('enum(UNKNOWN, NULL, INT, FLOAT, STR, BOOL)', 'EJSONValueType');
     addGlobalType('record {%CODETOOLS OFF}InternalData: Pointer;{%CODETOOLS ON} end', 'TJSONElement');

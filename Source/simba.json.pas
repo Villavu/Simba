@@ -106,7 +106,7 @@ type
 implementation
 
 uses
-  JsonParser, Variants;
+  jsonreader, jsonscanner, jsonparser, Variants;
 
 function TSimbaJSONElement.GetAsString: String;
 begin
@@ -311,10 +311,21 @@ begin
 end;
 
 constructor TSimbaJSONParser.Create(Str: String);
+var
+  Parser: TJSONParser;
 begin
   inherited Create();
 
-  FRoot := GetJSON(Str);
+  if (Str <> '') then
+  begin
+    Parser := TJSONParser.Create(Str, [joUTF8, joComments, joIgnoreTrailingComma]);
+    try
+      FRoot := Parser.Parse();
+    finally
+      Parser.Free();
+    end;
+  end;
+
   if (FRoot.FData = nil) then
     FRoot := TJSONObject.Create();
 end;

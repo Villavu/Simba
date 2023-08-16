@@ -142,6 +142,10 @@ begin
     'Target':        Result := 'https://villavu.github.io/Simba/Target.html';
     'Web':           Result := 'https://villavu.github.io/Simba/Web.html';
     'Encoding':      Result := 'https://villavu.github.io/Simba/Encoding.html';
+    'JSON':          Result := 'https://villavu.github.io/Simba/JSON.html';
+    'Color Math':    Result := 'https://villavu.github.io/Simba/Color Math.html';
+    'File':          Result := 'https://villavu.github.io/Simba/File.html';
+    'Timing':        Result := 'https://villavu.github.io/Simba/Timing.html';
   end;
 end;
 

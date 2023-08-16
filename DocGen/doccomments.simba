@@ -29,7 +29,7 @@ begin
 end;
 
 begin
-  Contents := FileRead('Source/script/imports/simba/simba.import_target.pas');
+  Contents := FileRead('Source/script/imports/simba/simba.import_timing.pas');
 
   for DocComment in Contents.BetweenAll('(*','*)') do
   begin
