@@ -91,9 +91,10 @@ uses
 
 function GetImage(const Decl: TDeclaration): Integer;
 begin
-  if (Decl is TDeclaration_Method) and Decl.isFunction       then Result := IMG_FUNC   else
-  if (Decl is TDeclaration_Method) and Decl.isProcedure      then Result := IMG_PROC   else
-  if (Decl is TDeclaration_Method) and Decl.isOperatorMethod then Result := IMG_FUNC   else
+  //if (Decl is TDeclaration_Method) and Decl.isFunction       then Result := IMG_FUNC   else
+  //if (Decl is TDeclaration_Method) and Decl.isProcedure      then Result := IMG_PROC   else
+  //if (Decl is TDeclaration_Method) and Decl.isOperatorMethod then Result := IMG_FUNC   else
+  if (Decl is TDeclaration_Method)                           then Result := IMG_FUNC   else
   if (Decl is TDeclaration_EnumElement)                      then Result := IMG_ENUM   else
   if (Decl is TDeclaration_Type)                             then Result := IMG_TYPE   else
   if (Decl is TDeclaration_Const)                            then Result := IMG_CONST  else
@@ -150,6 +151,9 @@ begin
     'Process':        Result := 'https://villavu.github.io/Simba/Process.html';
     'Match Template': Result := 'https://villavu.github.io/Simba/Match Template.html';
     'Math':           Result := 'https://villavu.github.io/Simba/Math.html';
+    'Matrix':         Result := 'https://villavu.github.io/Simba/Matrix.html';
+    'Misc':           Result := 'https://villavu.github.io/Simba/Misc.html';
+    'Dialogs':        Result := 'https://villavu.github.io/Simba/Dialogs.html';
   end;
 end;
 

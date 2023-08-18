@@ -54,7 +54,6 @@ type
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
 
     function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; override;
-    function addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; override;
     function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; override;
 
     procedure DumpToFile(FileName: String);
@@ -220,13 +219,6 @@ function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: lpString; AName: 
 begin
   Result := inherited addGlobalVar(Typ, Value, AName);
   Result._DocPos.FileName := ImportingSection;
-end;
-
-function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
-begin
-  Result := inherited addGlobalVar(Typ, Value, AName);
-
-  AddCode('var ' + AName + ': ' + Typ);
 end;
 
 function TSimbaCompilerDump.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString): TLapeGlobalVar;

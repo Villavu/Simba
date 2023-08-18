@@ -462,8 +462,9 @@ constructor TSimbaSettings.Create;
 begin
   inherited Create();
 
-  if Screen.Fonts.IndexOf('Cascadia Code Light') > -1 then
-    SynDefaultFontName := 'Cascadia Code Light';
+  if Screen.Fonts.IndexOf('Cascadia Code Semilight') > -1 then
+    SynDefaultFontName := 'Cascadia Code Semilight';
+  SynDefaultFontSize  := SynDefaultFontSize + 2;
 
   FFirstLaunch := True;
   FList := TSettingList.Create();
@@ -510,9 +511,9 @@ begin
   Editor.AutoCompleteWidth := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteWidth', 400);
   Editor.AutoCompleteLines := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteLines', 8);
 
-  OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', SynDefaultFontSize);
-  OutputBox.FontName        := TSimbaSetting_String.Create(Self,  'OutputBox', 'FontName', SynDefaultFontName);
-  OutputBox.FontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'FontAntiAliased', True);
+  OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', Editor.FontSize.DefaultValue);
+  OutputBox.FontName        := TSimbaSetting_String.Create(Self,  'OutputBox', 'FontName', Editor.FontName.DefaultValue);
+  OutputBox.FontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'FontAntiAliased', Editor.AntiAliased.DefaultValue);
   OutputBox.ClearOnCompile  := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'OutputClearOnCompile', False);
 
   ScriptBackup.Enabled  := TSimbaSetting_Boolean.Create(Self, 'ScriptBackup', 'Enabled', True);

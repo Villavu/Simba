@@ -38,7 +38,7 @@ end;
 (*
 SetSimbaSetting
 ~~~~~~~~~~~~~~~
-> function SetSimbaSetting(Name: String; DefValue: String = ""): String;
+> function SetSimbaSetting(Name: String; DefValue: String = ''): String;
 *)
 procedure _LapeGetSimpleSetting(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -97,7 +97,7 @@ SetClipBoard
 ~~~~~~~~~~~~
 > procedure SetClipBoard(Data: string);
 
-Sets the current clipboard string.
+Sets the systems clipboard string.
 *)
 procedure _LapeSetClipBoard(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -112,7 +112,7 @@ GetClipBoard
 ~~~~~~~~~~~~
 > function GetClipBoard: String;
 
-Returns the current clipboard string.
+Returns the systems clipboard string.
 *)
 procedure _LapeGetClipBoard(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -125,7 +125,7 @@ end;
 (*
 SetSimbaTitle
 ~~~~~~~~~~~~~~
-> procedure SetSimbaTitle(S: String)
+> procedure SetSimbaTitle(S: String);
 *)
 
 (*

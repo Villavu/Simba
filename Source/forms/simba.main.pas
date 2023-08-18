@@ -53,7 +53,7 @@ const
   IMG_FUNC = 43;
   IMG_PROC = 44;
   IMG_TYPE = 45;
-  IMG_VAR = 46;
+  IMG_VAR = {55}46;
   IMG_CONST = 47;
   IMG_ENUM = 48;
   IMG_ANCHOR = 49;
@@ -169,6 +169,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShortCut(var Msg: TLMKey; var Handled: Boolean);
+    procedure ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
+    procedure MainMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
     procedure MenuClearOutputClick(Sender: TObject);
     procedure MenuCloseAllTabsClick(Sender: TObject);
     procedure MenuCloseTabClick(Sender: TObject);
@@ -736,6 +738,31 @@ begin
              (KeyDataToShiftState(Msg.KeyData) = [ssAlt]); // Suppress windows freaking out
 end;
 
+procedure TSimbaForm.ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
+begin
+  if APPI <= 96 then
+    // no scaling
+  else
+  if APPI <= 168 then
+    AResultWidth := 24 // 125%-175% (120-168 DPI): 150% scaling
+  else
+    AResultWidth := 32; // 200, 300, 400, ...
+end;
+
+procedure TSimbaForm.MainMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
+begin
+  if TMenuItem(Sender).IsLine then
+    Exit;
+
+  if ACanvas.Font.PixelsPerInch <= 96 then
+    // no scaling
+  else
+  if ACanvas.Font.PixelsPerInch <= 168 then
+    AHeight := Round(24 * 1.3) // 125%-175% (120-168 DPI): 150% scaling
+  else
+    AHeight := Round(32 * 1.3); // 200, 300, 400, ...
+end;
+
 procedure TSimbaForm.MenuItemDocumentationClick(Sender: TObject);
 begin
   OpenURL(SIMBA_DOCS_URL);
@@ -1185,21 +1212,6 @@ begin
   end;
 end;
 
-{
-procedure TSimbaForm.ToolBarPaintButton(Sender: TObject);
-var
-  ArrowRect: TRect;
-begin
-  with TToolButton(Sender) do
-  begin
-    ArrowRect := ClientRect;
-    ArrowRect.Left := ArrowRect.Right-ToolBar.DropDownWidth;
-
-    CanvasPaintTriangleDown(Canvas, $FFFFFF, ArrowRect.CenterPoint, 2);
-  end;
-end;
-}
-
 procedure TSimbaForm.ToolBarPaintButton(Sender: TToolButton; State: integer);
 var
   IconSize: TSize;
@@ -1210,11 +1222,12 @@ var
 begin
   with Sender do
   begin
-    if Style = tbsDivider then
+    if (Style = tbsDivider) then
     begin
       Canvas.Pen.Color := SimbaTheme.ColorLine;
       with ClientRect.CenterPoint do
         Canvas.Line(X,3,X,Height-3);
+
       Exit;
     end;
 
@@ -1223,29 +1236,31 @@ begin
       IconSize.cx := 0;
 
     MainBtnRect := ClientRect;
-    if Sender.Style = tbsButtonDrop then
+    if (Style = tbsButtonDrop) then
     begin
       DropDownRect := MainBtnRect;
       DropDownRect.Left := DropDownRect.Right - ToolBar.DropDownWidth;
+
       MainBtnRect.Right := DropDownRect.Left;
     end;
 
-    IconPos.X := (MainBtnRect.Left+MainBtnRect.Right-IconSize.cx) div 2;
-    IconPos.Y := (MainBtnRect.Top+MainBtnRect.Bottom-IconSize.cy) div 2;
+    IconPos.X := (MainBtnRect.Left + MainBtnRect.Right - IconSize.cx) div 2;
+    IconPos.Y := (MainBtnRect.Top + MainBtnRect.Bottom - IconSize.cy) div 2;
 
     Canvas.Brush.Color := SimbaTheme.ColorFrame;
     Canvas.FillRect(ClientRect);
 
-    if State in [2,3] then
+    if State in [2, 3] then // down/hover
     begin
       R := ClientRect;
       R.Inflate(-1,-2);
+
       Canvas.Brush.Color := SimbaTheme.ColorActive;
       Canvas.FillRect(R);
       CanvasPaintRoundedCorners(Canvas, R, [acckLeftTop, acckRightTop, acckLeftBottom, acckRightBottom], Color, Canvas.Brush.Color, Canvas.Brush.Color);
     end;
 
-    if Sender.Enabled then
+    if Enabled then
       ToolBar.Images.ResolutionForPPI[ToolBar.ImagesWidth, Font.PixelsPerInch, GetCanvasScaleFactor].Draw(Canvas, IconPos.X, IconPos.Y, ImageIndex)
     else
       ToolBar.Images.ResolutionForPPI[ToolBar.ImagesWidth, Font.PixelsPerInch, GetCanvasScaleFactor].Draw(Canvas, IconPos.X, IconPos.Y, ImageIndex, gdeDisabled);

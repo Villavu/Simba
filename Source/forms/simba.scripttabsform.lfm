@@ -61,6 +61,7 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   end
   object TabPopupMenu: TPopupMenu
     Images = SimbaForm.Images
+    OnMeasureItem = TabPopupMenuMeasureItem
     Left = 320
     Top = 20
     object MenuItemNewTab: TMenuItem
