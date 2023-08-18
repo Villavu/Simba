@@ -37,6 +37,7 @@ type
     procedure FormMouseLeave(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure TabPopupMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
   protected
     FTabControl: TSimbaTabControl;
 
@@ -231,6 +232,20 @@ begin
 
   if (HostDockSite is TSimbaAnchorDockHostSite) then
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseUp(Button, Shift, X, Y);
+end;
+
+procedure TSimbaScriptTabsForm.TabPopupMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
+begin
+  if TMenuItem(Sender).IsLine then
+    Exit;
+
+  if ACanvas.Font.PixelsPerInch <= 96 then
+    // no scaling
+  else
+  if ACanvas.Font.PixelsPerInch <= 168 then
+    AHeight := Round(24 * 1.3) // 125%-175% (120-168 DPI): 150% scaling
+  else
+    AHeight := Round(32 * 1.3); // 200, 300, 400, ...
 end;
 
 procedure TSimbaScriptTabsForm.FontChanged(Sender: TObject);

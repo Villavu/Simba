@@ -179,6 +179,7 @@ begin
   FTree.SelectionColor := SimbaTheme.ColorActive;
   FTree.Font.Color := SimbaTheme.ColorFont;
   FTree.Images := SimbaForm.Images;
+  //FTree.ImagesWidth := 20;
 
   FScrollbarVert.ForwardScrollControl := FTree;
 

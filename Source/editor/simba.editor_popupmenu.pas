@@ -5,7 +5,7 @@ unit simba.editor_popupmenu;
 interface
 
 uses
-  Classes, SysUtils, Controls, Menus, Forms, LCLType;
+  Classes, SysUtils, Controls, Menus, Forms, Graphics, LCLType;
 
 type
   TSimbaEditorPopupMenu = class(TPopupMenu)
@@ -13,6 +13,7 @@ type
     procedure DoPopup(Sender: TObject);
     procedure DoClick(Sender: TObject);
     procedure DoScriptTabChange(Sender: TObject);
+    procedure DoMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
   public
     FindDeclaration: TMenuItem;
     Undo: TMenuItem;
@@ -112,6 +113,20 @@ begin
     PopupComponent := TSimbaScriptTab(Sender).Editor;
 end;
 
+procedure TSimbaEditorPopupMenu.DoMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
+begin
+  if TMenuItem(Sender).IsLine then
+    Exit;
+
+  if ACanvas.Font.PixelsPerInch <= 96 then
+    // no scaling
+  else
+  if ACanvas.Font.PixelsPerInch <= 168 then
+    AHeight := Round(24 * 1.3) // 125%-175% (120-168 DPI): 150% scaling
+  else
+    AHeight := Round(32 * 1.3); // 200, 300, 400, ...
+end;
+
 constructor TSimbaEditorPopupMenu.Create(AOwner: TComponent);
 
   function Add(ACaption: String; AImageIndex: Integer; Shortcut: TShortCut; AppendLine: Boolean): TMenuItem;
@@ -132,6 +147,7 @@ begin
   inherited Create(AOwner);
 
   OnPopup := @DoPopup;
+  OnMeasureItem := @DoMeasureItem;
 
   Images := SimbaForm.Images;
 

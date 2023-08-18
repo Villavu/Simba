@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, Menus,
-  simba.mufasatypes, simba.component_treeview;
+  simba.mufasatypes, simba.component_treeview, LCLType, Graphics;
 
 type
   TSimbaFileBrowserNode = class(TTreeNode)
@@ -34,6 +34,7 @@ type
 
     procedure DoUpdate(Sender: TObject);
     procedure DoPopupClick(Sender: TObject);
+    procedure PopupMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
     procedure PopupPopup(Sender: TObject);
   protected
   type
@@ -209,6 +210,20 @@ begin
     if (Sender = PopupMenu_OpenExternally) then
       SimbaNativeInterface.OpenFile(Node.FileName);
   end;
+end;
+
+procedure TSimbaFileBrowserForm.PopupMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
+begin
+  if TMenuItem(Sender).IsLine then
+    Exit;
+
+  if ACanvas.Font.PixelsPerInch <= 96 then
+    // no scaling
+  else
+  if ACanvas.Font.PixelsPerInch <= 168 then
+    AHeight := Round(24 * 1.3) // 125%-175% (120-168 DPI): 150% scaling
+  else
+    AHeight := Round(32 * 1.3); // 200, 300, 400, ...
 end;
 
 procedure TSimbaFileBrowserForm.PopupPopup(Sender: TObject);

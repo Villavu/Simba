@@ -35,6 +35,8 @@ begin
   SourceFiles += ['Source\script\imports\simba\simba.import_math.pas',          'Math'           ];
   SourceFiles += ['Source\script\imports\simba\simba.import_matchtemplate.pas', 'Match Template' ];
   SourceFiles += ['Source\script\imports\simba\simba.import_misc.pas',          'Misc'           ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_matrix.pas',        'Matrix'         ];
+  SourceFiles += ['Source\script\imports\simba\simba.import_dialogs.pas',       'Dialogs'       ];
 
   SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_json.pas',   'JSON'     ];
   SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_bitmap.pas', 'Image'    ];
