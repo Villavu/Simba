@@ -236,6 +236,7 @@ type
     procedure RealType; virtual;
     procedure RecordConstant; virtual;
     procedure RecordFieldConstant; virtual;
+    procedure RecordFields; virtual;
     procedure RecordType; virtual;
     procedure UnionType; virtual;
     procedure RecordVariant; virtual;
@@ -2546,7 +2547,7 @@ begin
     if Lexer.TokenID = tokSemicolon then
       Exit;
   end;
-  ClassMemberList;
+  RecordFields;
 
   Expected(tokEnd);
 end;
@@ -3406,6 +3407,21 @@ begin
   Expected(tokIdentifier);
   Expected(tokColon);
   TypedConstant;
+end;
+
+procedure TmwSimplePasPar.RecordFields;
+begin
+  while (Lexer.TokenID in [tokIdentifier, tokConst]) do
+  begin
+    if (Lexer.TokenID = tokConst) then
+    begin
+      NextToken;
+      ConstantDeclaration;
+    end else
+      ClassField;
+
+    Expected(tokSemiColon);
+  end;
 end;
 
 procedure TmwSimplePasPar.RecordConstant;

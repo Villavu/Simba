@@ -29,7 +29,7 @@ Example:
 
 ```
   Input.MouseMove([200,200]); // Move the mouse to x: 200, y: 200
-  Input.MouseClick(MouseButton.LEFT); // And left click
+  Input.MouseClick(EMouseButton.LEFT); // And left click
 ```
 
 ----
@@ -40,186 +40,186 @@ Example:
 Example:
 
 ```
-  MouseButton.LEFT
-  KeyCode.A
+  EMouseButton.LEFT
+  EKeyCode.A
 ```
 
 Available Mouse Buttons:
 
 ```
-  MouseButton.LEFT
-  MouseButton.RIGHT
-  MouseButton.MIDDLE
-  MouseButton.SCROLL_UP
-  MouseButton.SCROLL_DOWN
+  EMouseButton.LEFT
+  EMouseButton.RIGHT
+  EMouseButton.MIDDLE
+  EMouseButton.SCROLL_UP
+  EMouseButton.SCROLL_DOWN
 ```
 
 Available Key Codes:
 
 ```
-  KeyCode.UNKNOWN
-  KeyCode.LBUTTON
-  KeyCode.RBUTTON
-  KeyCode.CANCEL
-  KeyCode.MBUTTON
-  KeyCode.XBUTTON1
-  KeyCode.XBUTTON2
-  KeyCode.BACK
-  KeyCode.TAB
-  KeyCode.CLEAR
-  KeyCode.RETURN
-  KeyCode.SHIFT
-  KeyCode.CONTROL
-  KeyCode.MENU
-  KeyCode.PAUSE
-  KeyCode.CAPITAL
-  KeyCode.ESCAPE
-  KeyCode.CONVERT
-  KeyCode.NONCONVERT
-  KeyCode.ACCEPT
-  KeyCode.MODECHANGE
-  KeyCode.SPACE
-  KeyCode.PRIOR
-  KeyCode.NEXT
-  KeyCode.END_KEY
-  KeyCode.HOME
-  KeyCode.LEFT
-  KeyCode.UP
-  KeyCode.RIGHT
-  KeyCode.DOWN
-  KeyCode.SELECT
-  KeyCode.PRINT
-  KeyCode.EXECUTE
-  KeyCode.SNAPSHOT
-  KeyCode.INSERT
-  KeyCode.DELETE
-  KeyCode.HELP
-  KeyCode.NUM_0
-  KeyCode.NUM_1
-  KeyCode.NUM_2
-  KeyCode.NUM_3
-  KeyCode.NUM_4
-  KeyCode.NUM_5
-  KeyCode.NUM_6
-  KeyCode.NUM_7
-  KeyCode.NUM_8
-  KeyCode.NUM_9
-  KeyCode.A
-  KeyCode.B
-  KeyCode.C
-  KeyCode.D
-  KeyCode.E
-  KeyCode.F
-  KeyCode.G
-  KeyCode.H
-  KeyCode.I
-  KeyCode.J
-  KeyCode.K
-  KeyCode.L
-  KeyCode.M
-  KeyCode.N
-  KeyCode.O
-  KeyCode.P
-  KeyCode.Q
-  KeyCode.R
-  KeyCode.S
-  KeyCode.T
-  KeyCode.U
-  KeyCode.V
-  KeyCode.W
-  KeyCode.X
-  KeyCode.Y
-  KeyCode.Z
-  KeyCode.LWIN
-  KeyCode.RWIN
-  KeyCode.APPS
-  KeyCode.SLEEP
-  KeyCode.NUMPAD_0
-  KeyCode.NUMPAD_1
-  KeyCode.NUMPAD_2
-  KeyCode.NUMPAD_3
-  KeyCode.NUMPAD_4
-  KeyCode.NUMPAD_5
-  KeyCode.NUMPAD_6
-  KeyCode.NUMPAD_7
-  KeyCode.NUMPAD_8
-  KeyCode.NUMPAD_9
-  KeyCode.MULTIPLY
-  KeyCode.ADD
-  KeyCode.SEPARATOR
-  KeyCode.SUBTRACT
-  KeyCode.DECIMAL
-  KeyCode.DIVIDE
-  KeyCode.F1
-  KeyCode.F2
-  KeyCode.F3
-  KeyCode.F4
-  KeyCode.F5
-  KeyCode.F6
-  KeyCode.F7
-  KeyCode.F8
-  KeyCode.F9
-  KeyCode.F10
-  KeyCode.F11
-  KeyCode.F12
-  KeyCode.F13
-  KeyCode.F14
-  KeyCode.F15
-  KeyCode.F16
-  KeyCode.F17
-  KeyCode.F18
-  KeyCode.F19
-  KeyCode.F20
-  KeyCode.F21
-  KeyCode.F22
-  KeyCode.F23
-  KeyCode.F24
-  KeyCode.NUMLOCK
-  KeyCode.SCROLL
-  KeyCode.LSHIFT
-  KeyCode.RSHIFT
-  KeyCode.LCONTROL
-  KeyCode.RCONTROL
-  KeyCode.LMENU
-  KeyCode.RMENU
-  KeyCode.BROWSER_BACK
-  KeyCode.BROWSER_FORWARD
-  KeyCode.BROWSER_REFRESH
-  KeyCode.BROWSER_STOP
-  KeyCode.BROWSER_SEARCH
-  KeyCode.BROWSER_FAVORITES
-  KeyCode.BROWSER_HOME
-  KeyCode.VOLUME_MUTE
-  KeyCode.VOLUME_DOWN
-  KeyCode.VOLUME_UP
-  KeyCode.MEDIA_NEXT_TRACK
-  KeyCode.MEDIA_PREV_TRACK
-  KeyCode.MEDIA_STOP
-  KeyCode.MEDIA_PLAY_PAUSE
-  KeyCode.LAUNCH_MAIL
-  KeyCode.LAUNCH_MEDIA_SELECT
-  KeyCode.LAUNCH_APP1
-  KeyCode.LAUNCH_APP2
-  KeyCode.OEM_1
-  KeyCode.OEM_PLUS
-  KeyCode.OEM_COMMA
-  KeyCode.OEM_MINUS
-  KeyCode.OEM_PERIOD
-  KeyCode.OEM_2
-  KeyCode.OEM_3
-  KeyCode.OEM_4
-  KeyCode.OEM_5
-  KeyCode.OEM_6
-  KeyCode.OEM_7
-  KeyCode.OEM_8
-  KeyCode.OEM_102
-  KeyCode.PROCESSKEY
-  KeyCode.ATTN
-  KeyCode.CRSEL
-  KeyCode.EXSEL
-  KeyCode.EREOF
-  KeyCode.PLAY
-  KeyCode.ZOOM
+  EKeyCode.UNKNOWN
+  EKeyCode.LBUTTON
+  EKeyCode.RBUTTON
+  EKeyCode.CANCEL
+  EKeyCode.MBUTTON
+  EKeyCode.XBUTTON1
+  EKeyCode.XBUTTON2
+  EKeyCode.BACK
+  EKeyCode.TAB
+  EKeyCode.CLEAR
+  EKeyCode.RETURN
+  EKeyCode.SHIFT
+  EKeyCode.CONTROL
+  EKeyCode.MENU
+  EKeyCode.PAUSE
+  EKeyCode.CAPITAL
+  EKeyCode.ESCAPE
+  EKeyCode.CONVERT
+  EKeyCode.NONCONVERT
+  EKeyCode.ACCEPT
+  EKeyCode.MODECHANGE
+  EKeyCode.SPACE
+  EKeyCode.PRIOR
+  EKeyCode.NEXT
+  EKeyCode.END_KEY
+  EKeyCode.HOME
+  EKeyCode.LEFT
+  EKeyCode.UP
+  EKeyCode.RIGHT
+  EKeyCode.DOWN
+  EKeyCode.SELECT
+  EKeyCode.PRINT
+  EKeyCode.EXECUTE
+  EKeyCode.SNAPSHOT
+  EKeyCode.INSERT
+  EKeyCode.DELETE
+  EKeyCode.HELP
+  EKeyCode.NUM_0
+  EKeyCode.NUM_1
+  EKeyCode.NUM_2
+  EKeyCode.NUM_3
+  EKeyCode.NUM_4
+  EKeyCode.NUM_5
+  EKeyCode.NUM_6
+  EKeyCode.NUM_7
+  EKeyCode.NUM_8
+  EKeyCode.NUM_9
+  EKeyCode.A
+  EKeyCode.B
+  EKeyCode.C
+  EKeyCode.D
+  EKeyCode.E
+  EKeyCode.F
+  EKeyCode.G
+  EKeyCode.H
+  EKeyCode.I
+  EKeyCode.J
+  EKeyCode.K
+  EKeyCode.L
+  EKeyCode.M
+  EKeyCode.N
+  EKeyCode.O
+  EKeyCode.P
+  EKeyCode.Q
+  EKeyCode.R
+  EKeyCode.S
+  EKeyCode.T
+  EKeyCode.U
+  EKeyCode.V
+  EKeyCode.W
+  EKeyCode.X
+  EKeyCode.Y
+  EKeyCode.Z
+  EKeyCode.LWIN
+  EKeyCode.RWIN
+  EKeyCode.APPS
+  EKeyCode.SLEEP
+  EKeyCode.NUMPAD_0
+  EKeyCode.NUMPAD_1
+  EKeyCode.NUMPAD_2
+  EKeyCode.NUMPAD_3
+  EKeyCode.NUMPAD_4
+  EKeyCode.NUMPAD_5
+  EKeyCode.NUMPAD_6
+  EKeyCode.NUMPAD_7
+  EKeyCode.NUMPAD_8
+  EKeyCode.NUMPAD_9
+  EKeyCode.MULTIPLY
+  EKeyCode.ADD
+  EKeyCode.SEPARATOR
+  EKeyCode.SUBTRACT
+  EKeyCode.DECIMAL
+  EKeyCode.DIVIDE
+  EKeyCode.F1
+  EKeyCode.F2
+  EKeyCode.F3
+  EKeyCode.F4
+  EKeyCode.F5
+  EKeyCode.F6
+  EKeyCode.F7
+  EKeyCode.F8
+  EKeyCode.F9
+  EKeyCode.F10
+  EKeyCode.F11
+  EKeyCode.F12
+  EKeyCode.F13
+  EKeyCode.F14
+  EKeyCode.F15
+  EKeyCode.F16
+  EKeyCode.F17
+  EKeyCode.F18
+  EKeyCode.F19
+  EKeyCode.F20
+  EKeyCode.F21
+  EKeyCode.F22
+  EKeyCode.F23
+  EKeyCode.F24
+  EKeyCode.NUMLOCK
+  EKeyCode.SCROLL
+  EKeyCode.LSHIFT
+  EKeyCode.RSHIFT
+  EKeyCode.LCONTROL
+  EKeyCode.RCONTROL
+  EKeyCode.LMENU
+  EKeyCode.RMENU
+  EKeyCode.BROWSER_BACK
+  EKeyCode.BROWSER_FORWARD
+  EKeyCode.BROWSER_REFRESH
+  EKeyCode.BROWSER_STOP
+  EKeyCode.BROWSER_SEARCH
+  EKeyCode.BROWSER_FAVORITES
+  EKeyCode.BROWSER_HOME
+  EKeyCode.VOLUME_MUTE
+  EKeyCode.VOLUME_DOWN
+  EKeyCode.VOLUME_UP
+  EKeyCode.MEDIA_NEXT_TRACK
+  EKeyCode.MEDIA_PREV_TRACK
+  EKeyCode.MEDIA_STOP
+  EKeyCode.MEDIA_PLAY_PAUSE
+  EKeyCode.LAUNCH_MAIL
+  EKeyCode.LAUNCH_MEDIA_SELECT
+  EKeyCode.LAUNCH_APP1
+  EKeyCode.LAUNCH_APP2
+  EKeyCode.OEM_1
+  EKeyCode.OEM_PLUS
+  EKeyCode.OEM_COMMA
+  EKeyCode.OEM_MINUS
+  EKeyCode.OEM_PERIOD
+  EKeyCode.OEM_2
+  EKeyCode.OEM_3
+  EKeyCode.OEM_4
+  EKeyCode.OEM_5
+  EKeyCode.OEM_6
+  EKeyCode.OEM_7
+  EKeyCode.OEM_8
+  EKeyCode.OEM_102
+  EKeyCode.PROCESSKEY
+  EKeyCode.ATTN
+  EKeyCode.CRSEL
+  EKeyCode.EXSEL
+  EKeyCode.EREOF
+  EKeyCode.PLAY
+  EKeyCode.ZOOM
 ```
 *)
 
@@ -236,7 +236,7 @@ end;
 (*
 TInput.MousePressed
 ~~~~~~~~~~~~~~~~~~~
-> function TInput.MousePressed(Button: MouseButton): Boolean;
+> function TInput.MousePressed(Button: EMouseButton): Boolean;
 *)
 procedure _LapeInput_MousePressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -258,7 +258,7 @@ end;
 (*
 TInput.MouseClick
 ~~~~~~~~~~~~~~~~~
-> procedure TInput.MouseClick(Button: MouseButton);
+> procedure TInput.MouseClick(Button: EMouseButton);
 *)
 procedure _LapeInput_MouseClick(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -268,7 +268,7 @@ end;
 (*
 TInput.MouseDown
 ~~~~~~~~~~~~~~~~
-> procedure TInput.MouseDown(Button: MouseButton);
+> procedure TInput.MouseDown(Button: EMouseButton);
 *)
 procedure _LapeInput_MouseDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -278,7 +278,7 @@ end;
 (*
 TInput.MouseUp
 ~~~~~~~~~~~~~~
-> procedure TInput.MouseUp(Button: MouseButton);
+> procedure TInput.MouseUp(Button: EMouseButton);
 *)
 procedure _LapeInput_MouseUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -314,7 +314,7 @@ end;
 (*
 TInput.KeyDown
 ~~~~~~~~~~~~~~
-> procedure TInput.KeyDown(Key: KeyCode);
+> procedure TInput.KeyDown(Key: EKeyCode);
 *)
 procedure _LapeInput_KeyDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -324,7 +324,7 @@ end;
 (*
 TInput.KeyUp
 ~~~~~~~~~~~~
-> procedure TInput.KeyUp(Key: KeyCode);
+> procedure TInput.KeyUp(Key: EKeyCode);
 *)
 procedure _LapeInput_KeyUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -334,7 +334,7 @@ end;
 (*
 TInput.KeyPress
 ~~~~~~~~~~~~~~~
-> procedure TInput.KeyPress(Key: KeyCode);
+> procedure TInput.KeyPress(Key: EKeyCode);
 *)
 procedure _LapeInput_KeyPress(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -344,7 +344,7 @@ end;
 (*
 TInput.KeyPressed
 ~~~~~~~~~~~~~~~~~
-> function TInput.KeyPressed(Key: KeyCode): Boolean;
+> function TInput.KeyPressed(Key: EKeyCode): Boolean;
 *)
 procedure _LapeInput_KeyPressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -364,7 +364,7 @@ end;
 (*
 TInput.CharToKeyCode
 ~~~~~~~~~~~~~~~~~~~~
-> function TInput.CharToKeyCode(C: Char): KeyCode;
+> function TInput.CharToKeyCode(C: Char): EKeyCode;
 *)
 procedure _LapeInput_CharToKeyCode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -396,13 +396,43 @@ begin
 end;
 
 (*
+TInput.AddOnMouseDown
+~~~~~~~~~~~~~~~~~~~~~
+> function TInput.AddOnMouseDown(Event: TMouseButtonEvent): TMouseButtonEvent;
+*)
+procedure _LapeInput_AddOnMouseDown(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaInput.TMouseButtonEvent(Result^) := PSimbaInput(Params^[0])^.AddOnMouseDown(TSimbaInput.TMouseButtonEvent(Params^[1]^));
+end;
+
+(*
+TInput.AddOnMouseUp
+~~~~~~~~~~~~~~~~~~~
+> function TInput.AddOnMouseUp(Event: TMouseButtonEvent): TMouseButtonEvent;
+*)
+procedure _LapeInput_AddOnMouseUp(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaInput.TMouseButtonEvent(Result^) := PSimbaInput(Params^[0])^.AddOnMouseUp(TSimbaInput.TMouseButtonEvent(Params^[1]^));
+end;
+
+(*
+TInput.AddOnMouseClick
+~~~~~~~~~~~~~~~~~~~~~~
+> function TInput.AddOnMouseClick(Event: TMouseButtonEvent): TMouseButtonEvent;
+*)
+procedure _LapeInput_AddOnMouseClick(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaInput.TMouseButtonEvent(Result^) := PSimbaInput(Params^[0])^.AddOnMouseClick(TSimbaInput.TMouseButtonEvent(Params^[1]^));
+end;
+
+(*
 TInput.RemoveOnMouseTeleport
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 > procedure TInput.RemoveOnMouseTeleport(Event: TMouseTeleportEvent);
 *)
-procedure _LapeInput_RemoveOnMouseTeleport(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_RemoveOnMouseTeleport(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaInput(Params^[0])^.RemoveOnMouseTeleport(TSimbaInput.TMouseTeleportEvent(Params^[1]^));
+  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseTeleport(TSimbaInput.TMouseTeleportEvent(Params^[1]^));
 end;
 
 (*
@@ -410,9 +440,39 @@ TInput.RemoveOnMouseMoving
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 > procedure TInput.RemoveOnMouseMoving(Event: TMouseMovingEvent);
 *)
-procedure _LapeInput_RemoveOnMouseMoving(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeInput_RemoveOnMouseMoving(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaInput(Params^[0])^.RemoveOnMouseMoving(TSimbaInput.TMouseMovingEvent(Params^[1]^));
+  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseMoving(TSimbaInput.TMouseMovingEvent(Params^[1]^));
+end;
+
+(*
+TInput.RemoveOnMouseDown
+~~~~~~~~~~~~~~~~~~~~~~~~
+> procedure TInput.RemoveOnMouseDown(Event: TMouseButtonEvent);
+*)
+procedure _LapeInput_RemoveOnMouseDown(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseDown(TSimbaInput.TMouseButtonEvent(Params^[1]^));
+end;
+
+(*
+TInput.RemoveOnMouseUp
+~~~~~~~~~~~~~~~~~~~~~~
+> procedure TInput.RemoveOnMouseUp(Event: TMouseButtonEvent);
+*)
+procedure _LapeInput_RemoveOnMouseUp(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseUp(TSimbaInput.TMouseButtonEvent(Params^[1]^));
+end;
+
+(*
+TInput.RemoveOnMouseClick
+~~~~~~~~~~~~~~~~~~~~~~~~~
+> procedure TInput.RemoveOnMouseClick(Event: TMouseButtonEvent);
+*)
+procedure _LapeInput_RemoveOnMouseClick(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseClick(TSimbaInput.TMouseButtonEvent(Params^[1]^));
 end;
 
 procedure ImportInput(Compiler: TSimbaScript_Compiler);
@@ -442,20 +502,29 @@ begin
     // Must equal TSimbaInput
     addGlobalType([
       'packed record',
+      '  const DEFAULT_KEY_PRESS_MIN = 30;',
+      '  const DEFAULT_KEY_PRESS_MAX = 140;',
+      '  const DEFAULT_CLICK_MIN = 40;',
+      '  const DEFAULT_CLICK_MAX = 220;',
+      '  const DEFAULT_MOUSE_TIMEOUT = 15000;',
+      '  const DEFAULT_MOUSE_SPEED   = 12;',
+      '  const DEFAULT_MOUSE_GRAVITY = 9;',
+      '  const DEFAULT_MOUSE_WIND    = 6;',
+      '',
       '  Target: TTarget;',
       '',
-      '  TeleportingEvents: array of TMethod;',
-      '  MovingEvents: array of TMethod;',
+      '  MouseEvents: array[0..' + IntToStr(Ord(High(TSimbaInput.EMouseEventType))) + '] of array of TMethod;',
       '',
-      '  MinPressTime: Integer;',
-      '  MaxPressTime: Integer;',
+      '  KeyPressMin: Integer;',
+      '  KeyPressMax: Integer;',
       '',
-      '  MinClickTime: Integer;',
-      '  MaxClickTime: Integer;',
+      '  MouseClickMin: Integer;',
+      '  MouseClickMax: Integer;',
       '',
-      '  Speed: Integer;',
-      '  Gravity: Double;',
-      '  Wind: Double;',
+      '  MouseSpeed: Double;',
+      '  MouseGravity: Double;',
+      '  MouseWind: Double;',
+      '  MouseTimeout: Integer;',
       'end;'],
       'TInput'
     );
@@ -472,7 +541,7 @@ begin
       'enum(',
       '  LEFT, RIGHT, MIDDLE, SCROLL_UP, SCROLL_DOWN',
       ');'],
-      'MouseButton'
+      'EMouseButton'
     );
     addGlobalType([
       'enum(',
@@ -640,34 +709,42 @@ begin
       '  PLAY                = 250,',
       '  ZOOM                = 251',
       ');'],
-      'KeyCode'
+      'EKeyCode'
     );
 
     addGlobalType('procedure(var Input: TInput; X, Y: Integer) of object', 'TMouseTeleportEvent', FFI_DEFAULT_ABI);
     addGlobalType('function(var Input: TInput; var X, Y: Double): Boolean of object', 'TMouseMovingEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(var Input: TInput; Button: EMouseButton) of object', 'TMouseButtonEvent', FFI_DEFAULT_ABI);
 
     // Dont need addInputMethod for these
     addGlobalFunc('function TInput.AddOnMouseTeleportEvent(Event: TMouseTeleportEvent): TMouseTeleportEvent;', @_LapeInput_AddOnMouseTeleport);
     addGlobalFunc('function TInput.AddOnMouseMovingEvent(Event: TMouseMovingEvent): TMouseTeleportEvent;', @_LapeInput_AddOnMouseMoving);
-    addGlobalFunc('procedure TInput.RemoveOnMouseTeleportEvent(Event: TMouseTeleportEvent);', @_LapeInput_RemoveOnMouseTeleport);
-    addGlobalFunc('procedure TInput.RemoveOnMouseMovingEvent(Event: TMouseMovingEvent);', @_LapeInput_RemoveOnMouseMoving);
+    addGlobalFunc('function TInput.AddOnMouseDown(Event: TMouseButtonEvent): TMouseButtonEvent;', @_LapeInput_AddOnMouseDown);
+    addGlobalFunc('function TInput.AddOnMouseUp(Event: TMouseButtonEvent): TMouseButtonEvent;', @_LapeInput_AddOnMouseUp);
+    addGlobalFunc('function TInput.AddOnMouseClick(Event: TMouseButtonEvent): TMouseButtonEvent;', @_LapeInput_AddOnMouseClick);
 
-    addInputMethod('function TInput.MousePressed(Button: MouseButton): Boolean', @_LapeInput_MousePressed);
+    addGlobalFunc('function TInput.RemoveOnMouseTeleportEvent(Event: TMouseTeleportEvent): Boolean;', @_LapeInput_RemoveOnMouseTeleport);
+    addGlobalFunc('function TInput.RemoveOnMouseMovingEvent(Event: TMouseMovingEvent): Boolean;', @_LapeInput_RemoveOnMouseMoving);
+    addGlobalFunc('function TInput.RemoveOnMouseDown(Event: TMouseButtonEvent): Boolean;', @_LapeInput_RemoveOnMouseDown);
+    addGlobalFunc('function TInput.RemoveOnMouseUp(Event: TMouseButtonEvent): Boolean;', @_LapeInput_RemoveOnMouseUp);
+    addGlobalFunc('function TInput.RemoveOnMouseClick(Event: TMouseButtonEvent): Boolean;', @_LapeInput_RemoveOnMouseClick);
+
+    addInputMethod('function TInput.MousePressed(Button: EMouseButton): Boolean', @_LapeInput_MousePressed);
     addInputMethod('function TInput.MousePosition: TPoint', @_LapeInput_MousePosition);
     addInputMethod('procedure TInput.MouseTeleport(P: TPoint)', @_LapeInput_MouseTeleport);
-    addInputMethod('procedure TInput.MouseClick(Button: MouseButton)', @_LapeInput_MouseClick);
-    addInputMethod('procedure TInput.MouseDown(Button: MouseButton)', @_LapeInput_MouseDown);
-    addInputMethod('procedure TInput.MouseUp(Button: MouseButton)', @_LapeInput_MouseUp);
+    addInputMethod('procedure TInput.MouseClick(Button: EMouseButton)', @_LapeInput_MouseClick);
+    addInputMethod('procedure TInput.MouseDown(Button: EMouseButton)', @_LapeInput_MouseDown);
+    addInputMethod('procedure TInput.MouseUp(Button: EMouseButton)', @_LapeInput_MouseUp);
     addInputMethod('procedure TInput.MouseScroll(Scrolls: Integer)', @_LapeInput_MouseScroll);
     addInputMethod('procedure TInput.MouseMove(Dest: TPoint);', @_LapeInput_MouseMove);
 
     addInputMethod('procedure TInput.KeySend(Text: String)', @_LapeInput_KeySend);
-    addInputMethod('procedure TInput.KeyPress(Key: KeyCode)', @_LapeInput_KeyPress);
-    addInputMethod('procedure TInput.KeyDown(Key: KeyCode)', @_LapeInput_KeyDown);
-    addInputMethod('procedure TInput.KeyUp(Key: KeyCode)', @_LapeInput_KeyUp);
-    addInputMethod('function TInput.KeyPressed(Key: KeyCode): Boolean', @_LapeInput_KeyPressed);
+    addInputMethod('procedure TInput.KeyPress(Key: EKeyCode)', @_LapeInput_KeyPress);
+    addInputMethod('procedure TInput.KeyDown(Key: EKeyCode)', @_LapeInput_KeyDown);
+    addInputMethod('procedure TInput.KeyUp(Key: EKeyCode)', @_LapeInput_KeyUp);
+    addInputMethod('function TInput.KeyPressed(Key: EKeyCode): Boolean', @_LapeInput_KeyPressed);
 
-    addInputMethod('function TInput.CharToKeyCode(C: Char): KeyCode', @_LapeInput_CharToKeyCode);
+    addInputMethod('function TInput.CharToKeyCode(C: Char): EKeyCode', @_LapeInput_CharToKeyCode);
   end;
 end;
 

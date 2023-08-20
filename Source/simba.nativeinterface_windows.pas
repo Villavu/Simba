@@ -27,8 +27,8 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure KeyDownNativeKeyCode(KeyCode: Integer); override;
-    procedure KeyUpNativeKeyCode(KeyCode: Integer); override;
+    procedure KeyDownNativeKeyCode(EKeyCode: Integer); override;
+    procedure KeyUpNativeKeyCode(EKeyCode: Integer); override;
 
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
 
@@ -38,18 +38,18 @@ type
 
     function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean; override;
 
-    procedure MouseUp(Button: MouseButton); override;
-    procedure MouseDown(Button: MouseButton); override;
+    procedure MouseUp(Button: EMouseButton); override;
+    procedure MouseDown(Button: EMouseButton); override;
     procedure MouseScroll(Scrolls: Integer); override;
     procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); override;
-    function MousePressed(Button: MouseButton): Boolean; override;
+    function MousePressed(Button: EMouseButton): Boolean; override;
 
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
 
-    function KeyPressed(Key: KeyCode): Boolean; override;
-    procedure KeyDown(Key: KeyCode); override;
-    procedure KeyUp(Key: KeyCode); override;
+    function KeyPressed(Key: EKeyCode): Boolean; override;
+    procedure KeyDown(Key: EKeyCode); override;
+    procedure KeyUp(Key: EKeyCode); override;
 
     function GetProcessStartTime(PID: SizeUInt): TDateTime; override;
     function GetProcessMemUsage(PID: SizeUInt): Int64; override;
@@ -337,7 +337,7 @@ begin
   ReleaseDC(Window, WindowDC);
 end;
 
-procedure TSimbaNativeInterface_Windows.MouseUp(Button: MouseButton);
+procedure TSimbaNativeInterface_Windows.MouseUp(Button: EMouseButton);
 var
   Input: TInput;
 begin
@@ -345,15 +345,15 @@ begin
   Input._Type := INPUT_MOUSE;
 
   case Button of
-    MouseButton.LEFT: Input.mi.dwFlags := MOUSEEVENTF_LEFTUP;
-    MouseButton.MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_MIDDLEUP;
-    MouseButton.RIGHT: Input.mi.dwFlags := MOUSEEVENTF_RIGHTUP;
-    MouseButton.SCROLL_UP:
+    EMouseButton.LEFT: Input.mi.dwFlags := MOUSEEVENTF_LEFTUP;
+    EMouseButton.MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_MIDDLEUP;
+    EMouseButton.RIGHT: Input.mi.dwFlags := MOUSEEVENTF_RIGHTUP;
+    EMouseButton.SCROLL_UP:
       begin
         Input.mi.mouseData := XBUTTON1;
         Input.mi.dwFlags := MOUSEEVENTF_XUP;
       end;
-    MouseButton.SCROLL_DOWN:
+    EMouseButton.SCROLL_DOWN:
       begin
         Input.mi.mouseData := XBUTTON2;
         Input.mi.dwFlags := MOUSEEVENTF_XUP;
@@ -363,7 +363,7 @@ begin
   SendInput(1, @Input, SizeOf(Input));
 end;
 
-procedure TSimbaNativeInterface_Windows.MouseDown(Button: MouseButton);
+procedure TSimbaNativeInterface_Windows.MouseDown(Button: EMouseButton);
 var
   Input: TInput;
 begin
@@ -371,15 +371,15 @@ begin
   Input._Type := INPUT_MOUSE;
 
   case Button of
-    MouseButton.LEFT: Input.mi.dwFlags := MOUSEEVENTF_LEFTDOWN;
-    MouseButton.MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_MIDDLEDOWN;
-    MouseButton.RIGHT: Input.mi.dwFlags := MOUSEEVENTF_RIGHTDOWN;
-    MouseButton.SCROLL_UP:
+    EMouseButton.LEFT: Input.mi.dwFlags := MOUSEEVENTF_LEFTDOWN;
+    EMouseButton.MIDDLE: Input.mi.dwFlags := MOUSEEVENTF_MIDDLEDOWN;
+    EMouseButton.RIGHT: Input.mi.dwFlags := MOUSEEVENTF_RIGHTDOWN;
+    EMouseButton.SCROLL_UP:
       begin
         Input.mi.mouseData := XBUTTON1;
         Input.mi.dwFlags := MOUSEEVENTF_XDOWN;
       end;
-    MouseButton.SCROLL_DOWN:
+    EMouseButton.SCROLL_DOWN:
       begin
         Input.mi.mouseData := XBUTTON2;
         Input.mi.dwFlags := MOUSEEVENTF_XDOWN;
@@ -438,44 +438,44 @@ begin
   Result.Y := Result.Y - Bounds.Y1;
 end;
 
-function TSimbaNativeInterface_Windows.MousePressed(Button: MouseButton): Boolean;
+function TSimbaNativeInterface_Windows.MousePressed(Button: EMouseButton): Boolean;
 begin
   Result := False;
 
   case Button of
-    MouseButton.LEFT:        Result := (GetAsyncKeyState(VK_LBUTTON) and $8000 <> 0);
-    MouseButton.MIDDLE:      Result := (GetAsyncKeyState(VK_MBUTTON) and $8000 <> 0);
-    MouseButton.RIGHT:       Result := (GetAsyncKeyState(VK_RBUTTON) and $8000 <> 0);
-    MouseButton.SCROLL_UP:   Result := (GetAsyncKeyState(VK_XBUTTON1) and $8000 <> 0);
-    MouseButton.SCROLL_DOWN: Result := (GetAsyncKeyState(VK_XBUTTON2) and $8000 <> 0);
+    EMouseButton.LEFT:        Result := (GetAsyncKeyState(VK_LBUTTON) and $8000 <> 0);
+    EMouseButton.MIDDLE:      Result := (GetAsyncKeyState(VK_MBUTTON) and $8000 <> 0);
+    EMouseButton.RIGHT:       Result := (GetAsyncKeyState(VK_RBUTTON) and $8000 <> 0);
+    EMouseButton.SCROLL_UP:   Result := (GetAsyncKeyState(VK_XBUTTON1) and $8000 <> 0);
+    EMouseButton.SCROLL_DOWN: Result := (GetAsyncKeyState(VK_XBUTTON2) and $8000 <> 0);
   end;
 end;
 
-function TSimbaNativeInterface_Windows.KeyPressed(Key: KeyCode): Boolean;
+function TSimbaNativeInterface_Windows.KeyPressed(Key: EKeyCode): Boolean;
 begin
   Result := (GetAsyncKeyState(Ord(Key)) and $8000 <> 0); //only check if high-order bit is set
 end;
 
-procedure TSimbaNativeInterface_Windows.KeyDownNativeKeyCode(KeyCode: Integer);
+procedure TSimbaNativeInterface_Windows.KeyDownNativeKeyCode(EKeyCode: Integer);
 var
   Input: TInput;
 begin
   Input := Default(TInput);
   Input._Type := INPUT_KEYBOARD;
   Input.ki.dwFlags := KEYEVENTF_SCANCODE;
-  Input.ki.wScan := MapVirtualKey(KeyCode, 0);
+  Input.ki.wScan := MapVirtualKey(EKeyCode, 0);
 
   SendInput(1, @Input, SizeOf(Input));
 end;
 
-procedure TSimbaNativeInterface_Windows.KeyUpNativeKeyCode(KeyCode: Integer);
+procedure TSimbaNativeInterface_Windows.KeyUpNativeKeyCode(EKeyCode: Integer);
 var
   Input: TInput;
 begin
   Input := Default(TInput);
   Input._Type := INPUT_KEYBOARD;
   Input.ki.dwFlags := KEYEVENTF_KEYUP or KEYEVENTF_SCANCODE;
-  Input.ki.wScan := MapVirtualKey(KeyCode, 0);
+  Input.ki.wScan := MapVirtualKey(EKeyCode, 0);
 
   SendInput(1, @Input, SizeOf(Input));
 end;
@@ -488,7 +488,7 @@ begin
   Modifiers := TShiftState(VKKeyScan(Character) shr 8 and $FF);
 end;
 
-procedure TSimbaNativeInterface_Windows.KeyDown(Key: KeyCode);
+procedure TSimbaNativeInterface_Windows.KeyDown(Key: EKeyCode);
 var
   Input: TInput;
 begin
@@ -500,7 +500,7 @@ begin
   SendInput(1, @Input, SizeOf(Input));
 end;
 
-procedure TSimbaNativeInterface_Windows.KeyUp(Key: KeyCode);
+procedure TSimbaNativeInterface_Windows.KeyUp(Key: EKeyCode);
 var
   Input: TInput;
 begin

@@ -16,8 +16,8 @@ uses
 type
   TSimbaNativeInterface = class
   public
-    procedure KeyDownNativeKeyCode(KeyCode: Integer); virtual; abstract;
-    procedure KeyUpNativeKeyCode(KeyCode: Integer); virtual; abstract;
+    procedure KeyDownNativeKeyCode(EKeyCode: Integer); virtual; abstract;
+    procedure KeyUpNativeKeyCode(EKeyCode: Integer); virtual; abstract;
 
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; virtual; abstract;
 
@@ -25,18 +25,18 @@ type
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; virtual; abstract;
     function GetWindowBounds(Window: TWindowHandle): TBox; virtual; abstract;
 
-    procedure MouseUp(Button: MouseButton); virtual; abstract;
-    procedure MouseDown(Button: MouseButton); virtual; abstract;
+    procedure MouseUp(Button: EMouseButton); virtual; abstract;
+    procedure MouseDown(Button: EMouseButton); virtual; abstract;
     procedure MouseScroll(Scrolls: Integer); virtual; abstract;
     procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); virtual; abstract;
-    function MousePressed(Button: MouseButton): Boolean; virtual; abstract;
+    function MousePressed(Button: EMouseButton): Boolean; virtual; abstract;
 
     function GetMousePosition: TPoint; virtual; abstract;
     function GetMousePosition(Window: TWindowHandle): TPoint; virtual; abstract;
 
-    function KeyPressed(Key: KeyCode): Boolean; virtual; abstract;
-    procedure KeyDown(Key: KeyCode); virtual; abstract;
-    procedure KeyUp(Key: KeyCode); virtual; abstract;
+    function KeyPressed(Key: EKeyCode): Boolean; virtual; abstract;
+    procedure KeyDown(Key: EKeyCode); virtual; abstract;
+    procedure KeyUp(Key: EKeyCode); virtual; abstract;
 
     function GetProcessStartTime(PID: SizeUInt): TDateTime; virtual; abstract;
     function GetProcessMemUsage(PID: SizeUInt): Int64; virtual; abstract;
@@ -119,9 +119,9 @@ begin
 
   if (KeyModifiers <> []) then
   begin
-    if (ssShift in KeyModifiers) then KeyDown(KeyCode.SHIFT);
-    if (ssCtrl  in KeyModifiers) then KeyDown(KeyCode.CONTROL);
-    if (ssAlt   in KeyModifiers) then KeyDown(KeyCode.MENU);
+    if (ssShift in KeyModifiers) then KeyDown(EKeyCode.SHIFT);
+    if (ssCtrl  in KeyModifiers) then KeyDown(EKeyCode.CONTROL);
+    if (ssAlt   in KeyModifiers) then KeyDown(EKeyCode.MENU);
 
     PreciseSleep(ModifierDownTime);
   end;
@@ -131,9 +131,9 @@ begin
 
   if (KeyModifiers <> []) then
   begin
-    if (ssShift in KeyModifiers) then KeyUp(KeyCode.SHIFT);
-    if (ssCtrl  in KeyModifiers) then KeyUp(KeyCode.CONTROL);
-    if (ssAlt   in KeyModifiers) then KeyUp(KeyCode.MENU);
+    if (ssShift in KeyModifiers) then KeyUp(EKeyCode.SHIFT);
+    if (ssCtrl  in KeyModifiers) then KeyUp(EKeyCode.CONTROL);
+    if (ssAlt   in KeyModifiers) then KeyUp(EKeyCode.MENU);
 
     PreciseSleep(ModifierUpTime);
   end;
