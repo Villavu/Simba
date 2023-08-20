@@ -83,16 +83,16 @@ function LoadEIOS(FileName, Args: String): TEIOSTarget;
 function EIOSTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 procedure EIOSTarget_GetDimensions(Target: Pointer; out Width, Height: Integer);
 
-procedure EIOSTarget_KeyDown(Target: Pointer; Key: KeyCode);
-procedure EIOSTarget_KeyUp(Target: Pointer; Key: KeyCode);
+procedure EIOSTarget_KeyDown(Target: Pointer; Key: EKeyCode);
+procedure EIOSTarget_KeyUp(Target: Pointer; Key: EKeyCode);
 procedure EIOSTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
-function EIOSTarget_KeyPressed(Target: Pointer; Key: KeyCode): Boolean;
+function EIOSTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 
-function EIOSTarget_MousePressed(Target: Pointer; Button: MouseButton): Boolean;
+function EIOSTarget_MousePressed(Target: Pointer; Button: EMouseButton): Boolean;
 function EIOSTarget_MousePosition(Target: Pointer): TPoint;
 procedure EIOSTarget_MouseTeleport(Target: Pointer; P: TPoint);
-procedure EIOSTarget_MouseDown(Target: Pointer; Button: MouseButton);
-procedure EIOSTarget_MouseUp(Target: Pointer; Button: MouseButton);
+procedure EIOSTarget_MouseDown(Target: Pointer; Button: EMouseButton);
+procedure EIOSTarget_MouseUp(Target: Pointer; Button: EMouseButton);
 procedure EIOSTarget_MouseScroll(Target: Pointer; Scrolls: Integer);
 
 implementation
@@ -184,7 +184,7 @@ begin
   end;
 end;
 
-function EIOSTarget_MousePressed(Target: Pointer; Button: MouseButton): Boolean;
+function EIOSTarget_MousePressed(Target: Pointer; Button: EMouseButton): Boolean;
 begin
   with PEIOSTarget(Target)^ do
   begin
@@ -195,7 +195,7 @@ begin
   end;
 end;
 
-function EIOSTarget_KeyPressed(Target: Pointer; Key: KeyCode): Boolean;
+function EIOSTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 begin
   with PEIOSTarget(Target)^ do
   begin
@@ -226,7 +226,7 @@ begin
   end;
 end;
 
-procedure EIOSTarget_MouseDown(Target: Pointer; Button: MouseButton);
+procedure EIOSTarget_MouseDown(Target: Pointer; Button: EMouseButton);
 begin
   with PEIOSTarget(Target)^, EIOSTarget_MousePosition(Target) do
   begin
@@ -235,7 +235,7 @@ begin
   end;
 end;
 
-procedure EIOSTarget_MouseUp(Target: Pointer; Button: MouseButton);
+procedure EIOSTarget_MouseUp(Target: Pointer; Button: EMouseButton);
 begin
   with PEIOSTarget(Target)^, EIOSTarget_MousePosition(Target) do
   begin
@@ -253,7 +253,7 @@ begin
   end;
 end;
 
-procedure EIOSTarget_KeyDown(Target: Pointer; Key: KeyCode);
+procedure EIOSTarget_KeyDown(Target: Pointer; Key: EKeyCode);
 begin
   with PEIOSTarget(Target)^ do
   begin
@@ -262,7 +262,7 @@ begin
   end;
 end;
 
-procedure EIOSTarget_KeyUp(Target: Pointer; Key: KeyCode);
+procedure EIOSTarget_KeyUp(Target: Pointer; Key: EKeyCode);
 begin
   with PEIOSTarget(Target)^ do
   begin

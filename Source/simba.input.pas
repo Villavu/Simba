@@ -19,6 +19,10 @@ type
   type
     TMouseTeleportEvent = procedure(var Input: TSimbaInput; X, Y: Integer) of object;
     TMouseMovingEvent = function(var Input: TSimbaInput; var X, Y: Double): Boolean of object;
+    TMouseButtonEvent = procedure(var Input: TSimbaInput; Button: EMouseButton) of object;
+    {$SCOPEDENUMS ON}
+    EMouseEventType = (TELEPORT, MOVING, CLICK, DOWN, UP);
+    {$SCOPEDENUMS OFF}
   const
     DEFAULT_KEY_PRESS_MIN = 30;
     DEFAULT_KEY_PRESS_MAX = 140;
@@ -26,22 +30,29 @@ type
     DEFAULT_CLICK_MIN = 40;
     DEFAULT_CLICK_MAX = 220;
 
-    DEFAULT_SPEED   = 12;
-    DEFAULT_GRAVITY = 9;
-    DEFAULT_WIND    = 6;
+    DEFAULT_MOUSE_TIMEOUT = 15000;
+    DEFAULT_MOUSE_SPEED   = 12;
+    DEFAULT_MOUSE_GRAVITY = 9;
+    DEFAULT_MOUSE_WIND    = 6;
   public
     FTarget: TSimbaTarget;
 
-    FTeleportingEvents: array of TMouseTeleportEvent;
-    FMovingEvents: array of TMouseMovingEvent;
+    FMouseEvents: array[EMouseEventType] of array of TMethod;
+
+    function AddEvent(EventType: EMouseEventType; Method: TMethod): TMethod;
+    function RemoveEvent(EventType: EMouseEventType; Method: TMethod): Boolean;
 
     function GetRandomKeyPressTime: Integer;
     function GetRandomMouseClickTime: Integer;
 
-    function GetSpeed: Integer;
+    function GetSpeed: Double;
     function GetGravity: Double;
     function GetWind: Double;
+    function GetMouseTimeout: Integer;
 
+    procedure CallOnMouseClickEvents(Button: EMouseButton);
+    procedure CallOnMouseUpEvents(Button: EMouseButton);
+    procedure CallOnMouseDownEvents(Button: EMouseButton);
     procedure CallOnTeleportEvents(X, Y: Integer);
     function CallOnMovingEvents(var X, Y: Double): Boolean;
   public
@@ -51,36 +62,45 @@ type
     MouseClickMin: Integer;
     MouseClickMax: Integer;
 
-    Speed: Integer;
-    Gravity: Double;
-    Wind: Double;
+    MouseSpeed: Double;
+    MouseGravity: Double;
+    MouseWind: Double;
+
+    MouseTimeout: Integer;
 
     function IsTargetValid: Boolean;
     function IsFocused: Boolean;
     function Focus: Boolean;
 
     function MousePosition: TPoint;
-    function MousePressed(Button: MouseButton): Boolean;
+    function MousePressed(Button: EMouseButton): Boolean;
     procedure MouseMove(Dest: TPoint);
-    procedure MouseClick(Button: MouseButton);
+    procedure MouseClick(Button: EMouseButton);
     procedure MouseTeleport(X, Y: Integer); overload;
     procedure MouseTeleport(P: TPoint); overload;
-    procedure MouseDown(Button: MouseButton);
-    procedure MouseUp(Button: MouseButton);
+    procedure MouseDown(Button: EMouseButton);
+    procedure MouseUp(Button: EMouseButton);
     procedure MouseScroll(Scrolls: Integer);
 
     procedure KeySend(Text: String);
-    procedure KeyPress(Key: KeyCode);
-    procedure KeyDown(Key: KeyCode);
-    procedure KeyUp(Key: KeyCode);
-    function KeyPressed(Key: KeyCode): Boolean;
+    procedure KeyPress(Key: EKeyCode);
+    procedure KeyDown(Key: EKeyCode);
+    procedure KeyUp(Key: EKeyCode);
+    function KeyPressed(Key: EKeyCode): Boolean;
 
-    function CharToKeyCode(C: Char): KeyCode;
+    function CharToKeyCode(C: Char): EKeyCode;
 
     function AddOnMouseTeleport(Event: TMouseTeleportEvent): TMouseTeleportEvent;
     function AddOnMouseMoving(Event: TMouseMovingEvent): TMouseMovingEvent;
-    procedure RemoveOnMouseTeleport(Event: TMouseTeleportEvent);
-    procedure RemoveOnMouseMoving(Event: TMouseMovingEvent);
+    function AddOnMouseDown(Event: TMouseButtonEvent): TMouseButtonEvent;
+    function AddOnMouseUp(Event: TMouseButtonEvent): TMouseButtonEvent;
+    function AddOnMouseClick(Event: TMouseButtonEvent): TMouseButtonEvent;
+
+    function RemoveOnMouseTeleport(Event: TMouseTeleportEvent): Boolean;
+    function RemoveOnMouseMoving(Event: TMouseMovingEvent): Boolean;
+    function RemoveOnMouseDown(Event: TMouseButtonEvent): Boolean;
+    function RemoveOnMouseUp(Event: TMouseButtonEvent): Boolean;
+    function RemoveOnMouseClick(Event: TMouseButtonEvent): Boolean;
 
     class operator Initialize(var Self: TSimbaInput);
   end;
@@ -89,6 +109,28 @@ implementation
 
 uses
   simba.math, simba.nativeinterface, simba.random;
+
+function TSimbaInput.AddEvent(EventType: EMouseEventType; Method: TMethod): TMethod;
+begin
+  Result := Method;
+
+  FMouseEvents[EventType] += [Method];
+end;
+
+function TSimbaInput.RemoveEvent(EventType: EMouseEventType; Method: TMethod): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+
+  for I := High(FMouseEvents[EventType]) downto 0 do
+    if (Method.Code = FMouseEvents[EventType][I].Code) and (Method.Data = FMouseEvents[EventType][I].Data) then
+    begin
+      Delete(FMouseEvents[EventType], I, 1);
+
+      Result := True;
+    end;
+end;
 
 function TSimbaInput.GetRandomKeyPressTime: Integer;
 begin
@@ -106,28 +148,60 @@ begin
     Result := RandomLeft(MouseClickMin, MouseClickMax);
 end;
 
-function TSimbaInput.GetSpeed: Integer;
+function TSimbaInput.GetSpeed: Double;
 begin
-  if (Speed = 0) then
-    Result := DEFAULT_SPEED
+  if (MouseSpeed = 0) then
+    Result := DEFAULT_MOUSE_SPEED
   else
-    Result := Speed;
+    Result := MouseSpeed;
 end;
 
 function TSimbaInput.GetGravity: Double;
 begin
-  if (Gravity = 0) then
-    Result := DEFAULT_GRAVITY
+  if (MouseGravity = 0) then
+    Result := DEFAULT_MOUSE_GRAVITY
   else
-    Result := Gravity;
+    Result := MouseGravity;
 end;
 
 function TSimbaInput.GetWind: Double;
 begin
-  if (Wind = 0) then
-    Result := DEFAULT_WIND
+  if (MouseWind = 0) then
+    Result := DEFAULT_MOUSE_WIND
   else
-    Result := Wind;
+    Result := MouseWind;
+end;
+
+function TSimbaInput.GetMouseTimeout: Integer;
+begin
+  if (MouseTimeout = 0) then
+    Result := DEFAULT_MOUSE_TIMEOUT
+  else
+    Result := MouseTimeout;
+end;
+
+procedure TSimbaInput.CallOnMouseClickEvents(Button: EMouseButton);
+var
+  Method: TMethod;
+begin
+  for Method in FMouseEvents[EMouseEventType.CLICK] do
+    TMouseButtonEvent(Method)(Self, Button);
+end;
+
+procedure TSimbaInput.CallOnMouseUpEvents(Button: EMouseButton);
+var
+  Method: TMethod;
+begin
+  for Method in FMouseEvents[EMouseEventType.UP] do
+    TMouseButtonEvent(Method)(Self, Button);
+end;
+
+procedure TSimbaInput.CallOnMouseDownEvents(Button: EMouseButton);
+var
+  Method: TMethod;
+begin
+  for Method in FMouseEvents[EMouseEventType.DOWN] do
+    TMouseButtonEvent(Method)(Self, Button);
 end;
 
 function TSimbaInput.IsTargetValid: Boolean;
@@ -150,7 +224,7 @@ begin
   Result := FTarget.MousePosition();
 end;
 
-function TSimbaInput.MousePressed(Button: MouseButton): Boolean;
+function TSimbaInput.MousePressed(Button: EMouseButton): Boolean;
 begin
   Result := FTarget.MousePressed(Button);
 end;
@@ -163,6 +237,7 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
     x, y: Double;
     veloX, veloY, windX, windY, veloMag, randomDist, step, idle: Double;
     traveledDistance, remainingDistance: Double;
+    Timeout: UInt64;
   begin
     veloX := 0; veloY := 0;
     windX := 0; windY := 0;
@@ -170,8 +245,13 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
     x := xs;
     y := ys;
 
+    Timeout := GetTickCount64() + GetMouseTimeout();
+
     while CallOnMovingEvents(X, Y) do
     begin
+      if (GetTickCount64() > Timeout) then
+        SimbaException('MouseMove timed out after %dms. Start: (%d,%d), Dest: (%d,%d)', [GetMouseTimeout(), Round(xs), Round(ys), Round(xe), Round(ye)]);
+
       traveledDistance := Hypot(x - xs, y - ys);
       remainingDistance := Hypot(x - xe, y - ye);
       if (remainingDistance <= 1) then
@@ -193,7 +273,8 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
       end else
         step := maxStep;
 
-      step := Min(step, maxStep);
+      if (step >= maxStep) then
+        step := maxStep - (Random() * (maxStep / 4));
       if (step < 3) then
         step := 3 + (Random() * 3);
 
@@ -206,7 +287,7 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
       begin
         randomDist := step / 3.0 + (step / 2 * Random());
 
-        veloMag := sqrt(veloX * veloX + veloY * veloY);
+        veloMag := Sqrt(veloX * veloX + veloY * veloY);
         veloX := (veloX / veloMag) * randomDist;
         veloY := (veloY / veloMag) * randomDist;
       end;
@@ -240,12 +321,14 @@ begin
   WindMouse(
     Start.X, Start.Y, Dest.X, Dest.Y,
     GetGravity(), GetWind(),
-    5 / RandSpeed, 10 / RandSpeed, 20 * RandSpeed, 20 * RandSpeed
+    5 / RandSpeed, 10 / RandSpeed, 25 * RandSpeed, 20 * RandSpeed
   );
 end;
 
-procedure TSimbaInput.MouseClick(Button: MouseButton);
+procedure TSimbaInput.MouseClick(Button: EMouseButton);
 begin
+  CallOnMouseClickEvents(Button);
+
   FTarget.MouseDown(Button);
   SimbaNativeInterface.PreciseSleep(GetRandomMouseClickTime());
   FTarget.MouseUp(Button);
@@ -263,13 +346,17 @@ begin
   MouseTeleport(Point(X, Y));
 end;
 
-procedure TSimbaInput.MouseDown(Button: MouseButton);
+procedure TSimbaInput.MouseDown(Button: EMouseButton);
 begin
+  CallOnMouseDownEvents(Button);
+
   FTarget.MouseDown(Button);
 end;
 
-procedure TSimbaInput.MouseUp(Button: MouseButton);
+procedure TSimbaInput.MouseUp(Button: EMouseButton);
 begin
+  CallOnMouseUpEvents(Button);
+
   FTarget.MouseUp(Button);
 end;
 
@@ -286,87 +373,87 @@ begin
     FTarget.KeySend(Text[I], GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2);
 end;
 
-procedure TSimbaInput.KeyPress(Key: KeyCode);
+procedure TSimbaInput.KeyPress(Key: EKeyCode);
 begin
   FTarget.KeyDown(Key);
   SimbaNativeInterface.PreciseSleep(GetRandomKeyPressTime());
   FTarget.KeyUp(Key);
 end;
 
-procedure TSimbaInput.KeyDown(Key: KeyCode);
+procedure TSimbaInput.KeyDown(Key: EKeyCode);
 begin
   FTarget.KeyDown(Key);
 end;
 
-procedure TSimbaInput.KeyUp(Key: KeyCode);
+procedure TSimbaInput.KeyUp(Key: EKeyCode);
 begin
   FTarget.KeyUp(Key);
 end;
 
-function TSimbaInput.KeyPressed(Key: KeyCode): Boolean;
+function TSimbaInput.KeyPressed(Key: EKeyCode): Boolean;
 begin
   Result := FTarget.KeyPressed(Key);
 end;
 
-function TSimbaInput.CharToKeyCode(C: Char): KeyCode;
+function TSimbaInput.CharToKeyCode(C: Char): EKeyCode;
 begin
   case C of
-    '0'..'9': Result := KeyCode(Ord(KeyCode.NUM_0) + Ord(C) - Ord('0'));
-    'a'..'z': Result := KeyCode(Ord(KeyCode.A) + Ord(C) - Ord('a'));
-    'A'..'Z': Result := KeyCode(Ord(KeyCode.A) + Ord(C) - Ord('A'));
-    #34, #39: Result := KeyCode.OEM_7;
-    #32: Result := KeyCode.SPACE;
-    '!': Result := KeyCode.NUM_1;
-    '#': Result := KeyCode.NUM_3;
-    '$': Result := KeyCode.NUM_4;
-    '%': Result := KeyCode.NUM_5;
-    '&': Result := KeyCode.NUM_7;
-    '(': Result := KeyCode.NUM_9;
-    ')': Result := KeyCode.NUM_0;
-    '*': Result := KeyCode.NUM_8;
-    '+': Result := KeyCode.ADD;
-    ',': Result := KeyCode.OEM_COMMA;
-    '-': Result := KeyCode.OEM_MINUS;
-    '.': Result := KeyCode.OEM_PERIOD;
-    '/': Result := KeyCode.OEM_2;
-    ':': Result := KeyCode.OEM_1;
-    ';': Result := KeyCode.OEM_1;
-    '<': Result := KeyCode.OEM_COMMA;
-    '=': Result := KeyCode.ADD;
-    '>': Result := KeyCode.OEM_PERIOD;
-    '?': Result := KeyCode.OEM_2;
-    '@': Result := KeyCode.NUM_2;
-    '[': Result := KeyCode.OEM_4;
-    '\': Result := KeyCode.OEM_5;
-    ']': Result := KeyCode.OEM_6;
-    '^': Result := KeyCode.NUM_6;
-    '_': Result := KeyCode.OEM_MINUS;
-    '`': Result := KeyCode.OEM_3;
-    '{': Result := KeyCode.OEM_4;
-    '|': Result := KeyCode.OEM_5;
-    '}': Result := KeyCode.OEM_6;
-    '~': Result := KeyCode.OEM_3;
+    '0'..'9': Result := EKeyCode(Ord(EKeyCode.NUM_0) + Ord(C) - Ord('0'));
+    'a'..'z': Result := EKeyCode(Ord(EKeyCode.A) + Ord(C) - Ord('a'));
+    'A'..'Z': Result := EKeyCode(Ord(EKeyCode.A) + Ord(C) - Ord('A'));
+    #34, #39: Result := EKeyCode.OEM_7;
+    #32: Result := EKeyCode.SPACE;
+    '!': Result := EKeyCode.NUM_1;
+    '#': Result := EKeyCode.NUM_3;
+    '$': Result := EKeyCode.NUM_4;
+    '%': Result := EKeyCode.NUM_5;
+    '&': Result := EKeyCode.NUM_7;
+    '(': Result := EKeyCode.NUM_9;
+    ')': Result := EKeyCode.NUM_0;
+    '*': Result := EKeyCode.NUM_8;
+    '+': Result := EKeyCode.ADD;
+    ',': Result := EKeyCode.OEM_COMMA;
+    '-': Result := EKeyCode.OEM_MINUS;
+    '.': Result := EKeyCode.OEM_PERIOD;
+    '/': Result := EKeyCode.OEM_2;
+    ':': Result := EKeyCode.OEM_1;
+    ';': Result := EKeyCode.OEM_1;
+    '<': Result := EKeyCode.OEM_COMMA;
+    '=': Result := EKeyCode.ADD;
+    '>': Result := EKeyCode.OEM_PERIOD;
+    '?': Result := EKeyCode.OEM_2;
+    '@': Result := EKeyCode.NUM_2;
+    '[': Result := EKeyCode.OEM_4;
+    '\': Result := EKeyCode.OEM_5;
+    ']': Result := EKeyCode.OEM_6;
+    '^': Result := EKeyCode.NUM_6;
+    '_': Result := EKeyCode.OEM_MINUS;
+    '`': Result := EKeyCode.OEM_3;
+    '{': Result := EKeyCode.OEM_4;
+    '|': Result := EKeyCode.OEM_5;
+    '}': Result := EKeyCode.OEM_6;
+    '~': Result := EKeyCode.OEM_3;
     else
-      Result := KeyCode.UNKNOWN;
+      Result := EKeyCode.UNKNOWN;
   end;
 end;
 
 procedure TSimbaInput.CallOnTeleportEvents(X, Y: Integer);
 var
-  Event: TMouseTeleportEvent;
+  Method: TMethod;
 begin
-  for Event in FTeleportingEvents do
-    Event(Self, X, Y);
+  for Method in FMouseEvents[EMouseEventType.TELEPORT] do
+    TMouseTeleportEvent(Method)(Self, X, Y);
 end;
 
 function TSimbaInput.CallOnMovingEvents(var X, Y: Double): Boolean;
 var
-  Event: TMouseMovingEvent;
+  Method: TMethod;
 begin
   Result := True;
 
-  for Event in FMovingEvents do
-    if not Event(Self, X, Y) then
+  for Method in FMouseEvents[EMouseEventType.MOVING] do
+    if not TMouseMovingEvent(Method)(Self, X, Y) then
     begin
       Result := False;
       Exit;
@@ -375,34 +462,52 @@ end;
 
 function TSimbaInput.AddOnMouseTeleport(Event: TMouseTeleportEvent): TMouseTeleportEvent;
 begin
-  Result := Event;
-
-  FTeleportingEvents += [Event];
+  Result := TMouseTeleportEvent(AddEvent(EMouseEventType.TELEPORT, TMethod(Event)));
 end;
 
 function TSimbaInput.AddOnMouseMoving(Event: TMouseMovingEvent): TMouseMovingEvent;
 begin
-  Result := Event;
-
-  FMovingEvents += [Event];
+  Result := TMouseMovingEvent(AddEvent(EMouseEventType.MOVING, TMethod(Event)));
 end;
 
-procedure TSimbaInput.RemoveOnMouseTeleport(Event: TMouseTeleportEvent);
-var
-  I: Integer;
+function TSimbaInput.AddOnMouseDown(Event: TMouseButtonEvent): TMouseButtonEvent;
 begin
-  for I := High(FTeleportingEvents) downto 0 do
-    if (Event = FTeleportingEvents[I]) then
-      Delete(FTeleportingEvents, I, 1);
+  Result := TMouseButtonEvent(AddEvent(EMouseEventType.DOWN, TMethod(Event)));
 end;
 
-procedure TSimbaInput.RemoveOnMouseMoving(Event: TMouseMovingEvent);
-var
-  I: Integer;
+function TSimbaInput.AddOnMouseUp(Event: TMouseButtonEvent): TMouseButtonEvent;
 begin
-  for I := High(FMovingEvents) downto 0 do
-    if (Event = FMovingEvents[I]) then
-      Delete(FMovingEvents, I, 1);
+  Result := TMouseButtonEvent(AddEvent(EMouseEventType.UP, TMethod(Event)));
+end;
+
+function TSimbaInput.AddOnMouseClick(Event: TMouseButtonEvent): TMouseButtonEvent;
+begin
+  Result := TMouseButtonEvent(AddEvent(EMouseEventType.CLICK, TMethod(Event)));
+end;
+
+function TSimbaInput.RemoveOnMouseTeleport(Event: TMouseTeleportEvent): Boolean;
+begin
+  Result := RemoveEvent(EMouseEventType.TELEPORT, TMethod(Event));
+end;
+
+function TSimbaInput.RemoveOnMouseMoving(Event: TMouseMovingEvent): Boolean;
+begin
+  Result := RemoveEvent(EMouseEventType.MOVING, TMethod(Event));
+end;
+
+function TSimbaInput.RemoveOnMouseDown(Event: TMouseButtonEvent): Boolean;
+begin
+  Result := RemoveEvent(EMouseEventType.DOWN, TMethod(Event));
+end;
+
+function TSimbaInput.RemoveOnMouseUp(Event: TMouseButtonEvent): Boolean;
+begin
+  Result := RemoveEvent(EMouseEventType.UP, TMethod(Event));
+end;
+
+function TSimbaInput.RemoveOnMouseClick(Event: TMouseButtonEvent): Boolean;
+begin
+  Result := RemoveEvent(EMouseEventType.CLICK, TMethod(Event));
 end;
 
 class operator TSimbaInput.Initialize(var Self: TSimbaInput);

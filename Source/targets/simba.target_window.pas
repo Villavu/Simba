@@ -15,16 +15,16 @@ function WindowTarget_Focus(Target: Pointer): Boolean;
 function WindowTarget_IsFocused(Target: Pointer): Boolean;
 function WindowTarget_IsValid(Target: Pointer): Boolean;
 
-procedure WindowTarget_KeyDown(Target: Pointer; Key: KeyCode);
-procedure WindowTarget_KeyUp(Target: Pointer; Key: KeyCode);
+procedure WindowTarget_KeyDown(Target: Pointer; Key: EKeyCode);
+procedure WindowTarget_KeyUp(Target: Pointer; Key: EKeyCode);
 procedure WindowTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
-function WindowTarget_KeyPressed(Target: Pointer; Key: KeyCode): Boolean;
+function WindowTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 
 procedure WindowTarget_MouseTeleport(Target: Pointer; P: TPoint);
 function WindowTarget_MousePosition(Target: Pointer): TPoint;
-function WindowTarget_MousePressed(Target: Pointer; Button: MouseButton): Boolean;
-procedure WindowTarget_MouseUp(Target: Pointer; Button: MouseButton);
-procedure WindowTarget_MouseDown(Target: Pointer; Button: MouseButton);
+function WindowTarget_MousePressed(Target: Pointer; Button: EMouseButton): Boolean;
+procedure WindowTarget_MouseUp(Target: Pointer; Button: EMouseButton);
+procedure WindowTarget_MouseDown(Target: Pointer; Button: EMouseButton);
 procedure WindowTarget_MouseScroll(Target: Pointer; Scrolls: Integer);
 
 implementation
@@ -69,12 +69,12 @@ begin
   Result := SimbaNativeInterface.IsWindowValid(PWindowHandle(Target)^);
 end;
 
-procedure WindowTarget_KeyDown(Target: Pointer; Key: KeyCode);
+procedure WindowTarget_KeyDown(Target: Pointer; Key: EKeyCode);
 begin
   SimbaNativeInterface.KeyDown(Key);
 end;
 
-procedure WindowTarget_KeyUp(Target: Pointer; Key: KeyCode);
+procedure WindowTarget_KeyUp(Target: Pointer; Key: EKeyCode);
 begin
   SimbaNativeInterface.KeyUp(Key);
 end;
@@ -84,7 +84,7 @@ begin
   SimbaNativeInterface.KeySend(Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
 end;
 
-function WindowTarget_KeyPressed(Target: Pointer; Key: KeyCode): Boolean;
+function WindowTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 begin
   Result := SimbaNativeInterface.KeyPressed(Key);
 end;
@@ -99,17 +99,17 @@ begin
   Result := SimbaNativeInterface.GetMousePosition(PWindowHandle(Target)^);
 end;
 
-function WindowTarget_MousePressed(Target: Pointer; Button: MouseButton): Boolean;
+function WindowTarget_MousePressed(Target: Pointer; Button: EMouseButton): Boolean;
 begin
   Result := SimbaNativeInterface.MousePressed(Button);
 end;
 
-procedure WindowTarget_MouseUp(Target: Pointer; Button: MouseButton);
+procedure WindowTarget_MouseUp(Target: Pointer; Button: EMouseButton);
 begin
   SimbaNativeInterface.MouseUp(Button);
 end;
 
-procedure WindowTarget_MouseDown(Target: Pointer; Button: MouseButton);
+procedure WindowTarget_MouseDown(Target: Pointer; Button: EMouseButton);
 begin
   SimbaNativeInterface.MouseDown(Button);
 end;

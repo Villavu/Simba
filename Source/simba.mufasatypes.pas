@@ -15,7 +15,7 @@ uses
 {$PUSH}
 {$SCOPEDENUMS ON}
 type
-  KeyCode = (
+  EKeyCode = (
     UNKNOWN             = 0,
     LBUTTON             = 1,
     RBUTTON             = 2,
@@ -181,7 +181,7 @@ type
     ZOOM                = 251
   );
 
-  MouseButton = (
+  EMouseButton = (
     LEFT,
     RIGHT,
     MIDDLE,
@@ -189,8 +189,8 @@ type
     SCROLL_DOWN
   );
 
-  PKeyCode = ^KeyCode;
-  PMouseButton = ^MouseButton;
+  PKeyCode = ^EKeyCode;
+  PMouseButton = ^EMouseButton;
 
   ESimbaProcessType = (UNKNOWN, IDE, SCRIPT, SCRIPT_WITH_COMMUNICATION);
   ESimbaScriptState = (STATE_PAUSED, STATE_STOP, STATE_RUNNING, STATE_NONE);

@@ -85,7 +85,7 @@ var
 begin
   Result := 0;
 
-  while SimbaNativeInterface.MousePressed(MouseButton.LEFT) do
+  while SimbaNativeInterface.MousePressed(EMouseButton.LEFT) do
   begin
     Window := GetWindowAtCursor(FExcludeWindows);
     if (Window <> 0) and (Window <> Result) then

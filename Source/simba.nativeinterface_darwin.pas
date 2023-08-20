@@ -28,7 +28,7 @@ type
   type
     TKeyMapItem = record
       Exists: Boolean;
-      KeyCode: Integer;
+      EKeyCode: Integer;
       Modifiers: TShiftState;
     end;
     TKeyMap = array[#0..#255] of TKeyMapItem;
@@ -44,8 +44,8 @@ type
   public
     constructor Create;
 
-    procedure KeyDownNativeKeyCode(KeyCode: Integer); override;
-    procedure KeyUpNativeKeyCode(KeyCode: Integer); override;
+    procedure KeyDownNativeKeyCode(EKeyCode: Integer); override;
+    procedure KeyUpNativeKeyCode(EKeyCode: Integer); override;
 
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
 
@@ -58,15 +58,15 @@ type
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
 
-    procedure MouseUp(Button: MouseButton); override;
-    procedure MouseDown(Button: MouseButton); override;
+    procedure MouseUp(Button: EMouseButton); override;
+    procedure MouseDown(Button: EMouseButton); override;
     procedure MouseScroll(Scrolls: Integer); override;
     procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); override;
-    function MousePressed(Button: MouseButton): Boolean; override;
+    function MousePressed(Button: EMouseButton): Boolean; override;
 
-    function KeyPressed(Key: KeyCode): Boolean; override;
-    procedure KeyDown(Key: KeyCode); override;
-    procedure KeyUp(Key: KeyCode); override;
+    function KeyPressed(Key: EKeyCode): Boolean; override;
+    procedure KeyDown(Key: EKeyCode); override;
+    procedure KeyUp(Key: EKeyCode); override;
 
     function GetProcessStartTime(PID: SizeUInt): TDateTime; override;
     function GetProcessMemUsage(PID: SizeUInt): Int64; override;
@@ -179,125 +179,125 @@ const
 function proc_pidpath(pid: longint; buffer: pbyte; bufferSize: longword): longint; cdecl; external 'libproc';
 function proc_pidinfo(pid: longint; flavor: longint; arg: UInt64; buffer: pointer; buffersize: longint): longint; cdecl; external 'libproc';
 
-function VirtualKeyToNativeKeyCode(VirtualKey: KeyCode): Integer;
+function VirtualKeyToNativeKeyCode(VirtualKey: EKeyCode): Integer;
 begin
   case VirtualKey of
-    KeyCode.BACK:                Result := $33;
-    KeyCode.TAB:                 Result := $30;
-    KeyCode.CLEAR:               Result := $47;
-    KeyCode.RETURN:              Result := $24;
-    KeyCode.SHIFT:               Result := $38;
-    KeyCode.CONTROL:             Result := $3B;
-    KeyCode.MENU:                Result := $3A;
-    KeyCode.CAPITAL:             Result := $39;
-    KeyCode.ESCAPE:              Result := $35;
-    KeyCode.SPACE:               Result := $31;
-    KeyCode.PRIOR:               Result := $74;
-    KeyCode.NEXT:                Result := $79;
-    KeyCode.END_KEY:             Result := $77;
-    KeyCode.HOME:                Result := $73;
-    KeyCode.LEFT:                Result := $7B;
-    KeyCode.UP:                  Result := $7E;
-    KeyCode.RIGHT:               Result := $7C;
-    KeyCode.DOWN:                Result := $7D;
-    KeyCode.DELETE:              Result := $75;
-    KeyCode.HELP:                Result := $72;
-    KeyCode.NUM_0:               Result := $1D;
-    KeyCode.NUM_1:               Result := $12;
-    KeyCode.NUM_2:               Result := $13;
-    KeyCode.NUM_3:               Result := $14;
-    KeyCode.NUM_4:               Result := $15;
-    KeyCode.NUM_5:               Result := $17;
-    KeyCode.NUM_6:               Result := $16;
-    KeyCode.NUM_7:               Result := $1A;
-    KeyCode.NUM_8:               Result := $1C;
-    KeyCode.NUM_9:               Result := $19;
-    KeyCode.A:                   Result := $00;
-    KeyCode.B:                   Result := $0B;
-    KeyCode.C:                   Result := $08;
-    KeyCode.D:                   Result := $02;
-    KeyCode.E:                   Result := $0E;
-    KeyCode.F:                   Result := $03;
-    KeyCode.G:                   Result := $05;
-    KeyCode.H:                   Result := $04;
-    KeyCode.I:                   Result := $22;
-    KeyCode.J:                   Result := $26;
-    KeyCode.K:                   Result := $28;
-    KeyCode.L:                   Result := $25;
-    KeyCode.M:                   Result := $2E;
-    KeyCode.N:                   Result := $2D;
-    KeyCode.O:                   Result := $1F;
-    KeyCode.P:                   Result := $23;
-    KeyCode.Q:                   Result := $0C;
-    KeyCode.R:                   Result := $0F;
-    KeyCode.S:                   Result := $01;
-    KeyCode.T:                   Result := $11;
-    KeyCode.U:                   Result := $20;
-    KeyCode.V:                   Result := $09;
-    KeyCode.W:                   Result := $0D;
-    KeyCode.X:                   Result := $07;
-    KeyCode.Y:                   Result := $10;
-    KeyCode.Z:                   Result := $06;
-    KeyCode.LWIN:                Result := $37;
-    KeyCode.RWIN:                Result := $36;
-    KeyCode.APPS:                Result := $3D;
-    KeyCode.NUMPAD_0:            Result := $52;
-    KeyCode.NUMPAD_1:            Result := $53;
-    KeyCode.NUMPAD_2:            Result := $54;
-    KeyCode.NUMPAD_3:            Result := $55;
-    KeyCode.NUMPAD_4:            Result := $56;
-    KeyCode.NUMPAD_5:            Result := $57;
-    KeyCode.NUMPAD_6:            Result := $58;
-    KeyCode.NUMPAD_7:            Result := $59;
-    KeyCode.NUMPAD_8:            Result := $5B;
-    KeyCode.NUMPAD_9:            Result := $5C;
-    KeyCode.MULTIPLY:            Result := $43;
-    KeyCode.ADD:                 Result := $45;
-    KeyCode.SEPARATOR:           Result := $2B; // Separator used will be KeyCode.COMMA instead of KeyCode.PERIOD
-    KeyCode.SUBTRACT:            Result := $4E;
-    KeyCode.DECIMAL:             Result := $41;
-    KeyCode.DIVIDE:              Result := $4B;
-    KeyCode.F1:                  Result := $7A;
-    KeyCode.F2:                  Result := $78;
-    KeyCode.F3:                  Result := $63;
-    KeyCode.F4:                  Result := $76;
-    KeyCode.F5:                  Result := $60;
-    KeyCode.F6:                  Result := $61;
-    KeyCode.F7:                  Result := $62;
-    KeyCode.F8:                  Result := $64;
-    KeyCode.F9:                  Result := $65;
-    KeyCode.F10:                 Result := $6D;
-    KeyCode.F11:                 Result := $67;
-    KeyCode.F12:                 Result := $6F;
-    KeyCode.F13:                 Result := $69;
-    KeyCode.F14:                 Result := $6B;
-    KeyCode.F15:                 Result := $71;
-    KeyCode.F16:                 Result := $6A;
-    KeyCode.F17:                 Result := $40;
-    KeyCode.F18:                 Result := $4F;
-    KeyCode.F19:                 Result := $50;
-    KeyCode.F20:                 Result := $5A;
-    KeyCode.LSHIFT:              Result := $38;
-    KeyCode.RSHIFT:              Result := $3C;
-    KeyCode.LCONTROL:            Result := $3B;
-    KeyCode.RCONTROL:            Result := $3E;
-    KeyCode.LMENU:               Result := $3A;
-    KeyCode.RMENU:               Result := $3D;
-    KeyCode.VOLUME_MUTE:         Result := $4A;
-    KeyCode.VOLUME_DOWN:         Result := $49;
-    KeyCode.VOLUME_UP:           Result := $48;
-    KeyCode.OEM_1:               Result := $29;
-    KeyCode.OEM_PLUS:            Result := $45;
-    KeyCode.OEM_COMMA:           Result := $2B;
-    KeyCode.OEM_MINUS:           Result := $1B;
-    KeyCode.OEM_PERIOD:          Result := $2F;
-    KeyCode.OEM_2:               Result := $2C; // /?
-    KeyCode.OEM_3:               Result := $32; // `~
-    KeyCode.OEM_4:               Result := $21; // [{
-    KeyCode.OEM_5:               Result := $2A; // \|
-    KeyCode.OEM_6:               Result := $1E; // ]}
-    KeyCode.OEM_7:               Result := $27; // '"
-    KeyCode.OEM_102:             Result := $2A; // backslash RT-102
+    EKeyCode.BACK:                Result := $33;
+    EKeyCode.TAB:                 Result := $30;
+    EKeyCode.CLEAR:               Result := $47;
+    EKeyCode.RETURN:              Result := $24;
+    EKeyCode.SHIFT:               Result := $38;
+    EKeyCode.CONTROL:             Result := $3B;
+    EKeyCode.MENU:                Result := $3A;
+    EKeyCode.CAPITAL:             Result := $39;
+    EKeyCode.ESCAPE:              Result := $35;
+    EKeyCode.SPACE:               Result := $31;
+    EKeyCode.PRIOR:               Result := $74;
+    EKeyCode.NEXT:                Result := $79;
+    EKeyCode.END_KEY:             Result := $77;
+    EKeyCode.HOME:                Result := $73;
+    EKeyCode.LEFT:                Result := $7B;
+    EKeyCode.UP:                  Result := $7E;
+    EKeyCode.RIGHT:               Result := $7C;
+    EKeyCode.DOWN:                Result := $7D;
+    EKeyCode.DELETE:              Result := $75;
+    EKeyCode.HELP:                Result := $72;
+    EKeyCode.NUM_0:               Result := $1D;
+    EKeyCode.NUM_1:               Result := $12;
+    EKeyCode.NUM_2:               Result := $13;
+    EKeyCode.NUM_3:               Result := $14;
+    EKeyCode.NUM_4:               Result := $15;
+    EKeyCode.NUM_5:               Result := $17;
+    EKeyCode.NUM_6:               Result := $16;
+    EKeyCode.NUM_7:               Result := $1A;
+    EKeyCode.NUM_8:               Result := $1C;
+    EKeyCode.NUM_9:               Result := $19;
+    EKeyCode.A:                   Result := $00;
+    EKeyCode.B:                   Result := $0B;
+    EKeyCode.C:                   Result := $08;
+    EKeyCode.D:                   Result := $02;
+    EKeyCode.E:                   Result := $0E;
+    EKeyCode.F:                   Result := $03;
+    EKeyCode.G:                   Result := $05;
+    EKeyCode.H:                   Result := $04;
+    EKeyCode.I:                   Result := $22;
+    EKeyCode.J:                   Result := $26;
+    EKeyCode.K:                   Result := $28;
+    EKeyCode.L:                   Result := $25;
+    EKeyCode.M:                   Result := $2E;
+    EKeyCode.N:                   Result := $2D;
+    EKeyCode.O:                   Result := $1F;
+    EKeyCode.P:                   Result := $23;
+    EKeyCode.Q:                   Result := $0C;
+    EKeyCode.R:                   Result := $0F;
+    EKeyCode.S:                   Result := $01;
+    EKeyCode.T:                   Result := $11;
+    EKeyCode.U:                   Result := $20;
+    EKeyCode.V:                   Result := $09;
+    EKeyCode.W:                   Result := $0D;
+    EKeyCode.X:                   Result := $07;
+    EKeyCode.Y:                   Result := $10;
+    EKeyCode.Z:                   Result := $06;
+    EKeyCode.LWIN:                Result := $37;
+    EKeyCode.RWIN:                Result := $36;
+    EKeyCode.APPS:                Result := $3D;
+    EKeyCode.NUMPAD_0:            Result := $52;
+    EKeyCode.NUMPAD_1:            Result := $53;
+    EKeyCode.NUMPAD_2:            Result := $54;
+    EKeyCode.NUMPAD_3:            Result := $55;
+    EKeyCode.NUMPAD_4:            Result := $56;
+    EKeyCode.NUMPAD_5:            Result := $57;
+    EKeyCode.NUMPAD_6:            Result := $58;
+    EKeyCode.NUMPAD_7:            Result := $59;
+    EKeyCode.NUMPAD_8:            Result := $5B;
+    EKeyCode.NUMPAD_9:            Result := $5C;
+    EKeyCode.MULTIPLY:            Result := $43;
+    EKeyCode.ADD:                 Result := $45;
+    EKeyCode.SEPARATOR:           Result := $2B; // Separator used will be EKeyCode.COMMA instead of EKeyCode.PERIOD
+    EKeyCode.SUBTRACT:            Result := $4E;
+    EKeyCode.DECIMAL:             Result := $41;
+    EKeyCode.DIVIDE:              Result := $4B;
+    EKeyCode.F1:                  Result := $7A;
+    EKeyCode.F2:                  Result := $78;
+    EKeyCode.F3:                  Result := $63;
+    EKeyCode.F4:                  Result := $76;
+    EKeyCode.F5:                  Result := $60;
+    EKeyCode.F6:                  Result := $61;
+    EKeyCode.F7:                  Result := $62;
+    EKeyCode.F8:                  Result := $64;
+    EKeyCode.F9:                  Result := $65;
+    EKeyCode.F10:                 Result := $6D;
+    EKeyCode.F11:                 Result := $67;
+    EKeyCode.F12:                 Result := $6F;
+    EKeyCode.F13:                 Result := $69;
+    EKeyCode.F14:                 Result := $6B;
+    EKeyCode.F15:                 Result := $71;
+    EKeyCode.F16:                 Result := $6A;
+    EKeyCode.F17:                 Result := $40;
+    EKeyCode.F18:                 Result := $4F;
+    EKeyCode.F19:                 Result := $50;
+    EKeyCode.F20:                 Result := $5A;
+    EKeyCode.LSHIFT:              Result := $38;
+    EKeyCode.RSHIFT:              Result := $3C;
+    EKeyCode.LCONTROL:            Result := $3B;
+    EKeyCode.RCONTROL:            Result := $3E;
+    EKeyCode.LMENU:               Result := $3A;
+    EKeyCode.RMENU:               Result := $3D;
+    EKeyCode.VOLUME_MUTE:         Result := $4A;
+    EKeyCode.VOLUME_DOWN:         Result := $49;
+    EKeyCode.VOLUME_UP:           Result := $48;
+    EKeyCode.OEM_1:               Result := $29;
+    EKeyCode.OEM_PLUS:            Result := $45;
+    EKeyCode.OEM_COMMA:           Result := $2B;
+    EKeyCode.OEM_MINUS:           Result := $1B;
+    EKeyCode.OEM_PERIOD:          Result := $2F;
+    EKeyCode.OEM_2:               Result := $2C; // /?
+    EKeyCode.OEM_3:               Result := $32; // `~
+    EKeyCode.OEM_4:               Result := $21; // [{
+    EKeyCode.OEM_5:               Result := $2A; // \|
+    EKeyCode.OEM_6:               Result := $1E; // ]}
+    EKeyCode.OEM_7:               Result := $27; // '"
+    EKeyCode.OEM_102:             Result := $2A; // backslash RT-102
   else
     Result := $FFFF;
   end;
@@ -455,7 +455,7 @@ const
   kCGEventScrollWheel  = 22;
 
 const
-  ClickTypeToMouseDownEvent: array[MouseButton] of Integer = (
+  ClickTypeToMouseDownEvent: array[EMouseButton] of Integer = (
     kCGEventLeftMouseDown,
     kCGEventRightMouseDown,
     kCGEventOtherMouseDown,
@@ -463,7 +463,7 @@ const
     kCGEventOtherMouseDown
   );
 
-  ClickTypeToMouseButton: array[MouseButton] of Integer = (
+  ClickTypeToMouseButton: array[EMouseButton] of Integer = (
     kCGMouseButtonLeft,
     kCGMouseButtonRight,
     kCGMouseButtonCenter,
@@ -471,7 +471,7 @@ const
     4
   );
 
-  ClickTypeToMouseUpEvent: array[MouseButton] of Integer = (
+  ClickTypeToMouseUpEvent: array[EMouseButton] of Integer = (
     kCGEventLeftMouseUp,
     kCGEventRightMouseUp,
     kCGEventOtherMouseUp,
@@ -479,64 +479,64 @@ const
     kCGEventOtherMouseUp
   );
 
-procedure TSimbaNativeInterface_Darwin.MouseDown(Button: MouseButton);
+procedure TSimbaNativeInterface_Darwin.MouseDown(Button: EMouseButton);
 var
   event: CGEventRef;
-  eventType, mouseButton: Integer;
+  eventType, EMouseButton: Integer;
 begin
   eventType := ClickTypeToMouseDownEvent[Button];
-  mouseButton := ClickTypeToMouseButton[Button];
+  EMouseButton := ClickTypeToMouseButton[Button];
 
   with GetMousePosition() do
-    event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(X, Y), mouseButton);
+    event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(X, Y), EMouseButton);
 
   CGEventPost(kCGSessionEventTap, event);
   CFRelease(event);
 end;
 
-procedure TSimbaNativeInterface_Darwin.MouseUp(Button: MouseButton);
+procedure TSimbaNativeInterface_Darwin.MouseUp(Button: EMouseButton);
 var
   event: CGEventRef;
-  eventType, mouseButton: Integer;
+  eventType, EMouseButton: Integer;
 begin
   eventType := ClickTypeToMouseUpEvent[Button];
-  mouseButton := ClickTypeToMouseButton[Button];
+  EMouseButton := ClickTypeToMouseButton[Button];
 
   with GetMousePosition() do
-    event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(X, Y), mouseButton);
+    event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(X, Y), EMouseButton);
 
   CGEventPost(kCGSessionEventTap, event);
   CFRelease(event);
 end;
 
-function TSimbaNativeInterface_Darwin.MousePressed(Button: MouseButton): Boolean;
+function TSimbaNativeInterface_Darwin.MousePressed(Button: EMouseButton): Boolean;
 begin
   Result := CGEventSourceButtonState(kCGEventSourceStateCombinedSessionState, ClickTypeToMouseButton[Button]) > 0;
 end;
 
-function TSimbaNativeInterface_Darwin.KeyPressed(Key: KeyCode): Boolean;
+function TSimbaNativeInterface_Darwin.KeyPressed(Key: EKeyCode): Boolean;
 begin
   Result := CGEventSourceKeyState(kCGEventSourceStateCombinedSessionState, VirtualKeyToNativeKeyCode(Key)) <> 0;
 end;
 
-procedure TSimbaNativeInterface_Darwin.KeyDown(Key: KeyCode);
+procedure TSimbaNativeInterface_Darwin.KeyDown(Key: EKeyCode);
 begin
   CGPostKeyboardEvent(0, VirtualKeyToNativeKeyCode(Key), 1);
 end;
 
-procedure TSimbaNativeInterface_Darwin.KeyUp(Key: KeyCode);
+procedure TSimbaNativeInterface_Darwin.KeyUp(Key: EKeyCode);
 begin
   CGPostKeyboardEvent(0, VirtualKeyToNativeKeyCode(Key), 0);
 end;
 
-procedure TSimbaNativeInterface_Darwin.KeyDownNativeKeyCode(KeyCode: Integer);
+procedure TSimbaNativeInterface_Darwin.KeyDownNativeKeyCode(EKeyCode: Integer);
 begin
-  CGPostKeyboardEvent(0, KeyCode, 1);
+  CGPostKeyboardEvent(0, EKeyCode, 1);
 end;
 
-procedure TSimbaNativeInterface_Darwin.KeyUpNativeKeyCode(KeyCode: Integer);
+procedure TSimbaNativeInterface_Darwin.KeyUpNativeKeyCode(EKeyCode: Integer);
 begin
-  CGPostKeyboardEvent(0, KeyCode, 0);
+  CGPostKeyboardEvent(0, EKeyCode, 0);
 end;
 
 function TSimbaNativeInterface_Darwin.GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean;
@@ -545,7 +545,7 @@ begin
 
   if Result then
   begin
-    Code := FKeyMap[Character].KeyCode;
+    Code := FKeyMap[Character].EKeyCode;
     Modifiers := FKeyMap[Character].Modifiers;
   end
 end;
@@ -896,7 +896,7 @@ end;
 
 constructor TSimbaNativeInterface_Darwin.Create;
 
-  procedure MapKey(KeyCode: Integer; KeyChar: NSString; Modifiers: TShiftState);
+  procedure MapKey(EKeyCode: Integer; KeyChar: NSString; Modifiers: TShiftState);
   var
     Str: String;
   begin
@@ -906,7 +906,7 @@ constructor TSimbaNativeInterface_Darwin.Create;
       if FKeyMap[Str[1]].Exists then
         Exit;
 
-      FKeyMap[Str[1]].KeyCode := KeyCode;
+      FKeyMap[Str[1]].EKeyCode := EKeyCode;
       FKeyMap[Str[1]].Modifiers := Modifiers;
       FKeyMap[Str[1]].Exists := True;
     end;
@@ -914,24 +914,24 @@ constructor TSimbaNativeInterface_Darwin.Create;
 
 var
   Event: NSEvent;
-  KeyCode: Integer;
+  EKeyCode: Integer;
 begin
   inherited Create();
 
   SetLength(FVirtualWindowInfo, 1);
 
-  for KeyCode := 0 to 255 do
+  for EKeyCode := 0 to 255 do
   begin
-    Event := NSEvent.eventWithCGEvent(CGEventCreateKeyboardEvent(nil, KeyCode, 1));
+    Event := NSEvent.eventWithCGEvent(CGEventCreateKeyboardEvent(nil, EKeyCode, 1));
 
     if (Event <> nil) then
     begin
       if (Event.Type_ = NSKeyDown) then
       begin
-        MapKey(KeyCode, Event.characters, []);
-        MapKey(KeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSShiftKeyMask), [ssShift]);
-        MapKey(KeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSAlternateKeyMask), [ssAlt]);
-        MapKey(KeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSControlKeyMask), [ssCtrl]);
+        MapKey(EKeyCode, Event.characters, []);
+        MapKey(EKeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSShiftKeyMask), [ssShift]);
+        MapKey(EKeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSAlternateKeyMask), [ssAlt]);
+        MapKey(EKeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSControlKeyMask), [ssCtrl]);
       end;
 
       CFRelease(Event);

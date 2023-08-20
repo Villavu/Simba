@@ -16,8 +16,8 @@ uses
 type
   TSimbaNativeInterface_Linux = class(TSimbaNativeInterface)
   public
-    procedure KeyDownNativeKeyCode(KeyCode: Integer); override;
-    procedure KeyUpNativeKeyCode(KeyCode: Integer); override;
+    procedure KeyDownNativeKeyCode(EKeyCode: Integer); override;
+    procedure KeyUpNativeKeyCode(EKeyCode: Integer); override;
 
     function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
 
@@ -30,15 +30,15 @@ type
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
 
-    procedure MouseUp(Button: MouseButton); override;
-    procedure MouseDown(Button: MouseButton); override;
+    procedure MouseUp(Button: EMouseButton); override;
+    procedure MouseDown(Button: EMouseButton); override;
     procedure MouseScroll(Scrolls: Integer); override;
     procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); override;
-    function MousePressed(Button: MouseButton): Boolean; override;
+    function MousePressed(Button: EMouseButton): Boolean; override;
 
-    function KeyPressed(Key: KeyCode): Boolean; override;
-    procedure KeyDown(Key: KeyCode); override;
-    procedure KeyUp(Key: KeyCode); override;
+    function KeyPressed(Key: EKeyCode): Boolean; override;
+    procedure KeyDown(Key: EKeyCode); override;
+    procedure KeyUp(Key: EKeyCode); override;
 
     function GetProcessStartTime(PID: SizeUInt): TDateTime; override;
     function GetProcessMemUsage(PID: SizeUInt): Int64; override;
@@ -83,117 +83,117 @@ const
 
 function sysconf(i: cint): clong; cdecl; external name 'sysconf';
 
-function VirtualKeyToNativeKeyCode(VirtualKey: KeyCode): Integer;
+function VirtualKeyToNativeKeyCode(VirtualKey: EKeyCode): Integer;
 var
   Symbol: TKeySym;
 begin
   case VirtualKey of
-    KeyCode.BACK:      Symbol := XK_BackSpace;
-    KeyCode.TAB:       Symbol := XK_Tab;
-    KeyCode.CLEAR:     Symbol := XK_Clear;
-    KeyCode.RETURN:    Symbol := XK_Return;
-    KeyCode.SHIFT:     Symbol := XK_Shift_L;
-    KeyCode.CONTROL:   Symbol := XK_Control_L;
-    KeyCode.MENU:      Symbol := XK_Alt_R;
-    KeyCode.CAPITAL:   Symbol := XK_Caps_Lock;
+    EKeyCode.BACK:      Symbol := XK_BackSpace;
+    EKeyCode.TAB:       Symbol := XK_Tab;
+    EKeyCode.CLEAR:     Symbol := XK_Clear;
+    EKeyCode.RETURN:    Symbol := XK_Return;
+    EKeyCode.SHIFT:     Symbol := XK_Shift_L;
+    EKeyCode.CONTROL:   Symbol := XK_Control_L;
+    EKeyCode.MENU:      Symbol := XK_Alt_R;
+    EKeyCode.CAPITAL:   Symbol := XK_Caps_Lock;
 
-    KeyCode.ESCAPE:    Symbol := XK_Escape;
-    KeyCode.SPACE:     Symbol := XK_Space;
-    KeyCode.PRIOR:     Symbol := XK_Prior;
-    KeyCode.NEXT:      Symbol := XK_Next;
-    KeyCode.END_KEY:   Symbol := XK_End;
-    KeyCode.HOME:      Symbol := XK_Home;
-    KeyCode.LEFT:      Symbol := XK_Left;
-    KeyCode.UP:        Symbol := XK_Up;
-    KeyCode.RIGHT:     Symbol := XK_Right;
-    KeyCode.DOWN:      Symbol := XK_Down;
-    KeyCode.SELECT:    Symbol := XK_Select;
-    KeyCode.PRINT:     Symbol := XK_Print;
-    KeyCode.EXECUTE:   Symbol := XK_Execute;
+    EKeyCode.ESCAPE:    Symbol := XK_Escape;
+    EKeyCode.SPACE:     Symbol := XK_Space;
+    EKeyCode.PRIOR:     Symbol := XK_Prior;
+    EKeyCode.NEXT:      Symbol := XK_Next;
+    EKeyCode.END_KEY:   Symbol := XK_End;
+    EKeyCode.HOME:      Symbol := XK_Home;
+    EKeyCode.LEFT:      Symbol := XK_Left;
+    EKeyCode.UP:        Symbol := XK_Up;
+    EKeyCode.RIGHT:     Symbol := XK_Right;
+    EKeyCode.DOWN:      Symbol := XK_Down;
+    EKeyCode.SELECT:    Symbol := XK_Select;
+    EKeyCode.PRINT:     Symbol := XK_Print;
+    EKeyCode.EXECUTE:   Symbol := XK_Execute;
 
-    KeyCode.INSERT:    Symbol := XK_Insert;
-    KeyCode.DELETE:    Symbol := XK_Delete;
-    KeyCode.HELP:      Symbol := XK_Help;
-    KeyCode.NUM_0:     Symbol := XK_0;
-    KeyCode.NUM_1:     Symbol := XK_1;
-    KeyCode.NUM_2:     Symbol := XK_2;
-    KeyCode.NUM_3:     Symbol := XK_3;
-    KeyCode.NUM_4:     Symbol := XK_4;
-    KeyCode.NUM_5:     Symbol := XK_5;
-    KeyCode.NUM_6:     Symbol := XK_6;
-    KeyCode.NUM_7:     Symbol := XK_7;
-    KeyCode.NUM_8:     Symbol := XK_8;
-    KeyCode.NUM_9:     Symbol := XK_9;
+    EKeyCode.INSERT:    Symbol := XK_Insert;
+    EKeyCode.DELETE:    Symbol := XK_Delete;
+    EKeyCode.HELP:      Symbol := XK_Help;
+    EKeyCode.NUM_0:     Symbol := XK_0;
+    EKeyCode.NUM_1:     Symbol := XK_1;
+    EKeyCode.NUM_2:     Symbol := XK_2;
+    EKeyCode.NUM_3:     Symbol := XK_3;
+    EKeyCode.NUM_4:     Symbol := XK_4;
+    EKeyCode.NUM_5:     Symbol := XK_5;
+    EKeyCode.NUM_6:     Symbol := XK_6;
+    EKeyCode.NUM_7:     Symbol := XK_7;
+    EKeyCode.NUM_8:     Symbol := XK_8;
+    EKeyCode.NUM_9:     Symbol := XK_9;
 
-    KeyCode.A:         Symbol := XK_A;
-    KeyCode.B:         Symbol := XK_B;
-    KeyCode.C:         Symbol := XK_C;
-    KeyCode.D:         Symbol := XK_D;
-    KeyCode.E:         Symbol := XK_E;
-    KeyCode.F:         Symbol := XK_F;
-    KeyCode.G:         Symbol := XK_G;
-    KeyCode.H:         Symbol := XK_H;
-    KeyCode.I:         Symbol := XK_I;
-    KeyCode.J:         Symbol := XK_J;
-    KeyCode.K:         Symbol := XK_K;
-    KeyCode.L:         Symbol := XK_L;
-    KeyCode.M:         Symbol := XK_M;
-    KeyCode.N:         Symbol := XK_N;
-    KeyCode.O:         Symbol := XK_O;
-    KeyCode.P:         Symbol := XK_P;
-    KeyCode.Q:         Symbol := XK_Q;
-    KeyCode.R:         Symbol := XK_R;
-    KeyCode.S:         Symbol := XK_S;
-    KeyCode.T:         Symbol := XK_T;
-    KeyCode.U:         Symbol := XK_U;
-    KeyCode.V:         Symbol := XK_V;
-    KeyCode.W:         Symbol := XK_W;
-    KeyCode.X:         Symbol := XK_X;
-    KeyCode.Y:         Symbol := XK_Y;
-    KeyCode.Z:         Symbol := XK_Z;
+    EKeyCode.A:         Symbol := XK_A;
+    EKeyCode.B:         Symbol := XK_B;
+    EKeyCode.C:         Symbol := XK_C;
+    EKeyCode.D:         Symbol := XK_D;
+    EKeyCode.E:         Symbol := XK_E;
+    EKeyCode.F:         Symbol := XK_F;
+    EKeyCode.G:         Symbol := XK_G;
+    EKeyCode.H:         Symbol := XK_H;
+    EKeyCode.I:         Symbol := XK_I;
+    EKeyCode.J:         Symbol := XK_J;
+    EKeyCode.K:         Symbol := XK_K;
+    EKeyCode.L:         Symbol := XK_L;
+    EKeyCode.M:         Symbol := XK_M;
+    EKeyCode.N:         Symbol := XK_N;
+    EKeyCode.O:         Symbol := XK_O;
+    EKeyCode.P:         Symbol := XK_P;
+    EKeyCode.Q:         Symbol := XK_Q;
+    EKeyCode.R:         Symbol := XK_R;
+    EKeyCode.S:         Symbol := XK_S;
+    EKeyCode.T:         Symbol := XK_T;
+    EKeyCode.U:         Symbol := XK_U;
+    EKeyCode.V:         Symbol := XK_V;
+    EKeyCode.W:         Symbol := XK_W;
+    EKeyCode.X:         Symbol := XK_X;
+    EKeyCode.Y:         Symbol := XK_Y;
+    EKeyCode.Z:         Symbol := XK_Z;
 
-    KeyCode.NUMPAD_0:  Symbol := XK_KP_0;
-    KeyCode.NUMPAD_1:  Symbol := XK_KP_1;
-    KeyCode.NUMPAD_2:  Symbol := XK_KP_2;
-    KeyCode.NUMPAD_3:  Symbol := XK_KP_3;
-    KeyCode.NUMPAD_4:  Symbol := XK_KP_4;
-    KeyCode.NUMPAD_5:  Symbol := XK_KP_5;
-    KeyCode.NUMPAD_6:  Symbol := XK_KP_6;
-    KeyCode.NUMPAD_7:  Symbol := XK_KP_7;
-    KeyCode.NUMPAD_8:  Symbol := XK_KP_8;
-    KeyCode.NUMPAD_9:  Symbol := XK_KP_9;
-    KeyCode.MULTIPLY:  Symbol := XK_KP_Multiply;
-    KeyCode.ADD:       Symbol := XK_KP_Add;
-    KeyCode.SEPARATOR: Symbol := XK_KP_Separator;
-    KeyCode.SUBTRACT:  Symbol := XK_KP_Subtract;
-    KeyCode.DECIMAL:   Symbol := XK_KP_Decimal;
-    KeyCode.DIVIDE:    Symbol := XK_KP_Divide;
-    KeyCode.F1:        Symbol := XK_F1;
-    KeyCode.F2:        Symbol := XK_F2;
-    KeyCode.F3:        Symbol := XK_F3;
-    KeyCode.F4:        Symbol := XK_F4;
-    KeyCode.F5:        Symbol := XK_F5;
-    KeyCode.F6:        Symbol := XK_F6;
-    KeyCode.F7:        Symbol := XK_F7;
-    KeyCode.F8:        Symbol := XK_F8;
-    KeyCode.F9:        Symbol := XK_F9;
-    KeyCode.F10:       Symbol := XK_F10;
-    KeyCode.F11:       Symbol := XK_F11;
-    KeyCode.F12:       Symbol := XK_F12;
-    KeyCode.F13:       Symbol := XK_F13;
-    KeyCode.F14:       Symbol := XK_F14;
-    KeyCode.F15:       Symbol := XK_F15;
-    KeyCode.F16:       Symbol := XK_F16;
-    KeyCode.F17:       Symbol := XK_F17;
-    KeyCode.F18:       Symbol := XK_F18;
-    KeyCode.F19:       Symbol := XK_F19;
-    KeyCode.F20:       Symbol := XK_F20;
-    KeyCode.F21:       Symbol := XK_F21;
-    KeyCode.F22:       Symbol := XK_F22;
-    KeyCode.F23:       Symbol := XK_F23;
-    KeyCode.F24:       Symbol := XK_F24;
-    KeyCode.NUMLOCK:   Symbol := XK_Num_Lock;
-    KeyCode.SCROLL:    Symbol := XK_Scroll_Lock;
+    EKeyCode.NUMPAD_0:  Symbol := XK_KP_0;
+    EKeyCode.NUMPAD_1:  Symbol := XK_KP_1;
+    EKeyCode.NUMPAD_2:  Symbol := XK_KP_2;
+    EKeyCode.NUMPAD_3:  Symbol := XK_KP_3;
+    EKeyCode.NUMPAD_4:  Symbol := XK_KP_4;
+    EKeyCode.NUMPAD_5:  Symbol := XK_KP_5;
+    EKeyCode.NUMPAD_6:  Symbol := XK_KP_6;
+    EKeyCode.NUMPAD_7:  Symbol := XK_KP_7;
+    EKeyCode.NUMPAD_8:  Symbol := XK_KP_8;
+    EKeyCode.NUMPAD_9:  Symbol := XK_KP_9;
+    EKeyCode.MULTIPLY:  Symbol := XK_KP_Multiply;
+    EKeyCode.ADD:       Symbol := XK_KP_Add;
+    EKeyCode.SEPARATOR: Symbol := XK_KP_Separator;
+    EKeyCode.SUBTRACT:  Symbol := XK_KP_Subtract;
+    EKeyCode.DECIMAL:   Symbol := XK_KP_Decimal;
+    EKeyCode.DIVIDE:    Symbol := XK_KP_Divide;
+    EKeyCode.F1:        Symbol := XK_F1;
+    EKeyCode.F2:        Symbol := XK_F2;
+    EKeyCode.F3:        Symbol := XK_F3;
+    EKeyCode.F4:        Symbol := XK_F4;
+    EKeyCode.F5:        Symbol := XK_F5;
+    EKeyCode.F6:        Symbol := XK_F6;
+    EKeyCode.F7:        Symbol := XK_F7;
+    EKeyCode.F8:        Symbol := XK_F8;
+    EKeyCode.F9:        Symbol := XK_F9;
+    EKeyCode.F10:       Symbol := XK_F10;
+    EKeyCode.F11:       Symbol := XK_F11;
+    EKeyCode.F12:       Symbol := XK_F12;
+    EKeyCode.F13:       Symbol := XK_F13;
+    EKeyCode.F14:       Symbol := XK_F14;
+    EKeyCode.F15:       Symbol := XK_F15;
+    EKeyCode.F16:       Symbol := XK_F16;
+    EKeyCode.F17:       Symbol := XK_F17;
+    EKeyCode.F18:       Symbol := XK_F18;
+    EKeyCode.F19:       Symbol := XK_F19;
+    EKeyCode.F20:       Symbol := XK_F20;
+    EKeyCode.F21:       Symbol := XK_F21;
+    EKeyCode.F22:       Symbol := XK_F22;
+    EKeyCode.F23:       Symbol := XK_F23;
+    EKeyCode.F24:       Symbol := XK_F24;
+    EKeyCode.NUMLOCK:   Symbol := XK_Num_Lock;
+    EKeyCode.SCROLL:    Symbol := XK_Scroll_Lock;
   else
     Symbol := XK_VoidSymbol;
   end;
@@ -226,15 +226,15 @@ begin
   Result := GetWindowProperty(Window, SimbaXLib.XInternAtom(PChar(Name), False)) > 0;
 end;
 
-procedure TSimbaNativeInterface_Linux.KeyDownNativeKeyCode(KeyCode: Integer);
+procedure TSimbaNativeInterface_Linux.KeyDownNativeKeyCode(EKeyCode: Integer);
 begin
-  SimbaXLib.XTestFakeKeyEvent(KeyCode, True, 0);
+  SimbaXLib.XTestFakeKeyEvent(EKeyCode, True, 0);
   SimbaXLib.XSync(False);
 end;
 
-procedure TSimbaNativeInterface_Linux.KeyUpNativeKeyCode(KeyCode: Integer);
+procedure TSimbaNativeInterface_Linux.KeyUpNativeKeyCode(EKeyCode: Integer);
 begin
-  SimbaXLib.XTestFakeKeyEvent(KeyCode, False, 0);
+  SimbaXLib.XTestFakeKeyEvent(EKeyCode, False, 0);
   SimbaXLib.XSync(False);
 end;
 
@@ -399,49 +399,49 @@ begin
   begin
     if (Scrolls > 0) then
     begin
-      MouseDown(MouseButton.SCROLL_DOWN);
-      MouseUp(MouseButton.SCROLL_DOWN);
+      MouseDown(EMouseButton.SCROLL_DOWN);
+      MouseUp(EMouseButton.SCROLL_DOWN);
     end else
     begin
-      MouseDown(MouseButton.SCROLL_UP);
-      MouseUp(MouseButton.SCROLL_UP);
+      MouseDown(EMouseButton.SCROLL_UP);
+      MouseUp(EMouseButton.SCROLL_UP);
     end;
   end;
 end;
 
-procedure TSimbaNativeInterface_Linux.MouseDown(Button: MouseButton);
+procedure TSimbaNativeInterface_Linux.MouseDown(Button: EMouseButton);
 var
   Number: Integer;
 begin
   case Button of
-    MouseButton.LEFT:        Number := Button1;
-    MouseButton.MIDDLE:      Number := Button2;
-    MouseButton.RIGHT:       Number := Button3;
-    MouseButton.SCROLL_DOWN: Number := Button5;
-    MouseButton.SCROLL_UP:   Number := Button4;
+    EMouseButton.LEFT:        Number := Button1;
+    EMouseButton.MIDDLE:      Number := Button2;
+    EMouseButton.RIGHT:       Number := Button3;
+    EMouseButton.SCROLL_DOWN: Number := Button5;
+    EMouseButton.SCROLL_UP:   Number := Button4;
   end;
 
   SimbaXLib.XTestFakeButtonEvent(Number, True, CurrentTime);
   SimbaXLib.XFlush();
 end;
 
-procedure TSimbaNativeInterface_Linux.MouseUp(Button: MouseButton);
+procedure TSimbaNativeInterface_Linux.MouseUp(Button: EMouseButton);
 var
   Number: Integer;
 begin
   case Button of
-    MouseButton.LEFT:        Number := Button1;
-    MouseButton.MIDDLE:      Number := Button2;
-    MouseButton.RIGHT:       Number := Button3;
-    MouseButton.SCROLL_DOWN: Number := Button5;
-    MouseButton.SCROLL_UP:   Number := Button4;
+    EMouseButton.LEFT:        Number := Button1;
+    EMouseButton.MIDDLE:      Number := Button2;
+    EMouseButton.RIGHT:       Number := Button3;
+    EMouseButton.SCROLL_DOWN: Number := Button5;
+    EMouseButton.SCROLL_UP:   Number := Button4;
   end;
 
   SimbaXLib.XTestFakeButtonEvent(Number, False, CurrentTime);
   SimbaXLib.XFlush();
 end;
 
-function TSimbaNativeInterface_Linux.MousePressed(Button: MouseButton): Boolean;
+function TSimbaNativeInterface_Linux.MousePressed(Button: EMouseButton): Boolean;
 var
   Mask: Integer;
   Event: TXButtonEvent;
@@ -449,11 +449,11 @@ begin
   SimbaXLib.XSync(False);
 
   case Button of
-    MouseButton.LEFT:        begin Event.Button := Button1; Mask := Button1Mask; end;
-    MouseButton.MIDDLE:      begin Event.Button := Button2; Mask := Button2Mask; end;
-    MouseButton.RIGHT:       begin Event.Button := Button3; Mask := Button3Mask; end;
-    MouseButton.SCROLL_UP:   begin Event.Button := Button4; Mask := Button4Mask; end;
-    MouseButton.SCROLL_DOWN: begin Event.Button := Button5; Mask := Button5Mask; end;
+    EMouseButton.LEFT:        begin Event.Button := Button1; Mask := Button1Mask; end;
+    EMouseButton.MIDDLE:      begin Event.Button := Button2; Mask := Button2Mask; end;
+    EMouseButton.RIGHT:       begin Event.Button := Button3; Mask := Button3Mask; end;
+    EMouseButton.SCROLL_UP:   begin Event.Button := Button4; Mask := Button4Mask; end;
+    EMouseButton.SCROLL_DOWN: begin Event.Button := Button5; Mask := Button5Mask; end;
   end;
 
   Event := Default(TXButtonEvent);
@@ -467,7 +467,7 @@ begin
   Result := ((Event.State and Mask) > 0);
 end;
 
-function TSimbaNativeInterface_Linux.KeyPressed(Key: KeyCode): Boolean;
+function TSimbaNativeInterface_Linux.KeyPressed(Key: EKeyCode): Boolean;
 var
   Code: TKeySym;
   Keys: CharArr32;
@@ -480,13 +480,13 @@ begin
   Result := (Keys[Code shr 3] shr (Code and $07)) and $01 > 0;
 end;
 
-procedure TSimbaNativeInterface_Linux.KeyDown(Key: KeyCode);
+procedure TSimbaNativeInterface_Linux.KeyDown(Key: EKeyCode);
 begin
   SimbaXLib.XTestFakeKeyEvent(VirtualKeyToNativeKeyCode(Key), True, 0);
   SimbaXLib.XSync(False);
 end;
 
-procedure TSimbaNativeInterface_Linux.KeyUp(Key: KeyCode);
+procedure TSimbaNativeInterface_Linux.KeyUp(Key: EKeyCode);
 begin
   SimbaXLib.XTestFakeKeyEvent(VirtualKeyToNativeKeyCode(Key), False, 0);
   SimbaXLib.XSync(False);

@@ -29,16 +29,16 @@ type
     IsFocused: function(Target: Pointer): Boolean;
     Focus: function(Target: Pointer): Boolean;
 
-    KeyDown: procedure(Target: Pointer; Key: KeyCode);
-    KeyUp: procedure(Target: Pointer; Key: KeyCode);
+    KeyDown: procedure(Target: Pointer; Key: EKeyCode);
+    KeyUp: procedure(Target: Pointer; Key: EKeyCode);
     KeySend: procedure(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
-    KeyPressed: function(Target: Pointer; Key: KeyCode): Boolean;
+    KeyPressed: function(Target: Pointer; Key: EKeyCode): Boolean;
 
     MouseTeleport: procedure(Target: Pointer; P: TPoint);
     MousePosition: function(Target: Pointer): TPoint;
-    MousePressed: function(Target: Pointer; Button: MouseButton): Boolean;
-    MouseDown: procedure(Target: Pointer; Button: MouseButton);
-    MouseUp: procedure(Target: Pointer; Button: MouseButton);
+    MousePressed: function(Target: Pointer; Button: EMouseButton): Boolean;
+    MouseDown: procedure(Target: Pointer; Button: EMouseButton);
+    MouseUp: procedure(Target: Pointer; Button: EMouseButton);
     MouseScroll: procedure(Target: Pointer; Scrolls: Integer);
   end;
 
@@ -95,17 +95,17 @@ type
     procedure SetImage(Image: TSimbaImage);
     procedure SetEIOS(FileName, Args: String);
 
-    function MousePressed(Button: MouseButton): Boolean;
+    function MousePressed(Button: EMouseButton): Boolean;
     function MousePosition: TPoint;
     procedure MouseTeleport(P: TPoint);
-    procedure MouseUp(Button: MouseButton);
-    procedure MouseDown(Button: MouseButton);
+    procedure MouseUp(Button: EMouseButton);
+    procedure MouseDown(Button: EMouseButton);
     procedure MouseScroll(Scrolls: Integer);
 
-    procedure KeyDown(Key: KeyCode);
-    procedure KeyUp(Key: KeyCode);
+    procedure KeyDown(Key: EKeyCode);
+    procedure KeyUp(Key: EKeyCode);
     procedure KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
-    function KeyPressed(Key: KeyCode): Boolean;
+    function KeyPressed(Key: EKeyCode): Boolean;
 
     function ValidateBounds(var Bounds: TBox): Boolean;
     function GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
@@ -349,7 +349,7 @@ begin
   FMethods.GetImageData := @EIOSTarget_GetImageData;
 end;
 
-function TSimbaTarget.MousePressed(Button: MouseButton): Boolean;
+function TSimbaTarget.MousePressed(Button: EMouseButton): Boolean;
 begin
   if HasMethod(FMethods.MousePressed, 'MousePressed') then
     Result := FMethods.MousePressed(FTarget, Button);
@@ -375,7 +375,7 @@ begin
     FMethods.MouseTeleport(FTarget, P);
 end;
 
-procedure TSimbaTarget.MouseUp(Button: MouseButton);
+procedure TSimbaTarget.MouseUp(Button: EMouseButton);
 begin
   CheckAutoFocus();
 
@@ -383,7 +383,7 @@ begin
     FMethods.MouseUp(FTarget, Button);
 end;
 
-procedure TSimbaTarget.MouseDown(Button: MouseButton);
+procedure TSimbaTarget.MouseDown(Button: EMouseButton);
 begin
   CheckAutoFocus();
 
@@ -399,7 +399,7 @@ begin
     FMethods.MouseScroll(FTarget, Scrolls);
 end;
 
-procedure TSimbaTarget.KeyDown(Key: KeyCode);
+procedure TSimbaTarget.KeyDown(Key: EKeyCode);
 begin
   CheckAutoFocus();
 
@@ -407,7 +407,7 @@ begin
     FMethods.KeyDown(FTarget, Key);
 end;
 
-procedure TSimbaTarget.KeyUp(Key: KeyCode);
+procedure TSimbaTarget.KeyUp(Key: EKeyCode);
 begin
   CheckAutoFocus();
 
@@ -423,7 +423,7 @@ begin
     FMethods.KeySend(FTarget, Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
 end;
 
-function TSimbaTarget.KeyPressed(Key: KeyCode): Boolean;
+function TSimbaTarget.KeyPressed(Key: EKeyCode): Boolean;
 begin
   if HasMethod(FMethods.KeyPressed, 'KeyPressed') then
     Result := FMethods.KeyPressed(FTarget, Key);
