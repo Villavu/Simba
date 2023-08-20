@@ -222,6 +222,8 @@ type
     procedure TrayIconClick(Sender: TObject);
     procedure TrayPopupExitClick(Sender: TObject);
   protected
+    FToolbarImages: TImageList;
+
     FWindowSelection: TWindowHandle;
     FProcessSelection: TProcessID;
     FRecentFiles: TStringList;
@@ -292,7 +294,7 @@ uses
   simba.openssl, simba.env,
   simba.dockinghelpers, simba.nativeinterface,
   simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme,
-  simba.scriptbackup, simba.backupsform;
+  simba.scriptbackup, simba.backupsform, simba.ide_utils;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -700,8 +702,12 @@ begin
   FRecentFiles := TStringList.Create();
   FRecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
 
+  FToolbarImages := TImageList.Create(Self); // Create a copy so ImagesGetWidthForPPI is not used for toolbar
+  FToolbarImages.Assign(Images);
+
   Self.Color := SimbaTheme.ColorFrame;
   ToolBar.Color := SimbaTheme.ColorFrame;
+  ToolBar.Images := FToolbarImages;
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
@@ -740,27 +746,12 @@ end;
 
 procedure TSimbaForm.ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
 begin
-  if APPI <= 96 then
-    // no scaling
-  else
-  if APPI <= 168 then
-    AResultWidth := 24 // 125%-175% (120-168 DPI): 150% scaling
-  else
-    AResultWidth := 32; // 200, 300, 400, ...
+  AResultWidth := ImageWidthForDPI(APPI);
 end;
 
 procedure TSimbaForm.MainMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
 begin
-  if TMenuItem(Sender).IsLine then
-    Exit;
-
-  if ACanvas.Font.PixelsPerInch <= 96 then
-    // no scaling
-  else
-  if ACanvas.Font.PixelsPerInch <= 168 then
-    AHeight := Round(24 * 1.3) // 125%-175% (120-168 DPI): 150% scaling
-  else
-    AHeight := Round(32 * 1.3); // 200, 300, 400, ...
+  MenuItemHeight(Sender as TMenuItem, ACanvas, AHeight);
 end;
 
 procedure TSimbaForm.MenuItemDocumentationClick(Sender: TObject);

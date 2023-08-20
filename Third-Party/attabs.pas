@@ -1524,6 +1524,7 @@ var
   Sep: TATStringSeparator;
   SepItem: string;
   bOneLiner: boolean;
+  ImageRes: TScaledImageListResolution;
 begin
   //optimize for 200 tabs
   if AInfo.Rect.Left>=Width then exit;
@@ -1569,45 +1570,47 @@ begin
   if Assigned(FImages) then
     if (AInfo.ImageIndex>=0) and (AInfo.ImageIndex<FImages.Count) then
     begin
+      ImageRes := FImages.ResolutionForPPI[FImages.Width, Font.PixelsPerInch, GetCanvasScaleFactor];
+
       NIndentTop:=
-        (RectText.Top + RectText.Bottom - FImages.Height + DoScale(FOptColoredBandSize)) div 2;
+        (RectText.Top + RectText.Bottom - ImageRes.Height + DoScale(FOptColoredBandSize)) div 2;
       case FOptIconPosition of
         aipIconLefterThanText:
           begin
-            FImages.Draw(C,
+            ImageRes.Draw(C,
               RectText.Left - 2,
               NIndentTop,
               AInfo.ImageIndex);
-            Inc(RectText.Left, FImages.Width+DoScale(FOptSpaceBetweenIconCaption));
+            Inc(RectText.Left, ImageRes.Width+DoScale(FOptSpaceBetweenIconCaption));
           end;
         aipIconRighterThanText:
           begin
-            FImages.Draw(C,
-              RectText.Right - FImages.Width + 2,
+            ImageRes.Draw(C,
+              RectText.Right - ImageRes.Width + 2,
               NIndentTop,
               AInfo.ImageIndex);
-            Dec(RectText.Right, FImages.Width+DoScale(FOptSpaceBetweenIconCaption));
+            Dec(RectText.Right, ImageRes.Width+DoScale(FOptSpaceBetweenIconCaption));
           end;
         aipIconCentered:
           begin
-            FImages.Draw(C,
-              (RectText.Left + RectText.Right - FImages.Width) div 2,
+            ImageRes.Draw(C,
+              (RectText.Left + RectText.Right - ImageRes.Width) div 2,
               NIndentTop,
               AInfo.ImageIndex);
           end;
         aipIconAboveTextCentered:
           begin
-            FImages.Draw(C,
-              (RectText.Left + RectText.Right - FImages.Width) div 2,
+            ImageRes.Draw(C,
+              (RectText.Left + RectText.Right - ImageRes.Width) div 2,
               RectText.Top + DoScale(FOptColoredBandSize),
               AInfo.ImageIndex);
-            Inc(RectText.Top, FImages.Height+DoScale(FOptSpaceBetweenIconCaption));
+            Inc(RectText.Top, ImageRes.Height+DoScale(FOptSpaceBetweenIconCaption));
           end;
         aipIconBelowTextCentered:
           begin
-            FImages.Draw(C,
-              (RectText.Left + RectText.Right - FImages.Width) div 2,
-              RectText.Bottom - FImages.Height,
+            ImageRes.Draw(C,
+              (RectText.Left + RectText.Right - ImageRes.Width) div 2,
+              RectText.Bottom - ImageRes.Height,
               AInfo.ImageIndex);
             Dec(RectText.Bottom, FImages.Height+DoScale(FOptSpaceBetweenIconCaption));
           end;
@@ -2260,7 +2263,8 @@ begin
 
       if Data.TabImageIndex>=0 then
         if FOptIconPosition in [aipIconLefterThanText, aipIconRighterThanText] then
-          Inc(FTabWidth, FImages.Width+FOptSpaceBetweenIconCaption);
+          Inc(FTabWidth, FImages.WidthForPPI[FImages.Width, Font.PixelsPerInch] + FOptSpaceBetweenIconCaption);
+        //Inc(FTabWidth, FImages.Width+FOptSpaceBetweenIconCaption);
 
       if FOptShowXButtons<>atbxShowNone then
         if not Data.TabHideXButton then

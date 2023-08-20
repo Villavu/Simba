@@ -13,7 +13,8 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, Graphics, StdCtrls, ComCtrls, LMessages, LCLType, ImgList,
-  simba.component_edit, simba.component_treeviewhint, simba.component_scrollbar, simba.component_button;
+  simba.component_edit, simba.component_treeviewhint, simba.component_scrollbar, simba.component_button,
+  simba.settings;
      
 type
   TSimbaTreeView = class;
@@ -86,6 +87,7 @@ type
     procedure DoFilterEditChange(Sender: TObject);
     procedure DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
+    procedure DoSettingChanged_ImageSize(Setting: TSimbaSetting);
 
     procedure ScrollHorzChange(Sender: TObject);
     procedure ScrollVertChange(Sender: TObject);
@@ -179,7 +181,6 @@ begin
   FTree.SelectionColor := SimbaTheme.ColorActive;
   FTree.Font.Color := SimbaTheme.ColorFont;
   FTree.Images := SimbaForm.Images;
-  //FTree.ImagesWidth := 20;
 
   FScrollbarVert.ForwardScrollControl := FTree;
 
@@ -205,6 +206,9 @@ begin
   FFilterClearButton.Hint := 'Clear Filter';
   FFilterClearButton.ShowHint := True;
   FFilterClearButton.SetClearFilterGlyph();
+
+  with SimbaSettings do
+    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize);
 end;
 
 procedure TSimbaTreeView.FullCollapse;
@@ -455,6 +459,11 @@ begin
     NodeClass := FNodeClass
   else
     NodeClass := TTreeNode;
+end;
+
+procedure TSimbaTreeView.DoSettingChanged_ImageSize(Setting: TSimbaSetting);
+begin
+  Invalidate();
 end;
 
 procedure TSimbaTreeView.ScrollVertChange(Sender: TObject);

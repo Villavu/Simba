@@ -15,6 +15,8 @@ uses
 
 type
   TSimbaGeneralFrame = class(TFrame)
+    ImageSizeLabel: TLabel;
+    ImageSizeTrackBar: TTrackBar;
     Label1: TLabel;
     ToolbarSpacingSpinEdit: TSpinEdit;
     ToolbarPositionComboBox: TComboBox;
@@ -31,6 +33,7 @@ type
     ScrollBarSizeTrackBar: TTrackBar;
     ScrollBarArrowSizeTrackBar: TTrackBar;
 
+    procedure ImageSizeTrackBarChange(Sender: TObject);
     procedure ToolbarPositionComboBoxChange(Sender: TObject);
     procedure FontSizeTrackBarChange(Sender: TObject);
     procedure ToolbarSizeTrackBarChange(Sender: TObject);
@@ -71,6 +74,20 @@ begin
     1: SimbaSettings.General.ToolbarPosition.Value := 'Left';
     2: SimbaSettings.General.ToolbarPosition.Value := 'Right';
   end;
+end;
+
+procedure TSimbaGeneralFrame.ImageSizeTrackBarChange(Sender: TObject);
+begin
+  ImageSizeLabel.Caption := IfThen(
+    ImageSizeTrackBar.Position = ImageSizeTrackBar.Min,
+    'Image Size: Default',
+    'Image Size: ' + IntToStr(ImageSizeTrackBar.Position)
+  );
+
+  if ImageSizeTrackBar.Position = ImageSizeTrackBar.Min then
+    SimbaSettings.General.CustomImageSize.SetDefault()
+  else
+    SimbaSettings.General.CustomImageSize.Value := ImageSizeTrackBar.Position;
 end;
 
 procedure TSimbaGeneralFrame.DoScrollBarArrowTrackBarChange(Sender: TObject);
@@ -137,6 +154,7 @@ begin
   FontSizeTrackBar.Position := SimbaSettings.General.CustomFontSize.Value;
   ScrollBarSizeTrackBar.Position := SimbaSettings.General.ScrollBarSize.Value;
   ScrollBarArrowSizeTrackBar.Position := SimbaSettings.General.ScrollBarArrowSize.Value;
+  ImageSizeTrackBar.Position := SimbaSettings.General.CustomImageSize.Value;
 end;
 
 procedure TSimbaGeneralFrame.Save;
