@@ -4,8 +4,8 @@ object SimbaForm: TSimbaForm
   Top = 550
   Width = 1051
   Caption = 'Simba'
-  ClientHeight = 575
-  ClientWidth = 1051
+  ClientHeight = 0
+  ClientWidth = 0
   DesignTimePPI = 120
   KeyPreview = True
   OnClose = FormClose

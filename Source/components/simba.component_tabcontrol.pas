@@ -11,7 +11,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, ImgList, Menus,
-  attabs;
+  attabs,
+  simba.settings;
 
 type
   TSimbaTabControl = class;
@@ -55,6 +56,7 @@ type
 
     procedure CallTabChanged(Data: PtrInt);
 
+    procedure DoSettingChanged_ImageSize(Setting: TSimbaSetting);
     procedure DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
     procedure DoTabChanged(Sender: TObject);
     procedure DoTabPlusClick(Sender: TObject);
@@ -324,6 +326,11 @@ begin
     DoTabChanged(FTabs);
 end;
 
+procedure TSimbaTabControl.DoSettingChanged_ImageSize(Setting: TSimbaSetting);
+begin
+  Invalidate();
+end;
+
 procedure TSimbaTabControl.DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
 begin
   if (AIndexFrom = -1) or (AIndexTo = -1) then
@@ -475,6 +482,9 @@ begin
 
   if NeedChangeEvent and Assigned(FTabChangeEvent) then
     FTabChangeEvent(Self, Result);
+
+  with SimbaSettings do
+    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize);
 end;
 
 procedure TSimbaTabControl.MoveTab(AFrom, ATo: Integer);

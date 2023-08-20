@@ -330,7 +330,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="133">
+    <Units Count="134">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -941,6 +941,10 @@
         <Filename Value="simba.json.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit132>
+      <Unit133>
+        <Filename Value="simba.ide_utils.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit133>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
