@@ -204,6 +204,7 @@ begin
   AddNode('Point Cluster',        'EXAMPLE_CLUSTER_POINTS'      );
   AddNode('Mouse Teleport Event', 'EXAMPLE_MOUSE_TELEPORT_EVENT');
   AddNode('Static Method',        'EXAMPLE_STATIC_METHOD'       );
+  AddNode('JSON',                 'EXAMPLE_JSON'                );
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);

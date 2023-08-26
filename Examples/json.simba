@@ -1,0 +1,56 @@
+const
+  SOME_JSON_DATA =
+    '{'                                                                       + LINE_SEP +
+    '    "employee": {'                                                       + LINE_SEP +
+    '        "name": "John",'                                                 + LINE_SEP +
+    '        "age":  9000,'                                                   + LINE_SEP +
+    '        "car":  false'                                                   + LINE_SEP +
+    '    },'                                                                  + LINE_SEP +
+    '   "weekdays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]' + LINE_SEP +
+    '}';
+
+var
+  JsonParser: TJSONParser;
+  Element: TJSONElement;
+  I, J: Integer;
+begin
+  JsonParser := TJSONParser.Create(SOME_JSON_DATA);
+
+  for I := 0 to JSONParser.Count - 1 do
+  begin
+    Element := JsonParser.GetItem(I);
+    if Element.IsObject() then
+    begin
+      WriteLn('Item[',I,'] is a json object:');
+      WriteLn('Keys: ', Element.Keys);
+      for J := 0 to Element.Count - 1 do
+        WriteLn('  ', Element.GetItem(J).ValueType, ' -> ', Element.GetItem(J).GetValue());
+    end;
+
+    if Element.IsArray() then
+    begin
+      WriteLn('Item[',I,'] is a json array:');
+      for J := 0 to Element.Count - 1 do
+        WriteLn('  ', Element.GetItem(J).ValueType, ' -> ', Element.GetItem(J).GetValue());
+    end;
+  end;
+
+  // change `john` name to `james`
+  if JsonParser.Find('person', Element) then
+    Element.GetItem(0).SetValue('james');
+
+  // Add another employee
+  Element := JsonParser.AddObject('anotherEmployee');
+  Element.AddValue('name', 'bob');
+  Element.AddValue('age', 123);
+  Element.AddValue('car', True);
+
+  // Get our updated json string
+  WriteLn JsonParser.AsString();
+
+  // JSON paths are also useful
+  if JsonParser.FindPath('employee.name', Element) then
+    WriteLn('Found employee.name! ', Element.AsString);
+
+  JsonParser.Free();
+end;

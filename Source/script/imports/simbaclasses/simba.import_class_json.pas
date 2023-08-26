@@ -21,6 +21,8 @@ uses
 JSON
 ====
 JSON parser.
+
+It is `Variant` based.
 *)
 
 (*
@@ -81,6 +83,16 @@ TJSONElement.AddObject
 procedure _LapeJSONElement_AddObject(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaJSONElement(Result)^ := PSimbaJSONElement(Params^[0])^.AddObject(PString(Params^[1])^);
+end;
+
+(*
+TJSONElement.AddNull
+~~~~~~~~~~~~~~~~~~~~
+> function TJSONElement.AddNull(Key: String): TJSONElement;
+*)
+procedure _LapeJSONElement_AddNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaJSONElement(Result)^ := PSimbaJSONElement(Params^[0])^.AddNull(PString(Params^[1])^);
 end;
 
 (*
@@ -214,6 +226,42 @@ begin
 end;
 
 (*
+TJSONElement.HasKey
+~~~~~~~~~~~~~~~~~~~
+> function TJSONElement.HasKey(Key: String): Boolean;
+
+Returns `True` if the `Key` exists in the JSON object.
+*)
+procedure _LapeJSONElement_HasKey1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaJSONElement(Params^[0])^.HasKey(PString(Params^[1])^);
+end;
+
+(*
+TJSONElement.HasKey
+~~~~~~~~~~~~~~~~~~~
+> function TJSONElement.HasKey(Keys: TStringArray): Boolean;
+
+Returns `True` if **any** of the `Keys` exists in the JSON object.
+*)
+procedure _LapeJSONElement_HasKey2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaJSONElement(Params^[0])^.HasKey(PStringArray(Params^[1])^);
+end;
+
+(*
+TJSONElement.HasKeys
+~~~~~~~~~~~~~~~~~~~~
+> function TJSONElement.HasKeys(Keys: TStringArray): Boolean;
+
+Returns `True` if **all** `Keys` exists in the JSON object.
+*)
+procedure _LapeJSONElement_HasKeys(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaJSONElement(Params^[0])^.HasKeys(PStringArray(Params^[1])^);
+end;
+
+(*
 TJSONParser.Create
 ~~~~~~~~~~~~~~~~~~
 > function TJSONParser.Create(Str: String = ''): TJSONParser; static;
@@ -285,6 +333,16 @@ TJSONParser.Clear
 procedure _LapeJSONParser_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaJSONParser(Params^[0])^.Clear();
+end;
+
+(*
+TJSONParser.AddNull
+~~~~~~~~~~~~~~~~~~~~
+> function TJSONParser.AddNull(Key: String): TJSONElement;
+*)
+procedure _LapeJSONParser_AddNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaJSONElement(Result)^ := PSimbaJSONParser(Params^[0])^.AddNull(PString(Params^[1])^);
 end;
 
 (*
@@ -407,6 +465,42 @@ begin
   PStringArray(Result)^ := PSimbaJSONParser(Params^[0])^.Keys;
 end;
 
+(*
+TJSONParser.HasKey
+~~~~~~~~~~~~~~~~~~~
+> function TJSONParser.HasKey(Key: String): Boolean;
+
+Returns `True` if the `Key` exists in the root JSON parser.
+*)
+procedure _LapeJSONParser_HasKey1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaJSONParser(Params^[0])^.HasKey(PString(Params^[1])^);
+end;
+
+(*
+TJSONParser.HasKey
+~~~~~~~~~~~~~~~~~~~
+> function TJSONParser.HasKey(Keys: TStringArray): Boolean;
+
+Returns `True` if **any** of the `Keys` exists in the root JSON parser.
+*)
+procedure _LapeJSONParser_HasKey2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaJSONParser(Params^[0])^.HasKey(PStringArray(Params^[1])^);
+end;
+
+(*
+TJSONParser.HasKeys
+~~~~~~~~~~~~~~~~~~~~
+> function TJSONParser.HasKeys(Keys: TStringArray): Boolean;
+
+Returns `True` if **all** `Keys` exists in the root JSON parser.
+*)
+procedure _LapeJSONParser_HasKeys(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaJSONParser(Params^[0])^.HasKeys(PStringArray(Params^[1])^);
+end;
+
 procedure ImportJSON(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -414,9 +508,9 @@ begin
     ImportingSection := 'JSON';
 
     addGlobalType('enum(UNKNOWN, NULL, INT, FLOAT, STR, BOOL)', 'EJSONValueType');
-    addGlobalType('record {%CODETOOLS OFF}InternalData: Pointer;{%CODETOOLS ON} end', 'TJSONElement');
-    if (getGlobalType('TJSONElement').Size <> SizeOf(TSimbaJSONParser)) then
-      raise Exception.Create('SizeOf(TJSONElement) is wrong!');
+    with addGlobalType('record {%CODETOOLS OFF}InternalData: Pointer;{%CODETOOLS ON} end', 'TJSONElement') do
+      if (Size <> SizeOf(TSimbaJSONParser)) then
+        SimbaException('SizeOf(TJSONElement) is wrong!');
 
     addGlobalFunc('function TJSONElement.Keys: TStringArray', @_LapeJSONElement_Keys);
     addGlobalFunc('function TJSONElement.Count: Integer', @_LapeJSONElement_Count);
@@ -425,10 +519,11 @@ begin
     addGlobalFunc('function TJSONElement.AddArray(Key: String): TJSONElement', @_LapeJSONElement_AddArray);
     addGlobalFunc('function TJSONElement.AddObject(Key: String): TJSONElement', @_LapeJSONElement_AddObject);
     addGlobalFunc('procedure TJSONElement.AddElement(Key: String; Element: TJSONElement)', @_LapeJSONElement_AddElement);
+    addGlobalFunc('function TJSONElement.AddNull(Key: String): TJSONElement', @_LapeJSONElement_AddNull);
     addGlobalFunc('function TJSONElement.ValueType: EJSONValueType', @_LapeJSONElement_ValueType);
     addGlobalFunc('function TJSONElement.GetValue: Variant', @_LapeJSONElement_GetValue);
-    addGlobalFunc('procedure TJSONElement.SetValue(NewValue: Variant);', @_LapeJSONElement_SetValue);
-    addGlobalFunc('function TJSONElement.AsString: String', @_LapeJSONElement_SetValue);
+    addGlobalFunc('procedure TJSONElement.SetValue(NewValue: Variant)', @_LapeJSONElement_SetValue);
+    addGlobalFunc('function TJSONElement.AsString: String', @_LapeJSONElement_AsString);
     addGlobalFunc('function TJSONElement.Clone: TJSONElement', @_LapeJSONElement_Clone);
     addGlobalFunc('function TJSONElement.IsValue: Boolean', @_LapeJSONElement_IsValue);
     addGlobalFunc('function TJSONElement.IsArray: Boolean', @_LapeJSONElement_IsArray);
@@ -437,6 +532,16 @@ begin
     addGlobalFunc('procedure TJSONElement.Delete(Key: String); overload', @_LapeJSONElement_Delete1);
     addGlobalFunc('procedure TJSONElement.Delete(Index: Integer); overload', @_LapeJSONElement_Delete2);
     addGlobalFunc('function TJSONElement.Find(Key: String; out Element: TJSONElement): Boolean;', @_LapeJSONElement_Find);
+    addGlobalFunc('function TJSONElement.HasKey(Key: String): Boolean; overload', @_LapeJSONElement_HasKey1);
+    addGlobalFunc('function TJSONElement.HasKey(Keys: TStringArray): Boolean; overload', @_LapeJSONElement_HasKey2);
+    addGlobalFunc('function TJSONElement.HasKeys(Keys: TStringArray): Boolean', @_LapeJSONElement_HasKeys);
+
+    addGlobalFunc(
+      'function ToString(constref Element: TJSONElement): String; override;', [
+      'begin',
+      '  Result := Element.AsString();',
+      'end;'
+    ]);
 
     addClass('TJSONParser');
 
@@ -445,7 +550,11 @@ begin
     addGlobalFunc('function TJSONParser.SaveToFile(FileName: String): Boolean', @_LapeJSONParser_SaveToFile);
     addGlobalFunc('function TJSONParser.Keys: TStringArray', @_LapeJSONParser_Keys);
     addGlobalFunc('procedure TJSONParser.Clear;', @_LapeJSONParser_Clear);
-    addGlobalFunc('procedure TJSONParser.AddValue(Key: String; Value: Variant);', @_LapeJSONParser_AddValue);
+    addGlobalFunc('function TJSONParser.HasKey(Key: String): Boolean; overload', @_LapeJSONParser_HasKey1);
+    addGlobalFunc('function TJSONParser.HasKey(Keys: TStringArray): Boolean; overload', @_LapeJSONParser_HasKey2);
+    addGlobalFunc('function TJSONParser.HasKeys(Keys: TStringArray): Boolean', @_LapeJSONParser_HasKeys);
+    addGlobalFunc('function TJSONParser.AddNull(Key: String): TJSONElement', @_LapeJSONParser_AddNull);
+    addGlobalFunc('procedure TJSONParser.AddValue(Key: String; Value: Variant)', @_LapeJSONParser_AddValue);
     addGlobalFunc('function TJSONParser.AddArray(Key: String): TJSONElement;', @_LapeJSONParser_AddArray);
     addGlobalFunc('function TJSONParser.AddObject(Key: String): TJSONElement;', @_LapeJSONParser_AddObject);
     addGlobalFunc('procedure TJSONParser.AddElement(Key: String; Element: TJSONElement)', @_LapeJSONParser_AddElement);

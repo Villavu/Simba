@@ -44,6 +44,11 @@ type
     function Find(Key: String; out Element: TSimbaJSONElement): Boolean;
     function FindPath(Path: String; out Element: TSimbaJSONElement): Boolean;
 
+    function HasKey(Key: String): Boolean; overload;
+    function HasKey(Keys: TStringArray): Boolean; overload;
+    function HasKeys(Keys: TStringArray): Boolean;
+
+    function AddNull(Key: String): TSimbaJSONElement;
     function AddArray(Key: String): TSimbaJSONElement;
     function AddObject(Key: String): TSimbaJSONElement;
     procedure AddValue(Key: String; Value: Variant);
@@ -83,10 +88,15 @@ type
 
     function SaveToFile(FileName: String): Boolean;
 
-    // These just wrap FRoot.XXX
+    // These all just wrap FRoot.XXX
     function Find(Key: String; out Element: TSimbaJSONElement): Boolean;
     function FindPath(Path: String; out Element: TSimbaJSONElement): Boolean;
 
+    function HasKey(Key: String): Boolean; overload;
+    function HasKey(Keys: TStringArray): Boolean; overload;
+    function HasKeys(Keys: TStringArray): Boolean;
+
+    function AddNull(Key: String): TSimbaJSONElement;
     function AddArray(Key: String): TSimbaJSONElement;
     function AddObject(Key: String): TSimbaJSONElement;
     procedure AddValue(Key: String; Value: Variant);
@@ -201,6 +211,12 @@ begin
     else
       TJSONObject(FData).Add(Key, TJSONStringType(Value))
   else
+  if VarIsBool(Value) then
+    if IsArray then
+      TJSONArray(FData).Add(Boolean(Value))
+    else
+      TJSONObject(FData).Add(Key, Boolean(Value))
+  else
   if VarIsOrdinal(Value) then
     if IsArray then
       TJSONArray(FData).Add(TJSONLargeInt(Value))
@@ -212,12 +228,6 @@ begin
       TJSONArray(FData).Add(TJSONFloat(Value))
     else
       TJSONObject(FData).Add(Key, TJSONFloat(Value))
-  else
-  if VarIsBool(Value) then
-    if IsArray then
-      TJSONArray(FData).Add(Boolean(Value))
-    else
-      TJSONObject(FData).Add(Key, Boolean(Value))
   else
     raise Exception.Create('Invalid JSON variant type: ' + VarTypeAsText(VarType(Value)));
 end;
@@ -256,6 +266,18 @@ begin
   else
   if (FData is TJSONObject) then
     TJSONObject(FData).Add(Key, Element);
+end;
+
+function TSimbaJSONElement.AddNull(Key: String): TSimbaJSONElement;
+begin
+  if IsValue then
+    raise Exception.Create('Element is not json object or array');
+
+  if (FData is TJSONArray) then
+    Result := FData.Items[TJSONArray(FData).Add(TJSONNull.Create())]
+  else
+  if (FData is TJSONObject) then
+    Result := FData.Items[TJSONObject(FData).Add(Key, TJSONNull.Create())];
 end;
 
 procedure TSimbaJSONElement.Clear;
@@ -303,6 +325,48 @@ begin
   Result := Assigned(Data);
   if Result then
     Element := Data;
+end;
+
+function TSimbaJSONElement.HasKey(Key: String): Boolean;
+begin
+  if not IsObject then
+    raise Exception.Create('Element is not json object');
+
+  Result := Assigned(TJSONObject(FData).Find(Key));
+end;
+
+function TSimbaJSONElement.HasKey(Keys: TStringArray): Boolean;
+var
+  Key: String;
+begin
+  if not IsObject then
+    raise Exception.Create('Element is not json object');
+
+  for Key in Keys do
+    if Assigned(TJSONObject(FData).Find(Key)) then
+    begin
+      Result := True;
+      Exit;
+    end;
+
+  Result := False;
+end;
+
+function TSimbaJSONElement.HasKeys(Keys: TStringArray): Boolean;
+var
+  Key: String;
+begin
+  if not IsObject then
+    raise Exception.Create('Element is not json object');
+
+  for Key in Keys do
+    if not Assigned(TJSONObject(FData).Find(Key)) then
+    begin
+      Result := False;
+      Exit;
+    end;
+
+  Result := True;
 end;
 
 function TSimbaJSONElement.Clone: TSimbaJSONElement;
@@ -418,6 +482,26 @@ end;
 function TSimbaJSONParser.FindPath(Path: String; out Element: TSimbaJSONElement): Boolean;
 begin
   Result := FRoot.FindPath(Path, Element);
+end;
+
+function TSimbaJSONParser.HasKey(Key: String): Boolean;
+begin
+  Result := FRoot.HasKey(Key);
+end;
+
+function TSimbaJSONParser.HasKey(Keys: TStringArray): Boolean;
+begin
+  Result := FRoot.HasKey(Keys);
+end;
+
+function TSimbaJSONParser.HasKeys(Keys: TStringArray): Boolean;
+begin
+  Result := FRoot.HasKeys(Keys);
+end;
+
+function TSimbaJSONParser.AddNull(Key: String): TSimbaJSONElement;
+begin
+  Result := FRoot.AddNull(Key);
 end;
 
 function TSimbaJSONParser.GetCount: Integer;
