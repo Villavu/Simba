@@ -6,8 +6,8 @@ const
           '  "ThisIsALargeInteger" : 9223372036854775807,' + LINE_SEP +
           '  "ThisIsAFloat" : 1.5000000000000000E+000,'    + LINE_SEP +
           '  "ThisIsAString" : "HelloWorld",'              + LINE_SEP +
-          '  "ThisIsTrue" : -1,'                           + LINE_SEP +
-          '  "ThisIsFalse" : 0,'                           + LINE_SEP +
+          '  "ThisIsTrue" : true,'                         + LINE_SEP +
+          '  "ThisIsFalse" : false,'                       + LINE_SEP +
           '  "ThisIsAObject" : {'                          + LINE_SEP +
           '    "ObjectKey" : "ObjectValue"'                + LINE_SEP +
           '  },'                                           + LINE_SEP +
