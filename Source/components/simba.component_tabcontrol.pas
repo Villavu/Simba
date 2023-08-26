@@ -119,7 +119,7 @@ type
 implementation
 
 uses
-  simba.main, simba.mufasatypes, simba.theme;
+  simba.main, simba.mufasatypes, simba.theme, simba.fonthelpers, simba.ide_utils;
 
 function TSimbaTab.GetImageIndex: TImageIndex;
 begin
@@ -274,16 +274,25 @@ begin
 end;
 
 function TSimbaTabControl.GetTabHeight: Integer;
+var
+  FontHeight, ImageHeight: Integer;
 begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 4; // Measure on larger font size - Font size can be 0
+    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch);
 
-    Result := Canvas.TextHeight('Tay');
+    FontHeight := Canvas.TextHeight('Tay');
   finally
     Free();
   end;
+
+  if SimbaSettings.General.CustomImageSize.IsDefault() then
+    ImageHeight := ImageWidthForDPI(Canvas.Font.PixelsPerInch)
+  else
+    ImageHeight := SimbaSettings.General.CustomImageSize.Value;
+
+  Result := Max(FontHeight, ImageHeight) + Scale96ToScreen(8);
 end;
 
 procedure TSimbaTabControl.ShowControl(AControl: TControl);
@@ -328,6 +337,9 @@ end;
 
 procedure TSimbaTabControl.DoSettingChanged_ImageSize(Setting: TSimbaSetting);
 begin
+  FTabs.Height := GetTabHeight();
+  FTabs.OptTabHeight := FTabs.Height;
+
   Invalidate();
 end;
 
@@ -430,15 +442,15 @@ begin
   FTabs.Images := SimbaForm.Images;
   FTabs.BorderSpacing.Bottom := 5;
 
-  FTabs.OptSpaceBeforeText := 10;
-  FTabs.OptSpaceAfterText := 10;
+  FTabs.OptSpaceBeforeText := 12;
+  FTabs.OptSpaceAfterText := 12;
+  FTabs.OptSpaceBetweenIconCaption := 2;
   FTabs.OptShowPlusTab := False;
   FTabs.OptVarWidth := True;
   FTabs.OptShowScrollMark := False;
   FTabs.OptSpacer := 0;
   FTabs.OptMouseDoubleClickPlus := True;
   FTabs.OptActiveVisibleOnResize := False;
-  FTabs.OptSpaceBetweenIconCaption := 2;
   FTabs.OptTabHeight := FTabs.Height;
   FTabs.OptShowFlat := True;
 
@@ -451,6 +463,9 @@ begin
   FTabs.ColorTabActive := SimbaTheme.ColorActive;
   FTabs.ColorActiveMark := SimbaTheme.ColorActive;
   FTabs.ColorCloseBgOver := clNone;
+
+  with SimbaSettings do
+    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize);
 end;
 
 destructor TSimbaTabControl.Destroy;
@@ -482,9 +497,6 @@ begin
 
   if NeedChangeEvent and Assigned(FTabChangeEvent) then
     FTabChangeEvent(Self, Result);
-
-  with SimbaSettings do
-    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize);
 end;
 
 procedure TSimbaTabControl.MoveTab(AFrom, ATo: Integer);

@@ -610,10 +610,10 @@ begin
       end;
   end;
 
-  DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
-  DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaOutputForm), DockPanel, alBottom);
-  DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
-  DockMaster.ManualDockPanel(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockPanel, alRight);
+  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
+  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaOutputForm), DockPanel, alBottom);
+  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
+  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockPanel, alRight);
 
   DockMaster.MakeVisible(SimbaScriptTabsForm, False);
   DockMaster.MakeVisible(SimbaOutputForm, False);
