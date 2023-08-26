@@ -24,12 +24,15 @@ begin
   end;
 
   if (DPI <= 96) then
-    Result := 16   // no scaling
+    Result := 16  // 100%, no scaling
+  else
+  if (DPI <= 120) then
+    Result := 16  // 125%
   else
   if (DPI <= 168) then
-    Result := 24  // 125%-175% (120-168 DPI): 150% scaling
+    Result := 24  // 150%
   else
-    Result := 32; // 200, 300, 400, ...
+    Result := 32; // 200% +
 end;
 
 procedure MenuItemHeight(Item: TMenuItem; Canvas: TCanvas; var Height: Integer);

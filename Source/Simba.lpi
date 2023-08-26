@@ -13,6 +13,8 @@
       <UseXPManifest Value="True"/>
       <XPManifest>
         <DpiAware Value="True/PM_V2"/>
+        <TextName Value="Simba"/>
+        <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
       <Resources Count="9">

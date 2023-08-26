@@ -10,8 +10,7 @@ unit simba.dockinghelpers;
 interface
 
 uses
-  classes, sysutils, controls, menus, forms, graphics,
-  anchordocking, anchordockpanel;
+  Classes, SysUtils, Controls, Menus, Forms, Graphics, AnchorDocking;
 
 type
   TSimbaAnchorDockHeader = class(TAnchorDockHeader)
@@ -25,7 +24,7 @@ type
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X,Y: Integer); override;
-    procedure MouseLeave;  override;
+    procedure MouseLeave; override;
 
     constructor Create(AOwner: TComponent); override;
   end;
@@ -63,7 +62,6 @@ type
     procedure OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
   public
     procedure MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
-    procedure ManualDockPanel(SrcSite: TAnchorDockHostSite; TargetPanel: TAnchorDockPanel; Align: TAlign; TargetControl: TControl = nil);
 
     function SaveLayout: String;
     function LoadLayout(Layout: String): Boolean;
@@ -72,7 +70,7 @@ type
 implementation
 
 uses
-  anchordockstorage, xmlpropstorage, lazconfigstorage,
+  XMLPropStorage, LazConfigStorage,
   simba.theme, simba.fonthelpers;
 
 procedure TSimbaAnchorDockHeader.ParentFontChanged;
@@ -164,6 +162,7 @@ begin
 
   if Visible then
   begin
+    Writeln(FNeedDefaultPosition);
     if FNeedDefaultPosition then
     begin
       with Application.MainForm.Monitor.WorkareaRect.CenterPoint do
@@ -243,55 +242,6 @@ begin
   end;
 end;
 
-procedure TAnchorDockMasterHelper.ManualDockPanel(SrcSite: TAnchorDockHostSite; TargetPanel: TAnchorDockPanel; Align: TAlign; TargetControl: TControl);
-var
-  Site: TSimbaAnchorDockHostSite;
-  aManager: TAnchorDockManager;
-  DockObject: TDragDockObject;
-begin
-  {$IFDEF VerboseAnchorDocking}
-  debugln(['TAnchorDockMaster.ManualDock SrcSite=',DbgSName(SrcSite),' TargetPanel=',DbgSName(TargetPanel),' Align=',dbgs(Align),' TargetControl=',DbgSName(TargetControl)]);
-  {$ENDIF}
-  if SrcSite.IsParentOf(TargetPanel) then
-    raise Exception.Create('TAnchorDockMaster.ManualDock SrcSite.IsParentOf(TargetSite)');
-  if TargetPanel.IsParentOf(SrcSite) then
-    raise Exception.Create('TAnchorDockMaster.ManualDock TargetSite.IsParentOf(SrcSite)');
-
-
-  aManager:=TAnchorDockManager(TargetPanel.DockManager);
-  Site:=aManager.GetChildSite as TSimbaAnchorDockHostSite;
-  if Site=nil then begin
-    // dock as first site into AnchorDockPanel
-    {$IFDEF VerboseAnchorDocking}
-    debugln(['TAnchorDockMaster.ManualDock dock as first site into AnchorDockPanel: SrcSite=',DbgSName(SrcSite),' TargetPanel=',DbgSName(TargetPanel),' Align=',dbgs(Align)]);
-    {$ENDIF}
-    BeginUpdate;
-    try
-      DockObject := TDragDockObject.Create(SrcSite);
-      try
-        DockObject.DropAlign:=alClient;
-        DockObject.DockRect:=SrcSite.BoundsRect;
-        DockObject.Control.Dock(TargetPanel, SrcSite.BoundsRect);
-        aManager.InsertControl(DockObject);
-      finally
-        DockObject.Free;
-      end;
-    finally
-      EndUpdate;
-    end;
-    Exit;
-  end;
-
-  if AutoFreedIfControlIsRemoved(Site,SrcSite) then
-    raise Exception.Create('TAnchorDockMaster.ManualDock TargetPanel depends on SrcSite');
-  BeginUpdate;
-  try
-    Site.ExecuteDock(SrcSite,TargetControl,Align);
-  finally
-    EndUpdate;
-  end;
-end;
-
 function TAnchorDockMasterHelper.SaveLayout: String;
 var
   Config: TXMLConfigStorage;
@@ -305,10 +255,9 @@ begin
 
   try
     RestoreLayouts.Clear();
-    for I := 0 to Screen.CustomFormCount-1 do
-      if (Screen.CustomForms[I].HostDockSite is TSimbaAnchorDockHostSite) then
-        if TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite).Floating then
-          RestoreLayouts.Add(CreateRestoreLayout(Screen.CustomForms[I].HostDockSite), True);
+    for I := 0 to Screen.CustomFormCount - 1 do
+      if Screen.CustomForms[I].Showing and (Screen.CustomForms[I].HostDockSite is TSimbaAnchorDockHostSite) and TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite).Floating then
+        RestoreLayouts.Add(CreateRestoreLayout(Screen.CustomForms[I].HostDockSite), True);
 
     SaveLayoutToConfig(Config);
 
@@ -388,7 +337,6 @@ begin
 
   Stream := TStringStream.Create(Layout);
   Config := TXMLConfigStorage.Create(Stream);
-
   try
     LoadRestoredBounds(Config);
 
