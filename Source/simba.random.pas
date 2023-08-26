@@ -16,6 +16,8 @@ uses
 function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
 function RandomTPA(Amount: Integer; Box: TBox): TPointArray;
 
+function RandomRange(Lo, Hi: Double): Double; overload;
+
 function RandomLeft(Lo, Hi: Double): Double; overload;
 function RandomLeft(Lo, Hi: Int64): Int64; overload;
 
@@ -77,6 +79,11 @@ begin
   SetLength(Result, Amount);
   for i := 0 to Amount - 1 do
     Result[i] := Point(RandomRange(Box.X1, Box.X2), RandomRange(Box.Y1, Box.Y2));
+end;
+
+function RandomRange(Lo, Hi: Double): Double;
+begin
+  Result := Lo + Random() * (Hi - Lo);
 end;
 
 function RandomLeft(Lo, Hi: Double): Double;

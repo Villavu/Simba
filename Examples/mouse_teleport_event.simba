@@ -1,10 +1,10 @@
 var
   TPA: TPointArray; // stores the teleport events so we can view at the end
 
-procedure MouseTeleportEvent(var Sender: TInput; X, Y: Integer);
+procedure MouseTeleportEvent(var Sender: TInput; P: TPoint);
 begin
-  WriteLn('Mouse teleported to: ', X, ', ', Y);
-  TPA += [X, Y];
+  WriteLn('Mouse teleported to: ', P);
+  TPA += P;
 end;
 
 var
