@@ -11,14 +11,14 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  simba.mufasatypes, simba.target;
+  simba.mufasatypes, simba.target, simba.simplelock, simba.baseclass;
 
 type
   PSimbaInput = ^TSimbaInput;
   TSimbaInput = packed record
   type
-    TMouseTeleportEvent = procedure(var Input: TSimbaInput; X, Y: Integer) of object;
-    TMouseMovingEvent = function(var Input: TSimbaInput; var X, Y: Double): Boolean of object;
+    TMouseTeleportEvent = procedure(var Input: TSimbaInput; P: TPoint) of object;
+    TMouseMovingEvent = procedure(var Input: TSimbaInput; var X, Y, DestX, DestY: Double; var Stop: Boolean) of object;
     TMouseButtonEvent = procedure(var Input: TSimbaInput; Button: EMouseButton) of object;
     {$SCOPEDENUMS ON}
     EMouseEventType = (TELEPORT, MOVING, CLICK, DOWN, UP);
@@ -31,14 +31,14 @@ type
     DEFAULT_CLICK_MAX = 220;
 
     DEFAULT_MOUSE_TIMEOUT = 15000;
-    DEFAULT_MOUSE_SPEED   = 12;
+    DEFAULT_MOUSE_SPEED   = 10;
     DEFAULT_MOUSE_GRAVITY = 9;
-    DEFAULT_MOUSE_WIND    = 6;
+    DEFAULT_MOUSE_WIND    = 4;
   public
-    FTarget: TSimbaTarget;
+    Target: TSimbaTarget;
+    MouseEvents: array[EMouseEventType] of array of TMethod;
 
-    FMouseEvents: array[EMouseEventType] of array of TMethod;
-
+    procedure ClearEvent(EventType: EMouseEventType);
     function AddEvent(EventType: EMouseEventType; Method: TMethod): TMethod;
     function RemoveEvent(EventType: EMouseEventType; Method: TMethod): Boolean;
 
@@ -53,8 +53,8 @@ type
     procedure CallOnMouseClickEvents(Button: EMouseButton);
     procedure CallOnMouseUpEvents(Button: EMouseButton);
     procedure CallOnMouseDownEvents(Button: EMouseButton);
-    procedure CallOnTeleportEvents(X, Y: Integer);
-    function CallOnMovingEvents(var X, Y: Double): Boolean;
+    procedure CallOnTeleportEvents(P: TPoint);
+    function CallOnMovingEvents(var X, Y, DestX, DestY: Double): Boolean;
   public
     KeyPressMin: Integer;
     KeyPressMax: Integer;
@@ -65,6 +65,7 @@ type
     MouseSpeed: Double;
     MouseGravity: Double;
     MouseWind: Double;
+    MouseAccuracy: Double;
 
     MouseTimeout: Integer;
 
@@ -76,8 +77,7 @@ type
     function MousePressed(Button: EMouseButton): Boolean;
     procedure MouseMove(Dest: TPoint);
     procedure MouseClick(Button: EMouseButton);
-    procedure MouseTeleport(X, Y: Integer); overload;
-    procedure MouseTeleport(P: TPoint); overload;
+    procedure MouseTeleport(P: TPoint);
     procedure MouseDown(Button: EMouseButton);
     procedure MouseUp(Button: EMouseButton);
     procedure MouseScroll(Scrolls: Integer);
@@ -105,16 +105,43 @@ type
     class operator Initialize(var Self: TSimbaInput);
   end;
 
+  TSimbaASyncMouse = class(TSimbaBaseClass)
+  protected
+    FThread: TThread;
+    FLock: TSimpleWaitableLock;
+    FInput: TSimbaInput;
+    FDest: TPoint;
+    FMoving: Boolean;
+
+    procedure DoMouseMoving(var Input: TSimbaInput; var X, Y, DestX, DestY: Double; var Stop: Boolean);
+
+    procedure Execute;
+  public
+    constructor Create; reintroduce;
+
+    procedure ChangeDest(Dest: TPoint);
+    function IsMoving: Boolean;
+    procedure WaitMoving;
+    procedure Stop;
+
+    procedure Move(Input: TSimbaInput; Dest: TPoint; Accuracy: Double = 1);
+  end;
+
 implementation
 
 uses
-  simba.math, simba.nativeinterface, simba.random;
+  simba.math, simba.nativeinterface, simba.random, simba.threading;
+
+procedure TSimbaInput.ClearEvent(EventType: EMouseEventType);
+begin
+  MouseEvents[EventType] := [];
+end;
 
 function TSimbaInput.AddEvent(EventType: EMouseEventType; Method: TMethod): TMethod;
 begin
   Result := Method;
 
-  FMouseEvents[EventType] += [Method];
+  MouseEvents[EventType] += [Method];
 end;
 
 function TSimbaInput.RemoveEvent(EventType: EMouseEventType; Method: TMethod): Boolean;
@@ -123,10 +150,10 @@ var
 begin
   Result := False;
 
-  for I := High(FMouseEvents[EventType]) downto 0 do
-    if (Method.Code = FMouseEvents[EventType][I].Code) and (Method.Data = FMouseEvents[EventType][I].Data) then
+  for I := High(MouseEvents[EventType]) downto 0 do
+    if (Method.Code = MouseEvents[EventType][I].Code) and (Method.Data = MouseEvents[EventType][I].Data) then
     begin
-      Delete(FMouseEvents[EventType], I, 1);
+      Delete(MouseEvents[EventType], I, 1);
 
       Result := True;
     end;
@@ -184,7 +211,7 @@ procedure TSimbaInput.CallOnMouseClickEvents(Button: EMouseButton);
 var
   Method: TMethod;
 begin
-  for Method in FMouseEvents[EMouseEventType.CLICK] do
+  for Method in MouseEvents[EMouseEventType.CLICK] do
     TMouseButtonEvent(Method)(Self, Button);
 end;
 
@@ -192,7 +219,7 @@ procedure TSimbaInput.CallOnMouseUpEvents(Button: EMouseButton);
 var
   Method: TMethod;
 begin
-  for Method in FMouseEvents[EMouseEventType.UP] do
+  for Method in MouseEvents[EMouseEventType.UP] do
     TMouseButtonEvent(Method)(Self, Button);
 end;
 
@@ -200,33 +227,33 @@ procedure TSimbaInput.CallOnMouseDownEvents(Button: EMouseButton);
 var
   Method: TMethod;
 begin
-  for Method in FMouseEvents[EMouseEventType.DOWN] do
+  for Method in MouseEvents[EMouseEventType.DOWN] do
     TMouseButtonEvent(Method)(Self, Button);
 end;
 
 function TSimbaInput.IsTargetValid: Boolean;
 begin
-  Result := FTarget.IsValid();
+  Result := Target.IsValid();
 end;
 
 function TSimbaInput.IsFocused: Boolean;
 begin
-  Result := FTarget.IsFocused();
+  Result := Target.IsFocused();
 end;
 
 function TSimbaInput.Focus: Boolean;
 begin
-  Result := FTarget.Focus();
+  Result := Target.Focus();
 end;
 
 function TSimbaInput.MousePosition: TPoint;
 begin
-  Result := FTarget.MousePosition();
+  Result := Target.MousePosition();
 end;
 
 function TSimbaInput.MousePressed(Button: EMouseButton): Boolean;
 begin
-  Result := FTarget.MousePressed(Button);
+  Result := Target.MousePressed(Button);
 end;
 
 procedure TSimbaInput.MouseMove(Dest: TPoint);
@@ -236,7 +263,7 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
   var
     x, y: Double;
     veloX, veloY, windX, windY, veloMag, randomDist, step, idle: Double;
-    traveledDistance, remainingDistance: Double;
+    traveledDistance, remainingDistance, acc: Double;
     Timeout: UInt64;
   begin
     veloX := 0; veloY := 0;
@@ -244,17 +271,18 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
 
     x := xs;
     y := ys;
+    acc := MouseAccuracy + 0.5;
 
     Timeout := GetTickCount64() + GetMouseTimeout();
 
-    while CallOnMovingEvents(X, Y) do
+    while CallOnMovingEvents(x, y, xe, ye) do
     begin
       if (GetTickCount64() > Timeout) then
         SimbaException('MouseMove timed out after %dms. Start: (%d,%d), Dest: (%d,%d)', [GetMouseTimeout(), Round(xs), Round(ys), Round(xe), Round(ye)]);
 
       traveledDistance := Hypot(x - xs, y - ys);
       remainingDistance := Hypot(x - xe, y - ye);
-      if (remainingDistance <= 1) then
+      if (remainingDistance <= acc) then
         Break;
 
       wind := Min(wind, remainingDistance);
@@ -297,25 +325,23 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
       x := x + veloX;
       y := y + veloY;
 
-      Self.MouseTeleport(Round(x), Round(y));
+      Self.MouseTeleport(TPoint.Create(Round(x), Round(y)));
 
       SimbaNativeInterface.PreciseSleep(Round(idle));
     end;
-
-    Self.MouseTeleport(Round(xe), Round(ye));
   end;
 
 var
   Start: TPoint;
-  RandSpeed, Exponential: Double;
+  RandSpeed, Expo: Double;
 begin
   Start := MousePosition();
 
   // Further the distance the faster we move.
-  Exponential := Power(Hypot(Start.X - Dest.X, Start.Y - Dest.Y), 0.33) / 10;
+  Expo := Power(Hypot(Start.X - Dest.X, Start.Y - Dest.Y), RandomRange(0.32, 0.35)) / 10;
 
-  RandSpeed := RandomLeft(GetSpeed(), GetSpeed() * 1.65);
-  RandSpeed *= Exponential;
+  RandSpeed := RandomLeft(GetSpeed(), GetSpeed() * 1.5);
+  RandSpeed *= Expo;
   RandSpeed /= 10;
 
   WindMouse(
@@ -329,40 +355,35 @@ procedure TSimbaInput.MouseClick(Button: EMouseButton);
 begin
   CallOnMouseClickEvents(Button);
 
-  FTarget.MouseDown(Button);
+  Target.MouseDown(Button);
   SimbaNativeInterface.PreciseSleep(GetRandomMouseClickTime());
-  FTarget.MouseUp(Button);
+  Target.MouseUp(Button);
 end;
 
 procedure TSimbaInput.MouseTeleport(P: TPoint);
 begin
-  FTarget.MouseTeleport(P);
+  Target.MouseTeleport(P);
 
-  CallOnTeleportEvents(P.X, P.Y);
-end;
-
-procedure TSimbaInput.MouseTeleport(X, Y: Integer);
-begin
-  MouseTeleport(Point(X, Y));
+  CallOnTeleportEvents(P);
 end;
 
 procedure TSimbaInput.MouseDown(Button: EMouseButton);
 begin
   CallOnMouseDownEvents(Button);
 
-  FTarget.MouseDown(Button);
+  Target.MouseDown(Button);
 end;
 
 procedure TSimbaInput.MouseUp(Button: EMouseButton);
 begin
   CallOnMouseUpEvents(Button);
 
-  FTarget.MouseUp(Button);
+  Target.MouseUp(Button);
 end;
 
 procedure TSimbaInput.MouseScroll(Scrolls: Integer);
 begin
-  FTarget.MouseScroll(Scrolls);
+  Target.MouseScroll(Scrolls);
 end;
 
 procedure TSimbaInput.KeySend(Text: String);
@@ -370,29 +391,29 @@ var
   I: Integer;
 begin
   for I := 1 to Length(Text) do
-    FTarget.KeySend(Text[I], GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2);
+    Target.KeySend(Text[I], GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2);
 end;
 
 procedure TSimbaInput.KeyPress(Key: EKeyCode);
 begin
-  FTarget.KeyDown(Key);
+  Target.KeyDown(Key);
   SimbaNativeInterface.PreciseSleep(GetRandomKeyPressTime());
-  FTarget.KeyUp(Key);
+  Target.KeyUp(Key);
 end;
 
 procedure TSimbaInput.KeyDown(Key: EKeyCode);
 begin
-  FTarget.KeyDown(Key);
+  Target.KeyDown(Key);
 end;
 
 procedure TSimbaInput.KeyUp(Key: EKeyCode);
 begin
-  FTarget.KeyUp(Key);
+  Target.KeyUp(Key);
 end;
 
 function TSimbaInput.KeyPressed(Key: EKeyCode): Boolean;
 begin
-  Result := FTarget.KeyPressed(Key);
+  Result := Target.KeyPressed(Key);
 end;
 
 function TSimbaInput.CharToKeyCode(C: Char): EKeyCode;
@@ -438,26 +459,31 @@ begin
   end;
 end;
 
-procedure TSimbaInput.CallOnTeleportEvents(X, Y: Integer);
+procedure TSimbaInput.CallOnTeleportEvents(P: TPoint);
 var
   Method: TMethod;
 begin
-  for Method in FMouseEvents[EMouseEventType.TELEPORT] do
-    TMouseTeleportEvent(Method)(Self, X, Y);
+  for Method in MouseEvents[EMouseEventType.TELEPORT] do
+    TMouseTeleportEvent(Method)(Self, P);
 end;
 
-function TSimbaInput.CallOnMovingEvents(var X, Y: Double): Boolean;
+function TSimbaInput.CallOnMovingEvents(var X, Y, DestX, DestY: Double): Boolean;
 var
   Method: TMethod;
+  Stop: Boolean = False;
 begin
   Result := True;
 
-  for Method in FMouseEvents[EMouseEventType.MOVING] do
-    if not TMouseMovingEvent(Method)(Self, X, Y) then
+  for Method in MouseEvents[EMouseEventType.MOVING] do
+  begin
+    TMouseMovingEvent(Method)(Self, X, Y, DestX, DestY, Stop);
+
+    if Stop then
     begin
       Result := False;
       Exit;
     end;
+  end;
 end;
 
 function TSimbaInput.AddOnMouseTeleport(Event: TMouseTeleportEvent): TMouseTeleportEvent;
@@ -513,6 +539,81 @@ end;
 class operator TSimbaInput.Initialize(var Self: TSimbaInput);
 begin
   Self := Default(TSimbaInput);
+end;
+
+procedure TSimbaASyncMouse.DoMouseMoving(var Input: TSimbaInput; var X, Y, DestX, DestY: Double; var Stop: Boolean);
+begin
+  DestX := FDest.X;
+  DestY := FDest.Y;
+
+  Stop := not FMoving;
+end;
+
+procedure TSimbaASyncMouse.Execute;
+begin
+  while (not TThread.CheckTerminated) do
+  try
+    if FLock.WaitLocked(1000) then
+    try
+      FMoving := True;
+      FInput.MouseMove(FDest);
+    finally
+      FMoving := False;
+      FLock.Lock();
+    end;
+  except
+    on E: Exception do
+      DebugLn('ASyncMouse exception "' + E.Message + '"');
+  end;
+end;
+
+constructor TSimbaASyncMouse.Create;
+begin
+  inherited Create();
+
+  FFreeOnTerminate := True;
+end;
+
+procedure TSimbaASyncMouse.ChangeDest(Dest: TPoint);
+begin
+  FDest := Dest;
+end;
+
+function TSimbaASyncMouse.IsMoving: Boolean;
+begin
+  Result := not FLock.IsLocked;
+end;
+
+procedure TSimbaASyncMouse.WaitMoving;
+begin
+  while IsMoving() do
+    Sleep(20);
+end;
+
+procedure TSimbaASyncMouse.Move(Input: TSimbaInput; Dest: TPoint; Accuracy: Double);
+begin
+  FDest := Dest;
+  FInput := Input;
+
+  with FInput do
+  begin
+    MouseAccuracy := Accuracy;
+
+    MouseEvents[EMouseEventType.MOVING] := Copy(MouseEvents[EMouseEventType.MOVING]);
+    MouseEvents[EMouseEventType.MOVING] += [TMethod(@DoMouseMoving)];
+  end;
+
+  if (FThread = nil) then
+    FThread := Threaded(@Execute)
+  else
+    FLock.Unlock();
+end;
+
+procedure TSimbaASyncMouse.Stop;
+begin
+  FMoving := False;
+
+  WaitMoving();
 end;
 
 end.

@@ -34,7 +34,8 @@ type
   public
     procedure Lock;
     procedure Unlock;
-    procedure WaitLocked;
+    procedure WaitLocked; overload;
+    function WaitLocked(Timeout: Integer): Boolean; overload; // Returns True if unlocked!
 
     function IsLocked: Boolean;
 
@@ -137,6 +138,11 @@ end;
 procedure TSimpleWaitableLock.WaitLocked;
 begin
   FLock.WaitFor(INFINITE);
+end;
+
+function TSimpleWaitableLock.WaitLocked(Timeout: Integer): Boolean;
+begin
+  Result := FLock.WaitFor(Timeout) = wrSignaled;
 end;
 
 function TSimpleWaitableLock.IsLocked: Boolean;
