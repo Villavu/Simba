@@ -15,7 +15,7 @@ uses
   simba.settings, simba.mufasatypes, simba.component_tabcontrol, simba.component_synedit;
 
 type
-  TSimbaOutputBox = class(TSimbaSynEdit)
+  TSimbaOutputBox = class(TSimbaMemo)
   protected
     FLock: TCriticalSection;
     FBuffer: TStringList;
@@ -41,7 +41,7 @@ type
 
     function GetTab: TSimbaTab;
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); reintroduce;
     destructor Destroy; override;
 
     procedure GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: integer); override;
@@ -247,7 +247,7 @@ constructor TSimbaOutputBox.Create(AOwner: TComponent);
 var
   Setting: TSimbaSetting;
 begin
-  inherited Create(AOwner);
+  inherited Create(AOwner, False);
 
   FBuffer := TStringList.Create();
   FLock := TCriticalSection.Create();
@@ -268,8 +268,6 @@ begin
   ResetMouseActions();
   with MouseTextActions.Add() do
     Command := emcMouseLink;
-
-  HideSynEditThings();
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
   for Setting in [SimbaSettings.OutputBox.FontSize, SimbaSettings.OutputBox.FontName, SimbaSettings.OutputBox.FontAntiAliased] do

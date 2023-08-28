@@ -47,6 +47,7 @@ type
     MenuItemCopyBestColor: TMenuItem;
     Panel1: TPanel;
     AlignmentPanel: TPanel;
+    Panel2: TPanel;
     PanelTop: TPanel;
     PanelAlignment: TPanel;
     MenuItemLoadImage: TMenuItem;
@@ -88,7 +89,6 @@ type
     procedure MenuItemCopyBestColorClick(Sender: TObject);
     procedure MenuItemLoadHSLCircleClick(Sender: TObject);
     procedure MenuItemLoadHSLCircleExClick(Sender: TObject);
-    procedure PanelRightResize(Sender: TObject);
   protected
     FFreeOnClose: Boolean;
     FWindow: TWindowHandle;
@@ -162,11 +162,6 @@ var
 begin
   if InputQuery('ACA', 'HSL Circle Radius (Max 2000)', Value) and Value.IsInteger() then
     LoadHSLCircle(Min(Value.ToInteger(), 2000));
-end;
-
-procedure TSimbaACAForm.PanelRightResize(Sender: TObject);
-begin
-  PanelRight.Constraints.MinWidth := PanelRight.Width;
 end;
 
 procedure TSimbaACAForm.LoadHSLCircle(Radius: Integer);

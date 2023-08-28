@@ -1,10 +1,10 @@
 object SimbaACAForm: TSimbaACAForm
-  Left = 1192
+  Left = 3178
   Height = 886
-  Top = 252
+  Top = 375
   Width = 1076
   Caption = 'Auto Color Aid'
-  ClientHeight = 861
+  ClientHeight = 886
   ClientWidth = 1076
   Constraints.MinHeight = 400
   Constraints.MinWidth = 500
@@ -16,12 +16,12 @@ object SimbaACAForm: TSimbaACAForm
   Position = poScreenCenter
   ShowHint = True
   ShowInTaskBar = stAlways
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '3.0.0.1'
   object PanelMain: TPanel
     Left = 0
-    Height = 861
+    Height = 886
     Top = 0
-    Width = 720
+    Width = 757
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
@@ -29,18 +29,16 @@ object SimbaACAForm: TSimbaACAForm
   object PanelRight: TPanel
     AnchorSideLeft.Control = LabelMulti1
     AnchorSideLeft.Side = asrBottom
-    Left = 720
-    Height = 861
+    Left = 757
+    Height = 886
     Top = 0
-    Width = 356
+    Width = 319
     Align = alRight
     Anchors = [akTop, akRight]
     AutoSize = True
-    ClientHeight = 861
-    ClientWidth = 356
-    Constraints.MinWidth = 356
+    ClientHeight = 886
+    ClientWidth = 319
     TabOrder = 1
-    OnResize = PanelRightResize
     object ColorListBox: TColorListBox
       AnchorSideLeft.Control = PanelRight
       AnchorSideTop.Control = PanelTop
@@ -49,9 +47,9 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonRemoveColor
       Left = 7
-      Height = 487
+      Height = 511
       Top = 7
-      Width = 342
+      Width = 305
       Style = []
       Align = alCustom
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -69,80 +67,37 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = PanelRight
       AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = ButtonFindColor
+      AnchorSideBottom.Control = Panel2
       Left = 1
       Height = 20
-      Top = 804
-      Width = 354
+      Top = 828
+      Width = 317
       Anchors = [akLeft, akRight, akBottom]
       BevelStyle = bsRaised
       CaptionSpacing = 15
       LeftIndent = 80
       Style = gsHorLines
     end
-    object ButtonMatchColor: TButton
-      AnchorSideLeft.Control = PanelAlignment
-      AnchorSideTop.Control = Divider2
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = PanelRight
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = PanelRight
-      AnchorSideBottom.Side = asrBottom
-      Left = 242
-      Height = 30
-      Hint = 'Draws match color matrix'
-      Top = 824
-      Width = 107
-      Anchors = [akRight, akBottom]
-      AutoSize = True
-      BorderSpacing.Left = 6
-      BorderSpacing.Right = 6
-      BorderSpacing.Bottom = 6
-      Caption = 'Match Color'
-      OnClick = ButtonMatchColorClick
-      TabOrder = 1
-    end
-    object ButtonFindColor: TButton
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideLeft.Side = asrCenter
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = PanelRight
-      AnchorSideBottom.Side = asrBottom
-      Left = 127
-      Height = 30
-      Hint = 'Draws find color matches'
-      Top = 824
-      Width = 102
-      Anchors = [akLeft, akBottom]
-      AutoSize = True
-      BorderSpacing.Left = 6
-      BorderSpacing.Right = 6
-      BorderSpacing.Bottom = 6
-      Caption = ' Find Color '
-      OnClick = ButtonFindColorClick
-      TabOrder = 2
-    end
     object PanelAlignment: TPanel
       AnchorSideLeft.Control = PanelRight
       AnchorSideLeft.Side = asrCenter
-      AnchorSideTop.Control = ButtonFindColor
       AnchorSideBottom.Side = asrBottom
-      Left = 178
+      Left = 159
       Height = 1
-      Top = 824
+      Top = 1
       Width = 1
       BevelOuter = bvNone
-      TabOrder = 3
+      TabOrder = 1
     end
     object PanelTop: TPanel
       Left = 1
       Height = 0
       Top = 1
-      Width = 354
+      Width = 317
       Align = alTop
       AutoSize = True
       BevelOuter = bvNone
-      TabOrder = 4
+      TabOrder = 2
     end
     object Panel1: TPanel
       AnchorSideLeft.Control = PanelRight
@@ -153,16 +108,16 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = Divider2
       Left = 7
       Height = 252
-      Top = 552
-      Width = 342
+      Top = 576
+      Width = 305
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
       BorderSpacing.Left = 6
       BorderSpacing.Right = 6
       BevelOuter = bvNone
       ClientHeight = 252
-      ClientWidth = 342
-      TabOrder = 5
+      ClientWidth = 305
+      TabOrder = 3
       object BestColorEdit: TEdit
         AnchorSideLeft.Control = LabelMulti1
         AnchorSideLeft.Side = asrBottom
@@ -173,7 +128,7 @@ object SimbaACAForm: TSimbaACAForm
         Left = 121
         Height = 28
         Top = 92
-        Width = 221
+        Width = 184
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 6
@@ -189,7 +144,7 @@ object SimbaACAForm: TSimbaACAForm
         Left = 121
         Height = 28
         Top = 125
-        Width = 221
+        Width = 184
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 5
@@ -205,7 +160,7 @@ object SimbaACAForm: TSimbaACAForm
         Left = 121
         Height = 28
         Top = 158
-        Width = 221
+        Width = 184
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 5
@@ -221,7 +176,7 @@ object SimbaACAForm: TSimbaACAForm
         Left = 121
         Height = 28
         Top = 191
-        Width = 221
+        Width = 184
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 5
@@ -237,7 +192,7 @@ object SimbaACAForm: TSimbaACAForm
         Left = 121
         Height = 28
         Top = 224
-        Width = 221
+        Width = 184
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 5
@@ -325,12 +280,12 @@ object SimbaACAForm: TSimbaACAForm
         Left = 0
         Height = 86
         Top = 0
-        Width = 342
+        Width = 305
         Anchors = [akTop, akLeft, akRight]
         AutoSize = True
         Caption = 'Color Space'
         ClientHeight = 61
-        ClientWidth = 338
+        ClientWidth = 301
         TabOrder = 5
         object ButtonRGB: TRadioButton
           AnchorSideLeft.Control = GroupBoxColorSpace
@@ -338,7 +293,7 @@ object SimbaACAForm: TSimbaACAForm
           Left = 10
           Height = 24
           Top = 3
-          Width = 52
+          Width = 49
           BorderSpacing.Left = 10
           BorderSpacing.Top = 3
           Caption = 'RGB'
@@ -351,10 +306,10 @@ object SimbaACAForm: TSimbaACAForm
           AnchorSideLeft.Control = ButtonRGB
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Control = GroupBoxColorSpace
-          Left = 72
+          Left = 69
           Height = 24
           Top = 3
-          Width = 50
+          Width = 47
           BorderSpacing.Left = 10
           BorderSpacing.Top = 3
           Caption = 'HSL'
@@ -365,10 +320,10 @@ object SimbaACAForm: TSimbaACAForm
           AnchorSideLeft.Control = ButtonHSL
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Control = GroupBoxColorSpace
-          Left = 132
+          Left = 126
           Height = 24
           Top = 3
-          Width = 52
+          Width = 49
           BorderSpacing.Left = 10
           BorderSpacing.Top = 3
           Caption = 'HSV'
@@ -379,10 +334,10 @@ object SimbaACAForm: TSimbaACAForm
           AnchorSideLeft.Control = ButtonHSV
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Control = GroupBoxColorSpace
-          Left = 194
+          Left = 185
           Height = 24
           Top = 3
-          Width = 50
+          Width = 47
           BorderSpacing.Left = 10
           BorderSpacing.Top = 3
           Caption = 'XYZ'
@@ -396,7 +351,7 @@ object SimbaACAForm: TSimbaACAForm
           Left = 10
           Height = 24
           Top = 32
-          Width = 50
+          Width = 47
           BorderSpacing.Left = 10
           BorderSpacing.Top = 5
           Caption = 'LAB'
@@ -408,10 +363,10 @@ object SimbaACAForm: TSimbaACAForm
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Control = ButtonXYZ
           AnchorSideTop.Side = asrBottom
-          Left = 70
+          Left = 67
           Height = 24
           Top = 32
-          Width = 51
+          Width = 48
           BorderSpacing.Left = 10
           BorderSpacing.Top = 5
           Caption = 'LCH'
@@ -423,10 +378,10 @@ object SimbaACAForm: TSimbaACAForm
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Control = ButtonXYZ
           AnchorSideTop.Side = asrBottom
-          Left = 131
+          Left = 125
           Height = 24
           Top = 32
-          Width = 72
+          Width = 69
           BorderSpacing.Left = 10
           BorderSpacing.Top = 5
           BorderSpacing.Bottom = 5
@@ -445,14 +400,14 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = Divider1
       Left = 7
       Height = 30
-      Top = 500
-      Width = 169
+      Top = 524
+      Width = 150
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
       BorderSpacing.Right = 3
       Caption = 'Remove Color'
       OnClick = ButtonRemoveColorClick
-      TabOrder = 6
+      TabOrder = 4
     end
     object ButtonRemoveAllColors: TButton
       AnchorSideLeft.Control = AlignmentPanel
@@ -462,28 +417,28 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Control = ColorListBox
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Divider1
-      Left = 182
+      Left = 163
       Height = 30
-      Top = 500
-      Width = 167
+      Top = 524
+      Width = 149
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
       BorderSpacing.Left = 3
       Caption = 'Remove All Colors'
       OnClick = ButtonRemoveAllColorsClick
-      TabOrder = 7
+      TabOrder = 5
     end
     object AlignmentPanel: TPanel
       AnchorSideLeft.Control = ColorListBox
       AnchorSideLeft.Side = asrCenter
       AnchorSideTop.Control = ColorListBox
       AnchorSideTop.Side = asrBottom
-      Left = 178
+      Left = 159
       Height = 1
-      Top = 500
+      Top = 524
       Width = 1
       BevelOuter = bvNone
-      TabOrder = 8
+      TabOrder = 6
     end
     object Divider1: TDividerBevel
       AnchorSideLeft.Control = PanelRight
@@ -493,33 +448,70 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = Panel1
       Left = 1
       Height = 20
-      Top = 532
-      Width = 354
+      Top = 556
+      Width = 317
       Anchors = [akLeft, akRight, akBottom]
       BorderSpacing.Top = 2
       Font.Style = [fsBold]
       ParentFont = False
       Style = gsHorLines
     end
-    object ButtonClearImage: TButton
-      AnchorSideLeft.Control = PanelRight
-      AnchorSideRight.Control = PanelAlignment
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Control = PanelRight
-      AnchorSideBottom.Side = asrBottom
-      Left = 7
-      Height = 30
-      Hint = 'Clear all drawing from image'
-      Top = 824
-      Width = 106
-      Anchors = [akLeft, akBottom]
+    object Panel2: TPanel
+      Left = 1
+      Height = 37
+      Top = 848
+      Width = 317
+      Align = alBottom
       AutoSize = True
-      BorderSpacing.Left = 6
-      BorderSpacing.Right = 6
-      BorderSpacing.Bottom = 6
-      Caption = 'Clear Image'
-      OnClick = DoButtonClearImageClick
-      TabOrder = 9
+      Caption = 'Panel2'
+      ClientHeight = 37
+      ClientWidth = 317
+      TabOrder = 7
+      object ButtonMatchColor: TButton
+        Left = 207
+        Height = 30
+        Hint = 'Draws match color matrix'
+        Top = 1
+        Width = 107
+        Align = alLeft
+        AutoSize = True
+        BorderSpacing.Left = 2
+        BorderSpacing.Right = 2
+        BorderSpacing.Bottom = 5
+        Caption = 'Match Color'
+        OnClick = ButtonMatchColorClick
+        TabOrder = 0
+      end
+      object ButtonFindColor: TButton
+        Left = 111
+        Height = 30
+        Hint = 'Draws find color matches'
+        Top = 1
+        Width = 94
+        Align = alLeft
+        AutoSize = True
+        BorderSpacing.Left = 2
+        BorderSpacing.Right = 2
+        BorderSpacing.Bottom = 5
+        Caption = 'Find Color'
+        OnClick = ButtonFindColorClick
+        TabOrder = 1
+      end
+      object ButtonClearImage: TButton
+        Left = 3
+        Height = 30
+        Hint = 'Clear all drawing from image'
+        Top = 1
+        Width = 106
+        Align = alLeft
+        AutoSize = True
+        BorderSpacing.Left = 2
+        BorderSpacing.Right = 2
+        BorderSpacing.Bottom = 5
+        Caption = 'Clear Image'
+        OnClick = DoButtonClearImageClick
+        TabOrder = 2
+      end
     end
   end
   object MainMenu: TMainMenu
