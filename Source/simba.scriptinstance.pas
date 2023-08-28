@@ -186,7 +186,7 @@ begin
   FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
 
-  FOutputThread := Threaded(@DoOutputThread);
+  FOutputThread := RunInThread(@DoOutputThread);
   FOutputThread.OnTerminate := @DoOutputThreadTerminated;
 
   State := ESimbaScriptState.STATE_RUNNING;

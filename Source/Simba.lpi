@@ -333,7 +333,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="134">
+    <Units Count="135">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -948,6 +948,10 @@
         <Filename Value="simba.ide_utils.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit133>
+      <Unit134>
+        <Filename Value="script/imports/simba/simba.import_threading.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit134>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

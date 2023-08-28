@@ -604,7 +604,7 @@ begin
   end;
 
   if (FThread = nil) then
-    FThread := Threaded(@Execute)
+    FThread := RunInThread(@Execute)
   else
     FLock.Unlock();
 end;

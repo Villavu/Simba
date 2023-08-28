@@ -140,7 +140,7 @@ begin
   List.CaseSensitive := False;
 
   try
-    Thread := Threaded(@Load);
+    Thread := RunInThread(@Load);
     Thread.WaitFor();
     Thread.Free();
 
@@ -176,20 +176,26 @@ end;
 function LoadPackages: TSimbaPackageArray;
 var
   URLs: TStringArray;
-  Procs: TProcedureOfObjectArray;
+  Threads: specialize TArray<TThread>;
   I: Integer;
 begin
   URLs := LoadPackageURLs();
 
   SetLength(Result, Length(URLs));
-  SetLength(Procs, Length(URLs));
+  SetLength(Threads, Length(URLs));
   for I := 0 to High(URLs) do
   begin
     Result[I] := TSimbaPackage.Create(URLs[I]);
-    Procs[I] := @Result[I].Load;
+    Threads[I] := RunInThread(@Result[I].Load);
+
+    Sleep(100);
   end;
 
-  Threaded(Procs, 100);
+  for I := 0 to High(Threads) do
+  begin
+    Threads[I].WaitFor();
+    Threads[I].Free();
+  end;
 
   // reorder so updates are first, then installed, then uninstalled
   for I := 0 to High(Result) do

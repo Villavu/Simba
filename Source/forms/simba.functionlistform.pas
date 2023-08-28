@@ -275,7 +275,7 @@ var
   end;
 
 begin
-  ExecuteOnMainThread(@BeginUpdate);
+  RunInMainThread(@BeginUpdate);
 
   if CanUpdate then
   begin
@@ -284,7 +284,7 @@ begin
 
     PurgeNodes();
 
-    ExecuteOnMainThread(@EndUpdate);
+    RunInMainThread(@EndUpdate);
   end;
 end;
 
@@ -324,9 +324,9 @@ end;
 
 procedure TSimbaFunctionListForm.DoCodetoolsSetup(Sender: TObject);
 begin
-  ExecuteOnMainThread(@AddSimbaNodes);
+  RunInMainThread(@AddSimbaNodes);
 
-  FUpdateThread := Threaded(@DoUpdateThread);
+  FUpdateThread := RunInThread(@DoUpdateThread);
 end;
 
 procedure TSimbaFunctionListForm.DoAfterFilter(Sender: TObject);

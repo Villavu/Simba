@@ -9,31 +9,24 @@ uses
   simba.mufasatypes;
 
 type
-  TProcedureOfObject      = procedure of object;
-  TProcedureOfObjectArray = array of TProcedureOfObject;
+  TThreadNestedMethod = procedure is nested;
 
-  TProcedureNested   = procedure is nested;
-  TProcedureNestedEx = procedure(Params: TVariantArray) is nested;
+function IsMainThread: Boolean;
 
-procedure ExecuteOnMainThread(Method: TProcedureOfObject); overload;
-procedure ExecuteOnMainThread(Method: TProcedureNested); overload;
+procedure QueueOnMainThread(Proc: TThreadMethod);
 
-procedure QueueOnMainThread(Proc: TProcedureOfObject); overload;
-procedure QueueOnMainThread(Proc: TProcedureNested); overload;
-procedure QueueOnMainThread(Proc: TProcedureNestedEx; Params: TVariantArray); overload;
+procedure RunInMainThread(Method: TThreadMethod); overload;
+procedure RunInMainThread(NestedMethod: TThreadNestedMethod); overload;
 
-function Threaded(Method: TProcedureNested): TThread; overload;
-function Threaded(Method: TProcedureOfObject): TThread; overload;
-procedure Threaded(Methods: TProcedureOfObjectArray; Interval: Integer = 0); overload;
-
-procedure ThreadedAndForget(Method: TProcedureNested);
+function RunInThread(Method: TThreadMethod; FreeOnTerminate: Boolean = False): TThread; overload;
+function RunInThread(NestedMethod: TThreadNestedMethod; FreeOnTerminate: Boolean = False): TThread; overload;
 
 implementation
 
 type
   TSyncObject = object
-    Proc: TProcedureOfObject;
-    NestedProc: TProcedureNested;
+    Proc: TThreadMethod;
+    NestedProc: TThreadNestedMethod;
 
     procedure Execute;
   end;
@@ -45,15 +38,86 @@ begin
     if Assigned(NestedProc) then NestedProc();
   except
     on E: Exception do
-      DebugLn('Sync :: ' + E.Message);
+      DebugLn('RunOnMainThread exception: ' + E.Message);
   end;
 end;
 
-procedure ExecuteOnMainThread(Method: TProcedureOfObject);
+function IsMainThread: Boolean;
+begin
+  Result := GetCurrentThreadID() = MainThreadID;
+end;
+
+type
+  TThreaded = class(TThread)
+  protected
+    FProc: TThreadMethod;
+    FNestedProc: TThreadNestedMethod;
+
+    procedure Execute; override;
+  public
+    constructor Create(Proc: TThreadNestedMethod; AFreeOnTerminate: Boolean); reintroduce;
+    constructor Create(Proc: TThreadMethod; AFreeOnTerminate: Boolean); reintroduce;
+  end;
+
+procedure TThreaded.Execute;
+begin
+  if Assigned(FNestedProc) then FNestedProc();
+  if Assigned(FProc)       then FProc();
+end;
+
+constructor TThreaded.Create(Proc: TThreadNestedMethod; AFreeOnTerminate: Boolean);
+begin
+  inherited Create(False, DefaultStackSize div 2);
+
+  FNestedProc := Proc;
+
+  FreeOnTerminate := AFreeOnTerminate;
+end;
+
+constructor TThreaded.Create(Proc: TThreadMethod; AFreeOnTerminate: Boolean);
+begin
+  inherited Create(False, DefaultStackSize div 2);
+
+  FProc := Proc;
+
+  FreeOnTerminate := AFreeOnTerminate;
+end;
+
+type
+  TQueueObject = class
+  public
+    Proc: TThreadMethod;
+
+    procedure Execute(Data: PtrInt);
+  end;
+
+procedure TQueueObject.Execute(Data: PtrInt);
+begin
+  try
+    Proc();
+  except
+    on E: Exception do
+      DebugLn('QueueOnMainThread exception: ' + E.Message);
+  end;
+
+  Free();
+end;
+
+function RunInThread(Method: TThreadMethod; FreeOnTerminate: Boolean): TThread;
+begin
+  Result := TThreaded.Create(Method, FreeOnTerminate);
+end;
+
+function RunInThread(NestedMethod: TThreadNestedMethod; FreeOnTerminate: Boolean): TThread;
+begin
+  Result := TThreaded.Create(NestedMethod, FreeOnTerminate);
+end;
+
+procedure RunInMainThread(Method: TThreadMethod);
 var
   SyncObject: TSyncObject;
 begin
-  if (GetCurrentThreadID() <> MainThreadID) then
+  if (not IsMainThread()) then
   begin
     SyncObject.Proc       := Method;
     SyncObject.NestedProc := nil;
@@ -63,154 +127,26 @@ begin
     Method();
 end;
 
-procedure ExecuteOnMainThread(Method: TProcedureNested);
+procedure RunInMainThread(NestedMethod: TThreadNestedMethod);
 var
   SyncObject: TSyncObject;
 begin
-  if (GetCurrentThreadID() <> MainThreadID) then
+  if (not IsMainThread()) then
   begin
     SyncObject.Proc       := nil;
-    SyncObject.NestedProc := Method;
+    SyncObject.NestedProc := NestedMethod;
 
     TThread.Synchronize(nil, @SyncObject.Execute);
   end else
-    Method();
+    NestedMethod();
 end;
 
-type
-  TThreaded = class(TThread)
-  protected
-    FProc: TProcedureOfObject;
-    FNestedProc: TProcedureNested;
-
-    procedure DoTerminated(Sender: TObject);
-    procedure Execute; override;
-  public
-    constructor Create(Proc: TProcedureNested; Forget: Boolean); reintroduce;
-    constructor Create(Proc: TProcedureOfObject; Forget: Boolean); reintroduce;
-  end;
-
-procedure TThreaded.DoTerminated(Sender: TObject);
-begin
-  Flush(Output);
-end;
-
-procedure TThreaded.Execute;
-begin
-  if Assigned(FNestedProc) then FNestedProc();
-  if Assigned(FProc)       then FProc();
-end;
-
-constructor TThreaded.Create(Proc: TProcedureNested; Forget: Boolean);
-begin
-  inherited Create(False, 512*512);
-
-  if Forget then
-  begin
-    FreeOnTerminate := True;
-    OnTerminate := @DoTerminated;
-  end;
-
-  FNestedProc := Proc;
-end;
-
-constructor TThreaded.Create(Proc: TProcedureOfObject; Forget: Boolean);
-begin
-  inherited Create(False, 512*512);
-
-  if Forget then
-  begin
-    FreeOnTerminate := True;
-    OnTerminate := @DoTerminated;
-  end;
-
-  FProc := Proc;
-end;
-
-function Threaded(Method: TProcedureNested): TThread;
-begin
-  Result := TThreaded.Create(Method, False);
-end;
-
-function Threaded(Method: TProcedureOfObject): TThread;
-begin
-  Result := TThreaded.Create(Method, False);
-end;
-
-procedure Threaded(Methods: TProcedureOfObjectArray; Interval: Integer);
+procedure QueueOnMainThread(Proc: TThreadMethod);
 var
-  Threads: array of TThread;
-  I: Integer;
+  Queue: TQueueObject;
 begin
-  SetLength(Threads, Length(Methods));
-  for I := 0 to High(Threads) do
-  begin
-    Threads[I] := TThreaded.Create(Methods[I], False);
-    if (Interval > 0) then
-      Sleep(Interval);
-  end;
-
-  for I := 0 to High(Threads) do
-  begin
-    Threads[I].WaitFor();
-    Threads[I].Free();
-  end;
-end;
-
-procedure ThreadedAndForget(Method: TProcedureNested);
-begin
-  TThreaded.Create(Method, True);
-end;
-
-type
-  TQueueOnMainThread = class(TObject)
-  public
-    FParams: TVariantArray;
-    FProcNested: TProcedureNested;
-    FProcNestedEx: TProcedureNestedEx;
-    FProcObject: TProcedureOfObject;
-
-    procedure Execute(Data: PtrInt);
-  end;
-
-procedure TQueueOnMainThread.Execute(Data: PtrInt);
-begin
-  try
-    if Assigned(FProcNestedEx) then FProcNestedEx(FParams) else
-    if Assigned(FProcNested)   then FProcNested()          else
-    if Assigned(FProcObject)   then FProcObject();
-  finally
-    Free();
-  end;
-end;
-
-procedure QueueOnMainThread(Proc: TProcedureOfObject);
-var
-  Queue: TQueueOnMainThread;
-begin
-  Queue := TQueueOnMainThread.Create();
-  Queue.FProcObject := Proc;
-
-  Application.QueueAsyncCall(@Queue.Execute, 0);
-end;
-
-procedure QueueOnMainThread(Proc: TProcedureNested);
-var
-  Queue: TQueueOnMainThread;
-begin
-  Queue := TQueueOnMainThread.Create();
-  Queue.FProcNested := Proc;
-
-  Application.QueueAsyncCall(@Queue.Execute, 0);
-end;
-
-procedure QueueOnMainThread(Proc: TProcedureNestedEx; Params: TVariantArray);
-var
-  Queue: TQueueOnMainThread;
-begin
-  Queue := TQueueOnMainThread.Create();
-  Queue.FParams := Copy(Params);
-  Queue.FProcNestedEx := Proc;
+  Queue := TQueueObject.Create();
+  Queue.Proc := Proc;
 
   Application.QueueAsyncCall(@Queue.Execute, 0);
 end;
