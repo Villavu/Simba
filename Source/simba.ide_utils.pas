@@ -36,9 +36,15 @@ begin
 end;
 
 procedure MenuItemHeight(Item: TMenuItem; Canvas: TCanvas; var Height: Integer);
+var
+  ImgWidth: Integer;
 begin
   if not Item.IsLine then
-    Height := Round(ImageWidthForDPI(Canvas.Font.PixelsPerInch) * 1.3);
+  begin
+    ImgWidth := ImageWidthForDPI(Canvas.Font.PixelsPerInch);
+    if (ImgWidth > 16) then
+      Height := Round(ImgWidth * 1.3);
+  end;
 end;
 
 end.

@@ -29,9 +29,6 @@ var
 
 implementation
 
-uses
-  SynEdit;
-
 {$R *.lfm}
 
 procedure TSimbaNotesForm.FormDestroy(Sender: TObject);
@@ -48,10 +45,9 @@ constructor TSimbaNotesForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  SynEdit := TSimbaSynEdit.Create(Self);
+  SynEdit := TSimbaMemo.Create(Self, True);
   SynEdit.Parent := Self;
   SynEdit.Align := alClient;
-  SynEdit.HideSynEditThings();
 end;
 
 end.

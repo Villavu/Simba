@@ -203,9 +203,15 @@ end;
 
 function TSimbaCompilerDump.addGlobalType(Typ: TLapeType; AName: lpString; ACopy: Boolean): TLapeType;
 begin
-  Result := inherited addGlobalType(Typ, AName, ACopy);
-
-  AddType(AName, Typ.Name);
+  if (Typ.Name <> '') then
+  begin
+    AddType(AName, Typ.Name);
+    Result := inherited addGlobalType(Typ, AName, ACopy);
+  end else
+  begin
+    Result := inherited addGlobalType(Typ, AName, ACopy);
+    AddType(AName, Typ.Name);
+  end;
 end;
 
 function TSimbaCompilerDump.addGlobalType(Str: lpString; AName: lpString): TLapeType;

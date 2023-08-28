@@ -35,17 +35,22 @@ type
   public
     constructor Create(AOwner: TComponent); override;
 
-    // Hide gutters and such so the synedit acts more like the "memo" component.
-    procedure HideSynEditThings;
     procedure ReplaceKeyStrokeModifiers(const Find, Replace: TShiftStateEnum);
 
     property FontAntialising: Boolean read GetFontAntialising write SetFontAntialising;
   end;
 
+  // Hide gutters and such so the synedit acts more like the "memo" component.
+  TSimbaMemo = class(TSimbaSynEdit)
+  public
+    constructor Create(AOwner: TComponent; LineWrapping: Boolean); reintroduce;
+  end;
+
 implementation
 
 uses
-  simba.mufasatypes, simba.theme;
+  simba.mufasatypes, simba.theme,
+  SynEditWrappedView;
 
 function TSimbaSynEdit.GetFontAntialising: Boolean;
 begin
@@ -156,13 +161,6 @@ begin
   FontAntialising := True;
 end;
 
-procedure TSimbaSynEdit.HideSynEditThings;
-begin
-  Gutter.Visible := False;
-  RightGutter.Visible := False;
-  Options := Options + [eoHideRightMargin];
-end;
-
 procedure TSimbaSynEdit.ReplaceKeyStrokeModifiers(const Find, Replace: TShiftStateEnum);
 var
   I: Integer;
@@ -174,6 +172,18 @@ begin
   for I := 0 to MouseActions.Count - 1 do
     if (Find in MouseActions[I].Shift) then
       MouseActions[I].Shift := MouseActions[I].Shift - [Find] + [Replace];
+end;
+
+constructor TSimbaMemo.Create(AOwner: TComponent; LineWrapping: Boolean);
+begin
+  inherited Create(AOwner);
+
+  Gutter.Visible := False;
+  RightGutter.Visible := False;
+  Options := Options + [eoHideRightMargin];
+
+  if LineWrapping then
+    TLazSynEditLineWrapPlugin.Create(Self);
 end;
 
 end.
