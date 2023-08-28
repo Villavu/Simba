@@ -111,7 +111,7 @@ class procedure SimbaIDEInitialization.CallOnAfterCreateMethods;
   end;
 
 begin
-  ThreadedAndForget(@Execute);
+  RunInThread(@Execute, True);
 end;
 
 end.

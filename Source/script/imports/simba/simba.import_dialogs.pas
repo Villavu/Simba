@@ -35,7 +35,7 @@ procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); LAP
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 (*
@@ -51,7 +51,7 @@ procedure _LapeInputQuery(const Params: PParamArray; const Result: Pointer); LAP
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 (*
@@ -67,7 +67,7 @@ procedure _LapeShowMessage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 (*
@@ -98,7 +98,7 @@ procedure _LapeShowDTMEditor(const Params: PParamArray; const Result: Pointer); 
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 (*
@@ -129,7 +129,7 @@ procedure _LapeShowACA(const Params: PParamArray; const Result: Pointer); LAPE_W
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 (*
@@ -145,7 +145,7 @@ procedure _LapeSelectDirectory(const Params: PParamArray; const Result: Pointer)
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 (*
@@ -161,7 +161,7 @@ procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Point
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 (*

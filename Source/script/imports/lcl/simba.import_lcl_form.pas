@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.script_compiler;
+  simba.mufasatypes, simba.threading, simba.script_compiler;
 
 procedure ImportLCLForm(Compiler: TSimbaScript_Compiler);
 
@@ -338,8 +338,8 @@ end;
 
 procedure _LapeForm_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  if (GetCurrentThreadID() <> MainThreadID) then
-    SimbaException('TForm.Create must be called on main thread (Use Sync)');
+  if not IsMainThread() then
+    SimbaException('Forms must be created and run on the main thread, use RunInMainThread');
 
   PForm(Result)^ := TForm.CreateNew(PComponent(Params^[0])^);
   PForm(Result)^.ShowInTaskBar := stAlways;
@@ -1049,7 +1049,7 @@ begin
     addClassVar('TLazCustomForm', 'StayOnTop', 'Boolean', @_LapeCustomForm_StayOnTop_Read, @_LapeCustomForm_StayOnTop_Write);
 
     addClass('TLazForm', 'TLazCustomForm');
-    addClassConstructor('TLazForm', '(TheOwner: TLazComponent)', @_LapeForm_Create);
+    addClassConstructor('TLazForm', '(AOwner: TLazComponent = nil)', @_LapeForm_Create);
 
     addClassVar('TLazForm', 'OnActivate', 'TLazNotifyEvent', @_LapeForm_OnActivate_Read, @_LapeForm_OnActivate_Write);
     addClassVar('TLazForm', 'OnClose', 'TLazCloseEvent', @_LapeForm_OnClose_Read, @_LapeForm_OnClose_Write);

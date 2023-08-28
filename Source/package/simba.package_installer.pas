@@ -106,7 +106,7 @@ begin
     Log('', True);
   end;
 
-  Thread := Threaded(@Run);
+  Thread := RunInThread(@Run);
   while (not Thread.Finished) do
   begin
     FlushLog();
@@ -153,7 +153,7 @@ procedure TSimbaPackageInstaller.FlushLog;
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaPackageInstaller.Log(S: String; Flush: Boolean);
@@ -267,7 +267,7 @@ begin
   Options := Default(TSimbaPackageInstallOptions);
 
   Strings := TStringList.Create();
-  Thread := Threaded(@Run);
+  Thread := RunInThread(@Run);
   while (not Thread.Finished) do
   begin
     if (GetCurrentThreadID() = MainThreadID) then

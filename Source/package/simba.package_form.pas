@@ -105,7 +105,7 @@ var
 begin
   BeginLoading();
 
-  Thread := Threaded(@Load);
+  Thread := RunInThread(@Load);
   while (not Thread.Finished) do
   begin
     Application.ProcessMessages();
@@ -150,7 +150,7 @@ begin
 
     BeginLoading();
 
-    Thread := Threaded(@Load);
+    Thread := RunInThread(@Load);
     while (not Thread.Finished) do
     begin
       Application.ProcessMessages();

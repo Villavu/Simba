@@ -70,7 +70,7 @@ procedure TSimbaScriptInstanceCommunication.Disguise;
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.Status;
@@ -81,7 +81,7 @@ procedure TSimbaScriptInstanceCommunication.Status;
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.ShowTrayNotification;
@@ -103,7 +103,7 @@ begin
 
   FParams.Read(Timeout, SizeOf(Integer));
 
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 // Threadsafe
@@ -136,7 +136,7 @@ var
 begin
   FParams.Read(State, SizeOf(ESimbaScriptState));
 
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.ScriptError;
@@ -155,7 +155,7 @@ begin
   FParams.Read(Error.Line, SizeOf(Integer));
   FParams.Read(Error.Column, SizeOf(Integer));
 
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_SetMaxSize;
@@ -171,7 +171,7 @@ begin
   FParams.Read(Width, SizeOf(Integer));
   FParams.Read(Height, SizeOf(Integer));
 
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_MoveTo;
@@ -187,7 +187,7 @@ begin
   FParams.Read(X, SizeOf(Integer));
   FParams.Read(Y, SizeOf(Integer));
 
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Show;
@@ -205,7 +205,7 @@ var
 begin
   FInputStream.Read(EnsureVisible, SizeOf(Boolean));
 
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 // Chunked data is sent. Row by row.
@@ -320,7 +320,7 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Hide;
@@ -331,7 +331,7 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Hide;
   end;
 
 begin
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Display;
@@ -347,7 +347,7 @@ begin
   FParams.Read(Width, SizeOf(Integer));
   FParams.Read(Height, SizeOf(Integer));
 
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_DisplayXY;
@@ -367,7 +367,7 @@ begin
   FParams.Read(Width, SizeOf(Integer));
   FParams.Read(Height, SizeOf(Integer));
 
-  ExecuteOnMainThread(@Execute);
+  RunInMainThread(@Execute);
 end;
 
 constructor TSimbaScriptInstanceCommunication.Create(ScriptInstance: TObject);

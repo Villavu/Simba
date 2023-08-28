@@ -14,51 +14,12 @@ implementation
 
 uses
   Graphics,
-  lptypes, lpparser, ffi,
-  simba.nativeinterface, simba.env;
-
-procedure _LapeGetCurrentThreadID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPtrUInt(Result)^ := PtrUInt(GetCurrentThreadID());
-end;
-
-procedure _LapeGetMainThreadID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPtrUInt(Result)^ := PtrUInt(MainThreadID);
-end;
+  lptypes, lpvartypes, lpparser, ffi,
+  simba.nativeinterface, simba.env, simba.threading;
 
 procedure _LapePreciseSleep(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaNativeInterface.PreciseSleep(PUInt32(Params^[0])^);
-end;
-
-type
-  TSync = object
-    Params: PParamArray;
-
-    procedure Execute;
-  end;
-
-procedure TSync.Execute;
-type
-  TSyncProcedure = procedure of object; {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}cdecl;{$ENDIF}
-begin
-  TSyncProcedure(Params^[0]^)();
-end;
-
-procedure _LapeSync(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-var
-  Sync: TSync;
-begin
-  Sync := Default(TSync);
-  Sync.Params := Params;
-
-  TThread.Synchronize(nil, @Sync.Execute);
-end;
-
-procedure _LapeGetThreadCount(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPtrUInt(Result)^ := TThread.ProcessorCount;
 end;
 
 procedure _LapeGetEnvVar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -114,11 +75,7 @@ begin
     addBaseDefine('LINUX');
     {$ENDIF}
 
-    {$IF SizeOf(TColor) = 4}
-    addGlobalType('type Int32', 'TColor');
-    {$ELSE}
-    addGlobalType('type Int64', 'TColor');
-    {$ENDIF}
+    addGlobalType(getBaseType(DetermineIntType(SizeOf(TColor), False)).createCopy(), 'TColor');
     addGlobalType('array of TColor', 'TColorArray');
 
     addGlobalType('array of TStringArray', 'T2DStringArray');
@@ -140,13 +97,6 @@ begin
     addGlobalType('record X, Y: Single; end', 'TPointF');
 
     addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
-
-    addGlobalFunc('function GetThreadCount: Integer', @_LapeGetThreadCount);
-    addGlobalFunc('function GetMainThreadID: PtrUInt', @_LapeGetMainThreadID);
-    addGlobalFunc('function GetCurrentThreadID: PtrUInt', @_LapeGetCurrentThreadID);
-
-    addGlobalType('procedure() of object', 'TSyncMethod', {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
-    addGlobalFunc('procedure Sync(Method: TSyncMethod)', @_LapeSync);
 
     addGlobalFunc('function GetEnvVar(Name: String): String', @_LapeGetEnvVar);
     addGlobalFunc('function GetEnvVars: TStringArray', @_LapeGetEnvVars);

@@ -26,11 +26,19 @@ type
     FScriptInstance: TSimbaScriptInstance;
     FOutputBox: TSimbaOutputBox;
 
+    FLinkClick: record
+      Script: String;
+      ScriptFileName: String;
+      CaretPos: Integer;
+      Expression: String;
+    end;
+
     // Keep output tab in sync
     procedure TextChanged; override;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
+    procedure DoFindAndShowDeclaration;
     procedure DoEditorModified(Sender: TObject);
     procedure DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
@@ -111,18 +119,18 @@ begin
   inherited Notification(AComponent, Operation);
 end;
 
+procedure TSimbaScriptTab.DoFindAndShowDeclaration;
+begin
+  with FLinkClick do
+    FindAndShowDeclaration(Script, ScriptFileName, CaretPos, Expression);
+end;
+
 procedure TSimbaScriptTab.DoEditorModified(Sender: TObject);
 begin
   SimbaIDEEvents.CallOnEditorModified(Self);
 end;
 
 procedure TSimbaScriptTab.DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-
-  procedure Execute(Params: TVariantArray);
-  begin
-    FindAndShowDeclaration(Params[0], Params[1], Params[2], Params[3]);
-  end;
-
 begin
   if (Sender is TSynEdit) then
   begin
@@ -130,7 +138,12 @@ begin
     Y := TSynEdit(Sender).PixelsToRowColumn(ScreenToControl(Mouse.CursorPos), []).Y;
   end;
 
-  QueueOnMainThread(@Execute, [Script, ScriptFileName, Editor.GetCaretPos(True), Editor.GetExpressionEx(X, Y)]);
+  FLinkClick.Script := Script;
+  FLinkClick.ScriptFileName := ScriptFileName;
+  FLinkClick.CaretPos := Editor.GetCaretPos(True);
+  FLinkClick.Expression := Editor.GetExpressionEx(X, Y);
+
+  QueueOnMainThread(@DoFindAndShowDeclaration);
 end;
 
 procedure TSimbaScriptTab.DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);

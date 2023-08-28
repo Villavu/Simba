@@ -166,7 +166,7 @@ begin
   FOutputClient := TSimbaIPCInputStream.Create(DuplicateHandle(InputHandle));
 
   FClientID := IntToHex(FInputClient.Handle, 16) + IntToHex(FOutputClient.Handle, 16);
-  FThread := Threaded(@Execute);
+  FThread := RunInThread(@Execute);
 end;
 
 destructor TSimbaIPCServer.Destroy;
