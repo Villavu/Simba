@@ -28,6 +28,11 @@ generic procedure MoveElement<T>(var Arr: array of T; AFrom, ATo: Integer);
 var
   Item: T;
 begin
+  if (Length(Arr) = 0) then
+    SimbaException('MoveElement: Empty array');
+  AFrom := EnsureRange(AFrom, Low(Arr), High(Arr));
+  ATo := EnsureRange(ATo, Low(Arr), High(Arr));
+
   Item := Arr[AFrom];
   if (ATo > AFrom) then
     Move(Arr[AFrom + 1], Arr[AFrom], (ATo - AFrom) * SizeOf(T))

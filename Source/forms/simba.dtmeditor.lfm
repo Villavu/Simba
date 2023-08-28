@@ -1,10 +1,10 @@
 object SimbaDTMEditorForm: TSimbaDTMEditorForm
-  Left = 888
+  Left = 428
   Height = 1146
-  Top = 135
+  Top = 44
   Width = 1346
   Caption = 'DTM Editor'
-  ClientHeight = 1121
+  ClientHeight = 1146
   ClientWidth = 1346
   DesignTimePPI = 120
   KeyPreview = True
@@ -14,10 +14,10 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
   Position = poScreenCenter
   ShowHint = True
   ShowInTaskBar = stAlways
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '3.0.0.1'
   object PanelMain: TPanel
     Left = 0
-    Height = 1121
+    Height = 1146
     Top = 0
     Width = 990
     Align = alClient
@@ -26,14 +26,14 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
   end
   object PanelRight: TPanel
     Left = 990
-    Height = 1121
+    Height = 1146
     Top = 0
     Width = 356
     Align = alRight
     Anchors = [akTop, akRight]
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 1121
+    ClientHeight = 1146
     ClientWidth = 356
     Constraints.MinWidth = 356
     TabOrder = 1
@@ -46,7 +46,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = ButtonUpdateImage
       Left = 6
       Height = 20
-      Top = 1065
+      Top = 1090
       Width = 344
       Anchors = [akLeft, akRight, akBottom]
       BevelStyle = bsRaised
@@ -66,7 +66,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       Left = 184
       Height = 30
       Hint = 'Clear all drawing from the image'
-      Top = 1085
+      Top = 1110
       Width = 166
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
@@ -86,7 +86,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       Left = 6
       Height = 30
       Hint = 'Updates the image from the client'
-      Top = 1085
+      Top = 1110
       Width = 167
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -105,7 +105,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Side = asrBottom
       Left = 185
       Height = 30
-      Top = 1035
+      Top = 1060
       Width = 165
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
@@ -122,7 +122,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = Divider3
       Left = 6
       Height = 30
-      Top = 1035
+      Top = 1060
       Width = 166
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -151,7 +151,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonDeletePoints
       Left = 6
-      Height = 730
+      Height = 755
       Top = 6
       Width = 344
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -171,7 +171,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = Divider1
       Left = 6
       Height = 172
-      Top = 843
+      Top = 868
       Width = 350
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -301,7 +301,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 6
-        OnChange = PointEditChanged
+        OnEditingDone = PointEditChanged
         TabOrder = 3
       end
       object LabelSize: TLabel
@@ -365,7 +365,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = FindDTMButton
       Left = 6
       Height = 20
-      Top = 1015
+      Top = 1040
       Width = 344
       Anchors = [akLeft, akRight, akBottom]
       BorderSpacing.Left = 6
@@ -379,7 +379,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = PanelSelectedPoint
       Left = 6
       Height = 20
-      Top = 817
+      Top = 842
       Width = 344
       Caption = 'Selected Point'
       Anchors = [akLeft, akRight, akBottom]
@@ -397,7 +397,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = ButtonDeletePoint
       Left = 6
       Height = 30
-      Top = 742
+      Top = 767
       Width = 344
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -416,7 +416,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Side = asrBottom
       Left = 178
       Height = 30
-      Top = 1035
+      Top = 1060
       Width = 1
       Anchors = [akTop, akLeft, akBottom]
       BevelOuter = bvNone
@@ -431,7 +431,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = Divider2
       Left = 6
       Height = 30
-      Top = 778
+      Top = 803
       Width = 344
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True

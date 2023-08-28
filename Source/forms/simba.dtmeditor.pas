@@ -100,9 +100,9 @@ type
 
     procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
 
-    procedure AddPoint(X, Y, Col, Tol, Size: Integer); overload;
+    procedure AddPoint(X, Y, Col: Integer; Tol: Single; Size: Integer); overload;
     procedure AddPoint(X, Y, Col: Integer); overload;
-    procedure EditPoint(Index: Integer; X, Y, Col, Tol, Size: Integer);
+    procedure EditPoint(Index: Integer; X, Y, Col: Integer; Tol: Single; Size: Integer);
     procedure OffsetPoint(Index: Integer; X, Y: Integer);
 
     function GetPointAt(X, Y: Integer): Integer;
@@ -124,7 +124,7 @@ implementation
 
 uses
   math,
-  simba.windowhandle, simba.colormath, simba.colormath_distance;
+  simba.windowhandle, simba.colormath;
 
 procedure TSimbaDTMEditorForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -286,28 +286,28 @@ begin
   end;
 end;
 
-procedure TSimbaDTMEditorForm.AddPoint(X, Y, Col, Tol, Size: Integer);
+procedure TSimbaDTMEditorForm.AddPoint(X, Y, Col: Integer; Tol: Single; Size: Integer);
 begin
-  ListBox.ItemIndex := ListBox.Items.Add('%d, %d, %d, %d, %d', [X, Y, Col, Tol, Size]);
+  ListBox.ItemIndex := ListBox.Items.Add('%d, %d, %d, %f, %d', [X, Y, Col, Tol, Size]);
   DrawDTM();
 end;
 
 procedure TSimbaDTMEditorForm.AddPoint(X, Y, Col: Integer);
 begin
-  ListBox.ItemIndex := ListBox.Items.Add('%d, %d, %d, 0, 1', [X, Y, Col]);
+  ListBox.ItemIndex := ListBox.Items.Add('%d, %d, %d, 0, 0', [X, Y, Col]);
   DrawDTM();
 end;
 
-procedure TSimbaDTMEditorForm.EditPoint(Index: Integer; X, Y, Col, Tol, Size: Integer);
+procedure TSimbaDTMEditorForm.EditPoint(Index: Integer; X, Y, Col: Integer; Tol: Single; Size: Integer);
 begin
-  ListBox.Items[Index] := Format('%d, %d, %d, %d, %d', [X, Y, Col, Tol, Size]);
+  ListBox.Items[Index] := Format('%d, %d, %d, %f, %d', [X, Y, Col, Tol, Size]);
 
   if ListBox.ItemIndex = Index then
   begin
     EditPointX.Text := IntToStr(X);
     EditPointY.Text := IntToStr(Y);
     EditPointColor.Text := IntToStr(Col);
-    EditPointTolerance.Text := IntToStr(Tol);
+    EditPointTolerance.Text := Format('%f', [Tol]);
     EditPointSize.Text := IntToStr(Size);
   end;
 
@@ -318,8 +318,9 @@ procedure TSimbaDTMEditorForm.OffsetPoint(Index: Integer; X, Y: Integer);
 var
   Point: TDTMPoint;
 begin
-  Point := GetPoint(Index); EditPoint(Index, Point.X + X, Point.Y + Y, Point.Color, Point.Tolerance, Point.AreaSize);
-  Point := GetPoint(Index); EditPoint(Index, Point.X + X, Point.Y + Y, Point.Color, Point.Tolerance, Point.AreaSize);
+  Point := GetPoint(Index);
+
+  EditPoint(Index, Point.X + X, Point.Y + Y, Point.Color, Point.Tolerance, Point.AreaSize);
 end;
 
 function TSimbaDTMEditorForm.GetPoint(Index: Integer): TDTMPoint;
@@ -328,12 +329,11 @@ var
 begin
   Items := ListBox.Items[Index].Split(', ');
 
-  Result.x := StrToInt(Items[0]);
-  Result.y := StrToInt(Items[1]);
+  Result.X := StrToInt(Items[0]);
+  Result.Y := StrToInt(Items[1]);
   Result.Color := StrToInt(Items[2]);
-  Result.Tolerance := StrToInt(Items[3]);
+  Result.Tolerance := StrToFloat(Items[3]);
   Result.AreaSize := StrToInt(Items[4]);
- // Result.bp := False;
 end;
 
 function TSimbaDTMEditorForm.GetPoints: TDTMPointArray;
@@ -346,15 +346,8 @@ begin
 end;
 
 function TSimbaDTMEditorForm.GetDTM: TDTM;
-var
-  Points: TDTMPointArray;
-  i: Integer;
 begin
-  Points := GetPoints();
-
-  Result := TDTM.Create();
-  for i := 0 to High(Points) do
-    Result.AddPoint(Points[i]);
+  Result.Points := GetPoints();
 end;
 
 procedure TSimbaDTMEditorForm.LoadDTMClick(Sender: TObject);
@@ -375,18 +368,14 @@ begin
       Value := Copy(Value, 1, Pos(#39, Value) - 1);
     end;
 
-    DTM := TDTM.Create();
-
     try
-      DTM.LoadFromString(Value);
+      DTM.FromString(Value);
       for I := 0 to DTM.PointCount - 1 do
         with DTM.Points[I] do
           AddPoint(X, Y, Color, Tolerance, AreaSize);
     except
       ShowMessage('Invalid DTM String: ' + Value);
     end;
-
-    DTM.Free();
   end;
 end;
 
@@ -397,35 +386,20 @@ begin
 end;
 
 procedure TSimbaDTMEditorForm.FindDTMClick(Sender: TObject);
-var
-  DTM: TDTM;
 begin
   ListBox.ClearSelection();
 
-  DTM := GetDTM();
-  try
-    FDebugColor := [];
-    FDebugDTM   := FImageBox.FindDTM(DTM);
+  FDebugColor := [];
+  FDebugDTM   := FImageBox.FindDTM(GetDTM());
 
-    FImageBox.Paint();
-  finally
-    DTM.Free();
-  end;
+  FImageBox.Paint();
 end;
 
 procedure TSimbaDTMEditorForm.ButtonPrintDTMClick(Sender: TObject);
-var
-  DTM: TDTM;
 begin
-  DTM := GetDTM();
+  FDTMString := GetDTM().ToString();
 
-  try
-    FDTMString := DTM.SaveToString();
-
-    SimbaDebugLn([EDebugLn.FOCUS], 'DTM := TDTM.CreateFromString(' + #39 + FDTMString + #39 + ');');
-  finally
-    DTM.Free();
-  end;
+  SimbaDebugLn([EDebugLn.FOCUS], 'DTM := TDTM.CreateFromString(' + #39 + FDTMString + #39 + ');');
 end;
 
 procedure TSimbaDTMEditorForm.ListBoxSelectionChange(Sender: TObject; User: boolean);
@@ -444,7 +418,7 @@ begin
       EditPointX.Text := IntToStr(X);
       EditPointY.Text := IntToStr(Y);
       EditPointColor.Text := IntToStr(Color);
-      EditPointTolerance.Text := IntToStr(Tolerance);
+      EditPointTolerance.Text := Format('%f', [Tolerance]);
       EditPointSize.Text := IntToStr(AreaSize);
     end;
   end else
@@ -551,7 +525,8 @@ end;
 
 procedure TSimbaDTMEditorForm.PointEditChanged(Sender: TObject);
 var
-  X, Y, Col, Tol, Size: Integer;
+  X, Y, Col, Size: Integer;
+  Tol: Single;
   Point: TDTMPoint;
 begin
   if (ListBox.ItemIndex > -1) and (TEdit(Sender).Text <> '') then
@@ -561,7 +536,7 @@ begin
     X := StrToIntDef(EditPointX.Text, Point.X);
     Y := StrToIntDef(EditPointY.Text, Point.Y);
     Col := StrToIntDef(EditPointColor.Text, Point.Color);
-    Tol := StrToIntDef(EditPointTolerance.Text, Point.Tolerance);
+    Tol := StrToFloatDef(EditPointTolerance.Text, Point.Tolerance);
     Size := StrToIntDef(EditPointSize.Text, Point.AreaSize);
 
     EditPoint(ListBox.ItemIndex, X, Y, Col, Tol, Size);

@@ -23,178 +23,18 @@ DTM related methods
 *)
 
 (*
-TDTM.GetName
-~~~~~~~~~~~~~
-> function TDTM.GetName: String;
-*)
-procedure _LapeDTM_Name_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PDTM(Params^[0])^.Name;
-end;
-
-(*
-TDTM.SetName
-~~~~~~~~~~~~~
-> procedure TDTM.SetName(Value: String);
-*)
-procedure _LapeDTM_Name_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Params^[0])^.Name := PString(Params^[1])^;
-end;
-
-(*
-TDTM.FreeOnTerminate
-~~~~~~~~~~~~~~~~~~~~~
-> procedure TDTM.FreeOnTerminate(Value: Boolean);
-*)
-procedure _LapeDTM_FreeOnTerminate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Params^[0])^.FreeOnTerminate := PBoolean(Params^[1])^;
-end;
-
-(*
-TDTM.CreateFromString
-~~~~~~~~~~~~~~~~~~~~~~
-> function TDTM.CreateFromString(DTMString: String): TDTM; static;
-*)
-procedure _LapeDTM_CreateFromString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Result)^ := TDTM.CreateFromString(PString(Params^[0])^);
-end;
-
-(*
-TDTM.Create
-~~~~~~~~~~~~
-> function TDTM.Create: TDTM; static;
-*)
-procedure _LapeDTM_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Result)^ := TDTM.Create();
-end;
-
-(*
-TDTM.GetPoints
+TDTM.PointCount
 ~~~~~~~~~~~~~~~
-> function TDTM.GetPoints: TDTMPointArray;
+> function TDTM.PointCount: Integer;
 *)
-procedure _LapeDTM_Points_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTMPointArray(Result)^ := PDTM(Params^[0])^.Points;
-end;
-
-(*
-TDTM.GetPointCount
-~~~~~~~~~~~~~~~~~~~
-> function TDTM.GetPointCount: Integer;
-*)
-procedure _LapeDTM_PointCount_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeDTM_PointCount(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PDTM(Params^[0])^.PointCount;
 end;
 
 (*
-TDTM.GetPointColor
-~~~~~~~~~~~~~~~~~~~
-> function TDTM.GetPointColor: Integer;
-*)
-procedure _LapeDTM_PointColor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PDTM(Params^[0])^.PointColor[PInteger(Params^[1])^];
-end;
-
-(*
-TDTM.SetPointColor
-~~~~~~~~~~~~~~~~~~~
-> procedure TDTM.SetPointColor(Value: Integer);
-*)
-procedure _LapeDTM_PointColor_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Params^[0])^.PointColor[PInteger(Params^[1])^] := PInteger(Params^[2])^;
-end;
-
-(*
-TDTM.GetPointTolerance
-~~~~~~~~~~~~~~~~~~~~~~~
-> function TDTM.GetPointTolerance: Integer;
-*)
-procedure _LapeDTM_PointTolerance_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PDTM(Params^[0])^.PointTolerance[PInteger(Params^[1])^];
-end;
-
-(*
-TDTM.SetPointTolerance
-~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TDTM.SetPointTolerance(Value: Integer);
-*)
-procedure _LapeDTM_PointTolerance_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Params^[0])^.PointTolerance[PInteger(Params^[1])^] := PInteger(Params^[2])^;
-end;
-
-(*
-TDTM.GetPointX
-~~~~~~~~~~~~~~~
-> function TDTM.GetPointX: Integer;
-*)
-procedure _LapeDTM_PointX_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PDTM(Params^[0])^.PointX[PInteger(Params^[1])^];
-end;
-
-(*
-TDTM.SetPointX
-~~~~~~~~~~~~~~~
-> procedure TDTM.SetPointX(Value: Integer);
-*)
-procedure _LapeDTM_PointX_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Params^[0])^.PointX[PInteger(Params^[1])^] := PInteger(Params^[2])^;
-end;
-
-(*
-TDTM.GetPointY
-~~~~~~~~~~~~~~~
-> function TDTM.GetPointY: Integer;
-*)
-procedure _LapeDTM_PointY_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PDTM(Params^[0])^.PointY[PInteger(Params^[1])^];
-end;
-
-(*
-TDTM.SetPointY
-~~~~~~~~~~~~~~~
-> procedure TDTM.SetPointY(Value: Integer);
-*)
-procedure _LapeDTM_PointY_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Params^[0])^.PointY[PInteger(Params^[1])^] := PInteger(Params^[2])^;
-end;
-
-(*
-TDTM.GetPointAreaSize
-~~~~~~~~~~~~~~~~~~~~~~
-> function TDTM.GetPointAreaSize: Integer;
-*)
-procedure _LapeDTM_PointAreaSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PDTM(Params^[0])^.PointAreaSize[PInteger(Params^[1])^];
-end;
-
-(*
-TDTM.SetPointAreaSize
-~~~~~~~~~~~~~~~~~~~~~~
-> procedure TDTM.SetPointAreaSize(Value: Integer);
-*)
-procedure _LapeDTM_PointAreaSize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Params^[0])^.PointAreaSize[PInteger(Params^[1])^] := PInteger(Params^[2])^;
-end;
-
-(*
 TDTM.DeletePoints
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 > procedure TDTM.DeletePoints;
 *)
 procedure _LapeDTM_DeletePoints(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -233,33 +73,33 @@ begin
 end;
 
 (*
-TDTM.SaveToString
-~~~~~~~~~~~~~~~~~~
-> function TDTM.SaveToString: String;
+TDTM.ToString
+~~~~~~~~~~~~~
+> function TDTM.ToString: String;
 *)
-procedure _LapeDTM_SaveToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeDTM_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := PDTM(Params^[0])^.SaveToString();
+  PString(Result)^ := PDTM(Params^[0])^.ToString();
 end;
 
 (*
-TDTM.LoadFromString
-~~~~~~~~~~~~~~~~~~~~
-> procedure TDTM.LoadFromString(Str: String);
-*)
-procedure _LapeDTM_LoadFromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Params^[0])^.LoadFromString(PString(Params^[1])^);
-end;
-
-(*
-TDTM.SwapPoint
+TDTM.FromString
 ~~~~~~~~~~~~~~~
-> procedure TDTM.SwapPoint(Index1, Index2: Integer);
+> procedure TDTM.FromString(Str: String);
 *)
-procedure _LapeDTM_SwapPoint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeDTM_FromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDTM(Params^[0])^.SwapPoint(PInteger(Params^[1])^, PInteger(Params^[1])^);
+  PDTM(Params^[0])^.FromString(PString(Params^[1])^);
+end;
+
+(*
+TDTM.MovePoint
+~~~~~~~~~~~~~~
+> procedure TDTM.MovePoint(AFrom, ATo: Integer);
+*)
+procedure _LapeDTM_MovePoint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDTM(Params^[0])^.MovePoint(PInteger(Params^[1])^, PInteger(Params^[1])^);
 end;
 
 (*
@@ -278,31 +118,29 @@ begin
   begin
     ImportingSection := 'DTM';
 
-    addClass('TDTM');
+    addGlobalType([
+      'record',
+      '  X, Y: Integer;',
+      '  Color: Integer;',
+      '  Tolerance: Single;',
+      '  AreaSize: Integer;',
+      'end;'],
+      'TDTMPoint'
+    );
 
-    addGlobalType('record X, Y, Color, Tolerance, AreaSize: Integer; end', 'TDTMPoint');
     addGlobalType('array of TDTMPoint', 'TDTMPointArray');
+    addGlobalType('record Points: TDTMPointArray; end;', 'TDTM');
 
-    addClassVar('TDTM', 'Name', 'String', @_LapeDTM_Name_Read, @_LapeDTM_Name_Write);
-    addClassVar('TDTM', 'PointCount', 'Integer', @_LapeDTM_PointCount_Read);
-    addClassVar('TDTM', 'PointColor', 'Integer', @_LapeDTM_PointColor_Read, @_LapeDTM_PointColor_Write, True);
-    addClassVar('TDTM', 'PointTolerance', 'Integer', @_LapeDTM_PointTolerance_Read, @_LapeDTM_PointTolerance_Write, True);
-    addClassVar('TDTM', 'PointX', 'Integer', @_LapeDTM_PointX_Read, @_LapeDTM_PointX_Write, True);
-    addClassVar('TDTM', 'PointY', 'Integer', @_LapeDTM_PointY_Read, @_LapeDTM_PointY_Write, True);
-    addClassVar('TDTM', 'PointAreaSize', 'Integer', @_LapeDTM_PointAreaSize_Read, @_LapeDTM_PointAreaSize_Write, True);
-    addClassVar('TDTM', 'Points', 'TDTMPointArray', @_LapeDTM_Points_Read);
-
-    addGlobalFunc('function TDTM.Create: TDTM; static;', @_LapeDTM_Create);
-    addGlobalFunc('function TDTM.CreateFromString(DTMString: String): TDTM; static;', @_LapeDTM_CreateFromString);
-    addGlobalFunc('function TDTM.SaveToString: String', @_LapeDTM_SaveToString);
-    addGlobalFunc('procedure TDTM.LoadFromString(Str: String);', @_LapeDTM_LoadFromString);
-    addGlobalFunc('procedure TDTM.DeletePoints', @_LapeDTM_DeletePoints);
-    addGlobalFunc('procedure TDTM.DeletePoint(Index: Integer);', @_LapeDTM_DeletePoint);
+    addGlobalFunc('procedure TDTM.FromString(Str: String)', @_LapeDTM_FromString);
+    addGlobalFunc('function TDTM.ToString: String', @_LapeDTM_ToString);
+    addGlobalFunc('function TDTM.PointCount: Integer', @_LapeDTM_PointCount);
     addGlobalFunc('procedure TDTM.AddPoint(Point: TDTMPoint); overload', @_LapeDTM_AddPoint1);
     addGlobalFunc('procedure TDTM.AddPoint(X, Y, Color, Tolerance, AreaSize: Integer); overload', @_LapeDTM_AddPoint2);
-    addGlobalFunc('procedure TDTM.FreeOnTerminate(Value: Boolean);', @_LapeDTM_FreeOnTerminate);
-    addGlobalFunc('procedure TDTM.SwapPoint(Index1, Index2: Integer);', @_LapeDTM_SwapPoint);
+    addGlobalFunc('procedure TDTM.DeletePoints', @_LapeDTM_DeletePoints);
+    addGlobalFunc('procedure TDTM.DeletePoint(Index: Integer);', @_LapeDTM_DeletePoint);
+    addGlobalFunc('procedure TDTM.MovePoint(AFrom, ATo: Integer);', @_LapeDTM_MovePoint);
     addGlobalFunc('procedure TDTM.Normalize;', @_LapeDTM_Normalize);
+    addGlobalFunc('function TDTM.Valid: Boolean;', @_LapeDTM_Normalize);
 
     ImportingSection := '';
   end;
