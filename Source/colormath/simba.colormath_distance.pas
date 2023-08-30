@@ -34,10 +34,11 @@ function DistanceLAB_Max(const mul: TChannelMultipliers): Single; inline;
 function DistanceLCH_Max(const mul: TChannelMultipliers): Single; inline;
 function DistanceDeltaE_Max(const mul: TChannelMultipliers): Single; inline;
 
-function ColorDistance(const Color1, Color2: TColor; const ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Single;
+function ColorDistance(const Color1, Color2: TColor; const ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Single; overload;
+function ColorDistance(const Color1, Color2: TColor): Single; overload;
 
-function SimilarColors(const Color1, Color2: TColor; const Tolerance: Single): Boolean; overload;
 function SimilarColors(const Color1, Color2: TColor; const Tolerance: Single; ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Boolean; overload;
+function SimilarColors(const Color1, Color2: TColor; const Tolerance: Single): Boolean; overload;
 
 implementation
 
@@ -222,14 +223,19 @@ begin
   end;
 end;
 
-function SimilarColors(const Color1, Color2: TColor; const Tolerance: Single): Boolean;
+function ColorDistance(const Color1, Color2: TColor): Single;
 begin
-  Result := ColorDistance(Color1, Color2, EColorSpace.RGB, DefaultMultipliers) <= Tolerance;
+  Result := ColorDistance(Color1, Color2, EColorSpace.RGB, DefaultMultipliers);
 end;
 
 function SimilarColors(const Color1, Color2: TColor; const Tolerance: Single; ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Boolean;
 begin
   Result := ColorDistance(Color1, Color2, ColorSpace, Multipliers) <= Tolerance;
+end;
+
+function SimilarColors(const Color1, Color2: TColor; const Tolerance: Single): Boolean;
+begin
+  Result := ColorDistance(Color1, Color2) <= Tolerance;
 end;
 
 end.

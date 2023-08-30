@@ -365,21 +365,41 @@ end;
 (*
 SimilarColors
 ~~~~~~~~~~~~~
-> function SimilarColors(Color1, Color2: TColor; Tolerance: Single): Boolean;
+> function SimilarColors(Color1, Color2: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): Boolean;
 *)
 procedure _LapeSimilarColors1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := SimilarColors(PColor(Params^[0])^, PColor(Params^[1])^, PSingle(Params^[2])^);
+  PBoolean(Result)^ := SimilarColors(PColor(Params^[0])^, PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^);
 end;
 
 (*
 SimilarColors
 ~~~~~~~~~~~~~
-> function SimilarColors(Color1, Color2: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): Boolean;
+> function SimilarColors(Color1, Color2: TColor; Tolerance: Single): Boolean;
 *)
 procedure _LapeSimilarColors2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := SimilarColors(PColor(Params^[0])^, PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^);
+  PBoolean(Result)^ := SimilarColors(PColor(Params^[0])^, PColor(Params^[1])^, PSingle(Params^[2])^);
+end;
+
+(*
+ColorDistance
+~~~~~~~~~~~~~
+> function ColorDistance(const Color1, Color2: TColor; const ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Single;
+*)
+procedure _LapeColorDistance1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := ColorDistance(PColor(Params^[0])^, PColor(Params^[1])^, PColorSpace(Params^[2])^, PChannelMultipliers(Params^[3])^);
+end;
+
+(*
+ColorDistance
+~~~~~~~~~~~~~
+> function ColorDistance(const Color1, Color2: TColor): Single;
+*)
+procedure _LapeColorDistance2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := ColorDistance(PColor(Params^[0])^, PColor(Params^[1])^);
 end;
 
 (*
@@ -682,8 +702,11 @@ begin
        'end;'
      ]);
 
-    addGlobalFunc('function SimilarColors(Color1, Color2: TColor; Tolerance: Single): Boolean; overload', @_LapeSimilarColors1);
-    addGlobalFunc('function SimilarColors(Color1, Color2: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): Boolean; overload;', @_LapeSimilarColors2);
+    addGlobalFunc('function SimilarColors(Color1, Color2: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): Boolean; overload', @_LapeSimilarColors1);
+    addGlobalFunc('function SimilarColors(Color1, Color2: TColor; Tolerance: Single): Boolean; overload', @_LapeSimilarColors2);
+
+    addGlobalFunc('function ColorDistance(Color1, Color2: TColor; const ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Single; overload', @_LapeColorDistance1);
+    addGlobalFunc('function ColorDistance(Color1, Color2: TColor): Single; overload', @_LapeColorDistance2);
 
     addGlobalType([
       'record',
