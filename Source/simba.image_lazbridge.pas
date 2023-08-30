@@ -7,6 +7,7 @@
 }
 unit simba.image_lazbridge;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
