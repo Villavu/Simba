@@ -1,0 +1,107 @@
+// Simple form example doing random things.
+
+var
+  Form: TLazForm;
+
+// Called when the mouse the mouse is pressed on the form
+procedure FormMouseDown(Sender: TObject; Button: TLazMouseButton; Shift: TLazShiftState; X, Y: Integer);
+begin
+  WriteLn('FormMouseDown: ', Button, ', ', Shift, ' at ', X, ', ', Y);
+  if (ssShift in Shift) then
+    WriteLn('Shift is pressed too!');
+  if (ssCtrl in Shift) then
+    WriteLn('Control is pressed too!');
+end;
+
+// Called when the mouse the mouse is released on the form
+procedure FormMouseUp(Sender: TObject; Button: TLazMouseButton; Shift: TLazShiftState; X, Y: Integer);
+begin
+  WriteLn('FormMouseUp: ', Button, ', ', Shift, ' at ', X, ', ', Y);
+end;
+
+procedure DoButtonClick(Sender: TObject);
+begin
+  WriteLn('Button clicked: ', TLazButton(Sender).GetCaption());
+
+  if (TLazButton(Sender).GetCaption() = 'Close this form') then
+    Form.Close();
+end;
+
+procedure DoSelectionChange(Sender: TObject; User: Boolean);
+begin
+  WriteLn('List selection changed to: ', TLazListBox(Sender).GetSelectedText());
+end;
+
+procedure ShowMyForm;
+var
+  Button: TLazButton;
+  List: TLazListBox;
+  Lbl: TLazLabel;
+  Panel: TLazPanel;
+begin
+  Form := TLazForm.Create();
+  Form.SetCaption('Example form');
+  Form.SetOnMouseDown(@FormMouseDown);
+  Form.SetOnMouseUp(@FormMouseUp);
+  Form.SetWidth(700);
+  Form.SetHeight(500);
+  Form.SetPosition(poScreenCenter);
+  Form.SetColor(Colors.DARK_GREY);
+  Form.SetBorderStyle(bsSingle); // Do not allow resizing
+
+  Button := TLazButton.Create(Form);
+  Button.SetParent(Form);
+  Button.SetAutoSize(True);
+  Button.SetLeft(300);
+  Button.SetTop(50);
+  Button.SetShowHint(True);
+  Button.SetHint('Mouse over hint');
+  Button.SetCaption('This is a button');
+  Button.GetFont().SetSize(12);
+  Button.SetOnClick(@DoButtonClick);
+
+  Button := TLazButton.Create(Form);
+  Button.SetParent(Form);
+  Button.SetAutoSize(True);
+  Button.SetLeft(300);
+  Button.SetTop(100);
+  Button.SetCaption('This is a bigger button');
+  Button.GetFont().SetSize(18);
+  Button.SetOnClick(@DoButtonClick);
+
+  Button := TLazButton.Create(Form);
+  Button.SetParent(Form);
+  Button.SetAutoSize(True);
+  Button.SetLeft(25);
+  Button.SetTop(300);
+  Button.SetCaption('Close this form');
+  Button.GetFont().SetSize(12);
+  Button.SetOnClick(@DoButtonClick);
+
+  // Create a panel add a label and listbox in it, which are auto positioned&sized with SetAlign
+  Panel := TLazPanel.Create(Form);
+  Panel.SetParent(Form);
+  Panel.SetBounds(25,25, 250,250);
+  Panel.SetBevelOuter(bvNone);
+
+  Lbl := TLazLabel.Create(Panel);
+  Lbl.SetParent(Panel);
+  Lbl.SetCaption('List box:');
+  Lbl.SetAlign(alTop);
+
+  List := TLazListBox.Create(Panel);
+  List.SetParent(Panel);
+  List.SetAlign(alClient);
+  List.GetItems().Add('Item 1');
+  List.GetItems().Add('Item 2');
+  List.GetItems().Add('Item 3');
+  List.SetOnSelectionChange(@DoSelectionChange);
+
+  Form.ShowModal();
+
+  WriteLn('Form has been closed.');
+end;
+
+begin
+  RunInMainThread(@ShowMyForm);
+end.

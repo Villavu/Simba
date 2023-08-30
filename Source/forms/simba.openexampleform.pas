@@ -205,6 +205,7 @@ begin
   AddNode('Mouse Teleport Event', 'EXAMPLE_MOUSE_TELEPORT_EVENT');
   AddNode('Static Method',        'EXAMPLE_STATIC_METHOD'       );
   AddNode('JSON',                 'EXAMPLE_JSON'                );
+  AddNode('Form',                 'EXAMPLE_FORM'                );
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);
