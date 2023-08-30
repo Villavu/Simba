@@ -17,7 +17,7 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="9">
+      <Resources Count="10">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
         <Resource_2 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
@@ -27,6 +27,7 @@
         <Resource_6 FileName="..\Examples\mouse_teleport_event.simba" Type="RCDATA" ResourceName="EXAMPLE_MOUSE_TELEPORT_EVENT"/>
         <Resource_7 FileName="..\Examples\static_method.simba" Type="RCDATA" ResourceName="EXAMPLE_STATIC_METHOD"/>
         <Resource_8 FileName="..\Examples\json.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON"/>
+        <Resource_9 FileName="..\Examples\form.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM"/>
       </Resources>
     </General>
     <VersionInfo>
@@ -125,6 +126,10 @@
 -dStaticFFI
 -dLape_CDECL
 -dLape_NoExtended"/>
+            <OtherDefines Count="2">
+              <Define0 Value="StaticFFI"/>
+              <Define1 Value="Lape_CDECL"/>
+            </OtherDefines>
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
