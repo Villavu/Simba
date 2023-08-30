@@ -90,8 +90,7 @@ type
 implementation
 
 uses
-  simba.bitmap_utils,
-  simba.singlematrix, simba.integermatrix;
+  simba.image_lazbridge, simba.singlematrix, simba.integermatrix;
 
 const
   HEATMAP_LOOKUP_TABLE: array[0..837] of TColor = (
@@ -248,7 +247,7 @@ begin
   FBytesPerLine := FBitmap.RawImage.Description.BytesPerLine;
   FBytesPerPixel := FBitmap.RawImage.Description.BitsPerPixel shr 3;
   FData := FBitmap.RawImage.Data;
-  FPixelFormat := GetBitmapPixelFormat(FBitmap);
+  FPixelFormat := LazImage_PixelFormat(FBitmap);
 end;
 
 procedure TSimbaImageBoxBitmap.EndUpdate;

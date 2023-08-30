@@ -5,11 +5,6 @@
 
   Simple managed string builder.
 }
-{
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
 unit simba.stringbuilder;
 
 {$i simba.inc}
@@ -25,11 +20,14 @@ type
     FData: String;
     FCount: Integer;
 
+    procedure EnsureGrowth(const Len: Integer);
+
     function GetString: String;
     function GetPeek: Char;
   public
     class operator Initialize(var Self: TSimbaStringBuilder);
 
+    procedure AppendBuf(const Buffer; Count: Integer);
     procedure Append(const Str: String);
     procedure AppendLine(const Str: String = '');
     property Str: String read GetString;
@@ -42,6 +40,36 @@ implementation
 class operator TSimbaStringBuilder.Initialize(var Self: TSimbaStringBuilder);
 begin
   Self := Default(TSimbaStringBuilder);
+end;
+
+procedure TSimbaStringBuilder.AppendBuf(const Buffer; Count: Integer);
+begin
+  if (Count > 0) then
+  begin
+    EnsureGrowth(Count);
+
+    Move(Buffer, FData[1 + FCount], Count);
+    Inc(FCount, Count);
+  end;
+end;
+
+procedure TSimbaStringBuilder.EnsureGrowth(const Len: Integer);
+var
+  NewLen: Integer;
+begin
+  if (FCount + Len >= Length(FData)) then
+  begin
+    NewLen := Length(FData) + Len;
+    if (NewLen < 256) then
+      NewLen := 256
+    else
+    if (NewLen > 256000) then
+      NewLen := NewLen * 4
+    else
+      NewLen := NewLen * 2;
+
+    SetLength(FData, NewLen);
+  end;
 end;
 
 function TSimbaStringBuilder.GetString: String;
@@ -57,19 +85,9 @@ begin
 end;
 
 procedure TSimbaStringBuilder.Append(const Str: String);
-var
-  Len: Integer;
 begin
-  Len := Length(Str);
-
-  if (Len > 0) then
-  begin
-    if (FCount + Len >= Length(FData)) then
-      SetLength(FData, (Length(FData) * 2) + 1024 + Len);
-    Move(Str[1], FData[1 + FCount], Len * SizeOf(Char));
-
-    Inc(FCount, Len);
-  end;
+  if (Length(Str) > 0) then
+    AppendBuf(Str[1], Length(Str));
 end;
 
 procedure TSimbaStringBuilder.AppendLine(const Str: String);

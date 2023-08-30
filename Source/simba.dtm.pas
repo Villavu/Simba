@@ -56,10 +56,8 @@ var
 begin
   if not Str.StartsWith('DTM:', True) then
     raise Exception.Create('TDTM.FromString: Invalid string "' + Str + '"');
-  Str.DeleteRange(1, 4);
 
-  Stream := TStringStream.Create(DecompressString(Base64Decode(Str)));
-  Stream.Position := 0;
+  Stream := TStringStream.Create(DecompressString(Base64Decode(Str.After('DTM:'))));
 
   SetLength(Points, Stream.ReadDWord());
   for I := 0 to High(Points) do

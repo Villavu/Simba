@@ -333,7 +333,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="135">
+    <Units Count="138">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -952,6 +952,18 @@
         <Filename Value="script/imports/simba/simba.import_threading.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit134>
+      <Unit135>
+        <Filename Value="../Third-Party/fpqoi_simba.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit135>
+      <Unit136>
+        <Filename Value="simba.image_lazbridge.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit136>
+      <Unit137>
+        <Filename Value="simba.rgbsumtable.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit137>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

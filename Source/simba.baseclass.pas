@@ -26,6 +26,8 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    function GetSelf: TSimbaBaseClass;
+
     property Name: String read GetName write SetName;
     property FreeOnTerminate: Boolean read FFreeOnTerminate write FFreeOnTerminate;
   end;
@@ -81,6 +83,11 @@ begin
     SimbaObjectTracker.Remove(Self);
 
   inherited Destroy();
+end;
+
+function TSimbaBaseClass.GetSelf: TSimbaBaseClass;
+begin
+  Result := Self;
 end;
 
 procedure TSimbaObjectTracker.Add(Obj: TSimbaBaseClass);

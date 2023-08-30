@@ -36,7 +36,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.mufasatypes, simba.bitmap, simba.bitmap_utils, simba.stringbuilder;
+  simba.mufasatypes, simba.bitmap, simba.image_lazbridge, simba.stringbuilder;
 
 procedure TSimbaImageToStringForm.OpenButtonClick(Sender: TObject);
 begin
@@ -89,7 +89,7 @@ var
 begin
   if Assigned(ImagePreview.Picture.Bitmap) and (ImagePreview.Picture.Bitmap.Width > 0) and (ImagePreview.Picture.Bitmap.Height > 0) then
   begin
-    with ImagePreview.Picture.Bitmap.ToMufasaBitmap() do
+    with LazImage_ToSimbaImage(ImagePreview.Picture.Bitmap) do
     try
       ImageString := SaveToString();
     finally
@@ -98,11 +98,7 @@ begin
 
     if PadOutput.Checked then
     begin
-      Builder.Append('Image := TSimbaImage.CreateFromString(');
-      Builder.Append(IntToStr(ImagePreview.Picture.Bitmap.Width));
-      Builder.Append(', ');
-      Builder.Append(IntToStr(ImagePreview.Picture.Bitmap.Height));
-      Builder.Append(', ');
+      Builder.Append('Image := TImage.CreateFromString(');
       Builder.AppendLine();
 
       while (ImageString <> '') do
@@ -114,7 +110,7 @@ begin
 
       ImageString := Copy(Builder.Str, 1, Builder.Count - Length(LineEnding) - 2) + ');';
     end else
-      ImageString := 'Image := TSimbaImage.CreateFromString(' + IntToStr(ImagePreview.Picture.Bitmap.Width) + ',' + IntToStr(ImagePreview.Picture.Bitmap.Height) + ', ' + #39 + ImageString + #39 + ');';
+      ImageString := 'Image := TImage.CreateFromString(' + #39 + ImageString + #39 + ');';
 
     try
       Clipboard.AsText := ImageString;
