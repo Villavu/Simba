@@ -120,7 +120,7 @@ implementation
 
 uses
   Clipbrd, TypInfo, LCLType,
-  simba.windowhandle, simba.bitmap, simba.colormath_aca, simba.singlematrix;
+  simba.windowhandle, simba.bitmap, simba.colormath_aca, simba.singlematrix, simba.dialog;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
@@ -392,8 +392,11 @@ end;
 
 procedure TSimbaACAForm.ButtonRemoveAllColorsClick(Sender: TObject);
 begin
-  ColorListBox.Clear();
-  ColorListBox.OnSelectionChange(Sender, False);
+  if (SimbaQuestionDlg('ACA', 'Clear All Colors?') = ESimbaDialogResult.YES) then
+  begin
+    ColorListBox.Clear();
+    ColorListBox.OnSelectionChange(Sender, False);
+  end;
 end;
 
 procedure TSimbaACAForm.ButtonLoadImageClick(Sender: TObject);

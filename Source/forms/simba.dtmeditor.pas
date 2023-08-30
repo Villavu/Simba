@@ -123,8 +123,7 @@ implementation
 {$R *.lfm}
 
 uses
-  math,
-  simba.windowhandle, simba.colormath;
+  simba.windowhandle, simba.colormath, simba.dialog;
 
 procedure TSimbaDTMEditorForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -519,8 +518,11 @@ end;
 
 procedure TSimbaDTMEditorForm.ButtonDeletePointsClick(Sender: TObject);
 begin
-  ListBox.Clear();
-  ListBox.OnSelectionChange(Self, False);
+  if (SimbaQuestionDlg('DTMEditor', 'Clear All Points?') = ESimbaDialogResult.YES) then
+  begin
+    ListBox.Clear();
+    ListBox.OnSelectionChange(Self, False);
+  end;
 end;
 
 procedure TSimbaDTMEditorForm.PointEditChanged(Sender: TObject);
