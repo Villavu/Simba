@@ -52,7 +52,7 @@ implementation
 
 uses
   LCLType,
-  simba.bitmap, simba.windowhandle;
+  simba.bitmap, simba.windowhandle, simba.image_lazbridge;
 
 procedure TSimbaColorPickerHint.Paint;
 begin
@@ -176,7 +176,7 @@ begin
 
     with TSimbaImage.CreateFromWindow(DesktopWindow) do
     try
-      Picture.Bitmap.LoadFromRawImage(ToRawImage(), True);
+      Picture.Bitmap.LoadFromRawImage(SimbaImage_ToRawImage(GetSelf() as TSimbaImage), True);
 
       DataOwner := False;
     finally

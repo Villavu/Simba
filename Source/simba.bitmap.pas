@@ -64,7 +64,7 @@ type
     constructor Create; overload;
     constructor Create(AWidth, AHeight: Integer); overload;
     constructor CreateFromFile(FileName: String);
-    constructor CreateFromString(AWidth, AHeight: Integer; Str: String);
+    constructor CreateFromString(Str: String);
     constructor CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     constructor CreateFromWindow(Window: TWindowHandle);
 
@@ -189,7 +189,6 @@ type
     function ToMatrixBGR: TIntegerMatrix;
     function ToMatrix: TIntegerMatrix; overload;
     function ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix; overload;
-    function ToRawImage: TRawImage;
 
     function ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: ESimbaImageThreshMethod; K: Integer): TSimbaImage;
     function ThresholdSauvola(Window: Integer; AInvert: Boolean; K: Single): TSimbaImage;
@@ -201,7 +200,7 @@ type
 
     procedure LoadFromFile(FileName: String); overload;
     procedure LoadFromFile(FileName: String; Area: TBox); overload;
-    procedure LoadFromString(AWidth, AHeight: Integer; Str: String);
+    procedure LoadFromString(Str: String);
     procedure LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     procedure LoadFromImage(Image: TSimbaImage);
 
@@ -221,9 +220,11 @@ type
 implementation
 
 uses
-  simba.overallocatearray, simba.geometry, simba.tpa,
-  simba.bitmap_utils, simba.encoding, simba.compress, simba.math,
-  simba.nativeinterface, simba.singlematrix;
+  BMPcomn,
+  simba.overallocatearray, simba.geometry, simba.tpa, simba.datetime,
+  simba.encoding, simba.compress, simba.math,
+  simba.nativeinterface, simba.singlematrix, fpqoi_simba,
+  simba.image_lazbridge, simba.rgbsumtable;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
@@ -241,14 +242,12 @@ var
   Image: TLazIntfImage;
   Stream: TFileStream;
   WriterClass: TFPCustomImageWriterClass;
-  Writer: TFPCustomImageWriter;
 begin
   Result := False;
 
   if FileExists(FileName) and (not OverwriteIfExists) then
     SimbaException('TSimbaImage.SaveToFile: File already exists "%s"', [FileName]);
 
-  Writer := nil;
   Stream := nil;
   Image  := nil;
 
@@ -257,20 +256,15 @@ begin
     SimbaException('TSimbaImage.SaveToFile: Unknown image format "%s"', [FileName]);
 
   try
-    Writer := WriterClass.Create();
-
     if FileExists(FileName) then
       Stream := TFileStream.Create(FileName, fmOpenReadWrite or fmShareDenyWrite)
     else
       Stream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
 
-    Image := TLazIntfImage.Create(Self.ToRawImage(), False);
-    Image.SaveToStream(Stream, Writer);
+    SimbaImage_ToFPImageWriter(Self, WriterClass, Stream);
 
     Result := True;
   finally
-    if (Writer <> nil) then
-      Writer.Free();
     if (Stream <> nil) then
       Stream.Free();
     if (Image <> nil) then
@@ -280,25 +274,102 @@ end;
 
 procedure TSimbaImage.LoadFromFile(FileName: String);
 var
-  LazIntf: TLazIntfImage;
-  RawImageDesc: TRawImageDescription;
+  ReaderClass: TFPCustomImageReaderClass;
+  Stream: TFileStream;
 begin
   if (not FileExists(FileName)) then
-    SimbaException('TSimbaImage.LoadFromFile: File not found "%s"', [FileName]);
+    SimbaException('TSimbaImage.LoadFromFile: File "%s" does not exist', [FileName]);
 
+  ReaderClass := TFPCustomImage.FindReaderFromFileName(FileName);
+  if (ReaderClass = nil) then
+    SimbaException('TSimbaImage.LoadFromFile: Unknown image format "%s"', [FileName]);
+
+  Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
   try
-    LazIntf := TLazIntfImage.Create(0, 0);
-    RawImageDesc.Init_BPP32_B8G8R8_BIO_TTB(0, 0); // TColorBGRA format
-    LazIntf.DataDescription := RawImageDesc;
-    LazIntf.LoadFromFile(FileName);
-
-    LoadFromData(LazIntf.Width, LazIntf.Height, PColorBGRA(LazIntf.PixelData), LazIntf.Width);
+    SimbaImage_FromFPImageReader(Self, ReaderClass, Stream);
   finally
-    LazIntf.Free;
+    Stream.Free();
   end;
 end;
 
 procedure TSimbaImage.LoadFromFile(FileName: String; Area: TBox);
+
+  procedure LoadBitmapAreaFromFile(Bitmap: TSimbaImage; FileName: String; Area: TBox);
+
+    function ColorRGBToBGRA(const ColorRGB: TColorRGB): TColorBGRA; inline;
+    begin
+      Result.B := ColorRGB.B;
+      Result.G := ColorRGB.G;
+      Result.R := ColorRGB.R;
+      Result.A := 0;
+    end;
+
+  var
+    Stream: TFileStream;
+    FileHeader: TBitmapFileHeader;
+    Header: TBitmapInfoHeader;
+    Row, Column, PixelOffset: Integer;
+    ScanLineSize, Index: Int64;
+    Buffer: PByte;
+    BytesPerPixel: Byte;
+  begin
+    Buffer := nil;
+
+    Stream := TFileStream.Create(FileName, fmOpenRead);
+    try
+      if Stream.Read(FileHeader, SizeOf(TBitmapFileHeader)) <> SizeOf(TBitmapFileHeader) then
+        raise Exception.Create('Invalid file header');
+
+      {$IFDEF ENDIAN_BIG}
+      SwapBMPFileHeader(FileHeader);
+      {$ENDIF}
+      if (FileHeader.bfType <> BMmagic) then
+        raise Exception.Create('Invalid file header magic');
+
+      if Stream.Read(Header, SizeOf(TBitmapInfoHeader)) <> SizeOf(TBitmapInfoHeader) then
+        raise Exception.Create('Invalid info header');
+      {$IFDEF ENDIAN_BIG}
+      SwapBMPInfoHeader(Header);
+      {$ENDIF}
+
+      case Header.BitCount of
+        32: BytesPerPixel := 4;
+        24: BytesPerPixel := 3;
+        else
+          raise Exception.Create('Not a 32 or 24 bit bitmap');
+      end;
+
+      Area.Clip(TBox.Create(0, 0, Header.Width, Header.Height));
+      if (Area.Width > 1) and (Area.Height > 1) then
+      begin
+        Bitmap.SetSize(Area.Width, Area.Height);
+
+        PixelOffset := FileHeader.bfOffset;
+        ScanLineSize := Int64((Header.Width * Header.BitCount) + 31) div 32 * 4;
+        Buffer := GetMem(ScanLineSize);
+        Index := 0;
+
+        for Row := Area.Y1 to Area.Y2 do
+        begin
+          Stream.Position := PixelOffset + ((Header.Height - (Row + 1)) * ScanLineSize) + (Area.X1 * BytesPerPixel);
+          Stream.Read(Buffer^, ScanLineSize);
+
+          for Column := 0 to Area.Width - 1 do
+          begin
+            Bitmap.Data[Index] := ColorRGBToBGRA(PColorRGB(Buffer + (Column * BytesPerPixel))^);
+
+            Inc(Index);
+          end;
+        end;
+      end;
+    finally
+      if (Buffer <> nil) then
+        FreeMem(Buffer);
+
+      Stream.Free();
+    end;
+  end;
+
 begin
   if (not FileExists(FileName)) then
     SimbaException('TSimbaImage.LoadFromFile: File not found "%s"', [FileName]);
@@ -351,8 +422,7 @@ end;
 
 function TSimbaImage.ToLazBitmap: TBitmap;
 begin
-  Result := TBitmap.Create();
-  Result.FromData(FData, FWidth, FHeight);
+  Result := SimbaImage_ToLazImage(Self);
 end;
 
 function TSimbaImage.ToGreyMatrix: TByteMatrix;
@@ -365,30 +435,6 @@ begin
     for X := 0 to FWidth - 1 do
       with FData[Y * FWidth + X] do
         Result[Y, X] := Round(R * 0.3 + G * 0.59 + B * 0.11);
-end;
-
-function TSimbaImage.SaveToString: String;
-type
-  PRGB24 = ^TRGB24;
-  TRGB24 = packed record
-    B, G, R: Byte;
-  end;
-var
-  i: Integer;
-  DataStr: String;
-  DataPtr: PRGB24;
-begin
-  SetLength(DataStr, FWidth * FHeight * 3);
-
-  DataPtr := PRGB24(@DataStr[1]);
-  for i := FWidth * FHeight - 1 downto 0 do
-  begin
-    DataPtr[i].R := FData[i].R;
-    DataPtr[i].G := FData[i].G;
-    DataPtr[i].B := FData[i].B;
-  end;
-
-  Result := 'm' + Base64Encode(CompressString(DataStr));
 end;
 
 function TSimbaImage.ToMatrixBGR: TIntegerMatrix;
@@ -426,36 +472,6 @@ begin
   for Y := Y1 to Y2 do
     for X := X1 to X2 do
       Result[Y-Y1, X-X1] := FData[Y * FWidth + X].ToColor();
-end;
-
-function TSimbaImage.ToRawImage: TRawImage;
-begin
-  Result.Init();
-
-  Result.Description.PaletteColorCount := 0;
-  Result.Description.MaskBitsPerPixel  := 0;
-  Result.Description.Width             := FWidth;
-  Result.Description.Height            := FHeight;
-
-  Result.Description.Format       := ricfRGBA;
-  Result.Description.ByteOrder    := riboLSBFirst;
-  Result.Description.BitOrder     := riboBitsInOrder; // should be fine
-  Result.Description.Depth        := 24;
-  Result.Description.BitsPerPixel := 32;
-  Result.Description.LineOrder    := riloTopToBottom;
-  Result.Description.LineEnd      := rileDWordBoundary;
-
-  Result.Description.RedPrec   := 8;
-  Result.Description.GreenPrec := 8;
-  Result.Description.BluePrec  := 8;
-  Result.Description.AlphaPrec := 0;
-
-  Result.Description.RedShift   := 16;
-  Result.Description.GreenShift := 8;
-  Result.Description.BlueShift  := 0;
-
-  Result.DataSize := Result.Description.Width * Result.Description.Height * (Result.Description.BitsPerPixel shr 3);
-  Result.Data := PByte(FData);
 end;
 
 procedure TSimbaImage.DrawMatrix(Matrix: TIntegerMatrix);
@@ -533,35 +549,37 @@ begin
     Result[I] := @FData[FWidth * I];
 end;
 
-procedure TSimbaImage.LoadFromString(AWidth, AHeight: Integer; Str: String);
-type
-  PRGB24 = ^TRGB24;
-  TRGB24 = packed record
-    B, G, R: Byte;
-  end;
+function TSimbaImage.SaveToString: String;
+const
+  Header = 'IMG:';
 var
-  I: Integer;
-  Source: String;
-  SourcePtr: PRGB24;
-  DestPtr: PColorBGRA;
+  Stream: TStringStream;
 begin
-  SetSize(AWidth, AHeight);
+  Stream := TStringStream.Create();
+  try
+    SimbaImage_ToFPImageWriter(Self, TFPWriterQoi, Stream);
 
-  if (Str <> '') and (Str[1] = 'm') then
-    Delete(Str, 1, 1);
+    Result := Header + Base64Encode(CompressString(Stream.DataString));
+  finally
+    Stream.Free();
+  end;
+end;
 
-  Source := DecompressString(Base64Decode(Str));
-  if (Source = '') then
-    SimbaException('TSimbaImage.LoadFromString: Invalid string');
+procedure TSimbaImage.LoadFromString(Str: String);
+const
+  HEADER = 'IMG:';
+var
+  Stream: TStringStream;
+begin
+  if not Str.StartsWith(HEADER, True) then
+    SimbaException('TImage.LoadFromString: Invalid string "' + Str + '"');
+  Str := Str.After(HEADER);
 
-  SourcePtr := @Source[1];
-  DestPtr := PColorBGRA(FData);
-
-  for I := Width * Height - 1 downto 0 do
-  begin
-    DestPtr[I].R := SourcePtr[I].R;
-    DestPtr[I].G := SourcePtr[I].G;
-    DestPtr[I].B := SourcePtr[I].B;
+  Stream := TStringStream.Create(DecompressString(Base64Decode(Str)));
+  try
+    SimbaImage_FromFPImageReader(Self, TFPReaderQoi, Stream);
+  finally
+    Stream.Free();
   end;
 end;
 
@@ -774,7 +792,7 @@ var
 begin
   SetSize(0, 0);
 
-  TempBitmap := LazBitmap.ToMufasaBitmap();
+  TempBitmap := LazImage_ToSimbaImage(LazBitmap);
   TempBitmap.DataOwner := False;
 
   FData := TempBitmap.Data;
@@ -2357,11 +2375,11 @@ begin
   LoadFromFile(FileName);
 end;
 
-constructor TSimbaImage.CreateFromString(AWidth, AHeight: Integer; Str: String);
+constructor TSimbaImage.CreateFromString(Str: String);
 begin
   Create();
 
-  LoadFromString(AWidth, AHeight, Str);
+  LoadFromString(Str);
 end;
 
 constructor TSimbaImage.CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);

@@ -113,7 +113,7 @@ implementation
 
 uses
   Math, GraphType, LCLIntf,
-  simba.finder, simba.bitmap_utils, simba.windowhandle;
+  simba.finder, simba.image_lazbridge, simba.windowhandle;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
 begin
@@ -620,7 +620,7 @@ var
   Finder: TSimbaFinder;
   Img: TSimbaImage;
 begin
-  Img := FBackground.ToMufasaBitmap();
+  Img := LazImage_ToSimbaImage(FBackground);
   try
     Finder.Target.SetImage(Img);
 
@@ -635,7 +635,7 @@ var
   Finder: TSimbaFinder;
   Img: TSimbaImage;
 begin
-  Img := FBackground.ToMufasaBitmap();
+  Img := LazImage_ToSimbaImage(FBackground);
   try
     Finder.Target.SetImage(Img);
 
@@ -650,7 +650,7 @@ var
   Finder: TSimbaFinder;
   Img: TSimbaImage;
 begin
-  Img := FBackground.ToMufasaBitmap();
+  Img := LazImage_ToSimbaImage(FBackground);
   try
     Finder.Target.SetImage(Img);
 
@@ -662,7 +662,7 @@ end;
 
 procedure TSimbaImageBox.SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer);
 begin
-  FBackground.FromData(Data, AWidth, AHeight);
+  LazImage_FromData(FBackground, Data, AWidth, AHeight);
 end;
 
 procedure TSimbaImageBox.SetBackground(FileName: String);
@@ -672,7 +672,7 @@ end;
 
 procedure TSimbaImageBox.SetBackground(Bitmap: TSimbaImage);
 begin
-  FBackground.FromData(Bitmap.Data, Bitmap.Width, Bitmap.Height);
+  SetBackground(Bitmap.Data, Bitmap.Width, Bitmap.Height);
 end;
 
 procedure TSimbaImageBox.SetBackground(Window: TWindowHandle);

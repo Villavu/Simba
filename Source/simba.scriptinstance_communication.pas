@@ -49,7 +49,7 @@ type
 implementation
 
 uses
-  simba.scriptinstance, simba.main, simba.debugimageform, simba.bitmap_utils,
+  simba.scriptinstance, simba.main, simba.debugimageform, simba.image_lazbridge,
   simba.threading, simba.ide_mainstatusbar, simba.process;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
@@ -291,6 +291,7 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
         Inc(Dest, DestBytesPerLine);
       end;
     end;
+
   var
     Bitmap: TBitmap;
   begin
@@ -308,7 +309,7 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
     Source             := GetMem(SourceBytesPerLine);
     SourceUpper        := PtrUInt(Source + SourceBytesPerLine);
 
-    case GetBitmapPixelFormat(Bitmap) of
+    case LazImage_PixelFormat(Bitmap) of
       'BGR':  BGR();
       'BGRA': BGRA();
       'ARGB': ARGB();

@@ -1064,11 +1064,11 @@ end;
 (*
 TImage.LoadFromString
 ~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.LoadFromString(AWidth, AHeight: Integer; Str: String);
+> procedure TImage.LoadFromString(Str: String);
 *)
 procedure _LapeImage_LoadFromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromString(PInteger(Params^[1])^, PInteger(Params^[2])^, PString(Params^[3])^);
+  PSimbaImage(Params^[0])^.LoadFromString(PString(Params^[1])^);
 end;
 
 (*
@@ -1124,11 +1124,11 @@ end;
 (*
 TImage.CreateFromString
 ~~~~~~~~~~~~~~~~~~~~~~~
-> function TImage.CreateFromString(Width, Height: Integer; Str: String): TImage; static;
+> function TImage.CreateFromString(Str: String): TImage; static;
 *)
 procedure _LapeImage_CreateFromString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Result)^ := TSimbaImage.CreateFromString(PInteger(Params^[0])^, PInteger(Params^[1])^, PString(Params^[2])^);
+  PSimbaImage(Result)^ := TSimbaImage.CreateFromString(PString(Params^[0])^);
 end;
 
 (*
@@ -1300,7 +1300,7 @@ begin
     addGlobalFunc('function TImage.Create: TImage; static; overload', @_LapeImage_Create);
     addGlobalFunc('function TImage.Create(Width, Height: Integer): TImage; static; overload', @_LapeImage_CreateEx);
     addGlobalFunc('function TImage.CreateFromFile(FileName: String): TImage; static; overload', @_LapeImage_CreateFromFile);
-    addGlobalFunc('function TImage.CreateFromString(Width, Height: Integer; Str: String): TImage; static; overload', @_LapeImage_CreateFromString);
+    addGlobalFunc('function TImage.CreateFromString(Str: String): TImage; static; overload', @_LapeImage_CreateFromString);
 
     addGlobalFunc('function TImage.Equals(Other: TImage): Boolean;', @_LapeImage_Equals);
 
@@ -1403,7 +1403,7 @@ begin
 
     addGlobalFunc('procedure TImage.LoadFromFile(FileName: String); overload', @_LapeImage_LoadFromFile);
     addGlobalFunc('procedure TImage.LoadFromFile(FileName: String; Area: TBox); overload', @_LapeImage_LoadFromFileEx);
-    addGlobalFunc('procedure TImage.LoadFromString(AWidth, AHeight: Integer; Str: String)', @_LapeImage_LoadFromString);
+    addGlobalFunc('procedure TImage.LoadFromString(Str: String)', @_LapeImage_LoadFromString);
     addGlobalFunc('procedure TImage.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; DataWidth: Integer)', @_LapeImage_LoadFromData);
     addGlobalFunc('procedure TImage.LoadFromImage(Image: TImage);', @_LapeImage_LoadFromImage);
 
