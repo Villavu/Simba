@@ -1,4 +1,4 @@
-unit simba.import_class_bitmap;
+unit simba.import_class_image;
 
 {$i simba.inc}
 
@@ -15,7 +15,7 @@ implementation
 uses
   Graphics,
   lptypes,
-  simba.bitmap;
+  simba.image;
 
 type
   PBitmap = ^TBitmap;

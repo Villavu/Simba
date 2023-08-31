@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.bitmap_textdrawer;
+unit simba.image_textdrawer;
 
 {$i simba.inc}
 
@@ -84,7 +84,7 @@ implementation
 
 uses
   Forms, FileUtil, LazFileUtils, LazFreeTypeFontCollection,
-  simba.bitmap;
+  simba.image;
 
 procedure TSimbaFreeTypeFontLoader.LoadSystemFonts;
 var

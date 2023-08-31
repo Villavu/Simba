@@ -3,9 +3,9 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 
-  The simple bitmap finder.
+  The simple Image finder.
 }
-unit simba.finder_bitmap;
+unit simba.finder_image;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
@@ -16,14 +16,14 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.target, simba.bitmap,
-  simba.colormath_distance_unrolled, simba.simplelock;
+  simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.target,
+  simba.image, simba.colormath_distance_unrolled, simba.simplelock;
 
-function FindBitmapOnTarget(Target: TSimbaTarget; Bitmap: TSimbaImage; Bounds: TBox;
+function FindBitmapOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;
                             Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray;
 
 function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit;
-                            Bitmap: TSimbaImage;
+                            Image: TSimbaImage;
                             ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers;
                             Buffer: PColorBGRA; BufferWidth: Integer;
                             SearchWidth, SearchHeight: Integer): TPointArray;
@@ -37,9 +37,7 @@ var
 implementation
 
 uses
-  simba.datetime,
-  simba.overallocatearray,
-  simba.threadpool, simba.tpa, simba.atpa;
+  simba.datetime, simba.overallocatearray, simba.threadpool, simba.tpa, simba.atpa;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
@@ -63,21 +61,21 @@ const
 
 // Pre calculate color space
 // and "transparent" (aka ignore) colors.
-function ConvertBitmapColors(Bitmap: TSimbaImage; ColorSpace: EColorSpace): PByte;
+function ConvertBitmapColors(Image: TSimbaImage; ColorSpace: EColorSpace): PByte;
 var
   I: Integer;
   Source: PColorBGRA;
   Dest, DestFix: PByte;
 begin
   // packed record Transparent: Boolean; Color: TColorXXX; end;
-  Result := GetMem((Bitmap.Width * Bitmap.Height) * BitmapColorSize);
+  Result := GetMem((Image.Width * Image.Height) * BitmapColorSize);
 
-  Source := Bitmap.Data;
+  Source := Image.Data;
   Dest := Result;
 
-  for I := 0 to (Bitmap.Width * Bitmap.Height) - 1 do
+  for I := 0 to (Image.Width * Image.Height) - 1 do
   begin
-    PBoolean(Dest)^ := (Bitmap.TransparentColorActive and Source^.EqualsIgnoreAlpha(Bitmap.TransparentRGB));
+    PBoolean(Dest)^ := (Image.TransparentColorActive and Source^.EqualsIgnoreAlpha(Image.TransparentRGB));
     if not PBoolean(Dest)^ then
     begin
       DestFix := Dest + 1; // temp fix, https://gitlab.com/freepascal.org/fpc/source/-/commit/851af5033fb80d4e19c4a7b5c44d50a36f456374
@@ -97,7 +95,7 @@ begin
   end;
 end;
 
-function FindBitmapOnTarget(Target: TSimbaTarget; Bitmap: TSimbaImage; Bounds: TBox; Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
+function FindBitmapOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox; Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
 var
   Buffer: PColorBGRA;
   BufferWidth: Integer;
@@ -112,8 +110,8 @@ var
   begin
     TPA := FindBitmapOnBuffer(
       Limit,
-      Bitmap, Formula, Tolerance, Multipliers,
-      @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + Bitmap.Height
+      Image, Formula, Tolerance, Multipliers,
+      @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + Image.Height
     );
 
     SliceResults[Index] := TPA.Offset(Bounds.X1, Bounds.Y1 + Lo);
@@ -134,7 +132,7 @@ begin
     {$ENDIF}
 
     SetLength(SliceResults, CalculateSlices(Bounds.Width, Bounds.Height)); // Cannot exceed this
-    ThreadsUsed := SimbaThreadPool.RunParallel(Length(SliceResults), 0, Bounds.Height - Bitmap.Height, @Execute);
+    ThreadsUsed := SimbaThreadPool.RunParallel(Length(SliceResults), 0, Bounds.Height - Image.Height, @Execute);
     Result := SliceResults.Merge();
     if (MaxToFind > -1) and (Length(Result) > MaxToFind) then
       SetLength(Result, MaxToFind);
@@ -147,7 +145,7 @@ begin
   end;
 end;
 
-function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit; Bitmap: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
+function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit; Image: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
 var
   BitmapColors: PByte;
 
@@ -171,9 +169,9 @@ var
   begin
     BitmapPtr := BitmapColors;
 
-    for Y := 0 to Bitmap.Height - 1 do
+    for Y := 0 to Image.Height - 1 do
     begin
-      for X := 0 to Bitmap.Width - 1 do
+      for X := 0 to Image.Width - 1 do
       begin
         if (not IsTransparent(BitmapPtr)) and (not Match(BufferPtr^, BitmapPtr)) then
           Exit(False);
@@ -182,7 +180,7 @@ var
         Inc(BufferPtr);
       end;
 
-      Inc(BufferPtr, BufferWidth - Bitmap.Width);
+      Inc(BufferPtr, BufferWidth - Image.Width);
     end;
 
     Result := True;
@@ -242,11 +240,11 @@ begin
       SimbaException('FindBitmapOnBuffer: Formula invalid!');
   end;
 
-  BitmapColors := ConvertBitmapColors(Bitmap, ColorSpace);
+  BitmapColors := ConvertBitmapColors(Image, ColorSpace);
 
   try
-    Dec(SearchWidth, Bitmap.Width);
-    Dec(SearchHeight, Bitmap.Height);
+    Dec(SearchWidth, Image.Width);
+    Dec(SearchHeight, Image.Height);
 
     for Y := 0 to SearchHeight do
     begin

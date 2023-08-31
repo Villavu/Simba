@@ -11,8 +11,8 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.bitmap,
-  simba.target_eios, simba.target_window, simba.target_bitmap;
+  simba.mufasatypes, simba.image,
+  simba.target_eios, simba.target_window, simba.target_image;
 
 type
   {$PUSH}

@@ -586,7 +586,7 @@
         <IsPartOfProject Value="True"/>
       </Unit47>
       <Unit48>
-        <Filename Value="script/imports/simbaclasses/simba.import_class_bitmap.pas"/>
+        <Filename Value="script/imports/simbaclasses/simba.import_class_image.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit48>
       <Unit49>
@@ -839,7 +839,7 @@
         <IsPartOfProject Value="True"/>
       </Unit105>
       <Unit106>
-        <Filename Value="finders/simba.finder_bitmap.pas"/>
+        <Filename Value="finders/simba.finder_image.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit106>
       <Unit107>

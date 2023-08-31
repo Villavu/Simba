@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.bitmap;
+unit simba.image;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
@@ -11,8 +11,8 @@ unit simba.bitmap;
 interface
 
 uses
-  Classes, SysUtils, GraphType, Graphics, IntfGraphics, FPImage, Math,
-  simba.baseclass, simba.mufasatypes, simba.bitmap_textdrawer,
+  Classes, SysUtils, Graphics,
+  simba.baseclass, simba.mufasatypes, simba.image_textdrawer,
   simba.colormath, simba.colormath_distance, simba.matchtemplate;
 
 type
@@ -220,8 +220,8 @@ type
 implementation
 
 uses
-  BMPcomn, fpqoi_simba,
-  simba.overallocatearray, simba.geometry, simba.tpa, simba.datetime,
+  Math, FPImage, BMPcomn, fpqoi_simba,
+  simba.overallocatearray, simba.geometry, simba.tpa,
   simba.encoding, simba.compress, simba.math,
   simba.nativeinterface, simba.singlematrix,
   simba.image_lazbridge, simba.rgbsumtable;
@@ -239,7 +239,6 @@ end;
 
 function TSimbaImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean): Boolean;
 var
-  Image: TLazIntfImage;
   Stream: TFileStream;
   WriterClass: TFPCustomImageWriterClass;
 begin
@@ -248,13 +247,11 @@ begin
   if FileExists(FileName) and (not OverwriteIfExists) then
     SimbaException('TSimbaImage.SaveToFile: File already exists "%s"', [FileName]);
 
-  Stream := nil;
-  Image  := nil;
-
   WriterClass := TFPCustomImage.FindWriterFromFileName(FileName);
   if (WriterClass = nil) then
     SimbaException('TSimbaImage.SaveToFile: Unknown image format "%s"', [FileName]);
 
+  Stream := nil;
   try
     if FileExists(FileName) then
       Stream := TFileStream.Create(FileName, fmOpenReadWrite or fmShareDenyWrite)
@@ -267,8 +264,6 @@ begin
   finally
     if (Stream <> nil) then
       Stream.Free();
-    if (Image <> nil) then
-      Image.Free();
   end;
 end;
 

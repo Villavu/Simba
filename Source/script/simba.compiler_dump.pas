@@ -225,6 +225,8 @@ function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: lpString; AName: 
 begin
   Result := inherited addGlobalVar(Typ, Value, AName);
   Result._DocPos.FileName := ImportingSection;
+
+  // AddType
 end;
 
 function TSimbaCompilerDump.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString): TLapeGlobalVar;
