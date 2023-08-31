@@ -220,10 +220,10 @@ type
 implementation
 
 uses
-  BMPcomn,
+  BMPcomn, fpqoi_simba,
   simba.overallocatearray, simba.geometry, simba.tpa, simba.datetime,
   simba.encoding, simba.compress, simba.math,
-  simba.nativeinterface, simba.singlematrix, fpqoi_simba,
+  simba.nativeinterface, simba.singlematrix,
   simba.image_lazbridge, simba.rgbsumtable;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;

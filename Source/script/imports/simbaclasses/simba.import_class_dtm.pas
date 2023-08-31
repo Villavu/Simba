@@ -20,6 +20,8 @@ uses
 DTM
 ===
 DTM related methods
+
+Image:: ../images/dtm.png
 *)
 
 (*

@@ -334,7 +334,7 @@ end;
 
 procedure TSimbaAutoComplete.ContinueCompletion(Data: PtrInt);
 begin
-  Editor.CommandProcessor(ecChar, Char(Byte(Data)), nil);
+  Editor.CommandProcessor(TSynEditorCommand(Data), #0, nil);
 end;
 
 procedure TSimbaAutoComplete.DoCodeCompletion(var Value: String; SourceValue: String; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
@@ -346,10 +346,11 @@ begin
     Value := SourceValue
   else
     Value := Decl.Name;
+  Value := Value + KeyChar;
 
   case KeyChar of
-    '.': Application.QueueAsyncCall(@ContinueCompletion, Ord('.'));
-    ',': Application.QueueAsyncCall(@ContinueCompletion, Ord(','));
+    '.': Application.QueueAsyncCall(@ContinueCompletion, TSimbaEditor(Editor).AutoComplete.AutoCompleteCommand);
+    ',','(': Application.QueueAsyncCall(@ContinueCompletion, TSimbaEditor(Editor).ParamHint.ParamHintCommand);
   end;
 end;
 
