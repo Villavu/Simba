@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Dialogs, DividerBevel, Graphics, ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox,
   simba.mufasatypes,
-  simba.imagebox, simba.imagebox_zoom, simba.imagebox_bitmap,
+  simba.imagebox, simba.imagebox_zoom, simba.imagebox_image,
   simba.colormath, simba.finder;
 
 type
@@ -120,7 +120,7 @@ implementation
 
 uses
   Clipbrd, TypInfo, LCLType,
-  simba.windowhandle, simba.bitmap, simba.colormath_aca, simba.singlematrix, simba.dialog;
+  simba.windowhandle, simba.image, simba.colormath_aca, simba.singlematrix, simba.dialog;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin

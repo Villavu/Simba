@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes, lpvartypes, ffi,
-  simba.bitmap, simba.target;
+  simba.image, simba.target;
 
 (*
 Target

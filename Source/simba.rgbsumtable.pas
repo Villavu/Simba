@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.bitmap;
+  simba.mufasatypes, simba.image;
 
 type
   TRGBSum = record

@@ -16,7 +16,7 @@ uses
   lptypes,
   simba.tpa, simba.algo_sort, simba.algo_unique,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
-  simba.script, simba.bitmap, simba.process;
+  simba.script, simba.image, simba.process;
 
 procedure _LapeWrite(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin

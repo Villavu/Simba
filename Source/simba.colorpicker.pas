@@ -52,7 +52,7 @@ implementation
 
 uses
   LCLType,
-  simba.bitmap, simba.windowhandle, simba.image_lazbridge;
+  simba.image, simba.windowhandle, simba.image_lazbridge;
 
 procedure TSimbaColorPickerHint.Paint;
 begin

@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, ExtCtrls, Graphics,
-  simba.bitmap, simba.imagebox;
+  simba.image, simba.imagebox;
 
 type
   TSimbaImageBoxZoom = class(TCustomControl)

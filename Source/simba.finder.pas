@@ -13,10 +13,8 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes,
-  simba.colormath, simba.colormath_distance,
-  simba.bitmap, simba.dtm,
-  simba.target;
+  simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.image,
+  simba.dtm, simba.target;
 
 type
   PColorTolerance = ^TColorTolerance;
@@ -82,7 +80,7 @@ implementation
 
 uses
   simba.overallocatearray, simba.singlematrix, simba.tpa, simba.matchtemplate,
-  simba.finder_color, simba.finder_bitmap, simba.finder_dtm;
+  simba.finder_color, simba.finder_image, simba.finder_dtm;
 
 function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TSimbaImage): Boolean;
 var

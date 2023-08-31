@@ -5,7 +5,7 @@ unit simba.import_class_imagebox;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, Controls, ComCtrls, Graphics,
   simba.mufasatypes, simba.script_compiler;
 
 procedure ImportSimbaImageBox(Compiler: TSimbaScript_Compiler);
@@ -13,9 +13,8 @@ procedure ImportSimbaImageBox(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  controls, extctrls, comctrls, graphics, lptypes, ffi,
-  simba.imagebox, simba.imagebox_bitmap,
-  simba.bitmap, simba.dtm, simba.colormath;
+  lptypes, ffi,
+  simba.imagebox, simba.imagebox_image, simba.image, simba.dtm, simba.colormath;
 
 type
   PComponent = ^TComponent;

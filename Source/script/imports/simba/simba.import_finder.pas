@@ -21,8 +21,8 @@ implementation
 
 uses
   lptypes, lpvartypes,
-  simba.finder, simba.bitmap, simba.dtm,
-  simba.colormath, simba.target, simba.finder_color, simba.finder_bitmap;
+  simba.finder, simba.image, simba.dtm,
+  simba.colormath, simba.target, simba.finder_color, simba.finder_image;
 
 (*
 Finder
