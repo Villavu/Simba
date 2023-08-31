@@ -154,6 +154,7 @@ begin
     'Matrix':         Result := 'https://villavu.github.io/Simba/Matrix.html';
     'Misc':           Result := 'https://villavu.github.io/Simba/Misc.html';
     'Dialogs':        Result := 'https://villavu.github.io/Simba/Dialogs.html';
+    'DTM':            Result := 'https://villavu.github.io/Simba/DTM.html';
   end;
 end;
 
