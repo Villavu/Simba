@@ -341,16 +341,20 @@ procedure TSimbaAutoComplete.DoCodeCompletion(var Value: String; SourceValue: St
 var
   Decl: TDeclaration;
 begin
-  Decl := FFilteredDecls[Position];
-  if Decl.IsName(SourceValue) then
-    Value := SourceValue
+  Decl := GetDecl(Position);
+  if (Decl <> nil) then
+    if Decl.IsName(SourceValue) then
+      Value := SourceValue
+    else
+      Value := Decl.Name
   else
-    Value := Decl.Name;
+    Value := SourceValue;
+
   Value := Value + KeyChar;
 
   case KeyChar of
-    '.': Application.QueueAsyncCall(@ContinueCompletion, TSimbaEditor(Editor).AutoComplete.AutoCompleteCommand);
-    ',','(': Application.QueueAsyncCall(@ContinueCompletion, TSimbaEditor(Editor).ParamHint.ParamHintCommand);
+    '.':      Application.QueueAsyncCall(@ContinueCompletion, TSimbaEditor(Editor).AutoComplete.AutoCompleteCommand);
+    ',', '(': Application.QueueAsyncCall(@ContinueCompletion, TSimbaEditor(Editor).ParamHint.ParamHintCommand);
   end;
 end;
 

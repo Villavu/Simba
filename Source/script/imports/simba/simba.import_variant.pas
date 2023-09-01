@@ -26,6 +26,31 @@ uses
 Variant
 =======
 The variant "magic" datatype can store most base types.
+
+```
+var v: Variant;
+begin
+  WriteLn('Should be unassigned: ', v = Variant.UnAssigned);
+  v := 'I am a string';
+  Writeln('Now should *not* be unassigned: ', v = Variant.Unassigned);
+  WriteLn('And should be string:');
+  WriteLn(v.VarType, ' -> ', v);
+  v := 123;
+  WriteLn('Now should be integer:');
+  WriteLn(v.VarType, ' -> ', v);
+end;
+```
+
+Note:: If curious to how the Variant datatype works, internally it's a record:
+
+  ```
+  // pseudo code
+  type
+    InternalVariantData = record
+      VarType: EVariantType;
+      Value: array[0..SizeOf(LargestDataTypeVariantCanStore)] of Byte;
+    end;
+  ```
 *)
 
 type
@@ -51,6 +76,9 @@ procedure _LapeVariantVarType(const Params: PParamArray; const Result: Pointer);
   function GetVarType(const v: Variant): EVariantType;
   begin
     case VarType(v) of
+      varEmpty:    Result := EVariantType.Unassigned;
+      varNull:     Result := EVariantType.Null;
+
       varBoolean:  Result := EVariantType.Boolean;
 
       varShortInt: Result := EVariantType.Int8;
@@ -71,6 +99,8 @@ procedure _LapeVariantVarType(const Params: PParamArray; const Result: Pointer);
       varOleStr:   Result := EVariantType.WString;
       varUString:  Result := EVariantType.UString;
       varString:   Result := EVariantType.AString;
+
+      varVariant:  Result := EVariantType.Variant;
       else
         Result := EVariantType.Unknown;
     end;
@@ -84,10 +114,12 @@ end;
 Variant.IsNumeric
 ~~~~~~~~~~~~~~~~~
 > function Variant.IsNumeric: Boolean;
+
+Is integer or float?
 *)
 procedure _LapeVariantIsNumeric(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PEvalBool(Result)^ := VarIsNumeric(PVariant(Params^[0])^);
+  PBoolean(Result)^ := VarIsNumeric(PVariant(Params^[0])^);
 end;
 
 (*
@@ -97,17 +129,17 @@ Variant.IsString
 *)
 procedure _LapeVariantIsString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PEvalBool(Result)^ := VarIsStr(PVariant(Params^[0])^);
+  PBoolean(Result)^ := VarIsStr(PVariant(Params^[0])^);
 end;
 
 (*
-Variant.IsOrdinal
+Variant.IsInteger
 ~~~~~~~~~~~~~~~~~
-> function Variant.IsOrdinal: Boolean;
+> function Variant.IsInteger: Boolean;
 *)
-procedure _LapeVariantIsOrdinal(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeVariantIsInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PEvalBool(Result)^ := VarIsOrdinal(PVariant(Params^[0])^);
+  PBoolean(Result)^ := VarIsOrdinal(PVariant(Params^[0])^);
 end;
 
 (*
@@ -117,7 +149,7 @@ Variant.IsFloat
 *)
 procedure _LapeVariantIsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PEvalBool(Result)^ := VarIsFloat(PVariant(Params^[0])^);
+  PBoolean(Result)^ := VarIsFloat(PVariant(Params^[0])^);
 end;
 
 (*
@@ -127,7 +159,39 @@ Variant.IsBoolean
 *)
 procedure _LapeVariantIsBoolean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PEvalBool(Result)^ := VarIsBool(PVariant(Params^[0])^);
+  PBoolean(Result)^ := VarIsBool(PVariant(Params^[0])^);
+end;
+
+(*
+Variant.IsVariant
+~~~~~~~~~~~~~~~~~
+> function Variant.IsVariant: Boolean;
+
+The variant holds another variant!
+*)
+procedure _LapeVariantIsVariant(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := VarIsType(PVariant(Params^[0])^, varVariant);
+end;
+
+(*
+Variant.IsUnAssigned
+~~~~~~~~~~~~~~~~~~~~
+> function Variant.IsUnAssigned: Boolean;
+*)
+procedure _LapeVariantIsUnAssigned(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := VarIsClear(PVariant(Params^[0])^);
+end;
+
+(*
+Variant.IsNull
+~~~~~~~~~~~~~~
+> function Variant.IsNull: Boolean;
+*)
+procedure _LapeVariantIsNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := VarIsNull(PVariant(Params^[0])^);
 end;
 
 (*
@@ -176,11 +240,15 @@ begin
     addGlobalType('enum(Unknown, Unassigned, Null, Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Single, Double, DateTime, Currency, Boolean, Variant, AString, UString, WString)', 'EVariantVarType');
 
     addGlobalFunc('function Variant.VarType: EVariantVarType;', @_LapeVariantVarType);
+
     addGlobalFunc('function Variant.IsNumeric: Boolean;', @_LapeVariantIsNumeric);
-    addGlobalFunc('function Variant.IsString: Boolean;', @_LapeVariantIsString);
-    addGlobalFunc('function Variant.IsOrdinal: Boolean;', @_LapeVariantIsOrdinal);
+    addGlobalFunc('function Variant.IsInteger: Boolean;', @_LapeVariantIsInteger);
     addGlobalFunc('function Variant.IsFloat: Boolean;', @_LapeVariantIsFloat);
+    addGlobalFunc('function Variant.IsString: Boolean;', @_LapeVariantIsString);
     addGlobalFunc('function Variant.IsBoolean: Boolean;', @_LapeVariantIsBoolean);
+    addGlobalFunc('function Variant.IsVariant: Boolean;', @_LapeVariantIsVariant);
+    addGlobalFunc('function Variant.IsUnAssigned: Variant; static;', @_LapeVariantIsUnAssigned);
+    addGlobalFunc('function Variant.IsNull: Variant; static;', @_LapeVariantIsNull);
 
     addGlobalFunc('function Variant.Null: Variant; static;', @_LapeVariantNull);
     addGlobalFunc('function Variant.Unassigned: Variant; static;', @_LapeVariantUnassigned);
