@@ -376,7 +376,7 @@ begin
     OnClick := @FindEditChange;
   end;
 
-  FFindButtonDown := TSimbaToggleButton.Create(Self);
+  FFindButtonDown := TSimbaButton.Create(Self);
   with FFindButtonDown do
   begin
     Images := SimbaForm.Images;
@@ -389,7 +389,7 @@ begin
     OnClick := @FindButtonClick;
   end;
 
-  FFindButtonUp := TSimbaToggleButton.Create(Self);
+  FFindButtonUp := TSimbaButton.Create(Self);
   with FFindButtonUp do
   begin
     Images := SimbaForm.Images;
@@ -454,6 +454,8 @@ begin
   end;
 
   FindPanel.Show();
+
+  FFindEdit.SelectAll();
   if FFindEdit.CanSetFocus() then
     FFindEdit.SetFocus();
 end;
