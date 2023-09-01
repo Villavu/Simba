@@ -1,84 +1,41 @@
 // To run to locally build docs you need:
 //
-// 1) Python installed, on PATH too so Simba can execute "Python"
-// 2) "sphinx" and "sphinx_rtd_theme" installed:
-//      pip3 install sphinx sphinx_rtd_theme
+// 1) Python installed which is on the systems PATH too so Simba can execute "Python"
+// 2) "sphinx" and "furo" installed: pip3 install sphinx furo
 
-var
-  SourceFiles: array of record
-    FileName: String;
-    Title: String;
-  end;
+// Notes:
+//
+// The theme used is furo > https://pradyunsg.me/furo/quickstart/
+//
+// This script extracts comments from `SourceFiles` and adds them to .rst files,
+// where sphinx generates static html files.
+//
+// This script also parsers some more prettier syntax such as:
+//
+// - Triple backtick -> .. code-block::
+// - Single backtick -> :code:
+// - Greater than (at the beginning of line) -> .. code-block::
+//
+// Example documentation comment:
 
-begin
-  SourceFiles += ['Source\script\imports\simba\simba.import_colormath.pas',     'Color Math'     ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_point.pas',         'TPoint'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_tpa.pas',           'TPointArray'    ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_atpa.pas',          'T2DPointArray'  ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_box.pas',           'TBox'           ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_boxarray.pas',      'TBoxArray'      ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_quad.pas',          'TQuad'          ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_windowhandle.pas',  'TWindowHandle'  ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_debugimage.pas',    'Debug Image'    ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_variant.pas',       'Variant'        ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_script.pas',        'Script'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_random.pas',        'Random'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_input.pas',         'Input'          ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_finder.pas',        'Finder'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_target.pas',        'Target'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_web.pas',           'Web'            ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_file.pas',          'File'           ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_encoding.pas',      'Encoding'       ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_timing.pas',        'Timing'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_string.pas',        'String'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_process.pas',       'Process'        ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_math.pas',          'Math'           ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_matchtemplate.pas', 'Match Template' ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_misc.pas',          'Misc'           ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_matrix.pas',        'Matrix'         ];
-  SourceFiles += ['Source\script\imports\simba\simba.import_dialogs.pas',       'Dialogs'       ];
+(*
+SomeMethod
+~~~~~~~~~~
+> procedure SomeMethod(SomeInt: Integer);
 
-  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_json.pas',   'JSON'     ];
-  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_bitmap.pas', 'Image'    ];
-  SourceFiles += ['Source\script\imports\simbaclasses\simba.import_class_dtm.pas',    'DTM'      ];
-end;
+This method does something.
+Use it like:
+
+```
+SomeMethod(123)
+```
+*)
 
 const
-  OUTPUT_DIR = 'DocGen/output/';
-  INPUT_DIR  = 'DocGen/input/';
-
-  CONFIG_FILE = "
-from datetime import datetime
-
-project = 'Simba'
-author = 'Simba'
-copyright = str(datetime.now().year) + ', Simba'
-templates_path = ['.']
-pygments_style='sphinx'
-source_suffix = '.rst'
-master_doc = 'index'
-highlight_language = 'pascal'
-html_favicon = '../images/simba.png'
-html_theme = 'sphinx_rtd_theme'
-extensions = [
-    'sphinx.ext.githubpages',
-]
-";
-
-  TEMPLATE_FILE = "
-{% extends '!layout.html' %}
-  {% block footer %} {{ super() }}
-  <style>
-         .wy-nav-content { min-width: 85%; }
-  </style>
-{% endblock %}";
-
-  TOC_FILE = "
-Welcome to Simba documentation
-******************************
-.. toctree::
-
-";
+  SOURCE_SEARCH_PATHS = [
+    'Source\script\imports\simba\',
+    'Source\script\imports\simbaclasses\'
+  ];
 
 function Indent(Str: String; Size: Integer): String;
 var
@@ -140,8 +97,8 @@ end;
 // Header to code block
 {
 Test
-****
-procedure Test;
+~~~~
+> procedure Test;
 }
 procedure MakeCodeHeaders(var Str: String);
 var
@@ -164,10 +121,29 @@ begin
   Str := LINE_SEP.Join(Lines);
 end;
 
-function ParseComments(FileName, Name: String): Boolean;
+function FindSourceFile(FileName: String): String;
+var
+  SearchPath: String;
+  Matches: TStringArray;
+begin
+  for SearchPath in SOURCE_SEARCH_PATHS do
+  begin
+    Matches := DirSearch(SearchPath, FileName + '*');
+    if (Matches <> []) then
+      Exit(Matches[0]);
+  end;
+
+  WriteLn('Source file not found: ', FileName);
+end;
+
+function ParseSourceFile(FileName, Name: String): Boolean;
 var
   Str, Comments: String;
 begin
+  FileName := FindSourceFile(FileName);
+  if not FileExists(FileName) then
+    Exit;
+
   for Str in FileRead(FileName).BetweenAll('(*', '*)') do
   begin
     if (Comments <> '') then
@@ -186,32 +162,61 @@ begin
     Comments := Comments.Replace('Note::', '.. note::');
     Comments := Comments.Replace('Warning::', '.. warning::');
 
-    FileWrite(INPUT_DIR + Name + '.rst', Comments);
-    FileAppend(INPUT_DIR + 'index.rst', '   ' + Name + LINE_SEP);
+    FileWrite('DocGen/source/api/' + Name + '.rst', Comments);
   end;
 end;
 
+procedure BuildAPI;
 var
-  Str: String;
-  I: Integer;
+  FileName: String;
+begin
+  // Delete old api generation
+  for FileName in DirList('DocGen/source/api/') do
+    if (not (PathExtractName(FileName) in ['.gitkeep', 'index.rst'])) then
+      FileDelete(FileName);
+
+  ParseSourceFile('simba.import_colormath',     'Color Math'     );
+  ParseSourceFile('simba.import_point',         'TPoint'         );
+  ParseSourceFile('simba.import_tpa',           'TPointArray'    );
+  ParseSourceFile('simba.import_atpa',          'T2DPointArray'  );
+  ParseSourceFile('simba.import_box',           'TBox'           );
+  ParseSourceFile('simba.import_boxarray',      'TBoxArray'      );
+  ParseSourceFile('simba.import_quad',          'TQuad'          );
+  ParseSourceFile('simba.import_windowhandle',  'TWindowHandle'  );
+  ParseSourceFile('simba.import_debugimage',    'Debug Image'    );
+  ParseSourceFile('simba.import_variant',       'Variant'        );
+  ParseSourceFile('simba.import_script',        'Script'         );
+  ParseSourceFile('simba.import_random',        'Random'         );
+  ParseSourceFile('simba.import_input',         'Input'          );
+  ParseSourceFile('simba.import_finder',        'Finder'         );
+  ParseSourceFile('simba.import_target',        'Target'         );
+  ParseSourceFile('simba.import_web',           'Web'            );
+  ParseSourceFile('simba.import_file',          'File'           );
+  ParseSourceFile('simba.import_encoding',      'Encoding'       );
+  ParseSourceFile('simba.import_timing',        'Timing'         );
+  ParseSourceFile('simba.import_string',        'String'         );
+  ParseSourceFile('simba.import_process',       'Process'        );
+  ParseSourceFile('simba.import_math',          'Math'           );
+  ParseSourceFile('simba.import_matchtemplate', 'Match Template' );
+  ParseSourceFile('simba.import_misc',          'Misc'           );
+  ParseSourceFile('simba.import_matrix',        'Matrix'         );
+  ParseSourceFile('simba.import_dialogs',       'Dialogs'        );
+
+  ParseSourceFile('simba.import_class_json',  'JSON'  );
+  ParseSourceFile('simba.import_class_image', 'Image' );
+  ParseSourceFile('simba.import_class_dtm',   'DTM'   );
+end;
+
+var
+  SphinxOutput: String;
 begin
   ClearSimbaOutput();
 
-  DirCreate(OUTPUT_DIR);
-  DirDelete(OUTPUT_DIR, True);
-  DirCreate(INPUT_DIR);
-  DirDelete(INPUT_DIR, True);
+  BuildAPI();
 
-  FileWrite(INPUT_DIR + 'index.rst', TOC_FILE);
-  FileWrite(INPUT_DIR + 'conf.py', CONFIG_FILE);
-  FileWrite(INPUT_DIR + 'layout.html', TEMPLATE_FILE);
+  WriteLn('Sphinx exit code: ', RunCommand('sphinx-build', ['-q', '-E', 'DocGen/source', 'DocGen/build'], SphinxOutput));
+  if (SphinxOutput <> '') then
+    WriteLn(SphinxOutput);
 
-  for I := 0 to High(SourceFiles) do
-    ParseComments(SourceFiles[I].FileName, SourceFiles[I].Title);
-
-  WriteLn('Sphinx exit code: ', RunCommand('sphinx-build', ['-q', '-E', INPUT_DIR, OUTPUT_DIR], Str));
-  if (Str <> '') then
-    WriteLn(Str);
-
-  WriteLn('Link: "' + PathNormalize(OUTPUT_DIR) + 'index.html"');
+  WriteLn('Link: "' + PathNormalize('DocGen/build/index.html') + '"');
 end.
