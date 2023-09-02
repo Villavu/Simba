@@ -212,6 +212,9 @@ var
 begin
   ClearSimbaOutput();
 
+  DirCreate('DocGen/build');
+  DirDelete('DocGen/build', True);
+
   BuildAPI();
 
   WriteLn('Sphinx exit code: ', RunCommand('sphinx-build', ['-q', '-E', 'DocGen/source', 'DocGen/build'], SphinxOutput));
