@@ -417,8 +417,8 @@ var
 begin
   ptx := Center.X + Size;
   pty := Center.Y + Size;
-  SinR := Sin(Radians(360.0 / Sides));
-  CosR := Cos(Radians(360.0 / Sides));
+  SinR := Sin(DegToRad(360.0 / Sides));
+  CosR := Cos(DegToRad(360.0 / Sides));
 
   Result := [Point(Round(ptx),Round(pty))];
   for i:=1 to Sides-1 do
@@ -1297,8 +1297,8 @@ var
   Over180: Boolean;
   Buffer: TSimbaPointBuffer;
 begin
-  StartD := FixD(StartDegree);
-  EndD   := FixD(EndDegree);
+  StartD := DegNormalize(StartDegree);
+  EndD   := DegNormalize(EndDegree);
 
   if (not SameValue(StartD, EndD)) then // if StartD = EndD, then we have a circle...
   begin
@@ -1315,11 +1315,11 @@ begin
     end;
 
     // a is the midPoint, B is the left limit line, C is the right Limit Line, X the point we are checking
-    BminusAx := Cos(Radians(StartD - 90)); // creating the two unit vectors
-    BminusAy := Sin(Radians(StartD - 90)); // I use -90 or else it will start at the right side instead of top
+    BminusAx := Cos(DegToRad(StartD - 90)); // creating the two unit vectors
+    BminusAy := Sin(DegToRad(StartD - 90)); // I use -90 or else it will start at the right side instead of top
 
-    CminusAx := Cos(Radians(EndD - 90));
-    CminusAy := Sin(Radians(EndD - 90));
+    CminusAx := Cos(DegToRad(EndD - 90));
+    CminusAy := Sin(DegToRad(EndD - 90));
 
     Buffer.Init(Length(Self) div 2);
     for I := 0 to High(Self) do

@@ -148,7 +148,7 @@ end;
 
 class function TSimbaGeometry.AngleBetween(const P1, P2: TPoint): Double;
 begin
-  Result := Modulo(Degrees(ArcTan2(P2.Y - P1.Y, P2.X - P1.X)) - 90, 360);
+  Result := Modulo(RadToDeg(ArcTan2(P2.Y - P1.Y, P2.X - P1.X)) - 90, 360);
 end;
 
 class function TSimbaGeometry.DeltaAngle(const DegreesA, DegreesB: Double; R: Double): Double;

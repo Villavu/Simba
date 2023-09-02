@@ -13,7 +13,7 @@ unit simba.finder_dtm;
 interface
 
 uses
-  Classes, SysUtils, Graphics,
+  Classes, SysUtils, Graphics, Math,
   simba.mufasatypes, simba.colormath, simba.target, simba.simplelock,
   simba.dtm;
 
@@ -279,9 +279,9 @@ begin
   SetLength(RotatedPoints, Length(SearchPoints));
   SetLength(Table, SearchHeight, SearchWidth);
 
-  StartDegrees := FixD(StartDegrees);
+  StartDegrees := DegNormalize(StartDegrees);
   if (EndDegrees <> 360) then
-    EndDegrees := FixD(EndDegrees);
+    EndDegrees := DegNormalize(EndDegrees);
   if (StartDegrees > EndDegrees) then
     EndDegrees := EndDegrees + 360;
 
@@ -298,7 +298,7 @@ begin
 
     Inc(AngleSteps);
 
-    RotateDTMPoints(RotatedPoints, Radians(SearchDegree), DTMBounds);
+    RotateDTMPoints(RotatedPoints, DegToRad(SearchDegree), DTMBounds);
 
     MainPointArea.X1 := Abs(DTMBounds.X1);
     MainPointArea.Y1 := Abs(DTMBounds.Y1);
