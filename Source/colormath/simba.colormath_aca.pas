@@ -104,10 +104,10 @@ begin
   y := 0;
   for i:=0 to High(Arr) do
   begin
-    x += Cos(Radians(Arr[i]));
-    y += Sin(Radians(Arr[i]));
+    x += Cos(DegToRad(Arr[i]));
+    y += Sin(DegToRad(Arr[i]));
   end;
-  Result := FixD(Degrees(ArcTan2(y / Length(Arr), x / Length(Arr))));
+  Result := DegNormalize(RadToDeg(ArcTan2(y / Length(Arr), x / Length(Arr))));
 end;
 
 function NormalizeMods(Mods: TChannelMultipliers): TChannelMultipliers;

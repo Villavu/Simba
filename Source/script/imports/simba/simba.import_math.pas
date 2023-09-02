@@ -43,16 +43,6 @@ begin
 end;
 
 (*
-FixD
-~~~~
-> function FixD(Deg: Double): Double;
-*)
-procedure _LapeFixD(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDouble(Result)^ := FixD(PDouble(Params^[0])^);
-end;
-
-(*
 LogN
 ~~~~
 > function LogN(base, x: Double): Double;
@@ -93,23 +83,43 @@ begin
 end;
 
 (*
-Radians
-~~~~~~~
-> function Radians(Deg: Double): Double;
+DegToRad
+~~~~~~~~
+> function DegToRad(Deg: Double): Double;
 *)
-procedure _LapeRadians(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeDegToRad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := Radians(PDouble(Params^[0])^);
+  PDouble(Result)^ := DegToRad(PDouble(Params^[0])^);
 end;
 
 (*
-Degrees
-~~~~~~~
-> function Degrees(Rad: Double): Double;
+RadToDeg
+~~~~~~~~
+> function RadToDeg(Rad: Double): Double;
 *)
-procedure _LapeDegrees(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeRadToDeg(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := Degrees(PDouble(Params^[0])^);
+  PDouble(Result)^ := RadToDeg(PDouble(Params^[0])^);
+end;
+
+(*
+RadNormalize
+~~~~~~~~~~~~
+> function RadNormalize(Rad: Double): Double;
+*)
+procedure _LapeRadNormalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDouble(Result)^ := DegToRad(DegNormalize(RadToDeg(PDouble(Params^[0])^)));
+end;
+
+(*
+DegNormalize
+~~~~~~~~~~~~
+> function DegNormalize(Deg: Double): Double;
+*)
+procedure _LapeDegNormalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDouble(Result)^ := DegNormalize(PDouble(Params^[0])^);
 end;
 
 (*
@@ -130,16 +140,6 @@ Log10
 procedure _LapeLog10(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := Log10(PDouble(Params^[0])^);
-end;
-
-(*
-FixRad
-~~~~~~
-> function FixRad(Rad: Double): Double;
-*)
-procedure _LapeFixRad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDouble(Result)^ := FixRad(PDouble(Params^[0])^);
 end;
 
 (*
@@ -358,16 +358,20 @@ begin
 
     addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload', @_LapeDistance);
     addGlobalFunc('function Distance(const P1, P2: TPoint): Integer; overload', @_LapeDistanceEx);
-    addGlobalFunc('function FixD(Deg: Double): Double', @_LapeFixD);
+
     addGlobalFunc('function Sar(x: Integer; Shift: Byte): Integer', @_LapeSar);
     addGlobalFunc('function Ror(x: UInt32; Shift: Byte): UInt32', @_LapeRor);
     addGlobalFunc('function Rol(x: UInt32; Shift: Byte): UInt32', @_LapeRol);
-    addGlobalFunc('function Radians(Deg: Double): Double', @_LapeRadians);
-    addGlobalFunc('function Degrees(Rad: Double): Double', @_LapeDegrees);
-    addGlobalFunc('function LogN(base, x: Double): Double', @_LapeLogn);
+
+    addGlobalFunc('function LogN(base, x: Double): Double', @_LapeLogN);
     addGlobalFunc('function Log2(x: Double): Double', @_LapeLog2);
     addGlobalFunc('function Log10(x: Double): Double', @_LapeLog10);
-    addGlobalFunc('function FixRad(Rad: Double): Double', @_LapeFixRad);
+
+    addGlobalFunc('function DegToRad(Deg: Double): Double', @_LapeDegToRad);
+    addGlobalFunc('function RadToDeg(Rad: Double): Double', @_LapeRadToDeg);
+    addGlobalFunc('function RadNormalize(Rad: Double): Double', @_LapeRadNormalize);
+    addGlobalFunc('function DegNormalize(Deg: Double): Double', @_LapeDegNormalize);
+
     addGlobalFunc('function NextPower2(const n: Integer): Integer', @_LapeNextPower2);
 
     addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);

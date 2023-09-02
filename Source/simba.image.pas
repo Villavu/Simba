@@ -1133,7 +1133,7 @@ begin
   for Y := Bounds.Y1 to Bounds.Y2 do
     for X := Bounds.X1 to Bounds.X2 do
     begin
-      HSL.H := Degrees(ArcTan2(Y - ACenter.Y, X - ACenter.X));
+      HSL.H := RadToDeg(ArcTan2(Y - ACenter.Y, X - ACenter.X));
       HSL.S := Hypot(ACenter.X - X, ACenter.Y - Y) / Radius * 100;
       HSL.L := 50;
       if (HSL.S < 100) then

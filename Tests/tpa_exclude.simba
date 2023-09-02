@@ -16,7 +16,7 @@ begin
   Assert(ExcludedTPA.Length() = 769);
 
   // Quad
-  ExcludedTPA := TestTPA.ExcludeQuad(TQuad.CreateFromBox([20,20,30,30]).Rotate(Radians(45)));
+  ExcludedTPA := TestTPA.ExcludeQuad(TQuad.CreateFromBox([20,20,30,30]).Rotate(DegToRad(45)));
   Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
   Assert(ExcludedTPA.Length() = 848);
 

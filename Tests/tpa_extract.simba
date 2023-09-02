@@ -15,7 +15,7 @@ begin
   Assert(ExtractedTPA.Bounds() = [15,15,35,35]);
 
   // Quad
-  ExtractedTPA := TestTPA.ExtractQuad(TQuad.CreateFromBox([20,20,30,30]).Rotate(Radians(45)));
+  ExtractedTPA := TestTPA.ExtractQuad(TQuad.CreateFromBox([20,20,30,30]).Rotate(DegToRad(45)));
   Assert(ExtractedTPA.Bounds() = [18,18,32,32]);
 
   // Pie
