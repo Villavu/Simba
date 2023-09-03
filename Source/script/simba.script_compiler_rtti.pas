@@ -28,11 +28,6 @@ type
     function isConstant: Boolean; override;
   end;
 
-  TLapeTree_InternalMethod_RTTIClassFields = class(TLapeTree_InternalMethod_RTTIFields)
-  public
-    function Compile(var Offset: Integer): TResVar; override;
-  end;
-
 function TLapeTree_InternalMethod_RTTIFields.resType: TLapeType;
 begin
   if (FResType = nil) then
@@ -43,12 +38,66 @@ end;
 
 function TLapeTree_InternalMethod_RTTIFields.Compile(var Offset: Integer): TResVar;
 var
-  i: Integer;
   RecordVar: TResVar;
-  FieldName: lpString;
-  RecordType, FieldType: TLapeType;
-  NameExpr, TypeExpr, ValueExpr: TLapeTree_ExprBase;
-  FieldVar: TLapeTree_Operator;
+  RecordType: TLapeType;
+
+  procedure Add(FieldName: String; FieldType: TLapeType; isConst: Boolean);
+  var
+    NameExpr, TypeExpr, ValueExpr, IsConstExpr: TLapeTree_ExprBase;
+    FieldVar: TLapeTree_Operator;
+  begin
+    if (FieldType <> nil) then
+      if (FieldType.Name <> '') then
+        TypeExpr := TLapeTree_String.Create(FieldType.Name, Self)
+      else
+        TypeExpr := TLapeTree_String.Create(FieldType.AsString, Self)
+    else
+      TypeExpr := TLapeTree_String.Create('', Self);
+
+    NameExpr  := TLapeTree_String.Create(FieldName, Self);
+    ValueExpr := TLapeTree_InternalMethod_ToStr.Create(Self);
+    if isConst then
+      IsConstExpr := TLapeTree_GlobalVar.Create('True', ltBoolean, Self)
+    else
+      IsConstExpr := TLapeTree_GlobalVar.Create('False', ltBoolean, Self);
+
+    with TLapeTree_InternalMethod_ToStr(ValueExpr) do
+    begin
+      if (RecordVar.VarType is TLapeType_Type) then
+        addParam(TLapeTree_GlobalVar.Create(FieldType.NewGlobalVarP(), Self))
+      else
+      begin
+        FieldVar := TLapeTree_Operator.Create(op_Dot, Self);
+        FieldVar.Left := TLapeTree_ResVar.Create(RecordVar.IncLock(), Self);
+        FieldVar.Right := TLapeTree_String.Create(FieldName, Self);
+
+        addParam(FieldVar);
+      end;
+    end;
+
+    with TLapeTree_Operator.Create(op_Plus, Self) do
+    try
+      Dest := Result;
+
+      Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
+      Right := TLapeTree_OpenArray.Create(Self);
+      with TLapeTree_OpenArray(Right) do
+      begin
+        addValue(NameExpr);
+        addValue(TypeExpr);
+        addValue(ValueExpr);
+        addValue(IsConstExpr);
+      end;
+
+      Result := Compile(Offset);
+    finally
+      Free();
+    end;
+  end;
+
+var
+  i: Integer;
+  Decls: TLapeDeclArray;
 begin
   Dest := NullResVar;
   Result := _ResVar.New(FCompiler.getTempVar(resType())).IncLock();
@@ -61,58 +110,24 @@ begin
   if (RecordType is TLapeType_Type) then
     RecordType := TLapeType_Type(RecordType).TType;
 
-  if (RecordType is TLapeType_Record) then
-    with RecordType as TLapeType_Record do
-      for i := 0 to FieldMap.Count - 1 do
-      begin
-        FieldName := FieldMap.Key[i];
-        FieldType := FieldMap.ItemsI[i].FieldType;
-
-        if (FieldType <> nil) then
-          if (FieldType.Name <> '') then
-            TypeExpr := TLapeTree_String.Create(FieldType.Name, Self)
-          else
-            TypeExpr := TLapeTree_String.Create(FieldType.AsString, Self)
-        else
-          TypeExpr := TLapeTree_String.Create('', Self);
-
-        NameExpr  := TLapeTree_String.Create(FieldName, Self);
-        ValueExpr := TLapeTree_InternalMethod_ToStr.Create(Self);
-
-        with TLapeTree_InternalMethod_ToStr(ValueExpr) do
-        begin
-          if (RecordVar.VarType is TLapeType_Type) then
-            addParam(TLapeTree_GlobalVar.Create(FieldType.NewGlobalVarP(), Self))
-          else
-          begin
-            FieldVar := TLapeTree_Operator.Create(op_Dot, Self);
-            FieldVar.Left := TLapeTree_ResVar.Create(RecordVar.IncLock(), Self);
-            FieldVar.Right := TLapeTree_String.Create(FieldName, Self);
-
-            addParam(FieldVar);
-          end;
-        end;
-
-        with TLapeTree_Operator.Create(op_Plus, Self) do
-        try
-          Dest := Result;
-
-          Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
-          Right := TLapeTree_OpenArray.Create(Self);
-          with TLapeTree_OpenArray(Right) do
-          begin
-            addValue(NameExpr);
-            addValue(TypeExpr);
-            addValue(ValueExpr);
-          end;
-
-          Result := Compile(Offset);
-        finally
-          Free();
-        end;
-      end
-  else
+  if (not (RecordType is TLapeType_Record)) then
     LapeExceptionFmt(lpeExpected, ['Record']);
+
+  with TLapeType_Record(RecordType) do
+  begin
+    for i := 0 to FieldMap.Count - 1 do
+      Add(FieldMap.Key[i], FieldMap.ItemsI[i].FieldType, False);
+
+    // Consts
+    Decls := ManagedDeclarations.GetByClass(TLapeGlobalVar, bTrue);
+    for i := 0 to High(Decls) do
+    begin
+      if (TLapeGlobalVar(Decls[i]).BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
+        Continue;
+
+      Add(Decls[i].Name, TLapeGlobalvar(Decls[I]).VarType, True);
+    end;
+  end;
 end;
 
 function TLapeTree_InternalMethod_RTTIFields.isConstant: Boolean;
@@ -123,82 +138,12 @@ begin
   Result := inherited;
 end;
 
-function TLapeTree_InternalMethod_RTTIClassFields.Compile(var Offset: Integer): TResVar;
-var
-  i: Integer;
-  Decls: TLapeDeclArray;
-  RecordVar: TResVar;
-  FieldName: lpString;
-  RecordType, FieldType: TLapeType;
-  NameExpr, TypeExpr, ValueExpr: TLapeTree_ExprBase;
-  FieldVar: TLapeGlobalVar;
-begin
-  Dest := NullResVar;
-  Result := _ResVar.New(FCompiler.getTempVar(resType())).IncLock();
-
-  if (FParams.Count <> 1) or isEmpty(FParams[0]) then
-    LapeExceptionFmt(lpeWrongNumberParams, [1]);
-
-  RecordVar := FParams[0].Compile(Offset);
-  RecordType := RecordVar.VarType;
-  if (RecordType is TLapeType_Type) then
-    RecordType := TLapeType_Type(RecordType).TType;
-
-  if (RecordType is TLapeType_Record) then
-  begin
-    Decls := RecordType.ManagedDeclarations.GetByClass(TLapeGlobalVar, bTrue);
-
-    for i := 0 to High(Decls) do
-    begin
-      FieldVar := TLapeGlobalVar(Decls[i]);
-      if (FieldVar.BaseType in [ltUnknown, ltScriptMethod, ltImportedMethod]) then
-        Continue;
-
-      FieldName := FieldVar.Name;
-      FieldType := FieldVar.VarType;
-
-      if (FieldType <> nil) then
-        if (FieldType.Name <> '') then
-          TypeExpr := TLapeTree_String.Create(FieldType.Name, Self)
-        else
-          TypeExpr := TLapeTree_String.Create(FieldType.AsString, Self)
-      else
-        TypeExpr := TLapeTree_String.Create('', Self);
-
-      NameExpr  := TLapeTree_String.Create(FieldName, Self);
-      ValueExpr := TLapeTree_InternalMethod_ToStr.Create(Self);
-      with TLapeTree_InternalMethod_ToStr(ValueExpr) do
-        addParam(TLapeTree_GlobalVar.Create(FieldVar, Self));
-
-      with TLapeTree_Operator.Create(op_Plus, Self) do
-      try
-        Dest := Result;
-
-        Left := TLapeTree_ResVar.Create(Result.IncLock(), Self);
-        Right := TLapeTree_OpenArray.Create(Self);
-        with TLapeTree_OpenArray(Right) do
-        begin
-          addValue(NameExpr);
-          addValue(TypeExpr);
-          addValue(ValueExpr);
-        end;
-
-        Result := Compile(Offset);
-      finally
-        Free();
-      end;
-    end;
-  end else
-    LapeExceptionFmt(lpeExpected, ['Record']);
-end;
-
 procedure InitializeRTTI(Compiler: TLapeCompiler);
 begin
-  Compiler.addGlobalType('record Name, VarType, Value: String; end;', 'TRTTIField');
+  Compiler.addGlobalType('record Name, VarType, Value: String; isConst: Boolean; end;', 'TRTTIField');
   Compiler.addGlobalType('array of TRTTIField;', 'TRTTIFields');
 
-  Compiler.InternalMethodMap['RTTIClassFields'] := TLapeTree_InternalMethod_RTTIClassFields;
-  Compiler.InternalMethodMap['RTTIFields']      := TLapeTree_InternalMethod_RTTIFields;
+  Compiler.InternalMethodMap['RTTIFields'] := TLapeTree_InternalMethod_RTTIFields;
 end;
 
 end.
