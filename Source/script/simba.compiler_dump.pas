@@ -303,9 +303,7 @@ begin
   Add('System', 'function IndexOf(const Item: T; const A: array): Integer; external;');
   Add('System', 'function IndicesOf(const Item: T; const A: array): TIntegerArray; external;');
   Add('System', 'function Contains(const Item: T; const A: array): Boolean; external;');
-
   Add('System', 'function RTTIFields(constref AnyRecord): TRTTIFields; external;');
-  Add('System', 'function RTTIClassFields(constref AnyRecord): TRTTIFields; external;');
 
   Add('System', 'function GetCallerAddress: Pointer; external;');
   Add('System', 'function GetCallerName: String; external;');

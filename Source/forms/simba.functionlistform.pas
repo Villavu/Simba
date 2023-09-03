@@ -104,11 +104,23 @@ begin
   if (Decl is TDeclaration_Method) and Decl.isObjectMethod then
     Result := TDeclaration_Method(Decl).ObjectName + '.' + TDeclaration_Method(Decl).Name
   else
+  if (Decl is TDeclaration_EnumElement) then
+    if (Decl.Owner is TDeclaration_TypeEnumScoped) then
+      Result := Decl.Owner.Name + '.' + Decl.Name
+    else
+      Result := Decl.Name
+  else
     Result := Decl.Name;
 end;
 
 function GetHint(const Decl: TDeclaration): String;
 begin
+  if (Decl is TDeclaration_EnumElement) then
+    if (Decl.Owner is TDeclaration_TypeEnumScoped) then
+      Result := Decl.Owner.Name + '.' + Decl.Name
+    else
+      Result := Decl.Name
+  else
   if (Decl is TDeclaration_Method) then Result := TDeclaration_Method(Decl).HeaderString                                                                  else
   if (Decl is TDeclaration_Type)   then Result := 'type '    + Decl.Name + ' = ' + Decl.TextNoCommentsSingleLine                                          else
   if (Decl is TDeclaration_Const)  then Result := 'const '   + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
