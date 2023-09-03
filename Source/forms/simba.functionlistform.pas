@@ -69,9 +69,6 @@ type
     function AddPluginDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
 
     procedure AddSimbaNodes;
-
-    // Sort so order is: Types, Constants, Variables, Methods
-    function CompareDecl(A, B: TTreeNode): Integer;
   public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
@@ -85,7 +82,6 @@ implementation
 {$R *.lfm}
 
 uses
-  StrUtils,
   simba.main, simba.ide_mainstatusbar, simba.ide_events, simba.threading,
   simba.scripttabsform, simba.scripttab, simba.ide_showdeclaration, simba.nativeinterface;
 
@@ -609,27 +605,6 @@ begin
   end;
 end;
 
-function TSimbaFunctionListForm.CompareDecl(A, B: TTreeNode): Integer;
-begin
-  Result := NaturalCompareText(A.Text, B.Text);
-
-  case A.ImageIndex of
-    IMG_TYPE:      Dec(Result, 2000);
-    IMG_CONST:  Dec(Result, 1500);
-    IMG_VAR:  Dec(Result, 1000);
-    IMG_PROC: Dec(Result, 500);
-    IMG_FUNC:  Dec(Result, 500);
-  end;
-
-  case B.ImageIndex of
-    IMG_TYPE:      Inc(Result, 2000);
-    IMG_CONST:  Inc(Result, 1500);
-    IMG_VAR:  Inc(Result, 1000);
-    IMG_PROC: Inc(Result, 500);
-    IMG_FUNC:  Inc(Result, 500);
-  end;
-end;
-
 procedure TSimbaFunctionListForm.AddSimbaNodes;
 var
   I: Integer;
@@ -657,8 +632,6 @@ begin
     for Decl in Parser.Items.ToArray do
       if (Decl.Name <> '') and (not Decl.isOverrideMethod) and (Decl.Name[1] <> '_') then
         AddSimbaDecl(ParentNode, Decl);
-
-    ParentNode.CustomSort(@CompareDecl);
   end;
 
   FSimbaNode.AlphaSort();
