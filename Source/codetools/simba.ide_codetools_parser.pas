@@ -240,7 +240,11 @@ type
     function GetMethod: TDeclaration;
   end;
 
-  TDeclaration_TypeSet = class(TDeclaration_Type);
+  TDeclaration_TypeSet = class(TDeclaration_Type)
+  public
+    function EnumElements: TDeclarationArray;
+  end;
+
   TDeclaration_TypeRange = class(TDeclaration_Type);
   TDeclaration_TypeUnion = class(TDeclaration_Type);
 
@@ -460,6 +464,11 @@ end;
 function TDeclaration_TypeNativeMethod.GetMethod: TDeclaration;
 begin
   Result := FItems.GetByClassFirst(TDeclaration_ParentType);
+end;
+
+function TDeclaration_TypeSet.EnumElements: TDeclarationArray;
+begin
+  Result := FItems.GetByClass(TDeclaration_EnumElement);
 end;
 
 function TDeclaration_TypeMethod.GetResultString: String;
@@ -1234,7 +1243,10 @@ begin
       Continue;
     end else
     if (Decl.ClassType = TDeclaration_TypeEnum) then
-      FGlobals.Extend(TDeclaration_TypeEnum(Decl).Elements);
+      FGlobals.Extend(TDeclaration_TypeEnum(Decl).Elements)
+    else
+    if (Decl.ClassType = TDeclaration_TypeSet) then
+      FGlobals.Extend(TDeclaration_TypeSet(Decl).EnumElements);
 
     FGlobals.Add(Decl);
   end;
@@ -1836,7 +1848,7 @@ end;
 
 procedure TCodeParser.OrdinalType;
 begin
-  if (not InDeclaration(TDeclaration_TypeSet, TDeclaration_TypeArray, TDeclaration_TypeStub)) then
+  if (not InDeclaration(TDeclaration_TypeArray, TDeclaration_TypeStub)) then
   begin
     inherited;
     Exit;
@@ -1855,15 +1867,20 @@ end;
 
 procedure TCodeParser.EnumeratedType;
 begin
-  if Lexer.IsDefined('!SCOPEDENUMS') then
+  if InDeclaration(TDeclaration_TypeSet) then
   begin
-    EnumeratedScopedType();
+    inherited;
     Exit;
   end;
 
-  PushStack(TDeclaration_TypeEnum);
-  inherited;
-  PopStack();
+  if Lexer.IsDefined('!SCOPEDENUMS') then
+    EnumeratedScopedType()
+  else
+  begin
+    PushStack(TDeclaration_TypeEnum);
+    inherited;
+    PopStack();
+  end;
 end;
 
 procedure TCodeParser.EnumeratedScopedType;
@@ -1875,7 +1892,7 @@ end;
 
 procedure TCodeParser.EnumeratedTypeItem;
 begin
-  if (not InDeclaration(TDeclaration_TypeEnum, TDeclaration_TypeEnumScoped)) then
+  if (not InDeclaration(TDeclaration_TypeSet, TDeclaration_TypeEnum, TDeclaration_TypeEnumScoped)) then
   begin
     inherited;
     Exit;

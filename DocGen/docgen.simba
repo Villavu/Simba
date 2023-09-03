@@ -166,15 +166,18 @@ begin
   end;
 end;
 
-procedure BuildAPI;
+// Delete old api generation
+procedure CleanAPI;
 var
   FileName: String;
 begin
-  // Delete old api generation
   for FileName in DirList('DocGen/source/api/') do
     if (not (PathExtractName(FileName) in ['.gitkeep', 'index.rst'])) then
       FileDelete(FileName);
+end;
 
+procedure BuildAPI;
+begin
   ParseSourceFile('simba.import_colormath',     'Color Math'     );
   ParseSourceFile('simba.import_point',         'TPoint'         );
   ParseSourceFile('simba.import_tpa',           'TPointArray'    );
@@ -207,6 +210,14 @@ begin
   ParseSourceFile('simba.import_class_dtm',   'DTM'   );
 end;
 
+procedure H2ToH3(dir: String);
+var
+  FileName: String;
+begin
+  for FileName in DirList(dir) do
+    FileWrite(FileName, FileRead(FileName).Replace('h2','h3', [rfReplaceAll]));
+end;
+
 var
   SphinxOutput: String;
 begin
@@ -215,6 +226,7 @@ begin
   DirCreate('DocGen/build');
   DirDelete('DocGen/build', True);
 
+  CleanAPI();
   BuildAPI();
 
   WriteLn('Sphinx exit code: ', RunCommand('sphinx-build', ['-q', '-E', 'DocGen/source', 'DocGen/build'], SphinxOutput));
@@ -222,4 +234,9 @@ begin
     WriteLn(SphinxOutput);
 
   WriteLn('Link: "' + PathNormalize('DocGen/build/index.html') + '"');
+
+  // it looks a lot better like this...
+  H2ToH3('DocGen/build/api');
+
+  CleanAPI();
 end.

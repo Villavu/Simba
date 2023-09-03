@@ -1331,10 +1331,9 @@ begin
       Buffer.Add(Self[I]);
     end;
 
-    //Result := Buffer.Trim();
     Result := TPointArray(Buffer.Trim()).ExtractDist(Center, MinRadius, MaxRadius);
   end else
-    //Result := Self.ExcludeDist(Center, MinRadius, MaxRadius);
+    Result := Self.ExtractDist(Center, MinRadius, MaxRadius);
 end;
 
 function TPointArrayHelper.Extremes: TPointArray;
