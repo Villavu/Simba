@@ -58,8 +58,7 @@ implementation
 
 uses
   lpeval,
-  simba.script_imports,
-  simba.script_compiler_waituntil, simba.script_compiler_rtti;
+  simba.script_imports, simba.script_compiler_sleepuntil, simba.script_compiler_rtti;
 
 function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method;
 var
@@ -133,7 +132,7 @@ begin
 
     ImportingSection := 'System';
 
-    InitializeWaitUntil(Self);
+    InitializeSleepUntil(Self);
     InitializeFFI(Self);
     InitializeRTTI(Self);
 
