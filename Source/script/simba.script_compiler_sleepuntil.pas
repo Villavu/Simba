@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.script_compiler_waituntil;
+unit simba.script_compiler_sleepuntil;
 
 {$i simba.inc}
 
@@ -13,7 +13,7 @@ uses
   classes, sysutils,
   lpcompiler;
 
-procedure InitializeWaitUntil(Compiler: TLapeCompiler);
+procedure InitializeSleepUntil(Compiler: TLapeCompiler);
 
 implementation
 
@@ -21,23 +21,23 @@ uses
   lptypes, lptree, lpvartypes, lpmessages, lpinternalmethods;
 
 type
-  TLapeTree_WaitUntil_Operator = class(TLapeTree_Operator) // Dont take ownership of FLeft
+  TLapeTree_SleepUntil_Operator = class(TLapeTree_Operator) // Dont take ownership of FLeft
   protected
     procedure setLeft(Node: TLapeTree_ExprBase); override;
   end;
 
-  TLapeTree_InternalMethod_WaitUntil = class(TLapeTree_InternalMethod)
+  TLapeTree_InternalMethod_SleepUntil = class(TLapeTree_InternalMethod)
   public
     function resType: TLapeType; override;
     function Compile(var Offset: Integer): TResVar; override;
   end;
 
-procedure TLapeTree_WaitUntil_Operator.setLeft(Node: TLapeTree_ExprBase);
+procedure TLapeTree_SleepUntil_Operator.setLeft(Node: TLapeTree_ExprBase);
 begin
   FLeft := Node;
 end;
 
-function TLapeTree_InternalMethod_WaitUntil.resType: TLapeType;
+function TLapeTree_InternalMethod_SleepUntil.resType: TLapeType;
 begin
   if (FResType = nil) then
     FResType := FCompiler.getBaseType(ltEvalBool);
@@ -45,7 +45,7 @@ begin
   Result := inherited;
 end;
 
-function TLapeTree_InternalMethod_WaitUntil.Compile(var Offset: Integer): TResVar;
+function TLapeTree_InternalMethod_SleepUntil.Compile(var Offset: Integer): TResVar;
 var
   Loop: TLapeTree_While;
   Assignment: TLapeTree_Operator;
@@ -71,7 +71,7 @@ begin
   Interval := FParams[1].Compile(Offset);
   Timeout := FParams[2].Compile(Offset);
 
-  Condition := TLapeTree_WaitUntil_Operator.Create(op_cmp_Equal, Self);
+  Condition := TLapeTree_SleepUntil_Operator.Create(op_cmp_Equal, Self);
   Condition.Left := FParams[0];
   Condition.Right := TLapeTree_GlobalVar.Create('True', ltEvalBool, Self);
 
@@ -138,9 +138,9 @@ begin
   Timeout.Spill(1);
 end;
 
-procedure InitializeWaitUntil(Compiler: TLapeCompiler);
+procedure InitializeSleepUntil(Compiler: TLapeCompiler);
 begin
-  Compiler.InternalMethodMap['WaitUntil'] := TLapeTree_InternalMethod_WaitUntil;
+  Compiler.InternalMethodMap['SleepUntil'] := TLapeTree_InternalMethod_SleepUntil;
 end;
 
 end.

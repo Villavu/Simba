@@ -289,7 +289,7 @@ begin
   Add('System', 'function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;');
   Add('System', 'function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;');
   Add('System', 'function Ord(X: Ordinal): Int32; external;');
-  Add('System', 'function WaitUntil(Condition: Expression; Interval, Timeout: Int32): Boolean; external;');
+  Add('System', 'function SleepUntil(Condition: BoolExpr; Interval, Timeout: Int32): Boolean; external;');
   Add('System', 'function Default(T: AnyType): AnyType; external;');
   Add('System', 'procedure Sort(var A: array); overload; external;');
   Add('System', 'procedure Sort(var A: array; Weights: array of Ordinal; LowToHigh: Boolean); overload; external;');
@@ -303,7 +303,7 @@ begin
   Add('System', 'function IndexOf(const Item: T; const A: array): Integer; external;');
   Add('System', 'function IndicesOf(const Item: T; const A: array): TIntegerArray; external;');
   Add('System', 'function Contains(const Item: T; const A: array): Boolean; external;');
-  Add('System', 'function RTTIFields(constref AnyRecord): TRTTIFields; external;');
+  Add('System', 'function RTTIFields(constref RecordTypeOrVar): TRTTIFields; external;');
 
   Add('System', 'function GetCallerAddress: Pointer; external;');
   Add('System', 'function GetCallerName: String; external;');

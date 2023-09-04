@@ -50,11 +50,11 @@ begin
     addGlobalVar(CPUCount, 'CPU_COUNT').isConstant := True;
 
     addGlobalType(getBaseType(DetermineIntType(SizeOf(TThreadID), False)).createCopy(), 'TThreadID');
+    addGlobalType('procedure() of object', 'TThreadMethod', {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
 
     addGlobalFunc('function CurrentThreadID: TThreadID', @_LapeCurrentThreadID);
     addGlobalFunc('function MainThreadID: TThreadID', @_LapeMainThreadID);
 
-    addGlobalType('procedure() of object', 'TThreadMethod', {$IF DEFINED(CPU32) and DEFINED(LAPE_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
     addGlobalFunc('procedure RunInMainThread(Method: TThreadMethod)', @_LapeRunInMainThread);
     addGlobalFunc('procedure RunInThread(Method: TThreadMethod)', @_LapeRunInThread);
 
