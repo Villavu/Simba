@@ -79,7 +79,6 @@ end;
 procedure MakeInlineCode(var Str: String);
 var
   Start, Stop: Integer;
-  Block: String;
 begin
   Start := 1;
   while ((Start := Str.IndexOf('`', Start)) > 0) do
@@ -172,7 +171,7 @@ var
   FileName: String;
 begin
   for FileName in DirList('DocGen/source/api/') do
-    if (not (PathExtractName(FileName) in ['.gitkeep', 'index.rst'])) then
+    if (not (PathExtractName(FileName) in ['index.rst'])) then
       FileDelete(FileName);
 end;
 
@@ -223,9 +222,6 @@ var
 begin
   ClearSimbaOutput();
 
-  DirCreate('DocGen/build');
-  DirDelete('DocGen/build', True);
-
   CleanAPI();
   BuildAPI();
 
@@ -237,6 +233,4 @@ begin
 
   // it looks a lot better like this...
   H2ToH3('DocGen/build/api');
-
-  CleanAPI();
 end.

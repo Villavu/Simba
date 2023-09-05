@@ -10,7 +10,7 @@ highlight_language = 'pascal'
 html_title = 'Simba'
 html_favicon = '../images/icon.ico'
 html_theme = 'furo'
-html_css_files = ['../../source/custom.css'] # relative to `_static` dir
+html_css_files = ['custom.css']
 extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.mathjax'
