@@ -539,7 +539,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnBeforeCreate(@CreateSimbaSettings, 'SimbaSettings');
+  SimbaIDEInitialization_AddBeforeCreate(@CreateSimbaSettings, 'Create SimbaSettings');
 
 finalization
   if (SimbaSettingsInstance <> nil) then

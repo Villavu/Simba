@@ -250,7 +250,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnBeforeCreate(@CreateCodetoolsIncludes, 'Create CodetoolsIncludes');
+  SimbaIDEInitialization_AddBeforeCreate(@CreateCodetoolsIncludes, 'Codetools Includes');
 
 finalization
   if Assigned(CodetoolsIncludes) then

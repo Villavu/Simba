@@ -372,7 +372,8 @@ type
 var
   DoSimbaDebugLn: procedure(const S: String) of object = nil;
 
-procedure Debug(const Msg: String);
+procedure Debug(const Msg: String); overload;
+procedure Debug(const Msg: String; Args: array of const); overload;
 procedure DebugLn(const Msg: String); overload;
 procedure DebugLn(const Msg: String; Args: array of const); overload;
 
@@ -458,6 +459,13 @@ procedure Debug(const Msg: String);
 begin
   {$I-}
   Write(Msg);
+  {$I+}
+end;
+
+procedure Debug(const Msg: String; Args: array of const);
+begin
+  {$I-}
+  Write(Format(Msg, Args));
   {$I+}
 end;
 

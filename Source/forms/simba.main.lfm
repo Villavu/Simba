@@ -9,7 +9,6 @@ object SimbaForm: TSimbaForm
   DesignTimePPI = 120
   KeyPreview = True
   OnClose = FormClose
-  OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poScreenCenter
   LCLVersion = '3.0.0.1'

@@ -421,7 +421,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnBeforeCreate(@SetupKeywordDictionary, 'Keyword Dictionary');
+  SimbaIDEInitialization_AddBeforeCreate(@SetupKeywordDictionary, 'Create KeywordDictionary');
 
 finalization
   if (KeywordDictionary <> nil) then

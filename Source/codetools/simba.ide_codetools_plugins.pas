@@ -186,7 +186,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnBeforeCreate(@CreateCodetoolsPlugins, 'Create CodetoolsPlugins');
+  SimbaIDEInitialization_AddBeforeCreate(@CreateCodetoolsPlugins, 'Create CodetoolsPlugins');
 
 finalization
   if Assigned(CodetoolsPlugins) then
