@@ -5,10 +5,6 @@
   --------------------------------------------------------------------------
 
   Handler for managing initialization methods setup Simba's IDE.
-
-  RegisterMethodOnBeforeCreate -> Called before form creation.
-  RegisterMethodOnCreated      -> Called when forms have been created, just before show.
-  RegisterMethodOnAfterCreate  -> Called **on another thread** after create.
 }
 unit simba.ide_initialization;
 
@@ -21,97 +17,152 @@ uses
   simba.mufasatypes, simba.datetime;
 
 type
-  SimbaIDEInitialization = class
-  protected
-  type
-    TMethods = array of record
-      Proc: TProcedure;
-      Name: String;
-    end;
-    class procedure Call(Methods: TMethods; Name: String);
-  class var
-    FBeforeCreateMethods: TMethods;
-    FCreatedMethods: TMethods;
-    FAfterCreateMethods: TMethods;
-  public
-    class procedure RegisterMethodOnBeforeCreate(Proc: TProcedure; Name: String);
-    class procedure RegisterMethodOnCreated(Proc: TProcedure; Name: String);
-    class procedure RegisterMethodOnAfterCreate(Proc: TProcedure; Name: String);
+  TProcedureOfObject = procedure of object;
 
-    class procedure CallOnBeforeCreateMethods;
-    class procedure CallOnCreatedMethods;
-    class procedure CallOnAfterCreateMethods;
-  end;
+procedure SimbaIDEInitialization_AddBeforeCreate(Proc: TProcedureOfObject; Name: String); overload;
+procedure SimbaIDEInitialization_AddBeforeCreate(Proc: TProcedure; Name: String); overload;
+
+procedure SimbaIDEInitialization_AddBeforeShow(Proc: TProcedureOfObject; Name: String; BackgroundTask: Boolean = False); overload;
+procedure SimbaIDEInitialization_AddBeforeShow(Proc: TProcedure; Name: String; BackgroundTask: Boolean = False); overload;
+
+procedure SimbaIDEInitialization_CallBeforeCreate;
+procedure SimbaIDEInitialization_CallBeforeShow;
 
 implementation
 
 uses
   simba.threading;
 
-class procedure SimbaIDEInitialization.Call(Methods: TMethods; Name: String);
+type
+  TInitializationMethod = record
+    Name: String;
+    Proc: TProcedure;
+    ProcObj: TProcedureOfObject;
+    BackgroundTask: Boolean;
+  end;
+
 var
-  I: Integer;
+  BeforeCreateMethods: array of TInitializationMethod;
+  BeforeShowMethods: array of TInitializationMethod;
+
+procedure SimbaIDEInitialization_AddBeforeCreate(Proc: TProcedureOfObject; Name: String);
+var
+  Item: TInitializationMethod;
+begin
+  Item := Default(TInitializationMethod);
+  Item.ProcObj := Proc;
+  Item.Name := Name;
+
+  BeforeCreateMethods := BeforeCreateMethods + [Item];
+end;
+
+procedure SimbaIDEInitialization_AddBeforeCreate(Proc: TProcedure; Name: String);
+var
+  Item: TInitializationMethod;
+begin
+  Item := Default(TInitializationMethod);
+  Item.Proc := Proc;
+  Item.Name := Name;
+
+  BeforeCreateMethods := BeforeCreateMethods + [Item];
+end;
+
+procedure SimbaIDEInitialization_AddBeforeShow(Proc: TProcedureOfObject; Name: String; BackgroundTask: Boolean);
+var
+  Item: TInitializationMethod;
+begin
+  Item := Default(TInitializationMethod);
+  Item.ProcObj := Proc;
+  Item.Name := Name;
+  Item.BackgroundTask := BackgroundTask;
+
+  BeforeShowMethods := BeforeShowMethods + [Item];
+end;
+
+procedure SimbaIDEInitialization_AddBeforeShow(Proc: TProcedure; Name: String; BackgroundTask: Boolean);
+var
+  Item: TInitializationMethod;
+begin
+  Item := Default(TInitializationMethod);
+  Item.Proc := Proc;
+  Item.Name := Name;
+  Item.BackgroundTask := BackgroundTask;
+
+  BeforeShowMethods := BeforeShowMethods + [Item];
+end;
+
+procedure SimbaIDEInitialization_CallBeforeCreate;
+var
+  Method: TInitializationMethod;
   T: Double;
 begin
-  for I := 0 to High(Methods) do
+  for Method in BeforeCreateMethods do
   begin
-    T := HighResolutionTime();
-
-    DebugLn('[%s]: %s'.Format([Name, Methods[I].Name]));
+    Debug('[SimbaIDEInitialization.BeforeCreate]: %s ', [Method.Name]);
     try
-      Methods[I].Proc();
+      T := HighResolutionTime();
 
-      DebugLn('[%s]: %s (%f ms)'.Format([Name, Methods[I].Name, HighResolutionTime() - T]));
+      if Assigned(Method.Proc)    then Method.Proc() else
+      if Assigned(Method.ProcObj) then Method.ProcObj();
+
+      DebugLn('(%f ms)', [HighResolutionTime() - T]);
     except
       on E: Exception do
-        DebugLn('[%s]: %s Exception: (%s)'.Format([Name, Methods[I].Name, E.Message]));
+        DebugLn('Exception: (%s)', [E.Message]);
     end;
   end;
 end;
 
-class procedure SimbaIDEInitialization.RegisterMethodOnBeforeCreate(Proc: TProcedure; Name: String);
+procedure SimbaIDEInitialization_CallBeforeShow_Background;
+var
+  Method: TInitializationMethod;
+  T: Double;
 begin
-  SetLength(FBeforeCreateMethods, Length(FBeforeCreateMethods) + 1);
-
-  FBeforeCreateMethods[High(FBeforeCreateMethods)].Proc := Proc;
-  FBeforeCreateMethods[High(FBeforeCreateMethods)].Name := Name;
-end;
-
-class procedure SimbaIDEInitialization.RegisterMethodOnCreated(Proc: TProcedure; Name: String);
-begin
-  SetLength(FCreatedMethods, Length(FCreatedMethods) + 1);
-
-  FCreatedMethods[High(FCreatedMethods)].Proc := Proc;
-  FCreatedMethods[High(FCreatedMethods)].Name := Name;
-end;
-
-class procedure SimbaIDEInitialization.RegisterMethodOnAfterCreate(Proc: TProcedure; Name: String);
-begin
-  SetLength(FAfterCreateMethods, Length(FAfterCreateMethods) + 1);
-
-  FAfterCreateMethods[High(FAfterCreateMethods)].Proc := Proc;
-  FAfterCreateMethods[High(FAfterCreateMethods)].Name := Name;
-end;
-
-class procedure SimbaIDEInitialization.CallOnBeforeCreateMethods;
-begin
-  Call(FBeforeCreateMethods, 'SimbaIDEInitialization.CallOnBeforeCreateMethods');
-end;
-
-class procedure SimbaIDEInitialization.CallOnCreatedMethods;
-begin
-  Call(FCreatedMethods, 'SimbaIDEInitialization.CallOnCreatedMethods');
-end;
-
-class procedure SimbaIDEInitialization.CallOnAfterCreateMethods;
-
-  procedure Execute;
+  for Method in BeforeShowMethods do
   begin
-    Call(FAfterCreateMethods, 'SimbaIDEInitialization.CallOnAfterCreateMethods');
+    if not Method.BackgroundTask then
+      Continue;
+
+    Debug('[SimbaIDEInitialization.BeforeShow (Background task)]: %s ', [Method.Name]);
+    try
+      T := HighResolutionTime();
+
+      if Assigned(Method.Proc)    then Method.Proc() else
+      if Assigned(Method.ProcObj) then Method.ProcObj();
+
+      DebugLn('(%f ms)', [HighResolutionTime() - T]);
+    except
+      on E: Exception do
+        DebugLn('Exception: (%s)', [E.Message]);
+    end;
+  end;
+end;
+
+procedure SimbaIDEInitialization_CallBeforeShow;
+var
+  Method: TInitializationMethod;
+  T: Double;
+begin
+  for Method in BeforeShowMethods do
+  begin
+    if Method.BackgroundTask then
+      Continue;
+
+    Debug('[SimbaIDEInitialization.BeforeShow]: %s ', [Method.Name]);
+    try
+      T := HighResolutionTime();
+
+      if Assigned(Method.Proc)    then Method.Proc() else
+      if Assigned(Method.ProcObj) then Method.ProcObj();
+
+      DebugLn('(%f ms)', [HighResolutionTime() - T]);
+    except
+      on E: Exception do
+        DebugLn('Exception: (%s)', [E.Message]);
+    end;
   end;
 
-begin
-  RunInThread(@Execute, True);
+  RunInThread(@SimbaIDEInitialization_CallBeforeShow_Background, True);
 end;
 
 end.

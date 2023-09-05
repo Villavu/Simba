@@ -230,7 +230,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnAfterCreate(@RequestAccessibility, 'RequestAccessibility');
+  SimbaIDEInitialization_AddBeforeShow(@RequestAccessibility, 'RequestAccessibility');
 
   CreateCFStrings();
 

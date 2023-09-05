@@ -52,6 +52,6 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnAfterCreate(@SetupCodeTools, 'CodeTools');
+  SimbaIDEInitialization_AddBeforeShow(@SetupCodeTools, 'Setup CodeTools', True);
 
 end.

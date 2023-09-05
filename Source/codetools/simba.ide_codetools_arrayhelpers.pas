@@ -219,7 +219,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnBeforeCreate(@CreateArrayHelperGenerator, 'Codetools ArrayHelperGenerator');
+  SimbaIDEInitialization_AddBeforeCreate(@CreateArrayHelperGenerator, 'Codetools ArrayHelper Generator');
 
 finalization
   if (ArrayHelperGenerator <> nil) then

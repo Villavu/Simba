@@ -101,7 +101,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnAfterCreate(@ExtractOpenSSL, 'OpenSSL');
+  SimbaIDEInitialization_AddBeforeShow(@ExtractOpenSSL, 'Extract OpenSSL', True);
 
 end.
 

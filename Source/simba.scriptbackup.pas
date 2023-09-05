@@ -113,7 +113,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnCreated(@SetupScriptBackup, 'ScriptBackup');
+  SimbaIDEInitialization_AddBeforeShow(@SetupScriptBackup, 'Create Script Backup');
 
 end.
 

@@ -1,8 +1,8 @@
 object SimbaFileBrowserForm: TSimbaFileBrowserForm
-  Left = 1938
+  Left = 349
   Height = 309
-  Top = 792
-  Width = 185
+  Top = 672
+  Width = 1824
   Caption = 'File Browser'
   DesignTimePPI = 120
   LCLVersion = '3.0.0.1'

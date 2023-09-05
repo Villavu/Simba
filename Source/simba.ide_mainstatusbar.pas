@@ -134,7 +134,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization.RegisterMethodOnCreated(@CreateMainStatusBar, 'Create Main StatusBar');
+  SimbaIDEInitialization_AddBeforeShow(@CreateMainStatusBar, 'Create Main StatusBar');
 
 finalization
   if Assigned(SimbaMainStatusBar) then

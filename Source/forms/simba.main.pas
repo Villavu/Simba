@@ -166,7 +166,6 @@ type
     TrayPopupExit: TMenuItem;
 
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShortCut(var Msg: TLMKey; var Handled: Boolean);
     procedure ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
@@ -237,7 +236,9 @@ type
     procedure AddRecentFile(FileName: String);
     procedure SetButtonStates(Instance: TSimbaScriptInstance);
 
-    procedure SetDefaultDocking(IsResetting: Boolean = False);
+    procedure DoResetDocking;
+    procedure DoDefaultDocking;
+
     procedure SetupDocking;
     procedure SetupCompleted;
 
@@ -266,7 +267,7 @@ type
     property ProcessSelection: TProcessID read FProcessSelection;
     property MenuBar: TSimbaMainMenuBar read FMenuBar;
 
-    procedure Setup(Data: PtrInt);
+    procedure Setup;
   end;
 
 var
@@ -283,18 +284,14 @@ uses
   simba.debugimageform, simba.imagetostringform, simba.aboutform,
   simba.outputform, simba.filebrowserform, simba.notesform, simba.settingsform,
   simba.functionlistform, simba.scripttabsform, simba.ide_mainstatusbar,
-
   simba.package_form, simba.package_autoupdater,
-
   simba.associate, simba.ide_initialization, simba.ide_events,
   simba.aca, simba.dtmeditor,
-
   simba.windowselector, simba.colorpicker,
-
-  simba.openssl, simba.env,
+  simba.env,
   simba.dockinghelpers, simba.nativeinterface,
   simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme,
-  simba.scriptbackup, simba.backupsform, simba.ide_utils;
+  simba.scriptbackup, simba.backupsform, simba.ide_utils, simba.threading;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -584,32 +581,35 @@ begin
   end;
 end;
 
-procedure TSimbaForm.SetDefaultDocking(IsResetting: Boolean);
+procedure TSimbaForm.DoResetDocking;
 var
   I: Integer;
+begin
+  if (MessageDlg('Reset to default layout?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then
+    Exit;
+
+  SimbaSettings.General.Layout.Value := '';
+  SimbaSettings.General.LockLayout.Value := False;
+
+  Hide();
+  WindowState := wsNormal;
+  for I := 0 to Screen.CustomFormCount - 1 do
+    if (Screen.CustomForms[I].HostDockSite is TCustomForm) then
+    begin
+      Screen.CustomForms[I].Hide();
+
+      DockMaster.ManualFloat(Screen.CustomForms[I]);
+      if (DockMaster.GetAnchorSite(Screen.CustomForms[I]) <> nil) then
+        DockMaster.GetAnchorSite(Screen.CustomForms[I]).Header.Visible := True;
+    end;
+
+  DoDefaultDocking();
+end;
+
+procedure TSimbaForm.DoDefaultDocking;
+var
   Splitter: TAnchorDockSplitter;
 begin
-  if IsResetting then
-  begin
-    if (MessageDlg('Reset to default layout?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then
-      Exit;
-
-    SimbaSettings.General.Layout.Value := '';
-    SimbaSettings.General.LockLayout.Value := False;
-
-    Hide();
-    WindowState := wsNormal;
-    for I := 0 to Screen.CustomFormCount - 1 do
-      if (Screen.CustomForms[I].HostDockSite is TCustomForm) then
-      begin
-        Screen.CustomForms[I].Hide();
-
-        DockMaster.ManualFloat(Screen.CustomForms[I]);
-        if (DockMaster.GetAnchorSite(Screen.CustomForms[I]) <> nil) then
-          DockMaster.GetAnchorSite(Screen.CustomForms[I]).Header.Visible := True;
-      end;
-  end;
-
   DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
   DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaOutputForm), DockPanel, alBottom);
   DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
@@ -619,17 +619,19 @@ begin
   DockMaster.MakeVisible(SimbaOutputForm, False);
   DockMaster.MakeVisible(SimbaFunctionListForm, False);
   DockMaster.MakeVisible(SimbaFileBrowserForm, False);
+  DockMaster.ScaleOnResize:=False;
 
-  // Default size
-  Width := 1250;
+  Width := 1200;
   Height := 850;
 
   if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akLeft, Splitter) then
-    Splitter.SetSplitterPosition(180);
+    Splitter.SetSplitterPosition(250);
   if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akRight, Splitter) then
-    Splitter.SetSplitterPosition(720);
+    Splitter.SetSplitterPosition(1200 - 250);
   if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akBottom, Splitter) then
     Splitter.SetSplitterPosition(350);
+
+  Dockmaster.ScaleOnResize := True;
 
   DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
   DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
@@ -638,34 +640,13 @@ begin
   EnsureVisible();
 end;
 
-procedure TSimbaForm.Setup(Data: PtrInt);
+procedure TSimbaForm.Setup;
 begin
-  SimbaIDEInitialization.CallOnCreatedMethods();
-
   SimbaIDEEvents.RegisterMethodOnEditorLoaded(@DoTabLoaded);
   SimbaIDEEvents.RegisterMethodOnEditorModified(@DoTabModified);
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabModified); // Also do this
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoScriptTabChange);
   SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
-
-  SimbaScriptTabsForm.AddTab();
-
-  SetupDocking();
-
-  FMouseLogger := TSimbaMouseLogger.Create();
-  FMouseLogger.Hotkey := VK_F1;
-
-  SimbaIDEInitialization.CallOnAfterCreateMethods();
-
-  FMenuBar := TSimbaMainMenuBar.Create(Self);
-  FMenuBar.Parent := MainMenuPanel;
-  FMenuBar.Align := alTop;
-  FMenuBar.AddMenu('File', MainMenuFile);
-  FMenuBar.AddMenu('Edit', MainMenuEdit);
-  FMenuBar.AddMenu('Script', MainMenuScript);
-  FMenuBar.AddMenu('Tools', MainMenuTools);
-  FMenuBar.AddMenu('View', MainMenuView);
-  FMenuBar.AddMenu('Help', MainMenuHelp);
 
   SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
 
@@ -681,18 +662,6 @@ begin
   SimbaSettingChanged(SimbaSettings.General.TrayIconVisible);
   SimbaSettingChanged(SimbaSettings.General.ConsoleVisible);
 
-  // Finally, give the editor focus as default.
-  if Assigned(SimbaScriptTabsForm.CurrentEditor) then
-    if SimbaScriptTabsForm.CurrentEditor.CanSetFocus() then
-      SimbaScriptTabsForm.CurrentEditor.SetFocus();
-
-  SetupCompleted();
-end;
-
-procedure TSimbaForm.FormCreate(Sender: TObject);
-begin
-  SimbaIDEInitialization.CallOnBeforeCreateMethods();
-
   Application.CaptureExceptions := True;
   Application.OnException := @Self.HandleException;
   Application.OnShortcut := @Self.FormShortCut;
@@ -705,9 +674,34 @@ begin
   FToolbarImages := TImageList.Create(Self); // Create a copy so ImagesGetWidthForPPI is not used for toolbar
   FToolbarImages.Assign(Images);
 
-  Self.Color := SimbaTheme.ColorFrame;
   ToolBar.Color := SimbaTheme.ColorFrame;
   ToolBar.Images := FToolbarImages;
+
+  FMouseLogger := TSimbaMouseLogger.Create();
+  FMouseLogger.Hotkey := VK_F1;
+
+  FMenuBar := TSimbaMainMenuBar.Create(Self);
+  FMenuBar.Parent := MainMenuPanel;
+  FMenuBar.Align := alTop;
+  FMenuBar.AddMenu('File', MainMenuFile);
+  FMenuBar.AddMenu('Edit', MainMenuEdit);
+  FMenuBar.AddMenu('Script', MainMenuScript);
+  FMenuBar.AddMenu('Tools', MainMenuTools);
+  FMenuBar.AddMenu('View', MainMenuView);
+  FMenuBar.AddMenu('Help', MainMenuHelp);
+
+  Color := SimbaTheme.ColorFrame;
+
+  SimbaScriptTabsForm.AddTab();
+
+  SetupDocking();
+
+  // Finally, give the editor focus as default.
+  if Assigned(SimbaScriptTabsForm.CurrentEditor) then
+    if SimbaScriptTabsForm.CurrentEditor.CanSetFocus() then
+      SimbaScriptTabsForm.CurrentEditor.SetFocus();
+
+  SetupCompleted();
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
@@ -773,7 +767,7 @@ type
     if (Sender = MenuItemCompile) or (Sender = ToolbarButtonCompile) then Exit(Compile);
     if (Sender = MenuItemRun)     or (Sender = ToolbarButtonRun)     then Exit(Run);
     if (Sender = MenuItemPause)   or (Sender = ToolbarButtonPause)   then Exit(Pause);
-    if (Sender = MenuItemStop)    or (Sender = ToolbarButtonStop)       then Exit(Stop);
+    if (Sender = MenuItemStop)    or (Sender = ToolbarButtonStop)    then Exit(Stop);
 
     DebugLn('[TSimbaForm.MenuItemScriptStateClick]: Unknown component "' + Sender.ClassName + '"');
   end;
@@ -849,9 +843,7 @@ begin
   end;
 
   if Setting.Equals(SimbaSettings.General.ToolBarSpacing) then
-  begin
     ToolBar.BorderSpacing.Around := Setting.Value;
-  end;
 end;
 
 procedure TSimbaForm.SimbaSettingChanged(Setting: TSimbaSetting);
@@ -1022,7 +1014,7 @@ end;
 
 procedure TSimbaForm.MenuItemResetLayoutClick(Sender: TObject);
 begin
-  SetDefaultDocking(True);
+  QueueOnMainThread(@DoResetDocking);
 end;
 
 procedure TSimbaForm.MenuItemConsoleClick(Sender: TObject);
@@ -1312,7 +1304,7 @@ begin
 
       EnsureVisible();
     end else
-      SetDefaultDocking();
+      QueueOnMainThread(@DoDefaultDocking);
   finally
     DockMaster.EndUpdate();
 
@@ -1343,5 +1335,16 @@ begin
     end;
   end;
 end;
+
+procedure SetupSimbaForm;
+begin
+  if (SimbaForm = nil) then
+    SimbaException('SimbaForm is nil');
+
+  SimbaForm.Setup();
+end;
+
+initialization
+  SimbaIDEInitialization_AddBeforeShow(@SetupSimbaForm, 'Setup SimbaForm');
 
 end.

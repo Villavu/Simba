@@ -18,7 +18,8 @@ uses
   simba.settingsform, simba.associate, simba.openexampleform,
   simba.package_form, simba.shapeboxform, simba.backupsform,
   simba.compiler_dump, simba.plugin_dump,
-  simba.scriptthread;
+  simba.scriptthread, simba.ide_initialization, simba.threading,
+  simba.openssl, simba.ide_codetools_setup;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
@@ -98,6 +99,8 @@ begin
   begin
     SimbaProcessType := ESimbaProcessType.IDE;
 
+    SimbaIDEInitialization_CallBeforeCreate();
+
     Application.ShowMainForm := False;
     Application.CreateForm(TSimbaForm, SimbaForm);
     Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
@@ -115,7 +118,7 @@ begin
     Application.CreateForm(TSimbaShapeBoxForm, SimbaShapeBoxForm);
     Application.CreateForm(TSimbaBackupsForm, SimbaBackupsForm);
 
-    Application.QueueAsyncCall(@SimbaForm.Setup, 0);
+    SimbaIDEInitialization_CallBeforeShow();
   end;
 
   Application.Run();
