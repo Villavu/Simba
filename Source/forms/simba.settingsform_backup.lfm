@@ -6,6 +6,7 @@ object SimbaBackupFrame: TSimbaBackupFrame
   ClientHeight = 305
   ClientWidth = 668
   DesignTimePPI = 120
+  ParentFont = False
   TabOrder = 0
   DesignLeft = 4331
   DesignTop = 1010
@@ -16,7 +17,7 @@ object SimbaBackupFrame: TSimbaBackupFrame
     AnchorSideTop.Side = asrBottom
     Left = 106
     Height = 28
-    Top = 86
+    Top = 81
     Width = 144
     BorderSpacing.Left = 5
     BorderSpacing.Top = 10
@@ -29,7 +30,7 @@ object SimbaBackupFrame: TSimbaBackupFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 28
-    Top = 86
+    Top = 81
     Width = 101
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Backup Interval'
@@ -41,9 +42,8 @@ object SimbaBackupFrame: TSimbaBackupFrame
     AnchorSideTop.Control = Owner
     Left = 0
     Height = 20
-    Top = 5
+    Top = 0
     Width = 195
-    BorderSpacing.Top = 5
     Caption = 'Script backups are located at:'
     Layout = tlCenter
     ParentColor = False
@@ -55,7 +55,7 @@ object SimbaBackupFrame: TSimbaBackupFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 1
-    Top = 30
+    Top = 25
     Width = 1
     BorderSpacing.Top = 5
     Layout = tlCenter
@@ -69,7 +69,7 @@ object SimbaBackupFrame: TSimbaBackupFrame
     AnchorSideBottom.Side = asrBottom
     Left = 255
     Height = 28
-    Top = 86
+    Top = 81
     Width = 52
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 5
@@ -84,7 +84,7 @@ object SimbaBackupFrame: TSimbaBackupFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 20
-    Top = 56
+    Top = 51
     Width = 192
     Caption = 'Automatically Backup Scripts'
     Layout = tlCenter
@@ -98,8 +98,8 @@ object SimbaBackupFrame: TSimbaBackupFrame
     AnchorSideBottom.Side = asrBottom
     Left = 202
     Height = 20
-    Top = 56
-    Width = 24
+    Top = 51
+    Width = 21
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 10
     TabOrder = 1
@@ -112,7 +112,7 @@ object SimbaBackupFrame: TSimbaBackupFrame
     AnchorSideRight.Side = asrBottom
     Left = 0
     Height = 20
-    Top = 36
+    Top = 31
     Width = 668
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 5

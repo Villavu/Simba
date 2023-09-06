@@ -12,6 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, LCLType,
   SynEdit, SynEditTypes, SynEditKeyCmds,
+  simba.mufasatypes, simba.settings,
   simba.ide_codetools_insight, simba.ide_codetools_parser;
 
 type
@@ -45,6 +46,8 @@ type
     function IsShowing: Boolean;
     function GetParameterIndexAtCaret: Integer;
 
+    procedure DoSettingChanged_ParamHintKey(Setting: TSimbaSetting);
+
     procedure DoEditorTopLineChanged(Sender: TObject; Changes: TSynStatusChanges);
     procedure DoEditorCaretMove(Sender: TObject);
     procedure DoEditorCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
@@ -66,7 +69,7 @@ implementation
 
 uses
   mPasLexTypes, mPasLex,
-  simba.editor, simba.mufasatypes, simba.ide_codetools_setup, simba.theme;
+  simba.editor, simba.ide_codetools_setup, simba.theme;
 
 procedure TSimbaParamHintForm.SetBoldIndex(AValue: Integer);
 begin
@@ -321,6 +324,18 @@ begin
   end;
 end;
 
+procedure TSimbaParamHint.DoSettingChanged_ParamHintKey(Setting: TSimbaSetting);
+var
+  Index: Integer;
+begin
+  Index := Editor.Keystrokes.FindCommand(ParamHintCommand);
+  if (Index > -1) then
+  begin
+    Editor.Keystrokes[Index].Key := SimbaSettings.CodeTools.ParamHintKey.Value;
+    Editor.Keystrokes[Index].Shift := TShiftState(Integer(SimbaSettings.CodeTools.ParamHintKeyModifiers.Value));
+  end;
+end;
+
 procedure TSimbaParamHint.DoEditorTopLineChanged(Sender: TObject; Changes: TSynStatusChanges);
 begin
   if IsShowing then
@@ -434,8 +449,8 @@ begin
 
       with KeyStrokes.Add() do
       begin
-        Key := VK_SPACE;
-        Shift := [ssCtrl, ssShift];
+        Key := SimbaSettings.CodeTools.ParamHintKey.Value;
+        Shift := TShiftState(Int32(SimbaSettings.CodeTools.ParamHintKeyModifiers.Value));
         Command := ParamHintCommand;
       end;
     end;
@@ -465,7 +480,7 @@ end;
 
 class function TSimbaParamHint.IsParamHintCommand(Command: TSynEditorCommand; AChar: TUTF8Char): Boolean;
 begin
-  Result := ((Command = ecChar) and (AChar = '(')) or (Command = ParamHintCommand);
+  Result := (SimbaSettings.CodeTools.ParamHintOpenAutomatically.Value and (Command = ecChar) and (AChar = '(')) or (Command = ParamHintCommand);
 end;
 
 class constructor TSimbaParamHint.Create;
@@ -479,6 +494,9 @@ begin
 
   FCodeinsight := TCodeinsight.Create();
   FHintForm := TSimbaParamHintForm.Create(Self);
+
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.CodeTools.ParamHintKey, @DoSettingChanged_ParamHintKey);
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.CodeTools.ParamHintKeyModifiers, @DoSettingChanged_ParamHintKey);
 end;
 
 end.

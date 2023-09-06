@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils, Graphics, StdCtrls, Controls, Forms, LCLType, Types,
   SynEdit, SynEditTypes, SynCompletion, SynEditKeyCmds, SynEditHighlighter,
-  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight,
+  simba.mufasatypes, simba.settings, simba.ide_codetools_parser, simba.ide_codetools_insight,
   simba.component_scrollbar;
 
 type
@@ -69,6 +69,8 @@ type
     FColumnWidth: Integer;
     FDrawOffsetY: Integer;
 
+    procedure DoSettingChanged_CompletionKey(Setting: TSimbaSetting);
+
     function GetHintText(Decl: TDeclaration; IsHint: Boolean): String;
 
     function GetDecl(Index: Integer): TDeclaration;
@@ -105,7 +107,7 @@ type
 implementation
 
 uses
-  simba.settings, simba.algo_sort, simba.editor, simba.ide_codetools_setup, simba.theme;
+  simba.algo_sort, simba.editor, simba.ide_codetools_setup, simba.theme;
 
 {$IFDEF WINDOWS}
 function SetClassLong(Handle: HWND; Index: Integer = -26; Value: Integer = 0): UInt32; stdcall; external 'user32' name 'SetClassLongA';
@@ -460,6 +462,18 @@ begin
   end;
 end;
 
+procedure TSimbaAutoComplete.DoSettingChanged_CompletionKey(Setting: TSimbaSetting);
+var
+  Index: Integer;
+begin
+  Index := Editor.Keystrokes.FindCommand(AutoCompleteCommand);
+  if (Index > -1) then
+  begin
+    Editor.Keystrokes[Index].Key := SimbaSettings.CodeTools.CompletionKey.Value;
+    Editor.Keystrokes[Index].Shift := TShiftState(Integer(SimbaSettings.CodeTools.CompletionKeyModifiers.Value));
+  end;
+end;
+
 function TSimbaAutoComplete.GetHintText(Decl: TDeclaration; IsHint: Boolean): String;
 
   function GetMethodText(Decl: TDeclaration_Method): String;
@@ -581,8 +595,8 @@ begin
 
       with KeyStrokes.Add() do
       begin
-        Key := VK_SPACE;
-        Shift := [ssCtrl];
+        Key := SimbaSettings.CodeTools.CompletionKey.Value;
+        Shift := TShiftState(Int32(SimbaSettings.CodeTools.CompletionKeyModifiers.Value));
         Command := AutoCompleteCommand;
       end;
     end;
@@ -797,6 +811,9 @@ begin
   OnExecute := @DoExecute;
 
   LongLineHintType := sclpExtendRightOnly;
+
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.CodeTools.CompletionKey, @DoSettingChanged_CompletionKey);
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.CodeTools.CompletionKeyModifiers, @DoSettingChanged_CompletionKey);
 end;
 
 destructor TSimbaAutoComplete.Destroy;
@@ -809,7 +826,7 @@ end;
 
 class function TSimbaAutoComplete.IsAutoCompleteCommand(Command: TSynEditorCommand; AChar: TUTF8Char): Boolean;
 begin
-  Result := ((Command = ecChar) and (AChar = '.')) or (Command = AutoCompleteCommand);
+  Result := (SimbaSettings.CodeTools.CompletionOpenAutomatically.Value and (Command = ecChar) and (AChar = '.')) or (Command = AutoCompleteCommand);
 end;
 
 class constructor TSimbaAutoComplete.Create;

@@ -114,9 +114,7 @@ type
       RightMarginVisible: TSimbaSetting;
       AntiAliased: TSimbaSetting;
       AllowCaretPastEOL: TSimbaSetting;
-      IgnoreCodeToolsIDEDirective: TSimbaSetting;
-      AutomaticallyOpenAutoCompletion: TSimbaSetting;
-      AutomaticallyShowParameterHints: TSimbaSetting;
+
       AutomaticallyCompleteBegin: TSimbaSetting;
       AutomaticallyCompleteParentheses: TSimbaSetting;
       AutomaticallyCompleteIndex: TSimbaSetting;
@@ -127,6 +125,18 @@ type
       DocumentationComment: TSimbaSetting;
 
       FindPanelVisible: TSimbaSetting;
+    end;
+
+    CodeTools: record
+      IgnoreIDEDirective: TSimbaSetting;
+
+      CompletionOpenAutomatically: TSimbaSetting;
+      CompletionKey: TSimbaSetting;
+      CompletionKeyModifiers: TSimbaSetting;
+
+      ParamHintOpenAutomatically: TSimbaSetting;
+      ParamHintKey: TSimbaSetting;
+      ParamHintKeyModifiers: TSimbaSetting;
     end;
 
     OutputBox: record
@@ -172,7 +182,7 @@ property SimbaSettingFileName: String read GetSimbaSettingsFileName;
 implementation
 
 uses
-  Forms, SynEdit,
+  Forms, SynEdit, LCLType,
   simba.mufasatypes, simba.encoding, simba.env, simba.editor_docgenerator,
   simba.ide_initialization, simba.theme, simba.fonthelpers;
 
@@ -497,10 +507,8 @@ begin
   Editor.FontSize                        := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize);
   Editor.FontName                        := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', SynDefaultFontName);
   Editor.AntiAliased                     := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AntiAliased', True);
-  Editor.IgnoreCodeToolsIDEDirective     := TSimbaSetting_Boolean.Create(Self, 'Editor', 'IgnoreCodeToolsIDEDirective', False);
   Editor.AllowCaretPastEOL               := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AllowCaretPastEOL', True);
-  Editor.AutomaticallyOpenAutoCompletion := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyOpenAutoCompletion', True);
-  Editor.AutomaticallyShowParameterHints := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyShowParameterHints', True);
+
   Editor.RightMargin                     := TSimbaSetting_Integer.Create(Self, 'Editor', 'RightMargin', 80);
   Editor.RightMarginVisible              := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
   Editor.DocumentationComment            := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DocumentationComment', DEFAULT_DOCUMENTATION_COMMENT);
@@ -512,6 +520,16 @@ begin
 
   Editor.AutoCompleteWidth := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteWidth', 400);
   Editor.AutoCompleteLines := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteLines', 8);
+
+  CodeTools.IgnoreIDEDirective          := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'IgnoreIDEDirective', False);
+
+  CodeTools.CompletionOpenAutomatically := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'CompletionOpenAutomatically', True);
+  CodeTools.CompletionKey               := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'CompletionKey', VK_SPACE);
+  CodeTools.CompletionKeyModifiers      := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'CompletionKeyModifiers', Integer(TShiftState([ssCtrl])));
+
+  CodeTools.ParamHintOpenAutomatically  := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'ParamHintOpenAutomatically', True);
+  CodeTools.ParamHintKey                := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'ParamHintKey', VK_SPACE);
+  CodeTools.ParamHintKeyModifiers       := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'ParamHintKeyModifiers', Integer(TShiftState([ssCtrl, ssShift])));
 
   OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', Editor.FontSize.DefaultValue);
   OutputBox.FontName        := TSimbaSetting_String.Create(Self,  'OutputBox', 'FontName', Editor.FontName.DefaultValue);

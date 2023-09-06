@@ -12,7 +12,8 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls, ButtonPanel, Spin,
   simba.settingsform_editor_font, simba.settingsform_editor_colors, simba.settingsform_editor_general,
-  simba.settingsform_simba_general, simba.settingsform_outputbox, simba.settingsform_backup;
+  simba.settingsform_simba_general, simba.settingsform_outputbox, simba.settingsform_backup,
+  simba.settingsform_codetools;
 
 type
   TSimbaSettingsForm = class(TForm)
@@ -26,6 +27,7 @@ type
     procedure TreeViewSelectionChanged(Sender: TObject);
   public
     SimbaGeneralFrame: TSimbaGeneralFrame;
+    SimbaCodetoolsFrame: TSimbaCodetoolsFrame;
     SimbaOutputBoxFrame: TSimbaOutputBoxFrame;
     SimbaBackupFrame: TSimbaBackupFrame;
 
@@ -75,9 +77,6 @@ begin
   EditorGeneralFrame.RightMarginEdit.Value := SimbaSettings.Editor.RightMargin.Value;
   EditorGeneralFrame.VisibleRightMarginCheckbox.Checked := SimbaSettings.Editor.RightMarginVisible.Value;
   EditorGeneralFrame.CaretPastEOLCheckBox.Checked := SimbaSettings.Editor.AllowCaretPastEOL.Value;
-  EditorGeneralFrame.OpenAutoCompletionCheckbox.Checked := SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value;
-  EditorGeneralFrame.ShowParameterHintsCheckbox.Checked := SimbaSettings.Editor.AutomaticallyShowParameterHints.Value;
-  EditorGeneralFrame.IgnoreCodeToolsDirectiveCheckbox.Checked := SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value;
 
   EditorGeneralFrame.CompleteBeginCheckbox.Checked := SimbaSettings.Editor.AutomaticallyCompleteBegin.Value;
   EditorGeneralFrame.CompleteParenthesesCheckbox.Checked := SimbaSettings.Editor.AutomaticallyCompleteParentheses.Value;
@@ -89,6 +88,7 @@ begin
   SimbaGeneralFrame.FontSizeTrackBar.OnChange(nil);
 
   SimbaGeneralFrame.Load();
+  SimbaCodetoolsFrame.Load();
   EditorGeneralFrame.Load();
   EditorColorsFrame.Load();
   SimbaOutputBoxFrame.Load();
@@ -104,25 +104,13 @@ begin
   SimbaSettings.Editor.AllowCaretPastEOL.Value := EditorGeneralFrame.CaretPastEOLCheckBox.Checked;
   SimbaSettings.Editor.RightMargin.Value := EditorGeneralFrame.RightMarginEdit.Value;
   SimbaSettings.Editor.RightMarginVisible.Value := EditorGeneralFrame.VisibleRightMarginCheckbox.Checked;
-  SimbaSettings.Editor.AutomaticallyOpenAutoCompletion.Value := EditorGeneralFrame.OpenAutoCompletionCheckbox.Checked;
-  SimbaSettings.Editor.AutomaticallyShowParameterHints.Value := EditorGeneralFrame.ShowParameterHintsCheckbox.Checked;
-  SimbaSettings.Editor.IgnoreCodeToolsIDEDirective.Value := EditorGeneralFrame.IgnoreCodeToolsDirectiveCheckbox.Checked;
 
   SimbaSettings.Editor.AutomaticallyCompleteBegin.Value := EditorGeneralFrame.CompleteBeginCheckbox.Checked;
   SimbaSettings.Editor.AutomaticallyCompleteIndex.Value := EditorGeneralFrame.CompleteIndexCheckbox.Checked;
   SimbaSettings.Editor.AutomaticallyCompleteParentheses.Value := EditorGeneralFrame.CompleteParenthesesCheckbox.Checked;
 
-  //if (SimbaGeneralFrame.ToolbarSizeTrackBar.Position = SimbaGeneralFrame.ToolbarSizeTrackBar.Min) then
-  //  SimbaSettings.General.ToolbarSize.Value := SimbaSettings.General.ToolbarSize.DefaultValue
-  //else
-  //  SimbaSettings.General.ToolbarSize.Value := SimbaGeneralFrame.ToolbarSizeTrackBar.Position;
-  //
-  //if (SimbaGeneralFrame.FontSizeTrackBar.Position = SimbaGeneralFrame.FontSizeTrackBar.Min) then
-  //  SimbaSettings.General.CustomFontSize.Value := SimbaSettings.General.CustomFontSize.DefaultValue
-  //else
-  //  SimbaSettings.General.CustomFontSize.Value := SimbaGeneralFrame.FontSizeTrackBar.Position;
-
   SimbaGeneralFrame.Save();
+  SimbaCodetoolsFrame.Save();
   EditorGeneralFrame.Save();
   EditorColorsFrame.Save();
   SimbaOutputBoxFrame.Save();
@@ -162,6 +150,11 @@ begin
   SimbaGeneralFrame.Parent := AddPage('General', Node);
   SimbaGeneralFrame.Align := alClient;
   SimbaGeneralFrame.ParentFont := True;
+
+  SimbaCodetoolsFrame := TSimbaCodetoolsFrame.Create(Self);
+  SimbaCodetoolsFrame.Parent := AddPage('Code Tools', Node);
+  SimbaCodetoolsFrame.Align := alClient;
+  SimbaCodetoolsFrame.ParentFont := True;
 
   SimbaOutputBoxFrame := TSimbaOutputBoxFrame.Create(Self);
   SimbaOutputBoxFrame.Parent := AddPage('Output Box', Node);

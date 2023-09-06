@@ -324,21 +324,24 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
-    <RequiredPackages Count="4">
+    <RequiredPackages Count="5">
       <Item1>
-        <PackageName Value="SynEdit"/>
+        <PackageName Value="LazControlDsgn"/>
       </Item1>
       <Item2>
-        <PackageName Value="AnchorDocking"/>
+        <PackageName Value="SynEdit"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="AnchorDocking"/>
       </Item3>
       <Item4>
-        <PackageName Value="LCL"/>
+        <PackageName Value="LazControls"/>
       </Item4>
+      <Item5>
+        <PackageName Value="LCL"/>
+      </Item5>
     </RequiredPackages>
-    <Units Count="138">
+    <Units Count="139">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -969,6 +972,13 @@
         <Filename Value="simba.rgbsumtable.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit137>
+      <Unit138>
+        <Filename Value="forms/simba.settingsform_codetools.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaCodetoolsFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+      </Unit138>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
