@@ -67,7 +67,7 @@ end;
 
 procedure TSimbaSynEdit.DoVertScrollBarChange(Sender: TObject);
 begin
-  TopLine := FScrollbarVert.Position;
+  TopView := FScrollbarVert.Position;
 end;
 
 procedure TSimbaSynEdit.DoHorzScrollBarChange(Sender: TObject);
