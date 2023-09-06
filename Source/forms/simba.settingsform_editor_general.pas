@@ -19,16 +19,12 @@ type
     CompleteParenthesesCheckbox: TCheckBox;
     CompleteIndexCheckbox: TCheckBox;
     CompleteDivider: TDividerBevel;
-    IgnoreCodetoolsDirectiveCheckbox: TCheckBox;
     CaretPastEOLCheckBox: TCheckBox;
     DividerBevel4: TDividerBevel;
     CompleteLabel: TLabel;
     DocCommentMemo: TMemo;
     VisibleRightMarginCheckbox: TCheckBox;
     MarginValueLabel: TLabel;
-    ShowParameterHintsCheckbox: TCheckBox;
-    OpenAutoCompletionCheckbox: TCheckBox;
-    DividerBevel1: TDividerBevel;
     RightMarginEdit: TSpinEdit;
   public
     procedure Load;
