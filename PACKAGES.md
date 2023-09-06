@@ -27,10 +27,10 @@ example=example2.simba
 - `example` Will add a script to the "Open Example" window which is opened via the file menu.
 - `script` Will add a script to the menu bar.
 
-![Package menu](Images/docs/package_menu.png)  
+![Package menu](Images/readme/package_menu.png)  
 *(package menu)*
 
-![Package open example](Images/docs/package_openexample.png)  
+![Package open example](Images/readme/package_openexample.png)  
 *(package example)*
 
 ----
