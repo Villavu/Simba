@@ -94,9 +94,9 @@ type
 
     FFlags: UInt32;
 
-    procedure ClearFlags;
-    procedure SetFlags(const Index: Integer; const AValue: Boolean);
-    function GetFlags(const Index: Integer): Boolean;
+    procedure ClearFlags; inline;
+    procedure SetFlags(const Index: Integer; const AValue: Boolean); inline;
+    function GetFlags(const Index: Integer): Boolean; inline;
 
     function GetText: String;
     function GetTextNoComments: String;
@@ -137,6 +137,12 @@ type
     property isOverrideMethod: Boolean index 6 read GetFlags write SetFlags;
     property isOverloadMethod: Boolean index 7 read GetFlags write SetFlags;
     property isStaticMethod: Boolean index 8 read GetFlags write SetFlags;
+    property isVar: Boolean index 9 read GetFlags write SetFlags;
+    property isConst: Boolean index 10 read GetFlags write SetFlags;
+    property isField: Boolean index 11 read GetFlags write SetFlags;
+    property isEnumElement: Boolean index 12 read GetFlags write SetFlags;
+    property isType: Boolean index 13 read GetFlags write SetFlags;
+    property isKeyword: Boolean index 14 read GetFlags write SetFlags;
 
     constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); virtual; reintroduce;
     destructor Destroy; override;
@@ -145,6 +151,11 @@ type
   TDeclaration_Root = class(TDeclaration)
   public
     constructor Create; reintroduce;
+  end;
+
+  TDeclaration_Keyword = class(TDeclaration)
+  public
+    constructor Create(Keyword: String); reintroduce;
   end;
 
   TDeclaration_Anchor = class(TDeclaration);
@@ -180,7 +191,11 @@ type
   TDeclaration_ParentType = class(TDeclaration_Identifier);
   TDeclaration_OrdinalType = class(TDeclaration);
 
-  TDeclaration_Type = class(TDeclaration);
+  TDeclaration_Type = class(TDeclaration)
+  public
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
+  end;
+
   TDeclaration_TypeRecord = class(TDeclaration_Type)
   public
     function Parent: TDeclaration;
@@ -211,8 +226,10 @@ type
   end;
 
   TDeclaration_EnumElement = class(TDeclaration)
-  public
+  protected
     function GetName: string; override;
+  public
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
   end;
 
   TDeclaration_EnumElementName = class(TDeclaration)
@@ -261,14 +278,21 @@ type
   public
     DefToken: TptTokenKind;
 
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
+
     property VarType: TDeclaration read GetVarType;
     property VarTypeString: String read GetVarTypeString;
     property VarDefaultString: String read GetVarDefaultString;
   end;
 
   TDeclaration_VarClass = class of TDeclaration_Var;
-  TDeclaration_Const = class(TDeclaration_Var);
-  TDeclaration_Field = class(TDeclaration_Var);
+  TDeclaration_Const = class(TDeclaration_Var)
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
+  end;
+
+  TDeclaration_Field = class(TDeclaration_Var)
+    constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); override;
+  end;
 
   TDeclaration_Method = class(TDeclaration)
   protected
@@ -540,12 +564,38 @@ begin
   inherited Create(nil, nil, 0, 0);
 end;
 
+constructor TDeclaration_Keyword.Create(Keyword: String);
+begin
+  inherited Create(nil, nil, 0, 0);
+
+  FName.Value := Keyword;
+
+  ClearFlags();
+  isKeyword := True;
+end;
+
+constructor TDeclaration_Type.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+begin
+  inherited Create(AParser, AOwner, AStart, AEnd);
+
+  ClearFlags();
+  isType := True;
+end;
+
 function TDeclaration_EnumElement.GetName: string;
 begin
   if FName.IsNull then
     FName.Value := Items.GetTextOfClass(TDeclaration_EnumElementName);
 
   Result := inherited;
+end;
+
+constructor TDeclaration_EnumElement.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+begin
+  inherited Create(AParser, AOwner, AStart, AEnd);
+
+  ClearFlags();
+  isEnumElement := True;
 end;
 
 function TDeclaration_TypeAlias.VarType: TDeclaration;
@@ -625,6 +675,30 @@ begin
     end;
 
   Result := FVarDefaultString.Value;
+end;
+
+constructor TDeclaration_Var.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+begin
+  inherited Create(AParser, AOwner, AStart, AEnd);
+
+  ClearFlags();
+  isVar := True;
+end;
+
+constructor TDeclaration_Const.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+begin
+  inherited Create(AParser, AOwner, AStart, AEnd);
+
+  ClearFlags();
+  isConst := True;
+end;
+
+constructor TDeclaration_Field.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
+begin
+  inherited Create(AParser, AOwner, AStart, AEnd);
+
+  ClearFlags();
+  isField := True;
 end;
 
 function TDeclaration_EnumElementName.GetName: string;

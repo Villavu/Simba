@@ -341,7 +341,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="139">
+    <Units Count="140">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -979,6 +979,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
       </Unit138>
+      <Unit139>
+        <Filename Value="codetools/simba.ide_codetools_keywords.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit139>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

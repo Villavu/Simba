@@ -78,6 +78,7 @@ procedure TSimbaCodetoolsFrame.Load;
 begin
   AddKeysToComboBoxes();
 
+  CompletionKeywordsCheckbox.Checked := SimbaSettings.CodeTools.CompletionAddKeywords.Value;
   IgnoreDirectiveCheckbox.Checked    := SimbaSettings.CodeTools.IgnoreIDEDirective.Value;
   AutoOpenParamHintCheckbox.Checked  := SimbaSettings.CodeTools.ParamHintOpenAutomatically.Value;
   AutoOpenCompletionCheckbox.Checked := SimbaSettings.CodeTools.CompletionOpenAutomatically.Value;
@@ -99,6 +100,7 @@ var
 begin
   SimbaSettings.CodeTools.IgnoreIDEDirective.Value          := IgnoreDirectiveCheckbox.Checked;
   SimbaSettings.CodeTools.ParamHintOpenAutomatically.Value  := AutoOpenParamHintCheckbox.Checked;
+  SimbaSettings.CodeTools.CompletionAddKeywords.Value       := CompletionKeywordsCheckbox.Checked;
   SimbaSettings.CodeTools.CompletionOpenAutomatically.Value := AutoOpenCompletionCheckbox.Checked;
 
   if (CompletionKeyCombo.ItemIndex > -1) then

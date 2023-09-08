@@ -130,6 +130,7 @@ type
     CodeTools: record
       IgnoreIDEDirective: TSimbaSetting;
 
+      CompletionAddKeywords: TSimbaSetting;
       CompletionOpenAutomatically: TSimbaSetting;
       CompletionKey: TSimbaSetting;
       CompletionKeyModifiers: TSimbaSetting;
@@ -523,6 +524,7 @@ begin
 
   CodeTools.IgnoreIDEDirective          := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'IgnoreIDEDirective', False);
 
+  Codetools.CompletionAddKeywords       := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'CompletionAddKeywords', True);
   CodeTools.CompletionOpenAutomatically := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'CompletionOpenAutomatically', True);
   CodeTools.CompletionKey               := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'CompletionKey', VK_SPACE);
   CodeTools.CompletionKeyModifiers      := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'CompletionKeyModifiers', Integer(TShiftState([ssCtrl])));
