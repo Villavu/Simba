@@ -177,6 +177,7 @@ end;
 
 procedure BuildAPI;
 begin
+  ParseSourceFile('simba.import_system',        'System'         );
   ParseSourceFile('simba.import_colormath',     'Color Math'     );
   ParseSourceFile('simba.import_point',         'TPoint'         );
   ParseSourceFile('simba.import_tpa',           'TPointArray'    );

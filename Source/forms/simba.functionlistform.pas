@@ -163,6 +163,7 @@ begin
     'Misc':           Result := 'https://villavu.github.io/Simba/Misc.html';
     'Dialogs':        Result := 'https://villavu.github.io/Simba/Dialogs.html';
     'DTM':            Result := 'https://villavu.github.io/Simba/DTM.html';
+    'System':         Result := 'https://villavu.github.io/Simba/System.html';
   end;
 end;
 
