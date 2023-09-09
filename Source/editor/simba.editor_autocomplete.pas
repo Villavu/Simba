@@ -48,11 +48,12 @@ type
     function UseBGThemes: Boolean; override;
     function UseFGThemes: Boolean; override;
     procedure ActivateSub; override;
-    procedure EraseBackground(DC: HDC); override;
-    procedure Paint; override;
   public
     AutoComplete: TSimbaAutoComplete;
     TextWidth: Integer;
+
+    procedure EraseBackground(DC: HDC); override;
+    procedure Paint; override;
 
     constructor Create(AOwner: TComponent); override;
   end;

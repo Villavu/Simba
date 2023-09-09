@@ -21,7 +21,7 @@ DTM
 ===
 DTM related methods
 
-Image:: ../images/dtm.png
+Image:: ../../images/dtm.png
 *)
 
 (*
