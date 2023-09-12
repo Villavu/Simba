@@ -5,119 +5,28 @@
 }
 unit simba.script_plugin;
 
-(*
-
-  // procedure Test1(out test: TIntegerArray); native;
-  procedure Test1(const Params: PParamArray); cdecl;
-  var
-    Arr, Element: Pointer;
-    TypeInfo: Pointer;
-    Index: Integer;
-  begin
-    Arr := nil;
-
-    TypeInfo := MyMethods^.GetTypeInfo('TIntegerArray');
-
-    MyMethods^.SetArrayLength(TypeInfo, Arr, 10);
-    for Index := 0 to MyMethods^.GetArrayLength(Arr) - 1 do
-    begin
-      Element := MyMethods^.GetArrayElement(TypeInfo, Arr, Index);
-      Integer(Element^) := Index;
-    end;
-
-    PPointer(Params^[0])^ := Arr;
-  end;
-
-*)
-
-(*
-
-  // function Test2: array of record Int: Integer; Str: String; end; native;
-  procedure Test2(const Params: PParamArray; const Result: Pointer); cdecl;
-  var
-    TestInteger: Integer = 123456;
-    TestString: String = 'Hello World';
-  var
-    Arr, Field: Pointer;
-    ArrInfo, RecInfo, StrInfo: Pointer;
-  begin
-    Arr := nil;
-
-    ArrInfo := MyMethods^.GetTypeInfo('array of record Int: Integer; Str: String; end');
-    RecInfo := MyMethods^.GetTypeInfo('record Int: Integer; Str: String; end');
-    StrInfo := MyMethods^.GetTypeInfo('String');
-
-    MyMethods^.SetArrayLength(ArrInfo, Arr, 3);
-
-    // Result[1].Int := testInt;
-    Field := MyMethods^.GetArrayElement(ArrInfo, Arr, 1) + MyMethods^.GetFieldOffset(RecInfo, 'Int');
-    Move(TestInteger, Field^, SizeOf(Integer));
-
-    // SetLength(Result[1].Str, Length(TestString));
-    Field := MyMethods^.GetArrayElement(ArrInfo, Arr, 1) + MyMethods^.GetFieldOffset(RecInfo, 'Str');
-    MyMethods^.SetFieldArrayLength(StrInfo, Field, Length(TestString));
-
-    // Result[1].Str := TestString;
-    Field := MyMethods^.GetFieldArrayElement(StrInfo, Field, 0);
-    Move(TestString[1], Field^, Length(TestString));
-
-    PPointer(Result)^ := Arr;
-  end;
-
-*)
-
 {$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils, dynlibs, lpcompiler,
-  simba.mufasatypes, simba.script_compiler;
+  Classes, SysUtils, DynLibs,
+  simba.mufasatypes, simba.script_compiler, simba.script_pluginmethods;
 
 type
-  TSimbaSynchronizeMethod = procedure(Data: Pointer); cdecl;
-
-  PSimbaInfomation = ^TSimbaInfomation;
-  TSimbaInfomation = packed record
+  PSimbaPluginInfo = ^TSimbaPluginInfo;
+  TSimbaPluginInfo = packed record
     SimbaVersion: Integer;
     SimbaMajor: Integer;
 
     FileName: PChar;
 
-    // Extend this as much as you want, do not remove, reorder or change datatypes.
-  end;
+    Compiler: Pointer;
 
-  PSimbaMethods = ^TSimbaMethods;
-  TSimbaMethods = packed record
-    Synchronize: procedure(Method: TSimbaSynchronizeMethod; Data: Pointer = nil); cdecl;
-
-    GetMem: function(Size: PtrUInt): Pointer; cdecl;
-    FreeMem: function(P: Pointer): PtrUInt; cdecl;
-    AllocMem: function(Size: PtrUInt): Pointer; cdecl;
-    ReAllocMem: function(var P: Pointer; Size: PtrUInt): Pointer; cdecl;
-    MemSize: function(P: Pointer): PtrUInt; cdecl;
-
-    RaiseException: procedure(Message: PChar); cdecl;
-
-    GetTypeInfo: function(Str: PChar): Pointer; cdecl;
-    GetTypeSize: function(TypeInfo: Pointer): Integer; cdecl;
-    GetTypeBaseType: function(TypeInfo: Pointer): Integer; cdecl;
-    GetTypeClassName: function(TypeInfo: Pointer; Buffer: PChar): Integer; cdecl;
-
-    GetArrayElement: function(TypeInfo: Pointer; AVar: Pointer; Index: Integer): Pointer;  cdecl;
-    GetArrayLength: function(AVar: Pointer): Integer; cdecl;
-    SetArrayLength: procedure(TypeInfo: Pointer; var AVar: Pointer; Len: Integer); cdecl;
-
-    GetFieldOffset: function(TypeInfo: Pointer; FieldName: PChar): Integer; cdecl;
-    GetFieldArrayLength: function(AVar: Pointer): Integer; cdecl;
-    SetFieldArrayLength: procedure(TypeInfo: Pointer; var AVar: Pointer; Len: Integer); cdecl;
-    GetFieldArrayElement: function(TypeInfo: Pointer; AVar: Pointer; Index: Integer): Pointer; cdecl;
-
-    // Extend this as much as you want, do not remove, reorder or change datatypes.
+    // Extend this but do not remove, reorder or change datatypes.
   end;
 
   TSimbaPluginExports = packed record
-    GetPluginABIVersion: function: Integer; cdecl;
     GetFunctionInfo: function(Index: Integer; var Address: Pointer; var Header: PChar): Integer; cdecl;
     GetFunctionCount: function: Integer; cdecl;
     GetTypeInfo: function(Index: Integer; var Name: PChar; var Str: PChar): Integer; cdecl;
@@ -126,7 +35,7 @@ type
     GetCodeLength: function: Integer; cdecl;
     SetPluginMemManager: procedure(MemoryManager: TMemoryManager); cdecl;
 
-    RegisterSimbaPlugin: procedure(Infomation: PSimbaInfomation; Methods: PSimbaMethods); cdecl;
+    RegisterSimbaPlugin: procedure(Info: PSimbaPluginInfo; Methods: PSimbaPluginMethods); cdecl;
 
     OnAttach: procedure(Data: Pointer); cdecl;
     OnDetach: procedure; cdecl;
@@ -148,15 +57,11 @@ type
 
   TSimbaScriptPlugin = class
   protected
-  class var
-    FBaseCompiler: TSimbaScript_Compiler; // Type info.. Use script compiler.
-  protected
     FFileName: String;
     FHandle: TLibHandle;
 
-    FSimbaInfomation: TSimbaInfomation;
-    FSimbaMethods: TSimbaMethods;
-    FSimbaMemoryManager: TMemoryManager;
+    FInfo: TSimbaPluginInfo;
+    FMemoryManager: TMemoryManager;
 
     FExports: TSimbaPluginExports;
 
@@ -184,142 +89,7 @@ type
 implementation
 
 uses
-  ffi, lptypes, lpvartypes, lpvartypes_array, lpvartypes_record;
-
-function _GetMem(Size: PtrUInt): Pointer; cdecl;
-begin
-  Result := GetMem(Size);
-end;
-
-function _FreeMem(Ptr: Pointer): PtrUInt; cdecl;
-begin
-  Result := FreeMem(Ptr);
-end;
-
-function _AllocMem(Size: PtrUInt): Pointer; cdecl;
-begin
-  Result := AllocMem(Size);
-end;
-
-function _ReAllocMem(var P: Pointer; Size: PtrUInt): Pointer; cdecl;
-begin
-  Result := ReAllocMem(P, Size);
-end;
-
-function _MemSize(P: Pointer): PtrUInt; cdecl;
-begin
-  Result := MemSize(P);
-end;
-
-procedure _RaiseException(Message: PChar); cdecl;
-begin
-  raise Exception.Create(Message);
-end;
-
-function _GetTypeInfo(Str: PChar): Pointer; cdecl;
-var
-  Typ: TLapeType absolute Result;
-begin
-  Result := nil;
-
-  with TSimbaScriptPlugin.FBaseCompiler do
-  try
-    Typ := getGlobalType(Str);
-    if (Typ <> nil) then
-      Exit;
-
-    Typ := addGlobalType(Str, '_GetTypeInfo');
-    if (Typ <> nil) then
-      Typ.Name := Str;
-  except
-  end;
-end;
-
-function _GetFieldOffset(TypeInfo: Pointer; Name: PChar): Integer; cdecl;
-begin
-  Result := TLapeType_Record(TypeInfo).FieldMap[Name].Offset;
-end;
-
-procedure _SetArrayLength(TypeInfo: Pointer; var AVar: Pointer; Len: Integer); cdecl;
-begin
-  TLapeType_DynArray(TypeInfo).VarSetLength(AVar, Len);
-end;
-
-function _GetArrayLength(AVar: Pointer): Integer; cdecl;
-begin
-  Result := DynArraySize(AVar);
-end;
-
-function _GetArrayElement(TypeInfo: Pointer; AVar: Pointer; Index: Integer): Pointer; cdecl;
-begin
-  Result := AVar + (Index * TLapeType_DynArray(TypeInfo).PType.Size);
-end;
-
-function _GetFieldArrayLength(AVar: Pointer): Integer; cdecl;
-begin
-  Result := DynArraySize(PPointer(AVar)^);
-end;
-
-procedure _SetFieldArrayLength(TypeInfo: Pointer; var AVar: Pointer; Len: Integer); cdecl;
-begin
-  with TLapeType_DynArray(TypeInfo) do
-    VarSetLength(PPointer(AVar)^, Len);
-end;
-
-function _GetFieldArrayElement(TypeInfo: Pointer; AVar: Pointer; Index: Integer): Pointer; cdecl;
-begin
-  with TLapeType_DynArray(TypeInfo) do
-    Result := PPointer(AVar + (Index * PType.Size))^;
-end;
-
-function _GetTypeSize(TypeInfo: Pointer): Integer; cdecl;
-begin
-  with TLapeType(TypeInfo) do
-    Result := Size;
-end;
-
-function _GetTypeClassName(TypeInfo: Pointer; Buffer: PChar): Integer; cdecl;
-begin
-  with TLapeType(TypeInfo) do
-  begin
-    Result := Length(ClassName);
-    if (Result > 0) then
-      Move(ClassName[1], Buffer^, Result);
-  end;
-end;
-
-function _GetTypeBaseType(TypeInfo: Pointer): Integer; cdecl;
-begin
-  with TLapeType(TypeInfo) do
-    Result := Ord(BaseType);
-end;
-
-// Sync wrapper which includes a data parameter
-type
-  TSync = class
-    Data: Pointer;
-    Method: TSimbaSynchronizeMethod;
-
-    procedure Execute;
-  end;
-
-procedure TSync.Execute;
-begin
-  Method(Data);
-end;
-
-procedure _Synchronize(Method: TSimbaSynchronizeMethod; Data: Pointer = nil); cdecl;
-var
-  Sync: TSync;
-begin
-  Sync := TSync.Create();
-  Sync.Data := Data;
-  Sync.Method := Method;
-
-  TThread.Synchronize(TThread.CurrentThread, @Sync.Execute);
-
-  Sync.Free();
-end;
+  ffi;
 
 procedure TSimbaScriptPlugin.Load;
 
@@ -395,7 +165,6 @@ var
 begin
   with FExports do
   begin
-    Pointer(GetPluginABIVersion) := GetProcedureAddress(FHandle, 'GetPluginABIVersion');
     Pointer(GetFunctionInfo)     := GetProcedureAddress(FHandle, 'GetFunctionInfo');
     Pointer(GetFunctionCount)    := GetProcedureAddress(FHandle, 'GetFunctionCount');
     Pointer(GetTypeInfo)         := GetProcedureAddress(FHandle, 'GetTypeInfo');
@@ -410,9 +179,6 @@ begin
     Pointer(OnStop)              := GetProcedureAddress(FHandle, 'OnStop');
     Pointer(RegisterSimbaPlugin) := GetProcedureAddress(FHandle, 'RegisterSimbaPlugin');
   end;
-
-  if Assigned(FExports.SetPluginMemManager) then FExports.SetPluginMemManager(FSimbaMemoryManager);
-  if Assigned(FExports.RegisterSimbaPlugin) then FExports.RegisterSimbaPlugin(@FSimbaInfomation, @FSimbaMethods);
 
   // Methods
   if Assigned(FExports.GetFunctionCount) and Assigned(FExports.GetFunctionInfo) then
@@ -465,22 +231,28 @@ begin
     if FMethods[I].Native then
       Compiler.addGlobalFunc(FMethods[I].Header, FMethods[I].Address)
     else
-      Compiler.addGlobalFunc(FMethods[I].Header, FMethods[I].Address, {$IF DECLARED(FFI_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
+      Compiler.addGlobalFunc(FMethods[I].Header, FMethods[I].Address, FFI_DEFAULT_ABI);
   end;
 
   if (FCode <> '') then
     Compiler.addDelayedCode(FCode, '!' + FFileName, False);
+
+  GetMemoryManager(FMemoryManager);
+  if Assigned(FExports.SetPluginMemManager) then
+    FExports.SetPluginMemManager(FMemoryManager);
+
+  FInfo.SimbaMajor := SIMBA_MAJOR;
+  FInfo.SimbaVersion := SIMBA_VERSION;
+  FInfo.FileName := PChar(FFileName);
+  FInfo.Compiler := Compiler;
+
+  if Assigned(FExports.RegisterSimbaPlugin) then
+    FExports.RegisterSimbaPlugin(@FInfo, @SimbaPluginMethods);
 end;
 
 constructor TSimbaScriptPlugin.Create(FileName: String);
 begin
   inherited Create();
-
-  if (FBaseCompiler = nil) then
-  begin
-    FBaseCompiler := TSimbaScript_Compiler.Create(nil);
-    FBaseCompiler.Import();
-  end;
 
   FFileName := FileName;
   if (not FileExists(FFileName)) then
@@ -495,35 +267,6 @@ begin
 
     raise Exception.Create('Loading plugin failed. Architecture mismatch? (expected a ' + {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + ' bit plugin)');
   end;
-
-  FSimbaMethods.Synchronize := @_Synchronize;
-  FSimbaMethods.GetMem := @_GetMem;
-  FSimbaMethods.FreeMem := @_FreeMem;
-  FSimbaMethods.AllocMem := @_AllocMem;
-  FSimbaMethods.MemSize := @_MemSize;
-  FSimbaMethods.ReAllocMem := @_ReAllocMem;
-
-  FSimbaMethods.RaiseException := @_RaiseException;
-
-  FSimbaMethods.GetTypeInfo := @_GetTypeInfo;
-  FSimbaMethods.GetTypeSize := @_GetTypeSize;
-  FSimbaMethods.GetTypeBaseType := @_GetTypeBaseType;
-  FSimbaMethods.GetTypeClassName := @_GetTypeClassName;
-
-  FSimbaMethods.GetArrayElement := @_GetArrayElement;
-  FSimbaMethods.GetArrayLength := @_GetArrayLength;
-  FSimbaMethods.SetArrayLength := @_SetArrayLength;
-
-  FSimbaMethods.GetFieldOffset := @_GetFieldOffset;
-  FSimbaMethods.GetFieldArrayLength := @_GetFieldArrayLength;
-  FSimbaMethods.SetFieldArrayLength := @_SetFieldArrayLength;
-  FSimbaMethods.GetFieldArrayElement := @_GetFieldArrayElement;
-
-  FSimbaInfomation.FileName := PChar(FFileName);
-  FSimbaInfomation.SimbaMajor := SIMBA_MAJOR;
-  FSimbaInfomation.SimbaVersion := SIMBA_VERSION;
-
-  GetMemoryManager(FSimbaMemoryManager);
 
   Load();
 end;
@@ -568,10 +311,6 @@ begin
     if Assigned(Self[I].FExports.OnStop) then
       Self[I].FExports.OnStop();
 end;
-
-finalization
-  if (TSimbaScriptPlugin.FBaseCompiler <> nil) then
-    FreeAndNil(TSimbaScriptPlugin.FBaseCompiler);
 
 end.
 

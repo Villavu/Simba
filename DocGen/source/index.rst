@@ -7,3 +7,4 @@ Simba
 
    tutorials/index
    api/index
+   plugins/index

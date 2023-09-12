@@ -1,8 +1,8 @@
 object SimbaFunctionListForm: TSimbaFunctionListForm
-  Left = 2036
+  Left = 1446
   Height = 301
   Top = 685
-  Width = 175
+  Width = 765
   Caption = 'Function List'
   DesignTimePPI = 120
   LCLVersion = '3.0.0.1'
