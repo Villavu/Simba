@@ -11,13 +11,13 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.image,
-  simba.target_eios, simba.target_window, simba.target_image;
+  simba.mufasatypes, simba.image, simba.externalimage,
+  simba.target_eios, simba.target_window, simba.target_image, simba.target_plugin;
 
 type
   {$PUSH}
   {$SCOPEDENUMS ON}
-  ETargetType = (NONE, IMAGE, WINDOW, EIOS);
+  ETargetType = (NONE, IMAGE, WINDOW, EIOS, PLUGIN);
   ETargetTypes = set of ETargetType;
   {$POP}
 
@@ -43,7 +43,7 @@ type
   end;
 
 const
-  TargetName: array[ETargetType] of String = ('NONE', 'IMAGE', 'WINDOW', 'EIOS');
+  TargetName: array[ETargetType] of String = ('NONE', 'IMAGE', 'WINDOW', 'EIOS', 'PLUGIN');
 
 type
   PSimbaTarget = ^TSimbaTarget;
@@ -57,6 +57,7 @@ type
     FTargetImage: TSimbaImage;
     FTargetWindow: TWindowHandle;
     FTargetEIOS: TEIOSTarget;
+    FTargetPlugin: TSimbaPluginTarget;
     FMethods: TTargetMethods; // Targets need to provide these. They are filled in SetWindow,SetEIOS etc.
     FCustomClientArea: TBox;
     FAutoSetFocus: Boolean;
@@ -79,6 +80,7 @@ type
     function IsImageTarget: Boolean; overload;
     function IsImageTarget(out Image: TSimbaImage): Boolean; overload;
     function IsEIOSTarget: Boolean;
+    function IsPluginTarget: Boolean;
 
     function IsValid: Boolean;
     function IsFocused: Boolean;
@@ -94,6 +96,9 @@ type
     procedure SetWindow(Window: TWindowHandle);
     procedure SetImage(Image: TSimbaImage);
     procedure SetEIOS(FileName, Args: String);
+
+    procedure SetPlugin(FileName, Args: String); overload;
+    procedure SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalImage); overload;
 
     function MousePressed(Button: EMouseButton): Boolean;
     function MousePosition: TPoint;
@@ -231,6 +236,11 @@ begin
   Result := FTargetType = ETargetType.EIOS;
 end;
 
+function TSimbaTarget.IsPluginTarget: Boolean;
+begin
+  Result := FTargetType = ETargetType.PLUGIN;
+end;
+
 function TSimbaTarget.IsValid: Boolean;
 begin
   if HasMethod(FMethods.IsValid, 'IsValid') then
@@ -347,6 +357,20 @@ begin
 
   FMethods.GetDimensions := @EIOSTarget_GetDimensions;
   FMethods.GetImageData := @EIOSTarget_GetImageData;
+end;
+
+procedure TSimbaTarget.SetPlugin(FileName, Args: String);
+begin
+  ChangeTarget(ETargetType.PLUGIN);
+
+  FTargetPlugin := LoadPluginTarget(FileName, Args);
+end;
+
+procedure TSimbaTarget.SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalImage);
+begin
+  ChangeTarget(ETargetType.PLUGIN);
+
+  FTargetPlugin := LoadPluginTarget(FileName, Args, DebugImage);
 end;
 
 function TSimbaTarget.MousePressed(Button: EMouseButton): Boolean;
