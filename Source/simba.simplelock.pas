@@ -47,8 +47,9 @@ type
   private
     FLock: TCriticalSection;
   public
-    procedure Enter;
-    procedure Leave;
+    function TryEnter: Boolean; inline;
+    procedure Enter; inline;
+    procedure Leave; inline;
 
     class operator Initialize(var Self: TSimpleEnterableLock);
     class operator Finalize(var Self: TSimpleEnterableLock);
@@ -82,6 +83,11 @@ class function TSimpleThreadsafeLimit.Create(Limit: Integer): TSimpleThreadsafeL
 begin
   Result.FCounter := 0;
   Result.FLimit   := Limit;
+end;
+
+function TSimpleEnterableLock.TryEnter: Boolean;
+begin
+  Result := FLock.TryEnter();
 end;
 
 procedure TSimpleEnterableLock.Enter;
