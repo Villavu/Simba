@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes, lpvartypes, ffi,
-  simba.image, simba.target;
+  simba.image, simba.target, simba.externalimage;
 
 (*
 Target
@@ -70,6 +70,16 @@ Sets a plugin (via EIOS API) as the target.
 procedure _LapeTarget_SetEIOS(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.SetEIOS(PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure _LapeTarget_SetPlugin1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.SetPlugin(PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure _LapeTarget_SetPlugin2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.SetPlugin(PString(Params^[1])^, PString(Params^[2])^, PSimbaExternalImage(Params^[3])^);
 end;
 
 (*
@@ -190,6 +200,11 @@ TTarget.IsEIOSTarget
 procedure _LapeTarget_IsEIOSTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsEIOSTarget();
+end;
+
+procedure _LapeTarget_IsPluginTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsPluginTarget();
 end;
 
 (*
@@ -324,6 +339,8 @@ begin
     addGlobalFunc('procedure TTarget.SetImage(TImage: TImage)', @_LapeTarget_SetImage);
     addGlobalFunc('procedure TTarget.SetWindow(Window: TWindowHandle)', @_LapeTarget_SetWindow);
     addGlobalFunc('procedure TTarget.SetEIOS(Plugin, Args: String)', @_LapeTarget_SetEIOS);
+    addGlobalFunc('procedure TTarget.SetPlugin(Plugin, Args: String); overload', @_LapeTarget_SetPlugin1);
+    addGlobalFunc('procedure TTarget.SetPlugin(Plugin, Args: String; out DebugImage: TExternalImage); overload', @_LapeTarget_SetPlugin2);
 
     addGlobalFunc('function TTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage', @_LapeTarget_GetImage);
     addGlobalFunc('procedure TTarget.GetDimensions(out Width, Height: Integer)', @_LapeTarget_GetDimensions);
@@ -339,6 +356,7 @@ begin
     addGlobalFunc('function TTarget.IsImageTarget: Boolean; overload', @_LapeTarget_IsImageTarget1);
     addGlobalFunc('function TTarget.IsImageTarget(out TImage: TImage): Boolean; overload', @_LapeTarget_IsImageTarget2);
     addGlobalFunc('function TTarget.IsEIOSTarget: Boolean', @_LapeTarget_IsEIOSTarget);
+    addGlobalFunc('function TTarget.IsPluginTarget: Boolean', @_LapeTarget_IsPluginTarget);
 
     addGlobalFunc('function TTarget.IsDefault: Boolean', @_LapeTarget_IsDefault);
 
