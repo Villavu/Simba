@@ -13,6 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
+  simba.mufasatypes, simba.externalimage,
   lpcompiler;
 
 type
@@ -44,6 +45,14 @@ type
     SetArrayLength: procedure(TypeInfo: Pointer; var AVar: Pointer; NewLen: NativeInt); cdecl;
     GetArrayLength: function(AVar: Pointer): NativeInt; cdecl;
 
+    ExternalImage_Create: function(FreeOnTerminate: Boolean): Pointer; cdecl;
+    ExternalImage_SetMemory: procedure(Img: Pointer; Data: PColorBGRA; AWidth, AHeight: Integer); cdecl;
+    ExternalImage_TryLock: function(Img: Pointer): Boolean; cdecl;
+    ExternalImage_Lock: procedure(Img: Pointer); cdecl;
+    ExternalImage_UnLock: procedure(Img: Pointer); cdecl;
+
+    ExternalImage_AddCallbackOnUnlock: procedure(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
+    ExternalImage_RemoveCallbackOnUnlock: procedure(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
     // Extend this but do not remove, reorder or change datatypes.
   end;
 
@@ -53,7 +62,6 @@ var
 implementation
 
 uses
-  simba.mufasatypes,
   lpvartypes, lpvartypes_record, lpvartypes_array, lpffiwrappers;
 
 // Sync wrapper which includes a data parameter
@@ -261,6 +269,43 @@ begin
   Result := DynArraySize(Arr);
 end;
 
+function Plugin_ExternalImage_Create(FreeOnTerminate: Boolean): Pointer; cdecl;
+begin
+  Result := TSimbaExternalImage.Create();
+  if FreeOnTerminate then
+    TSimbaExternalImage(Result).FreeOnTerminate := True;
+end;
+
+procedure Plugin_ExternalImage_SetMemory(Img: Pointer; Data: PColorBGRA; AWidth, AHeight: Integer); cdecl;
+begin
+  TSimbaExternalImage(Img).SetMemory(Data, AWidth, AHeight);
+end;
+
+function Plugin_ExternalImage_TryLock(Img: Pointer): Boolean; cdecl;
+begin
+  Result := TSimbaExternalImage(Img).TryLock();
+end;
+
+procedure Plugin_ExternalImage_Lock(Img: Pointer); cdecl;
+begin
+  TSimbaExternalImage(Img).Lock();
+end;
+
+procedure Plugin_ExternalImage_UnLock(Img: Pointer); cdecl;
+begin
+  TSimbaExternalImage(Img).UnLock();
+end;
+
+procedure Plugin_ExternalImage_AddCallbackOnUnlock(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
+begin
+  TSimbaExternalImage(Img).AddUnlockCallback(Callback);
+end;
+
+procedure Plugin_ExternalImage_RemoveCallbackOnUnlock(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
+begin
+  TSimbaExternalImage(Img).RemoveUnlockCallback(Callback);
+end;
+
 initialization
 
   with SimbaPluginMethods do
@@ -287,6 +332,15 @@ initialization
 
     SetArrayLength := @Plugin_SetArrayLength;
     GetArrayLength := @Plugin_GetArrayLength;
+
+    ExternalImage_Create := @Plugin_ExternalImage_Create;
+    ExternalImage_SetMemory := @Plugin_ExternalImage_SetMemory;
+    ExternalImage_TryLock := @Plugin_ExternalImage_TryLock;
+    ExternalImage_Lock := @Plugin_ExternalImage_Lock;
+    ExternalImage_Unlock := @Plugin_ExternalImage_UnLock;
+
+    ExternalImage_AddCallbackOnUnlock := @Plugin_ExternalImage_AddCallbackOnUnlock;
+    ExternalImage_RemoveCallbackOnUnlock := @Plugin_ExternalImage_RemoveCallbackOnUnlock;
   end;
 
 end.

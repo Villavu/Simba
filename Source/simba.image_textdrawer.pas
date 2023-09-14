@@ -316,8 +316,8 @@ end;
 constructor TSimbaTextDrawer.Create(SimbaImage: TObject);
 begin
   FSimbaImage := SimbaImage;
-  FSize := 18;
-  FFontAntialised := True;
+  FSize := 20;
+  FFontAntialised := False;
 end;
 
 procedure TSimbaTextDrawer.DrawText(Text: String; Position: TPoint; Color: TColor);

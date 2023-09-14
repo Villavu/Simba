@@ -67,7 +67,7 @@ Show
 (*
 Show
 ~~~~
-> procedure Show(ATPA: T2DPointArray; Color: Integer = $0000FF);
+> procedure Show(ATPA: T2DPointArray);
 *)
 
 (*
@@ -103,7 +103,7 @@ ShowOnClient
 (*
 ShowOnClient
 ~~~~~~~~~~~~
-> procedure ShowOnClient(ATPA: T2DPointArray; Color: Integer = $0000FF);
+> procedure ShowOnClient(ATPA: T2DPointArray);
 *)
 
 (*
@@ -269,7 +269,7 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure Show(ATPA: T2DPointArray; Color: Integer = $0000FF); overload;', [
+      'procedure Show(ATPA: T2DPointArray); overload;', [
       'begin',
       '  with ATPA.Bounds() do',
       '    with TImage.Create(X1+X2+1, Y1+Y2+1) do',
@@ -363,7 +363,7 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure ShowOnClient(ATPA: T2DPointArray; Color: Integer = $0000FF); overload;', [
+      'procedure ShowOnClient(ATPA: T2DPointArray); overload;', [
       'begin',
       '  with TImage.CreateFromTarget() do',
       '  try',

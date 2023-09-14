@@ -117,8 +117,7 @@ type
     procedure SetExternalData(AData: PColorBGRA; AWidth, AHeight: Integer);
     procedure ResetExternalData;
 
-    procedure DrawATPA(ATPA: T2DPointArray); overload;
-    procedure DrawATPA(ATPA: T2DPointArray; Color: TColor); overload;
+    procedure DrawATPA(ATPA: T2DPointArray; Color: TColor = -1);
     procedure DrawTPA(Points: TPointArray; Color: TColor);
 
     procedure DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
@@ -804,20 +803,12 @@ begin
   Move(Image.FData^, FData^, FWidth * FHeight * SizeOf(TColorBGRA));
 end;
 
-procedure TSimbaImage.DrawATPA(ATPA: T2DPointArray);
-var
-  I: Integer;
-begin
-  for I := 0 to High(ATPA) do
-    DrawTPA(ATPA[I], GetDistinctColor(-1, I));
-end;
-
 procedure TSimbaImage.DrawATPA(ATPA: T2DPointArray; Color: TColor);
 var
   I: Integer;
 begin
   for I := 0 to High(ATPA) do
-    DrawTPA(ATPA[I], Color);
+    DrawTPA(ATPA[I], GetDistinctColor(Color, I));
 end;
 
 procedure TSimbaImage.DrawTPA(Points: TPointArray; Color: TColor);

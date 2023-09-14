@@ -192,19 +192,9 @@ end;
 (*
 TImage.DrawATPA
 ~~~~~~~~~~~~~~~
-> procedure TImage.DrawATPA(ATPA: T2DPointArray);
+> procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor = -1);
 *)
 procedure _LapeImage_DrawATPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^);
-end;
-
-(*
-TImage.DrawATPA
-~~~~~~~~~~~~~~~
-> procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor);
-*)
-procedure _LapeImage_DrawATPAEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^, PColor(Params^[2])^);
 end;
@@ -1323,8 +1313,7 @@ begin
     addGlobalFunc('procedure TImage.DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor); overload', @_LapeImage_DrawTextEx);
     addGlobalFunc('procedure TImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);', @_LapeImage_DrawTextLines);
 
-    addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray); overload', @_LapeImage_DrawATPA);
-    addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor); overload', @_LapeImage_DrawATPAEx);
+    addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor = -1)', @_LapeImage_DrawATPA);
     addGlobalFunc('procedure TImage.DrawTPA(TPA: TPointArray; Color: TColor);', @_LapeImage_DrawTPA);
 
     addGlobalFunc('procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Thickness: Integer; Color: TColor);', @_LapeImage_DrawCrosshairs);
