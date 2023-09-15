@@ -540,6 +540,8 @@ begin
       Result := 'ETargetType.WINDOW: Handle=%d, Valid: %s'.Format([FTargetWindow, BoolToStr(IsValid(), True)]);
     ETargetType.EIOS:
       Result := 'ETargetType.EIOS: Target=%P'.Format([FTargetEIOS.Target]);
+    ETargetType.PLUGIN:
+      Result := 'ETargetType.PLUGIN: Filename="%s" Target=%P'.Format([FTargetPlugin.FileName, FTargetPlugin.Target]);
   end;
 end;
 

@@ -12,6 +12,7 @@ type
   PSimbaPluginTarget = ^TSimbaPluginTarget;
   TSimbaPluginTarget = record
     Lib: TLibHandle;
+    FileName: String;
     Target: Pointer;
 
     Request: function(Args: PChar): Pointer; cdecl;
@@ -55,20 +56,22 @@ function PluginTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 implementation
 
 uses
-  simba.script_pluginloader;
+  simba.env, simba.files, simba.script_pluginloader;
 
-function Load(FileName: String): TSimbaPluginTarget;
+function Load(AFileName: String): TSimbaPluginTarget;
 begin
   Result := Default(TSimbaPluginTarget);
 
   with Result do
   begin
     try
-      Lib := LoadPlugin(FileName);
+      Lib := LoadPlugin(AFileName);
     except
       on E: Exception do
         raise Exception.Create('LoadPluginTarget: ' + E.Message);
     end;
+
+    FileName := TSimbaPath.PathExtractRelative(SimbaEnv.SimbaPath, AFileName);
 
     Pointer(Request)               := GetProcedureAddress(Lib, 'SimbaPluginTarget_Request');
     Pointer(RequestWithDebugImage) := GetProcedureAddress(Lib, 'SimbaPluginTarget_RequestWithDebugImage');

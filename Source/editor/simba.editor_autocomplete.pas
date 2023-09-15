@@ -697,6 +697,7 @@ begin
   if Decl.isProcedure   then Column := COLUMN_PROC    else
   if Decl.isType        then Column := COLUMN_TYPE    else
   if Decl.isVar         then Column := COLUMN_VAR     else
+  if Decl.isField       then Column := COLUMN_VAR     else
   if Decl.isConst       then Column := COLUMN_CONST   else
   if Decl.isEnumElement then Column := COLUMN_ENUM    else
   if Decl.isKeyword     then Column := COLUMN_KEYWORD else

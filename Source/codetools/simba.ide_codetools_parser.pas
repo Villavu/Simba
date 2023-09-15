@@ -111,6 +111,7 @@ type
 
     function IsName(const Value: String): Boolean; inline;
 
+    property Parser: TCodeParser read FParser;
     property Lexer: TmwPasLex read FLexer;
     property Owner: TDeclaration read FOwner;
 
@@ -335,8 +336,6 @@ type
   TFindPluginEvent  = function(Sender: TmwBasePasLex; var FileName: string): Boolean of object;
 
   TCodeParser = class(TmwSimplePasPar)
-  private
-    function GetFileName: String;
   protected
     FManagedItems: TDeclarationList;
 
@@ -356,6 +355,8 @@ type
 
     procedure FindLocals;
     procedure FindGlobals;
+
+    function GetFileName: String;
 
     // Hashes lexers filenames, fileage and defines.
     function GetHash: String; virtual;
@@ -461,6 +462,8 @@ type
     constructor Create; override;
     destructor Destroy; override;
   end;
+  TPluginParser = class(TCodeParser);
+
   TCodeParserArray = array of TCodeParser;
   TCodeParserList = specialize TSimbaObjectList<TCodeParser>;
 
