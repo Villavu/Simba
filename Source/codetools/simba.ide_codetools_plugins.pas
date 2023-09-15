@@ -42,7 +42,7 @@ uses
   simba.ide_initialization, simba.ide_codetools_utils;
 
 type
-  TCachedPlugin = class(TCodeParser)
+  TCachedPlugin = class(TPluginParser)
   public
     RefCount: Integer;
     LastUsed: Integer;
