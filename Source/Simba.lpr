@@ -23,7 +23,7 @@ uses
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
-  SetHeapTraceOutput(IntToStr(GetProcessID()) + '.trc');
+  SetHeapTraceOutput(Application.Location + '/' + IntToStr(GetProcessID()) + '.trc');
   {$ENDIF}
 
   Application.CaptureExceptions := False;
