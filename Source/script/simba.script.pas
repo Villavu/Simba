@@ -288,7 +288,14 @@ begin
   FPlugins := nil;
 
   if (FCompiler <> nil) then
+  begin
+    if (FCompiler.Globals['HTTPClient'] <> nil) then
+      TObject(FCompiler.Globals['HTTPClient'].Ptr^).Free();
+    if (FCompiler.Globals['ASyncMouse'] <> nil) then
+      TObject(FCompiler.Globals['ASyncMouse'].Ptr^).Free();
+
     FreeAndNil(FCompiler);
+  end;
   if (FSimbaCommunication <> nil) then
     FreeAndNil(FSimbaCommunication);
 
