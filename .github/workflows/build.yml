@@ -49,13 +49,13 @@ jobs:
           - name: MacOS 64
             runs-on: macos-latest
             build-mode: MACOS64
-            binary: Simba-MacOS.zip
+            binary: Simba-MacOS.dmg
             test: Simba
 
           - name: MacOS AArch64
             runs-on: macos-latest
             build-mode: MACOS-AARCH64
-            binary: Simba-MacOS-AArch64.zip
+            binary: Simba-MacOS-AArch64.dmg
             
     steps:
       - name: Install Lazarus
@@ -87,10 +87,14 @@ jobs:
           security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
 
-          codesign --sign "7ACAD7EE0AA3A0783CE9592567098A3F08FC0B0B" Simba.app  
+          codesign --deep --sign "7ACAD7EE0AA3A0783CE9592567098A3F08FC0B0B" Simba.app  
           codesign -v Simba.app
 
-          ditto -c -k --sequesterRsrc --keepParent Simba.app ${{ matrix.config.binary }}
+          brew install create-dmg
+          create-dmg --window-size 500 330 --icon-size 48 --icon "Simba.app" 130 135 --app-drop-link 380 135 --background "Source/macosbundle/installer.tff" "${{ matrix.config.binary }}" "Simba.app"
+
+          #ditto -c -k --sequesterRsrc --keepParent Simba.app ${{ matrix.config.binary }}
+
 
       - name: Test Simba
         if: matrix.config.test != ''
