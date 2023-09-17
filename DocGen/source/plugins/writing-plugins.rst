@@ -100,10 +100,24 @@ These pointers are provided to these structures:
 
     AllocateArray: function(TypeInfo: Pointer; Len: NativeInt): Pointer; cdecl;
     AllocateString: function(Data: PChar): Pointer; cdecl;
-    AllocateUnicodeString: function(Data: PUnicodeChar): Pointer; cdecl;  
+    AllocateUnicodeString: function(Data: PUnicodeChar): Pointer; cdecl;
 
     SetArrayLength: procedure(TypeInfo: Pointer; var AVar: Pointer; NewLen: NativeInt); cdecl;
     GetArrayLength: function(AVar: Pointer): NativeInt; cdecl;
+
+    ExternalImage_Create: function(FreeOnTerminate: Boolean): Pointer; cdecl;
+    ExternalImage_SetMemory: procedure(Img: Pointer; Data: PColorBGRA; AWidth, AHeight: Integer); cdecl;
+    ExternalImage_TryLock: function(Img: Pointer): Boolean; cdecl;
+    ExternalImage_Lock: procedure(Img: Pointer); cdecl;
+    ExternalImage_UnLock: procedure(Img: Pointer); cdecl;
+
+    ExternalImage_AddCallbackOnUnlock: procedure(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
+    ExternalImage_RemoveCallbackOnUnlock: procedure(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;  
   end; 
 
 See the `Example C++ plugin <plugin-cpp.html>`_ to see how TypeInfo is used to allocate custom records & arrays.
+
+.. note::
+  
+  `RunOnMainThread` is available for creating forms, installing windows hooks and other things that must be done on the main thread.
+  Simba scripts are not ran on the processes main thread for this reason.

@@ -24,7 +24,9 @@ uses
 (*
 Match Template
 ==============
-Template matching
+Template matching.
+
+Note:: These functions outputs are equal to OpenCV's matchTemplate.
 *)
 
 (*

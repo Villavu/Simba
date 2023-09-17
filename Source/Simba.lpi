@@ -32,11 +32,10 @@
     </General>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MajorVersionNr Value="1"/>
-      <MinorVersionNr Value="5"/>
+      <MajorVersionNr Value="2"/>
       <Language Value="0809"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="1.5"/>
+      <StringTable CompanyName="villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="2.0"/>
     </VersionInfo>
     <BuildModes Count="7">
       <Item1 Name="DEBUG" Default="True"/>

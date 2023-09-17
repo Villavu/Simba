@@ -98,17 +98,16 @@ var
 begin
   for Method in BeforeCreateMethods do
   begin
-    Debug('[SimbaIDEInitialization.BeforeCreate]: %s ', [Method.Name]);
     try
       T := HighResolutionTime();
 
       if Assigned(Method.Proc)    then Method.Proc() else
       if Assigned(Method.ProcObj) then Method.ProcObj();
 
-      DebugLn('(%f ms)', [HighResolutionTime() - T]);
+      DebugLn('[SimbaIDEInitialization.BeforeCreate]: %s (%f ms)', [Method.Name, HighResolutionTime() - T]);
     except
       on E: Exception do
-        DebugLn('Exception: (%s)', [E.Message]);
+        DebugLn('[SimbaIDEInitialization.BeforeCreate]: %s (exception: %s)', [Method.Name, E.Message]);
     end;
   end;
 end;
@@ -123,17 +122,16 @@ begin
     if not Method.BackgroundTask then
       Continue;
 
-    Debug('[SimbaIDEInitialization.BeforeShow (Background task)]: %s ', [Method.Name]);
     try
       T := HighResolutionTime();
 
       if Assigned(Method.Proc)    then Method.Proc() else
       if Assigned(Method.ProcObj) then Method.ProcObj();
 
-      DebugLn('(%f ms)', [HighResolutionTime() - T]);
+      DebugLn('[SimbaIDEInitialization.BeforeShow_Background]: %s (%f ms)', [Method.Name, HighResolutionTime() - T]);
     except
       on E: Exception do
-        DebugLn('Exception: (%s)', [E.Message]);
+        DebugLn('[SimbaIDEInitialization.BeforeShow_Background]: %s (exception: %s)', [Method.Name, E.Message]);
     end;
   end;
 end;
@@ -148,17 +146,16 @@ begin
     if Method.BackgroundTask then
       Continue;
 
-    Debug('[SimbaIDEInitialization.BeforeShow]: %s ', [Method.Name]);
     try
       T := HighResolutionTime();
 
       if Assigned(Method.Proc)    then Method.Proc() else
       if Assigned(Method.ProcObj) then Method.ProcObj();
 
-      DebugLn('(%f ms)', [HighResolutionTime() - T]);
+      DebugLn('[SimbaIDEInitialization.BeforeShow]: %s (%f ms)', [Method.Name, HighResolutionTime() - T]);
     except
       on E: Exception do
-        DebugLn('Exception: (%s)', [E.Message]);
+        DebugLn('[SimbaIDEInitialization.BeforeShow]: %s (exception: %s)', [Method.Name, E.Message]);
     end;
   end;
 

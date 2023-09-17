@@ -6,3 +6,4 @@ Simba
 
    Color Finding.rst
    Sleep Until.rst
+   Input & Finder Target.rst
