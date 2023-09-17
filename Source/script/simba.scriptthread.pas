@@ -7,11 +7,6 @@ unit simba.scriptthread;
 
 {$i simba.inc}
 
-{$IFDEF DARWIN}
-  {$DEFINE COCOA_TERMINATE_FIX} // https://gitlab.com/freepascal.org/lazarus/lazarus/-/issues/39496
-  {$MODESWITCH OBJECTIVEC1}
-{$ENDIF}
-
 interface
 
 uses
@@ -42,13 +37,9 @@ type
     ); reintroduce;
   end;
 
-
 implementation
 
 uses
-  {$IFDEF COCOA_TERMINATE_FIX}
-  cocoaall, cocoaint, cocoautils,
-  {$ENDIF}
   Forms, FileUtil,
   simba.env, simba.files, simba.datetime, simba.script_communication;
 
@@ -75,15 +66,6 @@ begin
   Application.Terminate();
   while (not Application.Terminated) do
     Application.ProcessMessages();
-
-  {$IFDEF COCOA_TERMINATE_FIX}
-  NSApplication.sharedApplication.postEvent_AtStart(
-    nsEvent.otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2(
-      NSApplicationDefined, GetNSPoint(0, 0), 0, NSTimeIntervalSince1970, 0, nil, 0, 0, 0
-    ),
-    True
-  );
-  {$ENDIF}
 end;
 
 procedure TSimbaScriptRunner.DoInputThread;

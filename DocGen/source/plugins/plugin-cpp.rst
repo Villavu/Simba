@@ -38,28 +38,37 @@ main.h
 
   struct __attribute__((__packed__)) TSimbaMethods
   {
-      void (*RunOnMainThread)(void(*Method)(void*), void* data);
+    void (*RunOnMainThread)(void(*Method)(void*), void* data);
 
-      void* (*GetMem)(NativeUInt size);
-      void  (*FreeMem)(void* ptr);
-      void* (*AllocMem)(NativeUInt Size);
-      void* (*ReAllocMem)(void** ptr, NativeUInt size);
-      NativeUInt (*MemSize)(void* ptr);
+    void* (*GetMem)(NativeUInt size);
+    void  (*FreeMem)(void* ptr);
+    void* (*AllocMem)(NativeUInt Size);
+    void* (*ReAllocMem)(void** ptr, NativeUInt size);
+    NativeUInt (*MemSize)(void* ptr);
 
-      void  (*RaiseException)(char* Message);
-      void* (*GetTypeInfo)(void* Compiler, char* Typ);
-      NativeUInt (*GetTypeInfoSize)(void* TypeInfo);
-      NativeInt  (*GetTypeInfoFieldOffset)(void* TypeInfo, char* FieldName);
+    void  (*RaiseException)(char* Message);
+    void* (*GetTypeInfo)(void* Compiler, char* Typ);
+    NativeUInt (*GetTypeInfoSize)(void* TypeInfo);
+    NativeInt  (*GetTypeInfoFieldOffset)(void* TypeInfo, char* FieldName);
 
-      void* (*AllocateRawArray)(NativeInt ElementSize, NativeUInt Len);
-      void (*ReAllocateRawArray)(void** ptr, NativeInt ElementSize, NativeUInt Len);
+    void* (*AllocateRawArray)(NativeInt ElementSize, NativeUInt Len);
+    void (*ReAllocateRawArray)(void** ptr, NativeInt ElementSize, NativeUInt Len);
 
-      void* (*AllocateArray)(void* TypeInfo, NativeUInt Len);
-      void* (*AllocateString)(void* Data);
-      void* (*AllocateUnicodeString)(void* Data);
+    void* (*AllocateArray)(void* TypeInfo, NativeUInt Len);
+    void* (*AllocateString)(void* Data);
+    void* (*AllocateUnicodeString)(void* Data);
 
-      void (*SetArrayLength)(void* TypeInfo, void**ptr, NativeInt NewLen);
-      NativeInt (*GetArrayLength)(void* AVar);
+    void (*SetArrayLength)(void* TypeInfo, void**ptr, NativeInt NewLen);
+    NativeInt (*GetArrayLength)(void* AVar);
+
+    void* (*ExternalImage_Create)(bool FreeOnTerminate);
+    void (*ExternalImage_SetMemory)(void* img, void* data, int width, int height);
+    bool (*ExternalImage_TryLock)(void* img);
+    void (*ExternalImage_Lock)(void* img);
+    void (*ExternalImage_UnLock)(void* img);
+
+    void (*ExternalImage_AddCallbackOnUnlock)(void* img, void(*callback)(void*));
+    void (*ExternalImage_RemoveCallbackOnUnlock)(void* img, void(*callback)(void*));
   };
 
   TSimbaInfo* SIMBA_INFO = {0};

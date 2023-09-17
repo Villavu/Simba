@@ -25,8 +25,8 @@
 {$MODESWITCH ARRAYOPERATORS}
 {$MODESWITCH NESTEDPROCVARS}
 
-{$DEFINE SIMBA_MAJOR   := 1500} // this should be 980 even if SimbaVersion is 981, etc
-{$DEFINE SIMBA_VERSION := 1500}
+{$DEFINE SIMBA_MAJOR   := 2000} // this should be 980 even if SimbaVersion is 981, etc
+{$DEFINE SIMBA_VERSION := 2000}
 
 {$DEFINE SIMBA_GITHUB_URL    := 'https://github.com/Villavu/Simba'}
 {$DEFINE SIMBA_BUGS_URL      := 'https://github.com/Villavu/Simba/issues'}
