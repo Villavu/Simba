@@ -709,6 +709,16 @@ begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.SortCircular(PPoint(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
+(*
+TPointArray.DistanceTransform
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> function TPointArray.DistanceTransform: TSingleMatrix;
+*)
+procedure _LapeTPADistanceTransform(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingleMatrix(Result)^ := PPointArray(Params^[0])^.DistanceTransform();
+end;
+
 procedure ImportTPA(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -797,6 +807,8 @@ begin
     addGlobalFunc('function TPointArray.Intersection(Other: TPointArray): TPointArray', @_Lape_Point_Intersection);
     addGlobalFunc('function TPointArray.Difference(Other: TPointArray): TPointArray', @_Lape_Point_Difference);
     addGlobalFunc('function TPointArray.SymmetricDifference(Other: TPointArray): TPointArray', @_Lape_Point_SymmetricDifference);
+
+    addGlobalFunc('function TPointArray.DistanceTransform: TSingleMatrix;', @_LapeTPADistanceTransform);
 
     ImportingSection := '';
   end;
