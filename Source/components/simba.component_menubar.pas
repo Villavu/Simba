@@ -59,7 +59,7 @@ type
 implementation
 
 uses
-  LMessages, LCLIntf,
+  LMessages, LCLIntf, ATCanvasPrimitives,
   simba.theme, simba.fonthelpers;
 
 function TSimbaMainMenuBar.GetMenus: TPopupMenuArray;
@@ -200,7 +200,7 @@ begin
     Canvas.TextRect(R, R.Left, R.Top, FItems[I].Text, Style);
   end;
 
-  Canvas.Pen.Color := SimbaTheme.ColorLine;
+  Canvas.Pen.Color := ColorBlendHalf(SimbaTheme.ColorFrame, SimbaTheme.ColorLine);
   Canvas.Line(0, Height - 1, Width, Height - 1);
 end;
 
