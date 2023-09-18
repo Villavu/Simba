@@ -18,6 +18,7 @@
   - Grow
   - RotateEx
   - PartitionEx
+  - DistanceTransform
 }
 
 {
@@ -128,6 +129,8 @@ type
     function PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray; overload;
 
     function Intersection(Other: TPointArray): TPointArray;
+
+    function DistanceTransform: TSingleMatrix;
   end;
 
 implementation
@@ -2123,6 +2126,106 @@ end;
 function TPointArrayHelper.Intersection(Other: TPointArray): TPointArray;
 begin
   Result := Algo_Point_Intersection(Self, Other);
+end;
+
+function TPointArrayHelper.DistanceTransform: TSingleMatrix;
+
+  function EucDist(const x1,x2:Int32): Int32; inline;
+  begin
+    Result := Sqr(x1) + Sqr(x2);
+  end;
+
+  function EucSep(const i,j, ii,jj:Int32): Int32; inline;
+  begin
+    Result := Round((sqr(j) - sqr(i) + sqr(jj) - sqr(ii))/(2*(j-i)));
+  end;
+
+  function Transform(const binIm:TIntegerArray; m,n:Int32): TSingleMatrix;
+  var
+    x,y,h,w,i,wid:Int32;
+    tmp,s,t:TIntegerArray;
+  begin
+    // first pass
+    SetLength(tmp, m*n);
+    h := n-1;
+    w := m-1;
+    for x:=0 to w do
+    begin
+      if binIm[x] = 0 then
+        tmp[x] := 0
+      else
+        tmp[x] := m+n;
+
+      for y:=1 to h do
+        if (binIm[y*m+x] = 0) then
+          tmp[y*m+x] := 0
+        else
+          tmp[y*m+x] := 1 + tmp[(y-1)*m+x];
+
+      for y:=h-1 downto 0 do
+        if (tmp[(y+1)*m+x] < tmp[y*m+x]) then
+          tmp[y*m+x] := 1 + tmp[(y+1)*m+x]
+    end;
+
+    // second pass
+    SetLength(Result,n,m);
+    SetLength(s,m);
+    SetLength(t,m);
+    wid := 0;
+    for y:=0 to h do
+    begin
+      i := 0;
+      s[0] := 0;
+      t[0] := 0;
+
+      for x:=1 to W do
+      begin
+        while (i >= 0) and (EucDist(t[i]-s[i], tmp[y*m+s[i]]) > EucDist(t[i]-x, tmp[y*m+x])) do
+          Dec(i);
+        if (i < 0) then
+        begin
+          i := 0;
+          s[0] := x;
+        end else
+        begin
+          wid := 1 + EucSep(s[i], x, tmp[y*m+s[i]], tmp[y*m+x]);
+          if (wid < m) then
+          begin
+            Inc(i);
+            s[i] := x;
+            t[i] := wid;
+          end;
+        end;
+      end;
+
+      for x:=W downto 0 do
+      begin
+        Result[y,x] := Sqrt(EucDist(x-s[i], tmp[y*m+s[i]]));
+        if (x = t[i]) then
+          Dec(i);
+      end;
+    end;
+  end;
+
+var
+  Data:TIntegerArray;
+  w,h,n,i:Int32;
+  B:TBox;
+begin
+  Result := nil;
+  if (Length(Self) = 0) then
+    Exit;
+
+  B := Self.Bounds();
+  B.Y1 -= 1;
+  B.X1 -= 1;
+  w := (B.x2 - B.X1) + 2;
+  h := (B.y2 - B.Y1) + 2;
+  SetLength(Data, h*w);
+  for i:=0 to High(Self) do
+    Data[(Self[i].y-B.Y1)*w+(Self[i].x-B.X1)] := 1;
+
+  Result := Transform(data,w,h);
 end;
 
 end.
