@@ -159,6 +159,11 @@ type
     ToolbarButtonSave: TToolButton;
     ToolbarButtonSaveAll: TToolButton;
     ToolbarButtonTargetSelector: TToolButton;
+    ToolButton1: TToolButton;
+    ToolButton2: TToolButton;
+    ToolButton3: TToolButton;
+    ToolButton4: TToolButton;
+    ToolButton5: TToolButton;
     ToolButtonNew: TToolButton;
     ToolButtonAreaSelector: TToolButton;
     TrayIcon: TTrayIcon;
@@ -256,8 +261,6 @@ type
     procedure DoScriptTabChange(Sender: TObject);
     procedure DoScriptStateChange(Sender: TObject);
 
-    procedure SetToolbarSize(Value: Integer);
-    procedure SetToolbarPosition(Value: String);
     procedure SetCustomFontSize(Value: Integer);
     procedure SetConsoleVisible(Value: Boolean);
     procedure SetLayoutLocked(Value: Boolean);
@@ -354,32 +357,6 @@ begin
   except
     // circular exception ...
   end;
-end;
-
-procedure TSimbaForm.SetToolbarSize(Value: Integer);
-begin
-  ToolBar.ImagesWidth := Value;
-
-  ToolBar.ButtonWidth  := Value + Scale96ToScreen(10);
-  ToolBar.ButtonHeight := Value + Scale96ToScreen(16);
-end;
-
-procedure TSimbaForm.SetToolbarPosition(Value: String);
-begin
-  MainMenuPanel.Align := alNone;
-
-  case Value of
-    'Top':   ToolBar.Align := alTop;
-    'Left':  ToolBar.Align := alLeft;
-    'Right': ToolBar.Align := alRight;
-  end;
-
-  if (Value = 'Top') then
-    ToolBar.EdgeBorders := [ebTop, ebBottom]
-  else
-    ToolBar.EdgeBorders := [];
-
-  MainMenuPanel.Align := alTop;
 end;
 
 procedure TSimbaForm.SetCustomFontSize(Value: Integer);
@@ -808,38 +785,38 @@ begin
 end;
 
 procedure TSimbaForm.DoSettingChanged_Toolbar(Setting: TSimbaSetting);
+var
+  I: Integer;
 begin
-  if Setting.Equals(SimbaSettings.General.ToolbarSize) then
-  begin
-    ToolBar.ImagesWidth := Setting.Value;
-
-    ToolBar.ButtonWidth  := Setting.Value + Scale96ToScreen(8);
-    ToolBar.ButtonHeight := Setting.Value + Scale96ToScreen(16);
-  end;
-
   if Setting.Equals(SimbaSettings.General.ToolbarPosition) then
   begin
     MainMenuPanel.Align := alNone;
 
     case String(Setting.Value) of
-      'Top':
-        begin
-          ToolBar.Align := alTop;
-          ToolBar.EdgeBorders := [ebTop, ebBottom];
-        end;
-      'Left':
-        begin
-          ToolBar.Align := alLeft;
-          ToolBar.EdgeBorders := [];
-        end;
-      'Right':
-        begin
-          ToolBar.Align := alRight;
-          ToolBar.EdgeBorders := [];
-        end;
+      'Top':   ToolBar.Align := alTop;
+      'Left':  ToolBar.Align := alLeft;
+      'Right': ToolBar.Align := alRight;
     end;
 
     MainMenuPanel.Align := alTop;
+  end;
+
+  ToolBar.ImagesWidth := SimbaSettings.General.ToolbarSize.Value;
+
+  if (ToolBar.Align = alTop) then
+  begin
+    ToolBar.ButtonWidth  := Round(ToolBar.ImagesWidth * 1.50);
+    ToolBar.ButtonHeight := Round(ToolBar.ImagesWidth * 1.75);
+    for I := 0 to Toolbar.ButtonCount - 1 do
+      if (ToolBar.Buttons[I].Style = tbsSeparator) then
+        ToolBar.Buttons[I].Visible := True;
+  end else
+  begin
+    ToolBar.ButtonWidth  := Round(ToolBar.ImagesWidth * 2.50);
+    ToolBar.ButtonHeight := Round(ToolBar.ImagesWidth * 1.75);
+    for I := 0 to Toolbar.ButtonCount - 1 do
+      if (ToolBar.Buttons[I].Style = tbsSeparator) then
+        ToolBar.Buttons[I].Visible := False;
   end;
 
   if Setting.Equals(SimbaSettings.General.ToolBarSpacing) then
@@ -1207,7 +1184,7 @@ begin
   begin
     if (Style = tbsDivider) then
     begin
-      Canvas.Pen.Color := SimbaTheme.ColorLine;
+      Canvas.Pen.Color := ColorBlendHalf(SimbaTheme.ColorFrame, SimbaTheme.ColorLine);
       with ClientRect.CenterPoint do
         Canvas.Line(X,3,X,Height-3);
 
@@ -1222,16 +1199,17 @@ begin
     if (Style = tbsButtonDrop) then
     begin
       DropDownRect := MainBtnRect;
-      DropDownRect.Left := DropDownRect.Right - ToolBar.DropDownWidth;
+      DropDownRect.Left := MainBtnRect.CenterPoint.X + 8;
+      DropDownRect.Right := MainBtnRect.Right - 3;
 
-      MainBtnRect.Right := DropDownRect.Left;
+      MainBtnRect.Right := MainBtnRect.Right - 10;
     end;
 
     IconPos.X := (MainBtnRect.Left + MainBtnRect.Right - IconSize.cx) div 2;
     IconPos.Y := (MainBtnRect.Top + MainBtnRect.Bottom - IconSize.cy) div 2;
 
     Canvas.Brush.Color := SimbaTheme.ColorFrame;
-    Canvas.FillRect(ClientRect);
+    Canvas.FillRect(Rect(ClientRect.Left, ClientRect.Top, ClientRect.Right, ClientRect.Bottom - 1));
 
     if State in [2, 3] then // down/hover
     begin
@@ -1249,7 +1227,10 @@ begin
       ToolBar.Images.ResolutionForPPI[ToolBar.ImagesWidth, Font.PixelsPerInch, GetCanvasScaleFactor].Draw(Canvas, IconPos.X, IconPos.Y, ImageIndex, gdeDisabled);
 
     if (Style = tbsButtonDrop) then
-      CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, DropDownRect.CenterPoint, 2);
+      if (IconSize.cx <= 20) then
+        CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, DropDownRect.CenterPoint, 1)
+      else
+        CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, DropDownRect.CenterPoint, 2);
   end;
 end;
 
