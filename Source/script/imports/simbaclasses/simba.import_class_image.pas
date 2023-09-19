@@ -15,7 +15,7 @@ implementation
 uses
   Graphics,
   lptypes,
-  simba.image;
+  simba.image, simba.circle;
 
 type
   PBitmap = ^TBitmap;
@@ -612,31 +612,31 @@ end;
 (*
 TImage.DrawCircle
 ~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);
+> procedure TImage.DrawCircle(Circle: TCircle; Color: TColor);
 *)
 procedure _LapeImage_DrawCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawCircle(PCircle(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TImage.DrawCircleFilled
 ~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
+> procedure TImage.DrawCircleFilled(Circle: TCircle; Color: TColor);
 *)
 procedure _LapeImage_DrawCircleFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawCircleFilled(PCircle(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
 TImage.DrawCircleInverted
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);
+> procedure TImage.DrawCircleInverted(Circle: TCircle; Color: TColor);
 *)
 procedure _LapeImage_DrawCircleInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawCircleInverted(PCircle(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
@@ -732,11 +732,11 @@ end;
 (*
 TImage.DrawCircleArray
 ~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);
+> procedure TImage.DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1);
 *)
 procedure _LapeImage_DrawCircleArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^, PColor(Params^[4])^);
+  PSimbaImage(Params^[0])^.DrawCircleArray(PCircleArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
@@ -1326,9 +1326,9 @@ begin
     addGlobalFunc('procedure TImage.DrawPolygonFilled(Points: TPointArray; Color: TColor);', @_LapeImage_DrawPolygonFilled);
     addGlobalFunc('procedure TImage.DrawPolygonInverted(Points: TPointArray; Color: TColor);', @_LapeImage_DrawPolygonInverted);
 
-    addGlobalFunc('procedure TImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeImage_DrawCircle);
-    addGlobalFunc('procedure TImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeImage_DrawCircleFilled);
-    addGlobalFunc('procedure TImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeImage_DrawCircleInverted);
+    addGlobalFunc('procedure TImage.DrawCircle(Circle: TCircle; Color: TColor);', @_LapeImage_DrawCircle);
+    addGlobalFunc('procedure TImage.DrawCircleFilled(Circle: TCircle; Color: TColor);', @_LapeImage_DrawCircleFilled);
+    addGlobalFunc('procedure TImage.DrawCircleInverted(Circle: TCircle; Color: TColor);', @_LapeImage_DrawCircleInverted);
 
     addGlobalFunc('procedure TImage.DrawBox(B: TBox; Color: TColor);', @_LapeImage_DrawBox);
     addGlobalFunc('procedure TImage.DrawBoxFilled(B: TBox; Color: TColor);', @_LapeImage_DrawBoxFilled);
@@ -1341,7 +1341,7 @@ begin
     addGlobalFunc('procedure TImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawQuadArray);
     addGlobalFunc('procedure TImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawBoxArray);
     addGlobalFunc('procedure TImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawPolygonArray);
-    addGlobalFunc('procedure TImage.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawCircleArray);
+    addGlobalFunc('procedure TImage.DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawCircleArray);
     addGlobalFunc('procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: TColor = -1);', @_LapeImage_DrawCrossArray);
 
     addGlobalFunc('procedure TImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer)', @_LapeImage_DrawHSLCircle);

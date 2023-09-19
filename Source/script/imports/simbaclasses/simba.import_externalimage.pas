@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.image, simba.externalimage;
+  simba.image, simba.externalimage, simba.circle;
 
 procedure _LapeExternalImage_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -303,7 +303,7 @@ TExternalImage.DrawCircle
 *)
 procedure _LapeExternalImage_DrawCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircle(PCircle(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
@@ -313,7 +313,7 @@ TExternalImage.DrawCircleFilled
 *)
 procedure _LapeExternalImage_DrawCircleFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircleFilled(PCircle(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
@@ -323,7 +323,7 @@ TExternalImage.DrawCircleInverted
 *)
 procedure _LapeExternalImage_DrawCircleInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircleInverted(PCircle(Params^[1])^, PColor(Params^[2])^);
 end;
 
 (*
@@ -423,7 +423,7 @@ TExternalImage.DrawCircleArray
 *)
 procedure _LapeExternalImage_DrawCircleArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^, PColor(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircleArray(PCircleArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
 end;
 
 (*
@@ -549,9 +549,9 @@ begin
     addGlobalFunc('procedure TExternalImage.DrawPolygonFilled(Points: TPointArray; Color: TColor);', @_LapeExternalImage_DrawPolygonFilled);
     addGlobalFunc('procedure TExternalImage.DrawPolygonInverted(Points: TPointArray; Color: TColor);', @_LapeExternalImage_DrawPolygonInverted);
 
-    addGlobalFunc('procedure TExternalImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeExternalImage_DrawCircle);
-    addGlobalFunc('procedure TExternalImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeExternalImage_DrawCircleFilled);
-    addGlobalFunc('procedure TExternalImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeExternalImage_DrawCircleInverted);
+    addGlobalFunc('procedure TExternalImage.DrawCircle(Circle: TCircle; Color: TColor);', @_LapeExternalImage_DrawCircle);
+    addGlobalFunc('procedure TExternalImage.DrawCircleFilled(Circle: TCircle; Radius: Integer; Color: TColor);', @_LapeExternalImage_DrawCircleFilled);
+    addGlobalFunc('procedure TExternalImage.DrawCircleInverted(Circle: TCircle; Radius: Integer; Color: TColor);', @_LapeExternalImage_DrawCircleInverted);
 
     addGlobalFunc('procedure TExternalImage.DrawBox(B: TBox; Color: TColor);', @_LapeExternalImage_DrawBox);
     addGlobalFunc('procedure TExternalImage.DrawBoxFilled(B: TBox; Color: TColor);', @_LapeExternalImage_DrawBoxFilled);
@@ -564,7 +564,7 @@ begin
     addGlobalFunc('procedure TExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);', @_LapeExternalImage_DrawQuadArray);
     addGlobalFunc('procedure TExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);', @_LapeExternalImage_DrawBoxArray);
     addGlobalFunc('procedure TExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);', @_LapeExternalImage_DrawPolygonArray);
-    addGlobalFunc('procedure TExternalImage.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);', @_LapeExternalImage_DrawCircleArray);
+    addGlobalFunc('procedure TExternalImage.DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1);', @_LapeExternalImage_DrawCircleArray);
     addGlobalFunc('procedure TExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: TColor = -1);', @_LapeExternalImage_DrawCrossArray);
 
     addGlobalFunc('procedure TExternalImage.Clear; overload', @_LapeExternalImage_Clear);

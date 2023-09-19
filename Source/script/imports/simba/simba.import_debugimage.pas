@@ -61,6 +61,18 @@ Show
 (*
 Show
 ~~~~
+> procedure Show(Circles: TCircleArray; Filled: Boolean = False);
+*)
+
+(*
+Show
+~~~~
+> procedure Show(Circle: TCircle; Filled: Boolean = False);
+*)
+
+(*
+Show
+~~~~
 > procedure Show(TPA: TPointArray; Color: Integer = $0000FF);
 *)
 
@@ -97,6 +109,18 @@ ShowOnClient
 (*
 ShowOnClient
 ~~~~~~~~~~~~
+> procedure ShowOnClient(Circles: TCircleArray; Filled: Boolean = False);
+*)
+
+(*
+ShowOnClient
+~~~~~~~~~~~~
+> procedure ShowOnClient(Circle: TCircle; Filled: Boolean = False);
+*)
+
+(*
+ShowOnClient
+~~~~~~~~~~~~
 > procedure ShowOnClient(TPA: TPointArray; Color: Integer = $0000FF);
 *)
 
@@ -104,12 +128,6 @@ ShowOnClient
 ShowOnClient
 ~~~~~~~~~~~~
 > procedure ShowOnClient(ATPA: T2DPointArray);
-*)
-
-(*
-Show
-~~~~
-> procedure Show(Bitmap: TSimbaImage; EnsureVisible: Boolean = True);
 *)
 
 (*
@@ -310,6 +328,33 @@ begin
     ]);
 
     addGlobalFunc(
+      'procedure Show(Circles: TCircleArray; Filled: Boolean = False); overload;', [
+      'var',
+      '  Boxes: TBoxArray;',
+      '  Circle: TCircle;',
+      'begin',
+      '  for Circle in Circles do',
+      '    Boxes += Circle.Bounds();',
+      '',
+      '  with Boxes.Merge() do',
+      '    with TImage.Create(X1+X2+1, Y1+Y2+1) do',
+      '    try',
+      '      DrawCircleArray(Circles, Filled);',
+      '      Show();',
+      '    finally',
+      '      Free();',
+      '    end;',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure Show(Circle: TCircle; Filled: Boolean = False); overload;', [
+      'begin',
+      '  Show(TCircleArray([Circle]), Filled);',
+      'end;'
+    ]);
+
+    addGlobalFunc(
       'procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False); overload;', [
       'begin',
       '  with TImage.CreateFromTarget() do',
@@ -346,6 +391,26 @@ begin
       'procedure ShowOnClient(Box: TBox; Filled: Boolean = False); overload;', [
       'begin',
       '  ShowOnClient(TBoxArray([Box]), Filled);',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure ShowOnClient(Circles: TCircleArray; Filled: Boolean = False); overload;', [
+      'begin',
+      '  with TImage.CreateFromTarget() do',
+      '  try',
+      '    DrawCircleArray(Circles, Filled);',
+      '    Show();',
+      '  finally',
+      '    Free();',
+      '  end;',
+      'end;'
+    ]);
+
+    addGlobalFunc(
+      'procedure ShowOnClient(Circle: TCircle; Filled: Boolean = False); overload;', [
+      'begin',
+      '  ShowOnClient(TCircleArray([Circle]), Filled);',
       'end;'
     ]);
 

@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes, simba.baseclass, simba.image, simba.simplelock;
+  simba.mufasatypes, simba.baseclass, simba.image, simba.simplelock,
+  simba.circle;
 
 type
   TSimbaExternalImageCallback = procedure(Image: Pointer); cdecl;
@@ -83,9 +84,9 @@ type
     procedure DrawPolygonFilled(Points: TPointArray; Color: TColor);
     procedure DrawPolygonInverted(Points: TPointArray; Color: TColor);
 
-    procedure DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);
-    procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
-    procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);
+    procedure DrawCircle(Circle: TCircle; Color: TColor);
+    procedure DrawCircleFilled(Circle: TCircle; Color: TColor);
+    procedure DrawCircleInverted(Circle: TCircle; Color: TColor);
 
     procedure DrawBox(B: TBox; Color: TColor);
     procedure DrawBoxFilled(B: TBox; Color: TColor);
@@ -98,7 +99,7 @@ type
     procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);
     procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);
     procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);
-    procedure DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);
+    procedure DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1);
     procedure DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor = -1);
   end;
 
@@ -477,31 +478,31 @@ begin
   end;
 end;
 
-procedure TSimbaExternalImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);
+procedure TSimbaExternalImage.DrawCircle(Circle: TCircle; Color: TColor);
 begin
   Lock();
   try
-    FImage.DrawCircle(ACenter, Radius, Color);
+    FImage.DrawCircle(Circle, Color);
   finally
     Unlock();
   end;
 end;
 
-procedure TSimbaExternalImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
+procedure TSimbaExternalImage.DrawCircleFilled(Circle: TCircle; Color: TColor);
 begin
   Lock();
   try
-    FImage.DrawCircleFilled(ACenter, Radius, Color);
+    FImage.DrawCircleFilled(Circle, Color);
   finally
     Unlock();
   end;
 end;
 
-procedure TSimbaExternalImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);
+procedure TSimbaExternalImage.DrawCircleInverted(Circle: TCircle; Color: TColor);
 begin
   Lock();
   try
-    FImage.DrawCircleInverted(ACenter, Radius, Color);
+    FImage.DrawCircleInverted(Circle, Color);
   finally
     Unlock();
   end;
@@ -597,11 +598,11 @@ begin
   end;
 end;
 
-procedure TSimbaExternalImage.DrawCircleArray(Points: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor);
+procedure TSimbaExternalImage.DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor);
 begin
   Lock();
   try
-    FImage.DrawCircleArray(Points, Radius, Filled, Color);
+    FImage.DrawCircleArray(Circles, Filled, Color);
   finally
     Unlock();
   end;

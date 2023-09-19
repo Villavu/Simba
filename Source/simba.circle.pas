@@ -19,6 +19,8 @@ type
     Center: TPoint;
     Radius: Integer;
   end;
+  PCircleArray = ^TCircleArray;
+  TCircleArray = array of TCircle;
 
   TCircleHelper = type helper for TCircle
   public const
