@@ -200,6 +200,7 @@ begin
     ImportingSection := 'TCircle';
 
     addGlobalType('record Center: TPoint; Radius: Integer; end;', 'TCircle');
+    addGlobalType('array of TCircle;', 'TCircleArray');
 
     addGlobalFunc('function TCircle.Create(ACenter: TPoint; ARadius: Integer): TCircle; static; overload', @_LapeCircle_Create);
     addGlobalFunc('function TCircle.CreateFromPoints(Points: TPointArray): TCircle; static; overload', @_LapeCircle_CreateFromPoints);
