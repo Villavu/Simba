@@ -319,14 +319,23 @@ begin
 
   // Move lape stuff to better sections
   Move('function Random(min, max: Int64): Int64;', 'Math', 'Random');
-  Move('function Random(min, max: Extended): Extended', 'Math', 'Random');
+  Move('function Random(min, max: Double): Double', 'Math', 'Random');
   Move('function Random(l: Int64): Int64', 'Math', 'Random');
-  Move('function Random: Extended', 'Math', 'Random');
+  Move('function Random: Double', 'Math', 'Random');
   Move('procedure Randomize', 'Math', 'Random');
   Move('var RandSeed', 'Math', 'Random');
 
   Move('function GetTickCount: UInt64', 'DateTime', 'Timing');
   Move('procedure Sleep(MilliSeconds: UInt32);', 'DateTime', 'Timing');
+
+  Move('type TBox = record X1, Y1, X2, Y2: Integer; end;', 'System', 'TBox');
+  Move('type TBoxArray = array of TBox;', 'System', 'TBox');
+
+  Move('type TQuad = record Top, Right, Bottom, Left: TPoint; end;', 'System', 'TQuad');
+  Move('type TQuadArray = array of TQuad;', 'System', 'TQuad');
+
+  Move('type TPoint = record X, Y: Integer; end;', 'System', 'TPoint');
+  Move('type TPointArray = array of TPoint;', 'System', 'TPointArray');
 
   with TStringList.Create() do
   try

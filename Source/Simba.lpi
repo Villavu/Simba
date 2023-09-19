@@ -340,7 +340,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="144">
+    <Units Count="146">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -998,6 +998,14 @@
         <Filename Value="script/imports/simbaclasses/simba.import_externalimage.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit143>
+      <Unit144>
+        <Filename Value="simba.circle.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit144>
+      <Unit145>
+        <Filename Value="script/imports/simba/simba.import_circle.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit145>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.import_tpa;
 
 {$i simba.inc}
@@ -14,7 +19,7 @@ implementation
 
 uses
   lptypes,
-  simba.tpa, simba.geometry,
+  simba.tpa, simba.circle, simba.geometry,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference;
 
 (*
@@ -638,6 +643,16 @@ begin
 end;
 
 (*
+TPointArray.MinAreaCircle
+~~~~~~~~~~~~~~~~~~~~~~~~~
+> function TPointArray.MinAreaCircle: TCircle;
+*)
+procedure _LapeTPAMinAreaCircle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PCircle(Result)^ := PPointArray(Params^[0])^.MinAreaCircle();
+end;
+
+(*
 TPointArray.Erode
 ~~~~~~~~~~~~~~~~~
 > function TPointArray.Erode(Iterations: Integer): TPointArray;
@@ -763,6 +778,7 @@ begin
     addGlobalFunc('function TPointArray.Extremes: TPointArray', @_LapeTPAExtremes);
     addGlobalFunc('function TPointArray.Bounds: TBox; overload', @_LapeTPABounds);
     addGlobalFunc('function TPointArray.MinAreaRect: TQuad', @_LapeTPAMinAreaRect);
+    addGlobalFunc('function TPointArray.MinAreaCircle: TCircle', @_LapeTPAMinAreaCircle);
     addGlobalFunc('function TPointArray.Mean: TPoint; overload', @_LapeTPAMean);
 
     addGlobalFunc('function TPointArray.Connect: TPointArray', @_LapeTPAConnect);
