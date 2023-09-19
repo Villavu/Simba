@@ -185,6 +185,7 @@ begin
   ParseSourceFile('simba.import_box',           'TBox'           );
   ParseSourceFile('simba.import_boxarray',      'TBoxArray'      );
   ParseSourceFile('simba.import_quad',          'TQuad'          );
+  ParseSourceFile('simba.import_circle',        'TCircle'        );
   ParseSourceFile('simba.import_windowhandle',  'TWindowHandle'  );
   ParseSourceFile('simba.import_debugimage',    'Debug Image'    );
   ParseSourceFile('simba.import_variant',       'Variant'        );

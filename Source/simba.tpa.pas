@@ -14,6 +14,7 @@
   - Border
   - Skeleton
   - MinAreaRect
+  - MinAreaCircle
   - Erode
   - Grow
   - RotateEx
@@ -36,7 +37,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.mufasatypes, simba.circle;
 
 type
   TPointArrayHelper = type helper for TPointArray
@@ -67,6 +68,7 @@ type
 
     function Mean: TPoint;
     function MinAreaRect: TQuad;
+    function MinAreaCircle: TCircle;
     function Bounds: TBox;
     function Area: Double;
 
@@ -2137,7 +2139,7 @@ function TPointArrayHelper.DistanceTransform: TSingleMatrix;
 
   function EucSep(const i,j, ii,jj:Int32): Int32; inline;
   begin
-    Result := Round((sqr(j) - sqr(i) + sqr(jj) - sqr(ii))/(2*(j-i)));
+    Result := Round((sqr(j) - sqr(i) + sqr(jj) - sqr(ii)) / (2*(j-i)));
   end;
 
   function Transform(const binIm:TIntegerArray; m,n:Int32): TSingleMatrix;
@@ -2209,7 +2211,7 @@ function TPointArrayHelper.DistanceTransform: TSingleMatrix;
 
 var
   Data:TIntegerArray;
-  w,h,n,i:Int32;
+  w,h,i:Int32;
   B:TBox;
 begin
   Result := nil;
@@ -2226,6 +2228,139 @@ begin
     Data[(Self[i].y-B.Y1)*w+(Self[i].x-B.X1)] := 1;
 
   Result := Transform(data,w,h);
+end;
+
+function TPointArrayHelper.MinAreaCircle: TCircle;
+var
+  Points: TPointArray;
+
+  function NewCircle2(const p0, p1: TPoint): TCircle;
+  begin
+    Result.Center.X := (p0.x + p1.x) div 2;
+    Result.Center.Y := (p0.y + p1.y) div 2;
+    Result.Radius := Ceil(Max(
+      Hypot(Result.Center.X - p0.X, Result.Center.Y - p0.Y),
+      Hypot(Result.Center.X - p1.X, Result.Center.Y - p1.Y)
+    ));
+  end;
+
+  function NewCircle3(const p0, p1, p2: TPoint): TCircle;
+  var
+    d,ax,ay,bx,by,cx,cy,ox,oy,x,y,ra,rb,rc: Integer;
+  begin
+    // Mathematical algorithm from Wikipedia: Circumscribed circle
+    ax := p0.x; ay := p0.y;
+    bx := p1.x; by := p1.y;
+    cx := p2.x; cy := p2.y;
+    ox := (Min(Min(ax, bx), cx) + Max(Max(ax, bx), cx)) div 2;
+    oy := (Min(Min(ay, by), cy) + Max(Max(ay, by), cy)) div 2;
+    ax -= ox; ay -= oy;
+    bx -= ox; by -= oy;
+    cx -= ox; cy -= oy;
+    d := (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by)) * 2;
+
+    if (d <> 0) then
+    begin
+      x := ox + ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) div d;
+      y := oy + ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) div d;
+      ra := Ceil(Hypot(x-p0.x, y-p0.y));
+      rb := Ceil(Hypot(x-p1.x, y-p1.y));
+      rc := Ceil(Hypot(x-p2.x, y-p2.y));
+
+      Result.Center.X := x;
+      Result.Center.Y := y;
+      Result.Radius := Max(ra, rb, rc);
+    end else
+      Result := TCircle.DEFAULT_VALUE;
+  end;
+
+  // Two boundary Points known
+  function makeCircleTwoPoints(stop: Integer; P, Q: TPoint): TCircle;
+  var
+    I: Integer;
+    c, circ, Left, Right: TCircle;
+    cross: Double;
+  begin
+    Left := TCircle.DEFAULT_VALUE;
+    Right := TCircle.DEFAULT_VALUE;
+
+    circ := NewCircle2(P, Q);
+
+    // For each point not in the two-point circle
+    for I := 0 to Min(stop, High(Points)) do
+    begin
+      if (circ.Contains(Points[I])) then
+        Continue;
+
+      // Form a circumcircle and classify it on Left or Right side
+      cross := TSimbaGeometry.CrossProduct(P, Q, Points[I]);
+      c := NewCircle3(P, Q, Points[I]);
+      if (c.Radius = 0) then
+        Continue;
+
+      if (cross > 0) and ((Left.Radius = 0) or (TSimbaGeometry.CrossProduct(P, Q, C.Center) > TSimbaGeometry.CrossProduct(P, Q, Left.Center))) then
+        Left := c
+      else
+      if (cross < 0) and ((Right.Radius = 0) or (TSimbaGeometry.CrossProduct(P, Q, C.Center) < TSimbaGeometry.CrossProduct(P, Q, Right.Center))) then
+        Right := c;
+    end;
+
+    // Select which circle to return
+    if (Left.Radius = 0) and (Right.Radius = 0) then
+      Result := circ
+    else if (Left.Radius = 0) then
+      Result := Right
+    else if (Right.Radius = 0) or (Left.Radius <= Right.Radius) then
+      Result := Left
+    else
+      Result := Right;
+  end;
+
+  // One boundary point known
+  function makeCircleOnePoint(stop:Integer; P:TPoint): TCircle;
+  var
+    I: Integer;
+    Q: TPoint;
+  begin
+    Result := TCircle.Create(P, 0);
+
+    for I := 0 to Min(stop, High(Points)) do
+    begin
+      Q := Points[I];
+      if Result.Contains(Q) then
+        Continue;
+
+      if (Result.Radius = 0) then
+        Result := NewCircle2(P, Q)
+      else
+        Result := makeCircleTwoPoints(I+1, P, Q);
+    end;
+  end;
+
+var
+  I: Integer;
+  P: TPoint;
+begin
+  Result := TCircle.DEFAULT_VALUE;
+
+  if (Length(Self) = 1) then
+    Result.Center := Self[0]
+  else
+  if (Length(Self) > 1) then
+  begin
+    // Copy the list and shuffle
+    Points := Copy(Self);
+    for I := High(Points) downto 0 do
+      Swap(Points[I], Points[Random(I+1)]);
+
+    // Add Points to circle one by one, and if needed recompute circle
+    for I := 0 to High(Points) do
+    begin
+      P := Points[I];
+      if (Result.Radius = 0) or (not Result.Contains(P)) then
+        Result := makeCircleOnePoint(I+1, P);
+    end;
+  end;
 end;
 
 end.

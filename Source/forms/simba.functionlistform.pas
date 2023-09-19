@@ -164,6 +164,8 @@ begin
     'Dialogs':        Result := 'https://villavu.github.io/Simba/Dialogs.html';
     'DTM':            Result := 'https://villavu.github.io/Simba/DTM.html';
     'System':         Result := 'https://villavu.github.io/Simba/System.html';
+    'TCircle':        Result := 'https://villavu.github.io/Simba/TCircle.html';
+    'DateTime':       Result := 'https://villavu.github.io/Simba/DateTime.html';
   end;
 end;
 
