@@ -43,6 +43,7 @@ type
     function Exclude(Points: TPointArray): TPointArray;
     function RandomPoint: TPoint;
     function RandomPointCenter: TPoint;
+    function Circularity(TPA: TPointArray): Double;
   end;
 
   operator in(const P: TPoint; const Circle: TCircle): Boolean;
@@ -51,7 +52,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.tpa, simba.random, simba.overallocatearray;
+  simba.math, simba.tpa, simba.random, simba.overallocatearray, simba.geometry;
 
 class function TCircleHelper.Create(AX, AY: Integer; ARadius: Integer): TCircle;
 begin
@@ -165,6 +166,26 @@ begin
 
   Result.X := Center.X + Round(R * CosValue);
   Result.Y := Center.X + Round(R * SinValue);
+end;
+
+function TCircleHelper.Circularity(TPA: TPointArray): Double;
+var
+  I: Integer;
+  Smallest, Test: Double;
+  Hull: TPointArray;
+begin
+  Hull := TPA.ConvexHull();
+  if Length(Hull) <= 1 then
+    Exit(0);
+
+  Smallest := $FFFFFF;
+  for I := 0 to High(Hull) do
+  begin
+    Test := TSimbaGeometry.DistToLine(Self.Center(), Hull[I], Hull[(I+1) mod Length(Hull)]);
+    if (Test < Smallest) then
+      Smallest := Test;
+  end;
+  Result := Sqr(Smallest) / Sqr(Self.Radius);
 end;
 
 operator in(const P: TPoint; const Circle: TCircle): Boolean;

@@ -134,6 +134,8 @@ type
     function Intersection(Other: TPointArray): TPointArray;
 
     function DistanceTransform: TSingleMatrix;
+
+    function Circularity: Double;
   end;
 
 implementation
@@ -2267,6 +2269,11 @@ begin
     Data[(Self[i].y-B.Y1)*w+(Self[i].x-B.X1)] := 1;
 
   Result := Transform(data,w,h);
+end;
+
+function TPointArrayHelper.Circularity: Double;
+begin
+  Result := MinAreaCircle().Circularity(Self);
 end;
 
 (*

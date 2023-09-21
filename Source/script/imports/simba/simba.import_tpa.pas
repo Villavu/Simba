@@ -744,6 +744,16 @@ begin
   PSingleMatrix(Result)^ := PPointArray(Params^[0])^.DistanceTransform();
 end;
 
+(*
+TPointArray.Circularity
+~~~~~~~~~~~~~~~~~~~~~~~
+> function TPointArray.Circularity: Double;
+*)
+procedure _LapeTPACircularity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDouble(Result)^ := PPointArray(Params^[0])^.Circularity();
+end;
+
 procedure ImportTPA(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -836,6 +846,8 @@ begin
     addGlobalFunc('function TPointArray.SymmetricDifference(Other: TPointArray): TPointArray', @_Lape_Point_SymmetricDifference);
 
     addGlobalFunc('function TPointArray.DistanceTransform: TSingleMatrix;', @_LapeTPADistanceTransform);
+
+    addGlobalFunc('function TPointArray.Circularity: Double;', @_LapeTPACircularity);
 
     ImportingSection := '';
   end;

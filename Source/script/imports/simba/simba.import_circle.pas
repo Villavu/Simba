@@ -124,6 +124,28 @@ begin
 end;
 
 (*
+TCircle.Center
+~~~~~~~~~~~~~~
+> function TCircle.Center: TPoint;
+
+Returns the center point of the circle.
+*)
+procedure _LapeCircle_Center(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PCircle(Params^[0])^.Center();
+end;
+
+(*
+TCircle.Circularity
+~~~~~~~~~~~~~~~~~~~
+> function TCircle.Circularity(TPA: TPointArray): Double;
+*)
+procedure _LapeCircle_Circularity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDouble(Result)^ := PCircle(Params^[0])^.Circularity(PPointArray(Params^[1])^);
+end;
+
+(*
 TCircle.Area
 ~~~~~~~~~~~~
 > function TCircle.Area: Double;
@@ -213,6 +235,8 @@ begin
     addGlobalFunc('function TCircle.RandomPoint: TPoint', @_LapeCircle_RandomPoint);
     addGlobalFunc('function TCircle.RandomPointCenter: TPoint', @_LapeCircle_RandomPointCenter);
 
+    addGlobalFunc('function TCircle.Center: TPoint', @_LapeCircle_Center);
+    addGlobalFunc('function TCircle.Circularity(TPA: TPointArray): Double', @_LapeCircle_Circularity);
     addGlobalFunc('function TCircle.Circumference: Double', @_LapeCircle_Circumference);
     addGlobalFunc('function TCircle.Area: Double', @_LapeCircle_Area);
     addGlobalFunc('function TCircle.Expand(Amount: Integer): TCircle', @_LapeCircle_Expand);
