@@ -259,6 +259,16 @@ begin
 end;
 
 (*
+TPointArray.FurthestPoints
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+> procedure TPointArray.FurthestPoints(out A, B: TPoint);
+*)
+procedure _LapeTPAFurthestPoints(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Params^[0])^.FurthestPoints(PPoint(Params^[1])^, PPoint(Params^[2])^);
+end;
+
+(*
 TPointArray.NearestPoint
 ~~~~~~~~~~~~~~~~~~~~~~~~
 > function TPointArray.NearestPoint(Other: TPoint): TPoint;
@@ -797,6 +807,7 @@ begin
     addGlobalFunc('function TPointArray.IsPointNearby(Other: TPoint; MinDist, MaxDist: Double): Boolean; overload', @_LapeTPAIsPointNearby1);
     addGlobalFunc('function TPointArray.IsPointNearby(Other: TPoint; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): Boolean; overload', @_LapeTPAIsPointNearby2);
 
+    addGlobalFunc('procedure TPointArray.FurthestPoints(out A, B: TPoint)', @_LapeTPAFurthestPoints);
     addGlobalFunc('function TPointArray.NearestPoint(Other: TPoint): TPoint', @_LapeTPANearestPoint);
 
     addGlobalFunc('function TPointArray.Unique: TPointArray; override', @_LapeTPAUnique);
