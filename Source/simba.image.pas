@@ -124,7 +124,8 @@ type
     procedure DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
     procedure DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);
 
-    procedure DrawLine(Start, Stop: TPoint; Color: TColor);
+    procedure DrawLine(Start, Stop: TPoint; Color: TColor); overload;
+    procedure DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: TColor); overload;
 
     procedure DrawPolygon(Points: TPointArray; Color: TColor);
     procedure DrawPolygonFilled(Points: TPointArray; Color: TColor);
@@ -872,6 +873,74 @@ var
   RX, RY, X, Y: Single;
 begin
   BGR := ColorToBGRA(Color);
+
+  DX := (Stop.X - Start.X);
+  DY := (Stop.Y - Start.Y);
+  if (Abs(DX) > Abs(DY)) then
+    Step := Abs(DX)
+  else
+    Step := Abs(DY);
+
+  if (Step = 0) then
+  begin
+    RX := DX;
+    RY := DY;
+  end else
+  begin
+    RX := DX / Step;
+    RY := DY / Step;
+  end;
+  X := Start.X;
+  Y := Start.Y;
+
+  PutPixel(X, Y);
+  for I := 1 to Step do
+  begin
+    X := X + RX;
+    Y := Y + RY;
+
+    PutPixel(X, Y);
+  end;
+end;
+
+procedure TSimbaImage.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: TColor);
+var
+  BGR: TColorBGRA;
+  Templ: TPointArray;
+  H: Integer;
+
+  procedure PutPixel(const X, Y: Single); inline;
+  var
+    XX, YY: Integer;
+    I: Integer;
+    P: TPoint;
+  begin
+    XX := Round(X);
+    YY := Round(Y);
+
+    for I := 0 to H do
+    begin
+      P.X := XX + Templ[I].X;
+      P.Y := YY + Templ[I].Y;
+      if (P.X >= 0) and (P.Y >= 0) and (P.X < FWidth) and (P.Y < FHeight) then
+        FData[P.Y * FWidth + P.X] := BGR;
+    end;
+  end;
+
+var
+  DX, DY, Step, I: Integer;
+  RX, RY, X, Y: Single;
+begin
+  if (Thickness <= 1) then
+  begin
+    DrawLine(Start, Stop, Color);
+    Exit;
+  end;
+
+  BGR := ColorToBGRA(Color);
+
+  Templ := TPointArray.CreateFromCircle(TPoint.Create(0,0), Thickness, True);
+  H := High(Templ);
 
   DX := (Stop.X - Start.X);
   DY := (Stop.Y - Start.Y);
