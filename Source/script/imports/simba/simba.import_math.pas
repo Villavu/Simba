@@ -25,21 +25,21 @@ Math functions
 (*
 Distance
 ~~~~~~~~
-> function Distance(const X1, Y1, X2, Y2: Integer): Integer;
+> function Distance(const X1, Y1, X2, Y2: Double): Double;
 *)
 procedure _LapeDistance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := Distance(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PDouble(Result)^ := Distance(PDouble(Params^[0])^, PDouble(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^);
 end;
 
 (*
 Distance
 ~~~~~~~~
-> function Distance(const P1, P2: TPoint): Integer;
+> function Distance(const P1, P2: TPoint): Double;
 *)
 procedure _LapeDistanceEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := Distance(PPoint(Params^[0])^, PPoint(Params^[1])^);
+  PDouble(Result)^ := Distance(PPoint(Params^[0])^, PPoint(Params^[1])^);
 end;
 
 (*
@@ -356,8 +356,8 @@ begin
     addGlobalFunc('function IsNumber(const Value: Single): Boolean; overload', @_LapeIsNumberS);
     addGlobalFunc('function IsNumber(const Value: Double): Boolean; overload', @_LapeIsNumberD);
 
-    addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Integer): Integer; overload', @_LapeDistance);
-    addGlobalFunc('function Distance(const P1, P2: TPoint): Integer; overload', @_LapeDistanceEx);
+    addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Double): Double; overload', @_LapeDistance);
+    addGlobalFunc('function Distance(const P1, P2: TPoint): Double; overload', @_LapeDistanceEx);
 
     addGlobalFunc('function Sar(x: Integer; Shift: Byte): Integer', @_LapeSar);
     addGlobalFunc('function Ror(x: UInt32; Shift: Byte): UInt32', @_LapeRor);

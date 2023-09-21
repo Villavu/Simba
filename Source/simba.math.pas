@@ -20,10 +20,9 @@ const
   SQRT_3 = Double(1.73205080756888);
   SQRT_5 = Double(2.23606797749979);
 
-function DistanceF(const X1,Y1,X2,Y2: Double): Double; inline;
+function Distance(const P1,P2: TPoint): Double; overload; inline;
+function Distance(const X1,Y1,X2,Y2: Double): Double; overload; inline;
 
-function Distance(const X1, Y1, X2, Y2: Integer): Integer; inline; overload;
-function Distance(const P1, P2: TPoint): Integer; inline; overload;
 function NextPower2(const n: Integer): Integer;
 
 function IsNumber(const n: Double): Boolean; inline; overload;
@@ -77,19 +76,14 @@ begin
   Result := Result + 1;
 end;
 
-function DistanceF(const X1, Y1, X2, Y2: Double): Double;
+function Distance(const P1, P2: TPoint): Double;
 begin
-  Result := Sqrt(Sqr(Double(X2) - Double(X1)) + Sqr(Double(Y2) - Double(Y1)));
+  Result := Sqrt(Sqr(Double(P2.X) - Double(P1.X)) + Sqr(Double(P2.Y) - Double(P1.Y))); // convert to Double to prevent integer overflows
 end;
 
-function Distance(const X1, Y1, X2, Y2: Integer): Integer;
+function Distance(const X1, Y1, X2, Y2: Double): Double;
 begin
-  Result := Round(Sqrt(Sqr(ValReal(X2) - ValReal(X1)) + Sqr(ValReal(Y2) - ValReal(Y1)))); // convert to ValReal to prevent integer overflows
-end;
-
-function Distance(const P1, P2: TPoint): Integer;
-begin
-  Result := Round(Sqrt(Sqr(ValReal(P2.X) - ValReal(P1.X)) + Sqr(ValReal(P2.Y) - ValReal(P1.Y)))); // convert to ValReal to prevent integer overflows
+  Result := Sqrt(Sqr(X2 - X1) + Sqr(Y2 - Y1));
 end;
 
 function CeilTo(const n: Double; const Precision: Int8 = 0): Double;

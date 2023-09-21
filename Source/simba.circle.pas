@@ -83,7 +83,7 @@ end;
 
 function TCircleHelper.Contains(const P: TPoint): Boolean;
 begin
-  Result := DistanceF(X, Y, P.X, P.Y) <= Radius;
+  Result := Distance(X, Y, P.X, P.Y) <= Radius;
 end;
 
 function TCircleHelper.PointAtDegrees(Degrees: Double): TPoint;
