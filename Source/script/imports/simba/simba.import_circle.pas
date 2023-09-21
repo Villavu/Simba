@@ -34,7 +34,7 @@ TCircle.Create
 *)
 procedure _LapeCircle_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCircle(Result)^ := TCircle.Create(PPoint(Params^[0])^, PInteger(Params^[1])^);
+  PCircle(Result)^ := TCircle.Create(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -199,10 +199,10 @@ begin
   begin
     ImportingSection := 'TCircle';
 
-    addGlobalType('record Center: TPoint; Radius: Integer; end;', 'TCircle');
+    addGlobalType('record X, Y, Radius: Integer; end;', 'TCircle');
     addGlobalType('array of TCircle;', 'TCircleArray');
 
-    addGlobalFunc('function TCircle.Create(ACenter: TPoint; ARadius: Integer): TCircle; static; overload', @_LapeCircle_Create);
+    addGlobalFunc('function TCircle.Create(X, Y, Radius: Integer): TCircle; static; overload', @_LapeCircle_Create);
     addGlobalFunc('function TCircle.CreateFromPoints(Points: TPointArray): TCircle; static; overload', @_LapeCircle_CreateFromPoints);
 
     addGlobalFunc('function TCircle.ToTPA(Filled: Boolean): TPointArray', @_LapeCircle_ToTPA);

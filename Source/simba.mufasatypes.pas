@@ -392,9 +392,6 @@ function Max(const A, B: Single): Single; inline; overload;
 function Min(const A, B: Double): Double; inline; overload;
 function Max(const A, B: Double): Double; inline; overload;
 
-function Min(const A, B, C: Integer): Integer; inline; overload;
-function Max(const A, B, C: Integer): Integer; inline; overload;
-
 procedure Swap(var A, B: Byte); overload;
 procedure Swap(var A, B: Integer); overload;
 procedure Swap(var A, B: Single); overload;
@@ -633,34 +630,6 @@ begin
     Result := A
   else
     Result := B;
-end;
-
-function Min(const A, B, C: Integer): Integer;
-begin
-  if A < B then
-    if C < A then
-      Result := C
-    else
-      Result := A
-  else
-    if C < B then
-      Result := C
-    else
-      Result := B;
-end;
-
-function Max(const A, B, C: Integer): Integer;
-begin
-  if A > B then
-    if C > A then
-      Result := C
-    else
-      Result := A
-  else
-    if C > B then
-      Result := C
-    else
-      Result := B;
 end;
 
 procedure Swap(var A, B: Byte);

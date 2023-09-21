@@ -20,6 +20,8 @@ const
   SQRT_3 = Double(1.73205080756888);
   SQRT_5 = Double(2.23606797749979);
 
+function DistanceF(const X1,Y1,X2,Y2: Double): Double; inline;
+
 function Distance(const X1, Y1, X2, Y2: Integer): Integer; inline; overload;
 function Distance(const P1, P2: TPoint): Integer; inline; overload;
 function NextPower2(const n: Integer): Integer;
@@ -73,6 +75,11 @@ begin
   Result := Result or (Result shr 16);
   Result := Result or (Result shr 32);
   Result := Result + 1;
+end;
+
+function DistanceF(const X1, Y1, X2, Y2: Double): Double;
+begin
+  Result := Sqrt(Sqr(Double(X2) - Double(X1)) + Sqr(Double(Y2) - Double(Y1)));
 end;
 
 function Distance(const X1, Y1, X2, Y2: Integer): Integer;

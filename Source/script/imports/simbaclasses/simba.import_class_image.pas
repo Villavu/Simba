@@ -572,11 +572,11 @@ end;
 (*
 TImage.DrawLine
 ~~~~~~~~~~~~~~~
-> procedure TImage.DrawLine(Start, Stop: TPoint; Color: TColor);
+> procedure TImage.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: TColor);
 *)
 procedure _LapeImage_DrawLineEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^);
 end;
 
 (*
@@ -1316,8 +1316,8 @@ begin
     addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor = -1)', @_LapeImage_DrawATPA);
     addGlobalFunc('procedure TImage.DrawTPA(TPA: TPointArray; Color: TColor);', @_LapeImage_DrawTPA);
 
-    addGlobalFunc('procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Thickness: Integer; Color: TColor);', @_LapeImage_DrawCrosshairs);
-    addGlobalFunc('procedure TImage.DrawCross(ACenter: TPoint; Radius: Integer; Thickness: Integer; Color: TColor);', @_LapeImage_DrawCross);
+    addGlobalFunc('procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);', @_LapeImage_DrawCrosshairs);
+    addGlobalFunc('procedure TImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeImage_DrawCross);
 
     addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint; Color: TColor); overload', @_LapeImage_DrawLine);
     addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: TColor); overload', @_LapeImage_DrawLineEx);
@@ -1342,7 +1342,7 @@ begin
     addGlobalFunc('procedure TImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawBoxArray);
     addGlobalFunc('procedure TImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawPolygonArray);
     addGlobalFunc('procedure TImage.DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawCircleArray);
-    addGlobalFunc('procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Thickness: Integer; Color: TColor = -1);', @_LapeImage_DrawCrossArray);
+    addGlobalFunc('procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor = -1);', @_LapeImage_DrawCrossArray);
 
     addGlobalFunc('procedure TImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer)', @_LapeImage_DrawHSLCircle);
 

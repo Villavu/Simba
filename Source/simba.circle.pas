@@ -16,7 +16,8 @@ uses
 type
   PCircle = ^TCircle;
   TCircle = record
-    Center: TPoint;
+    X: Integer;
+    Y: Integer;
     Radius: Integer;
   end;
   PCircleArray = ^TCircleArray;
@@ -24,14 +25,15 @@ type
 
   TCircleHelper = type helper for TCircle
   public const
-    DEFAULT_VALUE: TCircle = (Center: (X: 0; Y: 0); Radius: 0);
+    ZERO: TCircle = (X: 0; Y: 0; Radius: 0);
   public
-    class function Create(ACenter: TPoint; ARadius: Integer): TCircle; static;
+    class function Create(AX, AY: Integer; ARadius: Integer): TCircle; static;
     class function CreateFromPoints(Points: TPointArray): TCircle; static;
 
+    function Center: TPoint; inline;
+    function Contains(const P: TPoint): Boolean;
     function Bounds: TBox;
     function ToTPA(Filled: Boolean): TPointArray;
-    function Contains(const P: TPoint): Boolean; inline;
     function PointAtDegrees(Degrees: Double): TPoint;
     function Circumference: Double;
     function Area: Double;
@@ -49,17 +51,24 @@ implementation
 
 uses
   Math,
-  simba.tpa, simba.random, simba.overallocatearray;
+  simba.math, simba.tpa, simba.random, simba.overallocatearray;
 
-class function TCircleHelper.Create(ACenter: TPoint; ARadius: Integer): TCircle;
+class function TCircleHelper.Create(AX, AY: Integer; ARadius: Integer): TCircle;
 begin
-  Result.Center := ACenter;
+  Result.X := AX;
+  Result.Y := AY;
   Result.Radius := ARadius;
 end;
 
 class function TCircleHelper.CreateFromPoints(Points: TPointArray): TCircle;
 begin
   Result := Points.MinAreaCircle();
+end;
+
+function TCircleHelper.Center: TPoint;
+begin
+  Result.X := X;
+  Result.Y := Y;
 end;
 
 function TCircleHelper.Bounds: TBox;
@@ -74,7 +83,7 @@ end;
 
 function TCircleHelper.Contains(const P: TPoint): Boolean;
 begin
-  Result := Hypot(P.X - Self.Center.X, P.Y - Self.Center.Y) <= Self.Radius;
+  Result := DistanceF(X, Y, P.X, P.Y) <= Radius;
 end;
 
 function TCircleHelper.PointAtDegrees(Degrees: Double): TPoint;
@@ -102,7 +111,8 @@ end;
 function TCircleHelper.Offset(P: TPoint): TCircle;
 begin
   Result := Self;
-  Result.Center := Result.Center.Offset(P);
+  Result.X += P.X;
+  Result.Y += P.Y;
 end;
 
 function TCircleHelper.Extract(Points: TPointArray): TPointArray;
