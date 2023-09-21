@@ -28,12 +28,6 @@
   - Cluster
 }
 
-{
-  https://www.nayuki.io/page/smallest-enclosing-circle
-
-  - MinAreaCircle
-}
-
 unit simba.tpa;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
@@ -70,6 +64,7 @@ type
     function FloodFill(const StartPoint: TPoint; const EightWay: Boolean): TPointArray;
     function ShapeFill: TPointArray;
 
+    procedure FurthestPoints(out A, B: TPoint);
     function ConvexHull: TPointArray;
 
     function Mean: TPoint;
@@ -817,7 +812,7 @@ function TPointArrayHelper.ShapeFill: TPointArray;
 var
   Buffer: TSimbaPointBuffer;
 
-  procedure HorzLine(Y: Integer; XStart, XStop: Integer); inline;
+  procedure HorzLine(Y: Integer; XStart, XStop: Integer);
   var
     X: Integer;
   begin
@@ -838,6 +833,44 @@ begin
         HorzLine(Row[0].Y, Row[I-1].X, Row[I].X);
 
   Result := Buffer.Trim();
+end;
+
+procedure TPointArrayHelper.FurthestPoints(out A, B: TPoint);
+var
+  I, J, H: Integer;
+  Best, Test: Double;
+begin
+  if (Length(Self) <= 1) then
+  begin
+    A := TPoint.ZERO;
+    B := TPoint.ZERO;
+
+    Exit;
+  end;
+
+  if (Length(Self) = 2) then
+  begin
+    A := Self[0];
+    B := Self[1];
+
+    Exit;
+  end;
+
+  Best := 0;
+  H := High(Self);
+  for I := 0 to H do
+    for J := I+1 to H do
+    begin
+      Test := Distance(Self[I], Self[J]);
+
+      if (Test > Best) then
+      begin
+        Best := Test;
+
+        A := Self[I];
+        B := Self[J];
+      end;
+    end;
 end;
 
 function TPointArrayHelper.ConvexHull: TPointArray;
@@ -2236,142 +2269,146 @@ begin
   Result := Transform(data,w,h);
 end;
 
+(*
+  Approximate smallest bounding circle algorithm by Slacky
+  This formula makes 3 assumptions of outlier points that defines the circle.
+
+  p1 and p2 are the furthest possible points from one another
+  p3 is the furthest point from the center of the line of p1 and p2 at a 90 degree angle.
+
+  Already now we have a circle that is very close to encapsulating.
+
+  We assume that p3 is nearly always correct, and if there is one wrong assumption it's either p1, or p2.
+  We move p1 and/or p2 until the criteria is reached, odds are one of them is correct already alongside p3.
+  If we actually didn't solve it so far, we move p3 to see if that does it.
+
+  https://en.wikipedia.org/wiki/Smallest-circle_problem
+
+  Time complexity is somewhere along the lines of
+    O(max(n log n, h^2))
+
+  Where `h` is the remainding points after convex hull is performed.
+  `n` is the number of points, and `n log n` is assuming optimal convexhull algorithm.
+*)
 function TPointArrayHelper.MinAreaCircle: TCircle;
-var
-  Points: TPointArray;
 
-  function makeDiameter(const p0, p1: TPoint): TCircle;
+  function Circle3(const P1,P2,P3: TPoint): TCircle;
   var
-    x,y: Integer;
+    d,l: Single;
+    p,pcs,q,qcs: record x,y: Single; end;
   begin
-    x := (p0.x + p1.x) div 2;
-    y := (p0.y + p1.y) div 2;
-    Result.X := X;
-    Result.Y := Y;
-    Result.Radius := Ceil(Max(Hypot(x-p0.x,y-p0.y), Hypot(x-p1.x,y-p1.y)));
-  end;
+    p.x := (P1.x+P2.x) / 2;
+    p.y := (P1.y+P2.y) / 2;
 
-  // Mathematical algorithm from Wikipedia: Circumscribed circle
-  function makeCircumcircle(const p0, p1, p2: TPoint): TCircle;
-  var
-    d,ax,ay,bx,by,cx,cy,ox,oy,x,y,ra,rb,rc: Integer;
-  begin
-    ax := p0.x; ay := p0.y;
-    bx := p1.x; by := p1.y;
-    cx := p2.x; cy := p2.y;
-    ox := (Min(Min(ax, bx), cx) + Max(Max(ax, bx), cx)) div 2;
-    oy := (Min(Min(ay, by), cy) + Max(Max(ay, by), cy)) div 2;
-    ax -= ox; ay -= oy;
-    bx -= ox; by -= oy;
-    cx -= ox; cy -= oy;
-    d := (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by)) * 2;
+    q.x := (P1.x+P3.x) / 2;
+    q.y := (P1.y+P3.y) / 2;
 
-    if (Abs(d) >= 10) then
+    SinCos(ArcTan2(P1.Y-P2.Y, P1.X-P2.X) - PI/2, pcs.y, pcs.x);
+    SinCos(ArcTan2(P1.Y-P3.Y, P1.X-P3.X) - PI/2, qcs.y, qcs.x);
+
+    d := pcs.x * qcs.y - pcs.y * qcs.x;
+
+    if (Abs(d) >= 0.001) then
     begin
-      x := ox + ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx * cx + cy * cy) * (ay - by)) div d;
-      y := oy + ((ax * ax + ay * ay) * (cx - bx) + (bx * bx + by * by) * (ax - cx) + (cx * cx + cy * cy) * (bx - ax)) div d;
-      ra := Ceil(Hypot(x-p0.x, y-p0.y));
-      rb := Ceil(Hypot(x-p1.x, y-p1.y));
-      rc := Ceil(Hypot(x-p2.x, y-p2.y));
+      l := (qcs.x * (p.y - q.y) - qcs.y * (p.x - q.x)) / d;
 
-      Result.X := X;
-      Result.Y := Y;
-      Result.Radius := Max(Max(ra, rb), rc);
+      Result.X := Round(p.x + l * pcs.x);
+      Result.Y := Round(p.y + l * pcs.y);
+      Result.Radius := Ceil(Sqrt(Sqr((p.x + l * pcs.x) - P1.x) + Sqr((p.y + l * pcs.y) - P1.y)));
     end else
       Result := TCircle.ZERO;
   end;
 
-  // Two boundary Points known
-  function makeCircleTwoPoints(const count: Integer; const p, q: TPoint): TCircle;
+  function InCircle(const Points: TPointArray; const c: TCircle): Boolean;
   var
-    c, circ, Left, Right: TCircle;
-    r: TPoint;
-    cross: Double;
-    I: Integer;
+    i: Integer;
   begin
-    Left := TCircle.ZERO;
-    Right := TCircle.ZERO;
+    for i := 0 to High(Points) do
+      if (Distance(Points[i].x, Points[i].y, c.x, c.y) > c.Radius + 1) then
+      begin
+        Result := False;
+        Exit;
+      end;
 
-    circ := makeDiameter(p, q);
-
-    // For each point not in the two-point circle
-    for I := 0 to count do
-    begin
-      r := Points[I];
-      if (circ.Contains(r)) then
-        Continue;
-
-      // Form a circumcircle and classify it on Left or Right side
-      c := makeCircumcircle(p, q, r);
-      if (c.Radius = 0) then
-        Continue;
-
-      cross := TSimbaGeometry.CrossProduct(p.x, p.y, q.x, q.y, r.x, r.y);
-      if (cross > 0) and ((Left.Radius = 0) or (TSimbaGeometry.CrossProduct(p.x, p.y, q.x, q.y, c.center.x, c.center.y) > TSimbaGeometry.CrossProduct(p.x, p.y, q.x, q.y, Left.center.x, Left.center.y))) then
-        Left := c
-      else
-      if (cross < 0) and ((Right.Radius = 0) or (TSimbaGeometry.CrossProduct(p.x, p.y, q.x, q.y, c.center.x, c.center.y) < TSimbaGeometry.CrossProduct(p.x, p.y, q.x, q.y, Right.center.x, Right.center.y))) then
-        Right := c;
-    end;
-
-    // Select which circle to return
-    if (Left.Radius = 0) and (Right.Radius = 0) then
-      Result := circ
-    else
-    if (Left.Radius = 0) then
-      Result := Right
-    else
-    if (Right.Radius = 0) then
-      Result := Left
-    else
-    if (Left.Radius <= Right.Radius) then
-      Result := Left
-    else
-      Result := Right;
+    Result := True;
   end;
 
-  // One boundary point known
-  function makeCircleOnePoint(const count: Integer; const p: TPoint): TCircle;
+  function Pass(const Points: TPointArray; const p1,p2,p3: TPoint; const now:TCircle; var new: TPoint): TCircle;
   var
-    I: Integer;
-    q: TPoint;
+    i: Integer;
+    c: TCircle;
   begin
-    Result.X := p.x;
-    Result.Y := p.y;
-    Result.Radius := 0;
+    Result := now;
 
-    for I := 0 to count do
+    new := p2;
+    for i := 0 to High(Points) do
     begin
-      q := Points[I];
-      if (not Result.Contains(q)) then
+      if (Points[i] = p3) or (Points[i] = p1) then
+        Continue;
+
+      c := Circle3(p1,Points[i],p3);
+      if (c.Radius < Result.Radius) and InCircle(Points, c) then
       begin
-        if (Result.Radius = 0) then
-          Result := makeDiameter(p, q)
-        else
-          Result := makeCircleTwoPoints(I, p, q);
+        Result := c;
+        new := Points[i];
       end;
     end;
   end;
 
 var
-  I: Integer;
+  i: Integer;
+  v,q,p1,p2,p3: TPoint;
+  Points: TPointArray;
 begin
-  Result := TCircle.ZERO;
-  if (Length(Self) = 0) then
-    Exit;
-  if (Length(Self) = 1) then
+  Points := Self.ConvexHull();
+
+  if (Length(Points) <= 1) then
   begin
-    Result.X := Self[0].X;
-    Result.X := Self[0].Y;
+    Result := TCircle.ZERO;
+    if (Length(Points) = 1) then
+    begin
+      Result.X := Points[0].X;
+      Result.Y := Points[0].Y;
+    end;
+
     Exit;
   end;
 
-  Points := ConvexHull();
+  Points.FurthestPoints(P1, P2);
 
-  // Add Points to circle one by one, and if needed recompute circle
-  for I := 0 to High(Points) do
-    if (Result.Radius = 0) or (not Result.Contains(Points[I])) then
-      Result := makeCircleOnePoint(I, Points[I]);
+  v.x := (p1.x + p2.x) div 2;
+  v.y := (p1.y + p2.y) div 2;
+
+  p3 := Points[0];
+  for i := 0 to High(Points) do
+    if Sqrt(Sqr(v.x - Points[i].x) + Sqr(v.y - Points[i].y)) > Sqrt(Sqr(v.x - p3.x) + Sqr(v.y - p3.y)) then
+      p3 := Points[i];
+
+  if (p3 = p2) or (p3 = p1) then
+    Exit(TCircle.Create(Round(v.x), Round(v.y), Ceil(Distance(p1, p2) / 2)));
+
+  Result := Circle3(p1, p2, p3);
+  if (Result.Radius = 0) then
+    Exit(TCircle.Create(Round(v.x), Round(v.y), Ceil(Distance(p1, p2) / 2)));
+
+  if InCircle(Points, Result) then
+    Exit;
+
+  Result.Radius := $FFFF;
+  Result := Pass(Points, p1,p2,p3, Result, v);
+  if (v <> p2) then
+    q := v;
+
+  Result := Pass(Points, p2,p1,p3, Result, v);
+  if (v <> p1) then
+    Result := Pass(Points, v, q{%H-}, p3, Result, v);
+
+  if InCircle(Points, Result) and (Result.Radius <> $FFFF) then
+    Exit;
+
+  Result := Pass(Points, p2,p3,p1, Result, v); // very rarely is the p3 assumption is wrong.
+  if (Result.Radius = $FFFF) then
+    Result.Radius := Ceil(Distance(p1,p2) / 2);
 end;
 
 end.

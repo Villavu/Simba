@@ -54,7 +54,7 @@ end;
 
 function TBoxArrayHelper.SortFrom(From: TPoint): TBoxArray;
 var
-  Weights: TIntegerArray;
+  Weights: TDoubleArray;
   I: Integer;
 begin
   SetLength(Weights, Length(Self));
