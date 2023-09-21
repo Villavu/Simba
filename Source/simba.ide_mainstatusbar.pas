@@ -68,7 +68,7 @@ procedure TSimbaMainStatusBar.DoTabCaretMoved(Sender: TObject);
 begin
   if (Sender is TSimbaScriptTab) then
     with TSimbaScriptTab(Sender) do
-      FStatusBar.PanelText[2] := 'Line ' + IntToStr(Editor.CaretX) + ', Col ' + IntToStr(Editor.CaretY);
+      FStatusBar.PanelText[2] := 'Line ' + IntToStr(Editor.CaretY) + ', Col ' + IntToStr(Editor.CaretX);
 end;
 
 procedure TSimbaMainStatusBar.DoTabLoaded(Sender: TObject);
