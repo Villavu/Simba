@@ -26,6 +26,18 @@ uses
   simba.mufasatypes;
 
 type
+  TComplex = record
+    Re, Im: Single;
+  end;
+  TComplexArray  = array of TComplex;
+  TComplexMatrix = array of TComplexArray;
+
+  TComplexMatrixHelper = type helper for TComplexMatrix
+    function Width: Integer;
+    function Height: Integer;
+    procedure SetSize(AWidth, AHeight: Integer);
+  end;
+
   TRGBComplexMatrix = record
     Width: Integer;
     Height: Integer;
@@ -415,6 +427,24 @@ begin
   for Y := 0 to H do
     for X := 0 to W do
       Result[Y, X] := Left[Y, X] / Right[Y, X];
+end;
+
+function TComplexMatrixHelper.Width: Integer;
+begin
+  if (Length(Self) > 0) then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TComplexMatrixHelper.Height: Integer;
+begin
+  Result := Length(Self);
+end;
+
+procedure TComplexMatrixHelper.SetSize(AWidth, AHeight: Integer);
+begin
+  SetLength(Self, AHeight, AWidth);
 end;
 
 procedure TRGBMatrix.SetSize(AWidth, AHeight: Integer);

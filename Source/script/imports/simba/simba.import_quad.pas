@@ -18,7 +18,8 @@ procedure ImportQuad(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  lptypes;
+  lptypes,
+  simba.quad;
 
 (*
 TQuad

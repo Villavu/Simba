@@ -19,6 +19,7 @@ type
   // TThreadMethod = procedure of object;
 
 function IsMainThread: Boolean;
+procedure CheckMainThread(const Method: String);
 
 procedure QueueOnMainThread(Proc: TThreadProc); overload;
 procedure QueueOnMainThread(Method: TThreadMethod); overload;
@@ -31,6 +32,17 @@ function RunInThread(Method: TThreadMethod; FreeOnTerminate: Boolean = False): T
 function RunInThread(NestedMethod: TThreadNestedProc; FreeOnTerminate: Boolean = False): TThread; overload;
 
 implementation
+
+function IsMainThread: Boolean;
+begin
+  Result := GetCurrentThreadID() = MainThreadID;
+end;
+
+procedure CheckMainThread(const Method: String);
+begin
+  if (not IsMainThread()) then
+    SimbaException('Not called on main thread: ' + Method);
+end;
 
 type
   TSyncObject = object
@@ -51,11 +63,6 @@ begin
     on E: Exception do
       DebugLn('RunOnMainThread exception: ' + E.Message);
   end;
-end;
-
-function IsMainThread: Boolean;
-begin
-  Result := GetCurrentThreadID() = MainThreadID;
 end;
 
 type

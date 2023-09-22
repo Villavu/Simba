@@ -41,7 +41,7 @@ begin
   H := Matrix.Height - 1;
   for Y := 0 to H do
     for X := 0 to W do
-      Spec[Y, X].Re := Matrix[Y, X];  // WTF!!
+      Spec[Y, X].Re := Matrix[Y, X];
 
   Result := FFTPACK.FFT2(Spec);
 end;
