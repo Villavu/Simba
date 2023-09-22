@@ -124,7 +124,7 @@ procedure TSimbaScriptInstance.DoOutputThreadTerminated(Sender: TObject);
 var
   ScriptTab: TSimbaScriptTab;
 begin
-  AssertMainThread('TSimbaScriptInstance.DoOutputThreadTerminated');
+  CheckMainThread('TSimbaScriptInstance.DoOutputThreadTerminated');
   if FProcess.Running then
     FProcess.Terminate(EXIT_CODE_FORCE_STOP);
 

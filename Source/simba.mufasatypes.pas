@@ -10,7 +10,8 @@ unit simba.mufasatypes;
 interface
 
 uses
-  Classes, SysUtils, Graphics, fpjson;
+  Classes, SysUtils, Graphics,
+  fpjson;
 
 {$PUSH}
 {$SCOPEDENUMS ON}
@@ -316,23 +317,31 @@ type
   PBoxArray = ^TBoxArray;
   TBoxArray = array of TBox;
 
-  TComplex = record
-    Re, Im: Single;
+  PQuad = ^TQuad;
+  TQuad = record
+    Top: TPoint;
+    Right: TPoint;
+    Bottom: TPoint;
+    Left: TPoint;
   end;
-  TComplexArray  = array of TComplex;
-  TComplexMatrix = array of TComplexArray;
+  TQuadArray = array of TQuad;
+  PQuadArray = ^TQuadArray;
+
+  PCircle = ^TCircle;
+  TCircle = record
+    X: Integer;
+    Y: Integer;
+    Radius: Integer;
+  end;
+  PCircleArray = ^TCircleArray;
+  TCircleArray = array of TCircle;
 
   {$DEFINE HEADER}
     {$i generics.inc}
-    {$i quad.inc}
     {$i box.inc}
     {$i boxarray.inc}
     {$i point.inc}
     {$i string.inc}
-
-    {$DEFINE MACRO_HELPER_NAME := TComplexMatrixBaseHelper}
-    {$DEFINE MACRO_MATRIX_NAME := TComplexMatrix}
-    {$i matrix.inc}
 
     {$DEFINE MACRO_HELPER_NAME := TByteMatrixBaseHelper}
     {$DEFINE MACRO_MATRIX_NAME := TByteMatrix}
@@ -408,8 +417,6 @@ type
 procedure SimbaException(Message: String; Args: array of const); overload;
 procedure SimbaException(Message: String); overload;
 
-procedure AssertMainThread(const Method: String);
-
 // Writable const
 const
   SimbaProcessType: ESimbaProcessType = ESimbaProcessType.UNKNOWN;
@@ -419,19 +426,14 @@ implementation
 uses
   math, forms, uregexpr, strutils, jsonparser, jsonscanner,
   simba.math, simba.overallocatearray, simba.geometry,
-  simba.algo_sort, simba.tpa, simba.random;
+  simba.algo_sort, simba.random;
 
 {$DEFINE BODY}
   {$i generics.inc}
-  {$i quad.inc}
   {$i box.inc}
   {$i boxarray.inc}
   {$i point.inc}
   {$i string.inc}
-
-  {$DEFINE MACRO_HELPER_NAME := TComplexMatrixBaseHelper}
-  {$DEFINE MACRO_MATRIX_NAME := TComplexMatrix}
-  {$i matrix.inc}
 
   {$DEFINE MACRO_HELPER_NAME := TByteMatrixBaseHelper}
   {$DEFINE MACRO_MATRIX_NAME := TByteMatrix}
@@ -493,12 +495,6 @@ end;
 procedure SimbaException(Message: String);
 begin
   raise ESimbaException.Create(Message);
-end;
-
-procedure AssertMainThread(const Method: String);
-begin
-  if (GetCurrentThreadID() <> MainThreadID) then
-    SimbaException('Not called on main thread: ' + Method);
 end;
 
 procedure SimbaDebugLn(const Msg: String);

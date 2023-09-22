@@ -18,7 +18,7 @@ implementation
 
 uses
   simba.mufasatypes, simba.package, simba.package_installer,
-  simba.main, simba.outputform, simba.package_menubuilder;
+  simba.main, simba.outputform, simba.package_menubuilder, simba.threading;
 
 type
   TPackageUpdater = class(TThread)
@@ -35,7 +35,7 @@ type
 
 procedure TPackageUpdater.DoTerminateOnMainThread(Sender: TObject);
 begin
-  AssertMainThread('TPackageUpdater');
+  CheckMainThread('TPackageUpdater');
 
   // Update main menu
   BuildPackageMenus(FPackages, SimbaForm.MenuBar);

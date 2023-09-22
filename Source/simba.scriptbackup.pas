@@ -38,7 +38,7 @@ implementation
 
 uses
   crc,
-  simba.files, simba.env, simba.ide_initialization, simba.scripttabsform;
+  simba.files, simba.env, simba.ide_initialization, simba.scripttabsform, simba.threading;
 
 function Crc32String(const Str: String): UInt32;
 begin
@@ -51,7 +51,7 @@ procedure TSimbaScriptBackup.DoFileCollecting(Sender: TObject);
 var
   I: Integer;
 begin
-  AssertMainThread('TSimbaScriptBackup');
+  CheckMainThread('TSimbaScriptBackup');
 
   SetLength(FFiles, SimbaScriptTabsForm.TabCount);
   for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
@@ -107,7 +107,7 @@ end;
 
 procedure SetupScriptBackup;
 begin
-  AssertMainThread('SetupScriptBackup');
+  CheckMainThread('SetupScriptBackup');
 
   TSimbaScriptBackup.Create(SimbaScriptTabsForm);
 end;

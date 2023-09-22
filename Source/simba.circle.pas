@@ -14,15 +14,6 @@ uses
   simba.mufasatypes;
 
 type
-  PCircle = ^TCircle;
-  TCircle = record
-    X: Integer;
-    Y: Integer;
-    Radius: Integer;
-  end;
-  PCircleArray = ^TCircleArray;
-  TCircleArray = array of TCircle;
-
   TCircleHelper = type helper for TCircle
   public const
     ZERO: TCircle = (X: 0; Y: 0; Radius: 0);

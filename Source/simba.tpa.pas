@@ -37,7 +37,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.circle;
+  simba.mufasatypes, simba.quad, simba.circle;
 
 type
   TPointArrayHelper = type helper for TPointArray

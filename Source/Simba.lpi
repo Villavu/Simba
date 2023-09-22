@@ -340,7 +340,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="146">
+    <Units Count="147">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1006,6 +1006,10 @@
         <Filename Value="script/imports/simba/simba.import_circle.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit145>
+      <Unit146>
+        <Filename Value="simba.quad.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit146>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

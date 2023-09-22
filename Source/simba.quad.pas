@@ -1,23 +1,26 @@
 {
-  TQuad is TRectangle from SRL.
-  Author: Jarl Holta - https://github.com/slackydev
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
+unit simba.quad;
 
-{%MAINUNIT simba.mufasatypes}
+{$i simba.inc}
 
-{$IFDEF HEADER}
- type
-  PQuad = ^TQuad;
-  TQuad = record
-    Top: TPoint;
-    Right: TPoint;
-    Bottom: TPoint;
-    Left: TPoint;
+interface
 
+uses
+  Classes, SysUtils,
+  simba.mufasatypes;
+
+type
+  TQuadHelper = type helper for TQuad
+  const
+    EMPTY: TQuad = (Top: (X:0; Y:0); Right: (X:0; Y:0); Bottom: (X:0; Y:0); Left: (X:0; Y:0));
+  public
     class function Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static; overload;
     class function CreateFromBox(Box: TBox): TQuad; static; overload;
     class function CreateFromPoints(Points: TPointArray): TQuad; static; overload;
-    class operator in(const P: TPoint; const Quad: TQuad): Boolean;
 
     function RandomPoint: TPoint;
     function RandomPointCenter: TPoint;
@@ -39,12 +42,16 @@
     function Area: Integer;
     function Normalize: TQuad;
   end;
-  PQuadArray = ^TQuadArray;
-  TQuadArray = array of TQuad;
-{$ENDIF}
 
-{$IFDEF BODY}
-class function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad;
+  operator in(const P: TPoint; const Quad: TQuad): Boolean;
+
+implementation
+
+uses
+  Math,
+  simba.math, simba.tpa, simba.random, simba.geometry, simba.overallocatearray;
+
+class function TQuadHelper.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad;
 begin
   Result.Top    := ATop;
   Result.Right  := ARight;
@@ -52,7 +59,7 @@ begin
   Result.Left   := ALeft;
 end;
 
-class function TQuad.CreateFromBox(Box: TBox): TQuad;
+class function TQuadHelper.CreateFromBox(Box: TBox): TQuad;
 begin
   Result.Top    := TPoint.Create(Box.X1, Box.Y1);
   Result.Right  := TPoint.Create(Box.X2, Box.Y1);
@@ -60,17 +67,12 @@ begin
   Result.Left   := TPoint.Create(Box.X1, Box.Y2);
 end;
 
-class function TQuad.CreateFromPoints(Points: TPointArray): TQuad;
+class function TQuadHelper.CreateFromPoints(Points: TPointArray): TQuad;
 begin
   Result := Points.MinAreaRect();
 end;
 
-class operator TQuad.in(const P: TPoint; const Quad: TQuad): Boolean;
-begin
-  Result := Quad.Contains(P);
-end;
-
-function TQuad.RandomPoint: TPoint;
+function TQuadHelper.RandomPoint: TPoint;
 var
   a,x,y,x1,y1,x2,y2: Double;
 begin
@@ -90,7 +92,7 @@ begin
   Result := Result.Rotate(a, TPoint.Create(Round(X), Round(Y)));
 end;
 
-function TQuad.RandomPointCenter: TPoint;
+function TQuadHelper.RandomPointCenter: TPoint;
 var
   a,x,y,x1,y1,x2,y2: Double;
 begin
@@ -110,17 +112,17 @@ begin
   Result := Result.Rotate(a, TPoint.Create(Round(X), Round(Y)));
 end;
 
-function TQuad.ToTPA: TPointArray;
+function TQuadHelper.ToTPA: TPointArray;
 begin
   Result := [Top, Right, Bottom, Left];
 end;
 
-function TQuad.Bounds: TBox;
+function TQuadHelper.Bounds: TBox;
 begin
   Result := ToTPA().Bounds();
 end;
 
-function TQuad.ShortSideLen: Integer;
+function TQuadHelper.ShortSideLen: Integer;
 begin
   if (Hypot(Left.Y-Top.Y, Left.X-Top.X) < Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X)) then
     Result := Round(Hypot(Left.Y-Top.Y, Left.X-Top.X) / 2)
@@ -128,7 +130,7 @@ begin
     Result := Round(Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X) / 2);
 end;
 
-function TQuad.LongSideLen: Integer;
+function TQuadHelper.LongSideLen: Integer;
 begin
   if (Hypot(Left.Y-Top.Y, Left.X-Top.X) > Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X)) then
     Result := Round(Hypot(Left.Y-Top.Y, Left.X-Top.X) / 2)
@@ -136,13 +138,13 @@ begin
     Result := Round(Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X) / 2);
 end;
 
-function TQuad.Mean: TPoint;
+function TQuadHelper.Mean: TPoint;
 begin
   Result.X := (Self.Top.X + Self.Right.X + Self.Bottom.X + Self.Left.X) div 4;
   Result.Y := (Self.Top.Y + Self.Right.Y + Self.Bottom.Y + Self.Left.Y) div 4;
 end;
 
-function TQuad.Rotate(Radians: Double): TQuad;
+function TQuadHelper.Rotate(Radians: Double): TQuad;
 begin
   with Self.Mean() do
   begin
@@ -155,27 +157,27 @@ begin
   Result := Result.Normalize();
 end;
 
-function TQuad.Contains(P: TPoint): Boolean;
+function TQuadHelper.Contains(P: TPoint): Boolean;
 begin
   Result := TSimbaGeometry.PointInQuad(P, Self.Top, Self.Right, Self.Bottom, Self.Left);
 end;
 
-function TQuad.Contains(X, Y: Integer): Boolean;
+function TQuadHelper.Contains(X, Y: Integer): Boolean;
 begin
   Result := TSimbaGeometry.PointInQuad(TPoint.Create(X, Y), Self.Top, Self.Right, Self.Bottom, Self.Left);
 end;
 
-function TQuad.Offset(P: TPoint): TQuad;
+function TQuadHelper.Offset(P: TPoint): TQuad;
 begin
   Result := TQuad.Create(Top.Offset(P), Right.Offset(P), Bottom.Offset(P), Left.Offset(P));
 end;
 
-function TQuad.Offset(X, Y: Integer): TQuad;
+function TQuadHelper.Offset(X, Y: Integer): TQuad;
 begin
   Result := TQuad.Create(Top.Offset(X, Y), Right.Offset(X, Y), Bottom.Offset(X, Y), Left.Offset(X, Y));
 end;
 
-function TQuad.Extract(Points: TPointArray): TPointArray;
+function TQuadHelper.Extract(Points: TPointArray): TPointArray;
 var
   I: Integer;
   Buffer: TSimbaPointBuffer;
@@ -188,7 +190,7 @@ begin
   Result := Buffer.Trim();
 end;
 
-function TQuad.Exclude(Points: TPointArray): TPointArray;
+function TQuadHelper.Exclude(Points: TPointArray): TPointArray;
 var
   I: Integer;
   Buffer: TSimbaPointBuffer;
@@ -201,7 +203,7 @@ begin
   Result := Buffer.Trim();
 end;
 
-function TQuad.Expand(Amount: Double): TQuad;
+function TQuadHelper.Expand(Amount: Double): TQuad;
 var
   InTPA, OutTPA: array[0..3] of TPoint;
   Theta: Double;
@@ -224,7 +226,7 @@ begin
   Result := TQuad.Create(OutTPA[0], OutTPA[1], OutTPA[2], OutTPA[3]);
 end;
 
-function TQuad.NearestEdge(P: TPoint): TPoint;
+function TQuadHelper.NearestEdge(P: TPoint): TPoint;
 var
   Dists: array[0..3] of Double;
   Points: array[0..3] of TPoint;
@@ -247,12 +249,12 @@ begin
     end;
 end;
 
-function TQuad.Area: Integer;
+function TQuadHelper.Area: Integer;
 begin
   Result := Round(Distance(Self.Bottom, Self.Right)) * Round(Distance(Self.Bottom, Self.Left));
 end;
 
-function TQuad.Normalize: TQuad;
+function TQuadHelper.Normalize: TQuad;
 var
   I, T: Integer;
   Points: TPointArray;
@@ -268,6 +270,11 @@ begin
   Result.Bottom := Points[(T + 2) mod 4];
   Result.Left   := Points[(T + 3) mod 4];
 end;
-{$ENDIF}
 
+operator in(const P: TPoint; const Quad: TQuad): Boolean;
+begin
+  Result := Quad.Contains(P);
+end;
+
+end.
 

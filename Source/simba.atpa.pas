@@ -5,16 +5,13 @@
 }
 unit simba.atpa;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, Math,
   simba.mufasatypes;
 
 type
@@ -66,8 +63,7 @@ type
 implementation
 
 uses
-  math,
-  simba.tpa, simba.algo_sort, simba.overallocatearray, simba.integermatrix;
+  simba.tpa, simba.algo_sort, simba.overallocatearray, simba.integermatrix, simba.quad;
 
 function T2DPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): T2DPointArray;
 var
