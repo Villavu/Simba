@@ -339,7 +339,6 @@ type
   {$DEFINE HEADER}
     {$i generics.inc}
     {$i box.inc}
-    {$i boxarray.inc}
     {$i point.inc}
     {$i string.inc}
 
@@ -431,7 +430,6 @@ uses
 {$DEFINE BODY}
   {$i generics.inc}
   {$i box.inc}
-  {$i boxarray.inc}
   {$i point.inc}
   {$i string.inc}
 

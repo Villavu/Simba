@@ -3,7 +3,6 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-
 unit simba.algo_sort;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
