@@ -78,7 +78,7 @@ implementation
 {$R *.lfm}
 
 uses
-  SynEditMiscClasses,
+  SynEditTypes, SynEditMiscClasses,
   simba.settings, simba.editor_attributes, simba.env, simba.mufasatypes,
   simba.httpclient;
 
@@ -375,6 +375,8 @@ var
 begin
   inherited Create(AOwner);
 
+  Panel3.Height := Scale96ToScreen(250);
+
   BackgroundColorBox.Items.AddObject('Transparent', TObject(PtrUInt(clNone)));
   ForegoundColorBox.Items.AddObject('Transparent', TObject(PtrUInt(clNone)));
   FrameColorBox.Items.AddObject('Transparent', TObject(PtrUInt(clNone)));
@@ -389,13 +391,12 @@ begin
   begin
     Parent := Panel3;
     Align := alClient;
+    Options := Options - [eoScrollPastEof];
     ReadOnly := True;
     Text := 'program Highlight;                                      ' + LineEnding +
-            '{  brace }                                              ' + LineEnding +
-            '(* round *)                                             ' + LineEnding +
-            '// slash                                                ' + LineEnding +
+            '{  comment }                                            ' + LineEnding +
             '                                                        ' + LineEnding +
-            '{$I SRL/osr.simba}                                      ' + LineEnding +
+            '{$I directive.simba}                                    ' + LineEnding +
             '                                                        ' + LineEnding +
             'procedure Test(var i: Integer);                         ' + LineEnding +
             'var                                                     ' + LineEnding +
@@ -411,7 +412,6 @@ begin
             '                                                        ' + LineEnding +
             'function TPoint.Test: Boolean; overload;                ' + LineEnding +
             'begin                                                   ' + LineEnding +
-            '  Result := True;                                       ' + LineEnding +
             'end;                                                    ';
 
     UseSimbaColors := True;

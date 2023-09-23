@@ -31,13 +31,13 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideBottom.Control = Panel1
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 627
-      Top = 267
+      Height = 672
+      Top = 222
       Width = 1362
       Anchors = [akTop, akLeft, akRight, akBottom]
       AutoSize = True
       Caption = 'Customize'
-      ClientHeight = 602
+      ClientHeight = 647
       ClientWidth = 1358
       TabOrder = 0
       object TreeView: TTreeView
@@ -45,9 +45,9 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideTop.Control = GroupBox3
         AnchorSideBottom.Control = ButtonResetAttribute
         Left = 5
-        Height = 557
+        Height = 602
         Top = 5
-        Width = 205
+        Width = 250
         Align = alCustom
         Anchors = [akTop, akLeft, akRight, akBottom]
         AutoExpand = True
@@ -72,18 +72,19 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = GroupBox3
         AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Control = TreeView
+        AnchorSideBottom.Control = GroupBox3
         AnchorSideBottom.Side = asrBottom
-        Left = 215
-        Height = 407
-        Top = 155
-        Width = 1133
+        Left = 260
+        Height = 492
+        Top = 150
+        Width = 1088
         Anchors = [akTop, akLeft, akRight, akBottom]
         BorderSpacing.Left = 5
         BorderSpacing.Right = 10
+        BorderSpacing.Bottom = 5
         BevelOuter = bvNone
-        ClientHeight = 407
-        ClientWidth = 1133
+        ClientHeight = 492
+        ClientWidth = 1088
         TabOrder = 1
         OnResize = Panel2Resize
         object ForegoundColorBox: TColorListBox
@@ -94,7 +95,7 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideBottom.Control = Panel2
           AnchorSideBottom.Side = asrBottom
           Left = 5
-          Height = 385
+          Height = 470
           Top = 22
           Width = 202
           ColorRectWidth = 31
@@ -136,9 +137,9 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideBottom.Control = Panel2
           AnchorSideBottom.Side = asrBottom
           Left = 217
-          Height = 385
+          Height = 470
           Top = 22
-          Width = 177
+          Width = 178
           ColorRectWidth = 31
           Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
           Anchors = [akTop, akLeft, akBottom]
@@ -156,8 +157,8 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideRight.Side = asrBottom
           AnchorSideBottom.Control = Panel2
           AnchorSideBottom.Side = asrBottom
-          Left = 404
-          Height = 385
+          Left = 405
+          Height = 470
           Top = 22
           Width = 200
           ColorRectWidth = 31
@@ -172,7 +173,7 @@ object EditorColorsFrame: TEditorColorsFrame
         object LabelFrame: TLabel
           AnchorSideLeft.Control = FrameColorBox
           AnchorSideTop.Control = Panel2
-          Left = 404
+          Left = 405
           Height = 20
           Top = 0
           Width = 41
@@ -189,8 +190,8 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideBottom.Side = asrBottom
         Left = 5
         Height = 30
-        Top = 567
-        Width = 205
+        Top = 612
+        Width = 250
         Align = alCustom
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
@@ -206,19 +207,18 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = GroupBox3
         AnchorSideRight.Side = asrBottom
-        Left = 220
+        Left = 265
         Height = 20
-        Top = 135
-        Width = 1138
+        Top = 130
+        Width = 1093
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 10
-        BorderSpacing.Top = 5
         Style = gsHorLines
       end
       object Label1: TLabel
         AnchorSideLeft.Control = Panel2
         AnchorSideTop.Control = TreeView
-        Left = 220
+        Left = 265
         Height = 20
         Top = 5
         Width = 71
@@ -230,7 +230,7 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideLeft.Control = Panel2
         AnchorSideTop.Control = Label1
         AnchorSideTop.Side = asrBottom
-        Left = 220
+        Left = 265
         Height = 100
         Top = 30
         Width = 160
@@ -252,7 +252,7 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideLeft.Control = CheckListBox1
         AnchorSideLeft.Side = asrBottom
         AnchorSideTop.Control = TreeView
-        Left = 390
+        Left = 435
         Height = 20
         Top = 5
         Width = 39
@@ -265,7 +265,7 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideTop.Control = CheckListBox1
         AnchorSideBottom.Control = CheckListBox1
         AnchorSideBottom.Side = asrBottom
-        Left = 390
+        Left = 435
         Height = 100
         Top = 30
         Width = 195
@@ -282,7 +282,7 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideBottom.Side = asrBottom
           Left = 0
           Height = 28
-          Top = 31
+          Top = 30
           Width = 77
           Anchors = [akTop, akLeft, akBottom]
           Caption = 'Foreground'
@@ -310,10 +310,10 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideTop.Side = asrBottom
           Left = 84
           Height = 28
-          Top = 31
+          Top = 30
           Width = 106
           BorderSpacing.Left = 5
-          BorderSpacing.Top = 3
+          BorderSpacing.Top = 2
           BorderSpacing.Right = 5
           MaxValue = 255
           OnChange = ForegroundAlphaEditChange
@@ -414,7 +414,7 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
       Left = 355
-      Height = 265
+      Height = 220
       Top = 0
       Width = 1002
       Anchors = [akTop, akRight]
