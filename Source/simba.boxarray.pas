@@ -1,6 +1,18 @@
-{%MAINUNIT simba.mufasatypes}
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
+unit simba.boxarray;
 
-{$IFDEF HEADER}
+{$i simba.inc}
+
+interface
+
+uses
+  Classes, SysUtils,
+  simba.mufasatypes;
+
 type
   TBoxArrayHelper = type helper for TBoxArray
   public
@@ -28,9 +40,13 @@ type
     function Expand(SizeMod: Integer): TBoxArray; overload;
     function Expand(WidMod, HeiMod: Integer): TBoxArray; overload;
   end;
-{$ENDIF}
 
-{$IFDEF BODY}
+implementation
+
+uses
+  Math,
+  simba.math, simba.algo_sort;
+
 class function TBoxArrayHelper.Create(Start: TPoint; Columns, Rows, Width, Height: Int32; Spacing: TPoint): TBoxArray;
 var
   I: Int32;
@@ -306,6 +322,6 @@ function TBoxArrayHelper.Sort(Weights: TDoubleArray; LowToHigh: Boolean): TBoxAr
 begin
   Result := specialize Sorted<TBox, Double>(Self, Weights, LowToHigh);
 end;
-{$ENDIF}
 
+end.
 
