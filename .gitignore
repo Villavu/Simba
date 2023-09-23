@@ -34,3 +34,4 @@ backup/
 /DocGen/build/objects.inv
 /DocGen/build/_images
 /DocGen/build/plugins
+/DocGen/build/simba
