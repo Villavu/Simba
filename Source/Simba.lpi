@@ -340,7 +340,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="147">
+    <Units Count="148">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1010,6 +1010,10 @@
         <Filename Value="simba.quad.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit146>
+      <Unit147>
+        <Filename Value="simba.boxarray.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit147>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

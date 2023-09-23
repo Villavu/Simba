@@ -173,6 +173,7 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure FormShortCut(var Msg: TLMKey; var Handled: Boolean);
+    procedure FormWindowStateChange(Sender: TObject);
     procedure ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
     procedure MainMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
     procedure MenuClearOutputClick(Sender: TObject);
@@ -715,6 +716,14 @@ begin
              (KeyDataToShiftState(Msg.KeyData) = [ssAlt]); // Suppress windows freaking out
 end;
 
+procedure TSimbaForm.FormWindowStateChange(Sender: TObject);
+begin
+  case WindowState of
+    wsMinimized: DockMaster.Minimized();
+    wsNormal:    DockMaster.Restored();
+  end;
+end;
+
 procedure TSimbaForm.ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
 begin
   AResultWidth := ImageWidthForDPI(APPI);
@@ -745,6 +754,8 @@ type
     if (Sender = MenuItemRun)     or (Sender = ToolbarButtonRun)     then Exit(Run);
     if (Sender = MenuItemPause)   or (Sender = ToolbarButtonPause)   then Exit(Pause);
     if (Sender = MenuItemStop)    or (Sender = ToolbarButtonStop)    then Exit(Stop);
+
+    Result := Unknown;
 
     DebugLn('[TSimbaForm.MenuItemScriptStateClick]: Unknown component "' + Sender.ClassName + '"');
   end;

@@ -33,6 +33,7 @@ type
   protected
     FMenuItem: TMenuItem;
     FNeedDefaultPosition: Boolean;
+    FNeedRestore: Boolean;
 
     procedure DoMenuItemDestroyed(Sender: TObject);
     procedure DoMenuItemClicked(Sender: TObject);
@@ -62,6 +63,9 @@ type
     procedure OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
   public
     procedure MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
+
+    procedure Minimized;
+    procedure Restored;
 
     function SaveLayout: String;
     function LoadLayout(Layout: String): Boolean;
@@ -162,7 +166,6 @@ begin
 
   if Visible then
   begin
-    Writeln(FNeedDefaultPosition);
     if FNeedDefaultPosition then
     begin
       with Application.MainForm.Monitor.WorkareaRect.CenterPoint do
@@ -241,6 +244,39 @@ begin
     TSimbaAnchorDockHostSite(Form.HostDockSite).MenuItem := MenuItem;
   end;
 end;
+
+procedure TAnchorDockMasterHelper.Minimized;
+var
+  I: Integer;
+  Site: TSimbaAnchorDockHostSite;
+begin
+  for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
+    if Screen.CustomForms[I].Showing and (Site is TSimbaAnchorDockHostSite) and Site.Floating and Site.FMenuItem.Checked then
+    begin
+      Site.FNeedRestore := True;
+      Site.CloseSite();
+    end;
+  end;
+end;
+
+procedure TAnchorDockMasterHelper.Restored;
+var
+  I: Integer;
+  Site: TSimbaAnchorDockHostSite;
+begin
+  for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
+    if (Site is TSimbaAnchorDockHostSite) and Site.FNeedRestore then
+    begin
+      MakeVisible(Screen.CustomForms[I], False);
+      Site.FNeedRestore := False;
+    end;
+  end;
+end;
+
 
 function TAnchorDockMasterHelper.SaveLayout: String;
 var

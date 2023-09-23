@@ -327,6 +327,9 @@ begin
   Editor.LineHighlightColor.Background := $FFFFFF;
   Editor.LineHighlightColor.BackAlpha := 15;
 
+  Editor.MouseLinkColor.Foreground := clNone;
+  Editor.MouseLinkColor.Style := [fsUnderline];
+
   for I := 0 to Editor.Highlighter.AttrCount - 1 do
     Add('Highlighter.' + Editor.Highlighter.Attribute[I].StoredName, Editor.Highlighter.Attribute[I]);
 
