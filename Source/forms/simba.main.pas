@@ -67,6 +67,17 @@ type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
+    MenuItemSelectLine: TMenuItem;
+    MenuItemSelectWord: TMenuItem;
+    MenuItemFind: TMenuItem;
+    MenuItemFindNext: TMenuItem;
+    MenuItemFindPrev: TMenuItem;
+    MenuItemFindInFiles: TMenuItem;
+    MenuItemReplace: TMenuItem;
+    MenuItemGoto: TMenuItem;
+    MenuItemLowercase: TMenuItem;
+    MenuItemUppercase: TMenuItem;
+    MainMenuSearch: TPopupMenu;
     RecentFilesPopup: TPopupMenu;
     MainMenuTools: TPopupMenu;
     MainMenuView: TPopupMenu;
@@ -79,7 +90,6 @@ type
     MenuFile: TMenuItem;
     MenuHelp: TMenuItem;
     MenuItem1: TMenuItem;
-    MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
     MenuItem6: TMenuItem;
@@ -99,7 +109,6 @@ type
     MenuItemDebugImage: TMenuItem;
     MenuItemDivider10: TMenuItem;
     MenuItemDivider11: TMenuItem;
-    MenuItemDivider14: TMenuItem;
     MenuItemDivider2: TMenuItem;
     MenuItemDivider3: TMenuItem;
     MenuItemDivider4: TMenuItem;
@@ -109,12 +118,8 @@ type
     MenuItemEditor: TMenuItem;
     MenuItemExample: TMenuItem;
     MenuItemFileBrowser: TMenuItem;
-    MenuItemFind: TMenuItem;
-    MenuItemFindNext: TMenuItem;
-    MenuItemFindPrev: TMenuItem;
     MenuItemFormatScript: TMenuItem;
     MenuItemFunctionList: TMenuItem;
-    MenuItemGoto: TMenuItem;
     MenuItemLockLayout: TMenuItem;
     MenuItemMainExit: TMenuItem;
     MenuItemNew: TMenuItem;
@@ -126,7 +131,6 @@ type
     MenuItemPaste: TMenuItem;
     MenuItemPause: TMenuItem;
     MenuItemRedo: TMenuItem;
-    MenuItemReplace: TMenuItem;
     MenuItemReportBug: TMenuItem;
     MenuItemResetLayout: TMenuItem;
     MenuItemRun: TMenuItem;
@@ -146,6 +150,9 @@ type
     MainMenuEdit: TPopupMenu;
     MainMenuScript: TPopupMenu;
     MainMenuPanel: TPanel;
+    MainMenuSearchSep1: TMenuItem;
+    MainMenuSearchSep2: TMenuItem;
+    MainMenuSearchSep3: TMenuItem;
     ToolbarButtonStop: TToolButton;
     PackageUpdateTimer: TTimer;
     ToolBar: TToolBar;
@@ -186,7 +193,10 @@ type
     procedure MenuFileClick(Sender: TObject);
     procedure MenuFindClick(Sender: TObject);
     procedure MenuGotoClick(Sender: TObject);
+    procedure MenuItemSelectLineClick(Sender: TObject);
+    procedure MenuItemSelectWordClick(Sender: TObject);
     procedure MenuItemBackupsClick(Sender: TObject);
+    procedure MenuItemLowercaseClick(Sender: TObject);
     procedure MenuItemShapeBoxClick(Sender: TObject);
     procedure MenuItemAboutClick(Sender: TObject);
     procedure MenuItemACAClick(Sender: TObject);
@@ -205,6 +215,7 @@ type
     procedure MenuItemScriptStateClick(Sender: TObject);
     procedure MenuItemSettingsClick(Sender: TObject);
     procedure MenuItemTrayIconClick(Sender: TObject);
+    procedure MenuItemUppercaseClick(Sender: TObject);
     procedure MenuNewClick(Sender: TObject);
     procedure MenuNewTemplateClick(Sender: TObject);
     procedure MenuOpenClick(Sender: TObject);
@@ -663,6 +674,7 @@ begin
   FMenuBar.Align := alTop;
   FMenuBar.AddMenu('File', MainMenuFile);
   FMenuBar.AddMenu('Edit', MainMenuEdit);
+  FMenuBar.AddMenu('Search', MainMenuSearch);
   FMenuBar.AddMenu('Script', MainMenuScript);
   FMenuBar.AddMenu('Tools', MainMenuTools);
   FMenuBar.AddMenu('View', MainMenuView);
@@ -710,10 +722,10 @@ end;
 
 procedure TSimbaForm.FormShortCut(var Msg: TLMKey; var Handled: Boolean);
 begin
-  Handled := MainMenuFile.IsShortcut(Msg)  or MainMenuView.IsShortcut(Msg)   or
-             MainMenuEdit.IsShortcut(Msg)  or MainMenuScript.IsShortcut(Msg) or
-             MainMenuTools.IsShortcut(Msg) or MainMenuHelp.IsShortcut(Msg)   or
-             (KeyDataToShiftState(Msg.KeyData) = [ssAlt]); // Suppress windows freaking out
+  Handled := MainMenuFile.IsShortcut(Msg)   or MainMenuView.IsShortcut(Msg)   or
+             MainMenuEdit.IsShortcut(Msg)   or MainMenuScript.IsShortcut(Msg) or
+             MainMenuTools.IsShortcut(Msg)  or MainMenuHelp.IsShortcut(Msg)   or
+             MainMenuSearch.IsShortcut(Msg) or (KeyDataToShiftState(Msg.KeyData) = [ssAlt]); // Suppress windows freaking out
 end;
 
 procedure TSimbaForm.FormWindowStateChange(Sender: TObject);
@@ -880,6 +892,25 @@ begin
   end;
 end;
 
+procedure TSimbaForm.MenuItemSelectLineClick(Sender: TObject);
+begin
+  if Assigned(SimbaScriptTabsForm.CurrentEditor) then
+    SimbaScriptTabsForm.CurrentEditor.SelectLine();
+end;
+
+procedure TSimbaForm.MenuItemSelectWordClick(Sender: TObject);
+begin
+  if Assigned(SimbaScriptTabsForm.CurrentEditor) then
+    SimbaScriptTabsForm.CurrentEditor.SelectWord();
+end;
+
+procedure TSimbaForm.MenuItemLowercaseClick(Sender: TObject);
+begin
+  if Assigned(SimbaScriptTabsForm.CurrentEditor) then
+    if SimbaScriptTabsForm.CurrentEditor.SelAvail then
+      SimbaScriptTabsForm.CurrentEditor.SelText := LowerCase(SimbaScriptTabsForm.CurrentEditor.SelText);
+end;
+
 procedure TSimbaForm.MenuItemBackupsClick(Sender: TObject);
 begin
   SimbaBackupsForm.ShowModal();
@@ -1018,6 +1049,13 @@ end;
 procedure TSimbaForm.MenuItemTrayIconClick(Sender: TObject);
 begin
   SimbaSettings.General.TrayIconVisible.Value := TMenuItem(Sender).Checked;
+end;
+
+procedure TSimbaForm.MenuItemUppercaseClick(Sender: TObject);
+begin
+  if Assigned(SimbaScriptTabsForm.CurrentEditor) then
+    if SimbaScriptTabsForm.CurrentEditor.SelAvail then
+      SimbaScriptTabsForm.CurrentEditor.SelText := UpperCase(SimbaScriptTabsForm.CurrentEditor.SelText);
 end;
 
 procedure TSimbaForm.ToolbarButtonPackagesClick(Sender: TObject);
