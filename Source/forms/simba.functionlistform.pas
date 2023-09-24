@@ -130,42 +130,44 @@ begin
 end;
 
 function GetURL(const Section: String): String;
+const
+  ROOT = 'https://villavu.github.io/Simba/api/';
 begin
   Result := '';
 
   case Section of
-    'TPoint':         Result := 'https://villavu.github.io/Simba/TPoint.html';
-    'TPointArray':    Result := 'https://villavu.github.io/Simba/TPointArray.html';
-    'TBox':           Result := 'https://villavu.github.io/Simba/TBox.html';
-    'TBoxArray':      Result := 'https://villavu.github.io/Simba/TBoxArray.html';
-    'TQuad':          Result := 'https://villavu.github.io/Simba/TQuad.html';
-    'Random':         Result := 'https://villavu.github.io/Simba/Random.html';
-    'T2DPointArray':  Result := 'https://villavu.github.io/Simba/T2DPointArray.html';
-    'Debug Image':    Result := 'https://villavu.github.io/Simba/Debug Image.html';
-    'Script':         Result := 'https://villavu.github.io/Simba/Script.html';
-    'Variant':        Result := 'https://villavu.github.io/Simba/Variant.html';
-    'TWindowHandle':  Result := 'https://villavu.github.io/Simba/TWindowHandle.html';
-    'Image':          Result := 'https://villavu.github.io/Simba/Image.html';
-    'Finder':         Result := 'https://villavu.github.io/Simba/Finder.html';
-    'Input':          Result := 'https://villavu.github.io/Simba/Input.html';
-    'Target':         Result := 'https://villavu.github.io/Simba/Target.html';
-    'Web':            Result := 'https://villavu.github.io/Simba/Web.html';
-    'Encoding':       Result := 'https://villavu.github.io/Simba/Encoding.html';
-    'JSON':           Result := 'https://villavu.github.io/Simba/JSON.html';
-    'Color Math':     Result := 'https://villavu.github.io/Simba/Color Math.html';
-    'File':           Result := 'https://villavu.github.io/Simba/File.html';
-    'Timing':         Result := 'https://villavu.github.io/Simba/Timing.html';
-    'String':         Result := 'https://villavu.github.io/Simba/String.html';
-    'Process':        Result := 'https://villavu.github.io/Simba/Process.html';
-    'Match Template': Result := 'https://villavu.github.io/Simba/Match Template.html';
-    'Math':           Result := 'https://villavu.github.io/Simba/Math.html';
-    'Matrix':         Result := 'https://villavu.github.io/Simba/Matrix.html';
-    'Misc':           Result := 'https://villavu.github.io/Simba/Misc.html';
-    'Dialogs':        Result := 'https://villavu.github.io/Simba/Dialogs.html';
-    'DTM':            Result := 'https://villavu.github.io/Simba/DTM.html';
-    'System':         Result := 'https://villavu.github.io/Simba/System.html';
-    'TCircle':        Result := 'https://villavu.github.io/Simba/TCircle.html';
-    'DateTime':       Result := 'https://villavu.github.io/Simba/DateTime.html';
+    'TPoint':         Result := ROOT + 'TPoint.html';
+    'TPointArray':    Result := ROOT + 'TPointArray.html';
+    'TBox':           Result := ROOT + 'TBox.html';
+    'TBoxArray':      Result := ROOT + 'TBoxArray.html';
+    'TQuad':          Result := ROOT + 'TQuad.html';
+    'Random':         Result := ROOT + 'Random.html';
+    'T2DPointArray':  Result := ROOT + 'T2DPointArray.html';
+    'Debug Image':    Result := ROOT + 'Debug Image.html';
+    'Script':         Result := ROOT + 'Script.html';
+    'Variant':        Result := ROOT + 'Variant.html';
+    'TWindowHandle':  Result := ROOT + 'TWindowHandle.html';
+    'Image':          Result := ROOT + 'Image.html';
+    'Finder':         Result := ROOT + 'Finder.html';
+    'Input':          Result := ROOT + 'Input.html';
+    'Target':         Result := ROOT + 'Target.html';
+    'Web':            Result := ROOT + 'Web.html';
+    'Encoding':       Result := ROOT + 'Encoding.html';
+    'JSON':           Result := ROOT + 'JSON.html';
+    'Color Math':     Result := ROOT + 'Color Math.html';
+    'File':           Result := ROOT + 'File.html';
+    'Timing':         Result := ROOT + 'Timing.html';
+    'String':         Result := ROOT + 'String.html';
+    'Process':        Result := ROOT + 'Process.html';
+    'Match Template': Result := ROOT + 'Match Template.html';
+    'Math':           Result := ROOT + 'Math.html';
+    'Matrix':         Result := ROOT + 'Matrix.html';
+    'Misc':           Result := ROOT + 'Misc.html';
+    'Dialogs':        Result := ROOT + 'Dialogs.html';
+    'DTM':            Result := ROOT + 'DTM.html';
+    'System':         Result := ROOT + 'System.html';
+    'TCircle':        Result := ROOT + 'TCircle.html';
+    'DateTime':       Result := ROOT + 'DateTime.html';
   end;
 end;
 
