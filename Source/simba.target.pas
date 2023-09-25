@@ -357,6 +357,8 @@ begin
 
   FMethods.GetDimensions := @EIOSTarget_GetDimensions;
   FMethods.GetImageData := @EIOSTarget_GetImageData;
+
+  FMethods.IsValid := @EIOSTarget_IsValid;
 end;
 
 procedure TSimbaTarget.SetPlugin(FileName, Args: String);
@@ -364,6 +366,7 @@ begin
   ChangeTarget(ETargetType.PLUGIN);
 
   FTargetPlugin := LoadPluginTarget(FileName, Args);
+  FTarget := @FTargetPlugin;
 
   FMethods.KeyDown := @PluginTarget_KeyDown;
   FMethods.KeyUp := @PluginTarget_KeyUp;
@@ -379,6 +382,8 @@ begin
 
   FMethods.GetDimensions := @PluginTarget_GetDimensions;
   FMethods.GetImageData := @PluginTarget_GetImageData;
+
+  FMethods.IsValid := @PluginTarget_IsValid;
 end;
 
 procedure TSimbaTarget.SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalImage);

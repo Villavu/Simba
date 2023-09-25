@@ -53,10 +53,18 @@ procedure PluginTarget_KeyUp(Target: Pointer; Key: EKeyCode);
 procedure PluginTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
 function PluginTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 
+function PluginTarget_IsValid(Target: Pointer): Boolean;
+
 implementation
 
 uses
   simba.env, simba.files, simba.script_pluginloader;
+
+procedure CheckExported(const MethodName: String; const Method: Pointer); inline;
+begin
+  if (Method = nil) then
+    SimbaException('SimbaPluginTarget: "' + MethodName + '" is not exported');
+end;
 
 function Load(AFileName: String): TSimbaPluginTarget;
 begin
@@ -97,85 +105,148 @@ end;
 function LoadPluginTarget(FileName, Args: String): TSimbaPluginTarget;
 begin
   Result := Load(FileName);
-  Result.Target := Result.Request(PChar(Args));
+  with Result do
+  begin
+    CheckExported('SimbaPluginTarget_Request', Request);
+
+    Result.Target := Result.Request(PChar(Args));
+  end;
 end;
 
 function LoadPluginTarget(FileName, Args: String; out DebugImage: TSimbaExternalImage): TSimbaPluginTarget;
 begin
   Result := Load(FileName);
-  Result.Target := Result.RequestWithDebugImage(PChar(Args), DebugImage);
+  with Result do
+  begin
+    CheckExported('SimbaPluginTarget_RequestWithDebugImage', RequestWithDebugImage);
+
+    Target := Result.RequestWithDebugImage(PChar(Args), DebugImage);
+  end;
 end;
 
 procedure PluginTarget_GetDimensions(Target: Pointer; out W, H: Integer);
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_GetDimensions', GetDimensions);
+
     GetDimensions(Target, W, H);
+  end;
 end;
 
 function PluginTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_GetImageData', GetImageData);
+
     Result := GetImageData(Target, X, Y, Width, Height, Data, DataWidth);
+  end;
 end;
 
 function PluginTarget_MousePressed(Target: Pointer; Button: EMouseButton): Boolean;
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_MousePressed', MousePressed);
+
     Result := MousePressed(Target, Integer(Button));
+  end;
 end;
 
 function PluginTarget_MousePosition(Target: Pointer): TPoint;
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_MousePosition', MousePosition);
+
     Result := MousePosition(Target);
+  end;
 end;
 
 procedure PluginTarget_MouseTeleport(Target: Pointer; P: TPoint);
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_MouseTeleport', MouseTeleport);
+
     MouseTeleport(Target, P);
+  end;
 end;
 
 procedure PluginTarget_MouseUp(Target: Pointer; Button: EMouseButton);
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_MouseUp', MouseUp);
+
     MouseUp(Target, Integer(Button));
+  end;
 end;
 
 procedure PluginTarget_MouseDown(Target: Pointer; Button: EMouseButton);
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_MouseDown', MouseDown);
+
     MouseDown(Target, Integer(Button));
+  end;
 end;
 
 procedure PluginTarget_MouseScroll(Target: Pointer; Scrolls: Integer);
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_MouseScroll', MouseScroll);
+
     MouseScroll(Target, Scrolls);
+  end;
 end;
 
 procedure PluginTarget_KeyDown(Target: Pointer; Key: EKeyCode);
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_KeyDown', KeyDown);
+
     KeyDown(Target, Integer(Key));
+  end;
 end;
 
 procedure PluginTarget_KeyUp(Target: Pointer; Key: EKeyCode);
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_KeyUp', KeyUp);
+
     KeyUp(Target, Integer(Key));
+  end;
 end;
 
 procedure PluginTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_KeySend', KeySend);
+
     KeySend(Target, Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
+  end;
 end;
 
 function PluginTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 begin
   with PSimbaPluginTarget(Target)^ do
+  begin
+    CheckExported('SimbaPluginTarget_KeyPressed', KeyPressed);
+
     Result := KeyPressed(Target, Integer(Key));
+  end;
+end;
+
+function PluginTarget_IsValid(Target: Pointer): Boolean;
+begin
+  Result := True;
 end;
 
 end.

@@ -95,6 +95,8 @@ procedure EIOSTarget_MouseDown(Target: Pointer; Button: EMouseButton);
 procedure EIOSTarget_MouseUp(Target: Pointer; Button: EMouseButton);
 procedure EIOSTarget_MouseScroll(Target: Pointer; Scrolls: Integer);
 
+function EIOSTarget_IsValid(Target: Pointer): Boolean;
+
 implementation
 
 uses
@@ -251,6 +253,11 @@ begin
     if Assigned(ScrollMouse) then
       ScrollMouse(Target, X, Y, Scrolls);
   end;
+end;
+
+function EIOSTarget_IsValid(Target: Pointer): Boolean;
+begin
+  Result := True;
 end;
 
 procedure EIOSTarget_KeyDown(Target: Pointer; Key: EKeyCode);
