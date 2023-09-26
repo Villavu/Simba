@@ -68,7 +68,8 @@ type
 implementation
 
 uses
-  simba.env, simba.datetime, simba.httpclient, simba.target;
+  simba.env, simba.datetime, simba.httpclient, simba.target,
+  simba.script_pluginloader;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
@@ -107,12 +108,7 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
     if InIgnore or InPeek then
       Exit;
 
-    if not FindPlugin(Argument, [FCompiler.CurrentDir()]) then
-      raise Exception.Create('Plugin "' + Argument + '" not found');
-
-    CopyPlugin(Argument);
-
-    Plugin := TSimbaScriptPlugin.Create(Argument);
+    Plugin := TSimbaScriptPlugin.Create(Argument, [FCompiler.CurrentDir()]);
     Plugin.Import(FCompiler);
 
     FPlugins := FPlugins + [Plugin];
@@ -170,36 +166,38 @@ end;
 function TSimbaScript.DoFindMacro(Sender: TLapeCompiler; Name: lpString; var Value: lpString): Boolean;
 
   // {$MACRO ENV(HOME)}
-  function DoEnvVar: Boolean;
-  var
-    EnvVar: String;
+  function DoEnvVar(Param: String): Boolean;
   begin
-    EnvVar := Name.ToUpper().Between('ENV(', ')');
-
-    Result := EnvVar <> '';
+    Result := Param <> '';
     if Result then
-      Value := '"' + GetEnvironmentVariable(EnvVar) + '"';
+      Value := '"' + GetEnvironmentVariable(Param) + '"';
   end;
 
   // {$MACRO LIBPATH(plugin.dll)}
-  function DoLibPath: Boolean;
+  function DoLibPath(Param: String): Boolean;
   var
-    Lib: String;
+    I: Integer;
   begin
-    Lib :=  Name.ToUpper().Between('LIBPATH(', ')');
+    Result := FindPlugin(Param, [FCompiler.CurrentDir()]);
 
-    Result := Lib <> '';
     if Result then
     begin
-      if not FindPlugin(Lib, [FCompiler.CurrentDir()]) then
-        Lib := '';
+      for I := 0 to High(LoadedPlugins) do
+        if (LoadedPlugins[I].OrginalFileName = Param) then
+          Param := LoadedPlugins[I].FileName;
 
-      Value := '"' + Lib + '"';
+      Value := '"' + Param + '"';
     end;
   end;
 
 begin
-  Result := DoEnvVar() or DoLibPath();
+  Result := False;
+  Value := '';
+
+  case Name.Before('(').ToUpper() of
+    'LIBPATH': Result := DoLibPath(Name.Between('(', ')'));
+    'ENV':     Result := DoEnvVar(Name.Between('(', ')'));
+  end;
 end;
 
 function TSimbaScript.GetState: ESimbaScriptState;
