@@ -14,8 +14,6 @@ uses
   simba.mufasatypes;
 
   function FindInclude(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
-  function FindPlugin(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
-  procedure CopyPlugin(var FileName: String);
 
 type
   SimbaEnv = class
@@ -79,34 +77,6 @@ end;
 function FindInclude(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
 begin
   Result := FindFile(FileName, '', ExtraSearchDirs + [SimbaEnv.IncludesPath, SimbaEnv.SimbaPath]);
-end;
-
-function FindPlugin(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
-const
-  {$IF DEFINED(CPUAARCH64)}
-  // lib.aarch64
-  SimbaSuffix = SharedSuffix + '.aarch64';
-  {$ELSE}
-  // lib32.dll
-  // lib64.dll
-  SimbaSuffix = {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix;
-  {$ENDIF}
-begin
-  ExtraSearchDirs := ExtraSearchDirs + [SimbaEnv.PluginsPath, SimbaEnv.SimbaPath];
-
-  Result := FindFile(FileName, '',                 ExtraSearchDirs) or
-            FindFile(FileName, '.' + SharedSuffix, ExtraSearchDirs) or
-            FindFile(FileName, SimbaSuffix,        ExtraSearchDirs);
-end;
-
-// Make a copy of the plugin to data/plugins/ so we can delete/update if it's loaded
-procedure CopyPlugin(var FileName: String);
-var
-  NewFileName: String;
-begin
-  NewFileName := SimbaEnv.TempPath + TSimbaFile.FileHash(FileName) + TSimbaPath.PathExtractExt(FileName);
-  if TSimbaFile.FileExists(NewFileName) or TSimbaFile.FileCopy(FileName, NewFileName) then
-    FileName := NewFileName;
 end;
 
 class function SimbaEnv.WriteTempFile(const Contents, Prefix: String): String;

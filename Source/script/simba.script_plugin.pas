@@ -74,7 +74,7 @@ type
     procedure Import(Compiler: TSimbaScript_Compiler);
     procedure Load;
 
-    constructor Create(FileName: String);
+    constructor Create(FileName: String; ExtraSearchDirs: TStringArray = nil);
     destructor Destroy; override;
   end;
 
@@ -89,7 +89,8 @@ type
 implementation
 
 uses
-  ffi;
+  ffi,
+  simba.script_pluginloader;
 
 procedure TSimbaScriptPlugin.Load;
 
@@ -250,23 +251,12 @@ begin
     FExports.RegisterSimbaPlugin(@FInfo, @SimbaPluginMethods);
 end;
 
-constructor TSimbaScriptPlugin.Create(FileName: String);
+constructor TSimbaScriptPlugin.Create(FileName: String; ExtraSearchDirs: TStringArray);
 begin
   inherited Create();
 
   FFileName := FileName;
-  if (not FileExists(FFileName)) then
-    raise Exception.CreateFmt('Loading plugin: File "%s" does not exist', [FFileName]);
-
-  FHandle := LoadLibrary(FFileName);
-
-  if (FHandle = 0) then
-  begin
-    DebugLn('Plugin filename: ' + FFileName);
-    DebugLn('Plugin load error: ' + GetLoadErrorStr());
-
-    raise Exception.Create('Loading plugin failed. Architecture mismatch? (expected a ' + {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + ' bit plugin)');
-  end;
+  FHandle := LoadPlugin(FFileName, ExtraSearchDirs);
 
   Load();
 end;
