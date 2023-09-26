@@ -391,6 +391,24 @@ begin
   ChangeTarget(ETargetType.PLUGIN);
 
   FTargetPlugin := LoadPluginTarget(FileName, Args, DebugImage);
+  FTarget := @FTargetPlugin;
+
+  FMethods.KeyDown := @PluginTarget_KeyDown;
+  FMethods.KeyUp := @PluginTarget_KeyUp;
+  FMethods.KeySend := @PluginTarget_KeySend;
+  FMethods.KeyPressed := @PluginTarget_KeyPressed;
+
+  FMethods.MouseTeleport := @PluginTarget_MouseTeleport;
+  FMethods.MousePosition := @PluginTarget_MousePosition;
+  FMethods.MousePressed := @PluginTarget_MousePressed;
+  FMethods.MouseDown := @PluginTarget_MouseDown;
+  FMethods.MouseUp := @PluginTarget_MouseUp;
+  FMethods.MouseScroll := @PluginTarget_MouseScroll;
+
+  FMethods.GetDimensions := @PluginTarget_GetDimensions;
+  FMethods.GetImageData := @PluginTarget_GetImageData;
+
+  FMethods.IsValid := @PluginTarget_IsValid;
 end;
 
 function TSimbaTarget.MousePressed(Button: EMouseButton): Boolean;
