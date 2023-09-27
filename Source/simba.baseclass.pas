@@ -35,6 +35,7 @@ type
   TSimbaObjectTracker = class
   protected
     FList: TList;
+    FDestroying: Boolean;
   public
     procedure Add(Obj: TSimbaBaseClass);
     procedure Remove(Obj: TSimbaBaseClass);
@@ -54,9 +55,9 @@ uses
 procedure TSimbaBaseClass.NotifyUnfreed;
 begin
   if (Name <> '') then
-    SimbaDebugLn([EDebugLn.YELLOW], '%s (%s) "%s"'.Format([ClassName, HexStr(Self), Name]))
+    SimbaDebugLn([EDebugLn.YELLOW], '  %s (%s) "%s"'.Format([ClassName, HexStr(Self), Name]))
   else
-    SimbaDebugLn([EDebugLn.YELLOW], '%s (%s)'.Format([ClassName, HexStr(Self)]));
+    SimbaDebugLn([EDebugLn.YELLOW], '  %s (%s)'.Format([ClassName, HexStr(Self)]));
 end;
 
 function TSimbaBaseClass.GetName: String;
@@ -97,7 +98,12 @@ end;
 
 procedure TSimbaObjectTracker.Remove(Obj: TSimbaBaseClass);
 begin
-  FList.Remove(Obj);
+  if FDestroying then
+  begin
+    if (FList.IndexOf(Obj) > -1) then
+      FList[FList.IndexOf(Obj)] := nil;
+  end else
+    FList.Remove(Obj);
 end;
 
 constructor TSimbaObjectTracker.Create;
@@ -109,29 +115,33 @@ end;
 
 destructor TSimbaObjectTracker.Destroy;
 var
-  I, UnfreedCount: Integer;
+  I: Integer;
+  HasUnfreed: Boolean;
 begin
+  FDestroying := True;
+
   if (FList <> nil) then
   begin
     if (FList.Count > 0) then
     begin
-      UnfreedCount := 0;
+      for I := FList.Count - 1 downto 0 do
+        if (FList[I] <> nil) and TSimbaBaseClass(FList[I]).FreeOnTerminate then
+          TSimbaBaseClass(FList[I]).Free();
+
+      HasUnfreed := False;
       for I := 0 to FList.Count - 1 do
-        if not TSimbaBaseClass(FList[I]).FreeOnTerminate then
-          Inc(UnfreedCount);
-
-      if (UnfreedCount > 0) then
-      begin
-        SimbaDebugLn([EDebugLn.YELLOW], 'The following %d objects were not freed:'.Format([UnfreedCount]));
-
-        for I := 0 to FList.Count - 1 do
-          with TSimbaBaseClass(FList[I]) do
+        if (FList[I] <> nil) then
+        begin
+          if not HasUnfreed then
           begin
-            if not FreeOnTerminate then
-              NotifyUnfreed();
-            Free();
+            SimbaDebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
+
+            HasUnfreed := True;
           end;
-      end;
+
+          TSimbaBaseClass(FList[I]).NotifyUnfreed();
+          TSimbaBaseClass(FList[I]).Free();
+        end;
     end;
 
     FreeAndNil(FList);
@@ -144,8 +154,7 @@ initialization
   SimbaObjectTracker := TSimbaObjectTracker.Create();
 
 finalization
-  if Assigned(SimbaObjectTracker) then
-    FreeAndNil(SimbaObjectTracker);
+  SimbaObjectTracker.Free();
 
 end.
 
