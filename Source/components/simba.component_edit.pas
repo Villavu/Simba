@@ -12,7 +12,7 @@ unit simba.component_edit;
 interface
 
 uses
-  Classes, SysUtils, Controls, Graphics, ExtCtrls, LMessages, LCLType;
+  Classes, SysUtils, Controls, Graphics, StdCtrls, ExtCtrls, LMessages, LCLType;
 
 type
   TSimbaEdit = class(TCustomControl)
@@ -114,11 +114,35 @@ type
     property HintTextStyle: TFontStyles read FHintTextStyle write SetHintTextStyle;
   end;
 
+  TSimbaLabeledEdit = class(TCustomControl)
+  protected
+    FLabel: TLabel;
+    FEdit: TSimbaEdit;
+
+    procedure TextChanged; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+
+    property Edit: TSimbaEdit read FEdit;
+  end;
+
 implementation
 
 uses
   Math, Clipbrd,
   simba.theme, simba.fonthelpers;
+
+type
+  TSimbaEditLabel = class(TLabel)
+  protected
+    // Use parent font size, but use SimbaTheme.FontStyle and font styles if changed
+    procedure CMParentFontChanged(var Message: TLMessage); message CM_PARENTFONTCHANGED;
+  end;
+
+procedure TSimbaEditLabel.CMParentFontChanged(var Message: TLMessage);
+begin
+
+end;
 
 procedure TSimbaEdit.SetHintText(Value: String);
 begin
@@ -675,6 +699,37 @@ end;
 procedure TSimbaEdit.Clear;
 begin
   Text := '';
+end;
+
+procedure TSimbaLabeledEdit.TextChanged;
+begin
+  inherited TextChanged();
+
+  if Assigned(FLabel) then
+    FLabel.Caption := Text;
+end;
+
+constructor TSimbaLabeledEdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  ControlStyle := ControlStyle + [csOpaque];
+  Color := SimbaTheme.ColorBackground;
+  Font.Color := SimbaTheme.ColorFont;
+  AutoSize := True;
+  ParentFont := True;
+
+  FLabel := TLabel.Create(Self);
+  FLabel.Parent := Self;
+  FLabel.Align := alLeft;
+  FLabel.AutoSize := True;
+  FLabel.Layout := tlCenter;
+  FLabel.ParentFont := True;
+
+  FEdit := TSimbaEdit.Create(Self);
+  FEdit.Parent := Self;
+  FEdit.Align := alClient;
+  FEdit.BorderSpacing.Around := 5;
 end;
 
 end.

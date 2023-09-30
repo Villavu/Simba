@@ -9,8 +9,8 @@ object EditorColorsFrame: TEditorColorsFrame
   OnResize = FrameResize
   ParentFont = False
   TabOrder = 0
-  DesignLeft = 3477
-  DesignTop = 286
+  DesignLeft = 3662
+  DesignTop = 270
   object Panel1: TPanel
     Left = 0
     Height = 894

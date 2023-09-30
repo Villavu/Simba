@@ -344,8 +344,7 @@ begin
 
   FFindEdit := TSimbaEdit.Create(Self);
   FFindEdit.Parent := FindEditPanel;
-  FFindEdit.Align := alClient;
-  FFindEdit.AnchorVerticalCenterTo(FindEditPanel);
+  FFindEdit.Align := alLeft;
   FFindEdit.BorderSpacing.Around := 5;
   FFindEdit.OnChange := @FindEditChange;
   FFindEdit.OnKeyDown := @FindButtonKeyDown;
@@ -409,7 +408,7 @@ begin
     Parent := FindPanel;
     Align := alRight;
     BorderSpacing.Around := 5;
-    SetCloseGlyph();
+    SetImage(ESimbaButtonImage.CLOSE);
     OnClick := @FindButtonClick;
   end;
 

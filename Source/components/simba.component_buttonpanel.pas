@@ -81,17 +81,16 @@ begin
   FButtonOk.Align := alRight;
   FButtonOk.Caption := 'Ok';
   FButtonOk.BorderSpacing.Around := 8;
-  FButtonOk.VertPadding := 10;
-  FButtonOk.AutoSize := False;
-  FButtonOk.SetOkGlpyh();
+  FButtonOk.XPadding := 10;
+  FButtonOk.SetImage(ESimbaButtonImage.OK);
 
   FButtonCancel := TButtonPanelButton.Create(Self);
   FButtonCancel.Parent := Self;
   FButtonCancel.Align := alRight;
   FButtonCancel.Caption := 'Cancel';
   FButtonCancel.BorderSpacing.Around := 8;
-  FButtonCancel.VertPadding := 10;
-  FButtonCancel.SetCloseGlyph();
+  FButtonCancel.XPadding := 10;
+  FButtonCancel.SetImage(ESimbaButtonImage.CLOSE);
   FButtonCancel.OnResize := @DoButtonCancelResize;
 
   Color := SimbaTheme.ColorFrame;

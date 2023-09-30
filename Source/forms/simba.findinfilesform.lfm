@@ -1,0 +1,109 @@
+object SimbaFindInFilesForm: TSimbaFindInFilesForm
+  Left = 3171
+  Height = 332
+  Top = 380
+  Width = 750
+  Caption = 'Find in Files'
+  ClientHeight = 0
+  ClientWidth = 0
+  DesignTimePPI = 120
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  Position = poMainFormCenter
+  LCLVersion = '3.0.0.1'
+  object PanelMatches: TPanel
+    Left = 12
+    Height = 167
+    Top = 160
+    Width = 726
+    Align = alClient
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 7
+    BorderSpacing.Right = 7
+    BorderSpacing.Around = 5
+    BevelOuter = bvNone
+    ClientHeight = 167
+    ClientWidth = 726
+    TabOrder = 0
+    object MatchesLabel: TLabel
+      Left = 0
+      Height = 20
+      Top = 22
+      Width = 726
+      Align = alTop
+      BorderSpacing.Bottom = 5
+      Caption = 'Matches'
+    end
+    object PanelDivider: TPanel
+      Left = 0
+      Height = 2
+      Top = 10
+      Width = 726
+      Align = alTop
+      BorderSpacing.Top = 10
+      BorderSpacing.Bottom = 10
+      BevelOuter = bvNone
+      TabOrder = 0
+    end
+  end
+  object PanelTop: TPanel
+    Left = 12
+    Height = 150
+    Top = 5
+    Width = 726
+    Align = alTop
+    BorderSpacing.Left = 7
+    BorderSpacing.Right = 7
+    BorderSpacing.Around = 5
+    BevelOuter = bvNone
+    ClientHeight = 150
+    ClientWidth = 726
+    TabOrder = 1
+    object PanelLocation: TPanel
+      Left = 0
+      Height = 100
+      Top = 0
+      Width = 726
+      Align = alTop
+      BevelOuter = bvNone
+      ClientHeight = 100
+      ClientWidth = 726
+      TabOrder = 0
+      object PanelSelectLocation: TPanel
+        Left = 626
+        Height = 100
+        Top = 0
+        Width = 100
+        Align = alRight
+        BevelOuter = bvNone
+        TabOrder = 0
+      end
+    end
+    object PanelOptions: TPanel
+      Left = 0
+      Height = 100
+      Top = 100
+      Width = 726
+      Align = alTop
+      BevelOuter = bvNone
+      TabOrder = 1
+    end
+    object PanelSearchButton: TPanel
+      Left = 0
+      Height = 63
+      Top = 150
+      Width = 726
+      Align = alTop
+      BevelOuter = bvNone
+      TabOrder = 2
+    end
+  end
+  object DialogSelectDir: TSelectDirectoryDialog
+    OnClose = DialogSelectDirClose
+    Title = 'Search Directory'
+    Options = [ofPathMustExist, ofEnableSizing]
+    Left = 460
+    Top = 240
+  end
+end

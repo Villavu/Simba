@@ -340,7 +340,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="148">
+    <Units Count="149">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1014,6 +1014,13 @@
         <Filename Value="simba.boxarray.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit147>
+      <Unit148>
+        <Filename Value="forms/simba.findinfilesform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaFindInFilesForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit148>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

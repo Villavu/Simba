@@ -17,6 +17,7 @@ uses
   simba.colorpickerhistoryform, simba.filebrowserform, simba.notesform,
   simba.settingsform, simba.associate, simba.openexampleform,
   simba.package_form, simba.shapeboxform, simba.backupsform,
+  simba.findinfilesform,
   simba.compiler_dump, simba.plugin_dump,
   simba.scriptthread, simba.ide_initialization, simba.threading,
   simba.openssl, simba.ide_codetools_setup;
@@ -117,6 +118,7 @@ begin
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
     Application.CreateForm(TSimbaShapeBoxForm, SimbaShapeBoxForm);
     Application.CreateForm(TSimbaBackupsForm, SimbaBackupsForm);
+    Application.CreateForm(TSimbaFindInFilesForm, SimbaFindInFilesForm);
 
     SimbaIDEInitialization_CallBeforeShow();
   end;

@@ -38,7 +38,7 @@ const
   {$ENDIF}
 var
   OrginalFileName: String;
-  SearchDir, SearchFileName: String;
+  SearchDir: String;
 begin
   Result := False;
 

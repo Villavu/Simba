@@ -103,6 +103,14 @@ type
       CustomImageSize: TSimbaSetting;
       ScrollBarSize: TSimbaSetting; // in 96 DPI
       ScrollBarArrowSize: TSimbaSetting;
+
+      FindInFilesWidth: TSimbaSetting;
+      FindInFilesHeight: TSimbaSetting;
+      FindInFilesSearch: TSimbaSetting;
+      FindInFilesLocation: TSimbaSetting;
+      FindInFilesSubDirs: TSimbaSetting;
+      FindInFilesWholeWords: TSimbaSetting;
+      FindInFilesCaseSens: TSimbaSetting;
     end;
 
     Editor: record
@@ -501,6 +509,14 @@ begin
   General.CustomImageSize    := TSimbaSetting_Integer.Create(Self, 'General', 'CustomImageSize', 0);
   General.ScrollBarSize      := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarSize', SimbaTheme.ScrollBarSize);
   General.ScrollBarArrowSize := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarArrowSize', SimbaTheme.ScrollBarArrowSize);
+
+  General.FindInFilesWidth      := TSimbaSetting_Integer.Create(Self, 'General', 'FindInFilesWidth', 700);
+  General.FindInFilesHeight     := TSimbaSetting_Integer.Create(Self, 'General', 'FindInFilesHeight', 400);
+  General.FindInFilesSearch     := TSimbaSetting_BinaryString.Create(Self, 'General', 'FindInFilesSearch', '');
+  General.FindInFilesLocation   := TSimbaSetting_BinaryString.Create(Self, 'General', 'FindInFilesLocation', '');
+  General.FindInFilesSubDirs    := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesSubDirs', False);
+  General.FindInFilesWholeWords := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesWholeWords', False);
+  General.FindInFilesCaseSens   := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesCaseSens', False);
 
   // Editor
   Editor.DefaultScript                   := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
