@@ -205,7 +205,7 @@ begin
   FFilterClearButton.OnClick := @DoClearFilterClick;
   FFilterClearButton.Hint := 'Clear Filter';
   FFilterClearButton.ShowHint := True;
-  FFilterClearButton.SetClearFilterGlyph();
+  FFilterClearButton.SetImage(ESimbaButtonImage.CLEAR_FILTER);
 
   with SimbaSettings do
     RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize);

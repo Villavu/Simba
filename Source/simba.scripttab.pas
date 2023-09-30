@@ -65,6 +65,8 @@ type
     procedure Undo;
     procedure Redo;
 
+    procedure GotoLine(Line: Integer);
+
     function IsActiveTab: Boolean;
     function CanClose: Boolean;
 
@@ -243,6 +245,13 @@ end;
 procedure TSimbaScriptTab.Redo;
 begin
   FEditor.Redo();
+end;
+
+procedure TSimbaScriptTab.GotoLine(Line: Integer);
+begin
+  Editor.CaretX := 1;
+  Editor.CaretY := Line;
+  Editor.TopLine := (Line + 1) - (Editor.LinesInWindow div 2);
 end;
 
 function TSimbaScriptTab.IsActiveTab: Boolean;

@@ -48,6 +48,7 @@ type
     class operator Initialize(var Self: TSelf);
   end;
 
+  TSimbaStringBuffer = specialize TSimbaOverAllocateArray<String>;
   TSimbaPointBuffer = specialize TSimbaOverAllocateArray<TPoint>;
   TSimbaPointArrayBuffer = specialize TSimbaOverAllocateArray<TPointArray>;
 

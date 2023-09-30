@@ -73,6 +73,7 @@ type
   TSimbaDir = class
   public
     class function DirList(Path: String; Recursive: Boolean = False): TStringArray;
+    class function DirListFiles(Path: String; Recursive: Boolean = False): TStringArray;
     class function DirSearch(Path: String; Mask: String; Recursive: Boolean = False): TStringArray;
     class function DirDelete(Path: String; OnlyChildren: Boolean): Boolean;
     class function DirCreate(Path: String): Boolean;
@@ -107,25 +108,67 @@ uses
   BaseUnix,
   {$ENDIF}
   FileUtil, LazFileUtils, Zipper, IniFiles, md5, sha1,
-  simba.encoding, DateUtils;
+  simba.encoding, simba.overallocatearray;
 
 class function TSimbaDir.DirList(Path: String; Recursive: Boolean): TStringArray;
 var
-  SearchRec: TSearchRec;
-begin
-  Result := [];
+  Buffer: TSimbaStringBuffer;
 
-  Path := CleanAndExpandDirectory(Path);
-  if (FindFirst(Path + '*', faAnyFile and faDirectory, SearchRec) = 0) then
-  repeat
-    if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
-    begin
-      if (SearchRec.Attr = faDirectory) and Recursive then
-        Result := Result + DirList(Path + SearchRec.Name, Recursive);
-      Result := Result + [Path + SearchRec.Name];
-    end;
-  until FindNext(SearchRec) <> 0;
-  SysUtils.FindClose(SearchRec);
+  procedure Get(Path: String);
+  var
+    SearchRec: TSearchRec;
+  begin
+    Path := CleanAndExpandDirectory(Path);
+
+    if (FindFirst(Path + '*', faAnyFile and faDirectory, SearchRec) = 0) then
+    repeat
+      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+      begin
+        if (SearchRec.Attr = faDirectory) and Recursive then
+          Get(Path + SearchRec.Name);
+
+        Buffer.Add(Path + SearchRec.Name);
+      end;
+    until (FindNext(SearchRec) <> 0);
+
+    SysUtils.FindClose(SearchRec);
+  end;
+
+begin
+  Get(Path);
+
+  Result := Buffer.Trim();
+end;
+
+class function TSimbaDir.DirListFiles(Path: String; Recursive: Boolean): TStringArray;
+var
+  Buffer: TSimbaStringBuffer;
+
+  procedure Get(Path: String);
+  var
+    SearchRec: TSearchRec;
+  begin
+    Path := CleanAndExpandDirectory(Path);
+
+    if (FindFirst(Path + '*', faAnyFile and faDirectory, SearchRec) = 0) then
+    repeat
+      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+      begin
+        if (SearchRec.Attr = faDirectory) and Recursive then
+          Get(Path + SearchRec.Name);
+
+        if (SearchRec.Attr <> faDirectory) then
+          Buffer.Add(Path + SearchRec.Name);
+      end;
+    until (FindNext(SearchRec) <> 0);
+
+    SysUtils.FindClose(SearchRec);
+  end;
+
+begin
+  Get(Path);
+
+  Result := Buffer.Trim();
 end;
 
 class function TSimbaDir.DirSearch(Path: String; Mask: String; Recursive: Boolean): TStringArray;

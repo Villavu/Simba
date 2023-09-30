@@ -193,6 +193,7 @@ type
     procedure MenuFileClick(Sender: TObject);
     procedure MenuFindClick(Sender: TObject);
     procedure MenuGotoClick(Sender: TObject);
+    procedure MenuItemFindInFilesClick(Sender: TObject);
     procedure MenuItemSelectLineClick(Sender: TObject);
     procedure MenuItemSelectWordClick(Sender: TObject);
     procedure MenuItemBackupsClick(Sender: TObject);
@@ -293,10 +294,10 @@ implementation
 {$R *.lfm}
 
 uses
-  LCLType, LCLIntf, LazFileUtils, AnchorDocking, ToolWin, ATCanvasPrimitives, Types, GraphType,
+  LCLType, LCLIntf, LazFileUtils, AnchorDocking, ATCanvasPrimitives, Types, GraphType,
 
   simba.shapeboxform, simba.openexampleform, simba.colorpickerhistoryform,
-  simba.debugimageform, simba.imagetostringform, simba.aboutform,
+  simba.debugimageform, simba.imagetostringform, simba.aboutform, simba.findinfilesform,
   simba.outputform, simba.filebrowserform, simba.notesform, simba.settingsform,
   simba.functionlistform, simba.scripttabsform, simba.ide_mainstatusbar,
   simba.package_form, simba.package_autoupdater,
@@ -890,6 +891,11 @@ begin
     if InputQuery('Goto line', 'Goto line:', Value) and (StrToIntDef(Value, -1) > -1) then
       SimbaScriptTabsForm.CurrentEditor.TopLine := StrToInt(Value) - (SimbaScriptTabsForm.CurrentEditor.LinesInWindow div 2);
   end;
+end;
+
+procedure TSimbaForm.MenuItemFindInFilesClick(Sender: TObject);
+begin
+  SimbaFindInFilesForm.ShowModal();
 end;
 
 procedure TSimbaForm.MenuItemSelectLineClick(Sender: TObject);
