@@ -12,15 +12,14 @@ uses
   simba.init,
   Classes, SysUtils, Interfaces, Forms,
   simba.mufasatypes, simba.main,
-  simba.aboutform, simba.debugimageform, simba.imagetostringform,
-  simba.functionlistform, simba.scripttabsform, simba.outputform,
-  simba.colorpickerhistoryform, simba.filebrowserform, simba.notesform,
-  simba.settingsform, simba.associate, simba.openexampleform,
-  simba.package_form, simba.shapeboxform, simba.backupsform,
-  simba.findinfilesform,
+  simba.aboutform, simba.debugimageform, simba.imagetostringform, simba.functionlistform,
+  simba.scripttabsform, simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
+  simba.notesform, simba.settingsform, simba.associate, simba.openexampleform,
+  simba.package_form, simba.shapeboxform, simba.backupsform, simba.findinfilesform,
   simba.compiler_dump, simba.plugin_dump,
-  simba.scriptthread, simba.ide_initialization, simba.threading,
-  simba.openssl, simba.ide_codetools_setup;
+  simba.scriptthread,
+  simba.ide_initialization, simba.ide_analytics, simba.ide_codetools_setup,
+  simba.openssl;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}

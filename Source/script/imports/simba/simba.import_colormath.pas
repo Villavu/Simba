@@ -14,7 +14,7 @@ implementation
 
 uses
   Graphics, lptypes,
-  simba.colormath_distance, simba.colormath;
+  simba.colormath_distance, simba.colormath, simba.colormath_aca;
 
 (*
 Color Math
@@ -403,6 +403,16 @@ begin
 end;
 
 (*
+GetBestColor
+~~~~~~~~~~~~
+> function GetBestColor(ColorSpace: EColorSpace; Colors: TColorArray): TBestColor;
+*)
+procedure _LapeGetBestColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TBestColor(Result^) := GetBestColor(PColorSpace(Params^[0])^, PColorArray(Params^[1])^);
+end;
+
+(*
 TColor.R
 ~~~~~~~~
 > function TColor.R: Byte;
@@ -707,6 +717,17 @@ begin
 
     addGlobalFunc('function ColorDistance(Color1, Color2: TColor; const ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Single; overload', @_LapeColorDistance1);
     addGlobalFunc('function ColorDistance(Color1, Color2: TColor): Single; overload', @_LapeColorDistance2);
+
+    addGlobalType([
+      'record',
+      '  Color: TColor;',
+      '  Mods: TChannelMultipliers;',
+      '  Tolerance: Single;',
+      'end;'],
+      'TBestColor'
+    );
+
+    addGlobalFunc('function GetBestColor(Formula: EColorSpace; Colors: TColorArray): TBestColor;', @_LapeGetBestColor);
 
     addGlobalType([
       'record',
