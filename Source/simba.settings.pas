@@ -37,6 +37,7 @@ type
     constructor Create(ASettings: TSimbaSettings; ASection, AName: String; DefaultValue: Variant);
     destructor Destroy; override;
 
+    procedure Changed;
     procedure SetDefault;
     function IsDefault: Boolean;
 
@@ -80,7 +81,6 @@ type
   type
     TSettingList = specialize TFPGObjectList<TSimbaSetting>;
   protected
-    FChangeEventList: TMethodList;
     FList: TSettingList;
     FFirstLaunch: Boolean;
   public
@@ -170,13 +170,8 @@ type
     procedure Load;
     procedure Save;
 
-    procedure RegisterChangeHandler(Event: TSimbaSettingChangedEvent); overload; deprecated;
-    procedure UnRegisterChangeHandler(Event: TSimbaSettingChangedEvent); overload;
-
     procedure RegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent; CallEventInitially: Boolean = False); overload;
     procedure UnRegisterChangeHandler(Owner: TComponent; Setting: TSimbaSetting; Event: TSimbaSettingChangedEvent); overload;
-
-    procedure Changed(Setting: TSimbaSetting);
 
     constructor Create;
     destructor Destroy; override;
@@ -283,11 +278,12 @@ end;
 procedure TSimbaSetting.SetValue(AValue: Variant);
 begin
   CheckValue(AValue);
-  if (AValue = FValue) then
-    Exit;
 
-  FValue := AValue;
-  FSettings.Changed(Self);
+  if (AValue <> FValue) then
+  begin
+    FValue := AValue;
+    Changed();
+  end;
 end;
 
 constructor TSimbaSetting.Create(ASettings: TSimbaSettings; ASection, AName: String; DefaultValue: Variant);
@@ -313,6 +309,17 @@ begin
   inherited Destroy();
 end;
 
+procedure TSimbaSetting.Changed;
+var
+  I: Integer;
+begin
+  DebugLn('[TSimbaSettings] Setting changed: ' + FName);
+
+  I := FChangeEventList.Count;
+  while FChangeEventList.NextDownIndex(I) do
+    TSimbaSettingChangedEvent(FChangeEventList.Items[I])(Self);
+end;
+
 procedure TSimbaSetting.SetDefault;
 begin
   Value := FDefaultValue;
@@ -321,34 +328,6 @@ end;
 function TSimbaSetting.IsDefault: Boolean;
 begin
   Result := Value = FDefaultValue;
-end;
-
-procedure TSimbaSettings.Changed(Setting: TSimbaSetting);
-var
-  i: Integer;
-begin
-  if (FChangeEventList = nil) or (FChangeEventList.Count = 0) then
-    Exit;
-
-  i := Setting.FChangeEventList.Count;
-  while Setting.FChangeEventList.NextDownIndex(i) do
-    TSimbaSettingChangedEvent(Setting.FChangeEventList.Items[i])(Setting);
-
-  DebugLn('[TSimbaSettings.Changed] Setting changed: ' + Setting.Name);
-
-  i := FChangeEventList.Count;
-  while FChangeEventList.NextDownIndex(i) do
-    TSimbaSettingChangedEvent(FChangeEventList.Items[i])(Setting);
-end;
-
-procedure TSimbaSettings.RegisterChangeHandler(Event: TSimbaSettingChangedEvent);
-begin
-  FChangeEventList.Add(TMethod(Event));
-end;
-
-procedure TSimbaSettings.UnRegisterChangeHandler(Event: TSimbaSettingChangedEvent);
-begin
-  FChangeEventList.Remove(TMethod(Event));
 end;
 
 type
@@ -488,7 +467,6 @@ begin
 
   FFirstLaunch := True;
   FList := TSettingList.Create();
-  FChangeEventList := TMethodList.Create();
 
   // General
   General.ConsoleVisible     := TSimbaSetting_Boolean.Create(Self, 'General', 'ConsoleVisible', True);
@@ -560,8 +538,6 @@ end;
 
 destructor TSimbaSettings.Destroy;
 begin
-  if (FChangeEventList <> nil) then
-    FreeAndNil(FChangeEventList);
   if (FList <> nil) then
     FreeAndNil(FList);
 
