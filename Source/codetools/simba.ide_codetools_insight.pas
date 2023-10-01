@@ -139,7 +139,10 @@ begin
 
   Include := CodetoolsIncludes.Get(Sender);
   if (Include <> nil) then
+  begin
+    FScriptParser.Root.Items.Add(TDeclaration_IncludeDirective.Create(FScriptParser, Include.FileName));
     FIncludeParsers.Add(Include);
+  end;
 end;
 
 function TCodeinsight.DoFindPlugin(Sender: TmwBasePasLex; var FileName: String): Boolean;

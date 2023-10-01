@@ -160,6 +160,12 @@ type
   end;
 
   TDeclaration_Anchor = class(TDeclaration);
+  TDeclaration_IncludeDirective = class(TDeclaration)
+  public
+    FileName: String;
+
+    constructor Create(AParser: TCodeParser; AFileName: String); reintroduce;
+  end;
 
   TDeclaration_WithStatement = class(TDeclaration);
   TDeclaration_WithVariableList = class(TDeclaration);
@@ -364,6 +370,10 @@ type
     function GetCaretPos: Integer;
     procedure SetCaretPos(const Value: Integer);
 
+    function PushStack(const AClass: TDeclarationClass): TDeclaration; inline;
+    function PushStub(const AClass: TDeclarationClass): TDeclaration; inline;
+    procedure PopStack; inline;
+
     procedure EmptyVarStub(const VarStub: TDeclaration_VarStub; const VarClass: TDeclaration_VarClass);
     procedure EmptyParamStub(const ParamStub: TDeclaration_ParamStub);
 
@@ -371,10 +381,6 @@ type
     function InDeclaration(const AClassType1, AClassType2: TDeclarationClass): Boolean; overload;
     function InDeclaration(const AClassType1, AClassType2, AClassType3: TDeclarationClass): Boolean; overload;
     function InDeclaration(const AClassType1, AClassType2, AClassType3, AClassType4: TDeclarationClass): Boolean; overload;
-
-    function PushStack(const AClass: TDeclarationClass): TDeclaration; inline;
-    function PushStub(const AClass: TDeclarationClass): TDeclaration; inline;
-    procedure PopStack; inline;
 
     procedure ParseFile; override;
     procedure OnLibraryDirect(Sender: TmwBasePasLex); override;                 //Plugins
@@ -438,6 +444,7 @@ type
     procedure EnumeratedTypeItem; override;                                     //Enum Element
     procedure QualifiedIdentifier; override;                                    //Enum Element Name
   public
+    property Root: TDeclaration read FRoot;
     property Plugins: TStringList read FPlugins;
 
     property FileName: String read GetFileName;
@@ -575,6 +582,13 @@ begin
 
   ClearFlags();
   isKeyword := True;
+end;
+
+constructor TDeclaration_IncludeDirective.Create(AParser: TCodeParser; AFileName: String);
+begin
+  inherited Create(AParser, nil, AParser.Lexer.TokenPos, AParser.Lexer.TokenPos + AParser.Lexer.TokenLen);
+
+  FileName := AFileName;
 end;
 
 constructor TDeclaration_Type.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
