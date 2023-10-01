@@ -222,8 +222,8 @@ implementation
 
 uses
   Math, FPImage, BMPcomn, fpqoi_simba,
-  simba.overallocatearray, simba.geometry, simba.tpa,
-  simba.encoding, simba.compress, simba.math,
+  simba.arraybuffer, simba.geometry, simba.tpa,
+  simba.encoding, simba.compress,
   simba.nativeinterface, simba.singlematrix,
   simba.image_lazbridge, simba.rgbsumtable;
 
@@ -733,7 +733,7 @@ function TSimbaImage.PixelDifferenceTPA(Other: TSimbaImage): TPointArray;
 var
   X, Y, W, H: Integer;
   Index: Integer;
-  Buffer: specialize TSimbaOverAllocateArray<TPoint>;
+  Buffer: TSimbaPointBuffer;
 begin
   if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
     SimbaException('TSimbaImage.PixelDifference: Both images must be equal dimensions');
@@ -750,14 +750,14 @@ begin
         Buffer.Add(TPoint.Create(X, Y));
     end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TSimbaImage.PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Single): TPointArray;
 var
   X, Y, W, H: Integer;
   Index: Integer;
-  Buffer: specialize TSimbaOverAllocateArray<TPoint>;
+  Buffer: TSimbaPointBuffer;
 begin
   if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
     SimbaException('TSimbaImage.PixelDifference: Both images must be equal dimensions');
@@ -779,7 +779,7 @@ begin
         Buffer.Add(TPoint.Create(X, Y));
     end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 procedure TSimbaImage.LoadFromLazBitmap(LazBitmap: TBitmap);

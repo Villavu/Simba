@@ -90,7 +90,7 @@ begin
   Result := TMemoryStream.Create();
 
   try
-    while (FInputStream.Read(Header, SizeOf(TSimbaIPCHeader)) = SizeOf(TSimbaIPCHeader)) and (not TThread.CheckTerminated) do
+    while (FInputStream.Read(Header{%H-}, SizeOf(TSimbaIPCHeader)) = SizeOf(TSimbaIPCHeader)) and (not TThread.CheckTerminated) do
     begin
       // Keep a small amount of memory (0.25 mb) if allocated
       Params.Position := 0;

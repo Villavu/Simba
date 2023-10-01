@@ -43,7 +43,7 @@ implementation
 
 uses
   simba.threadpool, simba.simplelock,
-  simba.singlematrix, simba.integermatrix;
+  simba.singlematrix;
 
 // MatchTemplate_SQDIFF
 function __MatchTemplate_SQDIFF(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -187,7 +187,7 @@ type
 function TMatchTemplateCache_SQDIFF.GetSliceCache(Lo, Hi: Integer): TSliceCache;
 var
   ImgSlice: TRGBMatrix;
-  I, Y: Integer;
+  I: Integer;
 begin
   Lock.Enter();
 

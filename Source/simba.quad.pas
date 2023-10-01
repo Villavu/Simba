@@ -49,7 +49,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.tpa, simba.random, simba.geometry, simba.overallocatearray;
+  simba.math, simba.tpa, simba.random, simba.geometry, simba.arraybuffer;
 
 class function TQuadHelper.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad;
 begin
@@ -187,7 +187,7 @@ begin
     if Contains(Points[I]) then
       Buffer.Add(Points[I]);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TQuadHelper.Exclude(Points: TPointArray): TPointArray;
@@ -200,7 +200,7 @@ begin
     if not Contains(Points[I]) then
       Buffer.Add(Points[I]);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TQuadHelper.Expand(Amount: Double): TQuad;

@@ -269,7 +269,7 @@ begin
     if Contains(Points[I]) then
       Buffer.Add(Points[I]);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TBoxHelper.Exclude(Points: TPointArray): TPointArray;
@@ -282,7 +282,7 @@ begin
     if not Contains(Points[I]) then
       Buffer.Add(Points[I]);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TBoxHelper.NearestEdge(P: TPoint): TPoint;

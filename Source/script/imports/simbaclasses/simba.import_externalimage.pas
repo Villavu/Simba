@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.image, simba.externalimage, simba.circle;
+  simba.image, simba.externalimage;
 
 procedure _LapeExternalImage_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin

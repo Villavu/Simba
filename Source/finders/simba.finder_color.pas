@@ -48,7 +48,7 @@ var
 implementation
 
 uses
-  simba.overallocatearray, simba.colormath_distance_unrolled, simba.threadpool, simba.atpa, simba.datetime, simba.singlematrix;
+  simba.arraybuffer, simba.colormath_distance_unrolled, simba.threadpool, simba.atpa, simba.singlematrix;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
@@ -196,7 +196,7 @@ var
       PointBuffer.Add(X + OffsetX, Y + OffsetY);
   }
   {$DEFINE MACRO_FINDCOLORS_END :=
-    Result := PointBuffer.Trim();
+    Result := PointBuffer.ToArray(False);
   }
   MACRO_FINDCOLORS
 

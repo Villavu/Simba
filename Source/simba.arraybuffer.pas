@@ -2,10 +2,11 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
-unit simba.overallocatearray;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
+  Overallocate array.
+}
+unit simba.arraybuffer;
+
 {$i simba.inc}
 
 interface
@@ -15,10 +16,10 @@ uses
   simba.mufasatypes;
 
 type
-  generic TSimbaOverAllocateArray<_T> = record
+  generic TSimbaArrayBuffer<_T> = record
   private
   type
-    TSelf = specialize TSimbaOverAllocateArray<_T>;
+    TSelf = specialize TSimbaArrayBuffer<_T>;
     TArr = specialize TArray<_T>;
   private
     FLength: Integer;
@@ -28,6 +29,7 @@ type
     procedure EnsureGrowth(const Len: Integer = 1); inline;
     function GetItem(const Index: Integer): _T; inline;
   public
+    property Size: Integer read FLength;
     property Count: Integer read FCount;
     property Item[Index: Integer]: _T read GetItem; default;
 
@@ -42,17 +44,16 @@ type
     function Last: _T; inline;
     function Pop: _T; inline;
 
-    function Trim: TArr;
-    function Copy: TArr;
+    function ToArray(Copy: Boolean = True): TArr;
 
     class operator Initialize(var Self: TSelf);
   end;
 
-  TSimbaStringBuffer = specialize TSimbaOverAllocateArray<String>;
-  TSimbaPointBuffer = specialize TSimbaOverAllocateArray<TPoint>;
-  TSimbaPointArrayBuffer = specialize TSimbaOverAllocateArray<TPointArray>;
+  TSimbaIntegerBuffer    = specialize TSimbaArrayBuffer<Integer>;
+  TSimbaStringBuffer     = specialize TSimbaArrayBuffer<String>;
+  TSimbaPointBuffer      = specialize TSimbaArrayBuffer<TPoint>;
+  TSimbaPointArrayBuffer = specialize TSimbaArrayBuffer<TPointArray>;
 
-type
   TSimbaPointBufferHelper = record helper for TSimbaPointBuffer
   public
     procedure Add(const X, Y: Integer); overload; inline;
@@ -60,7 +61,7 @@ type
 
 implementation
 
-procedure TSimbaOverAllocateArray.EnsureGrowth(const Len: Integer);
+procedure TSimbaArrayBuffer.EnsureGrowth(const Len: Integer);
 begin
   if (FCount + Len >= FLength) then
   begin
@@ -87,17 +88,17 @@ begin
   Inc(FCount);
 end;
 
-function TSimbaOverAllocateArray.GetItem(const Index: Integer): _T;
+function TSimbaArrayBuffer.GetItem(const Index: Integer): _T;
 begin
   Result := FArr[Index];
 end;
 
-procedure TSimbaOverAllocateArray.Clear;
+procedure TSimbaArrayBuffer.Clear;
 begin
   FCount := 0;
 end;
 
-procedure TSimbaOverAllocateArray.Init(const InitialSize: Integer);
+procedure TSimbaArrayBuffer.Init(const InitialSize: Integer);
 begin
   FLength := InitialSize;
   FCount := 0;
@@ -106,14 +107,14 @@ begin
     SetLength(FArr, FLength);
 end;
 
-procedure TSimbaOverAllocateArray.InitWith(const Values: TArr);
+procedure TSimbaArrayBuffer.InitWith(const Values: TArr);
 begin
   FArr := Values;
   FLength := Length(FArr);
   FCount := FLength;
 end;
 
-procedure TSimbaOverAllocateArray.Add(const Value: _T);
+procedure TSimbaArrayBuffer.Add(const Value: _T);
 begin
   EnsureGrowth();
 
@@ -121,7 +122,7 @@ begin
   Inc(FCount);
 end;
 
-procedure TSimbaOverAllocateArray.Add(const Values: TArr);
+procedure TSimbaArrayBuffer.Add(const Values: TArr);
 var
   Len: Integer;
 begin
@@ -135,36 +136,36 @@ begin
   end;
 end;
 
-function TSimbaOverAllocateArray.First: _T;
+function TSimbaArrayBuffer.First: _T;
 begin
   Result := FArr[0];
 end;
 
-function TSimbaOverAllocateArray.Last: _T;
+function TSimbaArrayBuffer.Last: _T;
 begin
   Result := FArr[FCount - 1];
 end;
 
-function TSimbaOverAllocateArray.Pop: _T;
+function TSimbaArrayBuffer.Pop: _T;
 begin
   Result := FArr[FCount - 1];
   Dec(FCount);
 end;
 
-function TSimbaOverAllocateArray.Trim: TArr;
+function TSimbaArrayBuffer.ToArray(Copy: Boolean): TArr;
 begin
-  FLength := FCount;
-  SetLength(FArr, FLength);
+  if Copy then
+    Result := System.Copy(FArr, 0, FCount)
+  else
+  begin
+    FLength := FCount;
+    SetLength(FArr, FLength);
 
-  Result := FArr;
+    Result := FArr;
+  end;
 end;
 
-function TSimbaOverAllocateArray.Copy: TArr;
-begin
-  Result := System.Copy(FArr, 0, FCount);
-end;
-
-class operator TSimbaOverAllocateArray.Initialize(var Self: TSelf);
+class operator TSimbaArrayBuffer.Initialize(var Self: TSelf);
 begin
   Self := Default(TSelf);
 end;

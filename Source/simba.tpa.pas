@@ -141,10 +141,9 @@ type
 implementation
 
 uses
-  math,
-  simba.overallocatearray, simba.geometry, simba.math,
-  simba.algo_sort, simba.algo_intersection, simba.slacktree, simba.algo_unique,
-  simba.singlematrix, simba.integermatrix;
+  Math,
+  simba.arraybuffer, simba.geometry, simba.math,
+  simba.algo_sort, simba.algo_intersection, simba.slacktree, simba.algo_unique;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
 begin
@@ -239,7 +238,7 @@ class function TPointArrayHelper.CreateFromCircle(Center: TPoint; Radius: Intege
       for x := B.X1 to B.X2 do
         if Sqr(X - Center.X) + Sqr(Y - Center.Y) < d then
           Buffer.Add(X, Y);
-    Result := Buffer.Trim();
+    Result := Buffer.ToArray(False);
   end;
 
 begin
@@ -318,7 +317,7 @@ class function TPointArrayHelper.CreateFromEllipse(Center: TPoint; RadiusX, Radi
       end;
     end;
 
-    Result := Buffer.Trim();
+    Result := Buffer.ToArray(False);
   end;
 
   procedure CreateFilled;
@@ -339,7 +338,7 @@ class function TPointArrayHelper.CreateFromEllipse(Center: TPoint; RadiusX, Radi
       for x:= B.X1 to B.X2 do
         if (Sqr(X - Center.X) * SqY) + (Sqr(Y - Center.Y) * SqX) < d then
           Buffer.Add(X, Y);
-    Result := Buffer.Trim();
+    Result := Buffer.ToArray(False);
   end;
 
 begin
@@ -489,7 +488,7 @@ begin
       if not Matrix[Y, X] then
         Buffer.Add(ABounds.X1 + X, ABounds.Y1 + Y);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.Invert: TPointArray;
@@ -511,7 +510,7 @@ begin
     Buffer.Add(TPointArray.CreateFromLine(Self[High(Self)], Self[0]));
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.Density: Double;
@@ -554,7 +553,7 @@ begin
       Buffer.Add(Self[I]);
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.Border: TPointArray;
@@ -642,7 +641,7 @@ begin
     end;
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.Skeleton(FMin: Integer; FMax: Integer): TPointArray;
@@ -756,8 +755,8 @@ var
   B: TBox;
   Width, Height: Integer;
   Checked: TBooleanMatrix;
-  Queue: specialize TSimbaOverAllocateArray<TPoint>;
-  Arr: specialize TSimbaOverAllocateArray<TPoint>;
+  Queue: TSimbaPointBuffer;
+  Arr: TSimbaPointBuffer;
 
   procedure Push(const X, Y: Integer); inline;
   begin
@@ -807,7 +806,7 @@ begin
   while (Queue.Count > 0) do
     CheckNeighbours(Queue.Pop());
 
-  Result := Arr.Trim();
+  Result := Arr.ToArray(False);
 end;
 
 function TPointArrayHelper.ShapeFill: TPointArray;
@@ -834,7 +833,7 @@ begin
       if TSimbaGeometry.PointInPolygon((Row[I-1] + Row[I]) div 2, Self) then
         HorzLine(Row[0].Y, Row[I-1].X, Row[I].X);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 procedure TPointArrayHelper.FurthestPoints(out A, B: TPoint);
@@ -1104,7 +1103,7 @@ begin
     for X := 0 to B.X2-1 do
       if Matrix[Y, X] then
         QueueA.Add(X + B.X1, Y + B.Y1);
-  Result := QueueA.Trim();
+  Result := QueueA.ToArray(False);
 end;
 
 function TPointArrayHelper.Grow(Iterations: Integer): TPointArray;
@@ -1174,7 +1173,7 @@ begin
     for X := 0 to B.X2-1 do
       if Matrix[Y, X] then
         QueueA.Add(X + B.X1, Y + B.Y1);
-  Result := QueueA.Trim();
+  Result := QueueA.ToArray(False);
 end;
 
 function TPointArrayHelper.Unique: TPointArray;
@@ -1214,7 +1213,7 @@ begin
       end;
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
@@ -1234,7 +1233,7 @@ begin
       Buffer.Add(Self[I]);
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.ExcludePolygon(Polygon: TPointArray): TPointArray;
@@ -1247,7 +1246,7 @@ begin
     if not Self[I].InPolygon(Polygon) then
       Buffer.Add(Self[I]);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.ExcludeBox(Box: TBox): TPointArray;
@@ -1289,7 +1288,7 @@ begin
     if not Matrix[Self[I].Y - B.Y1, Self[I].X - B.X1] then
       Buffer.Add(Self[I]);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.ExtractDist(Center: TPoint; MinDist, MaxDist: Single): TPointArray;
@@ -1309,7 +1308,7 @@ begin
       Buffer.Add(Self[I]);
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.ExtractPolygon(Polygon: TPointArray): TPointArray;
@@ -1322,7 +1321,7 @@ begin
     if Self[I].InPolygon(Polygon) then
       Buffer.Add(Self[I]);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.ExtractBox(Box: TBox): TPointArray;
@@ -1377,7 +1376,7 @@ begin
       Buffer.Add(Self[I]);
     end;
 
-    Result := TPointArray(Buffer.Trim()).ExtractDist(Center, MinRadius, MaxRadius);
+    Result := TPointArray(Buffer.ToArray(False)).ExtractDist(Center, MinRadius, MaxRadius);
   end else
     Result := Self.ExtractDist(Center, MinRadius, MaxRadius);
 end;
@@ -1464,7 +1463,7 @@ begin
       end;
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.PointsNearby(Other: TPointArray; MinDist, MaxDist: Double): TPointArray;
@@ -1482,7 +1481,7 @@ begin
       Buffer.Add(Tree.RangeQueryEx(Other[I], MinDist, MinDist, MaxDist, MaxDist, True));
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.PointsNearby(Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray;
@@ -1500,7 +1499,7 @@ begin
       Buffer.Add(Tree.RangeQueryEx(Other[I], MinDistX, MinDistY, MaxDistX, MaxDistY, True));
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.IsPointNearby(Other: TPoint; MinDist, MaxDist: Double): Boolean;
@@ -1663,7 +1662,7 @@ begin
     Buffer.Add(Copy(TPA, Start, I-Start));
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.Columns: T2DPointArray;
@@ -1686,7 +1685,7 @@ begin
     Buffer.Add(Copy(TPA, Start, I-Start));
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.Split(Dist: Integer): T2DPointArray;
@@ -1713,7 +1712,7 @@ begin
     while ((Hi - ec) >= 0) do
     begin
       if (Buffer.Count > 0) then
-        ResultBuffer.Add(Buffer.Copy());
+        ResultBuffer.Add(Buffer.ToArray());
       Buffer.Clear();
       Buffer.Add(TPA[0]);
 
@@ -1741,9 +1740,9 @@ begin
     end;
 
     if (Buffer.Count > 0) then
-      ResultBuffer.Add(Buffer.Copy());
+      ResultBuffer.Add(Buffer.ToArray());
 
-    Result := ResultBuffer.Trim();
+    Result := ResultBuffer.ToArray(False);
   end;
 end;
 
@@ -1770,7 +1769,7 @@ begin
     while ((Hi - ec) >= 0) do
     begin
       if (Buffer.Count > 0) then
-        ResultBuffer.Add(Buffer.Copy());
+        ResultBuffer.Add(Buffer.ToArray());
       Buffer.Clear();
       Buffer.Add(TPA[0]);
 
@@ -1798,9 +1797,9 @@ begin
     end;
 
     if (Buffer.Count > 0) then
-      ResultBuffer.Add(Buffer.Copy());
+      ResultBuffer.Add(Buffer.ToArray());
 
-    Result := ResultBuffer.Trim();
+    Result := ResultBuffer.ToArray(False);
   end;
 end;
 
@@ -1856,7 +1855,7 @@ begin
       if PointScan[TPA[I].Y, TPA[I].X].HasPoints then
       begin
         if (Buffer.Count > 0) then
-          ResultBuffer.Add(Buffer.Copy());
+          ResultBuffer.Add(Buffer.ToArray());
 
         Buffer.Clear();
         Buffer.Add(TPA[I].X + OffsetX, TPA[I].Y + OffsetY);
@@ -1904,9 +1903,9 @@ begin
       end;
 
     if (Buffer.Count > 0) then
-      ResultBuffer.Add(Buffer.Copy());
+      ResultBuffer.Add(Buffer.ToArray());
 
-    Result := ResultBuffer.Trim();
+    Result := ResultBuffer.ToArray(False);
   end;
 end;
 
@@ -1960,7 +1959,7 @@ begin
       if PointScan[TPA[I].Y, TPA[I].X].HasPoints then
       begin
         if (Buffer.Count > 0) then
-          ResultBuffer.Add(Buffer.Copy());
+          ResultBuffer.Add(Buffer.ToArray());
 
         Buffer.Clear();
         Buffer.Add(TPA[I].X + OffsetX, TPA[I].Y + OffsetY);
@@ -2000,9 +1999,9 @@ begin
       end;
 
     if (Buffer.Count > 0) then
-      ResultBuffer.Add(Buffer.Copy());
+      ResultBuffer.Add(Buffer.ToArray());
 
-    Result := ResultBuffer.Trim();
+    Result := ResultBuffer.ToArray(False);
   end;
 end;
 
@@ -2057,7 +2056,7 @@ begin
 
     SetLength(Result, ScanCount);
     for I := 0 to ScanCount - 1 do
-      Result[I] := Scans[I].Arr.Trim();
+      Result[I] := Scans[I].Arr.ToArray(False);
   end;
 end;
 
@@ -2114,7 +2113,7 @@ begin
 
     SetLength(Result, ScanCount);
     for I := 0 to ScanCount - 1 do
-      Result[I] := Scans[I].Arr.Trim();
+      Result[I] := Scans[I].Arr.ToArray(False);
   end;
 end;
 
@@ -2154,7 +2153,7 @@ begin
     for I := 0 to High(Result) do
       if (Buffers[I].Count > 0) then
       begin
-        Result[ResultCount] := Buffers[I].Trim();
+        Result[ResultCount] := Buffers[I].ToArray(False);
         Inc(ResultCount);
       end;
     SetLength(Result, ResultCount);

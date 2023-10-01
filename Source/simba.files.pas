@@ -108,7 +108,7 @@ uses
   BaseUnix,
   {$ENDIF}
   FileUtil, LazFileUtils, Zipper, IniFiles, md5, sha1,
-  simba.encoding, simba.overallocatearray;
+  simba.encoding, simba.arraybuffer;
 
 class function TSimbaDir.DirList(Path: String; Recursive: Boolean): TStringArray;
 var
@@ -137,7 +137,7 @@ var
 begin
   Get(Path);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 class function TSimbaDir.DirListFiles(Path: String; Recursive: Boolean): TStringArray;
@@ -168,7 +168,7 @@ var
 begin
   Get(Path);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 class function TSimbaDir.DirSearch(Path: String; Mask: String; Recursive: Boolean): TStringArray;

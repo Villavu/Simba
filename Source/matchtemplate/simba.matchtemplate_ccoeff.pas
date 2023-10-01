@@ -210,7 +210,7 @@ type
 
 function TMatchTemplateCache_CCOEFF.GetSliceCache(Lo, Hi: Integer): TSliceCache;
 var
-  I, Y: Integer;
+  I: Integer;
   ImgSlice: TRGBMatrix;
 begin
   Lock.Enter();

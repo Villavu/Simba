@@ -37,7 +37,7 @@ var
 implementation
 
 uses
-  simba.datetime, simba.overallocatearray, simba.threadpool, simba.tpa, simba.atpa;
+  simba.arraybuffer, simba.threadpool, simba.tpa, simba.atpa;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
@@ -267,7 +267,7 @@ begin
         Break;
     end;
 
-    Result := PointBuffer.Trim();
+    Result := PointBuffer.ToArray(False);
   finally
     FreeMem(BitmapColors);
   end;

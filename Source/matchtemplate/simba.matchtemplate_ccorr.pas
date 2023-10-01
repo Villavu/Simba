@@ -43,7 +43,7 @@ implementation
 
 uses
   simba.threadpool, simba.simplelock,
-  simba.singlematrix, simba.integermatrix;
+  simba.singlematrix;
 
 // MatchTemplate_CCORR
 function __MatchTemplate_CCORR(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -181,7 +181,7 @@ type
 function TMatchTemplateCache_CCORR.GetSliceCache(Lo, Hi: Integer): TSliceCache;
 var
   ImgSlice: TRGBMatrix;
-  I, Y: Integer;
+  I: Integer;
 begin
   Lock.Enter();
 

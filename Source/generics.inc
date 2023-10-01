@@ -134,7 +134,7 @@ end;
 generic function IndicesOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
 var
   I: Integer;
-  Res: specialize TSimbaOverAllocateArray<Integer>;
+  Res: TSimbaIntegerBuffer;
 begin
   Res.Init(4);
 
@@ -142,7 +142,7 @@ begin
     if (Item = Arr[I]) then
       Res.Add(I);
 
-  Result := Res.Trim();
+  Result := Res.ToArray(False);
 end;
 
 generic function Mode<_T>(const Arr: specialize TArray<_T>): Integer;
@@ -197,7 +197,7 @@ end;
 generic function IndicesOf_SameValue<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
 var
   I: Integer;
-  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+  Buffer: TSimbaIntegerBuffer;
 begin
   Buffer.Init(4);
 
@@ -205,6 +205,6 @@ begin
     if SameValue(Item, Arr[I]) then
       Buffer.Add(I);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 {$ENDIF}

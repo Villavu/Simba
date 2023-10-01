@@ -63,7 +63,7 @@ type
 implementation
 
 uses
-  simba.tpa, simba.algo_sort, simba.overallocatearray, simba.integermatrix, simba.quad;
+  simba.tpa, simba.algo_sort, simba.arraybuffer, simba.quad;
 
 function T2DPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): T2DPointArray;
 var
@@ -290,7 +290,7 @@ begin
       __NE__: if (Length(Self[I]) <> Len) then Buffer.Add(Copy(Self[I]));
     end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function T2DPointArrayHelper.ExcludeSize(MinLen, MaxLen: Integer): T2DPointArray;
@@ -304,7 +304,7 @@ begin
     if InRange(Length(Self[I]), MinLen, MaxLen) then
       Buffer.Add(Copy(Self[I]));
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);;
 end;
 
 function T2DPointArrayHelper.ExcludeSizeEx(MaxLen: Integer): T2DPointArray;
@@ -324,7 +324,7 @@ begin
       if InRange(ShortSideLen, MinShortSide, MaxShortSide) and InRange(LongSideLen, MinLongSide, MaxLongSide) then
         Buffer.Add(Copy(Self[I]));
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);;
 end;
 
 function T2DPointArrayHelper.ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
@@ -447,7 +447,7 @@ begin
       end;
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);;
 end;
 
 

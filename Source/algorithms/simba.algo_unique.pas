@@ -26,7 +26,7 @@ function Algo_Unique_String(const Arr: TStringArray): TStringArray;
 implementation
 
 uses
-  simba.tpa, simba.overallocatearray, simba.math;
+  simba.tpa, simba.arraybuffer, simba.math;
 
 generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
 var
@@ -133,7 +133,7 @@ var
     Bucket: TIntegerArray;
     Count: Integer;
   end;
-  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+  Buffer: TSimbaIntegerBuffer;
 label
   Next;
 begin
@@ -164,7 +164,7 @@ begin
     Next:
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function Algo_Unique_String(const Arr: TStringArray): TStringArray;
@@ -175,7 +175,7 @@ var
     Bucket: TStringArray;
     Count: Integer;
   end;
-  Buffer: specialize TSimbaOverAllocateArray<String>;
+  Buffer: TSimbaStringBuffer;
 label
   Next;
 begin
@@ -206,7 +206,7 @@ begin
     Next:
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 end.
