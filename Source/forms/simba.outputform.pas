@@ -31,7 +31,9 @@ type
       end;
     end;
 
-    procedure SimbaSettingChanged(Setting: TSimbaSetting);
+    procedure DoSettingChange_FontName(Setting: TSimbaSetting);
+    procedure DoSettingChange_FontSize(Setting: TSimbaSetting);
+    procedure DoSettingChange_FontAntiAliased(Setting: TSimbaSetting);
 
     procedure DoOpenLink(Data: PtrInt);
     procedure DoSpecialLineMarkup(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
@@ -160,16 +162,20 @@ begin
   Result := TSimbaTab(Parent);
 end;
 
-procedure TSimbaOutputBox.SimbaSettingChanged(Setting: TSimbaSetting);
+procedure TSimbaOutputBox.DoSettingChange_FontName(Setting: TSimbaSetting);
 begin
-  if Setting.Equals(SimbaSettings.OutputBox.FontAntiAliased) then
-    FontAntialising := Setting.Value
-  else
-  if Setting.Equals(SimbaSettings.OutputBox.FontSize) then
-    Font.Size := Setting.Value
-  else
-  if Setting.Equals(SimbaSettings.OutputBox.FontName) and IsFontFixed(Setting.Value) then
+  if IsFontFixed(Setting.Value) then
     Font.Name := Setting.Value;
+end;
+
+procedure TSimbaOutputBox.DoSettingChange_FontSize(Setting: TSimbaSetting);
+begin
+  Font.Size := Setting.Value;
+end;
+
+procedure TSimbaOutputBox.DoSettingChange_FontAntiAliased(Setting: TSimbaSetting);
+begin
+  FontAntialising := Setting.Value;
 end;
 
 procedure TSimbaOutputBox.DoOpenLink(Data: PtrInt);
@@ -244,8 +250,6 @@ begin
 end;
 
 constructor TSimbaOutputBox.Create(AOwner: TComponent);
-var
-  Setting: TSimbaSetting;
 begin
   inherited Create(AOwner, False);
 
@@ -269,15 +273,13 @@ begin
   with MouseTextActions.Add() do
     Command := emcMouseLink;
 
-  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
-  for Setting in [SimbaSettings.OutputBox.FontSize, SimbaSettings.OutputBox.FontName, SimbaSettings.OutputBox.FontAntiAliased] do
-    SimbaSettingChanged(Setting);
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.OutputBox.FontName, @DoSettingChange_FontName, True);
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.OutputBox.FontSize, @DoSettingChange_FontSize, True);
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.OutputBox.FontAntiAliased, @DoSettingChange_FontAntiAliased, True);
 end;
 
 destructor TSimbaOutputBox.Destroy;
 begin
-  SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
-
   if (FLock <> nil) then
     FreeAndNil(FLock);
   if (FBuffer <> nil) then

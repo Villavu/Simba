@@ -185,7 +185,7 @@ begin
   FEditor.Attributes.SaveToFile(FileName);
 
   SimbaSettings.Editor.CustomColors.Value := FileName;
-  SimbaSettings.Changed(SimbaSettings.Editor.CustomColors);
+  SimbaSettings.Editor.CustomColors.Changed();
 end;
 
 procedure TEditorColorsFrame.DoSaveButtonClick(Sender: TObject);
@@ -205,7 +205,7 @@ begin
       FEditor.Attributes.SaveToFile(FileName);
 
       SimbaSettings.Editor.CustomColors.Value := FileName;
-      SimbaSettings.Changed(SimbaSettings.Editor.CustomColors);
+      SimbaSettings.Editor.CustomColors.Changed();
     end;
   finally
     Free();

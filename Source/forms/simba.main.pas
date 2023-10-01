@@ -261,9 +261,12 @@ type
     procedure SetupCompleted;
 
     procedure DoColorPicked(Data: PtrInt);
-    procedure DoSettingChanged_Toolbar(Setting: TSimbaSetting);
 
-    procedure SimbaSettingChanged(Setting: TSimbaSetting);
+    procedure DoSettingChanged_Toolbar(Setting: TSimbaSetting);
+    procedure DoSettingChanged_CustomFontSize(Setting: TSimbaSetting);
+    procedure DoSettingChanged_LockLayout(Setting: TSimbaSetting);
+    procedure DoSettingChanged_TrayIconVisible(Setting: TSimbaSetting);
+    procedure DoSettingChanged_ConsoleVisible(Setting: TSimbaSetting);
 
     procedure HandleRecentFileClick(Sender: TObject);
     procedure HandleException(Sender: TObject; E: Exception);
@@ -638,19 +641,17 @@ begin
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoScriptTabChange);
   SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
 
-  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
-
   with SimbaSettings do
   begin
     RegisterChangeHandler(Self, General.ToolbarSize, @DoSettingChanged_Toolbar, True);
     RegisterChangeHandler(Self, General.ToolbarPosition, @DoSettingChanged_Toolbar, True);
     RegisterChangeHandler(Self, General.ToolBarSpacing, @DoSettingChanged_Toolbar, True);
-  end;
 
-  SimbaSettingChanged(SimbaSettings.General.CustomFontSize);
-  SimbaSettingChanged(SimbaSettings.General.LockLayout);
-  SimbaSettingChanged(SimbaSettings.General.TrayIconVisible);
-  SimbaSettingChanged(SimbaSettings.General.ConsoleVisible);
+    RegisterChangeHandler(Self, General.CustomFontSize, @DoSettingChanged_CustomFontSize, True);
+    RegisterChangeHandler(Self, General.LockLayout, @DoSettingChanged_LockLayout, True);
+    RegisterChangeHandler(Self, General.TrayIconVisible, @DoSettingChanged_TrayIconVisible, True);
+    RegisterChangeHandler(Self, General.ConsoleVisible, @DoSettingChanged_ConsoleVisible, True);
+  end;
 
   Application.CaptureExceptions := True;
   Application.OnException := @Self.HandleException;
@@ -707,9 +708,6 @@ begin
 
     FreeAndNil(FMouseLogger);
   end;
-
-  if (SimbaSettings <> nil) then
-    SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
 
   if (FRecentFiles <> nil) then
   begin
@@ -847,16 +845,24 @@ begin
     ToolBar.BorderSpacing.Around := Setting.Value;
 end;
 
-procedure TSimbaForm.SimbaSettingChanged(Setting: TSimbaSetting);
+procedure TSimbaForm.DoSettingChanged_CustomFontSize(Setting: TSimbaSetting);
 begin
-  if (Setting = SimbaSettings.General.CustomFontSize) then
-    SetCustomFontSize(Setting.Value);
-  if (Setting = SimbaSettings.General.ConsoleVisible) then
-    SetConsoleVisible(Setting.Value);
-  if (Setting = SimbaSettings.General.LockLayout) then
-    SetLayoutLocked(Setting.Value);
-  if (Setting = SimbaSettings.General.TrayIconVisible) then
-    SetTrayIconVisible(Setting.Value);
+  SetCustomFontSize(Setting.Value);
+end;
+
+procedure TSimbaForm.DoSettingChanged_LockLayout(Setting: TSimbaSetting);
+begin
+  SetLayoutLocked(Setting.Value);
+end;
+
+procedure TSimbaForm.DoSettingChanged_TrayIconVisible(Setting: TSimbaSetting);
+begin
+  SetTrayIconVisible(Setting.Value);
+end;
+
+procedure TSimbaForm.DoSettingChanged_ConsoleVisible(Setting: TSimbaSetting);
+begin
+  SetConsoleVisible(Setting.Value);
 end;
 
 procedure TSimbaForm.MenuCloseTabClick(Sender: TObject);

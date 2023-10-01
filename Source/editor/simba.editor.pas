@@ -41,8 +41,13 @@ type
 
     procedure MaybeReplaceModifiers;
 
-    procedure SimbaSettingChanged(Setting: TSimbaSetting);
-    procedure DoSimbaSettingChanged_Colors(Setting: TSimbaSetting);
+    procedure DoSettingChanged_Colors(Setting: TSimbaSetting);
+    procedure DoSettingChanged_AllowCaretPastEOL(Setting: TSimbaSetting);
+    procedure DoSettingChanged_RightMargin(Setting: TSimbaSetting);
+    procedure DoSettingChanged_RightMarginVisible(Setting: TSimbaSetting);
+    procedure DoSettingChanged_AntiAliased(Setting: TSimbaSetting);
+    procedure DoSettingChanged_FontSize(Setting: TSimbaSetting);
+    procedure DoSettingChanged_FontName(Setting: TSimbaSetting);
 
     // Accept drop from TTreeView
     procedure DoDragDrop(Sender, Source: TObject; X, Y: Integer);
@@ -100,8 +105,7 @@ type
 implementation
 
 uses
-  SynEditPointClasses, SynGutterBase, SynGutter, SynHighlighterPas_Simba, SynEditMarkupHighAll,
-  LazSynEditMouseCmdsTypes, Forms,
+  SynEditPointClasses, SynGutter, SynHighlighterPas_Simba, SynEditMarkupHighAll, LazSynEditMouseCmdsTypes, Forms,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_multicaret,
@@ -290,52 +294,47 @@ begin
   ReplaceKeyStrokeModifiers(ssCtrl, ssMeta);
 end;
 
-procedure TSimbaEditor.SimbaSettingChanged(Setting: TSimbaSetting);
-begin
-  case Setting.Name of
-    'Editor.FontSize':
-      begin
-        Font.Size := Setting.Value;
-      end;
-
-    'Editor.FontName':
-      begin
-        if IsFontFixed(Setting.Value) then
-          Font.Name := Setting.Value;
-      end;
-
-    'Editor.RightMargin':
-      begin
-        RightEdge := Setting.Value;
-      end;
-
-    'Editor.RightMarginVisible':
-      begin
-        if Setting.Value then
-          Options := Options - [eoHideRightMargin]
-        else
-          Options := Options + [eoHideRightMargin];
-      end;
-
-    'Editor.AntiAliased':
-      begin
-        FontAntialising := Setting.Value;
-      end;
-
-    'Editor.AllowCaretPastEOL':
-      begin
-        if Setting.Value then
-          Options := Options + [eoTrimTrailingSpaces, eoScrollPastEol]
-        else
-          Options := Options - [eoTrimTrailingSpaces, eoScrollPastEol];
-      end;
-  end;
-end;
-
-procedure TSimbaEditor.DoSimbaSettingChanged_Colors(Setting: TSimbaSetting);
+procedure TSimbaEditor.DoSettingChanged_Colors(Setting: TSimbaSetting);
 begin
   if FUseSimbaColors then
     FAttributes.LoadFromFile(Setting.Value);
+end;
+
+procedure TSimbaEditor.DoSettingChanged_AllowCaretPastEOL(Setting: TSimbaSetting);
+begin
+  if Setting.Value then
+    Options := Options + [eoTrimTrailingSpaces, eoScrollPastEol]
+  else
+    Options := Options - [eoTrimTrailingSpaces, eoScrollPastEol];
+end;
+
+procedure TSimbaEditor.DoSettingChanged_RightMargin(Setting: TSimbaSetting);
+begin
+  RightEdge := Setting.Value;
+end;
+
+procedure TSimbaEditor.DoSettingChanged_RightMarginVisible(Setting: TSimbaSetting);
+begin
+  if Setting.Value then
+    Options := Options - [eoHideRightMargin]
+  else
+    Options := Options + [eoHideRightMargin];
+end;
+
+procedure TSimbaEditor.DoSettingChanged_AntiAliased(Setting: TSimbaSetting);
+begin
+  FontAntialising := Setting.Value;
+end;
+
+procedure TSimbaEditor.DoSettingChanged_FontSize(Setting: TSimbaSetting);
+begin
+  Font.Size := Setting.Value;
+end;
+
+procedure TSimbaEditor.DoSettingChanged_FontName(Setting: TSimbaSetting);
+begin
+  if IsFontFixed(Setting.Value) then
+    Font.Name := Setting.Value;
 end;
 
 procedure TSimbaEditor.DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
@@ -501,23 +500,20 @@ begin
   MaybeReplaceModifiers();
   {$ENDIF}
 
-  SimbaSettingChanged(SimbaSettings.Editor.AllowCaretPastEOL);
-  SimbaSettingChanged(SimbaSettings.Editor.RightMarginVisible);
-  SimbaSettingChanged(SimbaSettings.Editor.AntiAliased);
-  SimbaSettingChanged(SimbaSettings.Editor.FontSize);
-  SimbaSettingChanged(SimbaSettings.Editor.FontName);
-
-  SimbaSettings.RegisterChangeHandler(@SimbaSettingChanged);
-
   with SimbaSettings do
-    RegisterChangeHandler(Self, Editor.CustomColors, @DoSimbaSettingChanged_Colors);
+  begin
+    RegisterChangeHandler(Self, Editor.CustomColors, @DoSettingChanged_Colors);
+    RegisterChangeHandler(Self, Editor.AllowCaretPastEOL, @DoSettingChanged_AllowCaretPastEOL, True);
+    RegisterChangeHandler(Self, Editor.RightMargin, @DoSettingChanged_RightMargin, True);
+    RegisterChangeHandler(Self, Editor.RightMarginVisible, @DoSettingChanged_RightMarginVisible, True);
+    RegisterChangeHandler(Self, Editor.AntiAliased, @DoSettingChanged_AntiAliased, True);
+    RegisterChangeHandler(Self, Editor.FontSize, @DoSettingChanged_FontSize, True);
+    RegisterChangeHandler(Self, Editor.FontName, @DoSettingChanged_FontName, True);
+  end;
 end;
 
 destructor TSimbaEditor.Destroy;
 begin
-  if (SimbaSettings <> nil) then
-    SimbaSettings.UnRegisterChangeHandler(@SimbaSettingChanged);
-
   if (FAttributes <> nil) then
     FreeAndNil(FAttributes);
 
