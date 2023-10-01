@@ -15,7 +15,7 @@ implementation
 uses
   Graphics,
   lptypes,
-  simba.image, simba.circle;
+  simba.image;
 
 type
   PBitmap = ^TBitmap;

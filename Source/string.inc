@@ -422,7 +422,7 @@ end;
 
 function TSimbaStringHelper.IndicesOf(const Value: String): TIntegerArray;
 var
-  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+  Buffer: TSimbaIntegerBuffer;
   Matches: SizeIntArray;
   I: Integer;
 begin
@@ -438,7 +438,7 @@ begin
       if (Self[I] = Value) then
         Buffer.Add(I);
 
-    Result := Buffer.Trim();
+    Result := Buffer.ToArray(False);
     Exit;
   end;
 
@@ -452,7 +452,7 @@ end;
 
 function TSimbaStringHelper.IndicesOf(const Value: String; Offset: Integer): TIntegerArray;
 var
-  Buffer: specialize TSimbaOverAllocateArray<Integer>;
+  Buffer: TSimbaIntegerBuffer;
   Matches: SizeIntArray;
   I: Integer;
 begin
@@ -468,7 +468,7 @@ begin
       if (Self[I] = Value) then
         Buffer.Add(I);
 
-    Result := Buffer.Trim();
+    Result := Buffer.ToArray(False);
     Exit;
   end;
 

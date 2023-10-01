@@ -79,7 +79,7 @@ type
 implementation
 
 uses
-  simba.overallocatearray, simba.singlematrix, simba.tpa, simba.matchtemplate,
+  simba.arraybuffer, simba.singlematrix, simba.tpa, simba.matchtemplate,
   simba.finder_color, simba.finder_image, simba.finder_dtm;
 
 function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TSimbaImage): Boolean;
@@ -440,7 +440,7 @@ begin
     Bitmap.Free();
   end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TSimbaFinder.FindEdges(MinDiff: Single; Bounds: TBox): TPointArray;

@@ -26,7 +26,7 @@ type
 implementation
 
 uses
-  simba.math, simba.overallocatearray;
+  simba.math, simba.arraybuffer;
 
 function TIntegerMatrixHelper.Copy: TIntegerMatrix;
 var
@@ -130,7 +130,7 @@ end;
 function TIntegerMatrixHelper.Indices(Value: Integer; Comparator: EComparator): TPointArray;
 var
   W, H, X, Y: Integer;
-  Buffer: specialize TSimbaOverAllocateArray<TPoint>;
+  Buffer: TSimbaPointBuffer;
 begin
   W := Self.Width - 1;
   H := Self.Height - 1;
@@ -147,7 +147,7 @@ begin
           __NE__: if Self[Y, X] <> Value then Buffer.Add(TPoint.Create(X, Y));
         end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 end.

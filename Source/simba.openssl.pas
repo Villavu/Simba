@@ -43,7 +43,7 @@ begin
   OutputStream := TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite);
 
   repeat
-    Count := InputStream.Read(Buffer[1], Length(Buffer));
+    Count := InputStream.Read({%H-}Buffer[1], Length(Buffer));
   until OutputStream.Write(Buffer[1], Count) = 0;
 
   InputStream.Free();

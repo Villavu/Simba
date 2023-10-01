@@ -39,7 +39,7 @@ function FindDTMRotatedOnTarget(Target: TSimbaTarget;
 implementation
 
 uses
-  simba.colormath_distance, simba.math, simba.overallocatearray;
+  simba.colormath_distance, simba.arraybuffer;
 
 type
   TSearchPoint = record
@@ -178,7 +178,7 @@ begin
       Break;
   end;
 
-  Result := PointBuffer.Trim();
+  Result := PointBuffer.ToArray(False);
 end;
 
 function FindDTMRotatedOnBuffer(var Limit: TSimpleThreadsafeLimit; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; OffsetX, OffsetY: Integer): TPointArray;
@@ -257,7 +257,7 @@ var
 
 type
   TMatch = record X,Y: Integer; Deg: Double; end;
-  TMatchBuffer = specialize TSimbaOverAllocateArray<TMatch>;
+  TMatchBuffer = specialize TSimbaArrayBuffer<TMatch>;
 var
   I, X, Y: Integer;
   MainPointArea: TBox;

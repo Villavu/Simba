@@ -90,7 +90,7 @@ type
 implementation
 
 uses
-  simba.image_lazbridge, simba.singlematrix, simba.integermatrix;
+  simba.image_lazbridge;
 
 const
   HEATMAP_LOOKUP_TABLE: array[0..837] of TColor = (

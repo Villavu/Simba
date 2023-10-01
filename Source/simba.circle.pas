@@ -43,7 +43,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.tpa, simba.random, simba.overallocatearray, simba.geometry;
+  simba.math, simba.tpa, simba.random, simba.arraybuffer, simba.geometry;
 
 class function TCircleHelper.Create(AX, AY: Integer; ARadius: Integer): TCircle;
 begin
@@ -117,7 +117,7 @@ begin
     if Contains(Points[I]) then
       Buffer.Add(Points[I]);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TCircleHelper.Exclude(Points: TPointArray): TPointArray;
@@ -130,7 +130,7 @@ begin
     if not Contains(Points[I]) then
       Buffer.Add(Points[I]);
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TCircleHelper.RandomPoint: TPoint;

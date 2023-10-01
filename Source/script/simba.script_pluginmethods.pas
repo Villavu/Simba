@@ -62,7 +62,7 @@ var
 implementation
 
 uses
-  lpvartypes, lpvartypes_record, lpvartypes_array, lpffiwrappers;
+  lpvartypes, lpvartypes_record, lpvartypes_array;
 
 // Sync wrapper which includes a data parameter
 type

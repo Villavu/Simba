@@ -135,7 +135,7 @@ var iP, q : qword;
     arr : array [0..63] of TQoiPixel;
     iA : DWord; {index in pixel array}
 
-    p, aQ : pbyte; orgSize, imgSize : qword;
+    p: pbyte; orgSize, imgSize : qword;
     Row, Col, w, h : DWord;
     aLine : pbyte;
 

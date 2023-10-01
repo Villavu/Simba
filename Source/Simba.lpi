@@ -340,7 +340,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="149">
+    <Units Count="150">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1021,6 +1021,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit148>
+      <Unit149>
+        <Filename Value="script/imports/simba/simba.import_pointbuffer.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit149>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

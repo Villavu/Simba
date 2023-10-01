@@ -100,7 +100,7 @@ type
 implementation
 
 uses
-  SynEditPointClasses, SynGutterBase, SynGutter, SynEditMarkupWordGroup, SynHighlighterPas_Simba, SynEditMarkupHighAll,
+  SynEditPointClasses, SynGutterBase, SynGutter, SynHighlighterPas_Simba, SynEditMarkupHighAll,
   LazSynEditMouseCmdsTypes, Forms,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
@@ -291,8 +291,6 @@ begin
 end;
 
 procedure TSimbaEditor.SimbaSettingChanged(Setting: TSimbaSetting);
-var
-  I: Integer;
 begin
   case Setting.Name of
     'Editor.FontSize':

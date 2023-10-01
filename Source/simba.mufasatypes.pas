@@ -424,7 +424,7 @@ implementation
 
 uses
   math, forms, uregexpr, strutils, jsonparser, jsonscanner,
-  simba.math, simba.overallocatearray, simba.geometry,
+  simba.arraybuffer, simba.geometry,
   simba.algo_sort, simba.random;
 
 {$DEFINE BODY}

@@ -79,7 +79,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.overallocatearray, simba.heaparray, simba.tpa;
+  simba.math, simba.arraybuffer, simba.heaparray, simba.tpa;
 
 class operator TSingleSum.:=(const Right: Single): TSingleSum;
 begin
@@ -360,7 +360,7 @@ begin
       for X := 0 to W do
       begin
         Value := Self[Y, X];
-        if (not IsNumber(Value)) or (HasValue and (Value <= Best)) then
+        if (not IsNumber(Value)) or (HasValue and (Value <= {%H-}Best)) then
           Continue;
 
         HasValue := True;
@@ -387,7 +387,7 @@ begin
       for X := 0 to W do
       begin
         Value := Self[Y, X];
-        if (not IsNumber(Value)) or (HasValue and (Value >= Best)) then
+        if (not IsNumber(Value)) or (HasValue and (Value >= {%H-}Best)) then
           Continue;
 
         HasValue := True;
@@ -424,7 +424,7 @@ end;
 function TSingleMatrixHelper.Indices(Value: Single; Comparator: EComparator): TPointArray;
 var
   W, H, X, Y: Integer;
-  Buffer: specialize TSimbaOverAllocateArray<TPoint>;
+  Buffer: TSimbaPointBuffer;
 begin
   W := Self.Width - 1;
   H := Self.Height - 1;
@@ -441,7 +441,7 @@ begin
           __NE__: if Self[Y, X] <> Value then Buffer.Add(TPoint.Create(X, Y));
         end;
 
-  Result := Buffer.Trim();
+  Result := Buffer.ToArray(False);
 end;
 
 function TSingleMatrixHelper.ArgMulti(Count: Integer; HiLo: Boolean): TPointArray;
@@ -639,7 +639,7 @@ var
       end;
     end;
 
-    Result := Buffer.Copy();
+    Result := Buffer.ToArray();
   end;
 
   function pass_y(): TPointArray;
@@ -659,7 +659,7 @@ var
       end;
     end;
 
-    Result := Buffer.Copy();
+    Result := Buffer.ToArray();
   end;
 
 var

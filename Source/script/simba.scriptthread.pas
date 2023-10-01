@@ -74,7 +74,7 @@ var
   State: ESimbaScriptState;
 begin
   Stream := THandleStream.Create(StdInputHandle);
-  while Stream.Read(State, SizeOf(ESimbaScriptState)) = SizeOf(ESimbaScriptState) do
+  while Stream.Read(State{%H-}, SizeOf(ESimbaScriptState)) = SizeOf(ESimbaScriptState) do
     FScript.State := State;
   Stream.Free();
 end;
