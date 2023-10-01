@@ -33,6 +33,13 @@ begin
     Codeinsight.SetScript(Script, ScriptFileName, CaretPos);
     Codeinsight.Run();
 
+    Decl := Codeinsight.ScriptParser.Items.GetByPosition(CaretPos);
+    if (Decl is TDeclaration_IncludeDirective) then
+    begin
+      SimbaScriptTabsForm.Open(TDeclaration_IncludeDirective(Decl).FileName);
+      Exit;
+    end;
+
     Decl := Codeinsight.ParseExpression(What, []);
     if (Decl <> nil) then
     begin
