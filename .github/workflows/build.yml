@@ -93,9 +93,6 @@ jobs:
           brew install create-dmg
           create-dmg --window-size 500 330 --icon-size 48 --icon "Simba.app" 130 135 --app-drop-link 380 135 --background "Source/macosbundle/installer.tff" "${{ matrix.config.binary }}" "Simba.app"
 
-          #ditto -c -k --sequesterRsrc --keepParent Simba.app ${{ matrix.config.binary }}
-
-
       - name: Test Simba
         if: matrix.config.test != ''
         run: |
