@@ -754,6 +754,36 @@ begin
   PDouble(Result)^ := PPointArray(Params^[0])^.Circularity();
 end;
 
+(*
+TPointArray.DouglasPeucker
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+> function TPointArray.DouglasPeucker(epsilon: Double): TPointArray;
+*)
+procedure _LapeTPADouglasPeucker(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.DouglasPeucker(PDouble(Params^[1])^);
+end;
+
+(*
+TPointArray.ConcaveHull
+~~~~~~~~~~~~~~~~~~~~~~~
+> function TPointArray.ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPointArray;
+*)
+procedure _LapeTPAConcaveHull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ConcaveHull(PDouble(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
+TPointArray.ConcaveHullEx
+~~~~~~~~~~~~~~~~~~~~~~~~~
+> function TPointArray.ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): T2DPointArray;
+*)
+procedure _LapeTPAConcaveHullEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  P2DPointArray(Result)^ := PPointArray(Params^[0])^.ConcaveHullEx(PDouble(Params^[1])^, PDouble(Params^[2])^);
+end;
+
 procedure ImportTPA(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -848,6 +878,10 @@ begin
     addGlobalFunc('function TPointArray.DistanceTransform: TSingleMatrix;', @_LapeTPADistanceTransform);
 
     addGlobalFunc('function TPointArray.Circularity: Double;', @_LapeTPACircularity);
+
+    addGlobalFunc('function TPointArray.DouglasPeucker(Epsilon: Double): TPointArray;', @_LapeTPADouglasPeucker);
+    addGlobalFunc('function TPointArray.ConcaveHull(Epsilon: Double = 2.5; kCount: Integer = 5): TPointArray;', @_LapeTPAConcaveHull);
+    addGlobalFunc('function TPointArray.ConcaveHullEx(MaxLeap: Double = -1; Epsilon: Double = 2): T2DPointArray;', @_LapeTPAConcaveHullEx);
 
     ImportingSection := '';
   end;
