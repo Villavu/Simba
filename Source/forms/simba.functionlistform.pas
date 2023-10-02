@@ -87,15 +87,13 @@ uses
 
 function GetImage(const Decl: TDeclaration): Integer;
 begin
-  //if (Decl is TDeclaration_Method) and Decl.isFunction       then Result := IMG_FUNC   else
-  //if (Decl is TDeclaration_Method) and Decl.isProcedure      then Result := IMG_PROC   else
-  //if (Decl is TDeclaration_Method) and Decl.isOperatorMethod then Result := IMG_FUNC   else
-  if (Decl is TDeclaration_Method)                           then Result := IMG_FUNC   else
-  if (Decl is TDeclaration_EnumElement)                      then Result := IMG_ENUM   else
-  if (Decl is TDeclaration_Type)                             then Result := IMG_TYPE   else
-  if (Decl is TDeclaration_Const)                            then Result := IMG_CONST  else
-  if (Decl is TDeclaration_Var)                              then Result := IMG_VAR    else
-  if (Decl is TDeclaration_Anchor)                           then Result := IMG_ANCHOR else
+  if (Decl is TDeclaration_Method)           then Result := IMG_FUNC   else
+  if (Decl is TDeclaration_EnumElement)      then Result := IMG_ENUM   else
+  if (Decl is TDeclaration_Type)             then Result := IMG_TYPE   else
+  if (Decl is TDeclaration_Const)            then Result := IMG_CONST  else
+  if (Decl is TDeclaration_Var)              then Result := IMG_VAR    else
+  if (Decl is TDeclaration_Anchor)           then Result := IMG_ANCHOR else
+  if (Decl is TDeclaration_IncludeDirective) then Result := IMG_FILE   else
     Result := -1;
 end;
 
@@ -121,11 +119,13 @@ begin
     else
       Result := Decl.Name
   else
-  if (Decl is TDeclaration_Method) then Result := TDeclaration_Method(Decl).HeaderString                                                                  else
-  if (Decl is TDeclaration_Type)   then Result := 'type '    + Decl.Name + ' = ' + Decl.TextNoCommentsSingleLine                                          else
-  if (Decl is TDeclaration_Const)  then Result := 'const '   + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
-  if (Decl is TDeclaration_Var)    then Result := 'var '     + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
-  if (Decl is TDeclaration_Anchor) then Result := 'Anchor "' + Decl.Name + '"'                                                                            else
+  if (Decl is TDeclaration_Method)           then Result := TDeclaration_Method(Decl).HeaderString                                                                  else
+  if (Decl is TDeclaration_Type)             then Result := 'type '    + Decl.Name + ' = ' + Decl.TextNoCommentsSingleLine                                          else
+  if (Decl is TDeclaration_Const)            then Result := 'const '   + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
+  if (Decl is TDeclaration_Var)              then Result := 'var '     + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
+  if (Decl is TDeclaration_Anchor)           then Result := 'Anchor "' + Decl.Name + '"'                                                                            else
+  if (Decl is TDeclaration_IncludeDirective) then Result := TDeclaration_IncludeDirective(Decl).FileName
+  else
     Result := '';
 end;
 
@@ -291,7 +291,7 @@ var
 begin
   RunInMainThread(@BeginUpdate);
 
-  if CanUpdate then
+  if {%H-}CanUpdate then
   begin
     FCodeInsight.SetScript(Script, ScriptFileName);
     FCodeInsight.Run();
