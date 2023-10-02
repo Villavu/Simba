@@ -589,6 +589,7 @@ begin
   inherited Create(AParser, nil, AParser.Lexer.TokenPos, AParser.Lexer.TokenPos + AParser.Lexer.TokenLen);
 
   FileName := AFileName;
+  Name := ChangeFileExt(ExtractFileName(FileName), '');
 end;
 
 constructor TDeclaration_Type.Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer);
@@ -1324,7 +1325,7 @@ begin
   for I := 0 to FItems.Count - 1 do
   begin
     Decl := FItems[I];
-    if (Decl.Name = '') then
+    if (Decl.Name = '') or (Decl.ClassType = TDeclaration_IncludeDirective) then
       Continue;
 
     if (Decl is TDeclaration_Method) and Decl.isObjectMethod then
