@@ -11,6 +11,7 @@
   - CreateFromEllipse
   - CreateFromCircle
   - ConvexHull
+  - ConcaveHull
   - Border
   - Skeleton
   - MinAreaRect
@@ -136,13 +137,17 @@ type
     function DistanceTransform: TSingleMatrix;
 
     function Circularity: Double;
+
+    function DouglasPeucker(epsilon: Double): TPointArray;
+    function ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPointArray;
+    function ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): T2DPointArray;
   end;
 
 implementation
 
 uses
   Math,
-  simba.arraybuffer, simba.geometry, simba.math,
+  simba.atpa, simba.arraybuffer, simba.geometry, simba.math,
   simba.algo_sort, simba.algo_intersection, simba.slacktree, simba.algo_unique;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
@@ -2415,6 +2420,126 @@ begin
   Result := Pass(Points, p2,p3,p1, Result, v); // very rarely is the p3 assumption is wrong.
   if (Result.Radius = $FFFF) then
     Result.Radius := Ceil(Distance(p1,p2) / 2);
+end;
+
+function TPointArrayHelper.DouglasPeucker(epsilon: Double): TPointArray;
+var
+  H, i, index: Int32;
+  dmax, d: Double;
+  Slice1,Slice2: TPointArray;
+begin
+  H := High(Self);
+  if (H = -1) then
+    Exit(nil);
+
+  dmax := 0;
+  index := 0;
+  for i:=1 to H do
+  begin
+    d := TSimbaGeometry.DistToLine(Self[i], Self[0], Self[H]);
+    if (d > dmax) then
+    begin
+      index := i;
+      dmax  := d;
+    end;
+  end;
+
+  if (dmax > epsilon) then
+  begin
+    Slice1 := Copy(Self, 0, index).DouglasPeucker(epsilon);
+    Slice2 := Copy(Self, index).DouglasPeucker(epsilon);
+
+    Result := Slice1;
+    Result += Slice2;
+  end else
+    Result := [Self[0], Self[High(Self)]];
+end;
+
+(*
+  Concave hull approximation using k nearest neighbors
+  Instead of describing a specific max distance we assume that the boundary points are evenly spread out
+  so we can simply extract a number of neighbors and connect the hull of those.
+  Worst case it cuts off points.
+
+  Will reduce the TPA to a simpler shape if it's dense, defined by epsilon.
+
+  If areas are cut off, you have two options based on your needs:
+  1. Increase "Epsilon", this will reduce accurate.. But it's faster.
+  2. Increase "kCount", this will maintain accuracy.. But it's slower.
+*)
+function TPointArrayHelper.ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPointArray;
+var
+  TPA, pts: TPointArray;
+  Buffer: TSimbaPointBuffer;
+  tree: TSlackTree;
+  i: Int32;
+  B: TBox;
+begin
+  B := Self.Bounds();
+  TPA := Self.PartitionEx(TPoint.Create(B.X1-Round(Epsilon), B.Y1-Round(Epsilon)), Round(Epsilon*2-1), Round(Epsilon*2-1)).Means();
+  if Length(TPA) <= 2 then
+    Exit(TPA);
+
+  tree.Init(TPA);
+  Buffer.Init(256);
+  for i:=0 to High(tree.data) do
+  begin
+    pts := tree.KNearest(tree.data[i].split, kCount, False);
+    if Length(pts) <= 1 then
+      Continue;
+    pts := pts.ConvexHull().Connect();
+
+    Buffer.Add(pts);
+  end;
+
+  TPA := Buffer.ToArray(False);
+
+  Result := TPA.Border().DouglasPeucker(Max(2, Epsilon/2));
+end;
+
+(*
+  Concave hull approximation using range query based on given distance "MaxLeap".
+  if maxleap doesn't cover all of the input then several output polygons will be created.
+  MaxLeap is by default automatically calulcated by the density of the polygon
+  described by convexhull. But can be changed.
+
+  Higher maxleap is slower.
+  Epsilon describes how accurate you want your output, and have some impact on speed.
+*)
+function TPointArrayHelper.ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): T2DPointArray;
+var
+  TPA, pts: TPointArray;
+  tree: TSlackTree;
+  i: Int32;
+  B: TBox;
+  Buffer: TSimbaPointBuffer;
+  BufferResult: TSimbaPointArrayBuffer;
+begin
+  B := Self.Bounds();
+  TPA := Self.PartitionEx(TPoint.Create(B.X1-Round(Epsilon), B.Y1-Round(Epsilon)), Round(Epsilon*2-1), Round(Epsilon*2-1)).Means();
+  if Length(TPA) <= 2 then
+    Exit([TPA]);
+  tree.Init(TPA);
+
+  if MaxLeap = -1 then
+    MaxLeap := Ceil(Sqrt(TSimbaGeometry.PolygonArea(TPA.ConvexHull()) / Length(TPA)) * Sqrt(2));
+
+  MaxLeap := Max(MaxLeap, Epsilon*2);
+  Buffer.Init(256);
+  for i:=0 to High(tree.data) do
+  begin
+    pts := tree.RangeQueryEx(tree.data[i].split, MaxLeap,MaxLeap, False);
+    if Length(pts) <= 1 then
+      Continue;
+
+    Buffer.Add(pts.ConvexHull().Connect());
+  end;
+
+  pts := Buffer.ToArray(False);
+  for pts in pts.Cluster(2) do
+    BufferResult.Add(pts.Border().DouglasPeucker(Epsilon));
+
+  Result := BufferResult.ToArray();
 end;
 
 end.
