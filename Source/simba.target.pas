@@ -73,6 +73,8 @@ type
     procedure SetCustomClientArea(B: TBox);
     function GetCustomClientArea: TBox;
     procedure SetAutoSetFocus(Value: Boolean);
+
+    procedure GetDimensions(out W, H: Integer);
   public
     function GetWindowTarget: TWindowHandle;
     function IsWindowTarget: Boolean; overload;
@@ -86,11 +88,11 @@ type
     function IsFocused: Boolean;
     function Focus: Boolean;
 
-    procedure GetDimensions(out W, H: Integer);
-    function GetWidth: Integer;
-    function GetHeight: Integer;
+    function Bounds: TBox;
+    function Width: Integer;
+    function Height: Integer;
 
-    function GetImage(Bounds: TBox): TSimbaImage;
+    function GetImage(ABounds: TBox): TSimbaImage;
 
     procedure SetDesktop;
     procedure SetWindow(Window: TWindowHandle);
@@ -112,8 +114,8 @@ type
     procedure KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
     function KeyPressed(Key: EKeyCode): Boolean;
 
-    function ValidateBounds(var Bounds: TBox): Boolean;
-    function GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+    function ValidateBounds(var ABounds: TBox): Boolean;
+    function GetImageData(var ABounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
     procedure FreeImageData(var Data: PColorBGRA);
 
     function AddOnInvalidTargetEvent(Event: TInvalidTargetEvent): TInvalidTargetEvent;
@@ -259,6 +261,32 @@ begin
     Result := FMethods.Focus(FTarget);
 end;
 
+function TSimbaTarget.Bounds: TBox;
+var
+  W, H: Integer;
+begin
+  GetDimensions(W, H);
+
+  Result.X1 := 0;
+  Result.Y1 := 0;
+  Result.X2 := W-1;
+  Result.Y2 := H-1;
+end;
+
+function TSimbaTarget.Width: Integer;
+var
+  _: Integer;
+begin
+  GetDimensions(Result, _);
+end;
+
+function TSimbaTarget.Height: Integer;
+var
+  _: Integer;
+begin
+  GetDimensions(_, Result);
+end;
+
 procedure TSimbaTarget.GetDimensions(out W, H: Integer);
 begin
   CheckInvalidTarget();
@@ -267,27 +295,17 @@ begin
     FMethods.GetDimensions(FTarget, W, H);
 end;
 
-function TSimbaTarget.GetWidth: Integer;
-var
-  _: Integer;
-begin
-  GetDimensions(Result, _);
-end;
-
-function TSimbaTarget.GetHeight: Integer;
-var
-  _: Integer;
-begin
-  GetDimensions(_, Result);
-end;
-
-function TSimbaTarget.GetImage(Bounds: TBox): TSimbaImage;
+function TSimbaTarget.GetImage(ABounds: TBox): TSimbaImage;
 var
   Data: PColorBGRA;
   DataWidth: Integer;
 begin
-  if GetImageData(Bounds, Data, DataWidth) then
-    Result := TSimbaImage.CreateFromData(Bounds.Width, Bounds.Height, Data, DataWidth)
+  if GetImageData(ABounds, Data, DataWidth) then
+  try
+    Result := TSimbaImage.CreateFromData(ABounds.Width, ABounds.Height, Data, DataWidth);
+  finally
+    FreeImageData(Data);
+  end
   else
     Result := TSimbaImage.Create();
 end;
@@ -473,8 +491,8 @@ procedure TSimbaTarget.KeyUp(Key: EKeyCode);
 begin
   CheckAutoFocus();
 
-  if HasMethod(FMethods.KeyDown, 'KeyUp') then
-    FMethods.KeyDown(FTarget, Key);
+  if HasMethod(FMethods.KeyUp, 'KeyUp') then
+    FMethods.KeyUp(FTarget, Key);
 end;
 
 procedure TSimbaTarget.KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
@@ -491,53 +509,53 @@ begin
     Result := FMethods.KeyPressed(FTarget, Key);
 end;
 
-function TSimbaTarget.ValidateBounds(var Bounds: TBox): Boolean;
+function TSimbaTarget.ValidateBounds(var ABounds: TBox): Boolean;
 
   procedure ValidateBoundsInCustomClientArea;
   begin
-    if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
-      Bounds := FCustomClientArea
+    if (ABounds.X1 = -1) and (ABounds.Y1 = -1) and (ABounds.X2 = -1) and (ABounds.Y2 = -1) then
+      ABounds := FCustomClientArea
     else
     begin
-      Bounds := Bounds.Offset(FCustomClientArea.TopLeft);
+      ABounds := ABounds.Offset(FCustomClientArea.TopLeft);
 
-      if (Bounds.X1 < FCustomClientArea.X1)  then Bounds.X1 := FCustomClientArea.X1;
-      if (Bounds.Y1 < FCustomClientArea.Y1)  then Bounds.Y1 := FCustomClientArea.Y1;
-      if (Bounds.X2 >= FCustomClientArea.X2) then Bounds.X2 := FCustomClientArea.X2 - 1;
-      if (Bounds.Y2 >= FCustomClientArea.Y2) then Bounds.Y2 := FCustomClientArea.Y2 - 1;
+      if (ABounds.X1 < FCustomClientArea.X1)  then ABounds.X1 := FCustomClientArea.X1;
+      if (ABounds.Y1 < FCustomClientArea.Y1)  then ABounds.Y1 := FCustomClientArea.Y1;
+      if (ABounds.X2 >= FCustomClientArea.X2) then ABounds.X2 := FCustomClientArea.X2 - 1;
+      if (ABounds.Y2 >= FCustomClientArea.Y2) then ABounds.Y2 := FCustomClientArea.Y2 - 1;
     end;
   end;
 
 var
-  Width, Height: Integer;
+  W, H: Integer;
 begin
-  GetDimensions(Width, Height);
+  GetDimensions(W, H);
 
   if FCustomClientArea.IsDefault() then
-    if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
+    if (ABounds.X1 = -1) and (ABounds.Y1 = -1) and (ABounds.X2 = -1) and (ABounds.Y2 = -1) then
     begin
-      Bounds.X1 := 0;
-      Bounds.Y1 := 0;
-      Bounds.X2 := Width - 1;
-      Bounds.Y2 := Height - 1;
+      ABounds.X1 := 0;
+      ABounds.Y1 := 0;
+      ABounds.X2 := W - 1;
+      ABounds.Y2 := H - 1;
     end else
     begin
-      if (Bounds.X1 < 0)       then Bounds.X1 := 0;
-      if (Bounds.Y1 < 0)       then Bounds.Y1 := 0;
-      if (Bounds.X2 >= Width)  then Bounds.X2 := Width - 1;
-      if (Bounds.Y2 >= Height) then Bounds.Y2 := Height - 1;
+      if (ABounds.X1 < 0)  then ABounds.X1 := 0;
+      if (ABounds.Y1 < 0)  then ABounds.Y1 := 0;
+      if (ABounds.X2 >= W) then ABounds.X2 := W - 1;
+      if (ABounds.Y2 >= H) then ABounds.Y2 := H - 1;
     end
   else
     ValidateBoundsInCustomClientArea();
 
-  Result := (Bounds.Width > 0) and (Bounds.Height > 0);
+  Result := (ABounds.Width > 0) and (ABounds.Height > 0);
 end;
 
-function TSimbaTarget.GetImageData(var Bounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
+function TSimbaTarget.GetImageData(var ABounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 begin
   Data := nil;
   if HasMethod(FMethods.GetImageData, 'GetImageData') then
-    Result := ValidateBounds(Bounds) and FMethods.GetImageData(FTarget, Bounds.X1, Bounds.Y1, Bounds.Width, Bounds.Height, Data, DataWidth);
+    Result := ValidateBounds(ABounds) and FMethods.GetImageData(FTarget, ABounds.X1, ABounds.Y1, ABounds.Width, ABounds.Height, Data, DataWidth);
 end;
 
 procedure TSimbaTarget.FreeImageData(var Data: PColorBGRA);

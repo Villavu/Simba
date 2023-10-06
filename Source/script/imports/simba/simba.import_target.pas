@@ -93,33 +93,33 @@ begin
 end;
 
 (*
-TTarget.GetDimensions
-~~~~~~~~~~~~~~~~~~~~~
-> procedure TTarget.GetDimensions(out Width, Height: Integer);
+TTarget.Bounds
+~~~~~~~~~~~~~~
+> function TTarget.Bounds: TBox;
 *)
-procedure _LapeTarget_GetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_Bounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaTarget(Params^[0])^.GetDimensions(PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PBox(Result)^ := PSimbaTarget(Params^[0])^.Bounds();
 end;
 
 (*
-TTarget.GetWidth
-~~~~~~~~~~~~~~~~
-> function TTarget.GetWidth: Integer;
+TTarget.Width
+~~~~~~~~~~~~~
+> function TTarget.Width: Integer;
 *)
-procedure _LapeTarget_GetWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaTarget(Params^[0])^.GetWidth();
+  PInteger(Result)^ := PSimbaTarget(Params^[0])^.Width();
 end;
 
 (*
-TTarget.GetHeight
-~~~~~~~~~~~~~~~~~
-> function TTarget.GetHeight: Integer;
+TTarget.Height
+~~~~~~~~~~~~~~
+> function TTarget.Height: Integer;
 *)
-procedure _LapeTarget_GetHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaTarget(Params^[0])^.GetHeight();
+  PInteger(Result)^ := PSimbaTarget(Params^[0])^.Height();
 end;
 
 (*
@@ -343,9 +343,9 @@ begin
     addGlobalFunc('procedure TTarget.SetPlugin(Plugin, Args: String; out DebugImage: TExternalImage); overload', @_LapeTarget_SetPlugin2);
 
     addGlobalFunc('function TTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage', @_LapeTarget_GetImage);
-    addGlobalFunc('procedure TTarget.GetDimensions(out Width, Height: Integer)', @_LapeTarget_GetDimensions);
-    addGlobalFunc('function TTarget.GetWidth: Integer', @_LapeTarget_GetWidth);
-    addGlobalFunc('function TTarget.GetHeight: Integer', @_LapeTarget_GetHeight);
+    addGlobalFunc('function TTarget.Bounds: TBox', @_LapeTarget_Bounds);
+    addGlobalFunc('function TTarget.Width: Integer', @_LapeTarget_Width);
+    addGlobalFunc('function TTarget.Height: Integer', @_LapeTarget_Height);
 
     addGlobalFunc('function TTarget.IsValid: Boolean', @_LapeTarget_IsValid);
     addGlobalFunc('function TTarget.IsFocused: Boolean', @_LapeTarget_IsFocused);
