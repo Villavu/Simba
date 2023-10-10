@@ -85,7 +85,7 @@ procedure EIOSTarget_GetDimensions(Target: Pointer; out Width, Height: Integer);
 
 procedure EIOSTarget_KeyDown(Target: Pointer; Key: EKeyCode);
 procedure EIOSTarget_KeyUp(Target: Pointer; Key: EKeyCode);
-procedure EIOSTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+procedure EIOSTarget_KeySend(Target: Pointer; Text: PChar; TextLen: Int32; SleepTimes: PInt32);
 function EIOSTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 
 function EIOSTarget_MousePressed(Target: Pointer; Button: EMouseButton): Boolean;
@@ -278,12 +278,12 @@ begin
   end;
 end;
 
-procedure EIOSTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+procedure EIOSTarget_KeySend(Target: Pointer; Text: PChar; TextLen: Int32; SleepTimes: PInt32);
 begin
   with PEIOSTarget(Target)^ do
   begin
     if Assigned(SendString) then
-      SendString(Target, PChar(String(Key)), KeyDownTime, ModifierDownTime);
+      SendString(Target, Text, SleepTimes[0], SleepTimes[1]);
   end;
 end;
 

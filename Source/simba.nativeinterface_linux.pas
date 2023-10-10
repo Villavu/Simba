@@ -10,17 +10,12 @@ unit simba.nativeinterface_linux;
 interface
 
 uses
-  classes, sysutils,
-  simba.mufasatypes, simba.nativeinterface, simba.colormath;
+  Classes, SysUtils,
+  simba.mufasatypes, simba.nativeinterface;
 
 type
   TSimbaNativeInterface_Linux = class(TSimbaNativeInterface)
   public
-    procedure KeyDownNativeKeyCode(EKeyCode: Integer); override;
-    procedure KeyUpNativeKeyCode(EKeyCode: Integer); override;
-
-    function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
-
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
     procedure SetWindowBounds(Window: TWindowHandle; Bounds: TBox); override;
@@ -36,6 +31,7 @@ type
     procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); override;
     function MousePressed(Button: EMouseButton): Boolean; override;
 
+    procedure KeySend(Text: PChar; TextLen: Integer; SleepTimes: PInt32); override;
     function KeyPressed(Key: EKeyCode): Boolean; override;
     procedure KeyDown(Key: EKeyCode); override;
     procedure KeyUp(Key: EKeyCode); override;
@@ -201,6 +197,76 @@ begin
   Result := SimbaXLib.XKeySymToKeyCode(Symbol);
 end;
 
+function CharToKeySym(Key: Char): TKeySym;
+begin
+  case Key of
+    #9 : Result := XK_TAB;
+    #10: Result := XK_RETURN;
+    #32: Result := XK_SPACE;
+    #34: Result := XK_QUOTEDBL;
+    #39: Result := XK_APOSTROPHE;
+    '!': Result := XK_EXCLAM;
+    '#': Result := XK_NUMBERSIGN;
+    '%': Result := XK_PERCENT;
+    '$': Result := XK_DOLLAR;
+    '&': Result := XK_AMPERSAND;
+    '(': Result := XK_PARENLEFT;
+    ')': Result := XK_PARENRIGHT;
+    '=': Result := XK_EQUAL;
+    ',': Result := XK_COMMA;
+    '.': Result := XK_PERIOD;
+    ':': Result := XK_COLON;
+    ';': Result := XK_SEMICOLON;
+    '<': Result := XK_LESS;
+    '>': Result := XK_GREATER;
+    '?': Result := XK_QUESTION;
+    '@': Result := XK_AT;
+    '[': Result := XK_BRACKETLEFT;
+    ']': Result := XK_BRACKETRIGHT;
+    '\': Result := XK_BACKSLASH;
+    '^': Result := XK_ASCIICIRCUM;
+    '_': Result := XK_UNDERSCORE;
+    '`': Result := XK_GRAVE;
+    '{': Result := XK_BRACELEFT;
+    '|': Result := XK_BAR;
+    '}': Result := XK_BRACERIGHT;
+    '~': Result := XK_ASCIITILDE;
+    '+': Result := XK_PLUS;
+    '-': Result := XK_MINUS;
+    '*': Result := XK_ASTERISK;
+    '/': Result := XK_SLASH;
+    else
+      Result := SimbaXLib.XStringToKeysym(PChar(String(Key)));
+  end;
+end;
+
+procedure GetKeyModifiers(KeySym: TKeySym; KeyCode: TKeyCode; out Shift, Ctrl, Alt: Boolean);
+var
+  Index: Integer;
+begin
+  Shift := False;
+  Ctrl := False;
+  Alt := False;
+
+  if (KeyCode > 0) then
+  begin
+    Index := 0;
+    while (Index < 8) and (SimbaXLib.XKeyCodeToKeySym(KeyCode, Index) <> KeySym) do
+      Inc(Index);
+
+    if (Index > 0) then
+    begin
+      Dec(Index);
+
+      case Index of
+        ControlMapIndex:            Ctrl  := True;
+        ShiftMapIndex:              Shift := True;
+        Mod1MapIndex..Mod5MapIndex: Alt   := True;
+      end;
+    end;
+  end;
+end;
+
 function GetWindowProperty(Window: TWindow; Prop: TAtom): Int64;
 var
   Atom: TAtom;
@@ -224,97 +290,6 @@ end;
 function HasWindowProperty(Window: TWindow; Name: String): Boolean;
 begin
   Result := GetWindowProperty(Window, SimbaXLib.XInternAtom(PChar(Name), False)) > 0;
-end;
-
-procedure TSimbaNativeInterface_Linux.KeyDownNativeKeyCode(EKeyCode: Integer);
-begin
-  SimbaXLib.XTestFakeKeyEvent(EKeyCode, True, 0);
-  SimbaXLib.XSync(False);
-end;
-
-procedure TSimbaNativeInterface_Linux.KeyUpNativeKeyCode(EKeyCode: Integer);
-begin
-  SimbaXLib.XTestFakeKeyEvent(EKeyCode, False, 0);
-  SimbaXLib.XSync(False);
-end;
-
-function TSimbaNativeInterface_Linux.GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean;
-
-  function GetSpecialKeySym(Key: Char): TKeySym;
-  begin
-    case Key of
-      #9 : Result := XK_TAB;
-      #10: Result := XK_RETURN;
-      #32: Result := XK_SPACE;
-      #34: Result := XK_QUOTEDBL;
-      #39: Result := XK_APOSTROPHE;
-      '!': Result := XK_EXCLAM;
-      '#': Result := XK_NUMBERSIGN;
-      '%': Result := XK_PERCENT;
-      '$': Result := XK_DOLLAR;
-      '&': Result := XK_AMPERSAND;
-      '(': Result := XK_PARENLEFT;
-      ')': Result := XK_PARENRIGHT;
-      '=': Result := XK_EQUAL;
-      ',': Result := XK_COMMA;
-      '.': Result := XK_PERIOD;
-      ':': Result := XK_COLON;
-      ';': Result := XK_SEMICOLON;
-      '<': Result := XK_LESS;
-      '>': Result := XK_GREATER;
-      '?': Result := XK_QUESTION;
-      '@': Result := XK_AT;
-      '[': Result := XK_BRACKETLEFT;
-      ']': Result := XK_BRACKETRIGHT;
-      '\': Result := XK_BACKSLASH;
-      '^': Result := XK_ASCIICIRCUM;
-      '_': Result := XK_UNDERSCORE;
-      '`': Result := XK_GRAVE;
-      '{': Result := XK_BRACELEFT;
-      '|': Result := XK_BAR;
-      '}': Result := XK_BRACERIGHT;
-      '~': Result := XK_ASCIITILDE;
-      '+': Result := XK_PLUS;
-      '-': Result := XK_MINUS;
-      '*': Result := XK_ASTERISK;
-      '/': Result := XK_SLASH;
-      else
-        Result := 0;
-    end;
-  end;
-
-var
-  Symbol: TKeySym;
-  Index: Integer;
-begin
-  Symbol := GetSpecialKeySym(Character);
-  if (Symbol = NoSymbol) then
-    Symbol := SimbaXLib.XStringToKeysym(PChar(String(Character)));
-
-  Code := SimbaXLib.XKeySymToKeycode(Symbol);
-  Modifiers := [];
-
-  Result := (Code > 0);
-  if Result then
-  begin
-    Index := 0;
-    while (Index < 8) and (SimbaXLib.XKeyCodeToKeySym(Code, Index) <> Symbol) do
-      Inc(Index);
-
-    if (Index > 0) then
-    begin
-      Dec(Index);
-
-      case Index of
-        ControlMapIndex:
-          Modifiers := [ssCtrl];
-        ShiftMapIndex:
-          Modifiers := [ssShift];
-        Mod1MapIndex..Mod5MapIndex:
-          Modifiers := [ssAlt];
-      end;
-    end;
-  end;
 end;
 
 function TSimbaNativeInterface_Linux.GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean;
@@ -465,6 +440,70 @@ begin
                           @Event.State);
 
   Result := ((Event.State and Mask) > 0);
+end;
+
+procedure TSimbaNativeInterface_Linux.KeySend(Text: PChar; TextLen: Integer; SleepTimes: PInt32);
+var
+  ShiftDown, CtrlDown, AltDown: Boolean;
+
+  procedure DoSleep;
+  begin
+    PreciseSleep(SleepTimes^);
+    Inc(SleepTimes);
+  end;
+
+  procedure EnsureModifier(const Needed: Boolean; var isDown: Boolean; const KeyCode: EKeyCode);
+  begin
+    if (Needed = isDown) then
+      Exit;
+    isDown := Needed;
+
+    if Needed then
+      KeyDown(KeyCode)
+    else
+      KeyUp(KeyCode);
+
+    DoSleep();
+  end;
+
+  procedure KeyEvent(KeyCode: TKeyCode; Down: Boolean);
+  begin
+    SimbaXLib.XTestFakeKeyEvent(KeyCode, Down, 0);
+    SimbaXLib.XSync(False);
+
+    DoSleep();
+  end;
+
+var
+  I: Integer;
+  KeySym: TKeySym;
+  KeyCode: TKeyCode;
+  Shift, Ctrl, Alt: Boolean;
+begin
+  ShiftDown := False;
+  CtrlDown := False;
+  AltDown := False;
+
+  try
+    for I := 0 to TextLen - 1 do
+    begin
+      KeySym := CharToKeySym(Text[I]);
+      KeyCode := SimbaXLib.XKeySymToKeycode(KeySym);
+
+      GetKeyModifiers(KeySym, KeyCode, Shift, Ctrl, Alt);
+
+      EnsureModifier(Shift, ShiftDown, EKeyCode.SHIFT);
+      EnsureModifier(Ctrl, CtrlDown, EKeyCode.CONTROL);
+      EnsureModifier(Alt, AltDown, EKeyCode.MENU);
+
+      KeyEvent(KeyCode, True);
+      KeyEvent(KeyCode, False);
+    end;
+  finally
+    EnsureModifier(False, ShiftDown, EKeyCode.SHIFT);
+    EnsureModifier(False, CtrlDown, EKeyCode.CONTROL);
+    EnsureModifier(False, AltDown, EKeyCode.MENU);
+  end;
 end;
 
 function TSimbaNativeInterface_Linux.KeyPressed(Key: EKeyCode): Boolean;

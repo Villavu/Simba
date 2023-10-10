@@ -10,7 +10,7 @@ unit simba.imagebox;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, ComCtrls, LCLType,
+  Classes, SysUtils, Forms, Controls, Graphics, GraphType, ComCtrls, LCLType,
   simba.mufasatypes, simba.image, simba.dtm, simba.imagebox_image,
   simba.colormath;
 
@@ -112,7 +112,7 @@ type
 implementation
 
 uses
-  Math, GraphType, LCLIntf,
+  Math, LCLIntf,
   simba.finder, simba.image_lazbridge, simba.windowhandle;
 
 procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);

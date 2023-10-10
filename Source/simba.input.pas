@@ -24,8 +24,8 @@ type
     EMouseEventType = (TELEPORT, MOVING, CLICK, DOWN, UP);
     {$SCOPEDENUMS OFF}
   const
-    DEFAULT_KEY_PRESS_MIN = 30;
-    DEFAULT_KEY_PRESS_MAX = 140;
+    DEFAULT_KEY_PRESS_MIN = 20;
+    DEFAULT_KEY_PRESS_MAX = 125;
 
     DEFAULT_CLICK_MIN = 40;
     DEFAULT_CLICK_MAX = 220;
@@ -389,9 +389,16 @@ end;
 procedure TSimbaInput.KeySend(Text: String);
 var
   I: Integer;
+  SleepTimes: TIntegerArray;
 begin
-  for I := 1 to Length(Text) do
-    Target.KeySend(Text[I], GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2, GetRandomKeyPressTime() div 2);
+  if (Length(Text) = 0) then
+    Exit;
+
+  SetLength(SleepTimes, Length(Text) * 5);
+  for I := 0 to High(SleepTimes) do
+    SleepTimes[I] := GetRandomKeyPressTime();
+
+  Target.KeySend(PChar(Text), @SleepTimes[0]);
 end;
 
 procedure TSimbaInput.KeyPress(Key: EKeyCode);

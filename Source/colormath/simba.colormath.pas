@@ -38,6 +38,9 @@ type
     function AsString: String;
   end;
 
+  TColor = Graphics.TColor;
+  PColor = ^TColor;
+
   TColorHelper = type helper for TColor
     function ToBGRA: TColorBGRA;
     function ToRGB: TColorRGB;

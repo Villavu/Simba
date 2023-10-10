@@ -44,6 +44,7 @@ type
 
 
     // Called every 500ms from a script instance while a script is running.
+    // Called on a seperate thread - synchronize if doing GUI stuff!
     // Sender = TSimbaScriptInstance
     class procedure CallOnScriptRunning(Sender: TObject);
     class procedure RegisterMethodOnScriptRunning(Proc: TNotifyEvent);

@@ -3,6 +3,9 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
+
+// tccutil reset All com.villavu.simba
+
 unit simba.nativeinterface_darwin;
 
 {$i simba.inc}
@@ -11,8 +14,8 @@ unit simba.nativeinterface_darwin;
 interface
 
 uses
-  classes, sysutils, graphics, macosall,
-  simba.mufasatypes, simba.nativeinterface, simba.colormath;
+  Classes, SysUtils, Graphics, MacOSAll,
+  simba.mufasatypes, simba.nativeinterface;
 
 type
   TVirtualWindow = packed record
@@ -28,12 +31,13 @@ type
   type
     TKeyMapItem = record
       Exists: Boolean;
-      EKeyCode: Integer;
+      KeyCode: Integer;
       Modifiers: TShiftState;
     end;
     TKeyMap = array[#0..#255] of TKeyMapItem;
   protected
     FKeyMap: TKeyMap;
+    FKeyMapBuilt: Boolean;
     FVirtualWindowInfo: array of record
       ClientRect: TBox;
       ClassStr: ShortString;
@@ -41,13 +45,11 @@ type
 
     function IsVirtualWindow(Window: TWindowHandle; out VirtualWindow: TVirtualWindow): Boolean;
     function GetVirtualWindowInfoIndex(ClientRect: TBox; ClassStr: ShortString): Integer;
+
+    procedure BuildKeyMap;
+    procedure CheckAccessibility;
   public
     constructor Create;
-
-    procedure KeyDownNativeKeyCode(EKeyCode: Integer); override;
-    procedure KeyUpNativeKeyCode(EKeyCode: Integer); override;
-
-    function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
 
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
@@ -64,6 +66,7 @@ type
     procedure MouseTeleport(RelativeWindow: TWindowHandle; P: TPoint); override;
     function MousePressed(Button: EMouseButton): Boolean; override;
 
+    procedure KeySend(Text: PChar; TextLen: Integer; SleepTimes: PInt32); override;
     function KeyPressed(Key: EKeyCode): Boolean; override;
     procedure KeyDown(Key: EKeyCode); override;
     procedure KeyUp(Key: EKeyCode); override;
@@ -120,7 +123,7 @@ type
   end;
 
 var
-  timeInfo: TTimebaseInfoData;
+  timeInfo: TTimebaseInfoData = (numer: 0; denom: 0);
 
 function mach_timebase_info(var TimebaseInfoData: TTimebaseInfoData): Int64; cdecl; external 'libc';
 function mach_absolute_time: QWORD; cdecl; external 'libc';
@@ -179,9 +182,9 @@ const
 function proc_pidpath(pid: longint; buffer: pbyte; bufferSize: longword): longint; cdecl; external 'libproc';
 function proc_pidinfo(pid: longint; flavor: longint; arg: UInt64; buffer: pointer; buffersize: longint): longint; cdecl; external 'libproc';
 
-function VirtualKeyToNativeKeyCode(VirtualKey: EKeyCode): Integer;
+function SimbaToMacKeycode(KeyCode: EKeyCode): Integer;
 begin
-  case VirtualKey of
+  case KeyCode of
     EKeyCode.BACK:                Result := $33;
     EKeyCode.TAB:                 Result := $30;
     EKeyCode.CLEAR:               Result := $47;
@@ -438,6 +441,8 @@ procedure TSimbaNativeInterface_Darwin.MouseScroll(Scrolls: Integer);
 var
   ScrollEvent: CGEventRef;
 begin
+  CheckAccessibility();
+
   ScrollEvent := CGEventCreateScrollWheelEvent(nil, kCGScrollEventUnitPixel, 1, -Scrolls * 10);
   CGEventPost(kCGHIDEventTap, ScrollEvent);
   CFRelease(ScrollEvent);
@@ -482,13 +487,15 @@ const
 procedure TSimbaNativeInterface_Darwin.MouseDown(Button: EMouseButton);
 var
   event: CGEventRef;
-  eventType, EMouseButton: Integer;
+  eventType, mouseButton: Integer;
 begin
+  CheckAccessibility();
+
   eventType := ClickTypeToMouseDownEvent[Button];
-  EMouseButton := ClickTypeToMouseButton[Button];
+  mouseButton := ClickTypeToMouseButton[Button];
 
   with GetMousePosition() do
-    event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(X, Y), EMouseButton);
+    event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(X, Y), mouseButton);
 
   CGEventPost(kCGSessionEventTap, event);
   CFRelease(event);
@@ -497,13 +504,13 @@ end;
 procedure TSimbaNativeInterface_Darwin.MouseUp(Button: EMouseButton);
 var
   event: CGEventRef;
-  eventType, EMouseButton: Integer;
+  eventType, mouseButton: Integer;
 begin
   eventType := ClickTypeToMouseUpEvent[Button];
-  EMouseButton := ClickTypeToMouseButton[Button];
+  mouseButton := ClickTypeToMouseButton[Button];
 
   with GetMousePosition() do
-    event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(X, Y), EMouseButton);
+    event := CGEventCreateMouseEvent(nil, eventType, CGPointMake(X, Y), mouseButton);
 
   CGEventPost(kCGSessionEventTap, event);
   CFRelease(event);
@@ -514,40 +521,86 @@ begin
   Result := CGEventSourceButtonState(kCGEventSourceStateCombinedSessionState, ClickTypeToMouseButton[Button]) > 0;
 end;
 
+procedure TSimbaNativeInterface_Darwin.KeySend(Text: PChar; TextLen: Integer; SleepTimes: PInt32);
+var
+  ShiftDown, CtrlDown, AltDown: Boolean;
+
+  procedure DoSleep;
+  begin
+    PreciseSleep(SleepTimes^);
+    Inc(SleepTimes);
+  end;
+
+  procedure EnsureModifier(const Needed: Boolean; var isDown: Boolean; const KeyCode: EKeyCode);
+  begin
+    if (Needed = isDown) then
+      Exit;
+    isDown := Needed;
+
+    if Needed then
+      KeyDown(KeyCode)
+    else
+      KeyUp(KeyCode);
+
+    DoSleep();
+  end;
+
+  procedure KeyEvent(KeyCode: Integer; Down: Boolean);
+  begin
+    if Down then
+      CGPostKeyboardEvent(0, KeyCode, 1)
+    else
+      CGPostKeyboardEvent(0, KeyCode, 0);
+
+    DoSleep();
+  end;
+
+var
+  I: Integer;
+  KeyCode: Integer;
+  Modifiers: TShiftState;
+begin
+  BuildKeyMap();
+
+  ShiftDown := False;
+  CtrlDown := False;
+  AltDown := False;
+
+  try
+    for I := 0 to TextLen - 1 do
+    begin
+      KeyCode := FKeyMap[Text[I]].KeyCode;
+      Modifiers := FKeyMap[Text[I]].Modifiers;
+
+      EnsureModifier(ssShift in Modifiers, ShiftDown, EKeyCode.SHIFT);
+      EnsureModifier(ssCtrl in Modifiers, CtrlDown, EKeyCode.CONTROL);
+      EnsureModifier(ssAlt in Modifiers, AltDown, EKeyCode.MENU);
+
+      KeyEvent(KeyCode, True);
+      KeyEvent(KeyCode, False);
+    end;
+  finally
+    EnsureModifier(False, ShiftDown, EKeyCode.SHIFT);
+    EnsureModifier(False, CtrlDown, EKeyCode.CONTROL);
+    EnsureModifier(False, AltDown, EKeyCode.MENU);
+  end;
+end;
+
 function TSimbaNativeInterface_Darwin.KeyPressed(Key: EKeyCode): Boolean;
 begin
-  Result := CGEventSourceKeyState(kCGEventSourceStateCombinedSessionState, VirtualKeyToNativeKeyCode(Key)) <> 0;
+  Result := CGEventSourceKeyState(kCGEventSourceStateCombinedSessionState, SimbaToMacKeycode(Key)) <> 0;
 end;
 
 procedure TSimbaNativeInterface_Darwin.KeyDown(Key: EKeyCode);
 begin
-  CGPostKeyboardEvent(0, VirtualKeyToNativeKeyCode(Key), 1);
+  CheckAccessibility();
+
+  CGPostKeyboardEvent(0, SimbaToMacKeycode(Key), 1);
 end;
 
 procedure TSimbaNativeInterface_Darwin.KeyUp(Key: EKeyCode);
 begin
-  CGPostKeyboardEvent(0, VirtualKeyToNativeKeyCode(Key), 0);
-end;
-
-procedure TSimbaNativeInterface_Darwin.KeyDownNativeKeyCode(EKeyCode: Integer);
-begin
-  CGPostKeyboardEvent(0, EKeyCode, 1);
-end;
-
-procedure TSimbaNativeInterface_Darwin.KeyUpNativeKeyCode(EKeyCode: Integer);
-begin
-  CGPostKeyboardEvent(0, EKeyCode, 0);
-end;
-
-function TSimbaNativeInterface_Darwin.GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean;
-begin
-  Result := FKeyMap[Character].Exists;
-
-  if Result then
-  begin
-    Code := FKeyMap[Character].EKeyCode;
-    Modifiers := FKeyMap[Character].Modifiers;
-  end
+  CGPostKeyboardEvent(0, SimbaToMacKeycode(Key), 0);
 end;
 
 function TSimbaNativeInterface_Darwin.GetProcessStartTime(PID: SizeUInt): TDateTime;
@@ -714,7 +767,7 @@ end;
 
 function TSimbaNativeInterface_Darwin.GetDesktopWindow: TWindowHandle;
 begin
-  Result := 2; // kCGDesktopWindowLevelKey
+  Result := kCGDesktopWindowLevelKey;
 end;
 
 function TSimbaNativeInterface_Darwin.GetActiveWindow: TWindowHandle;
@@ -755,7 +808,9 @@ begin
 
   windows := CGWindowListCreateDescriptionFromArray(windowIds);
   if CFArrayGetCount(windows) <> 0 then
-    Result := NSNumber(CFDictionaryGetValue(CFArrayGetValueAtIndex(windows, 0), kCGWindowIsOnScreen)).boolValue;
+    Result := NSNumber(CFDictionaryGetValue(CFArrayGetValueAtIndex(windows, 0), kCGWindowIsOnScreen)).boolValue
+  else
+    Result := False;
 
   CFRelease(windowIds);
   CFRelease(windows);
@@ -894,9 +949,9 @@ begin
   FVirtualWindowInfo[Result].ClassStr := ClassStr;
 end;
 
-constructor TSimbaNativeInterface_Darwin.Create;
+procedure TSimbaNativeInterface_Darwin.BuildKeyMap;
 
-  procedure MapKey(EKeyCode: Integer; KeyChar: NSString; Modifiers: TShiftState);
+  procedure MapKey(KeyCode: Integer; KeyChar: NSString; Modifiers: TShiftState);
   var
     Str: String;
   begin
@@ -906,43 +961,53 @@ constructor TSimbaNativeInterface_Darwin.Create;
       if FKeyMap[Str[1]].Exists then
         Exit;
 
-      FKeyMap[Str[1]].EKeyCode := EKeyCode;
+      FKeyMap[Str[1]].KeyCode := KeyCode;
       FKeyMap[Str[1]].Modifiers := Modifiers;
       FKeyMap[Str[1]].Exists := True;
     end;
   end;
 
 var
+  I: Integer;
   Event: NSEvent;
-  EKeyCode: Integer;
+  LocalPool: NSAutoReleasePool;
+begin
+  if FKeymapBuilt then
+    Exit;
+  FKeymapBuilt := True;
+
+  CheckAccessibility();
+
+  LocalPool := NSAutoReleasePool.alloc.init();
+  for I := 0 to 255 do
+  begin
+    Event := NSEvent.eventWithCGEvent(CGEventCreateKeyboardEvent(nil, I, 1));
+
+    if (Event <> nil) and (Event.Type_ = NSKeyDown) then
+    begin
+      MapKey(I, Event.characters, []);
+      MapKey(I, NSEventFix(Event).charactersByApplyingModifiers(NSShiftKeyMask), [ssShift]);
+      MapKey(I, NSEventFix(Event).charactersByApplyingModifiers(NSAlternateKeyMask), [ssAlt]);
+      MapKey(I, NSEventFix(Event).charactersByApplyingModifiers(NSControlKeyMask), [ssCtrl]);
+    end;
+  end;
+  LocalPool.release();
+end;
+
+procedure TSimbaNativeInterface_Darwin.CheckAccessibility;
+begin
+  if (not AXIsProcessTrusted()) then
+    SimbaException('Simba needs accessbility privilege on MacOS.' + LineEnding + 'Settings > Security & Privacy Accessibility');
+end;
+
+constructor TSimbaNativeInterface_Darwin.Create;
 begin
   inherited Create();
 
   SetLength(FVirtualWindowInfo, 1);
-
-  for EKeyCode := 0 to 255 do
-  begin
-    Event := NSEvent.eventWithCGEvent(CGEventCreateKeyboardEvent(nil, EKeyCode, 1));
-
-    if (Event <> nil) then
-    begin
-      if (Event.Type_ = NSKeyDown) then
-      begin
-        MapKey(EKeyCode, Event.characters, []);
-        MapKey(EKeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSShiftKeyMask), [ssShift]);
-        MapKey(EKeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSAlternateKeyMask), [ssAlt]);
-        MapKey(EKeyCode, NSEventFix(Event).charactersByApplyingModifiers(NSControlKeyMask), [ssCtrl]);
-      end;
-
-      CFRelease(Event);
-    end;
-  end;
-
-  timeInfo.numer := 0;
-  timeInfo.denom := 0;
-
-  mach_timebase_info(timeInfo);
 end;
 
-end.
+initialization
+  mach_timebase_info(timeInfo{%H-});
 
+end.

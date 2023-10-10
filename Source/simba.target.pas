@@ -31,7 +31,7 @@ type
 
     KeyDown: procedure(Target: Pointer; Key: EKeyCode);
     KeyUp: procedure(Target: Pointer; Key: EKeyCode);
-    KeySend: procedure(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+    KeySend: procedure(Target: Pointer; Text: PChar; TextLen: Int32; SleepTimes: PInt32);
     KeyPressed: function(Target: Pointer; Key: EKeyCode): Boolean;
 
     MouseTeleport: procedure(Target: Pointer; P: TPoint);
@@ -111,7 +111,7 @@ type
 
     procedure KeyDown(Key: EKeyCode);
     procedure KeyUp(Key: EKeyCode);
-    procedure KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+    procedure KeySend(Text: String; SleepTimes: PInt32);
     function KeyPressed(Key: EKeyCode): Boolean;
 
     function ValidateBounds(var ABounds: TBox): Boolean;
@@ -495,12 +495,14 @@ begin
     FMethods.KeyUp(FTarget, Key);
 end;
 
-procedure TSimbaTarget.KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+procedure TSimbaTarget.KeySend(Text: String; SleepTimes: PInt32);
 begin
+  if (Length(Text) = 0) then
+    Exit;
   CheckAutoFocus();
 
   if HasMethod(FMethods.KeySend, 'KeySend') then
-    FMethods.KeySend(FTarget, Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
+    FMethods.KeySend(FTarget, PChar(Text), Length(Text), SleepTimes);
 end;
 
 function TSimbaTarget.KeyPressed(Key: EKeyCode): Boolean;

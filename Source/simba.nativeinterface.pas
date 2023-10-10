@@ -16,11 +16,6 @@ uses
 type
   TSimbaNativeInterface = class
   public
-    procedure KeyDownNativeKeyCode(EKeyCode: Integer); virtual; abstract;
-    procedure KeyUpNativeKeyCode(EKeyCode: Integer); virtual; abstract;
-
-    function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; virtual; abstract;
-
     function GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean; virtual; abstract;
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; virtual; abstract;
     function GetWindowBounds(Window: TWindowHandle): TBox; virtual; abstract;
@@ -34,6 +29,7 @@ type
     function GetMousePosition: TPoint; virtual; abstract;
     function GetMousePosition(Window: TWindowHandle): TPoint; virtual; abstract;
 
+    procedure KeySend(Text: PChar; TextLen: Integer; SleepTimes: PInt32); virtual; abstract;
     function KeyPressed(Key: EKeyCode): Boolean; virtual; abstract;
     procedure KeyDown(Key: EKeyCode); virtual; abstract;
     procedure KeyUp(Key: EKeyCode); virtual; abstract;
@@ -84,8 +80,6 @@ type
     procedure OpenURL(URL: String); virtual;
 
     function GetVirtualKeyCode(Character: Char): Integer; virtual;
-
-    procedure KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer); virtual;
   end;
 
 var
@@ -108,36 +102,6 @@ uses
   {$ELSEIF DEFINED(DARWIN)}
   simba.nativeinterface_darwin;
   {$ENDIF}
-
-procedure TSimbaNativeInterface.KeySend(Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
-var
-  NativeKeyCode: Integer;
-  KeyModifiers: TShiftState;
-begin
-  if not GetNativeKeyCodeAndModifiers(Key, NativeKeyCode, KeyModifiers) then
-    raise Exception.CreateFmt('TSimbaNativeInterface.SendChar: Unknown key code for "%s"', [Key]);
-
-  if (KeyModifiers <> []) then
-  begin
-    if (ssShift in KeyModifiers) then KeyDown(EKeyCode.SHIFT);
-    if (ssCtrl  in KeyModifiers) then KeyDown(EKeyCode.CONTROL);
-    if (ssAlt   in KeyModifiers) then KeyDown(EKeyCode.MENU);
-
-    PreciseSleep(ModifierDownTime);
-  end;
-
-  KeyDownNativeKeyCode(NativeKeyCode); PreciseSleep(KeyDownTime);
-  KeyUpNativeKeyCode(NativeKeyCode);   PreciseSleep(KeyUpTime);
-
-  if (KeyModifiers <> []) then
-  begin
-    if (ssShift in KeyModifiers) then KeyUp(EKeyCode.SHIFT);
-    if (ssCtrl  in KeyModifiers) then KeyUp(EKeyCode.CONTROL);
-    if (ssAlt   in KeyModifiers) then KeyUp(EKeyCode.MENU);
-
-    PreciseSleep(ModifierUpTime);
-  end;
-end;
 
 function TSimbaNativeInterface.WindowHandleToStr(WindowHandle: TWindowHandle): String;
 begin

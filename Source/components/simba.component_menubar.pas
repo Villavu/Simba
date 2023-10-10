@@ -51,6 +51,7 @@ type
     function GetMenus: TPopupMenuArray;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     property Menus: TPopupMenuArray read GetMenus;
     procedure AddMenu(Title: String; APopupMenu: TPopupMenu);
@@ -235,6 +236,8 @@ end;
 
 procedure TSimbaMainMenuBar.DoMenuClose(Sender: TObject);
 begin
+  if (FTrackTimer = nil) then
+    Exit;
   FTrackTimer.Enabled := False;
 
   Application.QueueAsyncCall(@ClearPopupIndex, 0);
@@ -284,6 +287,14 @@ begin
   ControlStyle := ControlStyle + [csOpaque];
 
   CalculateSizes();
+end;
+
+destructor TSimbaMainMenuBar.Destroy;
+begin
+  Application.RemoveAsyncCalls(Self);
+  FTrackTimer := nil;
+
+  inherited Destroy();
 end;
 
 procedure TSimbaMainMenuBar.AddMenu(Title: String; APopupMenu: TPopupMenu);
