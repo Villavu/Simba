@@ -32,7 +32,7 @@ type
     procedure Paint; override;
     procedure PaintPanel(Index: Integer);
 
-    procedure InvalidatePanel(Index: Integer);
+    procedure InvalidatePanelASync(Data: PtrInt);
     function PanelRect(Index: Integer): TRect;
 
     procedure CheckIndex(Index: Integer);
@@ -78,10 +78,9 @@ procedure TSimbaStatusBar.SetPanelText(Index: Integer; Value: String);
 begin
   if (FPanelText[Index] = Value) then
     Exit;
-
   FPanelText[Index] := Value;
 
-  InvalidatePanel(Index);
+  Application.QueueAsyncCall(@InvalidatePanelASync, Index);
 end;
 
 procedure TSimbaStatusBar.SetPanelTextMeasure(Index: Integer; Value: String);
@@ -194,11 +193,11 @@ begin
   Canvas.TextRect(R, R.Left + 5, R.Top, FPanelText[Index], Style);
 end;
 
-procedure TSimbaStatusBar.InvalidatePanel(Index: Integer);
+procedure TSimbaStatusBar.InvalidatePanelASync(Data: PtrInt);
 var
   R: TRect;
 begin
-  R := PanelRect(Index);
+  R := PanelRect(Data);
 
   InvalidateRect(Handle, @R, False);
 end;
@@ -226,4 +225,3 @@ begin
 end;
 
 end.
-

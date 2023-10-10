@@ -17,7 +17,7 @@ function WindowTarget_IsValid(Target: Pointer): Boolean;
 
 procedure WindowTarget_KeyDown(Target: Pointer; Key: EKeyCode);
 procedure WindowTarget_KeyUp(Target: Pointer; Key: EKeyCode);
-procedure WindowTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+procedure WindowTarget_KeySend(Target: Pointer; Text: PChar; TextLen: Integer; SleepTimes: PInt32);
 function WindowTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 
 procedure WindowTarget_MouseTeleport(Target: Pointer; P: TPoint);
@@ -79,9 +79,9 @@ begin
   SimbaNativeInterface.KeyUp(Key);
 end;
 
-procedure WindowTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+procedure WindowTarget_KeySend(Target: Pointer; Text: PChar; TextLen: Integer; SleepTimes: PInt32);
 begin
-  SimbaNativeInterface.KeySend(Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
+  SimbaNativeInterface.KeySend(Text, TextLen, SleepTimes);
 end;
 
 function WindowTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;

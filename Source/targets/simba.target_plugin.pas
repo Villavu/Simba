@@ -38,7 +38,7 @@ type
 
     KeyDown: procedure(Target: Pointer; Key: Int32); cdecl;
     KeyUp: procedure(Target: Pointer; Key: Int32); cdecl;
-    KeySend: procedure(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Int32); cdecl;
+    KeySend: procedure(Target: Pointer; Text: PChar; TextLen: Int32; SleepTimes: PInt32); cdecl;
     KeyPressed: function(Target: Pointer; Key: Int32): Boolean; cdecl;
   end;
 
@@ -57,7 +57,7 @@ procedure PluginTarget_MouseScroll(Target: Pointer; Scrolls: Integer);
 
 procedure PluginTarget_KeyDown(Target: Pointer; Key: EKeyCode);
 procedure PluginTarget_KeyUp(Target: Pointer; Key: EKeyCode);
-procedure PluginTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+procedure PluginTarget_KeySend(Target: Pointer; Text: PChar; TextLen: Int32; SleepTimes: PInt32);
 function PluginTarget_KeyPressed(Target: Pointer; Key: EKeyCode): Boolean;
 
 function PluginTarget_IsValid(Target: Pointer): Boolean;
@@ -231,13 +231,13 @@ begin
   end;
 end;
 
-procedure PluginTarget_KeySend(Target: Pointer; Key: Char; KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime: Integer);
+procedure PluginTarget_KeySend(Target: Pointer; Text: PChar; TextLen: Int32; SleepTimes: PInt32);
 begin
   with PSimbaPluginTarget(Target)^ do
   begin
     CheckExported('SimbaPluginTarget_KeySend', KeySend);
 
-    KeySend(Target, Key, KeyDownTime, KeyUpTime, ModifierDownTime, ModifierUpTime);
+    KeySend(Target, Text, TextLen, SleepTimes);
   end;
 end;
 

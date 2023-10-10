@@ -27,11 +27,6 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure KeyDownNativeKeyCode(EKeyCode: Integer); override;
-    procedure KeyUpNativeKeyCode(EKeyCode: Integer); override;
-
-    function GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean; override;
-
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
     procedure SetWindowBounds(Window: TWindowHandle; Bounds: TBox); override;
@@ -47,6 +42,7 @@ type
     function GetMousePosition: TPoint; override;
     function GetMousePosition(Window: TWindowHandle): TPoint; override;
 
+    procedure KeySend(Text: PChar; TextLen: Integer; SleepTimes: PInt32); override;
     function KeyPressed(Key: EKeyCode): Boolean; override;
     procedure KeyDown(Key: EKeyCode); override;
     procedure KeyUp(Key: EKeyCode); override;
@@ -438,6 +434,74 @@ begin
   Result.Y := Result.Y - Bounds.Y1;
 end;
 
+procedure TSimbaNativeInterface_Windows.KeySend(Text: PChar; TextLen: Integer; SleepTimes: PInt32);
+var
+  ShiftDown, CtrlDown, AltDown: Boolean;
+
+  procedure DoSleep;
+  begin
+    PreciseSleep(SleepTimes^);
+    Inc(SleepTimes);
+  end;
+
+  procedure EnsureModifier(const Needed: Boolean; var isDown: Boolean; const KeyCode: EKeyCode);
+  begin
+    if (Needed = isDown) then
+      Exit;
+    isDown := Needed;
+
+    if Needed then
+      KeyDown(KeyCode)
+    else
+      KeyUp(KeyCode);
+
+    DoSleep();
+  end;
+
+  procedure KeyEvent(VirtualKey: Integer; Down: Boolean);
+  var
+    Input: TInput;
+  begin
+    Input := Default(TInput);
+    Input._Type := INPUT_KEYBOARD;
+    if Down then
+      Input.ki.dwFlags := KEYEVENTF_SCANCODE
+    else
+      Input.ki.dwFlags := KEYEVENTF_KEYUP or KEYEVENTF_SCANCODE;
+    Input.ki.wScan := MapVirtualKey(VirtualKey, 0);
+
+    SendInput(1, @Input, SizeOf(Input));
+
+    DoSleep();
+  end;
+
+var
+  I: Integer;
+  ScanCode: SHORT;
+begin
+  ShiftDown := False;
+  CtrlDown := False;
+  AltDown := False;
+
+  try
+    for I := 0 to TextLen - 1 do
+    begin
+      ScanCode := VKKeyScan(Text[I]);
+
+      EnsureModifier((ScanCode and $100) > 0, ShiftDown, EKeyCode.SHIFT);
+      EnsureModifier((ScanCode and $200) > 0, CtrlDown, EKeyCode.CONTROL);
+      EnsureModifier((ScanCode and $400) > 0, AltDown, EKeyCode.MENU);
+
+      KeyEvent(ScanCode and $FF, True);
+      KeyEvent(ScanCode and $FF, False);
+    end;
+  finally
+    EnsureModifier(False, ShiftDown, EKeyCode.SHIFT);
+    EnsureModifier(False, CtrlDown, EKeyCode.CONTROL);
+    EnsureModifier(False, AltDown, EKeyCode.MENU);
+  end;
+end;
+
 function TSimbaNativeInterface_Windows.MousePressed(Button: EMouseButton): Boolean;
 begin
   Result := False;
@@ -454,38 +518,6 @@ end;
 function TSimbaNativeInterface_Windows.KeyPressed(Key: EKeyCode): Boolean;
 begin
   Result := (GetAsyncKeyState(Ord(Key)) and $8000 <> 0); //only check if high-order bit is set
-end;
-
-procedure TSimbaNativeInterface_Windows.KeyDownNativeKeyCode(EKeyCode: Integer);
-var
-  Input: TInput;
-begin
-  Input := Default(TInput);
-  Input._Type := INPUT_KEYBOARD;
-  Input.ki.dwFlags := KEYEVENTF_SCANCODE;
-  Input.ki.wScan := MapVirtualKey(EKeyCode, 0);
-
-  SendInput(1, @Input, SizeOf(Input));
-end;
-
-procedure TSimbaNativeInterface_Windows.KeyUpNativeKeyCode(EKeyCode: Integer);
-var
-  Input: TInput;
-begin
-  Input := Default(TInput);
-  Input._Type := INPUT_KEYBOARD;
-  Input.ki.dwFlags := KEYEVENTF_KEYUP or KEYEVENTF_SCANCODE;
-  Input.ki.wScan := MapVirtualKey(EKeyCode, 0);
-
-  SendInput(1, @Input, SizeOf(Input));
-end;
-
-function TSimbaNativeInterface_Windows.GetNativeKeyCodeAndModifiers(Character: Char; out Code: Integer; out Modifiers: TShiftState): Boolean;
-begin
-  Result := True;
-
-  Code := VKKeyScan(Character) and $FF;
-  Modifiers := TShiftState(VKKeyScan(Character) shr 8 and $FF);
 end;
 
 procedure TSimbaNativeInterface_Windows.KeyDown(Key: EKeyCode);

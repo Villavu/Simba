@@ -230,9 +230,8 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization_AddBeforeShow(@RequestAccessibility, 'RequestAccessibility');
+  //SimbaIDEInitialization_AddBeforeShow(@RequestAccessibility, 'RequestAccessibility');
 
   CreateCFStrings();
 
 end.
-
