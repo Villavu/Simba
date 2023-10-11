@@ -9,7 +9,7 @@ uses
   simba.mufasatypes, simba.baseclass, simba.image, simba.simplelock;
 
 type
-  TSimbaExternalImageCallback = procedure(Image: Pointer); cdecl;
+  TSimbaExternalImageCallback = procedure(Image: Pointer; UserData: Pointer); cdecl;
 
   PSimbaExternalImage = ^TSimbaExternalImage;
   TSimbaExternalImage = class(TSimbaBaseClass)
@@ -17,6 +17,7 @@ type
     FImage: TSimbaImage;
     FLock: TSimpleEnterableLock;
     FLockCount: Integer;
+    FUserData: Pointer;
 
     FUnlockCallbacks: array of TSimbaExternalImageCallback;
 
@@ -52,6 +53,9 @@ type
     property FontAntialiasing: Boolean read GetFontAntialiasing write SetFontAntialiasing;
     property FontBold: Boolean read GetFontBold write SetFontBold;
     property FontItalic: Boolean read GetFontItalic write SetFontItalic;
+
+    procedure SetUserData(UserData: Pointer);
+    function GetUserData: Pointer;
 
     procedure SetMemory(Data: PColorBGRA; AWidth, AHeight: Integer);
 
@@ -257,7 +261,7 @@ begin
   Dec(FLockCount);
   if (FLockCount = 0) then
     for i := 0 to High(FUnlockCallbacks) do
-      FUnlockCallbacks[i](Self);
+      FUnlockCallbacks[i](Self, FUserData);
   FLock.Leave();
 end;
 
@@ -285,6 +289,16 @@ begin
   finally
     Unlock();
   end;
+end;
+
+procedure TSimbaExternalImage.SetUserData(UserData: Pointer);
+begin
+  FUserData := UserData;
+end;
+
+function TSimbaExternalImage.GetUserData: Pointer;
+begin
+  Result := FUserData;
 end;
 
 function TSimbaExternalImage.TextWidth(Text: String): Integer;
