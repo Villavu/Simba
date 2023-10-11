@@ -6,3 +6,4 @@ Plugins
 
    writing-plugins.rst
    plugin-cpp.rst
+   plugin-target.rst
