@@ -67,8 +67,11 @@ main.h
     void (*ExternalImage_Lock)(void* img);
     void (*ExternalImage_UnLock)(void* img);
 
-    void (*ExternalImage_AddCallbackOnUnlock)(void* img, void(*callback)(void*));
-    void (*ExternalImage_RemoveCallbackOnUnlock)(void* img, void(*callback)(void*));
+    void (*ExternalImage_AddCallbackOnUnlock)(void* img, void(*callback)(void*)(void*));
+    void (*ExternalImage_RemoveCallbackOnUnlock)(void* img, void(*callback)(void*)(void*));
+
+    void (*ExternalImage_SetUserData)(void* img, void* USerData);
+    void* (*ExternalImage_GetUserData)(void* img);
   };
 
   TSimbaInfo* SIMBA_INFO = {0};
