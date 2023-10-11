@@ -50,9 +50,10 @@ type
     ExternalImage_TryLock: function(Img: Pointer): Boolean; cdecl;
     ExternalImage_Lock: procedure(Img: Pointer); cdecl;
     ExternalImage_UnLock: procedure(Img: Pointer); cdecl;
-
     ExternalImage_AddCallbackOnUnlock: procedure(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
     ExternalImage_RemoveCallbackOnUnlock: procedure(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
+    ExternalImage_SetUserData: procedure(Img: Pointer; UserData: Pointer); cdecl;
+    ExternalImage_GetUserData: function(Img: Pointer): Pointer; cdecl;
     // Extend this but do not remove, reorder or change datatypes.
   end;
 
@@ -306,6 +307,16 @@ begin
   TSimbaExternalImage(Img).RemoveUnlockCallback(Callback);
 end;
 
+procedure Plugin_ExternalImage_SetUserData(Img: Pointer; UserData: Pointer); cdecl;
+begin
+  TSimbaExternalImage(Img).SetUserData(UserData);
+end;
+
+function Plugin_ExternalImage_GetUserData(Img: Pointer): Pointer; cdecl;
+begin
+  Result := TSimbaExternalImage(Img).GetUserData();
+end;
+
 initialization
 
   with SimbaPluginMethods do
@@ -338,9 +349,10 @@ initialization
     ExternalImage_TryLock := @Plugin_ExternalImage_TryLock;
     ExternalImage_Lock := @Plugin_ExternalImage_Lock;
     ExternalImage_Unlock := @Plugin_ExternalImage_UnLock;
-
     ExternalImage_AddCallbackOnUnlock := @Plugin_ExternalImage_AddCallbackOnUnlock;
     ExternalImage_RemoveCallbackOnUnlock := @Plugin_ExternalImage_RemoveCallbackOnUnlock;
+    ExternalImage_GetUserData := @Plugin_ExternalImage_GetUserData;
+    ExternalImage_SetUserData := @Plugin_ExternalImage_SetUserData;
   end;
 
 end.

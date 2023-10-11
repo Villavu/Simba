@@ -501,6 +501,16 @@ begin
   PSimbaExternalImage(Params^[0])^.SetMemory(PPointer(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
+procedure _LapeExternalImage_GetUserData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointer(Result)^ := PSimbaExternalImage(Params^[0])^.GetUserData();
+end;
+
+procedure _LapeExternalImage_SetUserData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.SetUserData(PPointer(Params^[1])^);
+end;
+
 procedure ImportSimbaExternalImage(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -515,6 +525,7 @@ begin
     addClassVar('TExternalImage', 'FontAntialiasing', 'Boolean', @_LapeExternalImage_FontAntialiasing_Read, @_LapeExternalImage_FontAntialiasing_Write);
     addClassVar('TExternalImage', 'FontBold', 'Boolean', @_LapeExternalImage_FontBold_Read, @_LapeExternalImage_FontBold_Write);
     addClassVar('TExternalImage', 'FontItalic', 'Boolean', @_LapeExternalImage_FontItalic_Read, @_LapeExternalImage_FontItalic_Write);
+    addClassVar('TExternalImage', 'UserData', 'Pointer', @_LapeExternalImage_GetUserData, @_LapeExternalImage_SetUserData);
 
     addGlobalFunc('function TExternalImage.TextWidth(Text: String): Integer;', @_LapeExternalImage_TextWidth);
     addGlobalFunc('function TExternalImage.TextHeight(Text: String): Integer;', @_LapeExternalImage_TextHeight);
