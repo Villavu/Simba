@@ -12,6 +12,7 @@
   - CreateFromCircle
   - ConvexHull
   - ConcaveHull
+  - ConvexityDefects
   - Border
   - Skeleton
   - MinAreaRect
@@ -41,6 +42,11 @@ uses
   simba.mufasatypes, simba.quad, simba.circle;
 
 type
+  {$PUSH}
+  {$SCOPEDENUMS ON}
+  EConvexityDefects = (NONE, ALL, MINIMAL);
+  {$POP}
+
   TPointArrayHelper = type helper for TPointArray
   public
     class function CreateFromLine(Start, Stop: TPoint): TPointArray; static;
@@ -49,6 +55,8 @@ type
     class function CreateFromBox(Box: TBox; Filled: Boolean): TPointArray; static;
     class function CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static;
     class function CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static;
+
+    function IndexOf(P: TPoint): Integer;
 
     function Offset(P: TPoint): TPointArray; overload;
     function Offset(X, Y: Integer): TPointArray; overload;
@@ -141,6 +149,7 @@ type
     function DouglasPeucker(epsilon: Double): TPointArray;
     function ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPointArray;
     function ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): T2DPointArray;
+    function ConvexityDefects(Epsilon: Single; Mode: EConvexityDefects = EConvexityDefects.NONE): TPointArray;
   end;
 
 implementation
@@ -447,6 +456,16 @@ begin
   Result := Result.Connect();
   if Filled then
     Result := Result.ShapeFill();
+end;
+
+function TPointArrayHelper.IndexOf(P: TPoint): Integer;
+var
+  What: QWord absolute P;
+begin
+  if (Length(Self) > 0) then
+    Result := IndexQWord(Self[0], Length(Self), What)
+  else
+    Result := -1;
 end;
 
 function TPointArrayHelper.Offset(P: TPoint): TPointArray;
@@ -2540,6 +2559,60 @@ begin
     BufferResult.Add(pts.Border().DouglasPeucker(Epsilon));
 
   Result := BufferResult.ToArray();
+end;
+
+(*
+  Finds the defects in relation to a convex hull of the given concave hull.
+  EConvexityDefects.All     -> Keeps all convex points as well.
+  EConvexityDefects.Minimal -> Keeps the convex points that was linked to a defect
+  EConvexityDefects.None    -> Only defects
+*)
+function TPointArrayHelper.ConvexityDefects(Epsilon: Single; Mode: EConvexityDefects): TPointArray;
+var
+  x,y,i,j,k: Int32;
+  dist, best: Single;
+  pt: TPoint;
+  concavePoly: TPointArray;
+  convex: TPointArray;
+  Buffer: TSimbaPointBuffer;
+begin
+  concavePoly := Self;
+  convex := ConcavePoly.ConvexHull();
+
+  for x:=0 to High(ConcavePoly) do
+  begin
+    i := convex.IndexOf(ConcavePoly[x]);
+
+    if i <> -1 then
+    begin
+      j := (i+1) mod Length(convex);
+      y := concavePoly.IndexOf(convex[j]);
+
+      best := 0;
+      for k:=y to x do
+      begin
+        dist := TSimbaGeometry.DistToLine(concavePoly[k], convex[i], convex[j]);
+        if (dist > best) then
+        begin
+          best := dist;
+          pt := concavePoly[k];
+        end;
+      end;
+
+      if (best >= Epsilon) then
+      begin
+        if (Mode = EConvexityDefects.MINIMAL) and ((Buffer.Count = 0) or (Buffer.Last <> convex[j])) then Buffer.Add(convex[j]);
+        if (best > 0) then
+          Buffer.Add(pt{%H-});
+        if (Mode = EConvexityDefects.MINIMAL) then Buffer.Add(convex[i]);
+      end;
+
+      if (Mode = EConvexityDefects.ALL) then
+        Buffer.Add(convex[i]);
+    end;
+  end;
+
+  Result := Buffer.ToArray(False);
 end;
 
 end.

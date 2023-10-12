@@ -784,6 +784,22 @@ begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.ConcaveHullEx(PDouble(Params^[1])^, PDouble(Params^[2])^);
 end;
 
+(*
+TPointArray.ConvexityDefects
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> function TPointArray.ConvexityDefects(Epsilon: Single; Mode: EConvexityDefects = EConvexityDefects.NONE): TPointArray;
+
+Finds the defects in relation to a convex hull of the given concave hull.
+
+ - EConvexityDefects.All     -> Keeps all convex points as well.
+ - EConvexityDefects.Minimal -> Keeps the convex points that was linked to a defect
+ - EConvexityDefects.None    -> Only defects
+*)
+procedure _LapeTPAConvexityDefects(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ConvexityDefects(PDouble(Params^[1])^, EConvexityDefects(Params^[2]^));
+end;
+
 procedure ImportTPA(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -882,6 +898,9 @@ begin
     addGlobalFunc('function TPointArray.DouglasPeucker(Epsilon: Double): TPointArray;', @_LapeTPADouglasPeucker);
     addGlobalFunc('function TPointArray.ConcaveHull(Epsilon: Double = 2.5; kCount: Integer = 5): TPointArray;', @_LapeTPAConcaveHull);
     addGlobalFunc('function TPointArray.ConcaveHullEx(MaxLeap: Double = -1; Epsilon: Double = 2): T2DPointArray;', @_LapeTPAConcaveHullEx);
+
+    addGlobalType('enum(NONE, ALL, MINIMAL)', 'EConvexityDefects');
+    addGlobalFunc('function TPointArray.ConvexityDefects(Epsilon: Single = 0; Mode: EConvexityDefects = EConvexityDefects.NONE): TPointArray;', @_LapeTPAConvexityDefects);
 
     ImportingSection := '';
   end;
