@@ -340,7 +340,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="154">
+    <Units Count="155">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1041,6 +1041,10 @@
         <Filename Value="clearpixelaa.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit153>
+      <Unit154>
+        <Filename Value="simba.image_integral.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit154>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
