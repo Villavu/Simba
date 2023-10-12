@@ -192,7 +192,7 @@ type
     function ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix; overload;
 
     function ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: ESimbaImageThreshMethod; K: Integer): TSimbaImage;
-    function ThresholdSauvola(Window: Integer; AInvert: Boolean; K: Single): TSimbaImage;
+    function ThresholdSauvola(Radius: Integer; R: Single = 128; K: Single = 0.5): TSimbaImage;
 
     function RowPtrs: TSimbaImageRowPtrs;
 
@@ -229,7 +229,7 @@ uses
   simba.arraybuffer, simba.geometry, simba.tpa,
   simba.encoding, simba.compress,
   simba.nativeinterface, simba.singlematrix,
-  simba.image_lazbridge, simba.rgbsumtable;
+  simba.image_lazbridge, simba.rgbsumtable, simba.image_integral;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
@@ -2216,115 +2216,64 @@ begin
   end;
 end;
 
-function TSimbaImage.ThresholdSauvola(Window: Integer; AInvert: Boolean; K: Single): TSimbaImage;
+{
+  Radius = Window size
+  R      = dynamic range of standard deviation (default = 128)
+  K      = constant value in range 0.2..0.5 (default = 0.5)
+}
+function TSimbaImage.ThresholdSauvola(Radius: Integer; R: Single = 128; K: Single = 0.5): TSimbaImage;
+const
+  HIT:  TColorBGRA = (B: 255; G: 255; R: 255; A: 0);
+  MISS: TColorBGRA = (B: 0; G: 0; R: 0; A: 0);
 var
-  SumTable: TDoubleMatrix;
-  SumTableSquared: TDoubleMatrix;
-
-  function CreateSumTable(Matrix: TByteMatrix): TDoubleMatrix;
-  var
-    W, H, X, Y: Integer;
-  begin
-    SetLength(Result, Matrix.Height, Matrix.Width);
-
-    W := Result.Width - 1;
-    H := Result.Height - 1;
-
-    for Y := 0 to H do
-      Result[0, Y] := Matrix[0, Y];
-
-    for Y := 1 to H do
-      for X := 0 to W do
-        Result[Y, X] := Matrix[Y,X] + Result[Y-1, X];
-
-    for Y := 0 to H do
-      for X := 1 to W do
-        Result[Y, X] += Result[Y, X-1];
-  end;
-
-  function CreateSumTableSquared(Matrix: TByteMatrix): TDoubleMatrix;
-  var
-    W, H, X, Y: Integer;
-  begin
-    SetLength(Result, Matrix.Height, Matrix.Width);
-
-    W := Result.Width - 1;
-    H := Result.Height - 1;
-
-    for Y := 0 to H do
-      Result[0, Y] := Sqr(Matrix[0, Y]);
-
-    for Y := 1 to H do
-      for X := 0 to W do
-        Result[Y, X] := Sqr(Matrix[Y,X]) + Result[Y-1, X];
-
-    for Y := 0 to H do
-      for X := 1 to W do
-        Result[Y, X] += Result[Y, X-1];
-  end;
-
-  function QuerySumTable(Table: TDoubleMatrix; X1, Y1, X2, Y2: Integer): Double;
-  begin
-    Result := Table[Y2, X2];
-
-    if (Y1 > 0) then
-      Result := Result - Table[Y1 - 1, X2];
-    if (X1 > 0) then
-      Result := Result - Table[Y2, X1 - 1];
-    if (Y1 > 0) and (X1 > 0) then
-      Result := Result + Table[Y1 - 1, X1 - 1];
-  end;
-
-  function GetMean(B: TBox): Single;
-  begin
-    Result := QuerySumTable(SumTable, B.X1, B.Y1, B.X2, B.Y2) / B.Area();
-  end;
-
-  function GetStdDev(B: TBox; Mean: Double): Single;
-  begin
-    Result := QuerySumTable(SumTableSquared, B.X1, B.Y1, B.X2, B.Y2) - (Sqr(Mean) * B.Area);
-    Result := Sqrt(Result / B.Area);
-  end;
-
-var
-  X, Y, W, H: Integer;
-  Mean, StdDev, Thresh: Single;
-  B: TBox;
-  Matrix: TByteMatrix;
-  Background, Foreground: TColorBGRA;
+  Mat: TByteMatrix;
+  Integral: TSimbaIntegralImageF;
+  X,Y,W,H: Integer;
+  Left, Right, Top, Bottom: Integer;
+  Count: Integer;
+  Sum, SumSquares: Double;
+  Mean, Stdev, Threshold: Double;
 begin
   Result := TSimbaImage.Create(FWidth, FHeight);
 
-  Background := Default(TColorBGRA);
-  Foreground := Default(TColorBGRA);
-  Foreground.R := 255;
-  if AInvert then
-    Swap(Integer(Background), Integer(Foreground));
+  Mat := Self.ToGreyMatrix();
+  Mat.GetSize(W, H);
 
-  Matrix := ToGreyMatrix();
+  Dec(W);
+  Dec(H);
 
-  SumTable := CreateSumTable(Matrix);
-  SumTableSquared := CreateSumTableSquared(Matrix);
-
-  W := FWidth - 1;
-  H := FHeight - 1;
+  Radius := (Radius - 1) div 2;
+  Integral := TSimbaIntegralImageF.Create(Mat);
 
   for Y := 0 to H do
     for X := 0 to W do
     begin
-      B.X1 := Max(X-Window, 0);
-      B.Y1 := Max(Y-Window, 0);
-      B.X2 := Min(X+Window, W);
-      B.Y2 := Min(Y+Window, H);
+      Left   := Max(X-W, 0);
+      Right  := Min(X+W, W);
+      Top    := Max(Y-W, 0);
+      Bottom := Min(Y+W, H);
 
-      Mean   := GetMean(B);
-      StdDev := GetStdDev(B, Mean);
-      Thresh := Mean * (1.0 + K * ((StdDev / 128.0) - 1.0));
+      //Sum := 0;
+      //SumSquares := 0;
+      //
+      //for y := top to bottom do
+      //  for x := left to right do
+      //  begin
+      //    Sum += mat[y,x];
+      //    SumSquares += mat[y,x]*mat[y,x];
+      //  end;
 
-      if Matrix[Y, X] < Thresh then
-        Result.Data[Y*FWidth+X] := Foreground
+      Integral.Query(Left, Top, Right, Bottom, Sum, SumSquares);
+
+      Count := (Bottom - Top + 1) * (Right - Left + 1);
+      Mean := Sum / Count;
+      Stdev := Sqrt((SumSquares / Count) - Sqr(Mean));
+      Threshold := Mean * (1.0 + K * ((Stdev / R) - 1.0));
+
+      if Mat[Y, X] < Threshold then
+        Result.FData[Y * FWidth + X] := MISS
       else
-        Result.Data[Y*FWidth+X] := Background;
+        Result.FData[Y * FWidth + X] := HIT;
     end;
 end;
 

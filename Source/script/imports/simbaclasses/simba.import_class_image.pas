@@ -412,11 +412,15 @@ end;
 (*
 TImage.ThresholdSauvola
 ~~~~~~~~~~~~~~~~~~~~~~~
-> function TImage.ThresholdSauvola(Radius: Integer; AInvert: Boolean; k: Single): TImage;
+> function TImage.ThresholdSauvola(Radius: Integer; R: Single = 128; K: Single = 0.5): TImage;
+
+  Radius = Window size
+  R      = dynamic range of standard deviation (default = 128)
+  K      = constant value in range 0.2..0.5 (default = 0.5)
 *)
 procedure _LapeImage_ThresholdSauvola(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdSauvola(PInteger(Params^[1])^, PBoolean(Params^[2])^, PSingle(Params^[3])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdSauvola(PInteger(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^);
 end;
 
 (*
@@ -1402,7 +1406,7 @@ begin
     addGlobalFunc('function TImage.ToMatrix: TIntegerMatrix; overload', @_LapeImage_ToMatrix);
     addGlobalFunc('function TImage.ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix; overload', @_LapeImage_ToMatrixEx);
     addGlobalFunc('function TImage.ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: EImageThreshMethod; k: Integer): TImage', @_LapeImage_ThresholdAdaptive);
-    addGlobalFunc('function TImage.ThresholdSauvola(Radius: Integer; AInvert: Boolean; k: Single): TImage', @_LapeImage_ThresholdSauvola);
+    addGlobalFunc('function TImage.ThresholdSauvola(Radius: Integer; R: Single = 128; K: Single = 0.5): TImage', @_LapeImage_ThresholdSauvola);
     addGlobalFunc('procedure TImage.Pad(Amount: Integer)', @_LapeImage_Pad);
 
     addGlobalFunc('procedure TImage.LoadFromFile(FileName: String); overload', @_LapeImage_LoadFromFile);
