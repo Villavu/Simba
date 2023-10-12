@@ -1203,6 +1203,21 @@ begin
   TSimbaImageRowPtrs(Result^) := PSimbaImage(Params^[0])^.RowPtrs();
 end;
 
+procedure _LapeImage_DrawLineAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.DrawLineAA(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^, PSingle(Params^[4])^);
+end;
+
+procedure _LapeImage_DrawEllipseAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.DrawEllipseAA(PPoint(Params^[1])^, Pinteger(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^, PSingle(Params^[5])^);
+end;
+
+procedure _LapeImage_DrawCircleAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.DrawCircleAA(PPoint(Params^[1])^, Pinteger(Params^[2])^, PColor(Params^[3])^, PSingle(Params^[4])^);
+end;
+
 (*
 TImage.Finder
 ~~~~~~~~~~~~~~~~~~
@@ -1405,6 +1420,10 @@ begin
 
     addGlobalFunc('procedure TImage.SaveUnfreedImages(Directory: String); static;', @_LapeImage_SaveUnfreedImages);
     addGlobalFunc('procedure TImage.FreeOnTerminate(Value: Boolean);', @_LapeImage_FreeOnTerminate);
+
+    addGlobalFunc('procedure TImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single = 1.5);', @_LapeImage_DrawLineAA);
+    addGlobalFunc('procedure TImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single = 1.5);', @_LapeImage_DrawEllipseAA);
+    addGlobalFunc('procedure TImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single = 1.5);', @_LapeImage_DrawCircleAA);
 
     ImportingSection := '';
   end;

@@ -214,6 +214,10 @@ type
 
     function MatchTemplate(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
     function MatchTemplateMask(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
+
+    procedure DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single = 1.5);
+    procedure DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single = 1.5);
+    procedure DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single = 1.5);
   end;
 
   TSimbaImageArray = array of TSimbaImage;
@@ -2407,6 +2411,79 @@ end;
 function TSimbaImage.MatchTemplateMask(Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
 begin
   Result := simba.matchtemplate.MatchTemplateMask(Self.ToMatrixBGR(), Template.ToMatrixBGR(), Formula);
+end;
+
+procedure TSimbaImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single);
+
+  procedure DoClearAlpha;
+    {$i clearpixelaa.inc}
+    {$i drawlineaa.inc}
+  begin
+    DrawLineAA(
+      Start.X, Start.Y,
+      Stop.X, Stop.Y,
+      Thickness
+    );
+  end;
+
+  procedure DoDraw;
+  var
+    BGRA: TColorBGRA;
+
+    {$i drawpixelaa.inc}
+    {$i drawlineaa.inc}
+  begin
+    BGRA := Color.ToBGRA();
+
+    DrawLineAA(
+      Start.X, Start.Y,
+      Stop.X, Stop.Y,
+      Thickness
+    );
+  end;
+
+begin
+  DoClearAlpha();
+  DoDraw();
+end;
+
+procedure TSimbaImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single);
+
+  procedure DoClearAlpha;
+    {$i clearpixelaa.inc}
+    {$i drawellipseaa.inc}
+  begin
+    DrawEllipseAA(
+      ACenter.X - XRadius, ACenter.Y - YRadius,
+      ACenter.X + XRadius, ACenter.Y + YRadius,
+      Thickness
+    );
+  end;
+
+  procedure DoDraw;
+  var
+    BGRA: TColorBGRA;
+
+    {$i drawpixelaa.inc}
+    {$i drawellipseaa.inc}
+  begin
+    BGRA := Color.ToBGRA();
+
+    DrawEllipseAA(
+      ACenter.X - XRadius, ACenter.Y - YRadius,
+      ACenter.X + XRadius, ACenter.Y + YRadius,
+      Thickness
+    );
+  end;
+
+begin
+  DoClearAlpha();
+  DoDraw();
+end;
+
+procedure TSimbaImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single);
+begin
+  DrawEllipseAA(ACenter, Radius, Radius, Color, Thickness);
 end;
 
 constructor TSimbaImage.Create;
