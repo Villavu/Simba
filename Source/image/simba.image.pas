@@ -192,7 +192,7 @@ type
     function ToMatrix(X1, Y1, X2, Y2: Integer): TIntegerMatrix; overload;
 
     function ThresholdAdaptive(Alpha, Beta: Byte; AInvert: Boolean; Method: ESimbaImageThreshMethod; K: Integer): TSimbaImage;
-    function ThresholdSauvola(Radius: Integer; R: Single = 128; K: Single = 0.5): TSimbaImage;
+    function ThresholdSauvola(Radius: Integer; AInvert: Boolean = False; R: Single = 128; K: Single = 0.5): TSimbaImage;
 
     function RowPtrs: TSimbaImageRowPtrs;
 
@@ -2218,13 +2218,11 @@ end;
 
 {
   Radius = Window size
+  Invert = Invert output
   R      = dynamic range of standard deviation (default = 128)
   K      = constant value in range 0.2..0.5 (default = 0.5)
 }
-function TSimbaImage.ThresholdSauvola(Radius: Integer; R: Single = 128; K: Single = 0.5): TSimbaImage;
-const
-  HIT:  TColorBGRA = (B: 255; G: 255; R: 255; A: 0);
-  MISS: TColorBGRA = (B: 0; G: 0; R: 0; A: 0);
+function TSimbaImage.ThresholdSauvola(Radius: Integer; AInvert: Boolean; R: Single; K: Single): TSimbaImage;
 var
   Mat: TByteMatrix;
   Integral: TSimbaIntegralImageF;
@@ -2233,6 +2231,7 @@ var
   Count: Integer;
   Sum, SumSquares: Double;
   Mean, Stdev, Threshold: Double;
+  HitColor, MissColor: TColorBGRA;
 begin
   Result := TSimbaImage.Create(FWidth, FHeight);
 
@@ -2244,6 +2243,11 @@ begin
 
   Radius := (Radius - 1) div 2;
   Integral := TSimbaIntegralImageF.Create(Mat);
+
+  HitColor.AsInteger := $FFFFFF;
+  MissColor.AsInteger := 0;
+  if AInvert then
+    Swap(HitColor, MissColor);
 
   for Y := 0 to H do
     for X := 0 to W do
@@ -2271,9 +2275,9 @@ begin
       Threshold := Mean * (1.0 + K * ((Stdev / R) - 1.0));
 
       if Mat[Y, X] < Threshold then
-        Result.FData[Y * FWidth + X] := MISS
+        Result.FData[Y * FWidth + X] := MissColor
       else
-        Result.FData[Y * FWidth + X] := HIT;
+        Result.FData[Y * FWidth + X] := HitColor;
     end;
 end;
 
