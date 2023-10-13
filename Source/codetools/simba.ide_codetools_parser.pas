@@ -1272,9 +1272,9 @@ procedure TCodeParser.FindLocals;
       FLocals.Extend(Decl.Items.GetByClass(TDeclaration_Type));
       FLocals.Extend(Decl.Items.GetByClass(TDeclaration_EnumElement));
 
-      ParamListDecl := FItems.GetByClassFirst(TDeclaration_ParamList, True, True);
+      ParamListDecl := Decl.Items.GetByClassFirst(TDeclaration_ParamList, True, False);
       if Assigned(ParamListDecl) then
-        FLocals.Extend(ParamListDecl.Items.GetByClass(TDeclaration_Parameter, False, True));
+        FLocals.Extend(ParamListDecl.Items.GetByClass(TDeclaration_Parameter, True, True));
 
       Decl := Decl.GetOwnerByClass(TDeclaration_Method);
     end;
