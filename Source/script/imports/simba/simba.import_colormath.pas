@@ -624,7 +624,7 @@ begin
       'function TColor.R: Byte;', [
       'type TRGB = packed record B,G,R,A: Byte; end;',
       'begin',
-      '  Result := TRGB(Self).R;',
+      '  Result := TRGB(Self).B;',
       'end;'
     ]);
     addGlobalFunc(
@@ -638,7 +638,7 @@ begin
       'function TColor.B: Byte;', [
       'type TRGB = packed record B,G,R,A: Byte; end;',
       'begin',
-      '  Result := TRGB(Self).B;',
+      '  Result := TRGB(Self).R;',
       'end;'
     ]);
 
