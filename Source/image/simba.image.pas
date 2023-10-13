@@ -1022,19 +1022,49 @@ begin
 end;
 
 procedure TSimbaImage.DrawCircle(Circle: TCircle; Color: TColor);
+var
+  BGRA: TColorBGRA;
+
+  {$i setpixel.inc}
+  {$i drawcircle.inc}
+
 begin
   if (Circle.Radius < 1) then
     Exit;
 
-  DrawTPA(TPointArray.CreateFromCircle(Circle.Center, Circle.Radius, False), Color);
+  BGRA := Color.ToBGRA();
+
+  _DrawCircle(Circle.X, Circle.Y, Circle.Radius);
 end;
 
 procedure TSimbaImage.DrawCircleFilled(Circle: TCircle; Color: TColor);
+var
+  BGRA: TColorBGRA;
+
+  procedure _FillRow(const Y: Integer; X1, X2: Integer); inline;
+  begin
+    if (Y >= 0) and (Y < FHeight) then
+    begin
+      if      (X1 < 0)       then X1 := 0
+      else if (X1 >= FWidth) then X1 := FWidth - 1;
+
+      if      (X2 < 0)       then X2 := 0
+      else if (X2 >= FWidth) then X2 := FWidth - 1;
+
+      if ((X2 - X1) + 1 > 0) then
+        FillDWord(FData[Y * FWidth + X1], (X2 - X1) + 1, UInt32(BGRA));
+    end;
+  end;
+
+  {$i drawcirclefilled.inc}
+
 begin
   if (Circle.Radius < 1) then
     Exit;
 
-  DrawTPA(TPointArray.CreateFromCircle(Circle.Center, Circle.Radius, True), Color);
+  BGRA := Color.ToBGRA();
+
+  _DrawCircleFilled(Circle.Center.X, Circle.Center.Y, Circle.Radius);
 end;
 
 procedure TSimbaImage.DrawCircleInverted(Circle: TCircle; Color: TColor);
