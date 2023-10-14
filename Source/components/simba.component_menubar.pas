@@ -10,7 +10,7 @@ unit simba.component_menubar;
 interface
 
 uses
-  Classes, SysUtils, Controls, Forms, Menus, Graphics, ExtCtrls,
+  Classes, SysUtils, Controls, Forms, Menus, Graphics, ExtCtrls, LMessages,
   simba.settings;
 
 type
@@ -30,7 +30,6 @@ type
     procedure SetHotIndex(Index: Integer);
 
     function IndexAtXY(X, Y: Integer): Integer;
-    procedure Popup(Index: Integer);
 
     procedure DoTrackTimer(Sender: TObject);
     procedure DoChangePopupMenu(Data: PtrInt);
@@ -39,6 +38,7 @@ type
     procedure CalculateSizes;
     procedure Paint; override;
     procedure FontChanged(Sender: TObject); override;
+    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
 
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
@@ -49,19 +49,26 @@ type
     procedure MaybeReplaceModifiers(Menu: TPopupMenu);
 
     function GetMenus: TPopupMenuArray;
+
+    procedure PopupDelayed(Data: PtrInt);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
+    procedure WMKillFocus(var Message: TLMKillFocus); message LM_KILLFOCUS;
+    procedure SetFocus; override;
+
+    property HotIndex: Integer read FHotIndex write SetHotIndex;
     property Menus: TPopupMenuArray read GetMenus;
+    procedure Popup(Index: Integer);
     procedure AddMenu(Title: String; APopupMenu: TPopupMenu);
   end;
 
 implementation
 
 uses
-  LMessages, LCLIntf, ATCanvasPrimitives,
-  simba.theme, simba.fonthelpers;
+  LCLType, LCLIntf, ATCanvasPrimitives,
+  simba.theme, simba.fonthelpers, simba.scripttabsform;
 
 function TSimbaMainMenuBar.GetMenus: TPopupMenuArray;
 var
@@ -70,6 +77,11 @@ begin
   SetLength(Result, Length(FItems));
   for I := 0 to High(Result) do
     Result[I] := FItems[I].Menu;
+end;
+
+procedure TSimbaMainMenuBar.PopupDelayed(Data: PtrInt);
+begin
+  Popup(Data);
 end;
 
 procedure TSimbaMainMenuBar.SetHotIndex(Index: Integer);
@@ -212,6 +224,62 @@ begin
   CalculateSizes();
 end;
 
+procedure TSimbaMainMenuBar.SetFocus;
+begin
+  inherited SetFocus();
+
+  if (HotIndex = -1) then
+    HotIndex := 0;
+end;
+
+procedure TSimbaMainMenuBar.KeyDown(var Key: Word; Shift: TShiftState);
+var
+  Msg: TLMKillFocus;
+begin
+  if Focused then
+  begin
+    if (Key = VK_MENU) then
+    begin
+      Key := VK_RIGHT;
+    end;
+    if (Key = VK_ESCAPE) then
+    begin
+      WMKillFocus(Msg{%H-});
+      Key := 0;
+      Exit;
+    end;
+
+    if (Key = VK_RETURN) then
+    begin
+      Application.QueueAsyncCall(@PopupDelayed, HotIndex);
+      Key := 0;
+    end
+    else if (HotIndex = -1) then
+      HotIndex := 0
+    else
+    if (Key = VK_LEFT) then
+    begin
+      if (HotIndex = 0) then
+        HotIndex := High(FItems)
+      else
+        HotIndex := HotIndex - 1;
+
+      Key := 0;
+    end
+    else if (Key = VK_RIGHT) then
+    begin
+      if (HotIndex = High(FItems)) then
+        HotIndex := 0
+      else
+        HotIndex := HotIndex + 1;
+
+      Key := 0;
+    end;
+  end;
+
+  inherited KeyDown(Key, Shift);
+end;
+
 procedure TSimbaMainMenuBar.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   inherited MouseDown(Button, Shift, X, Y);
@@ -235,7 +303,10 @@ begin
 end;
 
 procedure TSimbaMainMenuBar.DoMenuClose(Sender: TObject);
+var
+  Msg: TLMKillFocus;
 begin
+  WMKillFocus(Msg{%H-});
   if (FTrackTimer = nil) then
     Exit;
   FTrackTimer.Enabled := False;
@@ -295,6 +366,15 @@ begin
   FTrackTimer := nil;
 
   inherited Destroy();
+end;
+
+procedure TSimbaMainMenuBar.WMKillFocus(var Message: TLMKillFocus);
+begin
+  HotIndex := -1;
+
+  if Assigned(SimbaScriptTabsForm) and Assigned(SimbaScriptTabsForm.CurrentEditor) then
+    if SimbaScriptTabsForm.CurrentEditor.CanSetFocus() then
+      SimbaScriptTabsForm.CurrentEditor.SetFocus();
 end;
 
 procedure TSimbaMainMenuBar.AddMenu(Title: String; APopupMenu: TPopupMenu);
