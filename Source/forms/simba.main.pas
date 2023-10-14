@@ -179,6 +179,7 @@ type
 
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormDestroy(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShortCut(var Msg: TLMKey; var Handled: Boolean);
     procedure FormWindowStateChange(Sender: TObject);
     procedure ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
@@ -719,6 +720,12 @@ begin
   SimbaSettings.Save();
 end;
 
+procedure TSimbaForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (Key = VK_MENU) and MenuBar.CanSetFocus() then
+    MenuBar.SetFocus();
+end;
+
 procedure TSimbaForm.FormShortCut(var Msg: TLMKey; var Handled: Boolean);
 begin
   Handled := MainMenuFile.IsShortcut(Msg)   or MainMenuView.IsShortcut(Msg)   or
@@ -791,6 +798,9 @@ begin
       Pause:   CurrentTab.Pause();
       Stop:    CurrentTab.Stop();
     end;
+
+    if CurrentTab.Editor.CanSetFocus() then
+      CurrentTab.Editor.SetFocus();
   except
     on E: Exception do
       MessageDlg('Exception while changing script state: ' + E.Message, mtError, [mbOK], 0);

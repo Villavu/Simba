@@ -340,7 +340,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="155">
+    <Units Count="158">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1045,6 +1045,18 @@
         <Filename Value="simba.image_integral.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit154>
+      <Unit155>
+        <Filename Value="image/drawcirclefilled.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit155>
+      <Unit156>
+        <Filename Value="image/drawcircle.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit156>
+      <Unit157>
+        <Filename Value="image/setpixel.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit157>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
