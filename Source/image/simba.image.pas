@@ -131,9 +131,12 @@ type
     procedure DrawPolygonFilled(Points: TPointArray; Color: TColor);
     procedure DrawPolygonInverted(Points: TPointArray; Color: TColor);
 
-    procedure DrawCircle(Circle: TCircle; Color: TColor);
-    procedure DrawCircleFilled(Circle: TCircle; Color: TColor);
-    procedure DrawCircleInverted(Circle: TCircle; Color: TColor);
+    procedure DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor); overload;
+    procedure DrawCircle(Circle: TCircle; Color: TColor); overload;
+    procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor); overload;
+    procedure DrawCircleFilled(Circle: TCircle; Color: TColor); overload;
+    procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor); overload;
+    procedure DrawCircleInverted(Circle: TCircle; Color: TColor); overload;
 
     procedure DrawBox(B: TBox; Color: TColor);
     procedure DrawBoxFilled(B: TBox; Color: TColor);
@@ -146,7 +149,8 @@ type
     procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);
     procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);
     procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);
-    procedure DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1);
+    procedure DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1); overload;
+    procedure DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1); overload;
     procedure DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor = -1);
 
     procedure DrawHSLCircle(ACenter: TPoint; Radius: Integer);
@@ -1021,7 +1025,7 @@ begin
         FData[Y*FWidth+X] := RGB;
 end;
 
-procedure TSimbaImage.DrawCircle(Circle: TCircle; Color: TColor);
+procedure TSimbaImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);
 var
   BGRA: TColorBGRA;
 
@@ -1029,15 +1033,20 @@ var
   {$i drawcircle.inc}
 
 begin
-  if (Circle.Radius < 1) then
+  if (Radius < 1) then
     Exit;
 
   BGRA := Color.ToBGRA();
 
-  _DrawCircle(Circle.X, Circle.Y, Circle.Radius);
+  _DrawCircle(ACenter.X, ACenter.Y, Radius);
 end;
 
-procedure TSimbaImage.DrawCircleFilled(Circle: TCircle; Color: TColor);
+procedure TSimbaImage.DrawCircle(Circle: TCircle; Color: TColor);
+begin
+  DrawCircle(Circle.Center, Circle.Radius, Color);
+end;
+
+procedure TSimbaImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
 var
   BGRA: TColorBGRA;
 
@@ -1059,15 +1068,20 @@ var
   {$i drawcirclefilled.inc}
 
 begin
-  if (Circle.Radius < 1) then
+  if (Radius < 1) then
     Exit;
 
   BGRA := Color.ToBGRA();
 
-  _DrawCircleFilled(Circle.Center.X, Circle.Center.Y, Circle.Radius);
+  _DrawCircleFilled(ACenter.X, ACenter.Y, Radius);
 end;
 
-procedure TSimbaImage.DrawCircleInverted(Circle: TCircle; Color: TColor);
+procedure TSimbaImage.DrawCircleFilled(Circle: TCircle; Color: TColor);
+begin
+  DrawCircleFilled(Circle.Center, Circle.Radius, Color);
+end;
+
+procedure TSimbaImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);
 var
   X, Y: Integer;
   B: TBox;
@@ -1075,20 +1089,22 @@ var
 begin
   RGB := ColorToBGRA(Color);
 
-  with Circle do
-  begin
-    B.X1 := Max(Center.X-Radius, 0);
-    B.Y1 := Max(Center.Y-Radius, 0);
-    B.X2 := Min(Center.X+Radius, FWidth-1);
-    B.Y2 := Min(Center.Y+Radius, FHeight-1);
-  end;
+  B.X1 := Max(ACenter.X-Radius, 0);
+  B.Y1 := Max(ACenter.Y-Radius, 0);
+  B.X2 := Min(ACenter.X+Radius, FWidth-1);
+  B.Y2 := Min(ACenter.Y+Radius, FHeight-1);
 
   Self.DrawBoxInverted(B, Color);
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not Circle.Contains(TPoint.Create(X, Y)) then
+      if not TSimbaGeometry.PointInCircle(TPoint.Create(X,Y), ACenter, Radius) then
         FData[Y*FWidth+X] := RGB;
+end;
+
+procedure TSimbaImage.DrawCircleInverted(Circle: TCircle; Color: TColor);
+begin
+  DrawCircleInverted(Circle.Center, Circle.Radius, Color);
 end;
 
 procedure TSimbaImage.DrawBox(B: TBox; Color: TColor);
@@ -1196,6 +1212,17 @@ begin
       DrawPolygonFilled(Polygons[I], GetDistinctColor(Color, I))
     else
       DrawPolygon(Polygons[I], GetDistinctColor(Color, I));
+end;
+
+procedure TSimbaImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor);
+var
+  I: Integer;
+begin
+  for I := 0 to High(Centers) do
+    if Filled then
+      DrawCircleFilled(Centers[I], Radius, GetDistinctColor(Color, I))
+    else
+      DrawCircle(Centers[I], Radius, GetDistinctColor(Color, I));
 end;
 
 procedure TSimbaImage.DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor);
@@ -2400,9 +2427,11 @@ procedure TSimbaImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: 
 
   procedure DoClearAlpha;
     {$i clearpixelaa.inc}
+    {$DEFINE _SetPixelA := _ClearPixelA}
     {$i drawlineaa.inc}
+    {$UNDEF _SetPixelA}
   begin
-    DrawLineAA(
+    _DrawLineAA(
       Start.X, Start.Y,
       Stop.X, Stop.Y,
       Thickness
@@ -2418,7 +2447,7 @@ procedure TSimbaImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: 
   begin
     BGRA := Color.ToBGRA();
 
-    DrawLineAA(
+    _DrawLineAA(
       Start.X, Start.Y,
       Stop.X, Stop.Y,
       Thickness
@@ -2434,9 +2463,11 @@ procedure TSimbaImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; 
 
   procedure DoClearAlpha;
     {$i clearpixelaa.inc}
+    {$DEFINE _SetPixelA := _ClearPixelA}
     {$i drawellipseaa.inc}
+    {$UNDEF _SetPixelA}
   begin
-    DrawEllipseAA(
+    _DrawEllipseAA(
       ACenter.X - XRadius, ACenter.Y - YRadius,
       ACenter.X + XRadius, ACenter.Y + YRadius,
       Thickness
@@ -2452,7 +2483,7 @@ procedure TSimbaImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; 
   begin
     BGRA := Color.ToBGRA();
 
-    DrawEllipseAA(
+    _DrawEllipseAA(
       ACenter.X - XRadius, ACenter.Y - YRadius,
       ACenter.X + XRadius, ACenter.Y + YRadius,
       Thickness

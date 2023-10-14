@@ -1,4 +1,4 @@
-procedure PixelProc(const X, Y: Integer; const Alpha: Byte); inline;
+procedure _SetPixelA(const X, Y: Integer; const Alpha: Byte); inline;
 var
   Pixel: PColorBGRA;
   APlus1, APlus1Inv: UInt32;
