@@ -177,7 +177,8 @@ type
     function Posterize(Value: Integer): TSimbaImage;
     function Convolute(Matrix: TDoubleMatrix): TSimbaImage;
     function Mirror(Style: ESimbaImageMirrorStyle): TSimbaImage;
-    function Blur(Block: Integer): TSimbaImage;
+    function BlockBlur(Block: Integer): TSimbaImage;
+    function GaussBlur(Radius: Double): TSimbaImage;
     function Blend(Points: TPointArray; Radius: Integer): TSimbaImage;
     function Downsample(Scale: Integer): TSimbaImage;
 
@@ -233,7 +234,7 @@ uses
   simba.arraybuffer, simba.geometry, simba.tpa,
   simba.encoding, simba.compress,
   simba.nativeinterface, simba.singlematrix,
-  simba.image_lazbridge, simba.rgbsumtable, simba.image_integral;
+  simba.image_lazbridge, simba.rgbsumtable, simba.image_integral, simba.image_gaussblur;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
@@ -1704,7 +1705,7 @@ begin
   end;
 end;
 
-function TSimbaImage.Blur(Block: Integer): TSimbaImage;
+function TSimbaImage.BlockBlur(Block: Integer): TSimbaImage;
 var
   X, Y, W, H: Integer;
   Size: Integer;
@@ -1716,7 +1717,7 @@ begin
 
   Size := Sqr(Block);
   if (Size <= 1) or (not Odd(Size)) then
-    SimbaException('TSimbaImage.Blur: Block(%d) must be a odd number (1,3,7,etc)', [Block]);
+    SimbaException('TSimbaImage.BlockBlur: Block(%d) must be a odd number (1,3,7,etc)', [Block]);
 
   Color := Default(TColorBGRA);
   Block := Block div 2;
@@ -1822,6 +1823,58 @@ begin
           for X := FHeight - 1 downto 0 do
             Result.FData[X*FHeight+Y] := FData[Y*FWidth+X];
       end;
+  end;
+end;
+
+function TSimbaImage.GaussBlur(Radius: Double): TSimbaImage;
+var
+  r,g,b: TByteArray;
+  i: Integer;
+  ptr: PColorBGRA;
+  ptrR, ptrG, ptrB: PByte;
+begin
+  Result := TSimbaImage.Create(FWidth, FHeight);
+  if (FWidth = 0) or (FHeight = 0) then
+    Exit;
+
+  SetLength(r, FWidth*FHeight);
+  SetLength(g, FWidth*FHeight);
+  SetLength(b, FWidth*FHeight);
+
+  ptr := FData;
+  ptrR := @r[0];
+  ptrG := @g[0];
+  ptrB := @b[0];
+
+  for i := 0 to (FWidth * FHeight) - 1 do
+  begin
+    ptrR^ := ptr^.R;
+    ptrG^ := ptr^.G;
+    ptrB^ := ptr^.B;
+
+    Inc(ptr);
+    Inc(ptrR);
+    Inc(ptrG);
+    Inc(ptrB);
+  end;
+
+  imgGaussBlur(Radius, r,g,b, FWidth, FHeight);
+
+  ptr := Result.FData;
+  ptrR := @r[0];
+  ptrG := @g[0];
+  ptrB := @b[0];
+
+  for i := 0 to (FWidth * FHeight) - 1 do
+  begin
+    ptr^.R := ptrR^;
+    ptr^.G := ptrG^;
+    ptr^.B := ptrB^;
+
+    Inc(ptr);
+    Inc(ptrR);
+    Inc(ptrG);
+    Inc(ptrB);
   end;
 end;
 
