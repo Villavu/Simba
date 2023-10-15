@@ -722,7 +722,7 @@ end;
 
 procedure TSimbaForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = VK_MENU) and MenuBar.CanSetFocus() then
+  if (Key = VK_MENU) and (not (ssAltGr in Shift)) and MenuBar.CanSetFocus() then
     MenuBar.SetFocus();
 end;
 

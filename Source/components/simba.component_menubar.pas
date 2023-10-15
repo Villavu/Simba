@@ -238,7 +238,7 @@ var
 begin
   if Focused then
   begin
-    if (Key = VK_MENU) then
+    if (Key = VK_MENU) and (not (ssAltGr in Shift)) then
     begin
       Key := VK_RIGHT;
     end;
