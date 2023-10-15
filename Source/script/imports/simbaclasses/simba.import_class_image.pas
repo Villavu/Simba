@@ -515,13 +515,23 @@ begin
 end;
 
 (*
-TImage.Blur
-~~~~~~~~~~~
-> function TImage.Blur(Block: Integer): TImage;
+TImage.BlockBlur
+~~~~~~~~~~~~~~~~
+> function TImage.BlockBlur(Block: Integer): TImage;
 *)
-procedure _LapeImage_Blur(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_BlockBlur(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Blur(PInteger(Params^[1])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.BlockBlur(PInteger(Params^[1])^);
+end;
+
+(*
+TImage.GaussBlur
+~~~~~~~~~~~~~~~~
+> function TImage.GaussBlur(Radius: Double): TImage;
+*)
+procedure _LapeImage_GaussBlur(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.GaussBlur(PDouble(Params^[1])^);
 end;
 
 (*
@@ -1440,7 +1450,8 @@ begin
     addGlobalFunc('function TImage.Posterize(Value: Integer): TImage', @_LapeImage_Posterize);
     addGlobalFunc('function TImage.Convolute(Matrix: TDoubleMatrix): TImage', @_LapeImage_Convolute);
     addGlobalFunc('function TImage.Mirror(Style: EImageMirrorStyle): TImage', @_LapeImage_Mirror);
-    addGlobalFunc('function TImage.Blur(Block: Integer): TImage', @_LapeImage_Blur);
+    addGlobalFunc('function TImage.BoxBlur(Block: Integer): TImage', @_LapeImage_BlockBlur);
+    addGlobalFunc('function TImage.GaussBlur(Radius: Double): TImage', @_LapeImage_GaussBlur);
     addGlobalFunc('function TImage.Blend(Points: TPointArray; Radius: Integer): TImage', @_LapeImage_Blend);
     addGlobalFunc('function TImage.Downsample(Scale: Integer): TImage', @_LapeImage_Downsample);
 
