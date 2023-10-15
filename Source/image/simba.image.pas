@@ -2362,10 +2362,10 @@ begin
   for Y := 0 to H do
     for X := 0 to W do
     begin
-      Left   := Max(X-W, 0);
-      Right  := Min(X+W, W);
-      Top    := Max(Y-W, 0);
-      Bottom := Min(Y+W, H);
+      Left   := Max(X-Radius, 0);
+      Right  := Min(X+Radius, W);
+      Top    := Max(Y-Radius, 0);
+      Bottom := Min(Y+Radius, H);
 
       //Sum := 0;
       //SumSquares := 0;
