@@ -1,0 +1,47 @@
+object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
+  Left = 2547
+  Height = 240
+  Top = 602
+  Width = 320
+  Caption = 'Download Simba'
+  ClientHeight = 240
+  ClientWidth = 320
+  DesignTimePPI = 120
+  OnCreate = FormCreate
+  OnResize = FormResize
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '3.0.0.1'
+  object Panel1: TPanel
+    Left = 0
+    Height = 240
+    Top = 0
+    Width = 320
+    Align = alClient
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 240
+    ClientWidth = 320
+    TabOrder = 0
+    object Panel2: TPanel
+      Left = 5
+      Height = 0
+      Top = 235
+      Width = 310
+      Align = alBottom
+      AutoSize = True
+      BorderSpacing.Around = 5
+      BevelOuter = bvNone
+      TabOrder = 0
+    end
+  end
+  object ProgressUpdateTimer: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = DoProgressUpdate
+    OnStartTimer = DoProgressTimerStart
+    OnStopTimer = DoProgressTimerStop
+    Left = 104
+    Top = 59
+  end
+end

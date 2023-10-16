@@ -125,6 +125,7 @@ type
 
     function PadLeft(ACount: Integer; PaddingChar: Char = #32): String;
     function PadRight(ACount: Integer; PaddingChar: Char = #32): String;
+    function PadCenter(ACount: Integer; PaddingChar: Char = #32): String;
 
     function Format(Args: array of const): String;
 
@@ -978,6 +979,16 @@ begin
   if (ACount > 0) then
     Result := Self + StringOfChar(PaddingChar, ACount)
   else
+    Result := Self;
+end;
+
+function TSimbaStringHelper.PadCenter(ACount: Integer; PaddingChar: Char): String;
+begin
+  if (Length(Self) < ACount) then
+  begin
+    Result := StringOfChar(' ', (ACount div 2) - (Length(Self) div 2)) + Self;
+    Result := Result + StringOfChar(' ', ACount - Length(Result));
+  end else
     Result := Self;
 end;
 

@@ -46,6 +46,9 @@ type
   TNodeForEachEvent = procedure(const Node: TTreeNode) is nested;
 
   TSimbaTreeView = class(TCustomControl)
+  private
+    function GetFilterVisible: Boolean;
+    procedure SetFilterVisible(Value: Boolean);
   protected
     FFilterPanel: TCustomControl;
     FFilterEdit: TSimbaEdit;
@@ -118,6 +121,7 @@ type
     property ScrolledLeft: Integer read GetScrolledLeft write SetScrolledLeft;
     property ScrolledTop: Integer read GetScrolledTop write SetScrolledTop;
     property TopLevelCount: Integer read GetTopLevelCount;
+    property FilterVisible: Boolean read GetFilterVisible write SetFilterVisible;
 
     property ScrollbarHorz: TSimbaScrollBar read FScrollbarHorz;
     property ScrollbarVert: TSimbaScrollBar read FScrollbarVert;
@@ -319,6 +323,16 @@ end;
 procedure TSimbaTreeView.DoClearFilterClick(Sender: TObject);
 begin
   Filter := '';
+end;
+
+function TSimbaTreeView.GetFilterVisible: Boolean;
+begin
+  Result := FFilterPanel.Visible;
+end;
+
+procedure TSimbaTreeView.SetFilterVisible(Value: Boolean);
+begin
+  FFilterPanel.Visible := Value;
 end;
 
 procedure TSimbaTreeView.FontChanged(Sender: TObject);
