@@ -67,6 +67,7 @@ type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
+    MenuItemDownloadAnotherSimba: TMenuItem;
     MenuItemSelectLine: TMenuItem;
     MenuItemSelectWord: TMenuItem;
     MenuItemFind: TMenuItem;
@@ -153,6 +154,7 @@ type
     MainMenuSearchSep1: TMenuItem;
     MainMenuSearchSep2: TMenuItem;
     MainMenuSearchSep3: TMenuItem;
+    Separator1: TMenuItem;
     ToolbarButtonStop: TToolButton;
     PackageUpdateTimer: TTimer;
     ToolBar: TToolBar;
@@ -194,6 +196,7 @@ type
     procedure MenuFileClick(Sender: TObject);
     procedure MenuFindClick(Sender: TObject);
     procedure MenuGotoClick(Sender: TObject);
+    procedure MenuItemDownloadAnotherSimbaClick(Sender: TObject);
     procedure MenuItemFindInFilesClick(Sender: TObject);
     procedure MenuItemSelectLineClick(Sender: TObject);
     procedure MenuItemSelectWordClick(Sender: TObject);
@@ -311,7 +314,8 @@ uses
   simba.env,
   simba.dockinghelpers, simba.nativeinterface,
   simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme,
-  simba.scriptbackup, simba.backupsform, simba.ide_utils, simba.threading;
+  simba.scriptbackup, simba.backupsform, simba.ide_utils, simba.threading,
+  simba.downloadsimbaform;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -907,6 +911,11 @@ begin
     if InputQuery('Goto line', 'Goto line:', Value) and (StrToIntDef(Value, -1) > -1) then
       SimbaScriptTabsForm.CurrentEditor.TopLine := StrToInt(Value) - (SimbaScriptTabsForm.CurrentEditor.LinesInWindow div 2);
   end;
+end;
+
+procedure TSimbaForm.MenuItemDownloadAnotherSimbaClick(Sender: TObject);
+begin
+  SimbaDownloadSimbaForm.ShowModal();
 end;
 
 procedure TSimbaForm.MenuItemFindInFilesClick(Sender: TObject);

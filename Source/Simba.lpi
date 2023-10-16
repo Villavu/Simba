@@ -340,7 +340,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="158">
+    <Units Count="160">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1057,6 +1057,17 @@
         <Filename Value="image/setpixel.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit157>
+      <Unit158>
+        <Filename Value="image/simba.image_gaussblur.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit158>
+      <Unit159>
+        <Filename Value="forms/simba.downloadsimbaform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SimbaDownloadSimbaForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit159>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

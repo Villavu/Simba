@@ -497,6 +497,13 @@ object SimbaForm: TSimbaForm
       Caption = 'Format Script'
       OnClick = MenuItemFormatScriptClick
     end
+    object Separator1: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemDownloadAnotherSimba: TMenuItem
+      Caption = 'Download Another Simba'
+      OnClick = MenuItemDownloadAnotherSimbaClick
+    end
   end
   object MainMenuView: TPopupMenu
     Images = Images
