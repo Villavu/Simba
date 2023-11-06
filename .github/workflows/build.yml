@@ -10,7 +10,7 @@ on:
 
 env:
   FPC_VER: release_3_2_2
-  LAZ_VER: fixes_3_0
+  LAZ_VER: lazarus_3_0_RC2
       
 jobs:
   build:
