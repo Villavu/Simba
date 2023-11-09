@@ -24,7 +24,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: windows-latest
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == 'Villavu/Simba' && github.event.workflow_run.head_branch == 'simba1500'
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == 'Villavu/Simba' && github.event.workflow_run.head_branch == 'simba2000'
     steps:
       - uses: actions/checkout@v3.0.2
         with:

@@ -13,7 +13,7 @@ object SimbaForm: TSimbaForm
   OnKeyDown = FormKeyDown
   OnWindowStateChange = FormWindowStateChange
   Position = poScreenCenter
-  LCLVersion = '3.0.0.1'
+  LCLVersion = '3.0.0.2'
   object DockPanel: TAnchorDockPanel
     Left = 0
     Height = 511
@@ -500,9 +500,9 @@ object SimbaForm: TSimbaForm
     object Separator1: TMenuItem
       Caption = '-'
     end
-    object MenuItemDownloadAnotherSimba: TMenuItem
-      Caption = 'Download Another Simba'
-      OnClick = MenuItemDownloadAnotherSimbaClick
+    object MenuItemDownloadSimba: TMenuItem
+      Caption = 'Download Simba ...'
+      OnClick = MenuItemDownloadSimbaClick
     end
   end
   object MainMenuView: TPopupMenu

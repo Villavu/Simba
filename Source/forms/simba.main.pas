@@ -67,7 +67,7 @@ type
   TSimbaForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
-    MenuItemDownloadAnotherSimba: TMenuItem;
+    MenuItemDownloadSimba: TMenuItem;
     MenuItemSelectLine: TMenuItem;
     MenuItemSelectWord: TMenuItem;
     MenuItemFind: TMenuItem;
@@ -196,7 +196,7 @@ type
     procedure MenuFileClick(Sender: TObject);
     procedure MenuFindClick(Sender: TObject);
     procedure MenuGotoClick(Sender: TObject);
-    procedure MenuItemDownloadAnotherSimbaClick(Sender: TObject);
+    procedure MenuItemDownloadSimbaClick(Sender: TObject);
     procedure MenuItemFindInFilesClick(Sender: TObject);
     procedure MenuItemSelectLineClick(Sender: TObject);
     procedure MenuItemSelectWordClick(Sender: TObject);
@@ -913,7 +913,7 @@ begin
   end;
 end;
 
-procedure TSimbaForm.MenuItemDownloadAnotherSimbaClick(Sender: TObject);
+procedure TSimbaForm.MenuItemDownloadSimbaClick(Sender: TObject);
 begin
   SimbaDownloadSimbaForm.ShowModal();
 end;
