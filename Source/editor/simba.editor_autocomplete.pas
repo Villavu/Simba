@@ -13,22 +13,15 @@ interface
 
 uses
   Classes, SysUtils, Graphics, StdCtrls, Controls, Forms, LCLType,
-  SynEdit, SynEditTypes, SynCompletion, SynEditKeyCmds, SynEditHighlighter,
-  simba.mufasatypes, simba.settings, simba.component_scrollbar,
+  SynEdit, SynEditTypes, SynEditKeyCmds, SynEditHighlighter,
+  SynCompletion_Simba,
+  simba.mufasatypes, simba.settings,
   simba.ide_codetools_parser, simba.ide_codetools_insight;
 
 type
-  TSimbaAutoCompleteSizeDrag = class(TSynBaseCompletionFormSizeDrag)
-    procedure Paint; override;
-  end;
-
   TSimbaAutoComplete = class;
   TSimbaAutoComplete_Form = class(TSynCompletionForm)
   protected
-    RealScroll: TSimbaScrollBar;
-
-    procedure DoScrollChange(Sender: TObject);
-
     procedure FontChanged(Sender: TObject); override;
 
     procedure Paint; override;
@@ -95,6 +88,7 @@ type
 
     function DoMeasureItem(const AKey: string; ACanvas: TCanvas; Selected: boolean; Index: integer): TPoint;
 
+    procedure DoPaintSizeDrag(Sender: TObject);
     procedure DoCodeCompletion(var Value: String; SourceValue: String; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
     procedure DoFiltering(var NewPosition: Integer);
     procedure DoTabPressed(Sender: TObject);
@@ -140,25 +134,6 @@ type
     procedure Clear; override;
     property Count: Integer read GetCount write SetCount;
   end;
-
-procedure TSimbaAutoCompleteSizeDrag.Paint;
-var
-  I: Integer;
-begin
-  Canvas.Brush.Color := SimbaTheme.ColorScrollBarInActive;
-  Canvas.Pen.Color := SimbaTheme.ColorLine;
-
-  Canvas.FillRect(ClientRect);
-
-  I := 2;
-  while (I < Height - 3) do
-  begin
-    Canvas.MoveTo(ClientRect.Right-I, ClientRect.Bottom-1-1);
-    Canvas.LineTo(ClientRect.Right-1, ClientRect.Bottom-I-1);
-
-    Inc(I, 3);
-  end;
-end;
 
 procedure TVirtualStringList.Clear;
 begin
@@ -224,11 +199,6 @@ begin
   { nothing }
 end;
 
-procedure TSimbaAutoComplete_Form.DoScrollChange(Sender: TObject);
-begin
-  Scroll.Position := RealScroll.Position;
-end;
-
 procedure TSimbaAutoComplete_Form.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
@@ -273,7 +243,7 @@ begin
   for i := 0 to Min(NbLinesInWindow - 1, ItemList.Count - Scroll.Position - 1) do
   begin
     ItemRect.Left   := DrawBorderWidth;
-    ItemRect.Right  := RealScroll.Left;
+    ItemRect.Right  := Scroll.Left;
     ItemRect.Top    := DrawBorderWidth + FFontHeight * i;
     ItemRect.Bottom := ItemRect.Top + FontHeight;
 
@@ -290,14 +260,10 @@ begin
     Canvas.FillRect(0, Height-DrawBorderWidth, Width, Height);
     Canvas.FillRect(0, 0, DrawBorderWidth, Height);
   end;
-
-  RealScroll.Assign(Scroll);
 end;
 
 procedure TSimbaAutoComplete_Form.DoShow;
 begin
-  RealScroll.Position := 0;
-
   Width           := SimbaSettings.Editor.AutoCompleteWidth.Value;
   NbLinesInWindow := SimbaSettings.Editor.AutoCompleteLines.Value;
 
@@ -347,41 +313,6 @@ end;
 constructor TSimbaAutoComplete_Form.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-
-  Scroll.Width := 0;
-
-  RealScroll := TSimbaScrollBar.Create(Self);
-  RealScroll.Parent := Self;
-  RealScroll.Kind := sbVertical;
-  RealScroll.OnEnter := @ScrollGetFocus;
-  RealScroll.OnChange := @DoScrollChange;
-  RealScroll.Anchors := [akTop, akRight, akBottom];
-  RealScroll.AnchorSide[akTop].Side := asrTop;
-  RealScroll.AnchorSide[akTop].Control := self;
-  RealScroll.AnchorSide[akRight].Side := asrBottom;
-  RealScroll.AnchorSide[akRight].Control := Self;
-  RealScroll.AnchorSide[akBottom].Side := asrTop;
-
-  SizeDrag.Free();
-  SizeDrag := TSimbaAutoCompleteSizeDrag.Create(Self);
-  SizeDrag.Parent := Self;
-  SizeDrag.BevelInner := bvNone;
-  SizeDrag.BevelOuter := bvNone;
-  SizeDrag.BorderStyle := bsNone;
-  SizeDrag.Cursor := crSizeNWSE;
-  SizeDrag.AutoSize := False;
-  SizeDrag.Visible := False;
-  SizeDrag.Anchors := [akBottom, akRight, akLeft];
-  SizeDrag.AnchorSideLeft.Side := asrTop;
-  SizeDrag.AnchorSideLeft.Control := RealScroll;
-  SizeDrag.AnchorSideRight.Side := asrBottom;
-  SizeDrag.AnchorSideRight.Control := Self;
-  SizeDrag.AnchorSideBottom.Side := asrBottom;
-  SizeDrag.AnchorSideBottom.Control := Self;
-  SizeDrag.Constraints.MinHeight := RealScroll.Width - DrawBorderWidth;
-  SizeDrag.Constraints.MaxHeight := RealScroll.Width - DrawBorderWidth;
-
-  RealScroll.AnchorSide[akBottom].Control := SizeDrag;
 
   if (FItemList <> nil) then
     FItemList.Free();
@@ -876,6 +807,28 @@ begin
     Result := TPoint.Create(0, 0);
 end;
 
+procedure TSimbaAutoComplete.DoPaintSizeDrag(Sender: TObject);
+var
+  I: Integer;
+begin
+  with TSynBaseCompletionFormSizeDrag(Sender) do
+  begin
+    Canvas.Brush.Color := SimbaTheme.ColorScrollBarInActive;
+    Canvas.Pen.Color := SimbaTheme.ColorLine;
+
+    Canvas.FillRect(ClientRect);
+
+    I := 2;
+    while (I < Height - 3) do
+    begin
+      Canvas.MoveTo(ClientRect.Right-I, ClientRect.Bottom-1-1);
+      Canvas.LineTo(ClientRect.Right-1, ClientRect.Bottom-I-1);
+
+      Inc(I, 3);
+    end;
+  end;
+end;
+
 constructor TSimbaAutoComplete.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -883,6 +836,7 @@ begin
   FCodeinsight := TCodeinsight.Create();
   FForm := TSimbaAutoComplete_Form(TheForm);
   FForm.AutoComplete := Self;
+  FForm.SizeDrag.OnPaint := @DoPaintSizeDrag;
 
   FHintForm := TSimbaAutoComplete_Hint.Create(TheForm);
   FHintForm.AutoComplete := Self;
