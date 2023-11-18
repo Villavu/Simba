@@ -40,6 +40,15 @@ type
 
     FTextDrawer: TSimbaTextDrawer;
 
+    procedure _DrawBoxFilled(Box: TBox; Color: TColor);
+    procedure _DrawBoxFilledAlpha(Box: TBox; Color: TColor; Alpha: Byte);
+
+    procedure _DrawCircleFilledAlpha(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
+    procedure _DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
+
+    procedure _DrawPolygonFilledAlpha(Points: TPointArray; Color: TColor; Alpha: Byte);
+    procedure _DrawPolygonFilled(Points: TPointArray; Color: TColor);
+
     procedure NotifyUnfreed; override;
 
     function GetPixel(X, Y: Integer): TColor;
@@ -128,22 +137,24 @@ type
     procedure DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: TColor); overload;
 
     procedure DrawPolygon(Points: TPointArray; Color: TColor);
-    procedure DrawPolygonFilled(Points: TPointArray; Color: TColor);
+    procedure DrawPolygonFilled(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
     procedure DrawPolygonInverted(Points: TPointArray; Color: TColor);
 
-    procedure DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor); overload;
+    procedure DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);
+    procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);
+    procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
+
+    // TCircle overloads
     procedure DrawCircle(Circle: TCircle; Color: TColor); overload;
-    procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor); overload;
-    procedure DrawCircleFilled(Circle: TCircle; Color: TColor); overload;
-    procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor); overload;
+    procedure DrawCircleFilled(Circle: TCircle; Color: TColor; Alpha: Byte = 0); overload;
     procedure DrawCircleInverted(Circle: TCircle; Color: TColor); overload;
 
     procedure DrawBox(B: TBox; Color: TColor);
-    procedure DrawBoxFilled(B: TBox; Color: TColor);
+    procedure DrawBoxFilled(Box: TBox; Color: TColor; Alpha: Byte = 0);
     procedure DrawBoxInverted(B: TBox; Color: TColor);
 
     procedure DrawQuad(Quad: TQuad; Color: TColor);
-    procedure DrawQuadFilled(Quad: TQuad; Color: TColor);
+    procedure DrawQuadFilled(Quad: TQuad; Color: TColor; Alpha: Byte = 0);
     procedure DrawQuadInverted(Quad: TQuad; Color: TColor);
 
     procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);
@@ -177,7 +188,7 @@ type
     function Posterize(Value: Integer): TSimbaImage;
     function Convolute(Matrix: TDoubleMatrix): TSimbaImage;
     function Mirror(Style: ESimbaImageMirrorStyle): TSimbaImage;
-    function BlockBlur(Block: Integer): TSimbaImage;
+    function BoxBlur(Radius: Integer): TSimbaImage;
     function GaussBlur(Radius: Double): TSimbaImage;
     function Blend(Points: TPointArray; Radius: Integer): TSimbaImage;
     function Downsample(Scale: Integer): TSimbaImage;
@@ -231,10 +242,10 @@ implementation
 
 uses
   Math, FPImage, BMPcomn, fpqoi_simba,
-  simba.arraybuffer, simba.geometry, simba.tpa,
+  simba.arraybuffer, simba.geometry, simba.tpa, simba.algo_sort,
   simba.encoding, simba.compress,
   simba.nativeinterface, simba.singlematrix,
-  simba.image_lazbridge, simba.rgbsumtable, simba.image_integral, simba.image_gaussblur;
+  simba.image_lazbridge, simba.image_integral, simba.image_gaussblur;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
@@ -985,24 +996,15 @@ begin
   Self.DrawTPA(Points.Connect(), Color);
 end;
 
-procedure TSimbaImage.DrawPolygonFilled(Points: TPointArray; Color: TColor);
-var
-  X, Y, Hi: Integer;
-  Bounds: TBox;
-  RGB: TColorBGRA;
+procedure TSimbaImage.DrawPolygonFilled(Points: TPointArray; Color: TColor; Alpha: Byte);
 begin
-  Hi := High(Points);
-  if (Hi < 0) then
+  if (Length(Points) = 0) then
     Exit;
 
-  RGB := ColorToBGRA(Color);
-
-  Bounds := Points.Bounds().Clip(Box(0, 0, FWidth-1, FHeight-1));
-
-  for X := Bounds.X1 to Bounds.X2 do
-    for Y := Bounds.Y1 to Bounds.Y2 do
-      if TSimbaGeometry.PointInPolygon(Point(X, Y), Points) then
-        FData[Y*FWidth+X] := RGB;
+  if (Alpha > 0) then
+    _DrawPolygonFilledAlpha(Points, Color, Alpha)
+  else
+    _DrawPolygonFilled(Points, Color);
 end;
 
 procedure TSimbaImage.DrawPolygonInverted(Points: TPointArray; Color: TColor);
@@ -1027,19 +1029,21 @@ begin
 end;
 
 procedure TSimbaImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor);
-var
-  BGRA: TColorBGRA;
 
-  {$i setpixel.inc}
-  {$i drawcircle.inc}
+  procedure _SetPixel(const X, Y: Integer); inline;
+  begin
+    if (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight) then
+      FData[Y*FWidth+X].AsInteger := Color;
+  end;
+
+  {$i circle.inc}
 
 begin
   if (Radius < 1) then
     Exit;
+  Color := Color.ToBGRA().AsInteger; // rgb to bgr
 
-  BGRA := Color.ToBGRA();
-
-  _DrawCircle(ACenter.X, ACenter.Y, Radius);
+  _Circle(ACenter.X, ACenter.Y, Radius);
 end;
 
 procedure TSimbaImage.DrawCircle(Circle: TCircle; Color: TColor);
@@ -1047,39 +1051,20 @@ begin
   DrawCircle(Circle.Center, Circle.Radius, Color);
 end;
 
-procedure TSimbaImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
-var
-  BGRA: TColorBGRA;
-
-  procedure _FillRow(const Y: Integer; X1, X2: Integer); inline;
-  begin
-    if (Y >= 0) and (Y < FHeight) then
-    begin
-      if      (X1 < 0)       then X1 := 0
-      else if (X1 >= FWidth) then X1 := FWidth - 1;
-
-      if      (X2 < 0)       then X2 := 0
-      else if (X2 >= FWidth) then X2 := FWidth - 1;
-
-      if ((X2 - X1) + 1 > 0) then
-        FillDWord(FData[Y * FWidth + X1], (X2 - X1) + 1, UInt32(BGRA));
-    end;
-  end;
-
-  {$i drawcirclefilled.inc}
-
+procedure TSimbaImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
 begin
   if (Radius < 1) then
     Exit;
 
-  BGRA := Color.ToBGRA();
-
-  _DrawCircleFilled(ACenter.X, ACenter.Y, Radius);
+  if (Alpha > 0) then
+    _DrawCircleFilledAlpha(ACenter, Radius, Color, Alpha)
+  else
+    _DrawCircleFilled(ACenter, Radius, Color);
 end;
 
-procedure TSimbaImage.DrawCircleFilled(Circle: TCircle; Color: TColor);
+procedure TSimbaImage.DrawCircleFilled(Circle: TCircle; Color: TColor; Alpha: Byte = 0);
 begin
-  DrawCircleFilled(Circle.Center, Circle.Radius, Color);
+  DrawCircleFilled(Circle.Center, Circle.Radius, Color, Alpha);
 end;
 
 procedure TSimbaImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor);
@@ -1113,19 +1098,16 @@ begin
   Self.DrawTPA(TPointArray.CreateFromBox(B, False), Color);
 end;
 
-procedure TSimbaImage.DrawBoxFilled(B: TBox; Color: TColor);
-var
-  Y, Size: Integer;
+procedure TSimbaImage.DrawBoxFilled(Box: TBox; Color: TColor; Alpha: Byte);
 begin
-  B := B.Clip(Box(0, 0, FWidth-1, FHeight-1));
+  Box := Box.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+  if (Box.X2 - Box.X1 < 1) or (Box.Y2 - Box.Y1 < 1) then
+    Exit;
 
-  if (B.X2 - B.X1 < 1) then Exit;
-  if (B.Y2 - B.Y1 < 1) then Exit;
-
-  Color := Integer(Color.ToBGRA());
-  Size := B.X2 - B.X1 + 1;
-  for Y := B.Y1 to B.Y2 do
-    FillDWord(FData[Y * FWidth + B.X1], Size, Color);
+  if (Alpha > 0) then
+    _DrawBoxFilledAlpha(Box, Color, Alpha)
+  else
+    _DrawBoxFilled(Box, Color);
 end;
 
 procedure TSimbaImage.DrawBoxInverted(B: TBox; Color: TColor);
@@ -1148,20 +1130,9 @@ begin
   DrawLine(Quad.Left, Quad.Top, Color);
 end;
 
-procedure TSimbaImage.DrawQuadFilled(Quad: TQuad; Color: TColor);
-var
-  X, Y: Integer;
-  Bounds: TBox;
-  RGB: TColorBGRA;
+procedure TSimbaImage.DrawQuadFilled(Quad: TQuad; Color: TColor; Alpha: Byte);
 begin
-  RGB := Color.ToBGRA();
-
-  Bounds := Quad.Bounds.Clip(Box(0, 0, FWidth-1, FHeight-1));
-
-  for X := Bounds.X1 to Bounds.X2 do
-    for Y := Bounds.Y1 to Bounds.Y2 do
-      if TSimbaGeometry.PointInQuad(TPoint.Create(X, Y), Quad.Top, Quad.Right, Quad.Bottom, Quad.Left) then
-        FData[Y*FWidth+X] := RGB;
+  DrawPolygonFilled([Quad.Top, Quad.Right, Quad.Bottom, Quad.Left], Color, Alpha);
 end;
 
 procedure TSimbaImage.DrawQuadInverted(Quad: TQuad; Color: TColor);
@@ -1705,23 +1676,22 @@ begin
   end;
 end;
 
-function TSimbaImage.BlockBlur(Block: Integer): TSimbaImage;
+function TSimbaImage.BoxBlur(Radius: Integer): TSimbaImage;
 var
   X, Y, W, H: Integer;
+  XX, YY: Integer;
   Size: Integer;
   B: TBox;
-  SumTable: TRGBSumTable;
-  Color: TColorBGRA;
+  Sum: record
+    R,G,B: UInt64;
+  end;
+  Ptr: PColorBGRA;
 begin
-  Result := TSimbaImage.Create(Self.Width, Self.Height);
+  Result := TSimbaImage.Create(FWidth, FHeight);
+  if (Radius <= 1) or (not Odd(Radius)) then
+    SimbaException('TSimbaImage.BlockBlur: Radius(%d) must be odd (1,3,5 etc).', [Radius]);
 
-  Size := Sqr(Block);
-  if (Size <= 1) or (not Odd(Size)) then
-    SimbaException('TSimbaImage.BlockBlur: Block(%d) must be a odd number (1,3,7,etc)', [Block]);
-
-  Color := Default(TColorBGRA);
-  Block := Block div 2;
-  SumTable := TRGBSumTable.Create(Self);
+  Radius := Radius div 2;
 
   W := FWidth - 1;
   H := FHeight - 1;
@@ -1729,20 +1699,29 @@ begin
   for Y := 0 to H do
     for X := 0 to W do
     begin
-      B.X1 := Max(X-Block, 0);
-      B.Y1 := Max(Y-Block, 0);
-      B.X2 := Min(X+Block, W);
-      B.Y2 := Min(Y+Block, H);
+      B.X1 := Max(X-Radius, 0);
+      B.Y1 := Max(Y-Radius, 0);
+      B.X2 := Min(X+Radius, W);
+      B.Y2 := Min(Y+Radius, H);
 
-      Size := B.Area;
-      with SumTable.Query(B) do
-      begin
-        Color.R := R div Size;
-        Color.G := G div Size;
-        Color.B := B div Size;
+      Size := 0;
+      Sum.R := 0; Sum.G := 0; Sum.B := 0;
 
-        Result.Data[Y * FWidth + X] := Color;
-      end;
+      for YY := B.Y1 to B.Y2 - 1 do
+        for XX := B.X1 to B.X2 - 1 do
+        begin
+          Ptr := @FData[YY * FWidth + XX];
+
+          Sum.R += Ptr^.R;
+          Sum.G += Ptr^.G;
+          Sum.B += Ptr^.B;
+          Size += 1;
+        end;
+
+      Ptr := @Result.Data[Y * FWidth + X];
+      Ptr^.R := Sum.R div Size;
+      Ptr^.G := Sum.G div Size;
+      Ptr^.B := Sum.B div Size;
     end;
 end;
 
@@ -2411,6 +2390,189 @@ begin
     else
       FillByte(FData[Y * FWidth], Amount * SizeOf(TColorBGRA), 0);
   end;
+end;
+
+procedure TSimbaImage._DrawBoxFilled(Box: TBox; Color: TColor);
+var
+  Size: Integer;
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); inline;
+  begin
+    FillDWord(FData[Y * FWidth + X1], Size, Color);
+  end;
+
+  {$i boxfilled.inc}
+
+begin
+  Color := Color.ToBGRA().AsInteger; // rgb to bgra
+  Size := (Box.X2 - Box.X1) + 1;
+
+  _BoxFilled(Box);
+end;
+
+procedure TSimbaImage._DrawBoxFilledAlpha(Box: TBox; Color: TColor; Alpha: Byte);
+var
+  R,G,B,A: Byte;
+  Size: Integer;
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); inline;
+  var
+    Ptr: PColorBGRA;
+    Upper: PtrUInt;
+  begin
+    Ptr := @FData[Y * FWidth + X1];
+    Upper := PtrUInt(Ptr) + Size;
+
+    while (PtrUInt(Ptr) <= Upper) do
+    begin
+      Ptr^.R := R + Ptr^.R * A shr 8;
+      Ptr^.G := G + Ptr^.G * A shr 8;
+      Ptr^.B := B + Ptr^.B * A shr 8;
+      Ptr^.A := Alpha;
+
+      Inc(Ptr);
+    end;
+  end;
+
+  {$i boxfilled.inc}
+
+begin
+  R := (Color.R * (255 - Alpha + 1)) shr 8;
+  G := (Color.G * (255 - Alpha + 1)) shr 8;
+  B := (Color.B * (255 - Alpha + 1)) shr 8;
+  A := Alpha + 1;
+
+  Size := (Box.X2 - Box.X1) * SizeOf(TColorBGRA);
+
+  _BoxFilled(Box);
+end;
+
+procedure TSimbaImage._DrawCircleFilledAlpha(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
+var
+  R,G,B,A: Byte;
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); inline;
+  var
+    Ptr: PColorBGRA;
+    Upper: PtrUInt;
+  begin
+    if (Y >= 0) and (Y < FHeight) then
+    begin
+      X1 := EnsureRange(X1, 0, FWidth - 1);
+      X2 := EnsureRange(X2, 0, FWidth - 1);
+
+      if ((X2 - X1) + 1 > 0) then
+      begin
+        Ptr := @FData[Y * FWidth + X1];
+        Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
+
+        while PtrUInt(Ptr) <= Upper do
+        begin
+          Ptr^.R := R + Ptr^.R * A shr 8;
+          Ptr^.G := G + Ptr^.G * A shr 8;
+          Ptr^.B := B + Ptr^.B * A shr 8;
+          Ptr^.A := Alpha;
+
+          Inc(Ptr);
+        end;
+      end;
+    end;
+  end;
+
+  {$i circlefilled.inc}
+
+begin
+  R := (Color.R * (255 - Alpha + 1)) shr 8;
+  G := (Color.G * (255 - Alpha + 1)) shr 8;
+  B := (Color.B * (255 - Alpha + 1)) shr 8;
+  A := Alpha + 1;
+
+  _CircleFilled(ACenter.X, ACenter.Y, Radius);
+end;
+
+procedure TSimbaImage._DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor);
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); inline;
+  begin
+    if (Y >= 0) and (Y < FHeight) then
+    begin
+      X1 := EnsureRange(X1, 0, FWidth - 1);
+      X2 := EnsureRange(X2, 0, FWidth - 1);
+      if ((X2 - X1) + 1 > 0) then
+        FillDWord(FData[Y * FWidth + X1], (X2 - X1) + 1, Color);
+    end;
+  end;
+
+  {$i circlefilled.inc}
+
+begin
+  Color := Color.ToBGRA().AsInteger; // rgb to bgra
+
+  _CircleFilled(ACenter.X, ACenter.Y, Radius);
+end;
+
+procedure TSimbaImage._DrawPolygonFilledAlpha(Points: TPointArray; Color: TColor; Alpha: Byte);
+var
+  R,G,B,A: Byte;
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); inline;
+  var
+    Ptr: PColorBGRA;
+    Upper: PtrUInt;
+  begin
+    if (Y >= 0) and (Y < FHeight) then
+    begin
+      X1 := EnsureRange(X1, 0, FWidth - 1);
+      X2 := EnsureRange(X2, 0, FWidth - 1);
+
+      if ((X2 - X1) + 1 > 0) then
+      begin
+        Ptr := @FData[Y * FWidth + X1];
+        Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
+
+        while PtrUInt(Ptr) <= Upper do
+        begin
+          Ptr^.R := R + Ptr^.R * A shr 8;
+          Ptr^.G := G + Ptr^.G * A shr 8;
+          Ptr^.B := B + Ptr^.B * A shr 8;
+          Ptr^.A := Alpha;
+
+          Inc(Ptr);
+        end;
+      end;
+    end;
+  end;
+
+  {$i polygonfilled.inc}
+
+begin
+  R := (Color.R * (255 - Alpha + 1)) shr 8;
+  G := (Color.G * (255 - Alpha + 1)) shr 8;
+  B := (Color.B * (255 - Alpha + 1)) shr 8;
+  A := Alpha + 1;
+
+  _PolygonFilled(Points, TRect.Create(0,0,FWidth-1,FHeight-1));
+end;
+
+procedure TSimbaImage._DrawPolygonFilled(Points: TPointArray; Color: TColor);
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); inline;
+  begin
+    if (Y >= 0) and (Y < FHeight) then
+    begin
+      X1 := EnsureRange(X1, 0, FWidth - 1);
+      X2 := EnsureRange(X2, 0, FWidth - 1);
+      if ((X2 - X1) + 1 > 0) then
+        FillDWord(FData[Y * FWidth + X1], (X2 - X1) + 1, Color);
+    end;
+  end;
+
+  {$i polygonfilled.inc}
+
+begin
+  Color := Color.ToBGRA().AsInteger; // rgb to bgra
+
+  _PolygonFilled(Points, TRect.Create(0,0,FWidth-1,FHeight-1));
 end;
 
 procedure TSimbaImage.NotifyUnfreed;

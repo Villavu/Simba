@@ -1,6 +1,8 @@
 // https://zingl.github.io/bresenham.js
 
-procedure _DrawCircleFilled(CenterX, CenterY, Radius: Integer);
+// Requires method `procedure _SetPixel(X, Y: Integer);`
+
+procedure _Circle(CenterX, CenterY, Radius: Integer);
 var
   X, Y, Err: Integer;
 begin
@@ -11,8 +13,10 @@ begin
 
   while (X < 0) do
   begin
-    _FillRow(CenterY - Y, CenterX+X, CenterX-X);
-    _FillRow(CenterY + Y, CenterX+X, CenterX-X);
+    _SetPixel(CenterX - X, CenterY + Y);
+    _SetPixel(CenterX - Y, CenterY - X);
+    _SetPixel(CenterX + X, CenterY - Y);
+    _SetPixel(CenterX + Y, CenterY + X);
 
     Radius := Err;
     if (Radius <= Y) then

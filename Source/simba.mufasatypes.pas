@@ -264,6 +264,9 @@ type
 
   PStringArray = ^TStringArray;
 
+  TPointF = record X, Y: Double; end;
+  TPointFArray = array of TPointF;
+
   PPoint = ^TPoint;
   PPointArray = ^TPointArray;
   TPointArray = array of TPoint;
