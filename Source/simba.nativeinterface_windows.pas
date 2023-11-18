@@ -792,7 +792,7 @@ end;
 
 function TSimbaNativeInterface_Windows.IsWindowVisible(Window: TWindowHandle): Boolean;
 begin
-  Result := Windows.IsWindowVisible(Window) and (not IsIconic(Window))
+  Result := Windows.IsWindowVisible(Window) and (not IsIconic(GetRootWindow(Window)));
 end;
 
 function TSimbaNativeInterface_Windows.GetWindowPID(Window: TWindowHandle): Integer;

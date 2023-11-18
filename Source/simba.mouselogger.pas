@@ -105,10 +105,16 @@ begin
     if not Window.IsValid() then
       Window := GetDesktopWindow();
 
-    with Window.GetRelativeCursorPos() do
+    if Window.IsVisible() then
+      with Window.GetRelativeCursorPos() do
+      begin
+        Point.X := Int16(X); // cast to prevent overflows when debugging
+        Point.Y := Int16(Y);
+      end
+    else
     begin
-      Point.X := X;
-      Point.Y := Y;
+      Point.X := -1;
+      Point.Y := -1;
     end;
 
     if (Point.X <> PrevPoint.X) or (Point.Y <> PrevPoint.Y) then
