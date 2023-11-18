@@ -241,11 +241,12 @@ type
 implementation
 
 uses
-  Math, FPImage, BMPcomn, fpqoi_simba,
+  Math, FPImage, fpqoi_simba,
   simba.arraybuffer, simba.geometry, simba.tpa, simba.algo_sort,
   simba.encoding, simba.compress,
   simba.nativeinterface, simba.singlematrix,
-  simba.image_lazbridge, simba.image_integral, simba.image_gaussblur;
+  simba.image_lazbridge, simba.image_integral, simba.image_gaussblur,
+  simba.image_bitmaparealoader;
 
 function GetDistinctColor(const Color, Index: Integer): Integer; inline;
 const
@@ -309,89 +310,12 @@ begin
 end;
 
 procedure TSimbaImage.LoadFromFile(FileName: String; Area: TBox);
-
-  procedure LoadBitmapAreaFromFile(Bitmap: TSimbaImage; FileName: String; Area: TBox);
-
-    function ColorRGBToBGRA(const ColorRGB: TColorRGB): TColorBGRA; inline;
-    begin
-      Result.B := ColorRGB.B;
-      Result.G := ColorRGB.G;
-      Result.R := ColorRGB.R;
-      Result.A := 0;
-    end;
-
-  var
-    Stream: TFileStream;
-    FileHeader: TBitmapFileHeader;
-    Header: TBitmapInfoHeader;
-    Row, Column, PixelOffset: Integer;
-    ScanLineSize, Index: Int64;
-    Buffer: PByte;
-    BytesPerPixel: Byte;
-  begin
-    Buffer := nil;
-
-    Stream := TFileStream.Create(FileName, fmOpenRead);
-    try
-      if Stream.Read(FileHeader, SizeOf(TBitmapFileHeader)) <> SizeOf(TBitmapFileHeader) then
-        raise Exception.Create('Invalid file header');
-
-      {$IFDEF ENDIAN_BIG}
-      SwapBMPFileHeader(FileHeader);
-      {$ENDIF}
-      if (FileHeader.bfType <> BMmagic) then
-        raise Exception.Create('Invalid file header magic');
-
-      if Stream.Read(Header, SizeOf(TBitmapInfoHeader)) <> SizeOf(TBitmapInfoHeader) then
-        raise Exception.Create('Invalid info header');
-      {$IFDEF ENDIAN_BIG}
-      SwapBMPInfoHeader(Header);
-      {$ENDIF}
-
-      case Header.BitCount of
-        32: BytesPerPixel := 4;
-        24: BytesPerPixel := 3;
-        else
-          raise Exception.Create('Not a 32 or 24 bit bitmap');
-      end;
-
-      Area.Clip(TBox.Create(0, 0, Header.Width, Header.Height));
-      if (Area.Width > 1) and (Area.Height > 1) then
-      begin
-        Bitmap.SetSize(Area.Width, Area.Height);
-
-        PixelOffset := FileHeader.bfOffset;
-        ScanLineSize := Int64((Header.Width * Header.BitCount) + 31) div 32 * 4;
-        Buffer := GetMem(ScanLineSize);
-        Index := 0;
-
-        for Row := Area.Y1 to Area.Y2 do
-        begin
-          Stream.Position := PixelOffset + ((Header.Height - (Row + 1)) * ScanLineSize) + (Area.X1 * BytesPerPixel);
-          Stream.Read(Buffer^, ScanLineSize);
-
-          for Column := 0 to Area.Width - 1 do
-          begin
-            Bitmap.Data[Index] := ColorRGBToBGRA(PColorRGB(Buffer + (Column * BytesPerPixel))^);
-
-            Inc(Index);
-          end;
-        end;
-      end;
-    finally
-      if (Buffer <> nil) then
-        FreeMem(Buffer);
-
-      Stream.Free();
-    end;
-  end;
-
 begin
   if (not FileExists(FileName)) then
     SimbaException('TSimbaImage.LoadFromFile: File not found "%s"', [FileName]);
 
   if FileName.EndsWith('.bmp', False) then
-    LoadBitmapAreaFromFile(Self, FileName, Area)
+    SimbaImage_LoadBitmapArea(Self, FileName, Area)
   else
   begin
     LoadFromFile(FileName);
