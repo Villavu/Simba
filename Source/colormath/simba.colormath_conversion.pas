@@ -12,6 +12,7 @@ unit simba.colormath_conversion;
 {$DEFINE B_BIT := 16}
 {$DEFINE G_BIT := 8}
 {$DEFINE R_BIT := 0}
+{$DEFINE A_BIT := 24}
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 
@@ -40,6 +41,7 @@ type
   TSimbaColorConversion = class
   public
     class function ColorToBGRA(const Color: TColor): TColorBGRA; static; inline;
+    class function BGRAToColor(const BGRA: TColorBGRA): TColor; static; inline;
     class function ColorToRGB(const Color: TColor): TColorRGB; static; inline;
     class function RGBToColor(const RGB: TColorRGB): TColor; static; inline;
     class function BGRAToRGB(const RGB: TColorBGRA): TColorRGB; static; inline;
@@ -66,7 +68,12 @@ begin
   Result.B := Color shr B_BIT and $FF;
   Result.G := Color shr G_BIT and $FF;
   Result.R := Color shr R_BIT and $FF;
-  Result.A := 0;
+  Result.A := Color shr A_BIT and $FF;
+end;
+
+class function TSimbaColorConversion.BGRAToColor(const BGRA: TColorBGRA): TColor;
+begin
+  Result := TColor(BGRA.R or BGRA.G shl G_BIT or BGRA.B shl B_BIT or BGRA.A shl A_BIT);
 end;
 
 class function TSimbaColorConversion.ColorToRGB(const Color: TColor): TColorRGB;
@@ -78,7 +85,7 @@ end;
 
 class function TSimbaColorConversion.RGBToColor(const RGB: TColorRGB): TColor;
 begin
-  Result := RGB.R or RGB.G shl G_BIT or RGB.B shl B_BIT;
+  Result := TColor(RGB.R or RGB.G shl G_BIT or RGB.B shl B_BIT);
 end;
 
 class function TSimbaColorConversion.BGRAToRGB(const RGB: TColorBGRA): TColorRGB;

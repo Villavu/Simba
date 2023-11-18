@@ -42,6 +42,10 @@ type
   PColor = ^TColor;
 
   TColorHelper = type helper for TColor
+    function R: Byte; inline;
+    function G: Byte; inline;
+    function B: Byte; inline;
+
     function ToBGRA: TColorBGRA;
     function ToRGB: TColorRGB;
     function ToXYZ: TColorXYZ;
@@ -257,7 +261,7 @@ end;
 
 function TColorBGRA_Helper.ToColor: TColor;
 begin
-  Result := TSimbaColorConversion.RGBToColor(ToRGB());
+  Result := TSimbaColorConversion.BGRAToColor(Self);
 end;
 
 function TColorBGRA_Helper.Equals(const Other: TColorBGRA): Boolean;
@@ -303,6 +307,21 @@ end;
 function TColorRGB_Helper.ToColor: TColor;
 begin
   Result := TSimbaColorConversion.RGBToColor(Self);
+end;
+
+function TColorHelper.R: Byte;
+begin
+  Result := Self shr R_BIT and $FF;
+end;
+
+function TColorHelper.G: Byte;
+begin
+  Result := Self shr G_BIT and $FF;
+end;
+
+function TColorHelper.B: Byte;
+begin
+  Result := Self shr B_BIT and $FF;
 end;
 
 function TColorHelper.ToBGRA: TColorBGRA;
