@@ -40,16 +40,6 @@ begin
 end;
 
 (*
-TImage.EnsureInImage
-~~~~~~~~~~~~~~~~~~~~
-> function TImage.EnsureInImage(var X, Y: Integer): Boolean;
-*)
-procedure _LapeImage_EnsureInImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.EnsureInImage(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
 TImage.GetData
 ~~~~~~~~~~~~~~
 > function TImage.GetData: PColorBGRA;
@@ -582,16 +572,6 @@ TImage.DrawLine
 procedure _LapeImage_DrawLine(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
-end;
-
-(*
-TImage.DrawLine
-~~~~~~~~~~~~~~~
-> procedure TImage.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: TColor);
-*)
-procedure _LapeImage_DrawLineEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^);
 end;
 
 (*
@@ -1355,7 +1335,6 @@ begin
     addGlobalFunc('function TImage.LoadFonts(Dir: String): Boolean; static;', @_LapeImage_LoadFonts);
 
     addGlobalFunc('function TImage.InImage(X, Y: Integer): Boolean', @_LapeImage_InImage);
-    addGlobalFunc('procedure TImage.EnsureInImage(var X, Y: Integer)', @_LapeImage_EnsureInImage);
 
     addGlobalFunc('function TImage.Create: TImage; static; overload', @_LapeImage_Create);
     addGlobalFunc('function TImage.Create(Width, Height: Integer): TImage; static; overload', @_LapeImage_CreateEx);
@@ -1389,8 +1368,7 @@ begin
     addGlobalFunc('procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);', @_LapeImage_DrawCrosshairs);
     addGlobalFunc('procedure TImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeImage_DrawCross);
 
-    addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint; Color: TColor); overload', @_LapeImage_DrawLine);
-    addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint; Thickness: Integer; Color: TColor); overload', @_LapeImage_DrawLineEx);
+    addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint; Color: TColor)', @_LapeImage_DrawLine);
 
     addGlobalFunc('procedure TImage.DrawPolygon(Points: TPointArray; Color: TColor);', @_LapeImage_DrawPolygon);
     addGlobalFunc('procedure TImage.DrawPolygonFilled(Points: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawPolygonFilled);

@@ -1,6 +1,7 @@
 // https://zingl.github.io/bresenham.js
+// Requires _SetPixelAntialias(const X, Y: Integer; const Alpha: Byte);
 
-procedure _DrawLineAA(x0, y0, x1, y1: Integer; Thickness: Single);
+procedure _LineAntialias(x0, y0, x1, y1: Integer; Thickness: Single);
 var
   dx, dy, err: Integer;
   e2, x2, y2: Integer;
@@ -22,7 +23,7 @@ begin
   Thickness := (Thickness + 1) / 2;
   while True do
   begin
-    _SetPixelA(x0, y0, Round(Max(0, 255 * (Abs(err-dx+dy)/ed-Thickness+1))));
+    _SetPixelAntialias(x0, y0, Round(Max(0, 255 * (Abs(err-dx+dy)/ed-Thickness+1))));
 
     e2 := err;
     x2 := x0;
@@ -33,7 +34,7 @@ begin
       while (e2 < ed*Thickness) and ((y1 <> y2) or (dx > dy)) do
       begin
         y2 += sy;
-        _SetPixelA(x0, y2, Round(Max(0, 255 * (Abs(e2)/ed-Thickness+1))));
+        _SetPixelAntialias(x0, y2, Round(Max(0, 255 * (Abs(e2)/ed-Thickness+1))));
         e2 += dx;
       end;
       if (x0 = x1) then
@@ -50,7 +51,7 @@ begin
       while (e2 < ed*Thickness) and ((x1 <> x2) or (dx < dy)) do
       begin
         x2 += sx;
-        _SetPixelA(x2, y0, Round(Max(0, 255 * (Abs(e2)/ed-Thickness+1))));
+        _SetPixelAntialias(x2, y0, Round(Max(0, 255 * (Abs(e2)/ed-Thickness+1))));
         e2 += dy;
       end;
       if (y0 = y1) then

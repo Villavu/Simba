@@ -1,6 +1,7 @@
 // https://zingl.github.io/bresenham.js
+// Requires _SetPixelAntialias(const X, Y: Integer; const Alpha: Byte);
 
-procedure _DrawEllipseAA(x0, y0, x1, y1: Integer; Thickness: Single);
+procedure _EllipseAntialias(x0, y0, x1, y1: Integer; Thickness: Single);
 var
   a,b,b1: Integer;
   a2,b2: Single;
@@ -76,10 +77,10 @@ begin
       i := 255*err/ed;
 
       Alpha := Byte(Round(i));
-      _SetPixelA(x0,y0, Alpha);
-      _SetPixelA(x0,y1, Alpha);
-      _SetPixelA(x1,y0, Alpha);
-      _SetPixelA(x1,y1, Alpha);
+      _SetPixelAntialias(x0,y0, Alpha);
+      _SetPixelAntialias(x0,y1, Alpha);
+      _SetPixelAntialias(x1,y0, Alpha);
+      _SetPixelAntialias(x1,y1, Alpha);
 
       if (err+dy+a < dx) then
       begin
@@ -95,10 +96,10 @@ begin
 
     while (i < Thickness) and (2*i <= x0+x1) do
     begin
-      _SetPixelA(Round(i), y0, 0);
-      _SetPixelA(Round(x0+x1-i), y0, 0);
-      _SetPixelA(Round(i), y1, 0);
-      _SetPixelA(Round(x0+x1-i), y1, 0);
+      _SetPixelAntialias(Round(i), y0, 0);
+      _SetPixelAntialias(Round(x0+x1-i), y0, 0);
+      _SetPixelAntialias(Round(i), y1, 0);
+      _SetPixelAntialias(Round(x0+x1-i), y1, 0);
 
       i += 1.0;
     end;
@@ -114,10 +115,10 @@ begin
          ed += 2*ed*i*i/(4*ed*ed+i*i);
 
        Alpha := Byte(Round(255-255*e2/ed));
-       _SetPixelA(Round(Thickness), y0, Alpha);
-       _SetPixelA(Round(x0+x1-Thickness), y0, Alpha);
-       _SetPixelA(Round(Thickness), y1, Alpha);
-       _SetPixelA(Round(x0+x1-Thickness), y1, Alpha);
+       _SetPixelAntialias(Round(Thickness), y0, Alpha);
+       _SetPixelAntialias(Round(x0+x1-Thickness), y0, Alpha);
+       _SetPixelAntialias(Round(Thickness), y1, Alpha);
+       _SetPixelAntialias(Round(x0+x1-Thickness), y1, Alpha);
 
        if (e2+dy2+a2 < dx2) then
          Break;
@@ -139,13 +140,13 @@ begin
   begin
     Alpha := Byte(Round(255*4*err/b1));
 
-    _SetPixelA(x0, y0, Alpha);
-    _SetPixelA(x1, y0, Alpha);
+    _SetPixelAntialias(x0, y0, Alpha);
+    _SetPixelAntialias(x1, y0, Alpha);
 
     y0 += 1;
 
-    _SetPixelA(x0, y1, Alpha);
-    _SetPixelA(x1, y1, Alpha);
+    _SetPixelAntialias(x0, y1, Alpha);
+    _SetPixelAntialias(x1, y1, Alpha);
 
     y1 -= 1;
     dy += a;
