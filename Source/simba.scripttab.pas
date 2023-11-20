@@ -202,9 +202,12 @@ begin
     end;
   end;
 
-  FScriptTitle := TSimbaPath.PathExtractNameWithoutExt(FileName);
-  FScriptFileName := FileName;
   FSavedText := FEditor.Text;
+
+  FScriptFileName := FileName;
+  FScriptTitle := TSimbaPath.PathExtractName(FScriptFileName);
+  if FScriptTitle.EndsWith('.simba') then
+    FScriptTitle := FScriptTitle.Before('.simba');
 
   Caption := FScriptTitle;
 end;
@@ -228,9 +231,12 @@ begin
     end;
   end;
 
-  FScriptTitle := TSimbaPath.PathExtractNameWithoutExt(FileName);
-  FScriptFileName := FileName;
   FSavedText := FEditor.Text;
+
+  FScriptFileName := FileName;
+  FScriptTitle := TSimbaPath.PathExtractName(FScriptFileName);
+  if FScriptTitle.EndsWith('.simba') then
+    FScriptTitle := FScriptTitle.Before('.simba');
 
   Caption := FScriptTitle;
   if Result then
