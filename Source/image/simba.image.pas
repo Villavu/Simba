@@ -40,6 +40,9 @@ type
 
     FTextDrawer: TSimbaTextDrawer;
 
+    procedure _DrawTPA(const TPA: TPointArray; Color: TColor);
+    procedure _DrawTPAAlpha(const TPA: TPointArray; Color: TColor; Alpha: Byte);
+
     procedure _DrawBoxFilled(Box: TBox; Color: TColor);
     procedure _DrawBoxFilledAlpha(Box: TBox; Color: TColor; Alpha: Byte);
 
@@ -126,8 +129,8 @@ type
     procedure SetExternalData(AData: PColorBGRA; AWidth, AHeight: Integer);
     procedure ResetExternalData;
 
-    procedure DrawATPA(ATPA: T2DPointArray; Color: TColor = -1);
-    procedure DrawTPA(Points: TPointArray; Color: TColor);
+    procedure DrawATPA(const ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);
+    procedure DrawTPA(const TPA: TPointArray; Color: TColor; Alpha: Byte = 0);
 
     // Line
     procedure DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
@@ -250,17 +253,6 @@ uses
   simba.nativeinterface, simba.singlematrix,
   simba.image_lazbridge, simba.image_integral, simba.image_gaussblur,
   simba.image_bitmaparealoader, simba.image_utils;
-
-function GetDistinctColor(const Color, Index: Integer): Integer; inline;
-const
-  // Distinct colors - https://sashamaps.net/docs/resources/20-colors/
-  DISTINCT_COLORS: TIntegerArray = ($4B19E6, $4BB43C, $19E1FF, $D86343, $3182F5, $B41E91, $F4D442, $E632F0, $45EFBF, $D4BEFA, $909946, $FFBEDC, $24639A, $C8FAFF, $000080, $C3FFAA, $008080, $B1D8FF, $750000, $A9A9A9);
-begin
-  if (Color > -1) then
-    Result := Color
-  else
-    Result := DISTINCT_COLORS[Index mod Length(DISTINCT_COLORS)];
-end;
 
 function TSimbaImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean): Boolean;
 var
@@ -752,31 +744,20 @@ begin
   Move(Image.FData^, FData^, FWidth * FHeight * SizeOf(TColorBGRA));
 end;
 
-procedure TSimbaImage.DrawATPA(ATPA: T2DPointArray; Color: TColor);
+procedure TSimbaImage.DrawTPA(const TPA: TPointArray; Color: TColor; Alpha: Byte);
+begin
+  if (Alpha = 0) then
+    _DrawTPA(TPA, Color)
+  else
+    _DrawTPAAlpha(TPA, Color, Alpha);
+end;
+
+procedure TSimbaImage.DrawATPA(const ATPA: T2DPointArray; Color: TColor; Alpha: Byte);
 var
   I: Integer;
 begin
   for I := 0 to High(ATPA) do
-    DrawTPA(ATPA[I], GetDistinctColor(Color, I));
-end;
-
-procedure TSimbaImage.DrawTPA(Points: TPointArray; Color: TColor);
-var
-  I: Integer;
-  P: TPoint;
-  BGR: TColorBGRA;
-begin
-  if (Length(Points) = 0) then
-    Exit;
-
-  BGR := ColorToBGRA(Color);
-
-  for I := 0 to High(Points) do
-  begin
-    P := Points[I];
-    if (P.X >= 0) and (P.Y >= 0) and (P.X < FWidth) and (P.Y < FHeight) then
-      FData[P.Y * FWidth + P.X] := BGR;
-  end;
+    DrawTPA(ATPA[I], GetDistinctColor(Color, I), Alpha);
 end;
 
 procedure TSimbaImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
@@ -1227,20 +1208,6 @@ begin
 
     Inc(Ptr);
   end;
-end;
-
-function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
-var
-  B: TPointArray;
-begin
-  B := [
-    TSimbaGeometry.RotatePoint(Point(0, H), Angle, W div 2, H div 2),
-    TSimbaGeometry.RotatePoint(Point(W, H), Angle, W div 2, H div 2),
-    TSimbaGeometry.RotatePoint(Point(W, 0), Angle, W div 2, H div 2),
-    TSimbaGeometry.RotatePoint(Point(0, 0), Angle, W div 2, H div 2)
-  ];
-
-  Result := B.Bounds();
 end;
 
 function TSimbaImage.RotateNN(Radians: Single; Expand: Boolean): TSimbaImage;
@@ -2250,6 +2217,40 @@ begin
     else
       FillData(@FData[Y * FWidth], Amount * SizeOf(TColorBGRA), TransparentRGB);
   end;
+end;
+
+procedure TSimbaImage._DrawTPA(const TPA: TPointArray; Color: TColor);
+var
+  BGRA: TColorBGRA;
+  Point: TPoint;
+begin
+  BGRA := Color.ToBGRA();
+
+  for Point in TPA do
+    if (Point.X >= 0) and (Point.Y >= 0) and (Point.X < FWidth) and (Point.Y < FHeight) then
+      FData[Point.Y * FWidth + Point.X] := BGRA;
+end;
+
+procedure TSimbaImage._DrawTPAAlpha(const TPA: TPointArray; Color: TColor; Alpha: Byte);
+var
+  R,G,B,A: Byte;
+  Point: TPoint;
+  Ptr: PColorBGRA;
+begin
+  R := (Color.R * (255 - Alpha + 1)) shr 8;
+  G := (Color.G * (255 - Alpha + 1)) shr 8;
+  B := (Color.B * (255 - Alpha + 1)) shr 8;
+  A := Alpha + 1;
+
+  for Point in TPA do
+    if (Point.X >= 0) and (Point.Y >= 0) and (Point.X < FWidth) and (Point.Y < FHeight) then
+    begin
+      Ptr := @FData[Point.Y * FWidth + Point.X];
+      Ptr^.R := R + Ptr^.R * A shr 8;
+      Ptr^.G := G + Ptr^.G * A shr 8;
+      Ptr^.B := B + Ptr^.B * A shr 8;
+      Ptr^.A := Alpha;
+    end;
 end;
 
 procedure TSimbaImage._DrawBoxFilled(Box: TBox; Color: TColor);

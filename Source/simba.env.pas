@@ -10,7 +10,7 @@ unit simba.env;
 interface
 
 uses
-  classes, sysutils,
+  Classes, SysUtils,
   simba.mufasatypes;
 
   function FindInclude(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;

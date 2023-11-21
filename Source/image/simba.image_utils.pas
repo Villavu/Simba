@@ -8,9 +8,48 @@ uses
   Classes, SysUtils,
   simba.mufasatypes;
 
-procedure FillData(Data: PColorBGRA; count: SizeInt; value: TColorBGRA);
+// https://sashamaps.net/docs/resources/20-colors/
+const
+  DISTINCT_COLORS: TIntegerArray = ($4B19E6, $4BB43C, $19E1FF, $D86343, $3182F5, $B41E91, $F4D442, $E632F0, $45EFBF, $D4BEFA, $909946, $FFBEDC, $24639A, $C8FAFF, $000080, $C3FFAA, $008080, $B1D8FF, $750000, $A9A9A9);
+
+function GetDistinctColor(const Index: Integer): Integer; overload; inline;
+function GetDistinctColor(const Color, Index: Integer): Integer; overload; inline;
+
+function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
+
+procedure FillData(const Data: PColorBGRA; const count: SizeInt; const value: TColorBGRA);
 
 implementation
+
+uses
+  simba.tpa, simba.geometry;
+
+function GetDistinctColor(const Index: Integer): Integer;
+begin
+  Result := DISTINCT_COLORS[Index mod Length(DISTINCT_COLORS)];
+end;
+
+function GetDistinctColor(const Color, Index: Integer): Integer;
+begin
+  if (Color > -1) then
+    Result := Color
+  else
+    Result := DISTINCT_COLORS[Index mod Length(DISTINCT_COLORS)];
+end;
+
+function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
+var
+  B: TPointArray;
+begin
+  B := [
+    TSimbaGeometry.RotatePoint(Point(0, H), Angle, W div 2, H div 2),
+    TSimbaGeometry.RotatePoint(Point(W, H), Angle, W div 2, H div 2),
+    TSimbaGeometry.RotatePoint(Point(W, 0), Angle, W div 2, H div 2),
+    TSimbaGeometry.RotatePoint(Point(0, 0), Angle, W div 2, H div 2)
+  ];
+
+  Result := B.Bounds();
+end;
 
 // in FPC trunk
 {$IFDEF CPUX86_64}
@@ -136,7 +175,7 @@ asm
 end;
 {$ENDIF}
 
-procedure FillData(Data: PColorBGRA; count: SizeInt; value: TColorBGRA);
+procedure FillData(const Data: PColorBGRA; const count: SizeInt; const value: TColorBGRA);
 begin
   FillDWord(Data^, Count, DWord(Value));
 end;

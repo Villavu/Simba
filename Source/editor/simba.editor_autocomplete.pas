@@ -12,7 +12,7 @@ unit simba.editor_autocomplete;
 interface
 
 uses
-  Classes, SysUtils, Graphics, StdCtrls, Controls, Forms, LCLType,
+  Classes, SysUtils, Graphics, Controls, Forms, LCLType,
   SynEdit, SynEditTypes, SynEditKeyCmds, SynEditHighlighter,
   SynCompletion_Simba,
   simba.mufasatypes, simba.settings,

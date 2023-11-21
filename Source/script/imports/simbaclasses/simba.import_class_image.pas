@@ -25,8 +25,15 @@ Image
 =====
 TImage is a data type that holds an image.
 
-This is used anipulate and process an image such as resizing, rotating, bluring and much more.
+This is used manipulate and process an image such as resizing, rotating, bluring and much more.
 Or simply get/set a pixel color at a given (x,y) coord.
+
+Note:
+
+  | For methods with a `Alpha` parameter "real" alpha blending is not performed.
+  | The background of the pixel is just mixed in.
+  | If `Alpha=127` half of the background will be blended in.
+
 *)
 
 (*
@@ -182,21 +189,25 @@ end;
 (*
 TImage.DrawATPA
 ~~~~~~~~~~~~~~~
-> procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor = -1);
+> procedure TImage.DrawATPA(const ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);
+
+Draws every TPA in the ATPA. Color by default is -1 which will display each TPA in a different color.
 *)
 procedure _LapeImage_DrawATPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^, PColor(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
 end;
 
 (*
 TImage.DrawTPA
 ~~~~~~~~~~~~~~
-> procedure TImage.DrawTPA(TPA: TPointArray; Color: TColor);
+> procedure TImage.DrawTPA(const Points: TPointArray; Color: TColor; Alpha: Byte = 0);
+
+Draws a TPA the same color.
 *)
 procedure _LapeImage_DrawTPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawTPA(PPointArray(Params^[1])^, PColor(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawTPA(PPointArray(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
 end;
 
 (*
@@ -1238,16 +1249,31 @@ begin
   TSimbaImageRowPtrs(Result^) := PSimbaImage(Params^[0])^.RowPtrs();
 end;
 
+(*
+TImage.DrawLineAA
+~~~~~~~~~~~~~~~~~~~~
+> procedure TImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single = 1.5);
+*)
 procedure _LapeImage_DrawLineAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.DrawLineAA(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^, PSingle(Params^[4])^);
 end;
 
+(*
+TImage.DrawEllipseAA
+~~~~~~~~~~~~~~~~~~~~
+> procedure TImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single = 1.5);
+*)
 procedure _LapeImage_DrawEllipseAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.DrawEllipseAA(PPoint(Params^[1])^, Pinteger(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^, PSingle(Params^[5])^);
 end;
 
+(*
+TImage.DrawCircleAA
+~~~~~~~~~~~~~~~~~~~~
+> procedure TImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single = 1.5);
+*)
 procedure _LapeImage_DrawCircleAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.DrawCircleAA(PPoint(Params^[1])^, Pinteger(Params^[2])^, PColor(Params^[3])^, PSingle(Params^[4])^);
@@ -1255,7 +1281,7 @@ end;
 
 (*
 TImage.Finder
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 > function TImage.Finder: TSimbaFinder;
 
 Returns a TSimbaFinder which is targetted to the image.
@@ -1362,8 +1388,8 @@ begin
     addGlobalFunc('procedure TImage.DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor); overload', @_LapeImage_DrawTextEx);
     addGlobalFunc('procedure TImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);', @_LapeImage_DrawTextLines);
 
-    addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor = -1)', @_LapeImage_DrawATPA);
-    addGlobalFunc('procedure TImage.DrawTPA(TPA: TPointArray; Color: TColor);', @_LapeImage_DrawTPA);
+    addGlobalFunc('procedure TImage.DrawATPA(const ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);', @_LapeImage_DrawATPA);
+    addGlobalFunc('procedure TImage.DrawTPA(const TPA: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawTPA);
 
     addGlobalFunc('procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);', @_LapeImage_DrawCrosshairs);
     addGlobalFunc('procedure TImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeImage_DrawCross);
