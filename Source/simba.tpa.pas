@@ -690,23 +690,23 @@ var
   Change, PTS: TPointArray;
   Matrix: TByteMatrix;
   iter: Boolean;
-  Area: TBox;
+  B: TBox;
 begin
   Result := Default(TPointArray);
 
   H := High(Self);
   if (H > 0) then
   begin
-    Area := Self.Bounds;
-    Area.x1 := Area.x1 - 2;
-    Area.y1 := Area.y1 - 2;
-    Matrix.SetSize(Area.Height + 2, Area.Width + 2);
+    B := Self.Bounds;
+    B.x1 := B.x1 - 2;
+    B.y1 := B.y1 - 2;
+    Matrix.SetSize(B.Height + 2, B.Width + 2);
 
     SetLength(PTS, H + 1);
     for i:=0 to H do
     begin
-      x := (Self[i].x-Area.x1);
-      y := (Self[i].y-Area.y1);
+      x := (Self[i].x-B.x1);
+      y := (Self[i].y-B.y1);
       PTS[i].x := X;
       PTS[i].y := Y;
       Matrix[y][x] := 1;
@@ -770,7 +770,7 @@ begin
 
     SetLength(Result, (MarkHigh + 1));
     for i := 0 to MarkHigh do
-      Result[i] := TPoint.Create(PTS[i].x+Area.x1, PTS[i].y+Area.y1);
+      Result[i] := TPoint.Create(PTS[i].x+B.x1, PTS[i].y+B.y1);
   end;
 end;
 
