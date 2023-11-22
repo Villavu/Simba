@@ -321,7 +321,17 @@
       <Version Value="2"/>
     </PublishOptions>
     <RunParams>
+      <local>
+        <WorkingDirectory Value="../"/>
+      </local>
       <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default">
+          <local>
+            <WorkingDirectory Value="../"/>
+          </local>
+        </Mode0>
+      </Modes>
     </RunParams>
     <RequiredPackages Count="5">
       <Item1>
@@ -340,7 +350,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="160">
+    <Units Count="165">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1046,11 +1056,11 @@
         <IsPartOfProject Value="True"/>
       </Unit154>
       <Unit155>
-        <Filename Value="image/drawcirclefilled.inc"/>
+        <Filename Value="image/circlefilled.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit155>
       <Unit156>
-        <Filename Value="image/drawcircle.inc"/>
+        <Filename Value="image/circle.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit156>
       <Unit157>
@@ -1068,6 +1078,26 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit159>
+      <Unit160>
+        <Filename Value="image/polygonfilled.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit160>
+      <Unit161>
+        <Filename Value="image/boxfilled.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit161>
+      <Unit162>
+        <Filename Value="image/simba.image_bitmaparealoader.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit162>
+      <Unit163>
+        <Filename Value="image/lineaa.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit163>
+      <Unit164>
+        <Filename Value="image/simba.image_utils.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit164>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
