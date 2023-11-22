@@ -29,8 +29,6 @@ type
     procedure InitBaseVariant; override;
     procedure InitBaseDefinitions; override;
   public
-    function CurrentDir: String;
-
     procedure pushTokenizer(ATokenizer: TLapeTokenizerBase); reintroduce;
     procedure pushConditional(AEval: Boolean; ADocPos: TDocPos); reintroduce;
 
@@ -194,13 +192,6 @@ end;
 procedure TSimbaScript_Compiler.InitBaseVariant;
 begin
   { nothing, we import our own variant }
-end;
-
-function TSimbaScript_Compiler.CurrentDir: String;
-begin
-  Result := '';
-  if (Tokenizer <> nil) then
-    Result := ExtractFileDir(Tokenizer.FileName);
 end;
 
 procedure TSimbaScript_Compiler.addGlobalFuncOverride(Header: lpString; Body: TStringArray);

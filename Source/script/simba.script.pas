@@ -10,14 +10,14 @@ unit simba.script;
 interface
 
 uses
-  classes, sysutils,
+  Classes, SysUtils,
   lptypes, lpvartypes, lpcompiler, lpparser, lpinterpreter, lpmessages,
   simba.script_compiler, simba.script_communication,
   simba.script_plugin, simba.mufasatypes, simba.windowhandle;
 
 type
   PSimbaScript = ^TSimbaScript;
-  TSimbaScript = class
+  TSimbaScript = class(TObject)
   protected
     FState: TInitBool;
     FUserTerminated: Boolean;
@@ -85,18 +85,21 @@ end;
 
 function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
 
-  function DoIncludeFromURL: Boolean;
+  function DoMaybeIncludeFromURL: Boolean;
   var
     URL, Source: String;
   begin
-    Result := ((Directive = 'I') or (Directive = 'INCLUDE')) and (Argument.ToUpper().Between('URL(', ')') <> '');
+    URL := Argument.ToUpper().Between('URL(', ')');
 
+    Result := URL <> '';
     if Result then
     begin
       URL    := Argument.ToUpper().Between('URL(', ')');
       Source := TSimbaHTTPClient.SimpleGet(URL, [EHTTPStatus.OK]);
 
-      FCompiler.pushTokenizer(TLapeTokenizerString.Create(Source, '!' + URL));
+      FCompiler.pushTokenizer(
+        TLapeTokenizerString.Create(Source, '!' + URL)
+      );
     end;
   end;
 
@@ -108,54 +111,59 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
     if InIgnore or InPeek then
       Exit;
 
-    Plugin := TSimbaScriptPlugin.Create(Argument, [FCompiler.CurrentDir()]);
+    Plugin := TSimbaScriptPlugin.Create(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]);
     Plugin.Import(FCompiler);
 
     FPlugins := FPlugins + [Plugin];
   end;
 
-  function DoHasLib: Boolean;
+  function DoFindLib(Want: Boolean): Boolean;
   begin
     Result := True;
 
     if InIgnore then
       FCompiler.pushConditional(False, Sender.DocPos)
     else
-      FCompiler.pushConditional(FindPlugin(Argument, [FCompiler.CurrentDir()]), Sender.DocPos);
+      FCompiler.pushConditional(FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]) = Want, Sender.DocPos);
   end;
 
-  function DoHasFile: Boolean;
+  function DoFindFile(Want: Boolean): Boolean;
   begin
     Result := True;
 
     if InIgnore then
       FCompiler.pushConditional(False, Sender.DocPos)
     else
-      FCompiler.pushConditional(FindInclude(Argument, [FCompiler.CurrentDir()]), Sender.DocPos);
+      FCompiler.pushConditional(FindInclude(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]) = Want, Sender.DocPos);
   end;
 
-  function DoError: Boolean;
+  function DoIncluded(Want: Boolean): Boolean;
   begin
     Result := True;
-    if InIgnore or InPeek then
-      Exit;
 
-    raise Exception.Create('User defined error: "' + Argument + '"');
+    if InIgnore then
+      FCompiler.pushConditional(False, Sender.DocPos)
+    else
+      FCompiler.pushConditional((FindInclude(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]) and FCompiler.HasInclude(Argument)) = Want, Sender.DocPos);
   end;
 
 begin
-  Directive := UpperCase(Directive);
+  Result := False;
 
   try
-    Result := DoIncludeFromURL();
-    if Result then
-      Exit;
+    case Directive.ToUpper() of
+      'I', 'INCLUDE':    Result := DoMaybeIncludeFromURL();
 
-    case Directive of
-      'LOADLIB':   Result := DoLoadLib();
-      'IFHASLIB':  Result := DoHasLib();
-      'IFHASFILE': Result := DoHasFile();
-      'ERROR':     Result := DoError();
+      'LOADLIB':         Result := DoLoadLib();
+
+      'IF_FINDLIB':      Result := DoFindLib(True);
+      'IF_NOT_FINDLIB':  Result := DoFindLib(False);
+
+      'IF_FINDFILE':     Result := DoFindFile(True);
+      'IF_NOT_FINDFILE': Result := DoFindFile(False);
+
+      'IF_INCLUDED':     Result := DoIncluded(True);
+      'IF_NOT_INCLUDED': Result := DoIncluded(False);
     end;
   except
     on E: Exception do
@@ -178,7 +186,7 @@ function TSimbaScript.DoFindMacro(Sender: TLapeCompiler; Name: lpString; var Val
   var
     I: Integer;
   begin
-    Result := FindPlugin(Param, [FCompiler.CurrentDir()]);
+    Result := FindPlugin(Param, [ExtractFileDir(Sender.Tokenizer.FileName)]);
 
     if Result then
     begin
