@@ -129,12 +129,6 @@ SetSimbaTitle
 *)
 
 (*
-SetSimbaTitle
-~~~~~~~~~~~~~~
-> procedure SetSimbaStatus(S: String);
-*)
-
-(*
 GetSimbaPID
 ~~~~~~~~~~~
 > function GetSimbaPID: TProcessID;
@@ -164,12 +158,6 @@ begin
   begin
     ImportingSection := 'Misc';
 
-    addGlobalFunc(
-      'procedure SetSimbaStatus(S: String);', [
-      'begin',
-      '  _SimbaScript.SetSimbaStatus(S);',
-      'end;'
-    ]);
     addGlobalFunc(
       'procedure SetSimbaTitle(S: String);', [
       'begin',

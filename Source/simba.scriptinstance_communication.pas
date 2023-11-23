@@ -11,20 +11,19 @@ interface
 
 uses
   classes, sysutils, forms, extctrls, graphics,
-  simba.ipc, simba.mufasatypes;
+  simba.mufasatypes, simba.ipc, simba.scripttab;
 
 type
   TSimbaScriptInstanceCommunication = class(TSimbaIPCServer)
   protected
-    FScriptInstance: TObject;
+    FRunner: TSimbaScriptTabRunner;
     FMethods: array[ESimbaCommunicationMessage] of TProcedureOfObject;
     FParams: TMemoryStream;
     FResult: TMemoryStream;
 
     procedure OnMessage(MessageID: Integer; Params, Result: TMemoryStream); override;
 
-    procedure Disguise;
-    procedure Status;
+    procedure SetSimbaTitle;
 
     procedure ShowTrayNotification;
 
@@ -43,13 +42,13 @@ type
     procedure DebugImage_Display;
     procedure DebugImage_DisplayXY;
   public
-    constructor Create(ScriptInstance: TObject); reintroduce;
+    constructor Create(Runner: TSimbaScriptTabRunner); reintroduce;
   end;
 
 implementation
 
 uses
-  simba.scriptinstance, simba.main, simba.debugimageform, simba.image_lazbridge,
+  simba.main, simba.debugimageform, simba.image_lazbridge,
   simba.threading, simba.ide_mainstatusbar, simba.process;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
@@ -62,22 +61,11 @@ begin
   FMethods[Message]();
 end;
 
-procedure TSimbaScriptInstanceCommunication.Disguise;
+procedure TSimbaScriptInstanceCommunication.SetSimbaTitle;
 
   procedure Execute;
   begin
     SimbaForm.Caption := FParams.ReadAnsiString();
-  end;
-
-begin
-  RunInMainThread(@Execute);
-end;
-
-procedure TSimbaScriptInstanceCommunication.Status;
-
-  procedure Execute;
-  begin
-    SimbaMainStatusBar.SetMainPanelText(FParams.ReadAnsiString());
   end;
 
 begin
@@ -130,7 +118,7 @@ var
 
   procedure Execute;
   begin
-    TSimbaScriptInstance(FScriptInstance).State := State;
+    FRunner.State := State;
   end;
 
 begin
@@ -141,19 +129,20 @@ end;
 
 procedure TSimbaScriptInstanceCommunication.ScriptError;
 var
-  Error: TSimbaScriptError;
+  Message, FileName: String;
+  Line, Column: Integer;
 
   procedure Execute;
   begin
-    TSimbaScriptInstance(FScriptInstance).Error := Error;
+    FRunner.SetError(Message, FileName, Line, Column);
   end;
 
 begin
-  Error.Message  := FParams.ReadAnsiString();
-  Error.FileName := FParams.ReadAnsiString();
+  Message  := FParams.ReadAnsiString();
+  FileName := FParams.ReadAnsiString();
 
-  FParams.Read(Error.Line, SizeOf(Integer));
-  FParams.Read(Error.Column, SizeOf(Integer));
+  FParams.Read(Line, SizeOf(Integer));
+  FParams.Read(Column, SizeOf(Integer));
 
   RunInMainThread(@Execute);
 end;
@@ -211,7 +200,7 @@ end;
 // Chunked data is sent. Row by row.
 procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
 
-  // Modified from TBitmapHelper.FromData in simba.bitmap_misc
+  // Modified from LazImage_FromData in simba.image_lazbridge
   procedure Execute;
   var
     Width, Height: Integer;
@@ -371,14 +360,13 @@ begin
   RunInMainThread(@Execute);
 end;
 
-constructor TSimbaScriptInstanceCommunication.Create(ScriptInstance: TObject);
+constructor TSimbaScriptInstanceCommunication.Create(Runner: TSimbaScriptTabRunner);
 begin
-  inherited Create();
+  inherited Create(Runner);
 
-  FScriptInstance := ScriptInstance;
+  FRunner := Runner;
 
-  FMethods[ESimbaCommunicationMessage.STATUS]                := @Status;
-  FMethods[ESimbaCommunicationMessage.DISGUSE]               := @Disguise;
+  FMethods[ESimbaCommunicationMessage.SIMBA_TITLE]           := @SetSimbaTitle;
   FMethods[ESimbaCommunicationMessage.SIMBA_PID]             := @GetSimbaPID;
   FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_PID]      := @GetSimbaTargetPID;
   FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW]   := @GetSimbaTargetWindow;

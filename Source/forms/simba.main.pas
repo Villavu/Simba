@@ -13,7 +13,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ComCtrls, ExtCtrls,
   Menus, ImgList, LMessages, AnchorDockPanel,
   simba.settings, simba.mufasatypes, simba.mouselogger, simba.areaselector,
-  simba.scriptinstance, simba.component_menubar, simba.process;
+  simba.component_menubar, simba.process, simba.scripttab;
 
 const
   IMG_NONE = -1;
@@ -256,7 +256,7 @@ type
     FAreaSelection: TBox;
 
     procedure AddRecentFile(FileName: String);
-    procedure SetButtonStates(Instance: TSimbaScriptInstance);
+    procedure SetButtonStates(ScriptTab: TSimbaScriptTab);
 
     procedure DoResetDocking;
     procedure DoDefaultDocking;
@@ -313,7 +313,7 @@ uses
   simba.windowselector, simba.colorpicker,
   simba.env,
   simba.dockinghelpers, simba.nativeinterface,
-  simba.scriptformatter, simba.windowhandle, simba.scripttab, simba.theme,
+  simba.scriptformatter, simba.windowhandle, simba.theme,
   simba.scriptbackup, simba.backupsform, simba.ide_utils, simba.threading,
   simba.downloadsimbaform;
 
@@ -524,58 +524,24 @@ begin
     FRecentFiles.Pop();
 end;
 
-procedure TSimbaForm.SetButtonStates(Instance: TSimbaScriptInstance);
-begin
-  if Assigned(Instance) then
-    case Instance.State of
-      ESimbaScriptState.STATE_PAUSED:
-        begin
-          ToolbarButtonRun.Enabled := True;
-          ToolbarButtonPause.Enabled := False;
-          ToolbarButtonCompile.Enabled := True;
+procedure TSimbaForm.SetButtonStates(ScriptTab: TSimbaScriptTab);
 
-          ToolbarButtonStop.Enabled := True;
-          ToolbarButtonStop.ImageIndex := IMG_STOP;
-        end;
-
-      ESimbaScriptState.STATE_STOP:
-        begin
-          ToolbarButtonRun.Enabled := False;
-          ToolbarButtonPause.Enabled := False;
-          ToolbarButtonCompile.Enabled := False;
-
-          ToolbarButtonStop.Enabled := True;
-          ToolbarButtonStop.ImageIndex := IMG_POWER;
-        end;
-
-      ESimbaScriptState.STATE_RUNNING:
-        begin
-          ToolbarButtonRun.Enabled := False;
-          ToolbarButtonPause.Enabled := True;
-          ToolbarButtonCompile.Enabled := False;
-
-          ToolbarButtonStop.Enabled := True;
-          ToolbarButtonStop.ImageIndex := IMG_STOP;
-        end;
-
-      ESimbaScriptState.STATE_NONE:
-        begin
-          ToolbarButtonRun.Enabled := True;
-          ToolbarButtonPause.Enabled := False;
-          ToolbarButtonCompile.Enabled := True;
-
-          ToolbarButtonStop.Enabled := False;
-          ToolbarButtonStop.ImageIndex := IMG_STOP;
-        end;
-     end
-  else
+  procedure UpdateButtons(RunEnabled, PauseEnabed, CompileEnabled, StopEnabled: Boolean; StopImageIndex: Integer);
   begin
-    ToolbarButtonRun.Enabled := True;
-    ToolbarButtonPause.Enabled := False;
-    ToolbarButtonCompile.Enabled := True;
+    ToolbarButtonRun.Enabled := RunEnabled;
+    ToolbarButtonPause.Enabled := PauseEnabed;
+    ToolbarButtonCompile.Enabled := CompileEnabled;
 
-    ToolbarButtonStop.Enabled := False;
-    ToolbarButtonStop.ImageIndex := IMG_STOP;
+    ToolbarButtonStop.Enabled := StopEnabled;
+    ToolbarButtonStop.ImageIndex := StopImageIndex;
+  end;
+
+begin
+  case ScriptTab.ScriptState of
+    ESimbaScriptState.STATE_PAUSED:  UpdateButtons(True,  False, True,  True,  IMG_STOP);
+    ESimbaScriptState.STATE_STOP:    UpdateButtons(False, False, False, True,  IMG_POWER);
+    ESimbaScriptState.STATE_RUNNING: UpdateButtons(False, True,  False, True,  IMG_STOP);
+    ESimbaScriptState.STATE_NONE:    UpdateButtons(True,  False, True,  False, IMG_STOP);
   end;
 end;
 
@@ -644,7 +610,7 @@ begin
   SimbaIDEEvents.RegisterMethodOnEditorModified(@DoTabModified);
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabModified); // Also do this
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoScriptTabChange);
-  SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
+  SimbaIDEEvents.RegisterActiveScriptStateChange(@DoScriptStateChange);
 
   with SimbaSettings do
   begin
@@ -791,7 +757,7 @@ begin
   try
     if (GetAction() in [Compile, Run]) then
     begin
-      CurrentTab.OutputBox.Tab.Show();
+      CurrentTab.OutputBox.MakeVisible();
       if SimbaSettings.OutputBox.ClearOnCompile.Value then
         CurrentTab.OutputBox.Empty();
     end;
@@ -954,7 +920,7 @@ end;
 
 procedure TSimbaForm.MenuClearOutputClick(Sender: TObject);
 begin
-  SimbaOutputForm.CurrentTab.Empty();
+  SimbaOutputForm.ActiveOutputBox.Empty();
 end;
 
 procedure TSimbaForm.MenuFileClick(Sender: TObject);
@@ -1166,7 +1132,7 @@ begin
   if (Sender is TSimbaScriptTab) then
     with TSimbaScriptTab(Sender) do
     begin
-      SetButtonStates(ScriptInstance);
+      SetButtonStates(TSimbaScriptTab(Sender));
 
       MenuItemSaveAll.Enabled      := TabControl.TabCount > 1;
       ToolbarButtonSaveAll.Enabled := TabControl.TabCount > 1;
@@ -1175,8 +1141,8 @@ end;
 
 procedure TSimbaForm.DoScriptStateChange(Sender: TObject);
 begin
-  if (Sender is TSimbaScriptInstance) and TSimbaScriptInstance(Sender).IsActiveTab() then
-    SetButtonStates(TSimbaScriptInstance(Sender));
+  if (Sender is TSimbaScriptTab) then
+    SetButtonStates(TSimbaScriptTab(Sender));
 end;
 
 procedure TSimbaForm.MenuEditClick(Sender: TObject);

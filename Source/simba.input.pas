@@ -394,7 +394,7 @@ begin
   if (Length(Text) = 0) then
     Exit;
 
-  SetLength(SleepTimes, Length(Text) * 5);
+  SetLength(SleepTimes, Length(Text) * 4);
   for I := 0 to High(SleepTimes) do
     SleepTimes[I] := GetRandomKeyPressTime();
 

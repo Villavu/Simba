@@ -29,7 +29,7 @@ type
     function Read(var Buffer; Count: Longint): LongInt; override;
   end;
 
-  TSimbaIPCServer = class
+  TSimbaIPCServer = class(TComponent)
   protected
     FInputClient: TOutputPipeStream;
     FInputStream: TSimbaIPCInputStream;
@@ -43,7 +43,7 @@ type
 
     procedure OnMessage(MessageID: Integer; Params, Result: TMemoryStream); virtual; abstract;
   public
-    constructor Create;
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
     property ClientID: String read FClientID;
@@ -131,7 +131,7 @@ begin
   Result.Free();
 end;
 
-constructor TSimbaIPCServer.Create;
+constructor TSimbaIPCServer.Create(AOwner: TComponent);
 
   function DuplicateHandle(Handle: THandle): THandle;
   begin
@@ -149,7 +149,7 @@ var
   InputHandle: THandle = 0;
   OutputHandle: THandle = 0;
 begin
-  inherited Create();
+  inherited Create(AOwner);
 
   // Input
   if (not CreatePipeHandles(InputHandle, OutputHandle, 4096)) then
