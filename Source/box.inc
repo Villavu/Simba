@@ -203,28 +203,28 @@ begin
   Result.Y2 := Max(Max(Self.Y1, Other.Y2), Max(Other.Y1, Self.Y2));
 end;
 
-function TBoxHelper.Invert(Area: TBox): TBoxArray;
+function TBoxHelper.Invert(Box: TBox): TBoxArray;
 var
-  B: TBox;
+  Box: TBox;
   Boxes: TBoxArray;
   I, Count: Integer;
 begin
-  Result := System.Default(TBoxArray);
+  Result := [];
 
-  B.X1 := Max(Area.X1, Self.X1-1);
-  B.X2 := Min(Area.X2, Self.X2+1);
-  B.Y1 := Max(Area.Y1, Self.Y1-1);
-  B.Y2 := Min(Area.Y2, Self.Y2+1);
+  Box.X1 := Max(Area.X1, Self.X1-1);
+  Box.X2 := Min(Area.X2, Self.X2+1);
+  Box.Y1 := Max(Area.Y1, Self.Y1-1);
+  Box.Y2 := Min(Area.Y2, Self.Y2+1);
 
   Boxes := [
-    TBox.Create(Area.X1, Area.Y1, B.X1,    B.Y1),
-    TBox.Create(Area.X1, B.Y1,    B.X1,    B.Y2),
-    TBox.Create(Area.X1, B.Y1,    B.X1,    Area.Y2),
-    TBox.Create(B.X1,    Area.Y1, B.X2,    B.Y1),
-    TBox.Create(B.X1,    B.Y2,    B.X2,    Area.Y2),
-    TBox.Create(B.X2,    Area.Y1, Area.X2, B.Y1),
-    TBox.Create(B.X2,    B.Y1,    Area.X2, B.Y2),
-    TBox.Create(B.X2,    B.Y1,    Area.X2, Area.Y2)
+    TBox.Create(Area.X1, Area.Y1, Box.X1,  Box.Y1),
+    TBox.Create(Area.X1, Box.Y1,  Box.X1,  Box.Y2),
+    TBox.Create(Area.X1, Box.Y1,  Box.X1,  Area.Y2),
+    TBox.Create(Box.X1,  Area.Y1, Box.X2,  Box.Y1),
+    TBox.Create(Box.X1,  Box.Y2,  Box.X2,  Area.Y2),
+    TBox.Create(Box.X2,  Area.Y1, Area.X2, Box.Y1),
+    TBox.Create(Box.X2,  Box.Y1,  Area.X2, Box.Y2),
+    TBox.Create(Box.X2,  Box.Y1,  Area.X2, Area.Y2)
   ];
 
   Count := 0;

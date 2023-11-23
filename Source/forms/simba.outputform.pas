@@ -41,7 +41,10 @@ type
     procedure DoAllowMouseLink(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
     procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
-    function GetTab: TSimbaTab;
+    function GetTabTitle: String;
+    function GetTabImageIndex: Integer;
+    procedure SetTabTitle(Value: String);
+    procedure SetTabImageIndex(Value: Integer);
   public
     constructor Create(AOwner: TComponent); reintroduce;
     destructor Destroy; override;
@@ -53,18 +56,10 @@ type
     procedure Empty;
     procedure Flush;
 
-    property Tab: TSimbaTab read GetTab;
-  end;
+    procedure MakeVisible;
 
-  TSimbaOutputTab = class(TSimbaTab)
-  protected
-    FOutputBox: TSimbaOutputBox;
-
-    procedure DoScriptStateChange(Sender: TObject);
-  public
-    constructor Create(AOwner: TComponent); override;
-
-    property OutputBox: TSimbaOutputBox read FOutputBox;
+    property TabTitle: String read GetTabTitle write SetTabTitle;
+    property TabImageIndex: Integer read GetTabImageIndex write SetTabImageIndex;
   end;
 
   TSimbaOutputForm = class(TForm)
@@ -91,30 +86,25 @@ type
   protected
     FTabControl: TSimbaTabControl;
     FSimbaOutputBox: TSimbaOutputBox;
-    FTabChangeLock: Integer;
 
     function CanAnchorDocking(X, Y: Integer): Boolean;
 
     procedure DoScriptTabChange(Sender: TObject);
-    procedure DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
 
     procedure DebugLn(const S: String);
 
-    function GetCurrentTab: TSimbaOutputBox;
+    function GetActiveOutputBox: TSimbaOutputBox;
   public
+    constructor Create(AOwner: TComponent); override;
+
     property SimbaOutputBox: TSimbaOutputBox read FSimbaOutputBox;
-    property CurrentTab: TSimbaOutputBox read GetCurrentTab;
+    property ActiveOutputBox: TSimbaOutputBox read GetActiveOutputBox;
 
     function AddSimbaOutput: TSimbaOutputBox;
     function AddScriptOutput(TabTitle: String): TSimbaOutputBox;
 
     procedure RemoveTab(OutputBox: TSimbaOutputBox);
     procedure MoveTab(AFrom, ATo: Integer);
-
-    procedure LockTabChange;
-    procedure UnlockTabChange;
-
-    constructor Create(AOwner: TComponent); override;
   end;
 
 var
@@ -127,18 +117,30 @@ implementation
 uses
   SynEditMarkupBracket, SynEditMarkupWordGroup,
   simba.dockinghelpers, simba.fonthelpers, simba.scripttabsform,
-  simba.nativeinterface, simba.settingsform, simba.main, simba.scriptinstance,
+  simba.nativeinterface, simba.settingsform, simba.main,
   simba.scripttab, simba.ide_events, simba.ide_utils;
+
+type
+  TSimbaOutputTab = class(TSimbaTab)
+  protected
+    FOutputBox: TSimbaOutputBox;
+
+    procedure DoScriptStateChange(Sender: TObject);
+  public
+    constructor Create(AOwner: TComponent); override;
+
+    property OutputBox: TSimbaOutputBox read FOutputBox;
+  end;
 
 procedure TSimbaOutputTab.DoScriptStateChange(Sender: TObject);
 begin
-  if (Sender is TSimbaScriptInstance) and (TSimbaScriptInstance(Sender).OutputBox = FOutputBox) then
+  if (Sender is TSimbaScriptTab) and (TSimbaScriptTab(Sender).OutputBox = FOutputBox) then
   begin
-    case TSimbaScriptInstance(Sender).State of
+    case TSimbaScriptTab(Sender).ScriptState of
       ESimbaScriptState.STATE_RUNNING: ImageIndex := IMG_PLAY;
       ESimbaScriptState.STATE_PAUSED:  ImageIndex := IMG_PAUSE;
-      ESimbaScriptState.STATE_STOP:    ImageIndex := IMG_STOP;
-      ESimbaScriptState.STATE_NONE:    ImageIndex := IMG_STOP;
+      else
+        ImageIndex := IMG_STOP;
     end;
   end;
 end;
@@ -152,14 +154,35 @@ begin
   FOutputBox.Align := alClient;
 
   SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
+  SimbaIDEEvents.RegisterActiveScriptStateChange(@DoScriptStateChange);
 end;
 
-function TSimbaOutputBox.GetTab: TSimbaTab;
+function TSimbaOutputBox.GetTabTitle: String;
 begin
-  if (not (Parent is TSimbaTab)) then
-    raise Exception.Create('TSimbaOutputBox.GetTab: Parent is not a TTabSheet!');
+  if (Parent is TSimbaOutputTab) then
+    Result := TSimbaOutputTab(Parent).Caption
+  else
+    Result := '';
+end;
 
-  Result := TSimbaTab(Parent);
+procedure TSimbaOutputBox.SetTabTitle(Value: String);
+begin
+  if (Parent is TSimbaOutputTab) then
+    TSimbaOutputTab(Parent).Caption := Value;
+end;
+
+function TSimbaOutputBox.GetTabImageIndex: Integer;
+begin
+  if (Parent is TSimbaOutputTab) then
+    Result := TSimbaOutputTab(Parent).ImageIndex
+  else
+    Result := -1;
+end;
+
+procedure TSimbaOutputBox.SetTabImageIndex(Value: Integer);
+begin
+  if (Parent is TSimbaOutputTab) then
+    TSimbaOutputTab(Parent).ImageIndex := Value;
 end;
 
 procedure TSimbaOutputBox.DoSettingChange_FontName(Setting: TSimbaSetting);
@@ -445,7 +468,7 @@ begin
       if NeedFocus or NeedScroll then
       begin
         if NeedFocus then
-          Tab.Show();
+          MakeVisible();
 
         TopLine := Lines.Count;
       end;
@@ -457,6 +480,12 @@ begin
   finally
     FLock.Leave();
   end;
+end;
+
+procedure TSimbaOutputBox.MakeVisible;
+begin
+  if (Parent is TSimbaOutputTab) then
+    TSimbaOutputTab(Parent).Show();
 end;
 
 procedure TSimbaOutputForm.MenuItemSelectAllClick(Sender: TObject);
@@ -474,19 +503,17 @@ begin
     TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox.Flush();
 end;
 
-procedure TSimbaOutputForm.DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
+function TSimbaOutputForm.GetActiveOutputBox: TSimbaOutputBox;
 begin
-  AllowChange := FTabChangeLock = 0;
+  if (FTabControl.ActiveTab is TSimbaOutputTab) then
+    Result := TSimbaOutputTab(FTabControl.ActiveTab).OutputBox
+  else
+    Result := nil;
 end;
 
 procedure TSimbaOutputForm.DebugLn(const S: String);
 begin
   SimbaOutputBox.Add(S + LineEnding);
-end;
-
-function TSimbaOutputForm.GetCurrentTab: TSimbaOutputBox;
-begin
-  Result := TSimbaOutputTab(FTabControl.ActiveTab).OutputBox;
 end;
 
 function TSimbaOutputForm.AddSimbaOutput: TSimbaOutputBox;
@@ -512,25 +539,13 @@ end;
 
 procedure TSimbaOutputForm.RemoveTab(OutputBox: TSimbaOutputBox);
 begin
-  if (OutputBox = nil) or (OutputBox.Tab = nil) then
-    Exit;
-
-  FTabControl.DeleteTab(OutputBox.Tab);
+  if (OutputBox <> nil) and (OutputBox.Parent is TSimbaOutputTab) then
+    FTabControl.DeleteTab(TSimbaOutputTab(OutputBox.Parent));
 end;
 
 procedure TSimbaOutputForm.MoveTab(AFrom, ATo: Integer);
 begin
   FTabControl.MoveTab(AFrom + 1, ATo + 1); // + 1 because of Simba tab
-end;
-
-procedure TSimbaOutputForm.LockTabChange;
-begin
-  Inc(FTabChangeLock);
-end;
-
-procedure TSimbaOutputForm.UnlockTabChange;
-begin
-  Dec(FTabChangeLock);
 end;
 
 procedure TSimbaOutputForm.MenuItemCopyClick(Sender: TObject);
@@ -574,7 +589,7 @@ end;
 procedure TSimbaOutputForm.DoScriptTabChange(Sender: TObject);
 begin
   if (Sender is TSimbaScriptTab) then
-    TSimbaScriptTab(Sender).OutputBox.Tab.Show();
+    TSimbaScriptTab(Sender).OutputBox.MakeVisible();
 end;
 
 procedure TSimbaOutputForm.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -611,7 +626,6 @@ begin
   FTabControl.CanMoveTabs := False;
   FTabControl.ShowCloseButtons := False;
 
-  FTabControl.OnTabCanChange := @DoTabCanChange;
   FTabControl.OnMouseMove := @FormMouseMove;
   FTabControl.OnMouseDown := @FormMouseDown;
   FTabControl.OnMouseLeave := @FormMouseLeave;

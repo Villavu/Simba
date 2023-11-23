@@ -265,16 +265,6 @@ begin
   PInt64Array(Result)^ := Algo_Int64_Difference(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
 end;
 
-procedure _LapeSetSimbaStatus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  with PSimbaScript(Params^[0])^ do
-  begin
-    if (SimbaCommunication = nil) then
-      SimbaException('SetSimbaStatus requires Simba communication');
-    SimbaCommunication.SetSimbaStatus(PString(Params^[1])^);
-  end;
-end;
-
 procedure _LapeSetSimbaTitle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   with PSimbaScript(Params^[0])^ do
@@ -406,7 +396,6 @@ begin
     addGlobalFunc('procedure _TSimbaScript.DebugImage_Display(X, Y, Width, Height: Integer); overload', @_LapeDebugImage_Display2);
     addGlobalFunc('procedure _TSimbaScript.Pause()', @_LapePause);
     addGlobalFunc('procedure _TSimbaScript.SetSimbaTitle(S: String)', @_LapeSetSimbaTitle);
-    addGlobalFunc('procedure _TSimbaScript.SetSimbaStatus(S: String)', @_LapeSetSimbaStatus);
     addGlobalFunc('procedure _TSimbaScript.ShowTrayNotification(Title, Message: String; Timeout: Integer)', @_LapeShowTrayNotification);
 
     addGlobalFunc('function _TSimbaScript.GetSimbaPID: TProcessID', @_LapeGetSimbaPID);

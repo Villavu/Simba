@@ -14,6 +14,19 @@ uses
   simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight, simba.component_treeview, simba.dictionary;
 
 type
+  ENodeType = (ntUnknown, ntSimbaSection, ntDecl, ntSimbaDecl, ntPluginDecl, ntIncludes, ntPlugins, ntIncludeFile, ntPluginFile);
+
+  TSimbaFunctionListNode = class(TTreeNode)
+  public
+    NodeType: ENodeType;
+    Hint: String;
+    Line: Integer;
+    StartPos: Integer;
+    EndPos: Integer;
+    FileName: String;
+    LastUsed: Integer;
+  end;
+
   TSimbaFunctionListForm = class(TForm)
   protected
   type
@@ -170,21 +183,6 @@ begin
     'DateTime':       Result := ROOT + 'DateTime.html';
   end;
 end;
-
-type
-  ENodeType = (ntUnknown, ntSimbaSection, ntDecl, ntSimbaDecl, ntPluginDecl, ntIncludes, ntPlugins, ntIncludeFile, ntPluginFile);
-
-type
-  TSimbaFunctionListNode = class(TTreeNode)
-  public
-    NodeType: ENodeType;
-    Hint: String;
-    Line: Integer;
-    StartPos: Integer;
-    EndPos: Integer;
-    FileName: String;
-    LastUsed: Integer;
-  end;
 
 procedure TSimbaFunctionListForm.ResetState;
 begin
@@ -539,12 +537,8 @@ begin
 end;
 
 procedure TSimbaFunctionListForm.DoSelectionChanged(Sender: TObject);
-var
-  Node: TSimbaFunctionListNode;
 begin
-  Node := TSimbaFunctionListNode(FTreeView.Selected);
-  if (Node is TSimbaFunctionListNode) then
-    SimbaMainStatusBar.SetMainPanelText(Node.Hint);
+  SimbaIDEEvents.CallOnFunctionListNodeSelection(FTreeView.Selected);
 end;
 
 function TSimbaFunctionListForm.AddDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;

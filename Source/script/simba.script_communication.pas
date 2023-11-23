@@ -25,7 +25,6 @@ type
 
     procedure ShowTrayNotification(Title, Message: String; Timeout: Integer);
 
-    procedure SetSimbaStatus(S: String);
     procedure SetSimbaTitle(S: String);
 
     procedure DebugImage_SetMaxSize(Width, Height: Integer);
@@ -121,22 +120,9 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.SetSimbaStatus(S: String);
-begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.STATUS));
-
-  try
-    FParams.WriteAnsiString(S);
-
-    Invoke();
-  finally
-    EndInvoke();
-  end;
-end;
-
 procedure TSimbaScriptCommunication.SetSimbaTitle(S: String);
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DISGUSE));
+  BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_TITLE));
 
   try
     FParams.WriteAnsiString(S);

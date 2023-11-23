@@ -16,7 +16,9 @@ type
       CODETOOLS_SETUP,
       TAB_CARETMOVED, TAB_MODIFIED, TAB_LOADED, TAB_SEARCH, TAB_BEFORECHANGE, TAB_CHANGE, TAB_CLOSED,
       MOUSELOGGER_CHANGE,
-      SCRIPTSTATE_CHANGE, SCRIPT_RUNNING
+      SCRIPTSTATE_CHANGE,
+      FUNCTIONLIST_NODE_SELECTION,
+      ACTIVE_SCRIPTSTATE_CHANGE
     );
   class var
     FMethodLists: array[EMethodType] of TMethodList;
@@ -32,8 +34,17 @@ type
     class procedure RegisterOnTabClosed(Proc: TNotifyEvent);
     class procedure CallOnScriptTabClose(Sender: TObject);
 
+    // When a function list node is selected.
+    // Sender=TSimbaFunctionListNode
+    class procedure RegisterOnFunctionListNodeSelection(Proc: TNotifyEvent);
+    class procedure CallOnFunctionListNodeSelection(Sender: TObject);
 
-    class procedure CallOnScriptStateChange(Sender: TObject); // Sender = TSimbaScriptInstance
+    // When the script state of the active tab changes.
+    // Sender=TSimbaScriptTab
+    class procedure RegisterActiveScriptStateChange(Proc: TNotifyEvent);
+    class procedure CallOnActiveScriptStateChange(Sender: TObject);
+
+    class procedure CallOnScriptStateChange(Sender: TObject); // Sender = TSimbaScriptTab
     class procedure CallOnBeforeTabChange(Sender: TObject);
     class procedure CallOnScriptTabChange(Sender: TObject); // Sender = TSimbaScriptTab
     class procedure CallOnEditorLoadedMethods(Sender: TObject);
@@ -41,15 +52,6 @@ type
     class procedure CallOnEditorCaretMoved(Sender: TObject);
     class procedure CallOnEditorModified(Sender: TObject);
     class procedure CallOnMouseLoggerChange(Sender: TObject);
-
-
-    // Called every 500ms from a script instance while a script is running.
-    // Called on a seperate thread - synchronize if doing GUI stuff!
-    // Sender = TSimbaScriptInstance
-    class procedure CallOnScriptRunning(Sender: TObject);
-    class procedure RegisterMethodOnScriptRunning(Proc: TNotifyEvent);
-    class procedure UnRegisterMethodOnScriptRunning(Proc: TNotifyEvent);
-
 
     class procedure RegisterMethodOnScriptStateChange(Proc: TNotifyEvent);
     class procedure RegisterMethodOnScriptTabChange(Proc: TNotifyEvent);
@@ -116,9 +118,24 @@ begin
   Call(TAB_CLOSED, Sender);
 end;
 
-class procedure SimbaIDEEvents.CallOnScriptRunning(Sender: TObject);
+class procedure SimbaIDEEvents.RegisterOnFunctionListNodeSelection(Proc: TNotifyEvent);
 begin
-  Call(SCRIPT_RUNNING, Sender);
+  RegisterMethod(FUNCTIONLIST_NODE_SELECTION, Proc);
+end;
+
+class procedure SimbaIDEEvents.CallOnFunctionListNodeSelection(Sender: TObject);
+begin
+  Call(FUNCTIONLIST_NODE_SELECTION, Sender);
+end;
+
+class procedure SimbaIDEEvents.RegisterActiveScriptStateChange(Proc: TNotifyEvent);
+begin
+  RegisterMethod(ACTIVE_SCRIPTSTATE_CHANGE, Proc);
+end;
+
+class procedure SimbaIDEEvents.CallOnActiveScriptStateChange(Sender: TObject);
+begin
+  Call(ACTIVE_SCRIPTSTATE_CHANGE, Sender);
 end;
 
 class procedure SimbaIDEEvents.CallOnScriptStateChange(Sender: TObject);
@@ -159,16 +176,6 @@ end;
 class procedure SimbaIDEEvents.CallOnMouseLoggerChange(Sender: TObject);
 begin
   Call(MOUSELOGGER_CHANGE, Sender);
-end;
-
-class procedure SimbaIDEEvents.RegisterMethodOnScriptRunning(Proc: TNotifyEvent);
-begin
-  RegisterMethod(SCRIPT_RUNNING, Proc);
-end;
-
-class procedure SimbaIDEEvents.UnRegisterMethodOnScriptRunning(Proc: TNotifyEvent);
-begin
-  UnRegisterMethod(SCRIPT_RUNNING, Proc);
 end;
 
 class procedure SimbaIDEEvents.RegisterMethodOnScriptStateChange(Proc: TNotifyEvent);

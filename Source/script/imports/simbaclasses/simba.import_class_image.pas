@@ -1251,7 +1251,7 @@ end;
 
 (*
 TImage.DrawLineAA
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 > procedure TImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single = 1.5);
 *)
 procedure _LapeImage_DrawLineAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

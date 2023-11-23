@@ -10,15 +10,13 @@ unit simba.ide_mainstatusbar;
 interface
 
 uses
-  Classes, SysUtils, Controls, Forms,
-  simba.mufasatypes, simba.component_statusbar, simba.scriptinstance;
+  Classes, SysUtils, Controls, Forms, ExtCtrls,
+  simba.mufasatypes, simba.component_statusbar;
 
 type
   TSimbaMainStatusBar = class
   protected
     FStatusBar: TSimbaStatusBar;
-
-    procedure SetScriptStatePanel(Instance: TSimbaScriptInstance);
 
     procedure DoMouseLoggerChange(Sender: TObject);
     procedure DoTabCaretMoved(Sender: TObject);
@@ -26,11 +24,9 @@ type
     procedure DoTabSearch(Sender: TObject);
     procedure DoTabChange(Sender: TObject);
     procedure DoScriptStateChange(Sender: TObject);
-    procedure DoScriptRunning(Sender: TObject);
+    procedure DoFunctionListNodeSelection(Sender: TObject);
   public
     constructor Create;
-
-    procedure SetMainPanelText(Str: String);
   end;
 
 var
@@ -40,18 +36,7 @@ implementation
 
 uses
   simba.ide_initialization, simba.ide_events, simba.mouselogger, simba.scripttab,
-  simba.editor_findreplace, simba.datetime;
-
-procedure TSimbaMainStatusBar.SetScriptStatePanel(Instance: TSimbaScriptInstance);
-begin
-  if (Instance <> nil) and (Instance.State = ESimbaScriptState.STATE_RUNNING) then
-    FStatusBar.PanelText[1] := FormatMilliseconds(Instance.TimeRunning, 'hh:mm:ss')
-  else
-  if (Instance <> nil) and (Instance.State = ESimbaScriptState.STATE_PAUSED) then
-    FStatusBar.PanelText[1] := 'Paused'
-  else
-    FStatusBar.PanelText[1] := 'Stopped'
-end;
+  simba.editor_findreplace, simba.functionlistform;
 
 procedure TSimbaMainStatusBar.DoMouseLoggerChange(Sender: TObject);
 begin
@@ -86,21 +71,19 @@ end;
 procedure TSimbaMainStatusBar.DoTabChange(Sender: TObject);
 begin
   if (Sender is TSimbaScriptTab) then
-    SetScriptStatePanel(TSimbaScriptTab(Sender).ScriptInstance);
+    FStatusBar.PanelText[1] := TSimbaScriptTab(Sender).ScriptStateStr;
 end;
 
 procedure TSimbaMainStatusBar.DoScriptStateChange(Sender: TObject);
 begin
-  if (Sender is TSimbaScriptInstance) and TSimbaScriptInstance(Sender).IsActiveTab() then
-    SetScriptStatePanel(TSimbaScriptInstance(Sender));
+  if (Sender is TSimbaScriptTab) and TSimbaScriptTab(Sender).IsActiveTab() then
+    FStatusBar.PanelText[1] := TSimbaScriptTab(Sender).ScriptStateStr;
 end;
 
-procedure TSimbaMainStatusBar.DoScriptRunning(Sender: TObject);
-var
-  ScriptInstance: TSimbaScriptInstance absolute Sender;
+procedure TSimbaMainStatusBar.DoFunctionListNodeSelection(Sender: TObject);
 begin
-  if (Sender is TSimbaScriptInstance) and ScriptInstance.IsActiveTab() and (ScriptInstance.State <> ESimbaScriptState.STATE_PAUSED) then
-    FStatusBar.PanelText[1] := FormatMilliseconds(ScriptInstance.TimeRunning, 'hh:mm:ss');
+  if (Sender is TSimbaFunctionListNode) then
+    FStatusBar.PanelText[3] := TSimbaFunctionListNode(Sender).Hint;
 end;
 
 constructor TSimbaMainStatusBar.Create;
@@ -120,12 +103,7 @@ begin
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabLoaded);
   SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
   SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabChange);
-  SimbaIDEEvents.RegisterMethodOnScriptRunning(@DoScriptRunning);
-end;
-
-procedure TSimbaMainStatusBar.SetMainPanelText(Str: String);
-begin
-  FStatusBar.PanelText[3] := Str;
+  SimbaIDEEvents.RegisterOnFunctionListNodeSelection(@DoFunctionListNodeSelection);
 end;
 
 procedure CreateMainStatusBar;

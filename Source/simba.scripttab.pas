@@ -10,12 +10,71 @@ unit simba.scripttab;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, Controls, Dialogs,
+  Classes, SysUtils, ComCtrls, Controls, Dialogs, Process,
   SynEdit, SynEditTypes,
-  simba.mufasatypes, simba.editor, simba.scriptinstance,
-  simba.outputform, simba.component_tabcontrol;
+  simba.mufasatypes, simba.editor,
+  simba.outputform, simba.component_tabcontrol,
+  simba.windowhandle;
 
 type
+  TSimbaScriptTab = class;
+
+  // main class which will run the script of a given tab.
+  // Manages output etc.
+  TSimbaScriptTabRunner = class(TComponent)
+  protected
+    FTab: TSimbaScriptTab;
+
+    FErrorSet: Boolean;
+    FError: record
+      Message, FileName: String;
+      Line, Col: Integer;
+    end;
+
+    FProcess: TProcess;
+
+    FStartTime: UInt64;
+
+    FOutputThread: TThread;
+
+    FState: ESimbaScriptState;
+
+    procedure Start(Args: TStringArray);
+
+    procedure ShowError;
+    procedure ShowOutputBox;
+
+    procedure DoOutputThread;
+    procedure DoOutputThreadTerminated(Sender: TObject);
+
+    function GetTimeRunning: UInt64;
+
+    procedure SetState(Value: ESimbaScriptState);
+  public
+    property Tab: TSimbaScriptTab read FTab;
+
+    property Process: TProcess read FProcess;
+    property State: ESimbaScriptState read FState write SetState;
+    property TimeRunning: UInt64 read GetTimeRunning;
+
+    // Start
+    procedure Run(Args: TStringArray);
+    procedure Compile(Args: TStringArray);
+
+    // Change the running state
+    procedure Resume;
+    procedure Pause;
+    procedure Stop;
+    procedure Kill;
+
+    procedure SetError(Message, FileName: String; Line, Col: Integer);
+
+    //function IsActiveTab: Boolean;
+
+    constructor Create(ATab: TSimbaScriptTab); reintroduce;
+    destructor Destroy; override;
+  end;
+
   TSimbaScriptTab = class(TSimbaTab)
   protected
     FUID: Integer;
@@ -23,7 +82,9 @@ type
     FSavedText: String;
     FScriptFileName: String;
     FScriptTitle: String;
-    FScriptInstance: TSimbaScriptInstance;
+
+    FScriptRunner: TSimbaScriptTabRunner;
+
     FOutputBox: TSimbaOutputBox;
 
     FLinkClick: record
@@ -49,7 +110,6 @@ type
     property UID: Integer read FUID;
     property OutputBox: TSimbaOutputBox read FOutputBox;
 
-    property ScriptInstance: TSimbaScriptInstance read FScriptInstance;
     property ScriptTitle: String read FScriptTitle;
     property ScriptFileName: String read FScriptFileName;
 
@@ -70,10 +130,11 @@ type
     function IsActiveTab: Boolean;
     function CanClose: Boolean;
 
+    function ScriptStateStr: String;
     function ScriptState: ESimbaScriptState;
     function ScriptTimeRunning: UInt64;
 
-    procedure Run(Target: THandle);
+    procedure Run(Target: TWindowHandle);
     procedure Compile;
     procedure Pause;
     procedure Stop;
@@ -85,8 +146,195 @@ type
 implementation
 
 uses
+  Forms,
   simba.files, simba.settings, simba.ide_events,
-  simba.main, simba.env, simba.ide_showdeclaration, simba.threading;
+  simba.main, simba.env, simba.ide_showdeclaration, simba.threading,
+  simba.scriptinstance_communication, simba.scripttabsform, simba.datetime;
+
+procedure TSimbaScriptTabRunner.DoOutputThread;
+var
+  ReadBuffer, RemainingBuffer: String;
+
+  procedure EmptyProcessOutput;
+  var
+    Count: Integer;
+  begin
+    while (FProcess.Output.NumBytesAvailable > 0) do
+    begin
+      Count := FProcess.Output.Read(ReadBuffer[1], Length(ReadBuffer));
+      if (Count > 0) then
+        RemainingBuffer := FTab.OutputBox.Add(RemainingBuffer + Copy(ReadBuffer, 1, Count));
+    end;
+
+    //SimbaIDEEvents.CallOnScriptRunning(FTab);
+  end;
+
+begin
+  try
+    SetLength(ReadBuffer, 8192);
+    SetLength(RemainingBuffer, 0);
+
+    while FProcess.Running do
+    begin
+      EmptyProcessOutput();
+
+      Sleep(500);
+    end;
+
+    DebugLn('Script process[%d] terminated. Exit code: %d', [FProcess.ProcessID, FProcess.ExitCode]);
+
+    EmptyProcessOutput();
+  except
+    on E: Exception do
+      DebugLn('Script process[%d] output thread crashed: %s', [FProcess.ProcessID, E.Message]);
+  end;
+end;
+
+procedure TSimbaScriptTabRunner.DoOutputThreadTerminated(Sender: TObject);
+begin
+  CheckMainThread('TSimbaScriptTabRunner.DoOutputThreadTerminated');
+  if FProcess.Running then
+    FProcess.Terminate(0);
+
+  if FErrorSet then
+  begin
+    ShowError();
+    ShowOutputBox();
+  end;
+
+  Self.Free();
+end;
+
+function TSimbaScriptTabRunner.GetTimeRunning: UInt64;
+begin
+  if (FStartTime = 0) then
+    Result := 0
+  else
+    Result := GetTickCount64() - FStartTime;
+end;
+
+procedure TSimbaScriptTabRunner.SetState(Value: ESimbaScriptState);
+begin
+  CheckMainThread('SimbaScriptTabRunner.SetState');
+
+  FState := Value;
+
+  if FTab.IsActiveTab() then
+    SimbaIDEEvents.CallOnActiveScriptStateChange(FTab)
+  else
+    SimbaIDEEvents.CallOnScriptStateChange(FTab);
+end;
+
+procedure TSimbaScriptTabRunner.Start(Args: TStringArray);
+var
+  FileName: String;
+begin
+  if (FTab.FScriptFileName = '') then
+    FileName := SimbaEnv.WriteTempFile(FTab.Script, FTab.ScriptTitle)
+  else
+    FileName := FTab.ScriptFileName;
+
+  FStartTime := GetTickCount64();
+
+  FProcess.Parameters.Add('--simbacommunication=%s', [TSimbaScriptInstanceCommunication.Create(Self).ClientID]);
+  FProcess.Parameters.AddStrings(Args);
+  FProcess.Parameters.Add(FileName);
+  FProcess.Execute();
+
+  FOutputThread := RunInThread(@DoOutputThread);
+  FOutputThread.OnTerminate := @DoOutputThreadTerminated;
+
+  State := ESimbaScriptState.STATE_RUNNING;
+end;
+
+procedure TSimbaScriptTabRunner.ShowError;
+begin
+  // FError is in the script tab that ran the script
+  if (FTab.ScriptFileName = FError.FileName) or ((FTab.ScriptFileName = '') and (FTab.ScriptTitle = FError.FileName)) then
+  begin
+    FTab.Show();
+    FTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
+  end else
+  // else, open the file and display.
+  if SimbaScriptTabsForm.Open(FError.FileName) then
+    SimbaScriptTabsForm.CurrentEditor.FocusLine(FError.Line, FError.Col, $0000A5);
+
+  FTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
+end;
+
+procedure TSimbaScriptTabRunner.ShowOutputBox;
+begin
+  FTab.OutputBox.MakeVisible();
+end;
+
+procedure TSimbaScriptTabRunner.Run(Args: TStringArray);
+begin
+  Start(Args + ['--run']);
+end;
+
+procedure TSimbaScriptTabRunner.Compile(Args: TStringArray);
+begin
+  Start(Args + ['--compile']);
+end;
+
+procedure TSimbaScriptTabRunner.Resume;
+begin
+  FState := ESimbaScriptState.STATE_RUNNING;
+  FProcess.Input.Write(FState, SizeOf(Int32));
+end;
+
+procedure TSimbaScriptTabRunner.Pause;
+begin
+  FState := ESimbaScriptState.STATE_PAUSED;
+  FProcess.Input.Write(FState, SizeOf(Int32));
+end;
+
+procedure TSimbaScriptTabRunner.Stop;
+begin
+  if (FState = ESimbaScriptState.STATE_STOP) then
+    FProcess.Terminate(1001)
+  else
+  begin
+    FState := ESimbaScriptState.STATE_STOP;
+    FProcess.Input.Write(FState, SizeOf(Int32));
+  end;
+end;
+
+constructor TSimbaScriptTabRunner.Create(ATab: TSimbaScriptTab);
+begin
+  inherited Create(ATab);
+
+  FTab := ATab;
+  FState := ESimbaScriptState.STATE_RUNNING;
+
+  FProcess := TProcess.Create(Self);
+  FProcess.PipeBufferSize := 16 * 1024;
+  FProcess.CurrentDirectory := Application.Location;
+  FProcess.Options := FProcess.Options + [poUsePipes, poStderrToOutPut];
+  FProcess.Executable := Application.ExeName;
+end;
+
+procedure TSimbaScriptTabRunner.Kill;
+begin
+  FProcess.Terminate(0);
+end;
+
+procedure TSimbaScriptTabRunner.SetError(Message, FileName: String; Line, Col: Integer);
+begin
+  FErrorSet := True;
+
+  FError.Message := Message;
+  FError.FileName := FileName;
+  FError.Line := Line;
+  FError.Col := Col;
+end;
+
+destructor TSimbaScriptTabRunner.Destroy;
+begin
+  State := ESimbaScriptState.STATE_NONE;
+
+  inherited Destroy();
+end;
 
 var
   __UID: Integer = 0;
@@ -106,16 +354,16 @@ begin
   inherited TextChanged();
 
   if Assigned(FOutputBox) then
-    FOutputBox.Tab.Caption := Caption;
+    FOutputBox.TabTitle := Caption;
 end;
 
 procedure TSimbaScriptTab.Notification(AComponent: TComponent; Operation: TOperation);
 begin
-  if (Operation = opRemove) and (AComponent = FScriptInstance) then
+  if (Operation = opRemove) and (AComponent = FScriptRunner) then
   begin
-    DebugLn('TSimbaScriptTab.Notification :: FScriptInstance = nil');
+    DebugLn('TSimbaScriptTab.Notification :: FScriptRunner = nil');
 
-    FScriptInstance := nil;
+    FScriptRunner := nil;
   end;
 
   inherited Notification(AComponent, Operation);
@@ -269,7 +517,7 @@ function TSimbaScriptTab.CanClose: Boolean;
 begin
   Result := True;
 
-  if (FScriptInstance <> nil) then
+  if (FScriptRunner <> nil) then
   begin
     Show();
 
@@ -280,8 +528,8 @@ begin
       Exit;
     end;
 
-    if (FScriptInstance <> nil) then
-      FScriptInstance.Kill();
+    if (FScriptRunner <> nil) then
+      FScriptRunner.Kill();
   end;
 
   if ScriptChanged then
@@ -300,39 +548,44 @@ begin
   end;
 end;
 
+function TSimbaScriptTab.ScriptStateStr: String;
+begin
+  Result := 'Stopped';
+
+  if (FScriptRunner <> nil) then
+    case FScriptRunner.State of
+      ESimbaScriptState.STATE_RUNNING: Result := FormatMilliseconds(FScriptRunner.TimeRunning, 'hh:mm:ss');
+      ESimbaScriptState.STATE_PAUSED:  Result := 'Paused';
+    end;
+end;
+
 function TSimbaScriptTab.ScriptState: ESimbaScriptState;
 begin
   Result := ESimbaScriptState.STATE_NONE;
-  if (FScriptInstance <> nil) then
-    Result := FScriptInstance.State;
+  if (FScriptRunner <> nil) then
+    Result := FScriptRunner.State;
 end;
 
 function TSimbaScriptTab.ScriptTimeRunning: UInt64;
 begin
   Result := 0;
-  if (FScriptInstance <> nil) then
-    Result := FScriptInstance.TimeRunning;
+  if (FScriptRunner <> nil) then
+    Result := FScriptRunner.TimeRunning;
 end;
 
-procedure TSimbaScriptTab.Run(Target: THandle);
+procedure TSimbaScriptTab.Run(Target: TWindowHandle);
 begin
   DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
 
-  if (FScriptInstance <> nil) then
-    FScriptInstance.Resume()
+  if (FScriptRunner <> nil) then
+    FScriptRunner.Resume()
   else
   begin
     if (FScriptFileName <> '') then
       Save(FScriptFileName);
 
-    FScriptInstance := TSimbaScriptInstance.Create(Self, FOutputBox);
-    FScriptInstance.Target := Target;
-    if (FScriptFileName = '') then
-      FScriptInstance.ScriptFile := SimbaEnv.WriteTempFile(Script, ScriptTitle)
-    else
-      FScriptInstance.ScriptFile := ScriptFileName;
-
-    FScriptInstance.Run();
+    FScriptRunner := TSimbaScriptTabRunner.Create(Self);
+    FScriptRunner.Run(['--target=' + Target.AsString()]);
   end;
 end;
 
@@ -340,19 +593,13 @@ procedure TSimbaScriptTab.Compile;
 begin
   DebugLn('TSimbaScriptTab.Compile :: ' + ScriptTitle + ' ' + ScriptFileName);
 
-  if (FScriptInstance = nil) then
+  if (FScriptRunner = nil) then
   begin
     if (FScriptFileName <> '') then
       Save(FScriptFileName);
 
-    FScriptInstance := TSimbaScriptInstance.Create(Self, FOutputBox);
-
-    if (FScriptFileName = '') then
-      FScriptInstance.ScriptFile := SimbaEnv.WriteTempFile(Script, ScriptTitle)
-    else
-      FScriptInstance.ScriptFile := ScriptFileName;
-
-    FScriptInstance.Compile();
+    FScriptRunner := TSimbaScriptTabRunner.Create(Self);
+    FScriptRunner.Compile([]);
   end;
 end;
 
@@ -360,16 +607,16 @@ procedure TSimbaScriptTab.Pause;
 begin
   DebugLn('TSimbaScriptTab.Pause :: ' + ScriptTitle + ' ' + ScriptFileName);
 
-  if (FScriptInstance <> nil) then
-    FScriptInstance.Pause();
+  if (FScriptRunner <> nil) then
+    FScriptRunner.Pause();
 end;
 
 procedure TSimbaScriptTab.Stop;
 begin
   DebugLn('TSimbaScriptTab.Stop :: ' + ScriptTitle + ' ' + ScriptFileName);
 
-  if (FScriptInstance <> nil) then
-    FScriptInstance.Stop();
+  if (FScriptRunner <> nil) then
+    FScriptRunner.Stop();
 end;
 
 constructor TSimbaScriptTab.Create(AOwner: TComponent);
@@ -394,7 +641,7 @@ begin
   FEditor.UseSimbaColors := True;
 
   FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
-  FOutputBox.Tab.ImageIndex := IMG_STOP;
+  FOutputBox.TabImageIndex := IMG_STOP;
 
   FSavedText := FEditor.Text;
 end;
