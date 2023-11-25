@@ -606,11 +606,14 @@ end;
 
 procedure TSimbaForm.Setup;
 begin
-  SimbaIDEEvents.RegisterMethodOnEditorLoaded(@DoTabLoaded);
-  SimbaIDEEvents.RegisterMethodOnEditorModified(@DoTabModified);
-  SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabModified); // Also do this
-  SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoScriptTabChange);
-  SimbaIDEEvents.RegisterActiveScriptStateChange(@DoScriptStateChange);
+  with SimbaIDEEvents do
+  begin
+    Register(Self, SimbaIDEEvent.TAB_LOADED,             @DoTabLoaded);
+    Register(Self, SimbaIDEEvent.TAB_MODIFIED,           @DoTabModified);
+    Register(Self, SimbaIDEEvent.TAB_CHANGE,             @DoTabModified); // Also do this
+    Register(Self, SimbaIDEEvent.TAB_CHANGE,             @DoScriptTabChange);
+    Register(Self, SimbaIDEEvent.TAB_SCRIPTSTATE_CHANGE, @DoScriptStateChange);
+  end;
 
   with SimbaSettings do
   begin
@@ -1141,7 +1144,7 @@ end;
 
 procedure TSimbaForm.DoScriptStateChange(Sender: TObject);
 begin
-  if (Sender is TSimbaScriptTab) then
+  if (Sender is TSimbaScriptTab) and TSimbaScriptTab(Sender).IsActiveTab() then
     SetButtonStates(TSimbaScriptTab(Sender));
 end;
 

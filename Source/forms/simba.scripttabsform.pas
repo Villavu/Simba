@@ -288,12 +288,12 @@ end;
 procedure TSimbaScriptTabsForm.DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
 begin
   if Assigned(OldTab) then
-    SimbaIDEEvents.CallOnBeforeTabChange(OldTab);
+    SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_BEFORECHANGE, OldTab);
 end;
 
 procedure TSimbaScriptTabsForm.DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
 begin
-  SimbaIDEEvents.CallOnScriptTabChange(NewTab);
+  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_CHANGE, NewTab);
 
   if (NewTab is TSimbaScriptTab) and TSimbaScriptTab(NewTab).Editor.CanSetFocus() then
     TSimbaScriptTab(NewTab).Editor.SetFocus();

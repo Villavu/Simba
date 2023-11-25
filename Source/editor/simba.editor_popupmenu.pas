@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.editor_popupmenu;
 
 {$i simba.inc}
@@ -10,9 +15,8 @@ uses
 type
   TSimbaEditorPopupMenu = class(TPopupMenu)
   protected
-    procedure DoPopup(Sender: TObject);
+    procedure DoPopup(Sender: TObject); override;
     procedure DoClick(Sender: TObject);
-    procedure DoScriptTabChange(Sender: TObject);
     procedure DoMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
   public
     FindDeclaration: TMenuItem;
@@ -32,28 +36,12 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
-function GetSimbaEditorPopupMenu: TPopupMenu;
-
 implementation
 
 uses
   simba.main, simba.editor, simba.editor_docgenerator, simba.nativeinterface,
   simba.scripttab, simba.scripttabsform,
-  simba.ide_events, simba.ide_utils;
-
-var
-  SimbaEditorPopupMenu: TSimbaEditorPopupMenu;
-
-function GetSimbaEditorPopupMenu: TPopupMenu;
-begin
-  if (SimbaEditorPopupMenu = nil) then
-  begin
-    SimbaEditorPopupMenu := TSimbaEditorPopupMenu.Create(Application.MainForm);
-    SimbaIDEEvents.RegisterMethodOnScriptTabChange(@SimbaEditorPopupMenu.DoScriptTabChange);
-  end;
-
-  Result := SimbaEditorPopupMenu;
-end;
+  simba.ide_utils;
 
 procedure TSimbaEditorPopupMenu.DoPopup(Sender: TObject);
 var
@@ -107,12 +95,6 @@ begin
   end;
 end;
 
-procedure TSimbaEditorPopupMenu.DoScriptTabChange(Sender: TObject);
-begin
-  if (Sender is TSimbaScriptTab) then
-    PopupComponent := TSimbaScriptTab(Sender).Editor;
-end;
-
 procedure TSimbaEditorPopupMenu.DoMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
 begin
   MenuItemHeight(Sender as TMenuItem, ACanvas, AHeight);
@@ -137,14 +119,13 @@ constructor TSimbaEditorPopupMenu.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  OnPopup := @DoPopup;
   OnMeasureItem := @DoMeasureItem;
 
   Images := SimbaForm.Images;
 
   FindDeclaration     := Add('Find Declaration',          IMG_NONE,       ShortCut(VK_UNKNOWN, []),                True );
-  Undo                := Add('Redo',                      IMG_UNDO,       ShortCut(VK_Z,       [ssCtrl]),          False);
-  Redo                := Add('Undo',                      IMG_REDO,       ShortCut(VK_Z,       [ssShift, ssCtrl]), True );
+  Undo                := Add('Undo',                      IMG_UNDO,       ShortCut(VK_Z,       [ssCtrl]),          False);
+  Redo                := Add('Redo',                      IMG_REDO,       ShortCut(VK_Z,       [ssShift, ssCtrl]), True );
   Cut                 := Add('Cut',                       IMG_CUT,        ShortCut(VK_X,       [ssCtrl]),          False);
   Copy                := Add('Copy',                      IMG_COPY,       ShortCut(VK_C,       [ssCtrl]),          False);
   Paste               := Add('Paste',                     IMG_PASTE,      ShortCut(VK_V,       [ssCtrl]),          False);

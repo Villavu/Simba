@@ -422,7 +422,7 @@ begin
   OnDragDrop := @DoDragDrop;
   OnDragOver := @DoDragOver;
 
-  PopupMenu := GetSimbaEditorPopupMenu();
+  PopupMenu := TSimbaEditorPopupMenu.Create(Self);
 
   Options := Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   Options2 := Options2 + [eoCaretSkipsSelection];
