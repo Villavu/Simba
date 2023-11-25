@@ -538,7 +538,7 @@ end;
 
 procedure TSimbaFunctionListForm.DoSelectionChanged(Sender: TObject);
 begin
-  SimbaIDEEvents.CallOnFunctionListNodeSelection(FTreeView.Selected);
+  SimbaIDEEvents.Notify(SimbaIDEEvent.FUNCTIONLIST_SELECTION, FTreeView.Selected);
 end;
 
 function TSimbaFunctionListForm.AddDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
@@ -684,11 +684,11 @@ begin
 
   FSavedStates := TFunctionListStateDict.Create(@HashInt32);
 
-  SimbaIDEEvents.RegisterOnCodetoolsSetup(@DoCodetoolsSetup);
-  SimbaIDEEvents.RegisterMethodOnEditorModified(@DoEditorModified);
-  SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoTabChange);
-  SimbaIDEEvents.RegisterOnBeforeTabChange(@DoTabBeforeChange);
-  SimbaIDEEvents.RegisterOnTabClosed(@DoTabClosed);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.CODETOOLS_SETUP,  @DoCodetoolsSetup);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_MODIFIED,     @DoEditorModified);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE,       @DoTabChange);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_BEFORECHANGE, @DoTabBeforeChange);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CLOSED,       @DoTabClosed);
 
   with TIdleTimer.Create(Self) do
   begin

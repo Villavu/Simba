@@ -12,9 +12,7 @@ interface
 uses
   Classes, SysUtils, ComCtrls, Controls, Dialogs, Process,
   SynEdit, SynEditTypes,
-  simba.mufasatypes, simba.editor,
-  simba.outputform, simba.component_tabcontrol,
-  simba.windowhandle;
+  simba.mufasatypes, simba.editor, simba.outputform, simba.component_tabcontrol, simba.windowhandle;
 
 type
   TSimbaScriptTab = class;
@@ -68,8 +66,6 @@ type
     procedure Kill;
 
     procedure SetError(Message, FileName: String; Line, Col: Integer);
-
-    //function IsActiveTab: Boolean;
 
     constructor Create(ATab: TSimbaScriptTab); reintroduce;
     destructor Destroy; override;
@@ -132,7 +128,6 @@ type
 
     function ScriptStateStr: String;
     function ScriptState: ESimbaScriptState;
-    function ScriptTimeRunning: UInt64;
 
     procedure Run(Target: TWindowHandle);
     procedure Compile;
@@ -165,8 +160,6 @@ var
       if (Count > 0) then
         RemainingBuffer := FTab.OutputBox.Add(RemainingBuffer + Copy(ReadBuffer, 1, Count));
     end;
-
-    //SimbaIDEEvents.CallOnScriptRunning(FTab);
   end;
 
 begin
@@ -215,14 +208,9 @@ end;
 
 procedure TSimbaScriptTabRunner.SetState(Value: ESimbaScriptState);
 begin
-  CheckMainThread('SimbaScriptTabRunner.SetState');
-
   FState := Value;
 
-  if FTab.IsActiveTab() then
-    SimbaIDEEvents.CallOnActiveScriptStateChange(FTab)
-  else
-    SimbaIDEEvents.CallOnScriptStateChange(FTab);
+  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_SCRIPTSTATE_CHANGE, FTab);
 end;
 
 procedure TSimbaScriptTabRunner.Start(Args: TStringArray);
@@ -377,7 +365,7 @@ end;
 
 procedure TSimbaScriptTab.DoEditorModified(Sender: TObject);
 begin
-  SimbaIDEEvents.CallOnEditorModified(Self);
+  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_MODIFIED, Self);
 end;
 
 procedure TSimbaScriptTab.DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -398,7 +386,7 @@ end;
 
 procedure TSimbaScriptTab.DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
 begin
-  SimbaIDEEvents.CallOnEditorCaretMoved(Self);
+  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_CARETMOVED, Self);
 end;
 
 function TSimbaScriptTab.SaveAsDialog: String;
@@ -488,7 +476,7 @@ begin
 
   Caption := FScriptTitle;
   if Result then
-    SimbaIDEEvents.CallOnEditorLoadedMethods(Self);
+    SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_LOADED, Self);
 end;
 
 procedure TSimbaScriptTab.Undo;
@@ -566,13 +554,6 @@ begin
     Result := FScriptRunner.State;
 end;
 
-function TSimbaScriptTab.ScriptTimeRunning: UInt64;
-begin
-  Result := 0;
-  if (FScriptRunner <> nil) then
-    Result := FScriptRunner.TimeRunning;
-end;
-
 procedure TSimbaScriptTab.Run(Target: TWindowHandle);
 begin
   DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
@@ -648,7 +629,7 @@ end;
 
 destructor TSimbaScriptTab.Destroy;
 begin
-  SimbaIDEEvents.CallOnScriptTabClose(Self);
+  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_CLOSED, Self);
 
   if Assigned(SimbaOutputForm) then
     SimbaOutputForm.RemoveTab(FOutputBox);

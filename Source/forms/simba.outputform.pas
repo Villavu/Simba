@@ -125,14 +125,14 @@ type
   protected
     FOutputBox: TSimbaOutputBox;
 
-    procedure DoScriptStateChange(Sender: TObject);
+    procedure DoTabScriptStateChange(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
 
     property OutputBox: TSimbaOutputBox read FOutputBox;
   end;
 
-procedure TSimbaOutputTab.DoScriptStateChange(Sender: TObject);
+procedure TSimbaOutputTab.DoTabScriptStateChange(Sender: TObject);
 begin
   if (Sender is TSimbaScriptTab) and (TSimbaScriptTab(Sender).OutputBox = FOutputBox) then
   begin
@@ -153,8 +153,7 @@ begin
   FOutputBox.Parent := Self;
   FOutputBox.Align := alClient;
 
-  SimbaIDEEvents.RegisterMethodOnScriptStateChange(@DoScriptStateChange);
-  SimbaIDEEvents.RegisterActiveScriptStateChange(@DoScriptStateChange);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_SCRIPTSTATE_CHANGE, @DoTabScriptStateChange);
 end;
 
 function TSimbaOutputBox.GetTabTitle: String;
@@ -634,7 +633,7 @@ begin
 
   DoSimbaDebugLn := @DebugLn;
 
-  SimbaIDEEvents.RegisterMethodOnScriptTabChange(@DoScriptTabChange);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE, @DoScriptTabChange);
 end;
 
 end.

@@ -48,7 +48,7 @@ begin
 
   CodetoolsSetup := True;
 
-  SimbaIDEEvents.CallOnCodetoolsSetup(nil);
+  SimbaIDEEvents.Notify(SimbaIDEEvent.CODETOOLS_SETUP, nil);
 end;
 
 initialization

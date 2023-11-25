@@ -321,7 +321,7 @@ begin
     SearchReplaceEx(FDialog.FindText, '', SearchOptions, Point(1, 1));
   end;
 
-  SimbaIDEEvents.CallOnEditorSearchMethods(Self);
+  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_SEARCH, Self);
 end;
 
 procedure TSimbaEditorFind.FindPrev(Editor: TSynEdit);

@@ -73,7 +73,7 @@ begin
   Y := Point.Y;
   HotkeyPressed := (Hotkey <> VK_UNKNOWN) and ((GetKeyState(FHotkey) and $8000) <> 0);
 
-  SimbaIDEEvents.CallOnMouseLoggerChange(Self);
+  SimbaIDEEvents.Notify(SimbaIDEEvent.MOUSELOGGER_CHANGE, Self);
 end;
 
 procedure TSimbaMouseLogger.Execute;
