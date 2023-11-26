@@ -40,7 +40,6 @@ type
 
     function GetState: ESimbaScriptState;
 
-    procedure SetSimbaCommunicationServer(Value: String);
     procedure SetTargetWindow(Value: String);
     procedure SetState(Value: ESimbaScriptState);
   public
@@ -50,7 +49,6 @@ type
     property Compiler: TSimbaScript_Compiler read FCompiler;
 
     property SimbaCommunication: TSimbaScriptCommunication read FSimbaCommunication;
-    property SimbaCommunicationServer: String write SetSimbaCommunicationServer;
 
     property TargetWindow: String write SetTargetWindow;
 
@@ -61,14 +59,15 @@ type
     property Script: String read FScript write FScript;
     property ScriptFileName: String read FScriptFileName write FScriptFileName;
 
-    constructor Create;
+    constructor Create(Communication: TSimbaScriptCommunication); reintroduce; overload;
+    constructor Create(FileName: String; Communication: TSimbaScriptCommunication = nil); reintroduce; overload;
     destructor Destroy; override;
   end;
 
 implementation
 
 uses
-  simba.env, simba.datetime, simba.httpclient, simba.target,
+  simba.env, simba.files, simba.datetime, simba.httpclient, simba.target,
   simba.script_pluginloader;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
@@ -217,14 +216,6 @@ begin
   end;
 end;
 
-procedure TSimbaScript.SetSimbaCommunicationServer(Value: String);
-begin
-  if (Value = '') then
-    Exit;
-
-  FSimbaCommunication := TSimbaScriptCommunication.Create(Value);
-end;
-
 procedure TSimbaScript.SetTargetWindow(Value: String);
 begin
   if (Value = '') then
@@ -278,11 +269,24 @@ begin
   Result := True;
 end;
 
-constructor TSimbaScript.Create;
+constructor TSimbaScript.Create(Communication: TSimbaScriptCommunication);
 begin
   inherited Create();
 
   FState := bTrue;
+
+  FSimbaCommunication := Communication;
+  FScript := FSimbaCommunication.GetScript(FScriptFileName);
+end;
+
+constructor TSimbaScript.Create(FileName: String; Communication: TSimbaScriptCommunication);
+begin
+  inherited Create();
+
+  FState := bTrue;
+
+  FScriptFileName := FileName;
+  FScript := TSimbaFile.FileRead(FileName);
 end;
 
 destructor TSimbaScript.Destroy;

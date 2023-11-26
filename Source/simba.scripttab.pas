@@ -37,6 +37,10 @@ type
 
     FState: ESimbaScriptState;
 
+    FScriptFile: String;
+    FScript: String;
+    FScriptTitle: String;
+
     procedure Start(Args: TStringArray);
 
     procedure ShowError;
@@ -49,6 +53,9 @@ type
 
     procedure SetState(Value: ESimbaScriptState);
   public
+    property Script: String read FScript;
+    property ScriptTitle: String read FScriptTitle;
+
     property Tab: TSimbaScriptTab read FTab;
 
     property Process: TProcess read FProcess;
@@ -214,19 +221,17 @@ begin
 end;
 
 procedure TSimbaScriptTabRunner.Start(Args: TStringArray);
-var
-  FileName: String;
 begin
-  if (FTab.FScriptFileName = '') then
-    FileName := SimbaEnv.WriteTempFile(FTab.Script, FTab.ScriptTitle)
-  else
-    FileName := FTab.ScriptFileName;
+  FScriptFile := FTab.ScriptFileName;
+  FScriptTitle := FTab.ScriptTitle;
+  FScript := FTab.Script;
 
   FStartTime := GetTickCount64();
 
   FProcess.Parameters.Add('--simbacommunication=%s', [TSimbaScriptInstanceCommunication.Create(Self).ClientID]);
   FProcess.Parameters.AddStrings(Args);
-  FProcess.Parameters.Add(FileName);
+  if (FScriptFile <> '') then
+    FProcess.Parameters.Add(FScriptFile);
   FProcess.Execute();
 
   FOutputThread := RunInThread(@DoOutputThread);

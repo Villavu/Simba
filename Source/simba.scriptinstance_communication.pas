@@ -23,6 +23,7 @@ type
 
     procedure OnMessage(MessageID: Integer; Params, Result: TMemoryStream); override;
 
+    procedure GetScript;
     procedure SetSimbaTitle;
 
     procedure ShowTrayNotification;
@@ -59,6 +60,12 @@ begin
   FResult := Result;
 
   FMethods[Message]();
+end;
+
+procedure TSimbaScriptInstanceCommunication.GetScript;
+begin
+  FResult.WriteAnsiString(FRunner.ScriptTitle);
+  FResult.WriteAnsiString(FRunner.Script);
 end;
 
 procedure TSimbaScriptInstanceCommunication.SetSimbaTitle;
@@ -366,6 +373,7 @@ begin
 
   FRunner := Runner;
 
+  FMethods[ESimbaCommunicationMessage.SCRIPT]                := @GetScript;
   FMethods[ESimbaCommunicationMessage.SIMBA_TITLE]           := @SetSimbaTitle;
   FMethods[ESimbaCommunicationMessage.SIMBA_PID]             := @GetSimbaPID;
   FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_PID]      := @GetSimbaTargetPID;
