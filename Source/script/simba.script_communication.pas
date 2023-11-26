@@ -16,6 +16,8 @@ uses
 type
   TSimbaScriptCommunication = class(TSimbaIPCClient)
   public
+    function GetScript(out Name: String): String;
+
     function GetSimbaTargetWindow: TWindowHandle;
     function GetSimbaTargetPID: TProcessID;
     function GetSimbaPID: TProcessID;
@@ -36,6 +38,20 @@ type
   end;
 
 implementation
+
+function TSimbaScriptCommunication.GetScript(out Name: String): String;
+begin
+  BeginInvoke(Integer(ESimbaCommunicationMessage.SCRIPT));
+
+  try
+    Invoke();
+
+    Name := FResult.ReadAnsiString();
+    Result := FResult.ReadAnsiString();
+  finally
+    EndInvoke();
+  end;
+end;
 
 function TSimbaScriptCommunication.GetSimbaTargetWindow: TWindowHandle;
 begin

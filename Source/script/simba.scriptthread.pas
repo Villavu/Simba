@@ -23,18 +23,15 @@ type
     procedure DoDebugLn(Flags: EDebugLnFlags; Text: String);
     procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 
-    procedure DoTerm(Sender: TObject);
+    procedure DoApplicationTerminate(Sender: TObject);
     procedure DoInputThread;
     procedure DoError(E: Exception);
 
     procedure Execute; override;
   public
-    property Script: TSimbaScript read FScript;
-
-    constructor Create(FileName: String;
-      SimbaCommunication, TargetWindow: String;
-      CompileOnly: Boolean
-    ); reintroduce;
+    constructor Create;
+    constructor Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly: Boolean); reintroduce; overload;
+    constructor Create(SimbaCommunication, TargetWindow: String; CompileOnly: Boolean); reintroduce; overload;
   end;
 
 implementation
@@ -61,7 +58,7 @@ begin
   DoDebugLn([EDebugLn.YELLOW], Hint);
 end;
 
-procedure TSimbaScriptRunner.DoTerm(Sender: TObject);
+procedure TSimbaScriptRunner.DoApplicationTerminate(Sender: TObject);
 begin
   Application.Terminate();
   while (not Application.Terminated) do
@@ -132,30 +129,38 @@ begin
   end;
 end;
 
-constructor TSimbaScriptRunner.Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly: Boolean);
+constructor TSimbaScriptRunner.Create;
 begin
   inherited Create(False);
 
   FreeOnTerminate := True;
-  OnTerminate := @DoTerm;
+  OnTerminate := @DoApplicationTerminate;
+end;
+
+constructor TSimbaScriptRunner.Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly: Boolean);
+begin
+  Create();
 
   FCompileOnly := CompileOnly;
 
-  FScript := TSimbaScript.Create();
+  if (SimbaCommunication <> '') then
+    FScript := TSimbaScript.Create(FileName, TSimbaScriptCommunication.Create(SimbaCommunication))
+  else
+    FScript := TSimbaScript.Create(FileName);
+
   FScript.Script := TSimbaFile.FileRead(FileName);
   FScript.ScriptFileName := FileName;
-  FScript.SimbaCommunicationServer := SimbaCommunication;
   FScript.TargetWindow := TargetWindow;
+end;
 
-  // Simba created a temp file. Most likely default script.
-  if FileIsInDirectory(FileName, SimbaEnv.TempPath) then
-  begin
-    FScript.ScriptFileName := ChangeFileExt(ExtractFileName(FileName), '');
+constructor TSimbaScriptRunner.Create(SimbaCommunication, TargetWindow: String; CompileOnly: Boolean);
+begin
+  Create();
 
-    // temp file, so delete.
-    if FileExists(FileName) then
-      DeleteFile(FileName);
-  end;
+  FCompileOnly := CompileOnly;
+
+  FScript := TSimbaScript.Create(TSimbaScriptCommunication.Create(SimbaCommunication));
+  FScript.TargetWindow := TargetWindow;
 end;
 
 end.

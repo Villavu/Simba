@@ -78,24 +78,35 @@ begin
 
   if (not Application.HasOption('open')) and (Application.HasOption('run') or Application.HasOption('compile')) then
   begin
-    if not FileExists(Application.Params[Application.ParamCount]) then
-    begin
-      DebugLn('Script "' + Application.Params[Application.ParamCount] + '" does not exist.');
-
-      Halt();
-    end;
-
     if Application.HasOption('simbacommunication') then
       SimbaProcessType := ESimbaProcessType.SCRIPT_WITH_COMMUNICATION
     else
       SimbaProcessType := ESimbaProcessType.SCRIPT;
 
-    TSimbaScriptRunner.Create(
-      Application.Params[Application.ParamCount],
-      Application.GetOptionValue('simbacommunication'),
-      Application.GetOptionValue('target'),
-      Application.HasOption('compile')
-    );
+    // Script will be sent though communication
+    if (Application.Params[Application.ParamCount] = '--run') or (Application.Params[Application.ParamCount] = '--compile') then
+    begin
+      TSimbaScriptRunner.Create(
+        Application.GetOptionValue('simbacommunication'),
+        Application.GetOptionValue('target'),
+        Application.HasOption('compile')
+      );
+    end else
+    // Script will be loaded from file
+    begin
+      if not FileExists(Application.Params[Application.ParamCount]) then
+      begin
+        DebugLn('Script "' + Application.Params[Application.ParamCount] + '" does not exist.');
+        Halt();
+      end;
+
+      TSimbaScriptRunner.Create(
+        Application.Params[Application.ParamCount],
+        Application.GetOptionValue('simbacommunication'),
+        Application.GetOptionValue('target'),
+        Application.HasOption('compile')
+      );
+    end;
   end else
   begin
     SimbaProcessType := ESimbaProcessType.IDE;

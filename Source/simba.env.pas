@@ -32,8 +32,6 @@ type
   public
     class constructor Create;
 
-    class function WriteTempFile(const Contents, Prefix: String): String;
-
     class property SimbaPath: String read FSimbaPath;
     class property IncludesPath: String read FIncludesPath;
     class property PluginsPath: String read FPluginsPath;
@@ -79,24 +77,9 @@ begin
   Result := FindFile(FileName, '', ExtraSearchDirs + [SimbaEnv.IncludesPath, SimbaEnv.SimbaPath]);
 end;
 
-class function SimbaEnv.WriteTempFile(const Contents, Prefix: String): String;
-var
-  Number: Integer = 0;
-begin
-  Result := Format('%s%s.%d', [SimbaEnv.TempPath, Prefix, Number]);
-  while FileExists(Result) do
-  begin
-    Inc(Number);
-
-    Result := Format('%s%s.%d', [SimbaEnv.TempPath, Prefix, Number]);
-  end;
-
-  TSimbaFile.FileWrite(Result, Contents);
-end;
-
 class constructor SimbaEnv.Create;
 
-  function Setup(Dir: String): String;
+  function Init(Dir: String): String;
   begin
     if (not DirectoryExists(Dir)) then
       ForceDirectories(Dir);
@@ -107,16 +90,16 @@ class constructor SimbaEnv.Create;
 begin
   FSimbaPath := IncludeTrailingPathDelimiter(Application.Location);
 
-  FIncludesPath    := Setup(FSimbaPath + 'Includes');
-  FPluginsPath     := Setup(FSimbaPath + 'Plugins');
-  FScriptsPath     := Setup(FSimbaPath + 'Scripts');
-  FScreenshotsPath := Setup(FSimbaPath + 'Screenshots');
-  FDataPath        := Setup(FSimbaPath + 'Data');
+  FIncludesPath    := Init(FSimbaPath + 'Includes');
+  FPluginsPath     := Init(FSimbaPath + 'Plugins');
+  FScriptsPath     := Init(FSimbaPath + 'Scripts');
+  FScreenshotsPath := Init(FSimbaPath + 'Screenshots');
+  FDataPath        := Init(FSimbaPath + 'Data');
 
-  FDumpsPath    := Setup(FDataPath + 'Dumps');
-  FTempPath     := Setup(FDataPath + 'Temp');
-  FPackagesPath := Setup(FDataPath + 'Packages');
-  FBackupsPath  := Setup(FDataPath + 'Backups');
+  FDumpsPath    := Init(FDataPath + 'Dumps');
+  FTempPath     := Init(FDataPath + 'Temp');
+  FPackagesPath := Init(FDataPath + 'Packages');
+  FBackupsPath  := Init(FDataPath + 'Backups');
 end;
 
 end.
