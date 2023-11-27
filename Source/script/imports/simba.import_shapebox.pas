@@ -1,4 +1,4 @@
-unit simba.import_class_shapebox;
+unit simba.import_shapebox;
 
 {$i simba.inc}
 

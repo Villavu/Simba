@@ -48,7 +48,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -93,7 +93,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -141,7 +141,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -184,7 +184,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -226,7 +226,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -274,7 +274,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -1108,7 +1108,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
       <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;script/imports/lcl;script/imports/simba;script/imports/simbaclasses;package;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;imagebox;colormath;components;image"/>
+      <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

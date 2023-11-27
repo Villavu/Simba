@@ -1,4 +1,4 @@
-unit simba.import_class_json;
+unit simba.import_json;
 
 {$i simba.inc}
 

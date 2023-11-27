@@ -29,8 +29,8 @@ uses
   simba.import_lcl_comctrls, simba.import_lcl_misc,
 
   // Simba classes
-  simba.import_class_image, simba.import_externalimage, simba.import_class_dtm, simba.import_matchtemplate,
-  simba.import_class_json, simba.import_class_imagebox, simba.import_class_shapebox,
+  simba.import_image, simba.import_externalimage, simba.import_dtm, simba.import_matchtemplate,
+  simba.import_json, simba.import_imagebox, simba.import_shapebox,
 
   // Simba
   simba.import_timing, simba.import_tpa, simba.import_atpa, simba.import_encoding,
