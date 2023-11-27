@@ -10,8 +10,7 @@ unit simba.scripttab;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, Controls, Dialogs, Process,
-  SynEdit, SynEditTypes,
+  Classes, SysUtils, ComCtrls, Controls, Dialogs, Process, SynEdit, SynEditTypes,
   simba.mufasatypes, simba.editor, simba.outputform, simba.component_tabcontrol, simba.windowhandle;
 
 type
@@ -151,7 +150,7 @@ uses
   Forms,
   simba.files, simba.settings, simba.ide_events,
   simba.main, simba.env, simba.ide_showdeclaration, simba.threading,
-  simba.scriptinstance_communication, simba.scripttabsform, simba.datetime;
+  simba.scriptcommunication, simba.scripttabsform, simba.datetime;
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var
