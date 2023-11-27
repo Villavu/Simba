@@ -3,14 +3,14 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.scriptinstance_communication;
+unit simba.scriptcommunication;
 
 {$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils, forms, extctrls, graphics,
+  Classes, SysUtils, Forms, ExtCtrls, Graphics,
   simba.mufasatypes, simba.ipc, simba.scripttab;
 
 type
@@ -208,6 +208,7 @@ end;
 procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
 
   // Modified from LazImage_FromData in simba.image_lazbridge
+  // Could maybe do this off main thread with only Begin/EndUpdate synced
   procedure Execute;
   var
     Width, Height: Integer;
@@ -217,11 +218,6 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
     SourcePtr, DestPtr: PByte;
 
     procedure BGR;
-    type
-      PRGB24 = ^TRGB24;
-      TRGB24 = packed record
-        B, G, R : Byte;
-      end;
     var
       Y: Integer;
     begin
@@ -234,10 +230,10 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
 
         while (PtrUInt(SourcePtr) < SourceUpper) do
         begin
-          PRGB24(DestPtr)^ := PRGB24(SourcePtr)^; // Can just use first three bytes
+          PColorRGB(DestPtr)^ := PColorRGB(SourcePtr)^; // Can just use first three bytes
 
           Inc(SourcePtr, SizeOf(TColorBGRA));
-          Inc(DestPtr, SizeOf(TRGB24));
+          Inc(DestPtr, SizeOf(TColorRGB));
         end;
 
         Inc(Dest, DestBytesPerLine);
@@ -258,11 +254,6 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
     end;
 
     procedure ARGB;
-    type
-      PARGB = ^TARGB;
-      TARGB = packed record
-        A, R, G, B: Byte;
-      end;
     var
       Y: Integer;
     begin
@@ -275,13 +266,10 @@ procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
 
         while (PtrUInt(SourcePtr) < SourceUpper) do
         begin
-          PARGB(DestPtr)^.R := PColorBGRA(SourcePtr)^.R;
-          PARGB(DestPtr)^.G := PColorBGRA(SourcePtr)^.G;
-          PARGB(DestPtr)^.B := PColorBGRA(SourcePtr)^.B;
-          PARGB(DestPtr)^.A := PColorBGRA(SourcePtr)^.A;
+          PUInt32(DestPtr)^ := SwapEndian(PUInt32(SourcePtr)^);
 
           Inc(SourcePtr, SizeOf(TColorBGRA));
-          Inc(DestPtr, SizeOf(TARGB));
+          Inc(DestPtr, SizeOf(TColorARGB));
         end;
 
         Inc(Dest, DestBytesPerLine);
