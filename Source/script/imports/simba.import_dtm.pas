@@ -1,4 +1,4 @@
-unit simba.import_class_dtm;
+unit simba.import_dtm;
 
 {$i simba.inc}
 

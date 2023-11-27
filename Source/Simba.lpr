@@ -17,8 +17,7 @@ uses
   simba.notesform, simba.settingsform, simba.associate, simba.openexampleform,
   simba.package_form, simba.shapeboxform, simba.backupsform, simba.findinfilesform,
   simba.downloadsimbaform,
-  simba.compiler_dump, simba.plugin_dump,
-  simba.scriptthread,
+  simba.compiler_dump, simba.plugin_dump, simba.script_runner,
   simba.ide_initialization, simba.ide_analytics, simba.ide_codetools_setup,
   simba.openssl;
 

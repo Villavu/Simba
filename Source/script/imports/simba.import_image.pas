@@ -1,4 +1,4 @@
-unit simba.import_class_image;
+unit simba.import_image;
 
 {$i simba.inc}
 

@@ -285,6 +285,8 @@ begin
 
   FState := bTrue;
 
+  FSimbaCommunication := Communication;
+
   FScriptFileName := FileName;
   FScript := TSimbaFile.FileRead(FileName);
 end;
