@@ -84,7 +84,7 @@ procedure TSimbaShapeBoxForm.MenuItemLoadImageClick(Sender: TObject);
 begin
   if OpenDialog.Execute() then
   begin
-    ShapeBox.SetBackground(OpenDialog.FileName);
+    ShapeBox.SetBackgroundFromFile(OpenDialog.FileName);
 
     HasBackground := True;
   end;

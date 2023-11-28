@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, GraphType, ComCtrls, LCLType,
   simba.mufasatypes, simba.image, simba.dtm, simba.imagebox_image,
-  simba.colormath;
+  simba.colormath, simba.target;
 
 type
   TSimbaImageBox_ScrollBox = class(TScrollBox)
@@ -98,10 +98,11 @@ type
     function FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
     function MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
 
-    procedure SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;
-    procedure SetBackground(FileName: String); overload;
-    procedure SetBackground(Bitmap: TSimbaImage); overload;
-    procedure SetBackground(Window: TWindowHandle); overload;
+    procedure SetBackground(Image: TSimbaImage);
+    procedure SetBackgroundFromFile(FileName: String);
+    procedure SetBackgroundFromWindow(Window: TWindowHandle);
+    procedure SetBackgroundFromTarget(Target: TSimbaTarget; Bounds: TBox); overload;
+    procedure SetBackgroundFromTarget(Target: TSimbaTarget); overload;
 
     procedure Paint;
 
@@ -427,8 +428,8 @@ begin
     Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 6;
 
     FMousePanel.Width := Canvas.TextWidth('(1000, 1000)');
-    FDimensionsPanel.Width  := Canvas.TextWidth('1000x1000');
-    FZoomPanel.Width  := Canvas.TextWidth('100%');
+    FDimensionsPanel.Width := Canvas.TextWidth('1000x1000');
+    FZoomPanel.Width := Canvas.TextWidth('100%');
 
     FStatusBar.Height := Round(Canvas.TextHeight('Taylor Swift') * 0.8);
     FStatusBar.Font := Self.Font;
@@ -660,22 +661,17 @@ begin
   end;
 end;
 
-procedure TSimbaImageBox.SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer);
-begin
-  LazImage_FromData(FBackground, Data, AWidth, AHeight);
-end;
-
-procedure TSimbaImageBox.SetBackground(FileName: String);
+procedure TSimbaImageBox.SetBackgroundFromFile(FileName: String);
 begin
   FBackground.LoadFromFile(FileName);
 end;
 
-procedure TSimbaImageBox.SetBackground(Bitmap: TSimbaImage);
+procedure TSimbaImageBox.SetBackground(Image: TSimbaImage);
 begin
-  SetBackground(Bitmap.Data, Bitmap.Width, Bitmap.Height);
+  LazImage_FromData(FBackground, Image.Data, Image.Width, Image.Height);
 end;
 
-procedure TSimbaImageBox.SetBackground(Window: TWindowHandle);
+procedure TSimbaImageBox.SetBackgroundFromWindow(Window: TWindowHandle);
 var
   Image: TSimbaImage;
 begin
@@ -688,6 +684,23 @@ begin
       Image.Free();
     end;
   end;
+end;
+
+procedure TSimbaImageBox.SetBackgroundFromTarget(Target: TSimbaTarget; Bounds: TBox);
+var
+  Image: TSimbaImage;
+begin
+  Image := Target.GetImage(Bounds);
+  try
+    SetBackground(Image);
+  finally
+    Image.Free();
+  end;
+end;
+
+procedure TSimbaImageBox.SetBackgroundFromTarget(Target: TSimbaTarget);
+begin
+  SetBackgroundFromTarget(Target, TBox.Create(-1,-1,-1,-1));
 end;
 
 constructor TSimbaImageBox.Create(AOwner: TComponent);

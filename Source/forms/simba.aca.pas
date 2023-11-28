@@ -217,7 +217,7 @@ procedure TSimbaACAForm.ButtonUpdateImageClick(Sender: TObject);
 begin
   if (not FWindow.IsValid()) then
     FWindow := GetDesktopWindow();
-  FImageBox.SetBackground(FWindow);
+  FImageBox.SetBackgroundFromWindow(FWindow);
 end;
 
 procedure TSimbaACAForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -406,7 +406,7 @@ begin
     try
       InitialDir := Application.Location;
       if Execute() then
-        FImageBox.SetBackground(FileName);
+        FImageBox.SetBackgroundFromFile(FileName);
     finally
       Free();
     end;
@@ -455,7 +455,7 @@ begin
   FImageBox.OnMouseDown := @ClientImageMouseDown;
   FImageBox.OnMouseMove := @ClientImageMouseMove;
   FImageBox.OnPaintArea := @DoPaintArea;
-  FImageBox.SetBackground(FWindow);
+  FImageBox.SetBackgroundFromWindow(FWindow);
 
   FImageZoom := TSimbaImageBoxZoom.Create(Self);
   FImageZoom.Parent := PanelTop;

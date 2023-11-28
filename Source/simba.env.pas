@@ -75,7 +75,7 @@ end;
 function FindInclude(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
 begin
   Result := FindFile(FileName, '', ExtraSearchDirs + [SimbaEnv.IncludesPath, SimbaEnv.SimbaPath]);
-  if (not Result) and (TSimbaPath.PathExtractExt(FileName) = '') then
+  if (not Result) and (TSimbaPath.PathExtractExt(FileName) <> '.simba') then
     Result := FindFile(FileName, '.simba', ExtraSearchDirs + [SimbaEnv.IncludesPath, SimbaEnv.SimbaPath]);
 end;
 
