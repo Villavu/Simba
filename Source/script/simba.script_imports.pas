@@ -68,8 +68,6 @@ begin
   ImportDTM(Compiler);
   ImportMatchTemplate(Compiler);
   ImportJSON(Compiler);
-  ImportSimbaImageBox(Compiler);
-  ImportSimbaShapeBox(Compiler);
 
   ImportTiming(Compiler);
   ImportTPA(Compiler);
@@ -93,6 +91,9 @@ begin
   ImportDialogs(Compiler);
   ImportThreading(Compiler);
   ImportPointBuffer(Compiler);
+
+  ImportSimbaImageBox(Compiler);
+  ImportSimbaShapeBox(Compiler);
 end;
 
 end.

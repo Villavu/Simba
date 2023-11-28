@@ -227,7 +227,7 @@ procedure TSimbaDTMEditorForm.ButtonUpdateImageClick(Sender: TObject);
 begin
   if (not FWindow.IsValid()) then
     FWindow := GetDesktopWindow();
-  FImageBox.SetBackground(FWindow);
+  FImageBox.SetBackgroundFromWindow(FWindow);
 
   DrawDTM();
 end;
@@ -502,7 +502,7 @@ begin
 
     if Execute() then
     try
-      FImageBox.SetBackground(FileName);
+      FImageBox.SetBackgroundFromFile(FileName);
     except
     end;
   finally
@@ -569,7 +569,7 @@ begin
   FImageBox.OnMouseDown := @ClientImageMouseDown;
   FImageBox.OnMouseMove := @ClientImageMouseMove;
   FImageBox.OnMouseUp := @ClientImageMouseUp;
-  FImageBox.SetBackground(FWindow);
+  FImageBox.SetBackgroundFromWindow(FWindow);
 
   FImageZoom := TSimbaImageBoxZoom.Create(Self);
   FImageZoom.Parent := PanelTop;

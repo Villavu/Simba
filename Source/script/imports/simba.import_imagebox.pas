@@ -14,7 +14,8 @@ implementation
 
 uses
   lptypes, ffi,
-  simba.imagebox, simba.imagebox_image, simba.image, simba.dtm, simba.colormath;
+  simba.imagebox, simba.imagebox_image, simba.image, simba.dtm, simba.colormath,
+  simba.target;
 
 type
   PComponent = ^TComponent;
@@ -161,24 +162,29 @@ begin
   PSimbaImageBox(Params^[0])^.Paint();
 end;
 
-procedure _LapeSimbaImageBox_SetBackground_Data(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBox(Params^[0])^.SetBackground(PPointer(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-end;
-
-procedure _LapeSimbaImageBox_SetBackground_FileName(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBox(Params^[0])^.SetBackground(PString(Params^[1])^);
-end;
-
-procedure _LapeSimbaImageBox_SetBackground_Bitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaImageBox_SetBackground(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.SetBackground(PSimbaImage(Params^[1])^);
 end;
 
-procedure _LapeSimbaImageBox_SetBackground_Window(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaImageBox_SetBackgroundFromFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBox(Params^[0])^.SetBackground(PWindowHandle(Params^[1])^);
+  PSimbaImageBox(Params^[0])^.SetBackgroundFromFile(PString(Params^[1])^);
+end;
+
+procedure _LapeSimbaImageBox_SetBackgroundFromWindow(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBox(Params^[0])^.SetBackgroundFromWindow(PWindowHandle(Params^[1])^);
+end;
+
+procedure _LapeSimbaImageBox_SetBackgroundFromTarget1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBox(Params^[0])^.SetBackgroundFromTarget(PSimbaTarget(Params^[1])^, PBox(Params^[2])^);
+end;
+
+procedure _LapeSimbaImageBox_SetBackgroundFromTarget2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBox(Params^[0])^.SetBackgroundFromTarget(PSimbaTarget(Params^[1])^);
 end;
 
 procedure _LapeSimbaImageBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -270,53 +276,56 @@ procedure ImportSimbaImageBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    addClass('TSimbaImageBoxBitmap');
+    addClass('TImageBoxImage');
 
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawLineGap(Start, Stop: TPoint; Gap: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawLineGap);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawLine(Start, Stop: TPoint; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawLine);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCross(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCross);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCrossArray);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCrossHair(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCrossHair);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawBox(Box: TBox; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawBox);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawBoxFilled(Box: TBox; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawBoxFilled);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawPoly(Poly: TPointArray; Connect: Boolean; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoly);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawPoint(P: TPoint; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoint);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawPoints(TPA: TPointArray; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoints);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircle);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircleFilled);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawBoxTransparent(Box: TBox; Color: TColor; Transparency: Single);', @_LapeSimbaImageBoxBitmap_DrawBoxTransparent);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawEllipse);
-    addGlobalFunc('procedure TSimbaImageBoxBitmap.DrawHeatmap(const Mat: TSingleMatrix);', @_LapeSimbaImageBoxBitmap_DrawHeatmap);
+    addGlobalFunc('procedure TImageBoxImage.DrawLineGap(Start, Stop: TPoint; Gap: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawLineGap);
+    addGlobalFunc('procedure TImageBoxImage.DrawLine(Start, Stop: TPoint; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawLine);
+    addGlobalFunc('procedure TImageBoxImage.DrawCross(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCross);
+    addGlobalFunc('procedure TImageBoxImage.DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCrossArray);
+    addGlobalFunc('procedure TImageBoxImage.DrawCrossHair(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCrossHair);
+    addGlobalFunc('procedure TImageBoxImage.DrawBox(Box: TBox; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawBox);
+    addGlobalFunc('procedure TImageBoxImage.DrawBoxFilled(Box: TBox; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawBoxFilled);
+    addGlobalFunc('procedure TImageBoxImage.DrawPoly(Poly: TPointArray; Connect: Boolean; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoly);
+    addGlobalFunc('procedure TImageBoxImage.DrawPoint(P: TPoint; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoint);
+    addGlobalFunc('procedure TImageBoxImage.DrawPoints(TPA: TPointArray; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawPoints);
+    addGlobalFunc('procedure TImageBoxImage.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircle);
+    addGlobalFunc('procedure TImageBoxImage.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircleFilled);
+    addGlobalFunc('procedure TImageBoxImage.DrawBoxTransparent(Box: TBox; Color: TColor; Transparency: Single);', @_LapeSimbaImageBoxBitmap_DrawBoxTransparent);
+    addGlobalFunc('procedure TImageBoxImage.DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawEllipse);
+    addGlobalFunc('procedure TImageBoxImage.DrawHeatmap(const Mat: TSingleMatrix);', @_LapeSimbaImageBoxBitmap_DrawHeatmap);
 
-    addGlobalType('procedure(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; Rect: TLazRect) of object', 'TSimbaImageBoxPaintAreaEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Bitmap: TImageBoxImage; Rect: TLazRect) of object', 'TImageBoxPaintAreaEvent', FFI_DEFAULT_ABI);
 
-    addClass('TSimbaImageBox', 'TLazWinControl');
+    addClass('TImageBox', 'TLazWinControl');
 
-    addClassVar('TSimbaImageBox', 'MousePoint', 'TPoint', @_LapeSimbaImageBox_MousePoint_Read);
-    addClassVar('TSimbaImageBox', 'Background', 'TLazBitmap', @_LapeSimbaImageBox_Background_Read);
-    addClassVar('TSimbaImageBox', 'Zoom', 'Single', @_LapeSimbaImageBox_Zoom_Read, @_LapeSimbaImageBox_Zoom_Write);
-    addClassVar('TSimbaImageBox', 'StatusBar', 'TLazStatusBar', @_LapeSimbaImageBox_StatusBar_Read);
-    addClassVar('TSimbaImageBox', 'StatusPanel', 'TLazStatusPanel', @_LapeSimbaImageBox_StatusPanel_Read);
-    addClassVar('TSimbaImageBox', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeSimbaImageBox_OnMouseMove_Read, @_LapeSimbaImageBox_OnMouseMove_Write);
-    addClassVar('TSimbaImageBox', 'OnMouseDown', 'TLazMouseEvent', @_LapeSimbaImageBox_OnMouseDown_Read, @_LapeSimbaImageBox_OnMouseDown_Write);
-    addClassVar('TSimbaImageBox', 'OnMouseUp', 'TLazMouseEvent', @_LapeSimbaImageBox_OnMouseUp_Read, @_LapeSimbaImageBox_OnMouseUp_Write);
-    addClassVar('TSimbaImageBox', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeSimbaImageBox_OnMouseLeave_Read, @_LapeSimbaImageBox_OnMouseLeave_Write);
-    addClassVar('TSimbaImageBox', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeSimbaImageBox_OnMouseEnter_Read, @_LapeSimbaImageBox_OnMouseEnter_Write);
-    addClassVar('TSimbaImageBox', 'OnDblClick', 'TLazNotifyEvent', @_LapeSimbaImageBox_OnDblClick_Read, @_LapeSimbaImageBox_OnDblClick_Write);
-    addClassVar('TSimbaImageBox', 'OnPaintArea', 'TSimbaImageBoxPaintAreaEvent', @_LapeSimbaImageBox_OnPaintArea_Read, @_LapeSimbaImageBox_OnPaintArea_Write);
+    addClassVar('TImageBox', 'MousePoint', 'TPoint', @_LapeSimbaImageBox_MousePoint_Read);
+    addClassVar('TImageBox', 'Background', 'TLazBitmap', @_LapeSimbaImageBox_Background_Read);
+    addClassVar('TImageBox', 'Zoom', 'Single', @_LapeSimbaImageBox_Zoom_Read, @_LapeSimbaImageBox_Zoom_Write);
+    addClassVar('TImageBox', 'StatusBar', 'TLazStatusBar', @_LapeSimbaImageBox_StatusBar_Read);
+    addClassVar('TImageBox', 'StatusPanel', 'TLazStatusPanel', @_LapeSimbaImageBox_StatusPanel_Read);
+    addClassVar('TImageBox', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeSimbaImageBox_OnMouseMove_Read, @_LapeSimbaImageBox_OnMouseMove_Write);
+    addClassVar('TImageBox', 'OnMouseDown', 'TLazMouseEvent', @_LapeSimbaImageBox_OnMouseDown_Read, @_LapeSimbaImageBox_OnMouseDown_Write);
+    addClassVar('TImageBox', 'OnMouseUp', 'TLazMouseEvent', @_LapeSimbaImageBox_OnMouseUp_Read, @_LapeSimbaImageBox_OnMouseUp_Write);
+    addClassVar('TImageBox', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeSimbaImageBox_OnMouseLeave_Read, @_LapeSimbaImageBox_OnMouseLeave_Write);
+    addClassVar('TImageBox', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeSimbaImageBox_OnMouseEnter_Read, @_LapeSimbaImageBox_OnMouseEnter_Write);
+    addClassVar('TImageBox', 'OnDblClick', 'TLazNotifyEvent', @_LapeSimbaImageBox_OnDblClick_Read, @_LapeSimbaImageBox_OnDblClick_Write);
+    addClassVar('TImageBox', 'OnPaintArea', 'TImageBoxPaintAreaEvent', @_LapeSimbaImageBox_OnPaintArea_Read, @_LapeSimbaImageBox_OnPaintArea_Write);
 
-    addGlobalFunc('function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray', @_LapeSimbaImageBox_FindDTM);
-    addGlobalFunc('function TSimbaImageBox.FindColor(Col: TColor; Tol: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray', @_LapeSimbaImageBox_FindColor);
-    addGlobalFunc('function TSimbaImageBox.MatchColor(Col: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix', @_LapeSimbaImageBox_MatchColor);
+    addGlobalFunc('function TImageBox.FindDTM(DTM: TDTM): TPointArray', @_LapeSimbaImageBox_FindDTM);
+    addGlobalFunc('function TImageBox.FindColor(Col: TColor; Tol: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray', @_LapeSimbaImageBox_FindColor);
+    addGlobalFunc('function TImageBox.MatchColor(Col: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix', @_LapeSimbaImageBox_MatchColor);
 
-    addGlobalFunc('procedure TSimbaImageBox.MoveTo(X, Y: Integer);', @_LapeSimbaImageBox_MoveTo);
-    addGlobalFunc('function TSimbaImageBox.IsVisible(X, Y: Integer): Boolean;', @_LapeSimbaImageBox_IsVisible);
-    addGlobalFunc('procedure TSimbaImageBox.Paint;', @_LapeSimbaImageBox_Paint);
-    addGlobalFunc('procedure TSimbaImageBox.SetBackground(Data: PColorBGRA; AWidth, AHeight: Integer); overload;', @_LapeSimbaImageBox_SetBackground_Data);
-    addGlobalFunc('procedure TSimbaImageBox.SetBackground(FileName: String); overload;', @_LapeSimbaImageBox_SetBackground_FileName);
-    addGlobalFunc('procedure TSimbaImageBox.SetBackground(Image: TImage); overload;', @_LapeSimbaImageBox_SetBackground_Bitmap);
-    addGlobalFunc('procedure TSimbaImageBox.SetBackground(Window: TWindowHandle); overload;', @_LapeSimbaImageBox_SetBackground_Window);
-    addClassConstructor('TSimbaImageBox', '(Owner: TLazComponent)', @_LapeSimbaImageBox_Create);
+    addGlobalFunc('procedure TImageBox.MoveTo(X, Y: Integer);', @_LapeSimbaImageBox_MoveTo);
+    addGlobalFunc('function TImageBox.IsVisible(X, Y: Integer): Boolean;', @_LapeSimbaImageBox_IsVisible);
+    addGlobalFunc('procedure TImageBox.Paint;', @_LapeSimbaImageBox_Paint);
+
+    addGlobalFunc('procedure TImageBox.SetBackground(Image: TImage)', @_LapeSimbaImageBox_SetBackground);
+    addGlobalFunc('procedure TImageBox.SetBackgroundFromFile(FileName: String)', @_LapeSimbaImageBox_SetBackgroundFromFile);
+    addGlobalFunc('procedure TImageBox.SetBackgroundFromWindow(Window: TWindowHandle)', @_LapeSimbaImageBox_SetBackgroundFromWindow);
+    addGlobalFunc('procedure TImageBox.SetBackgroundFromTarget(Target: TTarget; Bounds: TBox); overload', @_LapeSimbaImageBox_SetBackgroundFromTarget1);
+    addGlobalFunc('procedure TImageBox.SetBackgroundFromTarget(Target: TTarget); overload', @_LapeSimbaImageBox_SetBackgroundFromTarget2);
+
+    addClassConstructor('TImageBox', '(Owner: TLazComponent)', @_LapeSimbaImageBox_Create);
   end;
 end;
 

@@ -4,8 +4,8 @@ object SimbaForm: TSimbaForm
   Top = 623
   Width = 798
   Caption = 'Simba'
-  ClientHeight = 539
-  ClientWidth = 798
+  ClientHeight = 0
+  ClientWidth = 0
   DesignTimePPI = 120
   KeyPreview = True
   OnClose = FormClose
@@ -16,9 +16,9 @@ object SimbaForm: TSimbaForm
   LCLVersion = '3.0.0.2'
   object DockPanel: TAnchorDockPanel
     Left = 0
-    Height = 511
-    Top = 28
-    Width = 798
+    Height = 0
+    Top = 0
+    Width = 0
     Align = alClient
     BevelOuter = bvNone
     ParentFont = False
@@ -26,9 +26,9 @@ object SimbaForm: TSimbaForm
   end
   object ToolBar: TToolBar
     Left = 0
-    Height = 28
+    Height = 504
     Top = 0
-    Width = 798
+    Width = 0
     AutoSize = True
     ButtonHeight = 28
     ButtonWidth = 0
@@ -42,59 +42,59 @@ object SimbaForm: TSimbaForm
     TabOrder = 1
     OnPaintButton = ToolBarPaintButton
     object ToolbarButtonRun: TToolButton
-      Left = 123
+      Left = 0
       Hint = 'Run Script (Alt + R)'
-      Top = 0
+      Top = 196
       Caption = '&Run'
       ImageIndex = 1
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarButtonPause: TToolButton
-      Left = 143
+      Left = 0
       Hint = 'Pause Script'
-      Top = 0
+      Top = 224
       Caption = '&Pause'
       Enabled = False
       ImageIndex = 2
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarButtonStop: TToolButton
-      Left = 163
+      Left = 0
       Hint = 'Stop Script (Alt + S)'
-      Top = 0
+      Top = 252
       Caption = '&Stop'
       Enabled = False
       ImageIndex = 3
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarButtonClearOutput: TToolButton
-      Left = 253
+      Left = 0
       Hint = 'Clear Output Box'
-      Top = 0
+      Top = 420
       Caption = 'Clear'
       ImageIndex = 13
       OnClick = MenuClearOutputClick
     end
     object ToolbarButtonColorPicker: TToolButton
-      Left = 188
+      Left = 0
       Hint = 'Color Picker'
-      Top = 0
+      Top = 308
       Caption = 'ToolbarButtonColorPicker'
       ImageIndex = 11
       OnClick = ToolbarButtonColorPickerClick
     end
     object ToolbarButtonTargetSelector: TToolButton
-      Left = 208
+      Left = 0
       Hint = 'Target Selector'
-      Top = 0
+      Top = 336
       Caption = 'ToolbarButtonTargetSelector'
       ImageIndex = 10
       OnMouseDown = ToolbarButtonSelectTargetClick
     end
     object ToolbarButtonOpen: TToolButton
-      Left = 20
+      Left = 0
       Hint = 'Open Script (Ctrl + O)'
-      Top = 0
+      Top = 28
       Caption = '&Open'
       DropdownMenu = RecentFilesPopup
       ImageIndex = 6
@@ -104,40 +104,40 @@ object SimbaForm: TSimbaForm
       Style = tbsButtonDrop
     end
     object ToolbarButtonSave: TToolButton
-      Left = 53
+      Left = 0
       Hint = 'Save Script (Ctrl + S)'
-      Top = 0
+      Top = 56
       Caption = '&Save'
       ImageIndex = 8
       OnClick = MenuSaveClick
     end
     object ToolbarButtonSaveAll: TToolButton
-      Left = 73
+      Left = 0
       Hint = 'Save All'
-      Top = 0
+      Top = 84
       Caption = 'Save All'
       ImageIndex = 9
       OnClick = ToolbarButtonSaveAllClick
     end
     object ToolbarButtonCompile: TToolButton
-      Left = 98
+      Left = 0
       Hint = 'Compile Script (Alt + C)'
-      Top = 0
+      Top = 140
       ImageIndex = 0
       OnClick = MenuItemScriptStateClick
     end
     object ToolbarButtonPackages: TToolButton
-      Left = 278
+      Left = 0
       Hint = 'Open Packages'
-      Top = 0
+      Top = 476
       Caption = 'ToolbarButtonPackages'
       ImageIndex = 14
       OnClick = ToolbarButtonPackagesClick
     end
     object ToolButtonAreaSelector: TToolButton
-      Left = 228
+      Left = 0
       Hint = 'Area Selector'
-      Top = 0
+      Top = 364
       ImageIndex = 12
       OnClick = ToolButtonAreaSelectorClick
       ShowCaption = False
@@ -150,37 +150,37 @@ object SimbaForm: TSimbaForm
       OnClick = MenuNewClick
     end
     object ToolButton1: TToolButton
-      Left = 93
+      Left = 0
       Height = 28
-      Top = 0
+      Top = 112
       Caption = 'ToolButton1'
       Style = tbsDivider
     end
     object ToolButton2: TToolButton
-      Left = 118
+      Left = 0
       Height = 28
-      Top = 0
+      Top = 168
       Caption = 'ToolButton2'
       Style = tbsDivider
     end
     object ToolButton3: TToolButton
-      Left = 183
+      Left = 0
       Height = 28
-      Top = 0
+      Top = 280
       Caption = 'ToolButton3'
       Style = tbsDivider
     end
     object ToolButton4: TToolButton
-      Left = 248
+      Left = 0
       Height = 28
-      Top = 0
+      Top = 392
       Caption = 'ToolButton4'
       Style = tbsDivider
     end
     object ToolButton5: TToolButton
-      Left = 273
+      Left = 0
       Height = 28
-      Top = 0
+      Top = 448
       Caption = 'ToolButton5'
       Style = tbsDivider
     end
@@ -189,7 +189,7 @@ object SimbaForm: TSimbaForm
     Left = 0
     Height = 0
     Top = 0
-    Width = 798
+    Width = 0
     Align = alTop
     AutoSize = True
     BevelOuter = bvNone
