@@ -369,6 +369,11 @@ end;
 
 procedure TSimbaScriptTab.DoEditorModified(Sender: TObject);
 begin
+  if ScriptChanged then
+    Caption := '*' + FScriptTitle
+  else
+    Caption := FScriptTitle;
+
   SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_MODIFIED, Self);
 end;
 

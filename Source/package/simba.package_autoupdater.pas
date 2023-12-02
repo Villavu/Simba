@@ -38,18 +38,18 @@ begin
   CheckMainThread('TPackageUpdater');
 
   // Update main menu
-  BuildPackageMenus(FPackages, SimbaForm.MenuBar);
+  //BuildPackageMenus(FPackages, SimbaForm.MenuBar);
 
   // Update icon
-  if (FUpdates.Count > 0) then
-  begin
-    SimbaForm.ToolbarButtonPackages.Hint       := 'Open packages' + LineEnding + FUpdates.Text;
-    SimbaForm.ToolbarButtonPackages.ImageIndex := IMG_PACKAGE + Min(FUpdates.Count, 9);
-  end else
-  begin
-    SimbaForm.ToolbarButtonPackages.Hint       := 'Open packages';
-    SimbaForm.ToolbarButtonPackages.ImageIndex := IMG_PACKAGE;
-  end;
+  //if (FUpdates.Count > 0) then
+  //begin
+  //  SimbaForm.ToolbarButtonPackages.Hint       := 'Open packages' + LineEnding + FUpdates.Text;
+  //  SimbaForm.ToolbarButtonPackages.ImageIndex := IMG_PACKAGE + Min(FUpdates.Count, 9);
+  //end else
+  //begin
+  //  SimbaForm.ToolbarButtonPackages.Hint       := 'Open packages';
+  //  SimbaForm.ToolbarButtonPackages.ImageIndex := IMG_PACKAGE;
+  //end;
 end;
 
 procedure TPackageUpdater.Execute;

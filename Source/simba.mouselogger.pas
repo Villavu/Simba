@@ -20,10 +20,9 @@ type
   protected
     FWindowHandle: TWindowHandle;
     FWindowHandleChanged: Boolean;
-    FHotkey: Integer;
     FIdle: TSimpleWaitableLock;
 
-    procedure SetWindowHandle(Value: TWindowHandle);
+    procedure DoWindowSelected(Sender: TObject);
     procedure DoApplicationMinimized(Sender: TObject);
     procedure DoApplicationRestored(Sender: TObject);
     procedure DoChange(Data: PtrInt);
@@ -35,24 +34,18 @@ type
 
     constructor Create; reintroduce;
     destructor Destroy; override;
-
-    property Hotkey: Integer read FHotkey write FHotkey;
-    property WindowHandle: TWindowHandle read FWindowHandle write SetWindowHandle;
   end;
 
 implementation
 
 uses
-  forms, lclintf, lcltype,
-  simba.ide_events;
+  Forms,
+  simba.ide_events, simba.ide_maintoolbar, simba.nativeinterface;
 
-procedure TSimbaMouseLogger.SetWindowHandle(Value: TWindowHandle);
+procedure TSimbaMouseLogger.DoWindowSelected(Sender: TObject);
 begin
-  if (FWindowHandle = Value) then
-    Exit;
-
+  FWindowHandle := SimbaMainToolBar.WindowSelection;
   FWindowHandleChanged := True;
-  FWindowHandle := Value;
 end;
 
 procedure TSimbaMouseLogger.DoApplicationMinimized(Sender: TObject);
@@ -71,7 +64,7 @@ var
 begin
   X := Point.X;
   Y := Point.Y;
-  HotkeyPressed := (Hotkey <> VK_UNKNOWN) and ((GetKeyState(FHotkey) and $8000) <> 0);
+  HotkeyPressed := SimbaNativeInterface.KeyPressed(EKeyCode.F1);
 
   SimbaIDEEvents.Notify(SimbaIDEEvent.MOUSELOGGER_CHANGE, Self);
 end;
@@ -142,12 +135,16 @@ begin
 
   Application.AddOnMinimizeHandler(@DoApplicationMinimized);
   Application.AddOnRestoreHandler(@DoApplicationRestored);
+
+  SimbaIDEEvents.Register(SimbaIDEEvent.WINDOW_SELECTED, @DoWindowSelected);
 end;
 
 destructor TSimbaMouseLogger.Destroy;
 begin
   Application.RemoveAsyncCalls(Self);
   Application.RemoveAllHandlersOfObject(Self);
+
+  SimbaIDEEvents.UnRegister(SimbaIDEEvent.WINDOW_SELECTED, @DoWindowSelected);
 
   inherited Destroy();
 end;

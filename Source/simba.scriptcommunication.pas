@@ -50,7 +50,7 @@ implementation
 
 uses
   simba.main, simba.debugimageform, simba.image_lazbridge,
-  simba.threading, simba.ide_mainstatusbar, simba.process;
+  simba.threading, simba.ide_mainstatusbar, simba.ide_maintoolbar, simba.process;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
 var
@@ -110,13 +110,13 @@ end;
 // Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetWindow;
 begin
-  FResult.Write(SimbaForm.WindowSelection, SizeOf(TWindowHandle));
+  FResult.Write(SimbaMainToolBar.WindowSelection, SizeOf(TWindowHandle));
 end;
 
 // Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetPID;
 begin
-  FResult.Write(SimbaForm.ProcessSelection, SizeOf(TProcessID));
+  FResult.Write(SimbaMainToolBar.ProcessSelection, SizeOf(TProcessID));
 end;
 
 procedure TSimbaScriptInstanceCommunication.ScriptStateChanged;

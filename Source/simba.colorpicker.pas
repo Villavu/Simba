@@ -33,7 +33,7 @@ type
     FImage: TImage;
     FPicked: Boolean;
     FImageX, FImageY: Integer;
-    FSelectedWindow: TWindowHandle;
+    FWindow: TWindowHandle;
 
     procedure FormClosed(Sender: TObject; var CloseAction: TCloseAction);
     procedure HintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -41,18 +41,42 @@ type
     procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
-    property Color: TColor read FColor;
-    property Point: TPoint read FPoint;
-    property Picked: Boolean read FPicked;
+    function Pick(out X, Y: Integer; out Color: TColor): Boolean;
 
-    constructor Create(SelectedWindow: TWindowHandle); reintroduce;
+    constructor Create(Window: TWindowHandle); reintroduce;
   end;
+
+  function ShowColorPicker(Window: TWindowHandle; out X, Y: Integer; out Color: TColor): Boolean;
 
 implementation
 
 uses
   LCLType,
-  simba.image, simba.windowhandle, simba.image_lazbridge;
+  simba.image, simba.windowhandle, simba.image_lazbridge,
+  simba.colorpickerhistoryform, simba.threading, simba.dockinghelpers;
+
+procedure ShowHistoryForm;
+begin
+  SimbaDockMaster.MakeVisible(SimbaColorPickerHistoryForm);
+  if (SimbaColorPickerHistoryForm.ColorListBox.Items.Count > 0) then
+    SimbaColorPickerHistoryForm.ColorListBox.ItemIndex := SimbaColorPickerHistoryForm.ColorListBox.Count - 1;
+end;
+
+function ShowColorPicker(Window: TWindowHandle; out X, Y: Integer; out Color: TColor): Boolean;
+begin
+  with TSimbaColorPicker.Create(Window) do
+  try
+    Result := Pick(X, Y, Color);
+    if Result then
+    begin
+      SimbaColorPickerHistoryForm.Add(TPoint.Create(X, Y), Color);
+
+      QueueOnMainThread(@ShowHistoryForm);
+    end;
+  finally
+    Free();
+  end;
+end;
 
 procedure TSimbaColorPickerHint.Paint;
 begin
@@ -88,7 +112,7 @@ procedure TSimbaColorPicker.FormClosed(Sender: TObject; var CloseAction: TCloseA
 begin
   if FPicked then
   begin
-    FPoint := FSelectedWindow.GetRelativeCursorPos();
+    FPoint := FWindow.GetRelativeCursorPos();
     FColor := FImage.Picture.Bitmap.Canvas.Pixels[FImageX, FImageY];
   end;
 
@@ -122,7 +146,7 @@ begin
   FImageX := X;
   FImageY := Y;
 
-  FPoint := FSelectedWindow.GetRelativeCursorPos();
+  FPoint := FWindow.GetRelativeCursorPos();
 
   with FImage.ClientToScreen(TPoint.Create(X + 25, Y - (FHint.Height div 2))) do
   begin
@@ -141,7 +165,30 @@ begin
   FForm.Close();
 end;
 
-constructor TSimbaColorPicker.Create(SelectedWindow: TWindowHandle);
+function TSimbaColorPicker.Pick(out X, Y: Integer; out Color: TColor): Boolean;
+begin
+  FForm.ShowOnTop();
+
+  FHint.Show();
+  FHint.BringToFront();
+
+  while FForm.Showing do
+  begin
+    Application.ProcessMessages();
+
+    Sleep(25);
+  end;
+
+  Result := FPicked;
+  if FPicked then
+  begin
+    X := FPoint.X;
+    Y := FPoint.Y;
+    Color := FColor;
+  end;
+end;
+
+constructor TSimbaColorPicker.Create(Window: TWindowHandle);
 var
   DesktopWindow: TWindowHandle;
   DesktopBounds: TBox;
@@ -150,6 +197,10 @@ begin
 
   DesktopWindow := GetDesktopWindow();
   DesktopBounds := DesktopWindow.GetBounds();
+
+  FWindow := Window;
+  if (FWindow = 0) or (not FWindow.IsValid()) then
+    FWindow := GetDesktopWindow();
 
   FForm := TForm.CreateNew(nil);
   with FForm do
@@ -184,23 +235,9 @@ begin
     end;
   end;
 
-  FSelectedWindow := SelectedWindow;
-  if (FSelectedWindow = 0) or (not FSelectedWindow.IsValid()) then
-    FSelectedWindow := GetDesktopWindow();
-
-  FForm.ShowOnTop();
-
   FHint := TSimbaColorPickerHint.Create(FForm);
   FHint.OnKeyDown := @HintKeyDown;
   FHint.Show();
-  FHint.BringToFront();
-
-  while FForm.Showing do
-  begin
-    Application.ProcessMessages();
-
-    Sleep(25);
-  end;
 end;
 
 end.

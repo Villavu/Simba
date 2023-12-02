@@ -17,8 +17,7 @@ uses
 
 type
   SimbaEnv = class
-  private
-  class var
+  private class var
     FSimbaPath: String;
     FIncludesPath: String;
     FPluginsPath: String;

@@ -151,6 +151,9 @@ begin
     'Right': ToolbarPositionComboBox.ItemIndex := 2;
   end;
 
+  ToolbarSizeTrackBar.Position := SimbaSettings.General.ToolbarSize.Value;
+  ToolbarSpacingSpinEdit.Value := SimbaSettings.General.ToolBarSpacing.Value;
+
   FontSizeTrackBar.Position := SimbaSettings.General.CustomFontSize.Value;
   ScrollBarSizeTrackBar.Position := SimbaSettings.General.ScrollBarSize.Value;
   ScrollBarArrowSizeTrackBar.Position := SimbaSettings.General.ScrollBarArrowSize.Value;

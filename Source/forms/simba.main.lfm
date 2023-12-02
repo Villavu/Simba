@@ -1,199 +1,40 @@
 object SimbaForm: TSimbaForm
-  Left = 2927
+  Left = 971
   Height = 539
-  Top = 623
-  Width = 798
+  Top = 548
+  Width = 1015
   Caption = 'Simba'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 539
+  ClientWidth = 1015
   DesignTimePPI = 120
   KeyPreview = True
   OnClose = FormClose
   OnDestroy = FormDestroy
-  OnKeyDown = FormKeyDown
   OnWindowStateChange = FormWindowStateChange
   Position = poScreenCenter
   LCLVersion = '3.0.0.2'
   object DockPanel: TAnchorDockPanel
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 0
+    Height = 539
     Top = 0
-    Width = 0
+    Width = 1015
     Align = alClient
     BevelOuter = bvNone
     ParentFont = False
     TabOrder = 0
   end
-  object ToolBar: TToolBar
-    Left = 0
-    Height = 504
-    Top = 0
-    Width = 0
-    AutoSize = True
-    ButtonHeight = 28
-    ButtonWidth = 0
-    EdgeBorders = []
-    EdgeInner = esNone
-    EdgeOuter = esNone
-    Images = Images
-    Indent = 0
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 1
-    OnPaintButton = ToolBarPaintButton
-    object ToolbarButtonRun: TToolButton
-      Left = 0
-      Hint = 'Run Script (Alt + R)'
-      Top = 196
-      Caption = '&Run'
-      ImageIndex = 1
-      OnClick = MenuItemScriptStateClick
-    end
-    object ToolbarButtonPause: TToolButton
-      Left = 0
-      Hint = 'Pause Script'
-      Top = 224
-      Caption = '&Pause'
-      Enabled = False
-      ImageIndex = 2
-      OnClick = MenuItemScriptStateClick
-    end
-    object ToolbarButtonStop: TToolButton
-      Left = 0
-      Hint = 'Stop Script (Alt + S)'
-      Top = 252
-      Caption = '&Stop'
-      Enabled = False
-      ImageIndex = 3
-      OnClick = MenuItemScriptStateClick
-    end
-    object ToolbarButtonClearOutput: TToolButton
-      Left = 0
-      Hint = 'Clear Output Box'
-      Top = 420
-      Caption = 'Clear'
-      ImageIndex = 13
-      OnClick = MenuClearOutputClick
-    end
-    object ToolbarButtonColorPicker: TToolButton
-      Left = 0
-      Hint = 'Color Picker'
-      Top = 308
-      Caption = 'ToolbarButtonColorPicker'
-      ImageIndex = 11
-      OnClick = ToolbarButtonColorPickerClick
-    end
-    object ToolbarButtonTargetSelector: TToolButton
-      Left = 0
-      Hint = 'Target Selector'
-      Top = 336
-      Caption = 'ToolbarButtonTargetSelector'
-      ImageIndex = 10
-      OnMouseDown = ToolbarButtonSelectTargetClick
-    end
-    object ToolbarButtonOpen: TToolButton
-      Left = 0
-      Hint = 'Open Script (Ctrl + O)'
-      Top = 28
-      Caption = '&Open'
-      DropdownMenu = RecentFilesPopup
-      ImageIndex = 6
-      OnClick = MenuOpenClick
-      ParentShowHint = False
-      ShowHint = True
-      Style = tbsButtonDrop
-    end
-    object ToolbarButtonSave: TToolButton
-      Left = 0
-      Hint = 'Save Script (Ctrl + S)'
-      Top = 56
-      Caption = '&Save'
-      ImageIndex = 8
-      OnClick = MenuSaveClick
-    end
-    object ToolbarButtonSaveAll: TToolButton
-      Left = 0
-      Hint = 'Save All'
-      Top = 84
-      Caption = 'Save All'
-      ImageIndex = 9
-      OnClick = ToolbarButtonSaveAllClick
-    end
-    object ToolbarButtonCompile: TToolButton
-      Left = 0
-      Hint = 'Compile Script (Alt + C)'
-      Top = 140
-      ImageIndex = 0
-      OnClick = MenuItemScriptStateClick
-    end
-    object ToolbarButtonPackages: TToolButton
-      Left = 0
-      Hint = 'Open Packages'
-      Top = 476
-      Caption = 'ToolbarButtonPackages'
-      ImageIndex = 14
-      OnClick = ToolbarButtonPackagesClick
-    end
-    object ToolButtonAreaSelector: TToolButton
-      Left = 0
-      Hint = 'Area Selector'
-      Top = 364
-      ImageIndex = 12
-      OnClick = ToolButtonAreaSelectorClick
-      ShowCaption = False
-    end
-    object ToolButtonNew: TToolButton
-      Left = 0
-      Hint = 'New Script (Ctrl+N)'
-      Top = 0
-      ImageIndex = 5
-      OnClick = MenuNewClick
-    end
-    object ToolButton1: TToolButton
-      Left = 0
-      Height = 28
-      Top = 112
-      Caption = 'ToolButton1'
-      Style = tbsDivider
-    end
-    object ToolButton2: TToolButton
-      Left = 0
-      Height = 28
-      Top = 168
-      Caption = 'ToolButton2'
-      Style = tbsDivider
-    end
-    object ToolButton3: TToolButton
-      Left = 0
-      Height = 28
-      Top = 280
-      Caption = 'ToolButton3'
-      Style = tbsDivider
-    end
-    object ToolButton4: TToolButton
-      Left = 0
-      Height = 28
-      Top = 392
-      Caption = 'ToolButton4'
-      Style = tbsDivider
-    end
-    object ToolButton5: TToolButton
-      Left = 0
-      Height = 28
-      Top = 448
-      Caption = 'ToolButton5'
-      Style = tbsDivider
-    end
-  end
   object MainMenuPanel: TPanel
     Left = 0
     Height = 0
     Top = 0
-    Width = 0
+    Width = 1015
     Align = alTop
     AutoSize = True
     BevelOuter = bvNone
-    TabOrder = 2
+    TabOrder = 1
   end
   object TrayIcon: TTrayIcon
     PopUpMenu = TrayPopup
@@ -269,7 +110,7 @@ object SimbaForm: TSimbaForm
       Caption = '&New'
       ImageIndex = 5
       ShortCut = 16462
-      OnClick = MenuNewClick
+      OnClick = DoMenuItemNewClick
     end
     object MenuItemDivider11: TMenuItem
       Caption = '-'
@@ -278,7 +119,7 @@ object SimbaForm: TSimbaForm
       Caption = '&Open'
       ImageIndex = 6
       ShortCut = 16463
-      OnClick = MenuOpenClick
+      OnClick = DoMenuItemOpenClick
     end
     object MenuItemOpenRecent: TMenuItem
       Caption = 'Open &Recent'
@@ -302,7 +143,7 @@ object SimbaForm: TSimbaForm
       Caption = '&Save'
       ImageIndex = 8
       ShortCut = 16467
-      OnClick = MenuSaveClick
+      OnClick = DoMenuItemSaveClick
     end
     object MenuItemSaveAs: TMenuItem
       Caption = 'Save As ...'
@@ -316,7 +157,7 @@ object SimbaForm: TSimbaForm
     object MenuItemSaveAll: TMenuItem
       Caption = 'Save All'
       ImageIndex = 9
-      OnClick = MenuSaveClick
+      OnClick = DoMenuItemSaveAllClick
     end
     object MenuItemDivider2: TMenuItem
       Caption = '-'
@@ -426,24 +267,24 @@ object SimbaForm: TSimbaForm
       Hint = 'Compile Script'
       ImageIndex = 0
       ShortCut = 32835
-      OnClick = MenuItemScriptStateClick
+      OnClick = DoMenuItemCompileClick
     end
     object MenuItemRun: TMenuItem
       Caption = '&Run'
       ImageIndex = 1
       ShortCut = 32850
-      OnClick = MenuItemScriptStateClick
+      OnClick = DoMenuItemRunClick
     end
     object MenuItemPause: TMenuItem
       Caption = '&Pause'
       ImageIndex = 2
-      OnClick = MenuItemScriptStateClick
+      OnClick = DoMenuItemRunClick
     end
     object MenuItemStop: TMenuItem
       Caption = '&Stop'
       ImageIndex = 3
       ShortCut = 32851
-      OnClick = MenuItemScriptStateClick
+      OnClick = DoMenuItemStopClick
     end
   end
   object MainMenuTools: TPopupMenu
@@ -459,7 +300,7 @@ object SimbaForm: TSimbaForm
     object MenuItemPackages: TMenuItem
       Caption = 'Packages'
       ImageIndex = 14
-      OnClick = ToolbarButtonPackagesClick
+      OnClick = DoMenuItemPackagesClick
     end
     object MenuItem6: TMenuItem
       Caption = '-'

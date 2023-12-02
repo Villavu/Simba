@@ -71,6 +71,14 @@ type
     function LoadLayout(Layout: String): Boolean;
   end;
 
+type
+  TSimbaDockMaster = class(TObject)
+    procedure MakeVisible(Form: TCustomForm);
+  end;
+
+var
+  SimbaDockMaster: TSimbaDockMaster;
+
 implementation
 
 uses
@@ -382,5 +390,25 @@ begin
     Stream.Free();
   end;
 end;
+
+procedure TSimbaDockMaster.MakeVisible(Form: TCustomForm);
+begin
+  if (Form <> nil) and (Form.HostDockSite is TSimbaAnchorDockHostSite) then
+    with TSimbaAnchorDockHostSite(Form.HostDockSite) do
+    begin
+      if FNeedDefaultPosition then
+      begin
+        with Application.MainForm.Monitor.WorkareaRect.CenterPoint do
+          BoundsRect := TRect.Create(X - (Width div 2), Y - (Height div 2), X + (Width div 2), Y + (Height div 2));
+
+        FNeedDefaultPosition := False;
+      end;
+
+      EnsureVisible();
+    end;
+end;
+
+initialization
+  SimbaDockMaster := TSimbaDockMaster.Create();
 
 end.

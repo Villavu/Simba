@@ -6,6 +6,7 @@
 unit simba.ide_events;
 
 {$i simba.inc}
+{.$DEFINE SIMBA_PRINT_IDE_EVENTS}
 
 interface
 
@@ -32,7 +33,13 @@ type
     // Event called on mouselogger change. Sender=TSimbaMouseLogger
     MOUSELOGGER_CHANGE,
     // Function list selection changed. Sender=TSimbaFunctionListNode
-    FUNCTIONLIST_SELECTION
+    FUNCTIONLIST_SELECTION,
+    // Window selection changed
+    WINDOW_SELECTED,
+    // A color was picked
+    COLOR_PICKED,
+    // A area was selected
+    AREA_SELECTED
   );
   {$POP}
 
@@ -41,7 +48,8 @@ type
     FEvents: array[SimbaIDEEvent] of TMethodList;
   public
     procedure Notify(EventType: SimbaIDEEvent; Sender: TObject);
-    procedure Register(Owner: TComponent; EventType: SimbaIDEEvent; Method: TNotifyEvent);
+    procedure Register(Owner: TComponent; EventType: SimbaIDEEvent; Method: TNotifyEvent; AsFirst: Boolean = False); overload;
+    procedure Register(EventType: SimbaIDEEvent; Method: TNotifyEvent; AsFirst: Boolean = False); overload;
     procedure UnRegister(EventType: SimbaIDEEvent; Proc: TNotifyEvent);
 
     constructor Create;
@@ -62,18 +70,18 @@ type
     FMethod: TMethod;
     FList: TMethodList;
   public
-    constructor Create(AOwner: TComponent; AMethod: TMethod; AList: TMethodList); reintroduce;
+    constructor Create(AOwner: TComponent; AMethod: TMethod; AsFirst: Boolean; AList: TMethodList); reintroduce;
     destructor Destroy; override;
   end;
 
-constructor TManagedEvent.Create(AOwner: TComponent; AMethod: TMethod; AList: TMethodList);
+constructor TManagedEvent.Create(AOwner: TComponent; AMethod: TMethod; AsFirst: Boolean; AList: TMethodList);
 begin
   inherited Create(AOwner);
 
   FMethod := AMethod;
 
   FList := AList;
-  FList.Add(FMethod);
+  FList.Add(FMethod, not AsFirst);
 end;
 
 destructor TManagedEvent.Destroy;
@@ -85,12 +93,20 @@ end;
 
 procedure TSimbaIDEEvents.Notify(EventType: SimbaIDEEvent; Sender: TObject);
 begin
+  {$IFDEF SIMBA_PRINT_IDE_EVENTS}
+  WriteLn(EventType);
+  {$ENDIF}
   FEvents[EventType].CallNotifyEvents(Sender);
 end;
 
-procedure TSimbaIDEEvents.Register(Owner: TComponent; EventType: SimbaIDEEvent; Method: TNotifyEvent);
+procedure TSimbaIDEEvents.Register(Owner: TComponent; EventType: SimbaIDEEvent; Method: TNotifyEvent; AsFirst: Boolean);
 begin
-  TManagedEvent.Create(Owner, TMethod(Method), FEvents[EventType]);
+  TManagedEvent.Create(Owner, TMethod(Method), AsFirst, FEvents[EventType]);
+end;
+
+procedure TSimbaIDEEvents.Register(EventType: SimbaIDEEvent; Method: TNotifyEvent; AsFirst: Boolean);
+begin
+  FEvents[EventType].Add(TMethod(Method), not AsFirst);
 end;
 
 procedure TSimbaIDEEvents.UnRegister(EventType: SimbaIDEEvent; Proc: TNotifyEvent);
