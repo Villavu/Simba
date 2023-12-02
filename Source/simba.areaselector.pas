@@ -44,11 +44,23 @@ type
     function Pick(TargetWindow: TWindowHandle): TBox;
   end;
 
+  function ShowAreaSelector(Window: TWindowHandle): TBox;
+
 implementation
 
 uses
   math, lcltype,
   simba.windowhandle;
+
+function ShowAreaSelector(Window: TWindowHandle): TBox;
+begin
+  with TSimbaAreaSelector.Create() do
+  try
+    Result := Pick(Window);
+  finally
+    Free();
+  end;
+end;
 
 function TSimbaAreaSelector.GetDragEdge(X, Y: Integer): EDragEdge;
 

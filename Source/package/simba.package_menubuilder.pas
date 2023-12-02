@@ -13,7 +13,7 @@ uses
   Classes, SysUtils,
   simba.mufasatypes, simba.package, simba.component_menubar;
 
-procedure BuildPackageMenus(Packages: TSimbaPackageArray; MenuBar: TSimbaMainMenuBar);
+//procedure BuildPackageMenus(Packages: TSimbaPackageArray; MenuBar: TSimbaMainMenuBar);
 
 implementation
 
@@ -41,6 +41,7 @@ begin
     SimbaForm.MenuItemRun.Click();
 end;
 
+{
 procedure BuildPackageMenus(Packages: TSimbaPackageArray; MenuBar: TSimbaMainMenuBar);
 
   function GetMenu(PackageFullName: String): TPackagePopupMenu;
@@ -106,6 +107,7 @@ begin
       end;
     end;
 end;
+}
 
 end.
 

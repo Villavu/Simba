@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.package_form;
 
 {$i simba.inc}
@@ -32,6 +37,7 @@ type
     ButtonAddRepository: TToolButton;
     ToolButton1: TToolButton;
 
+    procedure FormHide(Sender: TObject);
     procedure InstallingButtonClick(Sender: TObject);
     procedure ButtonAddRepositoryClick(Sender: TObject);
     procedure ButtonRefreshClick(Sender: TObject);
@@ -65,7 +71,7 @@ implementation
 
 uses
   simba.mufasatypes, simba.package_installform,
-  simba.package_installer, simba.fonthelpers, simba.dialog, simba.threading;
+  simba.package_installer, simba.package_autoupdater, simba.dialog, simba.threading;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin
@@ -174,6 +180,11 @@ end;
 procedure TSimbaPackageForm.InstallingButtonClick(Sender: TObject);
 begin
   BottomNotebook.ShowControl(PageVersions);
+end;
+
+procedure TSimbaPackageForm.FormHide(Sender: TObject);
+begin
+  UpdatePackages();
 end;
 
 procedure TSimbaPackageForm.ButtonRefreshClick(Sender: TObject);
@@ -289,12 +300,12 @@ begin
   FInfoBox := TPackageInfoGrid.Create(Self);
   FInfoBox.Parent := ScrollBox1;
   FInfoBox.Align := alTop;
-  FInfoBox.BorderSpacing.Around := 8;
+  FInfoBox.BorderSpacing.Around := 5;
   FInfoBox.OnAutoUpdateChange := @DoAutoUpdateClicked;
 
   FVersionBox := TPackageVersionGrid.Create(Self);
   FVersionBox.Parent := ScrollBox1;
-  FVersionBox.BorderSpacing.Around := 8;
+  FVersionBox.BorderSpacing.Around := 5;
   FVersionBox.Anchors := [akTop, akLeft, akRight];
   FVersionBox.AnchorSideLeft.Control := ScrollBox1;
   FVersionBox.AnchorSideLeft.Side := asrLeft;
@@ -306,17 +317,14 @@ begin
   FListBox := TPackageListBox.Create(Self);
   FListBox.Parent := ListPanel;
   FListBox.Align := alClient;
-  FListBox.BorderSpacing.Around := 8;
+  FListBox.BorderSpacing.Around := 5;
   FListBox.OnSelectionChange := @DoPackageSelectionChanged;
   FListBox.OnInstallClick := @DoInstallClick;
   FListBox.OnAdvancedClick := @DoAdvancedClick;
   FListBox.ImageList := ImageList36;
-  FListBox.Font.Size := GetDefaultFontSize() + 1;
 
   ListPanel.Height := Scale96ToScreen(260);
-  LoadingLabel.Font.Size := GetDefaultFontSize() + 3;
 
-  OutputSynEdit.Font.Size := GetDefaultFontSize() + 1;
   {$IFDEF WINDOWS}
   OutputSynEdit.Font.Name := 'Consolas';
   {$ENDIF}

@@ -39,6 +39,7 @@ type
     function GetColorCount: Integer;
     function GetPoint(Index: Integer): TPoint;
   public
+    procedure Pick;
     procedure Add(APoint: TPoint; AColor: TColor);
 
     property ColorCount: Integer read GetColorCount;
@@ -55,7 +56,8 @@ implementation
 
 uses
   lcltype, types,
-  simba.mufasatypes, simba.main, simba.settings, simba.colormath;
+  simba.mufasatypes, simba.main, simba.settings, simba.colormath, simba.colorpicker,
+  simba.ide_maintoolbar;
 
 type
   TColorHistoryValue = packed record
@@ -102,7 +104,7 @@ end;
 
 procedure TSimbaColorPickerHistoryForm.HandleButtonPickColorClick(Sender: TObject);
 begin
-  SimbaForm.ToolbarButtonColorPicker.Click();
+  Pick();
 end;
 
 procedure TSimbaColorPickerHistoryForm.FormCreate(Sender: TObject);
@@ -177,6 +179,11 @@ begin
     Result.X := StrToIntDef(Arr[0], -1);
     Result.Y := StrToIntDef(Arr[1], -1);
   end;
+end;
+
+procedure TSimbaColorPickerHistoryForm.Pick;
+begin
+  SimbaMainToolBar.ButtonColorPicker.Click();
 end;
 
 procedure TSimbaColorPickerHistoryForm.SizeComponents;

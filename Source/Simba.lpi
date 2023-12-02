@@ -350,7 +350,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="165">
+    <Units Count="168">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1098,6 +1098,18 @@
         <Filename Value="image/simba.image_utils.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit164>
+      <Unit165>
+        <Filename Value="components/simba.component_toolbar.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit165>
+      <Unit166>
+        <Filename Value="simba.ide_maintoolbar.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit166>
+      <Unit167>
+        <Filename Value="simba.ide_mainmenubar.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit167>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -93,10 +93,15 @@ type
 
     function Open(FileName: String; CheckOtherTabs: Boolean = True): Boolean; overload;
     procedure Open; overload;
+
+    procedure Save;
+    procedure SaveAll;
   end;
 
 var
   SimbaScriptTabsForm: TSimbaScriptTabsForm;
+
+function GetSimbaActiveTab: TSimbaScriptTab;
 
 implementation
 
@@ -107,6 +112,14 @@ uses
   simba.mufasatypes, simba.env, simba.editor_docgenerator, simba.main,
   simba.dockinghelpers, simba.nativeinterface, simba.outputform,
   simba.ide_events, simba.ide_utils, simba.theme, simba.settings;
+
+function GetSimbaActiveTab: TSimbaScriptTab;
+begin
+  if Assigned(SimbaScriptTabsForm) then
+    Result := SimbaScriptTabsForm.CurrentTab
+  else
+    Result := nil;
+end;
 
 procedure TSimbaScriptTabsForm.DoOnDropFiles(Sender: TObject; const FileNames: array of String);
 var
@@ -553,6 +566,25 @@ begin
     on E: Exception do
       ShowMessage('Exception while opening file: ' + E.Message);
   end;
+end;
+
+procedure TSimbaScriptTabsForm.Save;
+begin
+  CurrentTab.Save(CurrentTab.ScriptFileName);
+end;
+
+procedure TSimbaScriptTabsForm.SaveAll;
+var
+  I: Integer;
+begin
+  for I := TabCount - 1 downto 0 do
+    if Tabs[I].ScriptChanged then
+    begin
+      if (Tabs[I].ScriptFileName = '') then
+        Tabs[I].Show();
+
+      Tabs[I].Save(Tabs[I].ScriptFileName);
+    end;
 end;
 
 end.

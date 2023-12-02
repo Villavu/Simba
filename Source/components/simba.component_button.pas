@@ -117,7 +117,7 @@ uses
 
 procedure TSimbaTransparentButton.PaintBackground(var PaintRect: TRect);
 begin
-  if Down or MouseInClient then
+  if Enabled and (Down or MouseInClient) then
     Canvas.Brush.Color := SimbaTheme.ColorActive
   else
     Canvas.Brush.Color := Color;
@@ -138,7 +138,7 @@ constructor TSimbaCheckButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  XPadding:=0;
+  XPadding := 0;
   Images := SimbaForm.Images;
   PressedImageIndex := 62;
   SelectedImageIndex := 62;

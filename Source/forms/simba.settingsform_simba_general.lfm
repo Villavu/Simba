@@ -18,10 +18,10 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Side = asrBottom
-    Left = 135
+    Left = 158
     Height = 31
-    Top = 107
-    Width = 784
+    Top = 112
+    Width = 761
     Max = 32
     Min = 12
     OnChange = ToolbarSizeTrackBarChange
@@ -41,10 +41,10 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = FontSizeLabel
     AnchorSideBottom.Side = asrBottom
-    Left = 135
+    Left = 158
     Height = 31
     Top = 0
-    Width = 784
+    Width = 761
     Max = 24
     Min = 8
     OnChange = FontSizeTrackBarChange
@@ -62,7 +62,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Left = 0
     Height = 31
     Top = 0
-    Width = 60
+    Width = 72
     Align = alCustom
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Size'
@@ -76,8 +76,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 31
-    Top = 107
-    Width = 27
+    Top = 112
+    Width = 31
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Size'
     Layout = tlCenter
@@ -90,10 +90,10 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 135
+    Left = 158
     Height = 31
-    Top = 254
-    Width = 774
+    Top = 274
+    Width = 751
     Max = 38
     Min = 8
     OnChange = DoScrollBarTrackBarChange
@@ -110,10 +110,10 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 135
+    Left = 158
     Height = 31
-    Top = 295
-    Width = 774
+    Top = 315
+    Width = 751
     Min = 1
     OnChange = DoScrollBarArrowTrackBarChange
     Position = 10
@@ -129,8 +129,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 31
-    Top = 254
-    Width = 27
+    Top = 274
+    Width = 31
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Size'
     Layout = tlCenter
@@ -143,8 +143,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 31
-    Top = 295
-    Width = 71
+    Top = 315
+    Width = 84
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Arrow Size'
     Layout = tlCenter
@@ -157,8 +157,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 20
-    Top = 224
+    Height = 25
+    Top = 239
     Width = 934
     Caption = 'Scroll Bar'
     Anchors = [akTop, akLeft, akRight]
@@ -168,9 +168,9 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
   object PlaceholderLabel: TLabel
     AnchorSideLeft.Control = Owner
     Left = 0
-    Height = 20
+    Height = 25
     Top = 600
-    Width = 129
+    Width = 152
     BorderSpacing.Right = 6
     Caption = 'Image Size: Default'
     ParentColor = False
@@ -182,7 +182,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 20
+    Height = 25
     Top = 77
     Width = 934
     Caption = 'Tool Bar'
@@ -194,21 +194,21 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideLeft.Control = ToolbarSizeTrackBar
     AnchorSideTop.Control = ToolbarSizeTrackBar
     AnchorSideTop.Side = asrBottom
-    Left = 135
-    Height = 28
-    Top = 148
+    Left = 158
+    Height = 33
+    Top = 153
     Width = 252
     BorderSpacing.Top = 10
-    ItemHeight = 20
+    ItemHeight = 25
     ItemIndex = 0
     Items.Strings = (
       'Top (Default)'
       'Left'
       'Right'
     )
-    OnChange = ToolbarPositionComboBoxChange
     TabOrder = 4
     Text = 'Top (Default)'
+    OnChange = ToolbarPositionComboBoxChange
   end
   object ToolbarSizeCaption1: TLabel
     AnchorSideLeft.Control = Owner
@@ -216,9 +216,9 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = ToolbarPositionComboBox
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 28
-    Top = 148
-    Width = 52
+    Height = 33
+    Top = 153
+    Width = 63
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Position'
     Layout = tlCenter
@@ -230,9 +230,9 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = ToolbarPositionComboBox
     AnchorSideRight.Side = asrBottom
-    Left = 135
-    Height = 28
-    Top = 186
+    Left = 158
+    Height = 33
+    Top = 196
     Width = 252
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 10
@@ -246,9 +246,9 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = ToolbarSpacingSpinEdit
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 28
-    Top = 186
-    Width = 53
+    Height = 33
+    Top = 196
+    Width = 63
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Spacing'
     Layout = tlCenter
@@ -262,7 +262,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Left = 0
     Height = 31
     Top = 41
-    Width = 73
+    Width = 86
     Align = alCustom
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Image Size'
@@ -278,10 +278,10 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ImageSizeLabel
     AnchorSideBottom.Side = asrBottom
-    Left = 135
+    Left = 158
     Height = 31
     Top = 41
-    Width = 784
+    Width = 761
     Max = 32
     Min = 15
     OnChange = ImageSizeTrackBarChange
