@@ -1,7 +1,7 @@
 object SimbaForm: TSimbaForm
-  Left = 971
+  Left = 1428
   Height = 539
-  Top = 548
+  Top = 583
   Width = 1015
   Caption = 'Simba'
   ClientHeight = 539
@@ -91,14 +91,6 @@ object SimbaForm: TSimbaForm
       ImageIndex = 4
       OnClick = TrayPopupExitClick
     end
-  end
-  object PackageUpdateTimer: TTimer
-    Enabled = False
-    Interval = 300000
-    OnTimer = DoPackageMenuTimer
-    OnStartTimer = DoPackageMenuTimer
-    Left = 60
-    Top = 130
   end
   object MainMenuFile: TPopupMenu
     Images = Images

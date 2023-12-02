@@ -11,15 +11,15 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.package, simba.component_menubar;
+  simba.mufasatypes, simba.package;
 
-//procedure BuildPackageMenus(Packages: TSimbaPackageArray; MenuBar: TSimbaMainMenuBar);
+procedure BuildPackageMenus(Packages: TSimbaPackageArray);
 
 implementation
 
 uses
   Menus,
-  simba.main, simba.scripttabsform, simba.files;
+  simba.main, simba.scripttabsform, simba.files, simba.ide_mainmenubar;
 
 type
   TPackagePopupMenu = class(TPopupMenu)
@@ -41,21 +41,20 @@ begin
     SimbaForm.MenuItemRun.Click();
 end;
 
-{
-procedure BuildPackageMenus(Packages: TSimbaPackageArray; MenuBar: TSimbaMainMenuBar);
+procedure BuildPackageMenus(Packages: TSimbaPackageArray);
 
   function GetMenu(PackageFullName: String): TPackagePopupMenu;
   var
     Menu: TPopupMenu;
   begin
-    for Menu in MenuBar.Menus do
+    for Menu in SimbaMainMenuBar.MenuBar.Menus do
       if (Menu is TPackagePopupMenu) and (TPackagePopupMenu(Menu).PackageFullName = PackageFullName) then
       begin
         Result := TPackagePopupMenu(Menu);
         Exit;
       end;
 
-    Result := TPackagePopupMenu.Create(MenuBar);
+    Result := TPackagePopupMenu.Create(SimbaMainMenuBar.MenuBar);
   end;
 
 var
@@ -103,11 +102,10 @@ begin
           Menu.Items.Add(SubMenu);
         end;
 
-        MenuBar.AddMenu(Packages[I].Info.Name, Menu);
+        SimbaMainMenuBar.MenuBar.AddMenu(Packages[I].Info.Name, Menu);
       end;
     end;
 end;
-}
 
 end.
 
