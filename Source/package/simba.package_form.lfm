@@ -9,7 +9,6 @@ object SimbaPackageForm: TSimbaPackageForm
   Constraints.MinHeight = 312
   Constraints.MinWidth = 312
   DesignTimePPI = 120
-  OnHide = FormHide
   OnShow = FormShow
   Position = poMainFormCenter
   ShowInTaskBar = stAlways

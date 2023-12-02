@@ -37,7 +37,6 @@ type
     ButtonAddRepository: TToolButton;
     ToolButton1: TToolButton;
 
-    procedure FormHide(Sender: TObject);
     procedure InstallingButtonClick(Sender: TObject);
     procedure ButtonAddRepositoryClick(Sender: TObject);
     procedure ButtonRefreshClick(Sender: TObject);
@@ -70,8 +69,8 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.mufasatypes, simba.package_installform,
-  simba.package_installer, simba.package_autoupdater, simba.dialog, simba.threading;
+  simba.package_installform, simba.package_installer, simba.package_autoupdater,
+  simba.mufasatypes, simba.dialog, simba.threading;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin
@@ -180,11 +179,6 @@ end;
 procedure TSimbaPackageForm.InstallingButtonClick(Sender: TObject);
 begin
   BottomNotebook.ShowControl(PageVersions);
-end;
-
-procedure TSimbaPackageForm.FormHide(Sender: TObject);
-begin
-  UpdatePackages();
 end;
 
 procedure TSimbaPackageForm.ButtonRefreshClick(Sender: TObject);

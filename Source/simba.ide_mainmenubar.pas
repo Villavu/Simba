@@ -20,6 +20,8 @@ type
     procedure DoTabScriptStateChange(Sender: TObject);
   public
     constructor Create; reintroduce;
+
+    property MenuBar: TSimbaMenuBar read FMenuBar;
   end;
 
 var

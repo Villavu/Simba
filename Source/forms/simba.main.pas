@@ -154,7 +154,6 @@ type
     MainMenuSearchSep2: TMenuItem;
     MainMenuSearchSep3: TMenuItem;
     Separator1: TMenuItem;
-    PackageUpdateTimer: TTimer;
     TrayIcon: TTrayIcon;
     TrayPopup: TPopupMenu;
     TrayPopupExit: TMenuItem;
@@ -216,7 +215,6 @@ type
     procedure MenuSaveAsDefaultClick(Sender: TObject);
     procedure MenuSelectAllClick(Sender: TObject);
     procedure MenuUndoClick(Sender: TObject);
-    procedure DoPackageMenuTimer(Sender: TObject);
     procedure RecentFilesPopupPopup(Sender: TObject);
     procedure TrayIconClick(Sender: TObject);
     procedure TrayPopupExitClick(Sender: TObject);
@@ -272,7 +270,7 @@ uses
   simba.dockinghelpers, simba.nativeinterface,
   simba.scriptformatter, simba.theme,
   simba.scriptbackup, simba.backupsform, simba.threading,
-  simba.downloadsimbaform, simba.package_autoupdater;
+  simba.downloadsimbaform;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -396,11 +394,6 @@ end;
 procedure TSimbaForm.MenuNewTemplateClick(Sender: TObject);
 begin
   SimbaOpenExampleForm.ShowModal();
-end;
-
-procedure TSimbaForm.DoPackageMenuTimer(Sender: TObject);
-begin
-  UpdatePackages();
 end;
 
 procedure TSimbaForm.RecentFilesPopupPopup(Sender: TObject);
@@ -992,8 +985,7 @@ end;
 
 procedure TSimbaForm.SetupCompleted;
 begin
-  PackageUpdateTimer.Enabled := True;
-
+  WriteLn('Setup completed');
   if SimbaSettings.FirstLaunch then
     MenuItemAssociateScripts.Click();
 
