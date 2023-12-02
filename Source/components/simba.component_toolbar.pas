@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.component_toolbar;
 
 {$i simba.inc}
@@ -5,7 +10,7 @@ unit simba.component_toolbar;
 interface
 
 uses
-  Classes, SysUtils, Controls, ExtCtrls, ImgList,
+  Classes, SysUtils, Controls, ExtCtrls, Buttons, ImgList, Menus,
   simba.mufasatypes, simba.component_button;
 
 type
@@ -27,6 +32,7 @@ type
     constructor Create(AOwner: TComponent); override;
 
     function AddButton(ImageIndex: Integer; HintText: String = ''; AOnClick: TNotifyEvent = nil): TSimbaTransparentButton;
+    function AddDropdownButton(ImageIndex: Integer; HintText: String = ''; AOnClick: TNotifyEvent = nil; APopupMenu: TPopupMenu = nil): TSimbaTransparentButton;
     function AddDivider: TSimbaTransparentButton;
 
     property Spacing: Integer read GetSpacing write SetSpacing;
@@ -37,7 +43,8 @@ type
 implementation
 
 uses
-  simba.main, simba.theme, ATCanvasPrimitives;
+  simba.main, simba.theme,
+  ATCanvasPrimitives;
 
 type
   TSimbaToolButton = class(TSimbaTransparentButton)
@@ -54,6 +61,79 @@ type
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
     procedure PaintBackground(var PaintRect: TRect); override;
   end;
+
+  TSimbaDropToolButton = class(TSimbaToolButton)
+  protected
+    FMouseInDropdownArrow: Boolean;
+
+    function ScaleToToolbarSize(Value: Integer): Integer;
+    function GetDropdownArrowRect: TRect;
+
+    procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
+    procedure PaintBackground(var PaintRect: TRect); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+  public
+    DropdownMenu: TPopupMenu;
+
+    procedure Click; override;
+  end;
+
+function TSimbaDropToolButton.ScaleToToolbarSize(Value: Integer): Integer;
+begin
+  if (FToolbar.FButtonSize > 24) then
+    Result := Round(Value * 2)
+  else
+  if (FToolBar.FButtonSize > 16) then
+    Result := Round(Value * 1.5)
+  else
+    Result := Value;
+end;
+
+function TSimbaDropToolButton.GetDropdownArrowRect: TRect;
+begin
+  Result.Left := Width - ScaleToToolbarSize(10);
+  Result.Right := Width - 2;
+  Result.Top := 3;
+  Result.Bottom := Height - 3;
+end;
+
+procedure TSimbaDropToolButton.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
+begin
+  inherited CalculatePreferredSize(PreferredWidth, PreferredHeight, WithThemeSpace);
+
+  PreferredWidth := PreferredWidth + ScaleToToolbarSize(10);
+  Margin := ScaleToToolbarSize(5);
+end;
+
+procedure TSimbaDropToolButton.PaintBackground(var PaintRect: TRect);
+begin
+  inherited PaintBackground(PaintRect);
+
+  CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, GetDropdownArrowRect().CenterPoint, IfThen(FToolbar.FButtonSize >= 20, 2, 1));
+  //Canvas.Pen.Color := 255;
+  //Canvas.Frame(GetDropdownArrowRect());
+end;
+
+procedure TSimbaDropToolButton.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseDown(Button, Shift, X, Y);
+
+  FMouseInDropdownArrow := GetDropdownArrowRect().Contains(TPoint.Create(X, Y));
+end;
+
+procedure TSimbaDropToolButton.Click;
+begin
+  if FMouseInDropdownArrow then
+  begin
+    if (DropdownMenu <> nil) then
+      with ClientToScreen(TPoint.Create(GetDropdownArrowRect().CenterPoint.X, Height)) do
+        DropdownMenu.PopUp(X, Y);
+
+    Exit;
+  end;
+
+  inherited Click();
+end;
 
 procedure TSimbaToolButton.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
 begin
@@ -142,6 +222,19 @@ begin
   Result.OnClick := AOnClick;
 end;
 
+function TSimbaToolbar.AddDropdownButton(ImageIndex: Integer; HintText: String; AOnClick: TNotifyEvent; APopupMenu: TPopupMenu): TSimbaTransparentButton;
+begin
+  Result := TSimbaDropToolButton.Create(Self);
+  Result.Parent := FFlowPanel;
+  Result.Images := FImages;
+  Result.ImageIndex := ImageIndex;
+  Result.Hint := HintText;
+  Result.ShowHint := HintText <> '';
+  Result.OnClick := AOnClick;
+
+  TSimbaDropToolButton(Result).DropdownMenu := APopupMenu;
+end;
+
 function TSimbaToolbar.AddDivider: TSimbaTransparentButton;
 begin
   Result := TSimbaToolButtonDivider.Create(Self);
@@ -154,8 +247,8 @@ begin
 
   FButtonSize := 24;
 
-  FImages := TImageList.Create(Self); // Create a copy so ImagesGetWidthForPPI is not used for toolbar
-  FImages.Assign(SimbaForm.Images);
+  FImages := TImageList.Create(Self);
+  FImages.Assign(SimbaForm.Images); // Create a copy so OnImagesGetWidthForPPI isn't used globally
   FImages.OnGetWidthForPPI := @DoGetImageWidth;
 
   FFlowPanel := TFlowPanel.Create(Self);
