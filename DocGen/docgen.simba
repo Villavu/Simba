@@ -33,8 +33,7 @@ SomeMethod(123)
 
 const
   SOURCE_SEARCH_PATHS = [
-    'Source\script\imports\simba\',
-    'Source\script\imports\simbaclasses\'
+    'Source\script\imports\'
   ];
 
 function Indent(Str: String; Size: Integer): String;
@@ -205,10 +204,9 @@ begin
   ParseSourceFile('simba.import_misc',          'Misc'           );
   ParseSourceFile('simba.import_matrix',        'Matrix'         );
   ParseSourceFile('simba.import_dialogs',       'Dialogs'        );
-
-  ParseSourceFile('simba.import_class_json',  'JSON'  );
-  ParseSourceFile('simba.import_class_image', 'Image' );
-  ParseSourceFile('simba.import_class_dtm',   'DTM'   );
+  ParseSourceFile('simba.import_json',          'JSON'           );
+  ParseSourceFile('simba.import_image',         'Image'          );
+  ParseSourceFile('simba.import_dtm',           'DTM'            );
 end;
 
 procedure H2ToH3(dir: String);
