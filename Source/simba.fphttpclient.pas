@@ -23,7 +23,7 @@ interface
 
 uses
   classes, sysutils,
-  fphttpclient, openssl, ssockets, opensslsockets
+  fphttpclient, ssockets, opensslsockets
   {$IFDEF USE_NSURLCONNECTION},
   cocoaall, cocoautils
   {$ENDIF};
@@ -59,6 +59,9 @@ type
   {$ENDIF}
 
 implementation
+
+uses
+  simba.openssl;
 
 {$IFDEF USE_NSURLCONNECTION}
 procedure TSimbaFPHTTPClient.DoMethod(const AMethod, AURL: String; Stream: TStream; const AllowedResponseCodes: array of Integer);
@@ -129,8 +132,8 @@ end;
 {$ELSE}
 function TSimbaFPHTTPClient.GetSocketHandler(const UseSSL: Boolean): TSocketHandler;
 begin
-  if UseSSL and (not IsSSLLoaded) then
-    InitSSLInterface();
+  if UseSSL then
+    LoadSSL();
 
   Result := inherited GetSocketHandler(UseSSL);
 end;
