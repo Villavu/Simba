@@ -28,7 +28,7 @@ uses
   simba.mufasatypes, simba.gz, simba.settings, simba.env, simba.files, simba.ide_initialization
   {$IF defined(WINDOWS)},
   windows
-  {$ELSEIF defined(BSD) or defined(LINUX)},
+  {$ELSEIF defined(LINUX)},
   dl
   {$ENDIF};
 
@@ -114,7 +114,7 @@ function LoadSSL(Debug: Boolean): Boolean;
     SetLength(Result, MAX_PATH);
     SetLength(Result, GetModuleFileName(Handle, @Result[1], Length(Result)));
   end;
-  {$ELSEIF defined(BSD) or defined(LINUX)}
+  {$ELSEIF defined(LINUX)}
   var
     map: plink_map;
   begin
