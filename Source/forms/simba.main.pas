@@ -985,7 +985,6 @@ end;
 
 procedure TSimbaForm.SetupCompleted;
 begin
-  WriteLn('Setup completed');
   if SimbaSettings.FirstLaunch then
     MenuItemAssociateScripts.Click();
 
