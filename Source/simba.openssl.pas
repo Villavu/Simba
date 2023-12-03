@@ -19,12 +19,18 @@ uses
   classes, sysutils;
 
 procedure ExtractOpenSSL;
+function LoadSSL(Debug: Boolean = False): Boolean;
 
 implementation
 
 uses
-  lcltype, Forms,
-  simba.mufasatypes, simba.gz, simba.settings, simba.env, simba.files, simba.ide_initialization;
+  LCLType, Forms, openssl,
+  simba.mufasatypes, simba.gz, simba.settings, simba.env, simba.files, simba.ide_initialization
+  {$IF defined(WINDOWS)},
+  windows
+  {$ELSEIF defined(BSD) or defined(LINUX)},
+  dl
+  {$ENDIF};
 
 function IsFileHash(FileName: String; Hash: String): Boolean;
 begin
@@ -98,6 +104,42 @@ begin
     on E: Exception do
       DebugLn('ExtractOpenSSL Exception: ' + E.Message);
   end;
+end;
+
+function LoadSSL(Debug: Boolean): Boolean;
+
+  function LibPath(Handle: TLibHandle): String;
+  {$IF defined(WINDOWS)}
+  begin
+    SetLength(Result, MAX_PATH);
+    SetLength(Result, GetModuleFileName(Handle, @Result[1], Length(Result)));
+  end;
+  {$ELSEIF defined(BSD) or defined(LINUX)}
+  var
+    map: plink_map;
+  begin
+    if (dlinfo(Pointer(Handle), RTLD_DI_LINKMAP, @map) = 0) and (map <> nil) then
+      Result := map^.l_name
+    else
+      Result := '';
+  end;
+  {$ELSE}
+  begin
+    Result := '';
+  end;
+  {$ENDIF}
+
+begin
+  Result := InitSSLInterface();
+
+  if Debug then
+    if Result then
+    begin
+      DebugLn('SSL is loaded');
+      DebugLn('SSLLib: ' + LibPath(SSLLibHandle));
+      DebugLn('SSLUtil: ' + LibPath(SSLUtilHandle));
+    end else
+      DebugLn('SSL is not loaded: ' + GetLoadErrorStr());
 end;
 
 initialization

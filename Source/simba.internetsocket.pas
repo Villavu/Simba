@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils, ssockets,
-  simba.mufasatypes, simba.baseclass;
+  simba.mufasatypes, simba.baseclass, simba.openssl;
 
 type
   PSimbaInternetSocket = ^TSimbaInternetSocket;
@@ -26,10 +26,10 @@ type
 
     function GetLastError: Integer;
     function GetConnectTimeout: Integer;
-    function GetIOTimeout: Integer;
+    function GetReadWriteTimeout: Integer;
 
     procedure SetConnectTimeout(Value: Integer);
-    procedure SetIOTimeout(Value: Integer);
+    procedure SetReadWriteTimeout(Value: Integer);
   public
     constructor Create(AHost: String; APort: UInt16; UseSSL: Boolean); reintroduce;
     destructor Destroy; override;
@@ -42,7 +42,7 @@ type
     function ReadStringUntil(Seq: String; Timeout: Integer): String;
     function WriteString(Str: String): Integer;
 
-    property IOTimeout: Integer read GetIOTimeout Write SetIOTimeout;
+    property ReadWriteTimeout: Integer read GetReadWriteTimeout Write SetReadWriteTimeout;
     property ConnectTimeout: Integer read GetConnectTimeout Write SetConnectTimeout;
     property LastError: Integer read GetLastError;
   end;
@@ -56,15 +56,15 @@ uses
 {$ifdef windows}
   WinSock2,
 {$endif}
-  openssl, opensslsockets, sockets;
+  opensslsockets, sockets;
 
 // is protected
 type
   TInetSocketHelper = class helper for TInetSocket
-    function SetSocketBlockingMode(ASocket: Integer; ABlockMode: TBlockingMode; AFDSPtr: Pointer): boolean;
+    function SetSocketBlockingMode(ASocket: Integer; ABlockMode: TBlockingMode; AFDSPtr: Pointer): Boolean;
   end;
 
-function TInetSocketHelper.SetSocketBlockingMode(ASocket: Integer; ABlockMode: TBlockingMode; AFDSPtr: Pointer): boolean;
+function TInetSocketHelper.SetSocketBlockingMode(ASocket: Integer; ABlockMode: TBlockingMode; AFDSPtr: Pointer): Boolean;
 begin
   Result := inherited SetSocketBlockingMode(ASocket, ABlockMode, AFDSPtr);
 end;
@@ -79,7 +79,7 @@ begin
   Result := FSocket.ConnectTimeout;
 end;
 
-function TSimbaInternetSocket.GetIOTimeout: Integer;
+function TSimbaInternetSocket.GetReadWriteTimeout: Integer;
 begin
   Result := FSocket.IOTimeout;
 end;
@@ -89,7 +89,7 @@ begin
   FSocket.ConnectTimeout := Value;
 end;
 
-procedure TSimbaInternetSocket.SetIOTimeout(Value: Integer);
+procedure TSimbaInternetSocket.SetReadWriteTimeout(Value: Integer);
 begin
   FSocket.IOTimeout := Value;
 end;
@@ -118,8 +118,8 @@ end;
 
 procedure TSimbaInternetSocket.Connect;
 begin
-  if FUseSSL and (not IsSSLLoaded) then
-    InitSSLInterface();
+  if FUseSSL then
+    LoadSSL();
 
   FSocket.Connect();
 end;
