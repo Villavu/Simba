@@ -350,7 +350,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="168">
+    <Units Count="169">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1110,6 +1110,10 @@
         <Filename Value="simba.ide_mainmenubar.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit167>
+      <Unit168>
+        <Filename Value="simba.internetsocket.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit168>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

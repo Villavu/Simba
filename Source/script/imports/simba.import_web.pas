@@ -15,7 +15,7 @@ implementation
 uses
   lptypes, ffi,
   fphttpclient,
-  simba.nativeinterface, simba.httpclient;
+  simba.nativeinterface, simba.httpclient, simba.internetsocket;
 
 (*
 Web
@@ -406,6 +406,66 @@ begin
   PSimbaHTTPClient(Params^[0])^.OnExtractProgress := TSimbaHTTPExtractingEvent(Params^[1]^);
 end;
 
+(*
+TSimbaInternetSocket.Create
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> function TSimbaInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean): TSimbaInternetSocket; static;
+*)
+procedure _LapeSimbaInternetSocket_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaInternetSocket(Result)^ := TSimbaInternetSocket.Create(PString(Params^[0])^, PUInt16(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+procedure _LapeSimbaInternetSocket_Connect(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaInternetSocket(Params^[0])^.Connect();
+end;
+
+procedure _LapeSimbaInternetSocket_HasData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaInternetSocket(Params^[0])^.HasData();
+end;
+
+procedure _LapeSimbaInternetSocket_ReadString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PSimbaInternetSocket(Params^[0])^.ReadString(PInteger(Params^[1])^);
+end;
+
+procedure _LapeSimbaInternetSocket_ReadStringUntil(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PSimbaInternetSocket(Params^[0])^.ReadStringUntil(PString(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeSimbaInternetSocket_WriteString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaInternetSocket(Params^[0])^.WriteString(PString(Params^[1])^);
+end;
+
+procedure _LapeSimbaInternetSocket_GetIOTimeout(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaInternetSocket(Params^[0])^.IOTimeout;
+end;
+
+procedure _LapeSimbaInternetSocket_SetIOTimeout(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaInternetSocket(Params^[0])^.IOTimeout := PInteger(Params^[1])^;
+end;
+
+procedure _LapeSimbaInternetSocket_GetConnectTimeout(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaInternetSocket(Params^[0])^.ConnectTimeout;
+end;
+
+procedure _LapeSimbaInternetSocket_SetConnectTimeout(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaInternetSocket(Params^[0])^.ConnectTimeout := PInteger(Params^[1])^;
+end;
+
+procedure _LapeSimbaInternetSocket_LastError(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaInternetSocket(Params^[0])^.LastError;
+end;
+
 procedure ImportWeb(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -542,6 +602,17 @@ begin
       TSimbaHTTPClient(Ptr^) := TSimbaHTTPClient.Create();
       TSimbaHTTPClient(Ptr^).FreeOnTerminate := True
     end;
+
+    addClass('TInternetSocket');
+    addGlobalFunc('function TInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean = False): TInternetSocket; static;', @_LapeSimbaInternetSocket_Create);
+    addGlobalFunc('procedure TInternetSocket.Connect;', @_LapeSimbaInternetSocket_Connect);
+    addGlobalFunc('function TInternetSocket.HasData: Boolean', @_LapeSimbaInternetSocket_HasData);
+    addGlobalFunc('function TInternetSocket.ReadString(MaxLen: Integer = 8192): String;', @_LapeSimbaInternetSocket_ReadString);
+    addGlobalFunc('function TInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;', @_LapeSimbaInternetSocket_ReadStringUntil);
+    addGlobalFunc('function TInternetSocket.WriteString(Str: String): Integer;', @_LapeSimbaInternetSocket_WriteString);
+    addGlobalFunc('function TInternetSocket.LastError: Integer;', @_LapeSimbaInternetSocket_LastError);
+    addClassVar('TInternetSocket', 'ConnectTimeout', 'Integer', @_LapeSimbaInternetSocket_GetConnectTimeout, @_LapeSimbaInternetSocket_SetConnectTimeout);
+    addClassVar('TInternetSocket', 'ReadWriteTimeout', 'Integer', @_LapeSimbaInternetSocket_GetIOTimeout, @_LapeSimbaInternetSocket_SetIOTimeout);
 
     ImportingSection := '';
   end;
