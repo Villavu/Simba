@@ -1,0 +1,54 @@
+// Very simple irc "bot" to test TInternetSocket
+// Joins rizon server, and replys the date and time when !date is said
+
+const
+  NICK_TO_USE := 'SimbaIRCBot' + ToString(Random(999));
+  CHANNEL_TO_JOIN := '#SimbaIRCBot';
+
+procedure tx(Sock: TInternetSocket; Str: String);
+begin
+  Sock.WriteString(Str + #13#10);
+end;
+
+function rx(Sock: TInternetSocket): Boolean;
+var
+  Line: String;
+begin
+  for Line in Sock.ReadString().Split(#13#10) do
+  begin
+    WriteLn(Line);
+
+    if (Line.StartsWith('PING')) then
+    begin
+      tx(Sock, Line.Replace('PING', 'PONG'));
+
+      Result := True;
+    end;
+
+    if ('End of /MOTD command' in Line) then
+      tx(Sock, 'JOIN ' + CHANNEL_TO_JOIN);
+
+    if ('!date' in Line) then
+      tx(Sock, 'PRIVMSG ' + CHANNEL_TO_JOIN + ' :' + FormatDateTime('c', Now()));
+  end;
+end;
+
+var
+  Sock: TInternetSocket;
+begin
+  Sock := TInternetSocket.Create('irc.rizon.net', 6667, False);
+  Sock.Connect();
+
+  tx(Sock, 'NICK ' + NICK_TO_USE);
+  tx(Sock, 'USER ' + NICK_TO_USE + ' * * *');
+
+  while True do
+  begin
+    if Sock.HasData() then
+      rx(Sock);
+
+    Sleep(500);
+  end;
+
+  Sock.Free();
+end.
