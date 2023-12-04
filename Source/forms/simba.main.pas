@@ -169,7 +169,7 @@ type
 
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormDestroy(Sender: TObject);
-    procedure FormShortCut(var Msg: TLMKey; var Handled: Boolean);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormWindowStateChange(Sender: TObject);
     procedure ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
     procedure MainMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
@@ -257,7 +257,7 @@ implementation
 {$R *.lfm}
 
 uses
-  LazFileUtils, AnchorDocking,
+  LazFileUtils, AnchorDocking, LCLType,
 
   simba.ide_initialization, simba.ide_events, simba.ide_utils,
   simba.ide_mainstatusbar, simba.ide_mainmenubar, simba.ide_maintoolbar,
@@ -547,7 +547,6 @@ begin
 
   Application.CaptureExceptions := True;
   Application.OnException := @Self.HandleException;
-  Application.OnShortcut := @Self.FormShortCut;
 
   Screen.AddHandlerFormAdded(@Self.HandleFormCreated, True);
 
@@ -590,12 +589,20 @@ begin
   SimbaSettings.Save();
 end;
 
-procedure TSimbaForm.FormShortCut(var Msg: TLMKey; var Handled: Boolean);
+procedure TSimbaForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+  Msg: TLMKey;
 begin
-  Handled := MainMenuFile.IsShortcut(Msg)   or MainMenuView.IsShortcut(Msg)   or
-             MainMenuEdit.IsShortcut(Msg)   or MainMenuScript.IsShortcut(Msg) or
-             MainMenuTools.IsShortcut(Msg)  or MainMenuHelp.IsShortcut(Msg)   or
-             MainMenuSearch.IsShortcut(Msg) or (KeyDataToShiftState(Msg.KeyData) = [ssAlt]); // Suppress windows freaking out
+  Msg := Default(TLMKey);
+  Msg.CharCode := Key;
+  if (ssAlt in Shift) then
+    Msg.KeyData := MK_ALT;
+
+  if MainMenuFile.IsShortcut(Msg) or MainMenuView.IsShortcut(Msg) or
+     MainMenuEdit.IsShortcut(Msg) or MainMenuScript.IsShortcut(Msg) or
+     MainMenuTools.IsShortcut(Msg) or MainMenuHelp.IsShortcut(Msg) or
+     MainMenuSearch.IsShortcut(Msg) then
+    Key := 0;
 end;
 
 procedure TSimbaForm.FormWindowStateChange(Sender: TObject);
