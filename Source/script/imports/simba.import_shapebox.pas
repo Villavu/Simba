@@ -66,6 +66,11 @@ begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.NameButton;
 end;
 
+procedure _LapeSimbaShapeBox_CopyButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PButton(Result)^ := PSimbaShapeBox(Params^[0])^.CopyButton;
+end;
+
 procedure _LapeSimbaShapeBox_DeleteButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PButton(Result)^ := PSimbaShapeBox(Params^[0])^.DeleteButton;
@@ -156,6 +161,11 @@ begin
   PSimbaShapeBox(Params^[0])^.QueryNameOnNew := PBoolean(Params^[1])^;
 end;
 
+procedure _LapeSimbaShapeBox_CopyShape(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaShapeBox(Params^[0])^.CopyShape(PInteger(Params^[1])^);
+end;
+
 procedure _LapeSimbaShapeBox_DeleteShape(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.DeleteShape(PInteger(Params^[1])^);
@@ -199,6 +209,7 @@ begin
     addClassVar('TShapeBox', 'UserDataSize', 'Integer', @_LapeSimbaShapeBox_UserDataSize_Read, @_LapeSimbaShapeBox_UserDataSize_Write);
     addClassVar('TShapeBox', 'QueryNameOnNew', 'Boolean', @_LapeSimbaShapeBox_QueryNameOnNew_Read, @_LapeSimbaShapeBox_QueryNameOnNew_Write);
 
+    addGlobalFunc('function TShapeBox.CopyShape(Index: Integer): Integer;', @_LapeSimbaShapeBox_CopyShape);
     addGlobalFunc('procedure TShapeBox.DeleteShape(Index: Integer);', @_LapeSimbaShapeBox_DeleteShape);
     addGlobalFunc('procedure TShapeBox.DeleteAllShapes;', @_LapeSimbaShapeBox_DeleteAllShapes);
 
@@ -211,6 +222,7 @@ begin
     addGlobalFunc('function TShapeBox.PathButton: TLazButton;', @_LapeSimbaShapeBox_PathButton);
     addGlobalFunc('function TShapeBox.PrintButton: TLazButton;', @_LapeSimbaShapeBox_PrintButton);
     addGlobalFunc('function TShapeBox.NameButton: TLazButton;', @_LapeSimbaShapeBox_NameButton);
+    addGlobalFunc('function TShapeBox.CopyButton: TLazButton;', @_LapeSimbaShapeBox_CopyButton);
     addGlobalFunc('function TShapeBox.DeleteButton: TLazButton;', @_LapeSimbaShapeBox_DeleteButton);
     addGlobalFunc('function TShapeBox.DeleteAllButton: TLazButton;', @_LapeSimbaShapeBox_DeleteAllButton);
 

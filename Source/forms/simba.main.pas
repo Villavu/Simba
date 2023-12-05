@@ -265,14 +265,15 @@ uses
   simba.ide_mainstatusbar, simba.ide_mainmenubar, simba.ide_maintoolbar,
 
   simba.shapeboxform, simba.openexampleform, simba.colorpickerhistoryform,
-  simba.debugimageform, simba.imagetostringform, simba.aboutform, simba.findinfilesform,
-  simba.outputform, simba.filebrowserform, simba.notesform, simba.settingsform,
-  simba.functionlistform, simba.scripttab, simba.scripttabsform,
-  simba.associate, simba.aca, simba.dtmeditor, simba.env,
-  simba.dockinghelpers, simba.nativeinterface,
-  simba.scriptformatter, simba.theme,
-  simba.scriptbackup, simba.backupsform, simba.threading,
-  simba.downloadsimbaform, simba.editor;
+  simba.debugimageform, simba.imagetostringform, simba.aboutform,
+  simba.findinfilesform, simba.outputform, simba.filebrowserform,
+  simba.notesform, simba.settingsform, simba.scripttabsform,
+  simba.functionlistform, simba.downloadsimbaform, simba.backupsform,
+
+  simba.scripttab, simba.associate,
+  simba.aca, simba.dtmeditor, simba.env, simba.dockinghelpers, simba.nativeinterface,
+  simba.scriptformatter, simba.theme, simba.scriptbackup,
+  simba.threading, simba.editor, simba.component_menubar;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -596,7 +597,7 @@ procedure TSimbaForm.DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift:
 var
   Msg: TLMKey;
 begin
-  if (Screen.ActiveControl is TSimbaEditor) then
+  if (Screen.ActiveControl is TSimbaEditor) or (Screen.ActiveControl is TSimbaMenuBar) then
   begin
     Msg := Default(TLMKey);
     Msg.CharCode := Key;

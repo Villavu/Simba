@@ -28,6 +28,7 @@ type
     function GetLineColor(const Flags: EPaintShapeFlags): TColor; inline;
     function GetConnectorColor(const Flags: EPaintShapeFlags): TColor; inline;
   public
+    FShapeBox: TSimbaShapeBox;
     FDragStart: TPoint;
     FName: String;
     FUserData: Pointer;
@@ -51,6 +52,8 @@ type
 
     function ToStr: String; virtual; abstract;
     procedure FromStr(Str: String); virtual; abstract;
+
+    function CreateCopy: TSimbaShapeBoxShape; virtual;
   end;
 
   TSimbaShapeBoxShape_Point = class(TSimbaShapeBoxShape)
@@ -78,6 +81,8 @@ type
 
     function ToStr: String; override;
     procedure FromStr(Str: String); override;
+
+    function CreateCopy: TSimbaShapeBoxShape; override;
   end;
 
   TSimbaShapeBoxShape_Box = class(TSimbaShapeBoxShape)
@@ -110,6 +115,8 @@ type
 
     function ToStr: String; override;
     procedure FromStr(Str: String); override;
+
+    function CreateCopy: TSimbaShapeBoxShape; override;
   end;
 
   TSimbaShapeBoxShape_Poly = class(TSimbaShapeBoxShape)
@@ -140,6 +147,8 @@ type
 
     function ToStr: String; override;
     procedure FromStr(Str: String); override;
+
+    function CreateCopy: TSimbaShapeBoxShape; override;
   end;
 
   TSimbaShapeBoxShape_Path = class(TSimbaShapeBoxShape_Poly)
@@ -189,6 +198,7 @@ type
     FDeleteButton: TButton;
     FDeleteAllButton: TButton;
     FPrintButton: TButton;
+    FCopyButton: TButton;
 
     FUserDataSize: Integer;
     FQueryNameOnNew: Boolean;
@@ -222,6 +232,7 @@ type
     procedure DoShapeDeleteAllClick(Sender: TObject);
     procedure DoShapeNameClick(Sender: TObject);
     procedure DoShapePrintClick(Sender: TObject);
+    procedure DoShapeCopyClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -230,6 +241,8 @@ type
 
     procedure SaveToFile(FileName: String);
     procedure LoadFromFile(FileName: String);
+
+    function CopyShape(Index: Integer): Integer;
 
     procedure DeleteShape(Index: Integer);
     procedure DeleteAllShapes;
@@ -255,6 +268,7 @@ type
     property DeleteButton: TButton read FDeleteButton;
     property DeleteAllButton: TButton read FDeleteAllButton;
     property PrintButton: TButton read FPrintButton;
+    property CopyButton: TButton read FCopyButton;
 
     property ShapeIndex: Integer read GetShapeIndex;
     property ShapeCount: Integer read GetShapeCount;
@@ -273,6 +287,7 @@ constructor TSimbaShapeBoxShape.Create(ShapeBox: TSimbaShapeBox);
 begin
   inherited Create();
 
+  FShapeBox := ShapeBox;
   FShapeType := String(ClassName).After('_');
   FName := FShapeType;
   FUserData := AllocMem(ShapeBox.UserDataSize);
@@ -284,6 +299,12 @@ begin
     FreeMemAndNil(FUserData);
 
   inherited Destroy();
+end;
+
+function TSimbaShapeBoxShape.CreateCopy: TSimbaShapeBoxShape;
+begin
+  Result := TSimbaShapeBoxShapeClass(Self.ClassType).Create(FShapeBox);
+  Result.FName := FName;
 end;
 
 function TSimbaShapeBoxShape.GetLineColor(const Flags: EPaintShapeFlags): TColor;
@@ -380,6 +401,13 @@ end;
 procedure TSimbaShapeBoxShape_Point.FromStr(Str: String);
 begin
   SScanf(Str, '%d,%d', [@FPoint.X, @FPoint.Y]);
+end;
+
+function TSimbaShapeBoxShape_Point.CreateCopy: TSimbaShapeBoxShape;
+begin
+  Result := inherited CreateCopy();
+
+  TSimbaShapeBoxShape_Point(Result).FPoint := FPoint;
 end;
 
 function TSimbaShapeBoxShape_Path.DistToEdge(P: TPoint): Integer;
@@ -588,6 +616,13 @@ begin
     SScanf(Elements[I], '%d,%d', [@FPoly[I].X, @FPoly[I].Y]);
 end;
 
+function TSimbaShapeBoxShape_Poly.CreateCopy: TSimbaShapeBoxShape;
+begin
+  Result := inherited CreateCopy();
+
+  TSimbaShapeBoxShape_Poly(Result).FPoly := Copy(FPoly);
+end;
+
 function TSimbaShapeBoxShape_Box.GetBox: TBox;
 begin
   Result := FBox;
@@ -602,6 +637,13 @@ end;
 procedure TSimbaShapeBoxShape_Box.FromStr(Str: String);
 begin
   SScanf(Str, '%d,%d,%d,%d', [@FBox.X1, @FBox.Y1, @FBox.X2, @FBox.Y2]);
+end;
+
+function TSimbaShapeBoxShape_Box.CreateCopy: TSimbaShapeBoxShape;
+begin
+  Result := inherited CreateCopy();
+
+  TSimbaShapeBoxShape_Box(Result).FBox := FBox;
 end;
 
 constructor TSimbaShapeBoxShape_Box.Create(ShapeBox: TSimbaShapeBox);
@@ -853,6 +895,11 @@ begin
     SimbaDebugLn([EDebugLn.FOCUS], FShapes[FListBox.ItemIndex].ToStr);
 end;
 
+procedure TSimbaShapeBox.DoShapeCopyClick(Sender: TObject);
+begin
+  CopyShape(FListBox.ItemIndex);
+end;
+
 function TSimbaShapeBox.GetShapeAt(P: TPoint): TSimbaShapeBoxShape;
 var
   I: Integer;
@@ -861,7 +908,7 @@ begin
   Result := nil;
 
   BestDist := Integer.MaxValue;
-  for I := 0 to FShapes.Count - 1 do
+  for I := FShapes.Count - 1 downto 0 do
   begin
     Dist := FShapes[I].DistToEdge(P);
 
@@ -1222,6 +1269,28 @@ begin
   end;
 end;
 
+function TSimbaShapeBox.CopyShape(Index: Integer): Integer;
+var
+  NewName: String;
+begin
+  Result := -1;
+
+  if CheckIndex(Index) then
+  begin
+    NewName := FShapes[Index].FName;
+    if FQueryNameOnNew and (not InputQuery('Simba', 'Enter name', NewName)) then
+      Exit;
+    InternalAddShape(FShapes[Index].CreateCopy());
+    if FQueryNameOnNew then
+      InternalNameShape(FListBox.ItemIndex, NewName);
+
+    if (FUserDataSize > 0) then
+      Move(FShapes[Index].FUserData^, FShapes[FListBox.ItemIndex].FUserData^, FUserDataSize);
+
+    Result := FListBox.ItemIndex;
+  end;
+end;
+
 procedure TSimbaShapeBox.DeleteShape(Index: Integer);
 begin
   InternalDeleteShape(Index);
@@ -1290,6 +1359,17 @@ begin
     Align := alTop;
     Caption := 'New Path';
     OnClick := @DoShapeAddButtonClick;
+    AutoSize := True;
+    BorderSpacing.Around := 5;
+  end;
+
+  FCopyButton := TButton.Create(FPanel);
+  with FCopyButton do
+  begin
+    Parent := FPanel;
+    Align := alBottom;
+    Caption := 'Copy Shape';
+    OnClick := @DoShapeCopyClick;
     AutoSize := True;
     BorderSpacing.Around := 5;
   end;
