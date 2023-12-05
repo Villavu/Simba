@@ -35,6 +35,8 @@ type
     FNeedDefaultPosition: Boolean;
     FNeedRestore: Boolean;
 
+    procedure DoShow; override;
+
     procedure DoMenuItemDestroyed(Sender: TObject);
     procedure DoMenuItemClicked(Sender: TObject);
 
@@ -45,8 +47,6 @@ type
     procedure SetParent(Value: TWinControl); override;
   public
     constructor CreateNew(AOwner: TComponent; Num: Integer = 0); override;
-
-    function ExecuteDock(NewControl, DropOnControl: TControl; DockAlign: TAlign): Boolean; override;
 
     property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
     property NeedDefaultPosition: Boolean read FNeedDefaultPosition write FNeedDefaultPosition;
@@ -224,9 +224,11 @@ begin
   FNeedDefaultPosition := True;
 end;
 
-function TSimbaAnchorDockHostSite.ExecuteDock(NewControl, DropOnControl: TControl; DockAlign: TAlign): Boolean;
+procedure TSimbaAnchorDockHostSite.DoShow;
 begin
-  Result := inherited;
+  inherited DoShow();
+
+  SimbaTheme.AddNativeWindowColoring(Self);
 end;
 
 procedure TSimbaAnchorDockSplitter.Paint;
@@ -284,7 +286,6 @@ begin
     end;
   end;
 end;
-
 
 function TAnchorDockMasterHelper.SaveLayout: String;
 var

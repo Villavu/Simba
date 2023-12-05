@@ -16,10 +16,7 @@ uses
 type
   TSimbaTheme = class
   protected
-    {$IFDEF WINDOWS}
     procedure DoFormAdded(Sender: TObject; Form: TCustomForm);
-    procedure DoColorTitle(Sender: TObject);
-    {$ENDIF}
 
     function GetScrollBarArrowSize: Integer;
     function GetScrollBarSize: Integer;
@@ -36,6 +33,8 @@ type
     ColorFont: TColor;
     ColorLine: TColor;
 
+    procedure AddNativeWindowColoring(Sender: TObject);
+
     property ScrollBarSize: Integer read GetScrollBarSize write SetScrollBarSize;
     property ScrollBarArrowSize: Integer read GetScrollBarArrowSize write SetScrollBarArrowSize;
 
@@ -50,20 +49,12 @@ implementation
 {$IFDEF WINDOWS}
 uses
   DwmApi;
+{$ENDIF}
 
 procedure TSimbaTheme.DoFormAdded(Sender: TObject; Form: TCustomForm);
 begin
-  Form.AddHandlerOnVisibleChanged(@DoColorTitle, True);
+  Form.AddHandlerFirstShow(@AddNativeWindowColoring);
 end;
-
-procedure TSimbaTheme.DoColorTitle(Sender: TObject);
-const
-  DWMWA_CAPTION_COLOR = 35;
-begin
-  if (Sender is TCustomForm) and TCustomForm(Sender).Visible and Assigned(DwmSetWindowAttribute) then
-    DwmSetWindowAttribute(TCustomForm(Sender).Handle, DWMWA_CAPTION_COLOR, @Self.ColorFrame, SizeOf(TColor));
-end;
-{$ENDIF}
 
 function TSimbaTheme.GetScrollBarArrowSize: Integer;
 begin
@@ -85,6 +76,20 @@ begin
   ATScrollbarTheme.InitialSize := Value;
 end;
 
+procedure TSimbaTheme.AddNativeWindowColoring(Sender: TObject);
+{$IFDEF WINDOWS}
+const
+  DWMWA_CAPTION_COLOR = 35;
+begin
+  // DWMWA_CAPTION_COLOR (Sadly need windows 11)
+  if (Win32BuildNumber >= 22000) and (Sender is TCustomForm) and Assigned(DwmSetWindowAttribute) then
+    DwmSetWindowAttribute(TCustomForm(Sender).Handle, DWMWA_CAPTION_COLOR, @ColorFrame, SizeOf(TColor));
+end;
+{$ELSE}
+begin
+end;
+{$ENDIF}
+
 constructor TSimbaTheme.Create;
 begin
   ColorFrame := $262628;
@@ -93,7 +98,7 @@ begin
   ColorScrollBarActive := $414346;
   ColorScrollBarInActive := $2D2E2F;
   ColorLine := $657076;
-  ColorFont := $f2f2f2;
+  ColorFont := $F2F2F2;
 
   with ATScrollbarTheme do
   begin
@@ -117,10 +122,7 @@ begin
     ColorArrowFillPressed := ColorScrollBarActive;
   end;
 
-  {$IFDEF WINDOWS}
-  if (Win32BuildNumber >= 22000) then // DWMWA_CAPTION_COLOR (Sadly windows 11)
-    Screen.AddHandlerFormAdded(@Self.DoFormAdded);
-  {$ENDIF}
+  Screen.AddHandlerFormAdded(@Self.DoFormAdded);
 end;
 
 initialization
