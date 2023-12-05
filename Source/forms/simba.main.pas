@@ -169,7 +169,6 @@ type
 
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormDestroy(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormWindowStateChange(Sender: TObject);
     procedure ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
     procedure MainMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
@@ -239,6 +238,9 @@ type
     procedure HandleException(Sender: TObject; E: Exception);
     procedure HandleFormCreated(Sender: TObject; Form: TCustomForm);
 
+    // Handle main menu shortcuts if editor is focused
+    procedure DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+
     procedure DoTabLoaded(Sender: TObject);
 
     procedure SetCustomFontSize(Value: Integer);
@@ -270,7 +272,7 @@ uses
   simba.dockinghelpers, simba.nativeinterface,
   simba.scriptformatter, simba.theme,
   simba.scriptbackup, simba.backupsform, simba.threading,
-  simba.downloadsimbaform;
+  simba.downloadsimbaform, simba.editor;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -547,6 +549,7 @@ begin
 
   Application.CaptureExceptions := True;
   Application.OnException := @Self.HandleException;
+  Application.AddOnKeyDownBeforeHandler(@DoApplicationKeyDown);
 
   Screen.AddHandlerFormAdded(@Self.HandleFormCreated, True);
 
@@ -589,20 +592,23 @@ begin
   SimbaSettings.Save();
 end;
 
-procedure TSimbaForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TSimbaForm.DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 var
   Msg: TLMKey;
 begin
-  Msg := Default(TLMKey);
-  Msg.CharCode := Key;
-  if (ssAlt in Shift) then
-    Msg.KeyData := MK_ALT;
+  if (Screen.ActiveControl is TSimbaEditor) then
+  begin
+    Msg := Default(TLMKey);
+    Msg.CharCode := Key;
+    if (ssAlt in Shift) then
+      Msg.KeyData := MK_ALT;
 
-  if MainMenuFile.IsShortcut(Msg) or MainMenuView.IsShortcut(Msg) or
-     MainMenuEdit.IsShortcut(Msg) or MainMenuScript.IsShortcut(Msg) or
-     MainMenuTools.IsShortcut(Msg) or MainMenuHelp.IsShortcut(Msg) or
-     MainMenuSearch.IsShortcut(Msg) then
-    Key := 0;
+    if MainMenuFile.IsShortcut(Msg) or MainMenuView.IsShortcut(Msg) or
+       MainMenuEdit.IsShortcut(Msg) or MainMenuScript.IsShortcut(Msg) or
+       MainMenuTools.IsShortcut(Msg) or MainMenuHelp.IsShortcut(Msg) or
+       MainMenuSearch.IsShortcut(Msg) then
+      Key := 0;
+  end;
 end;
 
 procedure TSimbaForm.FormWindowStateChange(Sender: TObject);
