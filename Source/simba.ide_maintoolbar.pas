@@ -21,6 +21,7 @@ type
 
     FButtonNew: TSimbaButton;
     FButtonOpen: TSimbaButton;
+    FButtonOpenDrop: TSimbaButton;
     FButtonSave: TSimbaButton;
     FButtonSaveAll: TSimbaButton;
 
@@ -266,7 +267,10 @@ begin
   FToolBar.Align := alClient;
 
   FButtonNew := FToolBar.AddButton(IMG_NEW, 'New File (Ctrl + N)', @DoClickFileButton);
-  FButtonOpen := FToolBar.AddDropdownButton(IMG_OPEN, 'Open File (Ctrl + O)', @DoClickFileButton, SimbaForm.RecentFilesPopup);
+  FButtonOpen := FToolBar.AddButton(IMG_OPEN, 'Open File (Ctrl + O)', @DoClickFileButton);
+  FButtonOpen.BorderSpacing.Right := 0;
+  FButtonOpenDrop := FToolBar.AddDropdownButton('Open Recent File', SimbaForm.RecentFilesPopup);
+  FButtonOpenDrop.BorderSpacing.Left := 0;
   FButtonSave := FToolBar.AddButton(IMG_SAVE, 'Save Script (Ctrl + S)', @DoClickFileButton);
   FButtonSaveAll := FToolBar.AddButton(IMG_SAVE_ALL, 'Save All', @DoClickFileButton);
 
