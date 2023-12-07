@@ -594,9 +594,18 @@ begin
 end;
 
 procedure TSimbaForm.DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+
+  function isEditorKeyStroke: Boolean;
+  begin
+    Result := (Screen.ActiveControl is TSimbaEditor) and (TSimbaEditor(Screen.ActiveControl).Keystrokes.FindKeycode(Key, Shift) > -1);
+  end;
+
 var
   Msg: TLMKey;
 begin
+  if isEditorKeyStroke() then
+    Exit;
+
   if (Screen.ActiveControl is TSimbaEditor) or (Screen.ActiveControl is TSimbaMenuBar) then
   begin
     Msg := Default(TLMKey);

@@ -32,7 +32,7 @@ type
     constructor Create(AOwner: TComponent); override;
 
     function AddButton(ImageIndex: Integer; HintText: String = ''; AOnClick: TNotifyEvent = nil): TSimbaTransparentButton;
-    function AddDropdownButton(ImageIndex: Integer; HintText: String = ''; AOnClick: TNotifyEvent = nil; APopupMenu: TPopupMenu = nil): TSimbaTransparentButton;
+    function AddDropdownButton(HintText: String = ''; APopupMenu: TPopupMenu = nil): TSimbaTransparentButton;
     function AddDivider: TSimbaTransparentButton;
 
     property Spacing: Integer read GetSpacing write SetSpacing;
@@ -67,11 +67,9 @@ type
     FMouseInDropdownArrow: Boolean;
 
     function ScaleToToolbarSize(Value: Integer): Integer;
-    function GetDropdownArrowRect: TRect;
 
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
     procedure PaintBackground(var PaintRect: TRect); override;
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   public
     DropdownMenu: TPopupMenu;
 
@@ -89,50 +87,27 @@ begin
     Result := Value;
 end;
 
-function TSimbaDropToolButton.GetDropdownArrowRect: TRect;
-begin
-  Result.Left := Width - ScaleToToolbarSize(10);
-  Result.Right := Width - 2;
-  Result.Top := 3;
-  Result.Bottom := Height - 3;
-end;
-
 procedure TSimbaDropToolButton.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
 begin
   inherited CalculatePreferredSize(PreferredWidth, PreferredHeight, WithThemeSpace);
 
-  PreferredWidth := PreferredWidth + ScaleToToolbarSize(10);
-  Margin := ScaleToToolbarSize(5);
+  PreferredWidth := ScaleToToolbarSize(10);
 end;
 
 procedure TSimbaDropToolButton.PaintBackground(var PaintRect: TRect);
 begin
   inherited PaintBackground(PaintRect);
 
-  CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, GetDropdownArrowRect().CenterPoint, IfThen(FToolbar.FButtonSize >= 20, 2, 1));
-  //Canvas.Pen.Color := 255;
-  //Canvas.Frame(GetDropdownArrowRect());
-end;
-
-procedure TSimbaDropToolButton.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  inherited MouseDown(Button, Shift, X, Y);
-
-  FMouseInDropdownArrow := GetDropdownArrowRect().Contains(TPoint.Create(X, Y));
+  CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, PaintRect.CenterPoint, IfThen(FToolbar.FButtonSize >= 20, 2, 1));
 end;
 
 procedure TSimbaDropToolButton.Click;
 begin
-  if FMouseInDropdownArrow then
-  begin
-    if (DropdownMenu <> nil) then
-      with ClientToScreen(TPoint.Create(GetDropdownArrowRect().CenterPoint.X, Height)) do
-        DropdownMenu.PopUp(X, Y);
-
-    Exit;
-  end;
-
   inherited Click();
+
+  if (DropdownMenu <> nil) then
+    with ClientToScreen(TPoint.Create(0,Height)) do
+      DropDownMenu.Popup(X, Y);
 end;
 
 procedure TSimbaToolButton.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
@@ -147,7 +122,10 @@ begin
 
   FToolBar := AOwner as TSimbaToolBar;
 
-  BorderSpacing.Around := 2;
+  BorderSpacing.Left := 2;
+  BorderSpacing.Right := 2;
+  BorderSpacing.Top := 2;
+  BorderSpacing.Bottom := 2;
 end;
 
 procedure TSimbaToolButtonDivider.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
@@ -222,15 +200,12 @@ begin
   Result.OnClick := AOnClick;
 end;
 
-function TSimbaToolbar.AddDropdownButton(ImageIndex: Integer; HintText: String; AOnClick: TNotifyEvent; APopupMenu: TPopupMenu): TSimbaTransparentButton;
+function TSimbaToolbar.AddDropdownButton(HintText: String; APopupMenu: TPopupMenu): TSimbaTransparentButton;
 begin
   Result := TSimbaDropToolButton.Create(Self);
   Result.Parent := FFlowPanel;
-  Result.Images := FImages;
-  Result.ImageIndex := ImageIndex;
   Result.Hint := HintText;
   Result.ShowHint := HintText <> '';
-  Result.OnClick := AOnClick;
 
   TSimbaDropToolButton(Result).DropdownMenu := APopupMenu;
 end;
