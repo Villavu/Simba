@@ -37,6 +37,8 @@ type
     FLastTextChangeStamp: Int64;
     FModifiedEvent: TNotifyEvent;
 
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+
     procedure FontChanged(Sender: TObject); override;
 
     procedure MaybeReplaceModifiers;
@@ -274,6 +276,14 @@ begin
 
   if FUseSimbaColors then
     FAttributes.LoadFromFile(SimbaSettings.Editor.CustomColors.Value);
+end;
+
+procedure TSimbaEditor.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if (ssCtrl in Shift) then // Mouse link fix
+    CaretXY := PixelsToRowColumn(Point(X, Y));
+
+  inherited MouseDown(Button, Shift, X, Y);
 end;
 
 procedure TSimbaEditor.FontChanged(Sender: TObject);
