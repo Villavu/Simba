@@ -379,16 +379,10 @@ end;
 
 procedure TSimbaScriptTab.DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if (Sender is TSynEdit) then
-  begin
-    X := TSynEdit(Sender).PixelsToRowColumn(ScreenToControl(Mouse.CursorPos), []).X;
-    Y := TSynEdit(Sender).PixelsToRowColumn(ScreenToControl(Mouse.CursorPos), []).Y;
-  end;
-
   FLinkClick.Script := Script;
   FLinkClick.ScriptFileName := ScriptFileName;
   FLinkClick.CaretPos := Editor.GetCaretPos(True);
-  FLinkClick.Expression := Editor.GetExpressionEx(X, Y);
+  FLinkClick.Expression := Editor.GetExpressionEx(FEditor.CaretX, FEditor.CaretY);
 
   QueueOnMainThread(@DoFindAndShowDeclaration);
 end;

@@ -133,7 +133,7 @@ begin
   FSocket.ReadFlags := MSG_PEEK;
 
   try
-    Result := FSocket.Read(b, 1) > 0;
+    Result := FSocket.Read(b{%H-}, 1) > 0;
   finally
     FSocket.SetSocketBlockingMode(FSocket.Handle, bmBlocking, @FDS);
     FSocket.ReadFlags := 0;
