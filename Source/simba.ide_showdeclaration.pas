@@ -100,6 +100,9 @@ begin
     if (Declaration is TDeclaration_Method) then
       SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, TDeclaration_Method(Declaration).HeaderString])
     else
+    if (Declaration is TDeclaration_Var) then
+      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, TDeclaration_Var(Declaration).Name + TDeclaration_Var(Declaration).VarTypeString + TDeclaration_Var(Declaration).VarDefaultString])
+    else
       SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, Declaration.Text])
   end;
 end;

@@ -40,6 +40,7 @@ type
     procedure SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint); virtual; abstract;
     procedure SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint); virtual; abstract;
 
+    procedure Offset(X, Y: Integer); virtual; abstract;
     function Center: TPoint; virtual; abstract;
     function DistToEdge(P: TPoint): Integer; virtual; abstract;
     function Contains(P: TPoint; ExpandMod: Integer = 0): Boolean; virtual; abstract;
@@ -65,6 +66,7 @@ type
     procedure SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint); override;
     procedure SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint); override;
 
+    procedure Offset(X, Y: Integer); override;
     function Center: TPoint; override;
     function DistToEdge(P: TPoint): Integer; override;
     function Contains(P: TPoint; ExpandMod: Integer = 0): Boolean; override;
@@ -98,6 +100,7 @@ type
     procedure SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint); override;
     procedure SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint); override;
 
+    procedure Offset(X, Y: Integer); override;
     function Center: TPoint; override;
     function DistToEdge(P: TPoint): Integer; override;
     function Contains(P: TPoint; ExpandMod: Integer = 0): Boolean; override;
@@ -131,6 +134,7 @@ type
     procedure SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint); override;
     procedure SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint); override;
 
+    procedure Offset(X, Y: Integer); override;
     function Center: TPoint; override;
     function GetDragIndex(MousePoint: TPoint): Integer;
     function DistToEdge(P: TPoint): Integer; override;
@@ -177,14 +181,14 @@ type
 
   PSimbaShapeBox = ^TSimbaShapeBox;
   TSimbaShapeBox = class(TSimbaImageBox)
-  protected
-  type
+  protected type
     TShapeList = specialize TFPGObjectList<TSimbaShapeBoxShape>;
   protected
     FShapes: TShapeList;
 
     FSelecting: TSimbaShapeBoxShape;
     FDragging: TSimbaShapeBoxShape;
+    FUpdating: Integer;
 
     FPanel: TPanel;
     FListBox: TListBox;
@@ -201,7 +205,8 @@ type
     FCopyButton: TButton;
 
     FUserDataSize: Integer;
-    FQueryNameOnNew: Boolean;
+    FQueryName: Boolean;
+    FOnSelectionChange: TNotifyEvent;
 
     function CheckIndex(Index: Integer): Boolean;
 
@@ -213,12 +218,12 @@ type
     procedure InternalClear;
 
     function GetShape(Index: Integer): TShapeBoxShape;
-    function GetShapeCount: Integer;
-    function GetShapeIndex: Integer;
-    function GetSelectedShape: TSimbaShapeBoxShape;
+    function GetCount: Integer;
     function GetShapeAt(P: TPoint): TSimbaShapeBoxShape;
 
-    procedure SetUserDataSize(AValue: Integer);
+    function GetSelectedShape: TShapeBoxShape;
+    function GetSelectedIndex: Integer;
+    procedure SetSelectedIndex(Value: Integer);
 
     procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
@@ -234,8 +239,11 @@ type
     procedure DoShapePrintClick(Sender: TObject);
     procedure DoShapeCopyClick(Sender: TObject);
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent; AUserDataSize: Integer = 0); reintroduce;
     destructor Destroy; override;
+
+    procedure BeginUpdate;
+    procedure EndUpdate;
 
     procedure PrintShapes;
 
@@ -247,6 +255,9 @@ type
     procedure DeleteShape(Index: Integer);
     procedure DeleteAllShapes;
 
+    function HasSelection: Boolean;
+    procedure MakeSelectionVisible;
+
     procedure ManualAddPoint(Point: TPoint; AName: String = ''); overload;
     procedure ManualAddPoint(Point: TPoint; AName: String; constref UserData); overload;
     procedure ManualAddBox(Box: TBox; AName: String = '');
@@ -256,8 +267,8 @@ type
     procedure ManualAddPath(Path: TPointArray; AName: String = '');
     procedure ManualAddPath(Path: TPointArray; AName: String; constref UserData); overload;
 
-    property QueryNameOnNew: Boolean read FQueryNameOnNew write FQueryNameOnNew;
-    property UserDataSize: Integer read FUserDataSize write SetUserDataSize;
+    property OnSelectionChange: TNotifyEvent read FOnSelectionChange write FOnSelectionChange;
+    property QueryName: Boolean read FQueryName write FQueryName;
     property Panel: TPanel read FPanel;
 
     property PointButton: TButton read FPointButton;
@@ -270,9 +281,11 @@ type
     property PrintButton: TButton read FPrintButton;
     property CopyButton: TButton read FCopyButton;
 
-    property ShapeIndex: Integer read GetShapeIndex;
-    property ShapeCount: Integer read GetShapeCount;
+    property Count: Integer read GetCount;
     property Shape[Index: Integer]: TShapeBoxShape read GetShape;
+
+    property SelectedIndex: Integer read GetSelectedIndex write SetSelectedIndex;
+    property SelectedShape: TShapeBoxShape read GetSelectedShape;
   end;
 
 implementation
@@ -290,7 +303,7 @@ begin
   FShapeBox := ShapeBox;
   FShapeType := String(ClassName).After('_');
   FName := FShapeType;
-  FUserData := AllocMem(ShapeBox.UserDataSize);
+  FUserData := AllocMem(ShapeBox.FUserDataSize);
 end;
 
 destructor TSimbaShapeBoxShape.Destroy;
@@ -340,6 +353,11 @@ end;
 procedure TSimbaShapeBoxShape_Point.SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint);
 begin
 
+end;
+
+procedure TSimbaShapeBoxShape_Point.Offset(X, Y: Integer);
+begin
+  FPoint := FPoint.Offset(X, Y);
 end;
 
 function TSimbaShapeBoxShape_Point.Center: TPoint;
@@ -438,8 +456,7 @@ begin
   else
     ACanvas.DrawPoly(FPoly, False, GetLineColor(Flags));
 
-  for P in FPoly do
-    ACanvas.DrawCircleFilled(P, 3, GetConnectorColor(Flags));
+  ACanvas.DrawCrossArray(FPoly, 8, GetConnectorColor(Flags));
 end;
 
 procedure TSimbaShapeBoxShape_Poly.BuildContainsCache;
@@ -479,6 +496,11 @@ begin
         Key := 0;
       end;
   end;
+end;
+
+procedure TSimbaShapeBoxShape_Poly.Offset(X, Y: Integer);
+begin
+  FPoly := FPoly.Offset(X, Y);
 end;
 
 function TSimbaShapeBoxShape_Poly.Center: TPoint;
@@ -665,6 +687,7 @@ begin
   begin
     FBox.X2 := MousePoint.X;
     FBox.Y2 := MousePoint.Y;
+    FBox := FBox.Normalize();
 
     Sender.InternalSetSelecting(nil);
   end;
@@ -672,7 +695,11 @@ end;
 
 procedure TSimbaShapeBoxShape_Box.SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint);
 begin
+end;
 
+procedure TSimbaShapeBoxShape_Box.Offset(X, Y: Integer);
+begin
+  FBox := FBox.Offset(X, Y);
 end;
 
 function TSimbaShapeBoxShape_Box.Center: TPoint;
@@ -813,23 +840,25 @@ end;
 
 procedure TSimbaShapeBox.DoSelectionChanged(Sender: TObject; User: Boolean);
 begin
-  if User and (GetSelectedShape() <> nil) then
+  if (FUpdating = 0) then
   begin
-    with GetSelectedShape().Center() do
-      if not IsVisible(X, Y) then
-        MoveTo(X, Y);
-  end;
+    if User then
+      MakeSelectionVisible();
 
-  Paint();
+    if Assigned(FOnSelectionChange) then
+      FOnSelectionChange(Self);
+
+    Paint();
+  end;
 end;
 
 procedure TSimbaShapeBox.DoShapeAddButtonClick(Sender: TObject);
 var
   NewShape: TSimbaShapeBoxShape;
-  NewName: String;
+  NewName: String = '';
 begin
   NewShape := nil;
-  if FQueryNameOnNew and (not InputQuery('Simba', 'Enter name', NewName)) then
+  if FQueryName and (not InputQuery('Simba', 'Enter name', NewName)) then
     Exit;
 
   if (Sender = FPathButton) then
@@ -858,7 +887,7 @@ begin
 
   if (NewShape <> nil) then
   begin
-    if FQueryNameOnNew then
+    if FQueryName then
       NewShape.FName := NewName;
 
     InternalAddShape(NewShape, True);
@@ -882,7 +911,7 @@ end;
 
 procedure TSimbaShapeBox.DoShapeNameClick(Sender: TObject);
 var
-  Value: String;
+  Value: String = '';
 begin
   if (FListBox.ItemIndex > -1) then
     if InputQuery('Shape name', 'Enter shape name', Value) then
@@ -947,31 +976,24 @@ begin
   end;
 end;
 
-function TSimbaShapeBox.GetShapeCount: Integer;
+function TSimbaShapeBox.GetCount: Integer;
 begin
   Result := FListBox.Count;
 end;
 
-function TSimbaShapeBox.GetShapeIndex: Integer;
+function TSimbaShapeBox.GetSelectedIndex: Integer;
 begin
   Result := FListBox.ItemIndex;
 end;
 
-procedure TSimbaShapeBox.SetUserDataSize(AValue: Integer);
+procedure TSimbaShapeBox.SetSelectedIndex(Value: Integer);
 begin
-  FUserDataSize := AValue;
+  FListBox.ItemIndex := Value;
 end;
 
 function TSimbaShapeBox.CheckIndex(Index: Integer): Boolean;
 begin
   Result := (Index >= 0) and (Index < FListBox.Count);
-end;
-
-function TSimbaShapeBox.GetSelectedShape: TSimbaShapeBoxShape;
-begin
-  Result := nil;
-  if CheckIndex(FListBox.ItemIndex) then
-    Result := FShapes[FListBox.ItemIndex];
 end;
 
 procedure TSimbaShapeBox.InternalAddShape(Shape: TSimbaShapeBoxShape; IsSelecting: Boolean);
@@ -1019,6 +1041,11 @@ procedure TSimbaShapeBox.InternalClear;
 begin
   FShapes.Clear();
   FListBox.Items.Clear();
+end;
+
+function TSimbaShapeBox.GetSelectedShape: TShapeBoxShape;
+begin
+  Result := GetShape(SelectedIndex);
 end;
 
 procedure TSimbaShapeBox.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -1088,26 +1115,46 @@ begin
   if (FSelecting <> nil) then
   begin
     FSelecting.SelectingKeyDown(Self, Key, Shift, FMousePoint);
-    if (Key = 0) then // Something happened
-      Paint();
+
+    Key := 0;
+  end
+  else
+  if HasSelection() then
+  begin
+    case Key of
+      VK_LEFT:  FShapes[FListBox.ItemIndex].Offset(-1, 0);
+      VK_RIGHT: FShapes[FListBox.ItemIndex].Offset(1, 0);
+      VK_UP:    FShapes[FListBox.ItemIndex].Offset(0, -1);
+      VK_DOWN:  FShapes[FListBox.ItemIndex].Offset(0, 1);
+      else
+        Exit;
+    end;
+
+    Key := 0;
   end;
+
+  if (Key = 0) then // Something happened
+    Paint();
 end;
 
 procedure TSimbaShapeBox.DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect);
 var
-  I: Integer;
-  SelectedShape, SelectingShape: TSimbaShapeBoxShape;
+  _SelectedShape, _SelectingShape: TSimbaShapeBoxShape;
   Flags: EPaintShapeFlags;
+  I: Integer;
 begin
-  SelectingShape := FSelecting;
-  SelectedShape  := GetSelectedShape();
+  _SelectingShape := FSelecting;
+  if CheckIndex(FListBox.ItemIndex) then
+    _SelectedShape := FShapes[FListBox.ItemIndex]
+  else
+    _SelectedShape := nil;
 
   for I := 0 to FShapes.Count - 1 do
     if FShapes[I].NeedPaint(R) then
     begin
       Flags := [];
-      if (FShapes[I] = SelectingShape) then Flags := Flags + [EPaintShapeFlag.SELECTING];
-      if (FShapes[I] = SelectedShape)  then Flags := Flags + [EPaintShapeFlag.SELECTED];
+      if (FShapes[I] = _SelectingShape) then Flags := Flags + [EPaintShapeFlag.SELECTING];
+      if (FShapes[I] = _SelectedShape)  then Flags := Flags + [EPaintShapeFlag.SELECTED];
 
       FShapes[I].Paint(Self, Bitmap, Flags, FMousePoint);
     end;
@@ -1278,10 +1325,10 @@ begin
   if CheckIndex(Index) then
   begin
     NewName := FShapes[Index].FName;
-    if FQueryNameOnNew and (not InputQuery('Simba', 'Enter name', NewName)) then
+    if FQueryName and (not InputQuery('Simba', 'Enter name', NewName)) then
       Exit;
     InternalAddShape(FShapes[Index].CreateCopy());
-    if FQueryNameOnNew then
+    if FQueryName then
       InternalNameShape(FListBox.ItemIndex, NewName);
 
     if (FUserDataSize > 0) then
@@ -1301,21 +1348,47 @@ begin
   InternalClear();
 end;
 
-constructor TSimbaShapeBox.Create(AOwner: TComponent);
+function TSimbaShapeBox.HasSelection: Boolean;
+begin
+  Result := CheckIndex(FListBox.ItemIndex);
+end;
+
+procedure TSimbaShapeBox.MakeSelectionVisible;
+var
+  P: TPoint;
+begin
+  if CheckIndex(FListBox.ItemIndex) then
+  begin
+    P := FShapes[FListBox.ItemIndex].Center();
+    if not IsVisible(P.X, P.Y) then
+      MoveTo(P.X, P.Y);
+  end;
+end;
+
+constructor TSimbaShapeBox.Create(AOwner: TComponent; AUserDataSize: Integer);
 begin
   inherited Create(AOwner);
 
+  FUserDataSize := AUserDataSize;
   FShapes := TShapeList.Create();
 
   FPanel := TPanel.Create(Self);
   FPanel.Parent := Self;
   FPanel.Align := alLeft;
   FPanel.BevelOuter := bvNone;
-  FPanel.Width := 200;
+
+  with TBitmap.Create() do
+  try
+    Font := Self.Font;
+
+    FPanel.Width := Round(Canvas.TextWidth('Delete All Shapes') * 1.5);
+  finally
+    Free();
+  end;
 
   FListBox := TListBox.Create(FPanel);
   FListBox.Parent := FPanel;
-  FListBox.BorderSpacing.Around := 10;
+  FListBox.BorderSpacing.Around := 5;
   FListBox.Align := alClient;
   FListBox.OnSelectionChange := @DoSelectionChanged;
 
@@ -1425,6 +1498,21 @@ begin
     FreeAndNil(FShapes);
 
   inherited Destroy();
+end;
+
+procedure TSimbaShapeBox.BeginUpdate;
+begin
+  Inc(FUpdating);
+end;
+
+procedure TSimbaShapeBox.EndUpdate;
+begin
+  if (FUpdating > 0) then
+  begin
+    Dec(FUpdating);
+    if (FUpdating = 0) then
+      DoSelectionChanged(Self, True);
+  end;
 end;
 
 end.

@@ -418,11 +418,11 @@ function TCodeinsight.ParseExpression(Expr: TExpressionItems; Flags: EParseExpre
     for Decl in GetMembersOfType(Decl) do
       if Decl.IsName(Expr.Text) then
       begin
-        if (Decl is TDeclaration_Var) and (TDeclaration_Var(Decl).VarType <> nil) then
-          Result := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType)
-        else
         if Expr.IsLastItem then
           Result := Decl
+        else
+        if (Decl is TDeclaration_Var) and (TDeclaration_Var(Decl).VarType <> nil) then
+          Result := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType)
         else
         if (Decl is TDeclaration_Method) and Assigned(TDeclaration_Method(Decl).ResultType) then
           Result := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType);
@@ -498,10 +498,11 @@ begin
   end;
 
   Result := Decl;
-
-  if (EParseExpressionFlag.WantMethodResult in Flags) then
-    if (Result is TDeclaration_Method) and Assigned(TDeclaration_Method(Result).ResultType) then
-      Result := EnsureTypeDeclaration(TDeclaration_Method(Result).ResultType);
+  if (EParseExpressionFlag.WantVarType in Flags) and (Result is TDeclaration_Var) then
+    Result := EnsureTypeDeclaration(TDeclaration_Var(Result).VarType)
+  else
+  if (EParseExpressionFlag.WantMethodResult in Flags) and (Result is TDeclaration_Method) and (TDeclaration_Method(Result).ResultType <> nil) then
+    Result := EnsureTypeDeclaration(TDeclaration_Method(Result).ResultType);
 end;
 
 function TCodeinsight.ParseExpression(Expr: String; Flags: EParseExpressionFlags): TDeclaration;

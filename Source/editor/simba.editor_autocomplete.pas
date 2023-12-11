@@ -558,7 +558,7 @@ begin
         end else
           Filter := '';
 
-        FDecls := FCodeinsight.GetMembersOfType(FCodeinsight.ParseExpression(Expression, [EParseExpressionFlag.WantMethodResult]));
+        FDecls := FCodeinsight.GetMembersOfType(FCodeinsight.ParseExpression(Expression, [EParseExpressionFlag.WantMethodResult, EParseExpressionFlag.WantVarType]));
       end else
       begin
         Filter := Expression;
