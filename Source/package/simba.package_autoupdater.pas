@@ -86,7 +86,7 @@ begin
   if (FUpdates.Count > 0) then
   begin
     SimbaMainToolBar.ButtonPackage.Hint       := 'Open packages' + LineEnding + FUpdates.Text;
-    SimbaMainToolBar.ButtonPackage.ImageIndex := IMG_PACKAGE + Min(FUpdates.Count, 9);
+    SimbaMainToolBar.ButtonPackage.ImageIndex := IMG_PACKAGE + Min(1 + FUpdates.Count, 9);
   end else
   begin
     SimbaMainToolBar.ButtonPackage.Hint       := 'Open packages';

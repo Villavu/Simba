@@ -20,10 +20,11 @@ type
   PComponent = ^TComponent;
   PPanel = ^TPanel;
   PButton = ^TButton;
+  PNotifyEvent = ^TNotifyEvent;
 
 procedure _LapeSimbaShapeBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBox(Result)^ := TSimbaShapeBox.Create(PComponent(Params^[0])^);
+  PSimbaImageBox(Result)^ := TSimbaShapeBox.Create(PComponent(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapeSimbaShapeBox_SaveToFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -131,34 +132,19 @@ begin
   PShapeBoxShape(Result)^ := PSimbaShapeBox(Params^[0])^.Shape[PInteger(Params^[1])^];
 end;
 
-procedure _LapeSimbaShapeBox_GetShapeIndex(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaShapeBox_GetCount(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaShapeBox(Params^[0])^.ShapeIndex;
+  PInteger(Result)^ := PSimbaShapeBox(Params^[0])^.Count;
 end;
 
-procedure _LapeSimbaShapeBox_GetShapeCount(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaShapeBox_QueryName_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaShapeBox(Params^[0])^.ShapeCount;
+  PBoolean(Result)^ := PSimbaShapeBox(Params^[0])^.QueryName;
 end;
 
-procedure _LapeSimbaShapeBox_UserDataSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaShapeBox_QueryName_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaShapeBox(Params^[0])^.UserDataSize;
-end;
-
-procedure _LapeSimbaShapeBox_UserDataSize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaShapeBox(Params^[0])^.UserDataSize := PInteger(Params^[1])^;
-end;
-
-procedure _LapeSimbaShapeBox_QueryNameOnNew_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PSimbaShapeBox(Params^[0])^.QueryNameOnNew;
-end;
-
-procedure _LapeSimbaShapeBox_QueryNameOnNew_WRite(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaShapeBox(Params^[0])^.QueryNameOnNew := PBoolean(Params^[1])^;
+  PSimbaShapeBox(Params^[0])^.QueryName := PBoolean(Params^[1])^;
 end;
 
 procedure _LapeSimbaShapeBox_CopyShape(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -174,6 +160,46 @@ end;
 procedure _LapeSimbaShapeBox_DeleteAllShapes(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaShapeBox(Params^[0])^.DeleteAllShapes();
+end;
+
+procedure _LapeSimbaShapeBox_BeginUpdate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaShapeBox(Params^[0])^.BeginUpdate();
+end;
+
+procedure _LapeSimbaShapeBox_EndUpdate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaShapeBox(Params^[0])^.EndUpdate();
+end;
+
+procedure _LapeSimbaShapeBox_OnSelectionChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PSimbaShapeBox(Params^[0])^.OnSelectionChange;
+end;
+
+procedure _LapeSimbaShapeBox_OnSelectionChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaShapeBox(Params^[0])^.OnSelectionChange := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeSimbaShapeBox_HasSelection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaShapeBox(Params^[0])^.HasSelection;
+end;
+
+procedure _LapeSimbaShapeBox_GetSelectedShape(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PShapeBoxShape(Result)^ := PSimbaShapeBox(Params^[0])^.SelectedShape;
+end;
+
+procedure _LapeSimbaShapeBox_SelectedIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaShapeBox(Params^[0])^.SelectedIndex;
+end;
+
+procedure _LapeSimbaShapeBox_SelectedIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaShapeBox(Params^[0])^.SelectedIndex := PInteger(Params^[1])^;
 end;
 
 procedure ImportSimbaShapeBox(Compiler: TSimbaScript_Compiler);
@@ -200,18 +226,23 @@ begin
       'end;'
     ], 'TShapeBoxShape');
 
-    addClassConstructor('TShapeBox', '(Owner: TLazComponent)', @_LapeSimbaShapeBox_Create);
+    addClassConstructor('TShapeBox', '(Owner: TLazComponent; UserDataSize: Integer = 0)', @_LapeSimbaShapeBox_Create);
 
+    addClassVar('TShapeBox', 'OnSelectionChange', 'TLazNotifyEvent', @_LapeSimbaShapeBox_OnSelectionChange_Read, @_LapeSimbaShapeBox_OnSelectionChange_Write);
+    addClassVar('TShapeBox', 'QueryName', 'Boolean', @_LapeSimbaShapeBox_QueryName_Read, @_LapeSimbaShapeBox_QueryName_Write);
+    addClassVar('TShapeBox', 'SelectedIndex', 'Integer', @_LapeSimbaShapeBox_SelectedIndex_Read, @_LapeSimbaShapeBox_SelectedIndex_Write);
+
+    addGlobalFunc('function TShapeBox.HasSelection: Boolean', @_LapeSimbaShapeBox_HasSelection);
+    addGlobalFunc('function TShapeBox.GetSelectedShape: TShapeBoxShape', @_LapeSimbaShapeBox_GetSelectedShape);
     addGlobalFunc('function TShapeBox.GetShape(Index: Integer): TShapeBoxShape', @_LapeSimbaShapeBox_GetShape);
-    addGlobalFunc('function TShapeBox.ShapeCount: Integer', @_LapeSimbaShapeBox_GetShapeCount);
-    addGlobalFunc('function TShapeBox.ShapeIndex: Integer', @_LapeSimbaShapeBox_GetShapeIndex);
-
-    addClassVar('TShapeBox', 'UserDataSize', 'Integer', @_LapeSimbaShapeBox_UserDataSize_Read, @_LapeSimbaShapeBox_UserDataSize_Write);
-    addClassVar('TShapeBox', 'QueryNameOnNew', 'Boolean', @_LapeSimbaShapeBox_QueryNameOnNew_Read, @_LapeSimbaShapeBox_QueryNameOnNew_Write);
+    addGlobalFunc('function TShapeBox.GetCount: Integer', @_LapeSimbaShapeBox_GetCount);
 
     addGlobalFunc('function TShapeBox.CopyShape(Index: Integer): Integer;', @_LapeSimbaShapeBox_CopyShape);
     addGlobalFunc('procedure TShapeBox.DeleteShape(Index: Integer);', @_LapeSimbaShapeBox_DeleteShape);
     addGlobalFunc('procedure TShapeBox.DeleteAllShapes;', @_LapeSimbaShapeBox_DeleteAllShapes);
+
+    addGlobalFunc('procedure TShapeBox.BeginUpdate;', @_LapeSimbaShapeBox_BeginUpdate);
+    addGlobalFunc('procedure TShapeBox.EndUpdate;', @_LapeSimbaShapeBox_EndUpdate);
 
     addGlobalFunc('procedure TShapeBox.SaveToFile(FileName: String);', @_LapeSimbaShapeBox_SaveToFile);
     addGlobalFunc('procedure TShapeBox.LoadFromFile(FileName: String);', @_LapeSimbaShapeBox_LoadFromFile);

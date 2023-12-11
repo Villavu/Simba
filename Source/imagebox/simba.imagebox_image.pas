@@ -76,7 +76,6 @@ type
     procedure DrawPoly(Poly: TPointArray; Connect: Boolean; Color: TColor);
     procedure DrawPoint(P: TPoint; Color: TColor);
     procedure DrawPoints(TPA: TPointArray; Color: TColor);
-    procedure DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);
     procedure DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);
     procedure DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor);
     procedure DrawHeatmap(const Mat: TSingleMatrix);
@@ -539,98 +538,52 @@ begin
   end;
 end;
 
- procedure TSimbaImageBoxBitmap.DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);
+procedure TSimbaImageBoxBitmap.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);
 
-  {$DEFINE MACRO_ELLIPSE :=
+  {$DEFINE MACRO_CIRCLE :=
     var
-      RadXSq, RadYSq: Integer;
-      TwoSqX, TwoSqY: Integer;
-      X, Y, P, PX, PY: Integer;
+      X, Y, Err: Integer;
     begin
-      RadXSq := RadiusX * RadiusX;
-      RadYSq := RadiusY * RadiusY;
-      TwoSqX := 2 * RadXSq;
-      TwoSqY := 2 * RadYSq;
-      X  := 0;
-      Y  := RadiusY;
-      PX := 0;
-      PY := TwoSqX * Y;
+      X := -Radius;
+      Y := 0;
 
-      PixelProc(Center.Y+Y, Center.X+X, Color);
-      PixelProc(Center.Y+Y, Center.X-X, Color);
-      PixelProc(Center.Y-Y, Center.X+X, Color);
-      PixelProc(Center.Y-Y, Center.X-X, Color);
+      Err := 2-2*Radius;
 
-      P := Round(RadYSQ - (RadXSQ * RadiusY) + (0.25 * RadXSQ));
-      while PX<PY do
+      while (X < 0) do
       begin
-        Inc(X);
-        Inc(PX, TwoSqY);
+        PixelProc(Center.X - X, Center.Y + Y, Color);
+        PixelProc(Center.X - Y, Center.Y - X, Color);
+        PixelProc(Center.X + X, Center.Y - Y, Color);
+        PixelProc(Center.X + Y, Center.Y + X, Color);
 
-        if (P < 0) then
-          Inc(P, RadYSq + PX)
-        else begin
-          Dec(Y);
-          Dec(PY, TwoSqX);
-          Inc(P, RadYSq + PX - PY);
+        Radius := Err;
+        if (Radius <= Y) then
+        begin
+          Y += 1;
+          Err += Y*2+1;
         end;
 
-        // Filled
-        //DrawLine(TPoint.Create(Center.Y+Y,Center.X+X), TPoint.Create(Center.Y+Y,Center.X-X), Color);
-        //DrawLine(TPoint.Create(Center.Y-Y,Center.X+X), TPoint.Create(Center.Y-Y,Center.X-X), Color);
-
-        PixelProc(Center.Y+Y, Center.X+X, Color);
-        PixelProc(Center.Y+Y, Center.X-X, Color);
-        PixelProc(Center.Y-Y, Center.X+X, Color);
-        PixelProc(Center.Y-Y, Center.X-X, Color);
-      end;
-
-      P := Round(RadYSQ * Sqr(X + 0.5) + RadXSQ * Sqr(Y - 1) - RadXSQ * RadYSQ);
-      while (Y>0) do
-      begin
-        Dec(Y);
-        Dec(PY, TwoSqX);
-        if (P > 0) then
-          Inc(P, RadXSq - PY)
-        else begin
-          Inc(X);
-          Inc(PX, TwoSqY);
-          Inc(P, RadXSq - PY + PX);
+        if (Radius > X) or (Err > Y) then
+        begin
+          X += 1;
+          Err += X*2+1;
         end;
-
-        // Filled
-        //DrawLine(TPoint.Create(Center.Y+Y,Center.X+X), TPoint.Create(Center.Y+Y,Center.X-X), Color);
-        //DrawLine(TPoint.Create(Center.Y-Y,Center.X+X), TPoint.Create(Center.Y-Y,Center.X-X), Color);
-
-        PixelProc(Center.Y+Y,Center.X+X, Color);
-        PixelProc(Center.Y+Y,Center.X-X, Color);
-        PixelProc(Center.Y-Y,Center.X+X, Color);
-        PixelProc(Center.Y-Y,Center.X-X, Color);
       end;
     end;
   }
 
   {$DEFINE PixelProc := PixelBGR}
-  procedure DrawBGR(Color: TBGR);   MACRO_ELLIPSE
+  procedure DrawBGR(Color: TBGR);   MACRO_CIRCLE
   {$DEFINE PixelProc := PixelBGRA}
-  procedure DrawBGRA(Color: TBGRA); MACRO_ELLIPSE
+  procedure DrawBGRA(Color: TBGRA); MACRO_CIRCLE
   {$DEFINE PixelProc := PixelARGB}
-  procedure DrawARGB(Color: TARGB); MACRO_ELLIPSE
+  procedure DrawARGB(Color: TARGB); MACRO_CIRCLE
 
 begin
   case FPixelFormat of
     'BGR':  DrawBGR(BGR(Color));
     'BGRA': DrawBGRA(BGRA(Color));
     'ARGB': DrawARGB(ARGB(Color));
-  end;
-end;
-
-procedure TSimbaImageBoxBitmap.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);
-begin
-  case FPixelFormat of
-    'BGR':  DrawEllipse(Center, Radius, Radius, Color);
-    'BGRA': DrawEllipse(Center, Radius, Radius, Color);
-    'ARGB': DrawEllipse(Center, Radius, Radius, Color);
   end;
 end;
 

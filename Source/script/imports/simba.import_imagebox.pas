@@ -92,11 +92,6 @@ begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawBoxTransparent(PBox(Params^[1])^, PColor(Params^[2])^, PSingle(Params^[3])^);
 end;
 
-procedure _LapeSimbaImageBoxBitmap_DrawEllipse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxBitmap(Params^[0])^.DrawEllipse(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^);
-end;
-
 procedure _LapeSimbaImageBoxBitmap_DrawHeatmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxBitmap(Params^[0])^.DrawHeatmap(PSingleMatrix(Params^[1])^);
@@ -291,7 +286,6 @@ begin
     addGlobalFunc('procedure TImageBoxImage.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircle);
     addGlobalFunc('procedure TImageBoxImage.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawCircleFilled);
     addGlobalFunc('procedure TImageBoxImage.DrawBoxTransparent(Box: TBox; Color: TColor; Transparency: Single);', @_LapeSimbaImageBoxBitmap_DrawBoxTransparent);
-    addGlobalFunc('procedure TImageBoxImage.DrawEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Color: TColor);', @_LapeSimbaImageBoxBitmap_DrawEllipse);
     addGlobalFunc('procedure TImageBoxImage.DrawHeatmap(const Mat: TSingleMatrix);', @_LapeSimbaImageBoxBitmap_DrawHeatmap);
 
     addGlobalType('procedure(Sender: TObject; Bitmap: TImageBoxImage; Rect: TLazRect) of object', 'TImageBoxPaintAreaEvent', FFI_DEFAULT_ABI);
