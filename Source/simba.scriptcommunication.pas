@@ -50,7 +50,7 @@ implementation
 
 uses
   simba.main, simba.debugimageform, simba.image_lazbridge,
-  simba.threading, simba.ide_mainstatusbar, simba.ide_maintoolbar, simba.process;
+  simba.threading, simba.ide_maintoolbar, simba.process;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
 var

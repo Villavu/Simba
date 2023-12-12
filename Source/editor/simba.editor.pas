@@ -11,12 +11,15 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Controls, ComCtrls, LCLType,
-  SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses, SynEditKeyCmds, SynEditHighlighter,
+  SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses, SynEditKeyCmds, SynEditHighlighter, SynEditMarkupCtrlMouseLink, SynEditMarkupHighAll,
   simba.mufasatypes, simba.settings, simba.editor_autocomplete, simba.editor_paramhint, simba.editor_attributes, simba.editor_modifiedlinegutter, simba.component_synedit;
 
 type
   TSimbaEditor = class(TSimbaSynEdit)
   protected
+    FMarkupHighlightAllCaret: TSynEditMarkupHighlightAllCaret;
+    FMarkupCtrlMouse: TSynEditMarkupCtrlMouseLink;
+
     FUseSimbaColors: Boolean;
     FAutoComplete: TSimbaAutoComplete;
     FParamHint: TSimbaParamHint;
@@ -51,21 +54,16 @@ type
     procedure DoSettingChanged_FontSize(Setting: TSimbaSetting);
     procedure DoSettingChanged_FontName(Setting: TSimbaSetting);
 
-    // Accept drop from TTreeView
-    procedure DoDragDrop(Sender, Source: TObject; X, Y: Integer);
-    procedure DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
-
     // Temp line coloring
     procedure DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
 
+    procedure StatusChanged(AChanges: TSynStatusChanges); override;
     procedure SetUpdateState(NewUpdating: Boolean; Sender: TObject); override;
 
     procedure SetColorModified(Value: TColor);
     procedure SetColorSaved(Value: TColor);
     procedure SetUseSimbaColors(Value: Boolean);
   public
-    FileName: String;
-
     property TextView;
     property AutoComplete: TSimbaAutoComplete read FAutoComplete;
     property ParamHint: TSimbaParamHint read FParamHint;
@@ -77,6 +75,10 @@ type
     property ColorSaved: TColor read FColorSaved write SetColorSaved;
     property ColorModified: TColor read FColorModified write SetColorModified;
     property UseSimbaColors: Boolean read FUseSimbaColors write SetUseSimbaColors;
+
+    // Accept from TTreeView
+    procedure DragDrop(Source: TObject; X, Y: Integer); override;
+    procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean); override;
 
     function GetCaretPos(GoBackToWord: Boolean): Integer;
 
@@ -107,11 +109,11 @@ type
 implementation
 
 uses
-  SynEditPointClasses, SynGutter, SynHighlighterPas_Simba, SynEditMarkupHighAll, LazSynEditMouseCmdsTypes, Forms,
+  SynEditPointClasses, SynGutter, SynHighlighterPas_Simba, LazSynEditMouseCmdsTypes, Forms,
   simba.fonthelpers, simba.editor_blockcompletion,
   simba.editor_docgenerator, simba.editor_commentblock,
   simba.editor_mousewheelzoom, simba.editor_multicaret,
-  simba.editor_popupmenu, simba.theme;
+  simba.theme;
 
 function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;
 var
@@ -210,18 +212,6 @@ begin
   end;
 end;
 
-procedure TSimbaEditor.DoDragDrop(Sender, Source: TObject; X, Y: Integer);
-begin
-  if (Source is TTreeView) and (TTreeView(Source).Selected <> nil) then
-    TextBetweenPoints[PixelsToRowColumn(TPoint.Create(X, Y)),
-                      PixelsToRowColumn(TPoint.Create(X, Y))] := TTreeView(Source).Selected.Text;
-end;
-
-procedure TSimbaEditor.DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
-begin
-  Accept := Source is TTreeView;
-end;
-
 procedure TSimbaEditor.SetUpdateState(NewUpdating: Boolean; Sender: TObject);
 begin
   inherited SetUpdateState(NewUpdating, Sender);
@@ -280,7 +270,8 @@ end;
 
 procedure TSimbaEditor.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if (ssCtrl in Shift) then // Mouse link fix
+  // Mouse link fix
+  if FMarkupCtrlMouse.IsMouseOverLink then
     CaretXY := PixelsToRowColumn(Point(X, Y));
 
   inherited MouseDown(Button, Shift, X, Y);
@@ -347,6 +338,22 @@ begin
     Font.Name := Setting.Value;
 end;
 
+procedure TSimbaEditor.DragDrop(Source: TObject; X, Y: Integer);
+begin
+  inherited DragDrop(Source, X, Y);
+
+  if (Source is TTreeView) and (TTreeView(Source).Selected <> nil) then
+    TextBetweenPoints[PixelsToRowColumn(TPoint.Create(X, Y)),
+                      PixelsToRowColumn(TPoint.Create(X, Y))] := TTreeView(Source).Selected.Text;
+end;
+
+procedure TSimbaEditor.DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+begin
+  Accept := Source is TTreeView;
+  if not Accept then
+    inherited DragOver(Source, X, Y, State, Accept);
+end;
+
 procedure TSimbaEditor.DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
 var
   I: Integer;
@@ -365,6 +372,14 @@ begin
       Special := True;
       Exit;
     end;
+end;
+
+procedure TSimbaEditor.StatusChanged(AChanges: TSynStatusChanges);
+begin
+  inherited StatusChanged(AChanges);
+
+  if (scSelection in AChanges) then
+    FMarkupHighlightAllCaret.Enabled := SelAvail;
 end;
 
 function TSimbaEditor.GetExpression(X, Y: Integer): String;
@@ -429,10 +444,8 @@ constructor TSimbaEditor.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  OnDragDrop := @DoDragDrop;
-  OnDragOver := @DoDragOver;
-
-  PopupMenu := TSimbaEditorPopupMenu.Create(Self);
+  FMarkupHighlightAllCaret := MarkupByClass[TSynEditMarkupHighlightAllCaret] as TSynEditMarkupHighlightAllCaret;
+  FMarkupCtrlMouse := MarkupByClass[TSynEditMarkupCtrlMouseLink] as TSynEditMarkupCtrlMouseLink;
 
   Options := Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   Options2 := Options2 + [eoCaretSkipsSelection];
@@ -464,7 +477,7 @@ begin
 
   with TSynEditMarkupHighlightAllCaret(MarkupByClass[TSynEditMarkupHighlightAllCaret]) do
   begin
-    Enabled := True;
+    Enabled := False;
     WaitTime := 1;
     IgnoreKeywords := True;
   end;
@@ -477,7 +490,7 @@ begin
     FModifiedLinesGutter.ColorSaved := Gutter.ChangesPart.SavedColor;
 
     AutoSize := False;
-    Width := Scale96ToScreen(4);
+    Width := Scale96ToScreen(6);
     //TSynGutterLOvProviderCurrentPage.Create(Providers);
   end;
 

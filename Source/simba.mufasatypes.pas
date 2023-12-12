@@ -412,6 +412,7 @@ procedure Swap(var A, B: TColorBGRA); overload;
 
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String; overload;
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: Integer): Integer; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean; overload;
 
 type
   ESimbaException = class(Exception);
@@ -673,6 +674,14 @@ begin
 end;
 
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: Integer): Integer;
+begin
+  if Val then
+    Result := IfTrue
+  else
+    Result := IfFalse;
+end;
+
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean;
 begin
   if Val then
     Result := IfTrue

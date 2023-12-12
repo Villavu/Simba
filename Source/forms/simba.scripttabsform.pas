@@ -178,6 +178,16 @@ end;
 procedure TSimbaScriptTabsForm.FindButtonKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
+    VK_F3:
+      begin
+        if (ssShift in Shift) then
+          FFindButtonUp.Click()
+        else
+          FFindButtonDown.Click();
+
+        Key := 0;
+      end;
+
     VK_ESCAPE:
       begin
         FindPanel.Hide();

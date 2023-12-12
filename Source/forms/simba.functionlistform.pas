@@ -252,7 +252,7 @@ var
     if CanUpdate then
     begin
       Script := SimbaScriptTabsForm.CurrentEditor.Text;
-      ScriptFileName := SimbaScriptTabsForm.CurrentEditor.FileName;
+      ScriptFileName := SimbaScriptTabsForm.CurrentTab.ScriptFileName;
       TabID := SimbaScriptTabsForm.CurrentTab.UID;
       ExpandScriptNode := (FScriptNode.Count = 0) or FScriptNode.Expanded;
 

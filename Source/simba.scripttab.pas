@@ -89,19 +89,11 @@ type
 
     FOutputBox: TSimbaOutputBox;
 
-    FLinkClick: record
-      Script: String;
-      ScriptFileName: String;
-      CaretPos: Integer;
-      Expression: String;
-    end;
-
     // Keep output tab in sync
     procedure TextChanged; override;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
-    procedure DoFindAndShowDeclaration;
     procedure DoEditorModified(Sender: TObject);
     procedure DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
@@ -129,6 +121,8 @@ type
 
     procedure GotoLine(Line: Integer);
 
+    procedure FindDeclarationAtCaret;
+
     function IsActiveTab: Boolean;
     function CanClose: Boolean;
 
@@ -150,7 +144,7 @@ uses
   Forms,
   simba.files, simba.settings, simba.ide_events,
   simba.main, simba.env, simba.ide_showdeclaration, simba.threading,
-  simba.scriptcommunication, simba.scripttabsform, simba.datetime;
+  simba.scriptcommunication, simba.scripttabsform, simba.datetime, simba.tab_popupmenu;
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var
@@ -361,10 +355,9 @@ begin
   inherited Notification(AComponent, Operation);
 end;
 
-procedure TSimbaScriptTab.DoFindAndShowDeclaration;
+procedure TSimbaScriptTab.FindDeclarationAtCaret;
 begin
-  with FLinkClick do
-    FindAndShowDeclaration(Script, ScriptFileName, CaretPos, Expression);
+  FindAndShowDeclaration(Script, ScriptFileName, Editor.GetCaretPos(True), Editor.GetExpressionEx(FEditor.CaretX, FEditor.CaretY));
 end;
 
 procedure TSimbaScriptTab.DoEditorModified(Sender: TObject);
@@ -379,12 +372,7 @@ end;
 
 procedure TSimbaScriptTab.DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  FLinkClick.Script := Script;
-  FLinkClick.ScriptFileName := ScriptFileName;
-  FLinkClick.CaretPos := Editor.GetCaretPos(True);
-  FLinkClick.Expression := Editor.GetExpressionEx(FEditor.CaretX, FEditor.CaretY);
-
-  QueueOnMainThread(@DoFindAndShowDeclaration);
+  FindDeclarationAtCaret();
 end;
 
 procedure TSimbaScriptTab.DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
@@ -429,7 +417,6 @@ begin
 
   try
     FEditor.Lines.SaveToFile(FileName);
-    FEditor.FileName := FileName;
 
     Result := True;
   except
@@ -459,7 +446,6 @@ begin
 
   try
     FEditor.Lines.LoadFromFile(FileName);
-    FEditor.FileName := FileName;
 
     Result := True;
   except
@@ -616,13 +602,13 @@ begin
   FEditor := TSimbaEditor.Create(Self);
   FEditor.Parent := Self;
   FEditor.Align := alClient;
-  FEditor.TabStop := True;
   FEditor.Text := SimbaSettings.Editor.DefaultScript.Value;
   FEditor.MarkTextAsSaved();
   FEditor.RegisterStatusChangedHandler(@DoEditorStatusChanges, [scCaretX, scCaretY, scModified]);
   FEditor.OnClickLink := @DoEditorLinkClick;
   FEditor.OnModified := @DoEditorModified;
   FEditor.UseSimbaColors := True;
+  FEditor.PopupMenu := TSimbaTabPopupMenu.Create(Self);
 
   FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
   FOutputBox.TabImageIndex := IMG_STOP;

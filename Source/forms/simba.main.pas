@@ -273,7 +273,7 @@ uses
   simba.scripttab, simba.associate,
   simba.aca, simba.dtmeditor, simba.env, simba.dockinghelpers, simba.nativeinterface,
   simba.scriptformatter, simba.theme, simba.scriptbackup,
-  simba.threading, simba.editor, simba.component_menubar;
+  simba.threading, simba.editor;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
 
@@ -595,28 +595,32 @@ end;
 
 procedure TSimbaForm.DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 
-  function isEditorKeyStroke: Boolean;
+  function isEditor: Boolean;
   begin
-    Result := (Screen.ActiveControl is TSimbaEditor) and (TSimbaEditor(Screen.ActiveControl).Keystrokes.FindKeycode(Key, Shift) > -1);
+    Result := SimbaScriptTabsForm.IsParentOf(Screen.ActiveControl) and (Screen.ActiveControl is TSimbaEditor) and (TSimbaEditor(Screen.ActiveControl).Keystrokes.FindKeycode(Key, Shift) = -1);
+  end;
+
+  function isMenuBar: Boolean;
+  begin
+    Result := Screen.ActiveControl = SimbaMainMenuBar.MenuBar;
   end;
 
 var
   Msg: TLMKey;
 begin
-  if isEditorKeyStroke() then
+  // Can't be anything we want...
+  if ((Key < VK_F1) or (Key > VK_F12)) and (Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssAltGr] = []) then
     Exit;
 
-  if (Screen.ActiveControl is TSimbaEditor) or (Screen.ActiveControl is TSimbaMenuBar) then
+  if isMenuBar() or isEditor() then
   begin
     Msg := Default(TLMKey);
     Msg.CharCode := Key;
     if (ssAlt in Shift) then
       Msg.KeyData := MK_ALT;
 
-    if MainMenuFile.IsShortcut(Msg) or MainMenuView.IsShortcut(Msg) or
-       MainMenuEdit.IsShortcut(Msg) or MainMenuScript.IsShortcut(Msg) or
-       MainMenuTools.IsShortcut(Msg) or MainMenuHelp.IsShortcut(Msg) or
-       MainMenuSearch.IsShortcut(Msg) then
+    if MainMenuFile.IsShortcut(Msg)   or MainMenuEdit.IsShortcut(Msg) or
+       MainMenuScript.IsShortcut(Msg) or MainMenuSearch.IsShortcut(Msg) then
       Key := 0;
   end;
 end;
