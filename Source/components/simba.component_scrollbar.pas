@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, ComCtrls, StdCtrls,
-  ATScrollBar, simba.settings;
+  ATScrollBar, simba.mufasatypes, simba.settings;
 
 type
   TSimbaScrollBar = class(TATScrollBar)
@@ -23,7 +23,7 @@ type
   public
     ForwardScrollControl: TControl;
 
-    procedure Assign(From: TScrollBar);
+    procedure Assign(Source: TPersistent); override;
 
     constructor Create(AOwner: TComponent); override;
   end;
@@ -31,8 +31,7 @@ type
 implementation
 
 uses
-  LMessages,
-  simba.mufasatypes;
+  LMessages;
 
 function TSimbaScrollBar.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
 begin
@@ -55,16 +54,22 @@ begin
   Update();
 end;
 
-procedure TSimbaScrollBar.Assign(From: TScrollBar);
+procedure TSimbaScrollBar.Assign(Source: TPersistent);
+var
+  From: TScrollBar absolute Source;
 begin
-  Min := From.Min;
-  Max := From.Max+1;
-  SmallChange := From.SmallChange;
-  LargeChange := From.LargeChange;
-  PageSize := From.PageSize;
-  Position := From.Position;
+  if (Source is TScrollBar) then
+  begin
+    Min := From.Min;
+    Max := From.Max + 1;
+    SmallChange := From.SmallChange;
+    LargeChange := From.LargeChange;
+    PageSize := From.PageSize;
+    Position := From.Position;
 
-  Update();
+    Update();
+  end else
+    inherited Assign(Source);
 end;
 
 constructor TSimbaScrollBar.Create(AOwner: TComponent);

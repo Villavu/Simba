@@ -27,7 +27,6 @@ type
   PPanelBevel = ^TPanelBevel;
   PTimer = ^TTimer;
   PComponent = ^TComponent;
-  PCanvas = ^TCanvas;
   PRect = ^TRect;
   PPicture = ^TPicture;
   PMouseEvent = ^TMouseEvent;

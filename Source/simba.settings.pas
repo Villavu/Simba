@@ -83,6 +83,7 @@ type
   protected
     FList: TSettingList;
     FFirstLaunch: Boolean;
+    FIsLoading: Boolean;
   public
     General: record
       ConsoleVisible: TSimbaSetting;
@@ -162,6 +163,7 @@ type
     end;
 
     property FirstLaunch: Boolean read FFirstLaunch;
+    property IsLoading: Boolean read FIsLoading;
 
     class function GetINIFile: TINIFile;
     class procedure SetSimpleSetting(AName, Value: String);
@@ -313,6 +315,9 @@ procedure TSimbaSetting.Changed;
 var
   I: Integer;
 begin
+  if FSettings.IsLoading then
+    Exit;
+
   DebugLn('[TSimbaSettings] Setting changed: ' + FName);
 
   I := FChangeEventList.Count;
@@ -375,6 +380,8 @@ var
   INI: TIniFile;
   Setting: TSimbaSetting;
 begin
+  FIsLoading := True;
+
   INI := GetINIFile();
   try
     if (INI.ReadInteger('Settings', 'Version', 0) <> SETTINGS_VERSION) then
@@ -399,6 +406,7 @@ begin
     end;
   finally
     INI.Free();
+    FIsLoading := False;
   end;
 end;
 

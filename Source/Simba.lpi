@@ -892,7 +892,7 @@
         <IsPartOfProject Value="True"/>
       </Unit115>
       <Unit116>
-        <Filename Value="editor/simba.editor_popupmenu.pas"/>
+        <Filename Value="simba.tab_popupmenu.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit116>
       <Unit117>
