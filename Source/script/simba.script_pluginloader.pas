@@ -14,7 +14,6 @@ interface
 uses
   Classes, SysUtils;
 
-function FindPlugin(var FileName: String; ExtraSearchDirs: TStringArray = nil): Boolean;
 function LoadPlugin(var FileName: String; ExtraSearchDirs: TStringArray = nil): TLibHandle;
 
 var
@@ -28,41 +27,6 @@ implementation
 
 uses
   simba.mufasatypes, simba.files, simba.env;
-
-function FindPlugin(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
-const
-  {$IF DEFINED(CPUAARCH64)}
-  SimbaSuffix = SharedSuffix + '.aarch64'; // lib.aarch64
-  {$ELSE}
-  SimbaSuffix = {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix; // lib32.dll / lib64.dll
-  {$ENDIF}
-var
-  OrginalFileName: String;
-  SearchDir: String;
-begin
-  Result := False;
-
-  OrginalFileName := FileName;
-  if TSimbaFile.FileExists(OrginalFileName) then
-    Exit(True);
-
-  for SearchDir in ExtraSearchDirs + [SimbaEnv.PluginsPath, SimbaEnv.SimbaPath] do
-  begin
-    FileName := TSimbaPath.PathJoin([SearchDir, OrginalFileName]);
-    if TSimbaFile.FileExists(FileName) then
-      Exit(True);
-
-    FileName := TSimbaPath.PathJoin([SearchDir, OrginalFileName]) + '.' + SharedSuffix;
-    if TSimbaFile.FileExists(FileName) then
-      Exit(True);
-
-    FileName := TSimbaPath.PathJoin([SearchDir, OrginalFileName]) + SimbaSuffix;
-    if TSimbaFile.FileExists(FileName) then
-      Exit(True);
-  end;
-
-  FileName := OrginalFileName;
-end;
 
 // Make a copy of the plugin to data/plugins/ so we can delete/update if it's loaded
 procedure CopyPlugin(var FileName: String);
@@ -79,8 +43,9 @@ var
   OrginalFileName: String;
   I: Integer;
 begin
-  if (not FindPlugin(FileName, ExtraSearchDirs)) then
-    SimbaException('Unable to find plugin "%s"', [FileName]);
+  FileName := SimbaEnv.FindPlugin(FileName, ExtraSearchDirs);
+  if (FileName = '') then
+    SimbaException('Plugin "%s" not found', [FileName]);
 
   OrginalFileName := FileName;
   for I := 0 to High(LoadedPlugins) do

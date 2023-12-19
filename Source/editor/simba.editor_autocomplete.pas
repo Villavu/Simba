@@ -543,7 +543,7 @@ begin
 
       FDecls := [];
       FLocalDecls := [];
-      FCodeinsight.SetScript(Text, '', GetCaretPos(True));
+      FCodeinsight.SetScript(Text, FileName, GetCaretPos(True));
       FCodeinsight.Run();
 
       Expression := GetExpression(CaretX - 1, CaretY);

@@ -400,7 +400,7 @@ begin
 
       FParenthesesPoint := FindParenthesesPoint();
 
-      FCodeinsight.SetScript(Text, '', GetCaretPos(True));
+      FCodeinsight.SetScript(Text, FileName, GetCaretPos(True));
       FCodeinsight.Run();
 
       Decl := FCodeinsight.ParseExpression(GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);

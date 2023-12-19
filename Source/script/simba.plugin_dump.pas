@@ -15,16 +15,38 @@ uses
   Classes, SysUtils;
 
 function DumpPlugin(Plugin: String): TStringList;
+function DumpPluginInAnotherProcess(FileName: String): String;
 
 implementation
 
 uses
-  simba.script_plugin;
+  simba.mufasatypes, simba.process, simba.script_plugin;
 
 function DumpPlugin(Plugin: String): TStringList;
 begin
   with TSimbaScriptPlugin.Create(Plugin) do
     Result := Dump();
+end;
+
+// Calls above but in another Simba process so it's "safe"
+function DumpPluginInAnotherProcess(FileName: String): String;
+var
+  List: TStringList;
+begin
+  Result := '';
+
+  List := nil;
+  try
+    List := SimbaProcess.RunDump(FileName, ['--dumpplugin=' + FileName]);
+
+    Result := List.Text;
+  except
+    on E: Exception do
+      DebugLn(E.Message);
+  end;
+
+  if (List <> nil) then
+    List.Free();
 end;
 
 end.

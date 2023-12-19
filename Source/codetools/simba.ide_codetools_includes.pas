@@ -3,8 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 
-  Caches an entire "top level" include.
-  If an include file includes another file, all the items will be stored in the cache item too.
+  Caches an entire include/plugin.
 }
 unit simba.ide_codetools_includes;
 
@@ -15,7 +14,7 @@ interface
 uses
   Classes, SysUtils,
   mPasLexTypes, mPasLex,
-  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_utils, simba.simplelock;
+  simba.mufasatypes, simba.ide_codetools_parser, simba.simplelock;
 
 const
   PurgeThreshold = 35; // If cache miss reaches of a include reaches this, remove the cache
@@ -31,8 +30,42 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Get(Sender: TmwBasePasLex): TCodeParser;
+    function GetInclude(Defines: TSaveDefinesRec; IncludedFiles: TStringList; FileName: String): TCodeParser; overload;
+    function GetInclude(Lexer: TmwBasePasLex; IncludedFiles: TStringList): TCodeParser; overload;
+
+    function GetPlugin(FileName: String): TCodeParser; overload;
+    function GetPlugin(Lexer: TmwBasePasLex): TCodeParser; overload;
+
     procedure Release(List: TCodeParserList);
+  end;
+
+  TCodetoolsInclude = class(TCodeParser)
+  protected
+    FIncludedFiles: TStringList;
+    FPlugins: TStringList;
+    FInDefines: TSaveDefinesRec;
+    FRefCount: Integer;
+    FLastUsed: Integer;
+
+    procedure OnIncludeDirect(Sender: TmwBasePasLex); override;
+    procedure OnLibraryDirect(Sender: TmwBasePasLex); override;
+
+    function GetPlugins: TStringArray;
+    function GetHash: String; override; // Add InDefines to hash
+  public
+    constructor Create(AFileName: String; InDefines: TSaveDefinesRec; IncludedFiles: TStringList); reintroduce;
+    destructor Destroy; override;
+
+    property Plugins: TStringArray read GetPlugins;
+
+    function IsOutdated: Boolean;
+    function IncRef: TCodetoolsInclude;
+    function DecRef: TCodetoolsInclude;
+  end;
+
+  TCodetoolsPlugin = class(TCodetoolsInclude)
+  public
+    constructor Create(AFileName: String); reintroduce;
   end;
 
 var
@@ -41,54 +74,75 @@ var
 implementation
 
 uses
-  simba.ide_initialization;
+  simba.env, simba.files, simba.plugin_dump;
 
-type
-  TCachedInclude = class(TCodeParser)
-  protected
-    FInDefines: TSaveDefinesRec;
+procedure TCodetoolsInclude.OnIncludeDirect(Sender: TmwBasePasLex);
+var
+  FilePath: String;
+begin
+  inherited OnIncludeDirect(Sender);
 
-    // Add InDefines to hash
-    function GetHash: String; override;
+  FilePath := SimbaEnv.FindInclude(Sender.DirectiveParamAsFileName, [TSimbaPath.PathExtractDir(Sender.FileName)]);
+  if (FilePath = '') then
+    Exit;
+  if (Lexer.TokenID = tokIncludeOnceDirect) and (FIncludedFiles <> nil) and (FIncludedFiles.IndexOf(FileName) > -1) then
+    Exit;
 
-    function DoFindPlugin(Sender: TmwBasePasLex; var AFileName: String): Boolean;
-    function DoFindInclude(Sender: TmwBasePasLex; var AFileName: String; var Handled: Boolean): Boolean;
-  public
-    RefCount: Integer;
-    LastUsed: Integer;
+  PushLexer(TmwPasLex.CreateFromFile(FilePath));
 
-    constructor Create(Sender: TmwBasePasLex; AFileName: String); reintroduce;
+  if (FIncludedFiles <> nil) then
+    FIncludedFiles.Add(FileName);
+end;
 
-    function IsOutdated: Boolean;
-    function IncRef: TCachedInclude;
-    function DecRef: TCachedInclude;
+procedure TCodetoolsInclude.OnLibraryDirect(Sender: TmwBasePasLex);
+var
+  FilePath: String;
+begin
+  inherited OnLibraryDirect(Sender);
 
-    property InDefines: TSaveDefinesRec read FInDefines;
-  end;
+  FilePath := SimbaEnv.FindPlugin(Sender.DirectiveParamAsFileName, [TSimbaPath.PathExtractDir(Sender.FileName)]);
+  if (FilePath = '') then
+    Exit;
 
-function TCachedInclude.GetHash: String;
+  FPlugins.Add(FilePath);
+end;
+
+function TCodetoolsInclude.GetPlugins: TStringArray;
+begin
+  Result := FPlugins.ToStringArray();
+end;
+
+function TCodetoolsInclude.GetHash: String;
 begin
   if FHash.IsNull then
-    FHash.Value := inherited + FInDefines.Defines + IntToStr(FInDefines.Stack);
+    FHash.Value := inherited + FInDefines.Defines + IntToStr(FInDefines.Stack) + FPlugins.Text;
 
   Result := FHash.Value;
 end;
 
-function TCachedInclude.DoFindPlugin(Sender: TmwBasePasLex; var AFileName: String): Boolean;
+constructor TCodetoolsInclude.Create(AFileName: String; InDefines: TSaveDefinesRec; IncludedFiles: TStringList);
 begin
-  AFileName := FindInclude(Sender);
+  inherited Create();
 
-  Result := AFileName <> '';
+  FPlugins := TStringList.Create();
+  FIncludedFiles := IncludedFiles;
+  FInDefines := InDefines;
+
+  SetFile(AFileName);
+  Lexer.LoadDefines(FInDefines);
+
+  FLastUsed := 0;
+  FRefCount := 1;
 end;
 
-function TCachedInclude.DoFindInclude(Sender: TmwBasePasLex; var AFileName: String; var Handled: Boolean): Boolean;
+destructor TCodetoolsInclude.Destroy;
 begin
-  AFileName := FindInclude(Sender);
+  FreeAndNil(FPlugins);
 
-  Result := AFileName <> '';
+  inherited Destroy();
 end;
 
-function TCachedInclude.IsOutdated: Boolean;
+function TCodetoolsInclude.IsOutdated: Boolean;
 var
   i: Integer;
 begin
@@ -102,40 +156,85 @@ begin
   Result := False;
 end;
 
-function TCachedInclude.IncRef: TCachedInclude;
+function TCodetoolsInclude.IncRef: TCodetoolsInclude;
 begin
-  Inc(RefCount);
+  Inc(FRefCount);
   Result := Self;
 
   {$IFDEF PARSER_CACHE_DEBUG}
-  DebugLn('IncRef: %s -> %d', [Lexer.FileName, RefCount]);
+  DebugLn('IncRef: %s -> %d', [Lexer.FileName, FRefCount]);
   {$ENDIF}
 end;
 
-function TCachedInclude.DecRef: TCachedInclude;
+function TCodetoolsInclude.DecRef: TCodetoolsInclude;
 begin
-  Dec(RefCount);
+  Dec(FRefCount);
   Result := Self;
 
   {$IFDEF PARSER_CACHE_DEBUG}
-  DebugLn('DecRef: %s -> %d', [Lexer.FileName, RefCount]);
+  DebugLn('DecRef: %s -> %d', [Lexer.FileName, FRefCount]);
   {$ENDIF}
 end;
 
-constructor TCachedInclude.Create(Sender: TmwBasePasLex; AFileName: String);
+constructor TCodetoolsPlugin.Create(AFileName: String);
 begin
-  inherited Create();
+  inherited Create(AFileName, Default(TSaveDefinesRec), nil);
 
-  LastUsed := 0;
-  RefCount := 1;
-  FInDefines := Sender.SaveDefines();
+  SetScript(DumpPluginInAnotherProcess(AFileName), AFileName);
+end;
 
-  OnFindInclude := @DoFindInclude;
-  OnFindPlugin := @DoFindPlugin;
+function TCodetoolsIncludes.GetPlugin(FileName: String): TCodeParser;
+var
+  I: Integer;
+begin
+  Result := nil;
 
-  SetFile(AFileName);
+  FLock.Enter();
+  try
+    for I := 0 to FParsers.Count - 1 do
+      if (FParsers[I].FileName = FileName) then
+        with TCodetoolsInclude(FParsers[I]) do
+        begin
+          if IsOutdated() then
+          begin
+            {$IFDEF PARSER_CACHE_DEBUG}
+            DebugLn('[Codetools]: Cache hit "%s" but is outdated %d', [Lexer.FileName, FRefCount]);
+            {$ENDIF}
 
-  Lexer.LoadDefines(FInDefines);
+            FLastUsed := 1000;
+            Continue;
+          end;
+
+          if (Result = nil) then // Already found, but we're checking above checks
+            Result := IncRef();
+        end;
+
+    Purge();
+
+    if (Result = nil) then
+    begin
+      DebugLn('[Codetools] Caching %s', [FileName]);
+
+      Result := TCodetoolsPlugin.Create(FileName);
+      Result.Run();
+
+      FParsers.Add(Result);
+    end;
+  finally
+    FLock.Leave();
+  end;
+end;
+
+function TCodetoolsIncludes.GetPlugin(Lexer: TmwBasePasLex): TCodeParser;
+var
+  FileName: String;
+begin
+  FileName := SimbaEnv.FindPlugin(Lexer.DirectiveParamAsFileName, [TSimbaPath.PathExtractDir(Lexer.FileName)]);
+
+  if (FileName <> '') then
+    Result := GetPlugin(FileName)
+  else
+    Result := nil;
 end;
 
 procedure TCodetoolsIncludes.Purge;
@@ -143,12 +242,12 @@ var
   I: Integer;
 begin
   for I := FParsers.Count - 1 downto 0 do
-    with TCachedInclude(FParsers[I]) do
+    with TCodetoolsInclude(FParsers[I]) do
     begin
-      if (RefCount > 0) or (LastUsed < PurgeThreshold) then
+      if (FRefCount > 0) or (FLastUsed < PurgeThreshold) then
         Continue;
 
-      DebugLn('Purge include: %s [%d]', [Lexer.FileName, LastUsed]);
+      DebugLn('Purge include: %s [%d]', [Lexer.FileName, FLastUsed]);
 
       FParsers.Delete(I);
     end;
@@ -169,64 +268,71 @@ begin
   inherited Destroy();
 end;
 
-function TCodetoolsIncludes.Get(Sender: TmwBasePasLex): TCodeParser;
+function TCodetoolsIncludes.GetInclude(Defines: TSaveDefinesRec; IncludedFiles: TStringList; FileName: String): TCodeParser;
 var
-  SenderDefines: TSaveDefinesRec;
-  FileName: String;
   I: Integer;
 begin
   Result := nil;
 
-  FileName := FindInclude(Sender);
-  if (FileName <> '') then
-  begin
-    SenderDefines := Sender.SaveDefines();
-
-    FLock.Enter();
-    try
-      for I := 0 to FParsers.Count - 1 do
-        if (FParsers[I].Lexer.FileName = FileName) then
-          with TCachedInclude(FParsers[I]) do
+  FLock.Enter();
+  try
+    for I := 0 to FParsers.Count - 1 do
+      if (FParsers[I].Lexer.FileName = FileName) then
+        with TCodetoolsInclude(FParsers[I]) do
+        begin
+          if (FInDefines.Stack <> Defines.Stack) or (FInDefines.Defines <> Defines.Defines) then
           begin
-            if (InDefines.Stack <> SenderDefines.Stack) or (InDefines.Defines <> SenderDefines.Defines) then
-            begin
-              {$IFDEF PARSER_CACHE_DEBUG}
-              DebugLn('Cache hit "%s" but not used (defines mismatch) %d, %d', [Lexer.FileName, RefCount, LastUsed + 1]);
-              {$ENDIF}
+            {$IFDEF PARSER_CACHE_DEBUG}
+            DebugLn('[Codetools]: Cache hit "%s" but not used (defines mismatch) %d, %d', [Lexer.FileName, FRefCount, FLastUsed + 1]);
+            {$ENDIF}
 
-              LastUsed := LastUsed + 1;
-              Continue;
-            end;
+            FLastUsed := FLastUsed + 1;
+            Continue;
+          end;
 
-            if IsOutdated() then
-            begin
-              {$IFDEF PARSER_CACHE_DEBUG}
-              DebugLn('Cache hit "%s" but is outdated %d', [Lexer.FileName, RefCount]);
-              {$ENDIF}
+          if IsOutdated() then
+          begin
+            {$IFDEF PARSER_CACHE_DEBUG}
+            DebugLn('[Codetools]: Cache hit "%s" but is outdated %d', [Lexer.FileName, FRefCount]);
+            {$ENDIF}
 
-              LastUsed := 1000;
-              Continue;
-            end;
+            FLastUsed := 1000;
+            Continue;
+          end;
 
-          if (Result = nil) then // Already found, but we're checking above checks
-            Result := IncRef();
-        end;
-
-      Purge();
-
-      if (Result = nil) then
-      begin
-        DebugLn('Caching %s', [FileName]);
-
-        Result := TCachedInclude.Create(Sender, FileName);
-        Result.Run();
-
-        FParsers.Add(Result);
+        if (Result = nil) then // Already found, but we're checking above checks
+          Result := IncRef();
       end;
-    finally
-      FLock.Leave();
+
+    Purge();
+
+    if (Result = nil) then
+    begin
+      DebugLn('[Codetools]: Caching %s', [FileName]);
+
+      Result := TCodetoolsInclude.Create(FileName, Defines, IncludedFiles);
+      Result.Run();
+
+      FParsers.Add(Result);
     end;
+  finally
+    FLock.Leave();
   end;
+end;
+
+function TCodetoolsIncludes.GetInclude(Lexer: TmwBasePasLex; IncludedFiles: TStringList): TCodeParser;
+var
+  FileName: String;
+begin
+  Result := nil;
+
+  FileName := SimbaEnv.FindInclude(Lexer.DirectiveParamAsFileName, [TSimbaPath.PathExtractDir(Lexer.FileName)]);
+  if (FileName = '') or ((Lexer.TokenID = tokIncludeOnceDirect) and (IncludedFiles.IndexOf(FileName) > -1)) then
+    Exit;
+
+  Result := GetInclude(Lexer.SaveDefines(), IncludedFiles, FileName);
+  if Assigned(Result) then
+    IncludedFiles.Add(FileName);
 end;
 
 procedure TCodetoolsIncludes.Release(List: TCodeParserList);
@@ -237,20 +343,15 @@ begin
 
   try
     for I := 0 to List.Count - 1 do
-      if (List[I] is TCachedInclude) then
-        TCachedInclude(List[I]).DecRef();
+      if (List[I] is TCodetoolsInclude) then
+        TCodetoolsInclude(List[I]).DecRef();
   finally
     FLock.Leave();
   end;
 end;
 
-procedure CreateCodetoolsIncludes;
-begin
-  CodetoolsIncludes := TCodetoolsIncludes.Create();
-end;
-
 initialization
-  SimbaIDEInitialization_AddBeforeCreate(@CreateCodetoolsIncludes, 'Codetools Includes');
+  CodetoolsIncludes := TCodetoolsIncludes.Create();
 
 finalization
   if Assigned(CodetoolsIncludes) then

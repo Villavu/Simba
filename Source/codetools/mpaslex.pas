@@ -589,12 +589,12 @@ begin
         end;
       tokIncludeDirect, tokIncludeOnceDirect:
         begin
-          if Assigned(fOnIncludeDirect) and (FDefineStack = 0) then
+          if Assigned(fOnIncludeDirect) and (FDefineStack = 0) and (not IsJunk) then
             fOnIncludeDirect(Self);
         end;
       tokLibraryDirect:
         begin
-          if Assigned(fOnLibraryDirect) and (FDefineStack = 0) then
+          if Assigned(fOnLibraryDirect) and (FDefineStack = 0) and (not IsJunk) then
             fOnLibraryDirect(Self);
         end;
       tokUndefDirect:

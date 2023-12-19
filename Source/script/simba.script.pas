@@ -78,8 +78,8 @@ end;
 function TSimbaScript.DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString): TLapeTokenizerBase;
 begin
   Result := nil;
-  if (not FindInclude(FileName, [ExtractFileDir(Sender.Tokenizer.FileName)])) then
-    FileName := '';
+
+  FileName := SimbaEnv.FindInclude(FileName, [TSimbaPath.PathExtractDir(Sender.Tokenizer.FileName)]);
 end;
 
 function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
@@ -123,7 +123,7 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
     if InIgnore then
       FCompiler.pushConditional(False, Sender.DocPos)
     else
-      FCompiler.pushConditional(FindPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]) = Want, Sender.DocPos);
+      FCompiler.pushConditional(SimbaEnv.HasPlugin(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]) = Want, Sender.DocPos);
   end;
 
   function DoFindFile(Want: Boolean): Boolean;
@@ -133,7 +133,7 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
     if InIgnore then
       FCompiler.pushConditional(False, Sender.DocPos)
     else
-      FCompiler.pushConditional(FindInclude(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]) = Want, Sender.DocPos);
+      FCompiler.pushConditional(SimbaEnv.HasInclude(Argument, [TSimbaPath.PathExtractDir(Sender.Tokenizer.FileName)]) = Want, Sender.DocPos);
   end;
 
   function DoIncluded(Want: Boolean): Boolean;
@@ -143,7 +143,7 @@ function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive
     if InIgnore then
       FCompiler.pushConditional(False, Sender.DocPos)
     else
-      FCompiler.pushConditional((FindInclude(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]) and FCompiler.HasInclude(Argument)) = Want, Sender.DocPos);
+      FCompiler.pushConditional((SimbaEnv.HasInclude(Argument, [TSimbaPath.PathExtractDir(Sender.Tokenizer.FileName)]) and FCompiler.HasInclude(Argument)) = Want, Sender.DocPos);
   end;
 
 begin
@@ -185,7 +185,7 @@ function TSimbaScript.DoFindMacro(Sender: TLapeCompiler; Name: lpString; var Val
   var
     I: Integer;
   begin
-    Result := FindPlugin(Param, [ExtractFileDir(Sender.Tokenizer.FileName)]);
+    Result := SimbaEnv.HasPlugin(Param, [ExtractFileDir(Sender.Tokenizer.FileName)]);
 
     if Result then
     begin
