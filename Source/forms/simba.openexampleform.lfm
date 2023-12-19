@@ -1,7 +1,7 @@
 object SimbaOpenExampleForm: TSimbaOpenExampleForm
-  Left = 2791
+  Left = 3781
   Height = 750
-  Top = 494
+  Top = 374
   Width = 1125
   Caption = 'Open Example'
   ClientHeight = 750
@@ -12,7 +12,7 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
   OnCreate = FormCreate
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '3.0.0.1'
+  LCLVersion = '3.0.0.2'
   object LeftPanel: TPanel
     Left = 0
     Height = 750

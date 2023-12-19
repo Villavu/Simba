@@ -1,7 +1,7 @@
 object SimbaScriptTabsForm: TSimbaScriptTabsForm
-  Left = 2780
+  Left = 2706
   Height = 206
-  Top = 1080
+  Top = 265
   Width = 816
   AllowDropFiles = True
   Caption = 'Editor'
@@ -14,7 +14,7 @@ object SimbaScriptTabsForm: TSimbaScriptTabsForm
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove
   OnMouseUp = FormMouseUp
-  LCLVersion = '3.0.0.1'
+  LCLVersion = '3.0.0.2'
   object FindPanel: TPanel
     Left = 0
     Height = 0

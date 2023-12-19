@@ -41,13 +41,10 @@ type
 
 function StringToExpression(const Str: String): TExpressionItems;
 
-function FindInclude(Sender: TmwBasePasLex): String;
-function FindPluginExports(FileName: String): String;
-
 implementation
 
 uses
-  simba.mufasatypes, simba.env, simba.process, simba.script_pluginloader;
+  simba.mufasatypes, simba.env;
 
 procedure TNullableString.SetValue(const AValue: String);
 begin
@@ -147,49 +144,6 @@ begin
 
   if (Length(Result) > 0) then
     Result[High(Result)].IsLastItem := True;
-end;
-
-function FindInclude(Sender: TmwBasePasLex): String;
-var
-  FileName: String;
-begin
-  Result := '';
-
-  FileName := Sender.DirectiveParamAsFileName;
-
-  case Sender.TokenID of
-    tokLibraryDirect:
-      begin
-        if FindPlugin(FileName, [ExtractFileDir(Sender.FileName)]) then
-          Result := FileName;
-      end;
-
-    tokIncludeDirect, tokIncludeOnceDirect:
-      begin
-        if simba.env.FindInclude(FileName, [ExtractFileDir(Sender.FileName)]) then
-          Result := FileName;
-      end;
-  end;
-end;
-
-function FindPluginExports(FileName: String): String;
-var
-  List: TStringList;
-begin
-  Result := '';
-
-  List := nil;
-  try
-    List := SimbaProcess.RunDump(FileName, ['--dumpplugin=' + FileName]);
-
-    Result := List.Text;
-  except
-    on E: Exception do
-      DebugLn(E.Message);
-  end;
-
-  if (List <> nil) then
-    List.Free();
 end;
 
 end.

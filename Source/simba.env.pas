@@ -13,11 +13,10 @@ uses
   Classes, SysUtils,
   simba.mufasatypes;
 
-  function FindInclude(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
-
 type
   SimbaEnv = class
-  private class var
+  private
+  class var
     FSimbaPath: String;
     FIncludesPath: String;
     FPluginsPath: String;
@@ -30,6 +29,11 @@ type
     FBackupsPath: String;
   public
     class constructor Create;
+
+    class function FindPlugin(FileName: String; ExtraSearchDirs: TStringArray = nil): String;
+    class function FindInclude(FileName: String; ExtraSearchDirs: TStringArray = nil): String;
+    class function HasInclude(FileName: String; ExtraSearchDirs: TStringArray = nil): Boolean;
+    class function HasPlugin(FileName: String; ExtraSearchDirs: TStringArray = nil): Boolean;
 
     class property SimbaPath: String read FSimbaPath;
     class property IncludesPath: String read FIncludesPath;
@@ -49,33 +53,66 @@ uses
   Forms,
   simba.files;
 
-function FindFile(var FileName: string; Ext: String; const SearchPaths: array of String): Boolean;
+class function SimbaEnv.FindPlugin(FileName: String; ExtraSearchDirs: TStringArray): String;
+const
+  {$IF DEFINED(CPUAARCH64)}
+  SimbaSuffix = SharedSuffix + '.aarch64'; // lib.aarch64
+  {$ELSE}
+  SimbaSuffix = {$IFDEF CPU32}'32'{$ELSE}'64'{$ENDIF} + '.' + SharedSuffix; // lib32.dll / lib64.dll
+  {$ENDIF}
 var
-  I: Int32;
+  SearchDir: String;
 begin
-  Result := False;
+  Result := '';
 
-  if FileExists(FileName) then
+  if TSimbaFile.FileExists(FileName) then
+    Exit(FileName);
+
+  for SearchDir in ExtraSearchDirs + [PluginsPath, SimbaPath] do
   begin
-    FileName := ExpandFileName(FileName);
+    Result := TSimbaPath.PathJoin([SearchDir, FileName]);
+    if TSimbaFile.FileExists(Result) then
+      Exit(Result);
 
-    Exit(True);
+    Result := TSimbaPath.PathJoin([SearchDir, FileName]) + '.' + SharedSuffix;
+    if TSimbaFile.FileExists(Result) then
+      Exit(Result);
+
+    Result := TSimbaPath.PathJoin([SearchDir, FileName]) + SimbaSuffix;
+    if TSimbaFile.FileExists(Result) then
+      Exit(Result);
   end;
-
-  for I := 0 to High(SearchPaths) do
-    if FileExists(IncludeTrailingPathDelimiter(SearchPaths[I]) + FileName + Ext) then
-    begin
-      FileName := ExpandFileName(IncludeTrailingPathDelimiter(SearchPaths[I]) + FileName + Ext);
-
-      Exit(True);
-    end;
 end;
 
-function FindInclude(var FileName: String; ExtraSearchDirs: TStringArray): Boolean;
+class function SimbaEnv.FindInclude(FileName: String; ExtraSearchDirs: TStringArray): String;
+var
+  SearchDir: String;
 begin
-  Result := FindFile(FileName, '', ExtraSearchDirs + [SimbaEnv.IncludesPath, SimbaEnv.SimbaPath]);
-  if (not Result) and (TSimbaPath.PathExtractExt(FileName) <> '.simba') then
-    Result := FindFile(FileName, '.simba', ExtraSearchDirs + [SimbaEnv.IncludesPath, SimbaEnv.SimbaPath]);
+  Result := '';
+
+  if TSimbaFile.FileExists(FileName) then
+    Exit(FileName);
+
+  for SearchDir in ExtraSearchDirs + [IncludesPath, SimbaPath] do
+  begin
+    Result := TSimbaPath.PathJoin([SearchDir, FileName]);
+    if TSimbaFile.FileExists(Result) then
+      Exit(Result);
+
+    Result := TSimbaPath.PathJoin([SearchDir, FileName]) + '.simba';
+    if TSimbaFile.FileExists(Result) then
+      Exit(Result);
+  end;
+end;
+
+class function SimbaEnv.HasInclude(FileName: String; ExtraSearchDirs: TStringArray): Boolean;
+begin
+  Result := (FindInclude(FileName, ExtraSearchDirs) <> '');
+end;
+
+class function SimbaEnv.HasPlugin(FileName: String; ExtraSearchDirs: TStringArray): Boolean;
+begin
+  Result := (FindPlugin(FileName, ExtraSearchDirs) <> '');
 end;
 
 class constructor SimbaEnv.Create;

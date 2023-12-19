@@ -344,10 +344,8 @@ type
 
     procedure Assign(From: TObject); virtual;
 
-    procedure SetScript(Script: String; FileName: String = ''; Defines: TStringArray = nil); virtual;
-    procedure SetFile(FileName: String; Defines: TStringArray = nil); virtual;
-
-    function HasFile(FileName: String): Boolean;
+    procedure SetScript(Script: String; FileName: String = ''); virtual;
+    procedure SetFile(FileName: String); virtual;
 
     procedure Reset; virtual;
     procedure Run; virtual;
@@ -592,29 +590,16 @@ begin
   fLexerStack.Clear();
 end;
 
-procedure TmwSimplePasPar.SetScript(Script: String; FileName: String; Defines: TStringArray);
+procedure TmwSimplePasPar.SetScript(Script: String; FileName: String);
 begin
   Reset();
   PushLexer(TmwPasLex.Create(Script, FileName));
-  fLexer.Defines.AddStrings(Defines);
 end;
 
-procedure TmwSimplePasPar.SetFile(FileName: String; Defines: TStringArray);
+procedure TmwSimplePasPar.SetFile(FileName: String);
 begin
   Reset();
   PushLexer(TmwPasLex.CreateFromFile(FileName));
-  fLexer.Defines.AddStrings(Defines);
-end;
-
-function TmwSimplePasPar.HasFile(FileName: String): Boolean;
-var
-  I: Integer;
-begin
-  for I := 0 to fLexers.Count - 1 do
-    if (fLexers[I].FileName = FileName) then
-      Exit(True);
-
-  Result := False;
 end;
 
 procedure TmwSimplePasPar.ParseFile;

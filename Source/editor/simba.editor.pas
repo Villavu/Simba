@@ -15,6 +15,8 @@ uses
   simba.mufasatypes, simba.settings, simba.editor_autocomplete, simba.editor_paramhint, simba.editor_attributes, simba.editor_modifiedlinegutter, simba.component_synedit;
 
 type
+  TSimbaEditorFileNameEvent = function(Sender: TObject): String of object;
+
   TSimbaEditor = class(TSimbaSynEdit)
   protected
     FMarkupHighlightAllCaret: TSynEditMarkupHighlightAllCaret;
@@ -39,6 +41,7 @@ type
 
     FLastTextChangeStamp: Int64;
     FModifiedEvent: TNotifyEvent;
+    FGetFileNameEvent: TSimbaEditorFileNameEvent;
 
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
 
@@ -60,6 +63,8 @@ type
     procedure StatusChanged(AChanges: TSynStatusChanges); override;
     procedure SetUpdateState(NewUpdating: Boolean; Sender: TObject); override;
 
+    function GetFileName: String;
+
     procedure SetColorModified(Value: TColor);
     procedure SetColorSaved(Value: TColor);
     procedure SetUseSimbaColors(Value: Boolean);
@@ -71,10 +76,13 @@ type
     property Attributes: TSimbaEditor_Attributes read FAttributes;
 
     property OnModified: TNotifyEvent read FModifiedEvent write FModifiedEvent;
+    property OnGetFileName: TSimbaEditorFileNameEvent read FGetFileNameEvent write FGetFileNameEvent;
 
     property ColorSaved: TColor read FColorSaved write SetColorSaved;
     property ColorModified: TColor read FColorModified write SetColorModified;
     property UseSimbaColors: Boolean read FUseSimbaColors write SetUseSimbaColors;
+
+    property FileName: String read GetFileName;
 
     // Accept from TTreeView
     procedure DragDrop(Source: TObject; X, Y: Integer); override;
@@ -224,6 +232,14 @@ begin
 
     FLastTextChangeStamp := ChangeStamp;
   end;
+end;
+
+function TSimbaEditor.GetFileName: String;
+begin
+  if Assigned(FGetFileNameEvent) then
+    Result := FGetFileNameEvent(Self)
+  else
+    Result := '';
 end;
 
 function TSimbaEditor.GetCaretPos(GoBackToWord: Boolean): Integer;

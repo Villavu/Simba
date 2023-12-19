@@ -94,6 +94,7 @@ type
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
+    function DoEditorGetFileName(Sender: TObject): String;
     procedure DoEditorModified(Sender: TObject);
     procedure DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
@@ -355,6 +356,11 @@ begin
   inherited Notification(AComponent, Operation);
 end;
 
+function TSimbaScriptTab.DoEditorGetFileName(Sender: TObject): String;
+begin
+  Result := FScriptFileName;
+end;
+
 procedure TSimbaScriptTab.FindDeclarationAtCaret;
 begin
   FindAndShowDeclaration(Script, ScriptFileName, Editor.GetCaretPos(True), Editor.GetExpressionEx(FEditor.CaretX, FEditor.CaretY));
@@ -607,6 +613,7 @@ begin
   FEditor.RegisterStatusChangedHandler(@DoEditorStatusChanges, [scCaretX, scCaretY, scModified]);
   FEditor.OnClickLink := @DoEditorLinkClick;
   FEditor.OnModified := @DoEditorModified;
+  FEditor.OnGetFileName := @DoEditorGetFileName;
   FEditor.UseSimbaColors := True;
   FEditor.PopupMenu := TSimbaTabPopupMenu.Create(Self);
 

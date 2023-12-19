@@ -31,33 +31,35 @@ type
   {$SCOPEDENUMS OFF}
 
   TCodeinsight = class(TObject)
-  protected
-  class var
+  protected class var
     FBaseParsers: TCodeParserList;
   protected
-    FPluginParsers: TCodeParserList;
     FIncludeParsers: TCodeParserList;
+    FPluginParsers: TCodeParserList;
     FScriptParser: TCodeParser;
+
+    FIncludedFiles: TStringList;
 
     class function Hash(Parsers: TCodeParserList): String;
 
-    function DoFindInclude(Sender: TmwBasePasLex; var FileName: String; var Handled: Boolean): Boolean;
-    function DoFindPlugin(Sender: TmwBasePasLex; var FileName: String): Boolean;
+    procedure DoHandleInclude(Sender: TmwBasePasLex);
+    procedure DoHandlePlugin(Sender: TmwBasePasLex);
+
+    procedure Reset;
 
     function GetIncludesHash: String;
     function GetPluginsHash: String;
-
-    procedure Reset;
   public
     class procedure AddBaseParser(Parser: TCodeParser);
     class property BaseParsers: TCodeParserList read FBaseParsers;
     class constructor Create;
     class destructor Destroy;
 
-    property PluginParsers: TCodeParserList read FPluginParsers;
-    property PluginsHash: String read GetPluginsHash;
     property IncludeParsers: TCodeParserList read FIncludeParsers;
     property IncludesHash: String read GetIncludesHash;
+
+    property PluginParsers: TCodeParserList read FPluginParsers;
+    property PluginsHash: String read GetPluginsHash;
 
     property ScriptParser: TCodeParser read FScriptParser;
 
@@ -98,7 +100,7 @@ implementation
 
 uses
   simba.mufasatypes, simba.ide_codetools_includes, simba.ide_codetools_arrayhelpers,
-  simba.ide_codetools_plugins, simba.stringbuilder;
+  simba.stringbuilder;
 
 function TCodeinsight.GetIncludesHash: String;
 begin
@@ -121,52 +123,44 @@ begin
   Result := Builder.Str;
 end;
 
-function TCodeinsight.DoFindInclude(Sender: TmwBasePasLex; var FileName: String; var Handled: Boolean): Boolean;
+procedure TCodeinsight.DoHandleInclude(Sender: TmwBasePasLex);
 var
-  I: Integer;
-  Include: TCodeParser;
+  Parser: TCodeParser;
+  Plugin: String;
 begin
-  Result := False;
-  Handled := True;
+  Parser := CodetoolsIncludes.GetInclude(Sender, FIncludedFiles);
 
-  if (Sender.TokenID = tokIncludeOnceDirect) then
+  if Assigned(Parser) then
   begin
-    FileName := Sender.DirectiveParamAsFileName;
-    for I := 0 to FIncludeParsers.Count - 1 do
-      if (FIncludeParsers[I].FileName = FileName) then
-        Exit;
-  end;
+    FScriptParser.Root.Items.Add(TDeclaration_IncludeDirective.Create(FScriptParser, Parser.FileName));
+    FIncludeParsers.Add(Parser);
 
-  Include := CodetoolsIncludes.Get(Sender);
-  if (Include <> nil) then
-  begin
-    FScriptParser.Root.Items.Add(TDeclaration_IncludeDirective.Create(FScriptParser, Include.FileName));
-    FIncludeParsers.Add(Include);
+    for Plugin in TCodetoolsPlugin(Parser).Plugins do
+    begin
+      Parser := CodetoolsIncludes.GetPlugin(Plugin);
+      if Assigned(Parser) then
+        FPluginParsers.Add(Parser);
+    end;
   end;
 end;
 
-function TCodeinsight.DoFindPlugin(Sender: TmwBasePasLex; var FileName: String): Boolean;
+procedure TCodeinsight.DoHandlePlugin(Sender: TmwBasePasLex);
 var
-  Include: TCodeParser;
+  Parser: TCodeParser;
 begin
-  FileName := FindInclude(Sender);
-
-  Result := FileName <> '';
-  if Result then
-  begin
-    Include := CodetoolsPlugins.Get(FileName);
-    if (Include <> nil) then
-      FPluginParsers.Add(Include);
-  end;
+  Parser := CodetoolsIncludes.GetPlugin(Sender);
+  if Assigned(Parser) then
+    FPluginParsers.Add(Parser);
 end;
 
 procedure TCodeinsight.Reset;
 begin
   CodetoolsIncludes.Release(FIncludeParsers);
-  CodetoolsPlugins.Release(FPluginParsers);
+  CodetoolsIncludes.Release(FPluginParsers);
 
-  FPluginParsers.Clear();
+  FIncludedFiles.Clear();
   FIncludeParsers.Clear();
+  FPluginParsers.Clear();
   FScriptParser.Reset();
 end;
 
@@ -298,7 +292,7 @@ begin
 
   Result[0] := ScriptParser;
 
-  Add(FBaseParsers);
+  {%H-}Add(FBaseParsers);
   Add(FIncludeParsers);
   Add(FPluginParsers);
 
@@ -515,9 +509,10 @@ begin
   inherited Create();
 
   FScriptParser := TCodeParser.Create();
-  FScriptParser.OnFindInclude := @DoFindInclude;
-  FScriptParser.OnFindPlugin := @DoFindPlugin;
+  FScriptParser.OnHandleInclude := @DoHandleInclude;
+  FScriptParser.OnHandlePlugin := @DoHandlePlugin;
 
+  FIncludedFiles := TStringList.Create();
   FIncludeParsers := TCodeParserList.Create();
   FPluginParsers := TCodeParserList.Create();
 end;
@@ -526,12 +521,10 @@ destructor TCodeinsight.Destroy;
 begin
   Reset();
 
-  if (FScriptParser <> nil) then
-    FreeAndNil(FScriptParser);
-  if (FIncludeParsers <> nil) then
-    FreeAndNil(FIncludeParsers);
-  if (FPluginParsers <> nil) then
-    FreeAndNil(FPluginParsers);
+  FreeAndNil(FScriptParser);
+  FreeAndNil(FIncludeParsers);
+  FreeAndNil(FPluginParsers);
+  FreeAndNil(FIncludedFiles);
 
   inherited Destroy();
 end;
