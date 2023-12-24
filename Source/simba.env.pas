@@ -63,8 +63,6 @@ const
 var
   SearchDir: String;
 begin
-  Result := '';
-
   if TSimbaFile.FileExists(FileName) then
     Exit(FileName);
 
@@ -82,14 +80,14 @@ begin
     if TSimbaFile.FileExists(Result) then
       Exit(Result);
   end;
+
+  Result := '';
 end;
 
 class function SimbaEnv.FindInclude(FileName: String; ExtraSearchDirs: TStringArray): String;
 var
   SearchDir: String;
 begin
-  Result := '';
-
   if TSimbaFile.FileExists(FileName) then
     Exit(FileName);
 
@@ -103,6 +101,8 @@ begin
     if TSimbaFile.FileExists(Result) then
       Exit(Result);
   end;
+
+  Result := '';
 end;
 
 class function SimbaEnv.HasInclude(FileName: String; ExtraSearchDirs: TStringArray): Boolean;

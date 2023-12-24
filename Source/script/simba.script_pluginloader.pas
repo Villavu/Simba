@@ -12,9 +12,19 @@ unit simba.script_pluginloader;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.mufasatypes;
 
 function LoadPlugin(var FileName: String; ExtraSearchDirs: TStringArray = nil): TLibHandle;
+
+function FindLoadedPlugin(FileName: String): String;
+function IsPluginLoaded(FileName: String): Boolean;
+function GetLoadedPlugins: TStringArray;
+
+implementation
+
+uses
+  simba.files, simba.env;
 
 var
   LoadedPlugins: array of record
@@ -22,11 +32,6 @@ var
     FileName: String;
     Handle: TLibHandle;
   end;
-
-implementation
-
-uses
-  simba.mufasatypes, simba.files, simba.env;
 
 // Make a copy of the plugin to data/plugins/ so we can delete/update if it's loaded
 procedure CopyPlugin(var FileName: String);
@@ -73,6 +78,31 @@ begin
   LoadedPlugins[High(LoadedPlugins)].OrginalFileName := OrginalFileName;
   LoadedPlugins[High(LoadedPlugins)].FileName := FileName;
   LoadedPlugins[High(LoadedPlugins)].Handle := Result;
+end;
+
+function FindLoadedPlugin(FileName: String): String;
+var
+  I: Integer;
+begin
+  Result := '';
+
+  for I := 0 to High(LoadedPlugins) do
+    if (LoadedPlugins[I].OrginalFileName = FileName) then
+      Exit(LoadedPlugins[I].FileName);
+end;
+
+function IsPluginLoaded(FileName: String): Boolean;
+begin
+  Result := FindLoadedPlugin(FileName) <> '';
+end;
+
+function GetLoadedPlugins: TStringArray;
+var
+  i: Integer;
+begin
+  SetLength(Result, Length(LoadedPlugins));
+  for I := 0 to High(LoadedPlugins) do
+    Result[I] := LoadedPlugins[i].OrginalFileName;
 end;
 
 end.
