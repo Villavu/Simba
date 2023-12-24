@@ -10,7 +10,7 @@ unit simba.script_plugin;
 interface
 
 uses
-  Classes, SysUtils, DynLibs,
+  Classes, SysUtils, dynlibs,
   simba.mufasatypes, simba.script_compiler, simba.script_pluginmethods;
 
 type

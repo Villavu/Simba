@@ -180,7 +180,6 @@ begin
     'DTM':            Result := ROOT + 'DTM.html';
     'System':         Result := ROOT + 'System.html';
     'TCircle':        Result := ROOT + 'TCircle.html';
-    'DateTime':       Result := ROOT + 'DateTime.html';
   end;
 end;
 
@@ -425,7 +424,6 @@ begin
         NodeType := ntPluginFile;
         Hint := Plugins[I].FileName;
       end;
-      WriteLn(Plugins[I].Items.Count);
 
       for Decl in Plugins[I].Items.ToArray do
         if (Decl.Name <> '') then

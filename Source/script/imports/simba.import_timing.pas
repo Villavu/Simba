@@ -118,7 +118,7 @@ However the more important use case of this function is for measuring time:
 ```
 Resolution is typically in the range of 10 milliseconds to 16 milliseconds.
 
-If you need higher resolution timer use `PerformanceTimer`
+If you need a more accurate timer use `PerformanceTimer`
 *)
 
 procedure ImportTiming(Compiler: TSimbaScript_Compiler);

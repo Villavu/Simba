@@ -2,7 +2,7 @@ var
   FileName, Output: String;
   Fail, Pass: Integer;
 begin
-  for FileName in DirSearch(DirParent({$macro CURRENT_DIRECTORY}), '*.simba') do
+  for FileName in DirSearch(DirParent({$macro DIR}), '*.simba') do
   begin
     WriteLn('Testing: ' + PathExtractNameWithoutExt(FileName));
 
