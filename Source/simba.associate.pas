@@ -10,7 +10,7 @@ unit simba.associate;
 interface
 
 uses
-  classes, sysutils;
+  Classes, SysUtils, Forms;
 
 procedure Associate;
 
@@ -18,51 +18,49 @@ implementation
 
 {$IFDEF WINDOWS}
 uses
-  forms, registry, windows, shellapi;
+  FileAssoc;
 
 procedure Associate;
 var
-  Info: TShellExecuteInfo;
+  assoc: TFileAssociation;
 begin
-  if not Application.HasOption('associate') then
-  begin
-    Info := Default(TShellExecuteInfo);
-    Info.cbSize := SizeOf(TShellExecuteInfo);
-    Info.Wnd := Application.MainFormHandle;
-    Info.fMask := SEE_MASK_FLAG_DDEWAIT or SEE_MASK_FLAG_NO_UI or SEE_MASK_NO_CONSOLE;
-    Info.lpVerb := 'runas';
-    Info.lpFile := PAnsiChar(Application.ExeName);
-    Info.lpParameters := PAnsiChar('--associate');
-    Info.nShow := SW_HIDE;
+  assoc := TFileAssociation.Create(nil);
+  assoc.ApplicationName := 'Simba';
 
-    ShellExecuteExA(@Info);
-  end else
-  begin
-    with TRegistry.Create() do
-    try
-      RootKey := HKEY_CLASSES_ROOT;
-      OpenKey('.simba', True);
-      WriteString('', 'simbafile');
-      CloseKey();
-      CreateKey('simbafile');
-      OpenKey('simbafile\DefaultIcon', True);
-      WriteString('', ParamStr(0) + ',0');
-      CloseKey();
-      OpenKey('simbafile\shell\Open\command', True);
-      WriteString('', ParamStr(0) + ' "%1"');
-      CloseKey();
-      OpenKey('simbafile\shell\Run\command', True);
-      WriteString('', ParamStr(0) + ' --open --run "%1"');
-      CloseKey();
-      OpenKey('simbafile\shell\Run (Headless)\command', True);
-      WriteString('', ParamStr(0) + ' --run "%1"');
-      CloseKey();
-    finally
-      Free();
-    end;
+  // Requires admin
+  assoc.RegisterForAllUsers := False;
 
-    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nil, nil);
-  end;
+  assoc.Extension := '.simba';
+  assoc.ExtensionName := 'Simba';
+  assoc.ExtensionIcon := '"' + Application.ExeName + '",0';
+
+  assoc.WriteFileAssociationClass();
+  assoc.WriteFileAssociation();
+  assoc.WriteDefaultPrograms();
+  assoc.WriteDefaultProgramsAddExt();
+
+  assoc.ActionName := 'Open';
+  assoc.ActionText := 'Open';
+  assoc.ActionIcon := '"' + Application.ExeName + '",0';
+  assoc.Action := '"' + Application.ExeName + '" --open "%1"';
+
+  assoc.WriteFileAssociationClassCommand();
+
+  assoc.ActionName := 'Open and Run';
+  assoc.ActionText := 'Open and Run';
+  assoc.ActionIcon := '"' + Application.ExeName + '",0';
+  assoc.Action := '"' + Application.ExeName + '" --open --run "%1"';
+
+  assoc.WriteFileAssociationClassCommand();
+
+  assoc.ActionName := 'Run';
+  assoc.ActionText := 'Run';
+  assoc.ActionIcon := '"' + Application.ExeName + '",0';
+  assoc.Action := '"' + Application.ExeName + '" --run "%1"';
+
+  assoc.WriteFileAssociationClassCommand();
+
+  assoc.ClearIconCache();
 end;
 {$ELSE}
 procedure Associate;
