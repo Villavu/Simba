@@ -36,7 +36,7 @@ type
     function DoCompilerPreprocessorFunc(Sender: TLapeCompiler; Name, Argument: lpString; out Value: lpString): Boolean;
     function DoCompilerMacro(Sender: TLapeCompiler; Name, Argument: lpString; out Value: lpString): Boolean;
     procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
-    function DoCompilerFindFile(Sender: TLapeCompiler; FileName: lpString): String;
+    procedure DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString);
     function DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
     function GetState: ESimbaScriptState;
 
@@ -114,9 +114,13 @@ begin
   SimbaDebugLn([EDebugLn.YELLOW], Hint);
 end;
 
-function TSimbaScript.DoCompilerFindFile(Sender: TLapeCompiler; FileName: lpString): String;
+procedure TSimbaScript.DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString);
+var
+  IncludeFile: lpString;
 begin
-  Result := SimbaEnv.FindInclude(FileName, [TSimbaPath.PathExtractDir(Sender.Tokenizer.FileName)]);
+  IncludeFile := SimbaEnv.FindInclude(FileName, [TSimbaPath.PathExtractDir(Sender.Tokenizer.FileName)]);
+  if (IncludeFile <> '') then
+    FileName := IncludeFile;
 end;
 
 function TSimbaScript.DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
