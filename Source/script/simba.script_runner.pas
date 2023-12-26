@@ -82,14 +82,14 @@ var
 begin
   ExitCode := 1;
 
-  DoDebugLn([EDebugLn.RED], E.Message);
+  DoDebugLn([EDebugLn.RED, EDebugLn.FOCUS], E.Message);
 
   if (E is lpException) then
     with lpException(E) do
     begin
       for Line in StackTrace.Split(LineEnding) do
         if (Line <> '') then
-          DoDebugLn([EDebugLn.RED], Line);
+          DoDebugLn([EDebugLn.RED, EDebugLn.FOCUS], Line);
 
       if (FScript.SimbaCommunication <> nil) then
         FScript.SimbaCommunication.ScriptError(Message, DocPos.Line, DocPos.Col, DocPos.FileName);

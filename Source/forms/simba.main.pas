@@ -226,7 +226,6 @@ type
     procedure DoResetDocking;
     procedure DoDefaultDocking;
 
-    procedure SetupDocking;
     procedure SetupCompleted;
 
     procedure DoSettingChanged_CustomFontSize(Setting: TSimbaSetting);
@@ -247,6 +246,10 @@ type
     procedure SetConsoleVisible(Value: Boolean);
     procedure SetLayoutLocked(Value: Boolean);
     procedure SetTrayIconVisible(Value: Boolean);
+
+    procedure DoApplicationParameters;
+    procedure DoFocusEditor;
+    procedure UpdateTitle;
   public
     procedure Setup;
   end;
@@ -372,6 +375,37 @@ begin
   TrayIcon.Visible := Value;
 end;
 
+procedure TSimbaForm.DoApplicationParameters;
+begin
+  if (Application.ParamCount > 0) then
+  begin
+    if (Application.ParamCount = 1) and FileExists(Application.Params[1]) then
+      SimbaScriptTabsForm.Open(Application.Params[1])
+    else
+    if Application.HasOption('open') and FileExists(Application.Params[Application.ParamCount]) then
+    begin
+      SimbaScriptTabsForm.Open(Application.Params[Application.ParamCount]);
+
+      if Application.HasOption('compile') then
+        SimbaMainToolBar.ButtonCompile.Click();
+      if Application.HasOption('run') then
+        SimbaMainToolBar.ButtonRun.Click();
+    end;
+  end;
+end;
+
+procedure TSimbaForm.DoFocusEditor;
+begin
+  if Assigned(SimbaScriptTabsForm.CurrentEditor) then
+    if SimbaScriptTabsForm.CurrentEditor.CanSetFocus() then
+      SimbaScriptTabsForm.CurrentEditor.SetFocus();
+end;
+
+procedure TSimbaForm.UpdateTitle;
+begin
+  Caption := Format('Simba %.1f', [SIMBA_VERSION / 1000]);
+end;
+
 procedure TSimbaForm.HandleFormCreated(Sender: TObject; Form: TCustomForm);
 begin
   if (SimbaSettings.General.CustomFontSize.Value > 0) then
@@ -385,11 +419,12 @@ end;
 
 procedure TSimbaForm.MenuItemAssociateScriptsClick(Sender: TObject);
 const
-  Message = 'Would you like to associate scripts with this Simba?' + LineEnding +
-            'This means when opening a script, the script will be opened using this Simba executable.';
+  Message = 'Would you like to associate Simba files with this Simba?'                                   + LineEnding +
+            'This means when opening a .simba file the file will be opened using this Simba executable.' + LineEnding +
+            'It also adds right click actions to run the script.';
 begin
   {$IFDEF WINDOWS}
-  if MessageDlg(Message, mtConfirmation, mbYesNo, 0) = mrYes then
+  if (MessageDlg(Message, mtConfirmation, mbYesNo, 0) = mrYes) then
     Associate();
   {$ENDIF}
 end;
@@ -515,7 +550,7 @@ begin
   DockMaster.MakeVisible(SimbaOutputForm, False);
   DockMaster.MakeVisible(SimbaFunctionListForm, False);
   DockMaster.MakeVisible(SimbaFileBrowserForm, False);
-  DockMaster.ScaleOnResize:=False;
+  DockMaster.ScaleOnResize := False;
 
   Width := 1200;
   Height := 850;
@@ -538,6 +573,13 @@ end;
 
 procedure TSimbaForm.Setup;
 begin
+  // Register events etc
+  Application.CaptureExceptions := True;
+  Application.OnException := @Self.HandleException;
+  Application.AddOnKeyDownBeforeHandler(@DoApplicationKeyDown);
+
+  Screen.AddHandlerFormAdded(@Self.HandleFormCreated, True);
+
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_LOADED, @DoTabLoaded);
 
   with SimbaSettings do
@@ -548,29 +590,65 @@ begin
     RegisterChangeHandler(Self, General.ConsoleVisible, @DoSettingChanged_ConsoleVisible, True);
   end;
 
-  Application.CaptureExceptions := True;
-  Application.OnException := @Self.HandleException;
-  Application.AddOnKeyDownBeforeHandler(@DoApplicationKeyDown);
-
-  Screen.AddHandlerFormAdded(@Self.HandleFormCreated, True);
-
+  // Create things
   FRecentFiles := TStringList.Create();
   FRecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
 
   FMouseLogger := TSimbaMouseLogger.Create();
 
-  Color := SimbaTheme.ColorFrame;
+  // Docking
+  BeginFormUpdate();
+  try
+    DockMaster.BeginUpdate();
+    DockMaster.SplitterWidth := Scale96ToScreen(8);
+    DockMaster.HeaderClass := TSimbaAnchorDockHeader;
+    DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
+    DockMaster.SiteClass := TSimbaAnchorDockHostSite;
+    DockMaster.HideHeaderCaptionFloatingControl := False;
+    DockMaster.HeaderAlignTop := $FFFFFF;
+    DockMaster.PageAreaInPercent := 0;
+    DockMaster.HeaderHint := 'Use the mouse to drag and dock this window';
+    DockMaster.MakeDockPanel(DockPanel, admrpChild);
+    DockMaster.DragTreshold := 40;
 
+    DockMaster.MakeDockable(SimbaScriptTabsForm, MenuItemEditor);
+    DockMaster.MakeDockable(SimbaOutputForm, MenuItemOutput);
+    DockMaster.MakeDockable(SimbaFileBrowserForm, MenuItemFileBrowser);
+    DockMaster.MakeDockable(SimbaFunctionListForm, MenuItemFunctionList);
+    DockMaster.MakeDockable(SimbaNotesForm, MenuItemNotes);
+    DockMaster.MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
+    DockMaster.MakeDockable(SimbaColorPickerHistoryForm, MenuItemColourHistory);
+
+    if (SimbaSettings.General.Layout.Value <> '') then
+    begin
+      DockMaster.LoadLayout(SimbaSettings.General.Layout.Value);
+
+      if (DockMaster.GetAnchorSite(SimbaScriptTabsForm) <> nil) then
+        DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
+      if (DockMaster.GetAnchorSite(SimbaOutputForm) <> nil) then
+        DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
+
+      EnsureVisible();
+    end else
+      QueueOnMainThread(@DoDefaultDocking);
+  finally
+    DockMaster.EndUpdate();
+
+    EndFormUpdate();
+  end;
+
+  // Main title
+  UpdateTitle();
+
+  // Add a tab
   SimbaScriptTabsForm.AddTab();
 
-  SetupDocking();
+  // If first simba launch, associate
+  if SimbaSettings.FirstLaunch then
+    QueueOnMainThread(@MenuItemAssociateScripts.Click);
 
-  // Finally, give the editor focus as default.
-  if Assigned(SimbaScriptTabsForm.CurrentEditor) then
-    if SimbaScriptTabsForm.CurrentEditor.CanSetFocus() then
-      SimbaScriptTabsForm.CurrentEditor.SetFocus();
-
-  SetupCompleted();
+  QueueOnMainThread(@DoApplicationParameters); // open/compile/run parameters
+  QueueOnMainThread(@DoFocusEditor); // finally focus the tab
 end;
 
 procedure TSimbaForm.FormDestroy(Sender: TObject);
@@ -964,50 +1042,6 @@ begin
   ShowOnTop();
   if CanSetFocus() then
     SetFocus();
-end;
-
-procedure TSimbaForm.SetupDocking;
-begin
-  BeginFormUpdate();
-
-  try
-    DockMaster.BeginUpdate();
-    DockMaster.SplitterWidth := Scale96ToScreen(8);
-    DockMaster.HeaderClass := TSimbaAnchorDockHeader;
-    DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
-    DockMaster.SiteClass := TSimbaAnchorDockHostSite;
-    DockMaster.HideHeaderCaptionFloatingControl := False;
-    DockMaster.HeaderAlignTop := $FFFFFF;
-    DockMaster.PageAreaInPercent := 0;
-    DockMaster.HeaderHint := 'Use the mouse to drag and dock this window';
-    DockMaster.MakeDockPanel(DockPanel, admrpChild);
-    DockMaster.DragTreshold := 40;
-
-    DockMaster.MakeDockable(SimbaScriptTabsForm, MenuItemEditor);
-    DockMaster.MakeDockable(SimbaOutputForm, MenuItemOutput);
-    DockMaster.MakeDockable(SimbaFileBrowserForm, MenuItemFileBrowser);
-    DockMaster.MakeDockable(SimbaFunctionListForm, MenuItemFunctionList);
-    DockMaster.MakeDockable(SimbaNotesForm, MenuItemNotes);
-    DockMaster.MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
-    DockMaster.MakeDockable(SimbaColorPickerHistoryForm, MenuItemColourHistory);
-
-    if (SimbaSettings.General.Layout.Value <> '') then
-    begin
-      DockMaster.LoadLayout(SimbaSettings.General.Layout.Value);
-
-      if (DockMaster.GetAnchorSite(SimbaScriptTabsForm) <> nil) then
-        DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
-      if (DockMaster.GetAnchorSite(SimbaOutputForm) <> nil) then
-        DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
-
-      EnsureVisible();
-    end else
-      QueueOnMainThread(@DoDefaultDocking);
-  finally
-    DockMaster.EndUpdate();
-
-    EndFormUpdate();
-  end;
 end;
 
 procedure TSimbaForm.SetupCompleted;
