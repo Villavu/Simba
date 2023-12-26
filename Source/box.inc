@@ -52,10 +52,6 @@ type
   function Box(const Mid: TPoint; const XRad, YRad: Integer): TBox; inline;
 
   operator = (const Left, Right: TBox): Boolean;
-
-const
-  NullBox: TBox = (X1: -1; Y1: -1; X2: -1; Y2: -1);
-
 {$ENDIF}
 
 {$IFDEF BODY}
@@ -203,41 +199,30 @@ begin
   Result.Y2 := Max(Max(Self.Y1, Other.Y2), Max(Other.Y1, Self.Y2));
 end;
 
-function TBoxHelper.Invert(Box: TBox): TBoxArray;
+function TBoxHelper.Invert(Area: TBox): TBoxArray;
 var
-  Box: TBox;
-  Boxes: TBoxArray;
-  I, Count: Integer;
+  lowX, maxX, lowY, maxY: Integer;
+  I: Integer;
 begin
-  Result := [];
+  lowX := Max(Area.X1, Self.X1-1);
+  maxX := Min(Area.X2, Self.X2+1);
+  lowY := Max(Area.Y1, Self.Y1-1);
+  maxY := Min(Area.Y2, Self.Y2+1);
 
-  Box.X1 := Max(Area.X1, Self.X1-1);
-  Box.X2 := Min(Area.X2, Self.X2+1);
-  Box.Y1 := Max(Area.Y1, Self.Y1-1);
-  Box.Y2 := Min(Area.Y2, Self.Y2+1);
-
-  Boxes := [
-    TBox.Create(Area.X1, Area.Y1, Box.X1,  Box.Y1),
-    TBox.Create(Area.X1, Box.Y1,  Box.X1,  Box.Y2),
-    TBox.Create(Area.X1, Box.Y1,  Box.X1,  Area.Y2),
-    TBox.Create(Box.X1,  Area.Y1, Box.X2,  Box.Y1),
-    TBox.Create(Box.X1,  Box.Y2,  Box.X2,  Area.Y2),
-    TBox.Create(Box.X2,  Area.Y1, Area.X2, Box.Y1),
-    TBox.Create(Box.X2,  Box.Y1,  Area.X2, Box.Y2),
-    TBox.Create(Box.X2,  Box.Y1,  Area.X2, Area.Y2)
+  Result := [
+    TBox.Create(Area.X1, Area.Y1, lowX,    lowY),
+    TBox.Create(Area.X1, lowY,    lowX,    maxY),
+    TBox.Create(Area.X1, lowY,    lowX,    Area.Y2),
+    TBox.Create(lowX,    Area.Y1, maxX,    lowY),
+    TBox.Create(lowX,    maxY,    maxX,    Area.Y2),
+    TBox.Create(maxX,    Area.Y1, Area.X2, lowY),
+    TBox.Create(maxX,    lowY,    Area.X2, maxY),
+    TBox.Create(maxX,    lowY,    Area.X2, Area.Y2)
   ];
 
-  Count := 0;
-  SetLength(Result, Length(Boxes));
-  for I := 0 to High(Boxes) do
-    with Boxes[I] do
-      if (X2 > X1) and (Y2 > Y1) then
-      begin
-        Result[Count] := Boxes[I];
-        Inc(Count);
-      end;
-
-  SetLength(Result, Count);
+  for I := High(Result) downto 0 do
+    if (Result[I].X2 <= Result[I].X1) or (Result[I].Y2 <= Result[I].Y1) then
+      Delete(Result, I, 1);
 end;
 
 function TBoxHelper.Partition(Rows, Cols: Integer): TBoxArray;

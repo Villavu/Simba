@@ -231,9 +231,10 @@ begin
   FFlowPanel.Align := alClient;
   FFlowPanel.BevelOuter := bvNone;
 
-  Spacing := 3;
-
+  ControlStyle := ControlStyle + [csOpaque];
   AutoSize := True;
+  Spacing := 3;
+  Color := SimbaTheme.ColorFrame;
 end;
 
 end.
