@@ -10,7 +10,8 @@ object SimbaShapeBoxForm: TSimbaShapeBoxForm
   OnHide = FormHide
   OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '2.2.2.0'
+  ShowInTaskBar = stAlways
+  LCLVersion = '3.0.0.3'
   object MainMenu1: TMainMenu
     Left = 70
     Top = 63

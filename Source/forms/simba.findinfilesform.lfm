@@ -4,14 +4,15 @@ object SimbaFindInFilesForm: TSimbaFindInFilesForm
   Top = 380
   Width = 750
   Caption = 'Find in Files'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 332
+  ClientWidth = 750
   DesignTimePPI = 120
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poMainFormCenter
-  LCLVersion = '3.0.0.1'
+  ShowInTaskBar = stAlways
+  LCLVersion = '3.0.0.3'
   object PanelMatches: TPanel
     Left = 12
     Height = 167
@@ -28,7 +29,7 @@ object SimbaFindInFilesForm: TSimbaFindInFilesForm
     TabOrder = 0
     object MatchesLabel: TLabel
       Left = 0
-      Height = 20
+      Height = 25
       Top = 22
       Width = 726
       Align = alTop

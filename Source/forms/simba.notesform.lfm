@@ -9,5 +9,6 @@ object SimbaNotesForm: TSimbaNotesForm
   Font.CharSet = ANSI_CHARSET
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '2.2.4.0'
+  ShowInTaskBar = stAlways
+  LCLVersion = '3.0.0.3'
 end

@@ -13,5 +13,6 @@ object SimbaDebugImageForm: TSimbaDebugImageForm
   KeyPreview = True
   OnCreate = FormCreate
   Position = poMainFormCenter
-  LCLVersion = '2.2.2.0'
+  ShowInTaskBar = stAlways
+  LCLVersion = '3.0.0.3'
 end

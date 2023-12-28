@@ -10,7 +10,8 @@ object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
   DesignTimePPI = 120
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '3.0.0.2'
+  ShowInTaskBar = stAlways
+  LCLVersion = '3.0.0.3'
   object ColorListBox: TColorListBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner

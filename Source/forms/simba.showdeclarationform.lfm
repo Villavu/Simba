@@ -8,10 +8,11 @@ object ShowDeclarationForm: TShowDeclarationForm
   ClientWidth = 700
   DesignTimePPI = 120
   Position = poMainFormCenter
-  LCLVersion = '2.2.4.0'
+  ShowInTaskBar = stAlways
+  LCLVersion = '3.0.0.3'
   object Grid: TStringGrid
     Left = 0
-    Height = 396
+    Height = 391
     Top = 0
     Width = 700
     Align = alClient
@@ -55,8 +56,8 @@ object ShowDeclarationForm: TShowDeclarationForm
   end
   object ButtonPanel: TButtonPanel
     Left = 8
-    Height = 38
-    Top = 404
+    Height = 43
+    Top = 399
     Width = 684
     BorderSpacing.Around = 8
     OKButton.Name = 'OKButton'
