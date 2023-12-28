@@ -10,9 +10,9 @@ unit simba.aca;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Dialogs, DividerBevel, Graphics, ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox,
-  simba.mufasatypes,
-  simba.imagebox, simba.imagebox_zoom, simba.imagebox_image,
+  Classes, SysUtils, Forms, Controls, Dialogs, DividerBevel, Graphics,
+  ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox, LMessages,
+  simba.mufasatypes, simba.imagebox, simba.imagebox_zoom, simba.imagebox_image,
   simba.colormath, simba.finder;
 
 type
@@ -110,6 +110,8 @@ type
   public
     constructor Create(Window: TWindowHandle); reintroduce;
 
+    function IsShortcut(var Message: TLMKey): Boolean; override;
+
     property BestColor: TColorTolerance read GetBestColorTol;
     property FreeOnClose: Boolean read FFreeOnClose write FFreeOnClose;
   end;
@@ -162,6 +164,16 @@ var
 begin
   if InputQuery('ACA', 'HSL Circle Radius (Max 2000)', Value) and Value.IsInteger() then
     LoadHSLCircle(Min(Value.ToInteger(), 2000));
+end;
+
+function TSimbaACAForm.IsShortcut(var Message: TLMKey): Boolean;
+begin
+  // allow control+c and such on edits
+  if BestColorEdit.Focused or BestToleranceEdit.Focused or
+     BestMulti1Edit.Focused or BestMulti2Edit.Focused or BestMulti3Edit.Focused then
+    Result := False
+  else
+    Result := inherited IsShortcut(Message);
 end;
 
 procedure TSimbaACAForm.LoadHSLCircle(Radius: Integer);
@@ -320,7 +332,7 @@ begin
   begin
     Best := GetBestColor(GetColorSpace(), Colors);
 
-    BestColorEdit.Text := IntToStr(Best.Color);
+    BestColorEdit.Text := '$' + IntToHex(Best.Color, 6);
     BestToleranceEdit.Text := Format('%.3f', [Best.Tolerance]);
     BestMulti1Edit.Text := Format('%.3f', [Best.Mods[0]]);
     BestMulti2Edit.Text := Format('%.3f', [Best.Mods[1]]);

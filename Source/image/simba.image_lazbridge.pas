@@ -17,6 +17,7 @@ uses
   simba.mufasatypes, simba.image;
 
 procedure LazImage_FromData(LazImage: TBitmap; Data: PColorBGRA; Width, Height: Integer);
+procedure LazImage_FromSimbaImage(LazImage: TBitmap; SimbaImage: TSimbaImage);
 function LazImage_ToSimbaImage(LazImage: TBitmap): TSimbaImage;
 function LazImage_PixelFormat(LazImage: TBitmap): String;
 
@@ -119,6 +120,11 @@ begin
   end;
 
   LazImage.EndUpdate();
+end;
+
+procedure LazImage_FromSimbaImage(LazImage: TBitmap; SimbaImage: TSimbaImage);
+begin
+  LazImage_FromData(LazImage, SimbaImage.Data, SimbaImage.Width, SimbaImage.Height);
 end;
 
 function LazImage_ToSimbaImage(LazImage: TBitmap): TSimbaImage;

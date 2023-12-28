@@ -662,8 +662,15 @@ begin
 end;
 
 procedure TSimbaImageBox.SetBackgroundFromFile(FileName: String);
+var
+  SimbaImage: TSimbaImage;
 begin
-  FBackground.LoadFromFile(FileName);
+  SimbaImage := TSimbaImage.CreateFromFile(FileName);
+  try
+    LazImage_FromSimbaImage(FBackground, SimbaImage);
+  finally
+    SimbaImage.Free();
+  end;
 end;
 
 procedure TSimbaImageBox.SetBackground(Image: TSimbaImage);
