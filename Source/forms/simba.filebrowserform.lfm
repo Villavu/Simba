@@ -5,7 +5,8 @@ object SimbaFileBrowserForm: TSimbaFileBrowserForm
   Width = 1824
   Caption = 'File Browser'
   DesignTimePPI = 120
-  LCLVersion = '3.0.0.1'
+  ShowInTaskBar = stAlways
+  LCLVersion = '3.0.0.3'
   object Popup: TPopupMenu
     Images = SimbaForm.Images
     OnMeasureItem = PopupMeasureItem

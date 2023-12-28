@@ -4,8 +4,8 @@
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
   --------------------------------------------------------------------------
 
-  A awfully simple downloader that parses the README here `https://github.com/Villavu/Simba-Build-Archive`
-  to download different version to test.
+  Very simple downloader that parses the README here `https://github.com/Villavu/Simba-Build-Archive`
+  to quickly download different version to test.
 }
 unit simba.downloadsimbaform;
 
