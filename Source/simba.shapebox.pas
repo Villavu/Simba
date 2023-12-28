@@ -25,8 +25,10 @@ type
   TSimbaShapeBoxShapeClass = class of TSimbaShapeBoxShape;
   TSimbaShapeBoxShape = class
   protected
-    function GetLineColor(const Flags: EPaintShapeFlags): TColor; inline;
-    function GetConnectorColor(const Flags: EPaintShapeFlags): TColor; inline;
+    procedure DrawConnectors(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
+    procedure DrawLines(ACanvas: TSimbaImageBoxBitmap; Box: TBox; Flags: EPaintShapeFlags); overload;
+    procedure DrawLines(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags); overload;
+    procedure DrawLinesGap(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
   public
     FShapeBox: TSimbaShapeBox;
     FDragStart: TPoint;
@@ -320,20 +322,64 @@ begin
   Result.FName := FName;
 end;
 
-function TSimbaShapeBoxShape.GetLineColor(const Flags: EPaintShapeFlags): TColor;
+procedure TSimbaShapeBoxShape.DrawConnectors(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
+var
+  Color: TColor;
+  P: TPoint;
 begin
   if (EPaintShapeFlag.SELECTED in Flags) or (EPaintShapeFlag.SELECTING in Flags) then
-    Result := clRed
+    Color := clYellow
   else
-    Result := clPurple;
+    Color := clLime;
+
+  for P in Points do
+    ACanvas.DrawBoxTransparent(TBox.Create(P.X - 2, P.Y - 2, P.X + 3, P.Y + 3), Color, 0.65);
 end;
 
-function TSimbaShapeBoxShape.GetConnectorColor(const Flags: EPaintShapeFlags): TColor;
+procedure TSimbaShapeBoxShape.DrawLines(ACanvas: TSimbaImageBoxBitmap; Box: TBox; Flags: EPaintShapeFlags);
+var
+  Color: TColor;
 begin
   if (EPaintShapeFlag.SELECTED in Flags) or (EPaintShapeFlag.SELECTING in Flags) then
-    Result := clYellow
+    Color := clRed
   else
-    Result := clLime;
+    Color := clPurple;
+
+  ACanvas.DrawBox(Box, Color);
+end;
+
+procedure TSimbaShapeBoxShape.DrawLines(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
+var
+  I: Integer;
+  Color: TColor;
+begin
+  if (Length(Points) <= 1) then
+    Exit;
+
+  if (EPaintShapeFlag.SELECTED in Flags) or (EPaintShapeFlag.SELECTING in Flags) then
+    Color := clRed
+  else
+    Color := clPurple;
+
+  for I := 0 to High(Points) - 1 do
+    ACanvas.DrawLine(Points[I], Points[I+1], Color);
+end;
+
+procedure TSimbaShapeBoxShape.DrawLinesGap(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
+var
+  I: Integer;
+  Color: TColor;
+begin
+  if (Length(Points) <= 1) then
+    Exit;
+
+  if (EPaintShapeFlag.SELECTED in Flags) or (EPaintShapeFlag.SELECTING in Flags) then
+    Color := clRed
+  else
+    Color := clPurple;
+
+  for I := 0 to High(Points) - 1 do
+    ACanvas.DrawLineGap(Points[I], Points[I+1], 3, Color);
 end;
 
 constructor TSimbaShapeBoxShape_Point.Create(ShapeBox: TSimbaShapeBox);
@@ -385,8 +431,9 @@ begin
   if (EPaintShapeFlag.SELECTING in Flags) then
     FPoint := MousePoint;
 
-  ACanvas.DrawCrossHair(FPoint, 15, GetLineColor(Flags));
-  ACanvas.DrawBoxFilled(TBox.Create(FPoint.X - 1, FPoint.Y - 1, FPoint.X + 1, FPoint.Y + 1), GetConnectorColor(Flags));
+  DrawLines(ACanvas, [TPoint.Create(Center.X - 15, Center.Y), TPoint.Create(Center.X + 15, Center.Y)], Flags);
+  DrawLines(ACanvas, [TPoint.Create(Center.X, Center.Y - 15), TPoint.Create(Center.X, Center.Y + 15)], Flags);
+  DrawConnectors(ACanvas, [FPoint], Flags);
 end;
 
 function TSimbaShapeBoxShape_Point.CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean;
@@ -448,15 +495,9 @@ begin
 end;
 
 procedure TSimbaShapeBoxShape_Path.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint);
-var
-  P: TPoint;
 begin
-  if EPaintShapeFlag.SELECTING in Flags then
-    ACanvas.DrawPoly(FPoly + [MousePoint], False, GetLineColor(Flags))
-  else
-    ACanvas.DrawPoly(FPoly, False, GetLineColor(Flags));
-
-  ACanvas.DrawCrossArray(FPoly, 8, GetConnectorColor(Flags));
+  DrawLinesGap(ACanvas, FPoly, Flags);
+  DrawConnectors(ACanvas, FPoly, Flags);
 end;
 
 procedure TSimbaShapeBoxShape_Poly.BuildContainsCache;
@@ -553,16 +594,13 @@ begin
 end;
 
 procedure TSimbaShapeBoxShape_Poly.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint);
-var
-  P: TPoint;
 begin
   if EPaintShapeFlag.SELECTING in Flags then
-    ACanvas.DrawPoly(FPoly + [MousePoint], True, GetLineColor(Flags))
+    DrawLines(ACanvas, FPoly + [MousePoint, FPoly[0]], Flags)
   else
-    ACanvas.DrawPoly(FPoly + [FPoly[0]], True, GetLineColor(Flags));
+    DrawLines(ACanvas, FPoly + [FPoly[0], FPoly[0]], Flags);
 
-  for P in FPoly do
-    ACanvas.DrawBoxFilled(TBox.Create(P, 3, 3), GetConnectorColor(Flags));
+  DrawConnectors(ACanvas, FPoly, Flags);
 end;
 
 function TSimbaShapeBoxShape_Poly.CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean;
@@ -710,24 +748,24 @@ end;
 function TSimbaShapeBoxShape_Box.DistToEdge(P: TPoint): Integer;
 var
   Edge: TPoint;
-  b: TBox;
+  B: TBox;
 begin
   Edge := P;
 
-  b := TBox.Create(FBox.X1, FBox.Y1, FBox.X2, FBox.Y2);
-  if Min(Abs(b.Y1 - P.Y), Abs(P.Y - b.Y2)) > Min(Abs(b.X1 - P.X), Abs(P.X - b.X2)) then
+  B := TBox.Create(FBox.X1, FBox.Y1, FBox.X2, FBox.Y2);
+  if Min(Abs(B.Y1 - P.Y), Abs(P.Y - B.Y2)) > Min(Abs(B.X1 - P.X), Abs(P.X - B.X2)) then
   begin
-    Edge.X := b.X1;
-    if (P.X - b.X1 > b.X2 - P.X) then
-      Edge.X := b.X2;
+    Edge.X := B.X1;
+    if (P.X - B.X1 > B.X2 - P.X) then
+      Edge.X := B.X2;
   end else
   begin
-    Edge.Y := b.Y1;
-    if (P.Y - b.Y1 > b.Y2 - P.Y) then
-      Edge.Y := b.Y2;
+    Edge.Y := B.Y1;
+    if (P.Y - B.Y1 > B.Y2 - P.Y) then
+      Edge.Y := B.Y2;
   end;
 
-   Result := Round(Edge.DistanceTo(P));
+  Result := Round(Edge.DistanceTo(P));
 end;
 
 function TSimbaShapeBoxShape_Box.Contains(P: TPoint; ExpandMod: Integer): Boolean;
@@ -777,12 +815,8 @@ begin
     FBox.Y2 := MousePoint.Y;
   end;
 
-  ACanvas.DrawBox(FBox, GetLineColor(Flags));
-  ACanvas.DrawBoxFilled(FBox.Create(TPoint.Create(FBox.X1, FBox.Y1), 2, 2), GetConnectorColor(Flags));
-  ACanvas.DrawBoxFilled(FBox.Create(TPoint.Create(FBox.X2, FBox.Y1), 2, 2), GetConnectorColor(Flags));
-
-  ACanvas.DrawBoxFilled(FBox.Create(TPoint.Create(FBox.X2, FBox.Y2), 2, 2), GetConnectorColor(Flags));
-  ACanvas.DrawBoxFilled(FBox.Create(TPoint.Create(FBox.X1, FBox.Y2), 2, 2), GetConnectorColor(Flags));
+  DrawLines(ACanvas, FBox, Flags);
+  DrawConnectors(ACanvas, FBox.Corners, Flags);
 end;
 
 function TSimbaShapeBoxShape_Box.CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean;
@@ -965,14 +999,10 @@ begin
     Result.IsPath  := (FShapes[Index].ClassType = TSimbaShapeBoxShape_Path);
     Result.IsPoly  := (FShapes[Index].ClassType = TSimbaShapeBoxShape_Poly);
 
-    if Result.IsPoint then
-      Result.Point := TSimbaShapeBoxShape_Point(FShapes[Index]).GetPoint();
-    if Result.IsPoly then
-      Result.Poly := TSimbaShapeBoxShape_Poly(FShapes[Index]).GetPoly();
-    if Result.IsPath then
-      Result.Path := TSimbaShapeBoxShape_Path(FShapes[Index]).GetPoly();
-    if Result.IsBox then
-      Result.Box :=  TSimbaShapeBoxShape_Box(FShapes[Index]).GetBox();
+         if Result.IsPoint then Result.Point := TSimbaShapeBoxShape_Point(FShapes[Index]).GetPoint()
+    else if Result.IsPoly  then Result.Poly  := TSimbaShapeBoxShape_Poly(FShapes[Index]).GetPoly()
+    else if Result.IsPath  then Result.Path  := TSimbaShapeBoxShape_Path(FShapes[Index]).GetPoly()
+    else if Result.IsBox   then Result.Box   := TSimbaShapeBoxShape_Box(FShapes[Index]).GetBox();
   end;
 end;
 
@@ -1276,6 +1306,7 @@ var
   NewShape: TSimbaShapeBoxShape;
   ShapeClass: TSimbaShapeBoxShapeClass;
 begin
+  BeginUpdate();
   InternalClear();
 
   if FileExists(FileName) then
@@ -1314,6 +1345,8 @@ begin
     end;
   except
   end;
+
+  EndUpdate();
 end;
 
 function TSimbaShapeBox.CopyShape(Index: Integer): Integer;

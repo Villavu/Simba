@@ -31,8 +31,8 @@ unit simba.geometry;
 interface
 
 uses
-  classes, sysutils,
-  simba.mufasatypes;
+  Classes, SysUtils, Math,
+  simba.mufasatypes, simba.math;
 
 type
   TSimbaGeometry = class
@@ -69,10 +69,6 @@ type
   end;
 
 implementation
-
-uses
-  math,
-  simba.math;
 
 class constructor TSimbaGeometry.Create;
 var

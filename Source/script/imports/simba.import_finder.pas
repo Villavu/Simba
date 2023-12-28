@@ -232,11 +232,11 @@ end;
 (*
 TFinder.GetColors
 ~~~~~~~~~~~~~~~~~
-> function TFinder.GetColors(Points: TPointArray): TIntegerArray;
+> function TFinder.GetColors(Points: TPointArray): TColorArray;
 *)
 procedure _LapeFinder_GetColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := PSimbaFinder(Params^[0])^.GetColors(PPointArray(Params^[1])^);
+  PColorArray(Result)^ := PSimbaFinder(Params^[0])^.GetColors(PPointArray(Params^[1])^);
 end;
 
 (*
@@ -406,7 +406,7 @@ begin
 
     addFinderMethod('function TFinder.GetColor(X, Y: Integer): TColor; overload', @_LapeFinder_GetColor1);
     addFinderMethod('function TFinder.GetColor(P: TPoint): TColor; overload', @_LapeFinder_GetColor2);
-    addFinderMethod('function TFinder.GetColors(Points: TPointArray): TIntegerArray', @_LapeFinder_GetColors);
+    addFinderMethod('function TFinder.GetColors(Points: TPointArray): TColorArray', @_LapeFinder_GetColors);
     addFinderMethod('function TFinder.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix', @_LapeFinder_GetColorsMatrix);
 
     addFinderMethod('function TFinder.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer; overload', @_LapeFinder_GetPixelDifference1);
