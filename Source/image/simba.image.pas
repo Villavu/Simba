@@ -1116,7 +1116,7 @@ begin
       if (DestX >= 0) and (DestY >= 0) and (DestX < FWidth) and (DestY < FHeight) then
       begin
         Color := Image.Data[LoopY * Image.Width + LoopX];
-        if (not Self.TransparentColorActive) or (not Color.EqualsIgnoreAlpha(FTransparentRGB)) then
+        if (Image.TransparentColorActive) and (not Color.EqualsIgnoreAlpha(Image.TransparentRGB)) then
           FData[DestY * FWidth + DestX] := Image.FData[LoopY * Image.Width + LoopX];
       end;
     end;
