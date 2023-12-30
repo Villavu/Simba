@@ -85,7 +85,7 @@ begin
   FilePath := SimbaEnv.FindInclude(Sender.DirectiveParamAsFileName, [TSimbaPath.PathExtractDir(Sender.FileName)]);
   if (FilePath = '') then
     Exit;
-  if (Lexer.TokenID = tokIncludeOnceDirect) and (FIncludedFiles <> nil) and (FIncludedFiles.IndexOf(FileName) > -1) then
+  if (FIncludedFiles <> nil) and (FIncludedFiles.IndexOf(FileName) > -1) then
     Exit;
 
   PushLexer(TmwPasLex.CreateFromFile(FilePath));
@@ -327,7 +327,7 @@ begin
   Result := nil;
 
   FileName := SimbaEnv.FindInclude(Lexer.DirectiveParamAsFileName, [TSimbaPath.PathExtractDir(Lexer.FileName)]);
-  if (FileName = '') or ((Lexer.TokenID = tokIncludeOnceDirect) and (IncludedFiles.IndexOf(FileName) > -1)) then
+  if (FileName = '') or (IncludedFiles.IndexOf(FileName) > -1) then
     Exit;
 
   Result := GetInclude(Lexer.SaveDefines(), IncludedFiles, FileName);
