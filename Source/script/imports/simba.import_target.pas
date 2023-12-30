@@ -299,6 +299,21 @@ begin
   PString(Result)^ := PSimbaTarget(Params^[0])^.ToString();
 end;
 
+procedure _LapeTarget_FreezeImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.FreezeImage(PBox(Params^[1])^);
+end;
+
+procedure _LapeTarget_UnFreezeImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.UnFreezeImage();
+end;
+
+procedure _LapeTarget_IsImageFrozen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsImageFrozen();
+end;
+
 procedure ImportTarget(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -308,9 +323,10 @@ begin
     addGlobalType([
       'packed record',
       '  {%CODETOOLS OFF}',
-      '  InternalData: array[1..' + IntToStr(SizeOf(TSimbaTarget) - LapeTypeSize[ltDynArray])  + '] of Byte;',
+      '  InternalData: array[1..' + IntToStr(SizeOf(TSimbaTarget) - (LapeTypeSize[ltDynArray]*2)) + '] of Byte;',
       '  {%CODETOOLS ON}',
       '  InvalidTargetEvents: array of TMethod;',
+      '  FrozenData: array of TColorBGRA;',
       'end;'],
       'TTarget'
     );
@@ -359,6 +375,10 @@ begin
     addGlobalFunc('function TTarget.IsPluginTarget: Boolean', @_LapeTarget_IsPluginTarget);
 
     addGlobalFunc('function TTarget.IsDefault: Boolean', @_LapeTarget_IsDefault);
+
+    addGlobalFunc('procedure TTarget.FreezeImage(ABounds: TBox);', @_LapeTarget_FreezeImage);
+    addGlobalFunc('procedure TTarget.UnFreezeImage;', @_LapeTarget_UnFreezeImage);
+    addGlobalFunc('function TTarget.IsImageFrozen: Boolean;', @_LapeTarget_IsImageFrozen);
 
     addGlobalFunc('function ToString(constref Target: TTarget): String; override;', @_LapeTarget_ToString);
 

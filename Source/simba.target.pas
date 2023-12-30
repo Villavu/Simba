@@ -51,6 +51,7 @@ type
   public
   type
     TInvalidTargetEvent = procedure(var Target: TSimbaTarget) of object;
+    TInvalidTargetEventArray = array of TInvalidTargetEvent;
   private
     FTargetType: ETargetType;
     FTarget: Pointer;
@@ -61,7 +62,10 @@ type
     FMethods: TTargetMethods; // Targets need to provide these. They are filled in SetWindow,SetEIOS etc.
     FCustomClientArea: TBox;
     FAutoSetFocus: Boolean;
-    FInvalidTargetEvents: array of TInvalidTargetEvent;
+    FFrozenDataWidth: Integer;
+    FFrozenBounds: TBox;
+    FInvalidTargetEvents: TInvalidTargetEventArray;
+    FFrozenData: TColorBGRAArray;
 
     procedure ChangeTarget(TargetType: ETargetType);
     function HasMethod(Method: Pointer; Name: String): Boolean;
@@ -117,6 +121,10 @@ type
     function ValidateBounds(var ABounds: TBox): Boolean;
     function GetImageData(var ABounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
     procedure FreeImageData(var Data: PColorBGRA);
+
+    function IsImageFrozen: Boolean; inline;
+    procedure FreezeImage(ABounds: TBox);
+    procedure UnFreezeImage;
 
     function AddOnInvalidTargetEvent(Event: TInvalidTargetEvent): TInvalidTargetEvent;
     procedure RemoveOnInvalidTargetEvent(Event: TInvalidTargetEvent);
@@ -555,6 +563,15 @@ end;
 
 function TSimbaTarget.GetImageData(var ABounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
 begin
+  if IsImageFrozen() then
+  begin
+    Data := @FFrozenData[0];
+    DataWidth := FFrozenDataWidth;
+    ABounds := FFrozenBounds;
+
+    Exit(True);
+  end;
+
   Data := nil;
   if HasMethod(FMethods.GetImageData, 'GetImageData') then
     Result := ValidateBounds(ABounds) and FMethods.GetImageData(FTarget, ABounds.X1, ABounds.Y1, ABounds.Width, ABounds.Height, Data, DataWidth);
@@ -562,8 +579,37 @@ end;
 
 procedure TSimbaTarget.FreeImageData(var Data: PColorBGRA);
 begin
+  if IsImageFrozen() and (Data = @FFrozenData[0]) then
+    Exit;
   if (FTargetType in [ETargetType.WINDOW]) then
     FreeMem(Data);
+end;
+
+function TSimbaTarget.IsImageFrozen: Boolean;
+begin
+  Result := Length(FFrozenData) > 0;
+end;
+
+procedure TSimbaTarget.FreezeImage(ABounds: TBox);
+var
+  Data: PColorBGRA;
+  DataWidth: Integer;
+begin
+  if GetImageData(ABounds, Data, DataWidth) then
+  try
+    FFrozenBounds := ABounds;
+    FFrozenDataWidth := DataWidth;
+
+    SetLength(FFrozenData, DataWidth * ABounds.Height);
+    Move(Data^, FFrozenData[0], Length(FFrozenData) * SizeOf(TColorBGRA));
+  finally
+    FreeImageData(Data);
+  end;
+end;
+
+procedure TSimbaTarget.UnFreezeImage;
+begin
+  FFrozenData := nil;
 end;
 
 function TSimbaTarget.AddOnInvalidTargetEvent(Event: TInvalidTargetEvent): TInvalidTargetEvent;
