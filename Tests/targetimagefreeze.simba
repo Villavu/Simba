@@ -1,0 +1,21 @@
+{$assertions on}
+var
+  img: TImage := TImage.Create(50, 50);
+begin
+  img.Fill(Colors.RED);
+
+  Target.SetImage(img);
+  Target.FreezeImage([5,5,25,25]);
+
+  img.Fill(Colors.GREEN); // draw green, but frozen image is still red
+  Assert(Target.IsImageFrozen());
+  Assert(Finder.CountColor(Colors.GREEN, 0) = 0);
+  Assert(Finder.FindColor(Colors.RED, 0).Bounds.Area = 21*21);
+
+  Target.UnFreezeImage();
+  Assert(not Target.IsImageFrozen());
+  Assert(Finder.CountColor(Colors.GREEN, 0) = (50*50));
+  Assert(Finder.CountColor(Colors.RED, 0) = 0);
+
+  img.Free();
+end.
