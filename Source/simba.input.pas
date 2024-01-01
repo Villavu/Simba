@@ -261,9 +261,9 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
   // Credit: BenLand100 (https://github.com/BenLand100/SMART/blob/master/src/EventNazi.java#L201)
   procedure WindMouse(xs, ys, xe, ye, gravity, wind, minWait, maxWait, maxStep, targetArea: Double);
   var
-    x, y: Double;
-    veloX, veloY, windX, windY, veloMag, randomDist, step, idle: Double;
-    traveledDistance, remainingDistance, acc: Double;
+    x, y, destX, destY: Double;
+    veloX, veloY, windX, windY, veloMag, randomDist, idle: Double;
+    remainingDist, acc, step: Double;
     Timeout: UInt64;
   begin
     veloX := 0; veloY := 0;
@@ -271,7 +271,11 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
 
     x := xs;
     y := ys;
+    destX := xe;
+    destY := ye;
+
     acc := MouseAccuracy + 0.5;
+    step := maxStep;
 
     Timeout := GetTickCount64() + GetMouseTimeout();
 
@@ -280,36 +284,35 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
       if (GetTickCount64() > Timeout) then
         SimbaException('MouseMove timed out after %dms. Start: (%d,%d), Dest: (%d,%d)', [GetMouseTimeout(), Round(xs), Round(ys), Round(xe), Round(ye)]);
 
-      traveledDistance := Hypot(x - xs, y - ys);
-      remainingDistance := Hypot(x - xe, y - ye);
-      if (remainingDistance <= acc) then
+      remainingDist := Hypot(x - xe, y - ye);
+      if (remainingDist <= acc) then
         Break;
 
-      wind := Min(wind, remainingDistance);
-      windX := windX / SQRT_3 + (Random(Round(wind) * 2 + 1) - wind) / SQRT_5;
-      windY := windY / SQRT_3 + (Random(Round(wind) * 2 + 1) - wind) / SQRT_5;
-
-      if (remainingDistance < targetArea) then
-        step := (remainingDistance / 2) + (Random() * 6 - 3)
-      else
-      if (traveledDistance < targetArea) then
-      begin
-        if (traveledDistance < 3) then
-          traveledDistance := 10 * Random();
-
-        step := traveledDistance * (1 + Random() * 3);
-      end else
+      // If destination changed ensure step is appropriate
+      if ((xe <> destX) or (ye <> destY)) and (remainingDist > targetArea) then
         step := maxStep;
+      destX := xe;
+      destY := ye;
 
-      if (step >= maxStep) then
-        step := maxStep - (Random() * (maxStep / 4));
-      if (step < 3) then
-        step := 3 + (Random() * 3);
+      if (remainingDist > targetArea) then
+      begin
+        wind := Min(wind, remainingDist);
+        windX := windX / SQRT_3 + (Random(Round(wind) * 2 + 1) - wind) / SQRT_5;
+        windY := windY / SQRT_3 + (Random(Round(wind) * 2 + 1) - wind) / SQRT_5;
+      end else
+      begin
+        windX /= SQRT_3;
+        windY /= SQRT_3;
+        if (step < 3) then
+          step := 3 + (Random() * 3)
+        else
+          step /= SQRT_5;
+      end;
 
       veloX := veloX + windX;
       veloY := veloY + windY;
-      veloX := veloX + gravity * (xe - x) / remainingDistance;
-      veloY := veloY + gravity * (ye - y) / remainingDistance;
+      veloX := veloX + gravity * (xe - x) / remainingDist;
+      veloY := veloY + gravity * (ye - y) / remainingDist;
 
       if (Hypot(veloX, veloY) > step) then
       begin
@@ -320,10 +323,9 @@ procedure TSimbaInput.MouseMove(Dest: TPoint);
         veloY := (veloY / veloMag) * randomDist;
       end;
 
-      idle := (maxWait - minWait) * (Hypot(veloX, veloY) / maxStep) + minWait;
-
       x := x + veloX;
       y := y + veloY;
+      idle := (maxWait - minWait) * (Hypot(veloX, veloY) / step) + minWait;
 
       Self.MouseTeleport(TPoint.Create(Round(x), Round(y)));
 
@@ -337,8 +339,8 @@ var
 begin
   Start := MousePosition();
 
-  // Further the distance the faster we move.
-  Expo := Power(Hypot(Start.X - Dest.X, Start.Y - Dest.Y), RandomRange(0.32, 0.35)) / 10;
+  // Further the distance the faster we move
+  Expo := 1 + Power(Hypot(Start.X - Dest.X, Start.Y - Dest.Y), 0.5) / 50;
 
   RandSpeed := RandomLeft(GetSpeed(), GetSpeed() * 1.5);
   RandSpeed *= Expo;
@@ -347,7 +349,7 @@ begin
   WindMouse(
     Start.X, Start.Y, Dest.X, Dest.Y,
     GetGravity(), GetWind(),
-    5 / RandSpeed, 10 / RandSpeed, 25 * RandSpeed, 20 * RandSpeed
+    5 / RandSpeed, 10 / RandSpeed, 10 * RandSpeed, 15 * RandSpeed
   );
 end;
 
