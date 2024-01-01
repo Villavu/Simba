@@ -102,6 +102,9 @@ implementation
 uses
   simba.script_pluginloader;
 
+const
+  MouseButtonToEIOS: array[EMouseButton] of Int32 = (1, 3, 2, 4, 5);
+
 function LoadEIOS(FileName, Args: String): TEIOSTarget;
 begin
   with Result do
@@ -191,7 +194,7 @@ begin
   with PEIOSTarget(Target)^ do
   begin
     if Assigned(IsMouseButtonHeld) then
-      Result := IsMouseButtonHeld(Target, Int32(Button))
+      Result := IsMouseButtonHeld(Target, MouseButtonToEIOS[Button])
     else
       Result := False;
   end;
@@ -229,27 +232,39 @@ begin
 end;
 
 procedure EIOSTarget_MouseDown(Target: Pointer; Button: EMouseButton);
+var
+  X,Y: Integer;
 begin
-  with PEIOSTarget(Target)^, EIOSTarget_MousePosition(Target) do
+  with PEIOSTarget(Target)^ do
   begin
+    if Assigned(GetMousePosition) then
+      GetMousePosition(Target, X, Y);
     if Assigned(HoldMouse) then
-      HoldMouse(Target, X, Y, Int32(Button));
+      HoldMouse(Target, X, Y, MouseButtonToEIOS[Button]);
   end;
 end;
 
 procedure EIOSTarget_MouseUp(Target: Pointer; Button: EMouseButton);
+var
+  X, Y: Integer;
 begin
-  with PEIOSTarget(Target)^, EIOSTarget_MousePosition(Target) do
+  with PEIOSTarget(Target)^ do
   begin
+    if Assigned(GetMousePosition) then
+      GetMousePosition(Target, X, Y);
     if Assigned(ReleaseMouse) then
-      ReleaseMouse(Target, X, Y, Int32(Button));
+      ReleaseMouse(Target, X, Y, MouseButtonToEIOS[Button]);
   end;
 end;
 
 procedure EIOSTarget_MouseScroll(Target: Pointer; Scrolls: Integer);
+var
+  X, Y: Integer;
 begin
-  with PEIOSTarget(Target)^, EIOSTarget_MousePosition(Target) do
+  with PEIOSTarget(Target)^ do
   begin
+    if Assigned(GetMousePosition) then
+      GetMousePosition(Target, X, Y);
     if Assigned(ScrollMouse) then
       ScrollMouse(Target, X, Y, Scrolls);
   end;
