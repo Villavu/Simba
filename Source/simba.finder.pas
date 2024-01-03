@@ -13,8 +13,9 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.image,
-  simba.dtm, simba.target;
+  simba.mufasatypes,
+  simba.colormath, simba.colormath_distance, simba.colormath_conversion,
+  simba.image, simba.dtm, simba.target;
 
 type
   PColorTolerance = ^TColorTolerance;
@@ -212,7 +213,7 @@ begin
 
   if FTarget.GetImageData(B, Data, DataWidth) then
   try
-    Result := Data^.ToColor()
+    Result := Data^.R or Data^.G shl G_BIT or Data^.B shl B_BIT;
   finally
     FTarget.FreeImageData(Data);
   end;
@@ -223,7 +224,8 @@ var
   B: TBox;
   Data: PColorBGRA;
   DataWidth: Integer;
-  I, X, Y, Count: Integer;
+  I, Count: Integer;
+  Pixel: TColorBGRA;
 begin
   Result := nil;
 
@@ -235,10 +237,9 @@ begin
     Count := 0;
     for I := 0 to High(Points) do
     begin
-      X := Points[I].X - B.X1;
-      Y := Points[I].Y - B.Y1;
+      Pixel := Data[(Points[I].Y - B.Y1) * DataWidth + (Points[I].X - B.X1)];
 
-      Result[Count] := Data[Y * DataWidth + X].ToColor();
+      Result[Count] := Pixel.R or Pixel.G shl G_BIT or Pixel.B shl B_BIT;
       Inc(Count);
     end;
     SetLength(Result, Count);
@@ -252,6 +253,7 @@ var
   Data: PColorBGRA;
   DataWidth: Integer;
   Width, Height, X, Y: Integer;
+  Pixel: TColorBGRA;
 begin
   Result := nil;
 
@@ -264,7 +266,11 @@ begin
 
     for Y := 0 to Height do
       for X := 0 to Width do
-        Result[Y, X] := Data[Y * DataWidth + X].ToColor();
+      begin
+        Pixel := Data[Y * DataWidth + X];
+
+        Result[Y, X] := Pixel.R or Pixel.G shl G_BIT or Pixel.B shl B_BIT;
+      end;
   finally
     FTarget.FreeImageData(Data);
   end;

@@ -9,11 +9,6 @@
 }
 unit simba.colormath_conversion;
 
-{$DEFINE B_BIT := 16}
-{$DEFINE G_BIT := 8}
-{$DEFINE R_BIT := 0}
-{$DEFINE A_BIT := 24}
-
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 
 {$i simba.inc}
