@@ -2455,7 +2455,8 @@ function TSimbaImage.GetPixel(X, Y: Integer): TColor;
 begin
   AssertInImage('GetPixel', X, Y);
 
-  Result := FData[Y * FWidth + X].ToColor();
+  with FData[Y * FWidth + X] do
+    Result := R or G shl G_BIT or B shl B_BIT;
 end;
 
 procedure TSimbaImage.SetPixel(X, Y: Integer; Color: TColor);
