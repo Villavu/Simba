@@ -184,6 +184,18 @@ begin
 end;
 
 procedure TSimbaFunctionListForm.ResetState;
+
+  procedure HideAllIncludePluginNodes(const ANode: TTreeNode);
+  var
+    Node: TSimbaFunctionListNode absolute ANode;
+  begin
+    if (Node.NodeType in [ntIncludes, ntPlugins]) then
+    begin
+      Node.Visible := False;
+      Node.Enabled := False;
+    end;
+  end;
+
 begin
   FTreeView.Filter := '';
   FTreeView.FullCollapse();
@@ -192,6 +204,10 @@ begin
 
   FSimbaNode.Expanded := True;
   FScriptNode.Expanded := True;
+
+  FTreeView.ForEachTopLevel(@HideAllIncludePluginNodes);
+
+  FForceUpdate := True;
 end;
 
 procedure TSimbaFunctionListForm.SaveState(TabID: Integer);
@@ -387,10 +403,12 @@ var
 
       Node.LastUsed := 0;
       Node.Visible := True;
+      Node.Enabled := True;
     end else
     begin
       Node.LastUsed := Node.LastUsed + 1;
       Node.Visible := False;
+      Node.Enabled := False;
     end;
   end;
 
@@ -449,10 +467,12 @@ var
 
       Node.LastUsed := 0;
       Node.Visible := True;
+      Node.Enabled := True;
     end else
     begin
       Node.LastUsed := Node.LastUsed + 1;
       Node.Visible := False;
+      Node.Enabled := False;
     end;
   end;
 

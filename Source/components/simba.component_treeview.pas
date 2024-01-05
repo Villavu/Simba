@@ -46,9 +46,6 @@ type
   TNodeForEachEvent = procedure(const Node: TTreeNode) is nested;
 
   TSimbaTreeView = class(TCustomControl)
-  private
-    function GetFilterVisible: Boolean;
-    procedure SetFilterVisible(Value: Boolean);
   protected
     FFilterPanel: TCustomControl;
     FFilterEdit: TSimbaEdit;
@@ -69,7 +66,11 @@ type
     function GetLoading: Boolean;
     function GetOnDoubleClick: TNotifyEvent;
     function GetOnSelectionChange: TNotifyEvent;
+    function GetFilterVisible: Boolean;
+    function GetScrolledLeft: Integer;
+    function GetScrolledTop: Integer;
 
+    procedure SetFilterVisible(Value: Boolean);
     procedure SetFilter(Value: String);
     procedure SetImages(Value: TCustomImageList);
     procedure SetLoading(Value: Boolean);
@@ -77,9 +78,6 @@ type
     procedure SetOnSelectionChange(Value: TNotifyEvent);
     procedure SetScrolledLeft(Value: Integer);
     procedure SetScrolledTop(Value: Integer);
-
-    function GetScrolledLeft: Integer;
-    function GetScrolledTop: Integer;
 
     function GetItems: TTreeNodes;
     function GetSelected: TTreeNode;
@@ -359,7 +357,15 @@ begin
     Node := Items.GetFirstNode();
     while Assigned(Node) do
     begin
-      Node.Visible := (FilterText = '') or (Pos(FilterText, LowerCase(Node.Text)) > 0);
+      if not Node.Enabled then
+      begin
+        Node.Visible := False;
+        Node := Node.GetNextSibling;
+
+        Continue;
+      end;
+
+      Node.Visible := ((FilterText = '') or (Pos(FilterText, LowerCase(Node.Text)) > 0));
 
       if Node.Visible then
       begin
