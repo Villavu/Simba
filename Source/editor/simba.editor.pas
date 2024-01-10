@@ -435,7 +435,7 @@ begin
 
       else
       begin
-        if (Line[X] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '.']) then
+        if (Line[X] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '.', '^']) then
           // in identifier
         else
         if (InRound <= 0) and (InSquare <= 0) then
