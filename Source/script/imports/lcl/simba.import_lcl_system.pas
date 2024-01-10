@@ -438,11 +438,6 @@ begin
   PStrings(Params^[0])^.Text := PString(Params^[1])^;
 end;
 
-procedure _LapeStrings_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStrings(Result)^ := TStrings.Create();
-end;
-
 procedure _LapeStringList_Add(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PStringList(Params^[0])^.Add(PString(Params^[1])^);
@@ -709,21 +704,20 @@ begin
     addClassVar('TLazStrings', 'Names', 'String', @_LapeStrings_Names_Read, nil, True);
     addClassVar('TLazStrings', 'ValueFromIndex', 'String', @_LapeStrings_ValueFromIndex_Read, @_LapeStrings_ValueFromIndex_Write, True);
     addClassVar('TLazStrings', 'Text', 'String', @_LapeStrings_Text_Read, @_LapeStrings_Text_Write);
-    addClassConstructor('TLazStrings', '', @_LapeStrings_Create);
 
-    addClass('TStringList', 'TLazStrings');
+    addClass('TLazStringList', 'TLazStrings');
 
-    addGlobalType('function(List: TStringList; Index1, Index2: Integer): Integer', 'TStringListSortCompare', FFI_DEFAULT_ABI);
-    addClassVar('TStringList', 'Sorted', 'Boolean', @_LapeStringList_Sorted_Read, @_LapeStringList_Sorted_Write);
-    addClassVar('TStringList', 'CaseSensitive', 'Boolean', @_LapeStringList_CaseSensitive_Read, @_LapeStringList_CaseSensitive_Write);
-    addClassVar('TStringList', 'OnChange', 'TLazNotifyEvent', @_LapeStringList_OnChange_Read, @_LapeStringList_OnChange_Write);
-    addClassVar('TStringList', 'OnChanging', 'TLazNotifyEvent', @_LapeStringList_OnChanging_Read, @_LapeStringList_OnChanging_Write);
-    addClassVar('TStringList', 'OwnsObjects', 'boolean', @_LapeStringList_OwnsObjects_Read, @_LapeStringList_OwnsObjects_Write);
+    addGlobalType('function(List: TLazStringList; Index1, Index2: Integer): Integer', 'TLazStringListSortCompare', FFI_DEFAULT_ABI);
+    addClassVar('TLazStringList', 'Sorted', 'Boolean', @_LapeStringList_Sorted_Read, @_LapeStringList_Sorted_Write);
+    addClassVar('TLazStringList', 'CaseSensitive', 'Boolean', @_LapeStringList_CaseSensitive_Read, @_LapeStringList_CaseSensitive_Write);
+    addClassVar('TLazStringList', 'OnChange', 'TLazNotifyEvent', @_LapeStringList_OnChange_Read, @_LapeStringList_OnChange_Write);
+    addClassVar('TLazStringList', 'OnChanging', 'TLazNotifyEvent', @_LapeStringList_OnChanging_Read, @_LapeStringList_OnChanging_Write);
+    addClassVar('TLazStringList', 'OwnsObjects', 'boolean', @_LapeStringList_OwnsObjects_Read, @_LapeStringList_OwnsObjects_Write);
 
-    addClassConstructor('TStringList', '', @_LapeStringList_Create);
-    addGlobalFunc('function TStringList.Find(const S: String; Out Index: Integer): Boolean;', @_LapeStringList_Find);
-    addGlobalFunc('procedure TStringList.Sort;', @_LapeStringList_Sort);
-    addGlobalFunc('procedure TStringList.CustomSort(CompareFn: TStringListSortCompare);', @_LapeStringList_CustomSort);
+    addClassConstructor('TLazStringList', '', @_LapeStringList_Create);
+    addGlobalFunc('function TLazStringList.Find(const S: String; Out Index: Integer): Boolean;', @_LapeStringList_Find);
+    addGlobalFunc('procedure TLazStringList.Sort;', @_LapeStringList_Sort);
+    addGlobalFunc('procedure TLazStringList.CustomSort(CompareFunc: TLazStringListSortCompare);', @_LapeStringList_CustomSort);
   end;
 end;
 
