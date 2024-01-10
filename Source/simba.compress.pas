@@ -35,8 +35,8 @@ type
     property IsCompressing: Boolean read GetIsCompressing;
   end;
 
-function CompressString(const Str: String): String;
-function DecompressString(const Str: String) : String;
+function ZCompressString(const Str: String): String;
+function ZDecompressString(const Str: String) : String;
 
 implementation
 
@@ -44,7 +44,7 @@ uses
   zstream,
   simba.datetime;
 
-function CompressString(const Str: String): String;
+function ZCompressString(const Str: String): String;
 var
   Len: Integer;
   Output: TMemoryStream;
@@ -78,7 +78,7 @@ begin
     Output.Free();
 end;
 
-function DecompressString(const Str: String): String;
+function ZDecompressString(const Str: String): String;
 var
   Input: TStringStream;
   Stream: TDeCompressionStream;

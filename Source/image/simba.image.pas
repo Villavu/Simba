@@ -77,6 +77,7 @@ type
     constructor Create; overload;
     constructor Create(AWidth, AHeight: Integer); overload;
     constructor CreateFromFile(FileName: String);
+    constructor CreateFromZip(ZipFileName, ZipEntryName: String);
     constructor CreateFromString(Str: String);
     constructor CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     constructor CreateFromWindow(Window: TWindowHandle);
@@ -225,6 +226,7 @@ type
     function SaveToFile(FileName: String; OverwriteIfExists: Boolean = False): Boolean;
     function SaveToString: String;
 
+    procedure LoadFromStream(Stream: TStream; FileName: String);
     procedure LoadFromFile(FileName: String); overload;
     procedure LoadFromFile(FileName: String; Area: TBox); overload;
     procedure LoadFromString(Str: String);
@@ -247,12 +249,12 @@ type
 implementation
 
 uses
-  Math, FPImage, fpqoi_simba,
+  Math, FPImage, fpqoi_simba, Zipper,
   simba.arraybuffer, simba.geometry, simba.tpa, simba.algo_sort,
   simba.encoding, simba.compress,
   simba.nativeinterface, simba.singlematrix,
   simba.image_lazbridge, simba.image_integral, simba.image_gaussblur,
-  simba.image_bitmaparealoader, simba.image_utils;
+  simba.image_bitmaparealoader, simba.image_utils, simba.files;
 
 function TSimbaImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean): Boolean;
 var
@@ -494,10 +496,21 @@ begin
   try
     SimbaImage_ToFPImageWriter(Self, TFPWriterQoi, Stream);
 
-    Result := Header + Base64Encode(CompressString(Stream.DataString));
+    Result := Header + Base64Encode(ZCompressString(Stream.DataString));
   finally
     Stream.Free();
   end;
+end;
+
+procedure TSimbaImage.LoadFromStream(Stream: TStream; FileName: String);
+var
+  ReaderClass: TFPCustomImageReaderClass;
+begin
+  ReaderClass := TFPCustomImage.FindReaderFromFileName(FileName);
+  if (ReaderClass = nil) then
+    SimbaException('TSimbaImage.LoadFromStream: Unknown image format "%s"', [FileName]);
+
+  SimbaImage_FromFPImageReader(Self, ReaderClass, Stream);
 end;
 
 procedure TSimbaImage.LoadFromString(Str: String);
@@ -510,7 +523,7 @@ begin
     SimbaException('TImage.LoadFromString: Invalid string "' + Str + '"');
   Str := Str.After(HEADER);
 
-  Stream := TStringStream.Create(DecompressString(Base64Decode(Str)));
+  Stream := TStringStream.Create(ZDecompressString(Base64Decode(Str)));
   try
     SimbaImage_FromFPImageReader(Self, TFPReaderQoi, Stream);
   finally
@@ -2589,6 +2602,20 @@ begin
   Create();
 
   LoadFromFile(FileName);
+end;
+
+constructor TSimbaImage.CreateFromZip(ZipFileName, ZipEntryName: String);
+var
+  Stream: TMemoryStream;
+begin
+  Create();
+
+  if ZipExtractOne(ZipFileName, ZipEntryName, Stream) then
+  try
+    LoadFromStream(Stream, ZipEntryName);
+  finally
+    Stream.Free();
+  end;
 end;
 
 constructor TSimbaImage.CreateFromString(Str: String);

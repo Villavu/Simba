@@ -57,7 +57,7 @@ begin
   if not Str.StartsWith('DTM:', True) then
     raise Exception.Create('TDTM.FromString: Invalid string "' + Str + '"');
 
-  Stream := TStringStream.Create(DecompressString(Base64Decode(Str.After('DTM:'))));
+  Stream := TStringStream.Create(ZDecompressString(Base64Decode(Str.After('DTM:'))));
 
   SetLength(Points, Stream.ReadDWord());
   for I := 0 to High(Points) do
@@ -103,7 +103,7 @@ begin
   for I := 0 to High(Points) do
     Stream.WriteDWord(Points[I].AreaSize);
 
-  Result := 'DTM:' + Base64Encode(CompressString(Stream.DataString));
+  Result := 'DTM:' + Base64Encode(ZCompressString(Stream.DataString));
 
   Stream.Free();
 end;

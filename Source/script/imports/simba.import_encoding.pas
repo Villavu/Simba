@@ -145,7 +145,7 @@ Base64Encode
 *)
 procedure _LapeBase64Encode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  Pstring(Result)^ := Base64Encode(PString(Params^[0])^);
+  PString(Result)^ := Base64Encode(PString(Params^[0])^);
 end;
 
 (*
@@ -155,7 +155,7 @@ Base64Decode
 *)
 procedure _LapeBase64Decode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  Pstring(Result)^ := Base64Decode(PString(Params^[0])^);
+  PString(Result)^ := Base64Decode(PString(Params^[0])^);
 end;
 
 (*
@@ -209,29 +209,29 @@ begin
 end;
 
 (*
-CompressString
-~~~~~~~~~~~~~~
-> function CompressString(S: String): String;
+ZCompressString
+~~~~~~~~~~~~~~~
+> function ZCompressString(S: String): String;
 *)
-procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeZCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  Pstring(Result)^ := CompressString(PString(Params^[0])^);
+  PString(Result)^ := ZCompressString(PString(Params^[0])^);
 end;
 
 (*
-DecompressString
-~~~~~~~~~~~~~~~~
-> function DecompressString(S: String): String;
+ZDecompressString
+~~~~~~~~~~~~~~~~~
+> function ZDecompressString(S: String): String;
 *)
-procedure _LapeDecompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeZDecompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  Pstring(Result)^ := DecompressString(PString(Params^[0])^);
+  PString(Result)^ := ZDecompressString(PString(Params^[0])^);
 end;
 
 (*
-LZCompress
-~~~~~~~~~~
-> function LZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
+SynLZCompress
+~~~~~~~~~~~~~
+> function SynLZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
 *)
 procedure _LapeSynLZCompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -239,9 +239,9 @@ begin
 end;
 
 (*
-LZDecompress
-~~~~~~~~~~~~
-> function LZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
+SynLZDecompress
+~~~~~~~~~~~~~~~
+> function SynLZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
 *)
 procedure _LapeSynLZDecompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -249,9 +249,9 @@ begin
 end;
 
 (*
-LZCompressDestLen
-~~~~~~~~~~~~~~~~~
-> function LZCompressDestLen(Len: Integer): Integer;
+SynLZCompressDestLen
+~~~~~~~~~~~~~~~~~~~~
+> function SynLZCompressDestLen(Len: Integer): Integer;
 *)
 procedure _LapeSynLZCompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -259,80 +259,40 @@ begin
 end;
 
 (*
-LZDecompressDestLen
-~~~~~~~~~~~~~~~~~~~
-> function LZDecompressDestLen(Src: Pointer): Integer;
+SynLZDecompressDestLen
+~~~~~~~~~~~~~~~~~~~~~~
+> function SynLZDecompressDestLen(Src: Pointer): Integer;
 *)
 procedure _LapeSynLZDecompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SynLZdecompressdestlen(PPAnsiChar(Params^[0])^);
 end;
 
-(*
-TLZCompressionThread.Create
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TLZCompressionThread.Create: TLZCompressionThread; static;
-*)
 procedure _LapeLZCompressionThread_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressionThread(Result)^ := TLZCompressionThread.Create();
 end;
 
-(*
-TLZCompressionThread.Free
-~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TLZCompressionThread.Free;
-*)
-procedure _LapeLZCompressionThread_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLZCompressionThread(Params^[0])^.Free();
-end;
-
-(*
-TLZCompressionThread.Write
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TLZCompressionThread.Write(constref Data; DataSize: Integer);
-*)
 procedure _LapeLZCompressionThread_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressionThread(Params^[0])^.Write(PPointer(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-(*
-TLZCompressionThread.WaitCompressing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TLZCompressionThread.WaitCompressing;
-*)
 procedure _LapeLZCompressionThread_WaitCompressing(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressionThread(Params^[0])^.WaitCompressing();
 end;
 
-(*
-TLZCompressionThread.IsCompressing
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TLZCompressionThread.IsCompressing: Boolean;
-*)
 procedure _LapeLZCompressionThread_IsCompressing(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PLZCompressionThread(Params^[0])^.IsCompressing;
 end;
 
-(*
-TLZCompressionThread.GetOnCompressed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TLZCompressionThread.GetOnCompressed: TLZCompressedEvent;
-*)
 procedure _LapeLZCompressionThreadOnCompressed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressedEvent(Result)^ := PLZCompressionThread(Params^[0])^.OnCompressed;
 end;
 
-(*
-TLZCompressionThread.SetOnCompressed
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TLZCompressionThread.SetOnCompressed(Value: TLZCompressedEvent);
-*)
 procedure _LapeLZCompressionThreadOnCompressed_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLZCompressionThread(Params^[0])^.OnCompressed := PLZCompressedEvent(Params^[1])^;
@@ -363,26 +323,24 @@ begin
     addGlobalFunc('function HMACMD5(const Key, Message: String): String', @_LapeHMACMD5);
     addGlobalFunc('function HMACSHA1(const Key, Message: String): String', @_LapeHMACSHA1);
 
-    addGlobalFunc('function CompressString(S: String): String', @_LapeCompressString);
-    addGlobalFunc('function DecompressString(S: String): String', @_LapeDecompressString);
+    addGlobalFunc('function ZCompressString(S: String): String', @_LapeZCompressString);
+    addGlobalFunc('function ZDecompressString(S: String): String', @_LapeZDecompressString);
 
-    addGlobalFunc('function LZCompressDestLen(Len: Integer): Integer', @_LapeSynLZCompressDestLen);
-    addGlobalFunc('function LZDecompressDestLen(Src: Pointer): Integer', @_LapeSynLZDecompressDestLen);
-    addGlobalFunc('function LZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZCompress);
-    addGlobalFunc('function LZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZDecompress);
-
-    addGlobalType('type Pointer', 'TLZCompressionThread');
-    addGlobalType('procedure(Sender: TLZCompressionThread; Data: Pointer; DataSize: Integer; TimeUsed: Double) of object', 'TLZCompressedEvent', FFI_DEFAULT_ABI);
-
-    addGlobalFunc('function TLZCompressionThread.Create: TLZCompressionThread; static', @_LapeLZCompressionThread_Create);
-    addGlobalFunc('procedure TLZCompressionThread.Free;', @_LapeLZCompressionThread_Free);
-    addGlobalFunc('procedure TLZCompressionThread.Write(constref Data; DataSize: Integer)', @_LapeLZCompressionThread_Write);
-    addGlobalFunc('procedure TLZCompressionThread.WaitCompressing', @_LapeLZCompressionThread_WaitCompressing);
-    addGlobalFunc('procedure TLZCompressionThread.SetOnCompressed(Value: TLZCompressedEvent)', @_LapeLZCompressionThreadOnCompressed_Write);
-    addGlobalFunc('function TLZCompressionThread.GetOnCompressed: TLZCompressedEvent', @_LapeLZCompressionThreadOnCompressed_Read);
-    addGlobalFunc('function TLZCompressionThread.IsCompressing: Boolean', @_LapeLZCompressionThread_IsCompressing);
+    addGlobalFunc('function SynLZCompressDestLen(Len: Integer): Integer', @_LapeSynLZCompressDestLen);
+    addGlobalFunc('function SynLZDecompressDestLen(Src: Pointer): Integer', @_LapeSynLZDecompressDestLen);
+    addGlobalFunc('function SynLZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZCompress);
+    addGlobalFunc('function SynLZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZDecompress);
 
     ImportingSection := '';
+
+    addClass('TSynLZThread');
+    addClassConstructor('TSynLZThread', '', @_LapeLZCompressionThread_Create);
+    addGlobalType('procedure(Sender: TSynLZThread; Data: Pointer; DataSize: Integer; TimeUsed: Double) of object', 'TSynLZCompressedEvent', FFI_DEFAULT_ABI);
+    addGlobalFunc('procedure TSynLZThread.Write(constref Data; DataSize: Integer)', @_LapeLZCompressionThread_Write);
+    addGlobalFunc('procedure TSynLZThread.WaitCompressing', @_LapeLZCompressionThread_WaitCompressing);
+    addGlobalFunc('procedure TSynLZThread.SetOnCompressed(Value: TSynLZCompressedEvent)', @_LapeLZCompressionThreadOnCompressed_Write);
+    addGlobalFunc('function TSynLZThread.GetOnCompressed: TSynLZCompressedEvent', @_LapeLZCompressionThreadOnCompressed_Read);
+    addGlobalFunc('function TSynLZThread.IsCompressing: Boolean', @_LapeLZCompressionThread_IsCompressing);
   end;
 end;
 
