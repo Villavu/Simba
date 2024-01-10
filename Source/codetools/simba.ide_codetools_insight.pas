@@ -24,7 +24,7 @@ uses
 type
   {$SCOPEDENUMS ON}
   EParseExpressionFlag = (
-    WantVarType,     // if found decl is a variable, return the variables type
+    WantVarType,      // if found decl is a variable, return the variables type
     WantMethodResult // if found decl is a function, return the result type
   );
   EParseExpressionFlags = set of EParseExpressionFlag;
@@ -405,14 +405,14 @@ end;
 
 function TCodeinsight.ParseExpression(Expr: TExpressionItems; Flags: EParseExpressionFlags): TDeclaration;
 
-  function FindMember(Decl: TDeclaration; Expr: TExpressionItem): TDeclaration;
+  function FindMember(Decl: TDeclaration; Expr: TExpressionItem; isLast: Boolean): TDeclaration;
   begin
     Result := nil;
 
     for Decl in GetMembersOfType(Decl) do
       if Decl.IsName(Expr.Text) then
       begin
-        if Expr.IsLastItem then
+        if isLast and (not Expr.HasSymbols) then // end of the tree, result will change depending on `Flags`
           Result := Decl
         else
         if (Decl is TDeclaration_Var) and (TDeclaration_Var(Decl).VarType <> nil) then
@@ -428,13 +428,13 @@ function TCodeinsight.ParseExpression(Expr: TExpressionItems; Flags: EParseExpre
   function DoSymbols(Decl: TDeclaration; Expr: TExpressionItem): TDeclaration;
   begin
     Result := Decl;
-    if Expr.DerefText then
+    if Expr.Symbols.Deref then
       Result := DoPointerDeref(Result);
 
-    if (Expr.Dimensions > 0) then
+    if (Expr.Symbols.DimCount > 0) then
     begin
-      Result := DoArrayIndex(Result, Expr.Dimensions);
-      if Expr.DerefDimension then
+      Result := DoArrayIndex(Result, Expr.Symbols.DimCount);
+      if Expr.Symbols.DerefDim then
         Result := DoPointerDeref(Result);
     end;
   end;
@@ -448,19 +448,20 @@ begin
     Exit;
 
   Decl := GetByName(Expr[0].Text);
-  if (Length(Expr) = 1) and (Flags * [EParseExpressionFlag.WantMethodResult, EParseExpressionFlag.WantVarType] = []) then
+  if (Length(Expr) = 1) and (Flags = []) then
   begin
     Result := Decl;
     Exit;
   end;
 
-  if (Decl is TDeclaration_Method) and (not Expr[0].IsLastItem) then
-   Decl := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType)
-  else
-  if (Decl is TDeclaration_Var) then
-    Decl := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType)
-  else
-    Decl := EnsureTypeDeclaration(Decl);
+  if (Length(Expr) > 1) or Expr[0].HasSymbols then
+    if (Decl is TDeclaration_Method) then
+     Decl := EnsureTypeDeclaration(TDeclaration_Method(Decl).ResultType)
+    else
+    if (Decl is TDeclaration_Var) then
+      Decl := EnsureTypeDeclaration(TDeclaration_Var(Decl).VarType)
+    else
+      Decl := EnsureTypeDeclaration(Decl);
 
   if (Decl = nil) then
   begin
@@ -477,12 +478,13 @@ begin
 
   for I := 1 to High(Expr) do
   begin
-    Decl := FindMember(Decl, Expr[I]);
+    Decl := FindMember(Decl, Expr[I], I=High(Expr));
     if (Decl = nil) then
     begin
       DebugLn('TCodeinsight.ParseExpression: Failed on member "' + Expr[I].Text + '"');
       Exit;
     end;
+
     Decl := DoSymbols(Decl, Expr[I]);
     if (Decl = nil) then
     begin
@@ -492,6 +494,7 @@ begin
   end;
 
   Result := Decl;
+
   if (EParseExpressionFlag.WantVarType in Flags) and (Result is TDeclaration_Var) then
     Result := EnsureTypeDeclaration(TDeclaration_Var(Result).VarType)
   else

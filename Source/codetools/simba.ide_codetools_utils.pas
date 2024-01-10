@@ -29,13 +29,13 @@ type
 
 type
   TExpressionItem = record
-    IsLastItem: Boolean;
-
     Text: String;
-    Dimensions: Integer;
-
-    DerefDimension: Boolean;
-    DerefText: Boolean;
+    HasSymbols: Boolean;
+    Symbols: record
+      DimCount: Integer; // [0,0] or [0][0] is `DimCount=2`
+      Deref: Boolean;    // arr^
+      DerefDim: Boolean; // arr[0]^
+    end;
   end;
   TExpressionItems = array of TExpressionItem;
 
@@ -67,8 +67,9 @@ var
   Lex: TmwPasLex;
   InSquare, InRound: Integer;
   LastToken: TptTokenKind;
+  I: Integer;
 begin
-  Result := nil;
+  Result := [];
 
   InSquare := 0;
   InRound := 0;
@@ -98,14 +99,14 @@ begin
         tokSquareClose:
           begin
             if (InSquare > 0) and (InRound = 0) and (Length(Result) > 0) then
-              Inc(Result[High(Result)].Dimensions);
+              Inc(Result[High(Result)].Symbols.DimCount);
 
             Dec(InSquare);
           end;
         tokComma:
           begin
             if (InSquare > 0) and (InRound = 0) and (Length(Result) > 0) then
-              Inc(Result[High(Result)].Dimensions);
+              Inc(Result[High(Result)].Symbols.DimCount);
           end;
         tokRoundOpen:
           begin
@@ -120,9 +121,9 @@ begin
             if (InRound = 0) and (InSquare = 0) and (Length(Result) > 0) then
             begin
               if (LastToken = tokSquareClose) then
-                Result[High(Result)].DerefDimension := True
+                Result[High(Result)].Symbols.DerefDim := True
               else
-                Result[High(Result)].DerefText := True;
+                Result[High(Result)].Symbols.Deref := True;
             end;
           end;
         tokStringConst:
@@ -138,12 +139,12 @@ begin
       LastToken := Lex.TokenID;
       Lex.NextNoJunk();
     end;
+
+    for I := 0 to High(Result) do
+      Result[I].HasSymbols := (Result[I].Symbols.DimCount > 0) or Result[I].Symbols.Deref or Result[I].Symbols.DerefDim;
   finally
     Lex.Free();
   end;
-
-  if (Length(Result) > 0) then
-    Result[High(Result)].IsLastItem := True;
 end;
 
 end.
