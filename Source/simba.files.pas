@@ -86,7 +86,8 @@ type
   end;
 
   function ZipExtractAll(ZipFileName, OutputDir: String): Boolean;
-  function ZipExtractOne(ZipFileName, FileName, OutputDir: String): Boolean;
+  function ZipExtractOne(ZipFileName, FileName, OutputDir: String): Boolean; overload;
+  function ZipExtractOne(ZipFileName, FileName: String; out Stream: TMemoryStream): Boolean; overload;
   function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean;
   function ZipEntries(ZipFileName: String): TStringArray;
   function ZipHasEntryCrc(ZipFileName: String; Crc32: UInt32): Boolean;
@@ -589,6 +590,71 @@ begin
         if (UnZipper.Entries[I].ArchiveFileName = FileName) then
         begin
           UnZipper.UnZipAllFiles();
+
+          Result := True;
+          Break;
+        end;
+    except
+    end;
+
+    UnZipper.Free();
+  end;
+end;
+
+type
+  TZipExtractor = class(TUnZipper)
+  protected
+    procedure DoCreateStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+    procedure DoDoneStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+  public
+    Stream: TMemoryStream;
+
+    constructor Create;
+  end;
+
+procedure TZipExtractor.DoCreateStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  AStream := TMemoryStream.Create();
+end;
+
+procedure TZipExtractor.DoDoneStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  Stream := TMemoryStream(AStream);
+
+  AStream := nil;
+end;
+
+constructor TZipExtractor.Create;
+begin
+  inherited Create;
+
+  OnCreateStream := @DoCreateStream;
+  OnDoneStream := @DoDoneStream;
+end;
+
+function ZipExtractOne(ZipFileName, FileName: String; out Stream: TMemoryStream): Boolean;
+var
+  UnZipper: TZipExtractor;
+  I: Integer;
+begin
+  Result := False;
+
+  if FileExists(ZipFileName) then
+  begin
+    UnZipper := TZipExtractor.Create();
+
+    try
+      UnZipper.Files.Add(FileName);
+      UnZipper.FileName := ZipFileName;
+      UnZipper.Examine();
+
+      for I := 0 to UnZipper.Entries.Count - 1 do
+        if (UnZipper.Entries[I].ArchiveFileName = FileName) then
+        begin
+          UnZipper.UnZipAllFiles();
+
+          Stream := UnZipper.Stream;
+          Stream.Position := 0;
 
           Result := True;
           Break;

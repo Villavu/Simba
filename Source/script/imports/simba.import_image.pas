@@ -1168,6 +1168,18 @@ begin
 end;
 
 (*
+TImage.CreateFromZip
+~~~~~~~~~~~~~~~~~~~~
+> function TImage.CreateFromZip(ZipFileName, ZipEntryName: String): TImage; static;
+
+Load an image from a file inside a zip file.
+*)
+procedure _LapeImage_CreateFromZip(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Result)^ := TSimbaImage.CreateFromZip(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+(*
 TImage.Compare
 ~~~~~~~~~~~~~~
 > function TImage.Compare(Other: TImage): Single;
@@ -1364,8 +1376,9 @@ begin
 
     addGlobalFunc('function TImage.Create: TImage; static; overload', @_LapeImage_Create);
     addGlobalFunc('function TImage.Create(Width, Height: Integer): TImage; static; overload', @_LapeImage_CreateEx);
-    addGlobalFunc('function TImage.CreateFromFile(FileName: String): TImage; static; overload', @_LapeImage_CreateFromFile);
-    addGlobalFunc('function TImage.CreateFromString(Str: String): TImage; static; overload', @_LapeImage_CreateFromString);
+    addGlobalFunc('function TImage.CreateFromFile(FileName: String): TImage; static', @_LapeImage_CreateFromFile);
+    addGlobalFunc('function TImage.CreateFromString(Str: String): TImage; static', @_LapeImage_CreateFromString);
+    addGlobalFunc('function TImage.CreateFromZip(ZipFileName, ZipEntryName: String): TImage; static', @_LapeImage_CreateFromZip);
 
     addGlobalFunc('function TImage.Equals(Other: TImage): Boolean;', @_LapeImage_Equals);
 
