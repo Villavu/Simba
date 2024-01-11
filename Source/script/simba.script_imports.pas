@@ -40,7 +40,7 @@ uses
   simba.import_script,  simba.import_slacktree, simba.import_string,
   simba.import_variant, simba.import_random,
   simba.import_debugimage, simba.import_web, simba.import_dialogs, simba.import_threading,
-  simba.import_pointbuffer, simba.import_stringpairlist;
+  simba.import_pointbuffer, simba.import_stringmap;
 
 procedure AddSimbaImports(Compiler: TSimbaScript_Compiler);
 begin
@@ -91,7 +91,10 @@ begin
   ImportDialogs(Compiler);
   ImportThreading(Compiler);
   ImportPointBuffer(Compiler);
-  ImportStringPairList(Compiler);
+
+  ImportStringMap(Compiler);
+  ImportStringPointerMap(Compiler);
+  ImportStringIntMap(Compiler);
 
   ImportSimbaImageBox(Compiler);
   ImportSimbaShapeBox(Compiler);
