@@ -1,6 +1,6 @@
 {$assertions on}
 
-procedure Test(var List: TStringPairList);
+procedure Test(var List: TStringMap);
 begin
   List.Add('one', '1');
   List.Add('two', '2');
@@ -30,7 +30,7 @@ begin
 end;
 
 var
-  List: TStringPairList;
+  List: TStringMap;
 begin
   List.Clear();
   List.SetSorted(True);
