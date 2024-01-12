@@ -15,8 +15,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, ComCtrls, Controls, Graphics, Dialogs, ExtCtrls,
-  simba.mufasatypes, simba.component_treeview, simba.component_buttonpanel, simba.component_button, simba.component_edit,
-  simba.settings;
+  simba.mufasatypes, simba.settings,
+  simba.component_treeview, simba.component_buttonpanel, simba.component_button, simba.component_edit;
 
 type
   TSimbaDownloadSimbaForm = class(TForm)
@@ -47,6 +47,8 @@ type
       Pos, Size: Int64;
     end;
 
+    procedure DoGetNodeColor(const Node: TTreeNode; var TheColor: TColor);
+
     procedure DoDownloadButtonClick(Sender: TObject);
     procedure DoSelectionChange(Sender: TObject);
 
@@ -68,13 +70,14 @@ implementation
 {$R *.lfm}
 
 uses
+  ATCanvasPrimitives,
   simba.httpclient, simba.theme, simba.main;
 
 type
   TUpdateFormNode = class(TTreeNode)
   public
-    URL: String;
-    ShortCommit: String;
+    Commit: String;
+    DownloadURL: String;
   end;
 
 const
@@ -91,6 +94,8 @@ begin
   FTreeView.Align := alClient;
   FTreeView.FilterVisible := False;
   FTreeView.OnSelectionChange := @DoSelectionChange;
+  if (SIMBA_COMMIT <> '') then
+    FTreeView.OnGetNodeColor := @DoGetNodeColor;
 
   FDownloadButton := TSimbaButton.Create(Self);
   FDownloadButton.Parent := Panel2;
@@ -127,6 +132,12 @@ begin
   FDownloadProgress.Size := 0;
 end;
 
+procedure TSimbaDownloadSimbaForm.DoGetNodeColor(const Node: TTreeNode; var TheColor: TColor);
+begin
+  if (TUpdateFormNode(Node).Commit.StartsWith(SIMBA_COMMIT)) then
+    TheColor := ColorBlend(TheColor, clPurple, 210);
+end;
+
 procedure TSimbaDownloadSimbaForm.DoProgressTimerStop(Sender: TObject);
 begin
   FDownloadButton.Caption := 'Download';
@@ -152,11 +163,10 @@ var
   Node: TUpdateFormNode;
 begin
   Node := TUpdateFormNode(FTreeView.Selected);
-  if (Node <> nil) and (Node.URL <> '') then
+  if (Node <> nil) and (Node.DownloadURL <> '') then
   begin
     ProgressUpdateTimer.Enabled := True;
-
-    FDownloadURL := Node.URL;
+    FDownloadURL := Node.DownloadURL;
     FDownloadFileName := FPathEdit.Text;
 
     TThread.ExecuteInThread(@DoDownload, @DoDownloadFinished);
@@ -168,8 +178,8 @@ var
   Node: TUpdateFormNode;
 begin
   Node := TUpdateFormNode(FTreeView.Selected);
-  if (Node <> nil) and (Node.URL <> '') then
-    FPathEdit.Text := Application.Location + Node.ShortCommit + '_' + Node.Text;
+  if (Node <> nil) and (Node.DownloadURL <> '') then
+    FPathEdit.Text := Application.Location + Copy(Node.Commit, 1, 8) + '_' + Node.Text;
 end;
 
 procedure TSimbaDownloadSimbaForm.DoDownloadProgress(Sender: TObject; URL, ContentType: String; Pos, Size: Int64);
@@ -236,31 +246,30 @@ end;
 
 procedure TSimbaDownloadSimbaForm.DoPopulated(Sender: TObject);
 
-  procedure Add(ParentNode: TTreeNode; Name: String; Link: String; Commit: String);
+  function Add(ParentNode: TTreeNode; Text: String; DataIndex: Integer; ImageIndex: Integer = -1): TUpdateFormNode;
   begin
-    with TUpdateFormNode(FTreeView.AddNode(ParentNode, Name, IMG_SIMBA)) do
-    begin
-      URL := Link.Replace('/tree/', '/raw/') + '/' + Name;
-      ShortCommit := Copy(Commit, 1, 8);
-    end;
+    Result := TUpdateFormNode(FTreeView.AddNode(ParentNode, Text, ImageIndex));
+    Result.Commit := FData[DataIndex].Commit;
+    if (ImageIndex = IMG_SIMBA) then
+      Result.DownloadURL := FData[DataIndex].Link.Replace('/tree/', '/raw/') + '/' + Text;
   end;
 
 var
-  i:Integer;
+  I:Integer;
   Node: TTreeNode;
 begin
   FTreeView.BeginUpdate();
   FTreeView.Clear();
-  for i:=0 to High(FData) do
+  for I := 0 to High(FData) do
   begin
-    Node := FTreeView.AddNode(FData[i].Date + ' | ' + FData[i].Commit + ' | ' + FData[i].Branch);
+    Node := Add(nil, FData[I].Date + ' | ' + FData[I].Commit + ' | ' + FData[I].Branch, I);
 
-    Add(Node, 'Simba-Win32.exe', FData[i].Link, FData[I].Commit);
-    Add(Node, 'Simba-Win64.exe', FData[i].Link, FData[I].Commit);
-    Add(Node, 'Simba-Linux-AArch64', FData[i].Link, FData[I].Commit);
-    Add(Node, 'Simba-Linux64', FData[i].Link, FData[I].Commit);
-    Add(Node, 'Simba-MacOS-AArch64.dmg', FData[i].Link, FData[I].Commit);
-    Add(Node, 'Simba-MacOS.dmg', FData[i].Link, FData[I].Commit);
+    Add(Node, 'Simba-Win32.exe', I, IMG_SIMBA);
+    Add(Node, 'Simba-Win64.exe', I, IMG_SIMBA);
+    Add(Node, 'Simba-Linux-AArch64', I, IMG_SIMBA);
+    Add(Node, 'Simba-Linux64', I, IMG_SIMBA);
+    Add(Node, 'Simba-MacOS-AArch64.dmg', I, IMG_SIMBA);
+    Add(Node, 'Simba-MacOS.dmg', I, IMG_SIMBA);
   end;
   FTreeView.EndUpdate();
   if (FTreeView.Items.Count > 0) then
