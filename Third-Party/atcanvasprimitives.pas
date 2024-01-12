@@ -669,6 +669,9 @@ function ColorBlend(c1, c2: Longint; A: Longint): Longint;
 var
   r, g, b, v1, v2: byte;
 begin
+  {$PUSH}
+  {$R-}
+  {$Q-}
   v1:= Byte(c1);
   v2:= Byte(c2);
   r:= A * (v1 - v2) shr 8 + v2;
@@ -679,12 +682,16 @@ begin
   v2:= Byte(c2 shr 16);
   b:= A * (v1 - v2) shr 8 + v2;
   Result := (b shl 16) + (g shl 8) + r;
+  {$POP}
 end;
 
 function ColorBlendHalf(c1, c2: Longint): Longint;
 var
   r, g, b, v1, v2: byte;
 begin
+  {$PUSH}
+  {$R-}
+  {$Q-}
   v1:= Byte(c1);
   v2:= Byte(c2);
   r:= (v1+v2) shr 1;
@@ -695,6 +702,7 @@ begin
   v2:= Byte(c2 shr 16);
   b:= (v1+v2) shr 1;
   Result := (b shl 16) + (g shl 8) + r;
+  {$POP}
 end;
 
 

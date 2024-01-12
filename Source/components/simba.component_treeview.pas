@@ -42,6 +42,7 @@ type
     constructor Create(AnOwner: TComponent); override;
   end;
 
+  TNodeColorEvent = procedure(const Node: TTreeNode; var Color: TColor) of object;
   TNodeHintEvent = function(const Node: TTreeNode): String of object;
   TNodeForEachEvent = procedure(const Node: TTreeNode) is nested;
 
@@ -55,8 +56,10 @@ type
     FScrollbarVert: TSimbaScrollBar;
     FScrollbarHorz: TSimbaScrollBar;
     FOnGetNodeHint: TNodeHintEvent;
+    FOnGetNodeColor: TNodeColorEvent;
     FNodeClass: TTreeNodeClass;
     FOnAfterFilter: TNotifyEvent;
+    FTempBackgroundColor: TColor;
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -88,6 +91,9 @@ type
     procedure DoFilterEditChange(Sender: TObject);
     procedure DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
+    // for GetNodeColor
+    procedure DoDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; Stage: TCustomDrawStage; var PaintImages, DefaultDraw: Boolean);
+
     procedure DoSettingChanged_ImageSize(Setting: TSimbaSetting);
 
     procedure ScrollHorzChange(Sender: TObject);
@@ -107,6 +113,7 @@ type
 
     procedure Invalidate; override;
 
+    property OnGetNodeColor: TNodeColorEvent read FOnGetNodeColor write FOnGetNodeColor;
     property OnGetNodeHint: TNodeHintEvent read FOnGetNodeHint write FOnGetNodeHint;
     property OnDoubleClick: TNotifyEvent read GetOnDoubleClick write SetOnDoubleClick;
     property OnSelectionChange: TNotifyEvent read GetOnSelectionChange write SetOnSelectionChange;
@@ -183,6 +190,7 @@ begin
   FTree.SelectionColor := SimbaTheme.ColorActive;
   FTree.Font.Color := SimbaTheme.ColorFont;
   FTree.Images := SimbaForm.Images;
+  FTree.OnAdvancedCustomDrawItem := @DoDrawItem;
 
   FScrollbarVert.ForwardScrollControl := FTree;
 
@@ -479,6 +487,25 @@ begin
     NodeClass := FNodeClass
   else
     NodeClass := TTreeNode;
+end;
+
+procedure TSimbaTreeView.DoDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; Stage: TCustomDrawStage; var PaintImages, DefaultDraw: Boolean);
+var
+  TheColor: TColor;
+begin
+  if Assigned(FOnGetNodeColor) then
+    case Stage of
+      cdPrePaint:
+        begin
+          FTempBackgroundColor := Sender.BackgroundColor;
+          TheColor := Sender.BackgroundColor;
+          FOnGetNodeColor(Node, TheColor);
+          Sender.BackgroundColor := TheColor;
+        end;
+
+      cdPostPaint:
+        Sender.BackgroundColor := FTempBackgroundColor;
+    end;
 end;
 
 procedure TSimbaTreeView.DoSettingChanged_ImageSize(Setting: TSimbaSetting);
