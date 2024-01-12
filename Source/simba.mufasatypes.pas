@@ -415,6 +415,11 @@ function IfThen(const Val: Boolean; const IfTrue, IfFalse: Integer): Integer; ov
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean; overload;
 
 type
+  TBooleanHelper = type helper for Boolean
+    function ToString: String;
+  end;
+
+type
   ESimbaException = class(Exception);
 
 procedure SimbaException(Message: String; Args: array of const); overload;
@@ -687,6 +692,14 @@ begin
     Result := IfTrue
   else
     Result := IfFalse;
+end;
+
+function TBooleanHelper.ToString: String;
+begin
+  if Self then
+    Result := 'True'
+  else
+    Result := 'False';
 end;
 
 end.

@@ -4,7 +4,7 @@
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 
   Simple managed string map.
-  Can be sorted for fast binary-search lookups.
+  Can be sorted for fast binary-search lookups using the keys hash.
 }
 unit simba.stringmap;
 
@@ -35,8 +35,16 @@ type
     FSorted: Boolean;
     FCaseSens: Boolean;
 
-    function _BSearch32(var Arr: TItemArray; Hash: UInt32; Lo, Hi: Integer): Integer;
-    procedure _Insert32(var Arr: TItemArray; var Index: Integer);
+    class function _StrToValue(Str: String; Default: String): String; overload; static;
+    class function _StrToValue(Str: String; Default: Int64): Int64; overload; static;
+    class function _StrToValue(Str: String; Default: Pointer): Pointer; overload; static;
+
+    class function _ValueToStr(Val: String): String; overload; static;
+    class function _ValueToStr(Val: Int64): String; overload; static;
+    class function _ValueToStr(Val: Pointer): String; overload; static;
+
+    class function _BSearch32(var Arr: TItemArray; Hash: UInt32; Lo, Hi: Integer): Integer; static;
+    class procedure _Insert32(var Arr: TItemArray; var Index: Integer); static;
 
     procedure CheckIndex(const Index: Integer); inline;
     function EqualKeys(const Key1, Key2: String): Boolean;
@@ -81,58 +89,49 @@ type
   end;
 
   PStringMap = ^TStringMap;
-  TStringMap = specialize TSimbaStringMap<String>;
-
   PStringPointerMap = ^TStringPointerMap;
-  TStringPointerMap = specialize TSimbaStringMap<Pointer>;
-
   PStringIntMap = ^TStringIntMap;
+
+  TStringMap = specialize TSimbaStringMap<String>;
+  TStringPointerMap = specialize TSimbaStringMap<Pointer>;
   TStringIntMap = specialize TSimbaStringMap<Int64>;
-
-  function StrToValue(Str: String; Default: String): String; overload;
-  function StrToValue(Str: String; Default: Int64): Int64; overload;
-  function StrToValue(Str: String; Default: Pointer): Pointer; overload;
-
-  function ValueToStr(Val: String): String; overload;
-  function ValueToStr(Val: Int64): String; overload;
-  function ValueToStr(Val: Pointer): String; overload;
 
 implementation
 
 uses
   simba.arraybuffer, simba.files, simba.algo_sort, simba.stringbuilder;
 
-function StrToValue(Str: String; Default: String): String; overload;
+class function TSimbaStringMap._StrToValue(Str: String; Default: String): String; overload;
 begin
   Result := Str;
 end;
 
-function StrToValue(Str: String; Default: Int64): Int64; overload;
+class function TSimbaStringMap._StrToValue(Str: String; Default: Int64): Int64; overload;
 begin
   Result := StrToInt64Def(Str, Default);
 end;
 
-function StrToValue(Str: String; Default: Pointer): Pointer; overload;
+class function TSimbaStringMap._StrToValue(Str: String; Default: Pointer): Pointer; overload;
 begin
-  Result := Pointer(StrToInt64Def(Str, Int64(Default)));
+  Result := Pointer(StrToInt64Def(Str.Replace('0x', '$'), Int64(Default)));
 end;
 
-function ValueToStr(Val: String): String; overload;
+class function TSimbaStringMap._ValueToStr(Val: String): String; overload;
 begin
   Result := Val;
 end;
 
-function ValueToStr(Val: Int64): String; overload;
+class function TSimbaStringMap._ValueToStr(Val: Int64): String; overload;
 begin
   Result := IntToStr(Val);
 end;
 
-function ValueToStr(Val: Pointer): String; overload;
+class function TSimbaStringMap._ValueToStr(Val: Pointer): String; overload;
 begin
-  Result := IntToStr(Int64(Val));
+  Result := '0x' + IntToHex(PtrUInt(Val), 1);
 end;
 
-function TSimbaStringMap._BSearch32(var Arr: TItemArray; Hash: UInt32; Lo, Hi: Integer): Integer;
+class function TSimbaStringMap._BSearch32(var Arr: TItemArray; Hash: UInt32; Lo, Hi: Integer): Integer;
 var
   mVal: UInt32;
   mIndex: Integer;
@@ -155,7 +154,7 @@ begin
   Result := -(Lo + 1);
 end;
 
-procedure TSimbaStringMap._Insert32(var Arr: TItemArray; var Index: Integer);
+class procedure TSimbaStringMap._Insert32(var Arr: TItemArray; var Index: Integer);
 var
   Item: TItem;
   Hi: Integer;
@@ -388,8 +387,6 @@ end;
 
 procedure TSimbaStringMap.Load(FileName: String; Sep: String = '=');
 var
-  func: function: Pointer;
-var
   Line: String;
   Pieces: TStringArray;
   wasSorted: Boolean;
@@ -404,7 +401,7 @@ begin
   begin
     Pieces := Line.Partition(Sep);
     if (Pieces[0] <> '') and (Pieces[1] <> '') and (Pieces[2] <> '') then
-      Add(Pieces[0], StrToValue(Pieces[2], Default(_T)));
+      Add(Pieces[0], _StrToValue(Pieces[2], InvalidVal));
   end;
 
   if wasSorted then
@@ -417,7 +414,7 @@ var
   Builder: TSimbaStringBuilder;
 begin
   for I := 0 to FCount - 1 do
-    Builder.AppendLine(FItems[I].Key + Sep + ValueToStr(FItems[I].Value));
+    Builder.AppendLine(FItems[I].Key + Sep + _ValueToStr(FItems[I].Value));
 
   TSimbaFile.FileWrite(FileName, Builder.Str);
 end;
@@ -431,10 +428,10 @@ begin
   begin
     if (I > 0) then
       Builder.Append(', ');
-    Builder.Append('[Key=' + FItems[I].Key + ',Value=' + ValueToStr(FItems[I].Value) + ']');
+    Builder.Append('[Key=' + FItems[I].Key + ', Value=' + _ValueToStr(FItems[I].Value) + ']');
   end;
 
-  Result := 'Count=%d, CaseSens=%s, Sorted=%s, Pairs=[%s]'.Format([FCount, FCaseSens.ToString(TUseBoolStrs.True), FSorted.ToString(TUseBoolStrs.True), Builder.Str]);
+  Result := 'Count=%d, CaseSens=%s, Sorted=%s, Pairs=[%s]'.Format([FCount, FCaseSens.ToString(), FSorted.ToString(), Builder.Str]);
 end;
 
 class operator TSimbaStringMap.Initialize(var Self: TSimbaStringMap);

@@ -45,4 +45,8 @@ begin
   List.Add('HELLO', 'WORLD');
   Assert(List.Exists('HELLO'));
   Assert(not List.Exists('hello'));
+
+  Assert(List.GetValue('abc') = '');
+  List.InvalidVal := 'Nope';
+  Assert(List.GetValue('abc') = 'Nope');
 end;
