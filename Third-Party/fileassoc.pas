@@ -265,10 +265,8 @@ begin
       b5 := WriteDefaultProgramsAddExt;
   end;
 
-  //WRiteln(b1,b2,b3,b4,b5);
-
   Result := False;
-  if b1 and b2 and b3 {and b4 and b5} then
+  if b1 and b2 and b3 and b4 and b5 then
     Result := True;
 end;
 

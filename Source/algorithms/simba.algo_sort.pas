@@ -5,7 +5,6 @@
 }
 unit simba.algo_sort;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
@@ -15,12 +14,11 @@ uses
   simba.mufasatypes;
 
 type
-  generic TCompareFunc<_T> = function(A, B: _T): Integer;
+  generic TCompareFunc<_T> = function(const A, B: _T): Integer;
 
-generic procedure QuickSortFunc<_T>(var AValues: array of _T; ALeft, ARight: SizeInt; CompareFunc: specialize TCompareFunc<_T>);
-
-generic procedure QuickSort<_T>(var AValues: array of _T; ALeft, ARight: SizeInt);
-generic procedure QuickSortWeighted<_T, _W>(var Arr: array of _T; var Weights: array of _W; iLo, iHi: SizeInt; SortUp: Boolean);
+generic procedure QuickSort<_T>(var AValues: specialize TArray<_T>; ALeft, ARight: SizeInt; CompareFunc: specialize TCompareFunc<_T>); overload;
+generic procedure QuickSort<_T>(var AValues: specialize TArray<_T>; ALeft, ARight: SizeInt); overload;
+generic procedure QuickSort<_T, _W>(var Arr: specialize TArray<_T>; var Weights: specialize TArray<_W>; iLo, iHi: SizeInt; SortUp: Boolean); overload;
 
 generic procedure Sort<_T>(var Arr: specialize TArray<_T>); overload;
 generic procedure Sort<_T, _W>(var Arr: specialize TArray<_T>; Weights: specialize TArray<_W>; SortUp: Boolean); overload;
@@ -30,7 +28,7 @@ generic function Sorted<_T, _W>(const Arr: specialize TArray<_T>; Weights: speci
 
 implementation
 
-generic procedure QuickSortFunc<_T>(var AValues: array of _T; ALeft, ARight: SizeInt; CompareFunc: specialize TCompareFunc<_T>);
+generic procedure QuickSort<_T>(var AValues: specialize TArray<_T>; ALeft, ARight: SizeInt; CompareFunc: specialize TCompareFunc<_T>);
 var
   I, J: SizeInt;
   Q, P: _T;
@@ -65,19 +63,19 @@ begin
     if J - ALeft < ARight - I then
     begin
       if ALeft < J then
-        specialize QuickSortFunc<_T>(AValues, ALeft, J, CompareFunc);
+        specialize QuickSort<_T>(AValues, ALeft, J, CompareFunc);
       ALeft := I;
     end
     else
     begin
       if I < ARight then
-        specialize QuickSortFunc<_T>(AValues, I, ARight, CompareFunc);
+        specialize QuickSort<_T>(AValues, I, ARight, CompareFunc);
       ARight := J;
     end;
   until ALeft >= ARight;
 end;
 
-generic procedure QuickSort<_T>(var AValues: array of _T; ALeft, ARight: SizeInt);
+generic procedure QuickSort<_T>(var AValues: specialize TArray<_T>; ALeft, ARight: SizeInt);
 var
   I, J: SizeInt;
   Q, P: _T;
@@ -124,7 +122,7 @@ begin
   until ALeft >= ARight;
 end;
 
-generic procedure QuickSortWeighted<_T, _W>(var Arr: array of _T; var Weights: array of _W; iLo, iHi: SizeInt; SortUp: Boolean);
+generic procedure QuickSort<_T, _W>(var Arr: specialize TArray<_T>; var Weights: specialize TArray<_W>; iLo, iHi: SizeInt; SortUp: Boolean);
 var
   Lo, Hi: SizeInt;
   Mid, T: _W;
@@ -169,12 +167,12 @@ begin
     if Hi - iLo < iHi - Lo then
     begin
       if iLo < Hi then
-        specialize QuickSortWeighted<_T, _W>(Arr, Weights, iLo, Hi, SortUp);
+        specialize QuickSort<_T, _W>(Arr, Weights, iLo, Hi, SortUp);
       iLo := Lo;
     end else
     begin
       if Lo < iHi then
-        specialize QuickSortWeighted<_T, _W>(Arr, Weights, Lo, iHi, SortUp);
+        specialize QuickSort<_T, _W>(Arr, Weights, Lo, iHi, SortUp);
       iHi := Hi;
     end;
   until iLo >= iHi;
@@ -189,7 +187,7 @@ generic procedure Sort<_T, _W>(var Arr: specialize TArray<_T>; Weights: speciali
 begin
   Weights := Copy(Weights);
 
-  specialize QuickSortWeighted<_T, _W>(Arr, Weights, Low(Arr), High(Arr), SortUp);
+  specialize QuickSort<_T, _W>(Arr, Weights, Low(Arr), High(Arr), SortUp);
 end;
 
 generic function Sorted<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
@@ -204,7 +202,7 @@ begin
   Weights := Copy(Weights);
   Result := Copy(Arr);
 
-  specialize QuickSortWeighted<_T, _W>(Result, Weights, Low(Result), High(Result), SortUp);
+  specialize QuickSort<_T, _W>(Result, Weights, Low(Result), High(Result), SortUp);
 end;
 
 end.

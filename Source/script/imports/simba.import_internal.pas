@@ -5,7 +5,7 @@ unit simba.import_internal;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, lptypes,
   simba.mufasatypes, simba.script_compiler;
 
 procedure ImportInternal(Compiler: TSimbaScript_Compiler);
@@ -13,10 +13,9 @@ procedure ImportInternal(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  lptypes,
-  simba.tpa, simba.algo_sort, simba.algo_unique,
+  simba.tpa, simba.algo_unique,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
-  simba.script, simba.image, simba.process;
+  simba.script, simba.image, simba.process, simba.array_ord, simba.array_string;
 
 procedure _LapeWrite(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -28,26 +27,46 @@ begin
   DebugLn('');
 end;
 
+procedure _Lape_IntegerArray_Equals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PIntegerArray(Params^[0])^.Equals(PIntegerArray(Params^[1])^);
+end;
+
+procedure _LapeSingleArray_Equals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSingleArray(Params^[0])^.Equals(PSingleArray(Params^[1])^);
+end;
+
+procedure _LapeDoubleArray_Equals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PDoubleArray(Params^[0])^.Equals(PDoubleArray(Params^[1])^);
+end;
+
 // Sort
 procedure _LapeSort_IntegerArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  specialize Sort<Integer>(PIntegerArray(Params^[0])^);
+  PIntegerArray(Params^[0])^.Sort();
 end;
 
 procedure _LapeSort_SingleArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  specialize Sort<Single>(PSingleArray(Params^[0])^);
+  PSingleArray(Params^[0])^.Sort();
 end;
 
 procedure _LapeSort_DoubleArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  specialize Sort<Double>(PDoubleArray(Params^[0])^);
+  PDoubleArray(Params^[0])^.Sort();
+end;
+
+procedure _LapeSort_StringArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PStringArray(Params^[0])^.Sort();
 end;
 
 // Unique
 procedure _LapeUnique_PointArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PPointArray(Params^[0])^.Unique();
+  PPointArray(Result)^ := Algo_Unique_Points(PPointArray(Params^[0])^);
 end;
 
 procedure _LapeUnique_IntegerArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -62,117 +81,117 @@ end;
 
 procedure _LapeUnique_SingleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleArray(Result)^ := Algo_Unique_Single(PSingleArray(Params^[0])^);
+  PSingleArray(Result)^ := PSingleArray(Params^[0])^.Unique();
 end;
 
 procedure _LapeUnique_DoubleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDoubleArray(Result)^ := Algo_Unique_Double(PDoubleArray(Params^[0])^);
+  PDoubleArray(Result)^ := PDoubleArray(Params^[0])^.Unique();
 end;
 
 // IndicesOf
 procedure _LapeIndicesOf_PointArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := specialize IndicesOf<TPoint>(PPoint(Params^[0])^, PPointArray(Params^[1])^);
+  PIntegerArray(Result)^ := PPointArray(Params^[1])^.IndicesOf(PPoint(Params^[0])^);
 end;
 
 procedure _LapeIndicesOf_IntegerArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := specialize IndicesOf<Integer>(PInteger(Params^[0])^, PIntegerArray(Params^[1])^);
+  PIntegerArray(Result)^ := PIntegerArray(Params^[1])^.IndicesOf(PInteger(Params^[0])^);
 end;
 
 procedure _LapeIndicesOf_StringArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := specialize IndicesOf<String>(PString(Params^[0])^, PStringArray(Params^[1])^);
+  PIntegerArray(Result)^ := PStringArray(Params^[1])^.IndicesOf(PString(Params^[0])^);
 end;
 
 procedure _LapeIndicesOf_SingleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := specialize IndicesOf_SameValue<Single>(PSingle(Params^[0])^, PSingleArray(Params^[1])^);
+  PIntegerArray(Result)^ := PSingleArray(Params^[1])^.IndicesOf(PSingle(Params^[0])^);
 end;
 
 procedure _LapeIndicesOf_DoubleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := specialize IndicesOf_SameValue<Double>(PDouble(Params^[0])^, PDoubleArray(Params^[1])^);
+  PIntegerArray(Result)^ := PDoubleArray(Params^[1])^.IndicesOf(PDouble(Params^[0])^);
 end;
 
 // IndexOf
 procedure _LapeIndexOf_PointArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := specialize IndexOf<TPoint>(PPoint(Params^[0])^, PPointArray(Params^[1])^);
+  PInteger(Result)^ := PPointArray(Params^[1])^.IndexOf(PPoint(Params^[0])^);
 end;
 
 procedure _LapeIndexOf_IntegerArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := specialize IndexOf<Integer>(PInteger(Params^[0])^, PIntegerArray(Params^[1])^);
+  PInteger(Result)^ := PIntegerArray(Params^[1])^.IndexOf(PInteger(Params^[0])^);
 end;
 
 procedure _LapeIndexOf_StringArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := specialize IndexOf<String>(PString(Params^[0])^, PStringArray(Params^[1])^);
+  PInteger(Result)^ := PStringArray(Params^[1])^.IndexOf(PString(Params^[0])^);
 end;
 
 procedure _LapeIndexOf_SingleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := specialize IndexOf_SameValue<Single>(PSingle(Params^[0])^, PSingleArray(Params^[1])^);
+  PInteger(Result)^ := PSingleArray(Params^[1])^.IndexOf(PSingle(Params^[0])^);
 end;
 
 procedure _LapeIndexOf_DoubleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := specialize IndexOf_SameValue<Double>(PDouble(Params^[0])^, PDoubleArray(Params^[1])^);
+  PInteger(Result)^ := PDoubleArray(Params^[1])^.IndexOf(PDouble(Params^[0])^);
 end;
 
 // Sum
 procedure _LapeArraySum_PointArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPoint(Result)^ := specialize Sum<TPoint, TPoint>(PPointArray(Params^[0])^);
+  PPoint(Result)^ := PPointArray(Params^[0])^.Sum();
 end;
 
 procedure _LapeArraySum_IntegerArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInt64(Result)^ := specialize Sum<Integer, Int64>(PIntegerArray(Params^[0])^);
+  PInteger(Result)^ := PIntegerArray(Params^[0])^.Sum();
 end;
 
 procedure _LapeArraySum_SingleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := specialize Sum<Single, Double>(PSingleArray(Params^[0])^);
+  PDouble(Result)^ := PSingleArray(Params^[0])^.Sum();
 end;
 
 procedure _LapeArraySum_DoubleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := specialize Sum<Double, Double>(PDoubleArray(Params^[0])^);
+  PDouble(Result)^ := PDoubleArray(Params^[0])^.Sum();
 end;
 
 // Min
 procedure _LapeArrayMin_IntegerArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := specialize MinA<Integer>(PIntegerArray(Params^[0])^);
+  PInteger(Result)^ := PIntegerArray(Params^[0])^.Min();
 end;
 
 procedure _LapeArrayMin_SingleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingle(Result)^ := specialize MinA<Single>(PSingleArray(Params^[0])^);
+  PSingle(Result)^ := PSingleArray(Params^[0])^.Min();
 end;
 
 procedure _LapeArrayMin_DoubleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := specialize MinA<Double>(PDoubleArray(Params^[0])^);
+  PDouble(Result)^ := PDoubleArray(Params^[0])^.Min();
 end;
 
 // Max
 procedure _LapeArrayMax_IntegerArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := specialize MaxA<Integer>(PIntegerArray(Params^[0])^);
+  PInteger(Result)^ := PIntegerArray(Params^[0])^.Max();
 end;
 
 procedure _LapeArrayMax_SingleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingle(Result)^ := specialize MaxA<Single>(PSingleArray(Params^[0])^);
+  PSingle(Result)^ := PSingleArray(Params^[0])^.Max();
 end;
 
 procedure _LapeArrayMax_DoubleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := specialize MaxA<Double>(PDoubleArray(Params^[0])^);
+  PDouble(Result)^ := PDoubleArray(Params^[0])^.Max();
 end;
 
 (*
@@ -385,6 +404,8 @@ procedure ImportInternal(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
+    ImportingSection := '!Hidden';
+
     addGlobalType('type Pointer', '_TSimbaScript');
     addGlobalVar('_TSimbaScript', nil, '_SimbaScript'); // Value added later
 
@@ -408,6 +429,7 @@ begin
     addGlobalFunc('procedure _Sort(var a: TIntegerArray); overload;', @_LapeSort_IntegerArray);
     addGlobalFunc('procedure _Sort(var a: TSingleArray); overload;', @_LapeSort_SingleArray);
     addGlobalFunc('procedure _Sort(var a: TDoubleArray); overload;', @_LapeSort_DoubleArray);
+    addGlobalFunc('procedure _Sort(var a: TStringArray); overload;', @_LapeSort_StringArray);
 
     addGlobalFunc('function _Unique(const a: TPointArray): TPointArray; overload', @_LapeUnique_PointArray);
     addGlobalFunc('function _Unique(const a: TIntegerArray): TIntegerArray; overload', @_LapeUnique_IntegerArray);
@@ -439,6 +461,12 @@ begin
     addGlobalFunc('function _ArrayMax(const a: TIntegerArray): Int64; overload', @_LapeArrayMax_IntegerArray);
     addGlobalFunc('function _ArrayMax(const a: TSingleArray): Single; overload', @_LapeArrayMax_SingleArray);
     addGlobalFunc('function _ArrayMax(const a: TDoubleArray): Double; overload', @_LapeArrayMax_DoubleArray);
+
+    ImportingSection := '';
+
+    addGlobalFunc('function TIntegerArray.Equals(Other: TIntegerArray): Boolean', @_Lape_IntegerArray_Equals);
+    addGlobalFunc('function TSingleArray.Equals(Other: TSingleArray): Boolean', @_LapeSingleArray_Equals);
+    addGlobalFunc('function TDoubleArray.Equals(Other: TDoubleArray): Boolean', @_LapeDoubleArray_Equals);
 
     addGlobalFunc('function TByteArray.Difference(Other: TByteArray): TByteArray', @_Lape_UInt8_Difference);
     addGlobalFunc('function TIntegerArray.Difference(Other: TIntegerArray): TIntegerArray', @_Lape_Int32_Difference);

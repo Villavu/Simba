@@ -95,7 +95,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.main, simba.ide_mainstatusbar, simba.ide_events, simba.threading,
+  simba.main, simba.ide_events, simba.threading,
   simba.scripttabsform, simba.scripttab, simba.ide_showdeclaration, simba.nativeinterface;
 
 function GetImage(const Decl: TDeclaration): Integer;

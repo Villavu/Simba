@@ -5,7 +5,6 @@
 }
 unit simba.algo_unique;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
@@ -14,11 +13,8 @@ uses
   Classes, SysUtils, Math,
   simba.mufasatypes;
 
-generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
-generic function Unique_SameValue<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
+generic function Unique<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
 
-function Algo_Unique_Single(const Arr: TSingleArray): TSingleArray;
-function Algo_Unique_Double(const Arr: TDoubleArray): TDoubleArray;
 function Algo_Unique_Points(const Arr: TPointArray): TPointArray;
 function Algo_Unique_Integer(const Arr: TIntegerArray): TIntegerArray;
 function Algo_Unique_String(const Arr: TStringArray): TStringArray;
@@ -26,12 +22,32 @@ function Algo_Unique_String(const Arr: TStringArray): TStringArray;
 implementation
 
 uses
+  TypInfo,
   simba.tpa, simba.arraybuffer, simba.math;
 
-generic function Unique<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
+generic function Unique<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
+var
+  VarType: (OTHER, SINGLE, DOUBLE);
+
+  function IsEquals(constref A, B: _T): Boolean;
+  begin
+    case VarType of
+      SINGLE: Result := SameValue(PSingle(@A)^, PSingle(@B)^);
+      DOUBLE: Result := SameValue(PDouble(@A)^, PDouble(@B)^);
+      OTHER:  Result := (A = B);
+    end;
+  end;
+
 var
   I, J, Last: Integer;
 begin
+  case GetTypeData(TypeInfo(_T))^.FloatType of
+    ftSingle: VarType := SINGLE;
+    ftDouble: VarType := DOUBLE;
+    else
+      VarType := OTHER;
+  end;
+
   Result := Copy(Arr);
 
   Last := Length(Result);
@@ -39,38 +55,9 @@ begin
   while (I < Last) do
   begin
     J := I + 1;
-    while (J < last) do
-    begin
-      if (Result[I] = Result[J]) then
-      begin
-        Result[J] := Result[Last - 1];
-
-        Dec(Last);
-        Dec(J);
-      end;
-
-      Inc(J);
-    end;
-    Inc(I);
-  end;
-
-  SetLength(Result, Last);
-end;
-
-generic function Unique_SameValue<T>(const Arr: specialize TArray<T>): specialize TArray<T>;
-var
-  I, J, Last: Integer;
-begin
-  Result := Copy(Arr);
-
-  Last := Length(Result);
-  I := 0;
-  while (I < last) do
-  begin
-    J := I + 1;
     while (J < Last) do
     begin
-      if SameValue(Result[I], Result[J]) then
+      if IsEquals(Result[I], Result[J]) then
       begin
         Result[J] := Result[Last - 1];
 
@@ -84,16 +71,6 @@ begin
   end;
 
   SetLength(Result, Last);
-end;
-
-function Algo_Unique_Single(const Arr: TSingleArray): TSingleArray;
-begin
-  Result := specialize Unique_SameValue<Single>(Arr);
-end;
-
-function Algo_Unique_Double(const Arr: TDoubleArray): TDoubleArray;
-begin
-  Result := specialize Unique_SameValue<Double>(Arr);
 end;
 
 function Algo_Unique_Points(const Arr: TPointArray): TPointArray;
@@ -188,7 +165,7 @@ begin
   begin
     Value := Arr[i];
 
-    with Table[Hash(Value) and Size] do
+    with Table[Value.Hash() and Size] do
     begin
       for J := 0 to Count - 1 do
         if (Value = Bucket[J]) then

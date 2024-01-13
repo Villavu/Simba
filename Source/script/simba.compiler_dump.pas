@@ -106,6 +106,9 @@ procedure TSimbaCompilerDump.Add(Section, Str: String);
 var
   Item: TSimbaStringPair;
 begin
+  if (Section = '!Hidden') then
+    Exit;
+
   Item.Name := Section;
   Item.Value := Str;
 
