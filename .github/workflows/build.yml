@@ -91,7 +91,11 @@ jobs:
           codesign -v Simba.app
 
           brew install create-dmg
-          create-dmg --window-size 500 330 --icon-size 48 --icon "Simba.app" 130 135 --app-drop-link 380 135 --background "Source/macosbundle/installer.tff" "${{ matrix.config.binary }}" "Simba.app"
+          
+          for i in {1..10}; 
+          do 
+            create-dmg --window-size 500 330 --icon-size 48 --icon "Simba.app" 130 135 --app-drop-link 380 135 --background "Source/macosbundle/installer.tff" "${{ matrix.config.binary }}" "Simba.app" && break || sleep 15; 
+          done
 
       - name: Test Simba
         if: matrix.config.test != ''
