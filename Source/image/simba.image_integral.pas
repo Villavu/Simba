@@ -38,6 +38,9 @@ type
 
 implementation
 
+uses
+  simba.matrix_int;
+
 class function TSimbaIntegralImageF.Create(const From: TByteMatrix): TSimbaIntegralImageF;
 var
   X, Y: Integer;

@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.atpa;
+  simba.array_pointarray;
 
 (*
 T2DPointArray

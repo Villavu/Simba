@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.integermatrix, simba.singlematrix;
+  simba.matrix_int, simba.matrix_float, simba.matrix_bool;
 
 (*
 Matrix
@@ -160,56 +160,6 @@ TIntegerMatrix.Copy
 procedure _LapeIntegerMatrix_Copy2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PIntegerMatrix(Result)^ := PIntegerMatrix(Params^[0])^.Copy(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-TByteMatrix.Width
-~~~~~~~~~~~~~~~~~
-> function TByteMatrix.Width: Integer;
-*)
-procedure _LapeByteMatrix_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PByteMatrix(Params^[0])^.Width;
-end;
-
-(*
-TByteMatrix.Height
-~~~~~~~~~~~~~~~~~~
-> function TByteMatrix.Height: Integer;
-*)
-procedure _LapeByteMatrix_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PByteMatrix(Params^[0])^.Height;
-end;
-
-(*
-TByteMatrix.SetSize
-~~~~~~~~~~~~~~~~~~~
-> procedure TByteMatrix.SetSize(Width, Height: Integer);
-*)
-procedure _LapeByteMatrix_SetSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteMatrix(Params^[0])^.SetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-TByteMatrix.Area
-~~~~~~~~~~~~~~~~
-> function TByteMatrix.Area: Integer;
-*)
-procedure _LapeByteMatrix_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PByteMatrix(Params^[0])^.Area();
-end;
-
-(*
-TByteMatrix.GetSize
-~~~~~~~~~~~~~~~~~~~
-> function TByteMatrix.GetSize(out Width, Height: Integer): Boolean;
-*)
-procedure _LapeByteMatrix_GetSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PByteMatrix(Params^[0])^.GetSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -600,10 +550,9 @@ begin
     ImportingSection := 'Matrix';
 
     addGlobalType('array of TSingleArray', 'TSingleMatrix');
+    addGlobalType('array of TDoubleArray', 'TDoubleMatrix');
     addGlobalType('array of TIntegerArray', 'TIntegerMatrix');
     addGlobalType('array of TBooleanArray', 'TBooleanMatrix');
-    addGlobalType('array of TByteArray', 'TByteMatrix');
-    addGlobalType('array of TDoubleArray', 'TDoubleMatrix');
 
     // single
     addGlobalFunc('function TSingleMatrix.Width: Integer;', @_LapeSingleMatrix_Width);
@@ -635,6 +584,13 @@ begin
     addGlobalFunc('function TSingleMatrix.Rot90: TSingleMatrix;', @_LapeSingleMatrix_Rot90);
     addGlobalFunc('function TSingleMatrix.ArgExtrema(Count: Int32; HiLo: Boolean = True): TPointArray;', @_LapeSingleMatrix_ArgExtrema);
 
+    //double
+    addGlobalFunc('function TDoubleMatrix.Width: Integer;', @_LapeDoubleMatrix_Width);
+    addGlobalFunc('function TDoubleMatrix.Height: Integer;', @_LapeDoubleMatrix_Height);
+    addGlobalFunc('procedure TDoubleMatrix.SetSize(Width, Height: Integer);', @_LapeDoubleMatrix_SetSize);
+    addGlobalFunc('function TDoubleMatrix.Area: Integer;', @_LapeDoubleMatrix_Area);
+    addGlobalFunc('function TDoubleMatrix.GetSize(out Width, Height: Integer): Boolean;', @_LapeDoubleMatrix_GetSize);
+
     // integer
     addGlobalFunc('function TIntegerMatrix.Width: Integer;', @_LapeIntegerMatrix_Width);
     addGlobalFunc('function TIntegerMatrix.Height: Integer;', @_LapeIntegerMatrix_Height);
@@ -657,20 +613,6 @@ begin
     addGlobalFunc('procedure TBooleanMatrix.SetSize(Width, Height: Integer);', @_LapeBooleanMatrix_SetSize);
     addGlobalFunc('function TBooleanMatrix.Area: Integer;', @_LapeBooleanMatrix_Area);
     addGlobalFunc('function TBooleanMatrix.GetSize(out Width, Height: Integer): Boolean;', @_LapeBooleanMatrix_GetSize);
-
-    // byte
-    addGlobalFunc('function TByteMatrix.Width: Integer;', @_LapeByteMatrix_Width);
-    addGlobalFunc('function TByteMatrix.Height: Integer;', @_LapeByteMatrix_Height);
-    addGlobalFunc('procedure TByteMatrix.SetSize(Width, Height: Integer);', @_LapeByteMatrix_SetSize);
-    addGlobalFunc('function TByteMatrix.Area: Integer;', @_LapeByteMatrix_Area);
-    addGlobalFunc('function TByteMatrix.GetSize(out Width, Height: Integer): Boolean;', @_LapeByteMatrix_GetSize);
-
-    // double
-    addGlobalFunc('function TDoubleMatrix.Width: Integer;', @_LapeDoubleMatrix_Width);
-    addGlobalFunc('function TDoubleMatrix.Height: Integer;', @_LapeDoubleMatrix_Height);
-    addGlobalFunc('procedure TDoubleMatrix.SetSize(Width, Height: Integer);', @_LapeDoubleMatrix_SetSize);
-    addGlobalFunc('function TDoubleMatrix.Area: Integer;', @_LapeDoubleMatrix_Area);
-    addGlobalFunc('function TDoubleMatrix.GetSize(out Width, Height: Integer): Boolean;', @_LapeDoubleMatrix_GetSize);
 
     ImportingSection := '';
   end;

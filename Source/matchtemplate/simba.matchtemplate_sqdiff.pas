@@ -43,7 +43,7 @@ implementation
 
 uses
   simba.threadpool, simba.simplelock,
-  simba.singlematrix;
+  simba.matrix_int, simba.matrix_float;
 
 // MatchTemplate_SQDIFF
 function __MatchTemplate_SQDIFF(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;

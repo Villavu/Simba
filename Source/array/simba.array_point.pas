@@ -30,7 +30,7 @@
   - Cluster
 }
 
-unit simba.tpa;
+unit simba.array_point;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
@@ -159,9 +159,9 @@ implementation
 
 uses
   Math,
-  simba.atpa, simba.arraybuffer, simba.geometry, simba.math,
+  simba.array_pointarray, simba.arraybuffer, simba.geometry, simba.math,
   simba.algo_sort, simba.algo_intersection, simba.slacktree, simba.algo_unique,
-  simba.array_ord;
+  simba.array_ord, simba.matrix_bool, simba.matrix_int;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
 begin
@@ -702,7 +702,7 @@ var
   j,i,x,y,h,transit,sumn,MarkHigh,hits: Integer;
   p2,p3,p4,p5,p6,p7,p8,p9:Integer;
   Change, PTS: TPointArray;
-  Matrix: TByteMatrix;
+  Matrix: TBooleanMatrix;
   iter: Boolean;
   B: TBox;
 begin
@@ -723,7 +723,7 @@ begin
       y := (Self[i].y-B.y1);
       PTS[i].x := X;
       PTS[i].y := Y;
-      Matrix[y][x] := 1;
+      Matrix[y][x] := True;
     end;
     j := 0;
     MarkHigh := H;
@@ -736,10 +736,10 @@ begin
       begin
         x := PTS[i].x;
         y := PTS[i].y;
-        p2 := Matrix[y-1,x];
-        p4 := Matrix[y,x+1];
-        p6 := Matrix[y+1,x];
-        p8 := Matrix[y,x-1];
+        p2 := Ord(Matrix[y-1,x]);
+        p4 := Ord(Matrix[y,x+1]);
+        p6 := Ord(Matrix[y+1,x]);
+        p8 := Ord(Matrix[y,x-1]);
 
         if Iter then
         begin
@@ -755,10 +755,10 @@ begin
           Continue;
         end;
 
-        p3 := Matrix[y-1,x+1];
-        p5 := Matrix[y+1,x+1];
-        p7 := Matrix[y+1,x-1];
-        p9 := Matrix[y-1,x-1];
+        p3 := Ord(Matrix[y-1,x+1]);
+        p5 := Ord(Matrix[y+1,x+1]);
+        p7 := Ord(Matrix[y+1,x-1]);
+        p9 := Ord(Matrix[y-1,x-1]);
         Sumn := (p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9);
         if (SumN >= FMin) and (SumN <= FMax) then
         begin
@@ -777,7 +777,7 @@ begin
       end;
 
       for i:=0 to (Hits-1) do
-        Matrix[Change[i].y, Change[i].x] := 0;
+        Matrix[Change[i].y, Change[i].x] := False;
 
       inc(j);
     until ((Hits=0) and (Iter=False));

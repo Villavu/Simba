@@ -1,6 +1,10 @@
-unit simba.integermatrix;
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
+unit simba.matrix_int;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
@@ -10,8 +14,13 @@ uses
   simba.mufasatypes;
 
 type
-  TIntegerMatrixHelper = type Helper(TIntegerMatrixBaseHelper) for TIntegerMatrix
+  TIntegerMatrixHelper = type helper for TIntegerMatrix
   public
+    function Width: Integer;
+    function Height: Integer;
+    function Area: Integer;
+    function GetSize(out AWidth, AHeight: Integer): Boolean;
+    procedure SetSize(AWidth, AHeight: Integer);
     function Copy: TIntegerMatrix; overload;
     function Copy(Y1, Y2: Integer): TIntegerMatrix; overload;
     function GetValues(Indices: TPointArray): TIntegerArray;
@@ -23,10 +32,49 @@ type
     function Indices(Value: Integer; Comparator: EComparator): TPointArray;
   end;
 
+  TByteMatrixHelper = type helper for TByteMatrix
+  public
+    function Width: Integer;
+    function Height: Integer;
+    function GetSize(out AWidth, AHeight: Integer): Boolean;
+    procedure SetSize(AWidth, AHeight: Integer);
+  end;
+
 implementation
 
 uses
   simba.math, simba.arraybuffer;
+
+function TIntegerMatrixHelper.Width: Integer;
+begin
+  if (Length(Self) > 0) then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TIntegerMatrixHelper.Height: Integer;
+begin
+  Result := Length(Self);
+end;
+
+function TIntegerMatrixHelper.Area: Integer;
+begin
+  Result := Width * Height;
+end;
+
+function TIntegerMatrixHelper.GetSize(out AWidth, AHeight: Integer): Boolean;
+begin
+  AWidth := Width;
+  AHeight := Height;
+
+  Result := (AWidth > 0) and (AHeight > 0);
+end;
+
+procedure TIntegerMatrixHelper.SetSize(AWidth, AHeight: Integer);
+begin
+  SetLength(Self, AHeight, AWidth);
+end;
 
 function TIntegerMatrixHelper.Copy: TIntegerMatrix;
 var
@@ -148,6 +196,32 @@ begin
         end;
 
   Result := Buffer.ToArray(False);
+end;
+
+function TByteMatrixHelper.Width: Integer;
+begin
+  if (Length(Self) > 0) then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TByteMatrixHelper.Height: Integer;
+begin
+  Result := Length(Self);
+end;
+
+function TByteMatrixHelper.GetSize(out AWidth, AHeight: Integer): Boolean;
+begin
+  AWidth := Width;
+  AHeight := Height;
+
+  Result := (AWidth > 0) and (AHeight > 0);
+end;
+
+procedure TByteMatrixHelper.SetSize(AWidth, AHeight: Integer);
+begin
+  SetLength(Self, AHeight, AWidth);
 end;
 
 end.

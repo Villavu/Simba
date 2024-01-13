@@ -249,10 +249,11 @@ type
 implementation
 
 uses
-  Math, FPImage, fpqoi_simba, Zipper,
-  simba.arraybuffer, simba.geometry, simba.tpa, simba.algo_sort,
+  Math, FPImage, fpqoi_simba,
+  simba.matrix_float, simba.matrix_int, simba.array_point,
+  simba.arraybuffer, simba.geometry, simba.algo_sort,
   simba.encoding, simba.compress,
-  simba.nativeinterface, simba.singlematrix,
+  simba.nativeinterface,
   simba.image_lazbridge, simba.image_integral, simba.image_gaussblur,
   simba.image_bitmaparealoader, simba.image_utils, simba.files;
 

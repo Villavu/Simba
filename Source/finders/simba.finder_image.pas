@@ -37,7 +37,7 @@ var
 implementation
 
 uses
-  simba.arraybuffer, simba.threadpool, simba.tpa, simba.atpa;
+  simba.arraybuffer, simba.threadpool, simba.array_point, simba.array_pointarray;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
