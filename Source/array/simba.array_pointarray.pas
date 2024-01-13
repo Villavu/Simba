@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.atpa;
+unit simba.array_pointarray;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
@@ -63,7 +63,8 @@ type
 implementation
 
 uses
-  simba.tpa, simba.algo_sort, simba.arraybuffer, simba.quad;
+  simba.array_point, simba.algo_sort, simba.arraybuffer, simba.quad,
+  simba.matrix_int;
 
 function T2DPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): T2DPointArray;
 var

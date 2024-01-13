@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.boxarray,
+  simba.array_box,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference;
 
 (*

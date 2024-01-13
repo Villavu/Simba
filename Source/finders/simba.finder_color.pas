@@ -48,7 +48,8 @@ var
 implementation
 
 uses
-  simba.arraybuffer, simba.colormath_distance_unrolled, simba.threadpool, simba.atpa, simba.singlematrix;
+  simba.arraybuffer, simba.colormath_distance_unrolled, simba.threadpool,
+  simba.array_pointarray, simba.matrix_float;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;

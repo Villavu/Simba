@@ -293,7 +293,7 @@ type
 implementation
 
 uses
-  LCLType, simba.geometry, simba.tpa, math;
+  LCLType, simba.geometry, simba.array_point;
 
 const
   CLOSE_DISTANCE = 4;

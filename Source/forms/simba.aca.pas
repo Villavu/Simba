@@ -122,7 +122,7 @@ implementation
 
 uses
   Clipbrd, TypInfo, LCLType,
-  simba.windowhandle, simba.image, simba.colormath_aca, simba.singlematrix, simba.dialog;
+  simba.windowhandle, simba.image, simba.colormath_aca, simba.matrix_float, simba.dialog;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin

@@ -10,7 +10,7 @@ unit simba.algo_unique;
 interface
 
 uses
-  Classes, SysUtils, Math,
+  Classes, SysUtils, Math, TypInfo,
   simba.mufasatypes;
 
 generic function Unique<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
@@ -22,8 +22,7 @@ function Algo_Unique_String(const Arr: TStringArray): TStringArray;
 implementation
 
 uses
-  TypInfo,
-  simba.tpa, simba.arraybuffer, simba.math;
+  simba.array_point, simba.arraybuffer, simba.math, simba.matrix_bool;
 
 generic function Unique<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
 var

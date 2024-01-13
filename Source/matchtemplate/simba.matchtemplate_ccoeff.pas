@@ -43,7 +43,7 @@ implementation
 
 uses
   simba.threadpool, simba.simplelock,
-  simba.singlematrix, simba.integermatrix;
+  simba.matrix_float, simba.matrix_int;
 
 // MatchTemplate_CCOEFF
 function __MatchTemplate_CCOEFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;

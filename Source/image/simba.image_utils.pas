@@ -22,7 +22,7 @@ procedure FillData(const Data: PColorBGRA; const count: SizeInt; const value: TC
 implementation
 
 uses
-  simba.tpa, simba.geometry;
+  simba.array_point, simba.geometry;
 
 function GetDistinctColor(const Index: Integer): Integer;
 begin

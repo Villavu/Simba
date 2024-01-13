@@ -43,7 +43,7 @@ implementation
 
 uses
   simba.threadpool, simba.simplelock,
-  simba.singlematrix;
+  simba.matrix_float, simba.matrix_int;
 
 // MatchTemplate_CCORR
 function __MatchTemplate_CCORR(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;

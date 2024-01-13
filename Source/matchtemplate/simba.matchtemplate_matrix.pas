@@ -82,7 +82,7 @@ function Rot90(const Matrix: TComplexMatrix): TComplexMatrix;
 implementation
 
 uses
-  simba.singlematrix;
+  simba.matrix_int, simba.matrix_float;
 
 function SumsPd(const Matrix: TSingleMatrix; out Square: TDoubleMatrix): TDoubleMatrix;
 var

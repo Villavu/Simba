@@ -28,7 +28,7 @@ implementation
 
 uses
   simba.FFTPACK4, simba.threadpool,
-  simba.singlematrix;
+  simba.matrix_float, simba.matrix_int;
 
 function DoFFT2(const Matrix: TSingleMatrix; const outW, outH: Integer): TComplexMatrix;
 var

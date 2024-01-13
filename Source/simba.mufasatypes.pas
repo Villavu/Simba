@@ -341,27 +341,6 @@ type
     {$i box.inc}
     {$i point.inc}
     {$i string.inc}
-
-    {$DEFINE MACRO_HELPER_NAME := TByteMatrixBaseHelper}
-    {$DEFINE MACRO_MATRIX_NAME := TByteMatrix}
-    {$i matrix.inc}
-
-    {$DEFINE MACRO_HELPER_NAME := TIntegerMatrixBaseHelper}
-    {$DEFINE MACRO_MATRIX_NAME := TIntegerMatrix}
-    {$i matrix.inc}
-
-    {$DEFINE MACRO_HELPER_NAME := TSingleMatrixBaseHelper}
-    {$DEFINE MACRO_MATRIX_NAME := TSingleMatrix}
-    {$i matrix.inc}
-
-    {$DEFINE MACRO_HELPER_NAME := TDoubleMatrixBaseHelper}
-    {$DEFINE MACRO_MATRIX_NAME := TDoubleMatrix}
-    {$i matrix.inc}
-
-    {$DEFINE MACRO_HELPER_NAME := TBooleanMatrixBaseHelper}
-    {$DEFINE MACRO_MATRIX_NAME := TBooleanMatrix}
-    {$i matrix.inc}
-
   {$UNDEF HEADER}
 
 {$PUSH}
@@ -384,6 +363,11 @@ procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: TStringArray); ove
 
 function FlagsToString(const Flags: EDebugLnFlags): String;
 function FlagsFromString(var Str: String): EDebugLnFlags;
+
+function InRange(const AValue, AMin, AMax: Integer): Boolean; inline;
+function InRange(const AValue, AMin, AMax: Int64): Boolean; inline;
+function InRange(const AValue, AMin, AMax: Single): Boolean; inline;
+function InRange(const AValue, AMin, AMax: Double): Boolean; inline;
 
 function Min(const A, B: Integer): Integer; inline; overload;
 function Max(const A, B: Integer): Integer; inline; overload;
@@ -443,27 +427,6 @@ uses
   {$i box.inc}
   {$i point.inc}
   {$i string.inc}
-
-  {$DEFINE MACRO_HELPER_NAME := TByteMatrixBaseHelper}
-  {$DEFINE MACRO_MATRIX_NAME := TByteMatrix}
-  {$i matrix.inc}
-
-  {$DEFINE MACRO_HELPER_NAME := TIntegerMatrixBaseHelper}
-  {$DEFINE MACRO_MATRIX_NAME := TIntegerMatrix}
-  {$i matrix.inc}
-
-  {$DEFINE MACRO_HELPER_NAME := TSingleMatrixBaseHelper}
-  {$DEFINE MACRO_MATRIX_NAME := TSingleMatrix}
-  {$i matrix.inc}
-
-  {$DEFINE MACRO_HELPER_NAME := TDoubleMatrixBaseHelper}
-  {$DEFINE MACRO_MATRIX_NAME := TDoubleMatrix}
-  {$i matrix.inc}
-
-  {$DEFINE MACRO_HELPER_NAME := TBooleanMatrixBaseHelper}
-  {$DEFINE MACRO_MATRIX_NAME := TBooleanMatrix}
-  {$i matrix.inc}
-
 {$UNDEF BODY}
 
 procedure Debug(const Msg: String);
@@ -571,6 +534,26 @@ end;
 procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: TStringArray);
 begin
   SimbaDebugLn(Flags, LineEnding.Join(Msg));
+end;
+
+function InRange(const AValue, AMin, AMax: Integer): Boolean;
+begin
+  Result := (AValue>=AMin) and (AValue<=AMax);
+end;
+
+function InRange(const AValue, AMin, AMax: Int64): Boolean;
+begin
+  Result := (AValue>=AMin) and (AValue<=AMax);
+end;
+
+function InRange(const AValue, AMin, AMax: Single): Boolean;
+begin
+  Result := (AValue>=AMin) and (AValue<=AMax);
+end;
+
+function InRange(const AValue, AMin, AMax: Double): Boolean;
+begin
+  Result := (AValue>=AMin) and (AValue<=AMax);
 end;
 
 function Min(const A, B: Integer): Integer;

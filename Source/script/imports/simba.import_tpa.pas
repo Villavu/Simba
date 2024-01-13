@@ -19,7 +19,7 @@ implementation
 
 uses
   lptypes,
-  simba.tpa, simba.geometry,
+  simba.array_point,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference;
 
 (*

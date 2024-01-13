@@ -9,10 +9,9 @@
 
   - ArgMulti
   - ArgExtrema
-
 }
 
-unit simba.singlematrix;
+unit simba.matrix_float;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
@@ -44,10 +43,14 @@ type
     function Query(Area: TBox): TSingleSum;
   end;
 
-  TSingleMatrixHelper = type Helper(TSingleMatrixBaseHelper) for TSingleMatrix
+  TSingleMatrixHelper = type helper for TSingleMatrix
   public
-    function GetSizeMinusOne(out AWidth, AHeight: Integer): Boolean;
+    function Width: Integer;
+    function Height: Integer;
+    function Area: Integer;
+    function GetSize(out AWidth, AHeight: Integer): Boolean;
     procedure SetSize(AWidth, AHeight: Integer);
+    function GetSizeMinusOne(out AWidth, AHeight: Integer): Boolean;
     function Copy: TSingleMatrix; overload;
     function Copy(Y1, Y2: Integer): TSingleMatrix; overload;
     function GetValues(Indices: TPointArray): TSingleArray;
@@ -75,11 +78,20 @@ type
     function ArgExtrema(Count: Int32; HiLo: Boolean = True): TPointArray;
   end;
 
+  TDoubleMatrixHelper = type helper for TDoubleMatrix
+  public
+    function Width: Integer;
+    function Height: Integer;
+    function Area: Integer;
+    function GetSize(out AWidth, AHeight: Integer): Boolean;
+    procedure SetSize(AWidth, AHeight: Integer);
+  end;
+
 implementation
 
 uses
   Math,
-  simba.math, simba.arraybuffer, simba.heaparray, simba.tpa;
+  simba.math, simba.arraybuffer, simba.heaparray, simba.array_point;
 
 class operator TSingleSum.:=(const Right: Single): TSingleSum;
 begin
@@ -139,6 +151,37 @@ begin
     Result.Value := Result.Value + Self[Area.Y1 - 1, Area.X1 - 1].Value;
 end;
 
+function TSingleMatrixHelper.Width: Integer;
+begin
+  if (Length(Self) > 0) then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TSingleMatrixHelper.Height: Integer;
+begin
+  Result := Length(Self);
+end;
+
+function TSingleMatrixHelper.Area: Integer;
+begin
+  Result := Width * Height;
+end;
+
+function TSingleMatrixHelper.GetSize(out AWidth, AHeight: Integer): Boolean;
+begin
+  AWidth := Width;
+  AHeight := Height;
+
+  Result := (AWidth > 0) and (AHeight > 0);
+end;
+
+procedure TSingleMatrixHelper.SetSize(AWidth, AHeight: Integer);
+begin
+  SetLength(Self, AHeight, AWidth);
+end;
+
 function TSingleMatrixHelper.GetSizeMinusOne(out AWidth, AHeight: Integer): Boolean;
 begin
   Result := GetSize(AWidth, AHeight);
@@ -148,11 +191,6 @@ begin
     Dec(AWidth);
     Dec(AHeight);
   end;
-end;
-
-procedure TSingleMatrixHelper.SetSize(AWidth, AHeight: Integer);
-begin
-  SetLength(Self, AHeight, AWidth);
 end;
 
 function TSingleMatrixHelper.Copy: TSingleMatrix;
@@ -681,6 +719,37 @@ begin
   Result := Result.Sort(Weights, not HiLo);
   if (Length(Result) > Count) then
     SetLength(Result, Count);
+end;
+
+function TDoubleMatrixHelper.Width: Integer;
+begin
+  if (Length(Self) > 0) then
+    Result := Length(Self[0])
+  else
+    Result := 0;
+end;
+
+function TDoubleMatrixHelper.Height: Integer;
+begin
+  Result := Length(Self);
+end;
+
+function TDoubleMatrixHelper.Area: Integer;
+begin
+  Result := Width * Height;
+end;
+
+function TDoubleMatrixHelper.GetSize(out AWidth, AHeight: Integer): Boolean;
+begin
+  AWidth := Width;
+  AHeight := Height;
+
+  Result := (AWidth > 0) and (AHeight > 0);
+end;
+
+procedure TDoubleMatrixHelper.SetSize(AWidth, AHeight: Integer);
+begin
+  SetLength(Self, AHeight, AWidth);
 end;
 
 end.

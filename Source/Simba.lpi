@@ -49,7 +49,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image;array;matrix"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -94,7 +94,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image;array;matrix"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -142,7 +142,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image;array;matrix"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -185,7 +185,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image;array;matrix"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -227,7 +227,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image;array;matrix"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -275,7 +275,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image;array;matrix"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -351,7 +351,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="169">
+    <Units Count="174">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -924,11 +924,11 @@
         <IsPartOfProject Value="True"/>
       </Unit123>
       <Unit124>
-        <Filename Value="simba.singlematrix.pas"/>
+        <Filename Value="simba.matrix_float.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit124>
       <Unit125>
-        <Filename Value="simba.integermatrix.pas"/>
+        <Filename Value="simba.matrix_int.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit125>
       <Unit126>
@@ -1115,6 +1115,26 @@
         <Filename Value="simba.internetsocket.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit168>
+      <Unit169>
+        <Filename Value="simba.stringmap.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit169>
+      <Unit170>
+        <Filename Value="script/imports/simba.import_stringmap.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit170>
+      <Unit171>
+        <Filename Value="simba.array_ord.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit171>
+      <Unit172>
+        <Filename Value="simba.array_string.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit172>
+      <Unit173>
+        <Filename Value="simba.matrix_bool.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit173>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -1125,7 +1145,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;editor"/>
       <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image"/>
+      <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;forms;codetools;targets;matchtemplate;algorithms;editor;finders;package;imagebox;colormath;components;image;array;matrix"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
@@ -1152,10 +1172,6 @@
 -dStaticFFI
 -dLape_CDECL
 -dLape_NoExtended"/>
-      <OtherDefines Count="2">
-        <Define0 Value="StaticFFI"/>
-        <Define1 Value="Lape_CDECL"/>
-      </OtherDefines>
       <CreateMakefileOnBuild Value="True"/>
     </Other>
   </CompilerOptions>
