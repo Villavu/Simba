@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.externalimage,
+  simba.base, simba.externalimage,
   lpcompiler;
 
 type

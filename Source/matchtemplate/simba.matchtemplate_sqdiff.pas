@@ -31,7 +31,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
+  simba.base, simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
 
 function MatchTemplate_SQDIFF(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 function MatchTemplateMask_SQDIFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;

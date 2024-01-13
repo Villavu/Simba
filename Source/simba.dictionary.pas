@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 
 const

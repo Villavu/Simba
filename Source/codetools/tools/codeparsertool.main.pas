@@ -27,7 +27,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.mufasatypes, simba.ide_codetools_parser;
+  simba.base, simba.ide_codetools_parser;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin

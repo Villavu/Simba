@@ -20,7 +20,7 @@ function DumpPluginInAnotherProcess(FileName: String): String;
 implementation
 
 uses
-  simba.mufasatypes, simba.process, simba.script_plugin;
+  simba.base, simba.process, simba.script_plugin;
 
 function DumpPlugin(Plugin: String): TStringList;
 begin

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 procedure WindowTarget_GetDimensions(Target: Pointer; out W, H: Integer);
 function WindowTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;

@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ComCtrls, ExtCtrls,
-  simba.mufasatypes, simba.editor,
+  simba.base, simba.editor,
   simba.component_treeview, simba.component_buttonpanel;
 
 type

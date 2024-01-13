@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Math, TypInfo,
-  simba.mufasatypes;
+  simba.base;
 
 generic function Unique<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
 

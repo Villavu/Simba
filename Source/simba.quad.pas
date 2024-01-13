@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 type
   TQuadHelper = type helper for TQuad

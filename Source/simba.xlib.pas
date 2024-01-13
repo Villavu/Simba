@@ -256,7 +256,7 @@ implementation
 
 uses
   dl,
-  simba.mufasatypes;
+  simba.base;
 
 function dlmopen(ID: SizeInt; Path: PChar; Flags: Integer): Pointer; cdecl; external;
 

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, lptypes,
-  simba.mufasatypes, simba.script_compiler;
+  simba.base, simba.script_compiler;
 
 procedure ImportInternal(Compiler: TSimbaScript_Compiler);
 

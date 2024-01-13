@@ -17,7 +17,7 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  simba.mufasatypes, simba.colormath, simba.colormath_conversion;
+  simba.base, simba.colormath, simba.colormath_conversion;
 
 type
   TColorDistanceFunc = function(const Color1: Pointer; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;

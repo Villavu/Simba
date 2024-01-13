@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, GraphType, ComCtrls, LCLType,
-  simba.mufasatypes, simba.image, simba.dtm, simba.imagebox_image,
+  simba.base, simba.image, simba.dtm, simba.imagebox_image,
   simba.colormath, simba.target;
 
 type

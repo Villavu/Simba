@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 function Algo_Box_Difference(x,y: TBoxArray): TBoxArray;
 function Algo_Point_Difference(x,y: TPointArray): TPointArray;

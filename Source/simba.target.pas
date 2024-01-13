@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.image, simba.externalimage,
+  simba.base, simba.image, simba.externalimage,
   simba.target_eios, simba.target_window, simba.target_image, simba.target_plugin;
 
 type

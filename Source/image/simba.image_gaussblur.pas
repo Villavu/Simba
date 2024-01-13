@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 procedure imgGaussBlur(radius: Double; var r,g,b: TByteArray; width, height: Integer);
 

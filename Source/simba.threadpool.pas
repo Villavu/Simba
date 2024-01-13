@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.baseclass, simba.mufasatypes, simba.simplelock;
+  simba.baseclass, simba.base, simba.simplelock;
 
 type
   TSimbaThreadPoolMethod_Nested = procedure(const Index, Lo, Hi: Integer) is nested;

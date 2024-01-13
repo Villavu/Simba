@@ -119,7 +119,7 @@ type
 implementation
 
 uses
-  simba.main, simba.mufasatypes, simba.theme, simba.ide_utils;
+  simba.main, simba.base, simba.theme, simba.ide_utils;
 
 function TSimbaTab.GetImageIndex: TImageIndex;
 begin

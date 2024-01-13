@@ -38,7 +38,7 @@ interface
 uses
   SysUtils, Classes,
   mPasLexTypes, mPasLex,
-  simba.mufasatypes;
+  simba.base;
 
 const
   ClassMethodDirectiveEnum = [

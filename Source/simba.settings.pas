@@ -189,7 +189,7 @@ implementation
 
 uses
   Forms, SynEdit, LCLType,
-  simba.mufasatypes, simba.encoding, simba.env, simba.editor_docgenerator,
+  simba.base, simba.encoding, simba.env, simba.editor_docgenerator,
   simba.ide_initialization, simba.theme, simba.fonthelpers;
 
 var

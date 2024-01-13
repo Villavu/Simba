@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils, LazMethodList,
-  simba.mufasatypes;
+  simba.base;
 
 type
   {$PUSH}

@@ -11,7 +11,7 @@ program Simba;
 uses
   simba.init,
   Classes, SysUtils, Interfaces, Forms,
-  simba.mufasatypes, simba.main,
+  simba.base, simba.main,
   simba.aboutform, simba.debugimageform, simba.imagetostringform, simba.functionlistform,
   simba.scripttabsform, simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
   simba.notesform, simba.settingsform, simba.associate, simba.openexampleform,

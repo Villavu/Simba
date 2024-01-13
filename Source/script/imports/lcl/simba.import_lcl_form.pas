@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.threading, simba.script_compiler;
+  simba.base, simba.threading, simba.script_compiler;
 
 procedure ImportLCLForm(Compiler: TSimbaScript_Compiler);
 

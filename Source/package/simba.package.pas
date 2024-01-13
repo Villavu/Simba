@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 const
   PACKAGE_SETTINGS_VERSION = 1;

@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Math,
-  simba.mufasatypes, simba.colormath, simba.target, simba.simplelock,
+  simba.base, simba.colormath, simba.target, simba.simplelock,
   simba.dtm;
 
 function FindDTMOnBuffer(var Limit: TSimpleThreadsafeLimit;

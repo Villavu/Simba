@@ -15,7 +15,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, ComCtrls, Controls, Graphics, Dialogs, ExtCtrls,
-  simba.mufasatypes, simba.settings,
+  simba.base, simba.settings,
   simba.component_treeview, simba.component_buttonpanel, simba.component_button, simba.component_edit;
 
 type

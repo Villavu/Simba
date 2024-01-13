@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, Graphics, LCLType, LMessages,
-  simba.mufasatypes;
+  simba.base;
 
 type
   TSimbaStatusBar = class(TCustomControl)

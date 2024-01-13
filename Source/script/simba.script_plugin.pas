@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, dynlibs,
-  simba.mufasatypes, simba.script_compiler, simba.script_pluginmethods;
+  simba.base, simba.script_compiler, simba.script_pluginmethods;
 
 type
   PSimbaPluginInfo = ^TSimbaPluginInfo;

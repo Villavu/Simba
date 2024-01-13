@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms,
-  simba.mufasatypes;
+  simba.base;
 
 type
   TThreadProc = procedure;

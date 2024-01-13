@@ -49,7 +49,7 @@ implementation
 
 uses
   fileutil, lazfileutils,
-  simba.mufasatypes;
+  simba.base;
 
 procedure TSimbaZipExtractor.DoProgress(Sender: TObject; const ATotPos, ATotSize: Int64);
 begin

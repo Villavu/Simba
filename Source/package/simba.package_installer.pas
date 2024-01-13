@@ -58,7 +58,7 @@ implementation
 
 uses
   Forms, FileUtil,
-  simba.mufasatypes, simba.threading, simba.env;
+  simba.base, simba.threading, simba.env;
 
 function TSimbaPackageInstaller.InternalInstall(URL: String; Path: String; IgnoreList: TStringArray; Flat: Boolean): Boolean;
 

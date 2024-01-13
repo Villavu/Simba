@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, ComCtrls, StdCtrls,
-  ATScrollBar, simba.mufasatypes, simba.settings;
+  ATScrollBar, simba.base, simba.settings;
 
 type
   TSimbaScrollBar = class(TATScrollBar)

@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, ComCtrls, Graphics,
-  simba.mufasatypes, simba.script_compiler;
+  simba.base, simba.script_compiler;
 
 procedure ImportSimbaImageBox(Compiler: TSimbaScript_Compiler);
 

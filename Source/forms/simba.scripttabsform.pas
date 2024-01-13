@@ -109,7 +109,7 @@ implementation
 
 uses
   LCLType,
-  simba.mufasatypes, simba.env, simba.editor_docgenerator, simba.main,
+  simba.base, simba.env, simba.editor_docgenerator, simba.main,
   simba.dockinghelpers, simba.nativeinterface, simba.outputform,
   simba.ide_events, simba.ide_utils, simba.theme, simba.settings;
 

@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
   Menus, ImgList, AnchorDockPanel, LMessages,
-  simba.mufasatypes, simba.settings, simba.mouselogger;
+  simba.base, simba.settings, simba.mouselogger;
 
 const
   IMG_NONE = -1;

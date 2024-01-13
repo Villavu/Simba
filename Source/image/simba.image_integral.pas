@@ -19,7 +19,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.image;
+  simba.base, simba.image;
 
 type
   TIntegralImageDataF = record Value: Double; ValueSqr: Double; end;

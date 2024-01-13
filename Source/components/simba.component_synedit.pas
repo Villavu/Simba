@@ -49,7 +49,7 @@ type
 implementation
 
 uses
-  simba.mufasatypes, simba.theme,
+  simba.base, simba.theme,
   SynEditWrappedView;
 
 function TSimbaSynEdit.GetFontAntialising: Boolean;

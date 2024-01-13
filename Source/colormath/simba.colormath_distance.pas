@@ -16,7 +16,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes, simba.colormath;
+  simba.base, simba.colormath;
 
 function DistanceRGB(const Color1, Color2: TColorRGB; const mul: TChannelMultipliers): Single; inline;
 function DistanceHSV(const Color1, Color2: TColorHSV; const mul: TChannelMultipliers): Single; inline;

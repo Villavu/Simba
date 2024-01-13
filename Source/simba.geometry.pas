@@ -32,7 +32,7 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  simba.mufasatypes, simba.math;
+  simba.base, simba.math;
 
 type
   TSimbaGeometry = class

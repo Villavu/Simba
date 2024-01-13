@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.ide_initialization;
+  simba.base, simba.ide_initialization;
 
 type
   TAXUIWindowInfo = record

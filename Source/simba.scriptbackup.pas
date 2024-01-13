@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils, ExtCtrls,
-  simba.mufasatypes, simba.settings;
+  simba.base, simba.settings;
 
 type
   TSimbaScriptBackup = class(TComponent)

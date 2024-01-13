@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, GraphType, IntfGraphics, FPImage,
-  simba.mufasatypes, simba.image;
+  simba.base, simba.image;
 
 procedure LazImage_FromData(LazImage: TBitmap; Data: PColorBGRA; Width, Height: Integer);
 procedure LazImage_FromSimbaImage(LazImage: TBitmap; SimbaImage: TSimbaImage);

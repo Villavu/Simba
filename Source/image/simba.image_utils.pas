@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 // https://sashamaps.net/docs/resources/20-colors/
 const

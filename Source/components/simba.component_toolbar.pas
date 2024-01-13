@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, ExtCtrls, Buttons, ImgList, Menus,
-  simba.mufasatypes, simba.component_button;
+  simba.base, simba.component_button;
 
 type
   TSimbaToolbar = class(TCustomControl)

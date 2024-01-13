@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, Menus,
-  simba.mufasatypes, simba.component_treeview, LCLType, Graphics;
+  simba.base, simba.component_treeview, LCLType, Graphics;
 
 type
   TSimbaFileBrowserNode = class(TTreeNode)

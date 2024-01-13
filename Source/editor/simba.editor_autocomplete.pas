@@ -15,7 +15,7 @@ uses
   Classes, SysUtils, Graphics, Controls, Forms, LCLType,
   SynEdit, SynEditTypes, SynEditKeyCmds, SynEditHighlighter,
   SynCompletion_Simba,
-  simba.mufasatypes, simba.settings,
+  simba.base, simba.settings,
   simba.ide_codetools_parser, simba.ide_codetools_insight;
 
 type

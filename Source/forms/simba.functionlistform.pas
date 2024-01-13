@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls,
-  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight, simba.component_treeview, simba.dictionary;
+  simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight, simba.component_treeview, simba.dictionary;
 
 type
   ENodeType = (ntUnknown, ntSimbaSection, ntDecl, ntSimbaDecl, ntPluginDecl, ntIncludes, ntPlugins, ntIncludeFile, ntPluginFile);

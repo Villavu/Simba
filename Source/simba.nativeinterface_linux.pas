@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.nativeinterface;
+  simba.base, simba.nativeinterface;
 
 type
   TSimbaNativeInterface_Linux = class(TSimbaNativeInterface)

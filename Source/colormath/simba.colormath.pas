@@ -17,7 +17,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes;
+  simba.base;
 
 type
   {$PUSH}

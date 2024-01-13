@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, TypInfo,
   ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter,
-  simba.mufasatypes;
+  simba.base;
 
 type
   TManagedImportClosure = class(TLapeDeclaration)

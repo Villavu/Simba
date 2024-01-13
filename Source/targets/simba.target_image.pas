@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.image;
+  simba.base, simba.image;
 
 procedure ImageTarget_GetDimensions(Target: Pointer; out W, H: Integer);
 function ImageTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;

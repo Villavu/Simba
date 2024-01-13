@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils, DynLibs,
-  simba.mufasatypes, simba.externalimage;
+  simba.base, simba.externalimage;
 
 type
   PSimbaPluginTarget = ^TSimbaPluginTarget;

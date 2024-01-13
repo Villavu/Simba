@@ -70,7 +70,7 @@ type
 implementation
 
 uses
-  simba.mufasatypes, simba.threading;
+  simba.base, simba.threading;
 
 function TSimbaIPCInputStream.Read(var Buffer; Count: Longint): longint;
 begin

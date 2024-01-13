@@ -15,7 +15,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, MacOSAll,
-  simba.mufasatypes, simba.nativeinterface;
+  simba.base, simba.nativeinterface;
 
 type
   TVirtualWindow = packed record

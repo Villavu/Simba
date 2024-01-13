@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, FPImage, LazFreeTypeFPImageDrawer, EasyLazFreeType,
-  simba.mufasatypes, simba.simplelock;
+  simba.base, simba.simplelock;
 
 type
   TSimbaFreeTypeFontLoader = class

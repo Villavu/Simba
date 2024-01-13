@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 function LoadPlugin(var FileName: String; ExtraSearchDirs: TStringArray = nil): TLibHandle;
 

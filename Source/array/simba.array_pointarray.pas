@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  simba.mufasatypes;
+  simba.base;
 
 type
   T2DPointArrayHelper = type helper for T2DPointArray

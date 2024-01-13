@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes, simba.baseclass, simba.image, simba.simplelock;
+  simba.base, simba.baseclass, simba.image, simba.simplelock;
 
 type
   TSimbaExternalImageCallback = procedure(Image: Pointer; UserData: Pointer); cdecl;

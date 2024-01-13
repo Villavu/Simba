@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.baseclass, simba.fphttpclient;
+  simba.base, simba.baseclass, simba.fphttpclient;
 
 {$PUSH}
 {$SCOPEDENUMS ON}

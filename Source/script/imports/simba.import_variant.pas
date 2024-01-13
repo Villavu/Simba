@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.script_compiler;
+  simba.base, simba.script_compiler;
 
 procedure ImportVariant(Compiler: TSimbaScript_Compiler);
 
