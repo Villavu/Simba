@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, graphics,
-  simba.mufasatypes;
+  simba.base;
 
 type
   TSimbaNativeInterface = class

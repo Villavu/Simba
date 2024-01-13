@@ -19,7 +19,7 @@ interface
 
 uses
   Classes, SysUtils, Math, Graphics,
-  simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.target;
+  simba.base, simba.colormath, simba.colormath_distance, simba.target;
 
 function FindColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;

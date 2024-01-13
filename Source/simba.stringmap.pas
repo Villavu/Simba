@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 type
   generic TSimbaStringMap<_T> = record

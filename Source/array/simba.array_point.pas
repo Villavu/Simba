@@ -39,7 +39,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.quad, simba.circle;
+  simba.base, simba.quad, simba.circle;
 
 type
   {$PUSH}

@@ -14,7 +14,7 @@ interface
 
 uses
   classes, sysutils, controls, forms, graphics,
-  simba.mufasatypes;
+  simba.base;
 
 function ShowWindowSelector: TWindowHandle;
 

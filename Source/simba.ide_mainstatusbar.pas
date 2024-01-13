@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, ExtCtrls,
-  simba.mufasatypes, simba.component_statusbar;
+  simba.base, simba.component_statusbar;
 
 type
   TSimbaMainStatusBar = class(TComponent)

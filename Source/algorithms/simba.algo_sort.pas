@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes;
+  simba.base;
 
 type
   generic TCompareFunc<_T> = function(const A, B: _T): Integer;

@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, dialogs, extctrls,
-  simba.mufasatypes;
+  simba.base;
 
 type
   TSimbaAreaSelector = class(TObject)

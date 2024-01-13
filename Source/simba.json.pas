@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils,
   fpjson,
-  simba.mufasatypes, simba.baseclass;
+  simba.base, simba.baseclass;
 
 type
   ESimbaJSONValueType = (UNKNOWN, NULL, INT, FLOAT, STR, BOOL);

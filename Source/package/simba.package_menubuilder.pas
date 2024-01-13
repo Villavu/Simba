@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.package;
+  simba.base, simba.package;
 
 procedure BuildPackageMenus(Packages: TSimbaPackageArray);
 

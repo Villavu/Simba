@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.script_compiler;
+  simba.base, simba.script_compiler;
 
 procedure ImportCircle(Compiler: TSimbaScript_Compiler);
 

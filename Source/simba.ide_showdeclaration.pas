@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_codetools_insight;
+  simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight;
 
 procedure FindAndShowDeclaration(Script, ScriptFileName: String; CaretPos: Integer; What: String);
 

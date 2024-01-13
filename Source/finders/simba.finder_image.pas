@@ -16,7 +16,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.mufasatypes, simba.colormath, simba.colormath_distance, simba.target,
+  simba.base, simba.colormath, simba.colormath_distance, simba.target,
   simba.image, simba.colormath_distance_unrolled, simba.simplelock;
 
 function FindBitmapOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;

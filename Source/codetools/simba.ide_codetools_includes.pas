@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils,
   mPasLexTypes, mPasLex,
-  simba.mufasatypes, simba.ide_codetools_parser, simba.simplelock;
+  simba.base, simba.ide_codetools_parser, simba.simplelock;
 
 const
   PurgeThreshold = 35; // If cache miss reaches of a include reaches this, remove the cache

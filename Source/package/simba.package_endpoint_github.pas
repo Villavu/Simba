@@ -31,7 +31,7 @@ implementation
 
 uses
   forms, fpjson, dateutils,
-  simba.httpclient, simba.env, simba.mufasatypes;
+  simba.httpclient, simba.env, simba.base;
 
 const
   URL_REPOS            = 'https://api.github.com/repos/%s/%s';                       // {Owner} {Name}

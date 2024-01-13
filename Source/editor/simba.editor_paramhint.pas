@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, LCLType,
   SynEdit, SynEditTypes, SynEditKeyCmds,
-  simba.mufasatypes, simba.settings,
+  simba.base, simba.settings,
   simba.ide_codetools_insight, simba.ide_codetools_parser;
 
 type

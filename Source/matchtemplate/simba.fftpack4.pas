@@ -26,7 +26,7 @@ interface
 
 uses
   sysutils, math,
-  simba.math, simba.mufasatypes, simba.matchtemplate_matrix;
+  simba.math, simba.base, simba.matchtemplate_matrix;
 
 type
   TFFTPACK = record

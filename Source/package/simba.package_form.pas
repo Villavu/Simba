@@ -70,7 +70,7 @@ implementation
 
 uses
   simba.package_installform, simba.package_installer, simba.package_autoupdater,
-  simba.mufasatypes, simba.dialog, simba.threading;
+  simba.base, simba.dialog, simba.threading;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin

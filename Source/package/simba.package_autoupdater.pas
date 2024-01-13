@@ -31,7 +31,7 @@ var
 implementation
 
 uses
-  simba.mufasatypes, simba.package, simba.package_installer,
+  simba.base, simba.package, simba.package_installer,
   simba.main, simba.outputform, simba.package_menubuilder, simba.threading,
   simba.ide_maintoolbar, simba.ide_initialization, simba.package_form;
 

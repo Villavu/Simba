@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.datetime;
+  simba.base, simba.datetime;
 
 type
   TProcedureOfObject = procedure of object;

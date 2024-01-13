@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils,
   lptypes, lpvartypes, lpmessages,
-  simba.script, simba.mufasatypes;
+  simba.script, simba.base;
 
 type
   TSimbaScriptRunner = class(TThread)

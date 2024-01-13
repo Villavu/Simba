@@ -23,7 +23,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.baseclass;
+  simba.base, simba.baseclass;
 
 type
   PTMFormula = ^ETMFormula;

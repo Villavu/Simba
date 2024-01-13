@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, Graphics, ComCtrls, StdCtrls, ExtCtrls, Dialogs, fgl,
-  simba.imagebox, simba.imagebox_image, simba.mufasatypes;
+  simba.imagebox, simba.imagebox_image, simba.base;
 
 type
   TSimbaShapeBox = class;

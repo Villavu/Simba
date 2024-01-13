@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.mufasatypes;
+  simba.base;
 
 type
   TWindowHandleHelper = type Helper for TWindowHandle

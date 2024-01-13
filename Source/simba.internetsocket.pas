@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils, ssockets,
-  simba.mufasatypes, simba.baseclass, simba.openssl;
+  simba.base, simba.baseclass, simba.openssl;
 
 type
   PSimbaInternetSocket = ^TSimbaInternetSocket;

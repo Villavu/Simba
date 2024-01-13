@@ -79,7 +79,7 @@ implementation
 
 uses
   SynEditTypes, SynEditMiscClasses,
-  simba.settings, simba.editor_attributes, simba.env, simba.mufasatypes,
+  simba.settings, simba.editor_attributes, simba.env, simba.base,
   simba.httpclient;
 
 type

@@ -44,7 +44,7 @@ function StringToExpression(const Str: String): TExpressionItems;
 implementation
 
 uses
-  simba.mufasatypes, simba.env;
+  simba.base, simba.env;
 
 procedure TNullableString.SetValue(const AValue: String);
 begin

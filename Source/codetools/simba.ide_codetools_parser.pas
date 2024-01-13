@@ -12,7 +12,7 @@ interface
 uses
   SysUtils, Classes,
   mPasLexTypes, mPasLex, mSimplePasPar,
-  simba.mufasatypes, simba.ide_codetools_utils,
+  simba.base, simba.ide_codetools_utils,
   simba.stack, simba.list, simba.stringbuilder;
 
 type

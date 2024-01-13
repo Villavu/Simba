@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils,
   lptypes, lpvartypes, lpcompiler, lpparser, lpinterpreter, lpmessages,
-  simba.mufasatypes,
+  simba.base,
   simba.script_compiler, simba.script_communication, simba.script_plugin;
 
 type

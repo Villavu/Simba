@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   SynEditMiscClasses, SynEditSearch, SynEditMouseCmds,
-  simba.mufasatypes,
+  simba.base,
   simba.component_synedit, simba.component_button, simba.component_edit, simba.component_buttonpanel;
 
 type

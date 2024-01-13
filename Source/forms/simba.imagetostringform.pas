@@ -36,7 +36,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.mufasatypes, simba.image, simba.image_lazbridge, simba.stringbuilder;
+  simba.base, simba.image, simba.image_lazbridge, simba.stringbuilder;
 
 procedure TSimbaImageToStringForm.OpenButtonClick(Sender: TObject);
 begin

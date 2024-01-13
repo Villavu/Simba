@@ -99,7 +99,7 @@ type
 implementation
 
 uses
-  simba.mufasatypes, simba.ide_codetools_includes, simba.ide_codetools_arrayhelpers,
+  simba.base, simba.ide_codetools_includes, simba.ide_codetools_arrayhelpers,
   simba.stringbuilder;
 
 function TCodeinsight.GetIncludesHash: String;

@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.mufasatypes, simba.ide_codetools_parser, simba.ide_initialization;
+  simba.base, simba.ide_codetools_parser, simba.ide_initialization;
 
 function GetArrayHelpers(Decl: TDeclaration): TCodeParser;
 

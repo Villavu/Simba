@@ -50,7 +50,7 @@ var
 implementation
 
 uses
-  simba.mufasatypes;
+  simba.base;
 
 procedure TSimbaBaseClass.NotifyUnfreed;
 begin

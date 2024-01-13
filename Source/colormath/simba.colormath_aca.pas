@@ -15,7 +15,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Math,
-  simba.mufasatypes, simba.math, simba.colormath, simba.colormath_distance;
+  simba.base, simba.math, simba.colormath, simba.colormath_distance;
 
 const
   COLOR_FITTING_ACCURACY: Single = 1.0;

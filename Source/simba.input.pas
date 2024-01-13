@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  simba.mufasatypes, simba.target, simba.simplelock, simba.baseclass;
+  simba.base, simba.target, simba.simplelock, simba.baseclass;
 
 type
   PSimbaInput = ^TSimbaInput;

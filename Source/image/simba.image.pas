@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.baseclass, simba.mufasatypes, simba.image_textdrawer,
+  simba.baseclass, simba.base, simba.image_textdrawer,
   simba.colormath, simba.colormath_distance, simba.matchtemplate,
   simba.circle, simba.quad;
 

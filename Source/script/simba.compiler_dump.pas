@@ -20,7 +20,7 @@ implementation
 
 uses
   lpparser, lptypes, lpvartypes, lptree,
-  simba.mufasatypes, simba.script_compiler, simba.list;
+  simba.base, simba.script_compiler, simba.list;
 
 type
   TSimbaCompilerDump = class(TSimbaScript_Compiler)

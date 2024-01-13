@@ -57,7 +57,7 @@ implementation
 
 uses
   LCLType,
-  simba.mufasatypes, simba.main, simba.editor, simba.editor_docgenerator, simba.nativeinterface,
+  simba.base, simba.main, simba.editor, simba.editor_docgenerator, simba.nativeinterface,
   simba.scripttab, simba.scripttabsform, simba.ide_utils;
 
 type
