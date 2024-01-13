@@ -139,6 +139,16 @@ begin
 end;
 
 (*
+TPointArray.Equals
+~~~~~~~~~~~~~~~~~~
+> function TPointArray.Equals(Other: TPointArray): Boolean;
+*)
+procedure _LapeTPAEquals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PPointArray(Params^[0])^.Equals(PPointArray(Params^[1])^);
+end;
+
+(*
 TPointArray.Offset
 ~~~~~~~~~~~~~~~~~~
 > function TPointArray.Offset(P: TPoint): TPointArray;
@@ -836,6 +846,7 @@ begin
 
     addGlobalFunc('function TPointArray.Rows: T2DPointArray', @_LapeTPARows);
     addGlobalFunc('function TPointArray.Columns: T2DPointArray', @_LapeTPAColumns);
+    addGlobalFunc('function TPointArray.Equals(Other: TPointArray): Boolean;', @_LapeTPAEquals);
     addGlobalFunc('function TPointArray.Offset(P: TPoint): TPointArray; overload', @_LapeTPAOffset1);
     addGlobalFunc('function TPointArray.Offset(X, Y: Integer): TPointArray; overload', @_LapeTPAOffset2);
     addGlobalFunc('function TPointArray.FloodFill(const StartPoint: TPoint; const EightWay: Boolean): TPointArray;', @_LapeTPAFloodFill);

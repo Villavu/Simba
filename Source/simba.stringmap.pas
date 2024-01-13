@@ -358,7 +358,7 @@ begin
   for I := 0 to FCount - 1 do
     Weights[I] := FItems[I].KeyHash;
 
-  specialize QuickSortWeighted<TItem, UInt32>(FItems, Weights, 0, FCount - 1, True);
+  specialize QuickSort<TItem, UInt32>(FItems, Weights, 0, FCount - 1, True);
 end;
 
 function TSimbaStringMap.GetKey(Index: Integer): String;

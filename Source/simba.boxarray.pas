@@ -262,7 +262,7 @@ begin
     MaxWidth := Max(MaxWidth, Blocks[I].W);
   end;
 
-  specialize QuickSortWeighted<TBlock, Integer>(Blocks, Weights, Low(Blocks), High(Blocks), False);
+  specialize QuickSort<TBlock, Integer>(Blocks, Weights, Low(Blocks), High(Blocks), False);
 
   StartWidth := Max(Ceil(Sqrt(Area / 0.95)), MaxWidth);
   Spaces := [Block(0, 0, StartWidth, $FFFFFF)];

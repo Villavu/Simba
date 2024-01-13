@@ -65,7 +65,7 @@ type
     FFrozenDataWidth: Integer;
     FFrozenBounds: TBox;
     FInvalidTargetEvents: TInvalidTargetEventArray;
-    FFrozenData: TColorBGRAArray;
+    FFrozenData: array of TColorBGRA;
 
     procedure ChangeTarget(TargetType: ETargetType);
     function HasMethod(Method: Pointer; Name: String): Boolean;

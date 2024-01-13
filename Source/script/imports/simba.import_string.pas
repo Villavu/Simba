@@ -637,6 +637,9 @@ String.Format
 > function String.Format(Args: TVariantArray): String;
 *)
 procedure _LapeString_Format(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+type
+  TVariantArray = array of Variant;
+  PVariantArray = ^TVariantArray;
 begin
   with VariantArrToConstArr(PVariantArray(Params^[1])^) do
     PString(Result)^ := PString(Params^[0])^.Format(VarRecs);

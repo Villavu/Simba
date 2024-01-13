@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  fpjson;
+  fpjson, jsonparser, jsonscanner;
 
 {$PUSH}
 {$SCOPEDENUMS ON}
@@ -206,6 +206,7 @@ type
   );
 {$POP}
 
+  // Colors
   TColorRGB = record
     R,G,B: Byte;
   end;
@@ -235,15 +236,14 @@ type
     0: (A, R, G, B: Byte);
     1: (AsInteger: Integer);
   end;
-  PColorARGB = ^TColorARGB;
 
   TColorBGRA = packed record
   case Byte of
     0: (B, G, R, A: Byte);
     1: (AsInteger: Integer);
   end;
-  TColorBGRAArray = array of TColorBGRA;
 
+  PColorARGB = ^TColorARGB;
   PColorBGRA = ^TColorBGRA;
   PColorRGB = ^TColorRGB;
   PColorXYZ = ^TColorXYZ;
@@ -255,11 +255,10 @@ type
   TColorArray = array of TColor;
   PColorArray = ^TColorArray;
 
-  PWindowHandle = ^TWindowHandle;
-  PWindowHandleArray = ^TWindowHandleArray;
-
   TWindowHandle = type UInt64;
   TWindowHandleArray = array of TWindowHandle;
+  PWindowHandle = ^TWindowHandle;
+  PWindowHandleArray = ^TWindowHandleArray;
 
   PStringArray = ^TStringArray;
 
@@ -271,9 +270,6 @@ type
   TPointArray = array of TPoint;
   P2DPointArray = ^T2DPointArray;
   T2DPointArray = array of TPointArray;
-
-  TVariantArray = array of Variant;
-  PVariantArray = ^TVariantArray;
 
   PIntegerArray = ^TIntegerArray;
   TIntegerArray = array of Integer;
@@ -310,16 +306,16 @@ type
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
   PComparator = ^EComparator;
 
-  PBox = ^TBox;
   TBox = record
   case Integer of
     0: (X1, Y1, X2, Y2: Integer);
     1: (TopLeft, BottomRight: TPoint);
   end;
-  PBoxArray = ^TBoxArray;
   TBoxArray = array of TBox;
 
-  PQuad = ^TQuad;
+  PBox = ^TBox;
+  PBoxArray = ^TBoxArray;
+
   TQuad = record
     Top: TPoint;
     Right: TPoint;
@@ -327,19 +323,21 @@ type
     Left: TPoint;
   end;
   TQuadArray = array of TQuad;
+
+  PQuad = ^TQuad;
   PQuadArray = ^TQuadArray;
 
-  PCircle = ^TCircle;
   TCircle = record
     X: Integer;
     Y: Integer;
     Radius: Integer;
   end;
-  PCircleArray = ^TCircleArray;
   TCircleArray = array of TCircle;
 
+  PCircle = ^TCircle;
+  PCircleArray = ^TCircleArray;
+
   {$DEFINE HEADER}
-    {$i generics.inc}
     {$i box.inc}
     {$i point.inc}
     {$i string.inc}
@@ -369,13 +367,7 @@ type
 {$PUSH}
 {$SCOPEDENUMS ON}
 type
-  EDebugLn = (
-    CLEAR,
-    YELLOW,
-    RED,
-    GREEN,
-    FOCUS
-  );
+  EDebugLn = (CLEAR, YELLOW, RED, GREEN, FOCUS);
   EDebugLnFlags = set of EDebugLn;
 {$POP}
 
@@ -414,6 +406,18 @@ function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String; over
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: Integer): Integer; overload;
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean; overload;
 
+// Generic helpers
+generic procedure Swap<_T>(var A, B: _T);
+generic procedure MoveElement<_T>(var Arr: specialize TArray<_T>; AFrom, ATo: Integer);
+generic function Min<_T>(const Arr: specialize TArray<_T>): _T;
+generic function Max<_T>(const Arr: specialize TArray<_T>): _T;
+generic function Sum<_T, _R>(var AValues: specialize TArray<_T>): _R;
+generic procedure Reverse<_T>(var Arr: specialize TArray<_T>);
+generic function Reversed<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
+generic function Equals<_T>(const A, B: specialize TArray<_T>): Boolean;
+generic function IndexOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): Integer;
+generic function IndicesOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
+
 type
   TBooleanHelper = type helper for Boolean
     function ToString: String;
@@ -432,12 +436,10 @@ const
 implementation
 
 uses
-  math, forms, uregexpr, strutils, jsonparser, jsonscanner,
-  simba.arraybuffer, simba.geometry,
-  simba.algo_sort, simba.random;
+  Math, RegExpr, StrUtils, TypInfo,
+  simba.arraybuffer, simba.geometry, simba.random;
 
 {$DEFINE BODY}
-  {$i generics.inc}
   {$i box.inc}
   {$i point.inc}
   {$i string.inc}
@@ -692,6 +694,222 @@ begin
     Result := IfTrue
   else
     Result := IfFalse;
+end;
+
+generic procedure Swap<_T>(var A, B: _T);
+var
+  C: _T;
+begin
+  C := A;
+
+  A := B;
+  B := C;
+end;
+
+generic procedure MoveElement<_T>(var Arr: specialize TArray<_T>; AFrom, ATo: Integer);
+var
+  Item: _T;
+begin
+  if (Length(Arr) = 0) then
+    SimbaException('MoveElement: Empty array');
+  AFrom := EnsureRange(AFrom, Low(Arr), High(Arr));
+  ATo := EnsureRange(ATo, Low(Arr), High(Arr));
+  Item := Arr[AFrom];
+
+  if (ATo > AFrom) then
+    Move(Arr[AFrom + 1], Arr[AFrom], (ATo - AFrom) * SizeOf(_T))
+  else
+    Move(Arr[ATo], Arr[ATo + 1], (AFrom - ATo) * SizeOf(_T));
+
+  Move(Item, Arr[ATo], SizeOf(_T));
+end;
+
+generic function Sum<_T, _R>(var AValues: specialize TArray<_T>): _R;
+var
+  I: Integer;
+begin
+  Result := Default(_R);
+  for I := 0 to High(AValues) do
+    Result := Result + AValues[I];
+end;
+
+generic procedure Reverse<_T>(var Arr: specialize TArray<_T>);
+var
+  tmp: _T;
+  Lo,Hi: ^_T;
+begin
+  if Length(Arr) > 0 then
+  begin
+    Lo := @Arr[0];
+    Hi := @Arr[High(Arr)];
+    while (PtrUInt(Lo) < PtrUInt(Hi)) do
+    begin
+      tmp := Hi^;
+      Hi^ := Lo^;
+      Lo^ := tmp;
+      Dec(Hi);
+      Inc(Lo);
+    end;
+  end;
+end;
+
+generic function Reversed<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
+var
+  Lo: PtrUInt;
+  r, p: ^_T;
+begin
+  SetLength(Result, Length(Arr));
+
+  if Length(Arr) > 0 then
+  begin
+    p := @Arr[High(Arr)];
+    r := @Result[0];
+
+    Lo := PtrUInt(@Arr[0]);
+    while (Lo <= PtrUInt(p)) do
+    begin
+      r^ := p^;
+      Dec(p);
+      Inc(r);
+    end;
+  end;
+end;
+
+generic function Equals<_T>(const A, B: specialize TArray<_T>): Boolean;
+var
+  VarType: (OTHER, SINGLE, DOUBLE);
+
+  function IsEquals(constref A, B: _T): Boolean; inline;
+  begin
+    case VarType of
+      SINGLE: Result := SameValue(PSingle(@A)^, PSingle(@B)^);
+      DOUBLE: Result := SameValue(PDouble(@A)^, PDouble(@B)^);
+      OTHER:  Result := (A = B);
+    end;
+  end;
+
+var
+  I: Integer;
+begin
+  if (Length(A) <> Length(B)) then
+    Exit(False);
+  if (Length(A) = 0) and (Length(B) = 0) then
+    Exit(True);
+
+  case GetTypeData(TypeInfo(_T))^.FloatType of
+    ftSingle: VarType := SINGLE;
+    ftDouble: VarType := DOUBLE;
+    else
+      VarType := OTHER;
+  end;
+
+  for I := 0 to High(A) do
+    if not IsEquals(A[I], B[I]) then
+      Exit(False);
+
+  Result := True;
+end;
+
+generic function IndexOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): Integer;
+var
+  VarType: (OTHER, SINGLE, DOUBLE);
+
+  function IsEquals(constref A, B: _T): Boolean; inline;
+  begin
+    case VarType of
+      SINGLE: Result := SameValue(PSingle(@A)^, PSingle(@B)^);
+      DOUBLE: Result := SameValue(PDouble(@A)^, PDouble(@B)^);
+      OTHER:  Result := (A = B);
+    end;
+  end;
+
+var
+  I: Integer;
+begin
+  Result := -1;
+  if (Length(Arr) = 0) then
+    Exit;
+
+  case GetTypeData(TypeInfo(_T))^.FloatType of
+    ftSingle: VarType := SINGLE;
+    ftDouble: VarType := DOUBLE;
+    else
+      VarType := OTHER;
+  end;
+
+  for I := 0 to High(Arr) do
+    if IsEquals(Arr[I], Item) then
+      Exit(I);
+end;
+
+generic function IndicesOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
+var
+  VarType: (OTHER, SINGLE, DOUBLE);
+
+  function IsEquals(constref A, B: _T): Boolean; inline;
+  begin
+    case VarType of
+      SINGLE: Result := SameValue(PSingle(@A)^, PSingle(@B)^);
+      DOUBLE: Result := SameValue(PDouble(@A)^, PDouble(@B)^);
+      OTHER:  Result := (A = B);
+    end;
+  end;
+
+var
+  I, Count: Integer;
+begin
+  Result := [];
+  if (Length(Arr) = 0) then
+    Exit;
+
+  case GetTypeData(TypeInfo(_T))^.FloatType of
+    ftSingle: VarType := SINGLE;
+    ftDouble: VarType := DOUBLE;
+    else
+      VarType := OTHER;
+  end;
+
+  SetLength(Result, 8);
+  Count := 0;
+
+  for I := 0 to High(Arr) do
+    if IsEquals(Arr[I], Item) then
+    begin
+      if (Count >= Length(Result)) then
+        SetLength(Result, Length(Result) * 2);
+      Result[Count] := I;
+      Inc(Count);
+    end;
+
+  SetLength(Result, Count);
+end;
+
+generic function Min<_T>(const Arr: specialize TArray<_T>): _T;
+var
+  I: Integer;
+begin
+  if (Length(Arr) = 0) then
+    Result := Default(_T)
+  else
+    Result := Arr[0];
+
+  for I := 1 to High(Arr) do
+    if (Arr[I] < Result) then
+      Result := Arr[I];
+end;
+
+generic function Max<_T>(const Arr: specialize TArray<_T>): _T;
+var
+  I: Integer;
+begin
+  if (Length(Arr) = 0) then
+    Result := Default(_T)
+  else
+    Result := Arr[0];
+
+  for I := 1 to High(Arr) do
+    if (Arr[I] > Result) then
+      Result := Arr[I];
 end;
 
 function TBooleanHelper.ToString: String;

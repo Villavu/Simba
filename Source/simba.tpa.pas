@@ -57,6 +57,9 @@ type
     class function CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static;
 
     function IndexOf(P: TPoint): Integer;
+    function IndicesOf(P: TPoint): TIntegerArray;
+    function Equals(Other: TPointArray): Boolean;
+    function Sum: TPoint;
 
     function Offset(P: TPoint): TPointArray; overload;
     function Offset(X, Y: Integer): TPointArray; overload;
@@ -157,7 +160,8 @@ implementation
 uses
   Math,
   simba.atpa, simba.arraybuffer, simba.geometry, simba.math,
-  simba.algo_sort, simba.algo_intersection, simba.slacktree, simba.algo_unique;
+  simba.algo_sort, simba.algo_intersection, simba.slacktree, simba.algo_unique,
+  simba.array_ord;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
 begin
@@ -459,13 +463,23 @@ begin
 end;
 
 function TPointArrayHelper.IndexOf(P: TPoint): Integer;
-var
-  What: QWord absolute P;
 begin
-  if (Length(Self) > 0) then
-    Result := IndexQWord(Self[0], Length(Self), What)
-  else
-    Result := -1;
+  Result := specialize IndexOf<TPoint>(P, Self);
+end;
+
+function TPointArrayHelper.IndicesOf(P: TPoint): TIntegerArray;
+begin
+  Result := specialize IndicesOf<TPoint>(P, Self);
+end;
+
+function TPointArrayHelper.Equals(Other: TPointArray): Boolean;
+begin
+  Result := specialize Equals<TPoint>(Self, Other);
+end;
+
+function TPointArrayHelper.Sum: TPoint;
+begin
+  Result := specialize Sum<TPoint, TPoint>(Self);
 end;
 
 function TPointArrayHelper.Offset(P: TPoint): TPointArray;
@@ -980,7 +994,7 @@ begin
     SetLength(Angles, Length(TPA));
     for I := 0 to High(TPA) - 1 do
       Angles[I] := TSimbaGeometry.AngleBetween(TPA[I], TPA[I+1]);
-    Angles := Algo_Unique_Double(Angles);
+    Angles := Angles.Unique();
 
     BestBox.Area := Double.MaxValue;
 

@@ -351,7 +351,7 @@ begin
   end;
 end;
 
-function CompareDeclarations(A, B: TDeclaration): Integer;
+function CompareDeclarations(const A, B: TDeclaration): Integer;
 begin
   Result := CompareText(A.Name, B.Name);
 end;
@@ -379,7 +379,7 @@ var
       Inc(Count);
     end;
 
-    specialize QuickSortFunc<TDeclaration>(FFilteredDecls, StartIndex, Count - 1, @CompareDeclarations);
+    specialize QuickSort<TDeclaration>(FFilteredDecls, StartIndex, Count - 1, @CompareDeclarations);
   end;
 
   procedure AddFiltered(Decls: TDeclarationArray; StartIndex: Integer);
@@ -402,7 +402,7 @@ var
       end;
     end;
 
-    specialize QuickSortWeighted<TDeclaration, Integer>(FFilteredDecls, FFilteredWeights, StartIndex, Count - 1, True);
+    specialize QuickSort<TDeclaration, Integer>(FFilteredDecls, FFilteredWeights, StartIndex, Count - 1, True);
   end;
 
 var
