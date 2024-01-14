@@ -86,7 +86,6 @@ type
     FIsLoading: Boolean;
   public
     General: record
-      ConsoleVisible: TSimbaSetting;
       TrayIconVisible: TSimbaSetting;
       Layout: TSimbaSetting;
       LockLayout: TSimbaSetting;
@@ -318,7 +317,7 @@ begin
   if FSettings.IsLoading then
     Exit;
 
-  DebugLn('[TSimbaSettings] Setting changed: ' + FName);
+  // DebugLn('[TSimbaSettings] Setting changed: ' + FName);
 
   I := FChangeEventList.Count;
   while FChangeEventList.NextDownIndex(I) do
@@ -477,7 +476,6 @@ begin
   FList := TSettingList.Create();
 
   // General
-  General.ConsoleVisible     := TSimbaSetting_Boolean.Create(Self, 'General', 'ConsoleVisible', True);
   General.TrayIconVisible    := TSimbaSetting_Boolean.Create(Self, 'General', 'TrayIconVisible', True);
   General.LockLayout         := TSimbaSetting_Boolean.Create(Self, 'General', 'LockLayout', False);
   General.Layout             := TSimbaSetting_BinaryString.Create(Self, 'General', 'Layout', '');

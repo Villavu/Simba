@@ -192,7 +192,6 @@ type
     procedure MenuItemACAClick(Sender: TObject);
     procedure MenuItemAssociateScriptsClick(Sender: TObject);
     procedure MenuItemImageToStringClick(Sender: TObject);
-    procedure MenuItemConsoleClick(Sender: TObject);
     procedure MenuItemDocumentationClick(Sender: TObject);
     procedure MenuItemDTMEditorClick(Sender: TObject);
     procedure MenuItemFindNextClick(Sender: TObject);
@@ -942,11 +941,6 @@ end;
 procedure TSimbaForm.MenuItemResetLayoutClick(Sender: TObject);
 begin
   QueueOnMainThread(@DoResetDocking);
-end;
-
-procedure TSimbaForm.MenuItemConsoleClick(Sender: TObject);
-begin
-  SimbaSettings.General.ConsoleVisible.Value := TMenuItem(Sender).Checked;
 end;
 
 procedure TSimbaForm.MenuItemLockLayoutClick(Sender: TObject);
