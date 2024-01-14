@@ -96,6 +96,7 @@ type
     function GetActiveOutputBox: TSimbaOutputBox;
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     property SimbaOutputBox: TSimbaOutputBox read FSimbaOutputBox;
     property ActiveOutputBox: TSimbaOutputBox read GetActiveOutputBox;
@@ -634,6 +635,13 @@ begin
   OnDebugLn := @DebugLn;
 
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE, @DoScriptTabChange);
+end;
+
+destructor TSimbaOutputForm.Destroy;
+begin
+  OnDebugLn := nil;
+
+  inherited Destroy();
 end;
 
 end.
