@@ -43,7 +43,7 @@ uses
 procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; Text: String);
 begin
   if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then // Only add flags if we have communication with simba to use them
-    SimbaDebugLn(Flags, Text)
+    DebugLn(Flags, Text)
   else
   begin
     if Application.HasOption('silent') and (Flags * [EDebugLn.YELLOW, EDebugLn.GREEN] <> []) then

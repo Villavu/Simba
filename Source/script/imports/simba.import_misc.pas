@@ -32,7 +32,7 @@ Clear the scripts output box in Simba.
 *)
 procedure ClearSimbaOutput(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaDebugLn([EDebugLn.CLEAR], '');
+  DebugLn([EDebugLn.CLEAR], '');
 end;
 
 (*

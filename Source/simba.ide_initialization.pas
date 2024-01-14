@@ -104,7 +104,7 @@ begin
       if Assigned(Method.Proc)    then Method.Proc() else
       if Assigned(Method.ProcObj) then Method.ProcObj();
 
-      DebugLn('[SimbaIDEInitialization]: %s (%f ms)', [Method.Name, HighResolutionTime() - T]);
+      //DebugLn('[SimbaIDEInitialization]: %s (%f ms)', [Method.Name, HighResolutionTime() - T]);
     except
       on E: Exception do
         DebugLn('[SimbaIDEInitialization]: %s (exception: %s)', [Method.Name, E.Message]);
@@ -128,7 +128,7 @@ begin
       if Assigned(Method.Proc)    then Method.Proc() else
       if Assigned(Method.ProcObj) then Method.ProcObj();
 
-      DebugLn('[SimbaIDEInitialization]: %s (%f ms in background)', [Method.Name, HighResolutionTime() - T]);
+      //DebugLn('[SimbaIDEInitialization]: %s (%f ms in background)', [Method.Name, HighResolutionTime() - T]);
     except
       on E: Exception do
         DebugLn('[SimbaIDEInitialization]: %s (exception: %s)', [Method.Name, E.Message]);
@@ -152,7 +152,7 @@ begin
       if Assigned(Method.Proc)    then Method.Proc() else
       if Assigned(Method.ProcObj) then Method.ProcObj();
 
-      DebugLn('[SimbaIDEInitialization]: %s (%f ms)', [Method.Name, HighResolutionTime() - T]);
+      //DebugLn('[SimbaIDEInitialization]: %s (%f ms)', [Method.Name, HighResolutionTime() - T]);
     except
       on E: Exception do
         DebugLn('[SimbaIDEInitialization]: %s (exception: %s)', [Method.Name, E.Message]);

@@ -631,7 +631,7 @@ begin
 
   FSimbaOutputBox := AddSimbaOutput();
 
-  DoSimbaDebugLn := @DebugLn;
+  OnDebugLn := @DebugLn;
 
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE, @DoScriptTabChange);
 end;

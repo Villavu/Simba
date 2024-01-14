@@ -107,21 +107,16 @@ begin
 
     if Package.HasUpdate() and Package.AutoUpdateEnabled then
     begin
-      SimbaDebugLn([EDebugLn.FOCUS], 'Automatically updating ' + Package.Info.FullName);
+      DebugLn([EDebugLn.FOCUS], 'Automatically updating %s', [Package.Info.FullName]);
 
       with TSimbaPackageInstaller.Create(Package, SimbaOutputForm.SimbaOutputBox) do
       try
         if InstallLatestVersion() then
         begin
-          SimbaDebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], [
-            'Succesfully updated "' + Package.Info.FullName + '"',
-            'Now at version: ' + Package.InstalledVersion,
-            'Scripts will need to be restarted for changes to take effect.'
-          ]);
+          DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Succesfully updated "%s"', [Package.Info.FullName]);
+          DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Now at version: %s', [Package.InstalledVersion]);
         end else
-          SimbaDebugLn([EDebugLn.FOCUS, EDebugLn.RED], [
-            'Failed to update "' + Package.Info.FullName + '"'
-          ]);
+          DebugLn([EDebugLn.FOCUS, EDebugLn.RED], 'Failed to update: %s', [Package.Info.FullName]);
       finally
         Free();
       end;

@@ -40,8 +40,7 @@ var
 implementation
 
 uses
-  Math,
-  simba.process;
+  Math, DateUtils;
 
 function nzRandom: Double;
 begin
@@ -167,9 +166,9 @@ procedure BetterRandomize;
 var
   A, B, C: UInt32;
 begin
-  A := UInt32(GetTickCount64());
-  B := UInt32(GetProcessID());
-  C := UInt32(SimbaProcess.GetProcessRunnningTime(GetProcessID()));
+  A := UInt32(GetTickCount64());             // SOURCE 1: System uptime
+  B := UInt32(DateTimeToUnix(Now(), False)); // SOURCE 2: Unix time
+  C := UInt32(GetProcessID());               // SOURCE 3: Process ID
 
   Mix(A, B, C);
 

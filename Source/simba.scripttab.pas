@@ -175,7 +175,7 @@ begin
       Sleep(500);
     end;
 
-    DebugLn('Script process[%d] terminated. Exit code: %d', [FProcess.ProcessID, FProcess.ExitCode]);
+    //DebugLn('Script process[%d] terminated. Exit code: %d', [FProcess.ProcessID, FProcess.ExitCode]);
 
     EmptyProcessOutput();
   except
@@ -347,11 +347,7 @@ end;
 procedure TSimbaScriptTab.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   if (Operation = opRemove) and (AComponent = FScriptRunner) then
-  begin
-    DebugLn('TSimbaScriptTab.Notification :: FScriptRunner = nil');
-
     FScriptRunner := nil;
-  end;
 
   inherited Notification(AComponent, Operation);
 end;
@@ -551,7 +547,7 @@ end;
 
 procedure TSimbaScriptTab.Run(Target: TWindowHandle);
 begin
-  DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
+  //DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
 
   if (FScriptRunner <> nil) then
     FScriptRunner.Resume()
@@ -567,7 +563,7 @@ end;
 
 procedure TSimbaScriptTab.Compile;
 begin
-  DebugLn('TSimbaScriptTab.Compile :: ' + ScriptTitle + ' ' + ScriptFileName);
+  //DebugLn('TSimbaScriptTab.Compile :: ' + ScriptTitle + ' ' + ScriptFileName);
 
   if (FScriptRunner = nil) then
   begin
@@ -581,7 +577,7 @@ end;
 
 procedure TSimbaScriptTab.Pause;
 begin
-  DebugLn('TSimbaScriptTab.Pause :: ' + ScriptTitle + ' ' + ScriptFileName);
+  //DebugLn('TSimbaScriptTab.Pause :: ' + ScriptTitle + ' ' + ScriptFileName);
 
   if (FScriptRunner <> nil) then
     FScriptRunner.Pause();
@@ -589,7 +585,7 @@ end;
 
 procedure TSimbaScriptTab.Stop;
 begin
-  DebugLn('TSimbaScriptTab.Stop :: ' + ScriptTitle + ' ' + ScriptFileName);
+  //DebugLn('TSimbaScriptTab.Stop :: ' + ScriptTitle + ' ' + ScriptFileName);
 
   if (FScriptRunner <> nil) then
     FScriptRunner.Stop();

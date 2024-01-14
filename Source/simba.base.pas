@@ -351,15 +351,14 @@ type
 {$POP}
 
 var
-  DoSimbaDebugLn: procedure(const S: String) of object = nil;
+  OnDebugLn: procedure(const S: String) of object = nil;
 
 procedure Debug(const Msg: String); overload;
 procedure Debug(const Msg: String; Args: array of const); overload;
 procedure DebugLn(const Msg: String); overload;
 procedure DebugLn(const Msg: String; Args: array of const); overload;
-
-procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: String); overload;
-procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: TStringArray); overload;
+procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String); overload;
+procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String; Args: array of const); overload;
 
 function FlagsToString(const Flags: EDebugLnFlags): String;
 function FlagsFromString(var Str: String): EDebugLnFlags;
@@ -431,6 +430,12 @@ uses
 
 procedure Debug(const Msg: String);
 begin
+  if Assigned(OnDebugLn) then
+  begin
+    OnDebugLn(Msg);
+    Exit;
+  end;
+
   {$I-}
   Write(Msg);
   {$I+}
@@ -438,13 +443,17 @@ end;
 
 procedure Debug(const Msg: String; Args: array of const);
 begin
-  {$I-}
-  Write(Format(Msg, Args));
-  {$I+}
+  Debug(Format(Msg, Args));
 end;
 
 procedure DebugLn(const Msg: String);
 begin
+  if Assigned(OnDebugLn) then
+  begin
+    OnDebugLn(Msg);
+    Exit;
+  end;
+
   {$I-}
   WriteLn(Msg);
   Flush(Output);
@@ -453,10 +462,17 @@ end;
 
 procedure DebugLn(const Msg: String; Args: array of const);
 begin
-  {$I-}
-  WriteLn(Format(Msg, Args));
-  Flush(Output);
-  {$I+}
+  DebugLn(Format(Msg, Args));
+end;
+
+procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String);
+begin
+  DebugLn(FlagsToString(Flags) + Msg);
+end;
+
+procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String; Args: array of const);
+begin
+  DebugLn(FlagsToString(Flags) + Format(Msg, Args));
 end;
 
 procedure SimbaException(Message: String; Args: array of const);
@@ -469,21 +485,11 @@ begin
   raise ESimbaException.Create(Message);
 end;
 
-procedure SimbaDebugLn(const Msg: String);
-begin
-  DebugLn(Msg);
-end;
-
-procedure SimbaDebugLn(const Msg: String; Args: array of const);
-begin
-  DebugLn(Msg.Format(Args));
-end;
-
 const
   DebugLnFlagsHeader       = String(#0#0);
   DebugLnFlagsHeaderLength = Length(DebugLnFlagsHeader) + 6;
 
-function FlagsToString(const Flags: EDebugLnFlags): String;
+function FlagsToString(const Flags: EDebugLnFlags): String; inline;
 begin
   Result := DebugLnFlagsHeader + IntToHex(Integer(Flags), 6);
 end;
@@ -521,19 +527,6 @@ begin
     Delete(Str, 1, DebugLnFlagsHeaderLength);
   end else
     Result := [];
-end;
-
-procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: String);
-begin
-  if Assigned(DoSimbaDebugLn) then
-    DoSimbaDebugLn(FlagsToString(Flags) + Msg)
-  else
-    DebugLn(FlagsToString(Flags) + Msg);
-end;
-
-procedure SimbaDebugLn(const Flags: EDebugLnFlags; const Msg: TStringArray);
-begin
-  SimbaDebugLn(Flags, LineEnding.Join(Msg));
 end;
 
 function InRange(const AValue, AMin, AMax: Integer): Boolean;

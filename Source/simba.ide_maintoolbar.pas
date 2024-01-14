@@ -187,7 +187,7 @@ begin
   try
     if ShowColorPicker(FWindowSelection, X, Y, Color) then
     begin
-      SimbaDebugLn([EDebugLn.FOCUS], 'Color picked: %d at (%d, %d)'.Format([Color, X, Y]));
+      DebugLn([EDebugLn.FOCUS], 'Color picked: %d at (%d, %d)', [Color, X, Y]);
 
       SimbaIDEEvents.Notify(SimbaIDEEvent.COLOR_PICKED, Self);
     end;
@@ -202,7 +202,7 @@ begin
   try
     FAreaSelection := ShowAreaSelector(FWindowSelection);
     with FAreaSelection do
-      SimbaDebugLn([EDebugLn.FOCUS], 'Area picked: [%d, %d, %d, %d]'.Format([X1, Y1, X2, Y2]));
+      DebugLn([EDebugLn.FOCUS], 'Area picked: [%d, %d, %d, %d]', [X1, Y1, X2, Y2]);
 
     SimbaIDEEvents.Notify(SimbaIDEEvent.AREA_SELECTED, Self);
   except
@@ -217,14 +217,12 @@ begin
     FWindowSelection := ShowWindowSelector();
     FProcessSelection := FWindowSelection.GetPID();
 
-    SimbaDebugLn([EDebugLn.FOCUS], [
-      'Window Selected: ' + IntToStr(FWindowSelection),
-      ' - Dimensions: '   + IntToStr(FWindowSelection.GetBounds().Width - 1) + 'x' + IntToStr(FWindowSelection.GetBounds().Height - 1),
-      ' - Title: "'       + FWindowSelection.GetTitle() + '"',
-      ' - Class: "'       + FWindowSelection.GetClassName() + '"',
-      ' - PID: '          + IntToStr(FWindowSelection.GetPID()) + ' (' + BoolToStr(SimbaProcess.IsProcess64Bit(FWindowSelection.GetPID()), '64', '32') + ' bit)',
-      ' - Executable: "'  + SimbaProcess.GetProcessPath(FWindowSelection.GetPID()) + '"'
-    ]);
+    DebugLn([EDebugLn.FOCUS], 'Window Selected: %d', [FWindowSelection]);
+    DebugLn([EDebugLn.FOCUS], ' - Dimensions: %dx%d', [FWindowSelection.GetBounds().Width - 1, FWindowSelection.GetBounds().Height - 1]);
+    DebugLn([EDebugLn.FOCUS], ' - Title: "%s"', [FWindowSelection.GetTitle()]);
+    DebugLn([EDebugLn.FOCUS], ' - Class: "%s"', [FWindowSelection.GetClassName()]);
+    DebugLn([EDebugLn.FOCUS], ' - PID: %d (%s)', [FWindowSelection.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(FWindowSelection.GetPID()), '64 bit', '32 bit')]);
+    DebugLn([EDebugLn.FOCUS], ' - Executable: "%s"', [SimbaProcess.GetProcessPath(FWindowSelection.GetPID())]);
 
     SimbaIDEEvents.Notify(SimbaIDEEvent.WINDOW_SELECTED, Self);
   except

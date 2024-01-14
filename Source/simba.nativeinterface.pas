@@ -73,9 +73,6 @@ type
     procedure PlaySound(Path: String); virtual;
     procedure StopSound; virtual;
 
-    procedure ShowTerminal; virtual;
-    procedure HideTerminal; virtual;
-
     procedure OpenFile(Path: String); virtual;
     procedure OpenURL(URL: String); virtual;
 
@@ -124,16 +121,6 @@ begin
 end;
 
 procedure TSimbaNativeInterface.StopSound;
-begin
-  { not critical }
-end;
-
-procedure TSimbaNativeInterface.ShowTerminal;
-begin
-  { not critical }
-end;
-
-procedure TSimbaNativeInterface.HideTerminal;
 begin
   { not critical }
 end;
