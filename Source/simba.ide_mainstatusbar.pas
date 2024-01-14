@@ -53,7 +53,7 @@ begin
     begin
       FStatusBar.PanelText[0] := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
       if HotkeyPressed then
-        SimbaDebugLn([EDebugLn.FOCUS], FStatusBar.PanelText[0]);
+        DebugLn([EDebugLn.FOCUS], FStatusBar.PanelText[0]);
     end;
 end;
 

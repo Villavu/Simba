@@ -117,7 +117,7 @@ begin
     except
     end;
 
-    SimbaDebugLn([EDebugLn.FOCUS], ImageString);
+    DebugLn([EDebugLn.FOCUS], ImageString);
   end;
 end;
 

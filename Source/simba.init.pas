@@ -53,6 +53,28 @@ begin
 end;
 {$ENDIF}
 
+{$IFDEF WINDOWS}
+procedure WindowsInitialization;
+
+  function HasOption(Option: String): Boolean;
+  var
+    I: Integer;
+  begin
+    for I := 0 to ParamCount do
+      if (ParamStr(I) = Option) then
+        Exit(True);
+    Exit(False);
+  end;
+
+begin
+  if (not HasOption('--open')) and (HasOption('--run') or HasOption('--compile')) then
+  begin
+    IsConsole := True;
+    SysInitStdIO();
+  end;
+end;
+{$ENDIF}
+
 initialization
   {$IFDEF DARWIN}
   DarwinInitialization();
@@ -60,6 +82,10 @@ initialization
 
   {$IFDEF LINUX}
   LinuxInitialization();
+  {$ENDIF}
+
+  {$IFDEF WINDOWS}
+  WindowsInitialization();
   {$ENDIF}
 
   FormatSettings.ThousandSeparator := ',';

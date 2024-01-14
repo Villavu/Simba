@@ -55,9 +55,9 @@ uses
 procedure TSimbaBaseClass.NotifyUnfreed;
 begin
   if (Name <> '') then
-    SimbaDebugLn([EDebugLn.YELLOW], '  %s (%s) "%s"'.Format([ClassName, HexStr(Self), Name]))
+    DebugLn([EDebugLn.YELLOW], '  %s (%s) "%s"'.Format([ClassName, HexStr(Self), Name]))
   else
-    SimbaDebugLn([EDebugLn.YELLOW], '  %s (%s)'.Format([ClassName, HexStr(Self)]));
+    DebugLn([EDebugLn.YELLOW], '  %s (%s)'.Format([ClassName, HexStr(Self)]));
 end;
 
 function TSimbaBaseClass.GetName: String;
@@ -134,7 +134,7 @@ begin
         begin
           if not HasUnfreed then
           begin
-            SimbaDebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
+            DebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
 
             HasUnfreed := True;
           end;

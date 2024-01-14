@@ -72,13 +72,23 @@ begin
 end;
 
 procedure ShowDeclaration(Declaration: TDeclaration);
+
+  function GetDeclarationText: String;
+  begin
+    if (Declaration is TDeclaration_Method) then
+      Result := TDeclaration_Method(Declaration).HeaderString
+    else
+    if (Declaration is TDeclaration_Var) then
+      Result := TDeclaration_Var(Declaration).Name + TDeclaration_Var(Declaration).VarTypeString + TDeclaration_Var(Declaration).VarDefaultString
+    else
+      Result := Declaration.Text;
+  end;
+
 begin
   if (Declaration.Parser is TPluginParser) then
   begin
-    if (Declaration is TDeclaration_Method) then
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, TDeclaration_Method(Declaration).HeaderString])
-    else
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin: ' + Declaration.Lexer.FileName, Declaration.Text])
+    DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [Declaration.Lexer.FileName]);
+    DebugLn([EDebugLn.FOCUS], GetDeclarationText());
   end
   else
   if (Declaration.Lexer.FileName = '') or FileExists(Declaration.Lexer.FileName) then
@@ -97,13 +107,8 @@ begin
   end
   else
   begin
-    if (Declaration is TDeclaration_Method) then
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, TDeclaration_Method(Declaration).HeaderString])
-    else
-    if (Declaration is TDeclaration_Var) then
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, TDeclaration_Var(Declaration).Name + TDeclaration_Var(Declaration).VarTypeString + TDeclaration_Var(Declaration).VarDefaultString])
-    else
-      SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + Declaration.Lexer.FileName, Declaration.Text])
+    DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [Declaration.Lexer.FileName]);
+    DebugLn([EDebugLn.FOCUS], GetDeclarationText());
   end;
 end;
 
@@ -112,7 +117,8 @@ begin
   if (Header = '') then
     Exit;
 
-  SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in Simba: ' + FileName, 'Declaration:', Header]);
+  DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [FileName]);
+  DebugLn([EDebugLn.FOCUS], 'Declaration: %s', [Header]);
 end;
 
 procedure ShowPluginDeclaration(Header: String; FileName: String);
@@ -120,7 +126,8 @@ begin
   if (Header = '') then
     Exit;
 
-  SimbaDebugLn([EDebugLn.FOCUS], ['Declared internally in plugin "' + FileName + '"', 'Declaration:', Header]);
+  DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [FileName]);
+  DebugLn([EDebugLn.FOCUS], 'Declaration: %s', [Header]);
 end;
 
 procedure ShowDeclarationDialog(Decls: TDeclarationArray);

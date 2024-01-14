@@ -103,7 +103,6 @@ type
     MenuItemCloseTabs: TMenuItem;
     MenuItemColourHistory: TMenuItem;
     MenuItemCompile: TMenuItem;
-    MenuItemConsole: TMenuItem;
     MenuItemCopy: TMenuItem;
     MenuItemCut: TMenuItem;
     MenuItemDebugImage: TMenuItem;
@@ -231,7 +230,6 @@ type
     procedure DoSettingChanged_CustomFontSize(Setting: TSimbaSetting);
     procedure DoSettingChanged_LockLayout(Setting: TSimbaSetting);
     procedure DoSettingChanged_TrayIconVisible(Setting: TSimbaSetting);
-    procedure DoSettingChanged_ConsoleVisible(Setting: TSimbaSetting);
 
     procedure HandleRecentFileClick(Sender: TObject);
     procedure HandleException(Sender: TObject; E: Exception);
@@ -243,7 +241,6 @@ type
     procedure DoTabLoaded(Sender: TObject);
 
     procedure SetCustomFontSize(Value: Integer);
-    procedure SetConsoleVisible(Value: Boolean);
     procedure SetLayoutLocked(Value: Boolean);
     procedure SetTrayIconVisible(Value: Boolean);
 
@@ -348,16 +345,6 @@ begin
   HandleNeeded();
   for I := 0 to Screen.CustomFormCount - 1 do
     Screen.CustomForms[I].Font.Size := Value;
-end;
-
-procedure TSimbaForm.SetConsoleVisible(Value: Boolean);
-begin
-  MenuItemConsole.Checked := Value;
-
-  if Value then
-    SimbaNativeInterface.ShowTerminal()
-  else
-    SimbaNativeInterface.HideTerminal();
 end;
 
 procedure TSimbaForm.SetLayoutLocked(Value: Boolean);
@@ -587,7 +574,6 @@ begin
     RegisterChangeHandler(Self, General.CustomFontSize, @DoSettingChanged_CustomFontSize, True);
     RegisterChangeHandler(Self, General.LockLayout, @DoSettingChanged_LockLayout, True);
     RegisterChangeHandler(Self, General.TrayIconVisible, @DoSettingChanged_TrayIconVisible, True);
-    RegisterChangeHandler(Self, General.ConsoleVisible, @DoSettingChanged_ConsoleVisible, True);
   end;
 
   // Create things
@@ -764,11 +750,6 @@ end;
 procedure TSimbaForm.DoSettingChanged_TrayIconVisible(Setting: TSimbaSetting);
 begin
   SetTrayIconVisible(Setting.Value);
-end;
-
-procedure TSimbaForm.DoSettingChanged_ConsoleVisible(Setting: TSimbaSetting);
-begin
-  SetConsoleVisible(Setting.Value);
 end;
 
 procedure TSimbaForm.MenuCloseTabClick(Sender: TObject);

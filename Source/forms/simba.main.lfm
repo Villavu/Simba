@@ -11,7 +11,7 @@ object SimbaForm: TSimbaForm
   OnDestroy = FormDestroy
   OnWindowStateChange = FormWindowStateChange
   Position = poScreenCenter
-  LCLVersion = '3.0.0.2'
+  LCLVersion = '3.0.0.3'
   object DockPanel: TAnchorDockPanel
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Side = asrBottom
@@ -388,11 +388,6 @@ object SimbaForm: TSimbaForm
       Caption = 'Tray Icon'
       ShowAlwaysCheckable = True
       OnClick = MenuItemTrayIconClick
-    end
-    object MenuItemConsole: TMenuItem
-      AutoCheck = True
-      Caption = 'Console'
-      OnClick = MenuItemConsoleClick
     end
     object MenuItem4: TMenuItem
       Caption = '-'

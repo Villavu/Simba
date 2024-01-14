@@ -81,9 +81,6 @@ type
 
     procedure PlaySound(Path: String); override;
     procedure StopSound; override;
-
-    procedure ShowTerminal; override;
-    procedure HideTerminal; override;
   end;
 
 implementation
@@ -896,24 +893,6 @@ end;
 procedure TSimbaNativeInterface_Windows.StopSound;
 begin
   sndPlaySound(nil, 0);
-end;
-
-procedure TSimbaNativeInterface_Windows.ShowTerminal;
-var
-  PID: UInt32 = 0;
-begin
-  GetWindowThreadProcessId(GetConsoleWindow(), PID);
-  if (PID = GetCurrentProcessID()) then
-    ShowWindow(GetConsoleWindow(), SW_SHOWNORMAL);
-end;
-
-procedure TSimbaNativeInterface_Windows.HideTerminal;
-var
-  PID: UInt32 = 0;
-begin
-  GetWindowThreadProcessId(GetConsoleWindow(), PID);
-  if (PID = GetCurrentProcessID()) then
-    ShowWindow(GetConsoleWindow(), SW_HIDE);
 end;
 
 end.
