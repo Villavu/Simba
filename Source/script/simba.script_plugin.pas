@@ -232,7 +232,7 @@ begin
     if FMethods[I].Native then
       Compiler.addGlobalFunc(FMethods[I].Header, FMethods[I].Address)
     else
-      Compiler.addGlobalFunc(FMethods[I].Header, FMethods[I].Address, FFI_DEFAULT_ABI);
+      Compiler.addGlobalFunc(FMethods[I].Header, FMethods[I].Address, {$IF DECLARED(FFI_CDECL)}FFI_CDECL{$ELSE}FFI_DEFAULT_ABI{$ENDIF});
   end;
 
   if (FCode <> '') then
