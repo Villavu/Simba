@@ -36,7 +36,6 @@ type
     procedure ScriptError;
 
     procedure DebugImage_SetMaxSize;
-    procedure DebugImage_MoveTo;
     procedure DebugImage_Show;
     procedure DebugImage_Update;
     procedure DebugImage_Hide;
@@ -166,22 +165,6 @@ var
 begin
   FParams.Read(Width, SizeOf(Integer));
   FParams.Read(Height, SizeOf(Integer));
-
-  RunInMainThread(@Execute);
-end;
-
-procedure TSimbaScriptInstanceCommunication.DebugImage_MoveTo;
-var
-  X, Y: Integer;
-
-  procedure Execute;
-  begin
-    SimbaDebugImageForm.ImageBox.MoveTo(X, Y);
-  end;
-
-begin
-  FParams.Read(X, SizeOf(Integer));
-  FParams.Read(Y, SizeOf(Integer));
 
   RunInMainThread(@Execute);
 end;
@@ -373,7 +356,6 @@ begin
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_SHOW]       := @DebugImage_Show;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE]     := @DebugImage_Update;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_HIDE]       := @DebugImage_Hide;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_MOVETO]     := @DebugImage_MoveTo;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY]    := @DebugImage_Display;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY_XY] := @DebugImage_DisplayXY;
 end;

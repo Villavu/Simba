@@ -221,6 +221,8 @@ type
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
     {$endif}
   published
+    procedure ScrollBy(Delta: Integer); reintroduce;
+
     {$ifndef FPC}
     property OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
     property OnMouseLeave: TNotifyEvent read FOnMouseLeave write FOnMouseLeave;
@@ -1127,6 +1129,11 @@ begin
       Inc(FRectMain.Top, Abs(Delta));
     end;
   end;
+end;
+
+procedure TATScrollbar.ScrollBy(Delta: Integer);
+begin
+  DoScrollBy(Delta);
 end;
 
 initialization

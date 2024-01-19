@@ -513,8 +513,8 @@ begin
   for I := 0 to Screen.CustomFormCount - 1 do
     if (Screen.CustomForms[I].HostDockSite is TCustomForm) then
     begin
-      Screen.CustomForms[I].Hide();
-
+      if (DockMaster.GetAnchorSite(Screen.CustomForms[I]) <> nil) then
+        DockMaster.GetAnchorSite(Screen.CustomForms[I]).Visible := False;
       DockMaster.ManualFloat(Screen.CustomForms[I]);
       if (DockMaster.GetAnchorSite(Screen.CustomForms[I]) <> nil) then
         DockMaster.GetAnchorSite(Screen.CustomForms[I]).Header.Visible := True;
