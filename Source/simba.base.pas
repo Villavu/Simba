@@ -200,9 +200,7 @@ type
     SIMBA_TITLE, SIMBA_PID, SIMBA_TARGET_PID, SIMBA_TARGET_WINDOW,
     SCRIPT, SCRIPT_ERROR, SCRIPT_STATE_CHANGE,
     TRAY_NOTIFICATION,
-    DEBUGIMAGE_UPDATE,
-    DEBUGIMAGE_MOVETO, DEBUGIMAGE_MAXSIZE, DEBUGIMAGE_SHOW, DEBUGIMAGE_HIDE,
-    DEBUGIMAGE_DISPLAY, DEBUGIMAGE_DISPLAY_XY
+    DEBUGIMAGE_UPDATE, DEBUGIMAGE_MAXSIZE, DEBUGIMAGE_SHOW, DEBUGIMAGE_HIDE, DEBUGIMAGE_DISPLAY, DEBUGIMAGE_DISPLAY_XY
   );
 {$POP}
 
@@ -385,9 +383,9 @@ procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
 procedure Swap(var A, B: TColorBGRA); overload;
 
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String; overload;
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: Integer): Integer; overload;
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String; inline; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Integer): Integer; inline; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean; inline; overload;
 
 // Generic helpers
 generic procedure Swap<_T>(var A, B: _T);
