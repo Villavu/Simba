@@ -10,7 +10,8 @@ unit simba.dockinghelpers;
 interface
 
 uses
-  Classes, SysUtils, Controls, Menus, Forms, Graphics, AnchorDocking;
+  Classes, SysUtils, Controls, Menus, Forms, Graphics, AnchorDocking,
+  simba.base;
 
 type
   TSimbaAnchorDockHeader = class(TAnchorDockHeader)
@@ -170,9 +171,9 @@ end;
 
 procedure TSimbaAnchorDockHostSite.DoMenuItemClicked(Sender: TObject);
 begin
-  Visible := TMenuItem(Sender).Checked;
-
-  if Visible then
+  if not TMenuItem(Sender).Checked then
+    CloseSite()
+  else
   begin
     if FNeedDefaultPosition then
     begin
