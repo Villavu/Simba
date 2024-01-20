@@ -328,10 +328,10 @@ end;
 
 procedure TSimbaImageScrollBox.DblClick;
 begin
-  inherited DblClick;
+  inherited DblClick();
 
-  if Assigned(OnDblClick) then
-    OnDblClick(FImageBox);
+  if Assigned(FImageBox.OnDblClick) then
+    FImageBox.OnDblClick(FImageBox);
 end;
 
 procedure TSimbaImageScrollBox.DoBackgroundChange(Sender: TObject);
