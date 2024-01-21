@@ -5,11 +5,8 @@
 [==============================================================================}
 unit simba.slacktree;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 interface
 
@@ -75,7 +72,7 @@ type
 implementation
 
 uses
-  math;
+  Math;
 
 const
   NONE = -1;
@@ -194,9 +191,9 @@ function TSlackTree.IndexOf(p:TPoint): Int32;
 
     Result := NONE;
     if (depth and 1 = 0) then
-      s := sign(this^.split.x - p.x)
+      s := Sign(this^.split.x - p.x)
     else
-      s := sign(this^.split.y - p.y);
+      s := Sign(this^.split.y - p.y);
 
     case s of
        1: if this^.L <> NONE then Exit(__find(this^.L, depth+1));
@@ -395,7 +392,7 @@ var
   pt:TPoint;
 begin
   nodes := self.RawRangeQuery(
-    Box(query.x-Trunc(xrad), query.y-Trunc(yrad), query.x+Ceil(xrad), query.y+Ceil(yrad))
+    TBox.Create(query.x-Trunc(xrad), query.y-Trunc(yrad), query.x+Ceil(xrad), query.y+Ceil(yrad))
   );
   sqx := Sqr(xrad);
   sqy := Sqr(yrad);
@@ -437,7 +434,7 @@ var
   pt:TPoint;
 begin
   nodes := self.RawRangeQuery(
-    Box(query.x-Trunc(xmax), query.y-Trunc(ymax), query.x+Ceil(xmax), query.y+Ceil(ymax))
+    TBox.Create(query.x-Trunc(xmax), query.y-Trunc(ymax), query.x+Ceil(xmax), query.y+Ceil(ymax))
   );
 
   SetLength(Result, length(nodes));

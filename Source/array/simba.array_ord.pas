@@ -70,12 +70,12 @@ end;
 
 function TIntegerArrayHelper.Min: Integer;
 begin
-  Result := specialize Min<Integer>(Self);
+  Result := specialize MinA<Integer>(Self);
 end;
 
 function TIntegerArrayHelper.Max: Integer;
 begin
-  Result := specialize Max<Integer>(Self);
+  Result := specialize MaxA<Integer>(Self);
 end;
 
 function TIntegerArrayHelper.Sum: Int64;
@@ -110,12 +110,12 @@ end;
 
 function TSingleArrayHelper.Min: Single;
 begin
-  Result := specialize Min<Single>(Self);
+  Result := specialize MinA<Single>(Self);
 end;
 
 function TSingleArrayHelper.Max: Single;
 begin
-  Result := specialize Max<Single>(Self);
+  Result := specialize MaxA<Single>(Self);
 end;
 
 function TSingleArrayHelper.Sum: Double;
@@ -150,12 +150,12 @@ end;
 
 function TDoubleArrayHelper.Min: Double;
 begin
-  Result := specialize Min<Double>(Self);
+  Result := specialize MinA<Double>(Self);
 end;
 
 function TDoubleArrayHelper.Max: Double;
 begin
-  Result := specialize Max<Double>(Self);
+  Result := specialize MaxA<Double>(Self);
 end;
 
 function TDoubleArrayHelper.Sum: Double;

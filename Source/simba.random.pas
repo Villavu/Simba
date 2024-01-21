@@ -40,7 +40,8 @@ var
 implementation
 
 uses
-  Math, DateUtils;
+  Math, DateUtils,
+  simba.box;
 
 function nzRandom: Double;
 begin
@@ -148,10 +149,10 @@ begin
   Result := Mean + Len * Cos(2 * PI * Random());
 end;
 
-{$R-}{$Q-}
-
-// https://github.com/dajobe/libmtwist/blob/master/seed.c
-procedure BetterRandomize;
+{$PUSH}
+{$R-}
+{$Q-}
+procedure BetterRandomize; // https://github.com/dajobe/libmtwist/blob/master/seed.c
 
   procedure Mix(var A, B, C: UInt32);
   begin
@@ -174,6 +175,7 @@ begin
 
   RandSeed := C;
 end;
+{$POP}
 
 end.
 

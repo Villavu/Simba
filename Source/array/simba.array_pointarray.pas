@@ -11,7 +11,7 @@ unit simba.array_pointarray;
 interface
 
 uses
-  Classes, SysUtils, Math,
+  Classes, SysUtils,
   simba.base;
 
 type
@@ -63,7 +63,7 @@ type
 implementation
 
 uses
-  simba.array_point, simba.algo_sort, simba.arraybuffer, simba.quad,
+  simba.array_point, simba.algo_sort, simba.arraybuffer, simba.quad, simba.box,
   simba.matrix_int;
 
 function T2DPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): T2DPointArray;
@@ -338,7 +338,7 @@ var
   I: Integer;
 begin
   if (Length(Self) = 0) then
-    Result := TBox.Default()
+    Result := TBox.ZERO
   else
   begin
     Result := Self[0].Bounds();

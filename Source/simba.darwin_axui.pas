@@ -73,7 +73,7 @@ var
   Value: CFTypeRef;
   Rect: NSRect;
 begin
-  Result := TBox.Default;
+  Result := TBox.ZERO;
 
   Value := nil;
   if (AXUIElementCopyAttributeValue(Element, AXFrameStr, Value) = kAXErrorSuccess) and (Value <> nil) then

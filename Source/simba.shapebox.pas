@@ -293,7 +293,7 @@ type
 implementation
 
 uses
-  LCLType, simba.geometry, simba.array_point;
+  LCLType, simba.geometry, simba.array_point, simba.box;
 
 const
   CLOSE_DISTANCE = 4;
@@ -685,8 +685,7 @@ end;
 
 function TSimbaShapeBoxShape_Box.GetBox: TBox;
 begin
-  Result := FBox;
-  Result.Normalize();
+  Result := FBox.Normalize();
 end;
 
 function TSimbaShapeBoxShape_Box.ToStr: String;

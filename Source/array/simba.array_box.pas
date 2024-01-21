@@ -45,7 +45,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.algo_sort;
+  simba.math, simba.algo_sort, simba.box;
 
 class function TBoxArrayHelper.Create(Start: TPoint; Columns, Rows, Width, Height: Int32; Spacing: TPoint): TBoxArray;
 var
@@ -167,7 +167,7 @@ var
   I: Integer;
 begin
   if Length(Self) = 0 then
-    Exit(TBox.Default());
+    Exit(TBox.ZERO);
 
   Result := Self[0];
   for I := 1 to High(Self) do

@@ -110,7 +110,7 @@ implementation
 
 uses
   BaseUnix, Unix, LCLType, CocoaAll, CocoaUtils, DateUtils,
-  simba.process, simba.darwin_axui, simba.windowhandle;
+  simba.process, simba.darwin_axui, simba.windowhandle, simba.box;
 
 type
   NSEventFix = objccategory external(NSEvent)
@@ -350,7 +350,7 @@ end;
 function TSimbaNativeInterface_Darwin.GetWindowBounds(Window: TWindowHandle): TBox;
 begin
   if not GetWindowBounds(Window, Result) then
-    Result := TBox.Default();
+    Result := TBox.ZERO;
 end;
 
 procedure TSimbaNativeInterface_Darwin.SetWindowBounds(Window: TWindowHandle; Bounds: TBox);

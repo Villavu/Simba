@@ -625,7 +625,7 @@ begin
   try
     Finder.Target.SetImage(Img);
 
-    Result := Finder.FindDTMEx(DTM, -1, Box(-1, -1, -1, -1));
+    Result := Finder.FindDTMEx(DTM, -1, TBox.Create(-1, -1, -1, -1));
   finally
     Img.Free();
   end;
@@ -640,7 +640,7 @@ begin
   try
     Finder.Target.SetImage(Img);
 
-    Result := Finder.FindColor(AColor, Tolerance, ColorSpace, Multipliers, Box(-1, -1, -1, -1));
+    Result := Finder.FindColor(AColor, Tolerance, ColorSpace, Multipliers, TBox.Create(-1, -1, -1, -1));
   finally
     Img.Free();
   end;
@@ -655,7 +655,7 @@ begin
   try
     Finder.Target.SetImage(Img);
 
-    Result := Finder.MatchColor(AColor, ColorSpace, Multipliers, Box(-1, -1, -1, -1));
+    Result := Finder.MatchColor(AColor, ColorSpace, Multipliers, TBox.Create(-1, -1, -1, -1));
   finally
     Img.Free();
   end;
