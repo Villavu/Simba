@@ -1,18 +1,24 @@
-{%MAINUNIT simba.base}
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
 
-{$IFDEF HEADER}
+  TBox methods.
+}
+unit simba.box;
+
+{$i simba.inc}
+
+interface
+
+uses
+  Classes, SysUtils,
+  simba.base;
+
 type
-  TBoxHelper = record Helper for TBox
-  protected
-    function GetCenter: TPoint;
-    function GetWidth: Integer;
-    function GetHeight: Integer;
+  TBoxHelper = record Helper(TBoxHelperBase) for TBox
   public
-    class function Create(X1, Y1, X2, Y2: Integer): TBox; static; overload;
-    class function Create(Center: TPoint; XRad, YRad: Integer): TBox; static; overload;
-    class function Default: TBox; static;
-    function IsDefault: Boolean;
-
     function RandomPoint: TPoint;
     function RandomPointCenter: TPoint;
 
@@ -42,60 +48,13 @@ type
 
     function Clip(Other: TBox): TBox;
     function Normalize: TBox;
-
-    property Width: Integer read GetWidth;
-    property Height: Integer read GetHeight;
-    property Center: TPoint read GetCenter;
   end;
 
-  function Box(const X1, Y1, X2, Y2: Integer): TBox; inline;
-  function Box(const Mid: TPoint; const XRad, YRad: Integer): TBox; inline;
+implementation
 
-  operator = (const Left, Right: TBox): Boolean;
-{$ENDIF}
-
-{$IFDEF BODY}
-function TBoxHelper.GetCenter: TPoint;
-begin
-  Result.X := (Self.X2 + Self.X1 + 1) div 2;
-  Result.Y := (Self.Y2 + Self.Y1 + 1) div 2;
-end;
-
-function TBoxHelper.GetWidth: Integer;
-begin
-  Result := (Self.X2 - Self.X1) + 1;
-end;
-
-function TBoxHelper.GetHeight: Integer;
-begin
-  Result := (Self.Y2 - Self.Y1) + 1;
-end;
-
-class function TBoxHelper.Create(X1, Y1, X2, Y2: Integer): TBox;
-begin
-  Result.X1 := X1;
-  Result.Y1 := Y1;
-  Result.X2 := X2;
-  Result.Y2 := Y2;
-end;
-
-class function TBoxHelper.Create(Center: TPoint; XRad, YRad: Integer): TBox;
-begin
-  Result.X1 := Center.X - XRad;
-  Result.Y1 := Center.Y - YRad;
-  Result.X2 := Center.X + XRad;
-  Result.Y2 := Center.Y + YRad;
-end;
-
-class function TBoxHelper.Default: TBox;
-begin
-  Result := System.Default(TBox);
-end;
-
-function TBoxHelper.IsDefault: Boolean;
-begin
-  Result := (Int64(TopLeft) = 0) and (Int64(BottomRight) = 0);
-end;
+uses
+  Math,
+  simba.random, simba.arraybuffer, simba.geometry;
 
 function TBoxHelper.RandomPoint: TPoint;
 begin
@@ -337,26 +296,5 @@ begin
     Swap(Result.Y1, Result.Y2);
 end;
 
-function Box(const X1, Y1, X2, Y2: Integer): TBox;
-begin
-  Result.X1 := X1;
-  Result.Y1 := Y1;
-  Result.X2 := X2;
-  Result.Y2 := Y2;
-end;
-
-function Box(const Mid: TPoint; const XRad, YRad: Integer): TBox;
-begin
-  Result.X1 := Mid.X-XRad;
-  Result.Y1 := Mid.Y-YRad;
-  Result.X2 := Mid.X+XRad;
-  Result.Y2 := Mid.Y+YRad;
-end;
-
-operator = (const Left, Right: TBox): Boolean;
-begin
-  Result := (Int64(Left.TopLeft)     = Int64(Right.TopLeft)) and
-            (Int64(Left.BottomRight) = Int64(Right.BottomRight));
-end;
-{$ENDIF}
+end.
 

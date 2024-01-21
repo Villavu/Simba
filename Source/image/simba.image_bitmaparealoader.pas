@@ -2,19 +2,19 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
 
   Because bitmaps are not compressed we can load a select area without loading the entire image.
 }
 unit simba.image_bitmaparealoader;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.image;
+  simba.base, simba.image, simba.box;
 
 procedure SimbaImage_LoadBitmapArea(Image: TSimbaImage; FileName: String; Area: TBox);
 

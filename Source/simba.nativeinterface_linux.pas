@@ -75,7 +75,7 @@ uses
   simba.process, simba.xlib, simba.windowhandle;
 
 const
-   _SC_PAGESIZE = 30;
+  _SC_PAGESIZE = 30;
 
 function sysconf(i: cint): clong; cdecl; external name 'sysconf';
 
@@ -313,7 +313,7 @@ end;
 function TSimbaNativeInterface_Linux.GetWindowBounds(Window: TWindowHandle): TBox;
 begin
   if not GetWindowBounds(Window, Result) then
-    Result := Box(0, 0, 0, 0);
+    Result := TBox.ZERO;
 end;
 
 procedure TSimbaNativeInterface_Linux.SetWindowBounds(Window: TWindowHandle; Bounds: TBox);

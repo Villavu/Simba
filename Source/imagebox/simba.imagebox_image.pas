@@ -89,7 +89,7 @@ type
 implementation
 
 uses
-  simba.image_lazbridge, simba.matrix_float;
+  simba.image_lazbridge, simba.matrix_float, simba.box;
 
 const
   HEATMAP_LOOKUP_TABLE: array[0..837] of TColor = (
@@ -406,12 +406,13 @@ end;
 
 procedure TSimbaImageBoxBitmap.DrawBox(Box: TBox; Color: TColor);
 begin
-  Box.Normalize();
-
-  DrawLine(TPoint.Create(Box.X1, Box.Y1), TPoint.Create(Box.X2, Box.Y1), Color);
-  DrawLine(TPoint.Create(Box.X2, Box.Y1), TPoint.Create(Box.X2, Box.Y2), Color);
-  DrawLine(TPoint.Create(Box.X2, Box.Y2), TPoint.Create(Box.X1, Box.Y2), Color);
-  DrawLine(TPoint.Create(Box.X1, Box.Y2), TPoint.Create(Box.X1, Box.Y1), Color);
+  with Box.Normalize() do
+  begin
+    DrawLine(TPoint.Create(X1, Y1), TPoint.Create(X2, Y1), Color);
+    DrawLine(TPoint.Create(X2, Y1), TPoint.Create(X2, Y2), Color);
+    DrawLine(TPoint.Create(X2, Y2), TPoint.Create(X1, Y2), Color);
+    DrawLine(TPoint.Create(X1, Y2), TPoint.Create(X1, Y1), Color);
+  end;
 end;
 
 procedure TSimbaImageBoxBitmap.DrawBoxTransparent(Box: TBox; Color: TColor; Transparency: Single);

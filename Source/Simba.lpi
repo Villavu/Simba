@@ -377,7 +377,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="174">
+    <Units Count="119">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -529,638 +529,418 @@
         <IsPartOfProject Value="True"/>
       </Unit23>
       <Unit24>
-        <Filename Value="script/imports/simba/simba.import_tpa.pas"/>
+        <Filename Value="package/simba.package_components.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit24>
       <Unit25>
-        <Filename Value="script/imports/simba/simba.import_colormath.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit25>
-      <Unit26>
-        <Filename Value="script/imports/simba/simba.import_encoding.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit26>
-      <Unit27>
-        <Filename Value="script/imports/simba/simba.import_debugimage.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit27>
-      <Unit28>
-        <Filename Value="script/imports/simba/simba.import_dialogs.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit28>
-      <Unit29>
-        <Filename Value="script/imports/simba/simba.import_file.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit29>
-      <Unit30>
-        <Filename Value="script/imports/simba/simba.import_finder.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit30>
-      <Unit31>
-        <Filename Value="script/imports/simba/simba.import_internal.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit31>
-      <Unit32>
-        <Filename Value="script/imports/simba/simba.import_matchtemplate.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit32>
-      <Unit33>
-        <Filename Value="script/imports/simba/simba.import_math.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit33>
-      <Unit34>
-        <Filename Value="script/imports/simba/simba.import_matrix.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit34>
-      <Unit35>
-        <Filename Value="script/imports/simba/simba.import_input.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit35>
-      <Unit36>
-        <Filename Value="script/imports/simba/simba.import_windowhandle.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit36>
-      <Unit37>
-        <Filename Value="script/imports/simba/simba.import_misc.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit37>
-      <Unit38>
-        <Filename Value="script/imports/simba/simba.import_process.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit38>
-      <Unit39>
-        <Filename Value="script/imports/simba/simba.import_slacktree.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit39>
-      <Unit40>
-        <Filename Value="script/imports/simba/simba.import_string.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit40>
-      <Unit41>
-        <Filename Value="script/imports/simba/simba.import_system.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit41>
-      <Unit42>
-        <Filename Value="script/imports/simba/simba.import_target.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit42>
-      <Unit43>
-        <Filename Value="script/imports/simba/simba.import_timing.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit43>
-      <Unit44>
-        <Filename Value="script/imports/simba/simba.import_web.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit44>
-      <Unit45>
-        <Filename Value="script/imports/simbaclasses/simba.import_class_json.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit45>
-      <Unit46>
-        <Filename Value="script/imports/simbaclasses/simba.import_class_imagebox.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit46>
-      <Unit47>
-        <Filename Value="script/imports/simbaclasses/simba.import_class_dtm.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit47>
-      <Unit48>
-        <Filename Value="script/imports/simbaclasses/simba.import_class_image.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit48>
-      <Unit49>
-        <Filename Value="package/simba.package_components.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit49>
-      <Unit50>
         <Filename Value="package/simba.package_form.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaPackageForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit50>
-      <Unit51>
+      </Unit25>
+      <Unit26>
         <Filename Value="package/simba.package_endpoint_github.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit51>
-      <Unit52>
+      </Unit26>
+      <Unit27>
         <Filename Value="package/simba.package.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit52>
-      <Unit53>
+      </Unit27>
+      <Unit28>
         <Filename Value="package/simba.package_installform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaPackageInstallForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit53>
-      <Unit54>
+      </Unit28>
+      <Unit29>
         <Filename Value="package/simba.package_endpoint_custom.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit54>
-      <Unit55>
+      </Unit29>
+      <Unit30>
         <Filename Value="package/simba.package_installer.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit55>
-      <Unit56>
+      </Unit30>
+      <Unit31>
         <Filename Value="simba.mouselogger.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit56>
-      <Unit57>
+      </Unit31>
+      <Unit32>
         <Filename Value="matchtemplate/simba.matchtemplate_ccorr.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit57>
-      <Unit58>
+      </Unit32>
+      <Unit33>
         <Filename Value="matchtemplate/simba.matchtemplate_helpers.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit58>
-      <Unit59>
+      </Unit33>
+      <Unit34>
         <Filename Value="matchtemplate/simba.matchtemplate_sqdiff.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit59>
-      <Unit60>
+      </Unit34>
+      <Unit35>
         <Filename Value="matchtemplate/simba.matchtemplate_ccoeff.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit60>
-      <Unit61>
-        <Filename Value="box.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit61>
-      <Unit62>
-        <Filename Value="script/imports/simba/simba.import_box.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit62>
-      <Unit63>
-        <Filename Value="generics.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit63>
-      <Unit64>
-        <Filename Value="boxarray.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit64>
-      <Unit65>
+      </Unit35>
+      <Unit36>
         <Filename Value="point.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit65>
-      <Unit66>
+      </Unit36>
+      <Unit37>
         <Filename Value="simba.geometry.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit66>
-      <Unit67>
-        <Filename Value="script/imports/simba/simba.import_point.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit67>
-      <Unit68>
-        <Filename Value="script/imports/simba/simba.import_boxarray.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit68>
-      <Unit69>
-        <Filename Value="matrix.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit69>
-      <Unit70>
+      </Unit37>
+      <Unit38>
         <Filename Value="forms/simba.dialog.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaDialogForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit70>
-      <Unit71>
+      </Unit38>
+      <Unit39>
         <Filename Value="string.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit71>
-      <Unit72>
-        <Filename Value="script/imports/simba/simba.import_variant.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit72>
-      <Unit73>
-        <Filename Value="script/imports/simba/simba.import_script.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit73>
-      <Unit74>
-        <Filename Value="script/imports/simba/simba.import_simba.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit74>
-      <Unit75>
+      </Unit39>
+      <Unit40>
         <Filename Value="simba.shapebox.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit75>
-      <Unit76>
+      </Unit40>
+      <Unit41>
         <Filename Value="algorithms/simba.algo_sort.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit76>
-      <Unit77>
+      </Unit41>
+      <Unit42>
         <Filename Value="forms/simba.shapeboxform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaShapeBoxForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit77>
-      <Unit78>
+      </Unit42>
+      <Unit43>
         <Filename Value="algorithms/simba.algo_unique.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit78>
-      <Unit79>
-        <Filename Value="script/imports/simbaclasses/simba.import_class_shapebox.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit79>
-      <Unit80>
-        <Filename Value="script/imports/simba/simba.import_quad.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit80>
-      <Unit81>
-        <Filename Value="quad.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit81>
-      <Unit82>
+      </Unit43>
+      <Unit44>
         <Filename Value="script/simba.script_compiler_rtti.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit82>
-      <Unit83>
-        <Filename Value="simba.atpa.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit83>
-      <Unit84>
-        <Filename Value="script/imports/simba/simba.import_atpa.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit84>
-      <Unit85>
+      </Unit44>
+      <Unit45>
         <Filename Value="simba.random.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit85>
-      <Unit86>
-        <Filename Value="script/imports/simba/simba.import_random.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit86>
-      <Unit87>
+      </Unit45>
+      <Unit46>
         <Filename Value="script/simba.compiler_dump.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit87>
-      <Unit88>
+      </Unit46>
+      <Unit47>
         <Filename Value="script/simba.plugin_dump.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit88>
-      <Unit89>
+      </Unit47>
+      <Unit48>
         <Filename Value="simba.encoding.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit89>
-      <Unit90>
-        <Filename Value="script/imports/simba/simba.import_compress.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit90>
-      <Unit91>
+      </Unit48>
+      <Unit49>
         <Filename Value="forms/simba.settingsform_outputbox.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaOutputBoxFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit91>
-      <Unit92>
+      </Unit49>
+      <Unit50>
         <Filename Value="simba.scriptbackup.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit92>
-      <Unit93>
+      </Unit50>
+      <Unit51>
         <Filename Value="simba.ide_initialization.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit93>
-      <Unit94>
+      </Unit51>
+      <Unit52>
         <Filename Value="simba.ide_analytics.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit94>
-      <Unit95>
+      </Unit52>
+      <Unit53>
         <Filename Value="codetools/simba.ide_codetools_setup.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit95>
-      <Unit96>
+      </Unit53>
+      <Unit54>
         <Filename Value="forms/simba.settingsform_backup.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaBackupFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit96>
-      <Unit97>
+      </Unit54>
+      <Unit55>
         <Filename Value="simba.darwin_axui.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit97>
-      <Unit98>
+      </Unit55>
+      <Unit56>
         <Filename Value="codetools/simba.ide_codetools_insight.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit98>
-      <Unit99>
+      </Unit56>
+      <Unit57>
         <Filename Value="codetools/simba.ide_codetools_parser.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit99>
-      <Unit100>
+      </Unit57>
+      <Unit58>
         <Filename Value="forms/simba.showdeclarationform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="ShowDeclarationForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit100>
-      <Unit101>
+      </Unit58>
+      <Unit59>
         <Filename Value="colormath/simba.colormath_distance.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit101>
-      <Unit102>
+      </Unit59>
+      <Unit60>
         <Filename Value="colormath/simba.colormath.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit102>
-      <Unit103>
+      </Unit60>
+      <Unit61>
         <Filename Value="finders/simba.finder_color.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit103>
-      <Unit104>
+      </Unit61>
+      <Unit62>
         <Filename Value="colormath/simba.colormath_aca.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit104>
-      <Unit105>
+      </Unit62>
+      <Unit63>
         <Filename Value="simba.finder.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit105>
-      <Unit106>
+      </Unit63>
+      <Unit64>
         <Filename Value="finders/simba.finder_image.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit106>
-      <Unit107>
+      </Unit64>
+      <Unit65>
         <Filename Value="colormath/simba.colormath_conversion.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit107>
-      <Unit108>
+      </Unit65>
+      <Unit66>
         <Filename Value="colormath/simba.colormath_distance_unrolled.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit108>
-      <Unit109>
+      </Unit66>
+      <Unit67>
         <Filename Value="simba.input.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit109>
-      <Unit110>
+      </Unit67>
+      <Unit68>
         <Filename Value="simba.target.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit110>
-      <Unit111>
+      </Unit68>
+      <Unit69>
         <Filename Value="script/simba.script_pluginloader.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit111>
-      <Unit112>
+      </Unit69>
+      <Unit70>
         <Filename Value="simba.ide_events.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit112>
-      <Unit113>
+      </Unit70>
+      <Unit71>
         <Filename Value="simba.threading.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit113>
-      <Unit114>
+      </Unit71>
+      <Unit72>
         <Filename Value="components/simba.component_statusbar.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit114>
-      <Unit115>
+      </Unit72>
+      <Unit73>
         <Filename Value="simba.ide_mainstatusbar.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit115>
-      <Unit116>
+      </Unit73>
+      <Unit74>
         <Filename Value="simba.tab_popupmenu.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit116>
-      <Unit117>
+      </Unit74>
+      <Unit75>
         <Filename Value="components/simba.component_treeview.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit117>
-      <Unit118>
+      </Unit75>
+      <Unit76>
         <Filename Value="components/simba.component_edit.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit118>
-      <Unit119>
+      </Unit76>
+      <Unit77>
         <Filename Value="components/simba.component_synedit.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit119>
-      <Unit120>
+      </Unit77>
+      <Unit78>
         <Filename Value="simba.theme.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit120>
-      <Unit121>
+      </Unit78>
+      <Unit79>
         <Filename Value="components/simba.component_menubar.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit121>
-      <Unit122>
+      </Unit79>
+      <Unit80>
         <Filename Value="components/simba.component_button.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit122>
-      <Unit123>
+      </Unit80>
+      <Unit81>
         <Filename Value="components/simba.component_scrollbar.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit123>
-      <Unit124>
-        <Filename Value="simba.matrix_float.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit124>
-      <Unit125>
-        <Filename Value="simba.matrix_int.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit125>
-      <Unit126>
+      </Unit81>
+      <Unit82>
         <Filename Value="../Third-Party/fpsha512_simba.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit126>
-      <Unit127>
+      </Unit82>
+      <Unit83>
         <Filename Value="../Third-Party/fpsha256_simba.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit127>
-      <Unit128>
+      </Unit83>
+      <Unit84>
         <Filename Value="../Third-Party/fphashutils_simba.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit128>
-      <Unit129>
+      </Unit84>
+      <Unit85>
         <Filename Value="package/simba.package_menubuilder.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit129>
-      <Unit130>
+      </Unit85>
+      <Unit86>
         <Filename Value="components/simba.component_buttonpanel.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit130>
-      <Unit131>
+      </Unit86>
+      <Unit87>
         <Filename Value="forms/simba.backupsform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaBackupsForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit131>
-      <Unit132>
+      </Unit87>
+      <Unit88>
         <Filename Value="simba.json.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit132>
-      <Unit133>
+      </Unit88>
+      <Unit89>
         <Filename Value="simba.ide_utils.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit133>
-      <Unit134>
-        <Filename Value="script/imports/simba/simba.import_threading.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit134>
-      <Unit135>
+      </Unit89>
+      <Unit90>
         <Filename Value="../Third-Party/fpqoi_simba.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit135>
-      <Unit136>
-        <Filename Value="simba.image_lazbridge.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit136>
-      <Unit137>
-        <Filename Value="simba.rgbsumtable.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit137>
-      <Unit138>
+      </Unit90>
+      <Unit91>
         <Filename Value="forms/simba.settingsform_codetools.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaCodetoolsFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
-      </Unit138>
-      <Unit139>
+      </Unit91>
+      <Unit92>
         <Filename Value="codetools/simba.ide_codetools_keywords.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit139>
-      <Unit140>
+      </Unit92>
+      <Unit93>
         <Filename Value="script/simba.script_pluginmethods.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit140>
-      <Unit141>
+      </Unit93>
+      <Unit94>
         <Filename Value="targets/simba.target_plugin.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit141>
-      <Unit142>
+      </Unit94>
+      <Unit95>
         <Filename Value="simba.externalimage.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit142>
-      <Unit143>
-        <Filename Value="script/imports/simbaclasses/simba.import_externalimage.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit143>
-      <Unit144>
+      </Unit95>
+      <Unit96>
         <Filename Value="simba.circle.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit144>
-      <Unit145>
-        <Filename Value="script/imports/simba/simba.import_circle.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit145>
-      <Unit146>
+      </Unit96>
+      <Unit97>
         <Filename Value="simba.quad.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit146>
-      <Unit147>
-        <Filename Value="simba.boxarray.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit147>
-      <Unit148>
+      </Unit97>
+      <Unit98>
         <Filename Value="forms/simba.findinfilesform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaFindInFilesForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit148>
-      <Unit149>
-        <Filename Value="script/imports/simba/simba.import_pointbuffer.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit149>
-      <Unit150>
-        <Filename Value="drawlineaa.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit150>
-      <Unit151>
-        <Filename Value="drawellipseaa.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit151>
-      <Unit152>
-        <Filename Value="drawpixelaa.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit152>
-      <Unit153>
-        <Filename Value="clearpixelaa.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit153>
-      <Unit154>
-        <Filename Value="simba.image_integral.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit154>
-      <Unit155>
+      </Unit98>
+      <Unit99>
         <Filename Value="image/circlefilled.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit155>
-      <Unit156>
+      </Unit99>
+      <Unit100>
         <Filename Value="image/circle.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit156>
-      <Unit157>
-        <Filename Value="image/setpixel.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit157>
-      <Unit158>
+      </Unit100>
+      <Unit101>
         <Filename Value="image/simba.image_gaussblur.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit158>
-      <Unit159>
+      </Unit101>
+      <Unit102>
         <Filename Value="forms/simba.downloadsimbaform.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaDownloadSimbaForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit159>
-      <Unit160>
+      </Unit102>
+      <Unit103>
         <Filename Value="image/polygonfilled.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit160>
-      <Unit161>
+      </Unit103>
+      <Unit104>
         <Filename Value="image/boxfilled.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit161>
-      <Unit162>
+      </Unit104>
+      <Unit105>
         <Filename Value="image/simba.image_bitmaparealoader.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit162>
-      <Unit163>
-        <Filename Value="image/lineaa.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit163>
-      <Unit164>
+      </Unit105>
+      <Unit106>
         <Filename Value="image/simba.image_utils.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit164>
-      <Unit165>
+      </Unit106>
+      <Unit107>
         <Filename Value="components/simba.component_toolbar.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit165>
-      <Unit166>
+      </Unit107>
+      <Unit108>
         <Filename Value="simba.ide_maintoolbar.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit166>
-      <Unit167>
+      </Unit108>
+      <Unit109>
         <Filename Value="simba.ide_mainmenubar.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit167>
-      <Unit168>
+      </Unit109>
+      <Unit110>
         <Filename Value="simba.internetsocket.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit168>
-      <Unit169>
+      </Unit110>
+      <Unit111>
         <Filename Value="simba.stringmap.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit169>
-      <Unit170>
+      </Unit111>
+      <Unit112>
         <Filename Value="script/imports/simba.import_stringmap.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit170>
-      <Unit171>
-        <Filename Value="simba.array_ord.pas"/>
+      </Unit112>
+      <Unit113>
+        <Filename Value="imagebox/simba.imagebox_new.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit171>
-      <Unit172>
-        <Filename Value="simba.array_string.pas"/>
+      </Unit113>
+      <Unit114>
+        <Filename Value="simba.nativeinterface.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit172>
-      <Unit173>
-        <Filename Value="simba.matrix_bool.pas"/>
+      </Unit114>
+      <Unit115>
+        <Filename Value="simba.nativeinterface_windows.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit173>
+      </Unit115>
+      <Unit116>
+        <Filename Value="simba.nativeinterface_darwin.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit116>
+      <Unit117>
+        <Filename Value="simba.nativeinterface_linux.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit117>
+      <Unit118>
+        <Filename Value="simba.box.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit118>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -161,7 +161,7 @@ uses
   Math,
   simba.array_pointarray, simba.arraybuffer, simba.geometry, simba.math,
   simba.algo_sort, simba.algo_intersection, simba.slacktree, simba.algo_unique,
-  simba.array_ord, simba.matrix_bool, simba.matrix_int;
+  simba.array_ord, simba.matrix_bool, simba.matrix_int, simba.box;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
 begin
@@ -1045,7 +1045,7 @@ var
   Ptr: PPoint;
   Upper: PtrUInt;
 begin
-  Result := TBox.Default();
+  Result := TBox.ZERO;
 
   if (Length(Self) > 0) then
   begin
@@ -1240,7 +1240,7 @@ begin
       begin
         Query := Tree.Data[I].Split;
         Nodes := Tree.RawRangeQuery(
-          Box(Query.X - Dist, Query.Y - Dist, Query.X + Dist, Query.Y + Dist)
+          TBox.Create(Query.X - Dist, Query.Y - Dist, Query.X + Dist, Query.Y + Dist)
         );
 
         for J := 0 to High(Nodes) do

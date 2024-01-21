@@ -255,7 +255,7 @@ uses
   simba.encoding, simba.compress,
   simba.nativeinterface,
   simba.image_lazbridge, simba.image_integral, simba.image_gaussblur,
-  simba.image_bitmaparealoader, simba.image_utils, simba.files;
+  simba.image_bitmaparealoader, simba.image_utils, simba.files, simba.box;
 
 function TSimbaImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean): Boolean;
 var
@@ -872,7 +872,7 @@ begin
     Exit;
   RGB := ColorToBGRA(Color);
 
-  Bounds := Points.Bounds().Clip(Box(0, 0, FWidth-1, FHeight-1));
+  Bounds := Points.Bounds().Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
 
   Self.DrawBoxInverted(Bounds, Color);
 
@@ -966,14 +966,14 @@ end;
 
 procedure TSimbaImage.DrawBoxInverted(B: TBox; Color: TColor);
 begin
-  Self.DrawBoxFilled(Box(0,    0,    B.X1,     B.Y1),      Color); //Top Left
-  Self.DrawBoxFilled(Box(0,    B.Y1, B.X1,     B.Y2),      Color); //Mid Left
-  Self.DrawBoxFilled(Box(0,    B.Y1, B.X1,     FHeight-1), Color); //Btm Left
-  Self.DrawBoxFilled(Box(B.X1, 0,    B.X2,     B.Y1),      Color); //Top Mid
-  Self.DrawBoxFilled(Box(B.X1, B.Y2, B.X2,     FHeight-1), Color); //Btm Mid
-  Self.DrawBoxFilled(Box(B.X2, 0,    FWidth-1, B.Y1),      Color); //Top Right
-  Self.DrawBoxFilled(Box(B.X2, B.Y1, FWidth-1, B.Y2),      Color); //Mid Right
-  Self.DrawBoxFilled(Box(B.X2, B.Y1, FWidth-1, FHeight-1), Color); //Btm Right
+  Self.DrawBoxFilled(TBox.Create(0,    0,    B.X1,     B.Y1),      Color); //Top Left
+  Self.DrawBoxFilled(TBox.Create(0,    B.Y1, B.X1,     B.Y2),      Color); //Mid Left
+  Self.DrawBoxFilled(TBox.Create(0,    B.Y1, B.X1,     FHeight-1), Color); //Btm Left
+  Self.DrawBoxFilled(TBox.Create(B.X1, 0,    B.X2,     B.Y1),      Color); //Top Mid
+  Self.DrawBoxFilled(TBox.Create(B.X1, B.Y2, B.X2,     FHeight-1), Color); //Btm Mid
+  Self.DrawBoxFilled(TBox.Create(B.X2, 0,    FWidth-1, B.Y1),      Color); //Top Right
+  Self.DrawBoxFilled(TBox.Create(B.X2, B.Y1, FWidth-1, B.Y2),      Color); //Mid Right
+  Self.DrawBoxFilled(TBox.Create(B.X2, B.Y1, FWidth-1, FHeight-1), Color); //Btm Right
 end;
 
 procedure TSimbaImage.DrawQuad(Quad: TQuad; Color: TColor);
@@ -997,7 +997,7 @@ var
 begin
   RGB := Color.ToBGRA();
 
-  Bounds := Quad.Bounds.Clip(Box(0, 0, FWidth-1, FHeight-1));
+  Bounds := Quad.Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
 
   Self.DrawBoxInverted(Bounds, Color);
 
@@ -1099,7 +1099,7 @@ end;
 
 procedure TSimbaImage.Clear;
 begin
-  DrawBoxFilled(Box(0, 0, FWidth-1, FHeight-1), FTransparentColor);
+  DrawBoxFilled(TBox.Create(0, 0, FWidth-1, FHeight-1), FTransparentColor);
 end;
 
 procedure TSimbaImage.Clear(Area: TBox);

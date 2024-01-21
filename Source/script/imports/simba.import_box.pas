@@ -13,7 +13,8 @@ procedure ImportBox(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  lptypes;
+  lptypes,
+  simba.box;
 
 (*
 TBox
@@ -33,7 +34,7 @@ Box
 *)
 procedure _LapeBox1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBox(Result)^ := Box(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PBox(Result)^ := TBox.Create(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
@@ -43,7 +44,7 @@ Box
 *)
 procedure _LapeBox2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBox(Result)^ := Box(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
+  PBox(Result)^ := TBox.Create(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*

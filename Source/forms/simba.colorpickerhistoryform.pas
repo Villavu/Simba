@@ -56,7 +56,7 @@ implementation
 
 uses
   lcltype, types,
-  simba.base, simba.main, simba.settings, simba.colormath, simba.colorpicker,
+  simba.base, simba.settings, simba.colormath,
   simba.ide_maintoolbar;
 
 type

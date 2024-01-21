@@ -4,7 +4,7 @@
 type
   TPointHelper = record Helper for TPoint
   const
-     ZERO: TPoint = (X: 0; Y: 0);
+    ZERO: TPoint = (X: 0; Y: 0);
   public
     class function Create(const X, Y: Integer): TPoint; static; inline;
 

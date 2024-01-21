@@ -218,7 +218,7 @@ end;
 function TSimbaNativeInterface_Windows.GetWindowBounds(Window: TWindowHandle): TBox;
 begin
   if not GetWindowBounds(Window, Result) then
-    Result := Box(0, 0, 0, 0);
+    Result := TBox.ZERO;
 end;
 
 procedure TSimbaNativeInterface_Windows.SetWindowBounds(Window: TWindowHandle; Bounds: TBox);

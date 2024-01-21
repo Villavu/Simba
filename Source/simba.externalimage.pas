@@ -1,3 +1,11 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+
+  provides a way to draw on a image which data is externally allocated.
+}
 unit simba.externalimage;
 
 {$i simba.inc}
@@ -42,8 +50,8 @@ type
     function InternalImage: TSimbaImage;
 
     function TryLock: Boolean;
-    procedure Lock; inline;
-    procedure Unlock; inline;
+    procedure Lock;
+    procedure Unlock;
 
     function Width: Integer; inline;
     function Height: Integer; inline;

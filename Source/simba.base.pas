@@ -2,6 +2,9 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+
+  Base types / methods that are used throughout Simba.
 }
 unit simba.base;
 
@@ -304,6 +307,7 @@ type
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
   PComparator = ^EComparator;
 
+  // Box
   TBox = record
   case Integer of
     0: (X1, Y1, X2, Y2: Integer);
@@ -311,9 +315,28 @@ type
   end;
   TBoxArray = array of TBox;
 
+  TBoxHelperBase = type helper for TBox
+  private
+    function GetCenter: TPoint; inline;
+    function GetWidth: Integer; inline;
+    function GetHeight: Integer; inline;
+  public
+    const ZERO: TBox = (X1: 0; Y1: 0; X2: 0; Y2: 0);
+
+    class function Create(const X1, Y1, X2, Y2: Integer): TBox; static; overload;
+    class function Create(const Center: TPoint; const XRad, YRad: Integer): TBox; static; overload;
+
+    property Width: Integer read GetWidth;
+    property Height: Integer read GetHeight;
+    property Center: TPoint read GetCenter;
+  end;
+
   PBox = ^TBox;
   PBoxArray = ^TBoxArray;
 
+  operator = (const Left, Right: TBox): Boolean;
+
+type
   TQuad = record
     Top: TPoint;
     Right: TPoint;
@@ -336,7 +359,6 @@ type
   PCircleArray = ^TCircleArray;
 
   {$DEFINE HEADER}
-    {$i box.inc}
     {$i point.inc}
     {$i string.inc}
   {$UNDEF HEADER}
@@ -361,19 +383,17 @@ procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String; Args: array of 
 function FlagsToString(const Flags: EDebugLnFlags): String;
 function FlagsFromString(var Str: String): EDebugLnFlags;
 
-function InRange(const AValue, AMin, AMax: Integer): Boolean; inline;
-function InRange(const AValue, AMin, AMax: Int64): Boolean; inline;
-function InRange(const AValue, AMin, AMax: Single): Boolean; inline;
-function InRange(const AValue, AMin, AMax: Double): Boolean; inline;
+function InRange(const AValue, AMin, AMax: Integer): Boolean; overload;
+function InRange(const AValue, AMin, AMax: Int64): Boolean; overload;
+function InRange(const AValue, AMin, AMax: Single): Boolean; overload;
+function InRange(const AValue, AMin, AMax: Double): Boolean; overload;
 
-function Min(const A, B: Integer): Integer; inline; overload;
-function Max(const A, B: Integer): Integer; inline; overload;
-function Min(const A, B: Int64): Int64; inline; overload;
-function Max(const A, B: Int64): Int64; inline; overload;
-function Min(const A, B: Single): Single; inline; overload;
-function Max(const A, B: Single): Single; inline; overload;
-function Min(const A, B: Double): Double; inline; overload;
-function Max(const A, B: Double): Double; inline; overload;
+function Min(const A, B: Int64): Int64; overload;
+function Max(const A, B: Int64): Int64; overload;
+function Min(const A, B: Single): Single; overload;
+function Max(const A, B: Single): Single; overload;
+function Min(const A, B: Double): Double; overload;
+function Max(const A, B: Double): Double; overload;
 
 procedure Swap(var A, B: Byte); overload;
 procedure Swap(var A, B: Integer); overload;
@@ -383,15 +403,17 @@ procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
 procedure Swap(var A, B: TColorBGRA); overload;
 
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String; inline; overload;
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: Integer): Integer; inline; overload;
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean; inline; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Int64): Int64; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean; overload;
 
 // Generic helpers
+generic function Min<_T>(const A, B: _T): _T;
+generic function Max<_T>(const A, B: _T): _T;
 generic procedure Swap<_T>(var A, B: _T);
 generic procedure MoveElement<_T>(var Arr: specialize TArray<_T>; AFrom, ATo: Integer);
-generic function Min<_T>(const Arr: specialize TArray<_T>): _T;
-generic function Max<_T>(const Arr: specialize TArray<_T>): _T;
+generic function MinA<_T>(const Arr: specialize TArray<_T>): _T;
+generic function MaxA<_T>(const Arr: specialize TArray<_T>): _T;
 generic function Sum<_T, _R>(var AValues: specialize TArray<_T>): _R;
 generic procedure Reverse<_T>(var Arr: specialize TArray<_T>);
 generic function Reversed<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
@@ -418,10 +440,47 @@ implementation
 
 uses
   Math, RegExpr, StrUtils, TypInfo,
-  simba.arraybuffer, simba.geometry, simba.random;
+  simba.arraybuffer, simba.geometry;
+
+function TBoxHelperBase.GetCenter: TPoint;
+begin
+  Result.X := (Self.X2 + Self.X1 + 1) div 2;
+  Result.Y := (Self.Y2 + Self.Y1 + 1) div 2;
+end;
+
+function TBoxHelperBase.GetWidth: Integer;
+begin
+  Result := (Self.X2 - Self.X1) + 1;
+end;
+
+function TBoxHelperBase.GetHeight: Integer;
+begin
+  Result := (Self.Y2 - Self.Y1) + 1;
+end;
+
+class function TBoxHelperBase.Create(const X1, Y1, X2, Y2: Integer): TBox;
+begin
+  Result.X1 := X1;
+  Result.Y1 := Y1;
+  Result.X2 := X2;
+  Result.Y2 := Y2;
+end;
+
+class function TBoxHelperBase.Create(const Center: TPoint; const XRad, YRad: Integer): TBox;
+begin
+  Result.X1 := Center.X - XRad;
+  Result.Y1 := Center.Y - YRad;
+  Result.X2 := Center.X + XRad;
+  Result.Y2 := Center.Y + YRad;
+end;
+
+operator = (const Left, Right: TBox): Boolean;
+begin
+  Result := (Int64(Left.TopLeft)     = Int64(Right.TopLeft)) and
+            (Int64(Left.BottomRight) = Int64(Right.BottomRight));
+end;
 
 {$DEFINE BODY}
-  {$i box.inc}
   {$i point.inc}
   {$i string.inc}
 {$UNDEF BODY}
@@ -529,86 +588,52 @@ end;
 
 function InRange(const AValue, AMin, AMax: Integer): Boolean;
 begin
-  Result := (AValue>=AMin) and (AValue<=AMax);
+  Result := (AValue >= AMin) and (AValue <= AMax);
 end;
 
 function InRange(const AValue, AMin, AMax: Int64): Boolean;
 begin
-  Result := (AValue>=AMin) and (AValue<=AMax);
+  Result := (AValue >= AMin) and (AValue <= AMax);
 end;
 
 function InRange(const AValue, AMin, AMax: Single): Boolean;
 begin
-  Result := (AValue>=AMin) and (AValue<=AMax);
+  Result := (AValue >= AMin) and (AValue <= AMax);
 end;
 
 function InRange(const AValue, AMin, AMax: Double): Boolean;
 begin
-  Result := (AValue>=AMin) and (AValue<=AMax);
-end;
-
-function Min(const A, B: Integer): Integer;
-begin
-  if A < B then
-    Result := A
-  else
-    Result := B;
-end;
-
-function Max(const A, B: Integer): Integer;
-begin
-  if A > B then
-    Result := A
-  else
-    Result := B;
+  Result := (AValue >= AMin) and (AValue <= AMax);
 end;
 
 function Min(const A, B: Int64): Int64;
 begin
-  if A < B then
-    Result := A
-  else
-    Result := B;
+  Result := specialize Min<Int64>(A, B);
 end;
 
 function Max(const A, B: Int64): Int64;
 begin
-  if A > B then
-    Result := A
-  else
-    Result := B;
+  Result := specialize Max<Int64>(A, B);
 end;
 
 function Min(const A, B: Single): Single;
 begin
-  if A < B then
-    Result := A
-  else
-    Result := B;
+  Result := specialize Min<Single>(A, B);
 end;
 
 function Max(const A, B: Single): Single;
 begin
-  if A > B then
-    Result := A
-  else
-    Result := B;
+  Result := specialize Max<Single>(A, B);
 end;
 
 function Min(const A, B: Double): Double;
 begin
-  if A < B then
-    Result := A
-  else
-    Result := B;
+  Result := specialize Min<Double>(A, B);
 end;
 
 function Max(const A, B: Double): Double;
 begin
-  if A > B then
-    Result := A
-  else
-    Result := B;
+  Result := specialize Max<Double>(A, B);
 end;
 
 procedure Swap(var A, B: Byte);
@@ -648,26 +673,33 @@ end;
 
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String;
 begin
-  if Val then
-    Result := IfTrue
-  else
-    Result := IfFalse;
+  Result := specialize IfThen<String>(Val, IfTrue, IfFalse);
 end;
 
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: Integer): Integer;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Int64): Int64;
 begin
-  if Val then
-    Result := IfTrue
-  else
-    Result := IfFalse;
+  Result := specialize IfThen<Int64>(Val, IfTrue, IfFalse);
 end;
 
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean;
 begin
-  if Val then
-    Result := IfTrue
+  Result := specialize IfThen<Boolean>(Val, IfTrue, IfFalse);
+end;
+
+generic function Min<_T>(const A, B: _T): _T;
+begin
+  if (A < B) then
+    Result := A
   else
-    Result := IfFalse;
+    Result := B;
+end;
+
+generic function Max<_T>(const A, B: _T): _T;
+begin
+  if (A > B) then
+    Result := A
+  else
+    Result := B;
 end;
 
 generic procedure Swap<_T>(var A, B: _T);
@@ -858,7 +890,7 @@ begin
   SetLength(Result, Count);
 end;
 
-generic function Min<_T>(const Arr: specialize TArray<_T>): _T;
+generic function MinA<_T>(const Arr: specialize TArray<_T>): _T;
 var
   I: Integer;
 begin
@@ -872,7 +904,7 @@ begin
       Result := Arr[I];
 end;
 
-generic function Max<_T>(const Arr: specialize TArray<_T>): _T;
+generic function MaxA<_T>(const Arr: specialize TArray<_T>): _T;
 var
   I: Integer;
 begin

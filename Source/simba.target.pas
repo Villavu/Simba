@@ -142,7 +142,7 @@ type
 implementation
 
 uses
-  simba.nativeinterface;
+  simba.nativeinterface, simba.box;
 
 procedure TSimbaTarget.SetAutoSetFocus(Value: Boolean);
 begin
@@ -541,7 +541,7 @@ var
 begin
   GetDimensions(W, H);
 
-  if FCustomClientArea.IsDefault() then
+  if (FCustomClientArea = TBox.ZERO) then
     if (ABounds.X1 = -1) and (ABounds.Y1 = -1) and (ABounds.X2 = -1) and (ABounds.Y2 = -1) then
     begin
       ABounds.X1 := 0;
@@ -630,7 +630,7 @@ end;
 
 procedure TSimbaTarget.ClearCustomClientArea;
 begin
-  FCustomClientArea := TBox.Default;
+  FCustomClientArea := TBox.ZERO;
 end;
 
 function TSimbaTarget.ToString: String;
