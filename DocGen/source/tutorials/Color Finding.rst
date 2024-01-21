@@ -2,7 +2,7 @@
 Color Finding
 #############
 
-Colorfinding with Simba 1.5
+Colorfinding with Simba 2.0
 
 The colorfinding concept has been changed after Simba 1.4, this new system adds several new mechanisms to aid you when you automate tasks using Simba.
 
