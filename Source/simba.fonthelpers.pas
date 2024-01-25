@@ -17,6 +17,8 @@ function GetFontSize(Control: TWinControl; IncAmount: Integer = 0): Integer;
 function IsFontFixed(FontName: String): Boolean;
 function GetFixedFonts: TStringArray;
 
+function GetDefaultFontName: String;
+
 implementation
 
 uses
@@ -108,6 +110,16 @@ begin
     Result := Strings.ToStringArray();
   finally
     Strings.Free();
+  end;
+end;
+
+function GetDefaultFontName: String;
+begin
+  with TBitmap.Create() do
+  try
+    Result := GetFontData(Canvas.Font.Reference.Handle).Name;
+  finally
+    Free();
   end;
 end;
 

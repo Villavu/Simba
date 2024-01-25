@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, LCLType,
-  simba.base;
+  simba.base, simba.image_lazbridge;
 
 type
   PSimbaImageBoxBitmap = ^TSimbaImageBoxBitmap;
@@ -28,7 +28,7 @@ type
     end;
   protected
     FBitmap: TBitmap;
-    FPixelFormat: String;
+    FPixelFormat: ELazPixelFormat;
     FOffset: TPoint;
     FRect: TRect;
 
@@ -89,7 +89,7 @@ type
 implementation
 
 uses
-  simba.image_lazbridge, simba.matrix_float, simba.box;
+  simba.box, simba.matrix_float;
 
 const
   HEATMAP_LOOKUP_TABLE: array[0..837] of TColor = (
@@ -300,9 +300,9 @@ procedure TSimbaImageBoxBitmap.DrawLine(Start, Stop: TPoint; Color: TColor);
 
 begin
   case FPixelFormat of
-    'BGR':  DrawBGR(BGR(Color));
-    'BGRA': DrawBGRA(BGRA(Color));
-    'ARGB': DrawARGB(ARGB(Color));
+    ELazPixelFormat.BGR:  DrawBGR(BGR(Color));
+    ELazPixelFormat.BGRA: DrawBGRA(BGRA(Color));
+    ELazPixelFormat.ARGB: DrawARGB(ARGB(Color));
   end;
 end;
 
@@ -361,9 +361,9 @@ procedure TSimbaImageBoxBitmap.DrawLineGap(Start, Stop: TPoint; Gap: Integer; Co
 
 begin
   case FPixelFormat of
-    'BGR':  DrawBGR(BGR(Color));
-    'BGRA': DrawBGRA(BGRA(Color));
-    'ARGB': DrawARGB(ARGB(Color));
+    ELazPixelFormat.BGR:  DrawBGR(BGR(Color));
+    ELazPixelFormat.BGRA: DrawBGRA(BGRA(Color));
+    ELazPixelFormat.ARGB: DrawARGB(ARGB(Color));
   end;
 end;
 
@@ -449,9 +449,9 @@ begin
   Transparency := 1.0 - Transparency;
 
   case FPixelFormat of
-    'BGR':  DrawBGR();
-    'BGRA': DrawBGRA();
-    'ARGB': DrawARGB();
+    ELazPixelFormat.BGR:  DrawBGR();
+    ELazPixelFormat.BGRA: DrawBGRA();
+    ELazPixelFormat.ARGB: DrawARGB();
   end;
 end;
 
@@ -478,9 +478,9 @@ begin
   Box.Normalize();
 
   case FPixelFormat of
-    'BGR':  DrawBGR(BGR(Color));
-    'BGRA': DrawBGRA(BGRA(Color));
-    'ARGB': DrawARGB(ARGB(Color));
+    ELazPixelFormat.BGR:  DrawBGR(BGR(Color));
+    ELazPixelFormat.BGRA: DrawBGRA(BGRA(Color));
+    ELazPixelFormat.ARGB: DrawARGB(ARGB(Color));
   end;
 end;
 
@@ -533,9 +533,9 @@ begin
     Exit;
 
   case FPixelFormat of
-    'BGR':  DrawBGR(BGR(Color));
-    'BGRA': DrawBGRA(BGRA(Color));
-    'ARGB': DrawARGB(ARGB(Color));
+    ELazPixelFormat.BGR:  DrawBGR(BGR(Color));
+    ELazPixelFormat.BGRA: DrawBGRA(BGRA(Color));
+    ELazPixelFormat.ARGB: DrawARGB(ARGB(Color));
   end;
 end;
 
@@ -582,9 +582,9 @@ procedure TSimbaImageBoxBitmap.DrawCircle(Center: TPoint; Radius: Integer; Color
 
 begin
   case FPixelFormat of
-    'BGR':  DrawBGR(BGR(Color));
-    'BGRA': DrawBGRA(BGRA(Color));
-    'ARGB': DrawARGB(ARGB(Color));
+    ELazPixelFormat.BGR:  DrawBGR(BGR(Color));
+    ELazPixelFormat.BGRA: DrawBGRA(BGRA(Color));
+    ELazPixelFormat.ARGB: DrawARGB(ARGB(Color));
   end;
 end;
 
@@ -613,9 +613,9 @@ procedure TSimbaImageBoxBitmap.DrawCircleFilled(Center: TPoint; Radius: Integer;
 
 begin
   case FPixelFormat of
-    'BGR':  DrawBGR(BGR(Color));
-    'BGRA': DrawBGRA(BGRA(Color));
-    'ARGB': DrawARGB(ARGB(Color));
+    ELazPixelFormat.BGR:  DrawBGR(BGR(Color));
+    ELazPixelFormat.BGRA: DrawBGRA(BGRA(Color));
+    ELazPixelFormat.ARGB: DrawARGB(ARGB(Color));
   end;
 end;
 
@@ -651,9 +651,9 @@ procedure TSimbaImageBoxBitmap.DrawHeatmap(const Mat: TSingleMatrix);
 
 begin
   case FPixelFormat of
-    'BGR':  DrawBGR();
-    'BGRA': DrawBGRA();
-    'ARGB': DrawARGB();
+    ELazPixelFormat.BGR:  DrawBGR();
+    ELazPixelFormat.BGRA: DrawBGRA();
+    ELazPixelFormat.ARGB: DrawARGB();
   end;
 end;
 

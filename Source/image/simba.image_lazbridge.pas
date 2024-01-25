@@ -16,10 +16,19 @@ uses
   Classes, SysUtils, Graphics, GraphType, IntfGraphics, FPImage,
   simba.base, simba.image;
 
+{$scopedenums on}
+type
+  ELazPixelFormat = (UNKNOWN, BGR, BGRA, RGB, RGBA, ARGB);
+{$scopedenums off}
+
+procedure LazImage_CopyRow_BGR(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGR); inline;
+procedure LazImage_CopyRow_ARGB(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorARGB); inline;
+procedure LazImage_CopyRow_BGRA(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGRA); inline;
+
 procedure LazImage_FromData(LazImage: TBitmap; Data: PColorBGRA; Width, Height: Integer);
 procedure LazImage_FromSimbaImage(LazImage: TBitmap; SimbaImage: TSimbaImage);
 function LazImage_ToSimbaImage(LazImage: TBitmap): TSimbaImage;
-function LazImage_PixelFormat(LazImage: TBitmap): String;
+function LazImage_PixelFormat(LazImage: TBitmap): ELazPixelFormat;
 
 procedure SimbaImage_ToFPImageWriter(SimbaImage: TSimbaImage; WriterClass: TFPCustomImageWriterClass; Stream: TStream);
 procedure SimbaImage_FromFPImageReader(SimbaImage: TSimbaImage; ReaderClass: TFPCustomImageReaderClass; Stream: TStream);
@@ -28,49 +37,61 @@ function SimbaImage_ToLazImage(SimbaImage: TSimbaImage): TBitmap;
 
 implementation
 
+uses
+  TypInfo;
+
 var
   SimbaRawImgDescription: TRawImageDescription;
+
+procedure LazImage_CopyRow_BGR(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGR);
+begin
+  while (PtrUInt(Source) < SourceUpper) do
+  begin
+    PColorBGR(Dest)^ := PColorBGR(Source)^; // Can just use first three bytes
+
+    Inc(Source);
+    Inc(Dest);
+  end;
+end;
+
+procedure LazImage_CopyRow_ARGB(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorARGB);
+begin
+  while (PtrUInt(Source) < SourceUpper) do
+  begin
+    PUInt32(Dest)^ := SwapEndian(PUInt32(Source)^); // reverse the bytes
+
+    Inc(Source);
+    Inc(Dest);
+  end;
+end;
+
+procedure LazImage_CopyRow_BGRA(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGRA);
+begin
+  Move(Source^, Dest^, SourceUpper - PtrUInt(Source)); // same formats, copy whole row
+end;
 
 procedure LazImage_FromData(LazImage: TBitmap; Data: PColorBGRA; Width, Height: Integer);
 var
   Source, Dest: PByte;
   SourceBytesPerLine, DestBytesPerLine: Integer;
-  Upper: PtrUInt;
+  SourceUpper: PtrUInt;
 
-  procedure BGR;
-  var
-    RowUpper: PtrUInt;
-    RowSource, RowDest: PByte;
+  procedure BGRA;
   begin
-    while (PtrUInt(Source) < Upper) do
+    while (PtrUInt(Source) < SourceUpper) do
     begin
-      RowSource := Source;
-      RowDest := Dest;
-      RowUpper := PtrUInt(Source + SourceBytesPerLine);
-
-      while (PtrUInt(RowSource) < RowUpper) do
-      begin
-        PColorRGB(RowDest)^ := PColorRGB(RowSource)^; // Can just use first three bytes
-
-        Inc(RowSource, SizeOf(TColorBGRA));
-        Inc(RowDest, SizeOf(TColorRGB));
-      end;
+      LazImage_CopyRow_BGRA(PColorBGRA(Source), PtrUInt(Source + SourceBytesPerLine), PColorBGRA(Dest));
 
       Inc(Source, SourceBytesPerLine);
       Inc(Dest, DestBytesPerLine);
     end;
   end;
 
-  procedure BGRA;
-  var
-    RowSource, RowDest: PByte;
+  procedure BGR;
   begin
-    while (PtrUInt(Source) < Upper) do
+    while (PtrUInt(Source) < SourceUpper) do
     begin
-      RowSource := Source;
-      RowDest := Dest;
-
-      Move(RowSource^, RowDest^, DestBytesPerLine);
+      LazImage_CopyRow_BGR(PColorBGRA(Source), PtrUInt(Source + SourceBytesPerLine), PColorBGR(Dest));
 
       Inc(Source, SourceBytesPerLine);
       Inc(Dest, DestBytesPerLine);
@@ -78,23 +99,10 @@ var
   end;
 
   procedure ARGB;
-  var
-    RowUpper: PtrUInt;
-    RowSource, RowDest: PByte;
   begin
-    while (PtrUInt(Source) < Upper) do
+    while (PtrUInt(Source) < SourceUpper) do
     begin
-      RowSource := Source;
-      RowDest := Dest;
-      RowUpper := PtrUInt(Source + SourceBytesPerLine);
-
-      while PtrUInt(RowSource) < RowUpper do
-      begin
-        PUInt32(RowDest)^ := SwapEndian(PUInt32(RowSource)^);
-
-        Inc(RowSource, SizeOf(TColorBGRA));
-        Inc(RowDest, SizeOf(TColorARGB));
-      end;
+      LazImage_CopyRow_ARGB(PColorBGRA(Source), PtrUInt(Source + SourceBytesPerLine), PColorARGB(Dest));
 
       Inc(Source, SourceBytesPerLine);
       Inc(Dest, DestBytesPerLine);
@@ -110,13 +118,14 @@ begin
 
   Source := PByte(Data);
   SourceBytesPerLine := Width * SizeOf(TColorBGRA);
-
-  Upper := PtrUInt(Source + (SourceBytesPerLine * Height));
+  SourceUpper := PtrUInt(Source + (SourceBytesPerLine * Height));
 
   case LazImage_PixelFormat(LazImage) of
-    'BGR':  BGR();
-    'BGRA': BGRA();
-    'ARGB': ARGB();
+    ELazPixelFormat.BGR:  BGR();
+    ELazPixelFormat.BGRA: BGRA();
+    ELazPixelFormat.ARGB: ARGB();
+    else
+      SimbaException('not supported');
   end;
 
   LazImage.EndUpdate();
@@ -210,43 +219,59 @@ begin
   Upper := PtrUInt(Source + (SourceBytesPerLine * LazImage.Height));
 
   case LazImage_PixelFormat(LazImage) of
-    'BGR':  BGR();
-    'BGRA': BGRA();
-    'ARGB': ARGB();
+    ELazPixelFormat.BGR:  BGR();
+    ELazPixelFormat.BGRA: BGRA();
+    ELazPixelFormat.ARGB: ARGB();
+    else
+      SimbaException('Not supported');
   end;
 end;
 
-function LazImage_PixelFormat(LazImage: TBitmap): String;
+function LazImage_PixelFormat(LazImage: TBitmap): ELazPixelFormat;
 
-  function isARGB: Boolean;
+  function isRGBA: Boolean;
   begin
-    // ARGB or ARGB but alpha is not used
     with LazImage.RawImage.Description do
-      Result := ((BitsPerPixel = 32) and (AlphaPrec = 8) and (((AlphaShift = 0) and (RedShift = 8) and (GreenShift = 16) and  (BlueShift = 24) and (ByteOrder = riboLSBFirst)) or ((AlphaShift = BitsPerPixel - 8) and (RedShift = BitsPerPixel - 16) and (GreenShift = BitsPerPixel - 24) and (BlueShift = BitsPerPixel - 32) and (ByteOrder = riboMSBFirst)))) or
-                ((BitsPerPixel = 32) and (AlphaPrec = 0) and (((RedShift = 8) and (GreenShift = 16) and (BlueShift = 24) and (ByteOrder = riboLSBFirst)) or ((RedShift = BitsPerPixel - 16) and (GreenShift = BitsPerPixel - 24) and (BlueShift = BitsPerPixel - 32) and (ByteOrder = riboMSBFirst))));
+      Result := (BitsPerPixel = 32) and (Depth = 32) and (RedShift = 0) and (GreenShift = 8) and (BlueShift = 16) and (AlphaShift = 24);
   end;
 
   function isBGRA: Boolean;
   begin
     with LazImage.RawImage.Description do
-      Result := ((BitsPerPixel = 32) and (((BlueShift = 0) and (GreenShift = 8) and (RedShift = 16) and (ByteOrder = riboLSBFirst)) or ((BlueShift = BitsPerPixel - 8) and (GreenShift = BitsPerPixel - 16) and (RedShift = BitsPerPixel - 24) and (ByteOrder = riboMSBFirst))));
+      Result := ((BitsPerPixel = 32) and (Depth = 32) and (ByteOrder = riboLSBFirst) and (BlueShift = 0) and (GreenShift = 8) and (RedShift = 16) and (AlphaShift = 24)) or
+                ((BitsPerPixel = 32) and (Depth = 24) and (ByteOrder = riboLSBFirst) and (BlueShift = 0) and (GreenShift = 8) and (RedShift = 16) and (AlphaShift = 0)); // 32bit but alpha not used
+  end;
+
+  function isARGB: Boolean;
+  begin
+    with LazImage.RawImage.Description do
+      Result := ((BitsPerPixel = 32) and (Depth = 32) and (ByteOrder = riboMSBFirst) and (BlueShift = 0) and (GreenShift = 8) and (RedShift = 16) and (AlphaShift = 24)) or
+                ((BitsPerPixel = 32) and (Depth = 24) and (ByteOrder = riboMSBFirst) and (BlueShift = 0) and (GreenShift = 8) and (RedShift = 16) and (AlphaShift = 0)); // 32bit but alpha not used
   end;
 
   function isBGR: Boolean;
   begin
     with LazImage.RawImage.Description do
-      Result := ((BitsPerPixel = 24) and (((BlueShift = 0) and (GreenShift = 8) and (RedShift = 16) and (ByteOrder = riboLSBFirst)) or ((BlueShift = BitsPerPixel - 8) and (GreenShift = BitsPerPixel - 16) and (RedShift = BitsPerPixel - 24) and (ByteOrder = riboMSBFirst))));
+      Result := (BitsPerPixel = 24) and (Depth = 24) and (ByteOrder = riboLSBFirst) and (BlueShift = 0) and (GreenShift = 8) and (RedShift = 16);
+  end;
+
+  function isRGB: Boolean;
+  begin
+    with LazImage.RawImage.Description do
+      Result := (BitsPerPixel = 24) and (Depth = 24) and (ByteOrder = riboMSBFirst) and (BlueShift = 0) and (GreenShift = 8) and (RedShift = 16);
   end;
 
 var
   ChannelCount: Integer;
 begin
+  Result := ELazPixelFormat.UNKNOWN;
+
   with LazImage.RawImage.Description do
   begin
     if ((BitsPerPixel and 7) <> 0) then
-      SimbaException('%d bit per pixel found but multiple of 8bit expected', [BitsPerPixel]);
-    if (BitsPerPixel < 24) then
-      SimbaException('%d bit per pixel found but at least 24bit expected', [BitsPerPixel]);
+      SimbaException('LazImage_PixelFormat: %d BitsPerPixel found but expected multiple of 8', [BitsPerPixel]);
+    if (BitsPerPixel < 24) or (BitsPerPixel > 32) then
+      SimbaException('LazImage_PixelFormat: %d BitsPerPixel found but expected 24..32', [BitsPerPixel]);
 
     ChannelCount := 0;
     if (RedPrec > 0)   then Inc(ChannelCount);
@@ -254,23 +279,22 @@ begin
     if (BluePrec > 0)  then Inc(ChannelCount);
 
     if (ChannelCount < 3) then
-      SimbaException('%d color channels found but 3 or 4 expected.', [ChannelCount]);
+      SimbaException('LazImage_PixelFormat: %d channels found but 3 or 4 expected.', [ChannelCount]);
 
-    if isARGB() then
-       Result := 'ARGB'
-    else
-    if isBGRA() then
-       Result := 'BGRA'
-    else
-    if isBGR() then
-       Result := 'BGR'
+         if isRGBA() then Result := ELazPixelFormat.RGBA
+    else if isBGRA() then Result := ELazPixelFormat.BGRA
+    else if isARGB() then Result := ELazPixelFormat.ARGB
+    else if isBGR()  then Result := ELazPixelFormat.BGR
+    else if isRGB()  then Result := ELazPixelFormat.RGB
     else
       SimbaException(
-        'Pixel format not supported: '                                               +
-        'BitsPerPixel: ' + IntToStr(BitsPerPixel)                                    + ', ' +
-        'RedShit: '      + IntToStr(RedShift)     + ', Prec: ' + IntToStr(RedPrec)   + ', ' +
-        'GreenShit: '    + IntToStr(GreenShift)   + ', Prec: ' + IntToStr(GreenPrec) + ', ' +
-        'BlueShift: '    + IntToStr(BlueShift)    + ', Prec: ' + IntToStr(BluePrec)  + ', ' +
+        'LazImage_PixelFormat: Pixel format not supported.'                              +
+        'ByteOrder: '    + GetEnumName(TypeInfo(TRawImageByteOrder), Integer(ByteOrder)) + ', ' +
+        'Depth: '        + IntToStr(Depth)                                               + ', ' +
+        'BitsPerPixel: ' + IntToStr(BitsPerPixel)                                        + ', ' +
+        'RedShit: '      + IntToStr(RedShift)     + ', Prec: ' + IntToStr(RedPrec)       + ', ' +
+        'GreenShit: '    + IntToStr(GreenShift)   + ', Prec: ' + IntToStr(GreenPrec)     + ', ' +
+        'BlueShift: '    + IntToStr(BlueShift)    + ', Prec: ' + IntToStr(BluePrec)      + ', ' +
         'AlphaShift: '   + IntToStr(AlphaShift)   + ', Prec: ' + IntToStr(AlphaPrec)
       );
   end;
@@ -278,76 +302,73 @@ end;
 
 procedure SimbaImage_ToFPImageWriter(SimbaImage: TSimbaImage; WriterClass: TFPCustomImageWriterClass; Stream: TStream);
 var
-  Writer: TFPCustomImageWriter;
   Img: TLazIntfImage;
+  Writer: TFPCustomImageWriter;
 begin
   Img := nil;
   Writer := nil;
-
   try
+    Writer := WriterClass.Create();
     Img := TLazIntfImage.Create(SimbaImage_ToRawImage(SimbaImage), False);
 
-    Writer := WriterClass.Create();
     Writer.ImageWrite(Stream, Img);
   finally
     if Assigned(Img) then
       Img.Free();
-    if Assigned(Writer) then
-      Writer.Free();
   end;
 end;
 
 procedure SimbaImage_FromFPImageReader(SimbaImage: TSimbaImage; ReaderClass: TFPCustomImageReaderClass; Stream: TStream);
 var
-  Reader: TFPCustomImageReader;
   Img: TLazIntfImage;
+  Reader: TFPCustomImageReader;
 begin
   Img := nil;
   Reader := nil;
-
   try
+    Reader := ReaderClass.Create();
+
     Img := TLazIntfImage.Create(0, 0);
     Img.DataDescription := SimbaRawImgDescription;
 
-    Reader := ReaderClass.Create();
     Reader.ImageRead(Stream, Img);
 
-    SimbaImage.LoadFromData(Img.Width, Img.Height, PColorBGRA(Img.PixelData), Img.Width);
+    SimbaImage.FromData(Img.Width, Img.Height, PColorBGRA(Img.PixelData), Img.Width);
   finally
-    if Assigned(Img) then
-      Img.Free();
-    if Assigned(Reader) then
-      Reader.Free();
+    Img.Free();
+    Reader.Free();
   end;
 end;
 
 function SimbaImage_ToRawImage(SimbaImage: TSimbaImage): TRawImage;
 begin
   Result.Init();
+  Result.Description.Init_BPP32_B8G8R8A8_BIO_TTB(SimbaImage.Width, SimbaImage.Height);
 
-  Result.Description.PaletteColorCount := 0;
-  Result.Description.MaskBitsPerPixel  := 0;
-  Result.Description.Width             := SimbaImage.Width;
-  Result.Description.Height            := SimbaImage.Height;
+  //Result.Description.PaletteColorCount := 0;
+  //Result.Description.MaskBitsPerPixel  := 0;
+  //Result.Description.Width             := SimbaImage.Width;
+  //Result.Description.Height            := SimbaImage.Height;
+  //
+  //Result.Description.Format       := ricfRGBA;
+  //Result.Description.ByteOrder    := riboLSBFirst;
+  //Result.Description.BitOrder     := riboBitsInOrder; // should be fine
+  //Result.Description.Depth        := 32;
+  //Result.Description.BitsPerPixel := 32;
+  //Result.Description.LineOrder    := riloTopToBottom;
+  //Result.Description.LineEnd      := rileDWordBoundary;
+  //
+  //Result.Description.RedPrec   := 8;
+  //Result.Description.GreenPrec := 8;
+  //Result.Description.BluePrec  := 8;
+  //Result.Description.AlphaPrec := 8;
+  //
+  //Result.Description.AlphaShift := 24;
+  //Result.Description.RedShift   := 16;
+  //Result.Description.GreenShift := 8;
+  //Result.Description.BlueShift  := 0;
 
-  Result.Description.Format       := ricfRGBA;
-  Result.Description.ByteOrder    := riboLSBFirst;
-  Result.Description.BitOrder     := riboBitsInOrder; // should be fine
-  Result.Description.Depth        := 24;
-  Result.Description.BitsPerPixel := 32;
-  Result.Description.LineOrder    := riloTopToBottom;
-  Result.Description.LineEnd      := rileDWordBoundary;
-
-  Result.Description.RedPrec   := 8;
-  Result.Description.GreenPrec := 8;
-  Result.Description.BluePrec  := 8;
-  Result.Description.AlphaPrec := 0;
-
-  Result.Description.RedShift   := 16;
-  Result.Description.GreenShift := 8;
-  Result.Description.BlueShift  := 0;
-
-  Result.DataSize := Result.Description.Width * Result.Description.Height * (Result.Description.BitsPerPixel shr 3);
+  Result.DataSize := Result.Description.Width * Result.Description.Height * SizeOf(TColorBGRA);
   Result.Data     := PByte(SimbaImage.Data);
 end;
 
@@ -359,7 +380,7 @@ begin
 end;
 
 initialization
-  SimbaRawImgDescription.Init_BPP32_B8G8R8_BIO_TTB(0, 0); // TColorBGRA format
+  SimbaRawImgDescription.Init_BPP32_B8G8R8A8_BIO_TTB(0, 0); // TColorBGRA format
 
 end.
 

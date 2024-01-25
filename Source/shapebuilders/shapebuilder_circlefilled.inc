@@ -1,6 +1,8 @@
-// Requires method `procedure _Row(const Y: Integer; X1, X2: Integer);`
+{$IF NOT DECLARED(_Row)}
+  {$ERROR _CircleFilled requires "procedure _Row(Y: Integer; X1, X2: Integer)"}
+{$ENDIF}
 
-procedure _CircleFilled(CenterX, CenterY, Radius: Integer);
+procedure _BuildCircleFilled(CenterX, CenterY, Radius: Integer);
 var
   X, Y: Integer;
   Radius2: Integer;

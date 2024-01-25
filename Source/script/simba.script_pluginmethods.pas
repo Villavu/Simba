@@ -47,14 +47,11 @@ type
 
     ExternalImage_Create: function(FreeOnTerminate: Boolean): Pointer; cdecl;
     ExternalImage_SetMemory: procedure(Img: Pointer; Data: PColorBGRA; AWidth, AHeight: Integer); cdecl;
-    ExternalImage_TryLock: function(Img: Pointer): Boolean; cdecl;
-    ExternalImage_Lock: procedure(Img: Pointer); cdecl;
-    ExternalImage_UnLock: procedure(Img: Pointer); cdecl;
-    ExternalImage_AddCallbackOnUnlock: procedure(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
-    ExternalImage_RemoveCallbackOnUnlock: procedure(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
+    ExternalImage_Resize: procedure(Img: Pointer; NewWidth, NewHeight: Integer); cdecl;
     ExternalImage_SetUserData: procedure(Img: Pointer; UserData: Pointer); cdecl;
     ExternalImage_GetUserData: function(Img: Pointer): Pointer; cdecl;
-    // Extend this but do not remove, reorder or change datatypes.
+
+    // Safe to extend this but do not modify!
   end;
 
 var
@@ -282,39 +279,19 @@ begin
   TSimbaExternalImage(Img).SetMemory(Data, AWidth, AHeight);
 end;
 
-function Plugin_ExternalImage_TryLock(Img: Pointer): Boolean; cdecl;
+procedure Plugin_ExternalImage_Resize(Img: Pointer; NewWidth, NewHeight: Integer); cdecl;
 begin
-  Result := TSimbaExternalImage(Img).TryLock();
-end;
-
-procedure Plugin_ExternalImage_Lock(Img: Pointer); cdecl;
-begin
-  TSimbaExternalImage(Img).Lock();
-end;
-
-procedure Plugin_ExternalImage_UnLock(Img: Pointer); cdecl;
-begin
-  TSimbaExternalImage(Img).UnLock();
-end;
-
-procedure Plugin_ExternalImage_AddCallbackOnUnlock(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
-begin
-  TSimbaExternalImage(Img).AddUnlockCallback(Callback);
-end;
-
-procedure Plugin_ExternalImage_RemoveCallbackOnUnlock(Img: Pointer; Callback: TSimbaExternalImageCallback); cdecl;
-begin
-  TSimbaExternalImage(Img).RemoveUnlockCallback(Callback);
+  TSimbaExternalImage(Img).Resize(NewWidth, NewHeight);
 end;
 
 procedure Plugin_ExternalImage_SetUserData(Img: Pointer; UserData: Pointer); cdecl;
 begin
-  TSimbaExternalImage(Img).SetUserData(UserData);
+  TSimbaExternalImage(Img).UserData := UserData;
 end;
 
 function Plugin_ExternalImage_GetUserData(Img: Pointer): Pointer; cdecl;
 begin
-  Result := TSimbaExternalImage(Img).GetUserData();
+  Result := TSimbaExternalImage(Img).UserData;
 end;
 
 initialization
@@ -344,13 +321,9 @@ initialization
     SetArrayLength := @Plugin_SetArrayLength;
     GetArrayLength := @Plugin_GetArrayLength;
 
-    ExternalImage_Create := @Plugin_ExternalImage_Create;
-    ExternalImage_SetMemory := @Plugin_ExternalImage_SetMemory;
-    ExternalImage_TryLock := @Plugin_ExternalImage_TryLock;
-    ExternalImage_Lock := @Plugin_ExternalImage_Lock;
-    ExternalImage_Unlock := @Plugin_ExternalImage_UnLock;
-    ExternalImage_AddCallbackOnUnlock := @Plugin_ExternalImage_AddCallbackOnUnlock;
-    ExternalImage_RemoveCallbackOnUnlock := @Plugin_ExternalImage_RemoveCallbackOnUnlock;
+    ExternalImage_Create      := @Plugin_ExternalImage_Create;
+    ExternalImage_SetMemory   := @Plugin_ExternalImage_SetMemory;
+    ExternalImage_Resize      := @Plugin_ExternalImage_Resize;
     ExternalImage_GetUserData := @Plugin_ExternalImage_GetUserData;
     ExternalImage_SetUserData := @Plugin_ExternalImage_SetUserData;
   end;

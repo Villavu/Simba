@@ -30,8 +30,8 @@ type
     GetImageData: function(Target: Pointer; X, Y, Width, Height: Int32; var Data: PColorBGRA; var DataWidth: Int32): Boolean; cdecl;
 
     MousePressed: function(Target: Pointer; Button: Int32): Boolean; cdecl;
-    MousePosition: function(Target: Pointer): TPoint; cdecl;
-    MouseTeleport: procedure(Target: Pointer; P: TPoint); cdecl;
+    MousePosition: procedure(Target: Pointer; out X, Y: Integer); cdecl;
+    MouseTeleport: procedure(Target: Pointer; X, Y: Int32); cdecl;
     MouseUp: procedure(Target: Pointer; Button: Int32); cdecl;
     MouseDown: procedure(Target: Pointer; Button: Int32); cdecl;
     MouseScroll: procedure(Target: Pointer; Scrolls: Int32); cdecl;
@@ -128,6 +128,7 @@ begin
     CheckExported('SimbaPluginTarget_RequestWithDebugImage', RequestWithDebugImage);
 
     Target := Result.RequestWithDebugImage(PChar(Args), DebugImage);
+    WriteLn('Target is: ', HexStr(Target));
   end;
 end;
 
@@ -167,7 +168,7 @@ begin
   begin
     CheckExported('SimbaPluginTarget_MousePosition', MousePosition);
 
-    Result := MousePosition(Target);
+    MousePosition(Target, Result.X, Result.Y);
   end;
 end;
 
@@ -177,7 +178,7 @@ begin
   begin
     CheckExported('SimbaPluginTarget_MouseTeleport', MouseTeleport);
 
-    MouseTeleport(Target, P);
+    MouseTeleport(Target, P.X, P.Y);
   end;
 end;
 

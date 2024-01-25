@@ -465,7 +465,7 @@ begin
 
   if GetDataAsBitmap(Bounds, Bitmap) then
   try
-    Mat := Bitmap.MatchTemplate(Templ, TM_CCOEFF_NORMED);
+    Mat := MatchTemplate(Bitmap, Templ, TM_CCOEFF_NORMED);
 
     Best := Mat.ArgMax();
     if (Mat[Best.Y, Best.X] >= MinMatch) then

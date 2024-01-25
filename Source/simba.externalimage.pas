@@ -4,7 +4,7 @@
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
   --------------------------------------------------------------------------
 
-  provides a way to draw on a image which data is externally allocated.
+  Provides a way to draw on an image which data is externally allocated.
 }
 unit simba.externalimage;
 
@@ -14,47 +14,55 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.base, simba.baseclass, simba.image, simba.simplelock;
+  simba.base, simba.baseclass, simba.image, simba.image_utils, simba.image_textdrawer,
+  simba.simplelock;
 
 type
-  TSimbaExternalImageCallback = procedure(Image: Pointer; UserData: Pointer); cdecl;
-
   PSimbaExternalImage = ^TSimbaExternalImage;
   TSimbaExternalImage = class(TSimbaBaseClass)
   protected
-    FImage: TSimbaImage;
     FLock: TSimpleEnterableLock;
-    FLockCount: Integer;
-    FUserData: Pointer;
 
-    FUnlockCallbacks: array of TSimbaExternalImageCallback;
+    FBackBuffer: TSimbaImage;
+
+    FData: PColorBGRA;
+    FWidth, FHeight: Integer;
+    FUserData: Pointer;
+    FInUpdate: Integer;
+
+    FDirty: Boolean;
+    FDirtyBox: TBox;
+
+    procedure CheckInUpdate; inline;
+
+    procedure addDirty(b: TBox); inline;
+    procedure addAllDirty; inline;
+
+    procedure Flush;
 
     function GetFontAntialiasing: Boolean;
     function GetFontBold: Boolean;
     function GetFontItalic: Boolean;
     function GetFontName: String;
     function GetFontSize: Single;
+    function GetUserData: Pointer;
 
+    procedure SetUserData(UserData: Pointer);
     procedure SetFontAntialiasing(Value: Boolean);
     procedure SetFontBold(Value: Boolean);
     procedure SetFontItalic(Value: Boolean);
     procedure SetFontName(Value: String);
     procedure SetFontSize(Value: Single);
   public
-    constructor Create;
+    constructor Create; reintroduce;
     destructor Destroy; override;
 
-    procedure AddUnlockCallback(Proc: TSimbaExternalImageCallback);
-    procedure RemoveUnlockCallback(Proc: TSimbaExternalImageCallback);
+    procedure BeginUpdate;
+    procedure EndUpdate;
 
-    function InternalImage: TSimbaImage;
-
-    function TryLock: Boolean;
-    procedure Lock;
-    procedure Unlock;
-
-    function Width: Integer; inline;
-    function Height: Integer; inline;
+    property Width: Integer read FWidth;
+    property Height: Integer read FHeight;
+    property UserData: Pointer read GetUserData write SetUserData;
 
     property FontName: String read GetFontName write SetFontName;
     property FontSize: Single read GetFontSize write SetFontSize;
@@ -62,241 +70,337 @@ type
     property FontBold: Boolean read GetFontBold write SetFontBold;
     property FontItalic: Boolean read GetFontItalic write SetFontItalic;
 
-    procedure SetUserData(UserData: Pointer);
-    function GetUserData: Pointer;
-
     procedure SetMemory(Data: PColorBGRA; AWidth, AHeight: Integer);
+    procedure Resize(NewWidth, NewHeight: Integer);
+
+    procedure SetAlpha(Value: Byte); overload;
+    procedure SetAlpha(Points: TPointArray; Value: Byte); overload;
+    procedure SetAlpha(Color: TColor; Value: Byte); overload;
+
+    // Point
+    procedure DrawATPA(ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);
+    procedure DrawTPA(TPA: TPointArray; Color: TColor; Alpha: Byte = 0);
+
+    // Line
+    procedure DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor; Alpha: Byte = 0);
+    procedure DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
+    procedure DrawLine(Start, Stop: TPoint; Color: TColor; Alpha: Byte = 0);
+    procedure DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor; Alpha: Byte = 0);
+
+    procedure Clear; overload;
+    procedure Clear(Box: TBox); overload;
+    procedure ClearInverted(Box: TBox);
+
+    procedure Fill(Color: TColor; Alpha: Byte = 0);
 
     function TextWidth(Text: String): Integer;
     function TextHeight(Text: String): Integer;
     function TextSize(Text: String): TPoint;
 
     procedure DrawText(Text: String; Position: TPoint; Color: TColor); overload;
-    procedure DrawText(Text: String; Box: TBox; ACenter: Boolean; Color: TColor); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor); overload;
     procedure DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);
 
-    procedure Fill(Color: TColor);
+    // Image
+    procedure DrawImage(Image: TSimbaImage; Location: TPoint; Alpha: Byte = 0);
 
-    procedure Clear;
-    procedure Clear(Area: TBox);
-    procedure ClearInverted(Area: TBox);
+    // Box
+    procedure DrawBox(Box: TBox; Color: TColor; Alpha: Byte = 0);
+    procedure DrawBoxFilled(Box: TBox; Color: TColor; Alpha: Byte = 0);
+    procedure DrawBoxInverted(Box: TBox; Color: TColor; Alpha: Byte = 0);
 
-    procedure Draw(Image: TSimbaImage; Position: TPoint);
+    // Poly
+    procedure DrawPolygon(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
+    procedure DrawPolygonFilled(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
+    procedure DrawPolygonInverted(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
 
-    procedure DrawATPA(ATPA: T2DPointArray; Color: TColor = -1);
-    procedure DrawTPA(Points: TPointArray; Color: TColor);
+    // Quad
+    procedure DrawQuad(Quad: TQuad; Color: TColor; Alpha: Byte = 0);
+    procedure DrawQuadFilled(Quad: TQuad; Color: TColor; Alpha: Byte = 0);
+    procedure DrawQuadInverted(Quad: TQuad; Color: TColor; Alpha: Byte = 0);
 
-    procedure DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
-    procedure DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);
+    // Circle
+    procedure DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
+    procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
+    procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
 
-    procedure DrawLine(Start, Stop: TPoint; Color: TColor);
+    // Antialiased
+    procedure DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single = 1.5);
+    procedure DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single = 1.5);
+    procedure DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single = 1.5);
 
-    procedure DrawPolygon(Points: TPointArray; Color: TColor);
-    procedure DrawPolygonFilled(Points: TPointArray; Color: TColor);
-    procedure DrawPolygonInverted(Points: TPointArray; Color: TColor);
-
-    procedure DrawCircle(Circle: TCircle; Color: TColor);
-    procedure DrawCircleFilled(Circle: TCircle; Color: TColor);
-    procedure DrawCircleInverted(Circle: TCircle; Color: TColor);
-
-    procedure DrawBox(B: TBox; Color: TColor);
-    procedure DrawBoxFilled(B: TBox; Color: TColor);
-    procedure DrawBoxInverted(B: TBox; Color: TColor);
-
-    procedure DrawQuad(Quad: TQuad; Color: TColor);
-    procedure DrawQuadFilled(Quad: TQuad; Color: TColor);
-    procedure DrawQuadInverted(Quad: TQuad; Color: TColor);
-
+    // Arrays
     procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);
     procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);
     procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);
-    procedure DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1);
+    procedure DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);
     procedure DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor = -1);
   end;
 
 implementation
 
+uses
+  Math,
+  simba.box, simba.quad,
+  simba.array_point, simba.array_pointarray, simba.array_box;
+
+procedure TSimbaExternalImage.CheckInUpdate;
+begin
+  if (FInUpdate <= 0) then
+    SimbaException('Not in BeginUpdate/EndUpdate');
+end;
+
+procedure TSimbaExternalImage.addDirty(b: TBox);
+begin
+  if (FInUpdate <= 0) then
+    SimbaException('Not in BeginUpdate/EndUpdate');
+
+  if FDirty then
+    FDirtyBox := FDirtyBox.Combine(b.Normalize())
+  else
+  begin
+    FDirty := True;
+    FDirtyBox := b.Normalize();
+  end;
+end;
+
+procedure TSimbaExternalImage.addAllDirty;
+begin
+  if (FInUpdate <= 0) then
+    SimbaException('Not in BeginUpdate/EndUpdate');
+
+  FDirty := True;
+  FDirtyBox.X1 := -$FFFFFF;
+  FDirtyBox.Y1 := -$FFFFFF;
+  FDirtyBox.X2 := $FFFFFF;
+  FDirtyBox.Y2 := $FFFFFF;
+end;
+
+procedure TSimbaExternalImage.Flush;
+var
+  Y: Integer;
+begin
+  if not FDirty then
+    Exit;
+
+  FDirty := False;
+  FDirtyBox := FDirtyBox.Expand(1).Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+
+  for Y := FDirtyBox.Y1 to FDirtyBox.Y2 do
+    Move(FBackBuffer.Data[Y * FWidth + FDirtyBox.X1], FData[Y * FWidth + FDirtyBox.X1], (FDirtyBox.X2 - FDirtyBox.X1) * SizeOf(TColorBGRA));
+end;
+
 function TSimbaExternalImage.GetFontAntialiasing: Boolean;
 begin
-  Lock();
-  try
-    Result := FImage.FontAntialiasing;
-  finally
-    Unlock();
-  end;
+  Result := FBackBuffer.FontAntialiasing;
 end;
 
 function TSimbaExternalImage.GetFontBold: Boolean;
 begin
-  Lock();
-  try
-    Result := FImage.FontBold;
-  finally
-    Unlock();
-  end;
+  Result := FBackBuffer.FontBold;
 end;
 
 function TSimbaExternalImage.GetFontItalic: Boolean;
 begin
-  Lock();
-  try
-    Result := FImage.FontItalic;
-  finally
-    Unlock();
-  end;
+  Result := FBackBuffer.FontItalic;
 end;
 
 function TSimbaExternalImage.GetFontName: String;
 begin
-  Lock();
-  try
-    Result := FImage.FontName;
-  finally
-    Unlock();
-  end;
+  Result := FBackBuffer.FontName;
 end;
 
 function TSimbaExternalImage.GetFontSize: Single;
 begin
-  Lock();
-  try
-    Result := FImage.FontSize;
-  finally
-    Unlock();
-  end;
+  Result := FBackBuffer.FontSize;
 end;
 
 procedure TSimbaExternalImage.SetFontAntialiasing(Value: Boolean);
 begin
-  Lock();
-  try
-    FImage.FontAntialiasing := Value;
-  finally
-    Unlock();
-  end;
+  FBackBuffer.FontAntialiasing := Value;
 end;
 
 procedure TSimbaExternalImage.SetFontBold(Value: Boolean);
 begin
-  Lock();
-  try
-    FImage.FontBold := Value;
-  finally
-    Unlock();
-  end;
+  FBackBuffer.FontBold := Value;
 end;
 
 procedure TSimbaExternalImage.SetFontItalic(Value: Boolean);
 begin
-  Lock();
-  try
-    FImage.FontItalic := Value;
-  finally
-    Unlock();
-  end;
+  FBackBuffer.FontItalic := Value;
 end;
 
 procedure TSimbaExternalImage.SetFontName(Value: String);
 begin
-  Lock();
-  try
-    FImage.FontName := Value;
-  finally
-    Unlock();
-  end;
+  FBackBuffer.FontName := Value;
 end;
 
 procedure TSimbaExternalImage.SetFontSize(Value: Single);
 begin
-  Lock();
-  try
-    FImage.FontSize := Value;
-  finally
-    Unlock();
-  end;
+  FBackBuffer.FontSize := Value;
 end;
 
 constructor TSimbaExternalImage.Create;
 begin
   inherited Create();
 
-  FImage := TSimbaImage.Create();
+  FBackBuffer := TSimbaImage.Create();
+  FBackBuffer.DefaultPixel.A := ALPHA_TRANSPARENT;
 end;
 
 destructor TSimbaExternalImage.Destroy;
 begin
-  if Assigned(FImage) then
-    FreeAndNil(FImage);
+  if Assigned(FBackBuffer) then
+    FreeAndNil(FBackBuffer);
 
   inherited Destroy();
 end;
 
-procedure TSimbaExternalImage.AddUnlockCallback(Proc: TSimbaExternalImageCallback);
+procedure TSimbaExternalImage.BeginUpdate;
 begin
   FLock.Enter();
-  FUnlockCallbacks += [Proc];
+
+  Inc(FInUpdate);
+  if (FInUpdate > 1) then
+    Exit;
+
+  FDirty := False;
+end;
+
+procedure TSimbaExternalImage.EndUpdate;
+begin
+  if (FInUpdate <= 0) then
+    SimbaException('Not in BeginUpdate');
+
+  Dec(FInUpdate);
+  if (FInUpdate > 0) then
+    Exit;
+
+  Flush();
+
   FLock.Leave();
-end;
-
-procedure TSimbaExternalImage.RemoveUnlockCallback(Proc: TSimbaExternalImageCallback);
-var
-  i: Integer;
-begin
-  FLock.Enter();
-  for i := High(FUnlockCallbacks) downto 0 do
-    if (FUnlockCallbacks[i] = Proc) then
-      Delete(FUnlockCallbacks, i, 1);
-  FLock.Leave();
-end;
-
-function TSimbaExternalImage.TryLock: Boolean;
-begin
-  Result := FLock.TryEnter();
-  if Result then
-    Inc(FLockCount);
-end;
-
-procedure TSimbaExternalImage.Lock;
-begin
-  FLock.Enter();
-  Inc(FLockCount);
-end;
-
-procedure TSimbaExternalImage.Unlock;
-var
-  i: Integer;
-begin
-  Dec(FLockCount);
-  if (FLockCount = 0) then
-    for i := 0 to High(FUnlockCallbacks) do
-      FUnlockCallbacks[i](Self, FUserData);
-  FLock.Leave();
-end;
-
-function TSimbaExternalImage.InternalImage: TSimbaImage;
-begin
-  Result := FImage;
-end;
-
-function TSimbaExternalImage.Width: Integer;
-begin
-  Result := FImage.Width;
-end;
-
-function TSimbaExternalImage.Height: Integer;
-begin
-  Result := FImage.Height;
 end;
 
 procedure TSimbaExternalImage.SetMemory(Data: PColorBGRA; AWidth, AHeight: Integer);
 begin
-  Lock();
+  BeginUpdate();
   try
-    FImage.ResetExternalData();
-    FImage.SetExternalData(Data, AWidth, AHeight);
+    FData := Data;
+    FWidth := AWidth;
+    FHeight := AHeight;
+
+    FBackBuffer.SetSize(AWidth, AHeight);
   finally
-    Unlock();
+    EndUpdate();
   end;
+end;
+
+procedure TSimbaExternalImage.Resize(NewWidth, NewHeight: Integer);
+var
+  Y: Integer;
+begin
+  BeginUpdate();
+  try
+    FWidth := NewWidth;
+    FHeight := NewHeight;
+
+    FBackBuffer.SetSize(FWidth, FHeight);
+    for Y := 0 to FHeight - 1 do
+      Move(FBackBuffer.Data[Y * FWidth], FData[Y * FWidth], FWidth * SizeOf(TColorBGRA));
+  finally
+    EndUpdate();
+  end;
+end;
+
+procedure TSimbaExternalImage.SetAlpha(Value: Byte);
+begin
+  addAllDirty();
+
+  FBackBuffer.SetAlpha(Value);
+end;
+
+procedure TSimbaExternalImage.SetAlpha(Points: TPointArray; Value: Byte);
+begin
+  addAllDirty();
+
+  FBackBuffer.SetAlpha(Points, Value);
+end;
+
+procedure TSimbaExternalImage.SetAlpha(Color: TColor; Value: Byte);
+begin
+  addAllDirty();
+
+  FBackBuffer.SetAlpha(Color, Value);
+end;
+
+procedure TSimbaExternalImage.DrawATPA(ATPA: T2DPointArray; Color: TColor; Alpha: Byte);
+begin
+  addDirty(ATPA.Bounds());
+
+  FBackBuffer.DrawATPA(ATPA, Color, Alpha);
+end;
+
+procedure TSimbaExternalImage.DrawTPA(TPA: TPointArray; Color: TColor; Alpha: Byte);
+begin
+  addDirty(TPA.Bounds());
+
+  FBackBuffer.DrawTPA(TPA, Color, Alpha);
+end;
+
+procedure TSimbaExternalImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor; Alpha: Byte);
+begin
+  addDirty(TBox.Create(ACenter, Size, Size));
+
+  FBackBuffer.DrawCrosshairs(ACenter, Size, Color, Alpha);
+end;
+
+procedure TSimbaExternalImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
+begin
+  addDirty(TBox.Create(ACenter, Radius, Radius));
+
+  FBackBuffer.DrawCross(ACenter, Radius, Color, Alpha);
+end;
+
+procedure TSimbaExternalImage.DrawLine(Start, Stop: TPoint; Color: TColor; Alpha: Byte);
+begin
+  addDirty(TBox.Create(Start.X, Start.Y, Stop.X, Stop.Y));
+
+  FBackBuffer.DrawLine(Start, Stop, Color, Alpha);
+end;
+
+procedure TSimbaExternalImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor; Alpha: Byte);
+begin
+  addDirty(TBox.Create(Start.X, Start.Y, Stop.X, Stop.Y));
+
+  FBackBuffer.DrawLineGap(Start, Stop, GapSize, Color, Alpha);
+end;
+
+procedure TSimbaExternalImage.Clear;
+begin
+  addAllDirty();
+
+  FBackBuffer.Clear();
+end;
+
+procedure TSimbaExternalImage.Clear(Box: TBox);
+begin
+  addDirty(Box);
+
+  FBackBuffer.Clear(Box);
+end;
+
+procedure TSimbaExternalImage.ClearInverted(Box: TBox);
+begin
+  addAllDirty();
+
+  FBackBuffer.ClearInverted(Box);
+end;
+
+procedure TSimbaExternalImage.Fill(Color: TColor; Alpha: Byte);
+begin
+  addAllDirty();
+
+  FBackBuffer.Fill(Color, Alpha);
 end;
 
 procedure TSimbaExternalImage.SetUserData(UserData: Pointer);
@@ -311,332 +415,192 @@ end;
 
 function TSimbaExternalImage.TextWidth(Text: String): Integer;
 begin
-  Lock();
-  try
-    Result := FImage.TextWidth(Text);
-  finally
-    Unlock();
-  end;
+  Result := FBackBuffer.TextWidth(Text);
 end;
 
 function TSimbaExternalImage.TextHeight(Text: String): Integer;
 begin
-  Lock();
-  try
-    Result := FImage.TextHeight(Text);
-  finally
-    Unlock();
-  end;
+  Result := FBackBuffer.TextHeight(Text);
 end;
 
 function TSimbaExternalImage.TextSize(Text: String): TPoint;
 begin
-  Lock();
-  try
-    Result := FImage.TextSize(Text);
-  finally
-    Unlock();
-  end;
+  Result := FBackBuffer.TextSize(Text);
 end;
 
 procedure TSimbaExternalImage.DrawText(Text: String; Position: TPoint; Color: TColor);
 begin
-  Lock();
-  try
-    FImage.DrawText(Text, Position, Color);
-  finally
-    Unlock();
-  end;
+  CheckInUpdate();
+
+  FBackBuffer.DrawText(Text, Position, Color);
+  addDirty(FBackBuffer.TextDrawer.DrawnBox);
 end;
 
-procedure TSimbaExternalImage.DrawText(Text: String; Box: TBox; ACenter: Boolean; Color: TColor);
+procedure TSimbaExternalImage.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor);
 begin
-  Lock();
-  try
-    FImage.DrawText(Text, Box, ACenter, Color);
-  finally
-    Unlock();
-  end;
+  CheckInUpdate();
+
+  FBackBuffer.DrawText(Text, Box, Alignments, Color);
+  addDirty(FBackBuffer.TextDrawer.DrawnBox);
 end;
 
 procedure TSimbaExternalImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);
 begin
-  Lock();
-  try
-    FImage.DrawTextLines(Text, Position, Color);
-  finally
-    Unlock();
-  end;
+  CheckInUpdate();
+
+  FBackBuffer.DrawTextLines(Text, Position, Color);
+  addDirty(FBackBuffer.TextDrawer.DrawnBox);
 end;
 
-procedure TSimbaExternalImage.Fill(Color: TColor);
+procedure TSimbaExternalImage.DrawImage(Image: TSimbaImage; Location: TPoint; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.Fill(Color);
-  finally
-    Unlock();
-  end;
+  addDirty(TBox.Create(Location.X, Location.Y, Location.X + Image.Width, Location.Y + Image.Height));
+
+  FBackBuffer.DrawImage(Image, Location, Alpha);
 end;
 
-procedure TSimbaExternalImage.Clear;
+procedure TSimbaExternalImage.DrawBox(Box: TBox; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.Clear();
-  finally
-    Unlock();
-  end;
+  addDirty(Box);
+
+  FBackBuffer.DrawBox(Box, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.Clear(Area: TBox);
+procedure TSimbaExternalImage.DrawBoxFilled(Box: TBox; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.Clear(Area);
-  finally
-    Unlock();
-  end;
+  addDirty(Box);
+
+  FBackBuffer.DrawBoxFilled(Box, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.ClearInverted(Area: TBox);
+procedure TSimbaExternalImage.DrawBoxInverted(Box: TBox; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.ClearInverted(Area);
-  finally
-    Unlock();
-  end;
+  addAllDirty();
+
+  FBackBuffer.DrawBoxInverted(Box, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.Draw(Image: TSimbaImage; Position: TPoint);
+procedure TSimbaExternalImage.DrawPolygon(Points: TPointArray; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.Draw(Image, Position);
-  finally
-    Unlock();
-  end;
+  addDirty(Points.Bounds);
+
+  FBackBuffer.DrawPolygon(Points, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.DrawATPA(ATPA: T2DPointArray; Color: TColor);
+procedure TSimbaExternalImage.DrawPolygonFilled(Points: TPointArray; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.DrawATPA(ATPA, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(Points.Bounds);
+
+  FBackBuffer.DrawPolygonFilled(Points, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.DrawTPA(Points: TPointArray; Color: TColor);
+procedure TSimbaExternalImage.DrawPolygonInverted(Points: TPointArray; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.DrawTPA(Points, Color);
-  finally
-    Unlock();
-  end;
+  addAllDirty();
+
+  FBackBuffer.DrawPolygonInverted(Points, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
+procedure TSimbaExternalImage.DrawQuad(Quad: TQuad; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.DrawCrosshairs(ACenter, Size, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(Quad.Bounds);
+
+  FBackBuffer.DrawQuad(Quad, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);
+procedure TSimbaExternalImage.DrawQuadFilled(Quad: TQuad; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.DrawCross(ACenter, Radius, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(Quad.Bounds);
+
+  FBackBuffer.DrawQuadFilled(Quad, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.DrawLine(Start, Stop: TPoint; Color: TColor);
+procedure TSimbaExternalImage.DrawQuadInverted(Quad: TQuad; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.DrawLine(Start, Stop, Color);
-  finally
-    Unlock();
-  end;
+  addAllDirty();
+
+  FBackBuffer.DrawQuadInverted(Quad, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.DrawPolygon(Points: TPointArray; Color: TColor);
+procedure TSimbaExternalImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.DrawPolygon(Points, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(TBox.Create(ACenter, Radius, Radius));
+
+  FBackBuffer.DrawCircle(ACenter, Radius, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.DrawPolygonFilled(Points: TPointArray; Color: TColor);
+procedure TSimbaExternalImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.DrawPolygonFilled(Points, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(TBox.Create(ACenter, Radius, Radius));
+
+  FBackBuffer.DrawCircleFilled(ACenter, Radius, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.DrawPolygonInverted(Points: TPointArray; Color: TColor);
+procedure TSimbaExternalImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
 begin
-  Lock();
-  try
-    FImage.DrawPolygonInverted(Points, Color);
-  finally
-    Unlock();
-  end;
+  addAllDirty();
+
+  FBackBuffer.DrawCircleInverted(ACenter, Radius, Color, Alpha);
 end;
 
-procedure TSimbaExternalImage.DrawCircle(Circle: TCircle; Color: TColor);
+procedure TSimbaExternalImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single);
 begin
-  Lock();
-  try
-    FImage.DrawCircle(Circle, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(TBox.Create(Ceil(Start.X - Thickness), Ceil(Start.Y - Thickness), Ceil(Stop.X - Thickness), Ceil(Stop.Y - Thickness)));
+  addDirty(TBox.Create(Ceil(Start.X + Thickness), Ceil(Start.Y + Thickness), Ceil(Stop.X + Thickness), Ceil(Stop.Y + Thickness)));
+
+  FBackBuffer.DrawLineAA(Start, Stop, Color, Thickness);
 end;
 
-procedure TSimbaExternalImage.DrawCircleFilled(Circle: TCircle; Color: TColor);
+procedure TSimbaExternalImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single);
 begin
-  Lock();
-  try
-    FImage.DrawCircleFilled(Circle, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(TBox.Create(ACenter, Ceil(XRadius + Thickness), Ceil(YRadius + Thickness)));
+
+  FBackBuffer.DrawEllipseAA(ACenter, XRadius, YRadius, Color, Thickness);
 end;
 
-procedure TSimbaExternalImage.DrawCircleInverted(Circle: TCircle; Color: TColor);
+procedure TSimbaExternalImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single);
 begin
-  Lock();
-  try
-    FImage.DrawCircleInverted(Circle, Color);
-  finally
-    Unlock();
-  end;
-end;
+  addDirty(TBox.Create(ACenter, Ceil(Radius + Thickness), Ceil(Radius + Thickness)));
 
-procedure TSimbaExternalImage.DrawBox(B: TBox; Color: TColor);
-begin
-  Lock();
-  try
-    FImage.DrawBox(B, Color);
-  finally
-    Unlock();
-  end;
-end;
-
-procedure TSimbaExternalImage.DrawBoxFilled(B: TBox; Color: TColor);
-begin
-  Lock();
-  try
-    FImage.DrawBoxFilled(B, Color);
-  finally
-    Unlock();
-  end;
-end;
-
-procedure TSimbaExternalImage.DrawBoxInverted(B: TBox; Color: TColor);
-begin
-  Lock();
-  try
-    FImage.DrawBoxInverted(B, Color);
-  finally
-    Unlock();
-  end;
-end;
-
-procedure TSimbaExternalImage.DrawQuad(Quad: TQuad; Color: TColor);
-begin
-  Lock();
-  try
-    FImage.DrawQuad(Quad, Color);
-  finally
-    Unlock();
-  end;
-end;
-
-procedure TSimbaExternalImage.DrawQuadFilled(Quad: TQuad; Color: TColor);
-begin
-  Lock();
-  try
-    FImage.DrawQuadFilled(Quad, Color);
-  finally
-    Unlock();
-  end;
-end;
-
-procedure TSimbaExternalImage.DrawQuadInverted(Quad: TQuad; Color: TColor);
-begin
-  Lock();
-  try
-    FImage.DrawQuadInverted(Quad, Color);
-  finally
-    Unlock();
-  end;
+  FBackBuffer.DrawCircleAA(ACenter, Radius, Color, Thickness);
 end;
 
 procedure TSimbaExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor);
+var
+  I: Integer;
 begin
-  Lock();
-  try
-    FImage.DrawQuadArray(Quads, Filled, Color);
-  finally
-    Unlock();
-  end;
+  for I := 0 to High(Quads) do
+    addDirty(Quads[I].Bounds());
+
+  FBackBuffer.DrawQuadArray(Quads, Filled, Color);
 end;
 
 procedure TSimbaExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor);
 begin
-  Lock();
-  try
-    FImage.DrawBoxArray(Boxes, Filled, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(Boxes.Merge());
+
+  FBackBuffer.DrawBoxArray(Boxes, Filled, Color);
 end;
 
 procedure TSimbaExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor);
 begin
-  Lock();
-  try
-    FImage.DrawPolygonArray(Polygons, Filled, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(Polygons.Bounds());
+
+  FBackBuffer.DrawPolygonArray(Polygons, Filled, Color);
 end;
 
-procedure TSimbaExternalImage.DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor);
+procedure TSimbaExternalImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor);
 begin
-  Lock();
-  try
-    FImage.DrawCircleArray(Circles, Filled, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(Centers.Bounds().Expand(Radius));
+
+  FBackBuffer.DrawCircleArray(Centers, Radius, Filled, Color);
 end;
 
 procedure TSimbaExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor);
 begin
-  Lock();
-  try
-    FImage.DrawCrossArray(Points, Radius, Color);
-  finally
-    Unlock();
-  end;
+  addDirty(Points.Bounds().Expand(Radius));
+
+  FBackBuffer.DrawCrossArray(Points, Radius, Color);
 end;
 
 end.

@@ -27,7 +27,7 @@ type
   {$POP}
 
   PChannelMultipliers = ^TChannelMultipliers;
-  TChannelMultipliers = array [0..2] of Single;
+  TChannelMultipliers = array[0..2] of Single;
 
 const
   DefaultMultipliers: TChannelMultipliers = (1, 1, 1);
@@ -37,6 +37,8 @@ type
   EColorSpaceHelper = type helper for EColorSpace
     function AsString: String;
   end;
+
+  // note: TColor stuff should not include alpha
 
   TColor = Graphics.TColor;
   PColor = ^TColor;

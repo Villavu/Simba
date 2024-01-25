@@ -232,16 +232,21 @@ type
     H,S,L: Single;
   end;
 
+  TColorBGR = packed record
+    B,G,R: Byte;
+  end;
+  PColorBGR = ^TColorBGR;
+
   TColorARGB = packed record
   case Byte of
     0: (A, R, G, B: Byte);
-    1: (AsInteger: Integer);
+    1: (AsInteger: UInt32);
   end;
 
   TColorBGRA = packed record
   case Byte of
     0: (B, G, R, A: Byte);
-    1: (AsInteger: Integer);
+    1: (AsInteger: UInt32);
   end;
 
   PColorARGB = ^TColorARGB;

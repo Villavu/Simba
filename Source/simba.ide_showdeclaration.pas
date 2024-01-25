@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight;
+  simba.base,
+  simba.ide_codetools_parser, simba.ide_codetools_insight, simba.ide_codetools_includes;
 
 procedure FindAndShowDeclaration(Script, ScriptFileName: String; CaretPos: Integer; What: String);
 
@@ -85,12 +86,14 @@ procedure ShowDeclaration(Declaration: TDeclaration);
   end;
 
 begin
-  if (Declaration.Parser is TPluginParser) then
+  if (Declaration.Parser is TCodetoolsPlugin) then
   begin
     DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [Declaration.Lexer.FileName]);
     DebugLn([EDebugLn.FOCUS], GetDeclarationText());
-  end
-  else
+
+    Exit;
+  end;
+
   if (Declaration.Lexer.FileName = '') or FileExists(Declaration.Lexer.FileName) then
   begin
     if FileExists(Declaration.Lexer.FileName) then
@@ -104,12 +107,12 @@ begin
       if CanSetFocus() then
         SetFocus();
     end;
-  end
-  else
-  begin
-    DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [Declaration.Lexer.FileName]);
-    DebugLn([EDebugLn.FOCUS], GetDeclarationText());
+
+    Exit;
   end;
+
+  DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [Declaration.Lexer.FileName]);
+  DebugLn([EDebugLn.FOCUS], GetDeclarationText());
 end;
 
 procedure ShowSimbaDeclaration(Header: String; FileName: String);

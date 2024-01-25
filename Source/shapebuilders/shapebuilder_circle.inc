@@ -1,8 +1,10 @@
 // https://zingl.github.io/bresenham.js
 
-// Requires method `procedure _SetPixel(X, Y: Integer);`
+{$IF NOT DECLARED(_SetPixel)}
+  {$ERROR _CircleFilled requires "procedure _SetPixel(X, Y: Integer);"}
+{$ENDIF}
 
-procedure _Circle(CenterX, CenterY, Radius: Integer);
+procedure _BuildCircle(CenterX, CenterY, Radius: Integer);
 var
   X, Y, Err: Integer;
 begin

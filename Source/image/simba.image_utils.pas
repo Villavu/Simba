@@ -10,14 +10,20 @@ uses
 
 // https://sashamaps.net/docs/resources/20-colors/
 const
-  DISTINCT_COLORS: TIntegerArray = (
+  DISTINCT_COLORS: TColorArray = (
     $4B19E6, $4BB43C, $19E1FF, $D86343, $3182F5, $B41E91, $F4D442,
     $E632F0, $45EFBF, $D4BEFA, $909946, $FFBEDC, $24639A, $C8FAFF,
     $000080, $C3FFAA, $008080, $B1D8FF, $750000, $A9A9A9
   );
 
-function GetDistinctColor(const Index: Integer): Integer; overload; inline;
-function GetDistinctColor(const Color, Index: Integer): Integer; overload; inline;
+  ALPHA_OPAQUE      = Byte(255);
+  ALPHA_TRANSPARENT = Byte(0);
+
+procedure BlendPixel(const Data: PColorBGRA; const DataW, DataH: Integer; const X,Y: Integer; const Color: TColorBGRA); overload; inline;
+procedure BlendPixel(const Pixel: PColorBGRA; const Color: TColorBGRA); overload; inline;
+
+function GetDistinctColor(const Index: Integer): Integer; overload;
+function GetDistinctColor(const Color, Index: Integer): Integer; overload;
 
 function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
 
@@ -27,6 +33,40 @@ implementation
 
 uses
   simba.array_point, simba.geometry;
+
+procedure BlendPixel(const Pixel: PColorBGRA; const Color: TColorBGRA);
+begin
+  if (Pixel^.A > 0) then
+    with Pixel^ do
+    begin
+      A := 255 - ((255 - A) * (255 - Color.A) div 255);
+      R := (R * Byte(255 - Color.A) + Color.R * Color.A) div 255;
+      G := (G * Byte(255 - Color.A) + Color.G * Color.A) div 255;
+      B := (B * Byte(255 - Color.A) + Color.B * Color.A) div 255;
+    end
+  else
+    Pixel^ := Color;
+end;
+
+procedure BlendPixel(const Data: PColorBGRA; const DataW, DataH: Integer; const X, Y: Integer; const Color: TColorBGRA);
+var
+  Pixel: PColorBGRA;
+begin
+  if (X >= 0) and (Y >= 0) and (X < DataW) and (Y < DataH) then
+  begin
+    Pixel := @Data[Y * DataW + X];
+    if (Pixel^.A > 0) then
+      with Pixel^ do
+      begin
+        A := 255 - ((255 - A) * (255 - Color.A) div 255);
+        R := (R * Byte(255 - Color.A) + Color.R * Color.A) div 255;
+        G := (G * Byte(255 - Color.A) + Color.G * Color.A) div 255;
+        B := (B * Byte(255 - Color.A) + Color.B * Color.A) div 255;
+      end
+    else
+      Pixel^ := Color;
+  end;
+end;
 
 function GetDistinctColor(const Index: Integer): Integer;
 begin

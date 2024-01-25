@@ -29,18 +29,26 @@ type
     FSystemFontsLoaded: Boolean;
 
     procedure LoadSystemFonts;
+
+    function GetFontNames: TStringArray;
   public
     function LoadFonts(Dir: String): Boolean;
     function GetFont(AName: String; ASize: Single; AAntialised, ABold, AItalic: Boolean): TFreeTypeFont;
 
-    property FontNames: TStringArray read FFontNames;
+    property FontNames: TStringArray read GetFontNames;
   end;
+
+  {$scopedenums on}
+  ETextDrawAlign = (LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM);
+  ETextDrawAlignSet = set of ETextDrawAlign;
+  {$scopedenums off}
 
   TSimbaTextDrawer = class(TFPImageFreeTypeDrawer)
   protected
     FWidth: Integer;
     FHeight: Integer;
     FData: PColorBGRA;
+    FCurrentX, FCurrentY: Integer;
     FCurrentColor: PColorBGRA;
     FSimbaImage: TObject;
     FFonts: TStringArray;
@@ -52,6 +60,8 @@ type
     FBold: Boolean;
     FItalic: Boolean;
     FLock: TSimpleEnterableLock;
+    FDrawn: Boolean;
+    FDrawnBox: TBox;
 
     procedure MoveToPixel(X, Y: Integer); override;
     function GetCurrentColor: TFPColor; override;
@@ -67,8 +77,11 @@ type
     property Bold: Boolean read FBold write FBold;
     property Italic: Boolean read FItalic write FItalic;
 
+    property Drawn: Boolean read FDrawn;
+    property DrawnBox: TBox read FDrawnBox;
+
     procedure DrawText(Text: String; Position: TPoint; Color: TColor); overload;
-    procedure DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor); overload;
 
     function TextWidth(Text: String): Integer;
     function TextHeight(Text: String): Integer;
@@ -84,7 +97,14 @@ implementation
 
 uses
   Forms, FileUtil, LazFileUtils, LazFreeTypeFontCollection,
-  simba.image;
+  simba.image, simba.image_utils, simba.fonthelpers;
+
+function TSimbaFreeTypeFontLoader.GetFontNames: TStringArray;
+begin
+  LoadSystemFonts();
+
+  Result := FFontNames;
+end;
 
 procedure TSimbaFreeTypeFontLoader.LoadSystemFonts;
 var
@@ -259,29 +279,52 @@ end;
 procedure TSimbaTextDrawer.MoveToPixel(X, Y: Integer);
 begin
   FCurrentColor := @FData[Y * FWidth + X];
+  FCurrentX := X;
+  FCurrentY := Y;
 end;
 
 function TSimbaTextDrawer.GetCurrentColor: TFPColor;
 begin
   with FCurrentColor^ do
   begin
-    Result.Red   := (R shl 8) or R;     // TFPColor fields are 16 bits. So duplicate our 8 bit data
-    Result.Green := (G shl 8) or G;
-    Result.Blue  := (B shl 8) or B;
-    Result.Alpha := (255 shl 8) or 255;
+    Result.Red   := R + (R shr 8); // TFPColor fields are 16 bits. So duplicate our 8 bit data
+    Result.Green := G + (G shr 8);
+    Result.Blue  := B + (B shr 8);
+    Result.Alpha := A + (A shr 8);
   end;
 end;
 
 procedure TSimbaTextDrawer.SetCurrentColorAndMoveRight(const AColor: TFPColor);
+var
+  BGRA: TColorBGRA;
 begin
-  FCurrentColor^ := TColorBGRA(((AColor.Blue shr 8) and $FF) or (AColor.Green and $FF00) or ((AColor.Red shl 8) and $FF0000) or (AColor.Alpha and $FF000000));
+  BGRA.R := AColor.Red div 257;
+  BGRA.G := AColor.Green div 257;
+  BGRA.B := AColor.Blue div 257;
+  BGRA.A := AColor.Alpha shr 8;
+
+  BlendPixel(FCurrentColor, BGRA);
+
+  if FDrawn then
+  begin
+    if (FCurrentX > FDrawnBox.X2) then FDrawnBox.X2 := FCurrentX else
+    if (FCurrentX < FDrawnBox.X1) then FDrawnBox.X1 := FCurrentX;
+    if (FCurrentY > FDrawnBox.Y2) then FDrawnBox.Y2 := FCurrentY else
+    if (FCurrentY < FDrawnBox.Y1) then FDrawnBox.Y1 := FCurrentY;
+  end else
+  begin
+    FDrawn := True;
+    FDrawnBox := TBox.Create(FCurrentX, FCurrentY, FCurrentX, FCurrentY);
+  end;
 
   Inc(FCurrentColor);
+  Inc(FCurrentX);
 end;
 
 procedure TSimbaTextDrawer.MoveRight;
 begin
   Inc(FCurrentColor);
+  Inc(FCurrentX);
 end;
 
 function TSimbaTextDrawer.GetClipRect: TRect;
@@ -303,6 +346,8 @@ begin
   FClipRect.Right := FWidth;
   FClipRect.Bottom := FHeight;
 
+  FDrawn := False;
+
   FFont := SimbaFreeTypeFontLoader.GetFont(FFontName, FSize, FFontAntialised, FBold, FItalic);
   if (FFont = nil) then
     SimbaException('Font "%s" not found', [FFontName]);
@@ -318,6 +363,7 @@ begin
   FSimbaImage := SimbaImage;
   FSize := 20;
   FFontAntialised := False;
+  FFontName := GetDefaultFontName();
 end;
 
 procedure TSimbaTextDrawer.DrawText(Text: String; Position: TPoint; Color: TColor);
@@ -330,15 +376,13 @@ begin
   end;
 end;
 
-procedure TSimbaTextDrawer.DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor);
+procedure TSimbaTextDrawer.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor);
+var
+  FreeTypeAlignments: TFreeTypeAlignments absolute Alignments;
 begin
   BeginDrawing();
-
   try
-    if Center then
-      inherited DrawTextRect(Text, FFont, Box.X1, Box.Y1, Box.X2, Box.Y2, TColorToFPColor(Color), [ftaCenter, ftaVerticalCenter])
-    else
-      inherited DrawTextRect(Text, FFont, Box.X1, Box.Y1, Box.X2, Box.Y2, TColorToFPColor(Color), [ftaLeft, ftaTop]);
+    inherited DrawTextRect(Text, FFont, Box.X1, Box.Y1, Box.X2, Box.Y2, TColorToFPColor(Color), FreeTypeAlignments);
   finally
     EndDrawing();
   end;
