@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
   ATScrollBar, LCLType, LMessages,
-  simba.base, simba.component_statusbar;
+  simba.base, simba.component_statusbar, simba.image_lazbridge;
 
 const
   ZOOM_LEVELS: array[1..9] of Integer = (
@@ -29,6 +29,8 @@ type
 
   TSimbaImageScrollBox = class(TCustomControl)
   protected
+    FPixelFormat: ELazPixelFormat;
+
     FImageBox: TSimbaImageBoxNew;
     FImageWidth: Integer;
     FImageHeight: Integer;
@@ -84,22 +86,25 @@ type
     procedure MoveTo(ImageXY: TPoint);
 
     property Background: TBitmap read FBackground;
+    property PixelFormat: ELazPixelFormat read FPixelFormat;
   end;
 
   TSimbaImageBoxNew = class(TCustomControl)
   protected
     FImageScrollBox: TSimbaImageScrollBox;
     FStatusBar: TSimbaStatusBar;
+    FPixelFormat: ELazPixelFormat;
+    FBackground: TBitmap;
 
-    function GetBackground: TBitmap;
     function GetMousePoint: TPoint;
   public
     constructor Create(AOwner: TComponent); override;
 
     property StatusBar: TSimbaStatusBar read FStatusBar;
-    property Background: TBitmap read GetBackground;
+    property Background: TBitmap read FBackground;
     property MousePoint: TPoint read GetMousePoint;
     property OnDblClick;
+    property PixelFormat: ELazPixelFormat read FPixelFormat;
   end;
 
 implementation
@@ -546,6 +551,8 @@ begin
   FBitmap := TBitmap.Create();
   FBackground := TBitmap.Create();
   FBackground.OnChange := @DoBackgroundChange;
+
+  FPixelFormat := LazImage_PixelFormat(FBackground);
 end;
 
 destructor TSimbaImageScrollBox.Destroy;
@@ -554,11 +561,6 @@ begin
   FreeAndNil(FBackground);
 
   inherited Destroy();
-end;
-
-function TSimbaImageBoxNew.GetBackground: TBitmap;
-begin
-  Result := FImageScrollBox.Background;
 end;
 
 function TSimbaImageBoxNew.GetMousePoint: TPoint;
@@ -583,6 +585,9 @@ begin
   FStatusBar.PanelTextMeasure[1] := '1234 x 1234';
   FStatusBar.PanelTextMeasure[2] := '1000%';
   FStatusBar.PanelText[2] := '100%';
+
+  FPixelFormat := FImageScrollBox.PixelFormat;
+  FBackground := FImageScrollBox.Background;
 end;
 
 end.

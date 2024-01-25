@@ -1,0 +1,23 @@
+var
+  myImage: TImage;
+  myBox: TBox;
+begin
+  myImage := TImage.Create(500,1000);
+  myImage.Fill(Colors.DARK_GRAY);
+
+  myImage.SetFontAntialiasing(True);
+  myImage.SetFontSize(20);
+
+  myImage.DrawTextLines(TImage.FontNames, [10,10], Colors.BLACK);
+
+  myBox := [225,25,450,240];
+  myImage.DrawBox(myBox, Colors.RED);
+  myImage.DrawText(FormatDateTime('c', Now()), myBox, [ETextDrawAlignment.CENTER,  ETextDrawAlignment.VERTICAL_CENTER], Colors.BLACK);
+
+  myImage.SetFontBold(True);
+  myImage.SetFontSize(50);
+  myImage.DrawText(IntToStr(Random(10000)), [225, 300], Colors.NAVY);
+
+  myImage.Show();
+  myImage.Free();
+end.

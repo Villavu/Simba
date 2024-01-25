@@ -207,6 +207,7 @@ begin
   AddNode('JSON',                 'EXAMPLE_JSON'                );
   AddNode('Form',                 'EXAMPLE_FORM'                );
   AddNode('IRC',                  'EXAMPLE_IRC'                 );
+  AddNode('Draw Text',            'EXAMPLE_DRAWTEXT'            );
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);

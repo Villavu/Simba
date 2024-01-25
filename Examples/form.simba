@@ -38,6 +38,8 @@ var
   List: TLazListBox;
   Lbl: TLazLabel;
   Panel: TLazPanel;
+  Img: TLazImage;
+  SimbaImg: TImage;
 begin
   Form := TLazForm.Create();
   Form.SetCaption('Example form');
@@ -48,6 +50,16 @@ begin
   Form.SetPosition(poScreenCenter);
   Form.SetColor(Colors.DARK_GREY);
   Form.SetBorderStyle(bsSingle); // Do not allow resizing
+
+  SimbaImg := TImage.CreateFromTarget([0,0,400,400]);
+
+  Img := TLazImage.Create(Form);
+  Img.SetParent(Form);
+  Img.SetBounds(400,200,200,200);
+  Img.SetStretch(True);
+  Img.GetPicture().SetBitmap(SimbaImg.ToLazBitmap());
+
+  SimbaImg.Free();
 
   Button := TLazButton.Create(Form);
   Button.SetParent(Form);

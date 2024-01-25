@@ -23,7 +23,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.baseclass;
+  simba.base, simba.baseclass, simba.image;
 
 type
   PTMFormula = ^ETMFormula;
@@ -43,10 +43,17 @@ type
     Height: Integer;
   end;
 
+// TIntegerMatrix
 function MatchTemplateCache(Image, Template: TIntegerMatrix; Formula: ETMFormula): TMatchTemplateCacheBase; overload;
 function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload;
 function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload;
-function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload;
+
+// TSimbaImage
+function MatchTemplateCache(Image, Template: TSimbaImage; Formula: ETMFormula): TMatchTemplateCacheBase; overload;
+function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix; overload;
+function MatchTemplateMask(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix; overload;
+function MatchTemplate(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix; overload;
 
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
 
@@ -173,6 +180,26 @@ begin
     TM_CCORR:         Result := MatchTemplate_CCORR(Image, Template, False);
     TM_CCORR_NORMED:  Result := MatchTemplate_CCORR(Image, Template, True);
   end;
+end;
+
+function MatchTemplateCache(Image, Template: TSimbaImage; Formula: ETMFormula): TMatchTemplateCacheBase;
+begin
+  Result := MatchTemplateCache(Image.ToMatrix(), Template.ToMatrix(), Formula);
+end;
+
+function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
+begin
+  Result := MatchTemplateMask(Cache, Template.ToMatrix(), Formula);
+end;
+
+function MatchTemplateMask(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
+begin
+  Result := MatchTemplateMask(Image.ToMatrix(), Template.ToMatrix(), Formula);
+end;
+
+function MatchTemplate(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
+begin
+  Result := MatchTemplate(Image.ToMatrix(), Template.ToMatrix(), Formula);
 end;
 
 initialization

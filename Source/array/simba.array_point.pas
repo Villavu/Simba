@@ -544,8 +544,12 @@ begin
   if (Length(Self) > 1) then
   begin
     for I := 0 to High(Self) - 1 do
+    begin
       Buffer.Add(TPointArray.CreateFromLine(Self[I], Self[I+1]));
+      Buffer.Pop(); // dont duplicate self[I+1]
+    end;
     Buffer.Add(TPointArray.CreateFromLine(Self[High(Self)], Self[0]));
+    Buffer.Pop(); // dont duplicate self[0]
   end;
 
   Result := Buffer.ToArray(False);
@@ -869,7 +873,7 @@ begin
   for Row in Rows() do
     for I := 1 to High(Row) do
       if TSimbaGeometry.PointInPolygon((Row[I-1] + Row[I]) div 2, Self) then
-        HorzLine(Row[0].Y, Row[I-1].X, Row[I].X);
+        HorzLine(Row[0].Y, Row[I-1].X + 1, Row[I].X - 1);
 
   Result := Buffer.ToArray(False);
 end;

@@ -1,4 +1,7 @@
 // https://blog.ivank.net/fastest-gaussian-blur.html
+// Olly:
+//  Hacked in `ignore` param to ignore a pixel, seems to work at first glance.
+//  This does mean the edges will be sharp, but might be useful.
 unit simba.image_gaussblur;
 
 {$i simba.inc}
@@ -9,7 +12,7 @@ uses
   Classes, SysUtils,
   simba.base;
 
-procedure imgGaussBlur(radius: Double; var r,g,b: TByteArray; width, height: Integer);
+procedure imgGaussBlur(radius: Double; var r,g,b: TByteArray; ignore: TBooleanArray; width, height: Integer);
 
 implementation
 
@@ -42,7 +45,7 @@ begin
   end;
 end;
 
-procedure boxBlurH_4(var scl, tcl: TByteArray; w, h: Integer; r: Integer);
+procedure boxBlurH_4(var scl, tcl: TByteArray; ignore: TBooleanArray; w, h: Integer; r: Integer);
 var
   iarr: Double;
   i,j: Integer;
@@ -54,6 +57,9 @@ begin
   for i := 0 to h-1 do
   begin
     ti := i * w;
+    if (ignore[ti]) then
+      Continue;
+
     li := ti;
     ri := Round(ti + r);
     fv := scl[ti];
@@ -90,7 +96,7 @@ begin
   end;
 end;
 
-procedure boxBlurT_4(var scl, tcl: TByteArray; w, h: Integer; r: Integer);
+procedure boxBlurT_4(var scl, tcl: TByteArray; ignore: TBooleanArray; w, h: Integer; r: Integer);
 var
   iarr: Double;
   i,j: Integer;
@@ -138,25 +144,22 @@ begin
   end;
 end;
 
-procedure boxBlur_4(var scl, tcl: TByteArray; w,h: Integer; r: Integer);
-var
-  i: Integer;
+procedure boxBlur_4(var scl, tcl: TByteArray; skip: TBooleanArray; w,h: Integer; r: Integer);
 begin
-  for i:=0 to High(scl) do
-    tcl[i] := scl[i];
+  Move(scl[0], tcl[0], Length(scl) * SizeOf(Byte));
 
-  boxBlurH_4(tcl, scl, w, h, r);
-  boxBlurT_4(scl, tcl, w, h, r);
+  boxBlurH_4(tcl, scl, skip, w, h, r);
+  boxBlurT_4(scl, tcl, skip, w, h, r);
 end;
 
-procedure gaussBlur_4(var scl, tcl: TByteArray; w,h: Integer; r: Double; bxs: TIntegerArray);
+procedure gaussBlur_4(var scl, tcl: TByteArray; skip: TBooleanArray; w,h: Integer; r: Double; bxs: TIntegerArray);
 begin
-  boxBlur_4(scl, tcl, w, h, (bxs[0] - 1) div 2);
-  boxBlur_4(tcl, scl, w, h, (bxs[1] - 1) div 2);
-  boxBlur_4(scl, tcl, w, h, (bxs[2] - 1) div 2);
+  boxBlur_4(scl, tcl, skip, w, h, (bxs[0] - 1) div 2);
+  boxBlur_4(tcl, scl, skip, w, h, (bxs[1] - 1) div 2);
+  boxBlur_4(scl, tcl, skip, w, h, (bxs[2] - 1) div 2);
 end;
 
-procedure imgGaussBlur(radius: Double; var r, g, b: TByteArray; width, height: Integer);
+procedure imgGaussBlur(radius: Double; var r, g, b: TByteArray; ignore: TBooleanArray; width, height: Integer);
 var
   outR, outG, outB: TByteArray;
   boxes: TIntegerArray;
@@ -167,9 +170,9 @@ begin
 
   boxes := boxesForGauss(radius, 3);
 
-  gaussBlur_4(r, outR, width, height-1, radius, boxes);
-  gaussBlur_4(g, outG, width, height, radius, boxes);
-  gaussBlur_4(b, outB, width, height, radius, boxes);
+  gaussBlur_4(r, outR, ignore, width, height, radius, boxes);
+  gaussBlur_4(g, outG, ignore, width, height, radius, boxes);
+  gaussBlur_4(b, outB, ignore, width, height, radius, boxes);
 
   r := outR;
   g := outG;

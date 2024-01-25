@@ -1475,8 +1475,11 @@ begin
 
 
   CurrentString := s;
-  if p >= 0 then
-    Position := p;
+  //if p >= 0 then
+  //  Position := p;
+
+  TheForm.Position := 0;
+  TheForm.Scroll.Position := 0;
 
   if Assigned(OnExecute) then
     OnExecute(Self);

@@ -3,9 +3,9 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 
-  Color space converting.
+  Color space converting, includes lots of code from: https://github.com/slackydev/colorlib
 
-  Lots of code from: https://github.com/slackydev/colorlib
+  note: TColor stuff should not include alpha
 }
 unit simba.colormath_conversion;
 
@@ -63,12 +63,12 @@ begin
   Result.B := Color shr B_BIT and $FF;
   Result.G := Color shr G_BIT and $FF;
   Result.R := Color shr R_BIT and $FF;
-  Result.A := Color shr A_BIT and $FF;
+  Result.A := 0;
 end;
 
 class function TSimbaColorConversion.BGRAToColor(const BGRA: TColorBGRA): TColor;
 begin
-  Result := TColor(BGRA.R or BGRA.G shl G_BIT or BGRA.B shl B_BIT or BGRA.A shl A_BIT);
+  Result := TColor(BGRA.R or BGRA.G shl G_BIT or BGRA.B shl B_BIT);
 end;
 
 class function TSimbaColorConversion.ColorToRGB(const Color: TColor): TColorRGB;

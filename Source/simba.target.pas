@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.image, simba.externalimage,
+  simba.base, simba.image, simba.image_utils, simba.externalimage,
   simba.target_eios, simba.target_window, simba.target_image, simba.target_plugin;
 
 type
@@ -311,6 +311,7 @@ begin
   if GetImageData(ABounds, Data, DataWidth) then
   try
     Result := TSimbaImage.CreateFromData(ABounds.Width, ABounds.Height, Data, DataWidth);
+    Result.SetAlpha(ALPHA_OPAQUE);
   finally
     FreeImageData(Data);
   end

@@ -15,7 +15,7 @@ implementation
 uses
   Graphics,
   lptypes,
-  simba.image;
+  simba.image, simba.image_textdrawer;
 
 type
   PBitmap = ^TBitmap;
@@ -27,13 +27,6 @@ TImage is a data type that holds an image.
 
 This is used manipulate and process an image such as resizing, rotating, bluring and much more.
 Or simply get/set a pixel color at a given (x,y) coord.
-
-Note:
-
-  | For methods with a `Alpha` parameter "real" alpha blending is not performed.
-  | The background of the pixel is just mixed in.
-  | If `Alpha=127` half of the background will be blended in.
-
 *)
 
 (*
@@ -131,7 +124,7 @@ TImage.SetExternalData
 ~~~~~~~~~~~~~~~~~~~~~~
 > procedure TImage.SetExternalData(AData: PColorBGRA; AWidth, AHeight: Integer);
 *)
-procedure _LapeImage_SetPersistentMemory(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_SetExternalData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.SetExternalData(PPointer(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
@@ -141,7 +134,7 @@ TImage.ResetExternalData
 ~~~~~~~~~~~~~~~~~~~~~~~~
 > procedure TImage.ResetExternalData;
 *)
-procedure _LapeImage_ResetPersistentMemory(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_ResetExternalData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.ResetExternalData();
 end;
@@ -151,9 +144,9 @@ TImage.SaveToFile
 ~~~~~~~~~~~~~~~~~
 > function TImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean = False): Boolean;
 *)
-procedure _LapeImage_SaveToFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_Save(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImage(Params^[0])^.SaveToFile(PString(Params^[1])^, PBoolean(Params^[2])^);
+  PBoolean(Result)^ := PSimbaImage(Params^[0])^.Save(PString(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -171,9 +164,9 @@ TImage.LoadFromFile
 ~~~~~~~~~~~~~~~~~~~
 > procedure TImage.LoadFromFile(FileName: String);
 *)
-procedure _LapeImage_LoadFromFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_Load1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromFile(PString(Params^[1])^);
+  PSimbaImage(Params^[0])^.Load(PString(Params^[1])^);
 end;
 
 (*
@@ -181,15 +174,15 @@ TImage.LoadFromFile
 ~~~~~~~~~~~~~~~~~~~
 > procedure TImage.LoadFromFile(FileName: String; Area: TBox);
 *)
-procedure _LapeImage_LoadFromFileEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_Load2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromFile(PString(Params^[1])^, PBox(Params^[2])^);
+  PSimbaImage(Params^[0])^.Load(PString(Params^[1])^, PBox(Params^[2])^);
 end;
 
 (*
 TImage.DrawATPA
 ~~~~~~~~~~~~~~~
-> procedure TImage.DrawATPA(const ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);
+> procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);
 
 Draws every TPA in the ATPA. Color by default is -1 which will display each TPA in a different color.
 *)
@@ -201,7 +194,7 @@ end;
 (*
 TImage.DrawTPA
 ~~~~~~~~~~~~~~
-> procedure TImage.DrawTPA(const Points: TPointArray; Color: TColor; Alpha: Byte = 0);
+> procedure TImage.DrawTPA(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
 
 Draws a TPA the same color.
 *)
@@ -335,9 +328,9 @@ TImage.LoadFromLazBitmap
 ~~~~~~~~~~~~~~~~~~~~~~~~
 > procedure TImage.LoadFromLazBitmap(LazBitmap: TLazBitmap);
 *)
-procedure _LapeImage_LoadFromLazBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_FromLazBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromLazBitmap(PBitmap(Params^[1])^);
+  PSimbaImage(Params^[0])^.FromLazBitmap(PBitmap(Params^[1])^);
 end;
 
 (*
@@ -436,46 +429,6 @@ begin
 end;
 
 (*
-TImage.SetTransparentColor
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.SetTransparentColor(Value: TColor);
-*)
-procedure _LapeImage_TransparentColor_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.TransparentColor := PColor(Params^[1])^;
-end;
-
-(*
-TImage.GetTransparentColor
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TImage.GetTransparentColor: TColor;
-*)
-procedure _LapeImage_TransparentColor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PColor(Result)^ := PSimbaImage(Params^[0])^.TransparentColor;
-end;
-
-(*
-TImage.GetTransparentColorActive
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> function TImage.GetTransparentColorActive: Boolean;
-*)
-procedure _LapeImage_TransparentColorActive_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PSimbaImage(Params^[0])^.TransparentColorActive;
-end;
-
-(*
-TImage.SetTransparentColorActive
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.SetTransparentColorActive(Value: Boolean);
-*)
-procedure _LapeImage_TransparentColorActive_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.TransparentColorActive := PBoolean(Params^[1])^;
-end;
-
-(*
 TImage.GetPixel
 ~~~~~~~~~~~~~~~
 > function TImage.GetPixel(X, Y: Integer): TColor;
@@ -558,41 +511,51 @@ end;
 (*
 TImage.DrawCross
 ~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);
+> procedure TImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawCross(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
 end;
 
 (*
 TImage.DrawCrosshairs
 ~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);
+> procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawCrosshairs(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCrosshairs(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawCrosshairs(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
 end;
 
 (*
 TImage.DrawLine
 ~~~~~~~~~~~~~~~
-> procedure TImage.DrawLine(Start, Stop: TPoint; Color: TColor);
+> procedure TImage.DrawLine(Start, Stop: TPoint; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawLine(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
+end;
+
+(*
+TImage.DrawLineGap
+~~~~~~~~~~~~~~~~~~
+> procedure TImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor; Alpha: Byte = 0);
+*)
+procedure _LapeImage_DrawLineGap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.DrawLineGap(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^, PByte(Params^[5])^);
 end;
 
 (*
 TImage.DrawPolygon
 ~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawPolygon(Points: TPointArray; Color: TColor);
+> procedure TImage.DrawPolygon(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawPolygon(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawPolygon(PPointArray(Params^[1])^, PColor(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawPolygon(PPointArray(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
 end;
 
 (*
@@ -608,31 +571,21 @@ end;
 (*
 TImage.DrawPolygonInverted
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawPolygonInverted(Points: TPointArray; Color: TColor);
+> procedure TImage.DrawPolygonInverted(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawPolygonInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawPolygonInverted(PPointArray(Params^[1])^, PColor(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawPolygonInverted(PPointArray(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
 end;
 
 (*
 TImage.DrawCircle
 ~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);
+> procedure TImage.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawCircle1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
-end;
-
-(*
-TImage.DrawCircle
-~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircle(Circle: TCircle; Color: TColor);
-*)
-procedure _LapeImage_DrawCircle2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.DrawCircle(PCircle(Params^[1])^, PColor(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
 end;
 
 (*
@@ -646,43 +599,23 @@ begin
 end;
 
 (*
-TImage.DrawCircleFilled
-~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircleFilled(Circle: TCircle; Color: TColor; Alpha: Byte = 0);
-*)
-procedure _LapeImage_DrawCircleFilled2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.DrawCircleFilled(PCircle(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
-end;
-
-(*
 TImage.DrawCircleInverted
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircleInverted(Center: TPoint; Radius: Integer; Color: TColor);
+> procedure TImage.DrawCircleInverted(Center: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawCircleInverted1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
-end;
-
-(*
-TImage.DrawCircleInverted
-~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircleInverted(Circle: TCircle; Color: TColor);
-*)
-procedure _LapeImage_DrawCircleInverted2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.DrawCircleInverted(PCircle(Params^[1])^, PColor(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
 end;
 
 (*
 TImage.DrawBox
 ~~~~~~~~~~~~~~
-> procedure TImage.DrawBox(B: TBox; Color: TColor);
+> procedure TImage.DrawBox(B: TBox; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawBox(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawBox(PBox(Params^[1])^, PColor(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawBox(PBox(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
 end;
 
 (*
@@ -698,21 +631,21 @@ end;
 (*
 TImage.DrawBoxInverted
 ~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawBoxInverted(B: TBox; Color: TColor);
+> procedure TImage.DrawBoxInverted(B: TBox; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawBoxInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawBoxInverted(PBox(Params^[1])^, PColor(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawBoxInverted(PBox(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
 end;
 
 (*
 TImage.DrawQuad
 ~~~~~~~~~~~~~~~
-> procedure TImage.DrawQuad(B: TBox; Color: TColor);
+> procedure TImage.DrawQuad(B: TBox; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawQuad(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawQuad(PQuad(Params^[1])^, PColor(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawQuad(PQuad(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
 end;
 
 (*
@@ -728,11 +661,11 @@ end;
 (*
 TImage.DrawQuadInverted
 ~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawQuadInverted(B: TBox; Color: TColor);
+> procedure TImage.DrawQuadInverted(B: TBox; Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_DrawQuadInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawQuadInverted(PQuad(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawQuadInverted(PQuad(Params^[1])^, PInteger(Params^[2])^, PByte(Params^[3])^);
 end;
 
 (*
@@ -776,16 +709,6 @@ begin
 end;
 
 (*
-TImage.DrawCircleArray
-~~~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1);
-*)
-procedure _LapeImage_DrawCircleArray2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.DrawCircleArray(PCircleArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
-end;
-
-(*
 TImage.DrawCrossArray
 ~~~~~~~~~~~~~~~~~~~~~
 > procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor = -1);
@@ -798,11 +721,11 @@ end;
 (*
 TImage.Fill
 ~~~~~~~~~~~
-> procedure TImage.Fill(Color: TColor);
+> procedure TImage.Fill(Color: TColor; Alpha: Byte = 0);
 *)
 procedure _LapeImage_Fill(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Fill(PColor(Params^[1])^);
+  PSimbaImage(Params^[0])^.Fill(PColor(Params^[1])^, PByte(Params^[2])^);
 end;
 
 (*
@@ -836,23 +759,13 @@ begin
 end;
 
 (*
-TImage.Draw
-~~~~~~~~~~~
-> procedure TImage.Draw(Image: TImage; X, Y: Integer);
+TImage.DrawImage
+~~~~~~~~~~~~~~~~
+> procedure TImage.DrawImage(Image: TImage; Position: TPoint; Alpha: Byte = 0);
 *)
-procedure _LapeImage_Draw1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_DrawImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Draw(PSimbaImage(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-end;
-
-(*
-TImage.Draw
-~~~~~~~~~~~
-> procedure TImage.Draw(Image: TImage; Position: TPoint);
-*)
-procedure _LapeImage_Draw2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.Draw(PSimbaImage(Params^[1])^, PPoint(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawImage(PSimbaImage(Params^[1])^, PPoint(Params^[2])^, PByte(Params^[3])^);
 end;
 
 (*
@@ -1018,11 +931,11 @@ end;
 (*
 TImage.DrawText
 ~~~~~~~~~~~~~~~
-> procedure TImage.DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor);
+> procedure TImage.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignmentSet; Color: TColor);
 *)
 procedure _LapeImage_DrawTextEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, PBoolean(Params^[3])^, PColor(Params^[4])^);
+  PSimbaImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, ETextDrawAlignSet(Params^[3]^), PColor(Params^[4])^);
 end;
 
 (*
@@ -1055,6 +968,36 @@ Are the two images exactly equal?
 procedure _LapeImage_Equals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaImage(Params^[0])^.Equals(PSimbaImage(Params^[1])^);
+end;
+
+(*
+TImage.SetAlpha
+~~~~~~~~~~~~~~~
+> procedure TImage.SetAlpha(Value: Byte);
+*)
+procedure _LapeImage_SetAlpha1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.SetAlpha(PByte(Params^[1])^);
+end;
+
+(*
+TImage.SetAlpha
+~~~~~~~~~~~~~~~
+> procedure TImage.SetAlpha(Points: TPointArray; Value: Byte);
+*)
+procedure _LapeImage_SetAlpha2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.SetAlpha(PPointArray(Params^[1])^, PByte(Params^[2])^);
+end;
+
+(*
+TImage.SetAlpha
+~~~~~~~~~~~~~~~
+> procedure TImage.SetAlpha(Color: TColor; Value: Byte);
+*)
+procedure _LapeImage_SetAlpha3(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.SetAlpha(PColor(Params^[1])^, PByte(Params^[2])^);
 end;
 
 (*
@@ -1102,9 +1045,9 @@ TImage.LoadFromString
 ~~~~~~~~~~~~~~~~~~~~~
 > procedure TImage.LoadFromString(Str: String);
 *)
-procedure _LapeImage_LoadFromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_FromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromString(PString(Params^[1])^);
+  PSimbaImage(Params^[0])^.FromString(PString(Params^[1])^);
 end;
 
 (*
@@ -1112,19 +1055,9 @@ TImage.LoadFromData
 ~~~~~~~~~~~~~~~~~~~
 > procedure TImage.LoadFromData(AWidth, AHeight: Integer; Memory: PColorBGRA; DataWidth: Integer);
 *)
-procedure _LapeImage_LoadFromData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_FromData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromData(PInteger(Params^[1])^, PInteger(Params^[2])^, PPointer(Params^[3])^, PInteger(Params^[4])^);
-end;
-
-(*
-TImage.LoadFromImage
-~~~~~~~~~~~~~~~~~~~~
-> procedure TImage.LoadFromImage(Image: TImage);
-*)
-procedure _LapeImage_LoadFromImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Params^[0])^.LoadFromImage(PSimbaImage(Params^[1])^);
+  PSimbaImage(Params^[0])^.FromData(PInteger(Params^[1])^, PInteger(Params^[2])^, PPointer(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 (*
@@ -1220,15 +1153,15 @@ begin
 end;
 
 (*
-TImage.GetFontNames
-~~~~~~~~~~~~~~~~~~~
-> function TImage.GetFontNames: TStringArray; static;
+TImage.FontNames
+~~~~~~~~~~~~~~~~
+> function TImage.FontNames: TStringArray; static;
 
 Returns all the available font names.
 *)
-procedure _LapeImage_LoadedFontNames(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_FontNames(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStringArray(Result)^ := TSimbaImage.LoadedFontNames();
+  PStringArray(Result)^ := TSimbaImage.FontNames();
 end;
 
 (*
@@ -1249,16 +1182,6 @@ TImage.DrawHSLCircle
 procedure _LapeImage_DrawHSLCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(Params^[0])^.DrawHSLCircle(PPoint(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-TImage.RowPtrs
-~~~~~~~~~~~~~~
-> function TImage.RowPtrs: TImageRowPtrs;
-*)
-procedure _LapeImage_RowPtrs(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  TSimbaImageRowPtrs(Result^) := PSimbaImage(Params^[0])^.RowPtrs();
 end;
 
 (*
@@ -1349,29 +1272,26 @@ begin
     addClass('TImage');
 
     addGlobalType('array of TImage', 'TImageArray');
-    addGlobalType('array of PColorBGRA', 'TImageRowPtrs');
     addGlobalType('enum(WIDTH, HEIGHT, LINE)', 'EImageMirrorStyle');
     addGlobalType('enum(MEAN, MIN_MAX)', 'EImageThreshMethod');
 
-    addClassVar('TImage', 'Data', 'PColorBGRA', @_LapeImage_Data_Read);
-    addClassVar('TImage', 'Name', 'String', @_LapeImage_Name_Read, @_LapeImage_Name_Write);
-    addClassVar('TImage', 'Width', 'Integer', @_LapeImage_Width_Read);
-    addClassVar('TImage', 'Height', 'Integer', @_LapeImage_Height_Read);
-    addClassVar('TImage', 'Center', 'TPoint', @_LapeImage_Center_Read);
-    addClassVar('TImage', 'TransparentColor', 'TColor', @_LapeImage_TransparentColor_Read, @_LapeImage_TransparentColor_Write);
-    addClassVar('TImage', 'TransparentColorActive', 'Boolean', @_LapeImage_TransparentColorActive_Read, @_LapeImage_TransparentColorActive_Write);
+    addGlobalType('enum(LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM)', 'ETextDrawAlign');
+    addGlobalType('set of ETextDrawAlign', 'ETextDrawAlignSet');
 
+    addClassVar('TImage', 'Name', 'String', @_LapeImage_Name_Read, @_LapeImage_Name_Write);
     addClassVar('TImage', 'FontName', 'String', @_LapeImage_FontName_Read, @_LapeImage_FontName_Write);
     addClassVar('TImage', 'FontSize', 'Single', @_LapeImage_FontSize_Read, @_LapeImage_FontSize_Write);
     addClassVar('TImage', 'FontAntialiasing', 'Boolean', @_LapeImage_FontAntialiasing_Read, @_LapeImage_FontAntialiasing_Write);
     addClassVar('TImage', 'FontBold', 'Boolean', @_LapeImage_FontBold_Read, @_LapeImage_FontBold_Write);
     addClassVar('TImage', 'FontItalic', 'Boolean', @_LapeImage_FontItalic_Read, @_LapeImage_FontItalic_Write);
 
-    addGlobalFunc('function TImage.RowPtrs: TImageRowPtrs', @_LapeImage_RowPtrs);
-
-    addGlobalFunc('function TImage.LoadedFontNames: TStringArray; static;', @_LapeImage_LoadedFontNames);
+    addGlobalFunc('function TImage.FontNames: TStringArray; static;', @_LapeImage_FontNames);
     addGlobalFunc('function TImage.LoadFonts(Dir: String): Boolean; static;', @_LapeImage_LoadFonts);
 
+    addGlobalFunc('function TImage.Width: Integer', @_LapeImage_Width_Read);
+    addGlobalFunc('function TImage.Height: Integer', @_LapeImage_Height_Read);
+    addGlobalFunc('function TImage.Data: PColorBGRA', @_LapeImage_Data_Read);
+    addGlobalFunc('function TImage.Center: TPoint', @_LapeImage_Center_Read);
     addGlobalFunc('function TImage.InImage(X, Y: Integer): Boolean', @_LapeImage_InImage);
 
     addGlobalFunc('function TImage.Create: TImage; static; overload', @_LapeImage_Create);
@@ -1381,6 +1301,10 @@ begin
     addGlobalFunc('function TImage.CreateFromZip(ZipFileName, ZipEntryName: String): TImage; static', @_LapeImage_CreateFromZip);
 
     addGlobalFunc('function TImage.Equals(Other: TImage): Boolean;', @_LapeImage_Equals);
+
+    addGlobalFunc('procedure TImage.SetAlpha(Value: Byte); overload;', @_LapeImage_SetAlpha1);
+    addGlobalFunc('procedure TImage.SetAlpha(Points: TPointArray; Value: Byte); overload;', @_LapeImage_SetAlpha2);
+    addGlobalFunc('procedure TImage.SetAlpha(Color: TColor; Value: Byte); overload;', @_LapeImage_SetAlpha3);
 
     addGlobalFunc('procedure TImage.SetPixel(X, Y: Integer; Color: TColor);', @_LapeImage_SetPixel);
     addGlobalFunc('function TImage.GetPixel(X, Y: Integer): TColor;', @_LapeImage_GetPixel);
@@ -1398,41 +1322,38 @@ begin
     addGlobalFunc('function TImage.TextHeight(Text: String): Integer;', @_LapeImage_TextHeight);
     addGlobalFunc('function TImage.TextSize(Text: String): TPoint;', @_LapeImage_TextSize);
     addGlobalFunc('procedure TImage.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeImage_DrawText);
-    addGlobalFunc('procedure TImage.DrawText(Text: String; Box: TBox; Center: Boolean; Color: TColor); overload', @_LapeImage_DrawTextEx);
+    addGlobalFunc('procedure TImage.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor); overload', @_LapeImage_DrawTextEx);
     addGlobalFunc('procedure TImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);', @_LapeImage_DrawTextLines);
 
-    addGlobalFunc('procedure TImage.DrawATPA(const ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);', @_LapeImage_DrawATPA);
-    addGlobalFunc('procedure TImage.DrawTPA(const TPA: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawTPA);
+    addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);', @_LapeImage_DrawATPA);
+    addGlobalFunc('procedure TImage.DrawTPA(TPA: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawTPA);
 
-    addGlobalFunc('procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor);', @_LapeImage_DrawCrosshairs);
-    addGlobalFunc('procedure TImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor);', @_LapeImage_DrawCross);
+    addGlobalFunc('procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawCrosshairs);
+    addGlobalFunc('procedure TImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawCross);
 
-    addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint; Color: TColor)', @_LapeImage_DrawLine);
+    addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint; Color: TColor; Alpha: Byte = 0)', @_LapeImage_DrawLine);
+    addGlobalFunc('procedure TImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor; Alpha: Byte = 0)', @_LapeImage_DrawLineGap);
 
-    addGlobalFunc('procedure TImage.DrawPolygon(Points: TPointArray; Color: TColor);', @_LapeImage_DrawPolygon);
+    addGlobalFunc('procedure TImage.DrawPolygon(Points: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawPolygon);
     addGlobalFunc('procedure TImage.DrawPolygonFilled(Points: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawPolygonFilled);
-    addGlobalFunc('procedure TImage.DrawPolygonInverted(Points: TPointArray; Color: TColor);', @_LapeImage_DrawPolygonInverted);
+    addGlobalFunc('procedure TImage.DrawPolygonInverted(Points: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawPolygonInverted);
 
-    addGlobalFunc('procedure TImage.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor); overload', @_LapeImage_DrawCircle1);
-    addGlobalFunc('procedure TImage.DrawCircle(Circle: TCircle; Color: TColor); overload', @_LapeImage_DrawCircle2);
-    addGlobalFunc('procedure TImage.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0); overload', @_LapeImage_DrawCircleFilled1);
-    addGlobalFunc('procedure TImage.DrawCircleFilled(Circle: TCircle; Color: TColor; Alpha: Byte = 0); overload', @_LapeImage_DrawCircleFilled2);
-    addGlobalFunc('procedure TImage.DrawCircleInverted(Center: TPoint; Radius: Integer; Color: TColor); overload', @_LapeImage_DrawCircleInverted1);
-    addGlobalFunc('procedure TImage.DrawCircleInverted(Circle: TCircle; Color: TColor); overload', @_LapeImage_DrawCircleInverted2);
+    addGlobalFunc('procedure TImage.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0)', @_LapeImage_DrawCircle1);
+    addGlobalFunc('procedure TImage.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0)', @_LapeImage_DrawCircleFilled1);
+    addGlobalFunc('procedure TImage.DrawCircleInverted(Center: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0)', @_LapeImage_DrawCircleInverted1);
 
-    addGlobalFunc('procedure TImage.DrawBox(B: TBox; Color: TColor);', @_LapeImage_DrawBox);
+    addGlobalFunc('procedure TImage.DrawBox(B: TBox; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawBox);
     addGlobalFunc('procedure TImage.DrawBoxFilled(B: TBox; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawBoxFilled);
-    addGlobalFunc('procedure TImage.DrawBoxInverted(B: TBox; Color: TColor);', @_LapeImage_DrawBoxInverted);
+    addGlobalFunc('procedure TImage.DrawBoxInverted(B: TBox; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawBoxInverted);
 
-    addGlobalFunc('procedure TImage.DrawQuad(Quad: TQuad; Color: TColor);', @_LapeImage_DrawQuad);
+    addGlobalFunc('procedure TImage.DrawQuad(Quad: TQuad; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawQuad);
     addGlobalFunc('procedure TImage.DrawQuadFilled(Quad: TQuad; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawQuadFilled);
-    addGlobalFunc('procedure TImage.DrawQuadInverted(Quad: TQuad; Color: TColor);', @_LapeImage_DrawQuadInverted);
+    addGlobalFunc('procedure TImage.DrawQuadInverted(Quad: TQuad; Color: TColor; Alpha: Byte = 0);', @_LapeImage_DrawQuadInverted);
 
     addGlobalFunc('procedure TImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawQuadArray);
     addGlobalFunc('procedure TImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawBoxArray);
     addGlobalFunc('procedure TImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawPolygonArray);
-    addGlobalFunc('procedure TImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1); overload;', @_LapeImage_DrawCircleArray1);
-    addGlobalFunc('procedure TImage.DrawCircleArray(Circles: TCircleArray; Filled: Boolean; Color: TColor = -1); overload;', @_LapeImage_DrawCircleArray2);
+    addGlobalFunc('procedure TImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);', @_LapeImage_DrawCircleArray1);
     addGlobalFunc('procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor = -1);', @_LapeImage_DrawCrossArray);
 
     addGlobalFunc('procedure TImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer)', @_LapeImage_DrawHSLCircle);
@@ -1441,15 +1362,14 @@ begin
     addGlobalFunc('procedure TImage.Clear(Area: TBox); overload', @_LapeImage_ClearEx);
     addGlobalFunc('procedure TImage.ClearInverted(Area: TBox);', @_LapeImage_ClearInverted);
 
-    addGlobalFunc('procedure TImage.Draw(Image: TImage; X, Y: Integer); overload', @_LapeImage_Draw1);
-    addGlobalFunc('procedure TImage.Draw(Image: TImage; Position: TPoint); overload', @_LapeImage_Draw2);
+    addGlobalFunc('procedure TImage.DrawImage(Image: TImage; Position: TPoint; Alpha: Byte = 0)', @_LapeImage_DrawImage);
 
     addGlobalFunc('procedure TImage.DrawMatrix(Matrix: TIntegerMatrix); overload', @_LapeImage_DrawMatrixI);
     addGlobalFunc('procedure TImage.DrawMatrix(Matrix: TSingleMatrix; ColorMapID: Integer = 0); overload', @_LapeImage_DrawMatrixF);
 
     addGlobalFunc('procedure TImage.SetSize(AWidth, AHeight: Integer);', @_LapeImage_SetSize);
-    addGlobalFunc('procedure TImage.SetPersistentMemory(Memory: PtrUInt; AWidth, AHeight: Integer);', @_LapeImage_SetPersistentMemory);
-    addGlobalFunc('procedure TImage.ResetPersistentMemory;', @_LapeImage_ResetPersistentMemory);
+    addGlobalFunc('procedure TImage.SetExternalData(Memory: PtrUInt; AWidth, AHeight: Integer);', @_LapeImage_SetExternalData);
+    addGlobalFunc('procedure TImage.ResetExternalData;', @_LapeImage_ResetExternalData);
 
     addGlobalFunc('function TImage.ResizeNN(AWidth, AHeight: Integer): TImage', @_LapeImage_ResizeNN);
     addGlobalFunc('function TImage.ResizeBilinear(AWidth, AHeight: Integer): TImage', @_LapeImage_ResizeBilinear);
@@ -1457,7 +1377,7 @@ begin
     addGlobalFunc('function TImage.RotateNN(Radians: Single; Expand: Boolean): TImage', @_LapeImage_RotateNN);
     addGlobalFunc('function TImage.RotateBilinear(Radians: Single; Expand: Boolean): TImage', @_LapeImage_RotateBilinear);
 
-    addGlobalFunc('procedure TImage.Fill(Color: TColor);', @_LapeImage_Fill);
+    addGlobalFunc('procedure TImage.Fill(Color: TColor; Alpha: Byte = 0);', @_LapeImage_Fill);
     addGlobalFunc('procedure TImage.ReplaceColor(OldColor, NewColor: TColor);', @_LapeImage_ReplaceColor);
     addGlobalFunc('procedure TImage.ReplaceColors(OldColors, NewColors: TColorArray);', @_LapeImage_ReplaceColors);
 
@@ -1482,17 +1402,16 @@ begin
     addGlobalFunc('function TImage.ThresholdSauvola(Radius: Integer; Invert: Boolean = False; R: Single = 128; K: Single = 0.5): TImage', @_LapeImage_ThresholdSauvola);
     addGlobalFunc('procedure TImage.Pad(Amount: Integer)', @_LapeImage_Pad);
 
-    addGlobalFunc('procedure TImage.LoadFromFile(FileName: String); overload', @_LapeImage_LoadFromFile);
-    addGlobalFunc('procedure TImage.LoadFromFile(FileName: String; Area: TBox); overload', @_LapeImage_LoadFromFileEx);
-    addGlobalFunc('procedure TImage.LoadFromString(Str: String)', @_LapeImage_LoadFromString);
-    addGlobalFunc('procedure TImage.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; DataWidth: Integer)', @_LapeImage_LoadFromData);
-    addGlobalFunc('procedure TImage.LoadFromImage(Image: TImage);', @_LapeImage_LoadFromImage);
-
-    addGlobalFunc('function TImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean = False): Boolean;', @_LapeImage_SaveToFile);
+    addGlobalFunc('procedure TImage.Load(FileName: String); overload', @_LapeImage_Load1);
+    addGlobalFunc('procedure TImage.Load(FileName: String; Area: TBox); overload', @_LapeImage_Load2);
+    addGlobalFunc('function TImage.Save(FileName: String; OverwriteIfExists: Boolean = False): Boolean;', @_LapeImage_Save);
     addGlobalFunc('function TImage.SaveToString: String;', @_LapeImage_SaveToString);
 
+    addGlobalFunc('procedure TImage.FromString(Str: String)', @_LapeImage_FromString);
+    addGlobalFunc('procedure TImage.FromData(AWidth, AHeight: Integer; AData: PColorBGRA; DataWidth: Integer)', @_LapeImage_FromData);
+
     addGlobalFunc('function TImage.ToLazBitmap: TLazBitmap;', @_LapeImage_ToLazBitmap);
-    addGlobalFunc('procedure TImage.LoadFromLazBitmap(LazBitmap: TLazBitmap);', @_LapeImage_LoadFromLazBitmap);
+    addGlobalFunc('procedure TImage.FromLazBitmap(LazBitmap: TLazBitmap);', @_LapeImage_FromLazBitmap);
     addGlobalFunc('function TImage.Compare(Other: TImage): Single;', @_LapeImage_Compare);
 
     addGlobalFunc('procedure TImage.SaveUnfreedImages(Directory: String); static;', @_LapeImage_SaveUnfreedImages);

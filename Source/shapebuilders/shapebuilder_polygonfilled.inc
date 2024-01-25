@@ -1,4 +1,6 @@
-// Requires method `procedure _Row(const Y: Integer; X1, X2: Integer);`
+{$IF NOT DECLARED(_Row)}
+  {$ERROR _PolygonFilled requires "procedure _Row(Y: Integer; X1, X2: Integer)"}
+{$ENDIF}
 
 (*
   Calculates the intersection points of a vertical (ACoordIsX = true) or horizontal
@@ -66,7 +68,7 @@ end;
   the even-odd rule
   http://www.tutorialspoint.com/computer_graphics/polygon_filling_algorithm
 *)
-procedure _PolygonFilled(APoints: TPointArray; ARect: TRect);
+procedure _BuildPolygonFilled(APoints: TPointArray; ARect: TRect);
 var
   scanlineY, scanLineY1, scanLineY2: Integer;
   lPoints, pts: TPointFArray;
@@ -105,18 +107,18 @@ begin
     lPoints := GetLinePolygonIntersectionPoints(scanlineY, pts, false);
     if Length(lPoints) < 2 then
     begin
-      inc(scanlineY);
+      Inc(scanlineY);
       Continue;
     end;
     // Draw lines between intersection points, skip every second pair
     I := 0;
     while I < High(lPoints) do
     begin
-      _Row(Round(lPoints[I].Y), round(lPoints[I].X), round(lPoints[I+1].X));
-      inc(I, 2);
+      _Row(Round(lPoints[I].Y), Round(lPoints[I].X), Round(lPoints[I+1].X));
+      Inc(I, 2);
     end;
     // Proceed to next scan line
-    inc(scanlineY);
+    Inc(scanlineY);
   end;
 end;
 

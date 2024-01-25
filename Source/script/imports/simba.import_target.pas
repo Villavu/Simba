@@ -403,7 +403,7 @@ begin
       '  Image: TImage;',
       'begin',
       '  Image := TImage.CreateFromTarget(Target, Bounds);',
-      '  Self.Draw(Image, P);',
+      '  Self.DrawImage(Image, P);',
       '  Image.Free();',
       'end;'
     ]);

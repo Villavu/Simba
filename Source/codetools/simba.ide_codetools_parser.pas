@@ -467,7 +467,6 @@ type
     constructor Create; override;
     destructor Destroy; override;
   end;
-  TPluginParser = class(TCodeParser);
 
   TCodeParserArray = array of TCodeParser;
   TCodeParserList = specialize TSimbaObjectList<TCodeParser>;
