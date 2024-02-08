@@ -385,7 +385,12 @@ function TSimbaHTTPClient.Post(URL: String; Data: String): String;
 begin
   FURL := URL;
 
-  Result := FHTTPClient.FormPost(FURL, Data);
+  FHTTPClient.RequestBody := TRawByteStringStream.Create(Data);
+  try
+     Result := FHTTPClient.Post(FURL);
+  finally
+    FHTTPClient.RequestBody.Free();
+  end;
 end;
 
 procedure TSimbaHTTPClient.Post(URL: String; Data: String; Response: TMemoryStream);
