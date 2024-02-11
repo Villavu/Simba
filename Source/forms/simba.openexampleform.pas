@@ -206,6 +206,7 @@ begin
   AddNode('Static Method',        'EXAMPLE_STATIC_METHOD'       );
   AddNode('JSON',                 'EXAMPLE_JSON'                );
   AddNode('Form',                 'EXAMPLE_FORM'                );
+  AddNode('Image Box',            'EXAMPLE_IMAGEBOX'            );
   AddNode('IRC',                  'EXAMPLE_IRC'                 );
   AddNode('Draw Text',            'EXAMPLE_DRAWTEXT'            );
 end;

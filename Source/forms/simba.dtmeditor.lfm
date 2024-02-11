@@ -1,7 +1,7 @@
 object SimbaDTMEditorForm: TSimbaDTMEditorForm
-  Left = 428
+  Left = 674
   Height = 1146
-  Top = 44
+  Top = 61
   Width = 1346
   Caption = 'DTM Editor'
   ClientHeight = 1146
@@ -14,7 +14,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
   Position = poScreenCenter
   ShowHint = True
   ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.1'
+  LCLVersion = '3.0.0.3'
   object PanelMain: TPanel
     Left = 0
     Height = 1146
@@ -45,8 +45,8 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonUpdateImage
       Left = 6
-      Height = 20
-      Top = 1090
+      Height = 25
+      Top = 1080
       Width = 344
       Anchors = [akLeft, akRight, akBottom]
       BevelStyle = bsRaised
@@ -64,9 +64,9 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = PanelRight
       AnchorSideBottom.Side = asrBottom
       Left = 184
-      Height = 30
+      Height = 35
       Hint = 'Clear all drawing from the image'
-      Top = 1110
+      Top = 1105
       Width = 166
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
@@ -74,8 +74,8 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       BorderSpacing.Right = 6
       BorderSpacing.Bottom = 6
       Caption = 'Clear Image'
-      OnClick = ButtonClearImageClick
       TabOrder = 0
+      OnClick = ButtonClearImageClick
     end
     object ButtonUpdateImage: TButton
       AnchorSideLeft.Control = PanelRight
@@ -84,9 +84,9 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = PanelRight
       AnchorSideBottom.Side = asrBottom
       Left = 6
-      Height = 30
+      Height = 35
       Hint = 'Updates the image from the client'
-      Top = 1110
+      Top = 1105
       Width = 167
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -94,8 +94,8 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       BorderSpacing.Right = 6
       BorderSpacing.Bottom = 6
       Caption = 'Update Image'
-      OnClick = ButtonUpdateImageClick
       TabOrder = 1
+      OnClick = ButtonUpdateImageClick
     end
     object ButtonPrintDTM: TButton
       AnchorSideLeft.Control = PanelAlignment
@@ -104,16 +104,16 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Control = PanelRight
       AnchorSideRight.Side = asrBottom
       Left = 185
-      Height = 30
-      Top = 1060
+      Height = 35
+      Top = 1045
       Width = 165
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
       BorderSpacing.Left = 6
       BorderSpacing.Right = 6
       Caption = 'Print DTM'
-      OnClick = ButtonPrintDTMClick
       TabOrder = 2
+      OnClick = ButtonPrintDTMClick
     end
     object FindDTMButton: TButton
       AnchorSideLeft.Control = PanelRight
@@ -121,16 +121,16 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Control = PanelAlignment
       AnchorSideBottom.Control = Divider3
       Left = 6
-      Height = 30
-      Top = 1060
+      Height = 35
+      Top = 1045
       Width = 166
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
       BorderSpacing.Left = 6
       BorderSpacing.Right = 6
       Caption = 'Find DTM'
-      OnClick = FindDTMClick
       TabOrder = 3
+      OnClick = FindDTMClick
     end
     object PanelTop: TPanel
       AnchorSideBottom.Control = ListBox
@@ -151,7 +151,7 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonDeletePoints
       Left = 6
-      Height = 755
+      Height = 695
       Top = 6
       Width = 344
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -160,9 +160,9 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       BorderSpacing.Right = 6
       BorderSpacing.Bottom = 6
       ItemHeight = 0
-      OnSelectionChange = ListBoxSelectionChange
       Options = []
       TabOrder = 5
+      OnSelectionChange = ListBoxSelectionChange
     end
     object PanelSelectedPoint: TPanel
       AnchorSideLeft.Control = PanelRight
@@ -170,14 +170,14 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Divider1
       Left = 6
-      Height = 172
-      Top = 868
+      Height = 197
+      Top = 823
       Width = 350
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
       BorderSpacing.Left = 6
       BevelOuter = bvNone
-      ClientHeight = 172
+      ClientHeight = 197
       ClientWidth = 350
       Enabled = False
       TabOrder = 6
@@ -187,15 +187,15 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideTop.Control = PanelSelectedPoint
         AnchorSideRight.Control = EditPointY
         AnchorSideRight.Side = asrBottom
-        Left = 70
-        Height = 28
+        Left = 79
+        Height = 33
         Top = 2
-        Width = 197
+        Width = 179
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 2
-        OnChange = PointEditChanged
         TabOrder = 0
+        OnChange = PointEditChanged
       end
       object LabelX: TLabel
         AnchorSideLeft.Control = PanelSelectedPoint
@@ -203,9 +203,9 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideBottom.Control = EditPointX
         AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 28
+        Height = 33
         Top = 2
-        Width = 9
+        Width = 11
         Anchors = [akTop, akLeft, akBottom]
         Caption = 'X'
         Layout = tlCenter
@@ -218,15 +218,15 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = EditPointColor
         AnchorSideRight.Side = asrBottom
-        Left = 70
-        Height = 28
-        Top = 36
-        Width = 197
+        Left = 79
+        Height = 33
+        Top = 41
+        Width = 179
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 6
-        OnChange = PointEditChanged
         TabOrder = 1
+        OnChange = PointEditChanged
       end
       object LabelY: TLabel
         AnchorSideLeft.Control = PanelSelectedPoint
@@ -234,9 +234,9 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideBottom.Control = EditPointY
         AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 28
-        Top = 36
-        Width = 8
+        Height = 33
+        Top = 41
+        Width = 10
         Anchors = [akTop, akLeft, akBottom]
         Caption = 'Y'
         Layout = tlCenter
@@ -249,15 +249,15 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = EditPointTolerance
         AnchorSideRight.Side = asrBottom
-        Left = 70
-        Height = 28
-        Top = 70
-        Width = 197
+        Left = 79
+        Height = 33
+        Top = 80
+        Width = 179
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 6
-        OnChange = PointEditChanged
         TabOrder = 2
+        OnChange = PointEditChanged
       end
       object LabelColor: TLabel
         AnchorSideLeft.Control = PanelSelectedPoint
@@ -265,9 +265,9 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideBottom.Control = EditPointColor
         AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 28
-        Top = 70
-        Width = 36
+        Height = 33
+        Top = 80
+        Width = 43
         Anchors = [akTop, akLeft, akBottom]
         Caption = 'Color'
         Layout = tlCenter
@@ -279,9 +279,9 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideBottom.Control = EditPointTolerance
         AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 28
-        Top = 104
-        Width = 64
+        Height = 33
+        Top = 119
+        Width = 73
         Anchors = [akTop, akLeft, akBottom]
         Caption = 'Tolerance'
         Layout = tlCenter
@@ -294,15 +294,15 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = EditPointSize
         AnchorSideRight.Side = asrBottom
-        Left = 70
-        Height = 28
-        Top = 104
-        Width = 197
+        Left = 79
+        Height = 33
+        Top = 119
+        Width = 179
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 6
-        OnEditingDone = PointEditChanged
         TabOrder = 3
+        OnEditingDone = PointEditChanged
       end
       object LabelSize: TLabel
         AnchorSideLeft.Control = PanelSelectedPoint
@@ -310,9 +310,9 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideBottom.Control = EditPointSize
         AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 28
-        Top = 138
-        Width = 27
+        Height = 33
+        Top = 158
+        Width = 31
         Anchors = [akTop, akLeft, akBottom]
         Caption = 'Size'
         Layout = tlCenter
@@ -326,17 +326,17 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideRight.Control = ButtonDebugColor
         AnchorSideBottom.Control = PanelSelectedPoint
         AnchorSideBottom.Side = asrBottom
-        Left = 70
-        Height = 28
-        Top = 138
-        Width = 197
+        Left = 79
+        Height = 33
+        Top = 158
+        Width = 179
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Left = 6
         BorderSpacing.Top = 6
         BorderSpacing.Right = 6
         BorderSpacing.Bottom = 6
-        OnChange = PointEditChanged
         TabOrder = 4
+        OnChange = PointEditChanged
       end
       object ButtonDebugColor: TButton
         AnchorSideLeft.Control = EditPointColor
@@ -346,16 +346,16 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = EditPointColor
         AnchorSideBottom.Side = asrBottom
-        Left = 273
-        Height = 28
-        Top = 70
-        Width = 71
+        Left = 264
+        Height = 33
+        Top = 80
+        Width = 80
         Anchors = [akTop, akRight, akBottom]
         AutoSize = True
         BorderSpacing.Right = 6
         Caption = 'Debug'
-        OnClick = ButtonDebugColorClick
         TabOrder = 5
+        OnClick = ButtonDebugColorClick
       end
     end
     object Divider1: TDividerBevel
@@ -364,8 +364,8 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = FindDTMButton
       Left = 6
-      Height = 20
-      Top = 1040
+      Height = 25
+      Top = 1020
       Width = 344
       Anchors = [akLeft, akRight, akBottom]
       BorderSpacing.Left = 6
@@ -378,8 +378,8 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = PanelSelectedPoint
       Left = 6
-      Height = 20
-      Top = 842
+      Height = 25
+      Top = 792
       Width = 344
       Caption = 'Selected Point'
       Anchors = [akLeft, akRight, akBottom]
@@ -396,16 +396,16 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonDeletePoint
       Left = 6
-      Height = 30
-      Top = 767
+      Height = 35
+      Top = 707
       Width = 344
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
       BorderSpacing.Left = 6
       BorderSpacing.Right = 6
       Caption = 'Delete Points'
-      OnClick = ButtonDeletePointsClick
       TabOrder = 7
+      OnClick = ButtonDeletePointsClick
     end
     object PanelAlignment: TPanel
       AnchorSideLeft.Control = PanelRight
@@ -415,8 +415,8 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideBottom.Control = FindDTMButton
       AnchorSideBottom.Side = asrBottom
       Left = 178
-      Height = 30
-      Top = 1060
+      Height = 35
+      Top = 1045
       Width = 1
       Anchors = [akTop, akLeft, akBottom]
       BevelOuter = bvNone
@@ -430,8 +430,8 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Divider2
       Left = 6
-      Height = 30
-      Top = 803
+      Height = 35
+      Top = 748
       Width = 344
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -439,8 +439,8 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
       BorderSpacing.Top = 6
       BorderSpacing.Right = 6
       Caption = 'Delete Selected Point'
-      OnClick = ButtonDeletePointClick
       TabOrder = 9
+      OnClick = ButtonDeletePointClick
     end
   end
   object MainMenu: TMainMenu
@@ -512,11 +512,5 @@ object SimbaDTMEditorForm: TSimbaDTMEditorForm
         end
       end
     end
-  end
-  object PointFlashTimer: TTimer
-    Interval = 500
-    OnTimer = PointFlash
-    Left = 150
-    Top = 30
   end
 end

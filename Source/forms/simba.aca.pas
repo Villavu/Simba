@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Dialogs, DividerBevel, Graphics,
   ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox, LMessages,
-  simba.base, simba.imagebox, simba.imagebox_zoom, simba.imagebox_image,
+  simba.base, simba.imagebox, simba.imagebox_canvas, simba.imagebox_zoom,
   simba.colormath, simba.finder;
 
 type
@@ -84,8 +84,8 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure ChangeDrawColor(Sender: TObject);
     procedure ButtonUpdateImageClick(Sender: TObject);
-    procedure ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure ClientImageMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
+    procedure ClientImageMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure MenuItemCopyBestColorClick(Sender: TObject);
     procedure MenuItemLoadHSLCircleClick(Sender: TObject);
     procedure MenuItemLoadHSLCircleExClick(Sender: TObject);
@@ -100,7 +100,7 @@ type
     FDrawColor: TColor;
 
     procedure LoadHSLCircle(Radius: Integer);
-    procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
+    procedure DoPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
     procedure CalculateBestColor;
 
     function GetBestColorTol: TColorTolerance;
@@ -124,10 +124,10 @@ uses
   Clipbrd, TypInfo, LCLType,
   simba.windowhandle, simba.image, simba.colormath_aca, simba.matrix_float, simba.dialog;
 
-procedure TSimbaACAForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaACAForm.ClientImageMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 begin
   FImageZoom.SetTempColor(-1);
-  FImageZoom.MoveTest(FImageBox, X, Y);
+  FImageZoom.Move(FImageBox.Background.Canvas, X, Y);
 
   with FImageBox.Background.Canvas.Pixels[X, Y].ToRGB(), FImageBox.Background.Canvas.Pixels[X, Y].ToHSL() do
     FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
@@ -135,7 +135,7 @@ begin
                          Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
 end;
 
-procedure TSimbaACAForm.ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaACAForm.ClientImageMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   Pixel: Integer;
 begin
@@ -188,13 +188,13 @@ begin
   Bitmap.Free();
 end;
 
-procedure TSimbaACAForm.DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
+procedure TSimbaACAForm.DoPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
 begin
   if (Length(FDebugTPA) > 0) then
-    Bitmap.DrawPoints(FDebugTPA, FDrawColor)
+    ACanvas.DrawPoints(FDebugTPA, FDrawColor)
   else
   if (Length(FDebugMat) > 0) then
-    Bitmap.DrawHeatmap(FDebugMat);
+    ACanvas.DrawHeatmap(FDebugMat);
 end;
 
 procedure TSimbaACAForm.ChangeDrawColor(Sender: TObject);
@@ -380,7 +380,7 @@ begin
     FDebugTPA := [];
     FDebugMat := FImageBox.MatchColor(Color, ColorSpace, Multipliers).NormMinMax(0, 1);
 
-    FImageBox.Paint();
+    FImageBox.Repaint();
   end;
 end;
 
@@ -391,8 +391,8 @@ begin
     FDebugMat := [];
     FDebugTPA := FImageBox.FindColor(Color, Tolerance, ColorSpace, Multipliers);
 
-    FImageBox.StatusPanel.Text := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
-    FImageBox.Paint();
+    FImageBox.Status := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
+    FImageBox.RePaint();
   end;
 end;
 
@@ -446,7 +446,7 @@ begin
   FDebugTPA := [];
   FDebugMat := [];
 
-  FImageBox.Paint();
+  FImageBox.RePaint();
 end;
 
 constructor TSimbaACAForm.Create(Window: TWindowHandle);
@@ -464,9 +464,9 @@ begin
   FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := PanelMain;
   FImageBox.Align := alClient;
-  FImageBox.OnMouseDown := @ClientImageMouseDown;
-  FImageBox.OnMouseMove := @ClientImageMouseMove;
-  FImageBox.OnPaintArea := @DoPaintArea;
+  FImageBox.OnImgMouseDown := @ClientImageMouseDown;
+  FImageBox.OnImgMouseMove := @ClientImageMouseMove;
+  FImageBox.OnImgPaint := @DoPaintArea;
   FImageBox.SetBackgroundFromWindow(FWindow);
 
   FImageZoom := TSimbaImageBoxZoom.Create(Self);

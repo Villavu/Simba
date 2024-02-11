@@ -155,7 +155,7 @@ begin
   end;
 
   FHint.Info.Caption := Format(INFO, [FImage.Picture.Bitmap.Canvas.Pixels[X, Y], FPoint.X, FPoint.Y]);
-  FHint.Zoom.Move(Sender as TImage, X, Y);
+  FHint.Zoom.Move(TImage(Sender).Canvas, X, Y);
 end;
 
 procedure TSimbaColorPicker.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

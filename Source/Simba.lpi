@@ -17,7 +17,7 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="12">
+      <Resources Count="13">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
         <Resource_2 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
@@ -30,6 +30,7 @@
         <Resource_9 FileName="..\Examples\form.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM"/>
         <Resource_10 FileName="..\Examples\irc.simba" Type="RCDATA" ResourceName="EXAMPLE_IRC"/>
         <Resource_11 FileName="..\Examples\image_drawtext.simba" Type="RCDATA" ResourceName="EXAMPLE_DRAWTEXT"/>
+        <Resource_12 FileName="..\Examples\form_imagebox.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGEBOX"/>
       </Resources>
     </General>
     <VersionInfo>
@@ -37,7 +38,7 @@
       <MajorVersionNr Value="2"/>
       <Language Value="0809"/>
       <CharSet Value="04B0"/>
-      <StringTable CompanyName="villavu.com" FileDescription="Simba: http://wizzup.org/simba/" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="2.0"/>
+      <StringTable FileDescription="https://github.com/Villavu/Simba" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="2.0"/>
     </VersionInfo>
     <BuildModes Count="7">
       <Item1 Name="DEBUG" Default="True"/>
@@ -378,7 +379,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="121">
+    <Units Count="123">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -899,7 +900,7 @@
         <IsPartOfProject Value="True"/>
       </Unit107>
       <Unit108>
-        <Filename Value="imagebox/simba.imagebox_new.pas"/>
+        <Filename Value="imagebox/simba.imagebox.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit108>
       <Unit109>
@@ -950,6 +951,14 @@
         <Filename Value="image/simba.image_stringconv.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit120>
+      <Unit121>
+        <Filename Value="imagebox/simba.imagebox_canvas.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit121>
+      <Unit122>
+        <Filename Value="imagebox/simba.imagebox_drawers.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit122>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

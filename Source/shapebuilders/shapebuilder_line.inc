@@ -1,5 +1,5 @@
 {$IF NOT DECLARED(_Pixel)}
-  {$ERROR _BuildLine requires "procedure _Pixel(X, Y: Integer)"}
+  {$ERROR _BuildLine requires "_Pixel(X, Y: Integer)"}
 {$ENDIF}
 
 procedure _BuildLine(Start, Stop: TPoint);

@@ -11,23 +11,23 @@ interface
 
 uses
   classes, sysutils, forms, controls,
-  simba.imagebox_new;
+  simba.imagebox;
 
 type
   TSimbaDebugImageForm = class(TForm)
     procedure FormCreate(Sender: TObject);
   protected
-    FImageBox: TSimbaImageBoxNew;
+    FImageBox: TSimbaImageBox;
     FMaxWidth, FMaxHeight: Integer;
 
-    procedure DoDoubleClick(Sender: TObject);
+    procedure DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
   public
     procedure Close;
 
     procedure SetMaxSize(AWidth, AHeight: Integer);
     procedure SetSize(AWidth, AHeight: Integer; AForce: Boolean; AEnsureVisible: Boolean = True);
 
-    property ImageBox: TSimbaImageBoxNew read FImageBox;
+    property ImageBox: TSimbaImageBox read FImageBox;
   end;
 
 var
@@ -56,16 +56,15 @@ begin
   FMaxWidth := 1500;
   FMaxHeight := 1000;
 
-  FImageBox := TSimbaImageBoxNew.Create(Self);
+  FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := Self;
   FImageBox.Align := alClient;
-  FImageBox.OnDblClick := @DoDoubleCLick;
+  FImageBox.OnImgDoubleClick := @DoImgDoubleClick;
 end;
 
-procedure TSimbaDebugImageForm.DoDoubleClick(Sender: TObject);
+procedure TSimbaDebugImageForm.DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
 begin
-  with TSimbaImageBoxNew(Sender).MousePoint do
-    DebugLn([EDebugLn.FOCUS], 'Debug Image Click: (%d, %d)', [X, Y]);
+  DebugLn([EDebugLn.FOCUS], 'Debug Image Click: (%d, %d)', [X, Y]);
 end;
 
 procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer; AForce: Boolean; AEnsureVisible: Boolean);

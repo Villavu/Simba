@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, Graphics, ComCtrls, StdCtrls, ExtCtrls, Dialogs, fgl,
-  simba.imagebox, simba.imagebox_image, simba.base;
+  simba.base, simba.imagebox, simba.imagebox_canvas;
 
 type
   TSimbaShapeBox = class;
@@ -25,10 +25,10 @@ type
   TSimbaShapeBoxShapeClass = class of TSimbaShapeBoxShape;
   TSimbaShapeBoxShape = class
   protected
-    procedure DrawConnectors(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
-    procedure DrawLines(ACanvas: TSimbaImageBoxBitmap; Box: TBox; Flags: EPaintShapeFlags); overload;
-    procedure DrawLines(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags); overload;
-    procedure DrawLinesGap(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
+    procedure DrawConnectors(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
+    procedure DrawLines(ACanvas: TSimbaImageBoxCanvas; Box: TBox; Flags: EPaintShapeFlags); overload;
+    procedure DrawLines(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags); overload;
+    procedure DrawLinesGap(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
   public
     FShapeBox: TSimbaShapeBox;
     FDragStart: TPoint;
@@ -46,7 +46,7 @@ type
     function Center: TPoint; virtual; abstract;
     function DistToEdge(P: TPoint): Integer; virtual; abstract;
     function Contains(P: TPoint; ExpandMod: Integer = 0): Boolean; virtual; abstract;
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint); virtual; abstract;
+    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); virtual; abstract;
 
     function BeginDrag(MousePoint: TPoint): Boolean; virtual; abstract;
     function CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean; virtual; abstract;
@@ -75,7 +75,7 @@ type
 
     function BeginDrag(MousePoint: TPoint): Boolean; override;
 
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
+    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
 
     function CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean; override;
     procedure Drag(MousePoint: TPoint); override;
@@ -110,7 +110,7 @@ type
 
     function BeginDrag(MousePoint: TPoint): Boolean; override;
 
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
+    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
 
     function CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean; override;
     procedure Drag(MousePoint: TPoint); override;
@@ -143,7 +143,7 @@ type
     function Contains(P: TPoint; ExpandMod: Integer = 0): Boolean; override;
 
     function BeginDrag(MousePoint: TPoint): Boolean; override;
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
+    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
 
     function CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean; override;
     procedure Drag(MousePoint: TPoint); override;
@@ -161,7 +161,7 @@ type
   public
     function DistToEdge(P: TPoint): Integer; override;
     function Contains(P: TPoint; ExpandMod: Integer=0): Boolean; override;
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
+    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
   end;
 
   PShapeBoxShape = ^TShapeBoxShape;
@@ -182,6 +182,7 @@ type
   end;
 
   PSimbaShapeBox = ^TSimbaShapeBox;
+
   TSimbaShapeBox = class(TSimbaImageBox)
   protected type
     TShapeList = specialize TFPGObjectList<TSimbaShapeBoxShape>;
@@ -227,12 +228,12 @@ type
     function GetSelectedIndex: Integer;
     procedure SetSelectedIndex(Value: Integer);
 
-    procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
-    procedure ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
-    procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); override;
-    procedure ImageKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); override;
+    procedure ImgKeyDown(var Key: Word; Shift: TShiftState); override;
+    procedure ImgMouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure ImgMouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure ImgMouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure ImgPaintArea(ACanvas: TSimbaImageBoxCanvas; R: TRect); override;
 
-    procedure DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect); override;
     procedure DoSelectionChanged(Sender: TObject; User: Boolean);
     procedure DoShapeAddButtonClick(Sender: TObject);
     procedure DoShapeDeleteClick(Sender: TObject);
@@ -322,7 +323,7 @@ begin
   Result.FName := FName;
 end;
 
-procedure TSimbaShapeBoxShape.DrawConnectors(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
+procedure TSimbaShapeBoxShape.DrawConnectors(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
 var
   Color: TColor;
   P: TPoint;
@@ -333,10 +334,10 @@ begin
     Color := clLime;
 
   for P in Points do
-    ACanvas.DrawBoxTransparent(TBox.Create(P.X - 2, P.Y - 2, P.X + 3, P.Y + 3), Color, 0.65);
+    ACanvas.DrawBoxFilled(TBox.Create(P.X - 2, P.Y - 2, P.X + 3, P.Y + 3), Color, 0.65);
 end;
 
-procedure TSimbaShapeBoxShape.DrawLines(ACanvas: TSimbaImageBoxBitmap; Box: TBox; Flags: EPaintShapeFlags);
+procedure TSimbaShapeBoxShape.DrawLines(ACanvas: TSimbaImageBoxCanvas; Box: TBox; Flags: EPaintShapeFlags);
 var
   Color: TColor;
 begin
@@ -348,7 +349,7 @@ begin
   ACanvas.DrawBox(Box, Color);
 end;
 
-procedure TSimbaShapeBoxShape.DrawLines(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
+procedure TSimbaShapeBoxShape.DrawLines(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
 var
   I: Integer;
   Color: TColor;
@@ -365,7 +366,7 @@ begin
     ACanvas.DrawLine(Points[I], Points[I+1], Color);
 end;
 
-procedure TSimbaShapeBoxShape.DrawLinesGap(ACanvas: TSimbaImageBoxBitmap; Points: TPointArray; Flags: EPaintShapeFlags);
+procedure TSimbaShapeBoxShape.DrawLinesGap(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
 var
   I: Integer;
   Color: TColor;
@@ -426,7 +427,7 @@ begin
   Result := DistToEdge(MousePoint) <= CLOSE_DISTANCE;
 end;
 
-procedure TSimbaShapeBoxShape_Point.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint);
+procedure TSimbaShapeBoxShape_Point.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint);
 begin
   if (EPaintShapeFlag.SELECTING in Flags) then
     FPoint := MousePoint;
@@ -494,7 +495,7 @@ begin
   Result := DistToEdge(P) <= CLOSE_DISTANCE;
 end;
 
-procedure TSimbaShapeBoxShape_Path.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint);
+procedure TSimbaShapeBoxShape_Path.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint);
 begin
   DrawLinesGap(ACanvas, FPoly, Flags);
   DrawConnectors(ACanvas, FPoly, Flags);
@@ -593,7 +594,7 @@ begin
     FDragStart := MousePoint;
 end;
 
-procedure TSimbaShapeBoxShape_Poly.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint);
+procedure TSimbaShapeBoxShape_Poly.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint);
 begin
   if EPaintShapeFlag.SELECTING in Flags then
     DrawLines(ACanvas, FPoly + [MousePoint, FPoly[0]], Flags)
@@ -803,7 +804,7 @@ begin
     FDragStart := MousePoint - TPoint.Create(FBox.X1, FBox.Y1);
 end;
 
-procedure TSimbaShapeBoxShape_Box.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxBitmap; Flags: EPaintShapeFlags; MousePoint: TPoint);
+procedure TSimbaShapeBoxShape_Box.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint);
 begin
   if (FBox.X1 = -1) and (FBox.Y1 = -1) then
     Exit;
@@ -838,7 +839,6 @@ begin
   case FDraggingCorner of
     DCENTER:
         begin
-          //   Offset(X-Left, Y-Top);
           FBox := FBox.Offset(
             (MousePoint.X - FDragStart.X) - FBox.X1,
             (MousePoint.Y - FDragStart.Y) - FBox.Y1
@@ -897,25 +897,25 @@ begin
   if (Sender = FPathButton) then
   begin
     NewShape := TSimbaShapeBoxShape_Path.Create(Self);
-    StatusPanel.Text := 'Selecting path: Click to set points and press ENTER to finish';
+    StatusBar.PanelText[3] := 'Selecting path: Click to set points and press ENTER to finish';
   end;
 
   if (Sender = FPolyButton) then
   begin
     NewShape := TSimbaShapeBoxShape_Poly.Create(Self);
-    StatusPanel.Text := 'Selecting polygon: Click to set points and press ENTER to finish';
+    StatusBar.PanelText[3] := 'Selecting polygon: Click to set points and press ENTER to finish';
   end;
 
   if (Sender = FPointButton) then
   begin
     NewShape := TSimbaShapeBoxShape_Point.Create(Self);
-    StatusPanel.Text := 'Selecting point: Click to set';
+    StatusBar.PanelText[3] := 'Selecting point: Click to set';
   end;
 
   if (Sender = FBoxButton) then
   begin
     NewShape := TSimbaShapeBoxShape_Box.Create(Self);
-    StatusPanel.Text := 'Selecting box: Click to set top left then again for bottom left';
+    StatusBar.PanelText[3] := 'Selecting box: Click to set top left then again for bottom left';
   end;
 
   if (NewShape <> nil) then
@@ -1061,7 +1061,7 @@ procedure TSimbaShapeBox.InternalSetSelecting(Shape: TSimbaShapeBoxShape);
 begin
   FSelecting := Shape;
   if (FSelecting = nil) then
-    StatusPanel.Text := '';
+    StatusBar.PanelText[3] := '';
 
   Paint();
 end;
@@ -1077,27 +1077,20 @@ begin
   Result := GetShape(SelectedIndex);
 end;
 
-procedure TSimbaShapeBox.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  inherited ImageMouseUp(Sender, Button, Shift, X, Y);
-
-  if (FDragging <> nil) then
-    FDragging := nil;
-end;
-
-procedure TSimbaShapeBox.ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaShapeBox.ImgMouseDown(Button: TMouseButton; Shift: TShiftState;
+  X, Y: Integer);
 var
   ShapeAtMouse: TSimbaShapeBoxShape;
 begin
-  inherited ImageMouseDown(Sender, Button, Shift, X, Y);
+  inherited;
 
   if (Button <> mbLeft) then
     Exit;
 
   if (FSelecting = nil) then
   begin
-    ShapeAtMouse := Self.GetShapeAt(FMousePoint);
-    if (ShapeAtMouse <> nil) and ShapeAtMouse.BeginDrag(FMousePoint) then
+    ShapeAtMouse := Self.GetShapeAt(MousePoint);
+    if (ShapeAtMouse <> nil) and ShapeAtMouse.BeginDrag(MousePoint) then
     begin
       InternalStartDragging(ShapeAtMouse);
       Exit;
@@ -1105,29 +1098,37 @@ begin
   end;
 
   if (FSelecting <> nil) then
-    FSelecting.SelectingMouseDown(Self, Button, Shift, FMousePoint);
+    FSelecting.SelectingMouseDown(Self, Button, Shift, MousePoint);
 end;
 
-procedure TSimbaShapeBox.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaShapeBox.ImgMouseUp(Button: TMouseButton; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  inherited;
+
+  FDragging := nil;
+end;
+
+procedure TSimbaShapeBox.ImgMouseMove(Shift: TShiftState; X, Y: Integer);
 var
   ShapeAtMouse: TSimbaShapeBoxShape;
   NewCursor: TCursor;
 begin
-  inherited ImageMouseMove(Sender, Shift, X, Y);
+  inherited;
 
   if (FSelecting = nil) then
   begin
     if (FDragging = nil) then
     begin
-      ShapeAtMouse := Self.GetShapeAt(FMousePoint);
-      if (ShapeAtMouse <> nil) and ShapeAtMouse.CanDrag(FMousePoint, NewCursor) then
+      ShapeAtMouse := Self.GetShapeAt(MousePoint);
+      if (ShapeAtMouse <> nil) and ShapeAtMouse.CanDrag(MousePoint, NewCursor) then
       begin
         Cursor := NewCursor;
         Exit;
       end;
     end else
     begin
-      FDragging.Drag(FMousePoint);
+      FDragging.Drag(MousePoint);
       Paint();
       Exit;
     end;
@@ -1137,13 +1138,13 @@ begin
   Cursor := crDefault;
 end;
 
-procedure TSimbaShapeBox.ImageKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TSimbaShapeBox.ImgKeyDown(var Key: Word; Shift: TShiftState);
 begin
-  inherited ImageKeyDown(Sender, Key, Shift);
+  inherited;
 
   if (FSelecting <> nil) then
   begin
-    FSelecting.SelectingKeyDown(Self, Key, Shift, FMousePoint);
+    FSelecting.SelectingKeyDown(Self, Key, Shift, MousePoint);
 
     Key := 0;
   end
@@ -1166,7 +1167,7 @@ begin
     Paint();
 end;
 
-procedure TSimbaShapeBox.DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect);
+procedure TSimbaShapeBox.ImgPaintArea(ACanvas: TSimbaImageBoxCanvas; R: TRect);
 var
   _SelectedShape, _SelectingShape: TSimbaShapeBoxShape;
   Flags: EPaintShapeFlags;
@@ -1185,7 +1186,7 @@ begin
       if (FShapes[I] = _SelectingShape) then Flags := Flags + [EPaintShapeFlag.SELECTING];
       if (FShapes[I] = _SelectedShape)  then Flags := Flags + [EPaintShapeFlag.SELECTED];
 
-      FShapes[I].Paint(Self, Bitmap, Flags, FMousePoint);
+      FShapes[I].Paint(Self, ACanvas, Flags, MousePoint);
     end;
 
   inherited;
@@ -1392,8 +1393,8 @@ begin
   if CheckIndex(FListBox.ItemIndex) then
   begin
     P := FShapes[FListBox.ItemIndex].Center();
-    if not IsVisible(P.X, P.Y) then
-      MoveTo(P.X, P.Y);
+    if not IsPointVisible(P) then
+      MoveTo(P);
   end;
 end;
 

@@ -1,5 +1,5 @@
 {$IF NOT DECLARED(_Row)}
-  {$ERROR _BoxFilled requires "procedure _Row(Y: Integer; X1, X2: Integer)"}
+  {$ERROR _BuildBoxFilled requires "procedure _Row(Y: Integer; X1, X2: Integer)"}
 {$ENDIF}
 
 procedure _BuildBoxFilled(Box: TBox);

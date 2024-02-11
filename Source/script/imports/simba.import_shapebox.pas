@@ -24,7 +24,7 @@ type
 
 procedure _LapeSimbaShapeBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBox(Result)^ := TSimbaShapeBox.Create(PComponent(Params^[0])^, PInteger(Params^[1])^);
+  PSimbaShapeBox(Result)^ := TSimbaShapeBox.Create(PComponent(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 procedure _LapeSimbaShapeBox_SaveToFile(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

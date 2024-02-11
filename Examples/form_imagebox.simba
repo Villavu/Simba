@@ -1,0 +1,42 @@
+// Simple form example doing random things.
+
+procedure ImgBoxPaint(Sender: TImageBox; Canvas: TImageBoxCanvas; R: TLazRect);
+begin
+  Canvas.DrawCircleFilled(Sender.MousePoint, 5, Colors.YELLOW);
+
+  // if 300,300 is visible in the paint rect
+  if (300 >= R.Left) and (300 >= R.Top) and (300 <= R.Right) and (300 <= R.Bottom) then
+    Canvas.DrawBoxFilled([300,300,350,350], Colors.LIME);
+end;
+
+procedure ImgBoxMouseMove(Sender: TImageBox; Shift: TLazShiftState; X, Y: Integer);
+begin
+  Sender.Repaint();
+end;
+
+var
+  Form: TLazForm;
+
+procedure ShowMyForm;
+var
+  ImgBox: TImageBox;
+begin
+  Form := TLazForm.Create();
+  Form.SetCaption('ImageBox example');
+  Form.SetWidth(700);
+  Form.SetHeight(500);
+  Form.SetPosition(poScreenCenter);
+
+  ImgBox := TImageBox.Create(Form);
+  ImgBox.SetParent(Form);
+  ImgBox.SetAlign(alClient);
+  ImgBox.SetBackgroundFromTarget(Target);
+  ImgBox.SetOnImgPaint(@ImgBoxPaint);
+  ImgBox.SetOnImgMouseMove(@ImgBoxMouseMove);
+
+  Form.ShowModal();
+end;
+
+begin
+  RunInMainThread(@ShowMyForm);
+end.

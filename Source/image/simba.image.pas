@@ -836,7 +836,7 @@ procedure TSimbaImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor
 var
   BGRA: TColorBGRA;
 
-  procedure _SetPixel(const X, Y: Integer); inline;
+  procedure _Pixel(const X, Y: Integer); inline;
   begin
     if (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight) then
       FData[Y*FWidth+X] := BGRA;
@@ -2549,6 +2549,11 @@ procedure TSimbaImage._DrawBoxEdge(Box: TBox; Color: TColor);
 var
   BGRA: TColorBGRA;
 
+  procedure _Pixel(const X, Y: Integer); inline;
+  begin
+    FData[Y * FWidth + X] := BGRA;
+  end;
+
   procedure _Row(const Y: Integer; const X1, X2: Integer);
   begin
     FillData(@FData[Y * FWidth + X1], (X2 - X1) + 1, BGRA);
@@ -2571,6 +2576,11 @@ end;
 procedure TSimbaImage._DrawBoxEdgeAlpha(Box: TBox; Color: TColor; Alpha: Byte);
 var
   BGRA: TColorBGRA;
+
+  procedure _Pixel(const X, Y: Integer); inline;
+  begin
+    FData[Y * FWidth + X] := BGRA;
+  end;
 
   procedure _Row(const Y: Integer; const X1, X2: Integer);
   begin
@@ -2686,7 +2696,7 @@ begin
   BGRA := Color.ToBGRA();
   BGRA.A := Alpha;
 
-  _BuildPolygonFilled(Points, TRect.Create(0, 0, FWidth-1, FHeight-1));
+  _BuildPolygonFilled(Points, TRect.Create(0, 0, FWidth-1, FHeight-1), TPoint.ZERO);
 end;
 
 procedure TSimbaImage._DrawPolygonFilled(Points: TPointArray; Color: TColor);
@@ -2709,7 +2719,7 @@ begin
   BGRA := Color.ToBGRA();
   BGRA.A := ALPHA_OPAQUE;
 
-  _BuildPolygonFilled(Points, TRect.Create(0, 0, FWidth-1, FHeight-1));
+  _BuildPolygonFilled(Points, TRect.Create(0, 0, FWidth-1, FHeight-1), TPoint.ZERO);
 end;
 
 procedure TSimbaImage._DrawImage(Image: TSimbaImage; P: TPoint);

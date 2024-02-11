@@ -1,11 +1,11 @@
 object SimbaACAForm: TSimbaACAForm
-  Left = 3178
+  Left = 3110
   Height = 886
-  Top = 375
+  Top = 360
   Width = 1076
   Caption = 'Auto Color Aid'
-  ClientHeight = 886
-  ClientWidth = 1076
+  ClientHeight = 0
+  ClientWidth = 0
   Constraints.MinHeight = 400
   Constraints.MinWidth = 500
   DesignTimePPI = 120
@@ -16,7 +16,7 @@ object SimbaACAForm: TSimbaACAForm
   Position = poScreenCenter
   ShowHint = True
   ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.2'
+  LCLVersion = '3.0.0.3'
   object PanelMain: TPanel
     Left = 0
     Height = 886

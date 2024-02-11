@@ -249,6 +249,12 @@ type
     1: (AsInteger: UInt32);
   end;
 
+  TColorRGBA = packed record
+  case Byte of
+    0: (R,G,B,A: Byte);
+    1: (AsInteger: UInt32);
+  end;
+
   PColorARGB = ^TColorARGB;
   PColorBGRA = ^TColorBGRA;
   PColorRGB = ^TColorRGB;

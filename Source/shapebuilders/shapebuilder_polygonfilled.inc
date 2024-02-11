@@ -1,13 +1,15 @@
 {$IF NOT DECLARED(_Row)}
-  {$ERROR _PolygonFilled requires "procedure _Row(Y: Integer; X1, X2: Integer)"}
+  {$ERROR _BuildPolygonFilled requires "procedure _Row(Y: Integer; X1, X2: Integer)"}
 {$ENDIF}
 
 (*
+  https://gitlab.com/freepascal.org/lazarus/lazarus/-/blob/main/components/fpvectorial/fpvutils.pas#L765
+
   Calculates the intersection points of a vertical (ACoordIsX = true) or horizontal
   (ACoordIsX = false) line with border of the polygon specified by APoints.
   Returns the coordinates of the intersection points.
 *)
-function GetLinePolygonIntersectionPoints(const ACoord: Double; const APoints: TPointFArray; const ACoordIsX: Boolean): TPointFArray;
+procedure GetLinePolygonIntersectionPoints(const ACoord: Double; const APoints: TPointFArray; const ACoordIsX: Boolean; out lpoints: TPointFArray);
 var
   I, Count: Integer;
   Arr: TDoubleArray;
@@ -42,23 +44,23 @@ begin
       end;
   end;
 
-  SetLength(Result, Count);
+  SetLength(lpoints, Count);
   if (Count = 0) then
     Exit;
 
   specialize QuickSort<Double>(Arr, 0, Count - 1);
 
   if ACoordIsX then
-    for I := 0 to High(Result) do
+    for I := 0 to High(lpoints) do
     begin
-      Result[I].X := ACoord;
-      Result[I].Y := Arr[I];
+      lpoints[I].X := ACoord;
+      lpoints[I].Y := Arr[I];
     end
   else
-    for I := 0 to High(Result) do
+    for I := 0 to High(lpoints) do
     begin
-      Result[I].X := Arr[I];
-      Result[I].Y := ACoord;
+      lpoints[I].X := Arr[I];
+      lpoints[I].Y := ACoord;
     end;
 end;
 
@@ -68,7 +70,7 @@ end;
   the even-odd rule
   http://www.tutorialspoint.com/computer_graphics/polygon_filling_algorithm
 *)
-procedure _BuildPolygonFilled(APoints: TPointArray; ARect: TRect);
+procedure _BuildPolygonFilled(APoints: TPointArray; ARect: TRect; AOffset: TPoint);
 var
   scanlineY, scanLineY1, scanLineY2: Integer;
   lPoints, pts: TPointFArray;
@@ -94,8 +96,8 @@ begin
   SetLength(pts, Length(APoints));
   for I := 0 to High(APoints) do
   begin
-    pts[I].x := APoints[I].X;
-    pts[I].y := APoints[I].Y;
+    pts[I].x := APoints[I].X + AOffset.X;
+    pts[I].y := APoints[I].Y + AOffset.Y;
   end;
 
   // Fill polygon by drawing horizontal line segments
@@ -104,7 +106,7 @@ begin
   begin
     // Find intersection points of horizontal scan line with polygon
     // with polygon
-    lPoints := GetLinePolygonIntersectionPoints(scanlineY, pts, false);
+    GetLinePolygonIntersectionPoints(scanlineY, pts, false, lpoints);
     if Length(lPoints) < 2 then
     begin
       Inc(scanlineY);

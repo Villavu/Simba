@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, ExtCtrls, Graphics,
-  simba.image, simba.imagebox;
+  simba.imagebox;
 
 type
   TSimbaImageBoxZoom = class(TCustomControl)
@@ -29,11 +29,7 @@ type
 
     procedure SetTempColor(AColor: Integer);
     procedure SetZoom(PixelCount, PixelSize: Integer);
-    procedure MoveTest(ImageBox: TSimbaImageBox; X, Y: Integer);
-
-    procedure Move(Image: TImage; X, Y: Integer); overload;
-    procedure Move(Image: TBitmap; X, Y: Integer); overload;
-    procedure Move(Image: TSimbaImage; X, Y: Integer); overload;
+    procedure Move(ACanvas: TCanvas; X, Y: Integer);
   end;
 
 implementation
@@ -124,7 +120,7 @@ begin
   DoAutoSize();
 end;
 
-procedure TSimbaImageBoxZoom.MoveTest(ImageBox: TSimbaImageBox; X, Y: Integer);
+procedure TSimbaImageBoxZoom.Move(ACanvas: TCanvas; X, Y: Integer);
 var
   LoopX, LoopY: Integer;
 begin
@@ -133,54 +129,7 @@ begin
 
   for LoopX := 0 to FBitmap.Width - 1 do
     for LoopY := 0 to FBitmap.Height - 1 do
-      FBitmap.Canvas.Pixels[LoopX, LoopY] := ImageBox.Background.Canvas.Pixels[X + LoopX, Y + LoopY];
-
-  Invalidate();
-end;
-
-procedure TSimbaImageBoxZoom.Move(Image: TImage; X, Y: Integer);
-var
-  LoopX, LoopY: Integer;
-begin
-  Dec(X, FPixelCount div 2);
-  Dec(Y, FPixelCount div 2);
-
-  for LoopX := 0 to FBitmap.Width - 1 do
-    for LoopY := 0 to FBitmap.Height - 1 do
-      FBitmap.Canvas.Pixels[LoopX, LoopY] := Image.Canvas.Pixels[X + LoopX, Y + LoopY];
-
-  Invalidate();
-end;
-
-procedure TSimbaImageBoxZoom.Move(Image: TBitmap; X, Y: Integer);
-var
-  LoopX, LoopY: Integer;
-begin
-  Dec(X, FPixelCount div 2);
-  Dec(Y, FPixelCount div 2);
-
-  for LoopX := 0 to FBitmap.Width - 1 do
-    for LoopY := 0 to FBitmap.Height - 1 do
-      FBitmap.Canvas.Pixels[LoopX, LoopY] := Image.Canvas.Pixels[X + LoopX, Y + LoopY];
-
-  Invalidate();
-end;
-
-procedure TSimbaImageBoxZoom.Move(Image: TSimbaImage; X, Y: Integer);
-var
-  LoopX, LoopY: Integer;
-begin
-  FTempColor := -1;
-
-  Dec(X, FPixelCount div 2);
-  Dec(Y, FPixelCount div 2);
-
-  for LoopX := 0 to FBitmap.Width - 1 do
-    for LoopY := 0 to FBitmap.Height - 1 do
-      if Image.InImage(X + LoopX, Y + LoopY) then
-        FBitmap.Canvas.Pixels[LoopX, LoopY] := Image.Pixel[X + LoopX, Y + LoopY]
-      else
-        FBitmap.Canvas.Pixels[LoopX, LoopY] := clBlack;
+      FBitmap.Canvas.Pixels[LoopX, LoopY] := ACanvas.Pixels[X + LoopX, Y + LoopY];
 
   Invalidate();
 end;

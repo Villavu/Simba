@@ -44,6 +44,7 @@ type
     procedure SetPanelCount(Value: Integer);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     procedure EraseBackground(DC: HDC); override;
 
@@ -106,6 +107,13 @@ begin
   ControlStyle := ControlStyle + [csOpaque];
 
   CalculateSizes();
+end;
+
+destructor TSimbaStatusBar.Destroy;
+begin
+  Application.RemoveAsyncCalls(Self);
+
+  inherited Destroy();
 end;
 
 procedure TSimbaStatusBar.WMPaint(var Message: TLMPaint);

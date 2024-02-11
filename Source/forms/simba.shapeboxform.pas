@@ -10,7 +10,7 @@ unit simba.shapeboxform;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Menus, ExtCtrls,
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Menus,
   simba.base, simba.shapebox, simba.env;
 
 type
@@ -28,8 +28,7 @@ type
     procedure MenuItem3Click(Sender: TObject);
     procedure MenuItem4Click(Sender: TObject);
     procedure MenuItemLoadImageClick(Sender: TObject);
-  protected
-    HasBackground: Boolean;
+  public
     ShapeBox: TSimbaShapeBox;
   end;
 
@@ -52,18 +51,12 @@ procedure TSimbaShapeBoxForm.FormHide(Sender: TObject);
 begin
   ShapeBox.PrintShapes();
   ShapeBox.SaveToFile(SimbaEnv.DataPath + 'shapes');
-  if (not HasBackground) then
-    ShapeBox.Background.SetSize(0, 0);
 end;
 
 procedure TSimbaShapeBoxForm.FormShow(Sender: TObject);
 begin
-  if (not HasBackground) then
-  begin
-    if (ShapeBox.Background = nil) then
-      ShapeBox.Background := TBitmap.Create();
+  if (ShapeBox.Background.Width = 0) and (ShapeBox.Background.Height = 0) then
     ShapeBox.Background.SetSize(1000, 1000);
-  end;
 
   ShapeBox.LoadFromFile(SimbaEnv.DataPath + 'shapes');
 end;
@@ -83,11 +76,7 @@ end;
 procedure TSimbaShapeBoxForm.MenuItemLoadImageClick(Sender: TObject);
 begin
   if OpenDialog.Execute() then
-  begin
     ShapeBox.SetBackgroundFromFile(OpenDialog.FileName);
-
-    HasBackground := True;
-  end;
 end;
 
 {$R *.lfm}

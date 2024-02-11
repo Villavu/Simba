@@ -1,5 +1,5 @@
 {$IF NOT DECLARED(_Pixel)}
-  {$ERROR _BuildLineGap requires "procedure _Pixel(X, Y: Integer)"}
+  {$ERROR _BuildLineGap requires "_Pixel(X, Y: Integer)"}
 {$ENDIF}
 
 procedure _BuildLineGap(Start, Stop: TPoint; GapSize: Integer);

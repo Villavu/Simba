@@ -10,187 +10,178 @@ unit simba.imagebox;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, GraphType, ComCtrls, LCLType,
-  simba.base, simba.image, simba.dtm, simba.imagebox_image,
-  simba.colormath, simba.target;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
+  ATScrollBar, LCLType, LMessages,
+  simba.base, simba.component_statusbar, simba.image_lazbridge, simba.imagebox_canvas,
+  simba.image, simba.dtm, simba.colormath, simba.finder, simba.target;
+
+const
+  ZOOM_LEVELS: TIntegerArray = (
+    25, 50, 100, 200, 400, 800, 1600, 3200
+  );
+  ZOOM_PIXELS: TIntegerArray = (
+    4, 2, 1, 2, 4, 8, 16, 32
+  );
 
 type
-  TSimbaImageBox_ScrollBox = class(TScrollBox)
+  TSimbaImageBox = class;
+
+  TSimbaImageScrollBox = class(TCustomControl)
   protected
-    FWidth, FHeight: Integer;
-  public
-    constructor Create(AOwner: TComponent); override;
+    FBackground: TBitmap; // background image
+    FCanvas: TSimbaImageBoxCanvas; // canvas for user to draw on in PaintArea
+    FResizeBuffer: TBitmap; // buffer to resize canvas onto for zoom
 
-    procedure EraseBackground(DC: HDC); override;
-    procedure GetPreferredSize(var PreferredWidth, PreferredHeight: Integer; Raw: Boolean = False; WithThemeSpace: Boolean = True); override;
-    procedure SetSize(AWidth, AHeight: Integer);
-  end;
+    FImageBox: TSimbaImageBox;
+    FImageWidth: Integer;
+    FImageHeight: Integer;
 
-  PSimbaImageBoxPaintAreaEvent = ^TSimbaImageBoxPaintAreaEvent;
-  TSimbaImageBoxPaintAreaEvent = procedure(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect) of object;
-
-  PSimbaImageBox = ^TSimbaImageBox;
-  TSimbaImageBox = class(TWinControl)
-  protected
-    FScrollBox: TSimbaImageBox_ScrollBox;
-    FStatusBar: TStatusBar;
-    FMousePanel: TStatusPanel;
-    FDimensionsPanel: TStatusPanel;
-    FZoomPanel: TStatusPanel;
-    FStatusPanel: TStatusPanel;
-    FZoom: Single;
+    FZoomMin: Integer;
+    FZoomMax: Integer;
+    FZoomLevel: Integer;
     FZoomPixels: Integer;
-    FWidth: Integer;
-    FHeight: Integer;
-    FOnPaintArea: TSimbaImageBoxPaintAreaEvent;
-    FBackground: TBitmap;
-    FScroll: record
+
+    FVertScroll: TATScrollbar;
+    FHorzScroll: TATScrollbar;
+
+    FDragging: record
       X, Y: Integer;
       Active: Boolean;
     end;
-    FMousePoint: TPoint;
-    FBitmap: TSimbaImageBoxBitmap;
+
+    procedure WMEraseBkgnd(var Message: TLMEraseBkgnd); message LM_ERASEBKGND;
+
+    function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean; override;
+    function DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): Boolean; override;
 
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
-    procedure DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect); virtual;
+    procedure KeyUp(var Key: Word; Shift: TShiftState); override;
 
-    function GetScrolledRect: TRect; virtual;
+    procedure MouseLeave; override;
+    procedure MouseEnter; override;
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
 
-    procedure ScrollBoxPaint(Sender: TObject); virtual;
+    procedure Click; override;
+    procedure DblClick; override;
 
-    procedure FontChanged(Sender: TObject); override;
-    procedure BackgroundChanged(Sender: TObject); virtual;
+    procedure Paint; override;
+    procedure Resize; override;
 
-    procedure ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); virtual;
-    procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); virtual;
-    procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer); virtual;
-    procedure ImageMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean); virtual;
-    procedure ImageMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean); virtual;
-    procedure ImageMouseEnter(Sender: TObject); virtual;
-    procedure ImageMouseLeave(Sender: TObject); virtual;
-    procedure ImageDoubleClick(Sender: TObject); virtual;
-    procedure ImageKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); virtual;
+    procedure DoBackgroundChange(Sender: TObject);
+    procedure DoScrollChange(Sender: TObject);
 
-    function GetCursor: TCursor; override;
-    procedure SetCursor(Value: TCursor); override;
+    procedure UpdateScrollBars;
+    procedure ChangeZoom(ZoomIndex: Integer);
+    procedure IncreaseZoom(Inc: Boolean);
 
-    procedure SetParent(Value: TWinControl); override;
-    procedure SetZoom(Value: Single); virtual;
+    function VisibleTopX: Integer;
+    function VisibleTopY: Integer;
   public
-    property OnMouseDown;
-    property OnMouseMove;
-    property OnMouseUp;
-    property OnMouseEnter;
-    property OnMouseLeave;
-    property OnDblClick;
-    property OnPaintArea: TSimbaImageBoxPaintAreaEvent read FOnPaintArea write FOnPaintArea;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
-    property MousePoint: TPoint read FMousePoint;
-    property Zoom: Single read FZoom write SetZoom;
-    property StatusBar: TStatusBar read FStatusBar;
-    property StatusPanel: TStatusPanel read FStatusPanel;
-    property Background: TBitmap read FBackground write FBackground;
+    function ScreenToImage(ScreenXY: TPoint): TPoint;
+    function ImageToScreen(ImageXY: TPoint): TPoint;
+    procedure MoveTo(ImageXY: TPoint);
+    function IsPointVisible(ImageXY: TPoint): Boolean;
 
-    procedure MoveTo(X, Y: Integer);
-    function IsVisible(X, Y: Integer): Boolean; overload;
+    property Background: TBitmap read FBackground;
+  end;
+
+  TImageBoxPaintEvent = procedure(Sender: TSimbaImageBox; Canvas: TSimbaImageBoxCanvas; R: TRect) of object;
+  TImageBoxEvent = procedure(Sender: TSimbaImageBox) of object;
+  TImageBoxClickEvent = procedure(Sender: TSimbaImageBox; X, Y: Integer) of object;
+  TImageBoxKeyEvent = procedure(Sender: TSimbaImageBox; var Key: Word; Shift: TShiftState);
+  TImageBoxMouseEvent = procedure(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer) of object;
+  TImageBoxMouseMoveEvent = procedure(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer) of object;
+
+  PSimbaImageBox = ^TSimbaImageBox;
+  TSimbaImageBox = class(TCustomControl)
+  protected
+    FImageScrollBox: TSimbaImageScrollBox;
+    FStatusBar: TSimbaStatusBar;
+    FBackground: TBitmap;
+    FPixelFormat: ELazPixelFormat;
+    FMouseX: Integer;
+    FMouseY: Integer;
+
+    FOnImgKeyDown: TImageBoxKeyEvent;
+    FOnImgKeyUp: TImageBoxKeyEvent;
+
+    FOnImgMouseEnter: TImageBoxEvent;
+    FOnImgMouseLeave: TImageBoxEvent;
+    FOnImgMouseDown: TImageBoxMouseEvent;
+    FOnImgMouseUp: TImageBoxMouseEvent;
+    FOnImgMouseMove: TImageBoxMouseMoveEvent;
+    FOnImgClick: TImageBoxClickEvent;
+    FOnImgDoubleClick: TImageBoxClickEvent;
+    FOnImgPaint: TImageBoxPaintEvent;
+
+    procedure Paint; override;
+
+    procedure ImgKeyDown(var Key: Word; Shift: TShiftState); virtual;
+    procedure ImgKeyUp(var Key: Word; Shift: TShiftState); virtual;
+    procedure ImgMouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); virtual;
+    procedure ImgMouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); virtual;
+    procedure ImgMouseMove(Shift: TShiftState; X, Y: Integer); virtual;
+    procedure ImgPaintArea(ACanvas: TSimbaImageBoxCanvas; R: TRect); virtual;
+    procedure ImgClick(X, Y: Integer); virtual;
+    procedure ImgDoubleClick(X, Y: Integer); virtual;
+    procedure ImgMouseEnter; virtual;
+    procedure ImgMouseLeave; virtual;
+
+    function GetMousePoint: TPoint;
+    function GetCursor: TCursor; override;
+    function GetStatus: String;
+    procedure SetCursor(Value: TCursor); override;
+    procedure SetStatus(Value: String);
+  public
+    constructor Create(AOwner: TComponent); override;
 
     function FindDTM(DTM: TDTM): TPointArray;
     function FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
     function MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
 
-    procedure SetBackground(Image: TSimbaImage);
+    function ScreenToImage(ScreenXY: TPoint): TPoint;
+    function ImageToScreen(ImageXY: TPoint): TPoint;
+    function IsPointVisible(ImageXY: TPoint): Boolean;
+    procedure MoveTo(ImageXY: TPoint);
+
+    procedure SetBackground(Img: TSimbaImage);
     procedure SetBackgroundFromFile(FileName: String);
     procedure SetBackgroundFromWindow(Window: TWindowHandle);
     procedure SetBackgroundFromTarget(Target: TSimbaTarget; Bounds: TBox); overload;
     procedure SetBackgroundFromTarget(Target: TSimbaTarget); overload;
 
-    procedure Paint;
+    property StatusBar: TSimbaStatusBar read FStatusBar;
+    property Status: String read GetStatus write SetStatus;
+    property PixelFormat: ELazPixelFormat read FPixelFormat;
+    property Background: TBitmap read FBackground;
+    property MouseX: Integer read FMouseX;
+    property MouseY: Integer read FMouseY;
+    property MousePoint: TPoint read GetMousePoint;
+    property Cursor;
 
-    constructor Create(AOwner: TComponent); virtual; reintroduce;
-    destructor Destroy; override;
+    property OnImgKeyDown: TImageBoxKeyEvent read FOnImgKeyDown write FOnImgKeyDown;
+    property OnImgKeyUp: TImageBoxKeyEvent read FOnImgKeyUp write FOnImgKeyUp;
+
+    property OnImgMouseEnter: TImageBoxEvent read FOnImgMouseEnter write FOnImgMouseEnter;
+    property OnImgMouseLeave: TImageBoxEvent read FOnImgMouseLeave write FOnImgMouseLeave;
+    property OnImgMouseDown: TImageBoxMouseEvent read FOnImgMouseDown write FOnImgMouseDown;
+    property OnImgMouseUp: TImageBoxMouseEvent read FOnImgMouseUp write FOnImgMouseUp;
+    property OnImgMouseMove: TImageBoxMouseMoveEvent read FOnImgMouseMove write FOnImgMouseMove;
+    property OnImgClick: TImageBoxClickEvent read FOnImgClick write FOnImgClick;
+    property OnImgDoubleClick: TImageBoxClickEvent read FOnImgDoubleClick write FOnImgDoubleClick;
+    property OnImgPaint: TImageBoxPaintEvent read FOnImgPaint write FOnImgPaint;
   end;
 
 implementation
 
 uses
-  Math, LCLIntf,
-  simba.finder, simba.image_lazbridge, simba.windowhandle;
-
-procedure TSimbaImageBox_ScrollBox.GetPreferredSize(var PreferredWidth, PreferredHeight: integer; Raw: boolean; WithThemeSpace: boolean);
-begin
-  PreferredWidth  := FWidth;
-  PreferredHeight := FHeight;
-end;
-
-procedure TSimbaImageBox_ScrollBox.EraseBackground(DC: HDC);
-begin
-  Brush.Color := clBlack;
-
-  inherited;
-end;
-
-procedure TSimbaImageBox_ScrollBox.SetSize(AWidth, AHeight: Integer);
-begin
-  FWidth  := AWidth;
-  FHeight := AHeight;
-
-  ComputeScrollbars();
-end;
-
-constructor TSimbaImageBox_ScrollBox.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  ControlStyle := ControlStyle + [csOpaque];
-end;
-
-procedure TSimbaImageBox.SetZoom(Value: Single);
-var
-  Center: TPoint;
-begin
-  Center := TPoint.Create(0, 0);
-  if (FZoom <> 0) then
-  begin
-    Center   := FScrollBox.ScreenToClient(Mouse.CursorPos); // Zoom into where the cursor is
-    Center.X := Trunc((Center.X + FScrollBox.HorzScrollBar.Position) / FZoom);
-    Center.Y := Trunc((Center.Y + FScrollBox.VertScrollBar.Position) / FZoom);
-  end;
-
-  if (Value = 0.25) or (Value = 0.50) or (Value = 1.00) or (Value = 2.00) or (Value = 4.00) or (Value = 8.00) or (Value = 16.00) or (Value = 32.00) then
-  begin
-    FZoom := Value;
-
-    if (FZoom >= 1) then
-    begin
-      FZoomPixels := Trunc(FZoom * 1);
-
-      FScrollBox.SetSize(
-        (FWidth * FZoomPixels),
-        (FHeight * FZoomPixels)
-      );
-    end else
-    begin
-      if (FZoom = 0.50) then
-        FZoomPixels := 2
-      else
-      if (FZoom = 0.25) then
-        FZoomPixels := 4;
-
-      FScrollBox.SetSize(
-        FWidth div FZoomPixels,
-        FHeight div FZoomPixels
-      );
-    end;
-
-    FDimensionsPanel.Text := Format('%dx%d', [FBackground.Width, FBackground.Height]);
-    FZoomPanel.Text := IntToStr(Round(FZoom * 100)) + '%';
-
-    if (Center.X > 0) and (Center.Y > 0) then
-      MoveTo(Center.X, Center.Y);
-
-    Paint();
-  end;
-end;
+  simba.windowhandle,
+  GraphType, LCLIntf;
 
 generic procedure ZoomOut<_T>(Ratio, SrcX, SrcY, LoopEndX, LoopEndY: Integer; SrcImg, DestImg: TRawImage);
 type
@@ -198,7 +189,6 @@ type
 var
   SourceData, DestData: PByte;
   SourceBytesPerLine, DestBytesPerLine: PtrUInt;
-var
   X, Y: Integer;
   SrcStart, SrcPtr, DestPtr: PByte;
 begin
@@ -231,7 +221,6 @@ type
 var
   SourceData, DestData: PByte;
   SourceBytesPerLine, DestBytesPerLine: PtrUInt;
-var
   X, Y: Integer;
   SrcStart, SrcPtr, DestPtr: PByte;
 begin
@@ -262,8 +251,7 @@ generic procedure NoZoom<_T>(SrcX, SrcY, Wid, Hei: Integer; SrcImg, DestImg: TRa
 var
   SourceData, DestData: PByte;
   SourceBytesPerLine, DestBytesPerLine: PtrUInt;
-  Y: Integer;
-  RowSize: Integer;
+  Y, RowSize: Integer;
 begin
   SourceData         := SrcImg.Data;
   SourceBytesPerLine := SrcImg.Description.BytesPerLine;
@@ -273,7 +261,7 @@ begin
   SourceData := SourceData + (SrcY * SourceBytesPerLine)
                            + (SrcX * SizeOf(_T));
 
-  RowSize := Wid * SizeOf(_T);
+  RowSize := (Wid * SizeOf(_T));
   for Y := 0 to Hei - 1 do
   begin
     Move(SourceData^, DestData^, RowSize);
@@ -283,337 +271,488 @@ begin
   end;
 end;
 
-procedure TSimbaImageBox.KeyDown(var Key: Word; Shift: TShiftState);
+procedure TSimbaImageScrollBox.ChangeZoom(ZoomIndex: Integer);
+var
+  Level, Pixels: Integer;
 begin
-  ImageKeyDown(Self, Key, Shift);
+  Level := ZOOM_LEVELS[ZoomIndex];
+  Pixels := ZOOM_PIXELS[ZoomIndex];
+
+  if (Level < FZoomMin) then
+    Level := FZoomMin;
+  if (Level > FZoomMax) then
+    Level := FZoomMax;
+
+  if (Level <> FZoomLevel) then
+  begin
+    FZoomLevel := Level;
+    FZoomPixels := Pixels;
+
+    Invalidate();
+  end;
+
+  FImageBox.StatusBar.PanelText[2] := Format('%d%s', [FZoomLevel, '%']);
 end;
 
-procedure TSimbaImageBox.DoPaintArea(Bitmap: TSimbaImageBoxBitmap; R: TRect);
+function TSimbaImageScrollBox.VisibleTopX: Integer;
 begin
-  if Assigned(FOnPaintArea) then
-    FOnPaintArea(Self, Bitmap, R);
+  Result := Max(0, FHorzScroll.Position + ((FZoomPixels - FHorzScroll.Position) mod FZoomPixels));
 end;
 
-function TSimbaImageBox.GetScrolledRect: TRect;
+function TSimbaImageScrollBox.VisibleTopY: Integer;
 begin
-  Result := FScrollBox.GetScrolledClientRect();
-
-  Result.Left   := Max(0, Result.Left   + ((FZoomPixels - Result.Left) mod FZoomPixels));
-  Result.Top    := Max(0, Result.Top    + ((FZoomPixels - Result.Top)  mod FZoomPixels));
-  Result.Right  := Result.Right  + FZoomPixels;
-  Result.Bottom := Result.Bottom + FZoomPixels;
+  Result := Max(0, FVertScroll.Position + ((FZoomPixels - FVertScroll.Position) mod FZoomPixels));
 end;
 
-procedure TSimbaImageBox.ScrollBoxPaint(Sender: TObject);
+procedure TSimbaImageScrollBox.WMEraseBkgnd(var Message: TLMEraseBkgnd);
+begin
+  Message.Result := 1;
+end;
+
+procedure TSimbaImageScrollBox.MouseLeave;
+begin
+  FDragging.Active := False;
+
+  FImageBox.StatusBar.PanelText[0] := '';
+  FImageBox.ImgMouseLeave();
+
+  inherited MouseLeave();
+end;
+
+procedure TSimbaImageScrollBox.MouseEnter;
+begin
+  FImageBox.ImgMouseEnter();
+
+  inherited MouseEnter();
+end;
+
+function TSimbaImageScrollBox.DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean;
+begin
+  if (ssCtrl in Shift) then
+    IncreaseZoom(True);
+
+  Result := inherited DoMouseWheelUp(Shift, MousePos);
+end;
+
+function TSimbaImageScrollBox.DoMouseWheelDown(Shift: TShiftState; MousePos: TPoint): Boolean;
+begin
+  if (ssCtrl in Shift) then
+    IncreaseZoom(False);
+
+  Result := inherited DoMouseWheelDown(Shift, MousePos);
+end;
+
+procedure TSimbaImageScrollBox.MouseMove(Shift: TShiftState; X, Y: Integer);
+var
+  Steps: Integer;
+begin
+  inherited;
+
+  X += VisibleTopX;
+  Y += VisibleTopY;
+
+  if FDragging.Active then
+  begin
+    if (Abs(FDragging.Y - Y) > 0) then
+    begin
+      Steps := Abs(FDragging.Y - Y) div FZoomPixels;
+      if (FZoomLevel > 100) then
+        Steps *= FZoomPixels;
+
+      if (Steps > 0) then
+      begin
+        if (FDragging.Y - Y > 0) then
+          FVertScroll.ScrollBy(Steps)
+        else
+          FVertScroll.ScrollBy(-Steps);
+      end;
+    end;
+
+    if (Abs(FDragging.X - X) > 0) then
+    begin
+      Steps := Abs(FDragging.X - X) div FZoomPixels;
+      if (FZoomLevel > 100) then
+        Steps *= FZoomPixels;
+
+      if (Steps > 0) then
+      begin
+        if (FDragging.X - X > 0) then
+          FHorzScroll.ScrollBy(Steps)
+        else
+          FHorzScroll.ScrollBy(-Steps);
+      end;
+    end;
+  end;
+
+  with FImageBox do
+  begin
+    FMouseX := IfThen(FZoomLevel >= 100, X div FZoomPixels, X * FZoomPixels);
+    FMouseY := IfThen(FZoomLevel >= 100, Y div FZoomPixels, Y * FZoomPixels);
+
+    StatusBar.PanelText[0] := Format('(%d, %d)', [FMouseX, FMouseY]);
+
+    ImgMouseMove(Shift, FMouseX, FMouseY);
+  end;
+end;
+
+procedure TSimbaImageScrollBox.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited;
+
+  if CanSetFocus() then
+    SetFocus();
+
+  X += VisibleTopX;
+  Y += VisibleTopY;
+
+  if (Button = mbRight) then
+  begin
+    FDragging.X := X;
+    FDragging.Y := Y;
+    FDragging.Active := True;
+
+    Cursor := crSizeAll;
+  end;
+
+  with FImageBox do
+  begin
+    FMouseX := IfThen(FZoomLevel >= 100, X div FZoomPixels, X * FZoomPixels);
+    FMouseY := IfThen(FZoomLevel >= 100, Y div FZoomPixels, Y * FZoomPixels);
+
+    ImgMouseDown(Button, Shift, FMouseX, FMouseY);
+  end;
+end;
+
+procedure TSimbaImageScrollBox.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited;
+
+  X += VisibleTopX;
+  Y += VisibleTopY;
+
+  if (Button = mbRight) then
+  begin
+    FDragging.Active := False;
+
+    Cursor := crDefault;
+  end;
+
+  with FImageBox do
+  begin
+    FMouseX := IfThen(FZoomLevel >= 100, X div FZoomPixels, X * FZoomPixels);
+    FMouseY := IfThen(FZoomLevel >= 100, Y div FZoomPixels, Y * FZoomPixels);
+
+    ImgMouseUp(Button, Shift, FMouseX, FMouseY);
+  end;
+end;
+
+procedure TSimbaImageScrollBox.KeyDown(var Key: Word; Shift: TShiftState);
+begin
+  inherited KeyDown(Key, Shift);
+
+  FImageBox.ImgKeyDown(Key, Shift);
+end;
+
+procedure TSimbaImageScrollBox.KeyUp(var Key: Word; Shift: TShiftState);
+begin
+  inherited KeyUp(Key, Shift);
+
+  FImageBox.ImgKeyUp(Key, Shift);
+end;
+
+procedure TSimbaImageScrollBox.Click;
+begin
+  inherited Click;
+
+  with FImageBox do
+    ImgClick(FMouseX, FMouseY);
+end;
+
+procedure TSimbaImageScrollBox.DblClick;
+begin
+  inherited DblClick();
+
+  with FImageBox do
+    ImgDoubleClick(FMouseX, FMouseY);
+end;
+
+procedure TSimbaImageScrollBox.DoBackgroundChange(Sender: TObject);
+begin
+  if (FBackground.Width <> FImageWidth) or (FBackground.Height <> FImageHeight) then
+  begin
+    FImageWidth := FBackground.Width;
+    FImageHeight := FBackground.Height;
+
+    FZoomLevel := 100;
+    FZoomPixels := 1;
+
+    FHorzScroll.Position := 0;
+    FVertScroll.Position := 0;
+  end;
+
+  Invalidate();
+
+  FImageBox.StatusBar.PanelText[1] := Format('%d x %d', [FImageWidth, FImageHeight]);
+end;
+
+procedure TSimbaImageScrollBox.DoScrollChange(Sender: TObject);
+begin
+  Invalidate();
+end;
+
+procedure TSimbaImageScrollBox.Paint;
 type
-  PixelRGB  = packed record R,G,B: Byte; end;
-  PixelRGBA = Integer;
+  PixelRGB  = record R,G,B: Byte; end;
+  PixelRGBA = record R,G,B,A: Byte; end;
 
   procedure RenderZoomOut(Ratio: Integer; src: TBitmap; srcX, srcY, srcW, srcH: Integer; dest: TBitmap);
   begin
     case (Src.RawImage.Description.BitsPerPixel shr 3) of
-      3: specialize ZoomOut<PixelRGB>(Ratio, SrcX, SrcY, FBitmap.Width - 1, FBitmap.Height - 1, Src.RawImage, Dest.RawImage);
-      4: specialize ZoomOut<PixelRGBA>(Ratio, SrcX, SrcY, FBitmap.Width - 1, FBitmap.Height - 1, Src.RawImage, Dest.RawImage);
+      3: specialize ZoomOut<PixelRGB>(Ratio, SrcX, SrcY, srcW div Ratio, srcH div Ratio, Src.RawImage, Dest.RawImage);
+      4: specialize ZoomOut<PixelRGBA>(Ratio, SrcX, SrcY, srcW div Ratio, srcH div Ratio, Src.RawImage, Dest.RawImage);
     end;
   end;
 
   procedure RenderZoomIn(Ratio: Integer; src: TBitmap; srcX, srcY, srcW, srcH: Integer; dest: TBitmap);
   begin
     case (Src.RawImage.Description.BitsPerPixel shr 3) of
-      3: specialize ZoomIn<PixelRGB>(Ratio, SrcX, SrcY, FBitmap.Width - 1, FBitmap.Height - 1, Src.RawImage, Dest.RawImage);
-      4: specialize ZoomIn<PixelRGBA>(Ratio, SrcX, SrcY, FBitmap.Width - 1, FBitmap.Height - 1, Src.RawImage, Dest.RawImage);
+      3: specialize ZoomIn<PixelRGB>(Ratio, SrcX, SrcY, srcW * Ratio, srcH * Ratio, Src.RawImage, Dest.RawImage);
+      4: specialize ZoomIn<PixelRGBA>(Ratio, SrcX, SrcY, srcW * Ratio, srcH * Ratio, Src.RawImage, Dest.RawImage);
     end;
   end;
 
   procedure RenderNoZoom(src: TBitmap; srcX, srcY, srcW, srcH: Integer; dest: TBitmap);
   begin
     case (Src.RawImage.Description.BitsPerPixel shr 3) of
-      3: specialize NoZoom<PixelRGB>(SrcX, SrcY, FBitmap.Width, FBitmap.Height, Src.RawImage, Dest.RawImage);
-      4: specialize NoZoom<PixelRGBA>(SrcX, SrcY, FBitmap.Width, FBitmap.Height, Src.RawImage, Dest.RawImage);
+      3: specialize NoZoom<PixelRGB>(SrcX, SrcY, srcW, srcH, Src.RawImage, Dest.RawImage);
+      4: specialize NoZoom<PixelRGBA>(SrcX, SrcY, srcW, srcH, Src.RawImage, Dest.RawImage);
     end;
   end;
 
 var
-  LocalRect, ScreenRect: TRect;
-  BackgroundBitmap: TBitmap;
-//  T: Double;
+  ScreenRect, LocalRect: TRect;
+  W, H: Integer;
 begin
-  if (FBackground.Width = 0) or (FBackground.Height = 0) or (FZoom = 0) then
-  begin
-    FScrollBox.Canvas.Brush.Color := clBlack;
-    FScrollBox.Canvas.Clear();
+  Canvas.Brush.Color := clBlack;
+  Canvas.FillRect(ClientRect);
 
-    Exit;
+  ScreenRect.Left := VisibleTopX;
+  ScreenRect.Top := VisibleTopY;
+  ScreenRect.Right := ScreenRect.Left + ClientWidth + FZoomPixels;
+  ScreenRect.Bottom := ScreenRect.Top + ClientHeight + FZoomPixels;
+
+  if (FZoomLevel = 100) then
+    LocalRect := ScreenRect
+  else
+  begin
+    LocalRect.Left   := IfThen(FZoomLevel > 100, ScreenRect.Left   div FZoomPixels, ScreenRect.Left   * FZoomPixels);
+    LocalRect.Top    := IfThen(FZoomLevel > 100, ScreenRect.Top    div FZoomPixels, ScreenRect.Top    * FZoomPixels);
+    LocalRect.Right  := IfThen(FZoomLevel > 100, ScreenRect.Right  div FZoomPixels, ScreenRect.Right  * FZoomPixels);
+    LocalRect.Bottom := IfThen(FZoomLevel > 100, ScreenRect.Bottom div FZoomPixels, ScreenRect.Bottom * FZoomPixels);
   end;
 
-  ScreenRect := GetScrolledRect();
-
-  if (FZoom > 1) then
-  begin
-    LocalRect.Left   := Trunc(ScreenRect.Left   / FZoomPixels);
-    LocalRect.Top    := Trunc(ScreenRect.Top    / FZoomPixels);
-    LocalRect.Right  := Trunc(ScreenRect.Right  / FZoomPixels);
-    LocalRect.Bottom := Trunc(ScreenRect.Bottom / FZoomPixels);
-  end else
-  if (FZoom < 1) then
-  begin
-    LocalRect.Left   := Trunc(ScreenRect.Left   * FZoomPixels);
-    LocalRect.Top    := Trunc(ScreenRect.Top    * FZoomPixels);
-    LocalRect.Right  := Trunc(ScreenRect.Right  * FZoomPixels);
-    LocalRect.Bottom := Trunc(ScreenRect.Bottom * FZoomPixels);
-  end else
-    LocalRect        := ScreenRect;
-
-  BackgroundBitmap := FBackground;
-
-  LocalRect.Right  := Min(LocalRect.Right,  BackgroundBitmap.Width);
-  LocalRect.Bottom := Min(LocalRect.Bottom, BackgroundBitmap.Height);
-
+  LocalRect.Right  := Min(LocalRect.Right,  FImageWidth);
+  LocalRect.Bottom := Min(LocalRect.Bottom, FImageHeight);
   if (LocalRect.Width < 1) or (LocalRect.Height < 1) then
     Exit;
 
-  // T := HighResolutionTime();
+  W := IfThen(FZoomLevel >= 100, LocalRect.Width * FZoomPixels, LocalRect.Width div FZoomPixels);
+  H := IfThen(FZoomLevel >= 100, LocalRect.Height * FZoomPixels, LocalRect.Height div FZoomPixels);
 
-  FBitmap.BeginUpdate(
+  FCanvas.BeginUpdate(
     LocalRect,
-    Trunc(LocalRect.Width * FZoom),
-    Trunc(LocalRect.Height * FZoom),
-    FZoomPixels,
-    FZoom
+    LocalRect.Width, LocalRect.Height
   );
 
-  if (FZoom = 1.00) then
-    RenderNoZoom(BackgroundBitmap, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap)
+  RenderNoZoom(background, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FCanvas.Bitmap);
+
+  FImageBox.ImgPaintArea(FCanvas, LocalRect);
+
+  FResizeBuffer.BeginUpdate();
+  FResizeBuffer.SetSize(
+    Max(FResizeBuffer.Width,  W + 150), // over allocate a little
+    Max(FResizeBuffer.Height, H + 150)
+  );
+
+  if (FZoomLevel = 100) then
+    RenderNoZoom(FCanvas.Bitmap, 0, 0, LocalRect.Width, LocalRect.Height, FResizeBuffer)
   else
-  if (FZoom > 1.00) then
-    RenderZoomIn(FZoomPixels, BackgroundBitmap, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap)
+  if (FZoomLevel > 100) then
+    RenderZoomIn(FZoomPixels, FCanvas.Bitmap, 0, 0, LocalRect.Width, LocalRect.Height, FResizeBuffer)
   else
-    RenderZoomOut(FZoomPixels, BackgroundBitmap, LocalRect.Left, LocalRect.Top, LocalRect.Width, LocalRect.Height, FBitmap.Bitmap);
+    RenderZoomOut(FZoomPixels, FCanvas.Bitmap, 0, 0, LocalRect.Width, LocalRect.Height, FResizeBuffer);
 
-  DoPaintArea(FBitmap, LocalRect);
-
-  // FBitmap.DrawBoxTransparent(TBox.Create(FMousePoint.X - 15, FMousePoint.Y - 15, FMousePoint.X + 15, FMousePoint.Y + 15), clRed, 0.25);
-
-  FBitmap.EndUpdate();
+  FResizeBuffer.EndUpdate();
+  FCanvas.EndUpdate();
 
   BitBlt(
-    FScrollBox.Canvas.Handle,
-    ScreenRect.Left, ScreenRect.Top,
-    FBitmap.Width, FBitmap.Height,
-    FBitmap.Handle,
+    Canvas.Handle,
+    0, 0,
+    W, H,
+    FResizeBuffer.Canvas.Handle,
     0, 0,
     SRCCOPY
   );
-
-  // WriteLn('Render time: ', FormatFloat('0.00', HighResolutionTime() - T), 'ms');
 end;
 
-procedure TSimbaImageBox.Paint;
+procedure TSimbaImageScrollBox.Resize;
 begin
-  FScrollBox.Refresh();
+  inherited Resize();
+
+  UpdateScrollBars();
 end;
 
-procedure TSimbaImageBox.FontChanged(Sender: TObject);
-begin
-  inherited FontChanged(Sender);
-
-  if (ControlCount = 0) then
-    Exit;
-
-  with TBitmap.Create() do
-  try
-    // Measure on larger font size
-    // Font size can be 0 so use GetFontData
-    Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(-GetFontData(Canvas.Font.Reference.Handle).Height * 72 / Canvas.Font.PixelsPerInch) + 6;
-
-    FMousePanel.Width := Canvas.TextWidth('(1000, 1000)');
-    FDimensionsPanel.Width := Canvas.TextWidth('1000x1000');
-    FZoomPanel.Width := Canvas.TextWidth('100%');
-
-    FStatusBar.Height := Round(Canvas.TextHeight('Taylor Swift') * 0.8);
-    FStatusBar.Font := Self.Font;
-  finally
-    Free();
-  end;
-end;
-
-procedure TSimbaImageBox.BackgroundChanged(Sender: TObject);
-begin
-  if (FBackground.Width <> FWidth) or (FBackground.Height <> FHeight) then
-  begin
-    FWidth := FBackground.Width;
-    FHeight := FBackground.Height;
-
-    Zoom := 1;
-    MoveTo(0, 0);
-  end;
-
-  Paint();
-end;
-
-procedure TSimbaImageBox.ImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  if CanSetFocus() then
-    SetFocus();
-
-  X := X + FScrollBox.HorzScrollBar.Position;
-  Y := Y + FScrollBox.VertScrollBar.Position;
-
-  if (Button = mbRight) then
-  begin
-    FScroll.X := X;
-    FScroll.Y := Y;
-    FScroll.Active := True;
-    FScrollBox.Cursor := crSizeAll;
-  end;
-
-  if (OnMouseDown <> nil) then
-    OnMouseDown(Self, Button, Shift, Trunc(X / FZoom), Trunc(Y / FZoom));
-end;
-
-procedure TSimbaImageBox.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  X := X + FScrollBox.HorzScrollBar.Position;
-  Y := Y + FScrollBox.VertScrollBar.Position;
-
-  if (Button = mbRight) then
-  begin
-    FScroll.Active := False;
-    FScrollBox.Cursor := crDefault;
-  end;
-
-  if (OnMouseUp <> nil) then
-    OnMouseUp(Self, Button, Shift, Trunc(X / FZoom), Trunc(Y / FZoom));
-end;
-
-procedure TSimbaImageBox.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaImageScrollBox.UpdateScrollBars;
 var
-  Steps: Integer;
+  W, H: Integer;
 begin
-  X := X + FScrollBox.HorzScrollBar.Position;
-  Y := Y + FScrollBox.VertScrollBar.Position;
+  W := IfThen(FZoomLevel >= 100, FImageWidth * FZoomPixels, FImageWidth div FZoomPixels);
+  H := IfThen(FZoomLevel >= 100, FImageHeight * FZoomPixels, FImageHeight div FZoomPixels);
 
-  FMousePoint.X := Trunc(X / FZoom);
-  FMousePoint.Y := Trunc(Y / FZoom);
-
-  if FScroll.Active then
+  if Assigned(FVertScroll) then
   begin
-    if (Abs(FScroll.Y - Y) > 0) then
-    begin
-      Steps := Abs(FScroll.Y - Y) div FZoomPixels;
+    FVertScroll.SmallChange := FZoomPixels;
+    FVertScroll.LargeChange := FZoomPixels;
+    FVertScroll.PageSize := ClientHeight - FHorzScroll.Height;
+    FVertScroll.Max := Max(0, ((H - ClientHeight) + FHorzScroll.Height) + FHorzScroll.PageSize);
+    FVertScroll.Invalidate;
+  end;
 
-      if (Steps > 0) then
-      begin
-        if (FScroll.Y - Y > 0) then
-          FScrollBox.VertScrollBar.Position := FScrollBox.VertScrollBar.Position + Steps * FZoomPixels
-        else
-          FScrollBox.VertScrollBar.Position := FScrollBox.VertScrollBar.Position - Steps * FZoomPixels;
-      end;
-    end;
-
-    if (Abs(FScroll.X - X) > 0) then
-    begin
-      Steps := Abs(FScroll.X - X) div FZoomPixels;
-
-      if (Steps > 0) then
-      begin
-        if (FScroll.X - X > 0) then
-          FScrollBox.HorzScrollBar.Position := FScrollBox.HorzScrollBar.Position + Steps * FZoomPixels
-        else
-          FScrollBox.HorzScrollBar.Position := FScrollBox.HorzScrollBar.Position - Steps * FZoomPixels;
-      end;
-    end;
-  end else
+  if Assigned(FHorzScroll) then
   begin
-    FMousePanel.Text := Format('%d, %d', [FMousePoint.X, FMousePoint.Y]);
-    if (OnMouseMove <> nil) then
-      OnMouseMove(Self, Shift, FMousePoint.X, FMousePoint.Y);
+    FHorzScroll.SmallChange := FZoomPixels;
+    FHorzScroll.LargeChange := FZoomPixels;
+    FHorzScroll.PageSize := ClientWidth - FVertScroll.Width;
+    FHorzScroll.Max := Max(0, ((W - ClientWidth) + FVertScroll.Width) + FHorzScroll.PageSize);
+    FHorzScroll.Invalidate;
   end;
 end;
 
-procedure TSimbaImageBox.ImageMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TSimbaImageScrollBox.IncreaseZoom(Inc: Boolean);
+var
+  I: Integer;
+  OldImagePoint: TPoint;
+  DidChange: Boolean;
 begin
-  Handled := True;
+  DidChange := False;
+  if MouseInClient then
+    OldImagePoint := ScreenToImage(ScreenToClient(Mouse.CursorPos));
 
-  if (ssCtrl in Shift) then
-    Zoom := Zoom * 2;
+  case Inc of
+    True:
+      for I := Low(ZOOM_LEVELS) to High(ZOOM_LEVELS) do
+        if (ZOOM_LEVELS[I] > FZoomLevel) then
+        begin
+          ChangeZoom(I);
+          DidChange := True;
+          Break;
+        end;
+
+    False:
+      for I := High(ZOOM_LEVELS) downto Low(ZOOM_LEVELS) do
+        if (ZOOM_LEVELS[I] < FZoomLevel) then
+        begin
+          ChangeZoom(I);
+          DidChange := True;
+          Break;
+        end;
+  end;
+
+  if DidChange then
+  begin
+    UpdateScrollBars();
+
+    if MouseInClient then
+      MoveTo(OldImagePoint{%H-});
+  end;
 end;
 
-procedure TSimbaImageBox.ImageMouseEnter(Sender: TObject);
+function TSimbaImageScrollBox.ScreenToImage(ScreenXY: TPoint): TPoint;
 begin
-  if (OnMouseEnter <> nil) then
-    OnMouseEnter(Self);
+  Result.X := (VisibleTopX + ScreenXY.X) div FZoomPixels;
+  Result.Y := (VisibleTopY + ScreenXY.Y) div FZoomPixels;
 end;
 
-procedure TSimbaImageBox.ImageMouseLeave(Sender: TObject);
+function TSimbaImageScrollBox.ImageToScreen(ImageXY: TPoint): TPoint;
 begin
-  FScroll.Active := False;
-  FScrollBox.Cursor := crDefault;
-  FMousePanel.Text := '(-1, -1)';
-
-  if (OnMouseLeave <> nil) then
-    OnMouseLeave(Self);
+  Result.X := IfThen(FZoomLevel >= 100, ImageXY.X * FZoomPixels, ImageXY.X div FZoomPixels) - VisibleTopX;
+  Result.Y := IfThen(FZoomLevel >= 100, ImageXY.Y * FZoomPixels, ImageXY.Y div FZoomPixels) - VisibleTopY;
 end;
 
-procedure TSimbaImageBox.ImageDoubleClick(Sender: TObject);
+procedure TSimbaImageScrollBox.MoveTo(ImageXY: TPoint);
 begin
-  if (OnDblClick <> nil) then
-    OnDblClick(Self);
+  FHorzScroll.Position := Min(IfThen(FZoomLevel >= 100, ImageXY.X * FZoomPixels, ImageXY.X div FZoomPixels) - (ClientWidth div 2), FHorzScroll.Max - FHorzScroll.PageSize);
+  FVertScroll.Position := Min(IfThen(FZoomLevel >= 100, ImageXY.Y * FZoomPixels, ImageXY.Y div FZoomPixels) - (ClientHeight div 2), FVertScroll.Max - FVertScroll.PageSize);
 end;
 
-procedure TSimbaImageBox.ImageKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+function TSimbaImageScrollBox.IsPointVisible(ImageXY: TPoint): Boolean;
 begin
-  if (OnKeyDown <> nil) then
-    OnKeyDown(Self, Key, Shift);
+  with ImageToScreen(ImageXY) do
+    Result := (X >= 0) and (Y >= 0) and (X < ClientWidth - FVertScroll.Width) and (Y < ClientHeight - FHorzScroll.Height);
 end;
 
-procedure TSimbaImageBox.ImageMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+constructor TSimbaImageScrollBox.Create(AOwner: TComponent);
 begin
-  Handled := True;
+  inherited Create(AOwner);
 
-  if (ssCtrl in Shift) then
-    Zoom := Zoom / 2;
+  ControlStyle := ControlStyle + [csOpaque];
+  DoubleBuffered := True;
+
+  FImageBox := AOwner as TSimbaImageBox;
+
+  FZoomMin := ZOOM_LEVELS[Low(ZOOM_LEVELS)];
+  FZoomMax := ZOOM_LEVELS[High(ZOOM_LEVELS)];
+  FZoomLevel := 100;
+  FZoomPixels := 1;
+
+  FVertScroll := TATScrollbar.Create(Self);
+  FVertScroll.Parent := Self;
+  FVertScroll.Kind := sbVertical;
+  FVertScroll.Align := alRight;
+  FVertScroll.OnChange := @DoScrollChange;
+
+  FHorzScroll := TATScrollbar.Create(Self);
+  FHorzScroll.Parent := Self;
+  FHorzScroll.Kind := sbHorizontal;
+  FHorzScroll.Align := alBottom;
+  FHorzScroll.OnChange := @DoScrollChange;
+  FHorzScroll.IndentCorner := 100;
+
+  FCanvas := TSimbaImageBoxCanvas.Create();
+  FResizeBuffer := TBitmap.Create();
+  FBackground := TBitmap.Create();
+  FBackground.OnChange := @DoBackgroundChange;
 end;
 
-procedure TSimbaImageBox.SetCursor(Value: TCursor);
+destructor TSimbaImageScrollBox.Destroy;
 begin
-  FScrollBox.Cursor := Value;
+  FreeAndNil(FCanvas);
+  FreeAndNil(FBackground);
+  FreeAndNil(FResizeBuffer);
+
+  inherited Destroy();
 end;
 
-procedure TSimbaImageBox.SetParent(Value: TWinControl);
+constructor TSimbaImageBox.Create(AOwner: TComponent);
 begin
-  inherited SetParent(Value);
+  inherited Create(AOwner);
 
-  if (Value <> nil) then
-    Font := Value.Font;
-end;
+  FImageScrollBox := TSimbaImageScrollBox.Create(Self);
+  FImageScrollBox.Parent := Self;
+  FImageScrollBox.Align := alClient;
 
-function TSimbaImageBox.GetCursor: TCursor;
-begin
-  Result := FScrollBox.Cursor;
-end;
+  FStatusBar := TSimbaStatusBar.Create(Self);
+  FStatusBar.Parent := Self;
+  FStatusBar.Align := alBottom;
 
-procedure TSimbaImageBox.MoveTo(X, Y: Integer);
-begin
-  FScrollBox.HandleNeeded();
-  FScrollBox.HorzScrollBar.Position := Trunc(X * FZoom);
-  FScrollBox.VertScrollBar.Position := Trunc(Y * FZoom);
+  FStatusBar.PanelCount := 4;
+  FStatusBar.PanelTextMeasure[0] := '(1235, 1234)';
+  FStatusBar.PanelTextMeasure[1] := '1234 x 1234';
+  FStatusBar.PanelTextMeasure[2] := '1000%';
+  FStatusBar.PanelText[2] := '100%';
 
-  if FScrollBox.HorzScrollBar.Position < (FScrollBox.HorzScrollBar.Range - FScrollBox.HorzScrollBar.Page) then
-    FScrollBox.HorzScrollBar.Position := FScrollBox.HorzScrollBar.Position - (FScrollBox.ClientWidth div 2);
-
-  if FScrollBox.VertScrollBar.Position < (FScrollBox.VertScrollBar.Range - FScrollBox.VertScrollBar.Page) then
-    FScrollBox.VertScrollBar.Position := FScrollBox.VertScrollBar.Position - (FScrollBox.ClientHeight div 2);
-end;
-
-function TSimbaImageBox.IsVisible(X, Y: Integer): Boolean;
-begin
-  X := Trunc(X * FZoom);
-  Y := Trunc(Y * FZoom);
-
-  Result := InRange(X, FScrollBox.HorzScrollBar.Position, FScrollBox.HorzScrollBar.Position + FScrollBox.ClientWidth) and
-            InRange(Y, FScrollBox.VertScrollBar.Position, FScrollBox.VertScrollBar.Position + FScrollBox.ClientHeight);
+  FBackground := FImageScrollBox.Background;
+  FPixelFormat := LazImage_PixelFormat(FBackground);
 end;
 
 function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;
@@ -661,6 +800,36 @@ begin
   end;
 end;
 
+function TSimbaImageBox.ScreenToImage(ScreenXY: TPoint): TPoint;
+begin
+  Result := FImageScrollBox.ScreenToImage(ScreenXY);
+end;
+
+function TSimbaImageBox.ImageToScreen(ImageXY: TPoint): TPoint;
+begin
+  Result := FImageScrollBox.ImageToScreen(ImageXY);
+end;
+
+function TSimbaImageBox.IsPointVisible(ImageXY: TPoint): Boolean;
+begin
+  Result := FImageScrollBox.IsPointVisible(ImageXY);
+end;
+
+procedure TSimbaImageBox.MoveTo(ImageXY: TPoint);
+begin
+  FImageScrollBox.MoveTo(ImageXY);
+end;
+
+procedure TSimbaImageBox.SetStatus(Value: String);
+begin
+  FStatusBar.PanelText[3] := Value;
+end;
+
+procedure TSimbaImageBox.SetBackground(Img: TSimbaImage);
+begin
+  LazImage_FromData(FBackground, Img.Data, Img.Width, Img.Height);
+end;
+
 procedure TSimbaImageBox.SetBackgroundFromFile(FileName: String);
 var
   SimbaImage: TSimbaImage;
@@ -671,11 +840,6 @@ begin
   finally
     SimbaImage.Free();
   end;
-end;
-
-procedure TSimbaImageBox.SetBackground(Image: TSimbaImage);
-begin
-  LazImage_FromData(FBackground, Image.Data, Image.Width, Image.Height);
 end;
 
 procedure TSimbaImageBox.SetBackgroundFromWindow(Window: TWindowHandle);
@@ -706,65 +870,109 @@ begin
 end;
 
 procedure TSimbaImageBox.SetBackgroundFromTarget(Target: TSimbaTarget);
+var
+  Image: TSimbaImage;
 begin
-  SetBackgroundFromTarget(Target, TBox.Create(-1,-1,-1,-1));
+  Image := Target.GetImage(TBox.Create(-1,-1,-1,-1));
+  try
+    SetBackground(Image);
+  finally
+    Image.Free();
+  end;
 end;
 
-constructor TSimbaImageBox.Create(AOwner: TComponent);
+procedure TSimbaImageBox.Paint;
 begin
-  inherited Create(AOwner);
+  FImageScrollBox.Invalidate();
 
-  FBackground := TBitmap.Create();
-  FBackground.OnChange := @BackgroundChanged;
-
-  FBitmap := TSimbaImageBoxBitmap.Create();
-
-  FScrollBox := TSimbaImageBox_ScrollBox.Create(Self);
-  FScrollBox.Parent := Self;
-  FScrollBox.Align := alClient;
-  FScrollBox.BorderStyle := bsNone;
-  FScrollBox.HorzScrollBar.Tracking := True;
-  FScrollBox.VertScrollBar.Tracking := True;
-  FScrollBox.DoubleBuffered := True;
-  FScrollBox.OnPaint := @ScrollBoxPaint;
-  FScrollBox.OnMouseDown := @ImageMouseDown;
-  FScrollBox.OnMouseUp := @ImageMouseUp;
-  FScrollBox.OnMouseMove := @ImageMouseMove;
-  FScrollBox.OnMouseWheelDown := @ImageMouseWheelDown;
-  FScrollBox.OnMouseWheelUp := @ImageMouseWheelUp;
-  FScrollBox.OnMouseLeave := @ImageMouseLeave;
-  FScrollBox.OnMouseEnter := @ImageMouseEnter;
-  FScrollBox.OnDblClick := @ImageDoubleClick;
-  FScrollBox.OnKeyDown := @ImageKeyDown;
-
-  FStatusBar := TStatusBar.Create(Self);
-  FStatusBar.Parent := Self;
-  FStatusBar.Align := alBottom;
-  FStatusBar.SimplePanel := False;
-  FStatusBar.AutoSize := False;
-  FStatusBar.BorderSpacing.Left := 5;
-  FStatusBar.BorderSpacing.Right := 5;
-
-  FMousePanel := FStatusBar.Panels.Add();
-  FMousePanel.Text := '(-1, -1)';
-  FDimensionsPanel := FStatusBar.Panels.Add();
-  FDimensionsPanel.Text := '(0, 0)';
-  FZoomPanel := FStatusBar.Panels.Add();
-  FStatusPanel := FStatusBar.Panels.Add();
-
-  Zoom := 1;
-
-  FontChanged(Self);
+  inherited Paint();
 end;
 
-destructor TSimbaImageBox.Destroy;
+function TSimbaImageBox.GetMousePoint: TPoint;
 begin
-  if (FBitmap <> nil) then
-    FreeAndNil(FBitmap);
-  if (FBackground <> nil) then
-    FreeAndNil(FBackground);
+  Result.X := FMouseX;
+  Result.Y := FMouseY;
+end;
 
-  inherited Destroy();
+procedure TSimbaImageBox.ImgKeyDown(var Key: Word; Shift: TShiftState);
+begin
+  if Assigned(FOnImgKeyDown) then
+    FOnImgKeyDown(Self, Key, Shift);
+end;
+
+procedure TSimbaImageBox.ImgKeyUp(var Key: Word; Shift: TShiftState);
+begin
+  if Assigned(FOnImgKeyUp) then
+    FOnImgKeyUp(Self, Key, Shift);
+end;
+
+procedure TSimbaImageBox.ImgMouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if Assigned(FOnImgMouseDown) then
+    FOnImgMouseDown(Self, Button, Shift, X, Y);
+end;
+
+procedure TSimbaImageBox.ImgMouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if Assigned(FOnImgMouseUp) then
+    FOnImgMouseUp(Self, Button, Shift, X, Y);
+end;
+
+procedure TSimbaImageBox.ImgMouseMove(Shift: TShiftState; X, Y: Integer);
+begin
+  if Assigned(FOnImgMouseMove) then
+    FOnImgMouseMove(Self, Shift, X, Y);
+end;
+
+procedure TSimbaImageBox.ImgPaintArea(ACanvas: TSimbaImageBoxCanvas; R: TRect);
+begin
+  if Assigned(FOnImgPaint) then
+    FOnImgPaint(Self, ACanvas, R);
+end;
+
+procedure TSimbaImageBox.ImgClick(X, Y: Integer);
+begin
+  if Assigned(FOnImgClick) then
+    FOnImgClick(Self, X, Y);
+end;
+
+procedure TSimbaImageBox.ImgDoubleClick(X, Y: Integer);
+begin
+  if Assigned(FOnImgDoubleClick) then
+    FOnImgDoubleClick(Self, X, Y);
+end;
+
+procedure TSimbaImageBox.ImgMouseEnter;
+begin
+  if Assigned(FOnImgMouseEnter) then
+    FOnImgMouseEnter(Self);
+end;
+
+procedure TSimbaImageBox.ImgMouseLeave;
+begin
+  if Assigned(FOnImgMouseLeave) then
+    FOnImgMouseLeave(Self);
+end;
+
+procedure TSimbaImageBox.SetCursor(Value: TCursor);
+begin
+  if Assigned(FImageScrollBox) then
+    FImageScrollBox.Cursor := Value
+  else
+    inherited SetCursor(Value);
+end;
+
+function TSimbaImageBox.GetCursor: TCursor;
+begin
+  if Assigned(FImageScrollBox) then
+    Result := FImageScrollBox.Cursor
+  else
+    Result := inherited GetCursor();
+end;
+
+function TSimbaImageBox.GetStatus: String;
+begin
+  Result := FStatusBar.PanelText[3];
 end;
 
 end.

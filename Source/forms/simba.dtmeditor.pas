@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, lcltype,
-  simba.base, simba.dtm, simba.imagebox, simba.imagebox_image, simba.imagebox_zoom;
+  simba.base, simba.dtm, simba.imagebox, simba.imagebox_canvas, simba.imagebox_zoom;
 
 type
   TSimbaDTMEditorForm = class(TForm)
@@ -58,7 +58,6 @@ type
     MenuItemColorYellow: TMenuItem;
     PanelMain: TPanel;
     PanelRight: TPanel;
-    PointFlashTimer: TTimer;
 
     procedure ButtonClearImageClick(Sender: TObject);
     procedure ButtonDeletePointsClick(Sender: TObject);
@@ -74,12 +73,8 @@ type
     procedure PointEditChanged(Sender: TObject);
     procedure ButtonPrintDTMClick(Sender: TObject);
     procedure FindDTMClick(Sender: TObject);
-    procedure PointFlash(Sender: TObject);
     procedure LoadDTMClick(Sender: TObject);
     procedure ChangeDrawColor(Sender: TObject);
-    procedure ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure ClientImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure ClientImageClear(Sender: TObject);
     procedure ButtonUpdateImageClick(Sender: TObject);
   protected
@@ -92,12 +87,13 @@ type
     FDebugColor: TPointArray;
 
     FDrawColor: TColor;
-    FFlashing: Boolean;
-    FLastFlash: UInt64;
     FWindow: TWindowHandle;
     FDTMString: String;
 
-    procedure DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
+    procedure DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
+    procedure DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure DoImgMouseUp(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure DoImgPaint(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
 
     procedure AddPoint(X, Y, Col: Integer; Tol: Single; Size: Integer); overload;
     procedure AddPoint(X, Y, Col: Integer); overload;
@@ -124,16 +120,15 @@ implementation
 uses
   simba.windowhandle, simba.colormath, simba.dialog;
 
-procedure TSimbaDTMEditorForm.ClientImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaDTMEditorForm.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 var
   Point: TDTMPoint;
 begin
-  FImageZoom.MoveTest(FImageBox, X, Y);
+  FImageZoom.Move(FImageBox.Background.Canvas, X, Y);
   with FImageBox.Background.Canvas.Pixels[X, Y].ToRGB(), FImageBox.Background.Canvas.Pixels[X, Y].ToHSL() do
     FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
                          Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
                          Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
-
 
   if (FDragging > -1) then
   begin
@@ -148,7 +143,7 @@ begin
     FImageBox.Cursor := crDefault;
 end;
 
-procedure TSimbaDTMEditorForm.ClientImageMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaDTMEditorForm.DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   case Button of
     mbLeft:
@@ -170,7 +165,7 @@ begin
   end;
 end;
 
-procedure TSimbaDTMEditorForm.ClientImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaDTMEditorForm.DoImgMouseUp(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (Button = mbLeft) then
     FDragging := -1;
@@ -200,7 +195,7 @@ begin
   FDebugColor := [];
   FDebugDTM   := [];
 
-  FImageBox.Paint();
+  FImageBox.RePaint();
 end;
 
 function TSimbaDTMEditorForm.GetPointAt(X, Y: Integer): Integer;
@@ -232,55 +227,42 @@ begin
   DrawDTM();
 end;
 
-procedure TSimbaDTMEditorForm.DoPaintArea(Sender: TObject; Bitmap: TSimbaImageBoxBitmap; R: TRect);
+procedure TSimbaDTMEditorForm.DoImgPaint(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
 var
   Points: TDTMPointArray;
   I: Integer;
-  FlashColor: TColor;
 begin
   if Length(FDebugDTM) > 0 then
-    Bitmap.DrawCrossArray(FDebugDTM, 10, FDrawColor)
+    ACanvas.DrawCrossArray(FDebugDTM, 10, FDrawColor)
   else
   if Length(FDebugColor) > 0 then
-    Bitmap.DrawPoints(FDebugColor, FDrawColor)
+    ACanvas.DrawPoints(FDebugColor, FDrawColor)
   else
   begin
     Points := GetPoints();
     for I := 0 to High(Points) do
     begin
       if (Length(Points) > 1) then // Connect to main point
-        Bitmap.DrawLine(TPoint.Create(Points[0].X, Points[0].Y),
-                        TPoint.Create(Points[I].X, Points[I].Y), clRed);
+        ACanvas.DrawLine(TPoint.Create(Points[0].X, Points[0].Y),
+                         TPoint.Create(Points[I].X, Points[I].Y), clRed);
 
       with Points[I] do
-        Bitmap.DrawBoxFilled(
-          TBox.Create(X - AreaSize, Y - AreaSize, X + AreaSize, Y + AreaSize), clYellow
+        ACanvas.DrawBoxFilled(
+          TBox.Create(TPoint.Create(X,Y), AreaSize+1, AreaSize+1), clYellow, 0.65
         );
     end;
 
     if Length(Points) > 0 then
       with Points[0] do
-        Bitmap.DrawBoxFilled(
-          TBox.Create(X - AreaSize, Y - AreaSize, X + AreaSize, Y + AreaSize), clYellow
+        ACanvas.DrawBoxFilled(
+          TBox.Create(X - AreaSize, Y - AreaSize, X + AreaSize, Y + AreaSize), clYellow, 0.65
         );
 
-    if FFlashing and (GetTickCount64() - FLastFlash > 400) then
-    begin
-      FLastFlash := GetTickCount64();
-
-      if Odd(PointFlashTimer.Tag) then
-        FlashColor := clRed
-      else
-        FlashColor := clYellow;
-
-      if ListBox.ItemIndex > -1 then
-        with GetPoint(ListBox.ItemIndex) do
-          Bitmap.DrawBoxFilled(
-            TBox.Create(X - AreaSize, Y - AreaSize, X + AreaSize, Y + AreaSize), FlashColor
-          );
-
-      PointFlashTimer.Tag := PointFlashTimer.Tag + 1;
-    end;
+    if ListBox.ItemIndex > -1 then
+      with GetPoint(ListBox.ItemIndex) do
+        ACanvas.DrawCircle(
+          TPoint.Create(X,Y), AreaSize + 5, clYellow
+        );
   end;
 end;
 
@@ -377,12 +359,6 @@ begin
   end;
 end;
 
-procedure TSimbaDTMEditorForm.PointFlash(Sender: TObject);
-begin
-  if FFlashing then
-    FImageBox.Paint();
-end;
-
 procedure TSimbaDTMEditorForm.FindDTMClick(Sender: TObject);
 begin
   ListBox.ClearSelection();
@@ -390,7 +366,7 @@ begin
   FDebugColor := [];
   FDebugDTM   := FImageBox.FindDTM(GetDTM());
 
-  FImageBox.Paint();
+  FImageBox.RePaint();
 end;
 
 procedure TSimbaDTMEditorForm.ButtonPrintDTMClick(Sender: TObject);
@@ -404,14 +380,12 @@ procedure TSimbaDTMEditorForm.ListBoxSelectionChange(Sender: TObject; User: bool
 begin
   if (ListBox.ItemIndex > -1) then
   begin
-    FFlashing := True;
-
     PanelSelectedPoint.Enabled := True;
 
     with GetPoint(ListBox.ItemIndex) do
     begin
-      if not FImageBox.IsVisible(X, Y) then
-        FImageBox.MoveTo(X, Y);
+      if not FImageBox.IsPointVisible(TPoint.Create(X, Y)) then
+        FImageBox.MoveTo(TPoint.Create(X, Y));
 
       EditPointX.Text := IntToStr(X);
       EditPointY.Text := IntToStr(Y);
@@ -435,12 +409,10 @@ begin
   if ListBox.ItemIndex > -1 then
     with GetPoint(ListBox.ItemIndex) do
     begin
-      FFlashing := False;
-
       FDebugDTM   := [];
       FDebugColor := FImageBox.FindColor(Color, Tolerance, EColorSpace.RGB, DefaultMultipliers);
 
-      FImageBox.Paint();
+      FImageBox.RePaint();
     end;
 end;
 
@@ -565,10 +537,10 @@ begin
   FImageBox := TSimbaImageBox.Create(Self);
   FImageBox.Parent := PanelMain;
   FImageBox.Align := alClient;
-  FImageBox.OnPaintArea := @DoPaintArea;
-  FImageBox.OnMouseDown := @ClientImageMouseDown;
-  FImageBox.OnMouseMove := @ClientImageMouseMove;
-  FImageBox.OnMouseUp := @ClientImageMouseUp;
+  FImageBox.OnImgPaint := @DoImgPaint;
+  FImageBox.OnImgMouseDown := @DoImgMouseDown;
+  FImageBox.OnImgMouseMove := @DoImgMouseMove;
+  FImageBox.OnImgMouseUp := @DoImgMouseUp;
   FImageBox.SetBackgroundFromWindow(FWindow);
 
   FImageZoom := TSimbaImageBoxZoom.Create(Self);
