@@ -663,19 +663,15 @@ procedure TSimbaForm.DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift:
     Result := SimbaScriptTabsForm.IsParentOf(Screen.ActiveControl) and (Screen.ActiveControl is TSimbaEditor) and (TSimbaEditor(Screen.ActiveControl).Keystrokes.FindKeycode(Key, Shift) = -1);
   end;
 
-  function isMenuBar: Boolean;
-  begin
-    Result := Screen.ActiveControl = SimbaMainMenuBar.MenuBar;
-  end;
-
 var
   Msg: TLMKey;
 begin
-  // Can't be anything we want...
-  if ((Key < VK_F1) or (Key > VK_F12)) and (Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssAltGr] = []) then
+  // quick exit: cant be anything we want.
+  if (Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssAltGr] = []) then
     Exit;
 
-  if isMenuBar() or isEditor() then
+  // Only check these if editor is focused
+  if isEditor() then
   begin
     Msg := Default(TLMKey);
     Msg.CharCode := Key;
@@ -684,7 +680,11 @@ begin
 
     if MainMenuFile.IsShortcut(Msg)   or MainMenuEdit.IsShortcut(Msg) or
        MainMenuScript.IsShortcut(Msg) or MainMenuSearch.IsShortcut(Msg) then
+    begin
+      SimbaMainMenuBar.MenuBar.HotIndex := -1;
+
       Key := 0;
+    end;
   end;
 end;
 

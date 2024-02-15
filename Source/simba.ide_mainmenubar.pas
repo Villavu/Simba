@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.ide_mainmenubar;
 
 {$i simba.inc}
@@ -35,11 +40,66 @@ uses
 
 procedure TSimbaMainMenuBar.DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = VK_MENU) and (not (ssCtrl in Shift)) and FMenuBar.CanSetFocus() then
-  begin
-    FMenuBar.SetFocus();
+  case Key of
+    VK_ESCAPE:
+      begin
+        if (FMenuBar.HotIndex = -1) then
+          Exit;
+        FMenuBar.HotIndex := -1;
 
-    Key := 0;
+        Key := 0;
+      end;
+
+    VK_MENU:
+      begin
+        if (FMenuBar.HotIndex > -1) then // move to next
+        begin
+          if (FMenuBar.HotIndex = FMenuBar.MenuCount - 1) then
+            FMenuBar.HotIndex := 0
+          else
+            FMenuBar.HotIndex := FMenuBar.HotIndex + 1;
+        end else
+          FMenuBar.HotIndex := 0;
+
+        Key := 0;
+      end;
+
+    VK_LEFT:
+      begin
+        if (FMenuBar.HotIndex = -1) then
+          Exit;
+
+        if (FMenuBar.HotIndex = 0) then
+          FMenuBar.HotIndex := FMenuBar.MenuCount - 1
+        else
+          FMenuBar.HotIndex := FMenuBar.HotIndex - 1;
+
+        Key := 0;
+      end;
+
+    VK_RIGHT:
+      begin
+        if (FMenuBar.HotIndex = -1) then
+          Exit;
+
+        if (FMenuBar.HotIndex = FMenuBar.MenuCount - 1) then
+          FMenuBar.HotIndex := 0
+        else
+          FMenuBar.HotIndex := FMenuBar.HotIndex + 1;
+
+        Key := 0;
+      end;
+
+    VK_RETURN:
+      begin
+        if (FMenuBar.HotIndex = -1) then
+          Exit;
+        Application.QueueAsyncCall(@FMenuBar.PopupDelayed, FMenuBar.HotIndex);
+
+        Key := 0;
+      end;
+    else
+      FMenuBar.HotIndex := -1;
   end;
 end;
 
