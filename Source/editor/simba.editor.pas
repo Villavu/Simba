@@ -520,6 +520,9 @@ begin
   Keystrokes.Delete(KeyStrokes.FindCommand(ecNormalSelect));
   Keystrokes.Delete(KeyStrokes.FindCommand(ecColumnSelect));
 
+  AddKey(ecFoldCurrent, VK_OEM_MINUS, [ssAlt,ssShift], 0, []);
+  AddKey(ecUnFoldCurrent, VK_OEM_PLUS, [ssAlt,ssShift], 0, []);
+
   FAttributes := TSimbaEditor_Attributes.Create(Self);
 
   Gutter.LeftOffset := Scale96ToScreen(12);

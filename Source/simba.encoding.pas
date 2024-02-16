@@ -5,12 +5,13 @@
 }
 unit simba.encoding;
 
-{$i simba.Inc}
+{$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.base;
 
 function HexEncode(const Data: String): String;
 function HexDecode(const Data: String): String;
@@ -23,17 +24,10 @@ function Base64Decode(const Data: String): String;
 
 function GetOTPToken(Secret: String): Integer;
 
-function SHA512String(const Data: String): String;
-function SHA512File(const FileName: String): String;
-
-function SHA256String(const Data: String): String;
-function SHA256File(const FileName: String): String;
-
 implementation
 
 uses
-  HMAC, DateUtils, sha1,
-  fpsha256_simba, fpsha512_simba, fphashutils_simba;
+  SHA1, HMAC, DateUtils;
 
 {$R-}
 {$Q-}
@@ -43,7 +37,7 @@ const
   Base64Table: array[0..63] of Char = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
   HexTable:    array[0..15] of Char = '0123456789abcdef';
 
-function HexEncode(const Data:String): String;
+function HexEncode(const Data: String): String;
 var
   i: Integer;
 begin
@@ -291,7 +285,7 @@ end;
 
 function GetOTPToken(Secret: String): Integer;
 
-  function Int64ToRawString(const Value: Int64): String;
+  function Int64ToRawString(Value: Int64): String;
   var
     B: array[0..7] of Byte absolute Value;
     I: Int32;
@@ -315,54 +309,6 @@ begin
   Part4 := (Digest[Offset + 3] and $FF);
 
   Result := ((Part1 shl 24) or (Part2 shl 16) or (Part3 shl 8) or Part4) mod 1000000;
-end;
-
-function SHA512String(const Data: String): String;
-begin
-  TSHA512.DigestHexa(BytesFromVar(@Data[1], Length(Data) * SizeOf(Char)), Result);
-end;
-
-function SHA512File(const FileName: String): String;
-var
-  Stream: TFileStream;
-begin
-  Result := '';
-  if not FileExists(FileName) then
-    Exit;
-
-  Stream := nil;
-  try
-    Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
-
-    TSHA512.StreamHexa(Stream, Result);
-  except
-  end;
-  if Assigned(Stream) then
-    Stream.Free();
-end;
-
-function SHA256String(const Data: String): String;
-begin
-  TSHA256.DigestHexa(BytesFromVar(@Data[1], Length(Data) * SizeOf(Char)), Result);
-end;
-
-function SHA256File(const FileName: String): String;
-var
-  Stream: TFileStream;
-begin
-  Result := '';
-  if not FileExists(FileName) then
-    Exit;
-
-  Stream := nil;
-  try
-    Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
-
-    TSHA256.StreamHexa(Stream, Result);
-  except
-  end;
-  if Assigned(Stream) then
-    Stream.Free();
 end;
 
 end.

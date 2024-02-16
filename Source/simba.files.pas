@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base;
+  simba.base, simba.hash;
 
 const
   PATH_SEP = DirectorySeparator;
@@ -47,7 +47,7 @@ type
     class function FileSize(FileName: String): Int64;
     class function FileSizeInMegaBytes(FileName: String): Single;
 
-    class function FileHash(FileName: String; HashType: String = 'SHA1'): String;
+    class function FileHash(FileName: String; HashType: EHashType = EHashType.SHA1): String;
   end;
 
   TSimbaPath = class
@@ -108,8 +108,8 @@ uses
   {$IFDEF UNIX}
   BaseUnix,
   {$ENDIF}
-  FileUtil, LazFileUtils, Zipper, IniFiles, md5, sha1,
-  simba.encoding, simba.arraybuffer;
+  FileUtil, LazFileUtils, Zipper, IniFiles,
+  simba.arraybuffer;
 
 class function TSimbaDir.DirList(Path: String; Recursive: Boolean): TStringArray;
 var
@@ -417,7 +417,7 @@ class function TSimbaFile.FileReadBytes(FileName: String): TByteArray;
 begin
   SetLength(Result, FileSize(FileName));
 
-  if (Length(Result) > 0) and (not DoFileRead(FileName, Result[1], Length(Result))) then
+  if (Length(Result) > 0) and (not DoFileRead(FileName, Result[0], Length(Result))) then
     Result := [];
 end;
 
@@ -534,16 +534,9 @@ begin
   Result := FileUtil.FileSize(FileName) / (1024 * 1024);
 end;
 
-class function TSimbaFile.FileHash(FileName: String; HashType: String): String;
+class function TSimbaFile.FileHash(FileName: String; HashType: EHashType): String;
 begin
-  case HashType.ToUpper() of
-    'MD5':    Result := MD5Print(MD5File(FileName));
-    'SHA1':   Result := SHA1Print(SHA1File(FileName));
-    'SHA256': Result := SHA256File(FileName);
-    'SHA512': Result := SHA512File(FileName);
-    else
-      SimbaException('Invalid hashtype. Expected: SHA1,SHA256,SHA512,MD5');
-  end;
+  Result := HashFile(HashType, FileName);
 end;
 
 function ZipExtractAll(ZipFileName, OutputDir: String): Boolean;

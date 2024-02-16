@@ -13,8 +13,8 @@ procedure ImportEncoding(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  lptypes, blowfish, md5, sha1, hmac, ffi,
-  simba.encoding, simba.compress, SynLZ;
+  lptypes, blowfish, hmac, ffi, SynLZ,
+  simba.encoding, simba.compress, simba.hash;
 
 (*
 Encoding
@@ -79,43 +79,33 @@ begin
 end;
 
 (*
-MD5String
-~~~~~~~~~
-> function MD5String(const Data: String): String;
-*)
-procedure _LapeMD5String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := MD5Print(MD5String(PString(Params^[0])^));
-end;
-
-(*
-SHA1String
+HashBuffer
 ~~~~~~~~~~
-> function SHA1String(const Data: String): String;
+> function HashBuffer(HashType: EHashType; Buf: PByte; Len: SizeUInt): String;
 *)
-procedure _LapeSHA1String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeHashBuffer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := SHA1Print(SHA1String(PString(Params^[0])^));
+  PString(Result)^ := HashBuffer(PHashType(Params^[0])^, PPointer(Params^[1])^, PSizeUInt(Params^[2])^);
 end;
 
 (*
-SHA256String
-~~~~~~~~~~~~
-> function SHA256String(const Data: String): String;
+HashString
+~~~~~~~~~~
+> function HashString(const Data: String): String;
 *)
-procedure _LapeSHA256String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeHashString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := SHA256String(PString(Params^[0])^);
+  PString(Result)^ := HashString(PHashType(Params^[0])^, PString(Params^[1])^);
 end;
 
 (*
-SHA512String
-~~~~~~~~~~~~
-> function SHA512String(const Data: String): String;
+HashFile
+~~~~~~~~
+> function HashFile(HashType: EHashType; FileName: String): String;
 *)
-procedure _LapeSHA512String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeHashFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := SHA512String(PString(Params^[0])^);
+  PString(Result)^ := HashFile(PHashType(Params^[0])^, PString(Params^[1])^);
 end;
 
 (*
@@ -304,6 +294,8 @@ begin
   begin
     ImportingSection := 'Encoding';
 
+    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5, CRC32)', 'EHashType');
+
     addGlobalFunc('function GetOTPToken(const Secret: String): Integer', @_LapeGetOTPToken);
 
     addGlobalFunc('function Base64Encode(const S: String): String', @_LapeBase64Encode);
@@ -316,10 +308,11 @@ begin
 
     addGlobalFunc('function BlowFishEncrypt(const Data, Password: String): String', @_LapeBlowFishEncrypt);
     addGlobalFunc('function BlowFishDecrypt(const Data, Password: String): String', @_LapeBlowFishDecrypt);
-    addGlobalFunc('function MD5String(const Data: String): String', @_LapeMD5String);
-    addGlobalFunc('function SHA1String(const Data: String): String', @_LapeSHA1String);
-    addGlobalFunc('function SHA256String(const Data: String): String', @_LapeSHA256String);
-    addGlobalFunc('function SHA512String(const Data: String): String', @_LapeSHA512String);
+
+    addGlobalFunc('function HashBuffer(HashType: EHashType; Buf: Pointer; Len: SizeUInt): String', @_LapeHashBuffer);
+    addGlobalFunc('function HashString(HashType: EHashType; S: String): String', @_LapeHashString);
+    addGlobalFunc('function HashFile(HashType: EHashType; FileName: String): String', @_LapeHashFile);
+
     addGlobalFunc('function HMACMD5(const Key, Message: String): String', @_LapeHMACMD5);
     addGlobalFunc('function HMACSHA1(const Key, Message: String): String', @_LapeHMACSHA1);
 

@@ -1,0 +1,30 @@
+{$assertions on}
+
+var
+  Test: String = 'Hello World';
+  TestFile: String := GetTempFileName();
+
+begin
+  FileWrite(TestFile, Test);
+
+  Assert(HashFile(EHashType.CRC32,  TestFile) = '4a17b156');
+  Assert(HashFile(EHashType.MD5,    TestFile) = 'b10a8db164e0754105b7a99be72e3fe5');
+  Assert(HashFile(EHashType.SHA1,   TestFile) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
+  Assert(HashFile(EHashType.SHA256, TestFile) = 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e');
+  Assert(HashFile(EHashType.SHA384, TestFile) = '99514329186b2f6ae4a1329e7ee6c610a729636335174ac6b740f9028396fcc803d0e93863a7c3d90f86beee782f4f3f');
+  Assert(HashFile(EHashType.SHA512, TestFile) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
+
+  Assert(HashString(EHashType.CRC32,  Test) = '4a17b156');
+  Assert(HashString(EHashType.MD5,    Test) = 'b10a8db164e0754105b7a99be72e3fe5');
+  Assert(HashString(EHashType.SHA1,   Test) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
+  Assert(HashString(EHashType.SHA256, Test) = 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e');
+  Assert(HashString(EHashType.SHA384, Test) = '99514329186b2f6ae4a1329e7ee6c610a729636335174ac6b740f9028396fcc803d0e93863a7c3d90f86beee782f4f3f');
+  Assert(HashString(EHashType.SHA512, Test) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
+
+  Assert(HashBuffer(EHashType.CRC32,  @Test[1], Length(Test)) = '4a17b156');
+  Assert(HashBuffer(EHashType.MD5,    @Test[1], Length(Test)) = 'b10a8db164e0754105b7a99be72e3fe5');
+  Assert(HashBuffer(EHashType.SHA1,   @Test[1], Length(Test)) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
+  Assert(HashBuffer(EHashType.SHA256, @Test[1], Length(Test)) = 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e');
+  Assert(HashBuffer(EHashType.SHA384, @Test[1], Length(Test)) = '99514329186b2f6ae4a1329e7ee6c610a729636335174ac6b740f9028396fcc803d0e93863a7c3d90f86beee782f4f3f');
+  Assert(HashBuffer(EHashType.SHA512, @Test[1], Length(Test)) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
+end.
