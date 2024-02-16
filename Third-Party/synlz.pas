@@ -143,8 +143,8 @@ function SynLZdecompress1partial(src: PAnsiChar; size: integer; dst: PAnsiChar; 
 
 implementation
 
-{$RangeChecks OFF}
-{$OverflowChecks OFF}
+{$R-}
+{$Q-}
 
 function SynLZcompressdestlen(in_len: integer): integer;
 begin // get maximum possible (worse) compressed size for out_p

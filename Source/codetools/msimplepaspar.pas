@@ -60,6 +60,8 @@ type
 
     fInRound: Boolean;
 
+    function getLexer: TmwPasLex;
+
     procedure PushLexer(ALexer: TmwPasLex); virtual;
     procedure PopLexer; virtual;
 
@@ -351,7 +353,7 @@ type
     procedure Run; virtual;
 
     property InterfaceOnly: Boolean read fInterfaceOnly write fInterfaceOnly;
-    property Lexer: TmwPasLex read fLexer;
+    property Lexer: TmwPasLex read getLexer;
     property LastNoJunkPos: Integer read fLastNoJunkPos;
   end;
 
@@ -4302,6 +4304,14 @@ begin
   end;
 end;
 
+function TmwSimplePasPar.getLexer: TmwPasLex;
+begin
+  if (FLexer = nil) then
+    SimbaException('Parser has a nil lexer');
+
+  Result := FLexer;
+end;
+
 procedure TmwSimplePasPar.PushLexer(ALexer: TmwPasLex);
 begin
   if (fLexer <> nil) then
@@ -4312,7 +4322,7 @@ begin
   fLexerStack.Push(fLexer);
 
   if (fLexerStack.Count > 100) then
-    raise Exception.Create('Recursive include');
+    SimbaException('Recursive include');
 
   fLexer.OnIncludeDirect := @OnIncludeDirect;
   fLexer.OnLibraryDirect := @OnLibraryDirect;

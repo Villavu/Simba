@@ -361,8 +361,6 @@ type
     procedure FindLocals;
     procedure FindGlobals;
 
-    function GetFileName: String;
-
     // Hashes lexers filenames, fileage and defines.
     function GetHash: String; virtual;
 
@@ -445,7 +443,6 @@ type
   public
     property Root: TDeclaration read FRoot;
 
-    property FileName: String read GetFileName;
     property Items: TDeclarationList read FItems;
     property Locals: TDeclarationList read FLocals;
     property Globals: TDeclarationList read FGlobals;
@@ -1226,14 +1223,6 @@ end;
 procedure TCodeParser.PopStack();
 begin
   FStack.Pop().fEndPos := fLastNoJunkPos;
-end;
-
-function TCodeParser.GetFileName: String;
-begin
-  if Assigned(FLexer) then
-    Result := FLexer.FileName
-  else
-    Result := '';
 end;
 
 procedure TCodeParser.FindLocals;

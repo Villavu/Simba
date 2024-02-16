@@ -132,7 +132,7 @@ begin
 
   if Assigned(Parser) then
   begin
-    FScriptParser.Root.Items.Add(TDeclaration_IncludeDirective.Create(FScriptParser, Parser.FileName));
+    FScriptParser.Root.Items.Add(TDeclaration_IncludeDirective.Create(FScriptParser, Parser.Lexer.FileName));
     FIncludeParsers.Add(Parser);
 
     for Plugin in TCodetoolsPlugin(Parser).Plugins do

@@ -85,13 +85,13 @@ begin
   FilePath := SimbaEnv.FindInclude(Sender.DirectiveParamAsFileName, [TSimbaPath.PathExtractDir(Sender.FileName)]);
   if (FilePath = '') then
     Exit;
-  if (FIncludedFiles <> nil) and (FIncludedFiles.IndexOf(FileName) > -1) then
+  if (FIncludedFiles <> nil) and (FIncludedFiles.IndexOf(FilePath) > -1) then
     Exit;
 
   PushLexer(TmwPasLex.CreateFromFile(FilePath));
 
   if (FIncludedFiles <> nil) then
-    FIncludedFiles.Add(FileName);
+    FIncludedFiles.Add(FilePath);
 end;
 
 procedure TCodetoolsInclude.OnLibraryDirect(Sender: TmwBasePasLex);
@@ -192,7 +192,7 @@ begin
   FLock.Enter();
   try
     for I := 0 to FParsers.Count - 1 do
-      if (FParsers[I].FileName = FileName) then
+      if (FParsers[I].Lexer.FileName = FileName) then
         with TCodetoolsInclude(FParsers[I]) do
         begin
           if IsOutdated() then

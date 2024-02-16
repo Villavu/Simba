@@ -436,11 +436,11 @@ begin
 
     for I := 0 to Plugins.Count - 1 do
     begin
-      ParentNode := FTreeView.AddNode(PluginsNode, ChangeFileExt(ExtractFileName(Plugins[I].FileName), ''), IMG_FILE);
+      ParentNode := FTreeView.AddNode(PluginsNode, ChangeFileExt(ExtractFileName(Plugins[I].Lexer.FileName), ''), IMG_FILE);
       with TSimbaFunctionListNode(ParentNode) do
       begin
         NodeType := ntPluginFile;
-        Hint := Plugins[I].FileName;
+        Hint := Plugins[I].Lexer.FileName;
       end;
 
       for Decl in Plugins[I].Items.ToArray do
@@ -646,14 +646,14 @@ begin
   for I := 0 to TCodeinsight.BaseParsers.Count - 1 do
   begin
     Parser := TCodeinsight.BaseParsers[I];
-    if (Parser = nil) or (Parser.Items.Count = 0) or (Parser.FileName.StartsWith('!')) then
+    if (Parser = nil) or (Parser.Items.Count = 0) or (Parser.Lexer.FileName.StartsWith('!')) then
       Continue;
 
-    ParentNode := FTreeView.AddNode(FSimbaNode, Parser.FileName, IMG_FILE);
+    ParentNode := FTreeView.AddNode(FSimbaNode, Parser.Lexer.FileName, IMG_FILE);
     with TSimbaFunctionListNode(ParentNode) do
     begin
       NodeType := ntSimbaSection;
-      FileName := GetURL(Parser.FileName);
+      FileName := GetURL(Parser.Lexer.FileName);
       if (FileName <> '') then
         Hint := Text + ' (double click to open online documentation)';
     end;
