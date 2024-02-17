@@ -53,7 +53,7 @@ jobs:
       - name: Build files
         shell: bash
         run: |
-          pip3 install sphinx furo myst-parse
+          pip3 install sphinx furo myst-parser
           unzip Simba-Win32.zip
           ./Simba-Win32.exe --run "DocGen/docgen.simba"
 
