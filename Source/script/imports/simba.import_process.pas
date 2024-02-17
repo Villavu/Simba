@@ -24,7 +24,7 @@ Process related things.
 
 (*
 RunCommandInDir
-~~~~~~~~~~~~~~~
+---------------
 > function RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID;
 *)
 procedure _LapeRunCommandInDir(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -34,7 +34,7 @@ end;
 
 (*
 RunCommandInDir
-~~~~~~~~~~~~~~~
+---------------
 > function RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;
 *)
 procedure _LapeRunCommandInDirOutput(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -44,7 +44,7 @@ end;
 
 (*
 RunCommand
-~~~~~~~~~~
+----------
 > function RunCommand(Executable: String; Commands: TStringArray): TProcessID;
 *)
 procedure _LapeRunCommand(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -54,7 +54,7 @@ end;
 
 (*
 RunCommand
-~~~~~~~~~~
+----------
 > function RunCommand(Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;
 *)
 procedure _LapeRunCommandOutput(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -64,7 +64,7 @@ end;
 
 (*
 RunCommandTimeout
-~~~~~~~~~~~~~~~~~
+-----------------
 > function RunCommandTimeout(Executable: String; Commands: TStringArray; out Output: String; Timeout: Integer): Boolean;
 *)
 procedure _LapeRunCommandTimeout(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -74,7 +74,7 @@ end;
 
 (*
 IsProcessRunning
-~~~~~~~~~~~~~~~~
+----------------
 > function IsProcessRunning(PID: TProcessID): Boolean;
 *)
 procedure _LapeIsProcessRunning(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -84,7 +84,7 @@ end;
 
 (*
 IsProcess64Bit
-~~~~~~~~~~~~~~
+--------------
 > function IsProcess64Bit(PID: TProcessID): Boolean;
 *)
 procedure _LapeIsProcess64Bit(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -94,7 +94,7 @@ end;
 
 (*
 GetProcessPath
-~~~~~~~~~~~~~~
+--------------
 > function GetProcessPath(PID: TProcessID): String;
 *)
 procedure _LapeGetProcessPath(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -104,7 +104,7 @@ end;
 
 (*
 GetProcessMemUsage
-~~~~~~~~~~~~~~~~~~
+------------------
 > function GetProcessMemUsage(PID: TProcessID): Int64;
 *)
 procedure _LapeGetProcessMemUsage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -114,7 +114,7 @@ end;
 
 (*
 GetProcessStartTime
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function GetProcessStartTime(PID: TProcessID): TDateTime;
 *)
 procedure _LapeGetProcessStartTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -124,7 +124,7 @@ end;
 
 (*
 GetProcessRunnningTime
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function GetProcessRunnningTime(PID: TProcessID): UInt64;
 *)
 procedure _LapeGetProcessRunningTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -134,7 +134,7 @@ end;
 
 (*
 TerminateProcess
-~~~~~~~~~~~~~~~~
+----------------
 > procedure TerminateProcess(PID: TProcessID);
 *)
 procedure _LapeTerminateProcess(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

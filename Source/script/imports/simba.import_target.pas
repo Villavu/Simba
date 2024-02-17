@@ -24,7 +24,7 @@ Target related methods.
 
 (*
 TTarget.SetDesktop
-~~~~~~~~~~~~~~~~~~
+------------------
 > procedure TTarget.SetDesktop;
 
 Sets the desktop as the target.
@@ -36,12 +36,14 @@ end;
 
 (*
 TTarget.SetImage
-~~~~~~~~~~~~~~~~
+----------------
 > procedure TTarget.SetImage(TImage: TImage);
 
 Sets the TSimbaImage as a target.
 
-Note:: Ownership of the TSimbaImage is **not** taken. Make sure you do not free the image while using this target.
+```{note}
+Ownership of the TSimbaImage is **not** taken. Make sure you do not free the image while using this target.
+```
 *)
 procedure _LapeTarget_SetImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -50,7 +52,7 @@ end;
 
 (*
 TTarget.SetWindow
-~~~~~~~~~~~~~~~~~
+-----------------
 > procedure TTarget.SetWindow(Window: TWindowHandle);
 
 Sets a window handle as a target.
@@ -62,7 +64,7 @@ end;
 
 (*
 TTarget.SetEIOS
-~~~~~~~~~~~~~~~
+---------------
 > procedure TTarget.SetEIOS(Plugin, Args: String);
 
 Sets a plugin (via EIOS API) as the target.
@@ -84,7 +86,7 @@ end;
 
 (*
 TTarget.GetImage
-~~~~~~~~~~~~~~~~
+----------------
 > function TTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage;
 *)
 procedure _LapeTarget_GetImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -94,7 +96,7 @@ end;
 
 (*
 TTarget.Bounds
-~~~~~~~~~~~~~~
+--------------
 > function TTarget.Bounds: TBox;
 *)
 procedure _LapeTarget_Bounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -104,7 +106,7 @@ end;
 
 (*
 TTarget.Width
-~~~~~~~~~~~~~
+-------------
 > function TTarget.Width: Integer;
 *)
 procedure _LapeTarget_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -114,7 +116,7 @@ end;
 
 (*
 TTarget.Height
-~~~~~~~~~~~~~~
+--------------
 > function TTarget.Height: Integer;
 *)
 procedure _LapeTarget_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -124,7 +126,7 @@ end;
 
 (*
 TTarget.IsValid
-~~~~~~~~~~~~~~~
+---------------
 > function TTarget.IsValid: Boolean;
 *)
 procedure _LapeTarget_IsValid(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -134,7 +136,7 @@ end;
 
 (*
 TTarget.IsFocused
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TTarget.IsFocused: Boolean;
 *)
 procedure _LapeTarget_IsFocused(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -144,7 +146,7 @@ end;
 
 (*
 TTarget.Focus
-~~~~~~~~~~~~~
+-------------
 > function TTarget.Focus: Boolean;
 *)
 procedure _LapeTarget_Focus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -154,7 +156,7 @@ end;
 
 (*
 TTarget.IsWindowTarget
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TTarget.IsWindowTarget: Boolean;
 *)
 procedure _LapeTarget_IsWindowTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -164,7 +166,7 @@ end;
 
 (*
 TTarget.IsWindowTarget
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TTarget.IsWindowTarget(out Window: TWindowHandle): Boolean;
 *)
 procedure _LapeTarget_IsWindowTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -174,7 +176,7 @@ end;
 
 (*
 TTarget.IsImageTarget
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TTarget.IsImageTarget: Boolean;
 *)
 procedure _LapeTarget_IsImageTarget1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -184,7 +186,7 @@ end;
 
 (*
 TTarget.IsImageTarget
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TTarget.IsImageTarget(out TImage: TImage): Boolean;
 *)
 procedure _LapeTarget_IsImageTarget2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -194,7 +196,7 @@ end;
 
 (*
 TTarget.IsEIOSTarget
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TTarget.IsEIOSTarget: Boolean;
 *)
 procedure _LapeTarget_IsEIOSTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -209,7 +211,7 @@ end;
 
 (*
 TTarget.IsDefault
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TTarget.IsDefault: Boolean;
 *)
 procedure _LapeTarget_IsDefault(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -219,7 +221,7 @@ end;
 
 (*
 TTarget.ClearCustomClientArea
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 > procedure TTarget.ClearCustomClientArea;
 *)
 procedure _LapeTarget_ClearCustomClientArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -229,7 +231,7 @@ end;
 
 (*
 TTarget.SetCustomClientArea
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 > procedure TTarget.SetCustomClientArea(B: TBox);
 
 Set a custom client area within the bounds of the target.
@@ -246,7 +248,7 @@ end;
 
 (*
 TTarget.GetCustomClientArea
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 > function TTarget.GetCustomClientArea: TBox;
 *)
 procedure _LapeTarget_GetCustomClientArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -256,7 +258,7 @@ end;
 
 (*
 TTarget.SetAutoFocus
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > procedure TTarget.SetAutoFocus(Value: Boolean);
 *)
 procedure _LapeTarget_SetAutoFocus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -266,7 +268,7 @@ end;
 
 (*
 TTarget.GetAutoFocus
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TTarget.GetAutoFocus: Boolean;
 *)
 procedure _LapeTarget_GetAutoFocus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -276,7 +278,7 @@ end;
 
 (*
 TTarget.AddHandlerOnInvalidTarget
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 > function TTarget.AddHandlerOnInvalidTarget(Event: TInvalidTargetEvent): TInvalidTargetEvent;
 *)
 procedure _LapeTarget_AddOnInvalidTargetEvent(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -286,7 +288,7 @@ end;
 
 (*
 TTarget.RemoveHandlerOnInvalidTarget
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 > procedure TTarget.RemoveHandlerOnInvalidTarget(Event: TInvalidTargetEvent);
 *)
 procedure _LapeTarget_RemoveOnInvalidTargetEvent(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

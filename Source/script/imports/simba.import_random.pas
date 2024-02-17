@@ -38,7 +38,7 @@ Methods relating to generating random numbers.
 
 (*
 RandSeed
-~~~~~~~~~~
+----------
 > var RandSeed: UInt32;
 
 The random seed used for all random number generation.
@@ -46,7 +46,7 @@ The random seed used for all random number generation.
 
 (*
 RandCutoff
-~~~~~~~~~~
+----------
 > var RandCutoff: Double;
 
 Cutoff for `RandomLeft`, `RandomRight`, `RandomMode`, `RandomMean`
@@ -54,7 +54,7 @@ Cutoff for `RandomLeft`, `RandomRight`, `RandomMode`, `RandomMean`
 
 (*
 RandomCenterTPA
-~~~~~~~~~~~~~~~
+---------------
 > function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
 
 Generates random points in `Box` weighted towards the center.
@@ -66,7 +66,7 @@ end;
 
 (*
 RandomTPA
-~~~~~~~~~
+---------
 > function RandomTPA(Amount: Integer; Box: TBox): TPointArray;
 
 Generates random points in `Box`.
@@ -78,7 +78,7 @@ end;
 
 (*
 RandomLeft
-~~~~~~~~~~
+----------
 > function RandomLeft(Lo, Hi: Double): Double;
 > function RandomLeft(Lo, Hi: Int64): Int64;
 
@@ -96,7 +96,7 @@ end;
 
 (*
 RandomRight
-~~~~~~~~~~~
+-----------
 > function RandomRight(Lo, Hi: Double): Double;
 > function RandomRight(Lo, Hi: Int64): Int64;
 
@@ -114,7 +114,7 @@ end;
 
 (*
 RandomMean
-~~~~~~~~~~
+----------
 > function RandomMean(Lo, Hi: Double): Double;
 > function RandomMean(Lo, Hi: Int64): Int64;
 
@@ -132,7 +132,7 @@ end;
 
 (*
 RandomMode
-~~~~~~~~~~
+----------
 > function RandomMode(Mode, Lo, Hi: Double): Double;
 > function RandomMode(Mode, Lo, Hi: Int64): Int64;
 
@@ -150,7 +150,7 @@ end;
 
 (*
 GaussRand
-~~~~~~~~~
+---------
 > function GaussRand(Mean, Dev: Double): Double;
 
 Generates a random gaussian/normal number.
@@ -162,7 +162,7 @@ end;
 
 (*
 Randomize
-~~~~~~~~~
+---------
 > procedure Randomize;
 
 Generates a new `RandSeed`

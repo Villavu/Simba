@@ -61,7 +61,7 @@ type
 
 (*
 Variant.VarType
-~~~~~~~~~~~~~~~
+---------------
 > function Variant.VarType: EVariantVarType;
 
 Returns the variants var type.
@@ -112,7 +112,7 @@ end;
 
 (*
 Variant.IsNumeric
-~~~~~~~~~~~~~~~~~
+-----------------
 > function Variant.IsNumeric: Boolean;
 
 Is integer or float?
@@ -124,7 +124,7 @@ end;
 
 (*
 Variant.IsString
-~~~~~~~~~~~~~~~~
+----------------
 > function Variant.IsString: Boolean;
 *)
 procedure _LapeVariantIsString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -134,7 +134,7 @@ end;
 
 (*
 Variant.IsInteger
-~~~~~~~~~~~~~~~~~
+-----------------
 > function Variant.IsInteger: Boolean;
 *)
 procedure _LapeVariantIsInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -144,7 +144,7 @@ end;
 
 (*
 Variant.IsFloat
-~~~~~~~~~~~~~~~
+---------------
 > function Variant.IsFloat: Boolean;
 *)
 procedure _LapeVariantIsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -154,7 +154,7 @@ end;
 
 (*
 Variant.IsBoolean
-~~~~~~~~~~~~~~~~~
+-----------------
 > function Variant.IsBoolean: Boolean;
 *)
 procedure _LapeVariantIsBoolean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -164,7 +164,7 @@ end;
 
 (*
 Variant.IsVariant
-~~~~~~~~~~~~~~~~~
+-----------------
 > function Variant.IsVariant: Boolean;
 
 The variant holds another variant!
@@ -176,7 +176,7 @@ end;
 
 (*
 Variant.IsUnAssigned
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function Variant.IsUnAssigned: Boolean;
 *)
 procedure _LapeVariantIsUnAssigned(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -186,7 +186,7 @@ end;
 
 (*
 Variant.IsNull
-~~~~~~~~~~~~~~
+--------------
 > function Variant.IsNull: Boolean;
 *)
 procedure _LapeVariantIsNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -196,7 +196,7 @@ end;
 
 (*
 Variant.Null
-~~~~~~~~~~~~
+------------
 > function Variant.Null: Variant; static;
 
 Static method that returns a null variant variable.
@@ -214,7 +214,7 @@ end;
 
 (*
 Variant.Unassigned
-~~~~~~~~~~~~~~~~~~
+------------------
 > function Variant.Unassigned: Variant; static;
 
 Static method that returns a unassigned variant variable.

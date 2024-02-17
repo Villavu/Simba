@@ -29,7 +29,7 @@ Record that contains center point and radius.
 
 (*
 TCircle.Create
-~~~~~~~~~~~~~~
+--------------
 > function TCircle.Create(ACenter: TPoint; ARadius: Integer): TCircle; static;
 *)
 procedure _LapeCircle_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -39,7 +39,7 @@ end;
 
 (*
 TCircle.CreateFromPoints
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function CreateFromPoints(Points: TPointArray): TCircle; static;
 *)
 procedure _LapeCircle_CreateFromPoints(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -49,7 +49,7 @@ end;
 
 (*
 TCircle.ToTPA
-~~~~~~~~~~~~~
+-------------
 > function TCircle.ToTPA(Filled: Boolean): TPointArray;
 *)
 procedure _LapeCircle_ToTPA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -59,7 +59,7 @@ end;
 
 (*
 TCircle.Bounds
-~~~~~~~~~~~~~~
+--------------
 > function TCircle.Bounds: TBox;
 *)
 procedure _LapeCircle_Bounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -69,7 +69,7 @@ end;
 
 (*
 TCircle.Contains
-~~~~~~~~~~~~~~~~
+----------------
 > function TCircle.Contains(P: TPoint): Boolean
 *)
 procedure _LapeCircle_Contains(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -79,7 +79,7 @@ end;
 
 (*
 TCircle.PointAtDegrees
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TCircle.PointAtDegrees(Degrees: Double): TPoint;
 *)
 procedure _LapeCircle_PointAtDegrees(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -89,7 +89,7 @@ end;
 
 (*
 TCircle.RandomPoint
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TCircle.RandomPoint: TPoint;
 
 Returns a completely random point in the circle.
@@ -101,7 +101,7 @@ end;
 
 (*
 TCircle.RandomPointCenter
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function TCircle.RandomPointCenter: TPoint;
 
 Returns a random point in the circle which is weighted torwards the circle's center.
@@ -113,7 +113,7 @@ end;
 
 (*
 TCircle.Circumference
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TCircle.Circumference: Double;
 
 Returns the distance around the outside of a circle.
@@ -125,7 +125,7 @@ end;
 
 (*
 TCircle.Center
-~~~~~~~~~~~~~~
+--------------
 > function TCircle.Center: TPoint;
 
 Returns the center point of the circle.
@@ -137,7 +137,7 @@ end;
 
 (*
 TCircle.Circularity
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TCircle.Circularity(TPA: TPointArray): Double;
 *)
 procedure _LapeCircle_Circularity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -147,7 +147,7 @@ end;
 
 (*
 TCircle.Area
-~~~~~~~~~~~~
+------------
 > function TCircle.Area: Double;
 
 Returns the area the circle covers.
@@ -159,7 +159,7 @@ end;
 
 (*
 TCircle.Area
-~~~~~~~~~~~~
+------------
 > function TCircle.Area: Double;
 
 Returns the area the circle covers.
@@ -171,7 +171,7 @@ end;
 
 (*
 TCircle.Area
-~~~~~~~~~~~~
+------------
 > function TCircle.Area: Double;
 
 Returns the area the circle covers.
@@ -183,7 +183,7 @@ end;
 
 (*
 TCircle.Extract
-~~~~~~~~~~~~~~~
+---------------
 > function TCircle.Extract(Points: TPointArray): TPointArray;
 
 Returns the points that **are** in the circle.
@@ -195,7 +195,7 @@ end;
 
 (*
 TCircle.Exclude
-~~~~~~~~~~~~~~~
+---------------
 > function TCircle.Exclude(Points: TPointArray): TPointArray;
 
 Returns the points that are not inside the circle.
@@ -207,7 +207,7 @@ end;
 
 (*
 in
-~~
+--
 > operator in(Left: TPoint; Right: TCircle): Boolean;
 *)
 procedure _LapePoint_IN_Cicle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

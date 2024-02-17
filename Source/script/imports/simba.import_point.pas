@@ -23,7 +23,7 @@ The TPoint type is a record which defines a X,Y coordinate.
 
 (*
 Point
-~~~~~
+-----
 > function Point(X, Y: Integer): TPoint;
 *)
 procedure _LapePoint(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -33,7 +33,7 @@ end;
 
 (*
 TPoint.Create
-~~~~~~~~~~~~~
+-------------
 > function TPoint.Create(X, Y: Integer): TPoint; static;
 *)
 procedure _LapePoint_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -43,7 +43,7 @@ end;
 
 (*
 TPoint.InPolygon
-~~~~~~~~~~~~~~~~
+----------------
 > function TPoint.InPolygon(Poly: TPointArray): Boolean;
 *)
 procedure _LapePoint_InPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -53,7 +53,7 @@ end;
 
 (*
 TPoint.InCircle
-~~~~~~~~~~~~~~~
+---------------
 > function TPoint.InCircle(Center: TPoint; Radius: Double): Boolean;
 *)
 procedure _LapePoint_InCircle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -63,7 +63,7 @@ end;
 
 (*
 TPoint.InTriangle
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TPoint.InTriangle(A, B, C: TPoint): Boolean;
 *)
 procedure _LapePoint_InTriangle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -73,7 +73,7 @@ end;
 
 (*
 TPoint.InBox
-~~~~~~~~~~~~
+------------
 > function TPoint.InBox(Box: TBox): Boolean;
 *)
 procedure _LapePoint_InBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -83,7 +83,7 @@ end;
 
 (*
 TPoint.DistanceTo
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TPoint.DistanceTo(Other: TPoint): Double;
 *)
 procedure _LapePoint_DistanceTo(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -93,7 +93,7 @@ end;
 
 (*
 TPoint.Rotate
-~~~~~~~~~~~~~
+-------------
 > function TPoint.Rotate(Radians: Double; Center: TPoint): TPoint;
 *)
 procedure _LapePoint_Rotate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -103,7 +103,7 @@ end;
 
 (*
 TPoint.RotateFast
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TPoint.RotateFast(Degrees: Integer; Center: TPoint): TPoint;
 *)
 procedure _LapePoint_RotateFast(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -113,7 +113,7 @@ end;
 
 (*
 TPoint.Magnitude
-~~~~~~~~~~~~~~~~
+----------------
 > function TPoint.Magnitude: Double;
 *)
 procedure _LapePoint_Magnitude(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -123,7 +123,7 @@ end;
 
 (*
 TPoint.AngleBetween
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TPoint.AngleBetween(Other: TPoint): Double;
 *)
 procedure _LapePoint_AngleBetween(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -133,7 +133,7 @@ end;
 
 (*
 TPoint.Offset
-~~~~~~~~~~~~~
+-------------
 > function TPoint.Offset(X, Y: Integer): TPoint;
 *)
 procedure _LapePoint_Offset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -143,7 +143,7 @@ end;
 
 (*
 TPoint.Offset
-~~~~~~~~~~~~~
+-------------
 > function TPoint.Offset(P: TPoint): TPoint;
 *)
 procedure _LapePoint_Offset2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -153,7 +153,7 @@ end;
 
 (*
 TPoint.Random
-~~~~~~~~~~~~~
+-------------
 > function TPoint.Random(Min, Max: Integer): TPoint;
 *)
 procedure _LapePoint_Random1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -163,7 +163,7 @@ end;
 
 (*
 TPoint.Random
-~~~~~~~~~~~~~
+-------------
 > function TPoint.Random(Value: Integer): TPoint;
 *)
 procedure _LapePoint_Random2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -173,7 +173,7 @@ end;
 
 (*
 TPoint +
-~~~~~~~~
+--------
 > operator + (L, R: TPoint): TPoint;
 *)
 procedure _LapePoint_Plus_Point(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -183,7 +183,7 @@ end;
 
 (*
 TPoint +=
-~~~~~~~~~
+---------
 > operator += (var L: TPoint; R: TPoint): TPoint;
 *)
 procedure _LapePoint_PlusAssign_Point(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -194,7 +194,7 @@ end;
 
 (*
 TPoint *
-~~~~~~~~
+--------
 > operator * (L: TPoint; R: Double): TPoint;
 *)
 procedure _LapePoint_Multiply_Double(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -205,7 +205,7 @@ end;
 
 (*
 TPoint \*=
-~~~~~~~~~~
+----------
 > operator *= (var L: TPoint; R: Double): TPoint;
 *)
 procedure _LapePoint_MultiplyAssign_Double(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -216,7 +216,7 @@ end;
 
 (*
 TPoint -
-~~~~~~~~
+--------
 > operator - (L, R: TPoint): TPoint;
 *)
 procedure _LapePoint_Minus_Point(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -226,7 +226,7 @@ end;
 
 (*
 TPoint -=
-~~~~~~~~~
+---------
 > operator -= (var L: TPoint; R: TPoint): TPoint;
 *)
 procedure _LapePoint_MinusAssign_Point(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -237,7 +237,7 @@ end;
 
 (*
 TPoint in
-~~~~~~~~~
+---------
 > operator in(Left: TPoint; Right: TBox): Boolean;
 *)
 procedure _LapePoint_IN_Box(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

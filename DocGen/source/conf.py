@@ -11,6 +11,7 @@ html_favicon = '../images/icon.ico'
 html_theme = 'furo'
 html_css_files = ['custom.css']
 extensions = [
+    'myst_parser',
     'sphinx.ext.githubpages',
     'sphinx.ext.mathjax'
 ]

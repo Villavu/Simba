@@ -27,11 +27,7 @@ File
 File, Path, Directory related methods.
 *)
 
-(*
-INIFileWrite
-~~~~~~~~~~~~~
-> function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean
-*)
+
 procedure _LapeINIFileWrite(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := INIFileWrite(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
@@ -39,8 +35,12 @@ end;
 
 (*
 INIFileRead
-~~~~~~~~~~~~~
-> function INIFileRead(FileName: String; Section, Key, Value: String): String
+-----------
+> function INIFileDelete(FileName: String; Section, Key: String): Boolean
+
+```
+INIFileDelete('Hello World', 'Hello', 'World');
+```
 *)
 procedure _LapeINIFileRead(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -49,7 +49,7 @@ end;
 
 (*
 INIFileDelete
-~~~~~~~~~~~~~
+-------------
 > function INIFileDelete(FileName: String; Section, Key: String): Boolean
 *)
 procedure _LapeINIFileDelete(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -59,7 +59,7 @@ end;
 
 (*
 INIFileKeys
-~~~~~~~~~~~
+-----------
 > function INIFileKeys(FileName: String; Section: String): TStringArray
 *)
 procedure _LapeINIFileKeys(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -69,7 +69,7 @@ end;
 
 (*
 INIFileSections
-~~~~~~~~~~~~~~~
+---------------
 > function INIFileSections(FileName: String): TStringArray
 *)
 procedure _LapeINIFileSections(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -79,7 +79,7 @@ end;
 
 (*
 ZipExtractAll
-~~~~~~~~~~~~~
+-------------
 > function ZipExtractAll(ZipFileName, OutputDir: String): Boolean;
 *)
 procedure _LapeZipExtractAll(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -89,7 +89,7 @@ end;
 
 (*
 ZipExtractOne
-~~~~~~~~~~~~~
+-------------
 > function ZipExtractOne(ZipFileName, FileName, OutputDir: String): Boolean;
 *)
 procedure _LapeZipExtractOne(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -99,7 +99,7 @@ end;
 
 (*
 ZipFiles
-~~~~~~~~
+--------
 > function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean;
 *)
 procedure _LapeZipFiles(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -109,7 +109,7 @@ end;
 
 (*
 ZipEntries
-~~~~~~~~~~
+----------
 > function ZipEntries(ZipFileName: String): TStringArray;
 *)
 procedure _LapeZipEntries(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -119,7 +119,7 @@ end;
 
 (*
 FileAppend
-~~~~~~~~~~
+----------
 > function FileAppend(FileName: String; Text: String): Boolean;
 *)
 procedure _LapeFileAppend(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -129,7 +129,7 @@ end;
 
 (*
 FileWrite
-~~~~~~~~~
+---------
 > function FileWrite(FileName: String; Text: String): Boolean;
 *)
 procedure _LapeFileWrite(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -139,7 +139,7 @@ end;
 
 (*
 FileCopy
-~~~~~~~~
+--------
 > function FileCopy(SourceFileName, DestFileName: String; OverwriteIfExists: Boolean = True): Boolean;
 *)
 procedure _LapeFileCopy(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -149,7 +149,7 @@ end;
 
 (*
 FileRename
-~~~~~~~~~~
+----------
 > function FileRename(SourceFileName, DestFileName: String): Boolean;
 *)
 procedure _LapeFileRename(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -159,7 +159,7 @@ end;
 
 (*
 FileDelete
-~~~~~~~~~~
+----------
 > function FileDelete(FileName: String): Boolean;
 *)
 procedure _LapeFileDelete(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -169,7 +169,7 @@ end;
 
 (*
 FileRead
-~~~~~~~~
+--------
 > function FileRead(FileName: String): String;
 *)
 procedure _LapeFileRead(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -179,7 +179,7 @@ end;
 
 (*
 FileReadEx
-~~~~~~~~~~
+----------
 > function FileReadEx(FileName: String; Offset: Integer): String;
 *)
 procedure _LapeFileReadEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -189,7 +189,7 @@ end;
 
 (*
 FileReadLines
-~~~~~~~~~~~~~
+-------------
 > function FileReadLines(FileName: String): TStringArray;
 *)
 procedure _LapeFileReadLines(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -199,7 +199,7 @@ end;
 
 (*
 FileReadBytes
-~~~~~~~~~~~~~
+-------------
 > function FileReadBytes(FileName: String): TByteArray;
 *)
 procedure _LapeFileReadBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -209,7 +209,7 @@ end;
 
 (*
 FileReadBytesEx
-~~~~~~~~~~~~~~~
+---------------
 > function FileReadBytesEx(FileName: String; Offset: Integer): TByteArray;
 *)
 procedure _LapeFileReadBytesEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -219,7 +219,7 @@ end;
 
 (*
 FileWriteBytes
-~~~~~~~~~~~~~~
+--------------
 > function FileWriteBytes(FileName: String; Bytes: TByteArray): Boolean;
 *)
 procedure _LapeFileWriteBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -229,7 +229,7 @@ end;
 
 (*
 FileAppendBytes
-~~~~~~~~~~~~~~~
+---------------
 > function FileAppendBytes(FileName: String; Bytes: TByteArray): Boolean;
 *)
 procedure _LapeFileAppendBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -239,7 +239,7 @@ end;
 
 (*
 FileCreate
-~~~~~~~~~~
+----------
 > function FileCreate(FileName: String): Boolean;
 *)
 procedure _LapeFileCreate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -249,7 +249,7 @@ end;
 
 (*
 FileExists
-~~~~~~~~~~
+----------
 > function FileExists(FileName: String): Boolean;
 *)
 procedure _LapeFileExists(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -259,7 +259,7 @@ end;
 
 (*
 FileCreationTime
-~~~~~~~~~~~~~~~~
+----------------
 > function FileCreationTime(FileName: String): TDateTime;
 *)
 procedure _LapeFileCreationTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -269,7 +269,7 @@ end;
 
 (*
 FileLastWriteTime
-~~~~~~~~~~~~~~~~~
+-----------------
 > function FileLastWriteTime(FileName: String): TDateTime;
 *)
 procedure _LapeFileLastWriteTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -279,7 +279,7 @@ end;
 
 (*
 FileSize
-~~~~~~~~
+--------
 > function FileSize(FileName: String): Int64;
 *)
 procedure _LapeFileSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -289,7 +289,7 @@ end;
 
 (*
 FileSizeInMegaBytes
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function FileSizeInMegaBytes(FileName: String): Single;
 *)
 procedure _LapeFileSizeInMegaBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -299,7 +299,7 @@ end;
 
 (*
 PathExists
-~~~~~~~~~~
+----------
 > function PathExists(Path: String): Boolean;
 *)
 procedure _LapePathExists(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -309,7 +309,7 @@ end;
 
 (*
 PathNormalize
-~~~~~~~~~~~~~
+-------------
 > function PathNormalize(Path: String): String;
 *)
 procedure _LapePathNormalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -319,7 +319,7 @@ end;
 
 (*
 PathIsFile
-~~~~~~~~~~
+----------
 > function PathIsFile(Path: String): Boolean;
 *)
 procedure _LapePathIsFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -329,7 +329,7 @@ end;
 
 (*
 PathIsDirectory
-~~~~~~~~~~~~~~~
+---------------
 > function PathIsDirectory(Path: String): Boolean;
 *)
 procedure _LapePathIsDirectory(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -339,7 +339,7 @@ end;
 
 (*
 PathExtractName
-~~~~~~~~~~~~~~~
+---------------
 > function PathExtractName(Path: String): String;
 *)
 procedure _LapePathExtractName(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -349,7 +349,7 @@ end;
 
 (*
 PathExtractNameWithoutExt
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function PathExtractNameWithoutExt(Path: String): String;
 *)
 procedure _LapePathExtractNameWithoutExt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -359,7 +359,7 @@ end;
 
 (*
 PathExtractExt
-~~~~~~~~~~~~~~
+--------------
 > function PathExtractExt(Path: String): String;
 *)
 procedure _LapePathExtractExt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -369,7 +369,7 @@ end;
 
 (*
 PathExtractDir
-~~~~~~~~~~~~~~
+--------------
 > function PathExtractDir(Path: String): String;
 *)
 procedure _LapePathExtractDir(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -379,7 +379,7 @@ end;
 
 (*
 PathJoin
-~~~~~~~~
+--------
 > function PathJoin(Paths: TStringArray): String;
 *)
 procedure _LapePathJoin(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -389,7 +389,7 @@ end;
 
 (*
 PathSetSeperators
-~~~~~~~~~~~~~~~~~
+-----------------
 > function PathSetSeperators(Path: String): String;
 *)
 procedure _LapePathSetSeperators(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -399,7 +399,7 @@ end;
 
 (*
 PathExcludeTrailingSep
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function PathExcludeTrailingSep(Path: String): String;
 *)
 procedure _LapePathExcludeTrailingSep(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -409,7 +409,7 @@ end;
 
 (*
 PathIncludeTrailingSep
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function PathIncludeTrailingSep(Path: String): String;
 *)
 procedure _LapePathIncludeTrailingSep(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -419,7 +419,7 @@ end;
 
 (*
 PathExcludeLeadingSep
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function PathExcludeLeadingSep(Path: String): String;
 *)
 procedure _LapePathExcludeLeadingSep(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -429,7 +429,7 @@ end;
 
 (*
 PathIncludeLeadingSep
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function PathIncludeLeadingSep(Path: String): String;
 *)
 procedure _LapePathIncludeLeadingSep(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -439,7 +439,7 @@ end;
 
 (*
 PathExtractRelative
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function PathExtractRelative(BasePath, DestPath: String): String;
 *)
 procedure _LapePathExtractRelative(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -449,7 +449,7 @@ end;
 
 (*
 PathChangeExt
-~~~~~~~~~~~~~
+-------------
 > function PathChangeExt(Path, NewExt: String): String;
 *)
 procedure _LapePathChangeExt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -459,7 +459,7 @@ end;
 
 (*
 DirList
-~~~~~~~
+-------
 > function DirList(Path: String; Recursive: Boolean = False): TStringArray;
 *)
 procedure _LapeDirList(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -469,7 +469,7 @@ end;
 
 (*
 DirSearch
-~~~~~~~~~
+---------
 > function DirSearch(Path: String; Mask: String; Recursive: Boolean = False): TStringArray;
 *)
 procedure _LapeDirSearch(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -479,7 +479,7 @@ end;
 
 (*
 DirCreate
-~~~~~~~~~
+---------
 > function DirCreate(Path: String): Boolean;
 *)
 procedure _LapeDirCreate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -489,7 +489,7 @@ end;
 
 (*
 DirDelete
-~~~~~~~~~
+---------
 > function DirDelete(Path: String; OnlyChildren: Boolean): Boolean;
 *)
 procedure _LapeDirDelete(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -499,7 +499,7 @@ end;
 
 (*
 DirExists
-~~~~~~~~~
+---------
 > function DirExists(Path: String): Boolean;
 *)
 procedure _LapeDirExists(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -509,7 +509,7 @@ end;
 
 (*
 DirParent
-~~~~~~~~~
+---------
 > function DirParent(Path: String): String;
 *)
 procedure _LapeDirParent(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -519,7 +519,7 @@ end;
 
 (*
 DirIsEmpty
-~~~~~~~~~~
+----------
 > function DirIsEmpty(Path: String): Boolean;
 *)
 procedure _LapeDirIsEmpty(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -529,7 +529,7 @@ end;
 
 (*
 DirSize
-~~~~~~~
+-------
 > function DirSize(Path: String): Int64;
 *)
 procedure _LapeDirSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -539,7 +539,7 @@ end;
 
 (*
 DirSizeInMegaBytes
-~~~~~~~~~~~~~~~~~~
+------------------
 > function DirSizeInMegaBytes(Path: String): Single;
 *)
 procedure _LapeDirSizeInMegaBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -549,7 +549,7 @@ end;
 
 (*
 GetUserDir
-~~~~~~~~~~
+----------
 > function GetUserDir: String;
 *)
 procedure _LapeGetUserDir(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -559,7 +559,7 @@ end;
 
 (*
 GetTempDir
-~~~~~~~~~~
+----------
 > function GetTempDir: String;
 *)
 procedure _LapeGetTempDir(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -569,7 +569,7 @@ end;
 
 (*
 GetTempFileName
-~~~~~~~~~~~~~~~
+---------------
 > function GetTempFileName: String;
 *)
 procedure _LapeGetTempFileName(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

@@ -24,7 +24,7 @@ A bit of Hashing, Encoding, Compressing.
 
 (*
 BlowFishEncrypt
-~~~~~~~~~~~~~~~
+---------------
 > function BlowFishEncrypt(const Data, Password: String): String;
 *)
 procedure _LapeBlowFishEncrypt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -53,7 +53,7 @@ end;
 
 (*
 BlowFishDecrypt
-~~~~~~~~~~~~~~~
+---------------
 > function BlowFishDecrypt(const Data, Password: String): String;
 *)
 procedure _LapeBlowFishDecrypt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -80,7 +80,7 @@ end;
 
 (*
 HashBuffer
-~~~~~~~~~~
+----------
 > function HashBuffer(HashType: EHashType; Buf: PByte; Len: SizeUInt): String;
 *)
 procedure _LapeHashBuffer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -90,7 +90,7 @@ end;
 
 (*
 HashString
-~~~~~~~~~~
+----------
 > function HashString(const Data: String): String;
 *)
 procedure _LapeHashString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -100,7 +100,7 @@ end;
 
 (*
 HashFile
-~~~~~~~~
+--------
 > function HashFile(HashType: EHashType; FileName: String): String;
 *)
 procedure _LapeHashFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -110,7 +110,7 @@ end;
 
 (*
 HMACMD5
-~~~~~~~
+-------
 > function HMACMD5(const Key, Message: String): String;
 *)
 procedure _LapeHMACMD5(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -120,7 +120,7 @@ end;
 
 (*
 HMACSHA1
-~~~~~~~~
+--------
 > function HMACSHA1(const Key, Message: String): String;
 *)
 procedure _LapeHMACSHA1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -130,7 +130,7 @@ end;
 
 (*
 Base64Encode
-~~~~~~~~~~~~
+------------
 > function Base64Encode(const S: String): String;
 *)
 procedure _LapeBase64Encode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -140,7 +140,7 @@ end;
 
 (*
 Base64Decode
-~~~~~~~~~~~~
+------------
 > function Base64Decode(const S: String): String;
 *)
 procedure _LapeBase64Decode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -150,7 +150,7 @@ end;
 
 (*
 Base32Encode
-~~~~~~~~~~~~
+------------
 > function Base32Encode(const S: String): String;
 *)
 procedure _LapeBase32Encode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -160,7 +160,7 @@ end;
 
 (*
 Base32Decode
-~~~~~~~~~~~~
+------------
 > function Base32Decode(const S: String): String;
 *)
 procedure _LapeBase32Decode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -170,7 +170,7 @@ end;
 
 (*
 HexEncode
-~~~~~~~~~
+---------
 > function HexEncode(const S: String): String;
 *)
 procedure _LapeHexEncode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -180,7 +180,7 @@ end;
 
 (*
 HexDecode
-~~~~~~~~~
+---------
 > function HexDecode(const S: String): String;
 *)
 procedure _LapeHexDecode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -190,7 +190,7 @@ end;
 
 (*
 GetOTPToken
-~~~~~~~~~~~
+-----------
 > function GetOTPToken(const Secret: String): Integer;
 *)
 procedure _LapeGetOTPToken(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -200,7 +200,7 @@ end;
 
 (*
 ZCompressString
-~~~~~~~~~~~~~~~
+---------------
 > function ZCompressString(S: String): String;
 *)
 procedure _LapeZCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -210,7 +210,7 @@ end;
 
 (*
 ZDecompressString
-~~~~~~~~~~~~~~~~~
+-----------------
 > function ZDecompressString(S: String): String;
 *)
 procedure _LapeZDecompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -220,7 +220,7 @@ end;
 
 (*
 SynLZCompress
-~~~~~~~~~~~~~
+-------------
 > function SynLZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
 *)
 procedure _LapeSynLZCompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -230,7 +230,7 @@ end;
 
 (*
 SynLZDecompress
-~~~~~~~~~~~~~~~
+---------------
 > function SynLZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
 *)
 procedure _LapeSynLZDecompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -240,7 +240,7 @@ end;
 
 (*
 SynLZCompressDestLen
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function SynLZCompressDestLen(Len: Integer): Integer;
 *)
 procedure _LapeSynLZCompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -250,7 +250,7 @@ end;
 
 (*
 SynLZDecompressDestLen
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function SynLZDecompressDestLen(Src: Pointer): Integer;
 *)
 procedure _LapeSynLZDecompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

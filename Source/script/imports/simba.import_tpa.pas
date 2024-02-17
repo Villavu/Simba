@@ -30,7 +30,7 @@ Methods relating to point arrays.
 
 (*
 TPointArray.Difference
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TPointArray.Difference(Other: TPointArray): TPointArray;
 *)
 procedure _Lape_Point_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -40,7 +40,7 @@ end;
 
 (*
 TPointArray.SymmetricDifference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 > function TPointArray.SymmetricDifference(Other: TPointArray): TPointArray;
 *)
 procedure _Lape_Point_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -50,7 +50,7 @@ end;
 
 (*
 TPointArray.Intersection
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function TPointArray.Intersection(Other: TPointArray): TPointArray;
 *)
 procedure _Lape_Point_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -60,7 +60,7 @@ end;
 
 (*
 TPointArray.CreateFromBox
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function TPointArray.CreateFromBox(Box: TBox; Filled: Boolean): TPointArray; static;
 *)
 procedure _LapeTPACreateFromBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -70,7 +70,7 @@ end;
 
 (*
 TPointArray.CreateFromEllipse
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 > function TPointArray.CreateFromEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Filled: Boolean): TPointArray; static;
 *)
 procedure _LapeTPACreateFromEllipse(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -80,7 +80,7 @@ end;
 
 (*
 TPointArray.CreateFromCircle
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 > function TPointArray.CreateFromCircle(Center: TPoint; Radius: Integer; Filled: Boolean): TPointArray; static;
 *)
 procedure _LapeTPACreateFromCircle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -90,7 +90,7 @@ end;
 
 (*
 TPointArray.CreateFromLine
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 > function TPointArray.CreateFromLine(Start, Stop: TPoint): TPointArray; static;
 *)
 procedure _LapeTPACreateFromLine(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -100,7 +100,7 @@ end;
 
 (*
 TPointArray.CreateFromPolygon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 > function TPointArray.CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static;
 *)
 procedure _LapeTPACreateFromPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -110,7 +110,7 @@ end;
 
 (*
 TPointArray.CreateFromSimplePolygon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 > function TPointArray.CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static;
 *)
 procedure _LapeTPACreateFromSimplePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -120,7 +120,7 @@ end;
 
 (*
 TPointArray.Rows
-~~~~~~~~~~~~~~~~
+----------------
 > function TPointArray.Rows: T2DPointArray;
 *)
 procedure _LapeTPARows(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -130,7 +130,7 @@ end;
 
 (*
 TPointArray.Columns
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TPointArray.Columns: T2DPointArray;
 *)
 procedure _LapeTPAColumns(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -140,7 +140,7 @@ end;
 
 (*
 TPointArray.Equals
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TPointArray.Equals(Other: TPointArray): Boolean;
 *)
 procedure _LapeTPAEquals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -150,7 +150,7 @@ end;
 
 (*
 TPointArray.Offset
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TPointArray.Offset(P: TPoint): TPointArray;
 *)
 procedure _LapeTPAOffset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -160,7 +160,7 @@ end;
 
 (*
 TPointArray.Offset
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TPointArray.Offset(X, Y: Integer): TPointArray;
 *)
 procedure _LapeTPAOffset2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -170,7 +170,7 @@ end;
 
 (*
 TPointArray.FloodFill
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TPointArray.FloodFill(const StartPoint: TPoint; const EightWay: Boolean): TPointArray;
 *)
 procedure _LapeTPAFloodFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -180,7 +180,7 @@ end;
 
 (*
 TPointArray.Invert
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TPointArray.Invert(Bounds: TBox): TPointArray;
 *)
 procedure _LapeTPAInvert1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -190,7 +190,7 @@ end;
 
 (*
 TPointArray.Invert
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TPointArray.Invert: TPointArray;
 *)
 procedure _LapeTPAInvert2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -200,7 +200,7 @@ end;
 
 (*
 TPointArray.Bounds
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TPointArray.Bounds: TBox;
 *)
 procedure _LapeTPABounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -210,7 +210,7 @@ end;
 
 (*
 TPointArray.Mean
-~~~~~~~~~~~~~~~~
+----------------
 > function TPointArray.Mean: TPoint;
 *)
 procedure _LapeTPAMean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -220,7 +220,7 @@ end;
 
 (*
 TPointArray.ReduceByDistance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 > function TPointArray.ReduceByDistance(Dist: Integer): TPointArray;
 *)
 procedure _LapeTPAReduceByDistance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -230,7 +230,7 @@ end;
 
 (*
 TPointArray.PointsNearby
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function TPointArray.PointsNearby(Other: TPointArray; MinDist, MaxDist: Double): TPointArray;
 *)
 procedure _LapeTPAPointsNearby1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -240,7 +240,7 @@ end;
 
 (*
 TPointArray.PointsNearby
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function TPointArray.PointsNearby(Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray;
 *)
 procedure _LapeTPAPointsNearby2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -250,7 +250,7 @@ end;
 
 (*
 TPointArray.IsPointNearby
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function TPointArray.IsPointNearby(Other: TPoint; MinDist, MaxDist: Double): Boolean;
 *)
 procedure _LapeTPAIsPointNearby1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -260,7 +260,7 @@ end;
 
 (*
 TPointArray.IsPointNearby
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function TPointArray.IsPointNearby(Other: TPoint; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): Boolean;
 *)
 procedure _LapeTPAIsPointNearby2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -270,7 +270,7 @@ end;
 
 (*
 TPointArray.FurthestPoints
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 > procedure TPointArray.FurthestPoints(out A, B: TPoint);
 *)
 procedure _LapeTPAFurthestPoints(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -280,7 +280,7 @@ end;
 
 (*
 TPointArray.NearestPoint
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function TPointArray.NearestPoint(Other: TPoint): TPoint;
 *)
 procedure _LapeTPANearestPoint(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -290,7 +290,7 @@ end;
 
 (*
 TPointArray.Density
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TPointArray.Density: Double;
 *)
 procedure _LapeTPADensity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -300,7 +300,7 @@ end;
 
 (*
 TPointArray.Connect
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TPointArray.Connect: TPointArray;
 *)
 procedure _LapeTPAConnect(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -310,7 +310,7 @@ end;
 
 (*
 TPointArray.Extremes
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TPointArray.Extremes: TPointArray;
 *)
 procedure _LapeTPAExtremes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -320,7 +320,7 @@ end;
 
 (*
 TPointArray.Rotate
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TPointArray.Rotate(Radians: Double; Center: TPoint): TPointArray;
 *)
 procedure _LapeTPARotate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -330,7 +330,7 @@ end;
 
 (*
 TPointArray.RotateEx
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TPointArray.RotateEx(Radians: Double): TPointArray;
 *)
 procedure _LapeTPARotateEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -340,7 +340,7 @@ end;
 
 (*
 TPointArray.Sort
-~~~~~~~~~~~~~~~~
+----------------
 > function TPointArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TPointArray;
 *)
 procedure _LapeTPASort1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -350,7 +350,7 @@ end;
 
 (*
 TPointArray.Sort
-~~~~~~~~~~~~~~~~
+----------------
 > function TPointArray.Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): TPointArray;
 *)
 procedure _LapeTPASort2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -360,7 +360,7 @@ end;
 
 (*
 TPointArray.SortByX
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TPointArray.SortByX(LowToHigh: Boolean = True): TPointArray;
 *)
 procedure _LapeTPASortByX(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -370,7 +370,7 @@ end;
 
 (*
 TPointArray.SortByY
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TPointArray.SortByY(LowToHigh: Boolean = True): TPointArray;
 *)
 procedure _LapeTPASortByY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -380,7 +380,7 @@ end;
 
 (*
 TPointArray.SortFrom
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TPointArray.SortFrom(From: TPoint): TPointArray;
 *)
 procedure _LapeTPASortFrom(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -390,7 +390,7 @@ end;
 
 (*
 TPointArray.SortByRow
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TPointArray.SortByRow(Reverse: Boolean = False): TPointArray;
 *)
 procedure _LapeTPASortByRow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -400,7 +400,7 @@ end;
 
 (*
 TPointArray.SortByColumn
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function TPointArray.SortByColumn(Reverse: Boolean = False): TPointArray;
 *)
 procedure _LapeTPASortByColumn(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -410,7 +410,7 @@ end;
 
 (*
 TPointArray.ExcludePie
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TPointArray.ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
 
 Returns all points from `Self` are **not** inside the "pie slice" defined by StartDegree, EndDegree and MinRadius, MaxRadius and Center.
@@ -424,7 +424,7 @@ end;
 
 (*
 TPointArray.ExcludeDist
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TPointArray.ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
 
 Returns all points from `Self` that are **not** within `MinDist` and `MaxDist` from `Center`
@@ -438,7 +438,7 @@ end;
 
 (*
 TPointArray.ExcludePoints
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function TPointArray.ExcludePoints(Points: TPointArray): TPointArray;
 
 Returns all points from `Self` that are **not** inside the `Points` array.
@@ -450,7 +450,7 @@ end;
 
 (*
 TPointArray.ExcludePolygon
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 > function TPointArray.ExcludePolygon(Polygon: TPointArray): TPointArray;
 
 Returns all points from `Self` that are **not** inside the polygon.
@@ -464,7 +464,7 @@ end;
 
 (*
 TPointArray.ExcludeBox
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TPointArray.ExcludeBox(Box: TBox): TPointArray;
 
 Returns all points from `Self` that **not** inside the box.
@@ -478,7 +478,7 @@ end;
 
 (*
 TPointArray.ExcludeQuad
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TPointArray.ExcludeQuad(Quad: TQuad): TPointArray;
 
 Returns all points from `Self` that **not** inside the quad.
@@ -492,7 +492,7 @@ end;
 
 (*
 TPointArray.ExtractDist
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TPointArray.ExtractDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
 
 Returns all points from `Self` that **are** within `MinDist` and `MaxDist` from `Center`
@@ -506,7 +506,7 @@ end;
 
 (*
 TPointArray.ExtractPolygon
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 > function TPointArray.ExtractPolygon(Polygon: TPointArray): TPointArray;
 
 Returns all points from `Self` that are **inside** the polygon.
@@ -518,7 +518,7 @@ end;
 
 (*
 TPointArray.ExtractBox
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TPointArray.ExtractBox(Box: TBox): TPointArray;
 
 Returns all points from `Self` that are **inside** the box.
@@ -530,7 +530,7 @@ end;
 
 (*
 TPointArray.ExtractQuad
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TPointArray.ExtractQuad(Quad: TQuad): TPointArray;
 
 Returns all points from `Self` that are **inside** the quad.
@@ -542,7 +542,7 @@ end;
 
 (*
 TPointArray.ExtractPie
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TPointArray.ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
 
 Returns all points from `Self` are **inside** the "pie slice" defined by StartDegree, EndDegree and MinRadius, MaxRadius and Center.
@@ -554,7 +554,7 @@ end;
 
 (*
 TPointArray.Skeleton
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TPointArray.Skeleton(FMin: Integer = 2; FMax: Integer = 6): TPointArray;
 *)
 procedure _LapeTPASkeleton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -564,7 +564,7 @@ end;
 
 (*
 TPointArray.Border
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TPointArray.Border: TPointArray;
 *)
 procedure _LapeTPABorder(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -574,7 +574,7 @@ end;
 
 (*
 TPointArray.Edges
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TPointArray.Edges: TPointArray;
 *)
 procedure _LapeTPAEdges(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -584,7 +584,7 @@ end;
 
 (*
 TPointArray.ConvexHull
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TPointArray.ConvexHull: TPointArray;
 *)
 procedure _LapeTPAConvexHull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -594,7 +594,7 @@ end;
 
 (*
 TPointArray.ShapeFill
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TPointArray.ShapeFill: TPointArray;
 *)
 procedure _LapeTPAShapeFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -604,7 +604,7 @@ end;
 
 (*
 TPointArray.Unique
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TPointArray.Unique: TPointArray; override;
 *)
 procedure _LapeTPAUnique(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -614,7 +614,7 @@ end;
 
 (*
 TPointArray.Split
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TPointArray.Split(Dist: Integer): T2DPointArray;
 *)
 procedure _LapeTPASplit1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -624,7 +624,7 @@ end;
 
 (*
 TPointArray.Split
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TPointArray.Split(DistX, DistY: Integer): T2DPointArray;
 *)
 procedure _LapeTPASplit2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -634,7 +634,7 @@ end;
 
 (*
 TPointArray.Cluster
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TPointArray.Cluster(Dist: Integer): T2DPointArray;
 *)
 procedure _LapeTPACluster1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -644,7 +644,7 @@ end;
 
 (*
 TPointArray.Cluster
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TPointArray.Cluster(DistX, DistY: Integer): T2DPointArray;
 *)
 procedure _LapeTPACluster2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -654,7 +654,7 @@ end;
 
 (*
 TPointArray.MinAreaRect
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TPointArray.MinAreaRect: TQuad;
 *)
 procedure _LapeTPAMinAreaRect(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -664,7 +664,7 @@ end;
 
 (*
 TPointArray.MinAreaCircle
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function TPointArray.MinAreaCircle: TCircle;
 *)
 procedure _LapeTPAMinAreaCircle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -674,7 +674,7 @@ end;
 
 (*
 TPointArray.Erode
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TPointArray.Erode(Iterations: Integer): TPointArray;
 *)
 procedure _LapeTPAErode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -684,7 +684,7 @@ end;
 
 (*
 TPointArray.Grow
-~~~~~~~~~~~~~~~~
+----------------
 > function TPointArray.Grow(Iterations: Integer): TPointArray;
 *)
 procedure _LapeTPAGrow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -694,7 +694,7 @@ end;
 
 (*
 TPointArray.Partition
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TPointArray.Partition(Dist: Integer): T2DPointArray;
 *)
 procedure _LapeTPAPartition1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -704,7 +704,7 @@ end;
 
 (*
 TPointArray.Partition
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TPointArray.Partition(Width, Height: Integer): T2DPointArray;
 *)
 procedure _LapeTPAPartition2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -714,7 +714,7 @@ end;
 
 (*
 TPointArray.PartitionEx
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TPointArray.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
 *)
 procedure _LapeTPAPartitionEx1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -724,7 +724,7 @@ end;
 
 (*
 TPointArray.PartitionEx
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TPointArray.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray;
 
 PartitionEx with StartPoint.
@@ -736,7 +736,7 @@ end;
 
 (*
 TPointArray.SortCircular
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function TPointArray.SortCircular(Center: TPoint; StartDegrees: Integer; Clockwise: Boolean): TPointArray;
 *)
 procedure _LapeTPASortCircular(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -746,7 +746,7 @@ end;
 
 (*
 TPointArray.DistanceTransform
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 > function TPointArray.DistanceTransform: TSingleMatrix;
 *)
 procedure _LapeTPADistanceTransform(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -756,7 +756,7 @@ end;
 
 (*
 TPointArray.Circularity
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TPointArray.Circularity: Double;
 *)
 procedure _LapeTPACircularity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -766,7 +766,7 @@ end;
 
 (*
 TPointArray.DouglasPeucker
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 > function TPointArray.DouglasPeucker(epsilon: Double): TPointArray;
 *)
 procedure _LapeTPADouglasPeucker(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -776,7 +776,7 @@ end;
 
 (*
 TPointArray.ConcaveHull
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TPointArray.ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPointArray;
 *)
 procedure _LapeTPAConcaveHull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -786,7 +786,7 @@ end;
 
 (*
 TPointArray.ConcaveHullEx
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function TPointArray.ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): T2DPointArray;
 *)
 procedure _LapeTPAConcaveHullEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -796,7 +796,7 @@ end;
 
 (*
 TPointArray.ConvexityDefects
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 > function TPointArray.ConvexityDefects(Epsilon: Single; Mode: EConvexityDefects = EConvexityDefects.NONE): TPointArray;
 
 Finds the defects in relation to a convex hull of the given concave hull.

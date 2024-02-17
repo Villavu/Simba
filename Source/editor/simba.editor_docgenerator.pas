@@ -15,17 +15,11 @@ uses
 
 const
   DEFAULT_DOCUMENTATION_COMMENT =
-    '(*'          + LineEnding +
-    '%s'          + LineEnding +
-    '%s'          + LineEnding +
-    '%s'          + LineEnding +
-    ''            + LineEnding +
-    'DESCRIPTION' + LineEnding +
-    ''            + LineEnding +
-    'Example::'   + LineEnding +
-    ''            + LineEnding +
-    '  EXAMPLE'   + LineEnding +
-    '*)'          + LineEnding;
+    '(*'   + LineEnding +
+    '%s'   + LineEnding +
+    '%s'   + LineEnding +
+    '> %s' + LineEnding +
+    '*)'   + LineEnding;
 
 type
   TSimbaEditorPlugin_DocGenerator = class(TLazSynEditPlugin)
@@ -85,7 +79,7 @@ procedure TSimbaEditorPlugin_DocGenerator.InsertDocumentation;
           FullName := Name;
 
         Editor.InsertTextAtCaret(
-          Format(SimbaSettings.Editor.DocumentationComment.Value, [FullName, StringOfChar('~', Length(FullName)), HeaderString])
+          Format(SimbaSettings.Editor.DocumentationComment.Value, [FullName, StringOfChar('-', Length(FullName)), HeaderString])
         );
       end;
   end;

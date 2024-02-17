@@ -24,10 +24,10 @@ Timing
 
 (*
 PreciseSleep
-~~~~~~~~~~~~
+------------
 > procedure PreciseSleep(Milliseconds: UInt32);
 
-Much more accurate sleep method, if you need millisecond accurate sleeps under ~50ms use this.
+Much more accurate sleep method, if you need millisecond accurate sleeps under -50ms use this.
 
 Note::
   This is only useful on Windows since on Linux and MacOS the regular `Sleep` is accurate to the milliseconds.
@@ -39,7 +39,7 @@ end;
 
 (*
 ConvertTime
-~~~~~~~~~~~
+-----------
 > procedure ConvertTime(Time: Integer; var h, m, s: Integer);
 *)
 procedure _LapeConvertTime(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -49,7 +49,7 @@ end;
 
 (*
 ConvertTime64
-~~~~~~~~~~~~~
+-------------
 > procedure ConvertTime64(Time: UInt64; var y, m, w, d, h, min, s: Integer);
 *)
 procedure _LapeConvertTime64(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -59,7 +59,7 @@ end;
 
 (*
 PerformanceTimer
-~~~~~~~~~~~~~~~~
+----------------
 > function PerformanceTimer: Double;
 *)
 procedure _LapePerformanceTimer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -69,7 +69,7 @@ end;
 
 (*
 FormatMilliseconds
-~~~~~~~~~~~~~~~~~~
+------------------
 > function FormatMilliseconds(Time: Double; Format: String): String;
 
 Formats milliseconds into a string. Formatting is defined by the `Format` string.
@@ -87,7 +87,7 @@ end;
 
 (*
 FormatMilliseconds
-~~~~~~~~~~~~~~~~~~
+------------------
 > function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String;
 *)
 procedure _LapeFormatMillisecondsEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -97,7 +97,7 @@ end;
 
 (*
 GetTimeRunning
-~~~~~~~~~~~~~~
+--------------
 > function GetTimeRunning: UInt64;
 
 Returns the current script runtime in milliseconds.
@@ -105,7 +105,7 @@ Returns the current script runtime in milliseconds.
 
 (*
 GetTickCount
-~~~~~~~~~~~~
+------------
 > function GetTickCount: UInt64;
 
 Returns the number of milliseconds that have elapsed since the system was started.
@@ -114,7 +114,7 @@ However the more important use case of this function is for measuring time:
 ```
   T := GetTickCount();
   Sleep(1000);
-  WriteLn('Should be around ~1000 :: ', GetTickCount()-T);
+  WriteLn('Should be around -1000 :: ', GetTickCount()-T);
 ```
 Resolution is typically in the range of 10 milliseconds to 16 milliseconds.
 

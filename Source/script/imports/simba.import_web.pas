@@ -27,7 +27,7 @@ Internet HTTP request/post methods.
 
 (*
 URLOpenInBrowser
-~~~~~~~~~~~~~~~~
+----------------
 > procedure URLOpenInBrowser(URL: String);
 
 Opens a URL in the systems default internet browser.
@@ -39,7 +39,7 @@ end;
 
 (*
 URLFetch
-~~~~~~~~
+--------
 > function URLFetch(URL: String): String;
 
 Simple method to return the contents of a webpage.
@@ -51,7 +51,7 @@ end;
 
 (*
 URLFetchToFile
-~~~~~~~~~~~~~~
+--------------
 > procedure URLFetchToFile(URL, FileName: String);
 
 Simple method to download the contents of a webpage to a file.
@@ -63,7 +63,7 @@ end;
 
 (*
 EncodeURLElement
-~~~~~~~~~~~~~~~~
+----------------
 > function EncodeURLElement(S: String): String;
 
 URL encode a string. For example a space character is changed to `%20`.
@@ -75,7 +75,7 @@ end;
 
 (*
 DecodeURLElement
-~~~~~~~~~~~~~~~~
+----------------
 > function DecodeURLElement(S: String): String;
 
 Inverse of EncodeURLElement.
@@ -87,7 +87,7 @@ end;
 
 (*
 TSimbaHTTPClient.Create
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TSimbaHTTPClient.Create: TSimbaHTTPClient; static;
 
 Create a SimbaHTTPClient. This must be freed.
@@ -111,7 +111,7 @@ end;
 
 (*
 TSimbaHTTPClient.SetProxy
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > procedure TSimbaHTTPClient.SetProxy(Host: String; Port: Integer; UserName, Password: String);
 *)
 procedure _LapeSimbaHTTPClient_SetProxy(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -121,7 +121,7 @@ end;
 
 (*
 TSimbaHTTPClient.ClearProxy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 > procedure TSimbaHTTPClient.ClearProxy;
 *)
 procedure _LapeSimbaHTTPClient_ClearProxy(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -131,7 +131,7 @@ end;
 
 (*
 TSimbaHTTPClient.Reset
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > procedure TSimbaHTTPClient.Reset;
 *)
 procedure _LapeSimbaHTTPClient_Reset(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -141,7 +141,7 @@ end;
 
 (*
 TSimbaHTTPClient.Get
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TSimbaHTTPClient.Get(URL: String; AllowedStatusCodes: THTTPStatusArray = []): String;
 
 Return a webpages content as a string.
@@ -156,7 +156,7 @@ end;
 
 (*
 TSimbaHTTPClient.GetFile
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > procedure TSimbaHTTPClient.GetFile(URL, LocalFileName: String; AllowedStatusCodes: THTTPStatusArray = []);
 
 Save a webpages content to a local file.
@@ -171,7 +171,7 @@ end;
 
 (*
 TSimbaHTTPClient.GetZip
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > procedure TSimbaHTTPClient.GetZip(URL: String; OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
 *)
 procedure _LapeSimbaHTTPClient_GetZIP(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -181,7 +181,7 @@ end;
 
 (*
 TSimbaHTTPClient.Head
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TSimbaHTTPClient.Head(URL: String): EHTTPStatus;
 
 Header request. Headers will be written to `HTTPClient.GetResponseHeaders()`
@@ -193,7 +193,7 @@ end;
 
 (*
 TSimbaHTTPClient.GetCookies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 > function TSimbaHTTPClient.GetCookies: TStringArray;
 *)
 procedure _LapeSimbaHTTPClient_GetCookies(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -203,7 +203,7 @@ end;
 
 (*
 TSimbaHTTPClient.SetCookies
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 > procedure TSimbaHTTPClient.SetCookies(Cookies: TStringArray);
 *)
 procedure _LapeSimbaHTTPClient_SetCookies(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -213,7 +213,7 @@ end;
 
 (*
 TSimbaHTTPClient.ResponseStatus
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 > function TSimbaHTTPClient.ResponseStatus: EHTTPStatus;
 
 Returns the response status.
@@ -230,7 +230,7 @@ end;
 
 (*
 TSimbaHTTPClient.GetResponseHeader
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------
 > function TSimbaHTTPClient.GetResponseHeader(Name: String): String;
 *)
 procedure _LapeSimbaHTTPClient_GetResponseHeader(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -240,7 +240,7 @@ end;
 
 (*
 TSimbaHTTPClient.GetResponseHeaders
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 > function TSimbaHTTPClient.GetResponseHeaders: TStringArray;
 *)
 procedure _LapeSimbaHTTPClient_GetResponseHeaders(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -250,7 +250,7 @@ end;
 
 (*
 TSimbaHTTPClient.GetRequestHeader
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 > function TSimbaHTTPClient.GetRequestHeader(Name: String): String;
 *)
 procedure _LapeSimbaHTTPClient_GetRequestHeader(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -260,7 +260,7 @@ end;
 
 (*
 TSimbaHTTPClient.SetRequestContentType
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 > procedure TSimbaHTTPClient.SetRequestContentType(Value: String);
 *)
 procedure _LapeSimbaHTTPClient_SetRequestContentType(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -270,7 +270,7 @@ end;
 
 (*
 TSimbaHTTPClient.SetRequestHeader
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 > procedure TSimbaHTTPClient.SetRequestHeader(Name, Value: String);
 *)
 procedure _LapeSimbaHTTPClient_SetRequestHeader(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -280,7 +280,7 @@ end;
 
 (*
 TSimbaHTTPClient.Post
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TSimbaHTTPClient.Post(URL: String; Data: String): String;
 
 HTTP post request.
@@ -294,7 +294,7 @@ end;
 
 (*
 TSimbaHTTPClient.PostForm
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function TSimbaHTTPClient.PostForm(URL: String; Data: String): String;
 
 Post form data (www-urlencoded)
@@ -306,7 +306,7 @@ end;
 
 (*
 TSimbaHTTPClient.PostFormFile
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 > function TSimbaHTTPClient.PostFormFile(const URL, FieldName, FileName: string): String;
 
 Post form with a local file file
@@ -318,7 +318,7 @@ end;
 
 (*
 TSimbaHTTPClient.Patch
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TSimbaHTTPClient.Patch(URL, PostData: String): String;
 *)
 procedure _LapeSimbaHTTPClient_Patch(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -328,7 +328,7 @@ end;
 
 (*
 TSimbaHTTPClient.Put
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TSimbaHTTPClient.Put(URL, PostData: String): String;
 *)
 procedure _LapeSimbaHTTPClient_Put(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -338,7 +338,7 @@ end;
 
 (*
 TSimbaHTTPClient.Delete
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TSimbaHTTPClient.Delete(URL, PostData: String): String;
 *)
 procedure _LapeSimbaHTTPClient_Delete(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -348,7 +348,7 @@ end;
 
 (*
 TSimbaHTTPClient.GetUserAgent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 > function TSimbaHTTPClient.GetUserAgent: String;
 *)
 procedure _LapeSimbaHTTPClient_GetUserAgent(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -358,7 +358,7 @@ end;
 
 (*
 TSimbaHTTPClient.SetUserAgent
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 > procedure TSimbaHTTPClient.SetUserAgent(Value: String);
 *)
 procedure _LapeSimbaHTTPClient_SetUserAgent(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -368,7 +368,7 @@ end;
 
 (*
 TSimbaHTTPClient.GetOnDownloadProgress
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 > function TSimbaHTTPClient.GetOnDownloadProgress: TSimbaHTTPDownloadingEvent;
 *)
 procedure _LapeSimbaHTTPClient_OnDownloadProgress_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -378,7 +378,7 @@ end;
 
 (*
 TSimbaHTTPClient.SetOnDownloadProgress
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 > procedure TSimbaHTTPClient.SetOnDownloadProgress(Value: TSimbaHTTPDownloadingEvent);
 *)
 procedure _LapeSimbaHTTPClient_OnDownloadProgress_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -388,7 +388,7 @@ end;
 
 (*
 TSimbaHTTPClient.GetOnExtractProgress
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 > function TSimbaHTTPClient.GetOnExtractProgress: TSimbaHTTPExtractingEvent;
 *)
 procedure _LapeSimbaHTTPClient_OnExtractProgress_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -398,7 +398,7 @@ end;
 
 (*
 TSimbaHTTPClient.SetOnExtractProgress
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 > procedure TSimbaHTTPClient.SetOnExtractProgress(Value: TSimbaHTTPExtractingEvent);
 *)
 procedure _LapeSimbaHTTPClient_OnExtractProgress_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -408,7 +408,7 @@ end;
 
 (*
 TSimbaInternetSocket.Create
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 > function TSimbaInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean): TSimbaInternetSocket; static;
 
 Basic internet socket functionality.
@@ -423,7 +423,7 @@ end;
 
 (*
 TSimbaInternetSocket.Connect
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 > procedure TSimbaInternetSocket.Connect;
 
 Connects to the host and port.
@@ -435,7 +435,7 @@ end;
 
 (*
 TSimbaInternetSocket.HasData
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 > function TSimbaInternetSocket.HasData: Boolean;
 
 Returns true if there is data waiting to be read.
@@ -447,7 +447,7 @@ end;
 
 (*
 TSimbaInternetSocket.ReadString
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 > function TSimbaInternetSocket.ReadString(MaxLen: Integer = 8192): String;
 
 Read a string from the socket up to `MaxLen` bytes.
@@ -459,7 +459,7 @@ end;
 
 (*
 TSimbaInternetSocket.ReadStringUntil
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 > function TSimbaInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;
 
 Reads a string until the data ends with `Seq` or `Timeout` (in milliseconds) is reached.
@@ -472,7 +472,7 @@ end;
 
 (*
 TSimbaInternetSocket.WriteString
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 > function TSimbaInternetSocket.WriteString(Str: String): Integer;
 
 Write a string to the socket.
@@ -484,7 +484,7 @@ end;
 
 (*
 TSimbaInternetSocket.GetReadWriteTimeout
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------
 > function TSimbaInternetSocket.GetReadWriteTimeout: Integer
 
 Returns the timeout (in milliseconds) on Read/Write operations.
@@ -496,7 +496,7 @@ end;
 
 (*
 TSimbaInternetSocket.SetReadWriteTimeout
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------
 > function TSimbaInternetSocket.SetReadWriteTimeout(Value: Integer)
 
 Sets the timeout (in milliseconds) on Read/Write operations.
@@ -508,7 +508,7 @@ end;
 
 (*
 TSimbaInternetSocket.GetConnectTimeout
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 > function TSimbaInternetSocket.GetConnectTimeout: Integer;
 
 Returns the connect timeout (in milliseconds).
@@ -520,7 +520,7 @@ end;
 
 (*
 TSimbaInternetSocket.SetConnectTimeout
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 > function TSimbaInternetSocket.SetConnectTimeout(Value: Integer);
 
 Sets the connect timeout (in milliseconds).
@@ -532,7 +532,7 @@ end;
 
 (*
 TSimbaInternetSocket.LastError
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 > function TSimbaInternetSocket.LastError: Integer;
 
 Returns the sockets last error code.
@@ -544,7 +544,7 @@ end;
 
 (*
 LoadSSL
-~~~~~~~
+-------
 > function LoadSSL(Debug: Boolean = False): Boolean;
 
 Loads SSL. This is automatically done but is useful for debugging errors.

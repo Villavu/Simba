@@ -24,7 +24,7 @@ Matrix related methods.
 
 (*
 TIntegerMatrix.Width
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TIntegerMatrix.Width: Integer;
 *)
 procedure _LapeIntegerMatrix_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -34,7 +34,7 @@ end;
 
 (*
 TIntegerMatrix.Height
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TIntegerMatrix.Height: Integer;
 *)
 procedure _LapeIntegerMatrix_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -44,7 +44,7 @@ end;
 
 (*
 TIntegerMatrix.SetSize
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > procedure TIntegerMatrix.SetSize(Width, Height: Integer);
 *)
 procedure _LapeIntegerMatrix_SetSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -54,7 +54,7 @@ end;
 
 (*
 TIntegerMatrix.Area
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TIntegerMatrix.Area: Integer;
 *)
 procedure _LapeIntegerMatrix_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -64,7 +64,7 @@ end;
 
 (*
 TIntegerMatrix.GetSize
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TIntegerMatrix.GetSize(out Width, Height: Integer): Boolean;
 *)
 procedure _LapeIntegerMatrix_GetSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -74,7 +74,7 @@ end;
 
 (*
 TIntegerMatrix.GetValues
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function TIntegerMatrix.GetValues(Indices: TPointArray): TIntegerArray;
 *)
 procedure _LapeIntegerMatrix_GetValues(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -84,7 +84,7 @@ end;
 
 (*
 TIntegerMatrix.SetValue
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > procedure TIntegerMatrix.SetValue(Indices: TPointArray; Value: Integer);
 *)
 procedure _LapeIntegerMatrix_SetValue(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -94,7 +94,7 @@ end;
 
 (*
 TIntegerMatrix.SetValues
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > procedure TIntegerMatrix.SetValues(Indices: TPointArray; Values: TIntegerArray);
 *)
 procedure _LapeIntegerMatrix_SetValues(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -104,7 +104,7 @@ end;
 
 (*
 TIntegerMatrix.Fill
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > procedure TIntegerMatrix.Fill(Area: TBox; Value: Integer);
 *)
 procedure _LapeIntegerMatrix_FillArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -114,7 +114,7 @@ end;
 
 (*
 TIntegerMatrix.Fill
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > procedure TIntegerMatrix.Fill(Value: Integer);
 *)
 procedure _LapeIntegerMatrix_Fill(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -124,7 +124,7 @@ end;
 
 (*
 TIntegerMatrix.Flatten
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TIntegerMatrix.Flatten: TIntegerArray;
 *)
 procedure _LapeIntegerMatrix_Flatten(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -134,7 +134,7 @@ end;
 
 (*
 TIntegerMatrix.Indices
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TIntegerMatrix.Indices(Value: Integer; Comparator: EComparator): TPointArray;
 *)
 procedure _LapeIntegerMatrix_Indices(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -144,7 +144,7 @@ end;
 
 (*
 TIntegerMatrix.Copy
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TIntegerMatrix.Copy: TIntegerMatrix;
 *)
 procedure _LapeIntegerMatrix_Copy1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -154,7 +154,7 @@ end;
 
 (*
 TIntegerMatrix.Copy
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TIntegerMatrix.Copy(Y1, Y2: Integer): TIntegerMatrix;
 *)
 procedure _LapeIntegerMatrix_Copy2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -164,7 +164,7 @@ end;
 
 (*
 TBooleanMatrix.Width
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TBooleanMatrix.Width: Integer;
 *)
 procedure _LapeBooleanMatrix_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -174,7 +174,7 @@ end;
 
 (*
 TBooleanMatrix.Height
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TBooleanMatrix.Height: Integer;
 *)
 procedure _LapeBooleanMatrix_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -184,7 +184,7 @@ end;
 
 (*
 TBooleanMatrix.SetSize
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > procedure TBooleanMatrix.SetSize(Width, Height: Integer);
 *)
 procedure _LapeBooleanMatrix_SetSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -194,7 +194,7 @@ end;
 
 (*
 TBooleanMatrix.Area
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TBooleanMatrix.Area: Integer;
 *)
 procedure _LapeBooleanMatrix_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -204,7 +204,7 @@ end;
 
 (*
 TBooleanMatrix.GetSize
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TBooleanMatrix.GetSize(out Width, Height: Integer): Boolean;
 *)
 procedure _LapeBooleanMatrix_GetSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -214,7 +214,7 @@ end;
 
 (*
 TSingleMatrix.Width
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TSingleMatrix.Width: Integer;
 *)
 procedure _LapeSingleMatrix_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -224,7 +224,7 @@ end;
 
 (*
 TSingleMatrix.Height
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TSingleMatrix.Height: Integer;
 *)
 procedure _LapeSingleMatrix_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -234,7 +234,7 @@ end;
 
 (*
 TSingleMatrix.SetSize
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > procedure TSingleMatrix.SetSize(Width, Height: Integer);
 *)
 procedure _LapeSingleMatrix_SetSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -244,7 +244,7 @@ end;
 
 (*
 TSingleMatrix.Area
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TSingleMatrix.Area: Integer;
 *)
 procedure _LapeSingleMatrix_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -254,7 +254,7 @@ end;
 
 (*
 TSingleMatrix.GetSize
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TSingleMatrix.GetSize(out Width, Height: Integer): Boolean;
 *)
 procedure _LapeSingleMatrix_GetSize(const Params: PParamArray ; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -264,7 +264,7 @@ end;
 
 (*
 TSingleMatrix.GetValues
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TSingleMatrix.GetValues(Indices: TPointArray): TSingleArray;
 *)
 procedure _LapeSingleMatrix_GetValues(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -274,7 +274,7 @@ end;
 
 (*
 TSingleMatrix.SetValues
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > procedure TSingleMatrix.SetValues(Indices: TPointArray; Values: TSingleArray);
 *)
 procedure _LapeSingleMatrix_SetValues(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -284,7 +284,7 @@ end;
 
 (*
 TSingleMatrix.SetValue
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > procedure TSingleMatrix.SetValue(Indices: TPointArray; Value: Single);
 *)
 procedure _LapeSingleMatrix_SetValue(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -294,7 +294,7 @@ end;
 
 (*
 TSingleMatrix.Fill
-~~~~~~~~~~~~~~~~~~
+------------------
 > procedure TSingleMatrix.Fill(Area: TBox; Value: Single);
 *)
 procedure _LapeSingleMatrix_FillArea(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -304,7 +304,7 @@ end;
 
 (*
 TSingleMatrix.Fill
-~~~~~~~~~~~~~~~~~~
+------------------
 > procedure TSingleMatrix.Fill(Value: Single);
 *)
 procedure _LapeSingleMatrix_Fill(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -314,7 +314,7 @@ end;
 
 (*
 TSingleMatrix.Flatten
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TSingleMatrix.Flatten: TSingleArray;
 *)
 procedure _LapeSingleMatrix_Flatten(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -324,7 +324,7 @@ end;
 
 (*
 TSingleMatrix.ToIntegerMatrix
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 > function TSingleMatrix.ToIntegerMatrix: TIntegerMatrix;
 *)
 procedure _LapeSingleMatrix_ToIntegerMatrix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -334,7 +334,7 @@ end;
 
 (*
 TSingleMatrix.Mean
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TSingleMatrix.Mean: Single;
 *)
 procedure _LapeSingleMatrix_Mean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -344,7 +344,7 @@ end;
 
 (*
 TSingleMatrix.MeanStdev
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > procedure TSingleMatrix.MeanStdev(out Mean, Stdev: Double);
 *)
 procedure _LapeSingleMatrix_MeanStdev(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -354,7 +354,7 @@ end;
 
 (*
 TSingleMatrix.MinMax
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > procedure TSingleMatrix.MinMax(out MinValue, MaxValue: Single);
 *)
 procedure _LapeSingleMatrix_MinMax(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -364,7 +364,7 @@ end;
 
 (*
 TSingleMatrix.Min
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TSingleMatrix.Min: Single;
 *)
 procedure _LapeSingleMatrix_Min(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -374,7 +374,7 @@ end;
 
 (*
 TSingleMatrix.Max
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TSingleMatrix.Max: Single;
 *)
 procedure _LapeSingleMatrix_Max(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -384,7 +384,7 @@ end;
 
 (*
 TSingleMatrix.ArgMax
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TSingleMatrix.ArgMax: TPoint;
 *)
 procedure _LapeSingleMatrix_ArgMax(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -394,7 +394,7 @@ end;
 
 (*
 TSingleMatrix.ArgMin
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TSingleMatrix.ArgMin: TPoint;
 *)
 procedure _LapeSingleMatrix_ArgMin(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -404,7 +404,7 @@ end;
 
 (*
 TSingleMatrix.NormMinMax
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function TSingleMatrix.NormMinMax(Alpha, Beta: Single): TSingleMatrix;
 *)
 procedure _LapeSingleMatrix_NormMinMax(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -414,7 +414,7 @@ end;
 
 (*
 TSingleMatrix.Indices
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TSingleMatrix.Indices(Value: Single; Comparator: EComparator): TPointArray;
 *)
 procedure _LapeSingleMatrix_Indices(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -424,7 +424,7 @@ end;
 
 (*
 TSingleMatrix.ArgMulti
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TSingleMatrix.ArgMulti(Count: Integer; HiLo: Boolean): TPointArray;
 *)
 procedure _LapeSingleMatrix_ArgMulti(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -434,7 +434,7 @@ end;
 
 (*
 TSingleMatrix.Smoothen
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > procedure TSingleMatrix.Smoothen(Block: Integer);
 *)
 procedure _LapeSingleMatrix_Smoothen(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -444,7 +444,7 @@ end;
 
 (*
 TSingleMatrix.Equals
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TSingleMatrix.Equals(Other: TSingleMatrix; Epsilon: Single = 0): Boolean;
 *)
 procedure _LapeSingleMatrix_Equals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -454,7 +454,7 @@ end;
 
 (*
 TSingleMatrix.Copy
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TSingleMatrix.Copy: TSingleMatrix;
 *)
 procedure _LapeSingleMatrix_Copy1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -464,7 +464,7 @@ end;
 
 (*
 TSingleMatrix.Copy
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TSingleMatrix.Copy(Y1, Y2: Integer): TSingleMatrix;
 *)
 procedure _LapeSingleMatrix_Copy2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -474,7 +474,7 @@ end;
 
 (*
 TSingleMatrix.Rot90
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TSingleMatrix.Rot90: TSingleMatrix;
 *)
 procedure _LapeSingleMatrix_Rot90(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -484,7 +484,7 @@ end;
 
 (*
 TSingleMatrix.ArgExtrema
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > function TSingleMatrix.ArgExtrema(Count: Int32; HiLo: Boolean = True): TPointArray;
 *)
 procedure _LapeSingleMatrix_ArgExtrema(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -495,7 +495,7 @@ end;
 // Double
 (*
 TDoubleMatrix.Width
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TDoubleMatrix.Width: Integer;
 *)
 procedure _LapeDoubleMatrix_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -505,7 +505,7 @@ end;
 
 (*
 TDoubleMatrix.Height
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TDoubleMatrix.Height: Integer;
 *)
 procedure _LapeDoubleMatrix_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -515,7 +515,7 @@ end;
 
 (*
 TDoubleMatrix.SetSize
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > procedure TDoubleMatrix.SetSize(Width, Height: Integer);
 *)
 procedure _LapeDoubleMatrix_SetSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -525,7 +525,7 @@ end;
 
 (*
 TDoubleMatrix.Area
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TDoubleMatrix.Area: Integer;
 *)
 procedure _LapeDoubleMatrix_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -535,7 +535,7 @@ end;
 
 (*
 TDoubleMatrix.GetSize
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TDoubleMatrix.GetSize(out Width, Height: Integer): Boolean;
 *)
 procedure _LapeDoubleMatrix_GetSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

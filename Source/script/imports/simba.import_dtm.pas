@@ -26,7 +26,7 @@ Image:: ../../images/dtm.png
 
 (*
 TDTM.PointCount
-~~~~~~~~~~~~~~~
+---------------
 > function TDTM.PointCount: Integer;
 *)
 procedure _LapeDTM_PointCount(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -36,7 +36,7 @@ end;
 
 (*
 TDTM.DeletePoints
-~~~~~~~~~~~~~~~~~
+-----------------
 > procedure TDTM.DeletePoints;
 *)
 procedure _LapeDTM_DeletePoints(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -46,7 +46,7 @@ end;
 
 (*
 TDTM.DeletePoint
-~~~~~~~~~~~~~~~~~
+-----------------
 > procedure TDTM.DeletePoint(Index: Integer);
 *)
 procedure _LapeDTM_DeletePoint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -56,7 +56,7 @@ end;
 
 (*
 TDTM.AddPoint
-~~~~~~~~~~~~~~
+--------------
 > procedure TDTM.AddPoint(Point: TDTMPoint);
 *)
 procedure _LapeDTM_AddPoint1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -66,7 +66,7 @@ end;
 
 (*
 TDTM.AddPoint
-~~~~~~~~~~~~~~
+--------------
 > procedure TDTM.AddPoint(X, Y, Color, Tolerance, AreaSize: Integer);
 *)
 procedure _LapeDTM_AddPoint2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -76,7 +76,7 @@ end;
 
 (*
 TDTM.ToString
-~~~~~~~~~~~~~
+-------------
 > function TDTM.ToString: String;
 *)
 procedure _LapeDTM_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -86,7 +86,7 @@ end;
 
 (*
 TDTM.FromString
-~~~~~~~~~~~~~~~
+---------------
 > procedure TDTM.FromString(Str: String);
 *)
 procedure _LapeDTM_FromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -96,7 +96,7 @@ end;
 
 (*
 TDTM.MovePoint
-~~~~~~~~~~~~~~
+--------------
 > procedure TDTM.MovePoint(AFrom, ATo: Integer);
 *)
 procedure _LapeDTM_MovePoint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -106,7 +106,7 @@ end;
 
 (*
 TDTM.Normalize
-~~~~~~~~~~~~~~~
+---------------
 > procedure TDTM.Normalize;
 *)
 procedure _LapeDTM_Normalize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

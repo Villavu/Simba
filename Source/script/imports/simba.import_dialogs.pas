@@ -24,7 +24,7 @@ Simple dialog methods.
 
 (*
 ShowComboDialog
-~~~~~~~~~~~~~~~
+---------------
 > function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer;
 *)
 procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -40,7 +40,7 @@ end;
 
 (*
 ShowQueryDialog
-~~~~~~~~~~~~~~~
+---------------
 > function ShowQueryDialog(Caption, Prompt: String; var Value: String): Boolean;
 *)
 procedure _LapeInputQuery(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -56,7 +56,7 @@ end;
 
 (*
 ShowMessage
-~~~~~~~~~~~
+-----------
 > procedure ShowMessage(Message: String);
 *)
 procedure _LapeShowMessage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -72,7 +72,7 @@ end;
 
 (*
 ShowDTMEditor
-~~~~~~~~~~~~~
+-------------
 > function ShowDTMEditor(Target: TTarget; Title: String): String;
 > function ShowDTMEditor(Title: String): String;
 *)
@@ -103,7 +103,7 @@ end;
 
 (*
 ShowACA
-~~~~~~~
+-------
 > function ShowACA(Target: TTarget; Title: String): TColorTolerance;
 > function ShowACA(Title: String): TColorTolerance;
 *)
@@ -134,7 +134,7 @@ end;
 
 (*
 ShowDirectoryDialog
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function ShowDirectoryDialog(Title, InitialDirectory: String; out Directory: String): Boolean;
 *)
 procedure _LapeSelectDirectory(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -150,7 +150,7 @@ end;
 
 (*
 ShowQuestionDialog
-~~~~~~~~~~~~~~~~~~
+------------------
 > function ShowQuestionDialog(Title, Question: String): Boolean;
 *)
 procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -166,7 +166,7 @@ end;
 
 (*
 ShowTrayNotification
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > procedure ShowTrayNotification(Title, Message: String; Timeout: Integer = 3000);
 *)
 procedure ImportDialogs(Compiler: TSimbaScript_Compiler);

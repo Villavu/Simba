@@ -225,7 +225,7 @@ Available Key Codes:
 
 (*
 TInput.MousePosition
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TInput.MousePosition: TPoint;
 *)
 procedure _LapeInput_MousePosition(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -235,7 +235,7 @@ end;
 
 (*
 TInput.MousePressed
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TInput.MousePressed(Button: EMouseButton): Boolean;
 *)
 procedure _LapeInput_MousePressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -245,7 +245,7 @@ end;
 
 (*
 TInput.MouseTeleport
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > procedure TInput.MouseTeleport(P: TPoint);
 
 Instantly moves the mouse to `P`
@@ -257,7 +257,7 @@ end;
 
 (*
 TInput.MouseClick
-~~~~~~~~~~~~~~~~~
+-----------------
 > procedure TInput.MouseClick(Button: EMouseButton);
 *)
 procedure _LapeInput_MouseClick(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -267,7 +267,7 @@ end;
 
 (*
 TInput.MouseDown
-~~~~~~~~~~~~~~~~
+----------------
 > procedure TInput.MouseDown(Button: EMouseButton);
 *)
 procedure _LapeInput_MouseDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -277,7 +277,7 @@ end;
 
 (*
 TInput.MouseUp
-~~~~~~~~~~~~~~
+--------------
 > procedure TInput.MouseUp(Button: EMouseButton);
 *)
 procedure _LapeInput_MouseUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -287,7 +287,7 @@ end;
 
 (*
 TInput.MouseScroll
-~~~~~~~~~~~~~~~~~~
+------------------
 > procedure TInput.MouseScroll(Scrolls: Integer);
 *)
 procedure _LapeInput_MouseScroll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -297,7 +297,7 @@ end;
 
 (*
 TInput.MouseMove
-~~~~~~~~~~~~~~~~
+----------------
 > procedure TInput.MouseMove(Dest: TPoint);
 
 Move the mouse in a human-like way.
@@ -313,7 +313,7 @@ end;
 
 (*
 TInput.KeyDown
-~~~~~~~~~~~~~~
+--------------
 > procedure TInput.KeyDown(Key: EKeyCode);
 *)
 procedure _LapeInput_KeyDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -323,7 +323,7 @@ end;
 
 (*
 TInput.KeyUp
-~~~~~~~~~~~~
+------------
 > procedure TInput.KeyUp(Key: EKeyCode);
 *)
 procedure _LapeInput_KeyUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -333,7 +333,7 @@ end;
 
 (*
 TInput.KeyPress
-~~~~~~~~~~~~~~~
+---------------
 > procedure TInput.KeyPress(Key: EKeyCode);
 *)
 procedure _LapeInput_KeyPress(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -343,7 +343,7 @@ end;
 
 (*
 TInput.KeyPressed
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TInput.KeyPressed(Key: EKeyCode): Boolean;
 *)
 procedure _LapeInput_KeyPressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -353,7 +353,7 @@ end;
 
 (*
 TInput.KeySend
-~~~~~~~~~~~~~~
+--------------
 > procedure TInput.KeySend(Text: String);
 *)
 procedure _LapeInput_KeySend(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -363,7 +363,7 @@ end;
 
 (*
 TInput.CharToKeyCode
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TInput.CharToKeyCode(C: Char): EKeyCode;
 *)
 procedure _LapeInput_CharToKeyCode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -373,7 +373,7 @@ end;
 
 (*
 TInput.AddOnMouseTeleport
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > function TInput.AddOnMouseTeleport(Event: TMouseTeleportEvent): TMouseTeleportEvent;
 
 Add a event to be called everytime the mouse is teleported.
@@ -385,7 +385,7 @@ end;
 
 (*
 TInput.AddOnMouseMoving
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function TInput.AddOnMouseMoving(Event: TMouseMovingEvent): TMouseTeleportEvent;
 
 Add a event to be called while the mouse is moving so that the destination can be changed.
@@ -397,7 +397,7 @@ end;
 
 (*
 TInput.AddOnMouseDown
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TInput.AddOnMouseDown(Event: TMouseButtonEvent): TMouseButtonEvent;
 *)
 procedure _LapeInput_AddOnMouseDown(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -407,7 +407,7 @@ end;
 
 (*
 TInput.AddOnMouseUp
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TInput.AddOnMouseUp(Event: TMouseButtonEvent): TMouseButtonEvent;
 *)
 procedure _LapeInput_AddOnMouseUp(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -417,7 +417,7 @@ end;
 
 (*
 TInput.AddOnMouseClick
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TInput.AddOnMouseClick(Event: TMouseButtonEvent): TMouseButtonEvent;
 *)
 procedure _LapeInput_AddOnMouseClick(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -427,7 +427,7 @@ end;
 
 (*
 TInput.RemoveOnMouseTeleport
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 > procedure TInput.RemoveOnMouseTeleport(Event: TMouseTeleportEvent);
 *)
 procedure _LapeInput_RemoveOnMouseTeleport(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -437,7 +437,7 @@ end;
 
 (*
 TInput.RemoveOnMouseMoving
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 > procedure TInput.RemoveOnMouseMoving(Event: TMouseMovingEvent);
 *)
 procedure _LapeInput_RemoveOnMouseMoving(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -447,7 +447,7 @@ end;
 
 (*
 TInput.RemoveOnMouseDown
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 > procedure TInput.RemoveOnMouseDown(Event: TMouseButtonEvent);
 *)
 procedure _LapeInput_RemoveOnMouseDown(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -457,7 +457,7 @@ end;
 
 (*
 TInput.RemoveOnMouseUp
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > procedure TInput.RemoveOnMouseUp(Event: TMouseButtonEvent);
 *)
 procedure _LapeInput_RemoveOnMouseUp(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -467,7 +467,7 @@ end;
 
 (*
 TInput.RemoveOnMouseClick
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 > procedure TInput.RemoveOnMouseClick(Event: TMouseButtonEvent);
 *)
 procedure _LapeInput_RemoveOnMouseClick(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -477,7 +477,7 @@ end;
 
 (*
 TASyncMouse.Move
-~~~~~~~~~~~~~~~~
+----------------
 > procedure TASyncMouse.Move(Input: TSimbaInput; Dest: TPoint; Accuracy: Double = 1);
 *)
 procedure _LapeASyncMouse_Move(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -487,7 +487,7 @@ end;
 
 (*
 TASyncMouse.ChangeDest
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > procedure TASyncMouse.ChangeDest(Dest: TPoint);
 *)
 procedure _LapeASyncMouse_ChangeDest(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -497,7 +497,7 @@ end;
 
 (*
 TASyncMouse.IsMoving
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TASyncMouse.IsMoving: Boolean;
 *)
 procedure _LapeASyncMouse_IsMoving(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -507,7 +507,7 @@ end;
 
 (*
 TASyncMouse.WaitMoving
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > procedure TASyncMouse.WaitMoving;
 *)
 procedure _LapeASyncMouse_WaitMoving(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -517,7 +517,7 @@ end;
 
 (*
 TASyncMouse.Stop
-~~~~~~~~~~~~~~~~
+----------------
 > procedure TASyncMouse.Stop;
 *)
 procedure _LapeASyncMouse_Stop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

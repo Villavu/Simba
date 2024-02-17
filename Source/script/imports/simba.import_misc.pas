@@ -25,7 +25,7 @@ Miscellaneous methods that dont go in any other sections.
 
 (*
 ClearSimbaOutput
-~~~~~~~~~~~~~~~~
+----------------
 > procedure ClearSimbaOutput;
 
 Clear the scripts output box in Simba.
@@ -37,7 +37,7 @@ end;
 
 (*
 SetSimbaSetting
-~~~~~~~~~~~~~~~
+---------------
 > function SetSimbaSetting(Name: String; DefValue: String = ''): String;
 *)
 procedure _LapeGetSimpleSetting(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -47,7 +47,7 @@ end;
 
 (*
 GetSimbaSetting
-~~~~~~~~~~~~~~~
+---------------
 > procedure GetSimbaSetting(Name, Value: String);
 *)
 procedure _LapeSetSimpleSetting(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -57,7 +57,7 @@ end;
 
 (*
 PlaySound
-~~~~~~~~~
+---------
 > procedure PlaySound(Sound: String);
 *)
 procedure _LapePlaySound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -67,7 +67,7 @@ end;
 
 (*
 StopSound
-~~~~~~~~~
+---------
 > procedure StopSound;
 *)
 procedure _LapeStopSound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -77,7 +77,7 @@ end;
 
 (*
 Simba
-~~~~~
+-----
 > procedure Simba;
 *)
 procedure _LapeSimba(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -94,7 +94,7 @@ end;
 
 (*
 SetClipBoard
-~~~~~~~~~~~~
+------------
 > procedure SetClipBoard(Data: string);
 
 Sets the systems clipboard string.
@@ -109,7 +109,7 @@ end;
 
 (*
 GetClipBoard
-~~~~~~~~~~~~
+------------
 > function GetClipBoard: String;
 
 Returns the systems clipboard string.
@@ -124,13 +124,13 @@ end;
 
 (*
 SetSimbaTitle
-~~~~~~~~~~~~~~
+--------------
 > procedure SetSimbaTitle(S: String);
 *)
 
 (*
 GetSimbaPID
-~~~~~~~~~~~
+-----------
 > function GetSimbaPID: TProcessID;
 
 Returns the Simba's PID this script is running in.
@@ -138,7 +138,7 @@ Returns the Simba's PID this script is running in.
 
 (*
 GetSimbaTargetPID
-~~~~~~~~~~~~~~~~~~
+------------------
 > function GetSimbaTargetPID: TProcessID;
 
 Returns the current Simba target PID (what is selected with the crosshair)
@@ -146,7 +146,7 @@ Returns the current Simba target PID (what is selected with the crosshair)
 
 (*
 GetSimbaTargetWindow
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function GetSimbaTargetWindow: TWindowHandle;
 
 Returns the current Simba target window (what is selected with the crosshair)

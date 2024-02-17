@@ -27,7 +27,7 @@ It is `Variant` based.
 
 (*
 TJSONElement.Keys
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TJSONElement.Keys: TStringArray;
 *)
 procedure _LapeJSONElement_Keys(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -37,7 +37,7 @@ end;
 
 (*
 TJSONElement.Count
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TJSONElement.Count: Integer;
 *)
 procedure _LapeJSONElement_Count(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -47,7 +47,7 @@ end;
 
 (*
 TJSONElement.GetItem
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONElement.GetItem(Index: Integer): TJSONElement;
 *)
 procedure _LapeJSONElement_GetItem(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -57,7 +57,7 @@ end;
 
 (*
 TJSONElement.AddValue
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > procedure TJSONElement.AddValue(Key: String; Value: Variant);
 *)
 procedure _LapeJSONElement_AddValue(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -67,7 +67,7 @@ end;
 
 (*
 TJSONElement.AddArray
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TJSONElement.AddArray(Key: String): TJSONElement;
 *)
 procedure _LapeJSONElement_AddArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -77,7 +77,7 @@ end;
 
 (*
 TJSONElement.AddObject
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TJSONElement.AddObject(Key: String): TJSONElement;
 *)
 procedure _LapeJSONElement_AddObject(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -87,7 +87,7 @@ end;
 
 (*
 TJSONElement.AddNull
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONElement.AddNull(Key: String): TJSONElement;
 *)
 procedure _LapeJSONElement_AddNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -97,7 +97,7 @@ end;
 
 (*
 TJSONElement.AddElement
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > procedure TJSONElement.AddElement(Key: String; Element: TJSONElement);
 *)
 procedure _LapeJSONElement_AddElement(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -107,7 +107,7 @@ end;
 
 (*
 TJSONElement.ValueType
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TJSONElement.ValueType: EJSONValueType;
 *)
 procedure _LapeJSONElement_ValueType(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -117,7 +117,7 @@ end;
 
 (*
 TJSONElement.GetValue
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TJSONElement.GetValue: Variant;
 *)
 procedure _LapeJSONElement_GetValue(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -127,7 +127,7 @@ end;
 
 (*
 TJSONElement.SetValue
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > procedure TJSONElement.SetValue(NewValue: Variant);
 *)
 procedure _LapeJSONElement_SetValue(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -137,7 +137,7 @@ end;
 
 (*
 TJSONElement.AsString
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TJSONElement.AsString: String;
 *)
 procedure _LapeJSONElement_AsString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -147,7 +147,7 @@ end;
 
 (*
 TJSONElement.Clone
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TJSONElement.Clone: TJSONElement;
 *)
 procedure _LapeJSONElement_Clone(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -157,7 +157,7 @@ end;
 
 (*
 TJSONElement.IsValue
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONElement.IsValue: Boolean;
 *)
 procedure _LapeJSONElement_IsValue(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -167,7 +167,7 @@ end;
 
 (*
 TJSONElement.IsArray
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONElement.IsArray: Boolean;
 *)
 procedure _LapeJSONElement_IsArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -177,7 +177,7 @@ end;
 
 (*
 TJSONElement.IsObject
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TJSONElement.IsObject: Boolean;
 *)
 procedure _LapeJSONElement_IsObject(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -187,7 +187,7 @@ end;
 
 (*
 TJSONElement.Delete
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > procedure TJSONElement.Delete(Key: String);
 *)
 procedure _LapeJSONElement_Delete1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -197,7 +197,7 @@ end;
 
 (*
 TJSONElement.Delete
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > procedure TJSONElement.Delete(Index: Integer);
 *)
 procedure _LapeJSONElement_Delete2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -207,7 +207,7 @@ end;
 
 (*
 TJSONElement.Clear
-~~~~~~~~~~~~~~~~~~
+------------------
 > procedure TJSONElement.Clear;
 *)
 procedure _LapeJSONElement_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -217,7 +217,7 @@ end;
 
 (*
 TJSONElement.Find
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TJSONElement.Find(Key: String; out Element: TJSONElement): Boolean;
 *)
 procedure _LapeJSONElement_Find(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -227,7 +227,7 @@ end;
 
 (*
 TJSONElement.HasKey
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TJSONElement.HasKey(Key: String): Boolean;
 
 Returns `True` if the `Key` exists in the JSON object.
@@ -239,7 +239,7 @@ end;
 
 (*
 TJSONElement.HasKey
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TJSONElement.HasKey(Keys: TStringArray): Boolean;
 
 Returns `True` if **any** of the `Keys` exists in the JSON object.
@@ -251,7 +251,7 @@ end;
 
 (*
 TJSONElement.HasKeys
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONElement.HasKeys(Keys: TStringArray): Boolean;
 
 Returns `True` if **all** `Keys` exists in the JSON object.
@@ -263,7 +263,7 @@ end;
 
 (*
 TJSONParser.Create
-~~~~~~~~~~~~~~~~~~
+------------------
 > function TJSONParser.Create(Str: String = ''): TJSONParser; static;
 
 Create a JSON Parser. Optional `Str` parameter which will parse the string into the parser.
@@ -291,7 +291,7 @@ end;
 
 (*
 TJSONParser.CreateFromFile
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 > function TJSONParser.CreateFromFile(FileName: String): TJSONParser; static;
 
 Create a JSON parser from a json file.
@@ -317,7 +317,7 @@ end;
 
 (*
 TJSONParser.SaveToFile
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > function TJSONParser.SaveToFile(FileName: String): Boolean;
 *)
 procedure _LapeJSONParser_SaveToFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -327,7 +327,7 @@ end;
 
 (*
 TJSONParser.Clear
-~~~~~~~~~~~~~~~~~
+-----------------
 > procedure TJSONParser.Clear;
 *)
 procedure _LapeJSONParser_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -337,7 +337,7 @@ end;
 
 (*
 TJSONParser.AddNull
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONParser.AddNull(Key: String): TJSONElement;
 *)
 procedure _LapeJSONParser_AddNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -347,7 +347,7 @@ end;
 
 (*
 TJSONParser.AddValue
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > procedure TJSONParser.AddValue(Key: String; Value: Variant);
 *)
 procedure _LapeJSONParser_AddValue(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -357,7 +357,7 @@ end;
 
 (*
 TJSONParser.AddArray
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONParser.AddArray(Key: String): TJSONElement;
 *)
 procedure _LapeJSONParser_AddArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -367,7 +367,7 @@ end;
 
 (*
 TJSONParser.AddObject
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 > function TJSONParser.AddObject(Key: String): TJSONElement;
 *)
 procedure _LapeJSONParser_AddObject(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -377,7 +377,7 @@ end;
 
 (*
 TJSONParser.AddElement
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 > procedure TJSONParser.AddElement(Key: String; Element: TJSONElement);
 *)
 procedure _LapeJSONParser_AddElement(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -387,7 +387,7 @@ end;
 
 (*
 TJSONParser.Count
-~~~~~~~~~~~~~~~~~
+-----------------
 > function TJSONParser.Count: Integer;
 *)
 procedure _LapeJSONParser_Count(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -397,7 +397,7 @@ end;
 
 (*
 TJSONParser.GetItem
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TJSONParser.GetItem(Index: Integer): TJSONElement;
 *)
 procedure _LapeJSONParser_GetItem(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -407,7 +407,7 @@ end;
 
 (*
 TJSONParser.AsString
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONParser.AsString: String;
 *)
 procedure _LapeJSONParser_AsString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -417,7 +417,7 @@ end;
 
 (*
 TJSONParser.Find
-~~~~~~~~~~~~~~~~
+----------------
 > function TJSONParser.Find(Key: String; out Element: TJSONElement): Boolean;
 *)
 procedure _LapeJSONParser_Find(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -427,7 +427,7 @@ end;
 
 (*
 TJSONParser.Delete
-~~~~~~~~~~~~~~~~~~
+------------------
 > procedure TJSONParser.Delete(Key: String);
 *)
 procedure _LapeJSONParser_Delete1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -437,7 +437,7 @@ end;
 
 (*
 TJSONParser.Delete
-~~~~~~~~~~~~~~~~~~
+------------------
 > procedure TJSONParser.Delete(Index: Integer);
 *)
 procedure _LapeJSONParser_Delete2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -447,7 +447,7 @@ end;
 
 (*
 TJSONParser.FindPath
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONParser.FindPath(Path: String; out Element: TJSONElement): Boolean;
 *)
 procedure _LapeJSONParser_FindPath(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -457,7 +457,7 @@ end;
 
 (*
 TJSONParser.Keys
-~~~~~~~~~~~~~~~~
+----------------
 > function TJSONParser.Keys: TStringArray;
 *)
 procedure _LapeJSONParser_Keys(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -467,7 +467,7 @@ end;
 
 (*
 TJSONParser.HasKey
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TJSONParser.HasKey(Key: String): Boolean;
 
 Returns `True` if the `Key` exists in the root JSON parser.
@@ -479,7 +479,7 @@ end;
 
 (*
 TJSONParser.HasKey
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function TJSONParser.HasKey(Keys: TStringArray): Boolean;
 
 Returns `True` if **any** of the `Keys` exists in the root JSON parser.
@@ -491,7 +491,7 @@ end;
 
 (*
 TJSONParser.HasKeys
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function TJSONParser.HasKeys(Keys: TStringArray): Boolean;
 
 Returns `True` if **all** `Keys` exists in the root JSON parser.

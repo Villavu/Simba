@@ -24,121 +24,121 @@ Debug Image
 
 (*
 Show
-~~~~
+----
 > procedure Show(Matrix: TIntegerMatrix);
 *)
 
 (*
 Show
-~~~~
+----
 > procedure Show(Matrix: TSingleMatrix; ColorMapID: Integer = 0);
 *)
 
 (*
 Show
-~~~~
+----
 > procedure Show(Boxes: TBoxArray; Filled: Boolean = False);
 *)
 
 (*
 Show
-~~~~
+----
 > procedure Show(Box: TBox; Filled: Boolean = False);
 *)
 
 (*
 Show
-~~~~
+----
 > procedure Show(Quads: TQuadArray; Filled: Boolean = False);
 *)
 
 (*
 Show
-~~~~
+----
 > procedure Show(Quad: TQuad; Filled: Boolean = False);
 *)
 
 (*
 Show
-~~~~
+----
 > procedure Show(TPA: TPointArray; Color: Integer = $0000FF);
 *)
 
 (*
 Show
-~~~~
+----
 > procedure Show(ATPA: T2DPointArray);
 *)
 
 (*
 ShowOnClient
-~~~~~~~~~~~~
+------------
 > procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False);
 *)
 
 (*
 ShowOnClient
-~~~~~~~~~~~~
+------------
 > procedure ShowOnClient(Box: TBox; Filled: Boolean = False);
 *)
 
 (*
 ShowOnClient
-~~~~~~~~~~~~
+------------
 > procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False);
 *)
 
 (*
 ShowOnClient
-~~~~~~~~~~~~
+------------
 > procedure ShowOnClient(Quad: TQuad; Filled: Boolean = False);
 *)
 
 (*
 ShowOnClient
-~~~~~~~~~~~~
+------------
 > procedure ShowOnClient(TPA: TPointArray; Color: Integer = $0000FF);
 *)
 
 (*
 ShowOnClient
-~~~~~~~~~~~~
+------------
 > procedure ShowOnClient(ATPA: T2DPointArray);
 *)
 
 (*
 DebugImageUpdate
-~~~~~~~~~~~~~~~~
+----------------
 > procedure DebugImageUpdate(Bitmap: TSimbaImage);
 *)
 
 (*
 DebugImageDisplay
-~~~~~~~~~~~~~~~~~
+-----------------
 > procedure DebugImageDisplay(Width, Height: Integer);
 *)
 
 (*
 DebugImageDisplay
-~~~~~~~~~~~~~~~~~
+-----------------
 > procedure DebugImageDisplay(X, Y,Width, Height: Integer);
 *)
 
 (*
 DebugImageClose
-~~~~~~~~~~~~~~~
+---------------
 > procedure DebugImageClose;
 *)
 
 (*
 DebugImageSetMaxSize
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > procedure DebugImageSetMaxSize(MaxWidth, MaxHeight: Integer);
 *)
 
 (*
 DebugImageShow
-~~~~~~~~~~~~~~
+--------------
 > procedure DebugImageShow(Image: TImage; EnsureVisible: Boolean = True);
 *)
 

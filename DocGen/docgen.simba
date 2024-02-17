@@ -1,104 +1,79 @@
 // To run to locally build docs you need:
 //
 // 1) Python installed which is on the systems PATH too so Simba can execute "Python"
-// 2) "sphinx" and "furo" installed: pip3 install sphinx furo
+// 2) "sphinx" and "furo" installed: pip3 install sphinx furo myst-parser
 
 // Notes:
-//
-// The theme used is furo > https://pradyunsg.me/furo/quickstart/
-//
-// This script extracts comments from `SourceFiles` and adds them to .rst files,
-// where sphinx generates static html files.
-//
-// This script also parsers some more prettier syntax such as:
-//
-// - Triple backtick -> .. code-block::
-// - Single backtick -> :code:
-// - Greater than (at the beginning of line) -> .. code-block::
-//
+// - The theme used is furo > https://pradyunsg.me/furo/quickstart/
+// - This script extracts documentation comments from `APIFiles` into .rst files
+//   where sphinx generates static html files.
+
 // Example documentation comment:
 
 (*
 SomeMethod
-~~~~~~~~~~
+----------
 > procedure SomeMethod(SomeInt: Integer);
 
 This method does something.
 Use it like:
 
 ```
-SomeMethod(123)
+SomeMethod(123);
 ```
 *)
 
-const
-  SOURCE_SEARCH_PATHS = [
-    'Source\script\imports\'
-  ];
-
-function Indent(Str: String; Size: Integer): String;
 var
-  Line: String;
-begin
-  for Line in Str.Split(LINE_SEP) do
-    Result := Result + (#32 * Size) + Line + LINE_SEP;
-end;
-
-// Code block to sphinx .. code-block::
-{
-```
-This is a code block
-```
-}
-procedure MakeCodeBlock(var Str: String);
-var
-  Start, Stop: Integer;
-  Block: String;
-begin
-  Start := 1;
-  while ((Start := Str.IndexOf('```', Start)) > 0) do
-  begin
-    Stop := Str.IndexOf('```', Start + 3) + 3;
-    if (Stop <= 3) then
-      Break;
-
-    Block := Str.CopyRange(Start, Stop);
-
-    Str.Delete(Start, Block.Length());
-    Str.Insert('.. code-block::' + (LINE_SEP * 2) + Indent(Block.Trim([#96, #10, #13]), 4), Start);
-
-    Start := Stop;
+  APIFiles: array of record
+    FileName: String;
+    Name: String;
   end;
-end;
 
-//Inline code to sphinx :code:
-{
- This is `inline` code
-}
-procedure MakeInlineCode(var Str: String);
-var
-  Start, Stop: Integer;
 begin
-  Start := 1;
-  while ((Start := Str.IndexOf('`', Start)) > 0) do
-  begin
-    Stop := Str.IndexOf('`', Start + 1) + 1;
-    if (Stop <= 1) then
-      Break;
-
-    Str.Insert(':code:', Start);
-
-    Start := Stop + 6;
-  end;
+  APIFiles += ['Source\script\imports\simba.import_system.pas',        'System'         ];
+  APIFiles += ['Source\script\imports\simba.import_colormath.pas',     'Color Math'     ];
+  APIFiles += ['Source\script\imports\simba.import_point.pas',         'TPoint'         ];
+  APIFiles += ['Source\script\imports\simba.import_tpa.pas',           'TPointArray'    ];
+  APIFiles += ['Source\script\imports\simba.import_atpa.pas',          'T2DPointArray'  ];
+  APIFiles += ['Source\script\imports\simba.import_box.pas',           'TBox'           ];
+  APIFiles += ['Source\script\imports\simba.import_boxarray.pas',      'TBoxArray'      ];
+  APIFiles += ['Source\script\imports\simba.import_quad.pas',          'TQuad'          ];
+  APIFiles += ['Source\script\imports\simba.import_circle.pas',        'TCircle'        ];
+  APIFiles += ['Source\script\imports\simba.import_windowhandle.pas',  'TWindowHandle'  ];
+  APIFiles += ['Source\script\imports\simba.import_debugimage.pas',    'Debug Image'    ];
+  APIFiles += ['Source\script\imports\simba.import_variant.pas',       'Variant'        ];
+  APIFiles += ['Source\script\imports\simba.import_script.pas',        'Script'         ];
+  APIFiles += ['Source\script\imports\simba.import_random.pas',        'Random'         ];
+  APIFiles += ['Source\script\imports\simba.import_input.pas',         'Input'          ];
+  APIFiles += ['Source\script\imports\simba.import_finder.pas',        'Finder'         ];
+  APIFiles += ['Source\script\imports\simba.import_target.pas',        'Target'         ];
+  APIFiles += ['Source\script\imports\simba.import_web.pas',           'Web'            ];
+  APIFiles += ['Source\script\imports\simba.import_file.pas',          'File'           ];
+  APIFiles += ['Source\script\imports\simba.import_encoding.pas',      'Encoding'       ];
+  APIFiles += ['Source\script\imports\simba.import_timing.pas',        'Timing'         ];
+  APIFiles += ['Source\script\imports\simba.import_string.pas',        'String'         ];
+  APIFiles += ['Source\script\imports\simba.import_process.pas',       'Process'        ];
+  APIFiles += ['Source\script\imports\simba.import_math.pas',          'Math'           ];
+  APIFiles += ['Source\script\imports\simba.import_matchtemplate.pas', 'Match Template' ];
+  APIFiles += ['Source\script\imports\simba.import_misc.pas',          'Misc'           ];
+  APIFiles += ['Source\script\imports\simba.import_matrix.pas',        'Matrix'         ];
+  APIFiles += ['Source\script\imports\simba.import_dialogs.pas',       'Dialogs'        ];
+  APIFiles += ['Source\script\imports\simba.import_json.pas',          'JSON'           ];
+  APIFiles += ['Source\script\imports\simba.import_image.pas',         'Image'          ];
+  APIFiles += ['Source\script\imports\simba.import_dtm.pas',           'DTM'            ];
 end;
 
-// Header to code block
-{
-Test
-~~~~
-> procedure Test;
-}
-procedure MakeCodeHeaders(var Str: String);
+procedure H2ToH3(Dir: String);
+var
+  FileName: String;
+begin
+  for FileName in DirList(Dir) do
+    FileWrite(FileName, FileRead(FileName).Replace('h2', 'h3', [rfReplaceAll]));
+end;
+
+// The one non sphinx/markdown we change is this:
+//  - Change lines that begin with '> ' to codeblocks.
+procedure RightArrowToCodeBlock(var Str: String);
 var
   I: Integer;
   Lines: TStringArray;
@@ -111,57 +86,12 @@ begin
       Lines[I].Delete(1,2);
       Lines.Insert('```', I);
       Lines.Insert('```', I+2);
-      Inc(I,2);
+      Inc(I, 2);
     end;
     Inc(I);
   end;
 
   Str := LINE_SEP.Join(Lines);
-end;
-
-function FindSourceFile(FileName: String): String;
-var
-  SearchPath: String;
-  Matches: TStringArray;
-begin
-  for SearchPath in SOURCE_SEARCH_PATHS do
-  begin
-    Matches := DirSearch(SearchPath, FileName + '*');
-    if (Matches <> []) then
-      Exit(Matches[0]);
-  end;
-
-  WriteLn('Source file not found: ', FileName);
-end;
-
-function ParseSourceFile(FileName, Name: String): Boolean;
-var
-  Str, Comments: String;
-begin
-  FileName := FindSourceFile(FileName);
-  if not FileExists(FileName) then
-    Exit;
-
-  for Str in FileRead(FileName).BetweenAll('(*', '*)') do
-  begin
-    if (Comments <> '') then
-      Comments += LINE_SEP + '----' + LINE_SEP;
-    Comments += Str;
-  end;
-
-  Result := Length(Comments) > 0;
-  if Result then
-  begin
-    MakeCodeHeaders(Comments);
-    MakeCodeBlock(Comments);
-    MakeInlineCode(Comments);
-
-    Comments := Comments.Replace('Image::', '.. figure::');
-    Comments := Comments.Replace('Note::', '.. note::');
-    Comments := Comments.Replace('Warning::', '.. warning::');
-
-    FileWrite('DocGen/source/api/' + Name + '.rst', Comments);
-  end;
 end;
 
 // Delete old api generation
@@ -175,46 +105,38 @@ begin
 end;
 
 procedure BuildAPI;
-begin
-  ParseSourceFile('simba.import_system',        'System'         );
-  ParseSourceFile('simba.import_colormath',     'Color Math'     );
-  ParseSourceFile('simba.import_point',         'TPoint'         );
-  ParseSourceFile('simba.import_tpa',           'TPointArray'    );
-  ParseSourceFile('simba.import_atpa',          'T2DPointArray'  );
-  ParseSourceFile('simba.import_box',           'TBox'           );
-  ParseSourceFile('simba.import_boxarray',      'TBoxArray'      );
-  ParseSourceFile('simba.import_quad',          'TQuad'          );
-  ParseSourceFile('simba.import_circle',        'TCircle'        );
-  ParseSourceFile('simba.import_windowhandle',  'TWindowHandle'  );
-  ParseSourceFile('simba.import_debugimage',    'Debug Image'    );
-  ParseSourceFile('simba.import_variant',       'Variant'        );
-  ParseSourceFile('simba.import_script',        'Script'         );
-  ParseSourceFile('simba.import_random',        'Random'         );
-  ParseSourceFile('simba.import_input',         'Input'          );
-  ParseSourceFile('simba.import_finder',        'Finder'         );
-  ParseSourceFile('simba.import_target',        'Target'         );
-  ParseSourceFile('simba.import_web',           'Web'            );
-  ParseSourceFile('simba.import_file',          'File'           );
-  ParseSourceFile('simba.import_encoding',      'Encoding'       );
-  ParseSourceFile('simba.import_timing',        'Timing'         );
-  ParseSourceFile('simba.import_string',        'String'         );
-  ParseSourceFile('simba.import_process',       'Process'        );
-  ParseSourceFile('simba.import_math',          'Math'           );
-  ParseSourceFile('simba.import_matchtemplate', 'Match Template' );
-  ParseSourceFile('simba.import_misc',          'Misc'           );
-  ParseSourceFile('simba.import_matrix',        'Matrix'         );
-  ParseSourceFile('simba.import_dialogs',       'Dialogs'        );
-  ParseSourceFile('simba.import_json',          'JSON'           );
-  ParseSourceFile('simba.import_image',         'Image'          );
-  ParseSourceFile('simba.import_dtm',           'DTM'            );
-end;
 
-procedure H2ToH3(dir: String);
+  function BuildFile(FileName, Name: String): Boolean;
+  var
+    Comment, Comments: String;
+  begin
+    if not FileExists(FileName) then
+    begin
+      WriteLn('API file "', FileName, '" does not exist');
+      Exit;
+    end;
+
+    for Comment in FileRead(FileName).BetweenAll('(*', '*)') do
+    begin
+      if (Comments <> '') then
+        Comments += LINE_SEP + '----' + LINE_SEP;
+      Comments += Comment;
+    end;
+
+    Result := Length(Comments) > 0;
+    if Result then
+    begin
+      RightArrowToCodeBlock(Comments);
+
+      FileWrite('DocGen/source/api/' + Name + '.md', Comments);
+    end;
+  end;
+
 var
-  FileName: String;
+  I: Integer;
 begin
-  for FileName in DirList(dir) do
-    FileWrite(FileName, FileRead(FileName).Replace('h2','h3', [rfReplaceAll]));
+  for I := 0 to High(APIFiles) do
+    BuildFile(APIFiles[I].FileName, APIFiles[I].Name);
 end;
 
 var
@@ -231,6 +153,6 @@ begin
 
   WriteLn('Link: "' + PathNormalize('DocGen/build/index.html') + '"');
 
-  // it looks a lot better like this...
+  // looks better like this, imo
   H2ToH3('DocGen/build/api');
 end.

@@ -24,7 +24,7 @@ Math functions
 
 (*
 Distance
-~~~~~~~~
+--------
 > function Distance(const X1, Y1, X2, Y2: Double): Double;
 *)
 procedure _LapeDistance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -34,7 +34,7 @@ end;
 
 (*
 Distance
-~~~~~~~~
+--------
 > function Distance(const P1, P2: TPoint): Double;
 *)
 procedure _LapeDistanceEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -44,7 +44,7 @@ end;
 
 (*
 LogN
-~~~~
+----
 > function LogN(base, x: Double): Double;
 *)
 procedure _LapeLogn(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -54,7 +54,7 @@ end;
 
 (*
 Sar
-~~~
+---
 > function Sar(x: Integer; Shift: Byte): Integer;
 *)
 procedure _LapeSar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -64,7 +64,7 @@ end;
 
 (*
 Ror
-~~~
+---
 > function Ror(x: UInt32; Shift: Byte): UInt32;
 *)
 procedure _LapeRor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -74,7 +74,7 @@ end;
 
 (*
 Rol
-~~~
+---
 > function Rol(x: UInt32; Shift: Byte): UInt32;
 *)
 procedure _LapeRol(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -84,7 +84,7 @@ end;
 
 (*
 DegToRad
-~~~~~~~~
+--------
 > function DegToRad(Deg: Double): Double;
 *)
 procedure _LapeDegToRad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -94,7 +94,7 @@ end;
 
 (*
 RadToDeg
-~~~~~~~~
+--------
 > function RadToDeg(Rad: Double): Double;
 *)
 procedure _LapeRadToDeg(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -104,7 +104,7 @@ end;
 
 (*
 RadNormalize
-~~~~~~~~~~~~
+------------
 > function RadNormalize(Rad: Double): Double;
 *)
 procedure _LapeRadNormalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -114,7 +114,7 @@ end;
 
 (*
 DegNormalize
-~~~~~~~~~~~~
+------------
 > function DegNormalize(Deg: Double): Double;
 *)
 procedure _LapeDegNormalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -124,7 +124,7 @@ end;
 
 (*
 Log2
-~~~~
+----
 > function Log2(x: Double): Double;
 *)
 procedure _LapeLog2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -134,7 +134,7 @@ end;
 
 (*
 Log10
-~~~~~
+-----
 > function Log10(x: Double): Double;
 *)
 procedure _LapeLog10(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -144,7 +144,7 @@ end;
 
 (*
 NextPower2
-~~~~~~~~~~
+----------
 > function NextPower2(const n: Integer): Integer;
 *)
 procedure _LapeNextPower2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -154,7 +154,7 @@ end;
 
 (*
 Modulo
-~~~~~~
+------
 > function Modulo(const X, Y: Integer): Integer;
 *)
 procedure _LapeModulo(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -164,7 +164,7 @@ end;
 
 (*
 Modulo
-~~~~~~
+------
 > function Modulo(const X, Y: Double): Double;
 *)
 procedure _LapeModuloF(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -174,7 +174,7 @@ end;
 
 (*
 DeltaAngle
-~~~~~~~~~~
+----------
 > function DeltaAngle(const DegreesA, DegreesB: Double; R: Double = 360): Double;
 *)
 procedure _LapeDeltaAngle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -184,7 +184,7 @@ end;
 
 (*
 ExpandPolygon
-~~~~~~~~~~~~~
+-------------
 > function ExpandPolygon(const Polygon: TPointArray; Amount: Integer): TPointArray;
 *)
 procedure _LapeExpandPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -194,7 +194,7 @@ end;
 
 (*
 PolygonArea
-~~~~~~~~~~~
+-----------
 > function PolygonArea(const Polygon: TPointArray): Double;
 *)
 procedure _LapePolygonArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -204,7 +204,7 @@ end;
 
 (*
 CrossProduct
-~~~~~~~~~~~~
+------------
 > function CrossProduct(const r, p, q: TPoint): Int64;
 *)
 procedure _LapeCrossProduct1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -214,7 +214,7 @@ end;
 
 (*
 CrossProduct
-~~~~~~~~~~~~
+------------
 > function CrossProduct(const rx,ry, px,py, qx,qy: Double): Double;
 *)
 procedure _LapeCrossProduct2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -224,7 +224,7 @@ end;
 
 (*
 LinesIntersect
-~~~~~~~~~~~~~~
+--------------
 > function LinesIntersect(const P1, P2, Q1, Q2: TPoint): Boolean;
 *)
 procedure _LapeLinesIntersect1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -234,7 +234,7 @@ end;
 
 (*
 LinesIntersect
-~~~~~~~~~~~~~~
+--------------
 > function LinesIntersect(const P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean;
 *)
 procedure _LapeLinesIntersect2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -244,7 +244,7 @@ end;
 
 (*
 DistToLine
-~~~~~~~~~~
+----------
 > function DistToLine(const P, P1, P2: TPoint; out Nearest: TPoint): Double;
 *)
 procedure _LapeDistToLine1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -254,7 +254,7 @@ end;
 
 (*
 DistToLine
-~~~~~~~~~~
+----------
 > function DistToLine(const P, P1, P2: TPoint): Double;
 *)
 procedure _LapeDistToLine2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -264,7 +264,7 @@ end;
 
 (*
 PointInTriangle
-~~~~~~~~~~~~~~~
+---------------
 > function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean;
 *)
 procedure _LapePointInTriangle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -274,7 +274,7 @@ end;
 
 (*
 PointInBox
-~~~~~~~~~~
+----------
 > function PointInBox(const P: TPoint; const Box: TBox): Boolean;
 *)
 procedure _LapePointInBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -284,7 +284,7 @@ end;
 
 (*
 PointInQuad
-~~~~~~~~~~~
+-----------
 > function PointInQuad(const P: TPoint; const A,B,C,D: TPoint): Boolean;
 *)
 procedure _LapePointInQuad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -294,7 +294,7 @@ end;
 
 (*
 PointInPolygon
-~~~~~~~~~~~~~~
+--------------
 > function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean;
 *)
 procedure _LapePointInPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -304,7 +304,7 @@ end;
 
 (*
 PointInCircle
-~~~~~~~~~~~~~
+-------------
 > function PointInCircle(const P, Center: TPoint; Radius: Double): Boolean; static;
 *)
 procedure _LapePointInCircle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -314,7 +314,7 @@ end;
 
 (*
 PointInEllipse
-~~~~~~~~~~~~~~
+--------------
 > function PointInEllipse(const P, Center: TPoint; const YRadius, XRadius: Double): Boolean;
 *)
 procedure _LapePointInEllipse(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -324,7 +324,7 @@ end;
 
 (*
 IsNumber
-~~~~~~~~
+--------
 > function IsNumber(const Value: Single): Boolean;
 *)
 procedure _LapeIsNumberS(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -334,7 +334,7 @@ end;
 
 (*
 IsNumber
-~~~~~~~~
+--------
 > function IsNumber(const Value: Double): Boolean;
 *)
 procedure _LapeIsNumberD(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

@@ -57,163 +57,163 @@ end;
 
 (*
 GetMem
-~~~~~~
+------
 > function GetMem(i: SizeInt): Pointer;
 *)
 
 (*
 AllocMem
-~~~~~~~~
+--------
 > function AllocMem(i: SizeInt): Pointer;
 *)
 
 (*
 FreeMem
-~~~~~~~
+-------
 > procedure FreeMem(p: Pointer);
 *)
 
 (*
 ReallocMem
-~~~~~~~~~~
+----------
 > procedure ReallocMem(var p: Pointer; s: SizeInt);
 *)
 
 (*
 FillMem
-~~~~~~~
+-------
 > procedure FillMem(var p; s: SizeInt; b: UInt8 = 0);
 *)
 
 (*
 Move
-~~~~
+----
 > procedure Move(constref Src; var Dst; s: SizeInt);
 *)
 
 (*
 CompareMem
-~~~~~~~~~~
+----------
 > function CompareMem(constref p1, p2; Length: SizeInt): EvalBool;
 *)
 
 (*
 Assigned
-~~~~~~~~
+--------
 > function Assigned(constref p): EvalBool;
 *)
 
 (*
 Delete
-~~~~~~
+------
 > procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A));
 *)
 
 (*
 Insert
-~~~~~~
+------
 > procedure Insert(Item: Anything; A: array; Index: Int32);
 *)
 
 (*
 Copy
-~~~~
+----
 > procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A));
 *)
 
 (*
 SetLength
-~~~~~~~~~
+---------
 > procedure SetLength(A: array; Length: Int32);
 *)
 
 (*
 Low
-~~~
+---
 > function Low(A: array): Int32;
 *)
 
 (*
 High
-~~~~
+----
 > function High(A: array): Int32;
 *)
 
 (*
 Length
-~~~~~~
+------
 > function Length(A: array): Int32;
 *)
 
 (*
 WriteLn
-~~~~~~~
+-------
 > procedure WriteLn(Args: Anything);
 *)
 
 (*
 Write
-~~~~~
+-----
 > procedure Write(Args: Anything);
 *)
 
 (*
 Swap
-~~~~
+----
 > procedure Swap(var A, B: Anything);
 *)
 
 (*
 SizeOf
-~~~~~~
+------
 > function SizeOf(A: Anything): Int32;
 *)
 
 (*
 ToString
-~~~~~~~~
+--------
 > function ToString(A: Anything): String;
 *)
 
 (*
 ToStr
-~~~~~
+-----
 > function ToStr(A: Anything): String;
 *)
 
 (*
 Inc
-~~~
+---
 > function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal;
 *)
 
 (*
 Dec
-~~~
+---
 > function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal;
 *)
 
 (*
 Ord
-~~~
+---
 > function Ord(X: Ordinal): Int32;
 *)
 
 (*
 SleepUntil
-~~~~~~~~~~
+----------
 > function SleepUntil(Condition: BoolExpr; Interval, Timeout: Int32): Boolean;
 *)
 
 (*
 Default
-~~~~~~~
+-------
 > function Default(T: AnyType): AnyType;
 *)
 
 (*
 Sort
-~~~~
+----
 > procedure Sort(var A: array);
 > procedure Sort(var A: array; Weights: array of Ordinal; LowToHigh: Boolean);
 > procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32);
@@ -221,7 +221,7 @@ Sort
 
 (*
 Sorted
-~~~~~~
+------
 > function Sorted(const A: array): array; overload;
 > function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array;
 > function Sorted(const A: array; Weights: array of Ordinal; LowToHigh: Boolean): array;
@@ -229,109 +229,109 @@ Sorted
 
 (*
 Unique
-~~~~~~
+------
 > function Unique(const A: array): array;
 *)
 
 (*
 Reverse
-~~~~~~~
+-------
 > procedure Reverse(var A: array);
 *)
 
 (*
 Reversed
-~~~~~~~~
+--------
 > function Reversed(const A: array): array;
 *)
 
 (*
 IndexOf
-~~~~~~~
+-------
 > function IndexOf(const Item: T; const A: array): Integer;
 *)
 
 (*
 IndicesOf
-~~~~~~~~~
+---------
 > function IndicesOf(const Item: T; const A: array): TIntegerArray;
 *)
 
 (*
 Contains
-~~~~~~~~
+--------
 > function Contains(const Item: T; const A: array): Boolean;
 *)
 
 (*
 GetCallerAddress
-~~~~~~~~~~~~~~~~
+----------------
 > function GetCallerAddress: Pointer;
 *)
 
 (*
 GetCallerName
-~~~~~~~~~~~~~
+-------------
 > function GetCallerName: String;
 *)
 
 (*
 GetCallerLocation
-~~~~~~~~~~~~~~~~~
+-----------------
 > function GetCallerLocation: Pointer;
 *)
 
 (*
 GetCallerLocationStr
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function GetCallerLocationStr: String;
 *)
 
 (*
 GetExceptionLocation
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 > function GetExceptionLocation: Pointer;
 *)
 
 (*
 GetExceptionLocationStr
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 > function GetExceptionLocationStr: String;
 *)
 
 (*
 GetExceptionMessage
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function GetExceptionMessage: String;
 *)
 
 (*
 GetScriptMethodName
-~~~~~~~~~~~~~~~~~~~
+-------------------
 > function GetScriptMethodName(Address: Pointer): String;
 *)
 
 (*
 DumpCallStack
-~~~~~~~~~~~~~
+-------------
 > function DumpCallStack(Start: Integer = 0): String;
 *)
 
 (*
 LoadLibrary
-~~~~~~~~~~~
+-----------
 > function LoadLibrary(const Name: string): TLibHandle;
 *)
 
 (*
 GetProcAddress
-~~~~~~~~~~~~~~
+--------------
 > function GetProcAddress(Lib: TlibHandle; const ProcName: string): ConstPointer;
 *)
 
 (*
 FreeLibrary
-~~~~~~~~~~~
+-----------
 > function FreeLibrary(Lib: TLibHandle): EvalBool;
 *)
 
