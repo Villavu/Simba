@@ -19,12 +19,14 @@ type
     FMenuBar: TSimbaMenuBar;
 
     procedure DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure DoActiveControlChange(Sender: TObject; LastControl: TControl);
 
     procedure DoTabModified(Sender: TObject);
     procedure DoTabChanged(Sender: TObject);
     procedure DoTabScriptStateChange(Sender: TObject);
   public
     constructor Create; reintroduce;
+    destructor Destroy; override;
 
     property MenuBar: TSimbaMenuBar read FMenuBar;
   end;
@@ -103,6 +105,11 @@ begin
   end;
 end;
 
+procedure TSimbaMainMenuBar.DoActiveControlChange(Sender: TObject; LastControl: TControl);
+begin
+  FMenuBar.HotIndex := -1;
+end;
+
 procedure TSimbaMainMenuBar.DoTabModified(Sender: TObject);
 begin
   SimbaForm.MenuItemSave.Enabled := SimbaMainToolBar.ButtonSave.Enabled;
@@ -143,10 +150,21 @@ begin
   FMenuBar.AddMenu('Help', SimbaForm.MainMenuHelp);
 
   Application.AddOnKeyDownBeforeHandler(@DoApplicationKeyDown);
+  Screen.AddHandlerActiveControlChanged(@DoActiveControlChange);
 
   SimbaIDEEvents.Register(SimbaIDEEvent.TAB_MODIFIED, @DoTabModified, True);
   SimbaIDEEvents.Register(SimbaIDEEvent.TAB_CHANGE, @DoTabChanged, True);
   SimbaIDEEvents.Register(SimbaIDEEvent.TAB_SCRIPTSTATE_CHANGE, @DoTabScriptStateChange, True);
+end;
+
+destructor TSimbaMainMenuBar.Destroy;
+begin
+  Application.RemoveAsyncCalls(Self);
+  Application.RemoveAllHandlersOfObject(Self);
+
+  Screen.RemoveAllHandlersOfObject(Self);
+
+  inherited Destroy();
 end;
 
 procedure CreateMainMenuBar;
