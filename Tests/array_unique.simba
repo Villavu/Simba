@@ -1,0 +1,33 @@
+{$assertions on}
+
+// Unique is a lape method but Simba provides some (faster) ones for some types
+// So test thoese.
+
+var
+  Singles: TSingleArray = [1,2,3,3,2,1,0];
+  Doubles: TDoubleArray = [1,2,3,3,2,1,0];
+
+  Ints: TIntegerArray = [1,2,3,3,2,1,0];
+  Int64s: TInt64Array = [1,2,3,3,2,1,0];
+
+  Strings: TStringArray = ['1','2','3','3','2','1','0','abc','abc'];
+
+  Points: TPointArray := TPointArray.CreateFromBox([200,200,299,299], True) +
+                         TPointArray.CreateFromBox([200,290,399,399], True);
+
+  Cols: TColorArray = [1,2,3,3,2,1,0,High(TColor),Low(TColor)];
+
+begin
+  Assert(ToString(Unique(Singles)) = '[1, 2, 3, 0]');
+  Assert(ToString(Unique(Doubles)) = '[1, 2, 3, 0]');
+
+  Assert(ToString(Unique(Ints)) = '[1, 2, 3, 0]');
+  Assert(ToString(Unique(Int64s)) = '[1, 2, 3, 0]');
+
+  Assert(ToString(Unique(Int64s)) = '[1, 2, 3, 0]');
+  Assert(ToString(Unique(Strings)) = '[1, 2, 3, 0, abc]');
+
+  Assert(Points.Unique.Length() = 31000);
+
+  Assert(ToString(Unique(Cols)) = '[1, 2, 3, 0, 4294967295]');
+end.

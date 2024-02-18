@@ -17,6 +17,7 @@ type
   TStringArrayHelper = type helper for TStringArray
     function IndexOf(Value: String): Integer;
     function IndicesOf(Value: String): TIntegerArray;
+    function Unique: TStringArray;
     procedure Sort;
   end;
 
@@ -24,7 +25,7 @@ implementation
 
 uses
   StrUtils,
-  simba.algo_sort;
+  simba.algo_sort, simba.algo_unique;
 
 function TStringArrayHelper.IndexOf(Value: String): Integer;
 begin
@@ -34,6 +35,11 @@ end;
 function TStringArrayHelper.IndicesOf(Value: String): TIntegerArray;
 begin
   Result := specialize IndicesOf<String>(Value, Self);
+end;
+
+function TStringArrayHelper.Unique: TStringArray;
+begin
+  Result := specialize Unique<String>(Self);
 end;
 
 procedure TStringArrayHelper.Sort;

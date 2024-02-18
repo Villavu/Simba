@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base;
+  simba.base, simba.colormath;
 
 type
   TIntegerArrayHelper = type helper for TIntegerArray
@@ -23,6 +23,10 @@ type
     function Sum: Int64;
     function Unique: TIntegerArray;
     procedure Sort;
+  end;
+
+  TColorArrayHelper = type helper for TColorArray
+    function Unique: TColorArray;
   end;
 
   TSingleArrayHelper = type helper for TSingleArray
@@ -85,12 +89,17 @@ end;
 
 function TIntegerArrayHelper.Unique: TIntegerArray;
 begin
-  Result := Algo_Unique_Integer(Self);
+  Result := specialize Unique<Integer>(Self);
 end;
 
 procedure TIntegerArrayHelper.Sort;
 begin
   specialize QuickSort<Integer>(Self, Low(Self), High(Self));
+end;
+
+function TColorArrayHelper.Unique: TColorArray;
+begin
+  Result := specialize Unique<TColor>(Self);
 end;
 
 function TSingleArrayHelper.Equals(Other: TSingleArray): Boolean;

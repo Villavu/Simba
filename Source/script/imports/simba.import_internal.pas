@@ -67,17 +67,22 @@ end;
 // Unique
 procedure _LapeUnique_PointArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := Algo_Unique_Points(PPointArray(Params^[0])^);
+  PPointArray(Result)^ := PPointArray(Params^[0])^.Unique();
 end;
 
 procedure _LapeUnique_IntegerArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := Algo_Unique_Integer(PIntegerArray(Params^[0])^);
+  PIntegerArray(Result)^ := PIntegerArray(Params^[0])^.Unique();
+end;
+
+procedure _LapeUnique_ColorArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorArray(Result)^ := PColorArray(Params^[0])^.Unique();
 end;
 
 procedure _LapeUnique_StringArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStringArray(Result)^ := Algo_Unique_String(PStringArray(Params^[0])^);
+  PStringArray(Result)^ := PStringArray(Params^[0])^.Unique();
 end;
 
 procedure _LapeUnique_SingleArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -434,6 +439,7 @@ begin
 
     addGlobalFunc('function _Unique(const a: TPointArray): TPointArray; overload', @_LapeUnique_PointArray);
     addGlobalFunc('function _Unique(const a: TIntegerArray): TIntegerArray; overload', @_LapeUnique_IntegerArray);
+    addGlobalFunc('function _Unique(const a: TColorArray): TColorArray; overload', @_LapeUnique_ColorArray);
     addGlobalFunc('function _Unique(const a: TSingleArray): TSingleArray; overload', @_LapeUnique_SingleArray);
     addGlobalFunc('function _Unique(const a: TDoubleArray): TDoubleArray; overload', @_LapeUnique_DoubleArray);
     addGlobalFunc('function _Unique(const a: TStringArray): TStringArray; overload', @_LapeUnique_StringArray);

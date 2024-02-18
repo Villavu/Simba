@@ -1219,8 +1219,31 @@ begin
 end;
 
 function TPointArrayHelper.Unique: TPointArray;
+var
+  Matrix: TBooleanMatrix;
+  I, Count: Integer;
 begin
-  Result := Algo_Unique_Points(Self);
+  if (Length(Self) > 0) then
+  begin
+    SetLength(Result, Length(Self));
+
+    Count := 0;
+    with Self.Bounds() do
+    begin
+      Matrix.SetSize(Width, Height);
+
+      for I := 0 to High(Self) do
+        if not Matrix[Self[I].Y - Y1, Self[I].X - X1] then
+        begin
+          Matrix[Self[I].Y - Y1, Self[I].X - X1] := True;
+          Result[Count] := Self[I];
+          Inc(Count);
+        end;
+    end;
+
+    SetLength(Result, Count);
+  end else
+    Result := [];
 end;
 
 function TPointArrayHelper.ReduceByDistance(Dist: Integer): TPointArray;
