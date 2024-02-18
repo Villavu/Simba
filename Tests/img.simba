@@ -1,0 +1,25 @@
+{$assertions on}
+
+var
+  img: TImage;
+begin
+  img := TImage.Create(100,100);
+  Assert(img.Width() = 100);
+  Assert(img.Height() = 100);
+  Assert(img.Data()^ = img.GetDefaultPixel());
+  Assert(img.GetPixel(0,0) = $000000);
+
+  img.SetDefaultPixel([255,255,255,0]);
+  img.Clear();
+
+  Assert(img.Data()^ = img.GetDefaultPixel());
+  Assert(img.GetPixel(0,0) = $FFFFFF);
+
+  Assert(img.Finder.CountColor($FFFFFF, 0) = 100*100);
+  img.SetPixel(img.Center.X, img.Center.Y, 0);
+  Assert(Length(img.GetColors().Unique()) = 2);
+  Assert(img.GetColors().Unique()[0] = 16777215);
+  Assert(img.GetColors().Unique()[1] = 0);
+
+  img.Free();
+end.

@@ -70,6 +70,26 @@ begin
 end;
 
 (*
+TImage.GetDefaultPixel
+----------------------
+> function TImage.GetDefaultPixel: TColorBGRA;
+*)
+procedure _LapeImage_DefaultPixel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorBGRA(Result)^ := PSimbaImage(Params^[0])^.DefaultPixel;
+end;
+
+(*
+TImage.SetDefaultPixel
+----------------------
+> procedure TImage.SetDefaultPixel(Value: TColorBGRA);
+*)
+procedure _LapeImage_DefaultPixel_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.DefaultPixel := PColorBGRA(Params^[1])^;
+end;
+
+(*
 TImage.SetSize
 --------------
 > procedure TImage.SetSize(AWidth, AHeight: Integer);
@@ -1279,6 +1299,8 @@ begin
     addGlobalType('set of ETextDrawAlign', 'ETextDrawAlignSet');
 
     addClassVar('TImage', 'Name', 'String', @_LapeImage_Name_Read, @_LapeImage_Name_Write);
+    addClassVar('TImage', 'DefaultPixel', 'TColorBGRA', @_LapeImage_DefaultPixel_Read, @_LapeImage_DefaultPixel_Write);
+
     addClassVar('TImage', 'FontName', 'String', @_LapeImage_FontName_Read, @_LapeImage_FontName_Write);
     addClassVar('TImage', 'FontSize', 'Single', @_LapeImage_FontSize_Read, @_LapeImage_FontSize_Write);
     addClassVar('TImage', 'FontAntialiasing', 'Boolean', @_LapeImage_FontAntialiasing_Read, @_LapeImage_FontAntialiasing_Write);
