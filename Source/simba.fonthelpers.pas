@@ -24,6 +24,10 @@ implementation
 uses
   Graphics, LCLIntf, LCLType;
 
+var
+  DefaultFontName: String;
+  DefaultFontNameDone: Boolean = False;
+
 // Font size can be zero, so this is needed!
 function GetDefaultFontSize: Integer;
 begin
@@ -115,11 +119,19 @@ end;
 
 function GetDefaultFontName: String;
 begin
-  with TBitmap.Create() do
-  try
-    Result := GetFontData(Canvas.Font.Reference.Handle).Name;
-  finally
-    Free();
+  if DefaultFontNameDone then
+    Result := DefaultFontName
+  else
+  begin
+    with TBitmap.Create() do
+    try
+      DefaultFontName := GetFontData(Canvas.Font.Reference.Handle).Name;
+      DefaultFontNameDone := True;
+
+      Result := DefaultFontName;
+    finally
+      Free();
+    end;
   end;
 end;
 

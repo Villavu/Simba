@@ -198,7 +198,7 @@ TExternalImage.DrawText
 *)
 procedure _LapeExternalImage_DrawTextEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, ETextDrawAlignSet(Params^[3]^), PColor(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, EDrawTextAlignSet(Params^[3]^), PColor(Params^[4])^);
 end;
 
 (*
@@ -420,7 +420,7 @@ begin
     addGlobalFunc('function TExternalImage.TextSize(Text: String): TPoint;', @_LapeExternalImage_TextSize);
 
     addGlobalFunc('procedure TExternalImage.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeExternalImage_DrawText);
-    addGlobalFunc('procedure TExternalImage.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor); overload', @_LapeExternalImage_DrawTextEx);
+    addGlobalFunc('procedure TExternalImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload', @_LapeExternalImage_DrawTextEx);
     addGlobalFunc('procedure TExternalImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);', @_LapeExternalImage_DrawTextLines);
 
     addGlobalFunc('procedure TExternalImage.Fill(Color: TColor; Alpha: Byte)', @_LapeExternalImage_Fill);

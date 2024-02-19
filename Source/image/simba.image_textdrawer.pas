@@ -39,26 +39,54 @@ type
   end;
 
   {$scopedenums on}
-  ETextDrawAlign = (LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM);
-  ETextDrawAlignSet = set of ETextDrawAlign;
+  EDrawTextAlign = (LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM);
+  EDrawTextAlignSet = set of EDrawTextAlign;
   {$scopedenums off}
 
-  TSimbaTextDrawer = class(TFPImageFreeTypeDrawer)
+  TSimbaTextDrawerBase = class(TFPImageFreeTypeDrawer)
   protected
+    FFont: TFreeTypeFont;
+    FFontName: String;
+    FFontAntialised: Boolean;
+    FSize: Single;
+    FBold: Boolean;
+    FItalic: Boolean;
+
+    procedure MoveToPixel(X, Y: Integer); override;
+    function GetCurrentColor: TFPColor; override;
+    procedure SetCurrentColorAndMoveRight(const AColor: TFPColor); override;
+    procedure MoveRight; override;
+    function GetClipRect: TRect; override;
+
+    procedure BeginDrawing; virtual;
+    procedure EndDrawing; virtual;
+  public
+    constructor Create; reintroduce;
+
+    procedure DrawText(Text: String; Position: TPoint; Color: TColor); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload;
+
+    function TextWidth(Text: String): Integer;
+    function TextHeight(Text: String): Integer;
+    function TextSize(Text: String): TPoint;
+
+    property Font: String read FFontName write FFontName;
+    property Size: Single read FSize write FSize;
+    property Antialiased: Boolean read FFontAntialised write FFontAntialised;
+    property Bold: Boolean read FBold write FBold;
+    property Italic: Boolean read FItalic write FItalic;
+  end;
+
+  TSimbaTextDrawer = class(TSimbaTextDrawerBase)
+  protected
+    FClipRect: TRect;
     FWidth: Integer;
     FHeight: Integer;
     FData: PColorBGRA;
     FCurrentX, FCurrentY: Integer;
     FCurrentColor: PColorBGRA;
     FSimbaImage: TObject;
-    FFonts: TStringArray;
-    FFont: TFreeTypeFont;
-    FFontName: String;
-    FFontAntialised: Boolean;
-    FSize: Single;
-    FClipRect: TRect;
-    FBold: Boolean;
-    FItalic: Boolean;
+
     FLock: TSimpleEnterableLock;
     FDrawn: Boolean;
     FDrawnBox: TBox;
@@ -68,24 +96,12 @@ type
     procedure SetCurrentColorAndMoveRight(const AColor: TFPColor); override;
     procedure MoveRight; override;
     function GetClipRect: TRect; override;
-    procedure BeginDrawing;
-    procedure EndDrawing;
-  public
-    property FontName: String read FFontName write FFontName;
-    property Size: Single read FSize write FSize;
-    property Antialiased: Boolean read FFontAntialised write FFontAntialised;
-    property Bold: Boolean read FBold write FBold;
-    property Italic: Boolean read FItalic write FItalic;
 
+    procedure BeginDrawing; override;
+    procedure EndDrawing; override;
+  public
     property Drawn: Boolean read FDrawn;
     property DrawnBox: TBox read FDrawnBox;
-
-    procedure DrawText(Text: String; Position: TPoint; Color: TColor); overload;
-    procedure DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor); overload;
-
-    function TextWidth(Text: String): Integer;
-    function TextHeight(Text: String): Integer;
-    function TextSize(Text: String): TPoint;
 
     constructor Create(SimbaImage: TObject); reintroduce;
   end;
@@ -276,6 +292,106 @@ begin
   end;
 end;
 
+procedure TSimbaTextDrawerBase.MoveToPixel(X, Y: Integer);
+begin
+  SimbaException('MoveToPixel');
+end;
+
+function TSimbaTextDrawerBase.GetCurrentColor: TFPColor;
+begin
+  SimbaException('GetCurrentColor');
+end;
+
+procedure TSimbaTextDrawerBase.SetCurrentColorAndMoveRight(const AColor: TFPColor);
+begin
+  SimbaException('SetCurrentColorAndMoveRight');
+end;
+
+procedure TSimbaTextDrawerBase.MoveRight;
+begin
+  SimbaException('MoveRight');
+end;
+
+function TSimbaTextDrawerBase.GetClipRect: TRect;
+begin
+  SimbaException('GetClipRect');
+end;
+
+procedure TSimbaTextDrawerBase.BeginDrawing;
+begin
+  FFont := SimbaFreeTypeFontLoader.GetFont(FFontName, FSize, FFontAntialised, FBold, FItalic);
+  if (FFont = nil) then
+    SimbaException('Font "%s" not found', [FFontName]);
+end;
+
+procedure TSimbaTextDrawerBase.EndDrawing;
+begin
+
+end;
+
+constructor TSimbaTextDrawerBase.Create;
+begin
+  FSize := 20;
+  FFontAntialised := False;
+  FFontName := GetDefaultFontName();
+end;
+
+procedure TSimbaTextDrawerBase.DrawText(Text: String; Position: TPoint; Color: TColor);
+begin
+  BeginDrawing();
+  try
+    inherited DrawText('Hello World', FFont, Position.X, Position.Y + FFont.SizeInPoints, TColorToFPColor(Color));
+  finally
+    EndDrawing();
+  end;
+end;
+
+procedure TSimbaTextDrawerBase.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor);
+var
+  FreeTypeAlignments: TFreeTypeAlignments absolute Alignments;
+begin
+  BeginDrawing();
+  try
+    inherited DrawTextRect(Text, FFont, Box.X1, Box.Y1, Box.X2, Box.Y2, TColorToFPColor(Color), FreeTypeAlignments);
+  finally
+    EndDrawing();
+  end;
+end;
+
+function TSimbaTextDrawerBase.TextWidth(Text: String): Integer;
+begin
+  BeginDrawing();
+
+  try
+    Result := Round(FFont.TextWidth(Text));
+  finally
+    EndDrawing();
+  end;
+end;
+
+function TSimbaTextDrawerBase.TextHeight(Text: String): Integer;
+begin
+  BeginDrawing();
+
+  try
+    Result := Round(FFont.TextHeight(Text));
+  finally
+    EndDrawing();
+  end;
+end;
+
+function TSimbaTextDrawerBase.TextSize(Text: String): TPoint;
+begin
+  BeginDrawing();
+
+  try
+    Result.X := Round(FFont.TextWidth(Text));
+    Result.Y := Round(FFont.TextHeight(Text));
+  finally
+    EndDrawing();
+  end;
+end;
+
 procedure TSimbaTextDrawer.MoveToPixel(X, Y: Integer);
 begin
   FCurrentColor := @FData[Y * FWidth + X];
@@ -360,66 +476,9 @@ end;
 
 constructor TSimbaTextDrawer.Create(SimbaImage: TObject);
 begin
+  inherited Create();
+
   FSimbaImage := SimbaImage;
-  FSize := 20;
-  FFontAntialised := False;
-  FFontName := GetDefaultFontName();
-end;
-
-procedure TSimbaTextDrawer.DrawText(Text: String; Position: TPoint; Color: TColor);
-begin
-  BeginDrawing();
-  try
-    inherited DrawText(Text, FFont, Position.X, Position.Y + FFont.SizeInPoints, TColorToFPColor(Color));
-  finally
-    EndDrawing();
-  end;
-end;
-
-procedure TSimbaTextDrawer.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor);
-var
-  FreeTypeAlignments: TFreeTypeAlignments absolute Alignments;
-begin
-  BeginDrawing();
-  try
-    inherited DrawTextRect(Text, FFont, Box.X1, Box.Y1, Box.X2, Box.Y2, TColorToFPColor(Color), FreeTypeAlignments);
-  finally
-    EndDrawing();
-  end;
-end;
-
-function TSimbaTextDrawer.TextWidth(Text: String): Integer;
-begin
-  BeginDrawing();
-
-  try
-    Result := Round(FFont.TextWidth(Text));
-  finally
-    EndDrawing();
-  end;
-end;
-
-function TSimbaTextDrawer.TextHeight(Text: String): Integer;
-begin
-  BeginDrawing();
-
-  try
-    Result := Round(FFont.TextHeight(Text));
-  finally
-    EndDrawing();
-  end;
-end;
-
-function TSimbaTextDrawer.TextSize(Text: String): TPoint;
-begin
-  BeginDrawing();
-
-  try
-    Result.X := Round(FFont.TextWidth(Text));
-    Result.Y := Round(FFont.TextHeight(Text));
-  finally
-    EndDrawing();
-  end;
 end;
 
 initialization

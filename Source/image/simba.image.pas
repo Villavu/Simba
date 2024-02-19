@@ -127,7 +127,7 @@ type
     function TextSize(Text: String): TPoint;
 
     procedure DrawText(Text: String; Position: TPoint; Color: TColor); overload;
-    procedure DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload;
     procedure DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);
 
     procedure SetSize(NewWidth, NewHeight: Integer);
@@ -1886,7 +1886,7 @@ end;
 
 function TSimbaImage.GetFontName: String;
 begin
-  Result := FTextDrawer.FontName;
+  Result := FTextDrawer.Font;
 end;
 
 class function TSimbaImage.FontNames: TStringArray;
@@ -1921,7 +1921,7 @@ end;
 
 procedure TSimbaImage.SetFontName(Value: String);
 begin
-  FTextDrawer.FontName := Value;
+  FTextDrawer.Font := Value;
 end;
 
 procedure TSimbaImage.SetFontSize(Value: Single);
@@ -1959,7 +1959,7 @@ begin
   FTextDrawer.DrawText(Text, Position, Color);
 end;
 
-procedure TSimbaImage.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor);
+procedure TSimbaImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor);
 begin
   FTextDrawer.DrawText(Text, Box, Alignments, Color);
 end;

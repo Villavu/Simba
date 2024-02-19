@@ -49,6 +49,8 @@ type
       Active: Boolean;
     end;
 
+    FPaintTime: Double;
+
     procedure WMEraseBkgnd(var Message: TLMEraseBkgnd); message LM_ERASEBKGND;
 
     function DoMouseWheelUp(Shift: TShiftState; MousePos: TPoint): Boolean; override;
@@ -132,6 +134,7 @@ type
     procedure ImgMouseEnter; virtual;
     procedure ImgMouseLeave; virtual;
 
+    function GetLastPaintTime: Double;
     function GetMousePoint: TPoint;
     function GetCursor: TCursor; override;
     function GetStatus: String;
@@ -155,6 +158,7 @@ type
     procedure SetBackgroundFromTarget(Target: TSimbaTarget; Bounds: TBox); overload;
     procedure SetBackgroundFromTarget(Target: TSimbaTarget); overload;
 
+    property LastPaintTime: Double read GetLastPaintTime;
     property StatusBar: TSimbaStatusBar read FStatusBar;
     property Status: String read GetStatus write SetStatus;
     property PixelFormat: ELazPixelFormat read FPixelFormat;
@@ -180,7 +184,7 @@ type
 implementation
 
 uses
-  simba.windowhandle,
+  simba.windowhandle, simba.datetime,
   GraphType, LCLIntf;
 
 generic procedure ZoomOut<_T>(Ratio, SrcX, SrcY, LoopEndX, LoopEndY: Integer; SrcImg, DestImg: TRawImage);
@@ -533,6 +537,8 @@ var
   ScreenRect, LocalRect: TRect;
   W, H: Integer;
 begin
+  FPaintTime := HighResolutionTime();
+
   Canvas.Brush.Color := clBlack;
   Canvas.FillRect(ClientRect);
 
@@ -593,6 +599,8 @@ begin
     0, 0,
     SRCCOPY
   );
+
+  FPaintTime := HighResolutionTime() - FPaintTime;
 end;
 
 procedure TSimbaImageScrollBox.Resize;
@@ -952,6 +960,14 @@ procedure TSimbaImageBox.ImgMouseLeave;
 begin
   if Assigned(FOnImgMouseLeave) then
     FOnImgMouseLeave(Self);
+end;
+
+function TSimbaImageBox.GetLastPaintTime: Double;
+begin
+  if Assigned(FImageScrollBox) then
+    Result := FImageScrollBox.FPaintTime
+  else
+    Result := -1;
 end;
 
 procedure TSimbaImageBox.SetCursor(Value: TCursor);

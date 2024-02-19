@@ -14,7 +14,9 @@ implementation
 
 uses
   lptypes, ffi,
-  simba.imagebox, simba.imagebox_canvas, simba.image, simba.dtm, simba.colormath,
+  simba.imagebox, simba.imagebox_canvas,
+  simba.image, simba.image_textdrawer,
+  simba.dtm, simba.colormath,
   simba.target;
 
 type
@@ -217,6 +219,81 @@ begin
   PSimbaImageBox(Params^[0])^.OnImgKeyUp := TImageBoxKeyEvent(Params^[1]^);
 end;
 
+procedure _LapeImageBoxCanvas_FontName_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontName;
+end;
+
+procedure _LapeImageBoxCanvas_FontName_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBoxCanvas(Params^[0])^.FontName := PString(Params^[1])^;
+end;
+
+procedure _LapeImageBoxCanvas_FontSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontSize;
+end;
+
+procedure _LapeImageBoxCanvas_FontSize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBoxCanvas(Params^[0])^.FontSize := PSingle(Params^[1])^;
+end;
+
+procedure _LapeImageBoxCanvas_FontAntialiasing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontAntialiasing;
+end;
+
+procedure _LapeImageBoxCanvas_FontAntialiasing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBoxCanvas(Params^[0])^.FontAntialiasing := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeImageBoxCanvas_FontBold_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontBold;
+end;
+
+procedure _LapeImageBoxCanvas_FontBold_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBoxCanvas(Params^[0])^.FontBold := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeImageBoxCanvas_FontItalic_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontItalic;
+end;
+
+procedure _LapeImageBoxCanvas_FontItalic_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBoxCanvas(Params^[0])^.FontItalic := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeImageBoxCanvas_TextWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.TextWidth(PString(Params^[1])^);
+end;
+
+procedure _LapeImageBoxCanvas_TextHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.TextHeight(PString(Params^[1])^);
+end;
+
+procedure _LapeImageBoxCanvas_TextSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.TextSize(PString(Params^[1])^);
+end;
+
+procedure _LapeImageBoxCanvas_DrawText(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBoxCanvas(Params^[0])^.DrawText(PString(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
+end;
+
+procedure _LapeImageBoxCanvas_DrawTextEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBoxCanvas(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, EDrawTextAlignSet(Params^[3]^), PColor(Params^[4])^);
+end;
+
 procedure _LapeSimbaImageBoxCanvas_DrawLine(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxCanvas(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
@@ -302,6 +379,18 @@ begin
   with Compiler do
   begin
     addClass('TImageBoxCanvas');
+
+    addClassVar('TImageBoxCanvas', 'FontName', 'String', @_LapeImageBoxCanvas_FontName_Read, @_LapeImageBoxCanvas_FontName_Write);
+    addClassVar('TImageBoxCanvas', 'FontSize', 'Single', @_LapeImageBoxCanvas_FontSize_Read, @_LapeImageBoxCanvas_FontSize_Write);
+    addClassVar('TImageBoxCanvas', 'FontAntialiasing', 'Boolean', @_LapeImageBoxCanvas_FontAntialiasing_Read, @_LapeImageBoxCanvas_FontAntialiasing_Write);
+    addClassVar('TImageBoxCanvas', 'FontBold', 'Boolean', @_LapeImageBoxCanvas_FontBold_Read, @_LapeImageBoxCanvas_FontBold_Write);
+    addClassVar('TImageBoxCanvas', 'FontItalic', 'Boolean', @_LapeImageBoxCanvas_FontItalic_Read, @_LapeImageBoxCanvas_FontItalic_Write);
+
+    addGlobalFunc('function TImageBoxCanvas.TextWidth(Text: String): Integer;', @_LapeImageBoxCanvas_TextWidth);
+    addGlobalFunc('function TImageBoxCanvas.TextHeight(Text: String): Integer;', @_LapeImageBoxCanvas_TextHeight);
+    addGlobalFunc('function TImageBoxCanvas.TextSize(Text: String): TPoint;', @_LapeImageBoxCanvas_TextSize);
+    addGlobalFunc('procedure TImageBoxCanvas.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeImageBoxCanvas_DrawText);
+    addGlobalFunc('procedure TImageBoxCanvas.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload', @_LapeImageBoxCanvas_DrawTextEx);
 
     addGlobalFunc('procedure TImageBoxCanvas.DrawLine(Start, Stop: TPoint; Color: TColor);', @_LapeSimbaImageBoxCanvas_DrawLine);
     addGlobalFunc('procedure TImageBoxCanvas.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor);', @_LapeSimbaImageBoxCanvas_DrawLineGap);

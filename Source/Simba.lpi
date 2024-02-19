@@ -1028,7 +1028,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="6">
+    <Exceptions Count="7">
       <Item1>
         <Name Value="ESyntaxError"/>
       </Item1>
@@ -1047,6 +1047,9 @@
       <Item6>
         <Name Value="EFOpenError"/>
       </Item6>
+      <Item7>
+        <Name Value="EFreeType"/>
+      </Item7>
     </Exceptions>
   </Debugging>
 </CONFIG>

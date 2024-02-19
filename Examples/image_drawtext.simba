@@ -12,7 +12,7 @@ begin
 
   myBox := [225,25,450,240];
   myImage.DrawBox(myBox, Colors.RED);
-  myImage.DrawText(FormatDateTime('c', Now()), myBox, [ETextDrawAlignment.CENTER,  ETextDrawAlignment.VERTICAL_CENTER], Colors.BLACK);
+  myImage.DrawText(FormatDateTime('c', Now()), myBox, [EDrawTextAlign.CENTER, EDrawTextAlign.VERTICAL_CENTER], Colors.BLACK);
 
   myImage.SetFontBold(True);
   myImage.SetFontSize(50);

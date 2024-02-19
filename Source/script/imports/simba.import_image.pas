@@ -955,7 +955,7 @@ TImage.DrawText
 *)
 procedure _LapeImage_DrawTextEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, ETextDrawAlignSet(Params^[3]^), PColor(Params^[4])^);
+  PSimbaImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, EDrawTextAlignSet(Params^[3]^), PColor(Params^[4])^);
 end;
 
 (*
@@ -1295,8 +1295,8 @@ begin
     addGlobalType('enum(WIDTH, HEIGHT, LINE)', 'EImageMirrorStyle');
     addGlobalType('enum(MEAN, MIN_MAX)', 'EImageThreshMethod');
 
-    addGlobalType('enum(LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM)', 'ETextDrawAlign');
-    addGlobalType('set of ETextDrawAlign', 'ETextDrawAlignSet');
+    addGlobalType('enum(LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM)', 'EDrawTextAlign');
+    addGlobalType('set of EDrawTextAlign', 'EDrawTextAlignSet');
 
     addClassVar('TImage', 'Name', 'String', @_LapeImage_Name_Read, @_LapeImage_Name_Write);
     addClassVar('TImage', 'DefaultPixel', 'TColorBGRA', @_LapeImage_DefaultPixel_Read, @_LapeImage_DefaultPixel_Write);
@@ -1344,7 +1344,7 @@ begin
     addGlobalFunc('function TImage.TextHeight(Text: String): Integer;', @_LapeImage_TextHeight);
     addGlobalFunc('function TImage.TextSize(Text: String): TPoint;', @_LapeImage_TextSize);
     addGlobalFunc('procedure TImage.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeImage_DrawText);
-    addGlobalFunc('procedure TImage.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignSet; Color: TColor); overload', @_LapeImage_DrawTextEx);
+    addGlobalFunc('procedure TImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload', @_LapeImage_DrawTextEx);
     addGlobalFunc('procedure TImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);', @_LapeImage_DrawTextLines);
 
     addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);', @_LapeImage_DrawATPA);
@@ -1390,7 +1390,7 @@ begin
     addGlobalFunc('procedure TImage.DrawMatrix(Matrix: TSingleMatrix; ColorMapID: Integer = 0); overload', @_LapeImage_DrawMatrixF);
 
     addGlobalFunc('procedure TImage.SetSize(AWidth, AHeight: Integer);', @_LapeImage_SetSize);
-    addGlobalFunc('procedure TImage.SetExternalData(Memory: PtrUInt; AWidth, AHeight: Integer);', @_LapeImage_SetExternalData);
+    addGlobalFunc('procedure TImage.SetExternalData(Data: PColorBGRA; AWidth, AHeight: Integer);', @_LapeImage_SetExternalData);
     addGlobalFunc('procedure TImage.ResetExternalData;', @_LapeImage_ResetExternalData);
 
     addGlobalFunc('function TImage.ResizeNN(AWidth, AHeight: Integer): TImage', @_LapeImage_ResizeNN);

@@ -11,11 +11,28 @@ unit simba.imagebox_canvas;
 interface
 
 uses
-  Classes, SysUtils, Graphics, LCLType,
-  simba.base, simba.image_lazbridge, simba.imagebox_drawers;
+  Classes, SysUtils, Graphics, LCLType, FPImage,
+  simba.base, simba.image_lazbridge, simba.imagebox_drawers, simba.image_textdrawer;
 
 type
+  TSimbaImageBoxCanvas = class;
   PSimbaImageBoxCanvas = ^TSimbaImageBoxCanvas;
+
+  TTextDrawer = class(TSimbaTextDrawerBase)
+  protected
+    FBitmap: TBitmap;
+    FCurrentColor: TFPColor;
+    FCurrentX, FCurrentY: Integer;
+
+    procedure MoveToPixel(x,y: integer); override;
+    function GetCurrentColor: TFPColor; override;
+    procedure SetCurrentColorAndMoveRight(const AColor: TFPColor); override;
+    procedure MoveRight; override;
+    function GetClipRect: TRect; override;
+  public
+    constructor Create(Bitmap: TBitmap); reintroduce;
+  end;
+
   TSimbaImageBoxCanvas = class
   protected
     FBitmap: TBitmap;
@@ -26,14 +43,40 @@ type
     FHeight: Integer;
     FData: PByte;
     FBytesPerLine: Integer;
+    FTextDrawer: TTextDrawer;
 
     function GetDrawInfo(Color: TColor): TDrawInfo;
+
+    function GetFontAntialiasing: Boolean;
+    function GetFontName: String;
+    function GetFontSize: Single;
+    function GetFontBold: Boolean;
+    function GetFontItalic: Boolean;
+
+    procedure SetFontAntialiasing(Value: Boolean);
+    procedure SetFontName(Value: String);
+    procedure SetFontSize(Value: Single);
+    procedure SetFontBold(Value: Boolean);
+    procedure SetFontItalic(Value: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure BeginUpdate(Rect: TRect; Width, Height: Integer);
     procedure EndUpdate;
+
+    property FontName: String read GetFontName write SetFontName;
+    property FontSize: Single read GetFontSize write SetFontSize;
+    property FontAntialiasing: Boolean read GetFontAntialiasing write SetFontAntialiasing;
+    property FontBold: Boolean read GetFontBold write SetFontBold;
+    property FontItalic: Boolean read GetFontItalic write SetFontItalic;
+
+    procedure DrawText(Text: String; Position: TPoint; Color: TColor); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload;
+
+    function TextWidth(Text: String): Integer;
+    function TextHeight(Text: String): Integer;
+    function TextSize(Text: String): TPoint;
 
     procedure DrawLine(Start, Stop: TPoint; Color: TColor);
     procedure DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor);
@@ -68,7 +111,44 @@ implementation
 
 uses
   Math,
-  simba.colormath, simba.box, simba.array_point;
+  simba.colormath, simba.box;
+
+procedure TTextDrawer.MoveToPixel(x, y: integer);
+begin
+  FCurrentX := X;
+  FCurrentY := Y;
+end;
+
+function TTextDrawer.GetCurrentColor: TFPColor;
+begin
+  Result := FBitmap.Canvas.Colors[FCurrentX, FCurrentY];
+end;
+
+procedure TTextDrawer.SetCurrentColorAndMoveRight(const AColor: TFPColor);
+begin
+  FBitmap.Canvas.Colors[FCurrentX, FCurrentY] := AColor;
+  Inc(FCurrentX);
+end;
+
+procedure TTextDrawer.MoveRight;
+begin
+  Inc(FCurrentX);
+end;
+
+function TTextDrawer.GetClipRect: TRect;
+begin
+  Result.Top := 0;
+  Result.Left := 0;
+  Result.Right := FBitmap.Width;
+  Result.Bottom := FBitmap.Height;
+end;
+
+constructor TTextDrawer.Create(Bitmap: TBitmap);
+begin
+  inherited Create();
+
+  FBitmap := Bitmap;
+end;
 
 function TSimbaImageBoxCanvas.GetDrawInfo(Color: TColor): TDrawInfo;
 begin
@@ -81,11 +161,62 @@ begin
   Result.Offset := FOffset;
 end;
 
+function TSimbaImageBoxCanvas.GetFontAntialiasing: Boolean;
+begin
+  Result := FTextDrawer.Antialiased;
+end;
+
+function TSimbaImageBoxCanvas.GetFontName: String;
+begin
+  Result := FTextDrawer.Font;
+end;
+
+function TSimbaImageBoxCanvas.GetFontSize: Single;
+begin
+  Result := FTextDrawer.Size;
+end;
+
+function TSimbaImageBoxCanvas.GetFontBold: Boolean;
+begin
+  Result := FTextDrawer.Bold;
+end;
+
+function TSimbaImageBoxCanvas.GetFontItalic: Boolean;
+begin
+  Result := FTextDrawer.Italic;
+end;
+
+procedure TSimbaImageBoxCanvas.SetFontAntialiasing(Value: Boolean);
+begin
+  FTextDrawer.Antialiased := Value;
+end;
+
+procedure TSimbaImageBoxCanvas.SetFontName(Value: String);
+begin
+  FTextDrawer.Font := Value;
+end;
+
+procedure TSimbaImageBoxCanvas.SetFontSize(Value: Single);
+begin
+  FTextDrawer.Size := Value;
+end;
+
+procedure TSimbaImageBoxCanvas.SetFontBold(Value: Boolean);
+begin
+  FTextDrawer.Bold := Value;
+end;
+
+procedure TSimbaImageBoxCanvas.SetFontItalic(Value: Boolean);
+begin
+  FTextDrawer.Italic := Value;
+end;
+
 constructor TSimbaImageBoxCanvas.Create;
 begin
   inherited Create();
 
   FBitmap := TBitmap.Create();
+  FTextDrawer := TTextDrawer.Create(FBitmap);
   FPixelFormat := LazImage_PixelFormat(FBitmap);
   if (not (FPixelFormat in [ELazPixelFormat.BGR, ELazPixelFormat.BGRA, ELazPixelFormat.ARGB])) then
     SimbaException('SimbaImageBoxCanvas pixel format not supported');
@@ -94,6 +225,7 @@ end;
 destructor TSimbaImageBoxCanvas.Destroy;
 begin
   FreeAndNil(FBitmap);
+  FreeAndNil(FTextDrawer);
 
   inherited Destroy();
 end;
@@ -121,6 +253,31 @@ end;
 procedure TSimbaImageBoxCanvas.EndUpdate;
 begin
   FBitmap.EndUpdate();
+end;
+
+procedure TSimbaImageBoxCanvas.DrawText(Text: String; Position: TPoint; Color: TColor);
+begin
+  FTextDrawer.DrawText(Text, Position.Offset(FOffset), Color);
+end;
+
+procedure TSimbaImageBoxCanvas.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor);
+begin
+  FTextDrawer.DrawText(Text, Box.Offset(FOffset), Alignments, Color);
+end;
+
+function TSimbaImageBoxCanvas.TextWidth(Text: String): Integer;
+begin
+  Result := FTextDrawer.TextWidth(Text);
+end;
+
+function TSimbaImageBoxCanvas.TextHeight(Text: String): Integer;
+begin
+  Result := FTextDrawer.TextHeight(Text);
+end;
+
+function TSimbaImageBoxCanvas.TextSize(Text: String): TPoint;
+begin
+  Result := FTextDrawer.TextSize(Text);
 end;
 
 procedure TSimbaImageBoxCanvas.DrawLine(Start, Stop: TPoint; Color: TColor);
