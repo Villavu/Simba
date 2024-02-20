@@ -340,7 +340,7 @@ procedure TSimbaTextDrawerBase.DrawText(Text: String; Position: TPoint; Color: T
 begin
   BeginDrawing();
   try
-    inherited DrawText('Hello World', FFont, Position.X, Position.Y + FFont.SizeInPoints, TColorToFPColor(Color));
+    inherited DrawText(Text, FFont, Position.X, Position.Y + FFont.SizeInPoints, TColorToFPColor(Color));
   finally
     EndDrawing();
   end;
