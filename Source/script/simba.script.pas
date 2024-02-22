@@ -197,8 +197,10 @@ begin
   if (FTargetWindow = 0) or (not FTargetWindow.IsValid()) then
     FTargetWindow := GetDesktopWindow();
 
-  PSimbaTarget(FCompiler['Target'].Ptr)^.SetWindow(FTargetWindow);
   PString(FCompiler['SCRIPT_FILE'].Ptr)^ := FScriptFileName;
+  PUInt64(FCompiler['SCRIPT_START_TIME'].Ptr)^ := GetTickCount64();
+
+  PSimbaTarget(FCompiler['Target'].Ptr)^.SetWindow(FTargetWindow);
   PPointer(FCompiler['_SimbaScript'].Ptr)^ := Self;
 
   FRunningTime := HighResolutionTime();

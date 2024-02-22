@@ -335,6 +335,31 @@ FreeLibrary
 > function FreeLibrary(Lib: TLibHandle): EvalBool;
 *)
 
+(*
+SimbaEnv
+--------
+```
+type
+  SimbaEnv = record
+    const SimbaPath       = 'PathToSimbaDir';
+    const IncludesPath    = 'PathToSimbaDir/Includes';
+    const PluginsPath     = 'PathToSimbaDir/Plugins';
+    const ScriptsPath     = 'PathToSimbaDir/Scripts';
+    const ScreenshotsPath = 'PathToSimbaDir/Screenshots';
+    const DataPath        = 'PathToSimbaDir/Data';
+    const TempPath        = 'PathToSimbaDir/Data/Temp';
+  end;
+```
+
+Record which contains constants to Simba environment paths.
+
+*Example:*
+
+```
+WriteLn(SimbaEnv.ScriptsPath);
+```
+*)
+
 procedure ImportSystem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -387,14 +412,21 @@ begin
     addGlobalFunc('function GetEnvVar(Name: String): String', @_LapeGetEnvVar);
     addGlobalFunc('function GetEnvVars: TStringArray', @_LapeGetEnvVars);
 
-    addGlobalVar('', 'SCRIPT_FILE').isConstant := True; // Filled in later
-    addGlobalVar(GetTickCount64(), 'SCRIPT_START_TIME').isConstant := True;
-    addGlobalVar(SimbaEnv.IncludesPath, 'INCLUDES_DIR').isConstant := True;
-    addGlobalVar(SimbaEnv.PluginsPath, 'PLUGINS_DIR').isConstant := True;
-    addGlobalVar(SimbaEnv.SimbaPath, 'SIMBA_DIR').isConstant := True;
-    addGlobalVar(SimbaEnv.ScriptsPath, 'SCRIPTS_DIR').isConstant := True;
-    addGlobalVar(SimbaEnv.DataPath, 'SIMBA_DATA_DIR').isConstant := True;
-    addGlobalVar(SimbaEnv.ScreenshotsPath, 'SCREENSHOTS_DIR').isConstant := True;
+    addGlobalType([
+      'record',
+      '  const SimbaPath       = "' + SimbaEnv.SimbaPath       + '";',
+      '  const IncludesPath    = "' + SimbaEnv.IncludesPath    + '";',
+      '  const PluginsPath     = "' + SimbaEnv.PluginsPath     + '";',
+      '  const ScriptsPath     = "' + SimbaEnv.ScriptsPath     + '";',
+      '  const ScreenshotsPath = "' + SimbaEnv.ScreenshotsPath + '";',
+      '  const DataPath        = "' + SimbaEnv.DataPath        + '";',
+      '  const TempPath        = "' + SimbaEnv.TempPath        + '";',
+      'end;'
+    ], 'SimbaEnv');
+
+    // Assigned later in `TSimbaScript.Run`
+    addGlobalVar('String', '', 'SCRIPT_FILE').isConstant := True;
+    addGlobalVar('UInt64', '0', 'SCRIPT_START_TIME').isConstant := True;
 
     ImportingSection := '';
   end;
