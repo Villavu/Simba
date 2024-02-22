@@ -19,7 +19,7 @@ implementation
 
 uses
   lptypes,
-  simba.files;
+  simba.files, simba.zip;
 
 (*
 File
@@ -78,23 +78,33 @@ begin
 end;
 
 (*
-ZipExtractAll
--------------
-> function ZipExtractAll(ZipFileName, OutputDir: String): Boolean;
+ZipExtract
+----------
+> function ZipExtract(ZipFileName, OutputDir: String): Boolean;
 *)
-procedure _LapeZipExtractAll(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeZipExtract(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := ZipExtractAll(PString(Params^[0])^, PString(Params^[1])^);
+  PBoolean(Result)^ := ZipExtract(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
 (*
-ZipExtractOne
--------------
-> function ZipExtractOne(ZipFileName, FileName, OutputDir: String): Boolean;
+ZipExtractEntries
+-----------------
+> function ZipExtractEntries(FileName, OutputDir: String; Entries: TStringArray): Integer;
 *)
-procedure _LapeZipExtractOne(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeZipExtractEntries(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := ZipExtractOne(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
+  PInteger(Result)^ := ZipExtractEntries(PString(Params^[0])^, PString(Params^[1])^, PStringArray(Params^[2])^);
+end;
+
+(*
+ZipExtractEntry
+---------------
+> function ZipExtractEntry(ZipFileName, FileName, OutputDir: String): Boolean;
+*)
+procedure _LapeZipExtractEntry(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := ZipExtractEntry(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 (*
@@ -108,13 +118,13 @@ begin
 end;
 
 (*
-ZipEntries
-----------
-> function ZipEntries(ZipFileName: String): TStringArray;
+ZipReadEntries
+--------------
+> function ZipReadEntries(FileName: String): TStringArray;
 *)
-procedure _LapeZipEntries(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeZipReadEntries(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStringArray(Result)^ := ZipEntries(PString(Params^[0])^);
+  PStringArray(Result)^ := ZipReadEntries(PString(Params^[0])^);
 end;
 
 (*
@@ -592,10 +602,11 @@ begin
     addGlobalFunc('function INIFileKeys(FileName: String; Section: String): TStringArray', @_LapeINIFileKeys);
     addGlobalFunc('function INIFileSections(FileName: String): TStringArray', @_LapeINIFileSections);
 
-    addGlobalFunc('function ZipExtractAll(ZipFileName, OutputDir: String): Boolean', @_LapeZipExtractAll);
-    addGlobalFunc('function ZipExtractOne(ZipFileName, FileName, OutputDir: String): Boolean', @_LapeZipExtractOne);
-    addGlobalFunc('function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean', @_LapeZipFiles);
-    addGlobalFunc('function ZipEntries(ZipFileName: String): TStringArray', @_LapeZipEntries);
+    addGlobalFunc('function ZipExtract(FileName, OutputDir: String): Boolean', @_LapeZipExtract);
+    addGlobalFunc('function ZipExtractEntries(FileName, OutputDir: String; Entries: TStringArray): Integer', @_LapeZipExtractEntries);
+    addGlobalFunc('function ZipExtractEntry(FileName, Entry, OutputDir: String): Boolean', @_LapeZipExtractEntry);
+    addGlobalFunc('function ZipFiles(FileName: String; Files: TStringArray): Boolean', @_LapeZipFiles);
+    addGlobalFunc('function ZipReadEntries(FileName: String): TStringArray', @_LapeZipReadEntries);
 
     addGlobalFunc('function GetUserDir: String', @_LapeGetUserDir);
     addGlobalFunc('function GetTempDir: String', @_LapeGetTempDir);

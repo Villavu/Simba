@@ -90,7 +90,7 @@ type
     constructor Create; overload;
     constructor Create(AWidth, AHeight: Integer); overload;
     constructor CreateFromFile(FileName: String);
-    constructor CreateFromZip(ZipFileName, ZipEntryName: String);
+    constructor CreateFromZip(ZipFileName, ZipEntry: String);
     constructor CreateFromString(Str: String);
     constructor CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     constructor CreateFromWindow(Window: TWindowHandle);
@@ -259,7 +259,7 @@ implementation
 
 uses
   Math, FPImage,
-  simba.files, simba.box, simba.quad, simba.geometry, simba.nativeinterface,
+  simba.files, simba.zip, simba.box, simba.quad, simba.geometry, simba.nativeinterface,
   simba.matrix_float, simba.matrix_int, simba.array_point, simba.arraybuffer, simba.algo_sort,
   simba.image_lazbridge, simba.image_integral, simba.image_gaussblur,
   simba.image_bitmaparealoader, simba.image_stringconv;
@@ -3092,15 +3092,15 @@ begin
   Load(FileName);
 end;
 
-constructor TSimbaImage.CreateFromZip(ZipFileName, ZipEntryName: String);
+constructor TSimbaImage.CreateFromZip(ZipFileName, ZipEntry: String);
 var
   Stream: TMemoryStream;
 begin
   Create();
 
-  if ZipExtractOne(ZipFileName, ZipEntryName, Stream) then
+  Stream := ZipExtractEntry(ZipFileName, ZipEntry);
   try
-    FromStream(Stream, ZipEntryName);
+    FromStream(Stream, ZipEntry);
   finally
     Stream.Free();
   end;

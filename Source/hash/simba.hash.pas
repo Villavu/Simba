@@ -38,8 +38,8 @@ type
   procedure RegisterHasher(HashType: EHashType; HashClass: TSimbaHasherClass);
 
   function HashBuffer(HashType: EHashType; Buf: PByte; Len: PtrUInt): String;
-  function HashString(HashType: EHashType; S: String): String;
-  function HashFile(HashType: EHashType; FileName: String): String;
+  function HashString(HashType: EHashType; const S: String): String;
+  function HashFile(HashType: EHashType; const FileName: String): String;
 
 implementation
 
@@ -74,7 +74,7 @@ begin
     Result := '';
 end;
 
-function HashString(HashType: EHashType; S: String): String;
+function HashString(HashType: EHashType; const S: String): String;
 begin
   if (Length(S) > 0) then
     Result := HashBuffer(HashType, @S[1], Length(S))
@@ -82,7 +82,7 @@ begin
     Result := '';
 end;
 
-function HashFile(HashType: EHashType; FileName: String): String;
+function HashFile(HashType: EHashType; const FileName: String): String;
 var
   Bytes: TBytes;
 begin

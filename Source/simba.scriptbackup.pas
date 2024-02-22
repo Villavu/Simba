@@ -37,14 +37,11 @@ type
 implementation
 
 uses
-  crc,
-  simba.files, simba.env, simba.ide_initialization, simba.scripttabsform, simba.threading;
+  simba.zip, simba.files, simba.env, simba.ide_initialization, simba.scripttabsform, simba.threading, simba.hash;
 
 function Crc32String(const Str: String): UInt32;
 begin
-  Result := crc32(0, nil, 0);
-  if (Str <> '') then
-    Result := crc32(Result, @Str[1], Length(Str));
+  Result := StrToUInt('$' + HashString(EHashType.CRC32, Str));
 end;
 
 procedure TSimbaScriptBackup.DoFileCollecting(Sender: TObject);

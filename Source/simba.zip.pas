@@ -10,17 +10,18 @@ unit simba.zip;
 interface
 
 uses
-  classes, sysutils, zipper;
+  Classes, SysUtils, Zipper;
 
 type
-  TZipProgressEvent = procedure(Sender: TObject; FileName: String; Percent: Double) of object;
-
   TSimbaZipExtractor = class
+  public
+  type
+    TProgressEvent = procedure(Sender: TObject; FileName: String; Percent: Double) of object;
   protected
     FInputStream: TStream;
     FOutputPath: String;
     FFlat: Boolean;
-    FOnProgress: TZipProgressEvent;
+    FOnProgress: TProgressEvent;
     FExtractingFinished: TNotifyEvent;
     FIgnoreList: TStringList;
     FCurrentFile: String;
@@ -35,9 +36,10 @@ type
     property InputStream: TStream read FInputStream write FInputStream;
     property OutputPath: String read FOutputPath write FOutputPath;
     property Flat: Boolean read FFlat write FFlat;
-    property OnProgress: TZipProgressEvent read FOnProgress write FOnProgress;
-    property OnExtractingFinished: TNotifyEvent read FExtractingFinished write FExtractingFinished;
     property IgnoreList: TStringList read FIgnoreList;
+
+    property OnProgress: TProgressEvent read FOnProgress write FOnProgress;
+    property OnExtractingFinished: TNotifyEvent read FExtractingFinished write FExtractingFinished;
 
     procedure Extract;
 
@@ -45,12 +47,24 @@ type
     destructor Destroy; override;
   end;
 
+function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean;
+function ZipReadEntries(FileName: String): TStringArray;
+function ZipAppend(FileName: String; Entry, FileContents: String): Boolean;
+
+function ZipExtractEntries(FileName, OutputDir: String; Entries: TStringArray): Integer;
+function ZipExtractEntry(FileName, Entry, OutputDir: String): Boolean; overload;
+function ZipExtractEntry(FileName: String; Entry: String): TMemoryStream; overload;
+function ZipExtract(ZipFileName, OutputDir: String): Boolean;
+
+function ZipHasEntryCrc(ZipFileName: String; Crc32: UInt32): Boolean;
+
 implementation
 
 uses
   fileutil, lazfileutils,
   simba.base;
 
+// Zip Extractor
 procedure TSimbaZipExtractor.DoProgress(Sender: TObject; const ATotPos, ATotSize: Int64);
 begin
   if (FOnProgress <> nil) then
@@ -144,6 +158,331 @@ begin
   ForceDirectories(ExtractFileDir(FileName));
   if (not AItem.IsDirectory) then
     AStream := TFileStream.Create(FileName, fmCreate or fmShareDenyWrite);
+end;
+
+// Zip Files
+function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean;
+var
+  Zipper: TZipper;
+  I: Integer;
+begin
+  Result := False;
+
+  if (Length(Files) > 0) then
+  begin
+    Zipper := TZipper.Create();
+
+    try
+      Zipper.FileName := ZipFileName;
+      for I := 0 to High(Files) do
+        Zipper.Entries.AddFileEntry(Files[I], ExtractFileName(Files[I]));
+
+      Zipper.ZipAllFiles();
+
+      Result := True;
+    except
+    end;
+
+    Zipper.Free();
+  end;
+end;
+
+// ZipReadEntries
+function ZipReadEntries(FileName: String): TStringArray;
+var
+  UnZipper: TUnZipper;
+  I: Integer;
+begin
+  Result := [];
+
+  if FileExists(FileName) then
+  begin
+    UnZipper := TUnZipper.Create();
+    try
+      UnZipper.FileName := FileName;
+      UnZipper.Examine();
+
+      SetLength(Result, UnZipper.Entries.Count);
+      for I := 0 to UnZipper.Entries.Count - 1 do
+        Result[I] := UnZipper.Entries[I].ArchiveFileName;
+    except
+    end;
+    UnZipper.Free();
+  end;
+end;
+
+// ZipAppend
+type
+  TZipAppender = class(TObject)
+  protected
+    FUnZip: TUnZipper;
+    FZip: TZipper;
+
+    procedure DoCreateStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+    procedure DoDoneStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+  public
+    constructor Create(AFileName: String);
+    destructor Destroy; override;
+
+    procedure Add(FileName, FileContents: String);
+  end;
+
+procedure TZipAppender.DoCreateStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  AStream := TMemoryStream.Create();
+end;
+
+procedure TZipAppender.DoDoneStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  with FZip.Entries.Add() as TZipFileEntry do
+  begin
+    Assign(AItem);
+
+    Stream := AStream;
+    Stream.Position := 0;
+  end;
+end;
+
+constructor TZipAppender.Create(AFileName: String);
+begin
+  inherited Create();
+
+  if FileExists(AFileName) then
+  begin
+    FUnZip := TUnZipper.Create();
+    FUnZip.FileName := AFileName;
+    FUnZip.OnCreateStream := @DoCreateStream;
+    FUnZip.OnDoneStream := @DoDoneStream;
+  end;
+
+  FZip := TZipper.Create();
+  FZip.FileName := AFileName;
+end;
+
+destructor TZipAppender.Destroy;
+begin
+  if Assigned(FUnZip) then
+    FreeAndNil(FUnZip);
+  if Assigned(FZip) then
+    FreeAndNil(FZip);
+
+  inherited Destroy();
+end;
+
+procedure TZipAppender.Add(FileName, FileContents: String);
+var
+  I: Integer;
+begin
+  if Assigned(FUnZip) then
+    FUnZip.UnZipAllFiles();
+
+  FZip.Entries.AddFileEntry(TStringStream.Create(FileContents), IfThen(FileName = '', FZip.Entries.Count.ToString(), FileName));
+  FZip.ZipAllFiles();
+
+  for I := 0 to FZip.Entries.Count - 1 do
+    if (FZip.Entries[I].Stream <> nil) then
+    begin
+      FZip.Entries[I].Stream.Free();
+      FZip.Entries[I].Stream := nil;
+    end;
+end;
+
+function ZipAppend(FileName: String; Entry, FileContents: String): Boolean;
+begin
+  Result := True;
+
+  with TZipAppender.Create(FileName) do
+  try
+    Add(Entry, FileContents);
+  finally
+    Free();
+  end;
+end;
+
+// Zip Entries
+function ZipEntries(ZipFileName: String): TStringArray;
+var
+  UnZipper: TUnZipper;
+  I: Integer;
+begin
+  Result := [];
+
+  if FileExists(ZipFileName) then
+  begin
+    UnZipper := TUnZipper.Create();
+    try
+      UnZipper.FileName := ZipFileName;
+      UnZipper.Examine();
+
+      SetLength(Result, UnZipper.Entries.Count);
+      for I := 0 to UnZipper.Entries.Count - 1 do
+        Result[I] := UnZipper.Entries[I].ArchiveFileName;
+    except
+    end;
+    UnZipper.Free();
+  end;
+end;
+
+// ZipExtractEntries
+type
+  TSimpleZipExtract = class(TUnZipper)
+  protected
+    FExtractCount: Integer;
+
+    procedure DoStartFile(Sender: TObject; const AFileName: String);
+  public
+    constructor Create;
+
+    property ExtractCount: Integer read FExtractCount;
+  end;
+
+procedure TSimpleZipExtract.DoStartFile(Sender: TObject; const AFileName: String);
+begin
+  Inc(FExtractCount);
+end;
+
+constructor TSimpleZipExtract.Create;
+begin
+  inherited Create();
+
+  OnStartFile := @DoStartFile;
+end;
+
+function ZipExtractEntries(FileName, OutputDir: String; Entries: TStringArray): Integer;
+var
+  UnZipper: TSimpleZipExtract;
+begin
+  Result := 0;
+
+  if FileExists(FileName) then
+  begin
+    UnZipper := TSimpleZipExtract.Create();
+    try
+      UnZipper.Files.AddStrings(Entries);
+      UnZipper.FileName := FileName;
+      UnZipper.OutputPath := OutputDir;
+      UnZipper.UnZipAllFiles();
+
+      Result := UnZipper.ExtractCount;
+    finally
+      UnZipper.Free();
+    end;
+  end;
+end;
+
+function ZipExtractEntry(FileName, Entry, OutputDir: String): Boolean;
+begin
+  Result := ZipExtractEntries(FileName, OutputDir, [Entry]) = 1;
+end;
+
+// ZipExtractEntry
+type
+  TSimpleZipExtractStream = class(TUnZipper)
+  protected
+    procedure DoCreateStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+    procedure DoDoneStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+  public
+    Stream: TMemoryStream;
+
+    constructor Create;
+  end;
+
+procedure TSimpleZipExtractStream.DoCreateStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  AStream := TMemoryStream.Create();
+end;
+
+procedure TSimpleZipExtractStream.DoDoneStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  Stream := TMemoryStream(AStream);
+  Stream.Position := 0;
+
+  AStream := nil;
+end;
+
+constructor TSimpleZipExtractStream.Create;
+begin
+  inherited Create();
+
+  OnCreateStream := @DoCreateStream;
+  OnDoneStream := @DoDoneStream;
+end;
+
+function ZipExtractEntry(FileName: String; Entry: String): TMemoryStream;
+var
+  UnZipper: TSimpleZipExtractStream;
+begin
+  Result := nil;
+
+  if FileExists(FileName) then
+  begin
+    UnZipper := TSimpleZipExtractStream.Create();
+    try
+      UnZipper.Files.Add(Entry);
+      UnZipper.FileName := FileName;
+      UnZipper.UnZipAllFiles();
+
+      Result := UnZipper.Stream;
+
+    finally
+      UnZipper.Free();
+    end;
+
+    if (Result = nil) then
+      SimbaException('Entry "%s" not found', [Entry]);
+  end else
+    SimbaException('Zip "%s" not found', [FileName]);
+end;
+
+// ZipExtract
+function ZipExtract(ZipFileName, OutputDir: String): Boolean;
+var
+  UnZipper: TUnZipper;
+begin
+  Result := False;
+
+  if FileExists(ZipFileName) then
+  begin
+    UnZipper := TUnZipper.Create();
+
+    try
+      UnZipper.FileName := ZipFileName;
+      UnZipper.OutputPath := OutputDir;
+      UnZipper.UnZipAllFiles();
+
+      Result := True;
+    except
+    end;
+
+    UnZipper.Free();
+  end;
+end;
+
+// ZipHasEntryCrc
+function ZipHasEntryCrc(ZipFileName: String; Crc32: UInt32): Boolean;
+var
+  UnZipper: TUnZipper;
+  I: Integer;
+begin
+  Result := False;
+
+  if FileExists(ZipFileName) then
+  begin
+    UnZipper := TUnZipper.Create();
+    try
+      UnZipper.FileName := ZipFileName;
+      UnZipper.Examine();
+
+      for I := 0 to UnZipper.Entries.Count - 1 do
+        if (UnZipper.Entries[I].CRC32 = Crc32) then
+        begin
+          Result := True;
+          Break;
+        end;
+    except
+    end;
+    UnZipper.Free();
+  end;
 end;
 
 end.
