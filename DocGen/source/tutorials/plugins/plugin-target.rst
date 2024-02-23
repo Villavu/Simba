@@ -20,8 +20,8 @@ Will load :code:`myplugin.dll` expecting these exports:
   SimbaPluginTarget_GetImageData: function(Target: Pointer; X, Y, Width, Height: Int32; var Data: PColorBGRA; var DataWidth: Int32): Boolean; cdecl;
 
   SimbaPluginTarget_MousePressed: function(Target: Pointer; Button: Int32): Boolean; cdecl;
-  SimbaPluginTarget_MousePosition: function(Target: Pointer): TPoint; cdecl;
-  SimbaPluginTarget_MouseTeleport: procedure(Target: Pointer; P: TPoint); cdecl;
+  SimbaPluginTarget_MousePosition: procedure(Target: Pointer; out X, Y: Integer); cdecl;
+  SimbaPluginTarget_MouseTeleport: procedure(Target: Pointer; X, Y: Int32); cdecl;
   SimbaPluginTarget_MouseUp: procedure(Target: Pointer; Button: Int32); cdecl;
   SimbaPluginTarget_MouseDown: procedure(Target: Pointer; Button: Int32); cdecl;
   SimbaPluginTarget_MouseScroll: procedure(Target: Pointer; Scrolls: Int32); cdecl;
@@ -38,7 +38,7 @@ KeySend
 
 The plugins KeySend is responsible for holding down modifiers (such as shift).
 
-:code:`SleepTimes` is a Int32 array which is graciously overallocated :code:`(TextLen*5)` of sleep times which should be performed after every keydown/keyrelease which is used to control the speed of typing.
+:code:`SleepTimes` is a Int32 array which is graciously overallocated :code:`(TextLen*4)` of sleep times which should be performed after every keydown/keyrelease which is used to control the speed of typing.
 
 Something like:
 
@@ -62,7 +62,6 @@ Something like:
       ReleaseTheKey();
       DoSleep();
     end;
-
   end;
 
 .. note::

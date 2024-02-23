@@ -38,39 +38,33 @@ main.h
 
   struct __attribute__((__packed__)) TSimbaMethods
   {
-    void (*RunOnMainThread)(void(*Method)(void*), void* data);
+    void (*RunOnMainThread)(void(*TMainThreadMethod)(void*), void* data);
+    void* (*GetMem)(std::size_t size);
+    void (*FreeMem)(void* ptr);
+    void* (*AllocMem)(std::size_t size);
+    void* (*ReAllocMem)(void** ptr, std::size_t size);
+    std::size_t (*MemSize)(void* ptr);
 
-    void* (*GetMem)(NativeUInt size);
-    void  (*FreeMem)(void* ptr);
-    void* (*AllocMem)(NativeUInt Size);
-    void* (*ReAllocMem)(void** ptr, NativeUInt size);
-    NativeUInt (*MemSize)(void* ptr);
+    void(*RaiseException)(const char* message);
 
-    void  (*RaiseException)(char* Message);
-    void* (*GetTypeInfo)(void* Compiler, char* Typ);
-    NativeUInt (*GetTypeInfoSize)(void* TypeInfo);
-    NativeInt  (*GetTypeInfoFieldOffset)(void* TypeInfo, char* FieldName);
+    void* (*GetTypeInfo)(void* Compiler, const char* Type);
+    void* (*GetTypeInfoSize)(void* TypeInfo);
+    std::size_t (*GetTypeInfoFieldOffset)(void* TypeInfo, const char* FieldName);
 
-    void* (*AllocateRawArray)(NativeInt ElementSize, NativeUInt Len);
-    void (*ReAllocateRawArray)(void** ptr, NativeInt ElementSize, NativeUInt Len);
+    void* (*AllocateRawArray)(std::size_t element_size, std::size_t length);
+    void (*ReAllocateRawArray)(void** array, std::size_t element_size, std::size_t new_length);
 
-    void* (*AllocateArray)(void* TypeInfo, NativeUInt Len);
-    void* (*AllocateString)(void* Data);
-    void* (*AllocateUnicodeString)(void* Data);
-
-    void (*SetArrayLength)(void* TypeInfo, void**ptr, NativeInt NewLen);
-    NativeInt (*GetArrayLength)(void* AVar);
+    void* (*AllocateArray)(void* TypeInfo, std::size_t length);
+    void* (*AllocateString)(const char* data);
+    void* (*AllocateUnicodeString)(const wchar_t* data);
+    
+    void (*SetArrayLength)(void* TypeInfo, void** var, std::size_t new_len);
+    std::size_t (*GetArrayLength)(void* array);
 
     void* (*ExternalImage_Create)(bool FreeOnTerminate);
-    void (*ExternalImage_SetMemory)(void* img, void* data, int width, int height);
-    bool (*ExternalImage_TryLock)(void* img);
-    void (*ExternalImage_Lock)(void* img);
-    void (*ExternalImage_UnLock)(void* img);
-
-    void (*ExternalImage_AddCallbackOnUnlock)(void* img, void(*callback)(void*)(void*));
-    void (*ExternalImage_RemoveCallbackOnUnlock)(void* img, void(*callback)(void*)(void*));
-
-    void (*ExternalImage_SetUserData)(void* img, void* USerData);
+    void (*ExternalImage_SetMemory)(void* img, void* bgra_data, std::int32_t width, std::int32_t height);
+    void (*ExternalImage_Resize)(void* img, std::int32_t new_width, std::int32_t new_height);
+    void (*ExternalImage_SetUserData)(void* img, void* userdata);
     void* (*ExternalImage_GetUserData)(void* img);
   };
 
