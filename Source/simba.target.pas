@@ -77,8 +77,6 @@ type
     procedure SetCustomClientArea(B: TBox);
     function GetCustomClientArea: TBox;
     procedure SetAutoSetFocus(Value: Boolean);
-
-    procedure GetDimensions(out W, H: Integer);
   public
     function GetWindowTarget: TWindowHandle;
     function IsWindowTarget: Boolean; overload;
@@ -92,11 +90,12 @@ type
     function IsFocused: Boolean;
     function Focus: Boolean;
 
+    procedure GetDimensions(out W, H: Integer);
+    function GetImage(ABounds: TBox): TSimbaImage;
+
     function Bounds: TBox;
     function Width: Integer;
     function Height: Integer;
-
-    function GetImage(ABounds: TBox): TSimbaImage;
 
     procedure SetDesktop;
     procedure SetWindow(Window: TWindowHandle);

@@ -95,6 +95,16 @@ begin
 end;
 
 (*
+TTarget.GetImage
+----------------
+> procedure TTarget.GetDimensions(out Width, Height: Integer);
+*)
+procedure _LapeTarget_GetDimensions(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.GetDimensions(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
 TTarget.Bounds
 --------------
 > function TTarget.Bounds: TBox;
@@ -204,6 +214,11 @@ begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsEIOSTarget();
 end;
 
+(*
+TTarget.IsPluginTarget
+----------------------
+> function TTarget.IsPluginTarget: Boolean;
+*)
 procedure _LapeTarget_IsPluginTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsPluginTarget();
@@ -296,24 +311,39 @@ begin
   PSimbaTarget(Params^[0])^.RemoveOnInvalidTargetEvent(TSimbaTarget.TInvalidTargetEvent(Params^[1]^));
 end;
 
-procedure _LapeTarget_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PSimbaTarget(Params^[0])^.ToString();
-end;
-
+(*
+TTarget.FreezeImage
+-------------------
+> procedure TTarget.FreezeImage(ABounds: TBox);
+*)
 procedure _LapeTarget_FreezeImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.FreezeImage(PBox(Params^[1])^);
 end;
 
+(*
+TTarget.UnFreezeImage
+---------------------
+> procedure TTarget.UnFreezeImage;
+*)
 procedure _LapeTarget_UnFreezeImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.UnFreezeImage();
 end;
 
+(*
+TTarget.IsImageFrozen
+---------------------
+> function TTarget.IsImageFrozen: Boolean;
+*)
 procedure _LapeTarget_IsImageFrozen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTarget(Params^[0])^.IsImageFrozen();
+end;
+
+procedure _LapeTarget_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PSimbaTarget(Params^[0])^.ToString();
 end;
 
 procedure ImportTarget(Compiler: TSimbaScript_Compiler);
@@ -361,6 +391,7 @@ begin
     addGlobalFunc('procedure TTarget.SetPlugin(Plugin, Args: String; out DebugImage: TExternalImage); overload', @_LapeTarget_SetPlugin2);
 
     addGlobalFunc('function TTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage', @_LapeTarget_GetImage);
+    addGlobalFunc('procedure TTarget.GetDimensions(out Width, Height: Integer)', @_LapeTarget_GetDimensions);
     addGlobalFunc('function TTarget.Bounds: TBox', @_LapeTarget_Bounds);
     addGlobalFunc('function TTarget.Width: Integer', @_LapeTarget_Width);
     addGlobalFunc('function TTarget.Height: Integer', @_LapeTarget_Height);

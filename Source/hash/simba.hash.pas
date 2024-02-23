@@ -19,7 +19,7 @@ type
   EHashType = (
     SHA1, SHA256, SHA384, SHA512,
     MD5,
-    CRC32
+    CRC32, CRC64
   );
   {$scopedenums off}
 
@@ -46,7 +46,7 @@ implementation
 uses
   simba.hash_sha1, simba.hash_sha256, simba.hash_sha384, simba.hash_sha512,
   simba.hash_md5,
-  simba.hash_crc32;
+  simba.hash_crc32, simba.hash_crc64;
 
 var
   Hashers: array[EHashType] of TSimbaHasherClass;

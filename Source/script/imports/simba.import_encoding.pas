@@ -294,7 +294,7 @@ begin
   begin
     ImportingSection := 'Encoding';
 
-    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5, CRC32)', 'EHashType');
+    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5, CRC32, CRC64)', 'EHashType');
 
     addGlobalFunc('function GetOTPToken(const Secret: String): Integer', @_LapeGetOTPToken);
 
