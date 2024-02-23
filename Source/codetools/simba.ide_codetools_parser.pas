@@ -144,6 +144,7 @@ type
     property isEnumElement: Boolean index 12 read GetFlags write SetFlags;
     property isType: Boolean index 13 read GetFlags write SetFlags;
     property isKeyword: Boolean index 14 read GetFlags write SetFlags;
+    property isNotFullyDeclared: Boolean index 15 read GetFlags write SetFlags;
 
     constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); virtual; reintroduce;
     destructor Destroy; override;
@@ -410,6 +411,7 @@ type
 
     procedure ProceduralDirective; override;                                    //Procedure/Function directives
     procedure ProcedureDeclarationSection; override;                            //Procedure/Function
+    procedure FunctionProcedureBlock; override;
     procedure FunctionProcedureName; override;                                  //Procedure/Function
     procedure ObjectNameOfMethod; override;                                     //Class Procedure/Function
     procedure ReturnType; override;                                             //Function Result
@@ -1314,12 +1316,19 @@ begin
     if (Decl.Name = '') or (Decl.ClassType = TDeclaration_IncludeDirective) then
       Continue;
 
-    if (Decl is TDeclaration_Method) and Decl.isObjectMethod then
+    if (Decl.ClassType = TDeclaration_Method) then
     begin
-      FTypeMethods.Add(TDeclaration_Method(Decl).ObjectName, Decl);
+      if Decl.isNotFullyDeclared then
+        Continue;
+
+      if Decl.isObjectMethod then
+        FTypeMethods.Add(TDeclaration_Method(Decl).ObjectName, Decl)
+      else
+        FGlobals.Add(Decl);
 
       Continue;
-    end else
+    end;
+
     if (Decl.ClassType = TDeclaration_TypeEnum) then
       FGlobals.Extend(TDeclaration_TypeEnum(Decl).Elements)
     else
@@ -1484,7 +1493,6 @@ begin
   if Assigned(FOnHandleInclude) then
     FOnHandleInclude(Sender);
 end;
-
 procedure TCodeParser.Anchor;
 var
   Decl: TDeclaration_Anchor;
@@ -1705,6 +1713,15 @@ end;
 procedure TCodeParser.ConstantName;
 begin
   VarName();
+end;
+
+procedure TCodeParser.FunctionProcedureBlock;
+begin
+  if (FStack.Top is TDeclaration_Method) then
+    if (fLastNoJunkTok <> tokSemiColon) then
+      TDeclaration_Method(FStack.Top).isNotFullyDeclared := True;
+
+  inherited;
 end;
 
 procedure TCodeParser.ProcedureDeclarationSection;

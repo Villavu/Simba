@@ -164,6 +164,7 @@ type
     procedure FunctionHeading; virtual;
     procedure FunctionMethodDeclaration; virtual;
     procedure FunctionMethodName; virtual;
+    procedure FunctionProcedureDirectives; virtual;
     procedure FunctionProcedureBlock; virtual;
     procedure FunctionProcedureName; virtual;
     procedure Identifier; virtual;
@@ -1490,7 +1491,7 @@ begin
   Expected(tokColon);
   ReturnType;
 
-  FunctionProcedureBlock;
+  FunctionProcedureDirectives;
 end;
 
 procedure TmwSimplePasPar.ProcedureMethodDeclaration;
@@ -1521,7 +1522,7 @@ begin
     FormalParameterList;
   end;
 
-  FunctionProcedureBlock;
+  FunctionProcedureDirectives;
 end;
 
 procedure TmwSimplePasPar.FunctionProcedureName;
@@ -1547,54 +1548,47 @@ begin
   NextToken;
 end;
 
-procedure TmwSimplePasPar.FunctionProcedureBlock;
+procedure TmwSimplePasPar.FunctionProcedureDirectives;
 var
   NoExternal: Boolean;
 begin
   NoExternal := True;
-  if Lexer.TokenID = tokSemiColon then SemiColon;
+  SemiColon;
+  //if Lexer.TokenID = tokSemiColon then SemiColon;
   case Lexer.ExID of
     tokForward:
       ForwardDeclaration;
   else
-    while (Lexer.ExID in [tokAbstract, tokCdecl, tokExport, tokExternal,
-      tokMessage, tokOverload, tokOverride, tokRegister,
-      tokReintroduce, tokSafeCall, tokStdCall, tokVirtual,
-      tokDeprecated, tokLibrary, tokPlatform,
-      tokNative, tokStatic, tokInline, tokConst
-       ]) or (Lexer.TokenID = tokConstRef)
-    do
+    while (Lexer.ExID in [tokAbstract, tokCdecl, tokExport, tokExternal, tokMessage, tokOverload, tokOverride,
+                          tokRegister, tokReintroduce, tokSafeCall, tokStdCall, tokVirtual, tokDeprecated, tokLibrary,
+                          tokPlatform, tokNative, tokStatic, tokInline, tokConst]) do
       begin
-        case Lexer.TokenID of
-          tokConstRef:
-            begin
-              NextToken;
-              if (Lexer.TokenID = tokSemiColon) then SemiColon;
-            end
-        else
-          case Lexer.ExID of
-            tokExternal:
-              begin
-                ProceduralDirective;
-                if Lexer.TokenID = tokSemiColon then SemiColon;
-                NoExternal := False;
-              end;
-          else
+        case Lexer.ExID of
+          tokExternal:
             begin
               ProceduralDirective;
               if Lexer.TokenID = tokSemiColon then SemiColon;
+              NoExternal := False;
             end;
+        else
+          begin
+            ProceduralDirective;
+            if Lexer.TokenID = tokSemiColon then SemiColon;
           end;
         end;
       end;
     if Lexer.ExID = tokForward then
       ForwardDeclaration
-    else if NoExternal then
-    begin
-      Block;
-      SemiColon;
-    end;
+    else
+    if NoExternal then
+      FunctionProcedureBlock();
   end;
+end;
+
+procedure TmwSimplePasPar.FunctionProcedureBlock;
+begin
+  Block;
+  SemiColon;
 end;
 
 procedure TmwSimplePasPar.ExternalDirective;
