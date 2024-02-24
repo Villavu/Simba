@@ -209,6 +209,7 @@ begin
   AddNode('Image Box',            'EXAMPLE_IMAGEBOX'            );
   AddNode('IRC',                  'EXAMPLE_IRC'                 );
   AddNode('Draw Text',            'EXAMPLE_DRAWTEXT'            );
+  AddNode('RandomLeft',           'EXAMPLE_RANDOMLEFT'          );
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);

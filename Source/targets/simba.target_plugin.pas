@@ -106,6 +106,8 @@ constructor TUpdateDebugImageThread.Create(Target: TSimbaPluginTarget; Img: TSim
 begin
   inherited Create(False, 512*512);
 
+  FreeOnTerminate := True;
+
   FTarget := Target;
   FImg := Img;
 end;

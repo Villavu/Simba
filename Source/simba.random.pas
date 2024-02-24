@@ -16,7 +16,8 @@ uses
 function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
 function RandomTPA(Amount: Integer; Box: TBox): TPointArray;
 
-function RandomRange(Lo, Hi: Double): Double; overload;
+function Random(Lo, Hi: Double): Double; overload;
+function Random(Lo, Hi: Int64): Int64; overload;
 
 function RandomLeft(Lo, Hi: Double): Double; overload;
 function RandomLeft(Lo, Hi: Int64): Int64; overload;
@@ -40,8 +41,7 @@ var
 implementation
 
 uses
-  Math, DateUtils,
-  simba.box;
+  Math, DateUtils;
 
 function nzRandom: Double;
 begin
@@ -81,9 +81,14 @@ begin
     Result[i] := Point(RandomRange(Box.X1, Box.X2), RandomRange(Box.Y1, Box.Y2));
 end;
 
-function RandomRange(Lo, Hi: Double): Double;
+function Random(Lo, Hi: Double): Double;
 begin
   Result := Lo + Random() * (Hi - Lo);
+end;
+
+function Random(Lo, Hi: Int64): Int64;
+begin
+  Result := Trunc(Random(Lo, Hi));
 end;
 
 function RandomLeft(Lo, Hi: Double): Double;
@@ -96,7 +101,7 @@ end;
 
 function RandomLeft(Lo, Hi: Int64): Int64;
 begin
-  Result := Round(RandomLeft(Lo * 1.00, Hi * 1.00));
+  Result := Trunc(RandomLeft(Lo * 1.00, Hi * 1.00));
 end;
 
 function RandomRight(Lo, Hi: Double): Double;
@@ -106,20 +111,20 @@ end;
 
 function RandomRight(Lo, Hi: Int64): Int64;
 begin
-  Result := Round(RandomRight(Lo * 1.00, Hi * 1.00));
+  Result := Trunc(RandomRight(Lo * 1.00, Hi * 1.00));
 end;
 
 function RandomMean(Lo, Hi: Double): Double;
 begin
-  case Random(2) of
-    0: Result := (Hi+Lo) / 2.0 + RandomLeft(0, (Hi-Lo) / 2);
-    1: Result := (Hi+Lo) / 2.0 - RandomLeft(0, (Hi-Lo) / 2);
-  end;
+  if (Random() < 0.50) then
+    Result := (Hi+Lo) / 2.0 + RandomLeft(0, (Hi-Lo) / 2)
+  else
+    Result := (Hi+Lo) / 2.0 - RandomLeft(0, (Hi-Lo) / 2);
 end;
 
 function RandomMean(Lo, Hi: Int64): Int64;
 begin
-  Result := Round(RandomMean(Lo * 1.00, Hi * 1.00));
+  Result := Trunc(RandomMean(Lo * 1.00, Hi * 1.00));
 end;
 
 function RandomMode(Mode, Lo, Hi: Double): Double;
@@ -138,7 +143,7 @@ end;
 
 function RandomMode(Mode, Lo, Hi: Int64): Int64;
 begin
-  Result := Round(RandomMode(Mode * 1.00, Lo * 1.00, Hi * 1.00));
+  Result := Trunc(RandomMode(Mode * 1.00, Lo * 1.00, Hi * 1.00));
 end;
 
 function GaussRand(Mean, Dev: Double): Double;
@@ -156,12 +161,12 @@ procedure BetterRandomize; // https://github.com/dajobe/libmtwist/blob/master/se
 
   procedure Mix(var A, B, C: UInt32);
   begin
-    A -= C;  A := A xor ((C shl 4)  or (C shr (32-4)));  C += B;
-    B -= A;  B := B xor ((A shl 6)  or (A shr (32-6)));  A += C;
-    C -= B;  C := C xor ((B shl 8)  or (B shr (32-8)));  B += A;
-    A -= C;  A := A xor ((C shl 16) or (C shr (32-16))); C += B;
-    B -= A;  B := B xor ((A shl 19) or (A shr (32-19))); A += C;
-    C -= B;  C := C xor ((B shl 4)  or (B shr (32-4)));  B += A;
+    A -= C;  A := A xor ((C shl 4)  or (C shr (32-4)));   C += B;
+    B -= A;  B := B xor ((A shl 6)  or (A shr (32-6)));   A += C;
+    C -= B;  C := C xor ((B shl 8)  or (B shr (32-8)));   B += A;
+    A -= C;  A := A xor ((C shl 16) or (C shr (32-16)));  C += B;
+    B -= A;  B := B xor ((A shl 19) or (A shr (32-19)));  A += C;
+    C -= B;  C := C xor ((B shl 4)  or (B shr (32-4)));   B += A;
   end;
 
 var

@@ -61,7 +61,7 @@ main.h
     void (*SetArrayLength)(void* TypeInfo, void** var, std::size_t new_len);
     std::size_t (*GetArrayLength)(void* array);
 
-    void* (*ExternalImage_Create)(bool FreeOnTerminate);
+    void* (*ExternalImage_Create)(bool AutoResize);
     void (*ExternalImage_SetMemory)(void* img, void* bgra_data, std::int32_t width, std::int32_t height);
     void (*ExternalImage_Resize)(void* img, std::int32_t new_width, std::int32_t new_height);
     void (*ExternalImage_SetUserData)(void* img, void* userdata);

@@ -121,7 +121,7 @@ type
     function GetImageData(var ABounds: TBox; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
     procedure FreeImageData(var Data: PColorBGRA);
 
-    function IsImageFrozen: Boolean; inline;
+    function IsImageFrozen: Boolean;
     procedure FreezeImage(ABounds: TBox);
     procedure UnFreezeImage;
 
@@ -645,7 +645,7 @@ begin
     ETargetType.EIOS:
       Result := 'ETargetType.EIOS: Target=%P'.Format([FTargetEIOS.Target]);
     ETargetType.PLUGIN:
-      Result := 'ETargetType.PLUGIN: Filename="%s" Target=%P'.Format([FTargetPlugin.FileName, FTargetPlugin.Target]);
+      Result := 'ETargetType.PLUGIN: Filename="%s", Target=%P'.Format([FTargetPlugin.FileName, FTargetPlugin.Target]);
   end;
 end;
 

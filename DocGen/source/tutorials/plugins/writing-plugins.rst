@@ -105,7 +105,7 @@ These pointers are provided to these structures:
     SetArrayLength: procedure(TypeInfo: Pointer; var AVar: Pointer; NewLen: NativeInt); cdecl;
     GetArrayLength: function(AVar: Pointer): NativeInt; cdecl;
 
-    ExternalImage_Create: function(FreeOnTerminate: Boolean): Pointer; cdecl;
+    ExternalImage_Create: function(AutoResize: Boolean): Pointer; cdecl;
     ExternalImage_SetMemory: procedure(Img: Pointer; Data: PColorBGRA; AWidth, AHeight: Integer); cdecl;
     ExternalImage_Resize: procedure(Img: Pointer; NewWidth, NewHeight: Integer); cdecl;
     ExternalImage_SetUserData: procedure(Img: Pointer; UserData: Pointer); cdecl;

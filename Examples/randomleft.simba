@@ -1,0 +1,15 @@
+const
+  SampleCount = 1000000;
+  Range = 10;
+
+var
+  Hits: TIntegerArray;
+  I: Integer;
+begin
+  SetLength(Hits, Range);
+  for I := 1 to SampleCount do
+    Hits[RandomLeft(0, Range)] += 1;
+
+  for I := 0 to High(Hits) do
+    WriteLn(I, ' was rolled ', Hits[I], ' times (', Round((Hits[I] / SampleCount) * 100, 4), ' percent)');
+end;
