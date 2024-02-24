@@ -33,6 +33,8 @@ type
     FDirty: Boolean;
     FDirtyBox: TBox;
 
+    FAutoResize: Boolean;
+
     procedure CheckInUpdate; inline;
 
     procedure addDirty(b: TBox); inline;
@@ -63,6 +65,7 @@ type
     property Width: Integer read FWidth;
     property Height: Integer read FHeight;
     property UserData: Pointer read GetUserData write SetUserData;
+    property AutoResize: Boolean read FAutoResize write FAutoResize;
 
     property FontName: String read GetFontName write SetFontName;
     property FontSize: Single read GetFontSize write SetFontSize;
@@ -299,6 +302,9 @@ procedure TSimbaExternalImage.Resize(NewWidth, NewHeight: Integer);
 var
   Y: Integer;
 begin
+  if (FWidth = NewWidth) and (FHeight = NewHeight) then
+    Exit;
+
   BeginUpdate();
   try
     FWidth := NewWidth;

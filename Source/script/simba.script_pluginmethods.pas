@@ -45,7 +45,7 @@ type
     SetArrayLength: procedure(TypeInfo: Pointer; var AVar: Pointer; NewLen: NativeInt); cdecl;
     GetArrayLength: function(AVar: Pointer): NativeInt; cdecl;
 
-    ExternalImage_Create: function(FreeOnTerminate: Boolean): Pointer; cdecl;
+    ExternalImage_Create: function(AutoResize: Boolean): Pointer; cdecl;
     ExternalImage_SetMemory: procedure(Img: Pointer; Data: PColorBGRA; AWidth, AHeight: Integer); cdecl;
     ExternalImage_Resize: procedure(Img: Pointer; NewWidth, NewHeight: Integer); cdecl;
     ExternalImage_SetUserData: procedure(Img: Pointer; UserData: Pointer); cdecl;
@@ -209,7 +209,7 @@ begin
     Inc(PtrUInt(AVar), SizeOf(SizeInt));
 
     if (ALen > OldLen) then
-      FillChar(Pointer(PtrInt(AVar) + (OldLen * AElementSize))^, (ALen - OldLen) * AElementSize, 0);
+      FillChar(Pointer(PtrUInt(AVar) + (OldLen * AElementSize))^, (ALen - OldLen) * AElementSize, 0);
   end else
   begin
     Dec(PtrInt(AVar^));
@@ -267,11 +267,12 @@ begin
   Result := DynArraySize(Arr);
 end;
 
-function Plugin_ExternalImage_Create(FreeOnTerminate: Boolean): Pointer; cdecl;
+function Plugin_ExternalImage_Create(AutoResize: Boolean): Pointer; cdecl;
 begin
   Result := TSimbaExternalImage.Create();
-  if FreeOnTerminate then
-    TSimbaExternalImage(Result).FreeOnTerminate := True;
+
+  TSimbaExternalImage(Result).FreeOnTerminate := True;
+  TSimbaExternalImage(Result).AutoResize := AutoResize;
 end;
 
 procedure Plugin_ExternalImage_SetMemory(Img: Pointer; Data: PColorBGRA; AWidth, AHeight: Integer); cdecl;

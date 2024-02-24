@@ -21,6 +21,7 @@ type
     Lib: TLibHandle;
     FileName: String;
     Target: Pointer;
+    DebugImageThread: TThread;
 
     Request: function(Args: PChar): Pointer; cdecl;
     RequestWithDebugImage: function(Args: PChar; out DebugImage: TSimbaExternalImage): Pointer; cdecl;
@@ -66,6 +67,48 @@ implementation
 
 uses
   simba.env, simba.files, simba.script_pluginloader;
+
+type
+  TUpdateDebugImageThread = class(TThread)
+  protected
+    FTarget: TSimbaPluginTarget;
+    FImg: TSimbaExternalImage;
+
+    procedure Execute; override;
+  public
+    constructor Create(Target: TSimbaPluginTarget; Img: TSimbaExternalImage); reintroduce;
+  end;
+
+procedure TUpdateDebugImageThread.Execute;
+var
+  CurrentWidth, CurrentHeight, NewWidth, NewHeight: Integer;
+begin
+  CurrentWidth := 0;
+  CurrentHeight := 0;
+
+  while (not Terminated) do
+  begin
+    FTarget.GetDimensions(FTarget.Target, NewWidth, NewHeight);
+
+    if (NewWidth <> CurrentWidth) or (NewHeight <> CurrentHeight) then
+    begin
+      CurrentWidth := NewWidth;
+      CurrentHeight := NewHeight;
+
+      FImg.Resize(CurrentWidth, CurrentHeight);
+    end;
+
+    Sleep(1000);
+  end;
+end;
+
+constructor TUpdateDebugImageThread.Create(Target: TSimbaPluginTarget; Img: TSimbaExternalImage);
+begin
+  inherited Create(False, 512*512);
+
+  FTarget := Target;
+  FImg := Img;
+end;
 
 procedure CheckExported(const MethodName: String; const Method: Pointer); inline;
 begin
@@ -116,7 +159,7 @@ begin
   begin
     CheckExported('SimbaPluginTarget_Request', Request);
 
-    Result.Target := Result.Request(PChar(Args));
+    Target := Result.Request(PChar(Args));
   end;
 end;
 
@@ -128,7 +171,8 @@ begin
     CheckExported('SimbaPluginTarget_RequestWithDebugImage', RequestWithDebugImage);
 
     Target := Result.RequestWithDebugImage(PChar(Args), DebugImage);
-    WriteLn('Target is: ', HexStr(Target));
+    if Assigned(DebugImage) and DebugImage.AutoResize then
+      DebugImageThread := TUpdateDebugImageThread.Create(Result, DebugImage);
   end;
 end;
 

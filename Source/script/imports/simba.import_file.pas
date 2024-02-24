@@ -27,7 +27,11 @@ File
 File, Path, Directory related methods.
 *)
 
-
+(*
+INIFileWrite
+------------
+> function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean
+*)
 procedure _LapeINIFileWrite(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := INIFileWrite(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^, PString(Params^[3])^);
@@ -37,10 +41,6 @@ end;
 INIFileRead
 -----------
 > function INIFileDelete(FileName: String; Section, Key: String): Boolean
-
-```
-INIFileDelete('Hello World', 'Hello', 'World');
-```
 *)
 procedure _LapeINIFileRead(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
