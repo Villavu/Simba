@@ -124,18 +124,12 @@ end;
 
 function TQuadHelper.ShortSideLen: Integer;
 begin
-  if (Hypot(Left.Y-Top.Y, Left.X-Top.X) < Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X)) then
-    Result := Round(Hypot(Left.Y-Top.Y, Left.X-Top.X) / 2)
-  else
-    Result := Round(Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X) / 2);
+  Result := Round(Min(Hypot(Left.Y-Top.Y, Left.X-Top.X), Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X)));
 end;
 
 function TQuadHelper.LongSideLen: Integer;
 begin
-  if (Hypot(Left.Y-Top.Y, Left.X-Top.X) > Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X)) then
-    Result := Round(Hypot(Left.Y-Top.Y, Left.X-Top.X) / 2)
-  else
-    Result := Round(Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X) / 2);
+  Result := Round(Max(Hypot(Left.Y-Top.Y, Left.X-Top.X), Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X)));
 end;
 
 function TQuadHelper.Mean: TPoint;

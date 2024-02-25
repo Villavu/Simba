@@ -1,0 +1,40 @@
+{$assertions on}
+
+procedure test(atpa: T2DPointArray; expected: T2DPointArray);
+var
+  i: Integer;
+begin
+  Assert(Length(atpa) = Length(expected));
+  for i:=0 to High(expected) do
+    Assert(atpa[i].Equals(expected[i]));
+end;
+
+var
+  a,b,c,d,e: TPointArray;
+  atpa: T2DPointArray;
+begin
+  a += TPointArray.CreateFromBox([10,10,20,20],True);
+  b += TPointArray.CreateFromBox([40,40,60,60],True);
+  c += TPointArray.CreateFromBox([80,80,120,120],True);
+  d += TPointArray.CreateFromBox([140,140,200,200],True);
+  e += TPointArray.CreateFromBox([220,220,320,320],True);
+
+  atpa := [a,b,c,d,e];
+
+  test(atpa.ExcludeSize(550, __LT__), [c,d,e]);
+  test(atpa.ExtractSize(550, __LT__), [a,b]);
+
+  test(atpa.ExcludeSize(550, __GT__), [a,b]);
+  test(atpa.ExtractSize(550, __GT__), [c,d,e]);
+
+  test(atpa.ExcludeSize(1681, __EQ__), [a,b,d,e]);
+  test(atpa.ExtractSize(1681, __EQ__), [c]);
+  test(atpa.ExtractSizeEx(400,1700), [b,c]);
+
+  test(atpa.ExtractDimensions(20,20,40,40), [b,c]);
+  test(atpa.ExtractDimensionsEx(41,41), [d,e]);
+
+  test(atpa.ExcludeDimensions(20,20,40,40), [a,d,e]);
+  test(atpa.ExcludeDimensionsEx(41,41), [a,b,c]);
+end;
+

@@ -40,9 +40,13 @@ type
     function SortByShortSide(LowToHigh: Boolean): T2DPointArray;
     function SortByLongSide(LowToHigh: Boolean): T2DPointArray;
 
-    function ExcludeSize(Len: Integer; KeepIf: EComparator): T2DPointArray; overload;
-    function ExcludeSize(MinLen, MaxLen: Integer): T2DPointArray; overload;
-    function ExcludeSizeEx(MaxLen: Integer): T2DPointArray;
+    function ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+    function ExtractSizeEx(MinLen, MaxLen: Integer): T2DPointArray;
+    function ExtractDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+    function ExtractDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
+
+    function ExcludeSize(Len: Integer; RemoveIf: EComparator): T2DPointArray;
+    function ExcludeSizeEx(MinLen, MaxLen: Integer): T2DPointArray;
     function ExcludeDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
     function ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
 
@@ -122,7 +126,7 @@ var
   I: Integer;
   Weights: TIntegerArray;
 begin
-  Result := Self.ExcludeSize(0, __EQ__);
+  Result := Self.ExtractSize(0, __GT__);
 
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
@@ -136,7 +140,7 @@ var
   I: Integer;
   Weights: TIntegerArray;
 begin
-  Result := Self.ExcludeSize(0, __EQ__);
+  Result := Self.ExtractSize(0, __GT__);
 
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
@@ -150,7 +154,7 @@ var
   I: Integer;
   Weights: TIntegerArray;
 begin
-  Result := Self.ExcludeSize(0, __GT__);
+  Result := Self.ExtractSize(0, __GT__);
 
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
@@ -274,7 +278,7 @@ begin
   Result := Sort(Weights, LowToHigh);
 end;
 
-function T2DPointArrayHelper.ExcludeSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+function T2DPointArrayHelper.ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
 var
   I: Integer;
   Buffer: TSimbaPointArrayBuffer;
@@ -294,7 +298,7 @@ begin
   Result := Buffer.ToArray(False);
 end;
 
-function T2DPointArrayHelper.ExcludeSize(MinLen, MaxLen: Integer): T2DPointArray;
+function T2DPointArrayHelper.ExtractSizeEx(MinLen, MaxLen: Integer): T2DPointArray;
 var
   I: Integer;
   Buffer: TSimbaPointArrayBuffer;
@@ -305,15 +309,10 @@ begin
     if InRange(Length(Self[I]), MinLen, MaxLen) then
       Buffer.Add(Copy(Self[I]));
 
-  Result := Buffer.ToArray(False);;
+  Result := Buffer.ToArray(False);
 end;
 
-function T2DPointArrayHelper.ExcludeSizeEx(MaxLen: Integer): T2DPointArray;
-begin
-  Result := Self.ExcludeSize(0, MaxLen);
-end;
-
-function T2DPointArrayHelper.ExcludeDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+function T2DPointArrayHelper.ExtractDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
 var
   I: Integer;
   Buffer: TSimbaPointArrayBuffer;
@@ -325,8 +324,62 @@ begin
       if InRange(ShortSideLen, MinShortSide, MaxShortSide) and InRange(LongSideLen, MinLongSide, MaxLongSide) then
         Buffer.Add(Copy(Self[I]));
 
-  Result := Buffer.ToArray(False);;
+  Result := Buffer.ToArray(False);
+ end;
+
+function T2DPointArrayHelper.ExtractDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
+begin
+  Result := Self.ExtractDimensions(MinShortSide, MinLongSide, Integer.MaxValue, Integer.MaxValue);
 end;
+
+function T2DPointArrayHelper.ExcludeSize(Len: Integer; RemoveIf: EComparator): T2DPointArray;
+var
+  I: Integer;
+  Buffer: TSimbaPointArrayBuffer;
+begin
+  Buffer.Init(Length(Self));
+
+  for I := 0 to High(Self) do
+    case RemoveIf of
+      __LT__: if not (Length(Self[I]) <  Len) then Buffer.Add(Copy(Self[I]));
+      __GT__: if not (Length(Self[I]) >  Len) then Buffer.Add(Copy(Self[I]));
+      __EQ__: if not (Length(Self[I]) =  Len) then Buffer.Add(Copy(Self[I]));
+      __LE__: if not (Length(Self[I]) <= Len) then Buffer.Add(Copy(Self[I]));
+      __GE__: if not (Length(Self[I]) >= Len) then Buffer.Add(Copy(Self[I]));
+      __NE__: if not (Length(Self[I]) <> Len) then Buffer.Add(Copy(Self[I]));
+    end;
+
+  Result := Buffer.ToArray(False);
+end;
+
+function T2DPointArrayHelper.ExcludeSizeEx(MinLen, MaxLen: Integer): T2DPointArray;
+var
+  I: Integer;
+  Buffer: TSimbaPointArrayBuffer;
+begin
+  Buffer.Init(Length(Self));
+
+  for I := 0 to High(Self) do
+    if not InRange(Length(Self[I]), MinLen, MaxLen) then
+      Buffer.Add(Copy(Self[I]));
+
+  Result := Buffer.ToArray(False);
+end;
+
+function T2DPointArrayHelper.ExcludeDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+var
+  I: Integer;
+  Buffer: TSimbaPointArrayBuffer;
+begin
+  Buffer.Init(Length(Self));
+
+  for I := 0 to High(Self) do
+    with Self[I].MinAreaRect() do
+      if not (InRange(ShortSideLen, MinShortSide, MaxShortSide) and InRange(LongSideLen, MinLongSide, MaxLongSide)) then
+        Buffer.Add(Copy(Self[I]));
+
+  Result := Buffer.ToArray(False);
+ end;
 
 function T2DPointArrayHelper.ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
 begin
@@ -450,7 +503,6 @@ begin
 
   Result := Buffer.ToArray(False);;
 end;
-
 
 end.
 

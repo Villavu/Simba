@@ -193,33 +193,63 @@ begin
 end;
 
 (*
+T2DPointArray.ExtractSize
+-------------------------
+> function T2DPointArray.ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+*)
+procedure _LapeATPA_ExtractSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  P2DPointArray(Result)^ := P2DPointArray(Params^[0])^.ExtractSize(PInteger(Params^[1])^, PComparator(Params^[2])^);
+end;
+
+(*
+T2DPointArray.ExtractSizeEx
+---------------------------
+> function T2DPointArray.ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+*)
+procedure _LapeATPA_ExtractSizeEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  P2DPointArray(Result)^ := P2DPointArray(Params^[0])^.ExtractSizeEx(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
+T2DPointArray.ExtractDimensions
+-------------------------------
+> function T2DPointArray.ExtractDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+*)
+procedure _LapeATPA_ExtractDimensions(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  P2DPointArray(Result)^ := P2DPointArray(Params^[0])^.ExtractDimensions(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+(*
+T2DPointArray.ExtractDimensionsEx
+---------------------------------
+> function T2DPointArray.ExtractDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
+*)
+procedure _LapeATPA_ExtractDimensionsEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  P2DPointArray(Result)^ := P2DPointArray(Params^[0])^.ExtractDimensionsEx(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
 T2DPointArray.ExcludeSize
 -------------------------
 > function T2DPointArray.ExcludeSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
 *)
-procedure _LapeATPA_ExcludeSize1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeATPA_ExcludeSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := P2DPointArray(Params^[0])^.ExcludeSize(PInteger(Params^[1])^, PComparator(Params^[2])^);
 end;
 
 (*
-T2DPointArray.ExcludeSize
--------------------------
-> function T2DPointArray.ExcludeSize(MinLen, MaxLen: Integer): T2DPointArray;
-*)
-procedure _LapeATPA_ExcludeSize2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  P2DPointArray(Result)^ := P2DPointArray(Params^[0])^.ExcludeSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
 T2DPointArray.ExcludeSizeEx
 ---------------------------
-> function T2DPointArray.ExcludeSizeEx(MaxLen: Integer): T2DPointArray;
+> function T2DPointArray.ExcludeSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
 *)
 procedure _LapeATPA_ExcludeSizeEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  P2DPointArray(Result)^ := P2DPointArray(Params^[0])^.ExcludeSizeEx(PInteger(Params^[1])^);
+  P2DPointArray(Result)^ := P2DPointArray(Params^[0])^.ExcludeSizeEx(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -235,7 +265,7 @@ end;
 (*
 T2DPointArray.ExcludeDimensionsEx
 ---------------------------------
-> function T2DPointArray.ExcludeDimensionsEx(MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+> function T2DPointArray.ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
 *)
 procedure _LapeATPA_ExcludeDimensionsEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -353,9 +383,13 @@ begin
     addGlobalFunc('function T2DPointArray.SortByShortSide(LowToHigh: Boolean): T2DPointArray', @_LapeATPA_SortByShortSide);
     addGlobalFunc('function T2DPointArray.SortByLongSide(LowToHigh: Boolean): T2DPointArray', @_LapeATPA_SortByLongSide);
 
-    addGlobalFunc('function T2DPointArray.ExcludeSize(Len: Integer; KeepIf: EComparator): T2DPointArray; overload', @_LapeATPA_ExcludeSize1);
-    addGlobalFunc('function T2DPointArray.ExcludeSize(MinLen, MaxLen: Integer): T2DPointArray; overload', @_LapeATPA_ExcludeSize2);
-    addGlobalFunc('function T2DPointArray.ExcludeSizeEx(MaxLen: Integer): T2DPointArray', @_LapeATPA_ExcludeSizeEx);
+    addGlobalFunc('function T2DPointArray.ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray', @_LapeATPA_ExtractSize);
+    addGlobalFunc('function T2DPointArray.ExtractSizeEx(MinLen, MaxLen: Integer): T2DPointArray', @_LapeATPA_ExtractSizeEx);
+    addGlobalFunc('function T2DPointArray.ExtractDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray', @_LapeATPA_ExtractDimensions);
+    addGlobalFunc('function T2DPointArray.ExtractDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray', @_LapeATPA_ExtractDimensionsEx);
+
+    addGlobalFunc('function T2DPointArray.ExcludeSize(Len: Integer; RemoveIf: EComparator): T2DPointArray', @_LapeATPA_ExcludeSize);
+    addGlobalFunc('function T2DPointArray.ExcludeSizeEx(MinLen, MaxLen: Integer): T2DPointArray', @_LapeATPA_ExcludeSizeEx);
     addGlobalFunc('function T2DPointArray.ExcludeDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray', @_LapeATPA_ExcludeDimensions);
     addGlobalFunc('function T2DPointArray.ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray', @_LapeATPA_ExcludeDimensionsEx);
 
