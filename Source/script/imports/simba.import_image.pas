@@ -40,9 +40,29 @@ begin
 end;
 
 (*
-TImage.GetData
---------------
-> function TImage.GetData: PColorBGRA;
+TImage.SplitChannels
+--------------------
+> procedure TImage.SplitChannels(var B,G,R,A: TByteArray);
+*)
+procedure _LapeImage_SplitChannels1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.SplitChannels(PByteArray(Params^[1])^, PByteArray(Params^[2])^, PByteArray(Params^[3])^, PByteArray(Params^[4])^);
+end;
+
+(*
+TImage.SplitChannels
+--------------------
+> procedure TImage.SplitChannels(var B,G,R: TByteArray);
+*)
+procedure _LapeImage_SplitChannels2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.SplitChannels(PByteArray(Params^[1])^, PByteArray(Params^[2])^, PByteArray(Params^[3])^);
+end;
+
+(*
+TImage.Data
+-----------
+> function TImage.Data: PColorBGRA;
 *)
 procedure _LapeImage_Data_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -120,9 +140,9 @@ begin
 end;
 
 (*
-TImage.GetWidth
----------------
-> function TImage.GetWidth: Integer;
+TImage.Width
+------------
+> function TImage.Width: Integer;
 *)
 procedure _LapeImage_Width_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -130,9 +150,9 @@ begin
 end;
 
 (*
-TImage.GetHeight
-----------------
-> function TImage.GetHeight: Integer;
+TImage.Height
+-------------
+> function TImage.Height: Integer;
 *)
 procedure _LapeImage_Height_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -799,9 +819,9 @@ begin
 end;
 
 (*
-TImage.GetCenter
-----------------
-> function TImage.GetCenter: TPoint;
+TImage.Center
+-------------
+> function TImage.Center: TPoint;
 *)
 procedure _LapeImage_Center_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -1315,6 +1335,9 @@ begin
     addGlobalFunc('function TImage.Data: PColorBGRA', @_LapeImage_Data_Read);
     addGlobalFunc('function TImage.Center: TPoint', @_LapeImage_Center_Read);
     addGlobalFunc('function TImage.InImage(X, Y: Integer): Boolean', @_LapeImage_InImage);
+
+    addGlobalFunc('procedure TImage.SplitChannels(var B,G,R,A: TByteArray); overload', @_LapeImage_SplitChannels1);
+    addGlobalFunc('procedure TImage.SplitChannels(var B,G,R: TByteArray); overload', @_LapeImage_SplitChannels2);
 
     addGlobalFunc('function TImage.Create: TImage; static; overload', @_LapeImage_Create);
     addGlobalFunc('function TImage.Create(Width, Height: Integer): TImage; static; overload', @_LapeImage_CreateEx);

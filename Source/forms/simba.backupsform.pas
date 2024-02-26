@@ -122,7 +122,7 @@ var
 begin
   for FileName in TSimbaDir.DirSearch(SimbaEnv.BackupsPath, '*.zip') do
   begin
-    CurrentNode := TreeView.AddNode(TSimbaPath.PathExtractNameWithoutExt(FileName), IMG_FOLDER);
+    CurrentNode := TreeView.AddNode(TSimbaPath.PathExtractName(FileName).Replace('.zip', ''), IMG_FOLDER);
 
     UnZipper := TUnZipper.Create();
     try

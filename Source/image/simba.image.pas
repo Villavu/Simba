@@ -204,7 +204,9 @@ type
     procedure Clear(Box: TBox); overload;
     procedure ClearInverted(Box: TBox);
 
-    procedure SplitChannels(out B,G,R,A: TByteArray);
+    procedure SplitChannels(var B,G,R,A: TByteArray); overload;
+    procedure SplitChannels(var B,G,R: TByteArray); overload;
+
     function GetColors: TColorArray;
     procedure ReplaceColor(OldColor, NewColor: TColor);
     procedure ReplaceColors(OldColors, NewColors: TColorArray);
@@ -1110,25 +1112,65 @@ begin
   Self.Clear(TBox.Create(Box.X2 + 1, Box.Y2 + 1, FWidth-1,   FHeight - 1)); //Btm Right
 end;
 
-procedure TSimbaImage.SplitChannels(out B,G,R,A: TByteArray);
+procedure TSimbaImage.SplitChannels(var B,G,R,A: TByteArray);
 var
-  I: Integer;
-  Ptr: PColorBGRA;
+  Upper: PtrUInt;
+  Src: PColorBGRA;
+  DestB, DestG, DestR, DestA: PByte;
 begin
   SetLength(B, FWidth*FHeight);
   SetLength(G, FWidth*FHeight);
   SetLength(R, FWidth*FHeight);
   SetLength(A, FWidth*FHeight);
 
-  Ptr := FData;
-  for I := 0 to FWidth * FHeight - 1 do
-  begin
-    B[I] := Ptr^.B;
-    G[I] := Ptr^.G;
-    R[I] := Ptr^.R;
-    A[I] := Ptr^.A;
+  DestB := @B[0];
+  DestG := @G[0];
+  DestR := @R[0];
+  DestA := @A[0];
 
-    Inc(Ptr);
+  Src := FData;
+  Upper := PtrUInt(FData) + FDataSize;
+  while (PtrUInt(Src) < Upper) do
+  begin
+    DestB^ := Src^.B;
+    DestG^ := Src^.G;
+    DestR^ := Src^.R;
+    DestA^ := Src^.A;
+
+    Inc(Src);
+    Inc(DestB);
+    Inc(DestG);
+    Inc(DestR);
+    Inc(DestA);
+  end;
+end;
+
+procedure TSimbaImage.SplitChannels(var B,G,R: TByteArray);
+var
+  Upper: PtrUInt;
+  Src: PColorBGRA;
+  DestB, DestG, DestR: PByte;
+begin
+  SetLength(B, FWidth*FHeight);
+  SetLength(G, FWidth*FHeight);
+  SetLength(R, FWidth*FHeight);
+
+  DestB := @B[0];
+  DestG := @G[0];
+  DestR := @R[0];
+
+  Src := FData;
+  Upper := PtrUInt(FData) + FDataSize;
+  while (PtrUInt(Src) < Upper) do
+  begin
+    DestB^ := Src^.B;
+    DestG^ := Src^.G;
+    DestR^ := Src^.R;
+
+    Inc(Src);
+    Inc(DestB);
+    Inc(DestG);
+    Inc(DestR);
   end;
 end;
 
