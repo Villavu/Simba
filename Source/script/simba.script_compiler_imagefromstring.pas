@@ -51,10 +51,15 @@ begin
   if (Param.BaseType <> ltAnsiString) then
     LapeExceptionFmt(lpeExpected, ['String parameter'], DocPos);
 
-  Result := resType().NewGlobalVarP();
+  try
+    Result := resType().NewGlobalVarP();
 
-  PSimbaImage(Result.Ptr)^ := TSimbaImage.CreateFromString(PAnsiString(Param.Ptr)^);
-  PSimbaImage(Result.Ptr)^.FreeOnTerminate := True;
+    PSimbaImage(Result.Ptr)^ := TSimbaImage.CreateFromString(PAnsiString(Param.Ptr)^);
+    PSimbaImage(Result.Ptr)^.FreeOnTerminate := True;
+  except
+    on E: Exception do
+      LapeException(E.Message, DocPos);
+  end;
 end;
 
 constructor TLapeTree_InternalMethod_ImageFromString.Create(ACompiler: TLapeCompilerBase; ADocPos: PDocPos);

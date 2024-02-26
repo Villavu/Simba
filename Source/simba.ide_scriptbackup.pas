@@ -6,7 +6,7 @@
 
   Automatically save copies of editor contents to a zipped file.
 }
-unit simba.scriptbackup;
+unit simba.ide_scriptbackup;
 
 {$i simba.inc}
 
@@ -21,7 +21,7 @@ type
   protected
     FTimer: TTimer;
     FFiles: array of record
-      FileName: String;
+      Name: String;
       Contents: String;
     end;
 
@@ -53,9 +53,9 @@ begin
   SetLength(FFiles, SimbaScriptTabsForm.TabCount);
   for I := 0 to SimbaScriptTabsForm.TabCount - 1 do
   begin
-    FFiles[I].FileName := SimbaScriptTabsForm.Tabs[I].ScriptFileName;
-    if (FFiles[I].FileName = '') then
-      FFiles[I].FileName := 'Untitled';
+    FFiles[I].Name := SimbaScriptTabsForm.Tabs[I].ScriptTitle;
+    if (FFiles[I].Name = '') then
+      FFiles[I].Name := 'Untitled';
 
     FFiles[I].Contents := SimbaScriptTabsForm.Tabs[I].Script;
   end;
@@ -69,15 +69,21 @@ var
   ZipPath: String;
 begin
   for I := 0 to High(FFiles) do
-  begin
-    ZipPath := TSimbaPath.PathJoin([SimbaEnv.BackupsPath, TSimbaPath.PathExtractNameWithoutExt(FFiles[I].FileName) + '.zip']);
+  try
+    if (FFiles[I].Contents = '') then
+      Continue;
+
+    ZipPath := TSimbaPath.PathJoin([SimbaEnv.BackupsPath, FFiles[I].Name + '.zip']);
     if ZipHasEntryCrc(ZipPath, Crc32String(FFiles[I].Contents)) then
       Continue;
 
     if ZipAppend(ZipPath, '', FFiles[I].Contents) then
-      DebugLn('[SimbaScriptBackup]: Backed up %s', [FFiles[I].FileName])
+      DebugLn('Backed up %s', [FFiles[I].Name])
     else
-      DebugLn('[SimbaScriptBackup]: Failed to backup %s', [FFiles[I].FileName]);
+      DebugLn('Failed to backup %s', [FFiles[I].Name]);
+  except
+    on E: Exception do
+      DebugLn('Failed to backup "%s"', [E.Message]);
   end;
 end;
 

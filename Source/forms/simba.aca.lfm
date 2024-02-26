@@ -1,11 +1,11 @@
 object SimbaACAForm: TSimbaACAForm
-  Left = 3110
-  Height = 886
-  Top = 360
+  Left = 500
+  Height = 888
+  Top = 314
   Width = 1076
   Caption = 'Auto Color Aid'
-  ClientHeight = 0
-  ClientWidth = 0
+  ClientHeight = 888
+  ClientWidth = 1076
   Constraints.MinHeight = 400
   Constraints.MinWidth = 500
   DesignTimePPI = 120
@@ -19,7 +19,7 @@ object SimbaACAForm: TSimbaACAForm
   LCLVersion = '3.0.0.3'
   object PanelMain: TPanel
     Left = 0
-    Height = 886
+    Height = 888
     Top = 0
     Width = 713
     Align = alClient
@@ -30,13 +30,13 @@ object SimbaACAForm: TSimbaACAForm
     AnchorSideLeft.Control = LabelMulti1
     AnchorSideLeft.Side = asrBottom
     Left = 713
-    Height = 886
+    Height = 888
     Top = 0
     Width = 363
     Align = alRight
     Anchors = [akTop, akRight]
     AutoSize = True
-    ClientHeight = 886
+    ClientHeight = 888
     ClientWidth = 363
     TabOrder = 1
     object ColorListBox: TColorListBox
@@ -47,7 +47,7 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonRemoveColor
       Left = 7
-      Height = 451
+      Height = 453
       Top = 7
       Width = 349
       Style = []
@@ -70,7 +70,7 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = Panel2
       Left = 1
       Height = 25
-      Top = 818
+      Top = 820
       Width = 361
       Anchors = [akLeft, akRight, akBottom]
       BevelStyle = bsRaised
@@ -108,7 +108,7 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = Divider2
       Left = 7
       Height = 292
-      Top = 526
+      Top = 528
       Width = 349
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -400,7 +400,7 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = Divider1
       Left = 7
       Height = 35
-      Top = 464
+      Top = 466
       Width = 172
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -419,7 +419,7 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = Divider1
       Left = 185
       Height = 35
-      Top = 464
+      Top = 466
       Width = 171
       Anchors = [akLeft, akRight, akBottom]
       AutoSize = True
@@ -435,7 +435,7 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideTop.Side = asrBottom
       Left = 181
       Height = 1
-      Top = 464
+      Top = 466
       Width = 1
       BevelOuter = bvNone
       TabOrder = 6
@@ -448,7 +448,7 @@ object SimbaACAForm: TSimbaACAForm
       AnchorSideBottom.Control = Panel1
       Left = 1
       Height = 25
-      Top = 501
+      Top = 503
       Width = 361
       Anchors = [akLeft, akRight, akBottom]
       BorderSpacing.Top = 2
@@ -459,7 +459,7 @@ object SimbaACAForm: TSimbaACAForm
     object Panel2: TPanel
       Left = 1
       Height = 42
-      Top = 843
+      Top = 845
       Width = 361
       Align = alBottom
       AutoSize = True

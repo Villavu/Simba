@@ -11,7 +11,7 @@ object SimbaBackupsForm: TSimbaBackupsForm
   OnShow = FormShow
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '3.0.0.3'
   object LeftPanel: TPanel
     Left = 0
     Height = 450

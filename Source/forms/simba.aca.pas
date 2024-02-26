@@ -118,11 +118,19 @@ type
 
 implementation
 
-{$R *.lfm}
-
 uses
   Clipbrd, TypInfo, LCLType,
   simba.windowhandle, simba.image, simba.colormath_aca, simba.matrix_float, simba.dialog;
+
+function FormatColor(Color: TColor): String; overload;
+begin
+  Result := '$' + IntToHex(Color, 6);
+end;
+
+function FormatColor(Color: String): String; overload;
+begin
+  Result := FormatColor(StrToIntDef(Color, 0));
+end;
 
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 begin
@@ -130,9 +138,9 @@ begin
   FImageZoom.Move(FImageBox.Background.Canvas, X, Y);
 
   with FImageBox.Background.Canvas.Pixels[X, Y].ToRGB(), FImageBox.Background.Canvas.Pixels[X, Y].ToHSL() do
-    FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
-                         Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
-                         Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
+    FZoomInfo.Caption := Format('Color: %s', [FormatColor(FImageBox.Background.Canvas.Pixels[X, Y])]) + LineEnding +
+                         Format('RGB: %d, %d, %d', [R, G, B])                                      + LineEnding +
+                         Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                                + LineEnding;
 end;
 
 procedure TSimbaACAForm.ClientImageMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -144,13 +152,13 @@ begin
     Pixel := FImageBox.Background.Canvas.Pixels[X, Y];
 
     if ColorListBox.Items.IndexOf(Pixel.ToString()) = -1 then
-      ColorListBox.ItemIndex := ColorListBox.Items.AddObject(Pixel.ToString(), TObject(PtrUInt(Pixel)));
+      ColorListBox.ItemIndex := ColorListBox.Items.AddObject(FormatColor(Pixel), TObject(PtrUInt(Pixel)));
   end;
 end;
 
 procedure TSimbaACAForm.MenuItemCopyBestColorClick(Sender: TObject);
 begin
-  Clipboard.AsText := Format('ColorTolerance($%s, %s, %s, [%s, %s, %s])', [IntToHex(StrToIntDef(BestColorEdit.Text, 0), 6), BestToleranceEdit.Text, GetColorSpaceStr(), BestMulti1Edit.Text, BestMulti2Edit.Text, BestMulti3Edit.Text]);
+  Clipboard.AsText := Format('ColorTolerance(%s, %s, %s, [%s, %s, %s])', [FormatColor(StrToIntDef(BestColorEdit.Text, 0)), BestToleranceEdit.Text, GetColorSpaceStr(), BestMulti1Edit.Text, BestMulti2Edit.Text, BestMulti3Edit.Text]);
 end;
 
 procedure TSimbaACAForm.MenuItemLoadHSLCircleClick(Sender: TObject);
@@ -332,7 +340,7 @@ begin
   begin
     Best := GetBestColor(GetColorSpace(), Colors);
 
-    BestColorEdit.Text := '$' + IntToHex(Best.Color, 6);
+    BestColorEdit.Text := FormatColor(Best.Color);
     BestToleranceEdit.Text := Format('%.3f', [Best.Tolerance]);
     BestMulti1Edit.Text := Format('%.3f', [Best.Mods[0]]);
     BestMulti2Edit.Text := Format('%.3f', [Best.Mods[1]]);
@@ -490,5 +498,7 @@ begin
     Free();
   end;
 end;
+
+{$R *.lfm}
 
 end.

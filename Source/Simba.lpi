@@ -651,7 +651,7 @@
         <ResourceBaseClass Value="Frame"/>
       </Unit49>
       <Unit50>
-        <Filename Value="simba.scriptbackup.pas"/>
+        <Filename Value="simba.ide_scriptbackup.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit50>
       <Unit51>

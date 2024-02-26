@@ -262,6 +262,7 @@ uses
 
   simba.ide_initialization, simba.ide_events, simba.ide_utils,
   simba.ide_mainstatusbar, simba.ide_mainmenubar, simba.ide_maintoolbar,
+  simba.ide_scriptbackup,
 
   simba.shapeboxform, simba.openexampleform, simba.colorpickerhistoryform,
   simba.debugimageform, simba.imagetostringform, simba.aboutform,
@@ -271,7 +272,7 @@ uses
 
   simba.scripttab, simba.associate,
   simba.aca, simba.dtmeditor, simba.env, simba.dockinghelpers, simba.nativeinterface,
-  simba.scriptformatter, simba.theme, simba.scriptbackup,
+  simba.scriptformatter, simba.theme,
   simba.threading, simba.editor;
 
 procedure TSimbaForm.HandleException(Sender: TObject; E: Exception);
