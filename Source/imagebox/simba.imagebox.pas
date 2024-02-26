@@ -622,7 +622,7 @@ begin
     FVertScroll.SmallChange := FZoomPixels;
     FVertScroll.LargeChange := FZoomPixels;
     FVertScroll.PageSize := ClientHeight - FHorzScroll.Height;
-    FVertScroll.Max := Max(0, ((H - ClientHeight) + FHorzScroll.Height) + FHorzScroll.PageSize);
+    FVertScroll.Max := Max(0, ((H - ClientHeight) + FHorzScroll.Height) + FVertScroll.PageSize);
     FVertScroll.Invalidate;
   end;
 
