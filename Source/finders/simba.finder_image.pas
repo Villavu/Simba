@@ -19,14 +19,14 @@ uses
   simba.base, simba.colormath, simba.colormath_distance, simba.target,
   simba.image, simba.colormath_distance_unrolled, simba.simplelock;
 
-function FindBitmapOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;
-                            Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray;
+function FindImageOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;
+                           Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray;
 
-function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit;
-                            Image: TSimbaImage;
-                            ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers;
-                            Buffer: PColorBGRA; BufferWidth: Integer;
-                            SearchWidth, SearchHeight: Integer): TPointArray;
+function FindImageOnBuffer(var Limit: TSimpleThreadsafeLimit;
+                           Image: TSimbaImage;
+                           ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers;
+                           Buffer: PColorBGRA; BufferWidth: Integer;
+                           SearchWidth, SearchHeight: Integer): TPointArray;
 
 var
   BitmapFinderMultithreadOpts: record
@@ -53,7 +53,7 @@ begin
         Exit(I);
   end;
 
-  // not possible to slice into at least `MatchTemplateMT_SliceHeight` pixels
+  // not possible to slice into at least `SliceHeight` pixels
 end;
 
 const
@@ -96,7 +96,7 @@ begin
   end;
 end;
 
-function FindBitmapOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox; Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
+function FindImageOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox; Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
 var
   Buffer: PColorBGRA;
   BufferWidth: Integer;
@@ -109,7 +109,7 @@ var
   var
     TPA: TPointArray;
   begin
-    TPA := FindBitmapOnBuffer(
+    TPA := FindImageOnBuffer(
       Limit,
       Image, Formula, Tolerance, Multipliers,
       @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + Image.Height
@@ -139,14 +139,14 @@ begin
       SetLength(Result, MaxToFind);
 
     {$IFDEF SIMBA_BENCHMARKS}
-    DebugLn('FindBitmap: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
+    DebugLn('FindImage: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
     {$ENDIF}
   finally
     Target.FreeImageData(Buffer);
   end;
 end;
 
-function FindBitmapOnBuffer(var Limit: TSimpleThreadsafeLimit; Image: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
+function FindImageOnBuffer(var Limit: TSimpleThreadsafeLimit; Image: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
 var
   BitmapColors: PByte;
 
@@ -236,9 +236,6 @@ begin
         CompareFunc := TColorDistanceFunc(@DistanceDeltaE_UnRolled);
         MaxDistance := DistanceDeltaE_Max(Multipliers);
       end;
-
-    else
-      SimbaException('FindBitmapOnBuffer: Formula invalid!');
   end;
 
   BitmapColors := ConvertBitmapColors(Image, ColorSpace);
@@ -276,7 +273,7 @@ end;
 
 initialization
   BitmapFinderMultithreadOpts.Enabled     := True;
-  BitmapFinderMultithreadOpts.SliceHeight := 125;
+  BitmapFinderMultithreadOpts.SliceHeight := 250;
   BitmapFinderMultithreadOpts.SliceWidth  := 250;
 
 end.

@@ -31,7 +31,7 @@ type
   private
     FTarget: TSimbaTarget;
 
-    function GetDataAsBitmap(var Bounds: TBox; out Bitmap: TSimbaImage): Boolean;
+    function GetDataAsBitmap(var Bounds: TBox; out Image: TSimbaImage): Boolean;
   public
     function FindDTMEx(DTM: TDTM; MaxToFind: Integer; Bounds: TBox): TPointArray;
     function FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; Bounds: TBox): TPointArray;
@@ -39,11 +39,14 @@ type
     function FindDTM(DTM: TDTM; Bounds: TBox): TPoint;
     function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox): TPoint;
 
-    function FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
-    function FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
+    function FindImageEx(Image: TSimbaImage; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
+    function FindImageEx(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray; overload;
 
-    function FindImage(Bitmap: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint; overload;
-    function FindImage(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPoint; overload;
+    function FindImage(Image: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint; overload;
+    function FindImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPoint; overload;
+
+    function HasImage(Image: TSimbaImage; Tolerance: Single; MinCount: Integer; Bounds: TBox): Boolean; overload;
+    function HasImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer; Bounds: TBox): Boolean; overload;
 
     function MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
 
@@ -74,7 +77,8 @@ type
     function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray; overload;
     function FindEdges(MinDiff: Single; Bounds: TBox): TPointArray; overload;
 
-    function FindTemplate(Templ: TSimbaImage; MinMatch: Single; Bounds: TBox): TPoint;
+    function FindTemplate(Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
+    function HasTemplate(Templ: TSimbaImage; MinMatch: Single; Bounds: TBox): Boolean;
 
     property Target: TSimbaTarget read FTarget write FTarget;
 
@@ -88,7 +92,7 @@ uses
   simba.finder_color, simba.finder_image, simba.finder_dtm,
   simba.arraybuffer, simba.matchtemplate;
 
-function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Bitmap: TSimbaImage): Boolean;
+function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Image: TSimbaImage): Boolean;
 var
   Data: PColorBGRA = nil;
   DataWidth: Integer;
@@ -98,9 +102,9 @@ begin
 
   if Result then
   begin
-    Bitmap := TSimbaImage.Create(Bounds.Width, Bounds.Height);
-    for Y := 0 to Bitmap.Height - 1 do
-      Move(Data[Y * DataWidth], Bitmap.Data[Y * Bitmap.Width], Bitmap.Width * SizeOf(TColorBGRA));
+    Image := TSimbaImage.Create(Bounds.Width, Bounds.Height);
+    for Y := 0 to Image.Height - 1 do
+      Move(Data[Y * DataWidth], Image.Data[Y * Image.Width], Image.Width * SizeOf(TColorBGRA));
 
     FTarget.FreeImageData(Data);
   end;
@@ -138,36 +142,46 @@ begin
     Result := TPoint.Create(-1, -1);
 end;
 
-function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray;
+function TSimbaFinder.FindImageEx(Image: TSimbaImage; Tolerance: Single; MaxToFind: Integer; Bounds: TBox): TPointArray;
 begin
-  Result := FindBitmapOnTarget(FTarget, Bitmap, Bounds, DefaultColorSpace, Tolerance, DefaultMultipliers, MaxToFind);
+  Result := FindImageOnTarget(FTarget, Image, Bounds, DefaultColorSpace, Tolerance, DefaultMultipliers, MaxToFind);
 end;
 
-function TSimbaFinder.FindImageEx(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray;
+function TSimbaFinder.FindImageEx(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; Bounds: TBox): TPointArray;
 begin
-  Result := FindBitmapOnTarget(FTarget, Bitmap, Bounds, ColorSpace, Tolerance, Multipliers, MaxToFind);
+  Result := FindImageOnTarget(FTarget, Image, Bounds, ColorSpace, Tolerance, Multipliers, MaxToFind);
 end;
 
-function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;
+function TSimbaFinder.FindImage(Image: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;
 var
   TPA: TPointArray;
 begin
-  TPA := FindBitmapOnTarget(FTarget, Bitmap, Bounds, DefaultColorSpace, Tolerance, DefaultMultipliers, 1);
+  TPA := FindImageOnTarget(FTarget, Image, Bounds, DefaultColorSpace, Tolerance, DefaultMultipliers, 1);
   if (Length(TPA) > 0) then
     Result := TPA[0]
   else
     Result := TPoint.Create(-1, -1);
 end;
 
-function TSimbaFinder.FindImage(Bitmap: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPoint;
+function TSimbaFinder.FindImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPoint;
 var
   TPA: TPointArray;
 begin
-  TPA := FindBitmapOnTarget(FTarget, Bitmap, Bounds, ColorSpace, Tolerance, Multipliers, 1);
+  TPA := FindImageOnTarget(FTarget, Image, Bounds, ColorSpace, Tolerance, Multipliers, 1);
   if (Length(TPA) > 0) then
     Result := TPA[0]
   else
     Result := TPoint.Create(-1, -1);
+end;
+
+function TSimbaFinder.HasImage(Image: TSimbaImage; Tolerance: Single; MinCount: Integer; Bounds: TBox): Boolean;
+begin
+  Result := Length(FindImageOnTarget(FTarget, Image, Bounds, DefaultColorSpace, Tolerance, DefaultMultipliers, MinCount)) >= MinCount;
+end;
+
+function TSimbaFinder.HasImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer; Bounds: TBox): Boolean;
+begin
+  Result := Length(FindImageOnTarget(FTarget, Image, Bounds, ColorSpace, Tolerance, Multipliers, MinCount)) >= MinCount;
 end;
 
 function TSimbaFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
@@ -207,17 +221,17 @@ end;
 
 function TSimbaFinder.HasColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer; Bounds: TBox): Boolean;
 begin
-  Result := HasColorOnTarget(FTarget, Bounds, ColorSpace, Color, Tolerance, Multipliers, MinCount);
+  Result := CountColorsOnTarget(FTarget, Bounds, ColorSpace, Color, Tolerance, Multipliers, MinCount) >= MinCount;
 end;
 
 function TSimbaFinder.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer; Bounds: TBox): Boolean;
 begin
-  Result := HasColorOnTarget(FTarget, Bounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers, MinCount);
+  Result := CountColorsOnTarget(FTarget, Bounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers, MinCount) >= MinCount;
 end;
 
 function TSimbaFinder.HasColor(Color: TColorTolerance; MinCount: Integer; Bounds: TBox): Boolean;
 begin
-  Result := HasColorOnTarget(FTarget, Bounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers, MinCount);
+  Result := CountColorsOnTarget(FTarget, Bounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers, MinCount) >= MinCount;
 end;
 
 function TSimbaFinder.GetColor(X, Y: Integer): TColor;
@@ -386,41 +400,41 @@ end;
 
 function TSimbaFinder.AverageBrightness(Area: TBox): Integer;
 var
-  Bitmap: TSimbaImage;
+  Image: TSimbaImage;
   X, Y, Sum: Integer;
 begin
   Result := 0;
 
-  if GetDataAsBitmap(Area, Bitmap) then
+  if GetDataAsBitmap(Area, Image) then
   try
-    for Y := 0 to Bitmap.Height - 1 do
+    for Y := 0 to Image.Height - 1 do
     begin
       Sum := 0;
-      for X := 0 to Bitmap.Width - 1 do
-        with Bitmap.Data[Y * Bitmap.Width + X] do
+      for X := 0 to Image.Width - 1 do
+        with Image.Data[Y * Image.Width + X] do
           Sum += Round((R + G + B) / 3 * 0.392);
 
-      Result += Sum div Bitmap.Width;
+      Result += Sum div Image.Width;
     end;
 
-    Result := Round(Result / Bitmap.Height);
+    Result := Round(Result / Image.Height);
   finally
-    Bitmap.Free();
+    Image.Free();
   end;
 end;
 
 function TSimbaFinder.PeakBrightness(Area: TBox): Integer;
 var
-  Bitmap: TSimbaImage;
+  Image: TSimbaImage;
   X, Y: Integer;
 begin
   Result := 0;
 
-  if GetDataAsBitmap(Area, Bitmap) then
+  if GetDataAsBitmap(Area, Image) then
   try
-    for Y := 0 to Bitmap.Height - 1 do
-      for X := 0 to Bitmap.Width - 1 do
-        with Bitmap.Data[Y * Bitmap.Width + X] do
+    for Y := 0 to Image.Height - 1 do
+      for X := 0 to Image.Width - 1 do
+        with Image.Data[Y * Image.Width + X] do
         begin
           if (R > Result) then Result := R;
           if (G > Result) then Result := G;
@@ -429,30 +443,30 @@ begin
 
     Result := Round(Result / 255 * 100);
   finally
-    Bitmap.Free();
+    Image.Free();
   end;
 end;
 
 function TSimbaFinder.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray;
 var
-  Bitmap: TSimbaImage;
+  Image: TSimbaImage;
   X, Y ,W, H: Integer;
   Buffer: TSimbaPointBuffer;
   First, Second, Third: TColor;
 begin
   Buffer.Init();
 
-  if GetDataAsBitmap(Bounds, Bitmap) then
+  if GetDataAsBitmap(Bounds, Image) then
   try
-    W := Bitmap.Width - 2;
-    H := Bitmap.Height - 2;
+    W := Image.Width - 2;
+    H := Image.Height - 2;
 
     for Y := 0 to H do
       for X := 0 to W do
       begin
-        First  := Bitmap.Data[Y*Bitmap.Width+X].ToColor();
-        Second := Bitmap.Data[Y*Bitmap.Width+(X+1)].ToColor();
-        Third  := Bitmap.Data[(Y+1)*Bitmap.Width+X].ToColor();
+        First  := Image.Data[Y*Image.Width+X].ToColor();
+        Second := Image.Data[Y*Image.Width+(X+1)].ToColor();
+        Third  := Image.Data[(Y+1)*Image.Width+X].ToColor();
 
         if (not SimilarColors(First, Second, MinDiff, ColorSpace, Multipliers)) or
            (not SimilarColors(First, Third, MinDiff, ColorSpace, Multipliers)) then
@@ -463,7 +477,7 @@ begin
         end;
       end;
   finally
-    Bitmap.Free();
+    Image.Free();
   end;
 
   Result := Buffer.ToArray(False);
@@ -474,24 +488,33 @@ begin
   Result := FindEdges(MinDiff, DefaultColorSpace, DefaultMultipliers, Bounds);
 end;
 
-function TSimbaFinder.FindTemplate(Templ: TSimbaImage; MinMatch: Single; Bounds: TBox): TPoint;
+function TSimbaFinder.FindTemplate(Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
 var
-  Bitmap: TSimbaImage;
+  Image: TSimbaImage;
   Mat: TSingleMatrix;
   Best: TPoint;
 begin
-  Result := TPoint.Create(-1, -1);
+  Match := 0;
 
-  if GetDataAsBitmap(Bounds, Bitmap) then
+  if GetDataAsBitmap(Bounds, Image) then
   try
-    Mat := MatchTemplate(Bitmap, Templ, TM_CCOEFF_NORMED);
+    Mat := MatchTemplate(Image, Templ, TM_CCOEFF_NORMED);
 
     Best := Mat.ArgMax();
-    if (Mat[Best.Y, Best.X] >= MinMatch) then
-      Result := Best + Bounds.TopLeft;
+    Match := Mat[Best.Y, Best.X];
+    Result := Best + Bounds.TopLeft;
   finally
-    Bitmap.Free();
+    Image.Free();
   end;
+end;
+
+function TSimbaFinder.HasTemplate(Templ: TSimbaImage; MinMatch: Single; Bounds: TBox): Boolean;
+var
+  Match: Single;
+begin
+  FindTemplate(Templ, Match, Bounds);
+
+  Result := Match >= MinMatch;
 end;
 
 class operator TSimbaFinder.Initialize(var Self: TSimbaFinder);

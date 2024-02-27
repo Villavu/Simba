@@ -63,6 +63,8 @@ type
     procedure Inc; inline;
     function Reached: Boolean; inline;
 
+    property Counter: Integer read FCounter;
+
     class function Create(Limit: Integer): TSimpleThreadsafeLimit; static;
   end;
 
@@ -70,8 +72,7 @@ implementation
 
 procedure TSimpleThreadsafeLimit.Inc;
 begin
-  if (FLimit > 0) then
-    InterlockedIncrement(FCounter);
+  InterlockedIncrement(FCounter);
 end;
 
 function TSimpleThreadsafeLimit.Reached: Boolean;

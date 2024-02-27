@@ -130,6 +130,26 @@ begin
 end;
 
 (*
+TFinder.HasImage
+----------------
+> function TFinder.HasImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer = 1; Bounds: TBox  = [-1,-1,-1,-1]): Boolean;
+*)
+procedure _LapeFinder_HasImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaFinder(Params^[0])^.HasImage(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^, PInteger(Params^[5])^, PBox(Params^[6])^);
+end;
+
+(*
+TFinder.HasImage
+----------------
+> function TFinder.HasImage(Image: TSimbaImage; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox  = [-1,-1,-1,-1]): Boolean;
+*)
+procedure _LapeFinder_HasImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaFinder(Params^[0])^.HasImage(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PInteger(Params^[3])^, PBox(Params^[4])^);
+end;
+
+(*
 TFinder.FindImage
 -----------------
 > function TFinder.FindImage(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
@@ -209,16 +229,31 @@ begin
   PInteger(Result)^ := PSimbaFinder(Params^[0])^.CountColor(PColorTolerance(Params^[1])^, PBox(Params^[2])^);
 end;
 
+(*
+TFinder.HasColor
+----------------
+> function TFinder.HasColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
+*)
 procedure _LapeFinder_HasColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaFinder(Params^[0])^.HasColor(PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^, PInteger(Params^[5])^, PBox(Params^[6])^);
 end;
 
+(*
+TFinder.HasColor
+----------------
+> function TFinder.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
+*)
 procedure _LapeFinder_HasColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaFinder(Params^[0])^.HasColor(PColor(Params^[1])^, PSingle(Params^[2])^, PInteger(Params^[3])^, PBox(Params^[4])^);
 end;
 
+(*
+TFinder.HasColor
+----------------
+> function TFinder.HasColor(Color: TColorTolerance; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload;
+*)
 procedure _LapeFinder_HasColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaFinder(Params^[0])^.HasColor(PColorTolerance(Params^[1])^, PInteger(Params^[2])^, PBox(Params^[3])^);
@@ -327,11 +362,21 @@ end;
 (*
 TFinder.FindTemplate
 --------------------
-> function TFinder.FindTemplate(Image: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+> function TFinder.FindTemplate(Image: TImage; out Match: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
 *)
 procedure _LapeFinder_FindTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PSimbaFinder(Params^[0])^.FindTemplate(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
+end;
+
+(*
+TFinder.HasTemplate
+--------------------
+> function TFinder.HasTemplate(Image: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
+*)
+procedure _LapeFinder_HasTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaFinder(Params^[0])^.HasTemplate(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
 end;
 
 procedure ImportFinder(Compiler: TSimbaScript_Compiler);
@@ -407,7 +452,11 @@ begin
     addFinderMethod('function TFinder.FindImage(Image: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeFinder_FindImage1);
     addFinderMethod('function TFinder.FindImage(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeFinder_FindImage2);
 
-    addFinderMethod('function TFinder.FindTemplate(Image: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeFinder_FindTemplate);
+    addFinderMethod('function TFinder.HasImage(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeFinder_HasImage1);
+    addFinderMethod('function TFinder.HasImage(Image: TImage; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeFinder_HasImage2);
+
+    addFinderMethod('function TFinder.FindTemplate(Image: TImage; out Match: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeFinder_FindTemplate);
+    addFinderMethod('function TFinder.HasTemplate(Image: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): Boolean', @_LapeFinder_HasTemplate);
 
     addFinderMethod('function TFinder.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix', @_LapeFinder_MatchColor);
 

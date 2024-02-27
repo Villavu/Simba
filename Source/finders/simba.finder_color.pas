@@ -27,17 +27,12 @@ function FindColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Sing
                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer): TPointArray;
 
 function CountColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
-                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): Integer;
+                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
+                             MaxToFind: Integer = -1): Integer;
 
-function CountColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
+function CountColorsOnBuffer(var Limit: TSimpleThreadsafeLimit;
+                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
                              Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
-
-procedure HasColorOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
-                           Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; var Limit: TSimpleThreadsafeLimit);
-
-function HasColorOnTarget(Target: TSimbaTarget; Bounds: TBox;
-                          Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
-                          MinCount: Integer): Boolean;
 
 function MatchColorsOnBuffer(Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers;
                              Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
@@ -205,7 +200,8 @@ var
   }
   MACRO_FINDCOLORS
 
-function CountColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
+function CountColorsOnBuffer(var Limit: TSimpleThreadsafeLimit;
+                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
                              Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
 
   {$DEFINE MACRO_FINDCOLORS_BEGIN :=
@@ -213,13 +209,13 @@ function CountColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Sin
   }
   {$DEFINE MACRO_FINDCOLORS_COMPARE :=
     if (Cache.Dist <= Tolerance) then
-      Inc(Result);
+      Limit.Inc();
   }
   {$DEFINE MACRO_FINDCOLORS_ROW :=
-    // Nothing
+    if Limit.Reached() then Exit;
   }
   {$DEFINE MACRO_FINDCOLORS_END :=
-    // Nothing
+    Result := Limit.Counter;
   }
   MACRO_FINDCOLORS
 
@@ -263,16 +259,17 @@ begin
   end;
 end;
 
-function CountColorsOnTarget(Target: TSimbaTarget; Bounds: TBox; Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): Integer;
+function CountColorsOnTarget(Target: TSimbaTarget; Bounds: TBox; Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): Integer;
 var
+  Limit: TSimpleThreadsafeLimit;
+
   Buffer: PColorBGRA;
   BufferWidth: Integer;
 
-  SliceResults: TIntegerArray;
-
   procedure Execute(const Index, Lo, Hi: Integer);
   begin
-    SliceResults[Index] := CountColorsOnBuffer(
+    CountColorsOnBuffer(
+      Limit,
       Formula, Color, Tolerance, Multipliers,
       @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + 1
     );
@@ -291,10 +288,9 @@ begin
     T := HighResolutionTime();
     {$ENDIF}
 
-    SetLength(SliceResults, CalculateSlices(Bounds.Width, Bounds.Height)); // Cannot exceed this
-    ThreadsUsed := SimbaThreadPool.RunParallel(Length(SliceResults), 0, Bounds.Height - 1, @Execute);
-    for I := 0 to High(SliceResults) do
-      Result += SliceResults[I];
+    Limit := TSimpleThreadsafeLimit.Create(MaxToFind);
+    ThreadsUsed := SimbaThreadPool.RunParallel(CalculateSlices(Bounds.Width, Bounds.Height), 0, Bounds.Height - 1, @Execute);
+    Result := Limit.Counter;
 
     {$IFDEF SIMBA_BENCHMARKS}
     DebugLn('CountColors: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
@@ -425,7 +421,7 @@ end;
 
 initialization
   ColorFinderMultithreadOpts.Enabled     := True;
-  ColorFinderMultithreadOpts.SliceWidth  := 125;
+  ColorFinderMultithreadOpts.SliceWidth  := 250;
   ColorFinderMultithreadOpts.SliceHeight := 250;
 
 end.
