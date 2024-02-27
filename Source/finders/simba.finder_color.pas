@@ -12,29 +12,35 @@ unit simba.finder_color;
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
-{.$DEFINE SIMBA_BUFFERCHECKS}
 {.$DEFINE SIMBA_BENCHMARKS}
 
 interface
 
 uses
   Classes, SysUtils, Math, Graphics,
-  simba.base, simba.colormath, simba.colormath_distance, simba.target;
+  simba.base, simba.colormath, simba.colormath_distance, simba.target, simba.simplelock;
 
 function FindColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
 
 function FindColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
-                            Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer {$IFDEF SIMBA_BUFFERCHECKS}; BufferLo, BufferHi: PColorBGRA{$ENDIF}): TPointArray;
+                            Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer): TPointArray;
 
 function CountColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
                              Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): Integer;
 
 function CountColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
-                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer {$IFDEF SIMBA_BUFFERCHECKS}; BufferLo, BufferHi: PColorBGRA{$ENDIF}): Integer;
+                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
+
+procedure HasColorOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
+                           Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; var Limit: TSimpleThreadsafeLimit);
+
+function HasColorOnTarget(Target: TSimbaTarget; Bounds: TBox;
+                          Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
+                          MinCount: Integer): Boolean;
 
 function MatchColorsOnBuffer(Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers;
-                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer {$IFDEF SIMBA_BUFFERCHECKS}; BufferLo, BufferHi: PColorBGRA{$ENDIF}): TSingleMatrix;
+                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
 
 function MatchColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
                              Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
@@ -49,7 +55,7 @@ implementation
 
 uses
   simba.arraybuffer, simba.colormath_distance_unrolled, simba.threadpool,
-  simba.array_pointarray, simba.matrix_float;
+  simba.array_pointarray, simba.matrix_float, simba.datetime;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
@@ -158,14 +164,6 @@ begin
     Ptr := RowPtr;
     for X := 0 to SearchWidth do
     begin
-      {$IFDEF SIMBA_BUFFERCHECKS}
-      if (Ptr < BufferLo) or (Ptr > BufferHi) then
-      begin
-        DebugLn('Outside of buffer: %d, (Lo: %d, Hi: %d)', [PtrUInt(Ptr), PtrUInt(BufferLo), PtrUInt(BufferHi)]);
-        Halt;
-      end;
-      {$ENDIF}
-
       if not Cache.Color.EqualsIgnoreAlpha(Ptr^) then
       begin
         Cache.Color := Ptr^;
@@ -176,6 +174,9 @@ begin
 
       Inc(Ptr);
     end;
+
+    MACRO_FINDCOLORS_ROW
+
     Inc(RowPtr, BufferWidth);
   end;
 
@@ -184,7 +185,7 @@ end;
 }
 
 function FindColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
-                            Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer {$IFDEF SIMBA_BUFFERCHECKS}; BufferLo, BufferHi: PColorBGRA{$ENDIF}): TPointArray;
+                            Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer): TPointArray;
 var
   PointBuffer: TSimbaPointBuffer;
 
@@ -196,13 +197,16 @@ var
     if (Cache.Dist <= Tolerance) then
       PointBuffer.Add(X + OffsetX, Y + OffsetY);
   }
+  {$DEFINE MACRO_FINDCOLORS_ROW :=
+    // Nothing
+  }
   {$DEFINE MACRO_FINDCOLORS_END :=
     Result := PointBuffer.ToArray(False);
   }
   MACRO_FINDCOLORS
 
 function CountColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
-                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer {$IFDEF SIMBA_BUFFERCHECKS}; BufferLo, BufferHi: PColorBGRA{$ENDIF}): Integer;
+                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
 
   {$DEFINE MACRO_FINDCOLORS_BEGIN :=
     Result := 0;
@@ -211,7 +215,12 @@ function CountColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Sin
     if (Cache.Dist <= Tolerance) then
       Inc(Result);
   }
-  {$DEFINE MACRO_FINDCOLORS_END := }
+  {$DEFINE MACRO_FINDCOLORS_ROW :=
+    // Nothing
+  }
+  {$DEFINE MACRO_FINDCOLORS_END :=
+    // Nothing
+  }
   MACRO_FINDCOLORS
 
 function FindColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
@@ -227,7 +236,6 @@ var
     SliceResults[Index] := FindColorsOnBuffer(
       Formula, Color, Tolerance, Multipliers,
       @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + 1, Bounds.X1, Bounds.Y1 + Lo
-      {$IFDEF SIMBA_BUFFERCHECKS}, Buffer, Buffer + (MemSize(Buffer) div SizeOf(TColorBGRA)) {$ENDIF}
     );
   end;
 
@@ -267,7 +275,6 @@ var
     SliceResults[Index] := CountColorsOnBuffer(
       Formula, Color, Tolerance, Multipliers,
       @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + 1
-      {$IFDEF SIMBA_BUFFERCHECKS}, Buffer, Buffer + (MemSize(Buffer) div SizeOf(TColorBGRA)) {$ENDIF}
     );
   end;
 
@@ -298,7 +305,7 @@ begin
 end;
 
 function MatchColorsOnBuffer(Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers;
-                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer {$IFDEF SIMBA_BUFFERCHECKS}; BufferLo, BufferHi: PColorBGRA{$ENDIF}): TSingleMatrix;
+                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
 
   {$DEFINE MACRO_FINDCOLORS_BEGIN :=
     Result.SetSize(SearchWidth, SearchHeight);
@@ -306,13 +313,16 @@ function MatchColorsOnBuffer(Formula: EColorSpace; Color: TColor; Multipliers: T
   {$DEFINE MACRO_FINDCOLORS_COMPARE :=
     Result[Y, X] := 1 - Cache.Dist;
   }
+  {$DEFINE MACRO_FINDCOLORS_ROW :=
+    // Nothing
+  }
   {$DEFINE MACRO_FINDCOLORS_END :=
     // Nothing
   }
   MACRO_FINDCOLORS
 
 function MatchColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
-                            Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
+                             Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
 var
   Buffer: PColorBGRA;
   BufferWidth: Integer;
@@ -324,7 +334,6 @@ var
     SliceResults[Index] := MatchColorsOnBuffer(
       Formula, Color, Multipliers,
       @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + 1
-      {$IFDEF SIMBA_BUFFERCHECKS}, Buffer, Buffer + (MemSize(Buffer) div SizeOf(TColorBGRA)) {$ENDIF}
     );
   end;
 
@@ -352,6 +361,66 @@ begin
   finally
     Target.FreeImageData(Buffer);
   end;
+end;
+
+procedure HasColorOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
+                           Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer;
+                           var Limit: TSimpleThreadsafeLimit);
+
+  {$DEFINE MACRO_FINDCOLORS_BEGIN :=
+    // Nothing
+  }
+  {$DEFINE MACRO_FINDCOLORS_COMPARE :=
+    if (Cache.Dist <= Tolerance) then
+      Limit.Inc();
+  }
+  {$DEFINE MACRO_FINDCOLORS_ROW :=
+    if Limit.Reached() then Exit;
+  }
+  {$DEFINE MACRO_FINDCOLORS_END :=
+    // Nothing
+  }
+  MACRO_FINDCOLORS
+
+function HasColorOnTarget(Target: TSimbaTarget; Bounds: TBox; Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers; MinCount: Integer): Boolean;
+var
+  Buffer: PColorBGRA;
+  BufferWidth: Integer;
+
+  Limit: TSimpleThreadsafeLimit;
+
+  procedure Execute(const Index, Lo, Hi: Integer);
+  begin
+    HasColorOnBuffer(
+      Formula, Color, Tolerance, Multipliers,
+      @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + 1,
+      Limit
+    );
+  end;
+
+var
+  ThreadsUsed: Integer;
+  T: Double;
+  I: Integer;
+begin
+  Limit := TSimpleThreadsafeLimit.Create(Max(MinCount, 1));
+
+  if Target.GetImageData(Bounds, Buffer, BufferWidth) then
+  try
+    {$IFDEF SIMBA_BENCHMARKS}
+    T := HighResolutionTime();
+    {$ENDIF}
+
+    ThreadsUsed := SimbaThreadPool.RunParallel(CalculateSlices(Bounds.Width, Bounds.Height), 0, Bounds.Height - 1, @Execute);
+
+    {$IFDEF SIMBA_BENCHMARKS}
+    DebugLn('HasColors: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
+    {$ENDIF}
+  finally
+    Target.FreeImageData(Buffer);
+  end;
+
+  Result := Limit.Reached;
 end;
 
 initialization

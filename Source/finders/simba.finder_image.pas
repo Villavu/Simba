@@ -76,7 +76,7 @@ begin
   for I := 0 to (Image.Width * Image.Height) - 1 do
   begin
     PBoolean(Dest)^ := Source^.A = 0;
-    //PBoolean(Dest)^ := (Image.TransparentColorActive and Source^.EqualsIgnoreAlpha(Image.TransparentRGB));
+
     if not PBoolean(Dest)^ then
     begin
       DestFix := Dest + 1; // temp fix, https://gitlab.com/freepascal.org/fpc/source/-/commit/851af5033fb80d4e19c4a7b5c44d50a36f456374

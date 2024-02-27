@@ -55,6 +55,10 @@ type
     function CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): Integer; overload;
     function CountColor(Color: TColorTolerance; Bounds: TBox): Integer; overload;
 
+    function HasColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer; Bounds: TBox): Boolean; overload;
+    function HasColor(Color: TColor; Tolerance: Single; MinCount: Integer; Bounds: TBox): Boolean; overload;
+    function HasColor(Color: TColorTolerance; MinCount: Integer; Bounds: TBox): Boolean; overload;
+
     function GetColor(X, Y: Integer): TColor;
     function GetColors(Points: TPointArray): TColorArray;
     function GetColorsMatrix(Bounds: TBox): TIntegerMatrix;
@@ -199,6 +203,21 @@ end;
 function TSimbaFinder.CountColor(Color: TColorTolerance; Bounds: TBox): Integer;
 begin
   Result := CountColorsOnTarget(FTarget, Bounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+end;
+
+function TSimbaFinder.HasColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer; Bounds: TBox): Boolean;
+begin
+  Result := HasColorOnTarget(FTarget, Bounds, ColorSpace, Color, Tolerance, Multipliers, MinCount);
+end;
+
+function TSimbaFinder.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer; Bounds: TBox): Boolean;
+begin
+  Result := HasColorOnTarget(FTarget, Bounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers, MinCount);
+end;
+
+function TSimbaFinder.HasColor(Color: TColorTolerance; MinCount: Integer; Bounds: TBox): Boolean;
+begin
+  Result := HasColorOnTarget(FTarget, Bounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers, MinCount);
 end;
 
 function TSimbaFinder.GetColor(X, Y: Integer): TColor;

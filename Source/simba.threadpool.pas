@@ -203,7 +203,10 @@ begin
 end;
 
 initialization
-  SimbaThreadPool := TSimbaThreadPool.Create(TThread.ProcessorCount);
+  if (TThread.ProcessorCount > 8) then
+    SimbaThreadPool := TSimbaThreadPool.Create(Round(TThread.ProcessorCount * 0.75)) // dont go crazy if we have >8 cores.
+  else
+    SimbaThreadPool := TSimbaThreadPool.Create(TThread.ProcessorCount);
 
 finalization
   if (SimbaThreadPool <> nil) then
