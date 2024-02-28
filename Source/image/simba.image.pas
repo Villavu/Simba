@@ -24,7 +24,6 @@ type
 
   TSimbaImageLineStarts = array of PColorBGRA;
 
-  PSimbaImage = ^TSimbaImage;
   TSimbaImage = class(TSimbaBaseClass)
   protected
     FWidth: Integer;
@@ -254,14 +253,16 @@ type
     function PixelDifferenceTPA(Other: TSimbaImage): TPointArray; overload;
     function PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Single): TPointArray; overload;
   end;
-
   TSimbaImageArray = array of TSimbaImage;
+
+  PSimbaImage = ^TSimbaImage;
+  PSimbaImageArray = ^TSimbaImageArray;
 
 implementation
 
 uses
   Math, FPImage,
-  simba.files, simba.zip, simba.box, simba.quad, simba.geometry, simba.nativeinterface,
+  simba.zip, simba.box, simba.quad, simba.geometry, simba.nativeinterface,
   simba.matrix_float, simba.matrix_int, simba.array_point, simba.arraybuffer, simba.algo_sort,
   simba.image_lazbridge, simba.image_integral, simba.image_gaussblur,
   simba.image_bitmaparealoader, simba.image_stringconv;

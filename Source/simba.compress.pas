@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.compress;
 
 {$i simba.inc}
@@ -138,7 +143,7 @@ begin
     Capacity := NeededCapacity;
 
   TimeUsed := HighResolutionTime();
-  Result := SynLZcompress1pas(Pointer(Buffer), Count, Self.Memory);
+  Result := SynLZcompress(Pointer(Buffer), Count, Self.Memory);
   TimeUsed := HighResolutionTime() - TimeUsed;
 end;
 

@@ -15,7 +15,7 @@ implementation
 uses
   Graphics,
   lptypes,
-  simba.image, simba.image_textdrawer;
+  simba.image, simba.image_textdrawer, simba.image_fastcompress;
 
 type
   PBitmap = ^TBitmap;
@@ -1254,6 +1254,16 @@ begin
   PSimbaImage(Params^[0])^.DrawCircleAA(PPoint(Params^[1])^, Pinteger(Params^[2])^, PColor(Params^[3])^, PSingle(Params^[4])^);
 end;
 
+procedure _LapeFastCompressImages(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  SimbaImage_FastCompress(TSimbaImageArray(Params^[0]^), PPointer(Params^[1])^, PSizeUInt(Params^[2])^);
+end;
+
+procedure _LapeFastDeCompressImages(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaImageArray(Result^) := SimbaImage_FastDeCompress(PPointer(Params^[0])^, PSizeUInt(Params^[1])^);
+end;
+
 (*
 TImage.Finder
 -------------
@@ -1465,6 +1475,9 @@ begin
     addGlobalFunc('procedure TImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single = 1.5);', @_LapeImage_DrawLineAA);
     addGlobalFunc('procedure TImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single = 1.5);', @_LapeImage_DrawEllipseAA);
     addGlobalFunc('procedure TImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single = 1.5);', @_LapeImage_DrawCircleAA);
+
+    addGlobalFunc('procedure FastCompressImages(Images: TImageArray; var Data: Pointer; out DataSize: SizeUInt);', @_LapeFastCompressImages);
+    addGlobalFunc('function FastDeCompressImages(Data: Pointer; out DataLen: SizeUInt): TImageArray', @_LapeFastDeCompressImages);
 
     ImportingSection := '';
   end;

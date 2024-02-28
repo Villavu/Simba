@@ -380,7 +380,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="123">
+    <Units Count="124">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -960,6 +960,10 @@
         <Filename Value="script/simba.script_compiler_imagefromstring.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit122>
+      <Unit123>
+        <Filename Value="image/simba.image_fastcompress.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit123>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
