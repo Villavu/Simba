@@ -13,7 +13,7 @@ procedure ImportEncoding(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  lptypes, blowfish, hmac, ffi, SynLZ,
+  lptypes, ffi, SynLZ,
   simba.encoding, simba.compress, simba.hash;
 
 (*
@@ -21,62 +21,6 @@ Encoding
 ========
 A bit of Hashing, Encoding, Compressing.
 *)
-
-(*
-BlowFishEncrypt
----------------
-> function BlowFishEncrypt(const Data, Password: String): String;
-*)
-procedure _LapeBlowFishEncrypt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-var
-  Data: String;
-  Output: TStringStream;
-  Encrypt: TBlowFishEncryptStream;
-begin
-  Data := PString(Params^[0])^;
-  Output := TStringStream.Create('');
-
-  try
-    Encrypt := TBlowFishEncryptStream.Create(PString(Params^[1])^, Output);
-
-    try
-      Encrypt.Write(Data[1], Length(Data));
-    finally
-      Encrypt.Free();
-    end;
-  finally
-    PString(Result)^ := Output.DataString;
-
-    Output.Free();
-  end;
-end;
-
-(*
-BlowFishDecrypt
----------------
-> function BlowFishDecrypt(const Data, Password: String): String;
-*)
-procedure _LapeBlowFishDecrypt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-var
-  Input: TStringStream;
-  Decrypt: TBlowFishDeCryptStream;
-begin
-  Input := TStringStream.Create(PString(Params^[0])^);
-
-  try
-    Decrypt := TBlowFishDeCryptStream.Create(PString(Params^[1])^, Input);
-
-    try
-      SetLength(PString(Result)^, Input.Size);
-
-      Decrypt.Read(PString(Result)^[1], Input.Size);
-    finally
-      Decrypt.Free();
-    end;
-  finally
-    Input.Free();
-  end;
-end;
 
 (*
 HashBuffer
@@ -109,93 +53,43 @@ begin
 end;
 
 (*
-HMACMD5
--------
-> function HMACMD5(const Key, Message: String): String;
+BaseEncode
+----------
+> function BaseEncode(Encoding: BaseEncoding; const Data: String): String;
 *)
-procedure _LapeHMACMD5(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBaseEncode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HMACMD5(PString(Params^[0])^, PString(Params^[1])^);
+  PString(Result)^ := BaseEncode(BaseEncoding(Params^[0]^), PString(Params^[1])^);
 end;
 
 (*
-HMACSHA1
---------
-> function HMACSHA1(const Key, Message: String): String;
+BaseDecode
+----------
+> function BaseDecode(Encoding: BaseEncoding; const Data: String): String;
 *)
-procedure _LapeHMACSHA1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBaseDecode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HMACSHA1(PString(Params^[0])^, PString(Params^[1])^);
+  PString(Result)^ := BaseDecode(BaseEncoding(Params^[0]^), PString(Params^[1])^);
 end;
 
 (*
-Base64Encode
-------------
-> function Base64Encode(const S: String): String;
+HOTPCalculateToken
+------------------
+> function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer;
 *)
-procedure _LapeBase64Encode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeHOTPCalculateToken(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := Base64Encode(PString(Params^[0])^);
+  PInteger(Result)^ := HOTPCalculateToken(PString(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 (*
-Base64Decode
-------------
-> function Base64Decode(const S: String): String;
+TOTPCalculateToken
+------------------
+> function TOTPCalculateToken(const Secret: String): Integer;
 *)
-procedure _LapeBase64Decode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTOTPCalculateToken(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := Base64Decode(PString(Params^[0])^);
-end;
-
-(*
-Base32Encode
-------------
-> function Base32Encode(const S: String): String;
-*)
-procedure _LapeBase32Encode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := Base32Encode(PString(Params^[0])^);
-end;
-
-(*
-Base32Decode
-------------
-> function Base32Decode(const S: String): String;
-*)
-procedure _LapeBase32Decode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := Base32Decode(PString(Params^[0])^);
-end;
-
-(*
-HexEncode
----------
-> function HexEncode(const S: String): String;
-*)
-procedure _LapeHexEncode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := HexEncode(PString(Params^[0])^);
-end;
-
-(*
-HexDecode
----------
-> function HexDecode(const S: String): String;
-*)
-procedure _LapeHexDecode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := HexDecode(PString(Params^[0])^);
-end;
-
-(*
-GetOTPToken
------------
-> function GetOTPToken(const Secret: String): Integer;
-*)
-procedure _LapeGetOTPToken(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := GetOTPToken(PString(Params^[0])^);
+  PInteger(Result)^ := TOTPCalculateToken(PString(Params^[0])^);
 end;
 
 (*
@@ -295,26 +189,17 @@ begin
     ImportingSection := 'Encoding';
 
     addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5, CRC32, CRC64)', 'EHashType');
+    addGlobalType('enum(b64URL, b64, b32, b32Hex, b16)', 'BaseEncoding');
 
-    addGlobalFunc('function GetOTPToken(const Secret: String): Integer', @_LapeGetOTPToken);
+    addGlobalFunc('function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer', @_LapeHOTPCalculateToken);
+    addGlobalFunc('function TOTPCalculateToken(const Secret: String): Integer', @_LapeTOTPCalculateToken);
 
-    addGlobalFunc('function Base64Encode(const S: String): String', @_LapeBase64Encode);
-    addGlobalFunc('function Base64Decode(const S: String): String', @_LapeBase64Decode);
-    addGlobalFunc('function Base32Encode(const S: String): String', @_LapeBase32Encode);
-    addGlobalFunc('function Base32Decode(const S: String): String', @_LapeBase32Decode);
-
-    addGlobalFunc('function HexEncode(const S: String): String', @_LapeHexEncode);
-    addGlobalFunc('function HexDecode(const S: String): String', @_LapeHexDecode);
-
-    addGlobalFunc('function BlowFishEncrypt(const Data, Password: String): String', @_LapeBlowFishEncrypt);
-    addGlobalFunc('function BlowFishDecrypt(const Data, Password: String): String', @_LapeBlowFishDecrypt);
+    addGlobalFunc('function BaseEncode(Encoding: BaseEncoding; const S: String): String', @_LapeBaseEncode);
+    addGlobalFunc('function BaseDecode(Encoding: BaseEncoding; const S: String): String', @_LapeBaseDecode);
 
     addGlobalFunc('function HashBuffer(HashType: EHashType; Buf: Pointer; Len: SizeUInt): String', @_LapeHashBuffer);
     addGlobalFunc('function HashString(HashType: EHashType; S: String): String', @_LapeHashString);
     addGlobalFunc('function HashFile(HashType: EHashType; FileName: String): String', @_LapeHashFile);
-
-    addGlobalFunc('function HMACMD5(const Key, Message: String): String', @_LapeHMACMD5);
-    addGlobalFunc('function HMACSHA1(const Key, Message: String): String', @_LapeHMACSHA1);
 
     addGlobalFunc('function ZCompressString(S: String): String', @_LapeZCompressString);
     addGlobalFunc('function ZDecompressString(S: String): String', @_LapeZDecompressString);

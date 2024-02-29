@@ -43,22 +43,25 @@ function _HashAStr(const Value: String): UInt32;
 var
   I: Int32;
 begin
+  {$PUSH}
+  {$Q-}{$R-}
   Result := 2166136261;
   for I := 1 to Length(Value) do
   begin
     Result := Result xor Byte(Value[I]);
     Result := Result * 16777619;
   end;
+  {$POP}
 end;
 
 function _HashInt(const Value: Integer): UInt32;
 begin
-  Result := Value;
+  Result := UInt32(Value);
 end;
 
 function _HashInt64(const Value: Int64): UInt32;
 begin
-  Result := Value;
+  Result := UInt32(Value);
 end;
 
 function _SameSingle(const A, B: Single): Boolean;

@@ -81,7 +81,7 @@ begin
 
   Stream := nil;
   try
-    Stream := TStringStream.Create(Base64Decode(Str));
+    Stream := TStringStream.Create(BaseDecode(BaseEncoding.b64, Str));
     Stream.Read(Header, SizeOf(TImageStringHeader));
 
     Image.SetSize(Header.Width, Header.Height);
@@ -146,7 +146,7 @@ begin
     Stream.Position := 0;
     Stream.Write(Header, SizeOf(TImageStringHeader));
 
-    Result := HeaderPrefix + Base64Encode(Stream.DataString);
+    Result := HeaderPrefix + BaseEncode(BaseEncoding.b64, Stream.DataString);
   finally
     Stream.Free();
   end;

@@ -29,5 +29,5 @@ begin
 
   Assert(Points.Unique.Length() = 31000);
 
-  Assert(ToString(Unique(Cols)) = '[1, 2, 3, 0, 4294967295]');
+  Assert(ToString(Unique(Cols)) = '[1, 2, 3, 0, 2147483647, -2147483648]');
 end.

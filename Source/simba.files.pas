@@ -402,7 +402,7 @@ end;
 
 class function TSimbaFile.FileReadLines(FileName: String): TStringArray;
 begin
-  Result := FileRead(FileName).Split(LineEnding);
+  Result := FileRead(FileName).Split([#13#10, #10]);
 end;
 
 class function TSimbaFile.FileReadBytes(FileName: String): TByteArray;

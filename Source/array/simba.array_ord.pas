@@ -25,10 +25,6 @@ type
     procedure Sort;
   end;
 
-  TColorArrayHelper = type helper for TColorArray
-    function Unique: TColorArray;
-  end;
-
   TSingleArrayHelper = type helper for TSingleArray
     function Equals(Other: TSingleArray): Boolean;
     function IndexOf(Value: Single): Integer;
@@ -95,11 +91,6 @@ end;
 procedure TIntegerArrayHelper.Sort;
 begin
   specialize QuickSort<Integer>(Self, Low(Self), High(Self));
-end;
-
-function TColorArrayHelper.Unique: TColorArray;
-begin
-  Result := specialize Unique<TColor>(Self);
 end;
 
 function TSingleArrayHelper.Equals(Other: TSingleArray): Boolean;

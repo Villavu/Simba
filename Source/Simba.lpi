@@ -380,7 +380,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="124">
+    <Units Count="125">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -964,6 +964,10 @@
         <Filename Value="image/simba.image_fastcompress.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit123>
+      <Unit124>
+        <Filename Value="../Third-Party/basenenc_simba.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit124>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

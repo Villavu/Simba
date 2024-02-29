@@ -386,7 +386,7 @@ begin
     addBaseDefine('LINUX');
     {$ENDIF}
 
-    addGlobalType(getBaseType(DetermineIntType(SizeOf(TColor), False)).createCopy(), 'TColor');
+    addGlobalType('Int32', 'TColor');
     addGlobalType('array of TColor', 'TColorArray');
 
     addGlobalType('array of TStringArray', 'T2DStringArray');
