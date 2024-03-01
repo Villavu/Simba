@@ -15,8 +15,7 @@ uses
 
 type
   {$scopedenums on}
-  PHashType = ^EHashType;
-  EHashType = (
+  HashAlgo = (
     SHA1, SHA256, SHA384, SHA512,
     MD5,
     CRC32, CRC64
@@ -35,11 +34,11 @@ type
   end;
   TSimbaHasherClass = class of TSimbaHasher;
 
-  procedure RegisterHasher(HashType: EHashType; HashClass: TSimbaHasherClass);
+  procedure RegisterHasher(Algo: HashAlgo; HashClass: TSimbaHasherClass);
 
-  function HashBuffer(HashType: EHashType; Buf: PByte; Len: PtrUInt): String;
-  function HashString(HashType: EHashType; const S: String): String;
-  function HashFile(HashType: EHashType; const FileName: String): String;
+  function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: PtrUInt): String;
+  function HashString(Algo: HashAlgo; const S: String): String;
+  function HashFile(Algo: HashAlgo; const FileName: String): String;
 
 implementation
 
@@ -49,20 +48,20 @@ uses
   simba.hash_crc32, simba.hash_crc64;
 
 var
-  Hashers: array[EHashType] of TSimbaHasherClass;
+  Hashers: array[HashAlgo] of TSimbaHasherClass;
 
-procedure RegisterHasher(HashType: EHashType; HashClass: TSimbaHasherClass);
+procedure RegisterHasher(Algo: HashAlgo; HashClass: TSimbaHasherClass);
 begin
-  Hashers[HashType] := HashClass;
+  Hashers[Algo] := HashClass;
 end;
 
-function HashBuffer(HashType: EHashType; Buf: PByte; Len: PtrUInt): String;
+function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: PtrUInt): String;
 begin
-  if (Hashers[HashType] = nil) then
+  if (Hashers[Algo] = nil) then
     SimbaException('Hash type not registered');
 
   if (Len > 0) then
-    with Hashers[HashType].Create() do
+    with Hashers[Algo].Create() do
     try
       Update(Buf, Len);
 
@@ -74,15 +73,15 @@ begin
     Result := '';
 end;
 
-function HashString(HashType: EHashType; const S: String): String;
+function HashString(Algo: HashAlgo; const S: String): String;
 begin
   if (Length(S) > 0) then
-    Result := HashBuffer(HashType, @S[1], Length(S))
+    Result := HashBuffer(Algo, @S[1], Length(S))
   else
     Result := '';
 end;
 
-function HashFile(HashType: EHashType; const FileName: String): String;
+function HashFile(Algo: HashAlgo; const FileName: String): String;
 var
   Bytes: TBytes;
 begin
@@ -92,7 +91,7 @@ begin
   end;
 
   if (Length(Bytes) > 0) then
-    Result := HashBuffer(HashType, @Bytes[0], Length(Bytes))
+    Result := HashBuffer(Algo, @Bytes[0], Length(Bytes))
   else
     Result := '';
 end;

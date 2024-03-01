@@ -171,7 +171,7 @@ begin
 end;
 
 initialization
-  RegisterHasher(EHashType.SHA384, THasherSHA384);
+  RegisterHasher(HashAlgo.SHA384, THasherSHA384);
 
 end.
 

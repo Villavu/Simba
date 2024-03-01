@@ -86,7 +86,7 @@ begin
 end;
 
 initialization
-  RegisterHasher(EHashType.CRC32, THasherCRC32);
+  RegisterHasher(HashAlgo.CRC32, THasherCRC32);
 
 end.
 

@@ -25,31 +25,31 @@ A bit of Hashing, Encoding, Compressing.
 (*
 HashBuffer
 ----------
-> function HashBuffer(HashType: EHashType; Buf: PByte; Len: SizeUInt): String;
+> function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: SizeUInt): String;
 *)
 procedure _LapeHashBuffer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashBuffer(PHashType(Params^[0])^, PPointer(Params^[1])^, PSizeUInt(Params^[2])^);
+  PString(Result)^ := HashBuffer(HashAlgo(Params^[0]^), PPointer(Params^[1])^, PSizeUInt(Params^[2])^);
 end;
 
 (*
 HashString
 ----------
-> function HashString(const Data: String): String;
+> function HashString(Algo: HashAlgo; S: String): String;
 *)
 procedure _LapeHashString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashString(PHashType(Params^[0])^, PString(Params^[1])^);
+  PString(Result)^ := HashString(HashAlgo(Params^[0]^), PString(Params^[1])^);
 end;
 
 (*
 HashFile
 --------
-> function HashFile(HashType: EHashType; FileName: String): String;
+> function HashFile(Algo: HashAlgo; FileName: String): String;
 *)
 procedure _LapeHashFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashFile(PHashType(Params^[0])^, PString(Params^[1])^);
+  PString(Result)^ := HashFile(HashAlgo(Params^[0]^), PString(Params^[1])^);
 end;
 
 (*
@@ -188,7 +188,7 @@ begin
   begin
     ImportingSection := 'Encoding';
 
-    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5, CRC32, CRC64)', 'EHashType');
+    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5, CRC32, CRC64)', 'HashAlgo');
     addGlobalType('enum(b64URL, b64, b32, b32Hex, b16)', 'BaseEncoding');
 
     addGlobalFunc('function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer', @_LapeHOTPCalculateToken);
@@ -197,9 +197,9 @@ begin
     addGlobalFunc('function BaseEncode(Encoding: BaseEncoding; const S: String): String', @_LapeBaseEncode);
     addGlobalFunc('function BaseDecode(Encoding: BaseEncoding; const S: String): String', @_LapeBaseDecode);
 
-    addGlobalFunc('function HashBuffer(HashType: EHashType; Buf: Pointer; Len: SizeUInt): String', @_LapeHashBuffer);
-    addGlobalFunc('function HashString(HashType: EHashType; S: String): String', @_LapeHashString);
-    addGlobalFunc('function HashFile(HashType: EHashType; FileName: String): String', @_LapeHashFile);
+    addGlobalFunc('function HashBuffer(Algo: HashAlgo; Buf: Pointer; Len: SizeUInt): String', @_LapeHashBuffer);
+    addGlobalFunc('function HashString(Algo: HashAlgo; S: String): String', @_LapeHashString);
+    addGlobalFunc('function HashFile(Algo: HashAlgo; FileName: String): String', @_LapeHashFile);
 
     addGlobalFunc('function ZCompressString(S: String): String', @_LapeZCompressString);
     addGlobalFunc('function ZDecompressString(S: String): String', @_LapeZDecompressString);

@@ -182,6 +182,16 @@ begin
 end;
 
 (*
+String.SplitLines
+-----------------
+> function String.SplitLines: TStringArray;
+*)
+procedure _LapeString_SplitLines(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PStringArray(Result)^ := PString(Params^[0])^.SplitLines();
+end;
+
+(*
 String.PadLeft
 --------------
 > function String.PadLeft(Count: Integer; PaddingChar: Char = #32): String;
@@ -999,6 +1009,7 @@ begin
 
     addGlobalFunc('function String.Join(Values: TStringArray): String;', @_LapeString_Join);
     addGlobalFunc('function String.Split(Seperator: String): TStringArray;', @_LapeString_Split);
+    addGlobalFunc('function String.SplitLines: TStringArray;', @_LapeString_SplitLines);
 
     addGlobalFunc('function String.CopyRange(StartIndex, EndIndex: Integer): String;', @_LapeString_CopyRange);
     addGlobalFunc('procedure String.DeleteRange(StartIndex, EndIndex: Integer);', @_LapeString_DeleteRange);

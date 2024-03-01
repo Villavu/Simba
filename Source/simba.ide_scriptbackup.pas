@@ -41,7 +41,7 @@ uses
 
 function Crc32String(const Str: String): UInt32;
 begin
-  Result := StrToUInt('$' + HashString(EHashType.CRC32, Str));
+  Result := StrToUInt('$' + HashString(HashAlgo.CRC32, Str));
 end;
 
 procedure TSimbaScriptBackup.DoFileCollecting(Sender: TObject);

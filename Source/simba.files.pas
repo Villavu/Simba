@@ -47,7 +47,7 @@ type
     class function FileSize(FileName: String): Int64;
     class function FileSizeInMegaBytes(FileName: String): Single;
 
-    class function FileHash(FileName: String; HashType: EHashType = EHashType.SHA1): String;
+    class function FileHash(FileName: String; Algo: HashAlgo = HashAlgo.SHA1): String;
   end;
 
   TSimbaPath = class
@@ -402,7 +402,7 @@ end;
 
 class function TSimbaFile.FileReadLines(FileName: String): TStringArray;
 begin
-  Result := FileRead(FileName).Split([#13#10, #10]);
+  Result := FileRead(FileName).SplitLines();
 end;
 
 class function TSimbaFile.FileReadBytes(FileName: String): TByteArray;
@@ -525,9 +525,9 @@ begin
   Result := FileUtil.FileSize(FileName) / (1024 * 1024);
 end;
 
-class function TSimbaFile.FileHash(FileName: String; HashType: EHashType): String;
+class function TSimbaFile.FileHash(FileName: String; Algo: HashAlgo): String;
 begin
-  Result := HashFile(HashType, FileName);
+  Result := HashFile(Algo, FileName);
 end;
 
 function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean;

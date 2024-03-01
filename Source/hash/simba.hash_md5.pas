@@ -174,7 +174,7 @@ begin
 end;
 
 initialization
-  RegisterHasher(EHashType.MD5, THasherMD5);
+  RegisterHasher(HashAlgo.MD5, THasherMD5);
 
 end.
 

@@ -169,7 +169,7 @@ begin
 end;
 
 initialization
-  RegisterHasher(EHashType.SHA1, THasherSHA1);
+  RegisterHasher(HashAlgo.SHA1, THasherSHA1);
 
 end.
 

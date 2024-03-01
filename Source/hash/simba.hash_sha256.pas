@@ -155,7 +155,7 @@ begin
 end;
 
 initialization
-  RegisterHasher(EHashType.SHA256, THasherSHA256);
+  RegisterHasher(HashAlgo.SHA256, THasherSHA256);
 
 end.
 

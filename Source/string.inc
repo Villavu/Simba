@@ -112,6 +112,8 @@ type
     function Split(const Seperators: TStringArray): TStringArray; overload;
     function Split(const Seperator: String): TStringArray; overload;
 
+    function SplitLines: TStringArray;
+
     function Copy: String;
     function CopyRange(StartIndex, EndIndex: Integer): String;
     procedure DeleteRange(StartIndex, EndIndex: Integer);
@@ -918,6 +920,11 @@ end;
 function TSimbaStringHelper.Split(const Seperator: String): TStringArray;
 begin
   Result := Split([Seperator]);
+end;
+
+function TSimbaStringHelper.SplitLines: TStringArray;
+begin
+  Result := Split([#13#10, #10]);
 end;
 
 function TSimbaStringHelper.Copy: String;
