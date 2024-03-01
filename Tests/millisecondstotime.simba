@@ -1,0 +1,25 @@
+{$assertions on}
+
+var
+  Days,Hours,Mins,Secs,Milli: Integer;
+  Years,Months,Weeks: Integer;
+begin
+  Milli := MillisecondsToTime((60000*60)*49+61111, Days,Hours,Mins,Secs);
+
+  Assert(Days = 2);
+  Assert(Hours = 1);
+  Assert(Mins = 1);
+  Assert(Secs = 1);
+  Assert(Milli = 111);
+
+  Milli := MillisecondsToTime((1000 * 60 * 60 * 24 * 365) + (1000 * 60 * 60 * 24 * 38) + 60001, Years,Months,Weeks,Days,Hours,Mins,Secs);
+
+  Assert(Years = 1);
+  Assert(Months = 1);
+  Assert(Weeks = 1);
+  Assert(Days = 1);
+  Assert(Hours = 0);
+  Assert(Mins = 1);
+  Assert(Secs = 0);
+  Assert(Milli = 1);
+end;

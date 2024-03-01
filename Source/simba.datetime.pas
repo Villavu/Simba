@@ -14,16 +14,52 @@ interface
 uses
   classes, sysutils;
 
-procedure ConvertTime(Time: Int64; var h, m, s: Integer);
-procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Integer);
+function MillisecondsToTime(Time: UInt64; out Days, Hours, Mins, Secs: Integer): Integer; overload;
+function MillisecondsToTime(Time: UInt64; out Years, Months, Weeks, Days, Hours, Mins, Secs: Integer): Integer; overload;
+
 function FormatMilliseconds(Time: Double; Fmt: String): String; overload;
 function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String; overload;
+
 function HighResolutionTime: Double;
 
 implementation
 
 uses
   simba.nativeinterface;
+
+function MillisecondsToTime(Time: UInt64; out Days, Hours, Mins, Secs: Integer): Integer;
+begin
+  Days := Time div 86400000; // 1000 * 60 * 60 * 24 (1 day or 24 hours)
+  Time := Time mod 86400000;
+  Hours:= Time div 3600000; // 1000 * 60 * 60 (1 hour or 60 minutes)
+  Time := Time mod 3600000;
+  Mins := Time div 60000; // 1000 * 60 (1 minute or 60 seconds)
+  Time := Time mod 60000;
+  Secs := Time div 1000; // 1000 (1 second)
+  Time := Time mod 1000;
+
+  Result := Time;
+end;
+
+function MillisecondsToTime(Time: UInt64; out Years, Months, Weeks, Days, Hours, Mins, Secs: Integer): Integer;
+begin
+  Years  := Time div 31536000000; // 1000 * 60 * 60 * 24 * 365 (1 year or 365 days)
+  Time   := Time mod 31536000000;
+  Months := Time div 2592000000; // 1000 * 60 * 60 * 24 * 30 (1 month or 30 days)
+  Time   := Time mod 2592000000;
+  Weeks  := Time div 604800000; // 1000 * 60 * 60 * 24 * 7 (1 week or 7 days)
+  Time   := Time mod 604800000;
+  Days   := Time div 86400000; // 1000 * 60 * 60 * 24 (1 day or 24 hours)
+  Time   := Time mod 86400000;
+  Hours  := Time div 3600000; // 1000 * 60 * 60 (1 hour or 60 minutes)
+  Time   := Time mod 3600000;
+  Mins   := Time div 60000; // 1000 * 60 (1 minute or 60 seconds)
+  Time   := Time mod 60000;
+  Secs   := Time div 1000; // 1000 (1 second)
+  Time   := Time mod 1000;
+
+  Result := Time;
+end;
 
 // Author: slacky
 // https://pastebin.com/zwue0VCt
@@ -195,7 +231,7 @@ begin
       'Y': begin
              while Next() = 'Y' do ;
              if fmtYearsNoPad in flags then
-               Result += IntToStr(Trunc(years))
+               Result += IntToStr(Trunc(years{%H-}))
              else begin
                if years < 10 then Result += '0';
                Result += IntToStr(Trunc(years));
@@ -204,7 +240,7 @@ begin
       'M': begin
              while Next() = 'M' do ;
              if fmtMonthsNoPad in flags then
-               Result += IntToStr(Trunc(months))
+               Result += IntToStr(Trunc(months{%H-}))
              else begin
                if months < 10 then Result += '0';
                Result += IntToStr(Trunc(months));
@@ -213,7 +249,7 @@ begin
       'W': begin
              while Next() = 'W' do ;
              if fmtWeeksNoPad in flags then
-               Result += IntToStr(Trunc(weeks))
+               Result += IntToStr(Trunc(weeks{%H-}))
              else begin
                if weeks < 10 then Result += '0';
                Result += IntToStr(Trunc(weeks));
@@ -222,7 +258,7 @@ begin
       'D': begin
              while Next() = 'D' do ;
              if fmtDaysNoPad in flags then
-               Result += IntToStr(Trunc(days))
+               Result += IntToStr(Trunc(days{%H-}))
              else begin
                if days < 10 then Result += '0';
                Result += IntToStr(Trunc(days));
@@ -231,7 +267,7 @@ begin
       'h': begin
              while Next() = 'h' do ;
              if fmtHoursNoPad in flags then
-               Result += IntToStr(Trunc(hours))
+               Result += IntToStr(Trunc(hours{%H-}))
              else begin
                if hours < 10 then Result += '0';
                Result += IntToStr(Trunc(hours));
@@ -240,7 +276,7 @@ begin
       'm': begin
              while Next() = 'm' do ;
              if fmtMinutesNoPad in flags then
-               Result += IntToStr(Trunc(minutes))
+               Result += IntToStr(Trunc(minutes{%H-}))
              else begin
                if minutes < 10 then Result += '0';
                Result += IntToStr(Trunc(minutes));
@@ -249,7 +285,7 @@ begin
       's': begin
              while Next() = 's' do ;
              if fmtSecondsNoPad in flags then
-               Result += IntToStr(Trunc(sec))
+               Result += IntToStr(Trunc(sec{%H-}))
              else begin
                if sec < 10 then Result += '0';
                Result += IntToStr(Trunc(sec));
@@ -258,7 +294,7 @@ begin
       'u': begin
              while Next() = 'u' do ;
              if fmtMillisecondsNoPad in flags then
-               Result += IntToStr(Trunc(ms))
+               Result += IntToStr(Trunc(ms{%H-}))
              else begin
                if ms < 1000 then Result += '0';
                if ms < 100 then  Result += '0';
@@ -331,39 +367,6 @@ end;
 function HighResolutionTime: Double;
 begin
   Result := SimbaNativeInterface.HighResolutionTime;
-end;
-
-procedure ConvertTime(Time: Int64; var h, m, s: Integer);
-var
-  x: Int64;
-begin
-  x := time;
-  h := x div (3600000);
-  x := x mod (3600000);
-  m := x div (60000);
-  x := x mod (60000);
-  s := x div (1000);
-end;
-
-procedure ConvertTime64(Time: Int64; var y, m, w, d, h, min, s: Integer);
-var
-  x: Int64;
-begin
-  x := time;
-  y := x div (31536000000); // 1000 * 60 * 60 * 24 * 365 (1 year or 365 days)
-  x := x mod (31536000000);
-  m := x div (2592000000); // 1000 * 60 * 60 * 24 * 30 (1 month or 30 days)
-  x := x mod (2592000000);
-  w := x div (604800000); // 1000 * 60 * 60 * 24 * 7 (1 week or 7 days)
-  x := x mod (604800000);
-  d := x div (86400000); // 1000 * 60 * 60 * 24 (1 day or 24 hours)
-  x := x mod (86400000);
-  h := x div (3600000); // 1000 * 60 * 60 (1 hour or 60 minutes)
-  x := x mod (3600000);
-  min := x div (60000); // 1000 * 60 (1 minute or 60 seconds)
-  x := x mod (60000);
-  s := x div (1000); // 1000 (1 second)
-  x := x mod (1000);
 end;
 
 end.

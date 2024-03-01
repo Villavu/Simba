@@ -38,23 +38,29 @@ begin
 end;
 
 (*
-ConvertTime
------------
-> procedure ConvertTime(Time: Integer; var h, m, s: Integer);
+MillisecondsToTime
+------------------
+> function MillisecondsToTime(Time: UInt64; out Days, Hours, Mins, Secs: Integer): Integer;
+
+Converts time (in milliseconds) to days,hours,mins and seconds.
+Any remaining milliseconds are returned in the Result.
 *)
-procedure _LapeConvertTime(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMillisecondsToTime1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  ConvertTime(PInteger(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PInteger(Result)^ := MillisecondsToTime(PUInt64(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 (*
-ConvertTime64
--------------
-> procedure ConvertTime64(Time: UInt64; var y, m, w, d, h, min, s: Integer);
+MillisecondsToTime
+------------------
+> function MillisecondsToTime(Time: UInt64; out Years, Months, Weeks, Days, Hours, Mins, Secs: Integer): Integer;
+
+Converts time (in milliseconds) to years,months,weeks,days,hours,mins and seconds.
+Any remaining milliseconds are returned in the Result.
 *)
-procedure _LapeConvertTime64(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMillisecondsToTime2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  ConvertTime64(PUInt64(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
+  PInteger(Result)^ := MillisecondsToTime(PUInt64(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^, PInteger(Params^[6])^, PInteger(Params^[7])^);
 end;
 
 (*
@@ -80,7 +86,7 @@ WriteLn FormatMilliseconds(GetTickCount(), 'hh\h:mm\m:ss\s:uu\m\s');
 WriteLn FormatMilliseconds(GetTickCount(), 'YY-MM-DD h:m:s:u');
 ```
 *)
-procedure _LapeFormatMilliseconds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFormatMilliseconds1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := FormatMilliseconds(PDouble(Params^[0])^, PString(Params^[1])^);
 end;
@@ -90,7 +96,7 @@ FormatMilliseconds
 ------------------
 > function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String;
 *)
-procedure _LapeFormatMillisecondsEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFormatMilliseconds2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := FormatMilliseconds(PDouble(Params^[0])^, PBoolean(Params^[1])^);
 end;
@@ -114,7 +120,7 @@ However the more important use case of this function is for measuring time:
 ```
   T := GetTickCount();
   Sleep(1000);
-  WriteLn('Should be around -1000 :: ', GetTickCount()-T);
+  WriteLn('Should be around ~1000 :: ', GetTickCount()-T);
 ```
 Resolution is typically in the range of 10 milliseconds to 16 milliseconds.
 
@@ -128,11 +134,11 @@ begin
     ImportingSection := 'Timing';
 
     addGlobalFunc('procedure PreciseSleep(Milliseconds: UInt32);', @_LapePreciseSleep);
-    addGlobalFunc('procedure ConvertTime(Time: Integer; var h, m, s: Integer)', @_LapeConvertTime);
-    addGlobalFunc('procedure ConvertTime64(Time: UInt64; var y, m, w, d, h, min, s: Integer)', @_LapeConvertTime64);
     addGlobalFunc('function PerformanceTimer: Double;', @_LapePerformanceTimer);
-    addGlobalFunc('function FormatMilliseconds(Time: Double; Format: String): String; overload;', @_LapeFormatMilliseconds);
-    addGlobalFunc('function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String; overload;', @_LapeFormatMillisecondsEx);
+    addGlobalFunc('function MillisecondsToTime(Time: UInt64; out Days, Hours, Mins, Secs: Integer): Integer; overload', @_LapeMillisecondsToTime1);
+    addGlobalFunc('function MillisecondsToTime(Time: UInt64; out Years, Months, Weeks, Days, Hours, Mins, Secs: Integer): Integer; overload', @_LapeMillisecondsToTime2);
+    addGlobalFunc('function FormatMilliseconds(Time: Double; Format: String): String; overload;', @_LapeFormatMilliseconds1);
+    addGlobalFunc('function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String; overload;', @_LapeFormatMilliseconds2);
 
     addDelayedCode([
       'function GetTimeRunning: UInt64;',
