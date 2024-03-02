@@ -53,6 +53,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure DialogSelectDirClose(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     Searcher: TSynEditSearch;
     ButtonFind: TSimbaButton;
@@ -168,8 +169,7 @@ begin
   ButtonFind.Parent := PanelSearchButton;
   ButtonFind.Caption := 'Find';
   ButtonFind.BorderSpacing.Around := 5;
-  ButtonFind.XPadding := Scale96ToScreen(15);
-  ButtonFind.YPadding := Scale96ToScreen(2);
+  ButtonFind.XPadding := 20;
   ButtonFind.OnClick := @DoButtonFindClick;
 
   CheckboxOptions := TSimbaCheckButtonGroup.Create(Self);
@@ -190,7 +190,7 @@ begin
   ButtonSelectDir.Parent := PanelSelectLocation;
   ButtonSelectDir.BorderSpacing.Around := 5;
   ButtonSelectDir.Align := alClient;
-  ButtonSelectDir.SetImage(ESimbaButtonImage.SELECT_DIR);
+  ButtonSelectDir.Image := ESimbaButtonImage.SELECT_DIR;
   ButtonSelectDir.OnClick := @DoSelectDirButtonClick;
 
   ButtonOpenAllFiles := TSimbaButton.Create(Self);
@@ -208,6 +208,7 @@ begin
   EditSearch.Edit.ColorBorder := SimbaTheme.ColorScrollBarActive;
 
   MemoResults := TResultsMemo.Create(Self, False);
+  MemoResults.ReadOnly := True;
   MemoResults.OnSpecialLineMarkup := @DoLineMarkup;
   MemoResults.OnMouseLink := @DoAllowMouseLink;
   MemoResults.OnClickLink := @DoMouseLinkClick;
@@ -259,6 +260,13 @@ end;
 procedure TSimbaFindInFilesForm.DialogSelectDirClose(Sender: TObject);
 begin
   EditLocation.Edit.Text := DialogSelectDir.FileName;
+end;
+
+procedure TSimbaFindInFilesForm.FormShow(Sender: TObject);
+begin
+  ActiveControl := EditSearch;
+  if EditSearch.CanSetFocus() then
+    EditSearch.SetFocus();
 end;
 
 procedure TSimbaFindInFilesForm.DoSearching;

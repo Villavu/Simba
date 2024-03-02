@@ -82,7 +82,7 @@ begin
   FButtonOk.Caption := 'Ok';
   FButtonOk.BorderSpacing.Around := 8;
   FButtonOk.XPadding := 10;
-  FButtonOk.SetImage(ESimbaButtonImage.OK);
+  FButtonOk.Image := ESimbaButtonImage.OK;
 
   FButtonCancel := TButtonPanelButton.Create(Self);
   FButtonCancel.Parent := Self;
@@ -90,7 +90,7 @@ begin
   FButtonCancel.Caption := 'Cancel';
   FButtonCancel.BorderSpacing.Around := 8;
   FButtonCancel.XPadding := 10;
-  FButtonCancel.SetImage(ESimbaButtonImage.CLOSE);
+  FButtonCancel.Image := ESimbaButtonImage.CLOSE;
   FButtonCancel.OnResize := @DoButtonCancelResize;
 
   Color := SimbaTheme.ColorFrame;

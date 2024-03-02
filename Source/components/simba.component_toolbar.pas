@@ -59,7 +59,7 @@ type
   TSimbaToolButtonDivider = class(TSimbaToolButton)
   protected
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
-    procedure PaintBackground(var PaintRect: TRect); override;
+    procedure Paint; override;
   end;
 
   TSimbaDropToolButton = class(TSimbaToolButton)
@@ -69,7 +69,7 @@ type
     function ScaleToToolbarSize(Value: Integer): Integer;
 
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
-    procedure PaintBackground(var PaintRect: TRect); override;
+    procedure Paint; override;
   public
     DropdownMenu: TPopupMenu;
 
@@ -94,11 +94,11 @@ begin
   PreferredWidth := ScaleToToolbarSize(10);
 end;
 
-procedure TSimbaDropToolButton.PaintBackground(var PaintRect: TRect);
+procedure TSimbaDropToolButton.Paint;
 begin
-  inherited PaintBackground(PaintRect);
+  inherited Paint();
 
-  CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, PaintRect.CenterPoint, IfThen(FToolbar.FButtonSize >= 20, 2, 1));
+  CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, ClientRect.CenterPoint, IfThen(FToolbar.FButtonSize >= 20, 2, 1));
 end;
 
 procedure TSimbaDropToolButton.Click;
@@ -122,6 +122,8 @@ begin
 
   FToolBar := AOwner as TSimbaToolBar;
 
+  FImageList := FToolbar.FImages;
+
   BorderSpacing.Left := 2;
   BorderSpacing.Right := 2;
   BorderSpacing.Top := 2;
@@ -138,10 +140,10 @@ begin
     PreferredWidth := 1;
 end;
 
-procedure TSimbaToolButtonDivider.PaintBackground(var PaintRect: TRect);
+procedure TSimbaToolButtonDivider.Paint;
 begin
   Canvas.Brush.Color := ColorBlendHalf(SimbaTheme.ColorFrame, SimbaTheme.ColorLine);
-  Canvas.FillRect(PaintRect);
+  Canvas.FillRect(ClientRect);
 end;
 
 procedure TSimbaToolbar.SetButtonSize(Value: Integer);
@@ -193,7 +195,6 @@ function TSimbaToolbar.AddButton(ImageIndex: Integer; HintText: String; AOnClick
 begin
   Result := TSimbaToolButton.Create(Self);
   Result.Parent := FFlowPanel;
-  Result.Images := FImages;
   Result.ImageIndex := ImageIndex;
   Result.Hint := HintText;
   Result.ShowHint := HintText <> '';

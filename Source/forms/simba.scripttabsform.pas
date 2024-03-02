@@ -401,10 +401,9 @@ begin
   FFindButtonDown := TSimbaButton.Create(Self);
   with FFindButtonDown do
   begin
-    Images := SimbaForm.Images;
     Parent := FindButtonPanel;
     Align := alLeft;
-    ImageINdex := IMG_ARROW_DOWN;
+    ImageIndex := IMG_ARROW_DOWN;
     Hint := 'Find Next';
     ShowHint := True;
     BorderSpacing.Around := 5;
@@ -414,7 +413,6 @@ begin
   FFindButtonUp := TSimbaButton.Create(Self);
   with FFindButtonUp do
   begin
-    Images := SimbaForm.Images;
     Parent := FindButtonPanel;
     Align := alLeft;
     ImageIndex := IMG_ARROW_UP;
@@ -427,11 +425,10 @@ begin
   FFindButtonClose := TSimbaTransparentButton.Create(Self);
   with FFindButtonClose do
   begin
-    Images := SimbaForm.Images;
     Parent := FindPanel;
     Align := alRight;
     BorderSpacing.Around := 5;
-    SetImage(ESimbaButtonImage.CLOSE);
+    Image := ESimbaButtonImage.CLOSE;
     OnClick := @FindButtonClick;
   end;
 

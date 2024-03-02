@@ -61,6 +61,7 @@ const
   IMG_CLOSE_ALL = 52;
   IMG_ARROW_UP = 53;
   IMG_ARROW_DOWN = 54;
+  IMG_TICK = 62;
 
 type
   TSimbaForm = class(TForm)
