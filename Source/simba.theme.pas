@@ -53,7 +53,7 @@ uses
 
 procedure TSimbaTheme.DoFormAdded(Sender: TObject; Form: TCustomForm);
 begin
-  Form.AddHandlerFirstShow(@AddNativeWindowColoring);
+  Form.AddHandlerOnVisibleChanged(@AddNativeWindowColoring);
 end;
 
 function TSimbaTheme.GetScrollBarArrowSize: Integer;
@@ -81,6 +81,9 @@ procedure TSimbaTheme.AddNativeWindowColoring(Sender: TObject);
 const
   DWMWA_CAPTION_COLOR = 35;
 begin
+  if not TCustomForm(Sender).Visible then
+    Exit;
+
   // DWMWA_CAPTION_COLOR (Sadly need windows 11)
   if (Win32BuildNumber >= 22000) and (Sender is TCustomForm) and Assigned(DwmSetWindowAttribute) then
     DwmSetWindowAttribute(TCustomForm(Sender).Handle, DWMWA_CAPTION_COLOR, @ColorFrame, SizeOf(TColor));

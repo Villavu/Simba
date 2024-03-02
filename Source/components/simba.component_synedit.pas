@@ -11,9 +11,9 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, StdCtrls, Graphics,
-  SynEdit, SynEditTypes, SynEditFoldedView, SynEditTextBuffer, SynEditMarkupSelection,
+  SynEdit, SynEditTypes, SynEditFoldedView, SynEditTextBuffer, SynEditMarkupSelection, SynEditWrappedView,
   LazSynEditText,
-  simba.component_scrollbar;
+  simba.theme, simba.component_scrollbar;
 
 type
   TSimbaSynEdit = class(TSynEdit)
@@ -47,10 +47,6 @@ type
   end;
 
 implementation
-
-uses
-  simba.base, simba.theme,
-  SynEditWrappedView;
 
 function TSimbaSynEdit.GetFontAntialising: Boolean;
 begin
@@ -93,9 +89,6 @@ begin
     FScrollbarHorz.Max := MaxLeftChar + 1;
   FScrollbarHorz.PageSize := CharsInWindow;
   FScrollbarHorz.Position := LeftChar;
-
-  FScrollbarVert.Update();
-  FScrollbarHorz.Update();
 end;
 
 procedure TSimbaSynEdit.StatusChanged(AChanges: TSynStatusChanges);
@@ -118,6 +111,7 @@ begin
   FScrollbarHorz.Parent := NewParent;
   FScrollbarHorz.Align := alBottom;
   FScrollbarHorz.IndentCorner := 100;
+
   FScrollbarVert.Parent := NewParent;
   FScrollbarVert.Align := alRight;
 end;
@@ -183,7 +177,11 @@ begin
   Options := Options + [eoHideRightMargin];
 
   if LineWrapping then
+  begin
+    FScrollbarHorz.Visible := False;
+    Options := Options - [eoScrollPastEol];
     TLazSynEditLineWrapPlugin.Create(Self);
+  end;
 end;
 
 end.

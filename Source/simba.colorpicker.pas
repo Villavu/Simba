@@ -207,8 +207,8 @@ begin
   begin
     Left := DesktopBounds.X1;
     Top := DesktopBounds.Y1;
-    Width := DesktopBounds.X2;
-    Height := DesktopBounds.Y2;
+    Width := DesktopBounds.Width;
+    Height := DesktopBounds.Height;
 
     BorderStyle := bsNone;
 

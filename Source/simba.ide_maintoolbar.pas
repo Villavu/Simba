@@ -217,12 +217,12 @@ begin
     FWindowSelection := ShowWindowSelector();
     FProcessSelection := FWindowSelection.GetPID();
 
-    DebugLn([EDebugLn.FOCUS], 'Window Selected: %d', [FWindowSelection]);
+    DebugLn([EDebugLn.FOCUS], 'Window Selected: %d',  [FWindowSelection]);
     DebugLn([EDebugLn.FOCUS], ' - Dimensions: %dx%d', [FWindowSelection.GetBounds().Width - 1, FWindowSelection.GetBounds().Height - 1]);
-    DebugLn([EDebugLn.FOCUS], ' - Title: "%s"', [FWindowSelection.GetTitle()]);
-    DebugLn([EDebugLn.FOCUS], ' - Class: "%s"', [FWindowSelection.GetClassName()]);
-    DebugLn([EDebugLn.FOCUS], ' - PID: %d (%s)', [FWindowSelection.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(FWindowSelection.GetPID()), '64 bit', '32 bit')]);
-    DebugLn([EDebugLn.FOCUS], ' - Executable: "%s"', [SimbaProcess.GetProcessPath(FWindowSelection.GetPID())]);
+    DebugLn([EDebugLn.FOCUS], ' - Title: "%s"',       [FWindowSelection.GetTitle()]);
+    DebugLn([EDebugLn.FOCUS], ' - Class: "%s"',       [FWindowSelection.GetClassName()]);
+    DebugLn([EDebugLn.FOCUS], ' - PID: %d (%s)',      [FWindowSelection.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(FWindowSelection.GetPID()), '64 bit', '32 bit')]);
+    DebugLn([EDebugLn.FOCUS], ' - Executable: "%s"',  [SimbaProcess.GetProcessPath(FWindowSelection.GetPID())]);
 
     SimbaIDEEvents.Notify(SimbaIDEEvent.WINDOW_SELECTED, Self);
   except
