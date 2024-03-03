@@ -18,6 +18,7 @@ type
   TSimbaDTMEditorForm = class(TForm)
     ButtonUpdateImage: TButton;
     ButtonClearImage: TButton;
+    ListBox: TListBox;
     MenuItemUpdateImage: TMenuItem;
     MenuItemClearImage: TMenuItem;
     MenuItemFindDTM: TMenuItem;
@@ -43,10 +44,8 @@ type
     LabelColor: TLabel;
     LabelTolerance: TLabel;
     LabelSize: TLabel;
-    ListBox: TListBox;
     MainMenu: TMainMenu;
     MenuItemImage: TMenuItem;
-    PanelTop: TPanel;
     PanelSelectedPoint: TPanel;
     MenuDTM: TMenuItem;
     MenuItemLoadDTM: TMenuItem;
@@ -58,6 +57,7 @@ type
     MenuItemColorYellow: TMenuItem;
     PanelMain: TPanel;
     PanelRight: TPanel;
+    PanelTop: TPanel;
 
     procedure ButtonClearImageClick(Sender: TObject);
     procedure ButtonDeletePointsClick(Sender: TObject);
@@ -80,8 +80,8 @@ type
   protected
     FFreeOnClose: Boolean;
     FImageBox: TSimbaImageBox;
-    FImageZoom: TSimbaImageBoxZoom;
-    FZoomInfo: TLabel;
+    FZoomPanel: TSimbaImageBoxZoomPanel;
+
     FDragging: Integer;
     FDebugDTM: TPointArray;
     FDebugColor: TPointArray;
@@ -124,11 +124,7 @@ procedure TSimbaDTMEditorForm.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShi
 var
   Point: TDTMPoint;
 begin
-  FImageZoom.Move(FImageBox.Background.Canvas, X, Y);
-  with FImageBox.Background.Canvas.Pixels[X, Y].ToRGB(), FImageBox.Background.Canvas.Pixels[X, Y].ToHSL() do
-    FZoomInfo.Caption := Format('Color: %d', [FImageBox.Background.Canvas.Pixels[X, Y]]) + LineEnding +
-                         Format('RGB: %d, %d, %d', [R, G, B])                            + LineEnding +
-                         Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                      + LineEnding;
+  FZoomPanel.Move(FImageBox.Background.Canvas, X, Y);
 
   if (FDragging > -1) then
   begin
@@ -274,19 +270,19 @@ end;
 
 procedure TSimbaDTMEditorForm.AddPoint(X, Y, Col: Integer);
 begin
-  ListBox.ItemIndex := ListBox.Items.Add('%d, %d, %d, 0, 0', [X, Y, Col]);
+  ListBox.ItemIndex := ListBox.Items.Add('%d, %d, %s, 0, 0', [X, Y, ColorToStr(Col)]);
   DrawDTM();
 end;
 
 procedure TSimbaDTMEditorForm.EditPoint(Index: Integer; X, Y, Col: Integer; Tol: Single; Size: Integer);
 begin
-  ListBox.Items[Index] := Format('%d, %d, %d, %f, %d', [X, Y, Col, Tol, Size]);
+  ListBox.Items[Index] := Format('%d, %d, %s, %f, %d', [X, Y, ColorToStr(Col), Tol, Size]);
 
   if ListBox.ItemIndex = Index then
   begin
     EditPointX.Text := IntToStr(X);
     EditPointY.Text := IntToStr(Y);
-    EditPointColor.Text := IntToStr(Col);
+    EditPointColor.Text := ColorToStr(Col);
     EditPointTolerance.Text := Format('%f', [Tol]);
     EditPointSize.Text := IntToStr(Size);
   end;
@@ -311,7 +307,7 @@ begin
 
   Result.X := StrToInt(Items[0]);
   Result.Y := StrToInt(Items[1]);
-  Result.Color := StrToInt(Items[2]);
+  Result.Color := StrToColor(Items[2]);
   Result.Tolerance := StrToFloat(Items[3]);
   Result.AreaSize := StrToInt(Items[4]);
 end;
@@ -543,15 +539,9 @@ begin
   FImageBox.OnImgMouseUp := @DoImgMouseUp;
   FImageBox.SetBackgroundFromWindow(FWindow);
 
-  FImageZoom := TSimbaImageBoxZoom.Create(Self);
-  FImageZoom.Parent := PanelTop;
-  FImageZoom.SetZoom(4, 5);
-  FImageZoom.BorderSpacing.Around := 10;
-
-  FZoomInfo := TLabel.Create(Self);
-  FZoomInfo.Parent := PanelTop;
-  FZoomInfo.BorderSpacing.Right := 10;
-  FZoomInfo.AnchorToNeighbour(akLeft, 10, FImageZoom);
+  FZoomPanel := TSimbaImageBoxZoomPanel.Create(Self);
+  FZoomPanel.Parent := PanelRight;
+  FZoomPanel.Align := alTop;
 end;
 
 end.

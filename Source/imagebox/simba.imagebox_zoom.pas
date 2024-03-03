@@ -10,7 +10,7 @@ unit simba.imagebox_zoom;
 interface
 
 uses
-  Classes, SysUtils, Controls, ExtCtrls, Graphics,
+  Classes, SysUtils, Controls, ExtCtrls, Graphics, StdCtrls,
   simba.imagebox;
 
 type
@@ -32,10 +32,28 @@ type
     procedure Move(ACanvas: TCanvas; X, Y: Integer);
   end;
 
+  TSimbaImageBoxZoomPanel = class(TCustomControl)
+  protected
+    FZoom: TSimbaImageBoxZoom;
+    FLabel: TLabel;
+
+    FImageCanvas: TCanvas;
+    FImageX, FImageY: Integer;
+
+    procedure DoUpdate(Data: PtrInt);
+    procedure DoFill(Data: PtrInt);
+  public
+    constructor Create(AOwner: TComponent); override;
+
+    procedure Move(ImgCanvas: TCanvas; ImgX, ImgY: Integer);
+    procedure Fill(AColor: TColor);
+  end;
+
 implementation
 
 uses
-  simba.nativeinterface;
+  Forms,
+  simba.nativeinterface, simba.colormath;
 
 constructor TSimbaImageBoxZoom.Create(AOwner: TComponent);
 begin
@@ -60,9 +78,12 @@ end;
 
 procedure TSimbaImageBoxZoom.SetTempColor(AColor: Integer);
 begin
-  FTempColor := AColor;
+  if (AColor <> FTempColor) then
+  begin
+    FTempColor := AColor;
 
-  Invalidate();
+    Invalidate();
+  end;
 end;
 
 procedure TSimbaImageBoxZoom.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
@@ -111,27 +132,92 @@ end;
 
 procedure TSimbaImageBoxZoom.SetZoom(PixelCount, PixelSize: Integer);
 begin
-  if not Odd(PixelCount) then
-    Inc(PixelCount);
+  if Odd(PixelCount) then
+    FPixelCount := PixelCount
+  else
+    FPixelCount := PixelCount + 1;
 
-  FPixelCount := PixelCount;
-  FPixelSize  := PixelCount + PixelSize;
+  FPixelSize := PixelCount + PixelSize;
 
-  DoAutoSize();
+  AdjustSize();
 end;
 
 procedure TSimbaImageBoxZoom.Move(ACanvas: TCanvas; X, Y: Integer);
 var
   LoopX, LoopY: Integer;
 begin
+  FTempColor := -1;
+
   Dec(X, FPixelCount div 2);
   Dec(Y, FPixelCount div 2);
 
+  FBitmap.BeginUpdate(True);
   for LoopX := 0 to FBitmap.Width - 1 do
     for LoopY := 0 to FBitmap.Height - 1 do
       FBitmap.Canvas.Pixels[LoopX, LoopY] := ACanvas.Pixels[X + LoopX, Y + LoopY];
+  FBitmap.EndUpdate();
 
   Invalidate();
+end;
+
+procedure TSimbaImageBoxZoomPanel.DoUpdate(Data: PtrInt);
+var
+  Col: TColor;
+begin
+  if (FImageCanvas <> nil) then
+  begin
+    Col := FImageCanvas.Pixels[FImageX, FImageY];
+
+    FZoom.Move(FImageCanvas, FImageX, FImageY);
+    with Col.ToRGB(), Col.ToHSL() do
+      FLabel.Caption := Format('Color: %s', [ColorToStr(Col)])     + LineEnding +
+                        Format('RGB: %d, %d, %d', [R, G, B])       + LineEnding +
+                        Format('HSL: %.2f, %.2f, %.2f', [H, S, L]);
+  end;
+end;
+
+procedure TSimbaImageBoxZoomPanel.DoFill(Data: PtrInt);
+var
+  Col: TColor absolute Data;
+begin
+  FZoom.SetTempColor(Col);
+  with Col.ToRGB(), Col.ToHSL() do
+    FLabel.Caption := Format('Color: %s', [ColorToStr(Col)])     + LineEnding +
+                      Format('RGB: %d, %d, %d', [R, G, B])       + LineEnding +
+                      Format('HSL: %.2f, %.2f, %.2f', [H, S, L]);
+end;
+
+constructor TSimbaImageBoxZoomPanel.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  AutoSize := True;
+
+  FZoom := TSimbaImageBoxZoom.Create(Self);
+  FZoom.Parent := Self;
+  FZoom.SetZoom(4, 5);
+  FZoom.BorderSpacing.Around := 10;
+
+  FLabel := TLabel.Create(Self);
+  FLabel.Parent := Self;
+  FLabel.BorderSpacing.Right := 10;
+  FLabel.AnchorToNeighbour(akLeft, 10, FZoom);
+end;
+
+procedure TSimbaImageBoxZoomPanel.Move(ImgCanvas: TCanvas; ImgX, ImgY: Integer);
+begin
+  FImageCanvas := ImgCanvas;
+  FImageX := ImgX;
+  FImageY := ImgY;
+
+  Application.RemoveAsyncCalls(Self);
+  Application.QueueAsyncCall(@DoUpdate, 0);
+end;
+
+procedure TSimbaImageBoxZoomPanel.Fill(AColor: TColor);
+begin
+  Application.RemoveAsyncCalls(Self);
+  Application.QueueAsyncCall(@DoFill, AColor);
 end;
 
 end.

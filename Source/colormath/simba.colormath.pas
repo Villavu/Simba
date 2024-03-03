@@ -116,6 +116,9 @@ function ColorToXYZ(const Color: TColor): TColorXYZ;
 function ColorToLAB(const Color: TColor): TColorLAB;
 function ColorToLCH(const Color: TColor): TColorLCH;
 
+function ColorToStr(Color: TColor): String;
+function StrToColor(Str: String): TColor;
+
 implementation
 
 uses
@@ -359,6 +362,16 @@ end;
 function TColorHelper.ToHSL: TColorHSL;
 begin
   Result := TSimbaColorConversion.RGBToHSL(ToRGB());
+end;
+
+function ColorToStr(Color: TColor): String;
+begin
+  Result := '$' + IntToHex(Color, 6);
+end;
+
+function StrToColor(Str: String): TColor;
+begin
+  Result := StrToIntDef(Str, 0);
 end;
 
 end.

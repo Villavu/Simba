@@ -48,7 +48,6 @@ type
     Panel1: TPanel;
     AlignmentPanel: TPanel;
     Panel2: TPanel;
-    PanelTop: TPanel;
     PanelAlignment: TPanel;
     MenuItemLoadImage: TMenuItem;
     MenuItemClearImage: TMenuItem;
@@ -93,8 +92,7 @@ type
     FFreeOnClose: Boolean;
     FWindow: TWindowHandle;
     FImageBox: TSimbaImageBox;
-    FImageZoom: TSimbaImageBoxZoom;
-    FZoomInfo: TLabel;
+    FZoomPanel: TSimbaImageBoxZoomPanel;
     FDebugTPA: TPointArray;
     FDebugMat: TSingleMatrix;
     FDrawColor: TColor;
@@ -122,43 +120,27 @@ uses
   Clipbrd, TypInfo, LCLType,
   simba.windowhandle, simba.image, simba.colormath_aca, simba.matrix_float, simba.dialog;
 
-function FormatColor(Color: TColor): String; overload;
-begin
-  Result := '$' + IntToHex(Color, 6);
-end;
-
-function FormatColor(Color: String): String; overload;
-begin
-  Result := FormatColor(StrToIntDef(Color, 0));
-end;
-
 procedure TSimbaACAForm.ClientImageMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 begin
-  FImageZoom.SetTempColor(-1);
-  FImageZoom.Move(FImageBox.Background.Canvas, X, Y);
-
-  with FImageBox.Background.Canvas.Pixels[X, Y].ToRGB(), FImageBox.Background.Canvas.Pixels[X, Y].ToHSL() do
-    FZoomInfo.Caption := Format('Color: %s', [FormatColor(FImageBox.Background.Canvas.Pixels[X, Y])]) + LineEnding +
-                         Format('RGB: %d, %d, %d', [R, G, B])                                      + LineEnding +
-                         Format('HSL: %.2f, %.2f, %.2f', [H, S, L])                                + LineEnding;
+  FZoomPanel.Move(FImageBox.Background.Canvas, X, Y);
 end;
 
 procedure TSimbaACAForm.ClientImageMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  Pixel: Integer;
+  Col: TColor;
 begin
   if (Button = mbLeft) then
   begin
-    Pixel := FImageBox.Background.Canvas.Pixels[X, Y];
+    Col := FImageBox.Background.Canvas.Pixels[X, Y];
 
-    if ColorListBox.Items.IndexOf(Pixel.ToString()) = -1 then
-      ColorListBox.ItemIndex := ColorListBox.Items.AddObject(FormatColor(Pixel), TObject(PtrUInt(Pixel)));
+    if ColorListBox.Items.IndexOf(ColorToStr(Col)) = -1 then
+      ColorListBox.ItemIndex := ColorListBox.Items.AddObject(ColorToStr(Col), TObject(PtrUInt(Col)));
   end;
 end;
 
 procedure TSimbaACAForm.MenuItemCopyBestColorClick(Sender: TObject);
 begin
-  Clipboard.AsText := Format('ColorTolerance(%s, %s, %s, [%s, %s, %s])', [FormatColor(StrToIntDef(BestColorEdit.Text, 0)), BestToleranceEdit.Text, GetColorSpaceStr(), BestMulti1Edit.Text, BestMulti2Edit.Text, BestMulti3Edit.Text]);
+  Clipboard.AsText := Format('ColorTolerance(%s, %s, %s, [%s, %s, %s])', [ColorToStr(StrToColor(BestColorEdit.Text)), BestToleranceEdit.Text, GetColorSpaceStr(), BestMulti1Edit.Text, BestMulti2Edit.Text, BestMulti3Edit.Text]);
 end;
 
 procedure TSimbaACAForm.MenuItemLoadHSLCircleClick(Sender: TObject);
@@ -253,15 +235,8 @@ end;
 
 procedure TSimbaACAForm.ColorSelectionChanged(Sender: TObject; User: Boolean);
 begin
-  if User and (ColorListBox.ItemIndex >= 0) then
-  begin
-    FImageZoom.SetTempColor(ColorListBox.Selected);
-
-    with ColorListBox.Selected.ToRGB(), ColorListBox.Selected.ToHSL() do
-      FZoomInfo.Caption := Format('Color: %d', [ColorListBox.Selected]) + LineEnding +
-                           Format('RGB: %d, %d, %d', [R, G, B])         + LineEnding +
-                           Format('HSL: %.2f, %.2f, %.2f', [H, S, L])   + LineEnding;
-  end;
+  if User and (ColorListBox.ItemIndex > -1) then
+    FZoomPanel.Fill(ColorListBox.Selected);
 
   CalculateBestColor();
 end;
@@ -340,7 +315,7 @@ begin
   begin
     Best := GetBestColor(GetColorSpace(), Colors);
 
-    BestColorEdit.Text := FormatColor(Best.Color);
+    BestColorEdit.Text := ColorToStr(Best.Color);
     BestToleranceEdit.Text := Format('%.3f', [Best.Tolerance]);
     BestMulti1Edit.Text := Format('%.3f', [Best.Mods[0]]);
     BestMulti2Edit.Text := Format('%.3f', [Best.Mods[1]]);
@@ -461,8 +436,6 @@ constructor TSimbaACAForm.Create(Window: TWindowHandle);
 begin
   inherited Create(Application.MainForm);
 
-  ColorListBox.Options := [];
-
   FWindow := Window;
   if (FWindow = 0) or (not FWindow.IsValid()) then
     FWindow := GetDesktopWindow();
@@ -477,15 +450,9 @@ begin
   FImageBox.OnImgPaint := @DoPaintArea;
   FImageBox.SetBackgroundFromWindow(FWindow);
 
-  FImageZoom := TSimbaImageBoxZoom.Create(Self);
-  FImageZoom.Parent := PanelTop;
-  FImageZoom.SetZoom(4, 5);
-  FImageZoom.BorderSpacing.Around := 5;
-
-  FZoomInfo := TLabel.Create(Self);
-  FZoomInfo.Parent := PanelTop;
-  FZoomInfo.BorderSpacing.Right := 10;
-  FZoomInfo.AnchorToNeighbour(akLeft, 10, FImageZoom);
+  FZoomPanel := TSimbaImageBoxZoomPanel.Create(Self);
+  FZoomPanel.Parent := PanelRight;
+  FZoomPanel.Align := alTop;
 
   FDrawColor := clRed;
 

@@ -53,7 +53,8 @@ implementation
 uses
   LCLType,
   simba.image, simba.windowhandle, simba.image_lazbridge,
-  simba.colorpickerhistoryform, simba.threading, simba.dockinghelpers;
+  simba.colorpickerhistoryform, simba.threading, simba.dockinghelpers,
+  simba.colormath;
 
 procedure ShowHistoryForm;
 begin
@@ -139,9 +140,6 @@ begin
 end;
 
 procedure TSimbaColorPicker.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-const
-  INFO = 'Color: %d' + LineEnding +
-         'Position: %d, %d';
 begin
   FImageX := X;
   FImageY := Y;
@@ -154,8 +152,9 @@ begin
     FHint.Top := Y;
   end;
 
-  FHint.Info.Caption := Format(INFO, [FImage.Picture.Bitmap.Canvas.Pixels[X, Y], FPoint.X, FPoint.Y]);
   FHint.Zoom.Move(TImage(Sender).Canvas, X, Y);
+  FHint.Info.Caption := 'Color: ' + ColorToStr(FImage.Picture.Bitmap.Canvas.Pixels[X, Y]) + LineEnding +
+                        'Position: ' + IntToStr(FPoint.X) + ', ' + IntToStr(FPoint.Y);
 end;
 
 procedure TSimbaColorPicker.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
