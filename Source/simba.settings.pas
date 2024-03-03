@@ -114,7 +114,9 @@ type
     end;
 
     Editor: record
+      DefaultScriptType: TSimbaSetting;
       DefaultScript: TSimbaSetting;
+      DefaultScriptFile: TSimbaSetting;
       CustomColors: TSimbaSetting;
       FontSize: TSimbaSetting;
       FontName: TSimbaSetting;
@@ -503,7 +505,9 @@ begin
   General.FindInFilesCaseSens   := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesCaseSens', False);
 
   // Editor
+  Editor.DefaultScriptType               := TSimbaSetting_Integer.Create(Self, 'Editor', 'DefaultScriptType', 1);
   Editor.DefaultScript                   := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
+  Editor.DefaultScriptFile               := TSimbaSetting_String.Create(Self, 'Editor', 'DefaultScriptFile', '');
   Editor.CustomColors                    := TSimbaSetting_String.Create(Self, 'Editor', 'CustomColors', '');
   Editor.FontSize                        := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize);
   Editor.FontName                        := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', SynDefaultFontName);
@@ -524,7 +528,7 @@ begin
 
   CodeTools.IgnoreIDEDirective          := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'IgnoreIDEDirective', False);
 
-  Codetools.CompletionAddKeywords       := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'CompletionAddKeywords', True);
+  CodeTools.CompletionAddKeywords       := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'CompletionAddKeywords', True);
   CodeTools.CompletionOpenAutomatically := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'CompletionOpenAutomatically', True);
   CodeTools.CompletionKey               := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'CompletionKey', VK_SPACE);
   CodeTools.CompletionKeyModifiers      := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'CompletionKeyModifiers', Integer(TShiftState([ssCtrl])));

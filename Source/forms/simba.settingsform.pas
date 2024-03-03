@@ -12,6 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls, ButtonPanel, Spin,
   simba.settingsform_editor_font, simba.settingsform_editor_colors, simba.settingsform_editor_general,
+  simba.settingsform_editor_default,
   simba.settingsform_simba_general, simba.settingsform_outputbox, simba.settingsform_backup,
   simba.settingsform_codetools;
 
@@ -34,6 +35,7 @@ type
     EditorGeneralFrame: TEditorGeneralFrame;
     EditorFontFrame: TEditorFontFrame;
     EditorColorsFrame: TEditorColorsFrame;
+    EditorDefaultFrame: TEditorDefaultFrame;
 
     procedure ShowPage(Title: String);
 
@@ -91,8 +93,11 @@ begin
   SimbaCodetoolsFrame.Load();
   EditorGeneralFrame.Load();
   EditorColorsFrame.Load();
+  EditorDefaultFrame.Load();
   SimbaOutputBoxFrame.Load();
   SimbaBackupFrame.Load();
+
+  TreeView.Selected := TreeView.Items.GetFirstNode();
 end;
 
 procedure TSimbaSettingsForm.OKButtonClick(Sender: TObject);
@@ -113,6 +118,7 @@ begin
   SimbaCodetoolsFrame.Save();
   EditorGeneralFrame.Save();
   EditorColorsFrame.Save();
+  EditorDefaultFrame.Save();
   SimbaOutputBoxFrame.Save();
   SimbaBackupFrame.Save();
 end;
@@ -183,7 +189,10 @@ begin
   EditorColorsFrame.Align := alClient;
   EditorColorsFrame.ParentFont := True;
 
-  TreeView.Selected := TreeView.Items.GetFirstNode();
+  EditorDefaultFrame := TEditorDefaultFrame.Create(Self);
+  EditorDefaultFrame.Parent := AddPage('Default Script', Node);
+  EditorDefaultFrame.Align := alClient;
+  EditorDefaultFrame.ParentFont := True;
 end;
 
 end.

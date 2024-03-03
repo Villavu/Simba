@@ -380,7 +380,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="125">
+    <Units Count="126">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -968,6 +968,13 @@
         <Filename Value="../Third-Party/basenenc_simba.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit124>
+      <Unit125>
+        <Filename Value="forms/simba.settingsform_editor_default.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="EditorDefaultFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+      </Unit125>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

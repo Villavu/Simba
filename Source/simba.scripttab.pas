@@ -89,6 +89,8 @@ type
 
     FOutputBox: TSimbaOutputBox;
 
+    procedure LoadDefaultScript;
+
     // Keep output tab in sync
     procedure TextChanged; override;
 
@@ -334,6 +336,16 @@ end;
 function TSimbaScriptTab.GetScriptChanged: Boolean;
 begin
   Result := FEditor.Text <> FSavedText;
+end;
+
+procedure TSimbaScriptTab.LoadDefaultScript;
+begin
+  case SimbaSettings.Editor.DefaultScriptType.Value of
+    0: FEditor.Text := TSimbaFile.FileRead(SimbaSettings.Editor.DefaultScriptFile.Value);
+    1: FEditor.Text := SimbaSettings.Editor.DefaultScript.Value;
+  end;
+
+  FEditor.MarkTextAsSaved();
 end;
 
 procedure TSimbaScriptTab.TextChanged;
@@ -604,8 +616,6 @@ begin
   FEditor := TSimbaEditor.Create(Self);
   FEditor.Parent := Self;
   FEditor.Align := alClient;
-  FEditor.Text := SimbaSettings.Editor.DefaultScript.Value;
-  FEditor.MarkTextAsSaved();
   FEditor.RegisterStatusChangedHandler(@DoEditorStatusChanges, [scCaretX, scCaretY, scModified]);
   FEditor.OnClickLink := @DoEditorLinkClick;
   FEditor.OnModified := @DoEditorModified;
@@ -615,6 +625,8 @@ begin
 
   FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
   FOutputBox.TabImageIndex := IMG_STOP;
+
+  LoadDefaultScript();
 
   FSavedText := FEditor.Text;
 end;

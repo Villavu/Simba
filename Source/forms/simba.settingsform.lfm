@@ -1,11 +1,11 @@
 object SimbaSettingsForm: TSimbaSettingsForm
-  Left = 3352
+  Left = -1107
   Height = 625
-  Top = 69
+  Top = 465
   Width = 750
   Caption = 'Settings'
-  ClientHeight = 625
-  ClientWidth = 750
+  ClientHeight = 0
+  ClientWidth = 0
   DesignTimePPI = 120
   OnShow = FormShow
   Position = poMainFormCenter
