@@ -6,7 +6,7 @@
 
   Save/Load bitmaps from/to a base64 string.
 
-  Channels (B,G,R,A) are split and compressed with zlib individually for better compression.
+  Strings are generated as PNG with a small header.
 }
 unit simba.image_stringconv;
 
@@ -25,130 +25,64 @@ type
   TImageStringHeader = packed record
     Version: Integer;
     Width, Height: Integer;
-    ChannelSize: record
-      B,G,R,A: Integer;
-    end;
     Name: String[128];
   end;
 
-procedure SimbaImage_FromString(Image: TSimbaImage; Str: String);
+procedure SimbaImage_FromString(Image: TSimbaImage; const Str: String);
 function SimbaImage_ToString(Image: TSimbaImage): String;
 
 implementation
 
 uses
-  ZStream,
-  simba.encoding;
+  FPReadPNG, FPWritePNG,
+  simba.encoding, simba.image_lazbridge;
 
-procedure SimbaImage_FromString(Image: TSimbaImage; Str: String);
-
-  procedure DecompressChannel(SourceStream: TStream; SourceSize: Integer; ChannelOffset: Integer);
-  var
-    Stream: TMemoryStream;
-    DecompressStream: Tdecompressionstream;
-    Buffer: array[0..	16384-1] of Byte;
-    I, Count, DataIndex: Integer;
-  begin
-    Stream := nil;
-    DecompressStream := nil;
-    try
-      Stream := TMemoryStream.Create();
-      Stream.CopyFrom(SourceStream, SourceSize);
-      Stream.Position := 0;
-
-      DecompressStream := Tdecompressionstream.create(Stream);
-
-      DataIndex := 0;
-      repeat
-        Count := DecompressStream.Read(Buffer[0], Length(Buffer));
-        for I := 0 to Count - 1 do
-          PByte(@Image.Data[DataIndex + I].B + ChannelOffset)^ := Buffer[I];
-        Inc(DataIndex, Count);
-      until (Count = 0);
-    finally
-      Stream.Free();
-      DecompressStream.Free();
-    end;
-  end;
-
+procedure SimbaImage_FromString(Image: TSimbaImage; const Str: String);
 var
   Stream: TStringStream;
   Header: TImageStringHeader;
 begin
   if not Str.StartsWith(HeaderPrefix, True) then
-    SimbaException('TImage.LoadFromString: Invalid string, it should begin with "IMG:"');
-  Str := Str.After(HeaderPrefix);
+    SimbaException('TImage.FromString: Invalid string, should begin with "IMG:"');
+  Str.DeleteRange(1, Length(HeaderPrefix));
 
   Stream := nil;
   try
     Stream := TStringStream.Create(BaseDecode(BaseEncoding.b64, Str));
     Stream.Read(Header, SizeOf(TImageStringHeader));
 
-    Image.SetSize(Header.Width, Header.Height);
     Image.Name := Header.Name;
 
-    DecompressChannel(Stream, Header.ChannelSize.B, 0);
-    DecompressChannel(Stream, Header.ChannelSize.G, 1);
-    DecompressChannel(Stream, Header.ChannelSize.R, 2);
-    DecompressChannel(Stream, Header.ChannelSize.A, 3);
+    SimbaImage_FromFPImageReader(Image, TFPReaderPNG, Stream);
   finally
-    if (Stream <> nil) then
-      FreeAndNil(Stream);
+    Stream.Free();
   end;
 end;
 
 function SimbaImage_ToString(Image: TSimbaImage): String;
-
-  procedure CompressChannel(ChannelOffset: Byte; DestStream: TStream; out Count: Integer);
-  var
-    Channel: TByteArray;
-    I: Integer;
-    CompressionStream: Tcompressionstream;
-  begin
-    CompressionStream := nil;
-
-    Count := DestStream.Position;
-    try
-      CompressionStream := Tcompressionstream.create(clDefault, DestStream);
-
-      SetLength(Channel, Image.Width * Image.Height);
-      for I := 0 to High(Channel) do
-        Channel[I] := PByte(@Image.Data[I].B + ChannelOffset)^;
-
-      CompressionStream.Write(Channel[0], Length(Channel));
-      CompressionStream.Flush();
-    finally
-      CompressionStream.Free();
-    end;
-
-    Count := DestStream.Position - Count;
-  end;
-
 var
-  Stream: TStringStream;
+  HeaderStream, ImageStream: TStringStream;
   Header: TImageStringHeader;
 begin
-  Stream := nil;
+  HeaderStream := nil;
+  ImageStream := nil;
+
   try
-    Stream := TStringStream.Create();
-    Stream.Write(Header{%H-}, SizeOf(TImageStringHeader)); // write header last, but reserve space
-
-    CompressChannel(0, Stream, Header.ChannelSize.B);
-    CompressChannel(1, Stream, Header.ChannelSize.G);
-    CompressChannel(2, Stream, Header.ChannelSize.R);
-    CompressChannel(3, Stream, Header.ChannelSize.A);
-
     Header.Version := 1;
     Header.Width   := Image.Width;
     Header.Height  := Image.Height;
     Header.Name    := Image.Name;
 
-    Stream.Position := 0;
-    Stream.Write(Header, SizeOf(TImageStringHeader));
+    HeaderStream := TStringStream.Create();
+    HeaderStream.Write(Header, SizeOf(TImageStringHeader));
+    ImageStream := TStringStream.Create();
 
-    Result := HeaderPrefix + BaseEncode(BaseEncoding.b64, Stream.DataString);
+    SimbaImage_ToFPImageWriter(Image, TFPWriterPNG, ImageStream);
+
+    Result := HeaderPrefix + BaseEncode(BaseEncoding.b64, HeaderStream.DataString + ImageStream.DataString);
   finally
-    Stream.Free();
+    HeaderStream.Free();
+    ImageStream.Free();
   end;
 end;
 
