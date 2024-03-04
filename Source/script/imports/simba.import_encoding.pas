@@ -52,6 +52,26 @@ begin
   PString(Result)^ := HashFile(HashAlgo(Params^[0]^), PString(Params^[1])^);
 end;
 
+procedure _LapeHash32(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt32(Result)^ := Hash32(PPointer(Params^[0])^, PInteger(Params^[1])^, PUInt32(Params^[2])^);
+end;
+
+procedure _LapeHash32String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt32(Result)^ := Hash32(PString(Params^[0])^, PUInt32(Params^[1])^);
+end;
+
+procedure _LapeHash64(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt64(Result)^ := Hash64(PPointer(Params^[0])^, PInteger(Params^[1])^, PUInt64(Params^[2])^);
+end;
+
+procedure _LapeHash64String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt64(Result)^ := Hash64(PString(Params^[0])^, PUInt64(Params^[1])^);
+end;
+
 (*
 BaseEncode
 ----------
@@ -188,7 +208,7 @@ begin
   begin
     ImportingSection := 'Encoding';
 
-    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5, CRC32, CRC64)', 'HashAlgo');
+    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5)', 'HashAlgo');
     addGlobalType('enum(b64URL, b64, b32, b32Hex, b16)', 'BaseEncoding');
 
     addGlobalFunc('function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer', @_LapeHOTPCalculateToken);
@@ -200,6 +220,11 @@ begin
     addGlobalFunc('function HashBuffer(Algo: HashAlgo; Buf: Pointer; Len: SizeUInt): String', @_LapeHashBuffer);
     addGlobalFunc('function HashString(Algo: HashAlgo; S: String): String', @_LapeHashString);
     addGlobalFunc('function HashFile(Algo: HashAlgo; FileName: String): String', @_LapeHashFile);
+
+    addGlobalFunc('function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32);
+    addGlobalFunc('function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32String);
+    addGlobalFunc('function Hash64(Data: Pointer; Len: Int32; Seed: UInt64 = 0): UInt64; overload', @_LapeHash64);
+    addGlobalFunc('function Hash64(S: String; Seed: UInt64 = 0): UInt64; overload', @_LapeHash64String);
 
     addGlobalFunc('function ZCompressString(S: String): String', @_LapeZCompressString);
     addGlobalFunc('function ZDecompressString(S: String): String', @_LapeZDecompressString);

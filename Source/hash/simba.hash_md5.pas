@@ -10,21 +10,9 @@ unit simba.hash_md5;
 interface
 
 uses
-  Classes, SysUtils,
-  simba.hash;
+  Classes, SysUtils;
 
-type
-  THasherMD5 = class(TSimbaHasher)
-  private
-    FHash: array[0..3] of Cardinal;
-    FTotalSize: Int64;
-    procedure Process(X: array of Cardinal);
-    procedure Last(Msg: PByte; Length: Integer);
-  public
-    constructor Create; override;
-    procedure Update(Msg: PByte; Length: Integer); override;
-    function Final: String; override;
-  end;
+function Hash_MD5(ABuffer: PByte; ALength: Integer): String;
 
 implementation
 
@@ -58,123 +46,116 @@ const
     6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
   );
 
-procedure THasherMD5.Update(Msg: PByte; Length: Integer);
+function Hash_MD5(ABuffer: PByte; ALength: Integer): String;
+var
+  Hash: array[0..3] of Cardinal = ($67452301, $EFCDAB89, $98BADCFE, $10325476);
+
+  procedure Process(X: array of Cardinal);
+  var j: Integer;
+      A,B,C,D,F,G: Cardinal;
+  begin
+    A := Hash[0];
+    B := Hash[1];
+    C := Hash[2];
+    D := Hash[3];
+
+    for j:=0 to 63 do begin
+
+      if j <= 15 then begin
+          F := (B and C) or ((not B) and D);
+          g := j;
+      end
+      else if j <= 31 then begin
+          F := (D and B) or ((not D) and C);
+          g := (5*j + 1) mod 16;
+      end
+      else if j <= 47 then begin
+          F := B xor C xor D;
+          g := (3*j + 5) mod 16;
+      end
+      else if j <= 63 then begin
+          F := C xor (B or (not D));
+          g := (7*j) mod 16;
+      end;
+
+      F := F + A + K[j] + X[g];
+      A := D;
+      D := C;
+      C := B;
+      B := B + RolDWord(F, s[j]);
+    end;
+
+    Hash[0] := Hash[0] + A;
+    Hash[1] := Hash[1] + B;
+    Hash[2] := Hash[2] + C;
+    Hash[3] := Hash[3] + D;
+  end;
+
+  procedure Last(Msg: PByte; Length: Integer);
+  var buf: array[0..63] of Byte;
+      Left: Integer;
+      Bits: QWord;
+      X: array[0..15] of Cardinal;
+  begin
+    Left := Length mod 64;
+
+    FillChar(Buf, 64, 0);
+    Move(Msg^, buf[0], Left);
+
+    Buf[Left] := $80;
+
+    Bits := ALength shl 3;
+
+    buf[56] := bits;
+    buf[57] := bits shr 8;
+    buf[58] := bits shr 16;
+    buf[59] := bits shr 24;
+    buf[60] := bits shr 32;
+    buf[61] := bits shr 40;
+    buf[62] := bits shr 48;
+    buf[63] := bits shr 56;
+
+    Move(buf[0], X[0], 64);
+    Process(X);
+  end;
+
+  function Final: String;
+  var
+    Msg: array[0..63] of Byte;
+  begin
+    if ALength mod 64 = 0 then
+    begin
+      FillChar(Msg, 64, 0);
+      Last(@Msg[0], 64);
+    end;
+
+    Hash[0] := SwapEndian(Hash[0]);
+    Hash[1] := SwapEndian(Hash[1]);
+    Hash[2] := SwapEndian(Hash[2]);
+    Hash[3] := SwapEndian(Hash[3]);
+
+    Result := LowerCase(IntToHex(Hash[0], 8) + IntToHex(Hash[1], 8) + IntToHex(Hash[2], 8) + IntToHex(Hash[3], 8));
+  end;
+
 var i: Integer;
     X: array[0..15] of Cardinal;
 begin
-  Inc(FTotalSize, Length);
   i := 0;
 
-  while i < Length do begin
-    if Length - i > 63 then begin
-      Move(Msg^, X[0], 64);
-      Inc(Msg, 64);
+  while i < ALength do begin
+    if ALength - i > 63 then begin
+      Move(ABuffer^, X[0], 64);
+      Inc(ABuffer, 64);
 
       Process(X);
     end
-    else Last(Msg, Length);
+    else Last(ABuffer, ALength);
 
     Inc(i, 64);
   end;
+
+  Result := Final();
 end;
-
-procedure THasherMD5.Last(Msg: PByte; Length: Integer);
-var buf: array[0..63] of Byte;
-    Left: Integer;
-    Bits: QWord;
-    X: array[0..15] of Cardinal;
-begin
-  Left := Length mod 64;
-
-  FillChar(Buf, 64, 0);
-  Move(Msg^, buf[0], Left);
-
-  Buf[Left] := $80;
-
-  Bits := FTotalSize shl 3;
-
-  buf[56] := bits;
-  buf[57] := bits shr 8;
-  buf[58] := bits shr 16;
-  buf[59] := bits shr 24;
-  buf[60] := bits shr 32;
-  buf[61] := bits shr 40;
-  buf[62] := bits shr 48;
-  Buf[63] := bits shr 56;
-
-  Move(buf[0], X[0], 64);
-  Process(X);
-end;
-
-procedure THasherMD5.Process(X: array of Cardinal);
-var j: Integer;
-    A,B,C,D,F,G: Cardinal;
-begin
-  A := FHash[0];
-  B := FHash[1];
-  C := FHash[2];
-  D := FHash[3];
-
-  for j:=0 to 63 do begin
-
-    if j <= 15 then begin
-        F := (B and C) or ((not B) and D);
-        g := j;
-    end
-    else if j <= 31 then begin
-        F := (D and B) or ((not D) and C);
-        g := (5*j + 1) mod 16;
-    end
-    else if j <= 47 then begin
-        F := B xor C xor D;
-        g := (3*j + 5) mod 16;
-    end
-    else if j <= 63 then begin
-        F := C xor (B or (not D));
-        g := (7*j) mod 16;
-    end;
-
-    F := F + A + K[j] + X[g];
-    A := D;
-    D := C;
-    C := B;
-    B := B + RolDWord(F, s[j]);
-  end;
-
-  FHash[0] := FHash[0] + A;
-  FHash[1] := FHash[1] + B;
-  FHash[2] := FHash[2] + C;
-  FHash[3] := FHash[3] + D;
-end;
-
-function THasherMD5.Final: String;
-var
-  Msg: array[0..63] of Byte;
-begin
-  if FTotalSize mod 64 = 0 then
-  begin
-    FillChar(Msg, 64, 0);
-    Last(@Msg[0], 64);
-  end;
-
-  FHash[0] := SwapEndian(FHash[0]);
-  FHash[1] := SwapEndian(FHash[1]);
-  FHash[2] := SwapEndian(FHash[2]);
-  FHash[3] := SwapEndian(FHash[3]);
-
-  Result := Hex(FHash[0], 8) + Hex(FHash[1], 8) + Hex(FHash[2], 8) + Hex(FHash[3], 8);
-end;
-
-constructor THasherMD5.Create;
-begin
-  FHash[0] := $67452301;
-  FHash[1] := $EFCDAB89;
-  FHash[2] := $98BADCFE;
-  FHash[3] := $10325476;
-end;
-
-initialization
-  RegisterHasher(HashAlgo.MD5, THasherMD5);
 
 end.
 

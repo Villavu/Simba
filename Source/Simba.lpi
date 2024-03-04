@@ -953,27 +953,27 @@
         <IsPartOfProject Value="True"/>
       </Unit120>
       <Unit121>
-        <Filename Value="hash/simba.hash_crc64.pas"/>
+        <Filename Value="script/simba.script_compiler_imagefromstring.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit121>
       <Unit122>
-        <Filename Value="script/simba.script_compiler_imagefromstring.pas"/>
+        <Filename Value="image/simba.image_fastcompress.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit122>
       <Unit123>
-        <Filename Value="image/simba.image_fastcompress.pas"/>
+        <Filename Value="../Third-Party/basenenc_simba.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit123>
       <Unit124>
-        <Filename Value="../Third-Party/basenenc_simba.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit124>
-      <Unit125>
         <Filename Value="forms/simba.settingsform_editor_default.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="EditorDefaultFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
+      </Unit124>
+      <Unit125>
+        <Filename Value="hash/simba.hash_murmur.pas"/>
+        <IsPartOfProject Value="True"/>
       </Unit125>
     </Units>
   </ProjectOptions>

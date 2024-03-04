@@ -130,7 +130,6 @@ function SynLZdecompressdestlen(in_p: PByte): integer;
 function SynLZcompress(src: PByte; size: integer; dst: PByte): integer;
 
 /// 1st compression algorithm uses hashing with a 32bits control word
-// - this is the fastest pure pascal implementation
 function SynLZdecompress(src: PByte; size: integer; dst: PByte): integer;
 
 implementation

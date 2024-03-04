@@ -39,11 +39,6 @@ implementation
 uses
   simba.zip, simba.files, simba.env, simba.ide_initialization, simba.scripttabsform, simba.threading, simba.hash;
 
-function Crc32String(const Str: String): UInt32;
-begin
-  Result := StrToUInt('$' + HashString(HashAlgo.CRC32, Str));
-end;
-
 procedure TSimbaScriptBackup.DoFileCollecting(Sender: TObject);
 var
   I: Integer;
@@ -74,7 +69,7 @@ begin
       Continue;
 
     ZipPath := TSimbaPath.PathJoin([SimbaEnv.BackupsPath, FFiles[I].Name + '.zip']);
-    if ZipHasEntryCrc(ZipPath, Crc32String(FFiles[I].Contents)) then
+    if ZipHasEntryCrc(ZipPath, CRC32(@FFiles[I].Contents[1], Length(FFiles[I].Contents))) then
       Continue;
 
     if ZipAppend(ZipPath, '', FFiles[I].Contents) then

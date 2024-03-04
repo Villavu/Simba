@@ -10,19 +10,9 @@ unit simba.hash_sha256;
 interface
 
 uses
-  Classes, SysUtils,
-  simba.hash;
+  Classes, SysUtils;
 
-type
-  THasherSHA256 = class(TSimbaHasher)
-  private
-    FTotalSize: Int64;
-    FHash: array[0..7] of Cardinal;
-  public
-    constructor Create; override;
-    procedure Update(Msg: PByte; Length: Integer); override;
-    function Final: String; override;
-  end;
+function Hash_SHA256(ABuffer: PByte; ALength: Integer): String;
 
 implementation
 
@@ -41,7 +31,17 @@ const
     $748F82EE, $78A5636F, $84C87814, $8CC70208, $90BEFFFA, $A4506CEB, $BEF9A3F7, $C67178F2
   );
 
-procedure THasherSHA256.Update(Msg: PByte; Length: Integer);
+function Hash_SHA256(ABuffer: PByte; ALength: Integer): String;
+var
+  Hash: array[0..7] of Cardinal = ($6a09e667, $bb67ae85, $3c6ef372, $a54ff53a,$510e527f, $9b05688c, $1f83d9ab, $5be0cd19);
+
+  function Final: String;
+  begin
+    Result := LowerCase(IntToHex(Hash[0], 8) + IntToHex(Hash[1], 8) + IntToHex(Hash[2], 8) +
+                        IntToHex(Hash[3], 8) + IntToHex(Hash[4], 8) + IntToHex(Hash[5], 8) +
+                        IntToHex(Hash[6], 8) + IntToHex(Hash[7], 8));
+  end;
+
 var i: Integer;
     j: Integer;
     A,B,C,D,E,F,G,H: Cardinal;
@@ -52,25 +52,23 @@ var i: Integer;
     s0, s1: Cardinal;
     ch, t1, t2, maj: Cardinal;
 begin
-  Inc(FTotalSize, Length);
-
   j := 0;
 
-  while j <= Length do begin
+  while j <= ALength do begin
 
-    if Length - j > 63 then begin
-      Move(Msg^, buf[0], 64);
-      Inc(Msg, 64);
+    if ALength - j > 63 then begin
+      Move(ABuffer^, buf[0], 64);
+      Inc(ABuffer, 64);
     end
     else begin
-      Left := Length mod 64;
+      Left := ALength mod 64;
 
       FillChar(buf, 64, 0);
-      Move(Msg^, buf[0], Left);
+      Move(ABuffer^, buf[0], Left);
 
       Buf[Left] := $80;
 
-      Bits := FTotalSize shl 3;
+      Bits := ALength shl 3;
 
       buf[56] := bits shr 56;
       buf[57] := bits shr 48;
@@ -91,14 +89,14 @@ begin
       w[i] := w[i-16] +  s0 +  w[i-7] +  s1;
     end;
 
-    a := FHash[0];
-    b := FHash[1];
-    c := FHash[2];
-    d := FHash[3];
-    e := FHash[4];
-    f := FHash[5];
-    g := FHash[6];
-    h := FHash[7];
+    a := Hash[0];
+    b := Hash[1];
+    c := Hash[2];
+    d := Hash[3];
+    e := Hash[4];
+    f := Hash[5];
+    g := Hash[6];
+    h := Hash[7];
 
     //main loop
     for i:=0 to 63 do begin
@@ -122,40 +120,20 @@ begin
     end;
 
     //finalize
-    FHash[0] := FHash[0] + a;
-    FHash[1] := FHash[1] + b;
-    FHash[2] := FHash[2] + c;
-    FHash[3] := FHash[3] + d;
-    FHash[4] := FHash[4] + e;
-    FHash[5] := FHash[5] + f;
-    FHash[6] := FHash[6] + g;
-    FHash[7] := FHash[7] + h;
+    Hash[0] := Hash[0] + a;
+    Hash[1] := Hash[1] + b;
+    Hash[2] := Hash[2] + c;
+    Hash[3] := Hash[3] + d;
+    Hash[4] := Hash[4] + e;
+    Hash[5] := Hash[5] + f;
+    Hash[6] := Hash[6] + g;
+    Hash[7] := Hash[7] + h;
 
     Inc(j, 64);
   end;
-end;
 
-function THasherSHA256.Final: String;
-begin
-  Result := Hex(FHash[0], 8) + Hex(FHash[1], 8) + Hex(FHash[2], 8) +
-            Hex(FHash[3], 8) + Hex(FHash[4], 8) + Hex(FHash[5], 8) +
-            Hex(FHash[6], 8) + Hex(FHash[7], 8);
+  Result := Final();
 end;
-
-constructor THasherSHA256.Create;
-begin
-  FHash[0] := $6a09e667;
-  FHash[1] := $bb67ae85;
-  FHash[2] := $3c6ef372;
-  FHash[3] := $a54ff53a;
-  FHash[4] := $510e527f;
-  FHash[5] := $9b05688c;
-  FHash[6] := $1f83d9ab;
-  FHash[7] := $5be0cd19
-end;
-
-initialization
-  RegisterHasher(HashAlgo.SHA256, THasherSHA256);
 
 end.
 

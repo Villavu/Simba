@@ -10,19 +10,9 @@ unit simba.hash_sha384;
 interface
 
 uses
-  Classes, SysUtils,
-  simba.hash;
+  Classes, SysUtils;
 
-type
-  THasherSHA384 = class(TSimbaHasher)
-  private
-    FTotalSize: Int64;
-    FHash: array[0..7] of QWord;
-  public
-    constructor Create; override;
-    procedure Update(Msg: PByte; Length: Integer); override;
-    function Final: String; override;
-  end;
+function Hash_SHA384(ABuffer: PByte; ALength: Integer): String;
 
 implementation
 
@@ -53,7 +43,19 @@ const
     QWord($4CC5D4BECB3E42B6), QWord($597F299CFC657E2A), QWord($5FCB6FAB3AD6FAEC), QWord($6C44198C4A475817)
   );
 
-procedure THasherSHA384.Update(Msg: PByte; Length: Integer);
+function Hash_SHA384(ABuffer: PByte; ALength: Integer): String;
+var
+  Hash: array[0..7] of QWord = (
+    QWord($CBBB9D5DC1059ED8), QWord($629A292A367CD507), QWord($9159015A3070DD17), QWord($152FECD8F70E5939),
+    QWord($67332667FFC00B31), QWord($8EB44A8768581511), QWord($DB0C2E0D64F98FA7), QWord($47B5481DBEFA4FA4)
+  );
+
+  function Final: String;
+  begin
+    Result := LowerCase(IntToHex(Hash[0], 16) + IntToHex(Hash[1], 16) + IntToHex(Hash[2], 16) +
+                        IntToHex(Hash[3], 16) + IntToHex(Hash[4], 16) + IntToHex(Hash[5], 16));
+  end;
+
 var i: Integer;
     A,B,C,D,E,F,G,H: QWord;
     w: array[0..79] of QWord;
@@ -65,25 +67,23 @@ var i: Integer;
     j: Integer;
     T, T2: QWord;
 begin
-  Inc(FTotalSize, Length);
-
   i := 0;
 
-  while i <= Length do begin
+  while i <= ALength do begin
 
-    if Length - i > 127 then begin
-      Move(Msg^, buf[0], 128);
-      Inc(Msg, 128);
+    if ALength - i > 127 then begin
+      Move(ABuffer^, buf[0], 128);
+      Inc(ABuffer, 128);
     end
     else begin
-      Left := Length mod 128;
+      Left := ALength mod 128;
 
       FillChar(buf, 128, 0);
-      Move(Msg^, buf[0], Left);
+      Move(ABuffer^, buf[0], Left);
 
       Buf[Left] := $80;
 
-      Bits := FTotalSize shl 3;
+      Bits := ALength shl 3;
 
       buf[64+56] := bits shr 56;
       buf[64+57] := bits shr 48;
@@ -95,14 +95,14 @@ begin
       buf[64+63] := bits;
     end;
 
-    a := FHash[0];
-    b := FHash[1];
-    c := FHash[2];
-    d := FHash[3];
-    e := FHash[4];
-    f := FHash[5];
-    g := FHash[6];
-    h := FHash[7];
+    a := Hash[0];
+    b := Hash[1];
+    c := Hash[2];
+    d := Hash[3];
+    e := Hash[4];
+    f := Hash[5];
+    g := Hash[6];
+    h := Hash[7];
 
     Move(buf[0], w[0], 128);
     for j:=0 to 15 do w[j] := SwapEndian(w[j]);
@@ -137,41 +137,20 @@ begin
     end;
 
     //finalize
-    FHash[0] := FHash[0] + a;
-    FHash[1] := FHash[1] + b;
-    FHash[2] := FHash[2] + c;
-    FHash[3] := FHash[3] + d;
-    FHash[4] := FHash[4] + e;
-    FHash[5] := FHash[5] + f;
-    FHash[6] := FHash[6] + g;
-    FHash[7] := FHash[7] + h;
+    Hash[0] := Hash[0] + a;
+    Hash[1] := Hash[1] + b;
+    Hash[2] := Hash[2] + c;
+    Hash[3] := Hash[3] + d;
+    Hash[4] := Hash[4] + e;
+    Hash[5] := Hash[5] + f;
+    Hash[6] := Hash[6] + g;
+    Hash[7] := Hash[7] + h;
 
     Inc(i, 128);
   end;
+
+  Result := Final();
 end;
-
-function THasherSHA384.Final: String;
-begin
-  Result := Hex(FHash[0], 16) + Hex(FHash[1], 16) + Hex(FHash[2], 16) +
-            Hex(FHash[3], 16) + Hex(FHash[4], 16) + Hex(FHash[5], 16);
-end;
-
-constructor THasherSHA384.Create;
-begin
-  FTotalSize := 0;
-
-  FHash[0] := QWord($CBBB9D5DC1059ED8);
-  FHash[1] := QWord($629A292A367CD507);
-  FHash[2] := QWord($9159015A3070DD17);
-  FHash[3] := QWord($152FECD8F70E5939);
-  FHash[4] := QWord($67332667FFC00B31);
-  FHash[5] := QWord($8EB44A8768581511);
-  FHash[6] := QWord($DB0C2E0D64F98FA7);
-  FHash[7] := QWord($47B5481DBEFA4FA4);
-end;
-
-initialization
-  RegisterHasher(HashAlgo.SHA384, THasherSHA384);
 
 end.
 

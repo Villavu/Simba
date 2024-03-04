@@ -10,67 +10,46 @@ unit simba.hash;
 interface
 
 uses
-  Classes, SysUtils,
-  simba.base;
+  Classes, SysUtils;
 
 type
-  {$scopedenums on}
-  HashAlgo = (
-    SHA1, SHA256, SHA384, SHA512,
-    MD5,
-    CRC32, CRC64
-  );
-  {$scopedenums off}
+  {$SCOPEDENUMS ON}
+  HashAlgo = (SHA1, SHA256, SHA384, SHA512, MD5);
+  {$SCOPEDENUMS OFF}
 
-  TSimbaHasher = class
-  protected
-    const HexDigits: array[0..15] of Char = '0123456789abcdef'; // lowercase
-    class function Hex(Value: Int64; Digits: Integer): string;
-    class function Hex(Value: UInt64; Digits: Integer): string;
-  public
-    constructor Create; virtual; abstract;
-    procedure Update(Msg: PByte; Length: Integer); virtual; abstract;
-    function Final: String; virtual; abstract;
-  end;
-  TSimbaHasherClass = class of TSimbaHasher;
-
-  procedure RegisterHasher(Algo: HashAlgo; HashClass: TSimbaHasherClass);
-
-  function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: PtrUInt): String;
+  function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: Integer): String;
   function HashString(Algo: HashAlgo; const S: String): String;
   function HashFile(Algo: HashAlgo; const FileName: String): String;
+
+  function Hash32(Data: PByte; Len: Int32; Seed: UInt32 = 0): UInt32; overload;
+  function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload;
+
+  function Hash64(Data: PByte; Len: Int32; Seed: UInt64 = 0): UInt64; overload;
+  function Hash64(S: String; Seed: UInt64 = 0): UInt64; overload;
+
+  function CRC32(Data: PByte; Len: Int32): UInt32;
+  function CRC64(Data: PByte; Len: Int32): UInt64;
 
 implementation
 
 uses
+  crc,
   simba.hash_sha1, simba.hash_sha256, simba.hash_sha384, simba.hash_sha512,
   simba.hash_md5,
-  simba.hash_crc32, simba.hash_crc64;
+  simba.hash_murmur;
 
-var
-  Hashers: array[HashAlgo] of TSimbaHasherClass;
-
-procedure RegisterHasher(Algo: HashAlgo; HashClass: TSimbaHasherClass);
+function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: Integer): String;
 begin
-  Hashers[Algo] := HashClass;
-end;
-
-function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: PtrUInt): String;
-begin
-  if (Hashers[Algo] = nil) then
-    SimbaException('Hash type not registered');
+  Result := '';
 
   if (Len > 0) then
-    with Hashers[Algo].Create() do
-    try
-      Update(Buf, Len);
-
-      Result := Final();
-    finally
-      Free();
-    end
-  else
-    Result := '';
+    case Algo of
+      HashAlgo.SHA1:   Result := Hash_SHA1(Buf, Len);
+      HashAlgo.SHA256: Result := Hash_SHA256(Buf, Len);
+      HashAlgo.SHA384: Result := Hash_SHA384(Buf, Len);
+      HashAlgo.SHA512: Result := Hash_SHA512(Buf, Len);
+      HashAlgo.MD5:    Result := Hash_MD5(Buf, Len);
+    end;
 end;
 
 function HashString(Algo: HashAlgo; const S: String): String;
@@ -96,30 +75,40 @@ begin
     Result := '';
 end;
 
-class function TSimbaHasher.Hex(Value: Int64; Digits: Integer): string;
-var
-  i: Integer;
+function Hash32(Data: PByte; Len: Int32; Seed: UInt32): UInt32;
 begin
-  if (Digits = 0) then
-    Digits := 1;
-
-  SetLength(Result, Digits);
-  for i := 0 to Digits - 1 do
-  begin
-    Result[Digits - i] := HexDigits[Value and 15];
-    Value := Value shr 4;
-  end;
-
-  while (Value <> 0) do
-  begin
-    Result := HexDigits[Value and 15] + Result;
-    Value := Value shr 4;
-  end;
+  Result := TMurmur2aLE.HashBuf(Data, Len, Seed);
 end;
 
-class function TSimbaHasher.Hex(Value: UInt64; Digits: Integer): string;
+function Hash32(S: String; Seed: UInt32): UInt32;
 begin
-  Result := Hex(Int64(Value), Digits);
+  if (Length(S) > 0) then
+    Result := Hash32(@S[1], Length(S), Seed)
+  else
+    Result := Seed;
+end;
+
+function Hash64(Data: PByte; Len: Int32; Seed: UInt64): UInt64;
+begin
+  Result := TMurmur64aLE.HashBuf(Data, Len, Seed);
+end;
+
+function Hash64(S: String; Seed: UInt64): UInt64;
+begin
+  if (Length(S) > 0) then
+    Result := Hash64(@S[1], Length(S), Seed)
+  else
+    Result := Seed;
+end;
+
+function CRC32(Data: PByte; Len: Int32): UInt32;
+begin
+  Result := crc.crc32(crc.crc32(0, nil, 0), Data, Len);
+end;
+
+function CRC64(Data: PByte; Len: Int32): UInt64;
+begin
+  Result := crc.crc64(crc.crc64(0, nil, 0), Data, Len);
 end;
 
 end.

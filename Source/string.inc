@@ -498,47 +498,9 @@ begin
   Result := CompareText(Self, Other);
 end;
 
-//MurMurHas2 by Tommi Prami & optimizations by Patrick van Logchem
 function TSimbaStringHelper.Hash(Seed: UInt32 = 0): UInt32;
-const
-  cM: UInt32 = $5BD1E995;
-  cR: UInt32 = 24;
-var
-  Data: Pointer;
-  Len: Integer;
-  i, k: UInt32;
 begin
-  Data := PChar(Self);
-  Len := Length(Self);
-
-  {$UNDEF REDO_Q}{$IFOPT Q+}{$Q-}{$DEFINE REDO_Q}{$ENDIF}
-  {$UNDEF REDO_R}{$IFOPT R+}{$R-}{$DEFINE REDO_R}{$ENDIF}
-  Result := Seed xor Len;
-  for i := 1 to Len div SizeOf(UInt32) do
-  begin
-    k := PUInt32(Data)^ * cM;
-    Result := (Result * cM) xor ((k xor (k shr cR)) * cM);
-    Inc(PtrUInt(Data), SizeOf(UInt32));
-  end;
-
-  Len := Len and 3;
-  if (Len > 0) then
-  begin
-    if (Len >= SizeOf(UInt16)) then
-    begin
-      k := PUInt16(Data)^;
-      if (Len > SizeOf(UInt16)) then
-        k := k + (UInt32(PUInt8(PtrUInt(Data) + SizeOf(UInt16))^) shl 16);
-    end
-    else
-      k := PUInt8(Data)^;
-    Result := (Result xor k) * cM;
-  end;
-
-  Result := (Result xor (Result shr 13)) * cM;
-  Result := (Result xor (Result shr 15));
-  {$IFDEF REDO_Q}{$Q+}{$ENDIF}
-  {$IFDEF REDO_R}{$R+}{$ENDIF}
+  Result := Hash32(Self, Seed);
 end;
 
 function TSimbaStringHelper.IsUpper(): Boolean;

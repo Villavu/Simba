@@ -7,27 +7,30 @@ var
 begin
   FileWrite(TestFile, Test);
 
-  Assert(HashFile(HashAlgo.CRC32,  TestFile) = '4a17b156');
-  Assert(HashFile(HashAlgo.CRC64,  TestFile) = '976ab66e2ef68109');
   Assert(HashFile(HashAlgo.MD5,    TestFile) = 'b10a8db164e0754105b7a99be72e3fe5');
   Assert(HashFile(HashAlgo.SHA1,   TestFile) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
   Assert(HashFile(HashAlgo.SHA256, TestFile) = 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e');
   Assert(HashFile(HashAlgo.SHA384, TestFile) = '99514329186b2f6ae4a1329e7ee6c610a729636335174ac6b740f9028396fcc803d0e93863a7c3d90f86beee782f4f3f');
   Assert(HashFile(HashAlgo.SHA512, TestFile) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
 
-  Assert(HashString(HashAlgo.CRC32,  Test) = '4a17b156');
-  Assert(HashString(HashAlgo.CRC64,  Test) = '976ab66e2ef68109');
   Assert(HashString(HashAlgo.MD5,    Test) = 'b10a8db164e0754105b7a99be72e3fe5');
   Assert(HashString(HashAlgo.SHA1,   Test) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
   Assert(HashString(HashAlgo.SHA256, Test) = 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e');
   Assert(HashString(HashAlgo.SHA384, Test) = '99514329186b2f6ae4a1329e7ee6c610a729636335174ac6b740f9028396fcc803d0e93863a7c3d90f86beee782f4f3f');
   Assert(HashString(HashAlgo.SHA512, Test) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
 
-  Assert(HashBuffer(HashAlgo.CRC32,  @Test[1], Length(Test)) = '4a17b156');
-  Assert(HashBuffer(HashAlgo.CRC64,  @Test[1], Length(Test)) = '976ab66e2ef68109');
   Assert(HashBuffer(HashAlgo.MD5,    @Test[1], Length(Test)) = 'b10a8db164e0754105b7a99be72e3fe5');
   Assert(HashBuffer(HashAlgo.SHA1,   @Test[1], Length(Test)) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
   Assert(HashBuffer(HashAlgo.SHA256, @Test[1], Length(Test)) = 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e');
   Assert(HashBuffer(HashAlgo.SHA384, @Test[1], Length(Test)) = '99514329186b2f6ae4a1329e7ee6c610a729636335174ac6b740f9028396fcc803d0e93863a7c3d90f86beee782f4f3f');
   Assert(HashBuffer(HashAlgo.SHA512, @Test[1], Length(Test)) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
+
+  // Test larger data
+  Test := 'eG8hwBtFzG0Rp0S6CrPFhUQ6KH8Ru665LkrR2BAK2ibF8yCy9HbfiJS4nUq4zHBv4eQL7rVw6WZkNetYJFHxzEYp8bCATfbZz8m5KF1Zypk7cYW2kZiSxKb7JUeJTEYPPx5uNPLa1SjEz68H57QMfPLAvhpMjCzDrU4cd80tQ4F54pXGgtfHMKLXprpTfLR92YNZWwU0dt2ZufciQNPnajyS521Jrc187Kbv6PrncgKALd0tQnXRkgvLiy1U34gjDLBNYaPGJDeRwJUEzV3rG4e703T1X0dxwanqTA0prmtQRt8mcurMrV13A8uSd7thrUAW6yxvnWSpGUu1x2Dgmw9h624ajdapj6wb0zuRZFLagecDSFkzKwPYMaKBDeNVkzajUxBnDAWwu1UpkFei9jKJ7pCFaXeT1PdXW4FXvqfrMWDV82zBNZmugcjCuMqX1TWvLW5EitZmRvy2X9RunE626gKP7Y12zQwmUqFYhi4QRtg821PmtzLjZMbErdfp4pTrqTiFe2hCLVGBMUgVnRtS9LdpuFdJ1Np3kUbYyXeYZpaTcK4ddJHzBcT1YqK6Dz8TTcPk5Utc3bE584414w3RGDPFSAHag31ceTTW2CqfNxaM7e4iPfdAuZh797aKgJBb2bdep8pBtMZ6LBLqmzXr7MAPNJNcShAvw4NgwPD46wDWWuxCe397Y40xSCUqFxWa4EMW4LzPZKFJGEgiruaLvS0TMTtDrD81NCRKEcMSgKuJAqqcqCJFdGFNDBVvqfnCbVYFLEvPSHmbFJPyx49pnX3jEfJaxUn2CFKg40RY9Ctbxmu0fkuQd4kPiUyghMp8Pvj3bEVSuPi92ZrFv5QHGWqWBJ6Jm72X9J9DmJxFDMkTZYCyhvgHMUTJ9K1veNnwUrHjNd5vW2yXB3GXbUWhq8CWaYZgBrRC6V1W42NX0Gd1niYmA8aCEHhBM2naZW6TC0MT7yRv1J5WwBXUw7miJF3kmL676HCdJpC96GWibzevVaBJHNekwMEUKWkp';
+
+  Assert(HashString(HashAlgo.MD5,    Test) = '70e537c506f06e34bf203a080f2c3d63');
+  Assert(HashString(HashAlgo.SHA1,   Test) = 'a1b98ee1e8b0e859d9cc0b9e68a3fb3d6822aec1');
+  Assert(HashString(HashAlgo.SHA256, Test) = '930f9d3e25017e4831ecb1764193c39d8bed6c87b8a0312b7e774aa10bb78d89');
+  Assert(HashString(HashAlgo.SHA384, Test) = 'accdae0159a60991ebd66c14d3b2d376a1dc08a0950ec2e807dc4bdbf4a4e79abf774c397b2a87bfe5f4c67ed6c56597');
+  Assert(HashString(HashAlgo.SHA512, Test) = '701dad374289b258cff7643b8eaffa4ef570e043150497af6300573f734dabf9f63173743e190b78a9381065023627cf28959c8e7578d60d1339c8849fdf59e8');
 end.
