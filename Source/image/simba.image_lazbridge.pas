@@ -38,7 +38,7 @@ function SimbaImage_ToLazImage(SimbaImage: TSimbaImage): TBitmap;
 implementation
 
 uses
-  TypInfo;
+  TypInfo, FPWritePNG;
 
 var
   SimbaRawImgDescription: TRawImageDescription;
@@ -309,6 +309,12 @@ begin
   Writer := nil;
   try
     Writer := WriterClass.Create();
+    if (Writer is TFPWriterPNG) then
+    begin
+      TFPWriterPNG(Writer).WordSized := False;
+      TFPWriterPNG(Writer).UseAlpha := True;
+    end;
+
     Img := TLazIntfImage.Create(SimbaImage_ToRawImage(SimbaImage), False);
 
     Writer.ImageWrite(Stream, Img);
