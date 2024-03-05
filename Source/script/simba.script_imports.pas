@@ -40,7 +40,8 @@ uses
   simba.import_script,  simba.import_slacktree, simba.import_string,
   simba.import_variant, simba.import_random,
   simba.import_debugimage, simba.import_web, simba.import_dialogs, simba.import_threading,
-  simba.import_pointbuffer, simba.import_stringmap;
+  simba.import_pointbuffer, simba.import_stringmap,
+  simba.import_compress;
 
 procedure AddSimbaImports(Compiler: TSimbaScript_Compiler);
 begin
@@ -73,6 +74,7 @@ begin
   ImportTPA(Compiler);
   ImportATPA(Compiler);
   ImportEncoding(Compiler);
+  ImportCompress(Compiler);
   ImportFile(Compiler);
   ImportProcess(Compiler);
   ImportInternal(Compiler);

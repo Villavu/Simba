@@ -380,7 +380,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="126">
+    <Units Count="127">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -975,6 +975,10 @@
         <Filename Value="hash/simba.hash_murmur.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit125>
+      <Unit126>
+        <Filename Value="script/imports/simba.import_compress.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit126>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

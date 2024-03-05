@@ -13,23 +13,43 @@ procedure ImportEncoding(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  lptypes, ffi, SynLZ,
-  simba.encoding, simba.compress, simba.hash;
+  lptypes, ffi,
+  simba.encoding, simba.hash;
 
 (*
 Encoding
 ========
-A bit of Hashing, Encoding, Compressing.
+Encoding & Hashing
 *)
 
 (*
-HashBuffer
-----------
-> function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: SizeUInt): String;
+HashAlgo
+--------
+> type HashAlgo = enum(SHA1, SHA256, SHA384, SHA512, MD5);
+
+```{note}
+This enum is scoped, so must be used like `HashAlgo.SHA512`
+```
 *)
-procedure _LapeHashBuffer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+
+(*
+BaseEncoding
+------------
+> type BaseEncoding = enum(b64URL, b64, b32, b32Hex, b16);
+
+```{note}
+This enum is scoped, so must be used like `BaseEncoding.b64`
+```
+*)
+
+(*
+HashData
+--------
+> function HashData(Algo: HashAlgo; Buf: PByte; Len: Int32): String;
+*)
+procedure _LapeHashData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashBuffer(HashAlgo(Params^[0]^), PPointer(Params^[1])^, PSizeUInt(Params^[2])^);
+  PString(Result)^ := HashBuffer(HashAlgo(Params^[0]^), PPointer(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -52,21 +72,41 @@ begin
   PString(Result)^ := HashFile(HashAlgo(Params^[0]^), PString(Params^[1])^);
 end;
 
+(*
+Hash32
+------
+> function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32;
+*)
 procedure _LapeHash32(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PUInt32(Result)^ := Hash32(PPointer(Params^[0])^, PInteger(Params^[1])^, PUInt32(Params^[2])^);
 end;
 
+(*
+Hash32
+------
+> function Hash32(S: String; Seed: UInt32 = 0): UInt32;
+*)
 procedure _LapeHash32String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PUInt32(Result)^ := Hash32(PString(Params^[0])^, PUInt32(Params^[1])^);
 end;
 
+(*
+Hash64
+------
+> function Hash64(Data: PByte; Len: Int32; Seed: UInt64 = 0): UInt64;
+*)
 procedure _LapeHash64(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PUInt64(Result)^ := Hash64(PPointer(Params^[0])^, PInteger(Params^[1])^, PUInt64(Params^[2])^);
 end;
 
+(*
+Hash64
+------
+> function Hash64(S: String; Seed: UInt64 = 0): UInt64;
+*)
 procedure _LapeHash64String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PUInt64(Result)^ := Hash64(PString(Params^[0])^, PUInt64(Params^[1])^);
@@ -112,96 +152,6 @@ begin
   PInteger(Result)^ := TOTPCalculateToken(PString(Params^[0])^);
 end;
 
-(*
-ZCompressString
----------------
-> function ZCompressString(S: String): String;
-*)
-procedure _LapeZCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := ZCompressString(PString(Params^[0])^);
-end;
-
-(*
-ZDecompressString
------------------
-> function ZDecompressString(S: String): String;
-*)
-procedure _LapeZDecompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := ZDecompressString(PString(Params^[0])^);
-end;
-
-(*
-SynLZCompress
--------------
-> function SynLZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
-*)
-procedure _LapeSynLZCompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := SynLZcompress(PPointer(Params^[0])^, PInteger(Params^[1])^, PPointer(Params^[2])^);
-end;
-
-(*
-SynLZDecompress
----------------
-> function SynLZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
-*)
-procedure _LapeSynLZDecompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := SynLZdecompress(PPointer(Params^[0])^, PInteger(Params^[1])^, PPointer(Params^[2])^);
-end;
-
-(*
-SynLZCompressDestLen
---------------------
-> function SynLZCompressDestLen(Len: Integer): Integer;
-*)
-procedure _LapeSynLZCompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := SynLZcompressdestlen(PInteger(Params^[0])^);
-end;
-
-(*
-SynLZDecompressDestLen
-----------------------
-> function SynLZDecompressDestLen(Src: Pointer): Integer;
-*)
-procedure _LapeSynLZDecompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := SynLZdecompressdestlen(PPointer(Params^[0])^);
-end;
-
-procedure _LapeLZCompressionThread_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLZCompressionThread(Result)^ := TLZCompressionThread.Create();
-end;
-
-procedure _LapeLZCompressionThread_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLZCompressionThread(Params^[0])^.Write(PPointer(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeLZCompressionThread_WaitCompressing(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLZCompressionThread(Params^[0])^.WaitCompressing();
-end;
-
-procedure _LapeLZCompressionThread_IsCompressing(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PLZCompressionThread(Params^[0])^.IsCompressing;
-end;
-
-procedure _LapeLZCompressionThreadOnCompressed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLZCompressedEvent(Result)^ := PLZCompressionThread(Params^[0])^.OnCompressed;
-end;
-
-procedure _LapeLZCompressionThreadOnCompressed_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLZCompressionThread(Params^[0])^.OnCompressed := PLZCompressedEvent(Params^[1])^;
-end;
-
 procedure ImportEncoding(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -217,7 +167,7 @@ begin
     addGlobalFunc('function BaseEncode(Encoding: BaseEncoding; const S: String): String', @_LapeBaseEncode);
     addGlobalFunc('function BaseDecode(Encoding: BaseEncoding; const S: String): String', @_LapeBaseDecode);
 
-    addGlobalFunc('function HashBuffer(Algo: HashAlgo; Buf: Pointer; Len: SizeUInt): String', @_LapeHashBuffer);
+    addGlobalFunc('function HashData(Algo: HashAlgo; Data: Pointer; Len: Int32): String', @_LapeHashData);
     addGlobalFunc('function HashString(Algo: HashAlgo; S: String): String', @_LapeHashString);
     addGlobalFunc('function HashFile(Algo: HashAlgo; FileName: String): String', @_LapeHashFile);
 
@@ -226,24 +176,7 @@ begin
     addGlobalFunc('function Hash64(Data: Pointer; Len: Int32; Seed: UInt64 = 0): UInt64; overload', @_LapeHash64);
     addGlobalFunc('function Hash64(S: String; Seed: UInt64 = 0): UInt64; overload', @_LapeHash64String);
 
-    addGlobalFunc('function ZCompressString(S: String): String', @_LapeZCompressString);
-    addGlobalFunc('function ZDecompressString(S: String): String', @_LapeZDecompressString);
-
-    addGlobalFunc('function SynLZCompressDestLen(Len: Integer): Integer', @_LapeSynLZCompressDestLen);
-    addGlobalFunc('function SynLZDecompressDestLen(Src: Pointer): Integer', @_LapeSynLZDecompressDestLen);
-    addGlobalFunc('function SynLZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZCompress);
-    addGlobalFunc('function SynLZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZDecompress);
-
     ImportingSection := '';
-
-    addClass('TSynLZThread');
-    addClassConstructor('TSynLZThread', '', @_LapeLZCompressionThread_Create);
-    addGlobalType('procedure(Sender: TSynLZThread; Data: Pointer; DataSize: Integer; TimeUsed: Double) of object', 'TSynLZCompressedEvent', FFI_DEFAULT_ABI);
-    addGlobalFunc('procedure TSynLZThread.Write(constref Data; DataSize: Integer)', @_LapeLZCompressionThread_Write);
-    addGlobalFunc('procedure TSynLZThread.WaitCompressing', @_LapeLZCompressionThread_WaitCompressing);
-    addGlobalFunc('procedure TSynLZThread.SetOnCompressed(Value: TSynLZCompressedEvent)', @_LapeLZCompressionThreadOnCompressed_Write);
-    addGlobalFunc('function TSynLZThread.GetOnCompressed: TSynLZCompressedEvent', @_LapeLZCompressionThreadOnCompressed_Read);
-    addGlobalFunc('function TSynLZThread.IsCompressing: Boolean', @_LapeLZCompressionThread_IsCompressing);
   end;
 end;
 

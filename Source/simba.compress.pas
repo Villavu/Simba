@@ -10,217 +10,73 @@ unit simba.compress;
 interface
 
 uses
-  classes, sysutils, syncobjs, synlz,
-  simba.baseclass, simba.simplelock;
+  Classes, SysUtils,
+  simba.base, simba.encoding;
 
-type
-  PLZCompressedEvent = ^TLZCompressedEvent;
-  TLZCompressedEvent = procedure(Sender: TObject; Data: Pointer; DataSize: Integer; TimeUsed: Double) of object;
+// TByteArray
+function CompressBytes(Data: TByteArray): TByteArray;
+function DeCompressBytes(Data: TByteArray): TByteArray;
 
-  PLZCompressionThread = ^TLZCompressionThread;
-  TLZCompressionThread = class(TSimbaBaseClass)
-  protected
-    FThread: TThread;
-    FCompressingLock: TSimpleWaitableLock;
-    FCompressingEvent: TSimpleEvent;
-    FSourceStream: TMemoryStream;
-    FOnCompressed: TLZCompressedEvent;
-
-    procedure DoCompressingThread;
-
-    function GetIsCompressing: Boolean;
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    procedure Write(const Data; DataSize: Integer);
-    procedure WaitCompressing;
-
-    property OnCompressed: TLZCompressedEvent read FOnCompressed write FOnCompressed;
-    property IsCompressing: Boolean read GetIsCompressing;
-  end;
-
-function ZCompressString(const Str: String): String;
-function ZDecompressString(const Str: String) : String;
+// String
+function CompressString(S: String; Encoding: BaseEncoding = BaseEncoding.b64): String;
+function DeCompressString(S: String; Encoding: BaseEncoding = BaseEncoding.b64): String;
 
 implementation
 
 uses
-  zstream,
-  simba.datetime;
+  basenenc_simba, ZStream;
 
-function ZCompressString(const Str: String): String;
+function CompressBytes(Data: TByteArray): TByteArray;
 var
-  Len: Integer;
-  Output: TMemoryStream;
-  Stream: TCompressionStream;
+  InStream: Tcompressionstream;
+  OutStream: TBytesStream;
 begin
-  Result := '';
-
-  Len := Length(Str);
-  if (Len = 0) then
-    Exit;
-
-  Output := nil;
-  Stream := nil;
+  OutStream := TBytesStream.Create();
+  InStream := TCompressionStream.Create(clDefault, OutStream);
   try
-    Output := TMemoryStream.Create();
+    InStream.Write(Data[0], Length(Data));
+    InStream.Flush();
 
-    Stream := TCompressionStream.Create(clDefault, Output);
-    Stream.Write(Str[1], Len);
-    Stream.Flush();
-
-    SetLength(Result, Output.Size);
-
-    Output.Position := 0;
-    Output.Read(Result[1], Output.Size);
-  except
+    Result := OutStream.Bytes;
+    SetLength(Result, OutStream.Size);
+  finally
+    InStream.Free();
+    OutStream.Free();
   end;
-
-  if (Stream <> nil) then
-    Stream.Free();
-  if (Output <> nil) then
-    Output.Free();
 end;
 
-function ZDecompressString(const Str: String): String;
+function DecompressBytes(Data: TByteArray): TByteArray;
 var
-  Input: TStringStream;
-  Stream: TDeCompressionStream;
-  Buffer: array[1..4096] of Char;
-  Count: Integer;
+  InStream: TBytesStream;
+  OutStream: Tdecompressionstream;
+  Count, Len: Integer;
 begin
-  Result := '';
-  if (Str = '') then
-    Exit;
+  SetLength(Result, 4096);
+  Len := 0;
 
-  Input := nil;
-  Stream := nil;
+  InStream := TBytesStream.Create(Data);
+  OutStream := TDeCompressionStream.Create(InStream);
   try
-    Input := TStringStream.Create(Str);
-
-    // Old simba had the uncompressed string in header. Skip this if zlib magic header.
-    if (Input.ReadByte() = $78) and (Input.ReadByte() = $9C) then
-      Input.Position := 0
-    else
-    begin
-      Input.Position := SizeOf(Integer);
-      if (Input.ReadByte() <> $78) or (Input.ReadByte() <> $9C) then
-        Input.Position := 0
-      else
-        Input.Position := SizeOf(Integer);
-    end;
-
-    Stream := TDeCompressionStream.Create(Input);
     repeat
-      Count := Stream.Read(Buffer[1], Length(Buffer));
-      if Count > 0 then
-        Result := Result + System.Copy(Buffer, 1, Count);
+      Count := OutStream.Read(Result[Len], Length(Result) - Len);
+      Len := Len + Count;
     until (Count = 0);
-  except
+  finally
+    InStream.Free();
+    OutStream.Free();
   end;
 
-  if (Stream <> nil) then
-    Stream.Free();
-  if (Input <> nil) then
-    Input.Free();
+  SetLength(Result, Len);
 end;
 
-type
-  TCompressingStream = class(TMemoryStream)
-  public
-    TimeUsed: Double;
-
-    function Write(const Buffer; Count: LongInt): LongInt; override;
-  end;
-
-function TCompressingStream.Write(const Buffer; Count: LongInt): LongInt;
-var
-  NeededCapacity: PtrInt;
+function CompressString(S: String; Encoding: BaseEncoding): String;
 begin
-  NeededCapacity := SynLZcompressdestlen(Count);
-  if (Capacity < NeededCapacity) then
-    Capacity := NeededCapacity;
-
-  TimeUsed := HighResolutionTime();
-  Result := SynLZcompress(Pointer(Buffer), Count, Self.Memory);
-  TimeUsed := HighResolutionTime() - TimeUsed;
+  Result := BaseEncodeBytes(Encoding, CompressBytes(GetRawStringBytes(S)));
 end;
 
-function TLZCompressionThread.GetIsCompressing: Boolean;
+function DeCompressString(S: String; Encoding: BaseEncoding): String;
 begin
-  Result := FCompressingLock.IsLocked;
-end;
-
-procedure TLZCompressionThread.DoCompressingThread;
-var
-  DestStream: TCompressingStream;
-begin
-  DestStream := TCompressingStream.Create();
-
-  while (not TThread.CheckTerminated) do
-  begin
-    FCompressingEvent.WaitFor(INFINITE);
-    if TThread.CheckTerminated then
-      Break;
-
-    DestStream.Position := 0;
-    DestStream.Position := DestStream.Write(FSourceStream.Memory, FSourceStream.Position);
-    if (FOnCompressed <> nil) then
-      FOnCompressed(Self, DestStream.Memory, DestStream.Position, DestStream.TimeUsed);
-
-    FCompressingEvent.ResetEvent();
-    FCompressingLock.Unlock();
-  end;
-
-  DestStream.Free();
-end;
-
-constructor TLZCompressionThread.Create;
-begin
-  inherited Create();
-
-  FCompressingEvent := TSimpleEvent.Create();
-  FSourceStream := TMemoryStream.Create();
-
-  FThread := TThread.ExecuteInThread(@DoCompressingThread);
-end;
-
-destructor TLZCompressionThread.Destroy;
-begin
-  FCompressingLock.WaitLocked();
-
-  if (FThread <> nil) then
-  begin
-    FThread.FreeOnTerminate := False;
-    FThread.Terminate();
-
-    FCompressingEvent.SetEvent(); // Wake thread
-
-    FThread.WaitFor();
-  end;
-
-  FreeAndNil(FCompressingEvent);
-  FreeAndNil(FSourceStream);
-  FreeAndNil(FThread);
-
-  inherited Destroy();
-end;
-
-procedure TLZCompressionThread.Write(const Data; DataSize: Integer);
-begin
-  FCompressingLock.WaitLocked();
-  FCompressingLock.Lock();
-
-  FSourceStream.Position := 0;
-  FSourceStream.Write(Data, DataSize);
-
-  FCompressingEvent.SetEvent(); // Start compressing
-end;
-
-procedure TLZCompressionThread.WaitCompressing;
-begin
-  FCompressingLock.WaitLocked();
+  Result := GetRawStringFromBytes(DeCompressBytes(BaseDecodeBytes(Encoding, S)));
 end;
 
 end.
