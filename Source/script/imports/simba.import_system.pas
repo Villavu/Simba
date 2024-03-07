@@ -23,38 +23,6 @@ System
 Base methods and types.
 *)
 
-procedure _LapePreciseSleep(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  SimbaNativeInterface.PreciseSleep(PUInt32(Params^[0])^);
-end;
-
-procedure _LapeGetEnvVar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := GetEnvironmentVariable(PString(Params^[0])^);
-end;
-
-procedure _LapeGetEnvVars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-
-  function _GetEnvVars: TStringArray;
-  var
-    Count, I: Integer;
-  begin
-    Count := 0;
-
-    SetLength(Result, GetEnvironmentVariableCount() + 1);
-    for I := 1 to GetEnvironmentVariableCount() do
-      if (GetEnvironmentString(I) <> '') then
-      begin
-        Result[Count] := GetEnvironmentString(I);
-        Inc(Count);
-      end;
-    SetLength(Result, Count);
-  end;
-
-begin
-  PStringArray(Result)^ := _GetEnvVars();
-end;
-
 (*
 GetMem
 ------
@@ -335,36 +303,11 @@ FreeLibrary
 > function FreeLibrary(Lib: TLibHandle): EvalBool;
 *)
 
-(*
-SimbaEnv
---------
-```
-type
-  SimbaEnv = record
-    const SimbaPath       = 'PathToSimbaDir';
-    const IncludesPath    = 'PathToSimbaDir/Includes';
-    const PluginsPath     = 'PathToSimbaDir/Plugins';
-    const ScriptsPath     = 'PathToSimbaDir/Scripts';
-    const ScreenshotsPath = 'PathToSimbaDir/Screenshots';
-    const DataPath        = 'PathToSimbaDir/Data';
-    const TempPath        = 'PathToSimbaDir/Data/Temp';
-  end;
-```
-
-Record which contains constants to Simba environment paths.
-
-*Example:*
-
-```
-WriteLn(SimbaEnv.ScriptsPath);
-```
-*)
-
 procedure ImportSystem(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    ImportingSection := 'System';
+    ImportingSection := 'Base';
 
     addBaseDefine('SIMBA' + Format('%d', [SIMBA_VERSION]));
     addBaseDefine('SIMBAMAJOR' + Format('%d', [SIMBA_MAJOR]));
@@ -386,6 +329,9 @@ begin
     addBaseDefine('LINUX');
     {$ENDIF}
 
+    addGlobalType(getBaseType(DetermineIntType(SizeOf(Byte), False)).createCopy(), 'Byte');
+    addGlobalType(getBaseType(DetermineIntType(SizeOf(Integer), True)).createCopy(), 'Integer');
+
     addGlobalType('Int32', 'TColor');
     addGlobalType('array of TColor', 'TColorArray');
 
@@ -405,28 +351,7 @@ begin
     addGlobalType('record X1, Y1, X2, Y2: Integer; end', 'TBox');
     addGlobalType('array of TBox', 'TBoxArray');
 
-    addGlobalType('record X, Y: Single; end', 'TPointF');
-
     addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
-
-    addGlobalFunc('function GetEnvVar(Name: String): String', @_LapeGetEnvVar);
-    addGlobalFunc('function GetEnvVars: TStringArray', @_LapeGetEnvVars);
-
-    addGlobalType([
-      'record',
-      '  const SimbaPath       = "' + SimbaEnv.SimbaPath       + '";',
-      '  const IncludesPath    = "' + SimbaEnv.IncludesPath    + '";',
-      '  const PluginsPath     = "' + SimbaEnv.PluginsPath     + '";',
-      '  const ScriptsPath     = "' + SimbaEnv.ScriptsPath     + '";',
-      '  const ScreenshotsPath = "' + SimbaEnv.ScreenshotsPath + '";',
-      '  const DataPath        = "' + SimbaEnv.DataPath        + '";',
-      '  const TempPath        = "' + SimbaEnv.TempPath        + '";',
-      'end;'
-    ], 'SimbaEnv');
-
-    // Assigned later in `TSimbaScript.Run`
-    addGlobalVar('String', '', 'SCRIPT_FILE').isConstant := True;
-    addGlobalVar('UInt64', '0', 'SCRIPT_START_TIME').isConstant := True;
 
     ImportingSection := '';
   end;

@@ -23,6 +23,12 @@ Timing
 *)
 
 (*
+Sleep
+-----
+> procedure Sleep(MilliSeconds: UInt32);
+*)
+
+(*
 PreciseSleep
 ------------
 > procedure PreciseSleep(Milliseconds: UInt32);
@@ -139,13 +145,6 @@ begin
     addGlobalFunc('function MillisecondsToTime(Time: UInt64; out Years, Months, Weeks, Days, Hours, Mins, Secs: Integer): Integer; overload', @_LapeMillisecondsToTime2);
     addGlobalFunc('function FormatMilliseconds(Time: Double; Format: String): String; overload;', @_LapeFormatMilliseconds1);
     addGlobalFunc('function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String; overload;', @_LapeFormatMilliseconds2);
-
-    addDelayedCode([
-      'function GetTimeRunning: UInt64;',
-      'begin',
-      '  Result := GetTickCount() - SCRIPT_START_TIME;',
-      'end;'
-    ]);
 
     addDelayedCode([
       'type',

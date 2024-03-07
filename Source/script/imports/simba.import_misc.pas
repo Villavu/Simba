@@ -14,13 +14,37 @@ implementation
 
 uses
   clipbrd, lptypes,
-  simba.nativeinterface,
-  simba.settings, simba.compress, simba.encoding;
+  simba.nativeinterface, simba.settings, simba.compress, simba.encoding, simba.env;
 
 (*
 Misc
 ====
 Miscellaneous methods that dont go in any other sections.
+*)
+
+(*
+SimbaEnv
+--------
+```
+type
+  SimbaEnv = record
+    const SimbaPath       = 'PathToSimbaDir';
+    const IncludesPath    = 'PathToSimbaDir/Includes';
+    const PluginsPath     = 'PathToSimbaDir/Plugins';
+    const ScriptsPath     = 'PathToSimbaDir/Scripts';
+    const ScreenshotsPath = 'PathToSimbaDir/Screenshots';
+    const DataPath        = 'PathToSimbaDir/Data';
+    const TempPath        = 'PathToSimbaDir/Data/Temp';
+  end;
+```
+
+Record which contains constants to Simba environment paths.
+
+*Example:*
+
+```
+WriteLn(SimbaEnv.ScriptsPath);
+```
 *)
 
 (*
@@ -150,6 +174,18 @@ begin
   with Compiler do
   begin
     ImportingSection := 'Misc';
+
+    addGlobalType([
+      'record',
+      '  const SimbaPath       = "' + SimbaEnv.SimbaPath       + '";',
+      '  const IncludesPath    = "' + SimbaEnv.IncludesPath    + '";',
+      '  const PluginsPath     = "' + SimbaEnv.PluginsPath     + '";',
+      '  const ScriptsPath     = "' + SimbaEnv.ScriptsPath     + '";',
+      '  const ScreenshotsPath = "' + SimbaEnv.ScreenshotsPath + '";',
+      '  const DataPath        = "' + SimbaEnv.DataPath        + '";',
+      '  const TempPath        = "' + SimbaEnv.TempPath        + '";',
+      'end;'
+    ], 'SimbaEnv');
 
     addGlobalFunc(
       'procedure SetSimbaTitle(S: String);', [

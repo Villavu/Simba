@@ -37,8 +37,27 @@ Methods relating to generating random numbers.
 *)
 
 (*
+Random
+------
+> function Random: Double;'
+*)
+
+(*
+Random
+------
+> function Random(l: Int64): Int64;
+*)
+
+(*
+Random
+------
+> function Random(min, max: Int64): Int64;
+> function Random(min, max: Double): Double;
+*)
+
+(*
 RandSeed
-----------
+--------
 > var RandSeed: UInt32;
 
 The random seed used for all random number generation.

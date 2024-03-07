@@ -142,6 +142,33 @@ begin
   SimbaProcess.TerminateProcess(PProcessID(Params^[0])^);
 end;
 
+procedure _LapeGetEnvVar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := GetEnvironmentVariable(PString(Params^[0])^);
+end;
+
+procedure _LapeGetEnvVars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+
+  function _GetEnvVars: TStringArray;
+  var
+    Count, I: Integer;
+  begin
+    Count := 0;
+
+    SetLength(Result, GetEnvironmentVariableCount() + 1);
+    for I := 1 to GetEnvironmentVariableCount() do
+      if (GetEnvironmentString(I) <> '') then
+      begin
+        Result[Count] := GetEnvironmentString(I);
+        Inc(Count);
+      end;
+    SetLength(Result, Count);
+  end;
+
+begin
+  PStringArray(Result)^ := _GetEnvVars();
+end;
+
 procedure ImportProcess(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -162,6 +189,9 @@ begin
     addGlobalFunc('function RunCommand(Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload', @_LapeRunCommandOutput);
     addGlobalFunc('function RunCommand(Executable: String; Commands: TStringArray): TProcessID; overload', @_LapeRunCommand);
     addGlobalFunc('function RunCommandTimeout(Executable: String; Commands: TStringArray; out Output: String; Timeout: Integer): Boolean', @_LapeRunCommandTimeout);
+
+    addGlobalFunc('function GetEnvVar(Name: String): String', @_LapeGetEnvVar);
+    addGlobalFunc('function GetEnvVars: TStringArray', @_LapeGetEnvVars);
 
     ImportingSection := '';
   end;

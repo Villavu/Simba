@@ -82,6 +82,10 @@ type
     function AddPluginDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
 
     procedure AddSimbaNodes;
+
+    procedure ArrangeBaseNodes;
+
+    function CompareNodes(A, B: TTreeNode): Integer;
   public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
@@ -663,11 +667,117 @@ begin
         AddSimbaDecl(ParentNode, Decl);
   end;
 
+  ParentNode := FSimbaNode.FindNode('Base');
+  if Assigned(ParentNode) then
+    ParentNode.CustomSort(@CompareNodes);
+
+  ArrangeBaseNodes();
+
   FSimbaNode.AlphaSort();
   FSimbaNode.Expanded := True; // This needs to be on main thread it seems?
 
   FTreeView.Loading := False;
   FTreeView.EndUpdate();
+end;
+
+procedure TSimbaFunctionListForm.ArrangeBaseNodes;
+var
+  BaseNode: TTreeNode;
+  Cur: Integer = 0;
+
+  procedure MoveToTop(const NodeText: String);
+  var
+    Node: TTreeNode;
+  begin
+    Node := BaseNode.FindNode(NodeText);
+    if not Assigned(Node) then
+    begin
+      DebugLn('ArrangeBaseNodes: Not found: ' + NodeText);
+      Exit;
+    end;
+
+    Node.Index := Cur;
+    Inc(Cur);
+  end;
+
+begin
+  BaseNode := FSimbaNode.FindNode('Base');
+  if (BaseNode = nil) then
+    Exit;
+
+  MoveToTop('Integer');
+  MoveToTop('Byte');
+  MoveToTop('Char');
+  MoveToTop('Boolean');
+
+  MoveToTop('Int8');
+  MoveToTop('Int16');
+  MoveToTop('Int32');
+  MoveToTop('Int64');
+  MoveToTop('UInt8');
+  MoveToTop('UInt16');
+  MoveToTop('UInt32');
+  MoveToTop('UInt64');
+
+  MoveToTop('NativeInt');
+  MoveToTop('NativeUInt');
+  MoveToTop('SizeInt');
+  MoveToTop('SizeUInt');
+  MoveToTop('PtrInt');
+  MoveToTop('PtrUInt');
+
+  MoveToTop('Single');
+  MoveToTop('Double');
+  MoveToTop('Currency');
+
+  MoveToTop('ByteBool');
+  MoveToTop('WordBool');
+  MoveToTop('LongBool');
+  MoveToTop('EvalBool');
+
+  MoveToTop('AnsiChar');
+  MoveToTop('WideChar');
+
+  MoveToTop('string');
+  MoveToTop('ShortString');
+  MoveToTop('AnsiString');
+  MoveToTop('WideString');
+  MoveToTop('UnicodeString');
+
+  MoveToTop('Pointer');
+  MoveToTop('ConstPointer');
+
+  MoveToTop('TByteArray');
+  MoveToTop('TBooleanArray');
+  MoveToTop('TSingleArray');
+  MoveToTop('TDoubleArray');
+  MoveToTop('TIntegerArray');
+  MoveToTop('TInt64Array');
+  MoveToTop('TStringArray');
+
+  MoveToTop('T2DIntegerArray');
+  MoveToTop('T2DStringArray');
+end;
+
+function TSimbaFunctionListForm.CompareNodes(A, B: TTreeNode): Integer;
+begin
+  Result := CompareText(A.Text, B.Text);
+
+  case A.ImageIndex of
+    IMG_TYPE:  Dec(Result, 2000);
+    IMG_CONST: Dec(Result, 1500);
+    IMG_VAR:   Dec(Result, 1000);
+    IMG_PROC:  Dec(Result, 500);
+    IMG_FUNC:  Dec(Result, 500);
+  end;
+
+  case B.ImageIndex of
+    IMG_TYPE:  Inc(Result, 2000);
+    IMG_CONST: Inc(Result, 1500);
+    IMG_VAR:   Inc(Result, 1000);
+    IMG_PROC:  Inc(Result, 500);
+    IMG_FUNC:  Inc(Result, 500);
+  end;
 end;
 
 procedure TSimbaFunctionListForm.DoIdleBegin(Sender: TObject);

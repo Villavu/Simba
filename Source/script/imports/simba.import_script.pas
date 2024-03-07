@@ -188,6 +188,17 @@ begin
   begin
     ImportingSection := 'Script';
 
+    // Assigned later in `TSimbaScript.Run`
+    addGlobalVar('String', '', 'SCRIPT_FILE').isConstant := True;
+    addGlobalVar('UInt64', '0', 'SCRIPT_START_TIME').isConstant := True;
+
+    addDelayedCode([
+      'function GetTimeRunning: UInt64;',
+      'begin',
+      '  Result := GetTickCount() - SCRIPT_START_TIME;',
+      'end;'
+    ]);
+
     addGlobalFunc('function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus; overload', @_LapeRunScript);
     addGlobalFunc('function RunScript(Script: String; Parameters: TStringArray): TProcessID; overload', @_LapeRunScriptEx);
     addGlobalFunc('function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID', @_LapeRunScriptOutputToFile);

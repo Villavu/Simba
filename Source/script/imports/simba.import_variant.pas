@@ -30,13 +30,22 @@ The variant "magic" datatype can store most base types.
 ```
 var v: Variant;
 begin
-  WriteLn('Should be unassigned: ', v = Variant.UnAssigned);
+  WriteLn('Should be unassigned: ', not v.IsAssigned());
+  WriteLn();
+
   v := 'I am a string';
-  Writeln('Now should *not* be unassigned: ', v = Variant.Unassigned);
+  Writeln('Now should *not* be unassigned: ', v.IsAssigned());
   WriteLn('And should be string:');
   WriteLn(v.VarType, ' -> ', v);
-  v := 123;
-  WriteLn('Now should be integer:');
+  WriteLn();
+
+  v := Int64(123);
+  WriteLn('Now should be Int64:');
+  WriteLn(v.VarType, ' -> ', v);
+  WriteLn();
+
+  v := 0.123456;
+  WriteLn('Now should be Double:');
   WriteLn(v.VarType, ' -> ', v);
 end;
 ```
@@ -56,7 +65,14 @@ Note:: If curious to how the Variant datatype works, internally it's a record:
 type
   {$SCOPEDENUMS ON}
   PVariantType = ^EVariantType;
-  EVariantType = (Unknown, Unassigned, Null, Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Single, Double, DateTime, Currency, Boolean, Variant, AString, UString, WString);
+  EVariantType = (
+    Unknown, Unassigned, Null,
+    Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64,
+    Single, Double, DateTime, Currency,
+    Boolean,
+    Variant,
+    AString, UString, WString
+  );
   {$SCOPEDENUMS OFF}
 
 (*
@@ -175,13 +191,22 @@ begin
 end;
 
 (*
-Variant.IsUnAssigned
---------------------
-> function Variant.IsUnAssigned: Boolean;
+Variant.IsAssigned
+------------------
+> function Variant.IsAssigned: Boolean;
+
+Example:
+
+```
+  if v.IsAssigned() then
+    WriteLn('Variant HAS been assigned to')
+  else
+    WriteLn('The variant has NOT been assigned to');
+```
 *)
-procedure _LapeVariantIsUnAssigned(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeVariantIsAssigned(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := VarIsClear(PVariant(Params^[0])^);
+  PBoolean(Result)^ := not VarIsClear(PVariant(Params^[0])^);
 end;
 
 (*
@@ -195,40 +220,21 @@ begin
 end;
 
 (*
-Variant.Null
+Variant.NULL
 ------------
-> function Variant.Null: Variant; static;
+> function Variant.NULL: Variant; static;
 
 Static method that returns a null variant variable.
 
 Example:
 
 ```
-  v := Variant.Null;
+  v := Variant.NULL;
 ```
 *)
-procedure _LapeVariantNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeVariantNULL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PVariant(Result)^ := Null;
-end;
-
-(*
-Variant.Unassigned
-------------------
-> function Variant.Unassigned: Variant; static;
-
-Static method that returns a unassigned variant variable.
-
-Example:
-
-```
-  if (v = Variant.Unassigned) then
-    WriteLn('The variant has not been assigned to!');
-```
-*)
-procedure _LapeVariantUnassigned(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PVariant(Result)^ := Unassigned;
 end;
 
 procedure ImportVariant(Compiler: TSimbaScript_Compiler);
@@ -247,11 +253,10 @@ begin
     addGlobalFunc('function Variant.IsString: Boolean;', @_LapeVariantIsString);
     addGlobalFunc('function Variant.IsBoolean: Boolean;', @_LapeVariantIsBoolean);
     addGlobalFunc('function Variant.IsVariant: Boolean;', @_LapeVariantIsVariant);
-    addGlobalFunc('function Variant.IsUnAssigned: Variant; static;', @_LapeVariantIsUnAssigned);
-    addGlobalFunc('function Variant.IsNull: Variant; static;', @_LapeVariantIsNull);
+    addGlobalFunc('function Variant.IsAssigned: Boolean;', @_LapeVariantIsAssigned);
+    addGlobalFunc('function Variant.IsNull: Boolean;', @_LapeVariantIsNull);
 
-    addGlobalFunc('function Variant.Null: Variant; static;', @_LapeVariantNull);
-    addGlobalFunc('function Variant.Unassigned: Variant; static;', @_LapeVariantUnassigned);
+    addGlobalFunc('function Variant.NULL: Variant; static;', @_LapeVariantNULL);
 
     ImportingSection := '';
   end;

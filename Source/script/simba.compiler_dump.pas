@@ -28,9 +28,7 @@ type
     FItems: TSimbaStringPairList;
 
     procedure InitBaseVariant; override;
-    procedure InitBaseMath; override;
     procedure InitBaseDefinitions; override;
-    procedure InitBaseDateTime; override;
     procedure InitBaseFile; override;
 
     procedure Add(Section, Str: String);
@@ -39,6 +37,7 @@ type
     procedure AddCode(Str: String; EnsureSemicolon: Boolean = True);
 
     procedure Move(Str, FromSection, ToSection: String);
+    procedure Del(Str, Section: String);
   public
     constructor Create(ATokenizer: TLapeTokenizerBase; ManageTokenizer: Boolean=True; AEmitter: TLapeCodeEmitter = nil; ManageEmitter: Boolean = True); reintroduce; override;
     destructor Destroy; override;
@@ -74,24 +73,64 @@ begin
   { nothing, we import our own variant }
 end;
 
-procedure TSimbaCompilerDump.InitBaseMath;
-begin
-  ImportingSection := 'Math';
-  inherited InitBaseMath();
-  ImportingSection := '';
-end;
-
 procedure TSimbaCompilerDump.InitBaseDefinitions;
+var
+  BaseType: ELapeBaseType;
 begin
-  ImportingSection := 'System';
-  inherited InitBaseDefinitions();
-  ImportingSection := '';
-end;
+  ImportingSection := 'Base';
 
-procedure TSimbaCompilerDump.InitBaseDateTime;
-begin
-  ImportingSection := 'DateTime';
-  inherited InitBaseDateTime();
+  // Base types
+  for BaseType in ELapeBaseType do
+    if (FBaseTypes[BaseType] <> nil) then
+      Add('Base', 'type %s = %s;'.Format([LapeTypeToString(BaseType), LapeTypeToString(BaseType)]));
+
+  inherited InitBaseDefinitions();
+
+  // add internal methods
+  Add('Base', 'procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;');
+  Add('Base', 'procedure Insert(Item: Anything; A: array; Index: Int32); external;');
+  Add('Base', 'procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A)); overload; external;');
+  Add('Base', 'procedure SetLength(A: array; Length: Int32); overload; external;');
+  Add('Base', 'function Low(A: array): Int32; external;');
+  Add('Base', 'function High(A: array): Int32; external;');
+  Add('Base', 'function Length(A: array): Int32; overload; external;');
+  Add('Base', 'procedure WriteLn(Args: Anything); external;');
+  Add('Base', 'procedure Write(Args: Anything); external;');
+  Add('Base', 'procedure Swap(var A, B: Anything); external;');
+  Add('Base', 'function SizeOf(A: Anything): Int32; external;');
+  Add('Base', 'function ToString(A: Anything): String; external;');
+  Add('Base', 'function ToStr(A: Anything): String; external;');
+  Add('Base', 'function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;');
+  Add('Base', 'function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;');
+  Add('Base', 'function Ord(X: Ordinal): Int32; external;');
+  Add('Base', 'function SleepUntil(Condition: BoolExpr; Interval, Timeout: Int32): Boolean; external;');
+  Add('Base', 'function Default(T: AnyType): AnyType; external;');
+  Add('Base', 'procedure Sort(var A: array); overload; external;');
+  Add('Base', 'procedure Sort(var A: array; Weights: array of Ordinal; LowToHigh: Boolean); overload; external;');
+  Add('Base', 'procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32); overload; external;');
+  Add('Base', 'function Sorted(const A: array): array; overload; external;');
+  Add('Base', 'function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array; overload; external;');
+  Add('Base', 'function Sorted(const A: array; Weights: array of Ordinal; LowToHigh: Boolean): array; overload; external;');
+  Add('Base', 'function Unique(const A: array): array; external;');
+  Add('Base', 'procedure Reverse(var A: array); external;');
+  Add('Base', 'function Reversed(const A: array): array; external;');
+  Add('Base', 'function IndexOf(const Item: T; const A: array): Integer; external;');
+  Add('Base', 'function IndicesOf(const Item: T; const A: array): TIntegerArray; external;');
+  Add('Base', 'function Contains(const Item: T; const A: array): Boolean; external;');
+  Add('Base', 'function RTTIFields(constref RecordTypeOrVar): TRTTIFields; external;');
+
+  Add('Base', 'function GetCallerAddress: Pointer; external;');
+  Add('Base', 'function GetCallerName: String; external;');
+  Add('Base', 'function GetCallerLocation: Pointer; external;');
+  Add('Base', 'function GetCallerLocationStr: String; external;');
+
+  Add('Base', 'function GetExceptionLocation: Pointer; external;');
+  Add('Base', 'function GetExceptionLocationStr: String; external;');
+  Add('Base', 'function GetExceptionMessage: String; external;');
+
+  Add('Base', 'function GetScriptMethodName(Address: Pointer): String; external;');
+  Add('Base', 'function DumpCallStack(Start: Integer = 0): String; external;');
+
   ImportingSection := '';
 end;
 
@@ -127,6 +166,18 @@ begin
       Item.Name := ToSection;
 
       FItems[I] := Item;
+    end;
+end;
+
+procedure TSimbaCompilerDump.Del(Str, Section: String);
+var
+  I: Integer;
+begin
+  for I := 0 to FItems.Count - 1 do
+    if (FItems[I].Name = Section) and FItems[I].Value.StartsWith(Str) then
+    begin
+      FItems.Delete(I);
+      Exit;
     end;
 end;
 
@@ -228,8 +279,6 @@ function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: lpString; AName: 
 begin
   Result := inherited addGlobalVar(Typ, Value, AName);
   Result._DocPos.FileName := ImportingSection;
-
-  // AddType
 end;
 
 function TSimbaCompilerDump.addGlobalVar(AVar: TLapeGlobalVar; AName: lpString): TLapeGlobalVar;
@@ -240,17 +289,11 @@ end;
 
 procedure TSimbaCompilerDump.DumpToFile(FileName: String);
 var
-  BaseType: ELapeBaseType;
   Decl: TLapeDeclaration;
   I: Integer;
   Str: String;
 begin
   Import();
-
-  // Base types
-  for BaseType in ELapeBaseType do
-    if (FBaseTypes[BaseType] <> nil) then
-      Add('System', 'type %s = %s;'.Format([LapeTypeToString(BaseType), LapeTypeToString(BaseType)]));
 
   // Variables & Constants
   for Decl in FGlobalDeclarations.GetByClass(TLapeGlobalVar, bTrue) do
@@ -275,70 +318,25 @@ begin
       Add(DocPos.FileName, Str);
     end;
 
-  // add internals
-  Add('System', 'procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;');
-  Add('System', 'procedure Insert(Item: Anything; A: array; Index: Int32); external;');
-  Add('System', 'procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A)); overload; external;');
-  Add('System', 'procedure SetLength(A: array; Length: Int32); overload; external;');
-  Add('System', 'function Low(A: array): Int32; external;');
-  Add('System', 'function High(A: array): Int32; external;');
-  Add('System', 'function Length(A: array): Int32; overload; external;');
-  Add('System', 'procedure WriteLn(Args: Anything); external;');
-  Add('System', 'procedure Write(Args: Anything); external;');
-  Add('System', 'procedure Swap(var A, B: Anything); external;');
-  Add('System', 'function SizeOf(A: Anything): Int32; external;');
-  Add('System', 'function ToString(A: Anything): String; external;');
-  Add('System', 'function ToStr(A: Anything): String; external;');
-  Add('System', 'function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;');
-  Add('System', 'function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal; overload; external;');
-  Add('System', 'function Ord(X: Ordinal): Int32; external;');
-  Add('System', 'function SleepUntil(Condition: BoolExpr; Interval, Timeout: Int32): Boolean; external;');
-  Add('System', 'function Default(T: AnyType): AnyType; external;');
-  Add('System', 'procedure Sort(var A: array); overload; external;');
-  Add('System', 'procedure Sort(var A: array; Weights: array of Ordinal; LowToHigh: Boolean); overload; external;');
-  Add('System', 'procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32); overload; external;');
-  Add('System', 'function Sorted(const A: array): array; overload; external;');
-  Add('System', 'function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array; overload; external;');
-  Add('System', 'function Sorted(const A: array; Weights: array of Ordinal; LowToHigh: Boolean): array; overload; external;');
-  Add('System', 'function Unique(const A: array): array; external;');
-  Add('System', 'procedure Reverse(var A: array); external;');
-  Add('System', 'function Reversed(const A: array): array; external;');
-  Add('System', 'function IndexOf(const Item: T; const A: array): Integer; external;');
-  Add('System', 'function IndicesOf(const Item: T; const A: array): TIntegerArray; external;');
-  Add('System', 'function Contains(const Item: T; const A: array): Boolean; external;');
-  Add('System', 'function RTTIFields(constref RecordTypeOrVar): TRTTIFields; external;');
+  Move('type TBox = record X1, Y1, X2, Y2: Integer; end;', 'Base', 'TBox');
+  Move('type TBoxArray = array of TBox;', 'Base', 'TBox');
 
-  Add('System', 'function GetCallerAddress: Pointer; external;');
-  Add('System', 'function GetCallerName: String; external;');
-  Add('System', 'function GetCallerLocation: Pointer; external;');
-  Add('System', 'function GetCallerLocationStr: String; external;');
+  Move('type TQuad = record Top, Right, Bottom, Left: TPoint; end;', 'Base', 'TQuad');
+  Move('type TQuadArray = array of TQuad;', 'Base', 'TQuad');
 
-  Add('System', 'function GetExceptionLocation: Pointer; external;');
-  Add('System', 'function GetExceptionLocationStr: String; external;');
-  Add('System', 'function GetExceptionMessage: String; external;');
+  Move('type TPoint = record X, Y: Integer; end;', 'Base', 'TPoint');
+  Move('type TPointArray = array of TPoint;', 'Base', 'TPointArray');
 
-  Add('System', 'function GetScriptMethodName(Address: Pointer): String; external;');
-  Add('System', 'function DumpCallStack(Start: Integer = 0): String; external;');
+  Move('type TColor = Int32', 'Base', 'Color Math');
+  Move('type TColorArray = array of TColor;', 'Base', 'Color Math');
 
-  // Move lape stuff to better sections
-  Move('function Random(min, max: Int64): Int64;', 'Math', 'Random');
-  Move('function Random(min, max: Double): Double', 'Math', 'Random');
-  Move('function Random(l: Int64): Int64', 'Math', 'Random');
-  Move('function Random: Double', 'Math', 'Random');
-  Move('procedure Randomize', 'Math', 'Random');
-  Move('var RandSeed', 'Math', 'Random');
+  Move('type Variant = Variant', 'Base', 'Variant');
+  Move('type TVariantArray = array of Variant', 'Base', 'Variant');
 
-  Move('function GetTickCount: UInt64', 'DateTime', 'Timing');
-  Move('procedure Sleep(MilliSeconds: UInt32);', 'DateTime', 'Timing');
+  Move('type T2DPointArray = array of TPointArray;', 'Base', 'T2DPointArray');
 
-  Move('type TBox = record X1, Y1, X2, Y2: Integer; end;', 'System', 'TBox');
-  Move('type TBoxArray = array of TBox;', 'System', 'TBox');
-
-  Move('type TQuad = record Top, Right, Bottom, Left: TPoint; end;', 'System', 'TQuad');
-  Move('type TQuadArray = array of TQuad;', 'System', 'TQuad');
-
-  Move('type TPoint = record X, Y: Integer; end;', 'System', 'TPoint');
-  Move('type TPointArray = array of TPoint;', 'System', 'TPointArray');
+  Del('function Hash(Str: String): UInt32', 'Base');
+  Del('function Hash(constref Data; DataSize: UInt32): UInt32', 'Base');
 
   with TStringList.Create() do
   try

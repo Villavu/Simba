@@ -28,7 +28,7 @@ type
     Name: String[128];
   end;
 
-procedure SimbaImage_FromString(Image: TSimbaImage; const Str: String);
+procedure SimbaImage_FromString(Image: TSimbaImage; Str: String);
 function SimbaImage_ToString(Image: TSimbaImage): String;
 
 implementation
@@ -37,7 +37,7 @@ uses
   FPReadPNG, FPWritePNG,
   simba.encoding, simba.image_lazbridge;
 
-procedure SimbaImage_FromString(Image: TSimbaImage; const Str: String);
+procedure SimbaImage_FromString(Image: TSimbaImage; Str: String);
 var
   Stream: TStringStream;
   Header: TImageStringHeader;
