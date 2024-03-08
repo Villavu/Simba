@@ -568,16 +568,6 @@ begin
   PInteger(Result)^ := PComponent(Params^[0])^.ComponentCount;
 end;
 
-procedure _LapeComponent_ComponentIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PComponent(Params^[0])^.ComponentIndex;
-end;
-
-procedure _LapeComponent_ComponentIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PComponent(Params^[0])^.ComponentIndex := PInteger(Params^[1])^;
-end;
-
 procedure _LapeComponent_Owner_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PComponent(Result)^ := PComponent(Params^[0])^.Owner;
@@ -623,7 +613,6 @@ begin
     addGlobalFunc('procedure TLazComponent.RemoveComponent(AComponent: TLazComponent);', @_LapeComponent_RemoveComponent);
     addGlobalFunc('function TLazComponent.GetComponent(index: Integer): TLazComponent;', @_LapeComponent_Components);
     addClassVar('TLazComponent', 'ComponentCount', 'Integer', @_LapeComponent_ComponentCount_Read);
-    addClassVar('TLazComponent', 'ComponentIndex', 'Integer', @_LapeComponent_ComponentIndex_Read, @_LapeComponent_ComponentIndex_Write);
     addClassVar('TLazComponent', 'Owner', 'TLazComponent', @_LapeComponent_Owner_Read);
     addClassVar('TLazComponent', 'Name', 'String', @_LapeComponent_Name_Read, @_LapeComponent_Name_Write);
     addClassVar('TLazComponent', 'Tag', 'PtrInt', @_LapeComponent_Tag_Read, @_LapeComponent_Tag_Write);

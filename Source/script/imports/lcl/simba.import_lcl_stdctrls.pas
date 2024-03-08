@@ -55,6 +55,8 @@ type
   PPoint = ^TPoint;
   PRect = ^TRect;
   PCanvas = ^TCanvas;
+  PMouseMoveEvent = ^TMouseMoveEvent;
+  PMouseEvent = ^TMouseEvent;
 
 procedure _LapeCustomComboBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -941,109 +943,149 @@ begin
   PLabel(Result)^ := TLabel.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeCustomSpeedButton_FindDownButton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Result)^ := PCustomSpeedButton(Params^[0])^.FindDownButton();
-end;
-
-procedure _LapeCustomSpeedButton_AllowAllUp_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.AllowAllUp;
-end;
-
-procedure _LapeCustomSpeedButton_AllowAllUp_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.AllowAllUp := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_Down_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.Down;
-end;
-
-procedure _LapeCustomSpeedButton_Down_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.Down := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_Flat_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.Flat;
-end;
-
-procedure _LapeCustomSpeedButton_Flat_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.Flat := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_Glyph_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBitmap(Result)^ := PCustomSpeedButton(Params^[0])^.Glyph;
-end;
-
-procedure _LapeCustomSpeedButton_Glyph_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.Glyph := PBitmap(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_Layout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PButtonLayout(Result)^ := PCustomSpeedButton(Params^[0])^.Layout;
-end;
-
-procedure _LapeCustomSpeedButton_Layout_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.Layout := PButtonLayout(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_Margin_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  Pinteger(Result)^ := PCustomSpeedButton(Params^[0])^.Margin;
-end;
-
-procedure _LapeCustomSpeedButton_Margin_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.Margin := Pinteger(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_ShowCaption_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.ShowCaption;
-end;
-
-procedure _LapeCustomSpeedButton_ShowCaption_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.ShowCaption := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_Spacing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  Pinteger(Result)^ := PCustomSpeedButton(Params^[0])^.Spacing;
-end;
-
-procedure _LapeCustomSpeedButton_Spacing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.Spacing := Pinteger(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_Transparent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomSpeedButton(Params^[0])^.Transparent;
-end;
-
-procedure _LapeCustomSpeedButton_Transparent_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Params^[0])^.Transparent := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomSpeedButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomSpeedButton(Result)^ := TCustomSpeedButton.Create(PComponent(Params^[0])^);
-end;
-
 procedure _LapeSpeedButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSpeedButton(Result)^ := TSpeedButton.Create(PComponent(Params^[0])^);
+end;
+
+procedure _LapeSpeedButton_OnMouseEnter_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PSpeedButton(Params^[0])^.OnMouseEnter;
+end;
+
+procedure _LapeSpeedButton_OnMouseEnter_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.OnMouseEnter := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_OnMouseLeave_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PSpeedButton(Params^[0])^.OnMouseLeave;
+end;
+
+procedure _LapeSpeedButton_OnMouseLeave_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.OnMouseLeave := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseMoveEvent(Result)^ := PSpeedButton(Params^[0])^.OnMouseMove;
+end;
+
+procedure _LapeSpeedButton_OnMouseMove_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_OnMouseDown_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseEvent(Result)^ := PSpeedButton(Params^[0])^.OnMouseDown;
+end;
+
+procedure _LapeSpeedButton_OnMouseDown_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.OnMouseDown := PMouseEvent(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_OnMouseUp_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseEvent(Result)^ := PSpeedButton(Params^[0])^.OnMouseUp;
+end;
+
+procedure _LapeSpeedButton_OnMouseUp_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.OnMouseUp := PMouseEvent(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_OnPaint_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PSpeedButton(Params^[0])^.OnPaint;
+end;
+
+procedure _LapeSpeedButton_OnPaint_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.OnPaint := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_Glyph_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBitmap(Result)^ := PSpeedButton(Params^[0])^.Glyph;
+end;
+
+procedure _LapeSpeedButton_Down_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSpeedButton(Params^[0])^.Down;
+end;
+
+procedure _LapeSpeedButton_Down_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.Down := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_Flat_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSpeedButton(Params^[0])^.Flat;
+end;
+
+procedure _LapeSpeedButton_Flat_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.Flat := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_Layout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PButtonLayout(Result)^ := PSpeedButton(Params^[0])^.Layout;
+end;
+
+procedure _LapeSpeedButton_Layout_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.Layout := PButtonLayout(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_Margin_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  Pinteger(Result)^ := PSpeedButton(Params^[0])^.Margin;
+end;
+
+procedure _LapeSpeedButton_Margin_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.Margin := Pinteger(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_ShowCaption_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSpeedButton(Params^[0])^.ShowCaption;
+end;
+
+procedure _LapeSpeedButton_ShowCaption_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.ShowCaption := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_Spacing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  Pinteger(Result)^ := PSpeedButton(Params^[0])^.Spacing;
+end;
+
+procedure _LapeSpeedButton_Spacing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.Spacing := Pinteger(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_Transparent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSpeedButton(Params^[0])^.Transparent;
+end;
+
+procedure _LapeSpeedButton_Transparent_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.Transparent := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeSpeedButton_Glyph_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSpeedButton(Params^[0])^.Glyph := PBitmap(Params^[1])^;
 end;
 
 procedure _LapeRadioButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1217,21 +1259,23 @@ begin
     addClassVar('TLazLabel', 'OptimalFill', 'Boolean', @_LapeLabel_OptimalFill_Read, @_LapeLabel_OptimalFill_Write);
     addClassConstructor('TLazLabel', '(TheOwner: TLazComponent)', @_LapeLabel_Create);
 
-    addClass('TLazCustomSpeedButton', 'TLazGraphicControl');
-    addGlobalFunc('function TLazCustomSpeedButton.FindDownButton: TLazCustomSpeedButton;', @_LapeCustomSpeedButton_FindDownButton);
-    addClassVar('TLazCustomSpeedButton', 'AllowAllUp', 'Boolean', @_LapeCustomSpeedButton_AllowAllUp_Read, @_LapeCustomSpeedButton_AllowAllUp_Write);
-    addClassVar('TLazCustomSpeedButton', 'Down', 'Boolean', @_LapeCustomSpeedButton_Down_Read, @_LapeCustomSpeedButton_Down_Write);
-    addClassVar('TLazCustomSpeedButton', 'Flat', 'Boolean', @_LapeCustomSpeedButton_Flat_Read, @_LapeCustomSpeedButton_Flat_Write);
-    addClassVar('TLazCustomSpeedButton', 'Glyph', 'TLazBitmap', @_LapeCustomSpeedButton_Glyph_Read, @_LapeCustomSpeedButton_Glyph_Write);
-    addClassVar('TLazCustomSpeedButton', 'Layout', 'TLazButtonLayout', @_LapeCustomSpeedButton_Layout_Read, @_LapeCustomSpeedButton_Layout_Write);
-    addClassVar('TLazCustomSpeedButton', 'Margin', 'Integer', @_LapeCustomSpeedButton_Margin_Read, @_LapeCustomSpeedButton_Margin_Write);
-    addClassVar('TLazCustomSpeedButton', 'ShowCaption', 'Boolean', @_LapeCustomSpeedButton_ShowCaption_Read, @_LapeCustomSpeedButton_ShowCaption_Write);
-    addClassVar('TLazCustomSpeedButton', 'Spacing', 'Integer', @_LapeCustomSpeedButton_Spacing_Read, @_LapeCustomSpeedButton_Spacing_Write);
-    addClassVar('TLazCustomSpeedButton', 'Transparent', 'Boolean', @_LapeCustomSpeedButton_Transparent_Read, @_LapeCustomSpeedButton_Transparent_Write);
-    addClassConstructor('TLazCustomSpeedButton', '(AOwner: TLazComponent)', @_LapeCustomSpeedButton_Create);
-
-    addClass('TLazSpeedButton', 'TLazCustomSpeedButton');
+    addClass('TLazSpeedButton', 'TLazGraphicControl');
     addClassConstructor('TLazSpeedButton', '(AOwner: TLazComponent)', @_LapeSpeedButton_Create);
+
+    addClassVar('TLazSpeedButton', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeSpeedButton_OnMouseEnter_Read, @_LapeSpeedButton_OnMouseEnter_Write);
+    addClassVar('TLazSpeedButton', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeSpeedButton_OnMouseLeave_Read, @_LapeSpeedButton_OnMouseLeave_Write);
+    addClassVar('TLazSpeedButton', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeSpeedButton_OnMouseMove_Read, @_LapeSpeedButton_OnMouseMove_Write);
+    addClassVar('TLazSpeedButton', 'OnMouseDown', 'TLazMouseEvent', @_LapeSpeedButton_OnMouseDown_Read, @_LapeSpeedButton_OnMouseDown_Write);
+    addClassVar('TLazSpeedButton', 'OnMouseUp', 'TLazMouseEvent', @_LapeSpeedButton_OnMouseUp_Read, @_LapeSpeedButton_OnMouseUp_Write);
+    addClassVar('TLazSpeedButton', 'OnPaint', 'TLazNotifyEvent', @_LapeSpeedButton_OnPaint_Read, @_LapeSpeedButton_OnPaint_Write);
+    addClassVar('TLazSpeedButton', 'Glyph', 'TLazBitmap', @_LapeSpeedButton_Glyph_Read, @_LapeSpeedButton_Glyph_Write);
+    addClassVar('TLazSpeedButton', 'Down', 'Boolean', @_LapeSpeedButton_Down_Read, @_LapeSpeedButton_Down_Write);
+    addClassVar('TLazSpeedButton', 'Flat', 'Boolean', @_LapeSpeedButton_Flat_Read, @_LapeSpeedButton_Flat_Write);
+    addClassVar('TLazSpeedButton', 'Layout', 'TLazButtonLayout', @_LapeSpeedButton_Layout_Read, @_LapeSpeedButton_Layout_Write);
+    addClassVar('TLazSpeedButton', 'Margin', 'Integer', @_LapeSpeedButton_Margin_Read, @_LapeSpeedButton_Margin_Write);
+    addClassVar('TLazSpeedButton', 'ShowCaption', 'Boolean', @_LapeSpeedButton_ShowCaption_Read, @_LapeSpeedButton_ShowCaption_Write);
+    addClassVar('TLazSpeedButton', 'Spacing', 'Integer', @_LapeSpeedButton_Spacing_Read, @_LapeSpeedButton_Spacing_Write);
+    addClassVar('TLazSpeedButton', 'Transparent', 'Boolean', @_LapeSpeedButton_Transparent_Read, @_LapeSpeedButton_Transparent_Write);
 
     addClass('TLazRadioButton', 'TLazCustomCheckBox');
     addClassConstructor('TLazRadioButton', '(AOwner: TLazComponent)', @_LapeRadioButton_Create);
