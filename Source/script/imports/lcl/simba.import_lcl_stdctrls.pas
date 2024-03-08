@@ -873,14 +873,9 @@ begin
   PCheckBox(Result)^ := TCheckBox.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeCustomLabel_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeLabel_AdjustFontForOptimalFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomLabel(Result)^ := TCustomLabel.Create(PComponent(Params^[0])^);
-end;
-
-procedure _LapeCustomLabel_AdjustFontForOptimalFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomLabel(Params^[0])^.AdjustFontForOptimalFill();
+  PBoolean(Result)^ := PLabel(Params^[0])^.AdjustFontForOptimalFill();
 end;
 
 procedure _LapeCustomLabel_SetBounds(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -936,6 +931,56 @@ end;
 procedure _LapeLabel_OptimalFill_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PLabel(Params^[0])^.OptimalFill := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeLabel_OnMouseEnter_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PLabel(Params^[0])^.OnMouseEnter;
+end;
+
+procedure _LapeLabel_OnMouseEnter_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLabel(Params^[0])^.OnMouseEnter := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeLabel_OnMouseLeave_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PLabel(Params^[0])^.OnMouseLeave;
+end;
+
+procedure _LapeLabel_OnMouseLeave_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLabel(Params^[0])^.OnMouseLeave := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeLabel_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseMoveEvent(Result)^ := PLabel(Params^[0])^.OnMouseMove;
+end;
+
+procedure _LapeLabel_OnMouseMove_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLabel(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
+end;
+
+procedure _LapeLabel_OnMouseDown_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseEvent(Result)^ := PLabel(Params^[0])^.OnMouseDown;
+end;
+
+procedure _LapeLabel_OnMouseDown_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLabel(Params^[0])^.OnMouseDown := PMouseEvent(Params^[1])^;
+end;
+
+procedure _LapeLabel_OnMouseUp_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseEvent(Result)^ := PLabel(Params^[0])^.OnMouseUp;
+end;
+
+procedure _LapeLabel_OnMouseUp_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLabel(Params^[0])^.OnMouseUp := PMouseEvent(Params^[1])^;
 end;
 
 procedure _LapeLabel_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1247,17 +1292,19 @@ begin
     addClass('TLazCheckBox', 'TLazCustomCheckBox');
     addClassConstructor('TLazCheckBox', '(TheOwner: TLazComponent)', @_LapeCheckBox_Create);
 
-    addClass('TLazCustomLabel', 'TLazGraphicControl');
-    addClassConstructor('TLazCustomLabel', '(TheOwner: TLazComponent)', @_LapeCustomLabel_Create);
-    addGlobalFunc('function TLazCustomLabel.AdjustFontForOptimalFill: Boolean;', @_LapeCustomLabel_AdjustFontForOptimalFill);
-
-    addClass('TLazLabel', 'TLazCustomLabel');
+    addClass('TLazLabel', 'TLazGraphicControl');
+    addClassConstructor('TLazLabel', '(TheOwner: TLazComponent)', @_LapeLabel_Create);
+    addGlobalFunc('function TLazLabel.AdjustFontForOptimalFill: Boolean;', @_LapeLabel_AdjustFontForOptimalFill);
     addClassVar('TLazLabel', 'Alignment', 'TLazAlignment', @_LapeLabel_Alignment_Read, @_LapeLabel_Alignment_Write);
     addClassVar('TLazLabel', 'Layout', 'TLazTextLayout', @_LapeLabel_Layout_Read, @_LapeLabel_Layout_Write);
     addClassVar('TLazLabel', 'Transparent', 'Boolean', @_LapeLabel_Transparent_Read, @_LapeLabel_Transparent_Write);
     addClassVar('TLazLabel', 'WordWrap', 'Boolean', @_LapeLabel_WordWrap_Read, @_LapeLabel_WordWrap_Write);
     addClassVar('TLazLabel', 'OptimalFill', 'Boolean', @_LapeLabel_OptimalFill_Read, @_LapeLabel_OptimalFill_Write);
-    addClassConstructor('TLazLabel', '(TheOwner: TLazComponent)', @_LapeLabel_Create);
+    addClassVar('TLazLabel', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeLabel_OnMouseEnter_Read, @_LapeLabel_OnMouseEnter_Write);
+    addClassVar('TLazLabel', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeLabel_OnMouseLeave_Read, @_LapeLabel_OnMouseLeave_Write);
+    addClassVar('TLazLabel', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeLabel_OnMouseMove_Read, @_LapeLabel_OnMouseMove_Write);
+    addClassVar('TLazLabel', 'OnMouseDown', 'TLazMouseEvent', @_LapeLabel_OnMouseDown_Read, @_LapeLabel_OnMouseDown_Write);
+    addClassVar('TLazLabel', 'OnMouseUp', 'TLazMouseEvent', @_LapeLabel_OnMouseUp_Read, @_LapeLabel_OnMouseUp_Write);
 
     addClass('TLazSpeedButton', 'TLazGraphicControl');
     addClassConstructor('TLazSpeedButton', '(AOwner: TLazComponent)', @_LapeSpeedButton_Create);
