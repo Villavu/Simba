@@ -833,6 +833,8 @@ begin
     addInputMethod('function TInput.KeyPressed(Key: EKeyCode): Boolean', @_LapeInput_KeyPressed);
 
     addInputMethod('function TInput.CharToKeyCode(C: Char): EKeyCode', @_LapeInput_CharToKeyCode);
+
+    ImportingSection := '';
   end;
 
   ImportASyncMouse(Compiler);

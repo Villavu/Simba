@@ -10,7 +10,7 @@ unit simba.functionlistform;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls,
+  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StrUtils,
   simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight, simba.component_treeview, simba.dictionary;
 
 type
@@ -665,13 +665,9 @@ begin
     for Decl in Parser.Items.ToArray do
       if (Decl.Name <> '') and (not Decl.isOverrideMethod) and (Decl.Name[1] <> '_') then
         AddSimbaDecl(ParentNode, Decl);
-  end;
 
-  ParentNode := FSimbaNode.FindNode('Base');
-  if Assigned(ParentNode) then
     ParentNode.CustomSort(@CompareNodes);
-
-  ArrangeBaseNodes();
+  end;
 
   FSimbaNode.AlphaSort();
   FSimbaNode.Expanded := True; // This needs to be on main thread it seems?
@@ -761,7 +757,7 @@ end;
 
 function TSimbaFunctionListForm.CompareNodes(A, B: TTreeNode): Integer;
 begin
-  Result := CompareText(A.Text, B.Text);
+  Result := NaturalCompareText(A.Text, B.Text);
 
   case A.ImageIndex of
     IMG_TYPE:  Dec(Result, 2000);

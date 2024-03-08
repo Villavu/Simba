@@ -93,8 +93,8 @@ procedure TSimbaFileBrowserForm.DoFindFiles;
     Files, Directories: TStringList;
     I: Integer;
   begin
-    Files := FindAllFiles(node^.Info.FileName, '', False);
-    Directories := FindAllDirectories(node^.Info.FileName, False);
+    Files := FindAllFiles(Node^.Info.FileName, '', False);
+    Directories := FindAllDirectories(Node^.Info.FileName, False);
 
     SetLength(Node^.Files, Files.Count);
     SetLength(Node^.Directories, Directories.Count);

@@ -23,6 +23,104 @@ Process related things.
 *)
 
 (*
+GetScriptPID
+------------
+> function GetScriptPID: TProcessID;
+
+Returns the process ID of the running script.
+*)
+procedure _LapeGetScriptPID(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PProcessID(Result)^ := GetProcessID();
+end;
+
+(*
+GetScriptParameters
+-------------------
+> function GetScriptParameters: TStringArray;
+
+Returns all command line parameters passed to the script.
+*)
+procedure _LapeGetScriptParameters(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PStringArray(Result)^ := SimbaProcess.GetScriptParameters();
+end;
+
+(*
+GetScriptParameter
+------------------
+> function GetScriptParameter(Name: String): String;
+
+Returns a command line parameter value passed to the script.
+Parameters should be passed as a key-pair value: `Name=Value`
+*)
+procedure _LapeGetScriptParameter(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := SimbaProcess.GetScriptParameter(PString(Params^[0])^);
+end;
+
+(*
+RunScript
+---------
+> function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus;
+
+Runs a simba script and **will wait** until the script has finished.
+
+ - The script output will be returned in the `Output` parameter.
+ - Returns the exit status of the scripts process.
+*)
+procedure _LapeRunScript(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PProcessExitStatus(Result)^ := SimbaProcess.RunScript(PString(Params^[0])^, PStringArray(Params^[1])^, PString(Params^[2])^);
+end;
+
+(*
+RunScript
+---------
+> function RunScript(Script: String; Parameters: TStringArray): TProcessID;
+
+Runs a simba script and instantly returns the scripts PID.
+
+- The script output will be printed normally.
+- The script PID can be used with process methods.
+
+Example:
+
+```
+  PID := RunScript('script.simba', []);
+  while IsProcessRunning(PID) do
+    Sleep(100);
+  WriteLn('Script finished!');
+```
+*)
+procedure _LapeRunScriptEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PProcessID(Result)^ := SimbaProcess.RunScript(PString(Params^[0])^, PStringArray(Params^[1])^);
+end;
+
+(*
+RunScriptOutputToFile
+---------------------
+> function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID;
+
+- The script output will be redirected to the file `OutputFileName`
+- The script PID can be used with process methods.
+
+Example:
+
+```
+  PID := RunScriptOutputToFile('script.simba', [], 'output.txt');
+  while IsProcessRunning(PID) do
+    Sleep(100);
+  WriteLn('Script finished!');
+```
+*)
+procedure _LapeRunScriptOutputToFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PProcessID(Result)^ := SimbaProcess.RunScriptOutputToFile(PString(Params^[0])^, PStringArray(Params^[1])^, PString(Params^[2])^);
+end;
+
+(*
 RunCommandInDir
 ---------------
 > function RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID;
@@ -142,11 +240,21 @@ begin
   SimbaProcess.TerminateProcess(PProcessID(Params^[0])^);
 end;
 
+(*
+GetEnvVar
+---------
+> function GetEnvVar(Name: String): String
+*)
 procedure _LapeGetEnvVar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := GetEnvironmentVariable(PString(Params^[0])^);
 end;
 
+(*
+GetEnvVars
+----------
+> function GetEnvVars: TStringArray
+*)
 procedure _LapeGetEnvVars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
   function _GetEnvVars: TStringArray;
@@ -177,6 +285,11 @@ begin
 
     addGlobalType('type Integer', 'TProcessID');
     addGlobalType('type Integer', 'TProcessExitStatus');
+
+    addGlobalFunc('function GetProcessID: TProcessID', @_LapeGetScriptPID);
+    addGlobalFunc('function GetProcessParameters: TStringArray', @_LapeGetScriptParameters);
+    addGlobalFunc('function GetProcessParameter(Name: String): String', @_LapeGetScriptParameter);
+
     addGlobalFunc('function IsProcessRunning(PID: TProcessID): Boolean', @_LapeIsProcessRunning);
     addGlobalFunc('function IsProcess64Bit(PID: TProcessID): Boolean', @_LapeIsProcess64Bit);
     addGlobalFunc('function GetProcessPath(PID: TProcessID): String', @_LapeGetProcessPath);
@@ -192,6 +305,10 @@ begin
 
     addGlobalFunc('function GetEnvVar(Name: String): String', @_LapeGetEnvVar);
     addGlobalFunc('function GetEnvVars: TStringArray', @_LapeGetEnvVars);
+
+    addGlobalFunc('function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus; overload', @_LapeRunScript);
+    addGlobalFunc('function RunScript(Script: String; Parameters: TStringArray): TProcessID; overload', @_LapeRunScriptEx);
+    addGlobalFunc('function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID', @_LapeRunScriptOutputToFile);
 
     ImportingSection := '';
   end;

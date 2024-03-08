@@ -30,7 +30,7 @@ var
   end;
 
 begin
-  APIFiles += ['Source\script\imports\simba.import_system.pas',        'System'         ];
+  APIFiles += ['Source\script\imports\simba.import_base.pas',          'Base'           ];
   APIFiles += ['Source\script\imports\simba.import_colormath.pas',     'Color Math'     ];
   APIFiles += ['Source\script\imports\simba.import_point.pas',         'TPoint'         ];
   APIFiles += ['Source\script\imports\simba.import_tpa.pas',           'TPointArray'    ];
@@ -41,8 +41,6 @@ begin
   APIFiles += ['Source\script\imports\simba.import_circle.pas',        'TCircle'        ];
   APIFiles += ['Source\script\imports\simba.import_windowhandle.pas',  'TWindowHandle'  ];
   APIFiles += ['Source\script\imports\simba.import_debugimage.pas',    'Debug Image'    ];
-  APIFiles += ['Source\script\imports\simba.import_variant.pas',       'Variant'        ];
-  APIFiles += ['Source\script\imports\simba.import_script.pas',        'Script'         ];
   APIFiles += ['Source\script\imports\simba.import_random.pas',        'Random'         ];
   APIFiles += ['Source\script\imports\simba.import_input.pas',         'Input'          ];
   APIFiles += ['Source\script\imports\simba.import_finder.pas',        'Finder'         ];
@@ -50,7 +48,6 @@ begin
   APIFiles += ['Source\script\imports\simba.import_web.pas',           'Web'            ];
   APIFiles += ['Source\script\imports\simba.import_file.pas',          'File'           ];
   APIFiles += ['Source\script\imports\simba.import_encoding.pas',      'Encoding'       ];
-  APIFiles += ['Source\script\imports\simba.import_compress.pas',      'Compress'       ];
   APIFiles += ['Source\script\imports\simba.import_timing.pas',        'Timing'         ];
   APIFiles += ['Source\script\imports\simba.import_string.pas',        'String'         ];
   APIFiles += ['Source\script\imports\simba.import_process.pas',       'Process'        ];
@@ -58,7 +55,6 @@ begin
   APIFiles += ['Source\script\imports\simba.import_matchtemplate.pas', 'Match Template' ];
   APIFiles += ['Source\script\imports\simba.import_misc.pas',          'Misc'           ];
   APIFiles += ['Source\script\imports\simba.import_matrix.pas',        'Matrix'         ];
-  APIFiles += ['Source\script\imports\simba.import_dialogs.pas',       'Dialogs'        ];
   APIFiles += ['Source\script\imports\simba.import_json.pas',          'JSON'           ];
   APIFiles += ['Source\script\imports\simba.import_image.pas',         'Image'          ];
   APIFiles += ['Source\script\imports\simba.import_dtm.pas',           'DTM'            ];

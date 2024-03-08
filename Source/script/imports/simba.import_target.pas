@@ -446,6 +446,8 @@ begin
       '  Self.DrawTarget(System.Target, P, Bounds);',
       'end;'
     ]);
+
+    ImportingSection := '';
   end;
 end;
 

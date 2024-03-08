@@ -254,7 +254,10 @@ begin
       Result[i div 2].X := Round((c1[2] * c2[1] - c1[1] * c2[2]) / det);
       Result[i div 2].Y := Round((c1[0] * c2[2] - c1[2] * c2[0]) / det);
     end else
-      Result[i div 2] := Point(Round(p2.x), Round(p2.y));
+    begin
+      Result[i div 2].X := Round(p2.x);
+      Result[i div 2].Y := Round(p2.y);
+    end;
 
     Inc(i, 2);
   end;

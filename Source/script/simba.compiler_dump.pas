@@ -327,13 +327,10 @@ begin
   Move('type TPoint = record X, Y: Integer; end;', 'Base', 'TPoint');
   Move('type TPointArray = array of TPoint;', 'Base', 'TPointArray');
 
+  Move('type T2DPointArray = array of TPointArray;', 'Base', 'T2DPointArray');
+
   Move('type TColor = Int32', 'Base', 'Color Math');
   Move('type TColorArray = array of TColor;', 'Base', 'Color Math');
-
-  Move('type Variant = Variant', 'Base', 'Variant');
-  Move('type TVariantArray = array of Variant', 'Base', 'Variant');
-
-  Move('type T2DPointArray = array of TPointArray;', 'Base', 'T2DPointArray');
 
   Del('function Hash(Str: String): UInt32', 'Base');
   Del('function Hash(constref Data; DataSize: UInt32): UInt32', 'Base');

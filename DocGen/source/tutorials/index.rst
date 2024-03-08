@@ -8,5 +8,6 @@ Tutorials
    Sleep Until.rst
    Input & Finder Target.rst
    Mouse & Keyboard.rst
+   Variant Data Type.rst
 
    plugins/index.rst

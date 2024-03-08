@@ -35,8 +35,9 @@ PreciseSleep
 
 Much more accurate sleep method, if you need millisecond accurate sleeps under -50ms use this.
 
-Note::
+```{note}
   This is only useful on Windows since on Linux and MacOS the regular `Sleep` is accurate to the milliseconds.
+```
 *)
 procedure _LapePreciseSleep(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
