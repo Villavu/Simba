@@ -203,9 +203,6 @@ begin
 
   inherited InitBaseDefinitions();
 
-  if (Globals['Hash'] <> nil) then
-    Globals['Hash'].Free();
-
   ImportingSection := '';
 end;
 

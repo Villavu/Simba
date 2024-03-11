@@ -31,11 +31,8 @@ type
   PCustomCheckBox = ^TCustomCheckBox;
   PCustomComboBox = ^TCustomComboBox;
   PCustomEdit = ^TCustomEdit;
-  PCustomGroupBox = ^TCustomGroupBox;
-  PCustomLabel = ^TCustomLabel;
   PCustomListBox = ^TCustomListBox;
   PCustomMemo = ^TCustomMemo;
-  PCustomSpeedButton = ^TCustomSpeedButton;
   PDrawItemEvent = ^TDrawItemEvent;
   PMeasureItemEvent = ^TMeasureItemEvent;
   PSelectionChangeEvent = ^TSelectionChangeEvent;
@@ -698,11 +695,6 @@ begin
   PEdit(Params^[0])^.OnEditingDone := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeCustomGroupBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomGroupBox(Result)^ := TCustomGroupBox.Create(PComponent(Params^[0])^);
-end;
-
 procedure _LapeGroupBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PGroupBox(Result)^ := TGroupBox.Create(PComponent(Params^[0])^);
@@ -876,11 +868,6 @@ end;
 procedure _LapeLabel_AdjustFontForOptimalFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PLabel(Params^[0])^.AdjustFontForOptimalFill();
-end;
-
-procedure _LapeCustomLabel_SetBounds(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomLabel(Params^[0])^.SetBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
 end;
 
 procedure _LapeLabel_Alignment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1143,16 +1130,17 @@ begin
   with Compiler do
   begin
     addGlobalType('(ssNone, ssHorizontal, ssVertical, ssBoth, ssAutoHorizontal, ssAutoVertical, ssAutoBoth)', 'TLazScrollStyle');
-    addGlobalType('(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odPainted)', 'TLazOwnerDrawStateType');
+    addGlobalType('(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odBackgroundPainted)', 'TLazOwnerDrawStateType');
     addGlobalType('set of TLazOwnerDrawStateType', 'TLazOwnerDrawState');
-    addGlobalType('procedure(Control: TLazWinControl; Index: Integer; ARect: TLazRect; State: TLazOwnerDrawState) of object', 'TLazDrawItemEvent', FFI_DEFAULT_ABI);
-    addGlobalType('(csDropDown,csSimple,csDropDownList,csOwnerDrawFixed,csOwnerDrawVariable)', 'TLazComboBoxStyle');
+    addGlobalType('(csDropDown, csSimple, csDropDownList, csOwnerDrawFixed, csOwnerDrawVariable, csOwnerDrawEditableFixed, csOwnerDrawEditableVariable)', 'TLazComboBoxStyle');
     addGlobalType('(lbStandard, lbOwnerDrawFixed, lbOwnerDrawVariable, lbVirtual)', 'TLazListBoxStyle');
     addGlobalType('(taLeftJustify, taRightJustify, taCenter)', 'TLazAlignment');
     addGlobalType('(cbUnchecked, cbChecked, cbGrayed)', 'TLazCheckBoxState');
     addGlobalType('(blGlyphLeft, blGlyphRight, blGlyphTop, blGlyphBottom)', 'TLazButtonLayout');
-    addGlobalType('procedure(Sender: TObject; User: Boolean) of object', 'TLazSelectionChangeEvent', FFI_DEFAULT_ABI);
+
+    addGlobalType('procedure(Control: TLazWinControl; Index: Integer; ARect: TLazRect; State: TLazOwnerDrawState) of object', 'TLazDrawItemEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Control: TLazWinControl; Index: Integer; var AHeight: Integer) of object', 'TLazMeasureItemEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; User: Boolean) of object', 'TLazSelectionChangeEvent', FFI_DEFAULT_ABI);
 
     addClass('TLazCustomComboBox', 'TLazWinControl');
     addClassConstructor('TLazCustomComboBox', '(TheOwner: TLazComponent)', @_LapeCustomComboBox_Create);
@@ -1250,19 +1238,15 @@ begin
     addClassVar('TLazEdit', 'OnEditingDone', 'TLazNotifyEvent', @_LapeEdit_OnEditingDone_Read, @_LapeEdit_OnEditingDone_Write);
     addClassConstructor('TLazEdit', '(AOwner: TLazComponent)', @_LapeEdit_Create);
 
-    addClass('TLazCustomGroupBox', 'TLazWinControl');
-    addClassConstructor('TLazCustomGroupBox', '(AOwner: TLazComponent)', @_LapeCustomGroupBox_Create);
-
-    addClass('TLazGroupBox', 'TLazCustomGroupBox');
+    addClass('TLazGroupBox', 'TLazWinControl');
     addClassConstructor('TLazGroupBox', '(AOwner: TLazComponent)', @_LapeGroupBox_Create);
 
-    addClass('TLazMemoScrollBar', 'TLazControlScrollBar');
     addClass('TLazCustomMemo', 'TLazCustomEdit');
     addClassConstructor('TLazCustomMemo', '(AOwner: TLazComponent)', @_LapeCustomMemo_Create);
     addGlobalFunc('procedure TLazCustomMemo.Append(const Value: String);', @_LapeCustomMemo_Append);
     addClassVar('TLazCustomMemo', 'Lines', 'TLazStrings', @_LapeCustomMemo_Lines_Read, @_LapeCustomMemo_Lines_Write);
-    addClassVar('TLazCustomMemo', 'HorzScrollBar', 'TLazMemoScrollBar', @_LapeCustomMemo_HorzScrollBar_Read, @_LapeCustomMemo_HorzScrollBar_Write);
-    addClassVar('TLazCustomMemo', 'VertScrollBar', 'TLazMemoScrollBar', @_LapeCustomMemo_VertScrollBar_Read, @_LapeCustomMemo_VertScrollBar_Write);
+    addClassVar('TLazCustomMemo', 'HorzScrollBar', 'TLazControlScrollBar', @_LapeCustomMemo_HorzScrollBar_Read, @_LapeCustomMemo_HorzScrollBar_Write);
+    addClassVar('TLazCustomMemo', 'VertScrollBar', 'TLazControlScrollBar', @_LapeCustomMemo_VertScrollBar_Read, @_LapeCustomMemo_VertScrollBar_Write);
     addClassVar('TLazCustomMemo', 'ScrollBars', 'TLazScrollStyle', @_LapeCustomMemo_ScrollBars_Read, @_LapeCustomMemo_ScrollBars_Write);
     addClassVar('TLazCustomMemo', 'WantReturns', 'Boolean', @_LapeCustomMemo_WantReturns_Read, @_LapeCustomMemo_WantReturns_Write);
     addClassVar('TLazCustomMemo', 'WantTabs', 'Boolean', @_LapeCustomMemo_WantTabs_Read, @_LapeCustomMemo_WantTabs_Write);

@@ -332,9 +332,6 @@ begin
   Move('type TColor = Int32', 'Base', 'Color Math');
   Move('type TColorArray = array of TColor;', 'Base', 'Color Math');
 
-  Del('function Hash(Str: String): UInt32', 'Base');
-  Del('function Hash(constref Data; DataSize: UInt32): UInt32', 'Base');
-
   with TStringList.Create() do
   try
     LineBreak := #0;
