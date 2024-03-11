@@ -25,7 +25,6 @@ type
   PCaption = ^TCaption;
   PCheckBoxState = ^TCheckBoxState;
   PCheckListBox = ^TCheckListBox;
-  PCustomPage = ^TCustomPage;
   PPageControl = ^TPageControl;
   PProgressBar = ^TProgressBar;
   PStatusBar = ^TStatusBar;
@@ -339,71 +338,6 @@ begin
   PCheckListBox(Params^[0])^.OnClickCheck := PNotifyEvent(Params^[1])^;
 end;
 
-procedure _LapeCustomPage_CanTab(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomPage(Params^[0])^.CanTab();
-end;
-
-procedure _LapeCustomPage_IsControlVisible(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomPage(Params^[0])^.IsControlVisible();
-end;
-
-procedure _LapeCustomPage_HandleObjectShouldBeVisible(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomPage(Params^[0])^.HandleObjectShouldBeVisible();
-end;
-
-procedure _LapeCustomPage_VisibleIndex(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PCustomPage(Params^[0])^.VisibleIndex();
-end;
-
-procedure _LapeCustomPage_PageIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PCustomPage(Params^[0])^.PageIndex;
-end;
-
-procedure _LapeCustomPage_PageIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomPage(Params^[0])^.PageIndex := PInteger(Params^[1])^;
-end;
-
-procedure _LapeCustomPage_TabVisible_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomPage(Params^[0])^.TabVisible;
-end;
-
-procedure _LapeCustomPage_TabVisible_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomPage(Params^[0])^.TabVisible := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomPage_OnHide_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PNotifyEvent(Result)^ := PCustomPage(Params^[0])^.OnHide;
-end;
-
-procedure _LapeCustomPage_OnHide_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomPage(Params^[0])^.OnHide := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomPage_OnShow_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PNotifyEvent(Result)^ := PCustomPage(Params^[0])^.OnShow;
-end;
-
-procedure _LapeCustomPage_OnShow_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomPage(Params^[0])^.OnShow := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeCustomPage_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomPage(Result)^ := TCustomPage.Create(PComponent(Params^[0])^);
-end;
-
 procedure _LapePageControl_TabRect(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PRect(Result)^ := PPageControl(Params^[0])^.TabRect(PInteger(Params^[1])^);
@@ -429,9 +363,9 @@ begin
   PPageControl(Params^[0])^.OnChanging := PTabChangingEvent(Params^[1])^;
 end;
 
-procedure _LapePageControl_Page_Index_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapePageControl_Tab_Index_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomPage(Result)^ := PPageControl(Params^[0])^.Page[PInteger(Params^[1])^];
+  PTabSheet(Result)^ := PPageControl(Params^[0])^.Pages[PInteger(Params^[1])^];
 end;
 
 procedure _LapePageControl_PageCount_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -439,12 +373,12 @@ begin
   PInteger(Result)^ := PPageControl(Params^[0])^.PageCount;
 end;
 
-procedure _LapePageControl_PageIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapePageControl_ActiveTabIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PPageControl(Params^[0])^.PageIndex;
 end;
 
-procedure _LapePageControl_PageIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapePageControl_ActiveTabIndex_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PPageControl(Params^[0])^.PageIndex := PInteger(Params^[1])^;
 end;
@@ -469,9 +403,44 @@ begin
   PPageControl(Params^[0])^.TabPosition := PTabPosition(Params^[1])^;
 end;
 
+procedure _LapePageControl_MultiLine_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PPageControl(Params^[0])^.MultiLine;
+end;
+
+procedure _LapePageControl_MultiLine_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPageControl(Params^[0])^.MultiLine := PBoolean(Params^[1])^;
+end;
+
+procedure _LapePageControl_TabHeight_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PPageControl(Params^[0])^.TabHeight;
+end;
+
+procedure _LapePageControl_TabHeight_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPageControl(Params^[0])^.TabHeight := PInteger(Params^[1])^;
+end;
+
+procedure _LapePageControl_TabWidth_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PPageControl(Params^[0])^.TabWidth;
+end;
+
+procedure _LapePageControl_TabWidth_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPageControl(Params^[0])^.TabWidth := PInteger(Params^[1])^;
+end;
+
 procedure _LapePageControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPageControl(Result)^ := TPageControl.Create(PComponent(Params^[0])^);
+end;
+
+procedure _LapeTabSheet_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTabSheet(Result)^ := TTabSheet.Create(PComponent(Params^[0])^);
 end;
 
 procedure _LapeTabSheet_TabIndex_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -479,9 +448,24 @@ begin
   PInteger(Result)^ := PTabSheet(Params^[0])^.TabIndex;
 end;
 
-procedure _LapeTabSheet_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTabSheet_OnHide_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PTabSheet(Result)^ := TTabSheet.Create(PComponent(Params^[0])^);
+  PNotifyEvent(Result)^ := PTabSheet(Params^[0])^.OnHide;
+end;
+
+procedure _LapeTabSheet_OnHide_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTabSheet(Params^[0])^.OnHide := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeTabSheet_OnShow_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PTabSheet(Params^[0])^.OnShow;
+end;
+
+procedure _LapeTabSheet_OnShow_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTabSheet(Params^[0])^.OnShow := PNotifyEvent(Params^[1])^;
 end;
 
 procedure _LapePageControl_AddTabSheet(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -499,12 +483,12 @@ begin
   PTabSheet(Result)^ := PPageControl(Params^[0])^.Pages[PInteger(Params^[1])^];
 end;
 
-procedure _LapePageControl_ActivePage_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapePageControl_ActiveTab_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PTabSheet(Result)^ := PPageControl(Params^[0])^.ActivePage;
 end;
 
-procedure _LapePageControl_ActivePage_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapePageControl_ActiveTab_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PPageControl(Params^[0])^.ActivePage := PTabSheet(Params^[1])^;
 end;
@@ -699,32 +683,28 @@ begin
     addClassVar('TLazCheckListBox', 'State', 'TLazCheckBoxState', @_LapeCheckListBox_State_Read, @_LapeCheckListBox_State_Write, True);
     addClassVar('TLazCheckListBox', 'OnClickCheck', 'TLazNotifyEvent', @_LapeCheckListBox_OnClickCheck_Read, @_LapeCheckListBox_OnClickCheck_Write);
 
-    addClass('TLazCustomPage', 'TLazWinControl');
-    addClassConstructor('TLazCustomPage', '(TheOwner: TLazComponent)', @_LapeCustomPage_Create);
-    addGlobalFunc('function TLazCustomPage.CanTab: Boolean;', @_LapeCustomPage_CanTab);
-    addGlobalFunc('function TLazCustomPage.VisibleIndex: Integer;', @_LapeCustomPage_VisibleIndex);
-    addClassVar('TLazCustomPage', 'PageIndex', 'Integer', @_LapeCustomPage_PageIndex_Read, @_LapeCustomPage_PageIndex_Write);
-    addClassVar('TLazCustomPage', 'TabVisible', 'Boolean', @_LapeCustomPage_TabVisible_Read, @_LapeCustomPage_TabVisible_Write);
-    addClassVar('TLazCustomPage', 'OnHide', 'TLazNotifyEvent', @_LapeCustomPage_OnHide_Read, @_LapeCustomPage_OnHide_Write);
-    addClassVar('TLazCustomPage', 'OnShow', 'TLazNotifyEvent', @_LapeCustomPage_OnShow_Read, @_LapeCustomPage_OnShow_Write);
-
-    addClass('TLazTabSheet', 'TLazCustomPage');
-    addClassVar('TLazTabSheet', 'TabIndex', 'Integer', @_LapeTabSheet_TabIndex_Read);
+    addClass('TLazTabSheet', 'TLazWinControl');
     addClassConstructor('TLazTabSheet', '(TheOwner: TLazComponent)', @_LapeTabSheet_Create);
+    addClassVar('TLazTabSheet', 'TabIndex', 'Integer', @_LapeTabSheet_TabIndex_Read);
+    addClassVar('TLazTabSheet', 'OnHide', 'TLazNotifyEvent', @_LapeTabSheet_OnHide_Read, @_LapeTabSheet_OnHide_Write);
+    addClassVar('TLazTabSheet', 'OnShow', 'TLazNotifyEvent', @_LapeTabSheet_OnShow_Read, @_LapeTabSheet_OnShow_Write);
 
     addClass('TLazPageControl', 'TLazWinControl');
     addClassConstructor('TLazPageControl', '(TheOwner: TLazComponent)', @_LapePageControl_Create);
     addGlobalFunc('function TLazPageControl.TabRect(AIndex: Integer): TLazRect;', @_LapePageControl_TabRect);
-    addGlobalFunc('function TLazPageControl.AddTabSheet: TLazTabSheet;', @_LapePageControl_AddTabSheet);
+    addGlobalFunc('function TLazPageControl.AddTab: TLazTabSheet;', @_LapePageControl_AddTabSheet);
     addGlobalFunc('function TLazPageControl.IndexOfTabAt(X, Y: Integer): Integer;', @_LapePageControl_IndexOfTabAt);
     addClassVar('TLazPageControl', 'OnChange', 'TLazNotifyEvent', @_LapePageControl_OnChange_Read, @_LapePageControl_OnChange_Write);
     addClassVar('TLazPageControl', 'OnChanging', 'TLazTabChangingEvent', @_LapePageControl_OnChanging_Read, @_LapePageControl_OnChanging_Write);
-    addClassVar('TLazPageControl', 'ActivePage', 'TLazTabSheet', @_LapePageControl_ActivePage_Read, @_LapePageControl_ActivePage_Write);
-    addClassVar('TLazPageControl', 'Page', 'TLazTabSheet', @_LapePageControl_Page_Index_Read, nil, True);
-    addClassVar('TLazPageControl', 'PageCount', 'Integer', @_LapePageControl_PageCount_Read);
-    addClassVar('TLazPageControl', 'PageIndex', 'Integer', @_LapePageControl_PageIndex_Read, @_LapePageControl_PageIndex_Write);
+    addClassVar('TLazPageControl', 'ActiveTab', 'TLazTabSheet', @_LapePageControl_ActiveTab_Read, @_LapePageControl_ActiveTab_Write);
+    addClassVar('TLazPageControl', 'ActiveTabIndex', 'Integer', @_LapePageControl_ActiveTabIndex_Read, @_LapePageControl_ActiveTabIndex_Write);
+    addClassVar('TLazPageControl', 'Tab', 'TLazTabSheet', @_LapePageControl_Tab_Index_Read, nil, True);
+    addClassVar('TLazPageControl', 'TabCount', 'Integer', @_LapePageControl_PageCount_Read);
     addClassVar('TLazPageControl', 'ShowTabs', 'Boolean', @_LapePageControl_ShowTabs_Read, @_LapePageControl_ShowTabs_Write);
     addClassVar('TLazPageControl', 'TabPosition', 'TLazTabPosition', @_LapePageControl_TabPosition_Read, @_LapePageControl_TabPosition_Write);
+    addClassVar('TLazPageControl', 'MultiLine', 'Boolean', @_LapePageControl_MultiLine_Read, @_LapePageControl_MultiLine_Write);
+    addClassVar('TLazPageControl', 'TabWidth', 'Integer', @_LapePageControl_TabWidth_Read, @_LapePageControl_TabWidth_Write);
+    addClassVar('TLazPageControl', 'TabHeight', 'Integer', @_LapePageControl_TabHeight_Read, @_LapePageControl_TabHeight_Write);
 
     addClass('TLazStatusBar', 'TLazWinControl');
     addClass('TLazStatusPanel');

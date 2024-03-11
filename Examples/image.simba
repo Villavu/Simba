@@ -10,7 +10,7 @@ begin
   Img.DrawText('Hello world', [125, 125], $00FF00);
 
   WriteLn('Color at 250,250 is ', '$' + IntToHex(Img.GetPixel(250, 250)));
-  WriteLn('Available fonts: ', Img.LoadedFontNames());
+  WriteLn('Available fonts: ', Img.FontNames());
 
   Img.Show(); // Show on Simba's debug image
   Img.Free(); // Images must be freed

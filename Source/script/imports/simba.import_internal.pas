@@ -13,7 +13,6 @@ procedure ImportInternal(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  simba.algo_unique,
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
   simba.script, simba.image, simba.process,
   simba.array_point, simba.array_ord, simba.array_string;

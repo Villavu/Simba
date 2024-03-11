@@ -56,7 +56,7 @@ implementation
 
 uses
   Math,
-  simba.matrix_float, simba.array_point, simba.box, simba.algo_sort;
+  simba.matrix_float, simba.algo_sort;
 
 generic procedure DoDrawPolygonFilled<_T>(Poly: TPointArray; DrawInfo: TDrawInfo);
 type

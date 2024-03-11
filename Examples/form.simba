@@ -32,6 +32,11 @@ begin
   WriteLn('List selection changed to: ', TLazListBox(Sender).GetSelectedText());
 end;
 
+procedure DoTabChange(Sender: TObject);
+begin
+  WriteLn('Tab changed to tab #', TLazPageControl(Sender).GetActiveTabIndex());
+end;
+
 procedure ShowMyForm;
 var
   Button: TLazButton;
@@ -40,24 +45,37 @@ var
   Panel: TLazPanel;
   Img: TLazImage;
   SimbaImg: TImage;
+  Tabs: TLazPageControl;
+  Tab1, Tab2: TLazTabSheet;
+  SpeedButton: TLazSpeedButton;
+  LazBmp: TLazBitmap;
+  Group: TLazGroupBox;
 begin
   Form := TLazForm.Create();
   Form.SetCaption('Example form');
   Form.SetOnMouseDown(@FormMouseDown);
   Form.SetOnMouseUp(@FormMouseUp);
   Form.SetWidth(700);
-  Form.SetHeight(500);
+  Form.SetHeight(700);
   Form.SetPosition(poScreenCenter);
   Form.SetColor(Colors.DARK_GREY);
   Form.SetBorderStyle(bsSingle); // Do not allow resizing
 
   SimbaImg := TImage.CreateFromTarget([0,0,400,400]);
 
-  Img := TLazImage.Create(Form);
-  Img.SetParent(Form);
+  Group := TLazGroupBox.Create(Form);
+  Group.SetParent(Form);
+  Group.SetBounds(400,200,200,200);
+  Group.SetAutoSize(True);
+  Group.SetCaption('Target image');
+  Group.GetFont().SetSize(15);
+
+  Img := TLazImage.Create(Group);
+  Img.SetParent(Group);
   Img.SetBounds(400,200,200,200);
   Img.SetStretch(True);
   Img.GetPicture().SetBitmap(SimbaImg.ToLazBitmap());
+  Img.GetBorderSpacing.SetAround(10);
 
   SimbaImg.Free();
 
@@ -108,6 +126,43 @@ begin
   List.GetItems().Add('Item 2');
   List.GetItems().Add('Item 3');
   List.SetOnSelectionChange(@DoSelectionChange);
+
+  Tabs := TLazPageControl.Create(Form);
+  Tabs.SetParent(Form);
+  Tabs.SetTop(450);
+  Tabs.SetLeft(50);
+  Tabs.SetWidth(400);
+  Tabs.SetOnChange(@DoTabChange);
+  Tab1 := Tabs.AddTab();
+  Tab1.SetCaption('Tab 1');
+  Tab2 := Tabs.AddTab();
+  Tab2.SetCaption('Tab 2');
+
+  Button := TLazButton.Create(Tab1);
+  Button.SetParent(Tab1);
+  Button.SetAutoSize(True);
+  Button.SetCaption('This button is on tab 1!');
+
+  Button := TLazButton.Create(Tab2);
+  Button.SetParent(Tab2);
+  Button.SetAutoSize(True);
+  Button.SetCaption('This button is on tab 2!');
+
+  LazBmp := TLazBitmap.Create();
+  LazBmp.SetWidth(25);
+  LazBmp.SetHeight(25);
+  with LazBmp.GetCanvas() do
+  begin
+    GetPen().SetColor(Colors.RED);
+    GetBrush().SetColor(Colors.WHITE);
+    Rectangle(0,0,25,25);
+  end;
+
+  SpeedButton := TLazSpeedButton.Create(Form);
+  SpeedButton.SetParent(Form);
+  SpeedButton.SetBounds(200,350,150,50);
+  SpeedButton.SetCaption('Hello World');
+  SpeedButton.SetGlyph(LazBmp);
 
   Form.ShowModal();
 

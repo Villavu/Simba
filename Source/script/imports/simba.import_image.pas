@@ -15,7 +15,7 @@ implementation
 uses
   Graphics,
   lptypes,
-  simba.image, simba.image_textdrawer, simba.image_fastcompress;
+  simba.image, simba.image_textdrawer;
 
 type
   PBitmap = ^TBitmap;

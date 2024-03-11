@@ -314,7 +314,6 @@ end;
 
 procedure TSimbaImageBoxCanvas.DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);
 var
-  I: Integer;
   Center: TPoint;
 begin
   Radius := Radius div 2;

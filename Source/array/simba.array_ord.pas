@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.colormath;
+  simba.base;
 
 type
   TIntegerArrayHelper = type helper for TIntegerArray

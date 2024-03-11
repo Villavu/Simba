@@ -2,18 +2,16 @@ program StopWatchExample;
 
 procedure SomethingToTime;
 var
-  Counter: Integer;
+  T: Integer;
 begin
-  while (Counter < 100) do
-  begin
-    Sleep(Random(30));
-    Inc(Counter);
-  end;
+  T := Random(1500, 3000);
+  WriteLn('Sleeping for: ', T);
+  Sleep(T);
 end;
 
 var
   StopWatch: TStopWatch;
-  Milliseconds: Integer;
+  Milliseconds: Double;
   Formatted: String;
 begin
   StopWatch.Start();
@@ -24,5 +22,5 @@ begin
   Formatted := StopWatch.ElapsedFmt('s');
 
   WriteLn('Milliseconds: ', Milliseconds);
-  WriteLN('Seconds: ', Formatted);
+  WriteLn('Seconds: ', Formatted);
 end.

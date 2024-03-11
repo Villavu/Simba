@@ -21,18 +21,15 @@ type
   PAlignment = ^TAlignment;
   PTextLayout = ^TTextLayout;
   PButton = ^TButton;
-  PButtonControl = ^TButtonControl;
   PButtonLayout = ^TButtonLayout;
   PCheckBox = ^TCheckBox;
   PCheckBoxState = ^TCheckBoxState;
   PComboBox = ^TComboBox;
   PComboBoxStyle = ^TComboBoxStyle;
-  PCustomButton = ^TCustomButton;
   PCustomCheckBox = ^TCustomCheckBox;
   PCustomComboBox = ^TCustomComboBox;
   PCustomEdit = ^TCustomEdit;
   PCustomListBox = ^TCustomListBox;
-  PCustomMemo = ^TCustomMemo;
   PDrawItemEvent = ^TDrawItemEvent;
   PMeasureItemEvent = ^TMeasureItemEvent;
   PSelectionChangeEvent = ^TSelectionChangeEvent;
@@ -700,124 +697,84 @@ begin
   PGroupBox(Result)^ := TGroupBox.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeCustomMemo_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Result)^ := TCustomMemo.Create(PComponent(Params^[0])^);
-end;
-
-procedure _LapeCustomMemo_Append(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Params^[0])^.Append(PString(Params^[1])^);
-end;
-
-procedure _LapeCustomMemo_Lines_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStrings(Result)^ := PCustomMemo(Params^[0])^.Lines;
-end;
-
-procedure _LapeCustomMemo_Lines_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Params^[0])^.Lines := PStrings(Params^[1])^;
-end;
-
-procedure _LapeCustomMemo_HorzScrollBar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMemoScrollBar(Result)^ := PCustomMemo(Params^[0])^.HorzScrollBar;
-end;
-
-procedure _LapeCustomMemo_HorzScrollBar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Params^[0])^.HorzScrollBar := PMemoScrollBar(Params^[1])^;
-end;
-
-procedure _LapeCustomMemo_VertScrollBar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PMemoScrollBar(Result)^ := PCustomMemo(Params^[0])^.VertScrollBar;
-end;
-
-procedure _LapeCustomMemo_VertScrollBar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Params^[0])^.VertScrollBar := PMemoScrollBar(Params^[1])^;
-end;
-
-procedure _LapeCustomMemo_ScrollBars_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PScrollStyle(Result)^ := PCustomMemo(Params^[0])^.ScrollBars;
-end;
-
-procedure _LapeCustomMemo_ScrollBars_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Params^[0])^.ScrollBars := PScrollStyle(Params^[1])^;
-end;
-
-procedure _LapeCustomMemo_WantReturns_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomMemo(Params^[0])^.WantReturns;
-end;
-
-procedure _LapeCustomMemo_WantReturns_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Params^[0])^.WantReturns := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomMemo_WantTabs_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomMemo(Params^[0])^.WantTabs;
-end;
-
-procedure _LapeCustomMemo_WantTabs_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Params^[0])^.WantTabs := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeCustomMemo_WordWrap_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PCustomMemo(Params^[0])^.WordWrap;
-end;
-
-procedure _LapeCustomMemo_WordWrap_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomMemo(Params^[0])^.WordWrap := PBoolean(Params^[1])^;
-end;
-
 procedure _LapeMemo_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PMemo(Result)^ := TMemo.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeButtonControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMemo_Append(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PButtonControl(Result)^ := TButtonControl.Create(PComponent(Params^[0])^);
+  PMemo(Params^[0])^.Append(PString(Params^[1])^);
 end;
 
-procedure _LapeCustomButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMemo_Lines_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomButton(Result)^ := TCustomButton.Create(PComponent(Params^[0])^);
+  PStrings(Result)^ := PMemo(Params^[0])^.Lines;
 end;
 
-procedure _LapeCustomButton_Active_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMemo_Lines_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PCustomButton(Params^[0])^.Active;
+  PMemo(Params^[0])^.Lines := PStrings(Params^[1])^;
 end;
 
-procedure _LapeCustomButton_Default_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMemo_HorzScrollBar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PCustomButton(Params^[0])^.Default;
+  PMemoScrollBar(Result)^ := PMemo(Params^[0])^.HorzScrollBar;
 end;
 
-procedure _LapeCustomButton_Default_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMemo_HorzScrollBar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomButton(Params^[0])^.Default := PBoolean(Params^[1])^;
+  PMemo(Params^[0])^.HorzScrollBar := PMemoScrollBar(Params^[1])^;
 end;
 
-procedure _LapeCustomButton_Cancel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMemo_VertScrollBar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PCustomButton(Params^[0])^.Cancel;
+  PMemoScrollBar(Result)^ := PMemo(Params^[0])^.VertScrollBar;
 end;
 
-procedure _LapeCustomButton_Cancel_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMemo_VertScrollBar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomButton(Params^[0])^.Cancel := PBoolean(Params^[1])^;
+  PMemo(Params^[0])^.VertScrollBar := PMemoScrollBar(Params^[1])^;
+end;
+
+procedure _LapeMemo_ScrollBars_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PScrollStyle(Result)^ := PMemo(Params^[0])^.ScrollBars;
+end;
+
+procedure _LapeMemo_ScrollBars_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMemo(Params^[0])^.ScrollBars := PScrollStyle(Params^[1])^;
+end;
+
+procedure _LapeMemo_WantReturns_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PMemo(Params^[0])^.WantReturns;
+end;
+
+procedure _LapeMemo_WantReturns_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMemo(Params^[0])^.WantReturns := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeMemo_WantTabs_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PMemo(Params^[0])^.WantTabs;
+end;
+
+procedure _LapeMemo_WantTabs_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMemo(Params^[0])^.WantTabs := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeMemo_WordWrap_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PMemo(Params^[0])^.WordWrap;
+end;
+
+procedure _LapeMemo_WordWrap_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMemo(Params^[0])^.WordWrap := PBoolean(Params^[1])^;
 end;
 
 procedure _LapeButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1241,33 +1198,21 @@ begin
     addClass('TLazGroupBox', 'TLazWinControl');
     addClassConstructor('TLazGroupBox', '(AOwner: TLazComponent)', @_LapeGroupBox_Create);
 
-    addClass('TLazCustomMemo', 'TLazCustomEdit');
-    addClassConstructor('TLazCustomMemo', '(AOwner: TLazComponent)', @_LapeCustomMemo_Create);
-    addGlobalFunc('procedure TLazCustomMemo.Append(const Value: String);', @_LapeCustomMemo_Append);
-    addClassVar('TLazCustomMemo', 'Lines', 'TLazStrings', @_LapeCustomMemo_Lines_Read, @_LapeCustomMemo_Lines_Write);
-    addClassVar('TLazCustomMemo', 'HorzScrollBar', 'TLazControlScrollBar', @_LapeCustomMemo_HorzScrollBar_Read, @_LapeCustomMemo_HorzScrollBar_Write);
-    addClassVar('TLazCustomMemo', 'VertScrollBar', 'TLazControlScrollBar', @_LapeCustomMemo_VertScrollBar_Read, @_LapeCustomMemo_VertScrollBar_Write);
-    addClassVar('TLazCustomMemo', 'ScrollBars', 'TLazScrollStyle', @_LapeCustomMemo_ScrollBars_Read, @_LapeCustomMemo_ScrollBars_Write);
-    addClassVar('TLazCustomMemo', 'WantReturns', 'Boolean', @_LapeCustomMemo_WantReturns_Read, @_LapeCustomMemo_WantReturns_Write);
-    addClassVar('TLazCustomMemo', 'WantTabs', 'Boolean', @_LapeCustomMemo_WantTabs_Read, @_LapeCustomMemo_WantTabs_Write);
-    addClassVar('TLazCustomMemo', 'WordWrap', 'Boolean', @_LapeCustomMemo_WordWrap_Read, @_LapeCustomMemo_WordWrap_Write);
-
-    addClass('TLazMemo', 'TLazCustomMemo');
+    addClass('TLazMemo', 'TLazCustomEdit');
     addClassConstructor('TLazMemo', '(AOwner: TLazComponent)', @_LapeMemo_Create);
+    addGlobalFunc('procedure TLazMemo.Append(const Value: String);', @_LapeMemo_Append);
+    addClassVar('TLazMemo', 'Lines', 'TLazStrings', @_LapeMemo_Lines_Read, @_LapeMemo_Lines_Write);
+    addClassVar('TLazMemo', 'HorzScrollBar', 'TLazControlScrollBar', @_LapeMemo_HorzScrollBar_Read, @_LapeMemo_HorzScrollBar_Write);
+    addClassVar('TLazMemo', 'VertScrollBar', 'TLazControlScrollBar', @_LapeMemo_VertScrollBar_Read, @_LapeMemo_VertScrollBar_Write);
+    addClassVar('TLazMemo', 'ScrollBars', 'TLazScrollStyle', @_LapeMemo_ScrollBars_Read, @_LapeMemo_ScrollBars_Write);
+    addClassVar('TLazMemo', 'WantReturns', 'Boolean', @_LapeMemo_WantReturns_Read, @_LapeMemo_WantReturns_Write);
+    addClassVar('TLazMemo', 'WantTabs', 'Boolean', @_LapeMemo_WantTabs_Read, @_LapeMemo_WantTabs_Write);
+    addClassVar('TLazMemo', 'WordWrap', 'Boolean', @_LapeMemo_WordWrap_Read, @_LapeMemo_WordWrap_Write);
 
-    addClass('TLazButtonControl', 'TLazWinControl');
-    addClassConstructor('TLazButtonControl', '(TheOwner: TLazComponent)', @_LapeButtonControl_Create);
-
-    addClass('TLazCustomButton', 'TLazButtonControl');
-    addClassConstructor('TLazCustomButton', '(TheOwner: TLazComponent)', @_LapeCustomButton_Create);
-    addClassVar('TLazCustomButton', 'Active', 'Boolean', @_LapeCustomButton_Active_Read);
-    addClassVar('TLazCustomButton', 'Default', 'Boolean', @_LapeCustomButton_Default_Read, @_LapeCustomButton_Default_Write);
-    addClassVar('TLazCustomButton', 'Cancel', 'Boolean', @_LapeCustomButton_Cancel_Read, @_LapeCustomButton_Cancel_Write);
-
-    addClass('TLazButton', 'TLazCustomButton');
+    addClass('TLazButton', 'TLazWinControl');
     addClassConstructor('TLazButton', '(TheOwner: TLazComponent)', @_LapeButton_Create);
 
-    addClass('TLazCustomCheckBox', 'TLazButtonControl');
+    addClass('TLazCustomCheckBox', 'TLazWinControl');
     addClassConstructor('TLazCustomCheckBox', '(TheOwner: TLazComponent)', @_LapeCustomCheckBox_Create);
     addClassVar('TLazCustomCheckBox', 'AllowGrayed', 'Boolean', @_LapeCustomCheckBox_AllowGrayed_Read, @_LapeCustomCheckBox_AllowGrayed_Write);
     addClassVar('TLazCustomCheckBox', 'State', 'TLazCheckBoxState', @_LapeCustomCheckBox_State_Read, @_LapeCustomCheckBox_State_Write);
@@ -1275,6 +1220,9 @@ begin
 
     addClass('TLazCheckBox', 'TLazCustomCheckBox');
     addClassConstructor('TLazCheckBox', '(TheOwner: TLazComponent)', @_LapeCheckBox_Create);
+
+    addClass('TLazRadioButton', 'TLazCustomCheckBox');
+    addClassConstructor('TLazRadioButton', '(AOwner: TLazComponent)', @_LapeRadioButton_Create);
 
     addClass('TLazLabel', 'TLazGraphicControl');
     addClassConstructor('TLazLabel', '(TheOwner: TLazComponent)', @_LapeLabel_Create);
@@ -1292,7 +1240,6 @@ begin
 
     addClass('TLazSpeedButton', 'TLazGraphicControl');
     addClassConstructor('TLazSpeedButton', '(AOwner: TLazComponent)', @_LapeSpeedButton_Create);
-
     addClassVar('TLazSpeedButton', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeSpeedButton_OnMouseEnter_Read, @_LapeSpeedButton_OnMouseEnter_Write);
     addClassVar('TLazSpeedButton', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeSpeedButton_OnMouseLeave_Read, @_LapeSpeedButton_OnMouseLeave_Write);
     addClassVar('TLazSpeedButton', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeSpeedButton_OnMouseMove_Read, @_LapeSpeedButton_OnMouseMove_Write);
@@ -1307,9 +1254,6 @@ begin
     addClassVar('TLazSpeedButton', 'ShowCaption', 'Boolean', @_LapeSpeedButton_ShowCaption_Read, @_LapeSpeedButton_ShowCaption_Write);
     addClassVar('TLazSpeedButton', 'Spacing', 'Integer', @_LapeSpeedButton_Spacing_Read, @_LapeSpeedButton_Spacing_Write);
     addClassVar('TLazSpeedButton', 'Transparent', 'Boolean', @_LapeSpeedButton_Transparent_Read, @_LapeSpeedButton_Transparent_Write);
-
-    addClass('TLazRadioButton', 'TLazCustomCheckBox');
-    addClassConstructor('TLazRadioButton', '(AOwner: TLazComponent)', @_LapeRadioButton_Create);
   end;
 end;
 
