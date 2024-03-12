@@ -1,10 +1,38 @@
 object SimbaFunctionListForm: TSimbaFunctionListForm
-  Left = 1530
+  Left = -943
   Height = 301
-  Top = 748
+  Top = 765
   Width = 765
   Caption = 'Function List'
   DesignTimePPI = 120
+  PopupMenu = ContextMenu
   ShowInTaskBar = stAlways
   LCLVersion = '3.0.0.3'
+  object ContextMenu: TPopupMenu
+    OnPopup = ContextMenuPopup
+    Left = 55
+    Top = 53
+    object PopupItemShowMouseoverHint: TMenuItem
+      AutoCheck = True
+      Caption = 'Show Mouseover Hint'
+      OnClick = PopupItemShowMouseoverHintClick
+    end
+    object Separator1: TMenuItem
+      Caption = '-'
+    end
+    object PopupItemShowHide: TMenuItem
+      Caption = 'Show/Hide Section ...'
+    end
+    object Separator2: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemShowAll: TMenuItem
+      Caption = 'Show All Sections'
+      OnClick = MenuItemShowAllClick
+    end
+    object MenuItemHideAll: TMenuItem
+      Caption = 'Hide All Sections'
+      OnClick = MenuItemHideAllClick
+    end
+  end
 end

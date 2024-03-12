@@ -163,6 +163,11 @@ type
       Interval: TSimbaSetting;
     end;
 
+    FunctionList: record
+      ShowMouseoverHint: TSimbaSetting;
+      HiddenSimbaSections: TSimbaSetting;
+    end;
+
     property FirstLaunch: Boolean read FFirstLaunch;
     property IsLoading: Boolean read FIsLoading;
 
@@ -544,6 +549,9 @@ begin
 
   ScriptBackup.Enabled  := TSimbaSetting_Boolean.Create(Self, 'ScriptBackup', 'Enabled', True);
   ScriptBackup.Interval := TSimbaSetting_Integer.Create(Self, 'ScriptBackup', 'Interval', 3);
+
+  FunctionList.ShowMouseoverHint := TSimbaSetting_Boolean.Create(Self, 'FunctionList', 'ShowMouseoverHint', True);
+  FunctionList.HiddenSimbaSections := TSimbaSetting_BinaryString.Create(Self, 'FunctionList', 'HiddenSimbaSections', '');
 end;
 
 destructor TSimbaSettings.Destroy;

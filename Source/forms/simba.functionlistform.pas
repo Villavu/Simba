@@ -10,7 +10,7 @@ unit simba.functionlistform;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StrUtils,
+  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, Menus, StrUtils,
   simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight, simba.component_treeview, simba.dictionary;
 
 type
@@ -28,6 +28,17 @@ type
   end;
 
   TSimbaFunctionListForm = class(TForm)
+    MenuItemHideAll: TMenuItem;
+    MenuItemShowAll: TMenuItem;
+    PopupItemShowMouseoverHint: TMenuItem;
+    PopupItemShowHide: TMenuItem;
+    ContextMenu: TPopupMenu;
+    Separator1: TMenuItem;
+    Separator2: TMenuItem;
+    procedure MenuItemHideAllClick(Sender: TObject);
+    procedure MenuItemShowAllClick(Sender: TObject);
+    procedure PopupItemShowMouseoverHintClick(Sender: TObject);
+    procedure ContextMenuPopup(Sender: TObject);
   protected
   type
     TFunctionListState = record
@@ -72,6 +83,7 @@ type
     procedure DoTabBeforeChange(Sender: TObject);
     procedure DoTabChange(Sender: TObject);
     procedure DoTabClosed(Sender: TObject);
+    procedure DoPopupShowHideClick(Sender: TObject);
 
     procedure AddPluginsNode(Plugins: TCodeParserList; Hash: String);
     procedure AddIncludesNode(Includes: TCodeParserList; Hash: String);
@@ -80,6 +92,9 @@ type
     function AddDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
     function AddSimbaDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
     function AddPluginDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
+
+    function ShouldSimbaNodeBeHidden(S: String): Boolean;
+    procedure SetSimbaNodeShouldBeHidden(S: String; Hidden: Boolean);
 
     procedure AddSimbaNodes;
 
@@ -99,7 +114,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.main, simba.ide_events, simba.threading,
+  simba.main, simba.ide_events, simba.threading, simba.settings,
   simba.scripttabsform, simba.scripttab, simba.ide_showdeclaration, simba.nativeinterface;
 
 function GetImage(const Decl: TDeclaration): Integer;
@@ -153,6 +168,7 @@ begin
   Result := '';
 
   case Section of
+    'Base':           Result := ROOT + 'Base.html';
     'TPoint':         Result := ROOT + 'TPoint.html';
     'TPointArray':    Result := ROOT + 'TPointArray.html';
     'TBox':           Result := ROOT + 'TBox.html';
@@ -161,8 +177,6 @@ begin
     'Random':         Result := ROOT + 'Random.html';
     'T2DPointArray':  Result := ROOT + 'T2DPointArray.html';
     'Debug Image':    Result := ROOT + 'Debug Image.html';
-    'Script':         Result := ROOT + 'Script.html';
-    'Variant':        Result := ROOT + 'Variant.html';
     'TWindowHandle':  Result := ROOT + 'TWindowHandle.html';
     'Image':          Result := ROOT + 'Image.html';
     'Finder':         Result := ROOT + 'Finder.html';
@@ -180,11 +194,64 @@ begin
     'Math':           Result := ROOT + 'Math.html';
     'Matrix':         Result := ROOT + 'Matrix.html';
     'Misc':           Result := ROOT + 'Misc.html';
-    'Dialogs':        Result := ROOT + 'Dialogs.html';
     'DTM':            Result := ROOT + 'DTM.html';
-    'System':         Result := ROOT + 'System.html';
     'TCircle':        Result := ROOT + 'TCircle.html';
   end;
+end;
+
+procedure TSimbaFunctionListForm.ContextMenuPopup(Sender: TObject);
+var
+  I: Integer;
+  Item: TMenuItem;
+  Val: String;
+begin
+  if (PopupItemShowHide.Count = 0) then
+    for I := 0 to FSimbaNode.Count - 1 do
+    begin
+      Item := TMenuItem.Create(PopupItemShowHide);
+      Item.Caption := FSimbaNode.Items[I].Text;
+      Item.AutoCheck := True;
+      Item.OnClick := @DoPopupShowHideClick;
+
+      PopupItemShowHide.Add(Item);
+    end;
+
+  Val := SimbaSettings.FunctionList.HiddenSimbaSections.Value;
+  for I := 0 to PopupItemShowHide.Count - 1 do
+    PopupItemShowHide.Items[i].Checked := not (PopupItemShowHide.Items[I].Caption + ',' in Val);
+
+  PopupItemShowMouseoverHint.Checked := SimbaSettings.FunctionList.ShowMouseoverHint.Value;
+end;
+
+procedure TSimbaFunctionListForm.PopupItemShowMouseoverHintClick(Sender: TObject);
+begin
+  SimbaSettings.FunctionList.ShowMouseoverHint.Value := TMenuItem(Sender).Checked;
+end;
+
+procedure TSimbaFunctionListForm.MenuItemShowAllClick(Sender: TObject);
+var
+  I: Integer;
+begin
+  SimbaSettings.FunctionList.HiddenSimbaSections.Value := '';
+  for I := 0 to FSimbaNode.Count - 1 do
+    FSimbaNode.Items[I].Visible := True;
+  ContextMenu.Close();
+end;
+
+procedure TSimbaFunctionListForm.MenuItemHideAllClick(Sender: TObject);
+var
+  I: Integer;
+  Val: String;
+begin
+  Val := '';
+  for I := 0 to PopupItemShowHide.Count - 1 do
+    Val += PopupItemShowHide.Items[I].Caption + ',';
+
+  SimbaSettings.FunctionList.HiddenSimbaSections.Value := Val;
+  for I := 0 to FSimbaNode.Count - 1 do
+    FSimbaNode.Items[I].Visible := False;
+
+  ContextMenu.Close();
 end;
 
 procedure TSimbaFunctionListForm.ResetState;
@@ -390,6 +457,17 @@ begin
     DeleteState(TSimbaScriptTab(Sender).UID);
 end;
 
+procedure TSimbaFunctionListForm.DoPopupShowHideClick(Sender: TObject);
+var
+  Node: TTreeNode;
+begin
+  SetSimbaNodeShouldBeHidden(TMenuItem(Sender).Caption, not TMenuItem(Sender).Checked);
+
+  Node := FSimbaNode.FindNode(TMenuItem(Sender).Caption);
+  if Assigned(Node) then
+    Node.Visible := TMenuItem(Sender).Checked;
+end;
+
 procedure TSimbaFunctionListForm.AddPluginsNode(Plugins: TCodeParserList; Hash: String);
 var
   PluginsNode: TTreeNode = nil;
@@ -552,10 +630,17 @@ end;
 
 function TSimbaFunctionListForm.DoGetNodeHint(const Node: TTreeNode): String;
 begin
-  if (Node is TSimbaFunctionListNode) then
-    Result := TSimbaFunctionListNode(Node).Hint
-  else
-    Result := '';
+  Result := '';
+
+  if SimbaSettings.FunctionList.ShowMouseoverHint.Value then
+  begin
+    if (Node is TSimbaFunctionListNode) then
+    begin
+      Result := TSimbaFunctionListNode(Node).Hint;
+      if (Length(Result) > 100) then
+        Result := Copy(Result, 1, 100) + ' ...';
+    end;
+  end;
 end;
 
 procedure TSimbaFunctionListForm.DoSelectionChanged(Sender: TObject);
@@ -638,6 +723,27 @@ begin
   end;
 end;
 
+function TSimbaFunctionListForm.ShouldSimbaNodeBeHidden(S: String): Boolean;
+var
+  Val: String;
+begin
+  Val := SimbaSettings.FunctionList.HiddenSimbaSections.Value;
+
+  Result := Val.Contains(S + ',');
+end;
+
+procedure TSimbaFunctionListForm.SetSimbaNodeShouldBeHidden(S: String; Hidden: Boolean);
+var
+  Val: String;
+begin
+  Val := SimbaSettings.FunctionList.HiddenSimbaSections.Value;
+  Val := Val.Replace(S + ',', ''); // remove
+  if Hidden then
+    Val := Val + S + ','; // add
+
+  SimbaSettings.FunctionList.HiddenSimbaSections.Value := Val;
+end;
+
 procedure TSimbaFunctionListForm.AddSimbaNodes;
 var
   I: Integer;
@@ -659,7 +765,7 @@ begin
       NodeType := ntSimbaSection;
       FileName := GetURL(Parser.Lexer.FileName);
       if (FileName <> '') then
-        Hint := Text + ' (double click to open online documentation)';
+        Hint := Text + ' (double click to open online docs)';
     end;
 
     for Decl in Parser.Items.ToArray do
@@ -667,6 +773,8 @@ begin
         AddSimbaDecl(ParentNode, Decl);
 
     ParentNode.CustomSort(@CompareNodes);
+    if ShouldSimbaNodeBeHidden(ParentNode.Text) then
+      ParentNode.Visible := False;
   end;
 
   FSimbaNode.AlphaSort();
