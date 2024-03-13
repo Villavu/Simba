@@ -47,7 +47,7 @@ const
 
 type
   PSimbaTarget = ^TSimbaTarget;
-  TSimbaTarget = packed record
+  TSimbaTarget = record
   public
   type
     TInvalidTargetEvent = procedure(var Target: TSimbaTarget) of object;

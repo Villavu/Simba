@@ -353,7 +353,7 @@ begin
     ImportingSection := 'Target';
 
     addGlobalType([
-      'packed record',
+      'record',
       '  {%CODETOOLS OFF}',
       '  InternalData: array[1..' + IntToStr(SizeOf(TSimbaTarget) - (LapeTypeSize[ltDynArray]*2)) + '] of Byte;',
       '  {%CODETOOLS ON}',

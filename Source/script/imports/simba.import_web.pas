@@ -691,6 +691,8 @@ begin
       TSimbaHTTPClient(Ptr^).FreeOnTerminate := True
     end;
 
+    ImportingSection := '';
+
     addClass('TInternetSocket');
     addGlobalFunc('function TInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean = False): TInternetSocket; static;', @_LapeSimbaInternetSocket_Create);
     addGlobalFunc('procedure TInternetSocket.Connect;', @_LapeSimbaInternetSocket_Connect);
@@ -702,9 +704,7 @@ begin
     addClassVar('TInternetSocket', 'ConnectTimeout', 'Integer', @_LapeSimbaInternetSocket_GetConnectTimeout, @_LapeSimbaInternetSocket_SetConnectTimeout);
     addClassVar('TInternetSocket', 'ReadWriteTimeout', 'Integer', @_LapeSimbaInternetSocket_GetReadWriteTimeout, @_LapeSimbaInternetSocket_SetReadWriteTimeout);
 
-     addGlobalFunc('function LoadSSL(Debug: Boolean = False): Boolean', @_LapeLoadSSL);
-
-    ImportingSection := '';
+    addGlobalFunc('function LoadSSL(Debug: Boolean = False): Boolean', @_LapeLoadSSL);
   end;
 end;
 

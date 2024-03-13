@@ -432,7 +432,7 @@ TInput.RemoveOnMouseTeleport
 *)
 procedure _LapeInput_RemoveOnMouseTeleport(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseTeleport(TSimbaInput.TMouseTeleportEvent(Params^[1]^));
+  PSimbaInput(Params^[0])^.RemoveOnMouseTeleport(TSimbaInput.TMouseTeleportEvent(Params^[1]^));
 end;
 
 (*
@@ -442,7 +442,7 @@ TInput.RemoveOnMouseMoving
 *)
 procedure _LapeInput_RemoveOnMouseMoving(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseMoving(TSimbaInput.TMouseMovingEvent(Params^[1]^));
+  PSimbaInput(Params^[0])^.RemoveOnMouseMoving(TSimbaInput.TMouseMovingEvent(Params^[1]^));
 end;
 
 (*
@@ -452,7 +452,7 @@ TInput.RemoveOnMouseDown
 *)
 procedure _LapeInput_RemoveOnMouseDown(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseDown(TSimbaInput.TMouseButtonEvent(Params^[1]^));
+  PSimbaInput(Params^[0])^.RemoveOnMouseDown(TSimbaInput.TMouseButtonEvent(Params^[1]^));
 end;
 
 (*
@@ -462,7 +462,7 @@ TInput.RemoveOnMouseUp
 *)
 procedure _LapeInput_RemoveOnMouseUp(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseUp(TSimbaInput.TMouseButtonEvent(Params^[1]^));
+  PSimbaInput(Params^[0])^.RemoveOnMouseUp(TSimbaInput.TMouseButtonEvent(Params^[1]^));
 end;
 
 (*
@@ -472,94 +472,7 @@ TInput.RemoveOnMouseClick
 *)
 procedure _LapeInput_RemoveOnMouseClick(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaInput(Params^[0])^.RemoveOnMouseClick(TSimbaInput.TMouseButtonEvent(Params^[1]^));
-end;
-
-(*
-TASyncMouse.Move
-----------------
-> procedure TASyncMouse.Move(Input: TSimbaInput; Dest: TPoint; Accuracy: Double = 1);
-*)
-procedure _LapeASyncMouse_Move(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  TSimbaASyncMouse(Params^[0]^).Move(PSimbaInput(Params^[1])^, PPoint(Params^[2])^, PDouble(Params^[3])^);
-end;
-
-(*
-TASyncMouse.ChangeDest
-----------------------
-> procedure TASyncMouse.ChangeDest(Dest: TPoint);
-*)
-procedure _LapeASyncMouse_ChangeDest(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  TSimbaASyncMouse(Params^[0]^).ChangeDest(PPoint(Params^[1])^);
-end;
-
-(*
-TASyncMouse.IsMoving
---------------------
-> function TASyncMouse.IsMoving: Boolean;
-*)
-procedure _LapeASyncMouse_IsMoving(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaASyncMouse(Params^[0]^).IsMoving();
-end;
-
-(*
-TASyncMouse.WaitMoving
-----------------------
-> procedure TASyncMouse.WaitMoving;
-*)
-procedure _LapeASyncMouse_WaitMoving(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  TSimbaASyncMouse(Params^[0]^).WaitMoving();
-end;
-
-(*
-TASyncMouse.Stop
-----------------
-> procedure TASyncMouse.Stop;
-*)
-procedure _LapeASyncMouse_Stop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  TSimbaASyncMouse(Params^[0]^).Stop();
-end;
-
-procedure ImportASyncMouse(Compiler: TSimbaScript_Compiler);
-begin
-  with Compiler do
-  begin
-    addGlobalType('strict Pointer', 'TASyncMouse');
-    with addGlobalVar('TASyncMouse', nil, 'ASyncMouse') do
-      PPointer(Ptr)^ := TSimbaASyncMouse.Create();
-
-    addGlobalFunc('procedure TASyncMouse.Move(Input: TInput; Dest: TPoint; Accuracy: Double = 1); overload;', @_LapeASyncMouse_Move);
-    addGlobalFunc(
-      'procedure TASyncMouse.Move(Dest: TPoint; Accuracy: Double = 1); overload;', [
-      'begin',
-      '  Self.Move(Input, Dest, Accuracy);',
-      'end;'
-    ]);
-
-    addGlobalFuncOverride(
-      'procedure TASyncMouse.Move(Input: TInput; Dest: TPoint; Accuracy: Double = 1);', [
-      'begin',
-      '  if Input.Target.IsDefault() then',
-      '  try',
-      '    Input.Target := System.Target;',
-      '    {$IFDECL Result}Result:={$ENDIF}inherited();',
-      '  finally',
-      '    Input.Target := [];',
-      '  end else',
-      '    {$IFDECL Result}Result:={$ENDIF}inherited();',
-      'end;'
-    ]);
-
-    addGlobalFunc('procedure TASyncMouse.ChangeDest(Dest: TPoint);', @_LapeASyncMouse_ChangeDest);
-    addGlobalFunc('function TASyncMouse.IsMoving: Boolean;', @_LapeASyncMouse_IsMoving);
-    addGlobalFunc('procedure TASyncMouse.WaitMoving;', @_LapeASyncMouse_WaitMoving);
-    addGlobalFunc('procedure TASyncMouse.Stop;', @_LapeASyncMouse_Stop);
-  end;
+  PSimbaInput(Params^[0])^.RemoveOnMouseClick(TSimbaInput.TMouseButtonEvent(Params^[1]^));
 end;
 
 procedure ImportInput(Compiler: TSimbaScript_Compiler);
@@ -588,7 +501,7 @@ begin
 
     // Must equal TSimbaInput
     addGlobalType([
-      'packed record',
+      'record',
       '  const DEFAULT_KEY_PRESS_MIN = 30;',
       '  const DEFAULT_KEY_PRESS_MAX = 140;',
       '  const DEFAULT_CLICK_MIN     = 40;',
@@ -600,7 +513,11 @@ begin
       '',
       '  Target: TTarget;',
       '',
-      '  MouseEvents: array[0..' + IntToStr(Ord(High(TSimbaInput.EMouseEventType))) + '] of array of TMethod;',
+      '  TeleportEvents: array of TMethod;',
+      '  MovingEvents: array of TMethod;',
+      '  ClickEvents: array of TMethod;',
+      '  DownEvents: array of TMethod;',
+      '  UpEvents: array of TMethod;',
       '',
       '  KeyPressMin: Integer;',
       '  KeyPressMax: Integer;',
@@ -836,8 +753,6 @@ begin
 
     ImportingSection := '';
   end;
-
-  ImportASyncMouse(Compiler);
 end;
 
 end.

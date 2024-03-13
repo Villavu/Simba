@@ -25,7 +25,7 @@ uses
   simba.import_target, simba.import_finder, simba.import_math, simba.import_misc,
   simba.import_input, simba.import_slacktree, simba.import_string, simba.import_random,
   simba.import_debugimage, simba.import_web, simba.import_threading, simba.import_pointbuffer,
-  simba.import_stringmap,
+  simba.import_stringmap, simba.import_async,
 
   // Simba classes
   simba.import_image, simba.import_externalimage, simba.import_dtm, simba.import_matchtemplate,
@@ -81,6 +81,7 @@ begin
   ImportWeb(Compiler);
   ImportMisc(Compiler);
   ImportThreading(Compiler);
+  ImportASync(Compiler);
   ImportPointBuffer(Compiler);
 
   ImportStringMap(Compiler);

@@ -97,8 +97,7 @@ type
     procedure SetSimbaNodeShouldBeHidden(S: String; Hidden: Boolean);
 
     procedure AddSimbaNodes;
-
-    procedure ArrangeBaseNodes;
+    procedure ArrangeSimbaNodes;
 
     function CompareNodes(A, B: TTreeNode): Integer;
   public
@@ -777,26 +776,27 @@ begin
       ParentNode.Visible := False;
   end;
 
-  FSimbaNode.AlphaSort();
+  //FSimbaNode.AlphaSort();
   FSimbaNode.Expanded := True; // This needs to be on main thread it seems?
+
+  ArrangeSimbaNodes();
 
   FTreeView.Loading := False;
   FTreeView.EndUpdate();
 end;
 
-procedure TSimbaFunctionListForm.ArrangeBaseNodes;
+procedure TSimbaFunctionListForm.ArrangeSimbaNodes;
 var
-  BaseNode: TTreeNode;
   Cur: Integer = 0;
 
   procedure MoveToTop(const NodeText: String);
   var
     Node: TTreeNode;
   begin
-    Node := BaseNode.FindNode(NodeText);
+    Node := FSimbaNode.FindNode(NodeText);
     if not Assigned(Node) then
     begin
-      DebugLn('ArrangeBaseNodes: Not found: ' + NodeText);
+      DebugLn('ArrangeSimbaNodes: Not found: ' + NodeText);
       Exit;
     end;
 
@@ -805,62 +805,36 @@ var
   end;
 
 begin
-  BaseNode := FSimbaNode.FindNode('Base');
-  if (BaseNode = nil) then
-    Exit;
-
-  MoveToTop('Integer');
-  MoveToTop('Byte');
-  MoveToTop('Char');
-  MoveToTop('Boolean');
-
-  MoveToTop('Int8');
-  MoveToTop('Int16');
-  MoveToTop('Int32');
-  MoveToTop('Int64');
-  MoveToTop('UInt8');
-  MoveToTop('UInt16');
-  MoveToTop('UInt32');
-  MoveToTop('UInt64');
-
-  MoveToTop('NativeInt');
-  MoveToTop('NativeUInt');
-  MoveToTop('SizeInt');
-  MoveToTop('SizeUInt');
-  MoveToTop('PtrInt');
-  MoveToTop('PtrUInt');
-
-  MoveToTop('Single');
-  MoveToTop('Double');
-  MoveToTop('Currency');
-
-  MoveToTop('ByteBool');
-  MoveToTop('WordBool');
-  MoveToTop('LongBool');
-  MoveToTop('EvalBool');
-
-  MoveToTop('AnsiChar');
-  MoveToTop('WideChar');
-
-  MoveToTop('string');
-  MoveToTop('ShortString');
-  MoveToTop('AnsiString');
-  MoveToTop('WideString');
-  MoveToTop('UnicodeString');
-
-  MoveToTop('Pointer');
-  MoveToTop('ConstPointer');
-
-  MoveToTop('TByteArray');
-  MoveToTop('TBooleanArray');
-  MoveToTop('TSingleArray');
-  MoveToTop('TDoubleArray');
-  MoveToTop('TIntegerArray');
-  MoveToTop('TInt64Array');
-  MoveToTop('TStringArray');
-
-  MoveToTop('T2DIntegerArray');
-  MoveToTop('T2DStringArray');
+  MoveToTop('Base');
+  MoveToTop('Math');
+  MoveToTop('Color Math');
+  MoveToTop('File');
+  MoveToTop('String');
+  MoveToTop('Random');
+  MoveToTop('Timing');
+  MoveToTop('DateTime');
+  MoveToTop('TBox');
+  MoveToTop('TBoxArray');
+  MoveToTop('TPoint');
+  MoveToTop('TPointArray');
+  MoveToTop('T2DPointArray');
+  MoveToTop('TCircle');
+  MoveToTop('TQuad');
+  MoveToTop('Finder');
+  MoveToTop('Input');
+  MoveToTop('Target');
+  MoveToTop('Image');
+  MoveToTop('Debug Image');
+  MoveToTop('Match Template');
+  MoveToTop('Matrix');
+  MoveToTop('DTM');
+  MoveToTop('TWindowHandle');
+  MoveToTop('Process');
+  MoveToTop('JSON');
+  MoveToTop('Encoding');
+  MoveToTop('Web');
+  MoveToTop('ASync');
+  MoveToTop('Misc');
 end;
 
 function TSimbaFunctionListForm.CompareNodes(A, B: TTreeNode): Integer;
