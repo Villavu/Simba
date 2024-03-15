@@ -393,9 +393,9 @@ begin
   if (vZ3 > 0.008856) then vZ := vZ3
   else                     vZ := (vZ - 16 / 116) / 7.787;
 
-  Result.X := vX *  95.470;
-  Result.Y := vY * 100.000;
-  Result.Z := vZ * 108.883;
+  Result.X := vX * 100.0;
+  Result.Y := vY * 100.0;
+  Result.Z := vZ * 100.0;
 end;
 
 class function TSimbaColorConversion.LABToRGB(const LAB: TColorLAB): TColorRGB;
