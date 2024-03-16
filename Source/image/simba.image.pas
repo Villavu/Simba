@@ -2842,7 +2842,13 @@ begin
   if (X < 0) or (Y < 0) or (X >= FWidth) or (Y >= FHeight) then
     RaiseOutOfImageException(X, Y);
 
-  FData[Y * FWidth + X] := Color.ToBGRA();
+  with FData[Y * FWidth + X] do
+  begin
+    B := Color shr B_BIT and $FF;
+    G := Color shr G_BIT and $FF;
+    R := Color shr R_BIT and $FF;
+    A := ALPHA_OPAQUE;
+  end;
 end;
 
 function TSimbaImage.InImage(const X, Y: Integer): Boolean;

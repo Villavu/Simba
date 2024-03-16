@@ -193,7 +193,7 @@ var
   I: Integer;
 begin
   FScriptParser.Run();
-  WriteLn(FScriptParser.DebugTree());
+
   for I := 0 to FScriptParser.Locals.Count - 1 do
     if (FScriptParser.Locals[I] is TDeclaration_WithVariable) then
       FScriptParser.Locals.Extend(GetMembersOfType(ParseExpression(FScriptParser.Locals[I].Text, [EParseExpressionFlag.WantMethodResult])));
@@ -303,11 +303,7 @@ function TCodeinsight.GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
 
   function CheckEnum(Decl: TDeclaration): TDeclarationArray;
   begin
-    if (Decl is TDeclaration_TypeSet) then
-    begin
-      //TDeclaration_TypeSet(Decl).Dump;
-      Result := Decl.Items.GetByClass(TDeclaration_EnumElement, False, True)
-    end
+    if (Decl is TDeclaration_TypeSet) then Result := Decl.Items.GetByClass(TDeclaration_EnumElement, False, True)
     else
     if (Decl is TDeclaration_TypeEnum) then
       Result := Decl.Items.GetByClass(TDeclaration_EnumElement)
@@ -358,7 +354,6 @@ begin
 
   for Depth := 1 to MAX_DEPTH do
   begin
-    Writeln(Decl.ClassName);
     Result := Result + CheckEnum(Decl);
     Result := Result + CheckRecord(Decl);
     Result := Result + CheckMethods(Decl, Depth > 1);
