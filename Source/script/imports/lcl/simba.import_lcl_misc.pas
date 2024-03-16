@@ -915,10 +915,10 @@ begin
     addClassVar('TLazListFilterEdit', 'OnChange', 'TLazNotifyEvent', @_LapeListFilterEdit_OnChange_Read, @_LapeListFilterEdit_OnChange_Write);
 
     addClass('TLazButtonPanel', 'TLazCustomPanel');
-    addGlobalType('set of (pbOK, pbCancel, pbClose, pbHelp)', 'TLazButtonPanelButtons');
+    addGlobalType('set of enum(OK, Cancel, Close, Help)', 'ELazButtonPanelButtons');
     addClassConstructor('TLazButtonPanel', '(AOwner: TLazComponent)', @_LapeButtonPanel_Create);
-    addClassVar('TLazButtonPanel', 'ShowButtons', 'TLazButtonPanelButtons', @_LapeButtonPanel_ShowButtons_Read, @_LapeButtonPanel_ShowButtons_Write);
-    addClassVar('TLazButtonPanel', 'ShowGlyphs', 'TLazButtonPanelButtons', @_LapeButtonPanel_ShowGlyphs_Read, @_LapeButtonPanel_ShowGlyphs_Write);
+    addClassVar('TLazButtonPanel', 'ShowButtons', 'ELazButtonPanelButtons', @_LapeButtonPanel_ShowButtons_Read, @_LapeButtonPanel_ShowButtons_Write);
+    addClassVar('TLazButtonPanel', 'ShowGlyphs', 'ELazButtonPanelButtons', @_LapeButtonPanel_ShowGlyphs_Read, @_LapeButtonPanel_ShowGlyphs_Write);
   end;
 end;
 

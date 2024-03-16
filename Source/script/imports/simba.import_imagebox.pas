@@ -94,16 +94,6 @@ begin
   PSimbaImageBox(Result)^ := TSimbaImageBox.Create(PComponent(Params^[0])^);
 end;
 
-procedure _LapeSimbaImageBox_Cursor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCursor(Result)^ := PSimbaImageBox(Params^[0])^.Cursor;
-end;
-
-procedure _LapeSimbaImageBox_Cursor_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBox(Params^[0])^.Cursor := PCursor(Params^[1])^;
-end;
-
 procedure _LapeSimbaImageBox_Status_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PSimbaImageBox(Params^[0])^.Status;
@@ -421,9 +411,9 @@ begin
     addGlobalType('procedure(Sender: TImageBox; Canvas: TImageBoxCanvas; R: TLazRect) of object', 'TImageBoxPaintEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TImageBox) of object', 'TImageBoxEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TImageBox; X, Y: Integer) of object', 'TImageBoxClickEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TImageBox; var Key: UInt16; Shift: TLazShiftState) of object', 'TImageBoxKeyEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TImageBox; Button: TLazMouseButton; Shift: TLazShiftState; X, Y: Integer) of object', 'TImageBoxMouseEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TImageBox; Shift: TLazShiftState; X, Y: Integer) of object', 'TImageBoxMouseMoveEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TImageBox; var Key: UInt16; Shift: ELazShiftStates) of object', 'TImageBoxKeyEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TImageBox; Button: ELazMouseButton; Shift: ELazShiftStates; X, Y: Integer) of object', 'TImageBoxMouseEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TImageBox; Shift: ELazShiftStates; X, Y: Integer) of object', 'TImageBoxMouseMoveEvent', FFI_DEFAULT_ABI);
 
     addClassVar('TImageBox', 'OnImgPaint', 'TImageBoxPaintEvent', @_LapeSimbaImageBox_OnImgPaint_Read, @_LapeSimbaImageBox_OnImgPaint_Write);
     addClassVar('TImageBox', 'OnImgMouseEnter', 'TImageBoxEvent', @_LapeSimbaImageBox_OnImgMouseEnter_Read, @_LapeSimbaImageBox_OnImgMouseEnter_Write);
@@ -436,7 +426,6 @@ begin
     addClassVar('TImageBox', 'OnImgKeyDown', 'TImageBoxKeyEvent', @_LapeSimbaImageBox_OnImgKeyDown_Read, @_LapeSimbaImageBox_OnImgKeyDown_Write);
     addClassVar('TImageBox', 'OnImgKeyUp', 'TImageBoxKeyEvent', @_LapeSimbaImageBox_OnImgKeyUp_Read, @_LapeSimbaImageBox_OnImgKeyUp_Write);
 
-    addClassVar('TImageBox', 'Cursor', 'TLazCursor', @_LapeSimbaImageBox_Cursor_Read, @_LapeSimbaImageBox_Cursor_Write);
     addClassVar('TImageBox', 'Status', 'String', @_LapeSimbaImageBox_Status_Read, @_LapeSimbaImageBox_Status_Write);
     addClassVar('TImageBox', 'Background', 'TLazBitmap', @_LapeSimbaImageBox_Background_Read);
 

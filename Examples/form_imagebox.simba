@@ -9,7 +9,7 @@ begin
     Canvas.DrawBoxFilled([300,300,350,350], Colors.LIME);
 end;
 
-procedure ImgBoxMouseMove(Sender: TImageBox; Shift: TLazShiftState; X, Y: Integer);
+procedure ImgBoxMouseMove(Sender: TImageBox; Shift: ELazShiftStates; X, Y: Integer);
 begin
   Sender.Repaint();
 end;
@@ -25,11 +25,11 @@ begin
   Form.SetCaption('ImageBox example');
   Form.SetWidth(700);
   Form.SetHeight(500);
-  Form.SetPosition(poScreenCenter);
+  Form.SetPosition(ELazFormPosition.ScreenCenter);
 
   ImgBox := TImageBox.Create(Form);
   ImgBox.SetParent(Form);
-  ImgBox.SetAlign(alClient);
+  ImgBox.SetAlign(ELazAlign.Client);
   ImgBox.SetBackgroundFromTarget(Target);
   ImgBox.SetOnImgPaint(@ImgBoxPaint);
   ImgBox.SetOnImgMouseMove(@ImgBoxMouseMove);

@@ -17,11 +17,11 @@ uses
 
 type
   PObject = ^TObject;
+  PHandle = ^THandle;
   PComponent = ^TComponent;
   PComponentName = ^TComponentName;
   PCustomMemoryStream = ^TCustomMemoryStream;
   PFileStream = ^TFileStream;
-  PHandle = ^THandle;
   PHandleStream = ^THandleStream;
   PMemoryStream = ^TMemoryStream;
   PNotifyEvent = ^TNotifyEvent;
@@ -602,9 +602,14 @@ begin
     addGlobalFunc('procedure TObject.Free;', @_LapeObject_Free);
     addGlobalFunc('function TObject.ClassName: String;', @_LapeObject_ClassName);
 
+    {$IF SizeOf(THandle) = 8)}
+    addGlobalType('type UInt64', 'TLazHandle');
+    {$ELSE}
+    addGlobalType('type UInt32', 'TLazHandle');
+    {$ENDIF}
+
+    addGlobalType('enum(soBeginning, soCurrent, soEnd)', 'ELazSeekOrigin');
     addGlobalType('procedure(Sender: TObject) of object', 'TLazNotifyEvent', FFI_DEFAULT_ABI);
-    addGlobalType('PtrUInt', 'TLazHandle');
-    addGlobalType('(soBeginning, soCurrent, soEnd)', 'TLazSeekOrigin');
 
     addClass('TLazComponent');
     addClassConstructor('TLazComponent', '(AOwner: TLazComponent)', @_LapeComponent_Create);
@@ -620,7 +625,7 @@ begin
     addClass('TLazStream');
     addGlobalFunc('function TLazStream.Read(var Buffer; Count: Integer): Integer;', @_LapeStream_Read);
     addGlobalFunc('function TLazStream.Write(constref Buffer; Count: Integer): Integer;', @_LapeStream_Write);
-    addGlobalFunc('function TLazStream.Seek(Offset: Integer; Origin: TLazSeekOrigin): Integer;', @_LapeStream_Seek);
+    addGlobalFunc('function TLazStream.Seek(Offset: Integer; Origin: ELazSeekOrigin): Integer;', @_LapeStream_Seek);
     addGlobalFunc('procedure TLazStream.ReadBuffer(var Buffer; Count: Integer);', @_LapeStream_ReadBuffer);
     addGlobalFunc('procedure TLazStream.WriteBuffer(constref Buffer; Count: Integer);', @_LapeStream_WriteBuffer);
     addGlobalFunc('function TLazStream.CopyFrom(Source: TLazStream; Count: Int64): Int64;', @_LapeStream_CopyFrom);
@@ -637,14 +642,14 @@ begin
 
     addClass('TLazHandleStream', 'TLazStream');
     addClassVar('TLazHandleStream', 'Handle', 'TLazHandle', @_LapeHandleStream_Handle_Read);
-    addClassConstructor('TLazHandleStream', '(AHandle: TLazHandle)', @_LapeHandleStream_Create);
+    addClassConstructor('TLazHandleStream', '(AHandle: PtrUInt)', @_LapeHandleStream_Create);
 
     addClass('TLazFileStream', 'TLazHandleStream');
     addClassVar('TLazFileStream', 'FileName', 'String', @_LapeFileStream_FileName_Read);
     addClassConstructor('TLazFileStream', '(const AFileName: String; Mode: Int16)', @_LapeFileStream_Create);
 
     addClass('TLazCustomMemoryStream', 'TLazStream');
-    addGlobalFunc('function TLazCustomMemoryStream.Seek(const Offset: Integer; Origin: TLazSeekOrigin): Int64;', @_LapeCustomMemoryStream_Seek);
+    addGlobalFunc('function TLazCustomMemoryStream.Seek(const Offset: Integer; Origin: ELazSeekOrigin): Int64;', @_LapeCustomMemoryStream_Seek);
     addGlobalFunc('procedure TLazCustomMemoryStream.SaveToStream(Stream: TLazStream);', @_LapeCustomMemoryStream_SaveToStream);
     addGlobalFunc('procedure TLazCustomMemoryStream.SaveToFile(const FileName: String);', @_LapeCustomMemoryStream_SaveToFile);
     addClassVar('TLazCustomMemoryStream', 'Memory', 'Pointer', @_LapeCustomMemoryStream_Memory_Read);
@@ -695,7 +700,6 @@ begin
     addClassVar('TLazStrings', 'Text', 'String', @_LapeStrings_Text_Read, @_LapeStrings_Text_Write);
 
     addClass('TLazStringList', 'TLazStrings');
-
     addGlobalType('function(List: TLazStringList; Index1, Index2: Integer): Integer', 'TLazStringListSortCompare', FFI_DEFAULT_ABI);
     addClassVar('TLazStringList', 'Sorted', 'Boolean', @_LapeStringList_Sorted_Read, @_LapeStringList_Sorted_Write);
     addClassVar('TLazStringList', 'CaseSensitive', 'Boolean', @_LapeStringList_CaseSensitive_Read, @_LapeStringList_CaseSensitive_Write);

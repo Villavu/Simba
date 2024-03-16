@@ -249,6 +249,8 @@ procedure ImportLCLExtCtrls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
+    addGlobalType('enum(None, Lowered, Raised, Space)', 'ELazPanelBevel');
+
     addClass('TLazTimer', 'TLazComponent');
     addClassConstructor('TLazTimer', '(AOwner: TLazComponent)', @_LapeTimer_Create);
     addClassVar('TLazTimer', 'Enabled', 'Boolean', @_LapeTimer_Enabled_Read, @_LapeTimer_Enabled_Write);
@@ -273,10 +275,9 @@ begin
     addClassVar('TLazImage', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeImage_OnMouseMove_Read, @_LapeImage_OnMouseMove_Write);
 
     addClass('TLazCustomPanel', 'TLazCustomControl');
-    addGlobalType('(bvNone, bvLowered, bvRaised, bvSpace)', 'TLazPanelBevel');
-    addClassVar('TLazCustomPanel', 'Alignment', 'TLazAlignment', @_LapeCustomPanel_Alignment_Read, @_LapeCustomPanel_Alignment_Write);
-    addClassVar('TLazCustomPanel', 'BevelInner', 'TLazPanelBevel', @_LapeCustomPanel_BevelInner_Read, @_LapeCustomPanel_BevelInner_Write);
-    addClassVar('TLazCustomPanel', 'BevelOuter', 'TLazPanelBevel', @_LapeCustomPanel_BevelOuter_Read, @_LapeCustomPanel_BevelOuter_Write);
+    addClassVar('TLazCustomPanel', 'Alignment', 'ELazAlignment', @_LapeCustomPanel_Alignment_Read, @_LapeCustomPanel_Alignment_Write);
+    addClassVar('TLazCustomPanel', 'BevelInner', 'ELazPanelBevel', @_LapeCustomPanel_BevelInner_Read, @_LapeCustomPanel_BevelInner_Write);
+    addClassVar('TLazCustomPanel', 'BevelOuter', 'ELazPanelBevel', @_LapeCustomPanel_BevelOuter_Read, @_LapeCustomPanel_BevelOuter_Write);
     addClassVar('TLazCustomPanel', 'BevelWidth', 'Integer', @_LapeCustomPanel_BevelWidth_Read, @_LapeCustomPanel_BevelWidth_Write);
     addClassConstructor('TLazCustomPanel', '(TheOwner: TLazComponent)', @_LapeCustomPanel_Create);
 

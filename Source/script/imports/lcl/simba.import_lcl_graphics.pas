@@ -763,16 +763,15 @@ begin
   with Compiler do
   begin
     addGlobalType('record Left, Top ,Right, Bottom: Integer; end', 'TLazRect');
-    addGlobalType('(fsBold, fsItalic, fsStrikeOut, fsUnderline)', 'TLazFontStyle');
-    addGlobalType('(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'TLazFontQuality');
-    addGlobalType('set of TLazFontStyle', 'TLazFontStyles');
-    addGlobalType('(fpDefault, fpVariable, fpFixed)', 'TLazFontPitch');
-    addGlobalType('(psSolid, psDash, psDot, psDashDot, psDashDotDot, psInsideFrame, psPattern, psClear)', 'TLazPenStyle');
-    addGlobalType('(pmBlack, pmWhite, pmNop, pmNot, pmCopy, pmNotCopy, pmMergePenNot, pmMaskPenNot, pmMergeNotPen, pmMaskNotPen, pmMerge, pmNotMerge, pmMask, pmNotMask, pmXor, pmNotXor)', 'TLazPenMode');
-    addGlobalType('(bsSolid, bsClear, bsHorizontal, bsVertical, bsFDiagonal, bsBDiagonal, bsCross, bsDiagCross, bsImage, bsPattern)', 'TLazBrushStyle');
-    addGlobalType('(tmAuto, tmFixed)', 'TLazTransparentMode');
-    addGlobalType('(amDontCare, amOn, amOff)', 'TLazAntialiasingMode');
-    addGlobalType('(tlTop, tlCenter, tlBottom)', 'TLazTextLayout');
+    addGlobalType('enum(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'ELazFontQuality');
+    addGlobalType('set of enum(fsBold, fsItalic, fsStrikeOut, fsUnderline)', 'ELazFontStyles');
+    addGlobalType('enum(fpDefault, fpVariable, fpFixed)', 'ELazFontPitch');
+    addGlobalType('enum(psSolid, psDash, psDot, psDashDot, psDashDotDot, psInsideFrame, psPattern, psClear)', 'ELazPenStyle');
+    addGlobalType('enum(pmBlack, pmWhite, pmNop, pmNot, pmCopy, pmNotCopy, pmMergePenNot, pmMaskPenNot, pmMergeNotPen, pmMaskNotPen, pmMerge, pmNotMerge, pmMask, pmNotMask, pmXor, pmNotXor)', 'ELazPenMode');
+    addGlobalType('enum(bsSolid, bsClear, bsHorizontal, bsVertical, bsFDiagonal, bsBDiagonal, bsCross, bsDiagCross, bsImage, bsPattern)', 'ELazBrushStyle');
+    addGlobalType('enum(tmAuto, tmFixed)', 'ELazTransparentMode');
+    addGlobalType('enum(amDontCare, amOn, amOff)', 'ELazAntialiasingMode');
+    addGlobalType('enum(tlTop, tlCenter, tlBottom)', 'ELazTextLayout');
 
     addClass('TLazGraphicsObject');
     addClassVar('TLazGraphicsObject', 'OnChanging', 'TLazNotifyEvent', @_LapeGraphicsObject_OnChanging_Read, @_LapeGraphicsObject_OnChanging_Write);
@@ -794,23 +793,23 @@ begin
     addClassVar('TLazFont', 'Height', 'Integer', @_LapeFont_Height_Read, @_LapeFont_Height_Write);
     addClassVar('TLazFont', 'Name', 'String', @_LapeFont_Name_Read, @_LapeFont_Name_Write);
     addClassVar('TLazFont', 'Orientation', 'Integer', @_LapeFont_Orientation_Read, @_LapeFont_Orientation_Write);
-    addClassVar('TLazFont', 'Pitch', 'TLazFontPitch', @_LapeFont_Pitch_Read, @_LapeFont_Pitch_Write);
+    addClassVar('TLazFont', 'Pitch', 'ELazFontPitch', @_LapeFont_Pitch_Read, @_LapeFont_Pitch_Write);
     addClassVar('TLazFont', 'Size', 'Integer', @_LapeFont_Size_Read, @_LapeFont_Size_Write);
-    addClassVar('TLazFont', 'Style', 'TLazFontStyles', @_LapeFont_Style_Read, @_LapeFont_Style_Write);
-    addClassVar('TLazFont', 'Quality', 'TLazFontQuality', @_LapeFont_Quality_Read, @_LapeFont_Quality_Write);
+    addClassVar('TLazFont', 'Style', 'ELazFontStyles', @_LapeFont_Style_Read, @_LapeFont_Style_Write);
+    addClassVar('TLazFont', 'Quality', 'ELazFontQuality', @_LapeFont_Quality_Read, @_LapeFont_Quality_Write);
 
     addClass('TLazPen', 'TLazGraphicsObject');
     addClassConstructor('TLazPen', '', @_LapePen_Create);
     addClassVar('TLazPen', 'Color', 'Integer', @_LapePen_Color_Read, @_LapePen_Color_Write);
     addClassVar('TLazPen', 'Cosmetic', 'Boolean', @_LapePen_Cosmetic_Read, @_LapePen_Cosmetic_Write);
-    addClassVar('TLazPen', 'Mode', 'TLazPenMode', @_LapePen_Mode_Read, @_LapePen_Mode_Write);
-    addClassVar('TLazPen', 'Style', 'TLazPenStyle', @_LapePen_Style_Read, @_LapePen_Style_Write);
+    addClassVar('TLazPen', 'Mode', 'ELazPenMode', @_LapePen_Mode_Read, @_LapePen_Mode_Write);
+    addClassVar('TLazPen', 'Style', 'ELazPenStyle', @_LapePen_Style_Read, @_LapePen_Style_Write);
     addClassVar('TLazPen', 'Width', 'Integer', @_LapePen_Width_Read, @_LapePen_Width_Write);
 
     addClass('TLazBrush', 'TLazGraphicsObject');
     addClassConstructor('TLazBrush', '', @_LapeBrush_Create);
     addClassVar('TLazBrush', 'Color', 'Integer', @_LapeBrush_Color_Read, @_LapeBrush_Color_Write);
-    addClassVar('TLazBrush', 'Style', 'TLazBrushStyle', @_LapeBrush_Style_Read, @_LapeBrush_Style_Write);
+    addClassVar('TLazBrush', 'Style', 'ELazBrushStyle', @_LapeBrush_Style_Read, @_LapeBrush_Style_Write);
 
     addClass('TLazGraphic');
     addGlobalFunc('procedure TLazGraphic.Clear;', @_LapeGraphic_Clear);
@@ -860,7 +859,7 @@ begin
     addClassVar('TLazCanvas', 'Pen', 'TLazPen', @_LapeCanvas_Pen_Read, @_LapeCanvas_Pen_Write);
     addClassVar('TLazCanvas', 'OnChange', 'TLazNotifyEvent', @_LapeCanvas_OnChange_Read, @_LapeCanvas_OnChange_Write);
     addClassVar('TLazCanvas', 'OnChanging', 'TLazNotifyEvent', @_LapeCanvas_OnChanging_Read, @_LapeCanvas_OnChanging_Write);
-    addClassVar('TLazCanvas', 'AntialiasingMode', 'TLazAntialiasingMode', @_LapeCanvas_AntialiasingMode_Get, @_LapeCanvas_AntialiasingMode_Set);
+    addClassVar('TLazCanvas', 'AntialiasingMode', 'ELazAntialiasingMode', @_LapeCanvas_AntialiasingMode_Get, @_LapeCanvas_AntialiasingMode_Set);
     addClassConstructor('TLazCanvas', '', @_LapeCanvas_Create);
 
     addClass('TLazBitmap', 'TLazGraphic');
@@ -876,7 +875,7 @@ begin
     addClassVar('TLazBitmap', 'Canvas', 'TLazCanvas', @_LapeBitmap_Canvas_Read);
     addClassVar('TLazBitmap', 'BitmapHandle', 'TLazHandle', @_LapeBitmap_BitmapHandle_Read, @_LapeBitmap_BitmapHandle_Write);
     addClassVar('TLazBitmap', 'TransparentColor', 'TColor', @_LapeBitmap_TransparentColor_Read, @_LapeBitmap_TransparentColor_Write);
-    addClassVar('TLazBitmap', 'TransparentMode', 'TLazTransparentMode', @_LapeBitmap_TransparentMode_Read, @_LapeBitmap_TransparentMode_Write);
+    addClassVar('TLazBitmap', 'TransparentMode', 'ELazTransparentMode', @_LapeBitmap_TransparentMode_Read, @_LapeBitmap_TransparentMode_Write);
 
     addClass('TLazPicture');
     addClassConstructor('TLazPicture', '', @_LapePicture_Create);

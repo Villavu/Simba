@@ -481,11 +481,17 @@ function TSimbaAutoComplete.GetHintText(Decl: TDeclaration; IsHint: Boolean): St
   end;
 
   function GetEnumElementText(Decl: TDeclaration_EnumElement): String;
+  var
+    OwnerDecl: TDeclaration;
   begin
-    if (Decl.Owner <> nil) then
-      Result := ': ' + Decl.Owner.Name
-    else
-      Result := '';
+    Result := '';
+
+    OwnerDecl := Decl.GetOwnerByClass(TDeclaration_TypeSet);
+    if (OwnerDecl = nil) then
+      OwnerDecl := Decl.Owner;
+
+    if (OwnerDecl <> nil) and (OwnerDecl.Name <> '') then
+      Result := ': ' + OwnerDecl.Name;
   end;
 
   function GetTypeText(Decl: TDeclaration_Type): String;

@@ -999,15 +999,15 @@ procedure ImportLCLForm(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    addGlobalType('(stDefault, stAlways, stNever)', 'TLazShowInTaskbar');
-    addGlobalType('(bsNone, bsSingle, bsSizeable, bsDialog, bsToolWindow, bsSizeToolWin)', 'TLazFormBorderStyle');
-    addGlobalType('(caNone, caHide, caFree, caMinimize)', 'TLazCloseAction');
-    addGlobalType('(poDesigned, poDefault, poDefaultPosOnly, poDefaultSizeOnly, poScreenCenter, poDesktopCenter, poMainFormCenter, poOwnerFormCenter, poWorkAreaCenter)', 'TLazPosition');
-    addGlobalType('(biSystemMenu, biMinimize, biMaximize, biHelp)', 'TLazBorderIcon');
-    addGlobalType('set of TLazBorderIcon', 'TLazBorderIcons');
+    addGlobalType('enum(Default, Always, Never)', 'ELazFormShowInTaskbar');
+    addGlobalType('enum(None, Single, Sizeable, Dialog, ToolWindow, SizeToolWin)', 'ELazFormBorderStyle');
+    addGlobalType('enum(None, Hide, Free, Minimize)', 'ELazFormCloseAction');
+    addGlobalType('enum(Designed, Default, DefaultPosOnly, DefaultSizeOnly, ScreenCenter, DesktopCenter, MainFormCenter, OwnerFormCenter, WorkAreaCenter)', 'ELazFormPosition');
+    addGlobalType('set of enum(SystemMenu, Minimize, Maximize, Help)', 'ELazFormBorderIcons');
+    addGlobalType('set of enum(ReadOnly, OverwritePrompt, HideReadOnly, NoChangeDir, ShowHelp, NoValidate, AllowMultiSelect, ExtensionDifferent, PathMustExist, FileMustExist, CreatePrompt, ShareAware, NoReadOnlyReturn, NoTestFileCreate, NoNetworkButton, NoLongNames, OldStyleDialog, NoDereferenceLinks, EnableIncludeNotify, EnableSizing, DontAddToRecent, ForceShowHidden, ViewDetail, AutoPreview)', 'ELazOpenFileOptions');
 
     addGlobalType('procedure(Sender: TObject; const FileNames: TStringArray) of object', 'TLazDropFilesEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TObject; var CloseAction: TLazCloseAction) of object', 'TLazCloseEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; var CloseAction: ELazFormCloseAction) of object', 'TLazCloseEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TObject; var CanClose: Boolean) of object', 'TLazCloseQueryEvent', FFI_DEFAULT_ABI);
 
     addClass('TLazSizeConstraints');
@@ -1028,8 +1028,8 @@ begin
     addGlobalFunc('procedure TLazCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: Integer);', @_LapeCustomForm_SetRestoredBounds);
     addGlobalFunc('function TLazCustomForm.ShowModal: Integer;', @_LapeCustomForm_ShowModal);
     addGlobalFunc('procedure TLazCustomForm.ShowOnTop;', @_LapeCustomForm_ShowOnTop);
-    addClassVar('TLazCustomForm', 'BorderStyle', 'TLazFormBorderStyle', @_LapeCustomForm_Read_BorderStyle, @_LapeCustomForm_Write_BorderStyle);
-    addClassVar('TLazCustomForm', 'BorderIcons', 'TLazBorderIcons', @_LapeCustomForm_Read_BorderIcons, @_LapeCustomForm_Write_BorderIcons);
+    addClassVar('TLazCustomForm', 'BorderStyle', 'ELazFormBorderStyle', @_LapeCustomForm_Read_BorderStyle, @_LapeCustomForm_Write_BorderStyle);
+    addClassVar('TLazCustomForm', 'BorderIcons', 'ELazFormBorderIcons', @_LapeCustomForm_Read_BorderIcons, @_LapeCustomForm_Write_BorderIcons);
     addClassVar('TLazCustomForm', 'Active', 'Boolean', @_LapeCustomForm_Active_Read);
     addClassVar('TLazCustomForm', 'ActiveControl', 'TLazWinControl', @_LapeCustomForm_ActiveControl_Read, @_LapeCustomForm_ActiveControl_Write);
     addClassVar('TLazCustomForm', 'AllowDropFiles', 'Boolean', @_LapeCustomForm_AllowDropFiles_Read, @_LapeCustomForm_AllowDropFiles_Write);
@@ -1043,8 +1043,8 @@ begin
     addClassVar('TLazCustomForm', 'RestoredWidth', 'Integer', @_LapeCustomForm_RestoredWidth_Read);
     addClassVar('TLazCustomForm', 'RestoredHeight', 'Integer', @_LapeCustomForm_RestoredHeight_Read);
     addClassVar('TLazCustomForm', 'Constraints', 'TLazSizeConstraints', @_LapeCustomForm_Constraints_Read, @_LapeCustomForm_Constraints_Write);
-    addClassVar('TLazCustomForm', 'ShowInTaskBar', 'TLazShowInTaskbar', @_LapeCustomForm_ShowInTaskBar_Read, @_LapeCustomForm_ShowInTaskBar_Write);
-    addClassVar('TLazCustomForm', 'Position', 'TLazPosition', @_LapeCustomForm_Position_Read, @_LapeCustomForm_Position_Write);
+    addClassVar('TLazCustomForm', 'ShowInTaskBar', 'ELazFormShowInTaskbar', @_LapeCustomForm_ShowInTaskBar_Read, @_LapeCustomForm_ShowInTaskBar_Write);
+    addClassVar('TLazCustomForm', 'Position', 'ELazFormPosition', @_LapeCustomForm_Position_Read, @_LapeCustomForm_Position_Write);
     addClassVar('TLazCustomForm', 'AutoScroll', 'Boolean', @_LapeCustomForm_AutoScroll_Read, @_LapeCustomForm_AutoScroll_Write);
     addClassVar('TLazCustomForm', 'StayOnTop', 'Boolean', @_LapeCustomForm_StayOnTop_Read, @_LapeCustomForm_StayOnTop_Write);
 
@@ -1074,9 +1074,6 @@ begin
     addClass('TLazScrollBox', 'TLazScrollingWinControl');
     addClassConstructor('TLazScrollBox', '(AOwner: TLazComponent)', @_LapeScrollBox_Create);
 
-    addGlobalType('(ofReadOnly, ofOverwritePrompt, ofHideReadOnly, ofNoChangeDir, ofShowHelp, ofNoValidate, ofAllowMultiSelect, ofExtensionDifferent, ofPathMustExist, ofFileMustExist, ofCreatePrompt, ofShareAware, ofNoReadOnlyReturn, ofNoTestFileCreate, ofNoNetworkButton, ofNoLongNames, ofOldStyleDialog, ofNoDereferenceLinks, ofEnableIncludeNotify, ofEnableSizing, ofDontAddToRecent, ofForceShowHidden, ofViewDetail, ofAutoPreview)', 'TLazOpenOption');
-    addGlobalType('set of TLazOpenOption', 'TLazOpenOptions');
-
     addClass('TLazCommonDialog', 'TLazComponent');
     addGlobalFunc('function TLazCommonDialog.Execute: Boolean;', @_LapeCommonDialog_Execute);
     addClassVar('TLazCommonDialog', 'UserChoice', 'Integer', @_LapeCommonDialog_UserChoice_Read, @_LapeCommonDialog_UserChoice_Write);
@@ -1100,7 +1097,7 @@ begin
     addClassConstructor('TLazFileDialog', '(AOwner: TLazComponent)', @_LapeFileDialog_Create);
 
     addClass('TLazOpenDialog', 'TLazFileDialog');
-    addClassVar('TLazOpenDialog', 'Options', 'TLazOpenOptions', @_LapeOpenDialog_Options_Read, @_LapeOpenDialog_Options_Write);
+    addClassVar('TLazOpenDialog', 'Options', 'ELazOpenFileOptions', @_LapeOpenDialog_Options_Read, @_LapeOpenDialog_Options_Write);
     addClassVar('TLazOpenDialog', 'OnFolderChange', 'TLazNotifyEvent', @_LapeOpenDialog_OnFolderChange_Read, @_LapeOpenDialog_OnFolderChange_Write);
     addClassVar('TLazOpenDialog', 'OnSelectionChange', 'TLazNotifyEvent', @_LapeOpenDialog_OnSelectionChange_Read, @_LapeOpenDialog_OnSelectionChange_Write);
     addClassConstructor('TLazOpenDialog', '(AOwner: TLazComponent)', @_LapeOpenDialog_Create);

@@ -4,17 +4,17 @@ var
   Form: TLazForm;
 
 // Called when the mouse the mouse is pressed on the form
-procedure FormMouseDown(Sender: TObject; Button: TLazMouseButton; Shift: TLazShiftState; X, Y: Integer);
+procedure FormMouseDown(Sender: TObject; Button: ELazMouseButton; Shift: ELazShiftStates; X, Y: Integer);
 begin
   WriteLn('FormMouseDown: ', Button, ', ', Shift, ' at ', X, ', ', Y);
-  if (ssShift in Shift) then
+  if (ELazShiftStates.Shift in Shift) then
     WriteLn('Shift is pressed too!');
-  if (ssCtrl in Shift) then
+  if (ELazShiftStates.Ctrl in Shift) then
     WriteLn('Control is pressed too!');
 end;
 
 // Called when the mouse the mouse is released on the form
-procedure FormMouseUp(Sender: TObject; Button: TLazMouseButton; Shift: TLazShiftState; X, Y: Integer);
+procedure FormMouseUp(Sender: TObject; Button: ELazMouseButton; Shift: ELazShiftStates; X, Y: Integer);
 begin
   WriteLn('FormMouseUp: ', Button, ', ', Shift, ' at ', X, ', ', Y);
 end;
@@ -57,9 +57,9 @@ begin
   Form.SetOnMouseUp(@FormMouseUp);
   Form.SetWidth(700);
   Form.SetHeight(700);
-  Form.SetPosition(poScreenCenter);
+  Form.SetPosition(ELazFormPosition.ScreenCenter);
   Form.SetColor(Colors.DARK_GREY);
-  Form.SetBorderStyle(bsSingle); // Do not allow resizing
+  Form.SetBorderStyle(ELazFormBorderStyle.Single); // Do not allow resizing
 
   SimbaImg := TImage.CreateFromTarget([0,0,400,400]);
 
@@ -112,16 +112,16 @@ begin
   Panel := TLazPanel.Create(Form);
   Panel.SetParent(Form);
   Panel.SetBounds(25,25, 250,250);
-  Panel.SetBevelOuter(bvNone);
+  Panel.SetBevelOuter(ELazPanelBevel.None);
 
   Lbl := TLazLabel.Create(Panel);
   Lbl.SetParent(Panel);
   Lbl.SetCaption('List box:');
-  Lbl.SetAlign(alTop);
+  Lbl.SetAlign(ELazAlign.Top);
 
   List := TLazListBox.Create(Panel);
   List.SetParent(Panel);
-  List.SetAlign(alClient);
+  List.SetAlign(ELazAlign.Client);
   List.GetItems().Add('Item 1');
   List.GetItems().Add('Item 2');
   List.GetItems().Add('Item 3');
@@ -142,6 +142,7 @@ begin
   Button.SetParent(Tab1);
   Button.SetAutoSize(True);
   Button.SetCaption('This button is on tab 1!');
+  Button.SetCursor(ELazCursor.SIZE);
 
   Button := TLazButton.Create(Tab2);
   Button.SetParent(Tab2);

@@ -2546,7 +2546,12 @@ procedure TmwSimplePasPar.SetType;
 begin
   Expected(tokSet);
   Expected(tokOf);
-  OrdinalType;
+  if (Lexer.TokenID = tokEnum) then
+  begin
+    NextToken();
+    EnumeratedScopedType;
+  end else
+    OrdinalType;
 end;
 
 procedure TmwSimplePasPar.ArrayType;

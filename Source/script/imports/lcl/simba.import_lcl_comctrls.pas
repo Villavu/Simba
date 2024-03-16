@@ -637,10 +637,10 @@ procedure ImportLCLComCtrls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    addGlobalType('(tmBottomRight, tmTopLeft, tmBoth)', 'TLazTickMark');
-    addGlobalType('(tsNone, tsAuto, tsManual)', 'TLazStickStyle');
-    addGlobalType('(tpTop, tpBottom, tpLeft, tpRight)', 'TLazTabPosition');
-    addGlobalType('(trHorizontal, trVertical)', 'TLazTrackBarOrientation');
+    addGlobalType('enum(BottomRight, TopLeft, Both)', 'ELazTickMark');
+    addGlobalType('enum(None, Auto, Manual)', 'ELazStickStyle');
+    addGlobalType('enum(Top, Bottom, Left, Right)', 'ELazTabPosition');
+    addGlobalType('enum(Horizontal, Vertical)', 'ELazTrackBarOrientation');
 
     addGlobalType('procedure(Sender: TObject; var AllowChange: Boolean) of object', 'TLazTabChangingEvent', FFI_DEFAULT_ABI);
 
@@ -663,24 +663,24 @@ begin
     addClassVar('TLazTrackBar', 'Max', 'Integer', @_LapeTrackBar_Max_Read, @_LapeTrackBar_Max_Write);
     addClassVar('TLazTrackBar', 'Min', 'Integer', @_LapeTrackBar_Min_Read, @_LapeTrackBar_Min_Write);
     addClassVar('TLazTrackBar', 'OnChange', 'TLazNotifyEvent', @_LapeTrackBar_OnChange_Read, @_LapeTrackBar_OnChange_Write);
-    addClassVar('TLazTrackBar', 'Orientation', 'TLazTrackBarOrientation', @_LapeTrackBar_Orientation_Read, @_LapeTrackBar_Orientation_Write);
+    addClassVar('TLazTrackBar', 'Orientation', 'ELazTrackBarOrientation', @_LapeTrackBar_Orientation_Read, @_LapeTrackBar_Orientation_Write);
     addClassVar('TLazTrackBar', 'PageSize', 'Integer', @_LapeTrackBar_PageSize_Read, @_LapeTrackBar_PageSize_Write);
     addClassVar('TLazTrackBar', 'Position', 'Integer', @_LapeTrackBar_Position_Read, @_LapeTrackBar_Position_Write);
     addClassVar('TLazTrackBar', 'Reversed', 'Boolean', @_LapeTrackBar_Reversed_Read, @_LapeTrackBar_Reversed_Write);
     addClassVar('TLazTrackBar', 'SelEnd', 'Integer', @_LapeTrackBar_SelEnd_Read, @_LapeTrackBar_SelEnd_Write);
     addClassVar('TLazTrackBar', 'SelStart', 'Integer', @_LapeTrackBar_SelStart_Read, @_LapeTrackBar_SelStart_Write);
     addClassVar('TLazTrackBar', 'ShowSelRange', 'Boolean', @_LapeTrackBar_ShowSelRange_Read, @_LapeTrackBar_ShowSelRange_Write);
-    addClassVar('TLazTrackBar', 'TickMarks', 'TLazTickMark', @_LapeTrackBar_TickMarks_Read, @_LapeTrackBar_TickMarks_Write);
-    addClassVar('TLazTrackBar', 'TickStyle', 'TLazStickStyle', @_LapeTrackBar_TickStyle_Read, @_LapeTrackBar_TickStyle_Write);
+    addClassVar('TLazTrackBar', 'TickMarks', 'ELazTickMark', @_LapeTrackBar_TickMarks_Read, @_LapeTrackBar_TickMarks_Write);
+    addClassVar('TLazTrackBar', 'TickStyle', 'ELazStickStyle', @_LapeTrackBar_TickStyle_Read, @_LapeTrackBar_TickStyle_Write);
 
     addClass('TLazCheckListBox', 'TLazCustomListBox');
     addClassConstructor('TLazCheckListBox', '(AOwner: TLazComponent)', @_LapeCheckListBox_Create);
     addGlobalFunc('procedure TLazCheckListBox.Toggle(AIndex: Integer);', @_LapeCheckListBox_Toggle);
-    addGlobalFunc('procedure TLazCheckListBox.CheckAll(AState: TLazCheckBoxState; aAllowGrayed: Boolean = True; aAllowDisabled: Boolean = True);', @_LapeCheckListBox_CheckAll);
+    addGlobalFunc('procedure TLazCheckListBox.CheckAll(AState: ELazCheckBoxState; aAllowGrayed: Boolean = True; aAllowDisabled: Boolean = True);', @_LapeCheckListBox_CheckAll);
     addClassVar('TLazCheckListBox', 'AllowGrayed', 'Boolean', @_LapeCheckListBox_AllowGrayed_Read, @_LapeCheckListBox_AllowGrayed_Write);
     addClassVar('TLazCheckListBox', 'Checked', 'Boolean', @_LapeCheckListBox_Checked_Read, @_LapeCheckListBox_Checked_Write, True);
     addClassVar('TLazCheckListBox', 'ItemEnabled', 'Boolean', @_LapeCheckListBox_ItemEnabled_Read, @_LapeCheckListBox_ItemEnabled_Write, True);
-    addClassVar('TLazCheckListBox', 'State', 'TLazCheckBoxState', @_LapeCheckListBox_State_Read, @_LapeCheckListBox_State_Write, True);
+    addClassVar('TLazCheckListBox', 'State', 'ELazCheckBoxState', @_LapeCheckListBox_State_Read, @_LapeCheckListBox_State_Write, True);
     addClassVar('TLazCheckListBox', 'OnClickCheck', 'TLazNotifyEvent', @_LapeCheckListBox_OnClickCheck_Read, @_LapeCheckListBox_OnClickCheck_Write);
 
     addClass('TLazTabSheet', 'TLazWinControl');
@@ -701,7 +701,7 @@ begin
     addClassVar('TLazPageControl', 'Tab', 'TLazTabSheet', @_LapePageControl_Tab_Index_Read, nil, True);
     addClassVar('TLazPageControl', 'TabCount', 'Integer', @_LapePageControl_PageCount_Read);
     addClassVar('TLazPageControl', 'ShowTabs', 'Boolean', @_LapePageControl_ShowTabs_Read, @_LapePageControl_ShowTabs_Write);
-    addClassVar('TLazPageControl', 'TabPosition', 'TLazTabPosition', @_LapePageControl_TabPosition_Read, @_LapePageControl_TabPosition_Write);
+    addClassVar('TLazPageControl', 'TabPosition', 'ELazTabPosition', @_LapePageControl_TabPosition_Read, @_LapePageControl_TabPosition_Write);
     addClassVar('TLazPageControl', 'MultiLine', 'Boolean', @_LapePageControl_MultiLine_Read, @_LapePageControl_MultiLine_Write);
     addClassVar('TLazPageControl', 'TabWidth', 'Integer', @_LapePageControl_TabWidth_Read, @_LapePageControl_TabWidth_Write);
     addClassVar('TLazPageControl', 'TabHeight', 'Integer', @_LapePageControl_TabHeight_Read, @_LapePageControl_TabHeight_Write);
@@ -709,7 +709,7 @@ begin
     addClass('TLazStatusBar', 'TLazWinControl');
     addClass('TLazStatusPanel');
     addGlobalFunc('function TLazStatusPanel.StatusBar: TLazStatusBar;', @_LapeStatusPanel_StatusBar);
-    addClassVar('TLazStatusPanel', 'Alignment', 'TLazAlignment', @_LapeStatusPanel_Alignment_Read, @_LapeStatusPanel_Alignment_Write);
+    addClassVar('TLazStatusPanel', 'Alignment', 'ELazAlignment', @_LapeStatusPanel_Alignment_Read, @_LapeStatusPanel_Alignment_Write);
     addClassVar('TLazStatusPanel', 'Text', 'String', @_LapeStatusPanel_Text_Read, @_LapeStatusPanel_Text_Write);
     addClassVar('TLazStatusPanel', 'Width', 'Integer', @_LapeStatusPanel_Width_Read, @_LapeStatusPanel_Width_Write);
 

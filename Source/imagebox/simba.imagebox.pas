@@ -166,7 +166,6 @@ type
     property MouseX: Integer read FMouseX;
     property MouseY: Integer read FMouseY;
     property MousePoint: TPoint read GetMousePoint;
-    property Cursor;
 
     property OnImgKeyDown: TImageBoxKeyEvent read FOnImgKeyDown write FOnImgKeyDown;
     property OnImgKeyUp: TImageBoxKeyEvent read FOnImgKeyUp write FOnImgKeyUp;

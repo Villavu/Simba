@@ -1086,16 +1086,15 @@ procedure ImportLCLStdCtrls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    addGlobalType('(ssNone, ssHorizontal, ssVertical, ssBoth, ssAutoHorizontal, ssAutoVertical, ssAutoBoth)', 'TLazScrollStyle');
-    addGlobalType('(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odBackgroundPainted)', 'TLazOwnerDrawStateType');
-    addGlobalType('set of TLazOwnerDrawStateType', 'TLazOwnerDrawState');
-    addGlobalType('(csDropDown, csSimple, csDropDownList, csOwnerDrawFixed, csOwnerDrawVariable, csOwnerDrawEditableFixed, csOwnerDrawEditableVariable)', 'TLazComboBoxStyle');
-    addGlobalType('(lbStandard, lbOwnerDrawFixed, lbOwnerDrawVariable, lbVirtual)', 'TLazListBoxStyle');
-    addGlobalType('(taLeftJustify, taRightJustify, taCenter)', 'TLazAlignment');
-    addGlobalType('(cbUnchecked, cbChecked, cbGrayed)', 'TLazCheckBoxState');
-    addGlobalType('(blGlyphLeft, blGlyphRight, blGlyphTop, blGlyphBottom)', 'TLazButtonLayout');
+    addGlobalType('enum(ssNone, ssHorizontal, ssVertical, ssBoth, ssAutoHorizontal, ssAutoVertical, ssAutoBoth)', 'ELazScrollStyle');
+    addGlobalType('set of enum(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odBackgroundPainted)', 'ELazOwnerDrawStates');
+    addGlobalType('enum(csDropDown, csSimple, csDropDownList, csOwnerDrawFixed, csOwnerDrawVariable, csOwnerDrawEditableFixed, csOwnerDrawEditableVariable)', 'ELazComboBoxStyle');
+    addGlobalType('enum(lbStandard, lbOwnerDrawFixed, lbOwnerDrawVariable, lbVirtual)', 'ELazListBoxStyle');
+    addGlobalType('enum(taLeftJustify, taRightJustify, taCenter)', 'ELazAlignment');
+    addGlobalType('enum(cbUnchecked, cbChecked, cbGrayed)', 'ELazCheckBoxState');
+    addGlobalType('enum(blGlyphLeft, blGlyphRight, blGlyphTop, blGlyphBottom)', 'ELazButtonLayout');
 
-    addGlobalType('procedure(Control: TLazWinControl; Index: Integer; ARect: TLazRect; State: TLazOwnerDrawState) of object', 'TLazDrawItemEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Control: TLazWinControl; Index: Integer; ARect: TLazRect; State: ELazOwnerDrawStates) of object', 'TLazDrawItemEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Control: TLazWinControl; Index: Integer; var AHeight: Integer) of object', 'TLazMeasureItemEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TObject; User: Boolean) of object', 'TLazSelectionChangeEvent', FFI_DEFAULT_ABI);
 
@@ -1121,7 +1120,7 @@ begin
     addClassVar('TLazCustomComboBox', 'SelLength', 'Integer', @_LapeCustomComboBox_SelLength_Read, @_LapeCustomComboBox_SelLength_Write);
     addClassVar('TLazCustomComboBox', 'SelStart', 'Integer', @_LapeCustomComboBox_SelStart_Read, @_LapeCustomComboBox_SelStart_Write);
     addClassVar('TLazCustomComboBox', 'SelText', 'String', @_LapeCustomComboBox_SelText_Read, @_LapeCustomComboBox_SelText_Write);
-    addClassVar('TLazCustomComboBox', 'Style', 'TLazComboBoxStyle', @_LapeCustomComboBox_Style_Read, @_LapeCustomComboBox_Style_Write);
+    addClassVar('TLazCustomComboBox', 'Style', 'ELazComboBoxStyle', @_LapeCustomComboBox_Style_Read, @_LapeCustomComboBox_Style_Write);
     addClassVar('TLazCustomComboBox', 'Text', 'string', @_LapeCustomComboBox_Text_Read, @_LapeCustomComboBox_Text_Write);
 
     addClass('TLazComboBox', 'TLazCustomComboBox');
@@ -1160,7 +1159,7 @@ begin
     addClassVar('TLazCustomListBox', 'SelCount', 'Integer', @_LapeCustomListBox_SelCount_Read);
     addClassVar('TLazCustomListBox', 'Sorted', 'Boolean', @_LapeCustomListBox_Sorted_Read, @_LapeCustomListBox_Sorted_Write);
     addClassVar('TLazCustomListBox', 'TopIndex', 'Integer', @_LapeCustomListBox_TopIndex_Read, @_LapeCustomListBox_TopIndex_Write);
-    addClassVar('TLazCustomListBox', 'Style', 'TLazListBoxStyle', @_LapeCustomListBox_Style_Read, @_LapeCustomListBox_Style_Write);
+    addClassVar('TLazCustomListBox', 'Style', 'ELazListBoxStyle', @_LapeCustomListBox_Style_Read, @_LapeCustomListBox_Style_Write);
     addClassVar('TLazCustomListBox', 'OnDblClick', 'TLazNotifyEvent', @_LapeCustomListBox_OnDblClick_Read, @_LapeCustomListBox_OnDblClick_Write);
     addClassVar('TLazCustomListBox', 'OnDrawItem', 'TLazDrawItemEvent', @_LapeCustomListBox_OnDrawItem_Read, @_LapeCustomListBox_OnDrawItem_Write);
     addClassVar('TLazCustomListBox', 'OnMeasureItemEvent', 'TLazMeasureItemEvent', @_LapeCustomListBox_OnMeasureItem_Read, @_LapeCustomListBox_OnMeasureItem_Write);
@@ -1204,7 +1203,7 @@ begin
     addClassVar('TLazMemo', 'Lines', 'TLazStrings', @_LapeMemo_Lines_Read, @_LapeMemo_Lines_Write);
     addClassVar('TLazMemo', 'HorzScrollBar', 'TLazControlScrollBar', @_LapeMemo_HorzScrollBar_Read, @_LapeMemo_HorzScrollBar_Write);
     addClassVar('TLazMemo', 'VertScrollBar', 'TLazControlScrollBar', @_LapeMemo_VertScrollBar_Read, @_LapeMemo_VertScrollBar_Write);
-    addClassVar('TLazMemo', 'ScrollBars', 'TLazScrollStyle', @_LapeMemo_ScrollBars_Read, @_LapeMemo_ScrollBars_Write);
+    addClassVar('TLazMemo', 'ScrollBars', 'ELazScrollStyle', @_LapeMemo_ScrollBars_Read, @_LapeMemo_ScrollBars_Write);
     addClassVar('TLazMemo', 'WantReturns', 'Boolean', @_LapeMemo_WantReturns_Read, @_LapeMemo_WantReturns_Write);
     addClassVar('TLazMemo', 'WantTabs', 'Boolean', @_LapeMemo_WantTabs_Read, @_LapeMemo_WantTabs_Write);
     addClassVar('TLazMemo', 'WordWrap', 'Boolean', @_LapeMemo_WordWrap_Read, @_LapeMemo_WordWrap_Write);
@@ -1215,7 +1214,7 @@ begin
     addClass('TLazCustomCheckBox', 'TLazWinControl');
     addClassConstructor('TLazCustomCheckBox', '(TheOwner: TLazComponent)', @_LapeCustomCheckBox_Create);
     addClassVar('TLazCustomCheckBox', 'AllowGrayed', 'Boolean', @_LapeCustomCheckBox_AllowGrayed_Read, @_LapeCustomCheckBox_AllowGrayed_Write);
-    addClassVar('TLazCustomCheckBox', 'State', 'TLazCheckBoxState', @_LapeCustomCheckBox_State_Read, @_LapeCustomCheckBox_State_Write);
+    addClassVar('TLazCustomCheckBox', 'State', 'ELazCheckBoxState', @_LapeCustomCheckBox_State_Read, @_LapeCustomCheckBox_State_Write);
     addClassVar('TLazCustomCheckBox', 'OnChange', 'TLazNotifyEvent', @_LapeCustomCheckBox_OnChange_Read, @_LapeCustomCheckBox_OnChange_Write);
 
     addClass('TLazCheckBox', 'TLazCustomCheckBox');
@@ -1227,8 +1226,8 @@ begin
     addClass('TLazLabel', 'TLazGraphicControl');
     addClassConstructor('TLazLabel', '(TheOwner: TLazComponent)', @_LapeLabel_Create);
     addGlobalFunc('function TLazLabel.AdjustFontForOptimalFill: Boolean;', @_LapeLabel_AdjustFontForOptimalFill);
-    addClassVar('TLazLabel', 'Alignment', 'TLazAlignment', @_LapeLabel_Alignment_Read, @_LapeLabel_Alignment_Write);
-    addClassVar('TLazLabel', 'Layout', 'TLazTextLayout', @_LapeLabel_Layout_Read, @_LapeLabel_Layout_Write);
+    addClassVar('TLazLabel', 'Alignment', 'ELazAlignment', @_LapeLabel_Alignment_Read, @_LapeLabel_Alignment_Write);
+    addClassVar('TLazLabel', 'Layout', 'ELazTextLayout', @_LapeLabel_Layout_Read, @_LapeLabel_Layout_Write);
     addClassVar('TLazLabel', 'Transparent', 'Boolean', @_LapeLabel_Transparent_Read, @_LapeLabel_Transparent_Write);
     addClassVar('TLazLabel', 'WordWrap', 'Boolean', @_LapeLabel_WordWrap_Read, @_LapeLabel_WordWrap_Write);
     addClassVar('TLazLabel', 'OptimalFill', 'Boolean', @_LapeLabel_OptimalFill_Read, @_LapeLabel_OptimalFill_Write);
@@ -1249,7 +1248,7 @@ begin
     addClassVar('TLazSpeedButton', 'Glyph', 'TLazBitmap', @_LapeSpeedButton_Glyph_Read, @_LapeSpeedButton_Glyph_Write);
     addClassVar('TLazSpeedButton', 'Down', 'Boolean', @_LapeSpeedButton_Down_Read, @_LapeSpeedButton_Down_Write);
     addClassVar('TLazSpeedButton', 'Flat', 'Boolean', @_LapeSpeedButton_Flat_Read, @_LapeSpeedButton_Flat_Write);
-    addClassVar('TLazSpeedButton', 'Layout', 'TLazButtonLayout', @_LapeSpeedButton_Layout_Read, @_LapeSpeedButton_Layout_Write);
+    addClassVar('TLazSpeedButton', 'Layout', 'ELazButtonLayout', @_LapeSpeedButton_Layout_Read, @_LapeSpeedButton_Layout_Write);
     addClassVar('TLazSpeedButton', 'Margin', 'Integer', @_LapeSpeedButton_Margin_Read, @_LapeSpeedButton_Margin_Write);
     addClassVar('TLazSpeedButton', 'ShowCaption', 'Boolean', @_LapeSpeedButton_ShowCaption_Read, @_LapeSpeedButton_ShowCaption_Write);
     addClassVar('TLazSpeedButton', 'Spacing', 'Integer', @_LapeSpeedButton_Spacing_Read, @_LapeSpeedButton_Spacing_Write);

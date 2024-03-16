@@ -438,14 +438,30 @@ begin
   PControl(Params^[0])^.ShowHint := PBoolean(Params^[1])^;
 end;
 
+{$scopedenums on}
+type  ELazCursor = (Default, None, Arrow, Cross, IBeam, Size, SizeNESW, SizeNS, SizeNWSE, SizeWE, SizeNW, SizeN, SizeNE, SizeW, SizeE, SizeSW, SizeS, SizeSE, UpArrow, HourGlass, Drag, NoDrop, HSplit, VSplit, MultiDrag, AppStart, Help, HandPoint);
+const ELazCurorToTCursor: array[ELazCursor] of TCursor = (crDefault, crNone, crArrow, crCross, crIBeam, crSize, crSizeNESW, crSizeNS, crSizeNWSE, crSizeWE, crSizeNW, crSizeN, crSizeNE, crSizeW, crSizeE, crSizeSW, crSizeS, crSizeSE, crUpArrow, crHourGlass, crDrag, crNoDrop, crHSplit, crVSplit, crMultiDrag, crAppStart, crHelp, crHandPoint);
+{$scopedenums off}
+
 procedure _LapeControl_Cursor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+
+  function CursorToEnum(val: TCursor): ELazCursor;
+  var
+    e: ELazCursor;
+  begin
+    for e in ELazCursor do
+      if (ELazCurorToTCursor[e] = Val) then
+        Exit(e);
+    Result := ELazCursor.Default;
+  end;
+
 begin
-  PCursor(Result)^ := PControl(Params^[0])^.Cursor;
+  ELazCursor(Result^) := CursorToEnum(PControl(Params^[0])^.Cursor);
 end;
 
 procedure _LapeControl_Cursor_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PControl(Params^[0])^.Cursor := PCursor(Params^[1])^;
+  PControl(Params^[0])^.Cursor := ELazCurorToTCursor[ELazCursor(Params^[1]^)];
 end;
 
 procedure _LapeWinControl_Brush_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -797,29 +813,21 @@ procedure ImportLCLControls(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    addGlobalType('(ssShift, ssAlt, ssCtrl, ssLeft, ssRight, ssMiddle, ssDouble, ssMeta, ssSuper, ssHyper, ssAltGr, ssCaps, ssNum, ssScroll, ssTriple, ssQuad, ssExtra1, ssExtra2)', 'TLazShiftStateEnum');
-    addGlobalType('set of TLazShiftStateEnum', 'TLazShiftState');
-    addGlobalType('(mbLeft, mbRight, mbMiddle, mbExtra1, mbExtra2)', 'TLazMouseButton');
+    addGlobalType('set of enum(Shift, Alt, Ctrl, Left, Right, Middle, Double, Meta, Super, Hyper, AltGr, Caps, Num, Scroll, Triple, Quad, Extra1, Extra2)', 'ELazShiftStates');
+    addGlobalType('enum(Left, Right, Middle, Extra1, Extra2)', 'ELazMouseButton');
+    addGlobalType('enum(Default, None, Arrow, Cross, IBeam, Size, SizeNESW, SizeNS, SizeNWSE, SizeWE, SizeNW, SizeN, SizeNE, SizeW, SizeE, SizeSW, SizeS, SizeSE, UpArrow, HourGlass, Drag, NoDrop, HSplit, VSplit, MultiDrag, AppStart, Help, HandPoint)', 'ELazCursor');
+    addGlobalType('enum(Horizontal, Vertical)', 'ELazScrollBarKind');
+    addGlobalType('enum(None, Top, Bottom, Left, Right, Client, Custom)', 'ELazAlign');
+    addGlobalType('enum(Top, Left, Right, Bottom)', 'ELazAnchorKind');
+    addGlobalType('set of ELazAnchorKind', 'ELazAnchors');
 
-    addGlobalType('procedure(Sender: TObject; var Key: Int16; Shift: TLazShiftState) of object', 'TLazKeyEvent', FFI_DEFAULT_ABI);
+    addGlobalType('enum(asrTop, asrBottom, asrCenter)', 'ELazAnchorSideReference');
+    addGlobalType('procedure(Sender: TObject; var Key: Int16; Shift: ELazShiftStates) of object', 'TLazKeyEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TObject; var Key: Char) of object', 'TLazKeyPressEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TObject; Button: TLazMouseButton; Shift: TLazShiftState; X, Y: Integer) of object', 'TLazMouseEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TObject; Shift: TLazShiftState; X, Y: Integer) of object', 'TLazMouseMoveEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TObject; Shift: TLazShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean) of object', 'TLazMouseWheelEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(Sender: TObject; Shift: TLazShiftState; MousePos: TPoint; var Handled: Boolean) of object', 'TLazMouseWheelUpDownEvent', FFI_DEFAULT_ABI);
-
-    addGlobalType('(sbHorizontal, sbVertical)', 'TLazScrollBarKind');
-    addGlobalType('(alNone, alTop, alBottom, alLeft, alRight, alClient, alCustom)', 'TLazAlign');
-    addGlobalType('(akTop, akLeft, akRight, akBottom)', 'TLazAnchorKind');
-    addGlobalType('set of TLazAnchorKind', 'TLazAnchors');
-    addGlobalType('(asrTop, asrBottom, asrCenter)', 'TLazAnchorSideReference');
-    addGlobalType('Integer', 'TLazCursor');
-    addGlobalVar(crDefault, 'crDefault').isConstant := True;
-    addGlobalVar(crNone, 'crNone').isConstant := True;
-    addGlobalVar(crSize, 'crSize').isConstant := True;
-    addGlobalVar(crCross, 'crCross').isConstant := True;
-    addGlobalVar(crHandPoint, 'crHandPoint').isConstant := True;
-    addGlobalVar(crIBeam, 'crIBeam').isConstant := True;
+    addGlobalType('procedure(Sender: TObject; Button: ELazMouseButton; Shift: ELazShiftStates; X, Y: Integer) of object', 'TLazMouseEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Shift: ELazShiftStates; X, Y: Integer) of object', 'TLazMouseMoveEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Shift: ELazShiftStates; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean) of object', 'TLazMouseWheelEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TObject; Shift: ELazShiftStates; MousePos: TPoint; var Handled: Boolean) of object', 'TLazMouseWheelUpDownEvent', FFI_DEFAULT_ABI);
 
     addClass('TLazControlBorderSpacing');
     addClassVar('TLazControlBorderSpacing', 'Left', 'Integer', @_LapeControlBorderSpacing_Left_Read, @_LapeControlBorderSpacing_Left_Write);
@@ -832,11 +840,11 @@ begin
     addClass('TLazWinControl', 'TLazControl');
 
     addClass('TLazAnchorSide');
-    addClassVar('TLazAnchorSide', 'Side', 'TLazAnchorSideReference', @_LapeAnchorSide_Side_Read, @_LapeAnchorSide_Side_Write);
-    addClassVar('TLazAnchorSide', 'Kind', 'TLazAnchorKind', @_LapeAnchorSide_Kind_Read);
+    addClassVar('TLazAnchorSide', 'Side', 'ELazAnchorSideReference', @_LapeAnchorSide_Side_Read, @_LapeAnchorSide_Side_Write);
+    addClassVar('TLazAnchorSide', 'Kind', 'ELazAnchorKind', @_LapeAnchorSide_Kind_Read);
     addClassVar('TLazAnchorSide', 'Control', 'TLazControl', @_LapeAnchorSide_Control_Read);
 
-    addClassVar('TLazControl', 'Anchors', 'TLazAnchors',  @_LapeControl_Anchors_Read, @_LapeControl_Anchors_Write);
+    addClassVar('TLazControl', 'Anchors', 'ELazAnchors',  @_LapeControl_Anchors_Read, @_LapeControl_Anchors_Write);
     addClassVar('TLazControl', 'AnchorSideLeft', 'TLazAnchorSide',  @_LapeControl_AnchorSideLeft_Read);
     addClassVar('TLazControl', 'AnchorSideTop', 'TLazAnchorSide',  @_LapeControl_AnchorSideTop_Read);
     addClassVar('TLazControl', 'AnchorSideRight', 'TLazAnchorSide',  @_LapeControl_AnchorSideRight_Read);
@@ -857,8 +865,8 @@ begin
     addGlobalFunc('procedure TLazControl.Show;', @_LapeControl_Show);
     addGlobalFunc('procedure TLazControl.Update;', @_LapeControl_Update);
 
-    addClassVar('TLazControl', 'Cursor', 'TLazCursor', @_LapeControl_Cursor_Read, @_LapeControl_Cursor_Write);
-    addClassVar('TLazControl', 'Align', 'TLazAlign', @_LapeControl_Align_Read, @_LapeControl_Align_Write);
+    addClassVar('TLazControl', 'Cursor', 'ELazCursor', @_LapeControl_Cursor_Read, @_LapeControl_Cursor_Write);
+    addClassVar('TLazControl', 'Align', 'ELazAlign', @_LapeControl_Align_Read, @_LapeControl_Align_Write);
     addClassVar('TLazControl', 'AutoSize', 'Boolean', @_LapeControl_AutoSize_Read, @_LapeControl_AutoSize_Write);
     addClassVar('TLazControl', 'BoundsRect', 'TLazRect', @_LapeControl_BoundsRect_Read, @_LapeControl_BoundsRect_Write);
     addClassVar('TLazControl', 'Caption', 'String', @_LapeControl_Caption_Read, @_LapeControl_Caption_Write);
@@ -912,7 +920,7 @@ begin
     addClassVar('TLazCustomControl', 'OnPaint', 'TLazNotifyEvent', @_LapeCustomControl_OnPaint_Read, @_LapeCustomControl_OnPaint_Write);
 
     addClass('TLazControlScrollBar');
-    addClassConstructor('TLazControlScrollBar' ,'(AControl: TLazWinControl; AKind: TLazScrollBarKind)', @_LapeControlScrollBar_Create);
+    addClassConstructor('TLazControlScrollBar' ,'(AControl: TLazWinControl; AKind: ELazScrollBarKind)', @_LapeControlScrollBar_Create);
     addGlobalFunc('function TLazControlScrollBar.GetOtherScrollBar: TLazControlScrollBar;', @_LapeControlScrollBar_GetOtherScrollBar);
     addClassVar('TLazControlScrollBar', 'Size', 'Integer', @_LapeControlScrollBar_Size_Read);
     addGlobalFunc('function TLazControlScrollBar.ClientSize: Integer;', @_LapeControlScrollBar_ClientSize);
