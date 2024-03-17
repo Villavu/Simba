@@ -119,6 +119,16 @@ begin
 end;
 
 (*
+TPointArray.CreateFromAxes
+--------------------------
+> function TPointArray.CreateFromAxes(X, Y: TIntegerArray): TPointArray; static;
+*)
+procedure _LapeTPACreateFromAxes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := TPointArray.CreateFromAxes(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^);
+end;
+
+(*
 TPointArray.Rows
 ----------------
 > function TPointArray.Rows: T2DPointArray;
@@ -810,6 +820,16 @@ begin
   PPointArray(Result)^ := PPointArray(Params^[0])^.ConvexityDefects(PDouble(Params^[1])^, EConvexityDefects(Params^[2]^));
 end;
 
+procedure _LapeTPAToAxes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Params^[0])^.ToAxes(PIntegerArray(Params^[1])^, PIntegerArray(Params^[2])^);
+end;
+
+procedure _LapeTPAMedian(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PPointArray(Params^[0])^.Median();
+end;
+
 procedure ImportTPA(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -822,6 +842,7 @@ begin
     addGlobalFunc('function TPointArray.CreateFromLine(Start, Stop: TPoint): TPointArray; static', @_LapeTPACreateFromLine);
     addGlobalFunc('function TPointArray.CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static', @_LapeTPACreateFromPolygon);
     addGlobalFunc('function TPointArray.CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static', @_LapeTPACreateFromSimplePolygon);
+    addGlobalFunc('function TPointArray.CreateFromAxes(X, Y: TIntegerArray): TPointArray; static', @_LapeTPACreateFromAxes);
 
     addGlobalFunc('function TPointArray.ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;', @_LapeTPAExcludePie);
     addGlobalFunc('function TPointArray.ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray', @_LapeTPAExcludeDist);
@@ -912,6 +933,9 @@ begin
 
     addGlobalType('enum(NONE, ALL, MINIMAL)', 'EConvexityDefects');
     addGlobalFunc('function TPointArray.ConvexityDefects(Epsilon: Single = 0; Mode: EConvexityDefects = EConvexityDefects.NONE): TPointArray;', @_LapeTPAConvexityDefects);
+
+    addGlobalFunc('procedure TPointArray.ToAxes(out X, Y: TIntegerArray);', @_LapeTPAToAxes);
+    addGlobalFunc('function TPointArray.Median: TPoint; overload', @_LapeTPAMedian);
 
     ImportingSection := '';
   end;

@@ -55,6 +55,7 @@ type
     class function CreateFromBox(Box: TBox; Filled: Boolean): TPointArray; static;
     class function CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static;
     class function CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static;
+    class function CreateFromAxes(X, Y: TIntegerArray): TPointArray; static;
 
     function IndexOf(P: TPoint): Integer;
     function IndicesOf(P: TPoint): TIntegerArray;
@@ -153,6 +154,9 @@ type
     function ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPointArray;
     function ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): T2DPointArray;
     function ConvexityDefects(Epsilon: Single; Mode: EConvexityDefects = EConvexityDefects.NONE): TPointArray;
+
+    procedure ToAxes(out X, Y: TIntegerArray);
+    function Median: TPoint;
   end;
 
 implementation
@@ -460,6 +464,21 @@ begin
   Result := Result.Connect();
   if Filled then
     Result := Result.ShapeFill();
+end;
+
+class function TPointArrayHelper.CreateFromAxes(X, Y: TIntegerArray): TPointArray;
+var
+  I: Integer;
+begin
+  if (Length(X) <> Length(Y)) then
+    SimbaException('TPointArray.CreateFromAxes: X and Y lengths differ (%d,%d)', [Length(X), Length(Y)]);
+
+  SetLength(Result, Length(X));
+  for I := 0 to High(Result) do
+  begin
+    Result[I].X := X[I];
+    Result[I].Y := Y[I];
+  end;
 end;
 
 function TPointArrayHelper.IndexOf(P: TPoint): Integer;
@@ -2654,6 +2673,50 @@ begin
   end;
 
   Result := Buffer.ToArray(False);
+end;
+
+procedure TPointArrayHelper.ToAxes(out X, Y: TIntegerArray);
+var
+  I,H:Integer;
+begin
+  H := High(Self);
+  SetLength(X, H+1);
+  SetLength(Y, H+1);
+  for I := 0 to H do
+  begin
+    X[I] := Self[I].X;
+    Y[I] := Self[I].Y;
+  end;
+end;
+
+function TPointArrayHelper.Median: TPoint;
+var
+  X, Y: TIntegerArray;
+  Mid: Integer;
+begin
+  if (Length(Self) = 0) then
+    Result := TPoint.ZERO
+  else
+  if (Length(Self) = 1) then
+    Result := Self[0]
+  else
+  begin
+    ToAxes(X, Y);
+    X.Sort();
+    Y.Sort();
+
+    Mid := Length(Self) div 2;
+
+    if (Mid mod 2) = 0 then
+    begin
+      Result.X := X[Mid];
+      Result.Y := Y[Mid];
+    end else
+    begin
+      Result.X := Round((X[Mid] + X[Mid+1]) / 2);
+      Result.Y := Round((Y[Mid] + Y[Mid+1]) / 2);
+    end;
+  end;
 end;
 
 end.
