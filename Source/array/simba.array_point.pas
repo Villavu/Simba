@@ -2707,7 +2707,7 @@ begin
 
     Mid := Length(Self) div 2;
 
-    if (Mid mod 2) = 0 then
+    if (Length(Self) mod 2) = 0 then
     begin
       Result.X := X[Mid];
       Result.Y := Y[Mid];
