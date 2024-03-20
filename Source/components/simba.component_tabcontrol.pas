@@ -119,7 +119,7 @@ type
 implementation
 
 uses
-  simba.main, simba.base, simba.theme, simba.ide_utils;
+  simba.form_main, simba.base, simba.ide_theme, simba.ide_utils;
 
 function TSimbaTab.GetImageIndex: TImageIndex;
 begin
@@ -439,7 +439,7 @@ begin
   FTabs.OnTabChangeQuery := @DoTabChangeQuery;
   FTabs.OnContextPopup := @DoTabRightClick;
   FTabs.ColorFont := SimbaTheme.ColorFont;
-  FTabs.Images := SimbaForm.Images;
+  FTabs.Images := SimbaMainForm.Images;
   FTabs.BorderSpacing.Bottom := 5;
 
   FTabs.OptSpaceBeforeText := 12;

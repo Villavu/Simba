@@ -141,7 +141,7 @@ type
 implementation
 
 uses
-  simba.nativeinterface, simba.box;
+  simba.nativeinterface, simba.vartype_box;
 
 procedure TSimbaTarget.SetAutoSetFocus(Value: Boolean);
 begin

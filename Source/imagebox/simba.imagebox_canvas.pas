@@ -111,7 +111,7 @@ implementation
 
 uses
   Math,
-  simba.colormath, simba.box;
+  simba.colormath, simba.vartype_box, simba.vartype_point;
 
 procedure TTextDrawer.MoveToPixel(x, y: integer);
 begin

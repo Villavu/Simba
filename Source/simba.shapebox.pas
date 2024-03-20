@@ -294,7 +294,8 @@ type
 implementation
 
 uses
-  LCLType, simba.geometry, simba.array_point, simba.box;
+  LCLType, simba.geometry, simba.vartype_pointarray,
+  simba.vartype_box, simba.vartype_string, simba.vartype_point;
 
 const
   CLOSE_DISTANCE = 4;

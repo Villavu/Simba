@@ -13,6 +13,7 @@ procedure ImportPoint(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
+  simba.vartype_point,
   lptypes;
 
 (*

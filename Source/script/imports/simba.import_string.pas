@@ -13,6 +13,7 @@ procedure ImportString(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
+  simba.vartype_string,
   lptypes;
 
 (*

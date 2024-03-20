@@ -14,7 +14,7 @@ implementation
 
 uses
   Graphics, lptypes, lpvartypes,
-  simba.arraybuffer;
+  simba.containers;
 
 type
   PSimbaPointBuffer = ^TSimbaPointBuffer;

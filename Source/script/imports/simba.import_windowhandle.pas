@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.windowhandle;
+  simba.vartype_windowhandle;
 
 (*
 Window Handle

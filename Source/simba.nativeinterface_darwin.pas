@@ -18,14 +18,6 @@ uses
   simba.base, simba.nativeinterface;
 
 type
-  TVirtualWindow = packed record
-    Handle: CGWindowID;
-    InfoIndex: Integer;
-  end;
-  {$IF SizeOf(TVirtualWindow) <> SizeOf(TWindowHandle)}
-    {$FATAL SizeOf(TVirtualWindow) <> SizeOf(TWindowHandle)}
-  {$ENDIF}
-
   TSimbaNativeInterface_Darwin = class(TSimbaNativeInterface)
   protected
   type
@@ -38,19 +30,9 @@ type
   protected
     FKeyMap: TKeyMap;
     FKeyMapBuilt: Boolean;
-    FVirtualWindowInfo: array of record
-      ClientRect: TBox;
-      ClassStr: ShortString;
-    end;
-
-    function IsVirtualWindow(Window: TWindowHandle; out VirtualWindow: TVirtualWindow): Boolean;
-    function GetVirtualWindowInfoIndex(ClientRect: TBox; ClassStr: ShortString): Integer;
 
     procedure BuildKeyMap;
-    procedure CheckAccessibility;
   public
-    constructor Create;
-
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
     procedure SetWindowBounds(Window: TWindowHandle; Bounds: TBox); override;
@@ -101,16 +83,16 @@ type
     function HighResolutionTime: Double; override;
 
     procedure OpenDirectory(Path: String); override;
-
-    function WindowHandleToStr(Window: TWindowHandle): String; override;
-    function WindowHandleFromStr(Str: String): TWindowHandle; override;
   end;
 
 implementation
 
 uses
   BaseUnix, Unix, LCLType, CocoaAll, CocoaUtils, DateUtils,
-  simba.process, simba.darwin_axui, simba.windowhandle, simba.box;
+  simba.process, simba.vartype_windowhandle, simba.vartype_box;
+
+function CGPreflightScreenCaptureAccess: Boolean; external name '_CGPreflightScreenCaptureAccess';
+function CGRequestPostEventAccess: Boolean; external name '_CGRequestPostEventAccess';
 
 type
   NSEventFix = objccategory external(NSEvent)
@@ -310,21 +292,8 @@ function TSimbaNativeInterface_Darwin.GetWindowBounds(Window: TWindowHandle; out
 var
   windowIds, windows: CFArrayRef;
   Rect: CGRect;
-  VirtualWindow: TVirtualWindow;
   B: TBox;
 begin
-  if Self.IsVirtualWindow(Window, VirtualWindow) then
-  begin
-    Result := GetWindowBounds(VirtualWindow.Handle, B);
-    if Result then
-    begin
-      Bounds := Self.FVirtualWindowInfo[VirtualWindow.InfoIndex].ClientRect;
-      Bounds := Bounds.Offset(B.X1, B.Y1);
-    end;
-
-    Exit;
-  end;
-
   windowIds := CFArrayCreateMutable(nil, 1, nil);
   CFArrayAppendValue(windowIds, Pointer(Window));
   windows := CGWindowListCreateDescriptionFromArray(windowIds);
@@ -355,7 +324,7 @@ end;
 
 procedure TSimbaNativeInterface_Darwin.SetWindowBounds(Window: TWindowHandle; Bounds: TBox);
 begin
-  // TODO: Requires usages of AX API.
+  SimbaException('Not currently possible on macos');
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean;
@@ -365,11 +334,8 @@ var
   Context: CGContextRef;
   WindowBounds: TBox;
   R: TRect;
-  VirtualWindow: TVirtualWindow;
 begin
   WindowBounds := GetWindowBounds(Window);
-  if IsVirtualWindow(Window, VirtualWindow) then
-    Window := VirtualWindow.Handle;
 
   R.Left   := WindowBounds.X1 + X;
   R.Top    := WindowBounds.Y1 + Y;
@@ -441,8 +407,6 @@ procedure TSimbaNativeInterface_Darwin.MouseScroll(Scrolls: Integer);
 var
   ScrollEvent: CGEventRef;
 begin
-  CheckAccessibility();
-
   ScrollEvent := CGEventCreateScrollWheelEvent(nil, kCGScrollEventUnitPixel, 1, -Scrolls * 10);
   CGEventPost(kCGHIDEventTap, ScrollEvent);
   CFRelease(ScrollEvent);
@@ -489,8 +453,6 @@ var
   event: CGEventRef;
   eventType, mouseButton: Integer;
 begin
-  CheckAccessibility();
-
   eventType := ClickTypeToMouseDownEvent[Button];
   mouseButton := ClickTypeToMouseButton[Button];
 
@@ -593,8 +555,6 @@ end;
 
 procedure TSimbaNativeInterface_Darwin.KeyDown(Key: EKeyCode);
 begin
-  CheckAccessibility();
-
   CGPostKeyboardEvent(0, SimbaToMacKeycode(Key), 1);
 end;
 
@@ -676,25 +636,8 @@ begin
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowChildren(Window: TWindowHandle; Recursive: Boolean): TWindowHandleArray;
-var
-  I: Integer;
-  VirtualWindow: ^TVirtualWindow;
-  B: TBox;
-  Info: TAXUIWindowInfo;
 begin
-  Info := AXUI_GetWindowInfo(GetWindowPID(Window));
-
-  if (Length(Info.Children) > 0) and GetWindowBounds(Window, B) then
-  begin
-    SetLength(Result, Length(Info.Children));
-    for I := 0 to High(Info.Children) do
-    begin
-      VirtualWindow := @Result[I];
-      VirtualWindow^.Handle := Window;
-      VirtualWindow^.InfoIndex := GetVirtualWindowInfoIndex(Info.Children[I].Bounds.Offset(-B.X1, -B.Y1), Info.Children[I].ClassName);
-    end;
-  end else
-    SetLength(Result, 0);
+  SimbaException('Not currently possible on macos');
 end;
 
 function TSimbaNativeInterface_Darwin.GetVisibleWindows: TWindowHandleArray;
@@ -735,30 +678,30 @@ begin
     begin
       Result := Windows[I];
 
-      BestSum   := Single.MaxValue;
-      BestIndex := -1;
-
-      Childs := Self.GetWindowChildren(Result, True);
-      for J := 0 to High(Childs) do
-      begin
-        B := GetWindowBounds(Childs[J]);
-        if not B.Contains(MousePos) then
-          Continue;
-
-        Sum := MousePos.DistanceTo(TPoint.Create(B.X1, B.Y1)) +
-               MousePos.DistanceTo(TPoint.Create(B.X2, B.Y1)) +
-               MousePos.DistanceTo(TPoint.Create(B.X1, B.Y2)) +
-               MousePos.DistanceTo(TPoint.Create(B.X2, B.Y2));
-
-        if (Sum < BestSum) then
-        begin
-          BestSum   := Sum;
-          BestIndex := J;
-        end;
-      end;
-
-      if (BestIndex > -1) then
-        Result := Childs[BestIndex];
+      //BestSum   := Single.MaxValue;
+      //BestIndex := -1;
+      //
+      //Childs := Self.GetWindowChildren(Result, True);
+      //for J := 0 to High(Childs) do
+      //begin
+      //  B := GetWindowBounds(Childs[J]);
+      //  if not B.Contains(MousePos) then
+      //    Continue;
+      //
+      //  Sum := MousePos.DistanceTo(TPoint.Create(B.X1, B.Y1)) +
+      //         MousePos.DistanceTo(TPoint.Create(B.X2, B.Y1)) +
+      //         MousePos.DistanceTo(TPoint.Create(B.X1, B.Y2)) +
+      //         MousePos.DistanceTo(TPoint.Create(B.X2, B.Y2));
+      //
+      //  if (Sum < BestSum) then
+      //  begin
+      //    BestSum   := Sum;
+      //    BestIndex := J;
+      //  end;
+      //end;
+      //
+      //if (BestIndex > -1) then
+      //  Result := Childs[BestIndex];
 
       Break;
     end;
@@ -772,8 +715,10 @@ end;
 
 function TSimbaNativeInterface_Darwin.GetActiveWindow: TWindowHandle;
 begin
+  SimbaException('Not currently possible on macos');
+
   // TODO: Requires usage of AX API, kAXFocusedApplicationAttribute
-  Result := 0;
+  // Maybe get window of frontmostApplication.processIdentifier
 end;
 
 function TSimbaNativeInterface_Darwin.IsWindowActive(Window: TWindowHandle): Boolean;
@@ -784,11 +729,7 @@ end;
 function TSimbaNativeInterface_Darwin.IsWindowValid(Window: TWindowHandle): Boolean;
 var
   windowIds, windows: CFArrayRef;
-  VirtualWindow: TVirtualWindow;
 begin
-  if IsVirtualWindow(Window, VirtualWindow) then
-    Window := VirtualWindow.Handle;
-
   windowIds := CFArrayCreateMutable(nil, 1, nil);
   CFArrayAppendValue(windowIds, Pointer(Window));
   windows := CGWindowListCreateDescriptionFromArray(windowIds);
@@ -857,38 +798,23 @@ begin
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowPID(Window: TWindowHandle): Integer;
-var
-  VirtualWindow: TVirtualWindow;
 begin
-  if IsVirtualWindow(Window, VirtualWindow) then
-    Window := VirtualWindow.Handle;
-
   Result := GetWindowDictionaryValueInt(Window, kCGWindowOwnerPID);
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowClass(Window: TWindowHandle): WideString;
-var
-  VirtualWindow: TVirtualWindow;
 begin
-  if IsVirtualWindow(Window, VirtualWindow) then
-    Result := FVirtualWindowInfo[VirtualWindow.InfoIndex].ClassStr
-  else
-    Result := AXUI_GetWindowClass(GetWindowPID(Window));
+  Result := GetWindowDictionaryValueStr(Window, kCGWindowOwnerName); // Return something at least
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowTitle(Window: TWindowHandle): WideString;
 begin
-  Result := AXUI_GetWindowTitle(GetWindowPID(Window));
+  Result := GetWindowDictionaryValueStr(Window, kCGWindowName);
 end;
 
 function TSimbaNativeInterface_Darwin.GetRootWindow(Window: TWindowHandle): TWindowHandle;
-var
-  VirtualWindow: TVirtualWindow;
 begin
-  if IsVirtualWindow(Window, VirtualWindow) then
-    Result := VirtualWindow.Handle
-  else
-    Result := Window;
+  Result := Window;
 end;
 
 function TSimbaNativeInterface_Darwin.ActivateWindow(Window: TWindowHandle): Boolean;
@@ -899,54 +825,6 @@ end;
 procedure TSimbaNativeInterface_Darwin.OpenDirectory(Path: String);
 begin
   SimbaProcess.RunCommand('open', [Path]);
-end;
-
-function TSimbaNativeInterface_Darwin.WindowHandleToStr(Window: TWindowHandle): String;
-var
-  VirtualWindow: TVirtualWindow;
-begin
-  if Self.IsVirtualWindow(Window, VirtualWindow) then
-  begin
-    with Self.FVirtualWindowInfo[VirtualWindow.InfoIndex] do
-      Result := 'VirtualWindow[%d, %d,%d,%d,%d, %s]'.Format([VirtualWindow.Handle, ClientRect.X1, ClientRect.Y1, ClientRect.X2, ClientRect.Y2, ClassStr]);
-  end else
-    Result := inherited;
-end;
-
-function TSimbaNativeInterface_Darwin.WindowHandleFromStr(Str: String): TWindowHandle;
-var
-  VirtualWindow: TVirtualWindow absolute Result;
-  Box: TBox;
-  ClassStr: String;
-begin
-  if Str.StartsWith('VirtualWindow') then
-  begin
-    SScanf(Str, 'VirtualWindow[%d, %d,%d,%d,%d, %s]', [@VirtualWindow.Handle, @Box.X1, @Box.Y1, @Box.X2, @Box.Y2, @ClassStr]);
-
-    VirtualWindow.InfoIndex := Self.GetVirtualWindowInfoIndex(Box, ClassStr);
-  end else
-    Result := inherited WindowHandleFromStr(Str);
-end;
-
-function TSimbaNativeInterface_Darwin.IsVirtualWindow(Window: TWindowHandle; out VirtualWindow: TVirtualWindow): Boolean;
-begin
-  VirtualWindow := TVirtualWindow(Window);
-
-  Result := VirtualWindow.InfoIndex > 0;
-end;
-
-function TSimbaNativeInterface_Darwin.GetVirtualWindowInfoIndex(ClientRect: TBox; ClassStr: ShortString): Integer;
-var
-  I: Integer;
-begin
-  Result := Length(Self.FVirtualWindowInfo);
-  for I := 0 to Result - 1 do
-    if (Self.FVirtualWindowInfo[I].ClientRect = ClientRect) and (Self.FVirtualWindowInfo[I].ClassStr = ClassStr) then
-      Exit(I);
-
-  SetLength(FVirtualWindowInfo, Result + 1);
-  FVirtualWindowInfo[Result].ClientRect := ClientRect;
-  FVirtualWindowInfo[Result].ClassStr := ClassStr;
 end;
 
 procedure TSimbaNativeInterface_Darwin.BuildKeyMap;
@@ -976,8 +854,6 @@ begin
     Exit;
   FKeymapBuilt := True;
 
-  CheckAccessibility();
-
   LocalPool := NSAutoReleasePool.alloc.init();
   for I := 0 to 255 do
   begin
@@ -992,19 +868,6 @@ begin
     end;
   end;
   LocalPool.release();
-end;
-
-procedure TSimbaNativeInterface_Darwin.CheckAccessibility;
-begin
-  if (not AXIsProcessTrusted()) then
-    SimbaException('Simba needs accessbility privilege on MacOS.' + LineEnding + 'Settings > Security & Privacy Accessibility');
-end;
-
-constructor TSimbaNativeInterface_Darwin.Create;
-begin
-  inherited Create();
-
-  SetLength(FVirtualWindowInfo, 1);
 end;
 
 initialization

@@ -19,8 +19,7 @@ implementation
 
 uses
   lptypes,
-  simba.array_point,
-  simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference;
+  simba.vartype_pointarray;
 
 (*
 TPointArray
@@ -35,7 +34,7 @@ TPointArray.Difference
 *)
 procedure _Lape_Point_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := Algo_Point_Difference(PPointArray(Params^[0])^, PPointArray(Params^[1])^)
+  PPointArray(Result)^ := PPointArray(Params^[0])^.Difference(PPointArray(Params^[1])^);
 end;
 
 (*
@@ -45,7 +44,7 @@ TPointArray.SymmetricDifference
 *)
 procedure _Lape_Point_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := Algo_Point_SymmetricDifference(PPointArray(Params^[0])^, PPointArray(Params^[1])^)
+  PPointArray(Result)^ := PPointArray(Params^[0])^.SymmetricDifference(PPointArray(Params^[1])^);
 end;
 
 (*
@@ -55,7 +54,7 @@ TPointArray.Intersection
 *)
 procedure _Lape_Point_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := Algo_Point_Intersection(PPointArray(Params^[0])^, PPointArray(Params^[1])^)
+  PPointArray(Result)^ := PPointArray(Params^[0])^.Intersection(PPointArray(Params^[1])^);
 end;
 
 (*

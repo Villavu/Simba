@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, ExtCtrls, Graphics,
-  simba.base, simba.ipc, simba.scripttab;
+  simba.base, simba.ipc, simba.ide_tab;
 
 type
   TSimbaScriptInstanceCommunication = class(TSimbaIPCServer)
@@ -48,7 +48,7 @@ type
 implementation
 
 uses
-  simba.main, simba.debugimageform, simba.image_lazbridge,
+  simba.form_main, simba.form_debugimage, simba.image_lazbridge,
   simba.threading, simba.ide_maintoolbar, simba.process;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
@@ -71,7 +71,7 @@ procedure TSimbaScriptInstanceCommunication.SetSimbaTitle;
 
   procedure Execute;
   begin
-    SimbaForm.Caption := FParams.ReadAnsiString();
+    SimbaMainForm.Caption := FParams.ReadAnsiString();
   end;
 
 begin
@@ -85,10 +85,10 @@ var
 
   procedure Execute;
   begin
-    SimbaForm.TrayIcon.BalloonTitle   := Title;
-    SimbaForm.TrayIcon.BalloonHint    := Hint;
-    SimbaForm.TrayIcon.BalloonTimeout := Timeout;
-    SimbaForm.TrayIcon.ShowBalloonHint();
+    SimbaMainForm.TrayIcon.BalloonTitle   := Title;
+    SimbaMainForm.TrayIcon.BalloonHint    := Hint;
+    SimbaMainForm.TrayIcon.BalloonTimeout := Timeout;
+    SimbaMainForm.TrayIcon.ShowBalloonHint();
   end;
 
 begin

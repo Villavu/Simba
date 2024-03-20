@@ -1,0 +1,56 @@
+{$assertions on}
+
+
+procedure TestInt;
+var
+  a: TIntegerArray;
+begin
+  a := [-1000, 1000, 0, 0, 1, 2, -1, 3];
+  a.Sort();
+
+  Assert(ToStr(a) = '[-1000, -1, 0, 0, 1, 2, 3, 1000]');
+end;
+
+procedure TestSingle;
+var
+  a: TSingleArray;
+  i: Integer;
+  s: String;
+begin
+  a := [-0.5, -0.51, 999.9, 1, 1, 1.1, 0, 2, -3];
+  a.Sort();
+  for i:=0 to High(a) do
+    s += ToStr(Round(a[i], 2)) + ' ';
+
+  Assert(s = '-3 -0.51 -0.5 0 1 1 1.1 2 999.9 ');
+end;
+
+procedure TestDouble;
+var
+  a: TDoubleArray;
+  i: Integer;
+  s: String;
+begin
+  a := [-0.5, -0.51, 999.9, 1, 1, 1.1, 0, 2, -3];
+  a.Sort();
+  for i:=0 to High(a) do
+    s += ToStr(Round(a[i], 2)) + ' ';
+
+  Assert(s = '-3 -0.51 -0.5 0 1 1 1.1 2 999.9 ');
+end;
+
+procedure TestString;
+var
+  a: TStringArray;
+begin
+  a := ['xyz', 'abc', '1', 'a', 'b', 'c', 'abc1', '0', 'xyz0'];
+  a.Sort();
+  Assert(ToStr(a) = '[0, 1, a, abc, abc1, b, c, xyz, xyz0]');
+end;
+
+begin
+  TestInt();
+  TestSingle();
+  TestDouble();
+  TestString();
+end.

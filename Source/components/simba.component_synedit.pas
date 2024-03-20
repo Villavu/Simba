@@ -13,7 +13,7 @@ uses
   Classes, SysUtils, Controls, Forms, StdCtrls, Graphics,
   SynEdit, SynEditTypes, SynEditFoldedView, SynEditTextBuffer, SynEditMarkupSelection, SynEditWrappedView,
   LazSynEditText,
-  simba.theme, simba.component_scrollbar;
+  simba.ide_theme, simba.component_scrollbar;
 
 type
   TSimbaSynEdit = class(TSynEdit)

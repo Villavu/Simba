@@ -13,9 +13,8 @@ procedure ImportInternal(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
   simba.script, simba.image, simba.process,
-  simba.array_point, simba.array_ord, simba.array_string;
+  simba.vartype_pointarray, simba.vartype_ordarray, simba.vartype_stringarray;
 
 procedure _LapeWrite(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -195,23 +194,13 @@ begin
 end;
 
 (*
-TByteArray.Intersection
-~~~~~~~~~~~~~~~~~~~~~~~
-function TByteArray.Intersection(Other: TByteArray): TByteArray;
-*)
-procedure _Lape_UInt8_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteArray(Result)^ := Algo_UInt8_Intersection(PByteArray(Params^[0])^, PByteArray(Params^[1])^)
-end;
-
-(*
 TIntegerArray.Intersection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 function TIntegerArray.Intersection(Other: TIntegerArray): TIntegerArray;
 *)
 procedure _Lape_Int32_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := Algo_Int32_Intersection(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^)
+  PIntegerArray(Result)^ := PIntegerArray(Params^[0])^.Intersection(PIntegerArray(Params^[1])^);
 end;
 
 (*
@@ -221,17 +210,7 @@ function TInt64Array.Intersection(Other: TInt64Array): TInt64Array;
 *)
 procedure _Lape_Int64_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInt64Array(Result)^ := Algo_Int64_Intersection(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
-end;
-
-(*
-TByteArray.SymmetricDifference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-function TByteArray.SymmetricDifference(Other: TByteArray): TByteArray;
-*)
-procedure _Lape_UInt8_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteArray(Result)^ := Algo_UInt8_SymmetricDifference(PByteArray(Params^[0])^, PByteArray(Params^[1])^)
+  PInt64Array(Result)^ := PInt64Array(Params^[0])^.Intersection(PInt64Array(Params^[1])^);
 end;
 
 (*
@@ -241,7 +220,7 @@ function TIntegerArray.SymmetricDifference(Other: TIntegerArray): TIntegerArray;
 *)
 procedure _Lape_Int32_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := Algo_Int32_SymmetricDifference(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^)
+  PIntegerArray(Result)^ := PIntegerArray(Params^[0])^.SymmetricDifference(PIntegerArray(Params^[1])^);
 end;
 
 (*
@@ -251,17 +230,7 @@ function TInt64Array.SymmetricDifference(Other: TInt64Array): TInt64Array;
 *)
 procedure _Lape_Int64_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInt64Array(Result)^ := Algo_Int64_SymmetricDifference(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
-end;
-
-(*
-TByteArray.Difference
-~~~~~~~~~~~~~~~~~~~~~
-function TByteArray.Difference(Other: TByteArray): TByteArray;
-*)
-procedure _Lape_UInt8_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteArray(Result)^ := Algo_UInt8_Difference(PByteArray(Params^[0])^, PByteArray(Params^[1])^)
+  PInt64Array(Result)^ := PInt64Array(Params^[0])^.SymmetricDifference(PInt64Array(Params^[1])^);
 end;
 
 (*
@@ -271,7 +240,7 @@ function TIntegerArray.Difference(Other: TIntegerArray): TIntegerArray;
 *)
 procedure _Lape_Int32_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PIntegerArray(Result)^ := Algo_Int32_Difference(PIntegerArray(Params^[0])^, PIntegerArray(Params^[1])^)
+    PIntegerArray(Result)^ := PIntegerArray(Params^[0])^.Difference(PIntegerArray(Params^[1])^);
 end;
 
 (*
@@ -281,7 +250,7 @@ function TInt64Array.Difference(Other: TInt64Array): TInt64Array;
 *)
 procedure _Lape_Int64_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInt64Array(Result)^ := Algo_Int64_Difference(PInt64Array(Params^[0])^, PInt64Array(Params^[1])^)
+  PInt64Array(Result)^ := PInt64Array(Params^[0])^.Difference(PInt64Array(Params^[1])^);
 end;
 
 procedure _LapeSetSimbaTitle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -468,15 +437,12 @@ begin
     addGlobalFunc('function TSingleArray.Equals(Other: TSingleArray): Boolean', @_LapeSingleArray_Equals);
     addGlobalFunc('function TDoubleArray.Equals(Other: TDoubleArray): Boolean', @_LapeDoubleArray_Equals);
 
-    addGlobalFunc('function TByteArray.Difference(Other: TByteArray): TByteArray', @_Lape_UInt8_Difference);
     addGlobalFunc('function TIntegerArray.Difference(Other: TIntegerArray): TIntegerArray', @_Lape_Int32_Difference);
     addGlobalFunc('function TInt64Array.Difference(Other: TInt64Array): TInt64Array', @_Lape_Int64_Difference);
 
-    addGlobalFunc('function TByteArray.SymmetricDifference(Other: TByteArray): TByteArray', @_Lape_UInt8_SymmetricDifference);
     addGlobalFunc('function TIntegerArray.SymmetricDifference(Other: TIntegerArray): TIntegerArray', @_Lape_Int32_SymmetricDifference);
     addGlobalFunc('function TInt64Array.SymmetricDifference(Other: TInt64Array): TInt64Array', @_Lape_Int64_SymmetricDifference);
 
-    addGlobalFunc('function TByteArray.Intersection(Other: TByteArray): TByteArray', @_Lape_UInt8_Intersection);
     addGlobalFunc('function TIntegerArray.Intersection(Other: TIntegerArray): TIntegerArray', @_Lape_Int32_Intersection);
     addGlobalFunc('function TInt64Array.Intersection(Other: TInt64Array): TInt64Array', @_Lape_Int64_Intersection);
   end;

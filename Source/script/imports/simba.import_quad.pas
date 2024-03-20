@@ -19,7 +19,7 @@ implementation
 
 uses
   lptypes,
-  simba.quad;
+  simba.vartype_quad;
 
 (*
 TQuad

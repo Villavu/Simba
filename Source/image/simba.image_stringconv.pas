@@ -35,7 +35,7 @@ implementation
 
 uses
   FPReadPNG, FPWritePNG,
-  simba.encoding, simba.image_lazbridge;
+  simba.encoding, simba.image_lazbridge, simba.vartype_string;
 
 procedure SimbaImage_FromString(Image: TSimbaImage; Str: String);
 var

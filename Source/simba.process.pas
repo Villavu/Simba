@@ -55,7 +55,7 @@ implementation
 
 uses
   Forms, Process, DateUtils,
-  simba.env, simba.files, simba.nativeinterface;
+  simba.env, simba.files, simba.nativeinterface, simba.vartype_string;
 
 type
   TProcessTimeout = class(TProcess)

@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.image, simba.box;
+  simba.base, simba.image, simba.vartype_box;
 
 procedure SimbaImage_LoadBitmapArea(Image: TSimbaImage; FileName: String; Area: TBox);
 

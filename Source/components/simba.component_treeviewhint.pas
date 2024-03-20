@@ -37,7 +37,7 @@ implementation
 
 uses
   LCLType,
-  simba.theme;
+  simba.ide_theme;
 
 type
   TCustomHintWindow = class(THintWindow)

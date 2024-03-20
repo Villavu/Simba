@@ -32,7 +32,7 @@ type
 implementation
 
 uses
-  simba.theme;
+  simba.ide_theme;
 
 type
   TButtonPanelButton = class(TSimbaButton)

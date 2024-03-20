@@ -14,7 +14,7 @@ uses
   classes, sysutils, inifiles, lazmethodlist, variants, fgl, controls, graphics;
 
 const
-  SETTINGS_VERSION = 1; // Increase if settings become incompatible
+  SETTINGS_VERSION = 2; // Increase if settings become incompatible
 
 type
   TSimbaSettings = class;
@@ -195,8 +195,8 @@ implementation
 
 uses
   Forms, SynEdit, LCLType,
-  simba.base, simba.encoding, simba.env, simba.editor_docgenerator,
-  simba.ide_initialization, simba.theme, simba.fonthelpers;
+  simba.base, simba.encoding, simba.env, simba.ide_editor_docgenerator,
+  simba.ide_initialization, simba.ide_theme, simba.fonthelpers;
 
 var
   SimbaSettingsInstance: TSimbaSettings = nil;

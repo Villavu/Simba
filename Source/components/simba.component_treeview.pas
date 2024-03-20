@@ -139,7 +139,7 @@ implementation
 
 uses
   Math,
-  simba.theme, simba.main;
+  simba.ide_theme, simba.form_main;
 
 constructor TSimbaTreeView.Create(AOwner: TComponent; NodeClass: TTreeNodeClass);
 var
@@ -189,7 +189,7 @@ begin
   FTree.BackgroundColor := SimbaTheme.ColorBackground;
   FTree.SelectionColor := SimbaTheme.ColorActive;
   FTree.Font.Color := SimbaTheme.ColorFont;
-  FTree.Images := SimbaForm.Images;
+  FTree.Images := SimbaMainForm.Images;
   FTree.OnAdvancedCustomDrawItem := @DoDrawItem;
 
   FScrollbarVert.ForwardScrollControl := FTree;

@@ -13,8 +13,7 @@ unit simba.base;
 interface
 
 uses
-  Classes, SysUtils, Graphics,
-  fpjson, jsonparser, jsonscanner;
+  Classes, SysUtils, Graphics;
 
 {$PUSH}
 {$SCOPEDENUMS ON}
@@ -326,26 +325,8 @@ type
   end;
   TBoxArray = array of TBox;
 
-  TBoxHelperBase = type helper for TBox
-  private
-    function GetCenter: TPoint; inline;
-    function GetWidth: Integer; inline;
-    function GetHeight: Integer; inline;
-  public
-    const ZERO: TBox = (X1: 0; Y1: 0; X2: 0; Y2: 0);
-
-    class function Create(const X1, Y1, X2, Y2: Integer): TBox; static; overload;
-    class function Create(const Center: TPoint; const XRad, YRad: Integer): TBox; static; overload;
-
-    property Width: Integer read GetWidth;
-    property Height: Integer read GetHeight;
-    property Center: TPoint read GetCenter;
-  end;
-
   PBox = ^TBox;
   PBoxArray = ^TBoxArray;
-
-  operator = (const Left, Right: TBox): Boolean;
 
 type
   TQuad = record
@@ -368,11 +349,6 @@ type
 
   PCircle = ^TCircle;
   PCircleArray = ^TCircleArray;
-
-  {$DEFINE HEADER}
-    {$i point.inc}
-    {$i string.inc}
-  {$UNDEF HEADER}
 
 {$PUSH}
 {$SCOPEDENUMS ON}
@@ -410,8 +386,8 @@ procedure Swap(var A, B: Byte); overload;
 procedure Swap(var A, B: Integer); overload;
 procedure Swap(var A, B: Single); overload;
 procedure Swap(var A, B: Double); overload;
-procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: Pointer); overload;
+procedure Swap(var A, B: TPoint); overload;
 procedure Swap(var A, B: TColorBGRA); overload;
 
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String overload;
@@ -450,51 +426,7 @@ const
 implementation
 
 uses
-  Math, RegExpr, StrUtils, TypInfo,
-  simba.arraybuffer, simba.geometry, simba.hash;
-
-function TBoxHelperBase.GetCenter: TPoint;
-begin
-  Result.X := (Self.X2 + Self.X1 + 1) div 2;
-  Result.Y := (Self.Y2 + Self.Y1 + 1) div 2;
-end;
-
-function TBoxHelperBase.GetWidth: Integer;
-begin
-  Result := (Self.X2 - Self.X1) + 1;
-end;
-
-function TBoxHelperBase.GetHeight: Integer;
-begin
-  Result := (Self.Y2 - Self.Y1) + 1;
-end;
-
-class function TBoxHelperBase.Create(const X1, Y1, X2, Y2: Integer): TBox;
-begin
-  Result.X1 := X1;
-  Result.Y1 := Y1;
-  Result.X2 := X2;
-  Result.Y2 := Y2;
-end;
-
-class function TBoxHelperBase.Create(const Center: TPoint; const XRad, YRad: Integer): TBox;
-begin
-  Result.X1 := Center.X - XRad;
-  Result.Y1 := Center.Y - YRad;
-  Result.X2 := Center.X + XRad;
-  Result.Y2 := Center.Y + YRad;
-end;
-
-operator = (const Left, Right: TBox): Boolean;
-begin
-  Result := (Int64(Left.TopLeft)     = Int64(Right.TopLeft)) and
-            (Int64(Left.BottomRight) = Int64(Right.BottomRight));
-end;
-
-{$DEFINE BODY}
-  {$i point.inc}
-  {$i string.inc}
-{$UNDEF BODY}
+  Math, TypInfo;
 
 procedure Debug(const Msg: String);
 begin
@@ -667,14 +599,14 @@ begin
   specialize Swap<Double>(A, B);
 end;
 
-procedure Swap(var A, B: TPoint);
-begin
-  specialize Swap<TPoint>(A, B);
-end;
-
 procedure Swap(var A, B: Pointer);
 begin
   specialize Swap<Pointer>(A, B);
+end;
+
+procedure Swap(var A, B: TPoint);
+begin
+  specialize Swap<TPoint>(A, B);
 end;
 
 procedure Swap(var A, B: TColorBGRA);

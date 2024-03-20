@@ -87,7 +87,7 @@ implementation
 
 uses
   windows, jwapsapi, dwmapi, multimon, mmsystem,
-  simba.process, simba.windowhandle;
+  simba.process, simba.vartype_windowhandle, simba.vartype_box;
 
 type
   MONITOR_DPI_TYPE = (

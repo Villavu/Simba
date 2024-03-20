@@ -101,7 +101,7 @@ uses
   BaseUnix,
   {$ENDIF}
   FileUtil, LazFileUtils, IniFiles,
-  simba.arraybuffer;
+  simba.containers, simba.vartype_string;
 
 class function TSimbaDir.DirList(Path: String; Recursive: Boolean): TStringArray;
 var

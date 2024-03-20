@@ -21,7 +21,6 @@ uses
 
 type
   PComponent = ^TComponent;
-  PCursor = ^TCursor;
   PBitmap = ^TBitmap;
 
 procedure _LapeSimbaImageBox_FindDTM(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

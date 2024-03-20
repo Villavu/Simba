@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.box;
+  simba.vartype_box;
 
 (*
 TBox

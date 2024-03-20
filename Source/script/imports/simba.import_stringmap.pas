@@ -16,7 +16,7 @@ implementation
 
 uses
   lptypes, lpvartypes,
-  simba.stringmap;
+  simba.container_stringmap;
 
 procedure _LapeStringMap_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin

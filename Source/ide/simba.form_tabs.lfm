@@ -1,0 +1,88 @@
+object SimbaTabsForm: TSimbaTabsForm
+  Left = 2706
+  Height = 206
+  Top = 265
+  Width = 816
+  AllowDropFiles = True
+  Caption = 'Editor'
+  ClientHeight = 206
+  ClientWidth = 816
+  DesignTimePPI = 120
+  OnDestroy = FormDestroy
+  OnDropFiles = DoOnDropFiles
+  OnMouseDown = FormMouseDown
+  OnMouseLeave = FormMouseLeave
+  OnMouseMove = FormMouseMove
+  OnMouseUp = FormMouseUp
+  ShowInTaskBar = stAlways
+  LCLVersion = '3.0.0.3'
+  object FindPanel: TPanel
+    Left = 0
+    Height = 0
+    Top = 206
+    Width = 816
+    Align = alBottom
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 0
+    ClientWidth = 816
+    ParentColor = False
+    TabOrder = 0
+    Visible = False
+    OnResize = FindPanelResize
+    object FindEditPanel: TPanel
+      AnchorSideLeft.Control = FindPanel
+      AnchorSideTop.Control = FindPanel
+      AnchorSideBottom.Control = FindPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 0
+      Top = 0
+      Width = 0
+      Anchors = [akTop, akLeft, akBottom]
+      AutoSize = True
+      BevelOuter = bvNone
+      TabOrder = 0
+    end
+    object FindButtonPanel: TPanel
+      AnchorSideLeft.Control = FindEditPanel
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = FindPanel
+      AnchorSideBottom.Control = FindPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 0
+      Top = 0
+      Width = 0
+      Anchors = [akTop, akLeft, akBottom]
+      AutoSize = True
+      BevelOuter = bvNone
+      TabOrder = 1
+    end
+  end
+  object TabPopupMenu: TPopupMenu
+    OnMeasureItem = TabPopupMenuMeasureItem
+    Left = 320
+    Top = 20
+    object MenuItemNewTab: TMenuItem
+      Caption = 'New Tab'
+      ImageIndex = 5
+      OnClick = DoTabPopupClick
+    end
+    object MenuItemCloseTab: TMenuItem
+      Caption = 'Close Tab'
+      ImageIndex = 52
+      OnClick = DoTabPopupClick
+    end
+    object MenuItemCloseOtherTabs: TMenuItem
+      Caption = 'Close All Other Tabs'
+      OnClick = DoTabPopupClick
+    end
+  end
+  object OpenDialog: TOpenDialog
+    Filter = 'Simba Files|*.simba;*.pas;*.inc|All Files|*.*'
+    Options = [ofAllowMultiSelect, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    Left = 110
+    Top = 20
+  end
+end

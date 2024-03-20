@@ -39,7 +39,7 @@ type
 implementation
 
 uses
-  simba.matrix_int;
+  simba.vartype_ordmatrix;
 
 class function TSimbaIntegralImageF.Create(const From: TByteMatrix): TSimbaIntegralImageF;
 var

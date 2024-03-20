@@ -1,0 +1,36 @@
+{$assertions on}
+
+procedure test(atpa: T2DPointArray; expected: T2DPointArray);
+var
+  i: Integer;
+begin
+  Assert(Length(atpa) = Length(expected));
+  for i:=0 to High(expected) do
+    Assert(atpa[i].Equals(expected[i]));
+end;
+
+var
+  a,b,c,d,e: TPointArray;
+  atpa: T2DPointArray;
+begin
+  a += TPointArray.CreateFromBox([10,10,20,20],True);
+  b += TPointArray.CreateFromBox([40,40,60,60],True);
+  c += TPointArray.CreateFromBox([80,80,120,120],True);
+  d += TPointArray.CreateFromBox([140,140,200,200],True);
+  e += TPointArray.CreateFromBox([220,220,320,320],True);
+
+  atpa := [a,b,c,d,e];
+
+  test(atpa.SortByY(True), [a,b,c,d,e]);
+  test(atpa.SortByY(False), [e,d,c,b,a]);
+
+  test(atpa.SortByX(True), [a,b,c,d,e]);
+  test(atpa.SortByX(False), [e,d,c,b,a]);
+
+  test(atpa.SortBySize(True), [a,b,c,d,e]);
+  test(atpa.SortBySize(False), [e,d,c,b,a]);
+
+  test(atpa.SortFromSize(1700), [c,b,a,d,e]);
+  test(atpa.SortFrom([144,144]), [d,c,b,e,a]);
+end;
+

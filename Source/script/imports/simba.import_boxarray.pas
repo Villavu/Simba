@@ -14,8 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.array_box,
-  simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference;
+  simba.vartype_boxarray;
 
 (*
 TBoxArray
@@ -210,7 +209,7 @@ TBoxArray.SymmetricDifference
 *)
 procedure _Lape_Box_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoxArray(Result)^ := Algo_Box_SymmetricDifference(PBoxArray(Params^[0])^, PBoxArray(Params^[1])^)
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.SymmetricDifference(PBoxArray(Params^[1])^);
 end;
 
 (*
@@ -220,7 +219,7 @@ TBoxArray.Difference
 *)
 procedure _Lape_Box_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoxArray(Result)^ := Algo_Box_Difference(PBoxArray(Params^[0])^, PBoxArray(Params^[1])^)
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.Difference(PBoxArray(Params^[1])^);
 end;
 
 (*
@@ -230,7 +229,7 @@ TBoxArray.Intersection
 *)
 procedure _Lape_Box_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoxArray(Result)^ := Algo_Box_Intersection(PBoxArray(Params^[0])^, PBoxArray(Params^[1])^)
+  PBoxArray(Result)^ := PBoxArray(Params^[0])^.Intersection(PBoxArray(Params^[1])^);
 end;
 
 procedure ImportBoxArray(Compiler: TSimbaScript_Compiler);

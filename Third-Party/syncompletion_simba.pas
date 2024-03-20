@@ -719,8 +719,6 @@ end;
 destructor TSynBaseCompletionForm.Destroy;
 begin
   UnRegisterHandlers;
-  FreeAndNil(Scroll);
-  FreeAndNil(SizeDrag);
   FItemList.Free;
   FHintTimer.Free;
   FHint.Free;

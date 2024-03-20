@@ -5,21 +5,19 @@
 }
 program Simba;
 
-{$i simba.inc}
+{$I simba.inc}
 {$R Simba.res}
 
 uses
   simba.init,
   Classes, SysUtils, Interfaces, Forms,
-  simba.base, simba.main,
-  simba.aboutform, simba.debugimageform, simba.imagetostringform, simba.functionlistform,
-  simba.scripttabsform, simba.outputform, simba.colorpickerhistoryform, simba.filebrowserform,
-  simba.notesform, simba.settingsform, simba.associate, simba.openexampleform,
-  simba.package_form, simba.shapeboxform, simba.backupsform, simba.findinfilesform,
-  simba.downloadsimbaform,
+  simba.base,
+  simba.form_main, simba.form_tabs, simba.form_about, simba.form_debugimage, simba.form_imagestring,
+  simba.form_functionlist, simba.form_output, simba.form_colorpickhistory, simba.form_filebrowser,
+  simba.form_notes, simba.form_settings, simba.form_openexample, simba.form_shapebox,
+  simba.form_backups, simba.form_findinfiles, simba.form_downloadsimba, simba.form_package,
   simba.compiler_dump, simba.plugin_dump, simba.script_runner,
-  simba.ide_initialization, simba.ide_analytics, simba.ide_codetools_setup,
-  simba.openssl;
+  simba.ide_initialization;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
@@ -68,13 +66,6 @@ begin
     Halt();
   end;
 
-  if Application.HasOption('associate') then
-  begin
-    Associate();
-
-    Halt();
-  end;
-
   if (not Application.HasOption('open')) and (Application.HasOption('run') or Application.HasOption('compile')) then
   begin
     if Application.HasOption('simbacommunication') then
@@ -113,23 +104,23 @@ begin
     SimbaIDEInitialization_CallBeforeCreate();
 
     Application.ShowMainForm := False;
-    Application.CreateForm(TSimbaForm, SimbaForm);
+    Application.CreateForm(TSimbaMainForm, SimbaMainForm);
+    Application.CreateForm(TSimbaTabsForm, SimbaTabsForm);
     Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
     Application.CreateForm(TSimbaDebugImageForm, SimbaDebugImageForm);
     Application.CreateForm(TSimbaNotesForm, SimbaNotesForm);
-    Application.CreateForm(TSimbaScriptTabsForm, SimbaScriptTabsForm);
     Application.CreateForm(TSimbaOutputForm, SimbaOutputForm);
     Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
     Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
-    Application.CreateForm(TSimbaImageToStringForm, SimbaImageToStringForm);
+    Application.CreateForm(TSimbaImageStringForm, SimbaImageStringForm);
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
-    Application.CreateForm(TSimbaColorPickerHistoryForm, SimbaColorPickerHistoryForm);
-    Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
+    Application.CreateForm(TSimbaColorPickHistoryForm, SimbaColorPickHistoryForm);
     Application.CreateForm(TSimbaShapeBoxForm, SimbaShapeBoxForm);
     Application.CreateForm(TSimbaBackupsForm, SimbaBackupsForm);
     Application.CreateForm(TSimbaFindInFilesForm, SimbaFindInFilesForm);
     Application.CreateForm(TSimbaDownloadSimbaForm, SimbaDownloadSimbaForm);
+    Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
 
     SimbaIDEInitialization_CallBeforeShow();
   end;

@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes,
-  simba.slacktree;
+  simba.container_slacktree;
 
 procedure _LapeSlackTreeInit(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin

@@ -48,7 +48,7 @@ begin
   if (Count = 0) then
     Exit;
 
-  specialize QuickSort<Double>(Arr, 0, Count - 1);
+  specialize TArraySort<Double>.QuickSort(Arr, 0, Count - 1);
 
   if ACoordIsX then
     for I := 0 to High(lpoints) do

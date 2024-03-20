@@ -1,0 +1,78 @@
+{$assertions on}
+
+procedure TestIntegerArray;
+var
+  a,b: TIntegerArray;
+begin
+  a := [1,2,3];
+  b := [3,2,1];
+  Assert(ToString(a.Difference(b)) = '[]');
+  Assert(ToString(a.SymmetricDifference(b)) = '[]');
+  Assert(ToString(a.Intersection(b)) = '[1, 2, 3]');
+
+  a := [1,2,3,4];
+  b := [5,4,3];
+  Assert(ToString(a.Difference(b)) = '[1, 2]');
+  Assert(ToString(a.SymmetricDifference(b)) = '[1, 2, 5]');
+  Assert(ToString(a.Intersection(b)) = '[3, 4]');
+end;
+
+procedure TestInt64Array;
+var
+  a,b: TInt64Array;
+begin
+  a := [1,2,3];
+  b := [3,2,1];
+  Assert(ToString(a.Difference(b)) = '[]');
+  Assert(ToString(a.SymmetricDifference(b)) = '[]');
+  Assert(ToString(a.Intersection(b)) = '[1, 2, 3]');
+
+  a := [1,2,3,4];
+  b := [5,4,3];
+  Assert(ToString(a.Difference(b)) = '[1, 2]');
+  Assert(ToString(a.SymmetricDifference(b)) = '[1, 2, 5]');
+  Assert(ToString(a.Intersection(b)) = '[3, 4]');
+end;
+
+procedure TestPointArray;
+var
+  a,b: TPointArray;
+begin
+  a := [[1,1],[2,2],[3,3]];
+  b := [[3,3],[2,2],[1,1]];
+  Assert(ToString(a.Difference(b)) = '[]');
+  Assert(ToString(a.SymmetricDifference(b)) = '[]');
+  Assert(ToString(a.Intersection(b)) = '[{X = 1, Y = 1}, {X = 2, Y = 2}, {X = 3, Y = 3}]');
+
+  a := [[1,2],[2,3],[3,4]];
+  b := [[1,2],[2,3]];
+  Assert(ToString(a.Difference(b)) = '[{X = 3, Y = 4}]');
+  Assert(ToString(a.SymmetricDifference(b)) = '[{X = 3, Y = 4}]');
+  Assert(ToString(a.Intersection(b)) = '[{X = 1, Y = 2}, {X = 2, Y = 3}]');
+end;
+
+procedure TestBoxArray;
+var
+  a,b: TBoxArray;
+begin
+  a := [[1,1,1,1],[2,2,2,2],[3,3,3,3]];
+  b := [[3,3,3,3],[2,2,2,2],[1,1,1,1]];
+
+  Assert(ToString(a.Difference(b)) = '[]');
+  Assert(ToString(a.SymmetricDifference(b)) = '[]');
+  Assert(ToString(a.Intersection(b)) = '[{X1 = 1, Y1 = 1, X2 = 1, Y2 = 1}, {X1 = 2, Y1 = 2, X2 = 2, Y2 = 2}, {X1 = 3, Y1 = 3, X2 = 3, Y2 = 3}]');
+
+  a := [[1,1,1,1],[2,2,2,2],[3,3,3,3]];
+  b := [[1,1,1,1],[2,2,2,2]];
+
+  Assert(ToString(a.Difference(b)) = '[{X1 = 3, Y1 = 3, X2 = 3, Y2 = 3}]');
+  Assert(ToString(a.SymmetricDifference(b)) = '[{X1 = 3, Y1 = 3, X2 = 3, Y2 = 3}]');
+  Assert(ToString(a.Intersection(b)) = '[{X1 = 1, Y1 = 1, X2 = 1, Y2 = 1}, {X1 = 2, Y1 = 2, X2 = 2, Y2 = 2}]');
+end;
+
+begin
+  TestIntegerArray();
+  TestInt64Array();
+  TestPointArray();
+  TestBoxArray();
+end;
