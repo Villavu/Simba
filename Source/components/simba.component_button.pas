@@ -146,7 +146,7 @@ type
 implementation
 
 uses
-  simba.theme, simba.main, simba.fonthelpers,
+  simba.theme, simba.form_main, simba.fonthelpers,
   ATCanvasPrimitives;
 
 procedure TSimbaTransparentButton.Paint;
@@ -412,7 +412,7 @@ begin
   Color := SimbaTheme.ColorScrollBarActive;
   AutoSize := True;
 
-  FImageList := SimbaForm.Images;
+  FImageList := SimbaMainForm.Images;
   FImageIndex := -1;
 
   XPadding := 6;

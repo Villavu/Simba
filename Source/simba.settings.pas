@@ -14,7 +14,7 @@ uses
   classes, sysutils, inifiles, lazmethodlist, variants, fgl, controls, graphics;
 
 const
-  SETTINGS_VERSION = 1; // Increase if settings become incompatible
+  SETTINGS_VERSION = 2; // Increase if settings become incompatible
 
 type
   TSimbaSettings = class;

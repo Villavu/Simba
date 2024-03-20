@@ -57,8 +57,8 @@ implementation
 
 uses
   LCLType,
-  simba.base, simba.main, simba.editor, simba.editor_docgenerator, simba.nativeinterface,
-  simba.scripttab, simba.scripttabsform, simba.ide_utils;
+  simba.base, simba.form_main, simba.editor, simba.editor_docgenerator, simba.nativeinterface,
+  simba.scripttab, simba.form_tabs, simba.ide_utils;
 
 type
   TSimbaTabPopupMenuHelper = class helper for TSimbaTabPopupMenu
@@ -125,12 +125,12 @@ end;
 
 procedure TSimbaTabPopupMenu.DoFind(Sender: TObject);
 begin
-  SimbaScriptTabsForm.Find();
+  SimbaTabsForm.Find();
 end;
 
 procedure TSimbaTabPopupMenu.DoReplace(Sender: TObject);
 begin
-  SimbaScriptTabsForm.Replace();
+  SimbaTabsForm.Replace();
 end;
 
 procedure TSimbaTabPopupMenu.DoDocComment(Sender: TObject);
@@ -180,7 +180,7 @@ constructor TSimbaTabPopupMenu.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   OnMeasureItem := @DoMeasureItem;
-  Images := SimbaForm.Images;
+  Images := SimbaMainForm.Images;
 
   FFindDecl   := Add('Find Declaration',          IMG_NONE,       0,                                       @DoFindDeclaration);
                  AddLine();
