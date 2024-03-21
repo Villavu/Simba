@@ -38,7 +38,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.base, simba.dockinghelpers;
+  simba.base, simba.ide_dockinghelpers;
 
 procedure TSimbaDebugImageForm.Close;
 var

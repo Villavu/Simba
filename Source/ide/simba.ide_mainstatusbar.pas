@@ -37,8 +37,8 @@ var
 implementation
 
 uses
-  simba.ide_initialization, simba.ide_events, simba.mouselogger, simba.scripttab,
-  simba.editor_findreplace, simba.form_tabs, simba.form_functionlist;
+  simba.ide_initialization, simba.ide_events, simba.ide_mouselogger, simba.ide_tab,
+  simba.ide_editor_findreplace, simba.form_tabs, simba.form_functionlist;
 
 procedure TSimbaMainStatusBar.DoUpdateScriptStatus(Sender: TObject);
 begin

@@ -195,8 +195,8 @@ implementation
 
 uses
   Forms, SynEdit, LCLType,
-  simba.base, simba.encoding, simba.env, simba.editor_docgenerator,
-  simba.ide_initialization, simba.theme, simba.fonthelpers;
+  simba.base, simba.encoding, simba.env, simba.ide_editor_docgenerator,
+  simba.ide_initialization, simba.ide_theme, simba.fonthelpers;
 
 var
   SimbaSettingsInstance: TSimbaSettings = nil;

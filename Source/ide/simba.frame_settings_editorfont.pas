@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ExtCtrls, StdCtrls, Graphics, Spin,
-  simba.editor;
+  simba.ide_editor;
 
 type
   TEditorFontFrame = class(TFrame)

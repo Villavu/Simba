@@ -117,10 +117,10 @@ implementation
 
 uses
   SynEditMarkupBracket, SynEditMarkupWordGroup,
-  simba.dockinghelpers, simba.fonthelpers,
+  simba.ide_dockinghelpers, simba.fonthelpers,
   simba.form_main, simba.form_tabs,  simba.form_settings,
   simba.nativeinterface,
-  simba.scripttab, simba.ide_events, simba.ide_utils;
+  simba.ide_tab, simba.ide_events, simba.ide_utils;
 
 type
   TSimbaOutputTab = class(TSimbaTab)

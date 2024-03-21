@@ -67,7 +67,7 @@ implementation
 
 uses
   LCLType, LCLIntf, LMessages, ATCanvasPrimitives,
-  simba.theme, simba.fonthelpers;
+  simba.ide_theme, simba.fonthelpers;
 
 function TSimbaMenuBar.GetMenus: TPopupMenuArray;
 var

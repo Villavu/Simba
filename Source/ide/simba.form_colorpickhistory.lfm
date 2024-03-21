@@ -1,4 +1,4 @@
-object SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm
+object SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm
   Left = 80
   Height = 430
   Top = 135

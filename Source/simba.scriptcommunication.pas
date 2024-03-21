@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, ExtCtrls, Graphics,
-  simba.base, simba.ipc, simba.scripttab;
+  simba.base, simba.ipc, simba.ide_tab;
 
 type
   TSimbaScriptInstanceCommunication = class(TSimbaIPCServer)

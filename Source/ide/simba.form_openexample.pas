@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ComCtrls, ExtCtrls,
-  simba.base, simba.editor,
+  simba.base, simba.ide_editor,
   simba.component_treeview, simba.component_buttonpanel;
 
 type
@@ -45,7 +45,7 @@ implementation
 
 uses
   LCLType, AnchorDocking,
-  simba.form_main, simba.form_tabs, simba.package, simba.files, simba.theme;
+  simba.form_main, simba.form_tabs, simba.ide_package, simba.files, simba.ide_theme;
 
 function ReadResourceString(ResourceName: String): String;
 begin

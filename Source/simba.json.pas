@@ -116,7 +116,7 @@ type
 implementation
 
 uses
-  jsonreader, jsonscanner, jsonparser, Variants;
+  jsonscanner, jsonparser, Variants;
 
 function TSimbaJSONElement.GetAsString: String;
 begin
@@ -203,7 +203,7 @@ end;
 procedure TSimbaJSONElement.AddValue(Key: String; Value: Variant);
 begin
   if IsValue then
-    raise Exception.Create('Element is not json object or array');
+    SimbaException('Element is not json object or array');
 
   if VarIsStr(Value) then
     if IsArray then
@@ -229,13 +229,13 @@ begin
     else
       TJSONObject(FData).Add(Key, TJSONFloat(Value))
   else
-    raise Exception.Create('Invalid JSON variant type: ' + VarTypeAsText(VarType(Value)));
+    SimbaException('Invalid JSON variant type: ' + VarTypeAsText(VarType(Value)));
 end;
 
 function TSimbaJSONElement.AddArray(Key: String): TSimbaJSONElement;
 begin
   if IsValue then
-    raise Exception.Create('Element is not json object or array');
+    SimbaException('Element is not json object or array');
 
   if (FData is TJSONArray) then
     Result := FData.Items[TJSONArray(FData).Add(TJSONArray.Create())]
@@ -247,7 +247,7 @@ end;
 function TSimbaJSONElement.AddObject(Key: String): TSimbaJSONElement;
 begin
   if IsValue then
-    raise Exception.Create('Element is not json object or array');
+    SimbaException('Element is not json object or array');
 
   if (FData is TJSONArray) then
     Result := FData.Items[TJSONArray(FData).Add(TJSONObject.Create())]
@@ -259,7 +259,7 @@ end;
 procedure TSimbaJSONElement.AddElement(Key: String; Element: TSimbaJSONElement);
 begin
   if IsValue then
-    raise Exception.Create('Element is not json object or array');
+    SimbaException('Element is not json object or array');
 
   if (FData is TJSONArray) then
     TJSONArray(FData).Add(Element)
@@ -271,7 +271,7 @@ end;
 function TSimbaJSONElement.AddNull(Key: String): TSimbaJSONElement;
 begin
   if IsValue then
-    raise Exception.Create('Element is not json object or array');
+    SimbaException('Element is not json object or array');
 
   if (FData is TJSONArray) then
     Result := FData.Items[TJSONArray(FData).Add(TJSONNull.Create())]
@@ -288,7 +288,7 @@ end;
 procedure TSimbaJSONElement.Delete(Key: String);
 begin
   if not IsObject then
-    raise Exception.Create('Element is not a json object');
+    SimbaException('Element is not a json object');
 
   TJSONObject(FData).Delete(Key);
 end;
@@ -296,7 +296,7 @@ end;
 procedure TSimbaJSONElement.Delete(Index: Integer);
 begin
   if IsValue then
-    raise Exception.Create('Element is not json object or array');
+    SimbaException('Element is not json object or array');
 
   if (FData is TJSONArray) then
     TJSONArray(FData).Delete(Index)
@@ -310,7 +310,7 @@ var
   Data: TJSONData;
 begin
   if not IsObject then
-    raise Exception.Create('Element is not json object');
+    SimbaException('Element is not json object');
 
   Result := TJSONObject(FData).Find(Key, Data);
   if Result then
@@ -330,7 +330,7 @@ end;
 function TSimbaJSONElement.HasKey(Key: String): Boolean;
 begin
   if not IsObject then
-    raise Exception.Create('Element is not json object');
+    SimbaException('Element is not json object');
 
   Result := Assigned(TJSONObject(FData).Find(Key));
 end;
@@ -340,7 +340,7 @@ var
   Key: String;
 begin
   if not IsObject then
-    raise Exception.Create('Element is not json object');
+    SimbaException('Element is not json object');
 
   for Key in Keys do
     if Assigned(TJSONObject(FData).Find(Key)) then
@@ -357,7 +357,7 @@ var
   Key: String;
 begin
   if not IsObject then
-    raise Exception.Create('Element is not json object');
+    SimbaException('Element is not json object');
 
   for Key in Keys do
     if not Assigned(TJSONObject(FData).Find(Key)) then

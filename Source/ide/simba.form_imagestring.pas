@@ -13,7 +13,7 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtDlgs, ExtCtrls, ClipBrd;
 
 type
-  TSimbaImageToStringForm = class(TForm)
+  TSimbaImageStringForm = class(TForm)
     ClipboardButton: TButton;
     GroupBox: TGroupBox;
     ToStringButton: TButton;
@@ -29,7 +29,7 @@ type
   end; 
 
 var
-  SimbaImageToStringForm: TSimbaImageToStringForm;
+  SimbaImageStringForm: TSimbaImageStringForm;
 
 implementation
 
@@ -38,7 +38,7 @@ implementation
 uses
   simba.base, simba.image, simba.image_lazbridge, simba.stringbuilder;
 
-procedure TSimbaImageToStringForm.OpenButtonClick(Sender: TObject);
+procedure TSimbaImageStringForm.OpenButtonClick(Sender: TObject);
 begin
   if OpenPictureDialog.Execute() then
   try
@@ -50,7 +50,7 @@ begin
   end;
 end;
 
-procedure TSimbaImageToStringForm.ClipboardButtonClick(Sender: TObject);
+procedure TSimbaImageStringForm.ClipboardButtonClick(Sender: TObject);
 begin
   if (Clipboard.HasPictureFormat()) then
   try
@@ -62,13 +62,13 @@ begin
   end;
 end;
 
-procedure TSimbaImageToStringForm.FormCreate(Sender: TObject);
+procedure TSimbaImageStringForm.FormCreate(Sender: TObject);
 begin
   Width := Scale96ToScreen(500);
   Height := Scale96ToScreen(300);
 end;
 
-procedure TSimbaImageToStringForm.FormDropFiles(Sender: TObject; const FileNames: array of string);
+procedure TSimbaImageStringForm.FormDropFiles(Sender: TObject; const FileNames: array of string);
 begin
   if (Length(FileNames) > 0) then
   try
@@ -80,7 +80,7 @@ begin
   end;
 end;
 
-procedure TSimbaImageToStringForm.ToStringButtonClick(Sender: TObject);
+procedure TSimbaImageStringForm.ToStringButtonClick(Sender: TObject);
 const
   PAD_WIDTH = 65;
 var

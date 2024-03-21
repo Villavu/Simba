@@ -139,7 +139,7 @@ implementation
 
 uses
   Math,
-  simba.theme, simba.form_main;
+  simba.ide_theme, simba.form_main;
 
 constructor TSimbaTreeView.Create(AOwner: TComponent; NodeClass: TTreeNodeClass);
 var

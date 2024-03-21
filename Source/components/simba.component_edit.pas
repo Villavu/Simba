@@ -130,7 +130,7 @@ implementation
 
 uses
   Math, Clipbrd,
-  simba.theme, simba.fonthelpers;
+  simba.ide_theme, simba.fonthelpers;
 
 type
   TSimbaEditLabel = class(TLabel)

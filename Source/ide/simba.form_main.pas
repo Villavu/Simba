@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
   Menus, ImgList, AnchorDockPanel, LMessages,
-  simba.base, simba.settings, simba.mouselogger;
+  simba.base, simba.settings, simba.ide_mouselogger;
 
 const
   IMG_NONE = -1;
@@ -263,7 +263,7 @@ uses
 
   simba.ide_initialization, simba.ide_events, simba.ide_utils,
   simba.ide_mainstatusbar, simba.ide_mainmenubar, simba.ide_maintoolbar,
-  simba.ide_scriptbackup,
+  simba.ide_scriptbackup, simba.ide_associate,
 
   simba.form_shapebox, simba.form_openexample, simba.form_colorpickhistory,
   simba.form_debugimage, simba.form_imagestring, simba.form_about,
@@ -271,10 +271,10 @@ uses
   simba.form_notes, simba.form_settings, simba.form_tabs,
   simba.form_functionlist, simba.form_downloadsimba, simba.form_backups,
 
-  simba.scripttab, simba.associate,
-  simba.aca, simba.dtmeditor, simba.env, simba.dockinghelpers, simba.nativeinterface,
-  simba.scriptformatter, simba.theme,
-  simba.threading, simba.editor;
+  simba.ide_tab,
+  simba.aca, simba.dtmeditor, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
+  simba.ide_simpleformatter, simba.ide_theme,
+  simba.threading, simba.ide_editor;
 
 procedure TSimbaMainForm.HandleException(Sender: TObject; E: Exception);
 
@@ -604,7 +604,7 @@ begin
     DockMaster.MakeDockable(SimbaFunctionListForm, MenuItemFunctionList);
     DockMaster.MakeDockable(SimbaNotesForm, MenuItemNotes);
     DockMaster.MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
-    DockMaster.MakeDockable(SimbaColorPickerHistoryForm, MenuItemColourHistory);
+    DockMaster.MakeDockable(SimbaColorPickHistoryForm, MenuItemColourHistory);
 
     if (SimbaSettings.General.Layout.Value <> '') then
     begin
@@ -970,7 +970,7 @@ end;
 
 procedure TSimbaMainForm.MenuItemImageToStringClick(Sender: TObject);
 begin
-  SimbaImageToStringForm.Show();
+  SimbaImageStringForm.Show();
 end;
 
 procedure TSimbaMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);

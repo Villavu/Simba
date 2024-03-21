@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, StdCtrls, Graphics,
   Dialogs, ColorBox, CheckLst, Spin, SynEditHighlighter, DividerBevel,
-  simba.editor;
+  simba.ide_editor;
 
 type
   TEditorColorsFrame = class(TFrame)
@@ -79,7 +79,7 @@ implementation
 
 uses
   SynEditTypes, SynEditMiscClasses,
-  simba.settings, simba.editor_attributes, simba.env, simba.base,
+  simba.settings, simba.ide_editor_attributes, simba.env, simba.base,
   simba.httpclient;
 
 type

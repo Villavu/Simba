@@ -114,7 +114,7 @@ implementation
 
 uses
   simba.form_main, simba.ide_events, simba.threading, simba.settings,
-  simba.form_tabs, simba.scripttab, simba.ide_showdeclaration, simba.nativeinterface;
+  simba.form_tabs, simba.ide_tab, simba.ide_showdeclaration, simba.nativeinterface;
 
 function GetImage(const Decl: TDeclaration): Integer;
 begin

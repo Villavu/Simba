@@ -14,7 +14,7 @@ uses
   ExtCtrls, Grids;
 
 type
-  TSimbaColorPickerHistoryForm = class(TForm)
+  TSimbaColorPickHistoryForm = class(TForm)
     ButtonExit: TButton;
     ButtonDelete: TButton;
     ButtonClear: TButton;
@@ -48,7 +48,7 @@ type
   end;
 
 var
-  SimbaColorPickerHistoryForm: TSimbaColorPickerHistoryForm;
+  SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm;
 
 implementation
 
@@ -65,7 +65,7 @@ type
     Color: TColor;
   end;
 
-procedure TSimbaColorPickerHistoryForm.ColorListBoxSelectionChange(Sender: TObject; User: Boolean);
+procedure TSimbaColorPickHistoryForm.ColorListBoxSelectionChange(Sender: TObject; User: Boolean);
 var
   Selected: Integer;
   SelectedColor: TColor;
@@ -85,29 +85,29 @@ begin
   end;
 end;
 
-procedure TSimbaColorPickerHistoryForm.HandleButtonClearClick(Sender: TObject);
+procedure TSimbaColorPickHistoryForm.HandleButtonClearClick(Sender: TObject);
 begin
   if MessageDlg('Clear the entire list?', mtConfirmation, mbYesNo, 0) = mrYes then
     ColorListBox.Clear();
 end;
 
-procedure TSimbaColorPickerHistoryForm.HandleButtonDeleteClick(Sender: TObject);
+procedure TSimbaColorPickHistoryForm.HandleButtonDeleteClick(Sender: TObject);
 begin
   if (ColorListBox.ItemIndex > -1) then
     ColorListBox.Items.Delete(ColorListBox.ItemIndex);
 end;
 
-procedure TSimbaColorPickerHistoryForm.HandleButtonExitClick(Sender: TObject);
+procedure TSimbaColorPickHistoryForm.HandleButtonExitClick(Sender: TObject);
 begin
   Close();
 end;
 
-procedure TSimbaColorPickerHistoryForm.HandleButtonPickColorClick(Sender: TObject);
+procedure TSimbaColorPickHistoryForm.HandleButtonPickColorClick(Sender: TObject);
 begin
   Pick();
 end;
 
-procedure TSimbaColorPickerHistoryForm.FormCreate(Sender: TObject);
+procedure TSimbaColorPickHistoryForm.FormCreate(Sender: TObject);
 var
   Value: TColorHistoryValue;
   Stream: TMemoryStream;
@@ -129,7 +129,7 @@ begin
   SizeComponents();
 end;
 
-procedure TSimbaColorPickerHistoryForm.FormDestroy(Sender: TObject);
+procedure TSimbaColorPickHistoryForm.FormDestroy(Sender: TObject);
 var
   I: Integer;
   Value: TColorHistoryValue;
@@ -150,23 +150,23 @@ begin
   Stream.Free();
 end;
 
-procedure TSimbaColorPickerHistoryForm.StringGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TSimbaColorPickHistoryForm.StringGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if (Key <> VK_C) and (not (ssModifier in Shift)) then
     Key := VK_UNKNOWN;
 end;
 
-function TSimbaColorPickerHistoryForm.GetColor(Index: Integer): TColor;
+function TSimbaColorPickHistoryForm.GetColor(Index: Integer): TColor;
 begin
   Result := ColorListBox.Colors[Index];
 end;
 
-function TSimbaColorPickerHistoryForm.GetColorCount: Integer;
+function TSimbaColorPickHistoryForm.GetColorCount: Integer;
 begin
   Result := ColorListBox.Count;
 end;
 
-function TSimbaColorPickerHistoryForm.GetPoint(Index: Integer): TPoint;
+function TSimbaColorPickHistoryForm.GetPoint(Index: Integer): TPoint;
 var
   Arr: TStringArray;
 begin
@@ -181,12 +181,12 @@ begin
   end;
 end;
 
-procedure TSimbaColorPickerHistoryForm.Pick;
+procedure TSimbaColorPickHistoryForm.Pick;
 begin
   SimbaMainToolBar.ButtonColorPicker.Click();
 end;
 
-procedure TSimbaColorPickerHistoryForm.SizeComponents;
+procedure TSimbaColorPickHistoryForm.SizeComponents;
 var
   Size: TSize;
   I: Integer;
@@ -211,12 +211,12 @@ begin
     StringGrid.RowHeights[I] := Size.Height;
 end;
 
-procedure TSimbaColorPickerHistoryForm.Add(APoint: TPoint; AColor: TColor);
+procedure TSimbaColorPickHistoryForm.Add(APoint: TPoint; AColor: TColor);
 begin
   ColorListBox.ItemIndex := ColorListBox.Items.AddObject('%d at (%d, %d)', [AColor, APoint.X, APoint.Y], TObject(PtrUInt(AColor)));
 end;
 
-procedure TSimbaColorPickerHistoryForm.FontChanged(Sender: TObject);
+procedure TSimbaColorPickHistoryForm.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
 

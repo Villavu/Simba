@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, dialogs, stdctrls, extctrls, comctrls, synedit,
-  simba.package, simba.package_components;
+  simba.ide_package, simba.ide_package_components;
 
 type
   TSimbaPackageForm = class(TForm)
@@ -69,7 +69,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.package_installform, simba.package_installer, simba.package_autoupdater,
+  simba.form_packageinstall, simba.ide_package_installer, simba.ide_package_autoupdater,
   simba.base, simba.dialog, simba.threading;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);

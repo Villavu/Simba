@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Menus, Buttons,
-  simba.scripttab, simba.editor, simba.editor_findreplace,
+  simba.ide_tab, simba.ide_editor, simba.ide_editor_findreplace,
   simba.component_tabcontrol, simba.component_button, simba.component_edit;
 
 type
@@ -109,10 +109,10 @@ implementation
 
 uses
   LCLType,
-  simba.base, simba.env, simba.editor_docgenerator,
+  simba.base, simba.env, simba.ide_editor_docgenerator,
   simba.form_main, simba.form_output,
-  simba.dockinghelpers, simba.nativeinterface,
-  simba.ide_events, simba.ide_utils, simba.theme, simba.settings;
+  simba.ide_dockinghelpers, simba.nativeinterface,
+  simba.ide_events, simba.ide_utils, simba.ide_theme, simba.settings;
 
 function GetSimbaActiveTab: TSimbaScriptTab;
 begin

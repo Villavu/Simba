@@ -57,7 +57,7 @@ implementation
 
 uses
   LCLIntf, ATCanvasPrimitives,
-  simba.theme;
+  simba.ide_theme;
 
 procedure TSimbaStatusBar.CheckIndex(Index: Integer);
 begin

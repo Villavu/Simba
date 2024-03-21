@@ -436,7 +436,7 @@
       <Unit8>
         <Filename Value="ide/simba.form_colorpickhistory.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaColorPickerHistoryForm"/>
+        <ComponentName Value="SimbaColorPickHistoryForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit8>
@@ -478,7 +478,7 @@
       <Unit14>
         <Filename Value="ide/simba.form_imagestring.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaImageToStringForm"/>
+        <ComponentName Value="SimbaImageStringForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit14>

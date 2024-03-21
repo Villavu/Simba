@@ -5,21 +5,19 @@
 }
 program Simba;
 
-{$i simba.inc}
+{$I simba.inc}
 {$R Simba.res}
 
 uses
   simba.init,
   Classes, SysUtils, Interfaces, Forms,
   simba.base,
-  simba.settings,
   simba.form_main, simba.form_tabs, simba.form_about, simba.form_debugimage, simba.form_imagestring,
-  simba.form_functionlist, simba.form_output, simba.form_colorpickhistory,
-  simba.form_filebrowser, simba.form_notes, simba.form_settings, simba.form_openexample,
-  simba.form_shapebox, simba.form_backups, simba.form_findinfiles, simba.form_downloadsimba,
-  simba.form_package,
+  simba.form_functionlist, simba.form_output, simba.form_colorpickhistory, simba.form_filebrowser,
+  simba.form_notes, simba.form_settings, simba.form_openexample, simba.form_shapebox,
+  simba.form_backups, simba.form_findinfiles, simba.form_downloadsimba, simba.form_package,
   simba.compiler_dump, simba.plugin_dump, simba.script_runner,
-  simba.openssl, simba.associate, simba.ide_initialization;
+  simba.ide_initialization;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
@@ -64,13 +62,6 @@ begin
   begin
     with DumpPlugin(Application.GetOptionValue('dumpplugin')) do
       SaveToFile(Application.Params[Application.ParamCount]);
-
-    Halt();
-  end;
-
-  if Application.HasOption('associate') then
-  begin
-    Associate();
 
     Halt();
   end;
@@ -122,9 +113,9 @@ begin
     Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
     Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
-    Application.CreateForm(TSimbaImageToStringForm, SimbaImageToStringForm);
+    Application.CreateForm(TSimbaImageStringForm, SimbaImageStringForm);
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
-    Application.CreateForm(TSimbaColorPickerHistoryForm, SimbaColorPickerHistoryForm);
+    Application.CreateForm(TSimbaColorPickHistoryForm, SimbaColorPickHistoryForm);
     Application.CreateForm(TSimbaShapeBoxForm, SimbaShapeBoxForm);
     Application.CreateForm(TSimbaBackupsForm, SimbaBackupsForm);
     Application.CreateForm(TSimbaFindInFilesForm, SimbaFindInFilesForm);

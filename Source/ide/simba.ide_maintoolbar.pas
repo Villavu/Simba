@@ -88,8 +88,8 @@ implementation
 uses
   Dialogs,
   simba.ide_initialization, simba.ide_events, simba.form_main, simba.form_tabs, simba.form_output,
-  simba.scripttab, simba.form_package,
-  simba.colorpicker, simba.windowselector, simba.areaselector,
+  simba.ide_tab, simba.form_package,
+  simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector,
   simba.windowhandle;
 
 procedure TSimbaMainToolBar.SetStates(ScriptState: ESimbaScriptState);

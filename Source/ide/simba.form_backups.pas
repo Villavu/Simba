@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Zipper,
-  simba.editor, simba.component_treeview, simba.component_buttonpanel;
+  simba.ide_editor, simba.component_treeview, simba.component_buttonpanel;
 
 type
   TSimbaBackupsForm = class(TForm)
@@ -44,7 +44,7 @@ implementation
 
 uses
   AnchorDocking,
-  simba.env, simba.files, simba.theme, simba.form_main, simba.form_tabs;
+  simba.env, simba.files, simba.ide_theme, simba.form_main, simba.form_tabs;
 
 type
   TBackupNode = class(TTreeNode)

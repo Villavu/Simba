@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, ComCtrls, ExtCtrls, Spin, DividerBevel,
-  simba.base, simba.theme;
+  simba.base, simba.ide_theme;
 
 type
   TSimbaGeneralFrame = class(TFrame)

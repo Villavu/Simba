@@ -43,7 +43,7 @@ type
 implementation
 
 uses
-  simba.form_main, simba.theme,
+  simba.form_main, simba.ide_theme,
   ATCanvasPrimitives;
 
 type
