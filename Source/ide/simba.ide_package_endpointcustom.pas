@@ -64,7 +64,7 @@ implementation
 
 uses
   dateutils, fpjson,
-  simba.httpclient, simba.base;
+  simba.httpclient, simba.base, simba.vartype_string;
 
 function TSimbaPackageEndpoint_Custom.GetPage(URL: String): String;
 begin

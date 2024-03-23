@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base;
+  simba.base, simba.vartype_box;
 
 function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
 function RandomTPA(Amount: Integer; Box: TBox): TPointArray;

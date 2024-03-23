@@ -90,7 +90,7 @@ uses
   simba.ide_initialization, simba.ide_events, simba.form_main, simba.form_tabs, simba.form_output,
   simba.ide_tab, simba.form_package,
   simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector,
-  simba.windowhandle;
+  simba.vartype_windowhandle, simba.vartype_box;
 
 procedure TSimbaMainToolBar.SetStates(ScriptState: ESimbaScriptState);
 

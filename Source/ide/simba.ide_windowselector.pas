@@ -22,12 +22,12 @@ implementation
 
 uses
   {$IFDEF WINDOWS}
-  windows,
+  Windows,
   {$ENDIF}
   {$IFDEF DARWIN}
   CocoaAll, CocoaWSForms, CocoaUtils,
   {$ENDIF}
-  simba.baseclass, simba.windowhandle, simba.nativeinterface;
+  simba.baseclass, simba.vartype_windowhandle, simba.nativeinterface;
 
 type
   TSimbaWindowSelectorBase = class(TSimbaBaseClass)

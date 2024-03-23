@@ -12,7 +12,8 @@ interface
 uses
   classes, sysutils, forms, controls, comctrls, graphics, menus, extctrls, syncobjs,
   synedit, syneditmiscclasses, syneditmousecmds,
-  simba.settings, simba.base, simba.component_tabcontrol, simba.component_synedit;
+  simba.settings, simba.base, simba.component_tabcontrol, simba.component_synedit,
+  simba.vartype_string;
 
 type
   TSimbaOutputBox = class(TSimbaMemo)

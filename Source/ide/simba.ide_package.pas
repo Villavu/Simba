@@ -118,7 +118,7 @@ uses
   inifiles, dateutils, fileutil, lazfileutils,
   simba.env, simba.httpclient,
   simba.ide_package_endpointgithub, simba.ide_package_endpointcustom, simba.threading,
-  simba.files;
+  simba.files, simba.vartype_string;
 
 function LoadPackageURLs: TStringArray;
 var

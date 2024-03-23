@@ -100,7 +100,7 @@ type
 implementation
 
 uses
-  simba.containers, simba.files, simba.algo_sort;
+  simba.containers, simba.files, simba.algo_sort, simba.vartype_string;
 
 class function TSimbaStringMap._StrToValue(Str: String; Default: String): String; overload;
 begin

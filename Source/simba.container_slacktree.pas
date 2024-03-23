@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base;
+  simba.base, simba.vartype_box;
 
 type
   (*

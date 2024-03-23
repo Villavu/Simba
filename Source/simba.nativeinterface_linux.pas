@@ -72,7 +72,7 @@ implementation
 
 uses
   x, xatom, keysym, baseunix, unix, linux, lcltype, ctypes,
-  simba.process, simba.xlib, simba.windowhandle;
+  simba.process, simba.xlib, simba.vartype_windowhandle, simba.vartype_box;
 
 const
   _SC_PAGESIZE = 30;

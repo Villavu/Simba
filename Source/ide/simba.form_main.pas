@@ -274,7 +274,7 @@ uses
   simba.ide_tab,
   simba.aca, simba.dtmeditor, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
   simba.ide_simpleformatter, simba.ide_theme,
-  simba.threading, simba.ide_editor;
+  simba.threading, simba.ide_editor, simba.vartype_string;
 
 procedure TSimbaMainForm.HandleException(Sender: TObject; E: Exception);
 

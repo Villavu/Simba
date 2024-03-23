@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.quad;
+unit simba.vartype_quad;
 
 {$i simba.inc}
 
@@ -49,7 +49,8 @@ implementation
 
 uses
   Math,
-  simba.math, simba.array_point, simba.random, simba.geometry, simba.containers;
+  simba.math, simba.array_point, simba.random, simba.geometry, simba.containers,
+  simba.vartype_point;
 
 class function TQuadHelper.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad;
 begin

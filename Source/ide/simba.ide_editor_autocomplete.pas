@@ -116,7 +116,7 @@ implementation
 uses
   ATCanvasPrimitives,
   simba.algo_sort, simba.ide_editor, simba.ide_theme, simba.fonthelpers,
-  simba.ide_codetools_setup, simba.ide_codetools_keywords;
+  simba.ide_codetools_setup, simba.ide_codetools_keywords, simba.vartype_string;
 
 {$IFDEF WINDOWS}
 function SetClassLong(Handle: HWND; Index: Integer = -26; Value: Integer = 0): UInt32; stdcall; external 'user32' name 'SetClassLongA';

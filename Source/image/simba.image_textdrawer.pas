@@ -113,7 +113,7 @@ implementation
 
 uses
   Forms, FileUtil, LazFileUtils, LazFreeTypeFontCollection,
-  simba.image, simba.image_utils, simba.fonthelpers;
+  simba.image, simba.image_utils, simba.fonthelpers, simba.vartype_box;
 
 function TSimbaFreeTypeFontLoader.GetFontNames: TStringArray;
 begin

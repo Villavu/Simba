@@ -30,7 +30,7 @@ procedure WindowTarget_MouseScroll(Target: Pointer; Scrolls: Integer);
 implementation
 
 uses
-  simba.nativeinterface;
+  simba.nativeinterface, simba.vartype_box;
 
 procedure WindowTarget_GetDimensions(Target: Pointer; out W, H: Integer);
 var

@@ -62,7 +62,7 @@ implementation
 
 uses
   fileutil, lazfileutils,
-  simba.base;
+  simba.base, simba.vartype_string;
 
 // Zip Extractor
 procedure TSimbaZipExtractor.DoProgress(Sender: TObject; const ATotPos, ATotSize: Int64);

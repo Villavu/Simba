@@ -92,6 +92,7 @@ implementation
 
 uses
   LCLType, LCLIntf,
+  simba.vartype_string,
   {$IF DEFINED(WINDOWS)}
   simba.nativeinterface_windows;
   {$ELSEIF DEFINED(LINUX)}

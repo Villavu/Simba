@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, ComCtrls, Controls, Dialogs, Process, SynEdit, SynEditTypes,
-  simba.base, simba.ide_editor, simba.form_output, simba.component_tabcontrol, simba.windowhandle;
+  simba.base, simba.ide_editor, simba.form_output, simba.component_tabcontrol, simba.vartype_windowhandle;
 
 type
   TSimbaScriptTab = class;
@@ -147,7 +147,7 @@ uses
   Forms,
   simba.files, simba.settings, simba.ide_events,
   simba.form_main, simba.form_tabs, simba.env, simba.ide_showdeclaration, simba.threading,
-  simba.scriptcommunication, simba.datetime, simba.ide_editor_popupmenu;
+  simba.scriptcommunication, simba.datetime, simba.ide_editor_popupmenu, simba.vartype_string;
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var

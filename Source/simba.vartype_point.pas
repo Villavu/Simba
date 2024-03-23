@@ -1,6 +1,13 @@
-{%MAINUNIT simba.base}
+unit simba.vartype_point;
 
-{$IFDEF HEADER}
+{$i simba.inc}
+
+interface
+
+uses
+  Classes, SysUtils,
+  simba.base;
+
 type
   TPointHelper = record Helper for TPoint
   const
@@ -31,9 +38,12 @@ type
   operator * (const Left: TPoint; const Right: Double): TPoint;
   operator div (const Left: TPoint; const Right: Integer): TPoint;
   operator in (const Left: TPoint; const Right: TBox): Boolean;
-{$ENDIF}
 
-{$IFDEF BODY}
+implementation
+
+uses
+  simba.geometry;
+
 class function TPointHelper.Create(const X, Y: Integer): TPoint;
 begin
   Result.X := X;
@@ -149,6 +159,5 @@ begin
   Result.Y := Y;
 end;
 
-{$ENDIF}
-
+end.
 

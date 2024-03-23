@@ -18,7 +18,7 @@ function GetArrayHelpers(Decl: TDeclaration): TCodeParser;
 implementation
 
 uses
-  simba.containers;
+  simba.containers, simba.vartype_string;
 
 type
   TArrayHelperGenerator = class(TObject)

@@ -45,7 +45,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.algo_sort, simba.box;
+  simba.math, simba.algo_sort, simba.vartype_box;
 
 class function TBoxArrayHelper.Create(Start: TPoint; Columns, Rows, Width, Height: Int32; Spacing: TPoint): TBoxArray;
 var

@@ -1,6 +1,14 @@
-{%MAINUNIT simba.base}
+unit simba.vartype_string;
 
-{$IFDEF HEADER}
+{$i simba.inc}
+
+interface
+
+uses
+  Classes, SysUtils,
+  fpjson, jsonparser, jsonscanner,
+  simba.base;
+
 type
   PRegExprGroup = ^TRegExprGroup;
   TRegExprGroup = record
@@ -150,9 +158,13 @@ type
   operator * (const Left: String; Right: Int32): String;
   operator in(const Left: String; const Right: String): Boolean;
   operator in(const Left: String; const Right: TStringArray): Boolean;
-{$ENDIF}
 
-{$IFDEF BODY}
+implementation
+
+uses
+  RegExpr, StrUtils,
+  simba.containers, simba.hash;
+
 function TSimbaCharHelper.IsUpper(): Boolean;
 begin
   Result := (Byte(Self) >= Byte('A')) and (Byte(Self) <= Byte('Z'));
@@ -1103,5 +1115,6 @@ begin
 
   Result := False;
 end;
-{$ENDIF}
+
+end.
 

@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.windowhandle, simba.simplelock;
+  simba.base, simba.vartype_windowhandle, simba.simplelock;
 
 type
   TSimbaMouseLogger = class(TThread)

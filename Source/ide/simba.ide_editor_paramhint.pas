@@ -69,7 +69,8 @@ implementation
 
 uses
   mPasLexTypes, mPasLex,
-  simba.ide_editor, simba.ide_codetools_setup, simba.ide_theme;
+  simba.ide_editor, simba.ide_codetools_setup, simba.ide_theme,
+  simba.vartype_point;
 
 procedure TSimbaParamHintForm.SetBoldIndex(AValue: Integer);
 begin

@@ -71,7 +71,7 @@ implementation
 
 uses
   ATCanvasPrimitives,
-  simba.httpclient, simba.ide_theme, simba.form_main;
+  simba.httpclient, simba.ide_theme, simba.form_main, simba.vartype_string;
 
 type
   TUpdateFormNode = class(TTreeNode)

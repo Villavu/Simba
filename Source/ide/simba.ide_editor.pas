@@ -123,7 +123,7 @@ uses
   simba.fonthelpers, simba.ide_editor_blockcompletion,
   simba.ide_editor_docgenerator, simba.ide_editor_commentblock,
   simba.ide_editor_mousewheelzoom, simba.ide_editor_multicaret,
-  simba.ide_theme;
+  simba.ide_theme, simba.vartype_string;
 
 function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;
 var

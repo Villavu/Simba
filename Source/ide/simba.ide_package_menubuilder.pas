@@ -19,7 +19,7 @@ implementation
 
 uses
   Menus,
-  simba.form_main, simba.form_tabs, simba.files, simba.ide_mainmenubar;
+  simba.form_main, simba.form_tabs, simba.files, simba.ide_mainmenubar, simba.vartype_string;
 
 type
   TPackagePopupMenu = class(TPopupMenu)

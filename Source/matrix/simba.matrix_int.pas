@@ -43,7 +43,7 @@ type
 implementation
 
 uses
-  simba.math, simba.containers, simba.box;
+  simba.math, simba.containers, simba.vartype_box;
 
 function TIntegerMatrixHelper.Width: Integer;
 begin

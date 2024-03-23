@@ -6,7 +6,7 @@
 
   TBox methods.
 }
-unit simba.box;
+unit simba.vartype_box;
 
 {$i simba.inc}
 
@@ -17,8 +17,17 @@ uses
   simba.base;
 
 type
-  TBoxHelper = record Helper(TBoxHelperBase) for TBox
+  TBoxHelper = record helper for TBox
+  private
+    function GetCenter: TPoint; inline;
+    function GetWidth: Integer; inline;
+    function GetHeight: Integer; inline;
   public
+    const ZERO: TBox = (X1: 0; Y1: 0; X2: 0; Y2: 0);
+
+    class function Create(const X1, Y1, X2, Y2: Integer): TBox; static; overload;
+    class function Create(const Center: TPoint; const XRad, YRad: Integer): TBox; static; overload;
+
     function RandomPoint: TPoint;
     function RandomPointCenter: TPoint;
 
@@ -48,13 +57,51 @@ type
 
     function Clip(Other: TBox): TBox;
     function Normalize: TBox;
+
+    property Width: Integer read GetWidth;
+    property Height: Integer read GetHeight;
+    property Center: TPoint read GetCenter;
   end;
+
+  operator = (const Left, Right: TBox): Boolean;
 
 implementation
 
 uses
   Math,
   simba.random, simba.containers, simba.geometry;
+
+function TBoxHelper.GetCenter: TPoint;
+begin
+  Result.X := (Self.X2 + Self.X1 + 1) div 2;
+  Result.Y := (Self.Y2 + Self.Y1 + 1) div 2;
+end;
+
+function TBoxHelper.GetWidth: Integer;
+begin
+  Result := (Self.X2 - Self.X1) + 1;
+end;
+
+function TBoxHelper.GetHeight: Integer;
+begin
+  Result := (Self.Y2 - Self.Y1) + 1;
+end;
+
+class function TBoxHelper.Create(const X1, Y1, X2, Y2: Integer): TBox;
+begin
+  Result.X1 := X1;
+  Result.Y1 := Y1;
+  Result.X2 := X2;
+  Result.Y2 := Y2;
+end;
+
+class function TBoxHelper.Create(const Center: TPoint; const XRad, YRad: Integer): TBox;
+begin
+  Result.X1 := Center.X - XRad;
+  Result.Y1 := Center.Y - YRad;
+  Result.X2 := Center.X + XRad;
+  Result.Y2 := Center.Y + YRad;
+end;
 
 function TBoxHelper.RandomPoint: TPoint;
 begin
@@ -294,6 +341,12 @@ begin
     Swap(Result.X1, Result.X2);
   if (Result.Y1 > Result.Y2) then
     Swap(Result.Y1, Result.Y2);
+end;
+
+operator = (const Left, Right: TBox): Boolean;
+begin
+  Result := (Int64(Left.TopLeft)     = Int64(Right.TopLeft)) and
+            (Int64(Left.BottomRight) = Int64(Right.BottomRight));
 end;
 
 end.

@@ -118,7 +118,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.windowhandle, simba.colormath, simba.dialog;
+  simba.vartype_windowhandle, simba.colormath, simba.dialog, simba.vartype_box;
 
 procedure TSimbaDTMEditorForm.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 var

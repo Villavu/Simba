@@ -56,6 +56,7 @@ implementation
 
 uses
   lpeval,
+  simba.vartype_string,
   simba.script_imports, simba.script_compiler_sleepuntil, simba.script_compiler_rtti, simba.script_compiler_imagefromstring;
 
 function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method;

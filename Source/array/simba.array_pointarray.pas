@@ -67,7 +67,7 @@ type
 implementation
 
 uses
-  simba.array_point, simba.algo_sort, simba.containers, simba.quad, simba.box,
+  simba.array_point, simba.algo_sort, simba.containers, simba.vartype_quad, simba.vartype_box,
   simba.matrix_int;
 
 function T2DPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): T2DPointArray;

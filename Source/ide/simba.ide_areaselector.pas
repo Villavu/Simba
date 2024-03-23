@@ -49,8 +49,8 @@ type
 implementation
 
 uses
-  math, lcltype,
-  simba.windowhandle;
+  Math, LCLType,
+  simba.vartype_windowhandle;
 
 function ShowAreaSelector(Window: TWindowHandle): TBox;
 begin

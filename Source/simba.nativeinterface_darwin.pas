@@ -89,7 +89,7 @@ implementation
 
 uses
   BaseUnix, Unix, LCLType, CocoaAll, CocoaUtils, DateUtils,
-  simba.process, simba.windowhandle, simba.box;
+  simba.process, simba.vartype_windowhandle, simba.vartype_box;
 
 function CGPreflightScreenCaptureAccess: Boolean; external name '_CGPreflightScreenCaptureAccess';
 function CGRequestPostEventAccess: Boolean; external name '_CGRequestPostEventAccess';

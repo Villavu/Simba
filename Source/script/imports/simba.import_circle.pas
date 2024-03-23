@@ -19,7 +19,7 @@ implementation
 
 uses
   lptypes,
-  simba.circle;
+  simba.vartype_circle;
 
 (*
 TCircle

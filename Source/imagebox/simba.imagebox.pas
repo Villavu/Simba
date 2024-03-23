@@ -183,7 +183,7 @@ type
 implementation
 
 uses
-  simba.windowhandle, simba.datetime,
+  simba.vartype_windowhandle, simba.datetime, simba.vartype_box,
   GraphType, LCLIntf;
 
 generic procedure ZoomOut<_T>(Ratio, SrcX, SrcY, LoopEndX, LoopEndY: Integer; SrcImg, DestImg: TRawImage);

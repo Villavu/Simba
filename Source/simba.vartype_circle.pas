@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.circle;
+unit simba.vartype_circle;
 
 {$i simba.inc}
 
@@ -43,7 +43,8 @@ implementation
 
 uses
   Math,
-  simba.math, simba.array_point, simba.random, simba.containers, simba.geometry;
+  simba.math, simba.array_point, simba.random, simba.containers, simba.geometry,
+  simba.vartype_box;
 
 class function TCircleHelper.Create(AX, AY: Integer; ARadius: Integer): TCircle;
 begin

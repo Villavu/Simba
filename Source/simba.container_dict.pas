@@ -35,7 +35,8 @@ type
 
   TDictionary<K,V> = class
   public type
-    THashFunc    = function(constref key:K): UInt32;
+    THashFunc    = function(constref key: K): UInt32;
+    TCompareFunc = function(constref A,B: K): Boolean;
     THashElement = record key:K; val:V; end;
     THashBucket  = array of THashElement;
     TMap         = array of THashBucket;
@@ -44,15 +45,22 @@ type
     FSize: UInt32; //num items
     FHigh: UInt32; //real size
     FResizable: Boolean;
+
     FHashFunc: THashFunc;
     FHashData: Boolean;
+
+    FCompareFunc: TCompareFunc;
+    FCompareData: Boolean;
 
     procedure _growRebuild();
     function _addItem(h:UInt32; key:K; value:V; checkResize:Boolean=True): Boolean;
     function _delItem(pos:THashIndex; key:K): Boolean;
+
+    procedure DetermineHashFunc;
+    procedure DetermineCompareFunc;
   public
     // create
-    constructor Create(AHashFunc: THashFunc = nil);
+    constructor Create(AHashFunc: THashFunc = nil; ACompareFunc: TCompareFunc = nil);
 
     // Access hashmap-items directly [r]
     // value := Dict.Items[hash,idx]
@@ -71,6 +79,7 @@ type
 
     // function used to hash the key
     function Hash(constref key:K): UInt32;
+    function Compare(constref A,B: K): Boolean;
 
     // Returns position `pos` of they item `key`
     // it can then be used with the the read-only property `Items`
@@ -126,6 +135,13 @@ type
     class function HashInt32(constref k: Int32): UInt32; static;
     class function HashInt64(constref k: Int64): UInt32; static;
     class function HashString(constref k: String): UInt32; static;
+
+    class function CompareBool(constref A,B: Boolean): Boolean; static;
+    class function CompareInt8(constref A,B: Byte): Boolean; static;
+    class function CompareInt16(constref A,B: Int16): Boolean; static;
+    class function CompareInt32(constref A,B: Int32): Boolean; static;
+    class function CompareInt64(constref A,B: Int64): Boolean; static;
+    class function CompareString(constref A,B: String): Boolean; static;
   end;
 
 implementation
@@ -159,7 +175,7 @@ begin
   Result := UInt32(k);
 end;
 
-class function TDictionary<K,V>.HashString(constref k: AnsiString): UInt32;
+class function TDictionary<K, V>.HashString(constref k: String): UInt32;
 var i: Int32;
 begin
   Result := 2166136261;
@@ -168,6 +184,36 @@ begin
     Result := Result xor Byte(k[I]);
     Result := Result * 16777619;
   end;
+end;
+
+class function TDictionary<K, V>.CompareBool(constref A, B: Boolean): Boolean;
+begin
+  Result := A = B;
+end;
+
+class function TDictionary<K, V>.CompareInt8(constref A, B: Byte): Boolean;
+begin
+  Result := A = B;
+end;
+
+class function TDictionary<K, V>.CompareInt16(constref A, B: Int16): Boolean;
+begin
+  Result := A = B;
+end;
+
+class function TDictionary<K, V>.CompareInt32(constref A, B: Int32): Boolean;
+begin
+  Result := A = B;
+end;
+
+class function TDictionary<K, V>.CompareInt64(constref A, B: Int64): Boolean;
+begin
+  Result := A = B;
+end;
+
+class function TDictionary<K, V>.CompareString(constref A, B: String): Boolean;
+begin
+  Result := A = B;
 end;
 
 (******************************************************************************)
@@ -181,37 +227,65 @@ end;
   as the hash-value will be computed every time you index.
 }
 
-constructor TDictionary<K,V>.Create(AHashFunc: THashFunc);
+procedure TDictionary<K, V>.DetermineHashFunc;
+begin
+  if IsManagedType(K) then
+  begin
+    if (GetTypeKind(K) = tkAString) then
+      FHashFunc := @HashString;
+  end else
+  begin
+    if (GetTypeKind(K) in [tkInteger, tkInt64, tkQWord, tkBool, tkPointer, tkRecord]) then
+      case SizeOf(K) of
+        1: FHashFunc := @HashInt8;
+        2: FHashFunc := @HashInt16;
+        4: FHashFunc := @HashInt32;
+        8: FHashFunc := @HashInt64;
+        else
+          FHashData := True;
+      end;
+  end;
+
+  if (@FHashFunc = nil) and (not FHashData) then
+    SimbaException('HashFunc required');
+end;
+
+procedure TDictionary<K, V>.DetermineCompareFunc;
+begin
+  if IsManagedType(K) then
+  begin
+    if (GetTypeKind(K) = tkAString) then
+      FCompareFunc := @HashString;
+  end else
+  begin
+    if (GetTypeKind(K) in [tkInteger, tkInt64, tkQWord, tkBool, tkPointer, tkRecord]) then
+      case SizeOf(K) of
+        1: FCompareFunc := @CompareInt8;
+        2: FCompareFunc := @CompareInt16;
+        4: FCompareFunc := @CompareInt32;
+        8: FCompareFunc := @CompareInt64;
+        else
+          FCompareData := True;
+      end;
+  end;
+
+  if (@FCompareFunc = nil) and (not FCompareData) then
+    SimbaException('CompareFunc required');
+end;
+
+constructor TDictionary<K,V>.Create(AHashFunc: THashFunc; ACompareFunc: TCompareFunc);
 begin
   inherited Create();
 
-  if (@AHashFunc = nil) then
-  begin
-    if IsManagedType(K) then
-    begin
-      if (GetTypeKind(K) = tkAString) then
-        AHashFunc := @HashString;
-    end else
-    begin
-      if (GetTypeKind(K) in [tkInteger, tkInt64, tkQWord, tkBool, tkPointer, tkRecord]) then
-        case SizeOf(K) of
-          1: AHashFunc := @HashInt8;
-          2: AHashFunc := @HashInt16;
-          4: AHashFunc := @HashInt32;
-          8: AHashFunc := @HashInt64;
-          else
-            FHashData := True;
-        end;
-    end;
+  FHashFunc := AHashFunc;
+  FCompareFunc := ACompareFunc;
 
-    if (@AHashFunc = nil) and (not FHashData) then
-      SimbaException('HashFunc required');
-  end;
+  if (@FHashFunc = nil) then DetermineHashFunc();
+  if (@FCompareFunc = nil) then DetermineCompareFunc();
 
   FHigh := 0;
   FSize := DICT_MIN_SIZE - 1;
   SetLength(FData, DICT_MIN_SIZE);
-  FHashFunc := AHashFunc;
   FResizable := True;
 end;
 
@@ -240,6 +314,14 @@ begin
     Result := UInt32(TMurmur2aLE.HashBuf(@key, SizeOf(K)) and FSize)
   else
     Result := UInt32(FHashFunc(key) and FSize);
+end;
+
+function TDictionary<K, V>.Compare(constref A, B: K): Boolean;
+begin
+  if FCompareData then
+    Result := CompareMem(@A, @B, SizeOf(K))
+  else
+    Result := FCompareFunc(A, B);
 end;
 
 
@@ -304,7 +386,6 @@ begin
   Result := True;
 end;
 
-
 function TDictionary<K,V>.Find(constref key: K; out pos:THashIndex): Boolean;
 var
   l: Int32;
@@ -314,7 +395,7 @@ begin
   pos.idx := 0;
   while pos.idx <= l do
   begin
-    if FData[pos.hash][pos.idx].key = key then
+    if Compare(FData[pos.hash][pos.idx].key, key) then
       Exit(True);
     Inc(pos.idx);
   end;

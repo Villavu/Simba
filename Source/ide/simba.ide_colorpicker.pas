@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, dialogs, extctrls, stdctrls,
-  simba.imagebox_zoom, simba.base;
+  simba.imagebox_zoom, simba.base, simba.vartype_box;
 
 type
   TSimbaColorPickerHint = class(THintWindow)
@@ -52,7 +52,7 @@ implementation
 
 uses
   LCLType,
-  simba.image, simba.windowhandle, simba.image_lazbridge,
+  simba.image, simba.vartype_windowhandle, simba.image_lazbridge,
   simba.form_colorpickhistory, simba.threading, simba.ide_dockinghelpers,
   simba.colormath;
 

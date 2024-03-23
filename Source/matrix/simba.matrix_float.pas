@@ -91,7 +91,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.containers, simba.container_heaparray, simba.array_point, simba.box;
+  simba.math, simba.containers, simba.container_heaparray, simba.array_point, simba.vartype_box;
 
 class operator TSingleSum.:=(const Right: Single): TSingleSum;
 begin

@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.windowhandle;
+unit simba.vartype_windowhandle;
 
 {$i simba.inc}
 
@@ -53,7 +53,7 @@ type
 implementation
 
 uses
-  simba.nativeinterface;
+  simba.nativeinterface, simba.vartype_string;
 
 function TWindowHandleHelper.IsValid: Boolean;
 begin
