@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Math,
-  simba.base, simba.target, simba.simplelock, simba.baseclass;
+  simba.base, simba.target, simba.baseclass;
 
 type
   PSimbaInput = ^TSimbaInput;
@@ -112,7 +112,7 @@ type
 implementation
 
 uses
-  simba.math, simba.nativeinterface, simba.random, simba.threading;
+  simba.math, simba.nativeinterface, simba.random;
 
 function TSimbaInput.GetRandomKeyPressTime: Integer;
 begin

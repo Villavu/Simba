@@ -37,7 +37,7 @@ interface
 
 uses
   SysUtils, Classes,
-  simba.base, simba.list, simba.stack,
+  simba.base, simba.containers,
   mPasLexTypes;
 
 type

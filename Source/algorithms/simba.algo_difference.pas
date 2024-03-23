@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base;
+  simba.base, simba.hash_murmur;
 
 function Algo_Box_Difference(x,y: TBoxArray): TBoxArray;
 function Algo_Point_Difference(x,y: TPointArray): TPointArray;
@@ -24,7 +24,7 @@ function Algo_Int64_Difference(x,y: TInt64Array): TInt64Array;
 implementation
 
 uses
-  simba.dictionary;
+  simba.container_dict, simba.hash;
 
 {$DEFINE MACRO_SET_DIFF :=
   for i:=0 to High(x) do dict[x[i]] := True;
@@ -51,7 +51,7 @@ var
   tmp: Boolean;
 begin
   Result := nil;
-  dict := TDict.Create(@HashBox);
+  dict := TDict.Create();
   MACRO_SET_DIFF;
   dict.Free();
 end;
@@ -65,7 +65,7 @@ var
   tmp: Boolean;
 begin
   Result := nil;
-  dict := TDict.Create(@HashPoint);
+  dict := TDict.Create();
   MACRO_SET_DIFF;
   dict.Free();
 end;
@@ -79,7 +79,7 @@ var
   tmp: Boolean;
 begin
   Result := nil;
-  dict := TDict.Create(@HashUInt8);
+  dict := TDict.Create();
   MACRO_SET_DIFF;
   dict.Free();
 end;
@@ -93,7 +93,7 @@ var
   tmp: Boolean;
 begin
   Result := nil;
-  dict := TDict.Create(@HashInt32);
+  dict := TDict.Create();
   MACRO_SET_DIFF;
   dict.Free();
 end;
@@ -107,7 +107,7 @@ var
   tmp: Boolean;
 begin
   Result := nil;
-  dict := TDict.Create(@HashInt64);
+  dict := TDict.Create();
   MACRO_SET_DIFF;
   dict.Free();
 end;

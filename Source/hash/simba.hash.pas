@@ -10,7 +10,8 @@ unit simba.hash;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.base;
 
 type
   {$SCOPEDENUMS ON}

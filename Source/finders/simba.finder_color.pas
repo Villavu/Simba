@@ -49,7 +49,7 @@ var
 implementation
 
 uses
-  simba.arraybuffer, simba.colormath_distance_unrolled, simba.threadpool,
+  simba.containers, simba.colormath_distance_unrolled, simba.threadpool,
   simba.array_pointarray, simba.matrix_float, simba.datetime;
 
 // How much to "Slice" (vertically) the image up for multithreading.

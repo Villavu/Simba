@@ -6,13 +6,10 @@
 {==============================================================================]
   Copyright (c) 2021, Jarl `slacky` Holta
 [==============================================================================}
-unit simba.heaparray;
+unit simba.container_heaparray;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
 
 interface
 

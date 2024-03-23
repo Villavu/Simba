@@ -6,8 +6,9 @@
   Simple managed string map.
   Can be sorted for fast binary-search lookups using the keys hash.
 }
-unit simba.stringmap;
+unit simba.container_stringmap;
 
+{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
@@ -99,7 +100,7 @@ type
 implementation
 
 uses
-  simba.arraybuffer, simba.files, simba.algo_sort, simba.stringbuilder;
+  simba.containers, simba.files, simba.algo_sort;
 
 class function TSimbaStringMap._StrToValue(Str: String; Default: String): String; overload;
 begin

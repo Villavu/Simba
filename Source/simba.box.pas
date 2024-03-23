@@ -54,7 +54,7 @@ implementation
 
 uses
   Math,
-  simba.random, simba.arraybuffer, simba.geometry;
+  simba.random, simba.containers, simba.geometry;
 
 function TBoxHelper.RandomPoint: TPoint;
 begin

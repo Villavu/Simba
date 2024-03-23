@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, Menus, StrUtils,
-  simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight, simba.component_treeview, simba.dictionary;
+  simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight, simba.component_treeview, simba.container_dict;
 
 type
   ENodeType = (ntUnknown, ntSimbaSection, ntDecl, ntSimbaDecl, ntPluginDecl, ntIncludes, ntPlugins, ntIncludeFile, ntPluginFile);
@@ -888,7 +888,7 @@ begin
   FCodeinsight := TCodeinsight.Create();
   FCodeinsight.ScriptParser.NoErrorMessages := True;
 
-  FSavedStates := TFunctionListStateDict.Create(@HashInt32);
+  FSavedStates := TFunctionListStateDict.Create();
 
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.CODETOOLS_SETUP,  @DoCodetoolsSetup);
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_MODIFIED,     @DoEditorModified);

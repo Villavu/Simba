@@ -451,7 +451,7 @@ implementation
 
 uses
   Math, RegExpr, StrUtils, TypInfo,
-  simba.arraybuffer, simba.geometry, simba.hash;
+  simba.containers, simba.geometry, simba.hash;
 
 function TBoxHelperBase.GetCenter: TPoint;
 begin

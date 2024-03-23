@@ -19,7 +19,6 @@ type
   PAlign = ^TAlign;
   PControl = ^TControl;
   PControlScrollBar = ^TControlScrollBar;
-  PCursor = ^TCursor;
   PCustomControl = ^TCustomControl;
   PGraphicControl = ^TGraphicControl;
   PKeyEvent = ^TKeyEvent;

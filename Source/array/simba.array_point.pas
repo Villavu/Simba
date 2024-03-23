@@ -163,8 +163,8 @@ implementation
 
 uses
   Math,
-  simba.array_pointarray, simba.arraybuffer, simba.geometry, simba.math,
-  simba.algo_sort, simba.algo_intersection, simba.slacktree,
+  simba.array_pointarray, simba.containers, simba.geometry, simba.math,
+  simba.algo_sort, simba.algo_intersection, simba.container_slacktree,
   simba.array_ord, simba.matrix_bool, simba.matrix_int, simba.box;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;

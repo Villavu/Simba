@@ -3,7 +3,7 @@
   Project: SlackTree
   License: GNU Lesser GPL (http://www.gnu.org/licenses/lgpl.html)
 [==============================================================================}
-unit simba.slacktree;
+unit simba.container_slacktree;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}

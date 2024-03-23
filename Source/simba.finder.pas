@@ -90,7 +90,7 @@ implementation
 uses
   simba.matrix_float, simba.matrix_int, simba.array_point,
   simba.finder_color, simba.finder_image, simba.finder_dtm,
-  simba.arraybuffer, simba.matchtemplate;
+  simba.containers, simba.matchtemplate;
 
 function TSimbaFinder.GetDataAsBitmap(var Bounds: TBox; out Image: TSimbaImage): Boolean;
 var

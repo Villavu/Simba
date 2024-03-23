@@ -47,7 +47,7 @@ type
 implementation
 
 uses
-  simba.compress, simba.encoding;
+  simba.compress;
 
 procedure TDTM.FromString(Str: String);
 var

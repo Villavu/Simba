@@ -1,4 +1,4 @@
-unit simba.dictionary;
+unit simba.container_dict;
 {==============================================================================]
   Hashmap copyright (c) 2022, Jarl `slacky` Holta
 [==============================================================================}
@@ -29,7 +29,7 @@ const
 
 
 type
-  THashIndex = packed record 
+  THashIndex = record
     hash,idx:UInt32; 
   end;
 
@@ -44,14 +44,15 @@ type
     FSize: UInt32; //num items
     FHigh: UInt32; //real size
     FResizable: Boolean;
-    HashFunc: THashFunc;
+    FHashFunc: THashFunc;
+    FHashData: Boolean;
 
     procedure _growRebuild();
     function _addItem(h:UInt32; key:K; value:V; checkResize:Boolean=True): Boolean;
     function _delItem(pos:THashIndex; key:K): Boolean;
   public
     // create
-    constructor Create(AHashFunc:THashFunc);
+    constructor Create(AHashFunc: THashFunc = nil);
 
     // Access hashmap-items directly [r]
     // value := Dict.Items[hash,idx]
@@ -69,7 +70,7 @@ type
     procedure Clear; inline;
 
     // function used to hash the key
-    function Hash(constref key:K): UInt32; inline;
+    function Hash(constref key:K): UInt32;
 
     // Returns position `pos` of they item `key`
     // it can then be used with the the read-only property `Items`
@@ -118,63 +119,47 @@ type
     property Item[key:K]: V read GetFast write AddFast; default;
     property Size:UInt32 read FSize;
     property Data:TMap read FData;
-  end;
 
-// hash-functions to go with the hashtable.
-function HashBool(constref k: Boolean): UInt32; inline;
-function HashUInt8(constref k: Byte): UInt32; inline;
-function HashInt32(constref k: Int32): UInt32; inline;
-function HashInt64(constref k: Int64): UInt32; inline;
-function HashNative(constref k: NativeInt): UInt32; inline;
-function HashPoint(constref k: TPoint): UInt32; inline;
-function HashBox(constref k: TBox): UInt32; inline;
-function HashAStr(constref k: AnsiString): UInt32; inline;
+    class function HashBool(constref k: Boolean): UInt32; static;
+    class function HashInt8(constref k: Byte): UInt32; static;
+    class function HashInt16(constref k: Int16): UInt32; static;
+    class function HashInt32(constref k: Int32): UInt32; static;
+    class function HashInt64(constref k: Int64): UInt32; static;
+    class function HashString(constref k: String): UInt32; static;
+  end;
 
 implementation
 
 uses
-  simba.math;
+  TypInfo,
+  simba.math, simba.hash_murmur;
 
-(******************************* Hash Functions *******************************)
-function HashBool(constref k: Boolean): UInt32;
+class function TDictionary<K,V>.HashBool(constref k: Boolean): UInt32;
 begin
-  Result := Ord(k);
+  Result := UInt32(k);
 end;
 
-function HashUInt8(constref k: Byte): UInt32;
+class function TDictionary<K,V>.HashInt8(constref k: Byte): UInt32;
 begin
-  Result := k;
+  Result := UInt32(k);
 end;
 
-function HashInt32(constref k: Int32): UInt32;
+class function TDictionary<K,V>.HashInt16(constref k: Int16): UInt32;
 begin
-  Result := k;
+  Result := UInt32(k);
 end;
 
-function HashInt64(constref k: Int64): UInt32;
+class function TDictionary<K,V>.HashInt32(constref k: Int32): UInt32;
 begin
-  Result := k;
+  Result := UInt32(k);
 end;
 
-function HashNative(constref k: NativeInt): UInt32;
+class function TDictionary<K,V>.HashInt64(constref k: Int64): UInt32;
 begin
-  Result := k;
+  Result := UInt32(k);
 end;
 
-function HashPoint(constref k: TPoint): UInt32;
-begin
-  Result := UInt32((k.y * $0f0f1f1f) xor k.x);
-end;
-
-function HashBox(constref k: TBox): UInt32;
-var a,b:UInt32;
-begin
-  a := (k.y1 * $0f0f1f1f) xor k.x1;
-  b := (k.y2 * $0f0f1f1f) xor k.x2;
-  Result := UInt32((a * $0f0f1f1f) xor b);
-end;
-
-function HashAStr(constref k: AnsiString): UInt32;
+class function TDictionary<K,V>.HashString(constref k: AnsiString): UInt32;
 var i: Int32;
 begin
   Result := 2166136261;
@@ -196,14 +181,37 @@ end;
   as the hash-value will be computed every time you index.
 }
 
-
 constructor TDictionary<K,V>.Create(AHashFunc: THashFunc);
 begin
+  inherited Create();
+
+  if (@AHashFunc = nil) then
+  begin
+    if IsManagedType(K) then
+    begin
+      if (GetTypeKind(K) = tkAString) then
+        AHashFunc := @HashString;
+    end else
+    begin
+      if (GetTypeKind(K) in [tkInteger, tkInt64, tkQWord, tkBool, tkPointer, tkRecord]) then
+        case SizeOf(K) of
+          1: AHashFunc := @HashInt8;
+          2: AHashFunc := @HashInt16;
+          4: AHashFunc := @HashInt32;
+          8: AHashFunc := @HashInt64;
+          else
+            FHashData := True;
+        end;
+    end;
+
+    if (@AHashFunc = nil) and (not FHashData) then
+      SimbaException('HashFunc required');
+  end;
+
   FHigh := 0;
-  FSize := DICT_MIN_SIZE-1;
+  FSize := DICT_MIN_SIZE - 1;
   SetLength(FData, DICT_MIN_SIZE);
-  
-  HashFunc := AHashFunc;
+  FHashFunc := AHashFunc;
   FResizable := True;
 end;
 
@@ -211,7 +219,7 @@ end;
 procedure TDictionary<K,V>.SetSize(k:SizeInt);
 begin
   if FHigh <> 0 then
-    raise Exception.Create('Can''t set size after dictionary has been filled. Call `clear` first');
+    SimbaException('Can''t set size after dictionary has been filled. Call `clear` first');
   FSize := Max(DICT_MIN_SIZE-1, NextPower2(k-1));
   SetLength(FData, FSize+1);
 end;
@@ -228,7 +236,10 @@ end;
 
 function TDictionary<K,V>.Hash(constref key: K): UInt32;
 begin
-  Result := HashFunc(key) and FSize;
+  if FHashData then
+    Result := UInt32(TMurmur2aLE.HashBuf(@key, SizeOf(K)) and FSize)
+  else
+    Result := UInt32(FHashFunc(key) and FSize);
 end;
 
 
@@ -324,7 +335,7 @@ function TDictionary<K,V>.GetFast(key: K): V;
 var pos: THashIndex;
 begin
   if not Find(key, pos) then
-    raise Exception.Create('The key does not exist');
+    SimbaException('The key does not exist');
   Result := FData[pos.hash][pos.idx].val;
 end;
 
@@ -382,7 +393,7 @@ function TDictionary<K,V>.Contains(key: K): Boolean;
 var idx: THashIndex;
 begin
   Result := Find(key, idx);
-end;  
+end;
 
 
 end.

@@ -263,9 +263,9 @@ implementation
 uses
   Math, FPImage,
   simba.zip, simba.box, simba.quad, simba.geometry, simba.nativeinterface,
-  simba.matrix_float, simba.matrix_int, simba.array_point, simba.arraybuffer, simba.algo_sort,
+  simba.matrix_float, simba.matrix_int, simba.array_point, simba.algo_sort,
   simba.image_lazbridge, simba.image_integral, simba.image_gaussblur,
-  simba.image_bitmaparealoader, simba.image_stringconv;
+  simba.image_bitmaparealoader, simba.image_stringconv, simba.containers, simba.array_relationship;
 
 function TSimbaImage.Save(FileName: String; OverwriteIfExists: Boolean): Boolean;
 var

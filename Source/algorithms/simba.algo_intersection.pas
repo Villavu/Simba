@@ -20,11 +20,10 @@ function Algo_UInt8_Intersection(x,y: TByteArray): TByteArray;
 function Algo_Int32_Intersection(x,y: TIntegerArray): TIntegerArray;
 function Algo_Int64_Intersection(x,y: TInt64Array): TInt64Array;
 
-
 implementation
 
 uses
-  simba.dictionary;
+  simba.container_dict;
 
 {$DEFINE MACRO_SET_INTERSECTION :=
   for i:=0 to High(x) do dict[x[i]] := 1;
@@ -64,8 +63,8 @@ var
   i,c: Int32;
 begin
   Result := nil;
-  dict := TDict.Create(@HashBox);
-  dupes := TDict.Create(@HashBox);
+  dict := TDict.Create();
+  dupes := TDict.Create();
   MACRO_SET_INTERSECTION;
   dict.Free();
   dupes.Free();
@@ -79,8 +78,8 @@ var
   i,c: Int32;
 begin
   Result := nil;
-  dict := TDict.Create(@HashPoint);
-  dupes := TDict.Create(@HashPoint);
+  dict := TDict.Create();
+  dupes := TDict.Create();
   MACRO_SET_INTERSECTION;
   dict.Free(); 
   dupes.Free();
@@ -94,8 +93,8 @@ var
   i,c: Int32;
 begin
   Result := nil;
-  dict := TDict.Create(@HashUInt8);
-  dupes := TDict.Create(@HashUInt8);
+  dict := TDict.Create();
+  dupes := TDict.Create();
   MACRO_SET_INTERSECTION;
   dict.Free();
   dupes.Free();
@@ -109,8 +108,8 @@ var
   i,c: Int32;
 begin
   Result := nil;
-  dict := TDict.Create(@HashInt32);
-  dupes := TDict.Create(@HashInt32);
+  dict := TDict.Create();
+  dupes := TDict.Create();
   MACRO_SET_INTERSECTION;
   dict.Free();
   dupes.Free();
@@ -124,8 +123,8 @@ var
   i,c: Int32;
 begin
   Result := nil;
-  dict  := TDict.Create(@HashInt64);
-  dupes := TDict.Create(@HashInt64);
+  dict  := TDict.Create();
+  dupes := TDict.Create();
   MACRO_SET_INTERSECTION;
   dict.Free();
   dupes.Free();

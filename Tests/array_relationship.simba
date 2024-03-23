@@ -1,0 +1,74 @@
+{$assertions on}
+
+procedure TestIntegerArray;
+var
+  a,b: TIntegerArray;
+begin
+  a := [];
+  b := [];
+  Assert(ToString(a.Difference(b)) = '[]');
+
+  a := [1,2,3];
+  b := [1,2,3];
+  Assert(ToString(a.Difference(b)) = '[]');
+
+  a := [1,2,3,4];
+  b := [5,4,3];
+  Assert(ToString(a.Difference(b)) = '[1, 2]');
+end;
+
+procedure TestInt64Array;
+var
+  a,b: TInt64Array;
+begin
+  a := [];
+  b := [];
+  Assert(ToString(a.Difference(b)) = '[]');
+
+  a := [1,2,3];
+  b := [1,2,3];
+  Assert(ToString(a.Difference(b)) = '[]');
+
+  a := [1,2,3,4];
+  b := [5,4,3];
+  Assert(ToString(a.Difference(b)) = '[1, 2]');
+end;
+
+procedure TestPointArray;
+var
+  a,b: TPointArray;
+begin
+  a := [];
+  b := [];
+  Assert(ToString(a.Difference(b)) = '[]');
+
+  a := [[1,2],[2,3],[3,4]];
+  b := [[1,2],[2,3],[3,4]];
+  Assert(ToString(a.Difference(b)) = '[]');
+
+  a := [[1,2],[2,3],[3,4]];
+  b := [[1,2],[2,3]];
+  Assert(ToString(a.Difference(b)) = '[{X = 3, Y = 4}]');
+end;
+
+procedure TestBoxArray;
+var
+  a,b: TBoxArray;
+begin
+  a := [[1,1,1,1],[2,2,2,2],[3,3,3,3]];
+  b := [[1,1,1,1],[2,2,2,2],[3,3,3,3]];
+
+  Assert(ToString(a.Difference(b)) = '[]');
+
+  a := [[1,1,1,1],[2,2,2,2],[3,3,3,3]];
+  b := [[1,1,1,1],[2,2,2,2]];
+
+  Assert(ToString(a.Difference(b)) = '[{X1 = 3, Y1 = 3, X2 = 3, Y2 = 3}]');
+end;
+
+begin
+  TestIntegerArray();
+  TestInt64Array();
+  TestPointArray();
+  TestBoxArray();
+end;

@@ -21,7 +21,7 @@ implementation
 
 uses
   lpparser,
-  simba.list;
+  simba.containers;
 
 type
   TKeywordList = specialize TSimbaObjectList<TDeclaration>;

@@ -13,7 +13,7 @@ uses
   SysUtils, Classes,
   mPasLexTypes, mPasLex, mSimplePasPar,
   simba.base, simba.ide_codetools_utils,
-  simba.stack, simba.list, simba.stringbuilder;
+  simba.containers;
 
 type
   TCodeParser = class;

@@ -100,7 +100,7 @@ implementation
 
 uses
   simba.base, simba.ide_codetools_includes, simba.ide_codetools_arrayhelpers,
-  simba.stringbuilder;
+  simba.containers;
 
 function TCodeinsight.GetIncludesHash: String;
 begin
