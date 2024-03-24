@@ -145,7 +145,7 @@ implementation
 uses
   Math,
   simba.vartype_box, simba.vartype_quad,
-  simba.array_point, simba.array_pointarray, simba.array_box;
+  simba.vartype_pointarray, simba.vartype_boxarray;
 
 procedure TSimbaExternalImage.CheckInUpdate;
 begin

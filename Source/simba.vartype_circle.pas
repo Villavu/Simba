@@ -43,7 +43,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.array_point, simba.random, simba.containers, simba.geometry,
+  simba.math, simba.vartype_pointarray, simba.random, simba.containers, simba.geometry,
   simba.vartype_box;
 
 class function TCircleHelper.Create(AX, AY: Integer; ARadius: Integer): TCircle;

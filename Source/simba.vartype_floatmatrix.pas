@@ -11,7 +11,7 @@
   - ArgExtrema
 }
 
-unit simba.matrix_float;
+unit simba.vartype_floatmatrix;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
@@ -91,7 +91,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.containers, simba.container_heaparray, simba.array_point, simba.vartype_box;
+  simba.math, simba.containers, simba.container_heaparray, simba.vartype_pointarray, simba.vartype_box;
 
 class operator TSingleSum.:=(const Right: Single): TSingleSum;
 begin

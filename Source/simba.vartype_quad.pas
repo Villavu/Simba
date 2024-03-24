@@ -49,7 +49,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.array_point, simba.random, simba.geometry, simba.containers,
+  simba.math, simba.vartype_pointarray, simba.random, simba.geometry, simba.containers,
   simba.vartype_point;
 
 class function TQuadHelper.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad;

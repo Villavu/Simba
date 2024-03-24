@@ -88,7 +88,7 @@ type
 implementation
 
 uses
-  simba.matrix_float, simba.matrix_int, simba.array_point,
+  simba.vartype_floatmatrix, simba.vartype_ordmatrix, simba.vartype_pointarray,
   simba.finder_color, simba.finder_image, simba.finder_dtm,
   simba.containers, simba.matchtemplate, simba.vartype_box;
 

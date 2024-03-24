@@ -37,7 +37,7 @@ procedure FillData(const Data: PColorBGRA; const Count: SizeInt; const Value: TC
 implementation
 
 uses
-  simba.array_point, simba.geometry;
+  simba.vartype_pointarray, simba.geometry;
 
 procedure BlendPixel(const Pixel: PColorBGRA; const Color: TColorBGRA);
 begin

@@ -15,7 +15,7 @@ implementation
 uses
   simba.algo_difference, simba.algo_intersection, simba.algo_symmetricDifference,
   simba.script, simba.image, simba.process,
-  simba.array_point, simba.array_ord, simba.array_string;
+  simba.vartype_pointarray, simba.vartype_ordarray, simba.vartype_stringarray;
 
 procedure _LapeWrite(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
