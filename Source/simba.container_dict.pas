@@ -175,15 +175,20 @@ begin
   Result := UInt32(k);
 end;
 
+// FNV
 class function TDictionary<K, V>.HashString(constref k: String): UInt32;
-var i: Int32;
+var
+  I: Int32;
 begin
+  {$PUSH}
+  {$Q-}{$R-}
   Result := 2166136261;
-  for i:=1 to Length(k) do
+  for I := 1 to Length(k) do
   begin
     Result := Result xor Byte(k[I]);
     Result := Result * 16777619;
   end;
+  {$POP}
 end;
 
 class function TDictionary<K, V>.CompareBool(constref A, B: Boolean): Boolean;

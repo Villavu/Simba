@@ -18,6 +18,10 @@ type
   public
     class function Create(Start: TPoint; Columns, Rows, Width, Height: Int32; Spacing: TPoint): TBoxArray; static;
 
+    function Difference(Other: TBoxArray): TBoxArray;
+    function SymmetricDifference(Other: TBoxArray): TBoxArray;
+    function Intersection(Other: TBoxArray): TBoxArray;
+
     function Pack: TBoxArray;
 
     function Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TBoxArray; overload;
@@ -45,7 +49,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.algo_sort, simba.vartype_box;
+  simba.math, simba.vartype_box, simba.array_algorithm;
 
 class function TBoxArrayHelper.Create(Start: TPoint; Columns, Rows, Width, Height: Int32; Spacing: TPoint): TBoxArray;
 var
@@ -66,6 +70,21 @@ begin
     Result[I].X2 := Result[I].X1 + Width;
     Result[I].Y2 := Result[I].Y1 + Height;
   end;
+end;
+
+function TBoxArrayHelper.Difference(Other: TBoxArray): TBoxArray;
+begin
+  Result := specialize TArrayRelationship<TBox>.Difference(Self, Other);
+end;
+
+function TBoxArrayHelper.SymmetricDifference(Other: TBoxArray): TBoxArray;
+begin
+  Result := specialize TArrayRelationship<TBox>.SymmetricDifference(Self, Other);
+end;
+
+function TBoxArrayHelper.Intersection(Other: TBoxArray): TBoxArray;
+begin
+  Result := specialize TArrayRelationship<TBox>.Intersection(Self, Other);
 end;
 
 function TBoxArrayHelper.SortFrom(From: TPoint): TBoxArray;
@@ -262,7 +281,7 @@ begin
     MaxWidth := Max(MaxWidth, Blocks[I].W);
   end;
 
-  specialize QuickSort<TBlock, Integer>(Blocks, Weights, Low(Blocks), High(Blocks), False);
+  specialize TArraySortWeighted<TBlock, Integer>.QuickSort(Blocks, Weights, Low(Blocks), High(Blocks), False);
 
   StartWidth := Max(Ceil(Sqrt(Area / 0.95)), MaxWidth);
   Spaces := [Block(0, 0, StartWidth, $FFFFFF)];
@@ -315,12 +334,18 @@ end;
 
 function TBoxArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): TBoxArray;
 begin
-  Result := specialize Sorted<TBox, Integer>(Self, Weights, LowToHigh);
+  Result := Copy(Self);
+  Weights := Copy(Weights);
+
+  specialize TArraySortWeighted<TBox, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
 end;
 
 function TBoxArrayHelper.Sort(Weights: TDoubleArray; LowToHigh: Boolean): TBoxArray;
 begin
-  Result := specialize Sorted<TBox, Double>(Self, Weights, LowToHigh);
+  Result := Copy(Self);
+  Weights := Copy(Weights);
+
+  specialize TArraySortWeighted<TBox, Double>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
 end;
 
 end.

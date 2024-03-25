@@ -145,6 +145,8 @@ type
     function PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray; overload;
 
     function Intersection(Other: TPointArray): TPointArray;
+    function SymmetricDifference(Other: TPointArray): TPointArray;
+    function Difference(Other: TPointArray): TPointArray;
 
     function DistanceTransform: TSingleMatrix;
 
@@ -213,9 +215,10 @@ implementation
 uses
   Math,
   simba.containers, simba.geometry, simba.math,
-  simba.algo_sort, simba.algo_intersection, simba.container_slacktree,
+  simba.container_slacktree,
   simba.vartype_ordarray, simba.vartype_ordmatrix,
-  simba.vartype_box, simba.vartype_point, simba.vartype_quad, simba.vartype_circle;
+  simba.vartype_box, simba.vartype_point, simba.vartype_quad, simba.vartype_circle,
+  simba.array_algorithm;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
 begin
@@ -1682,17 +1685,26 @@ end;
 
 function TPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): TPointArray;
 begin
-  Result := specialize Sorted<TPoint, Integer>(Self, Weights, LowToHigh);
+  Result := Copy(Self);
+  Weights := Copy(Weights);
+
+  specialize TArraySortWeighted<TPoint, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
 end;
 
 function TPointArrayHelper.Sort(Weights: TSingleArray; LowToHigh: Boolean): TPointArray;
 begin
-  Result := specialize Sorted<TPoint, Single>(Self, Weights, LowToHigh);
+  Result := Copy(Self);
+  Weights := Copy(Weights);
+
+  specialize TArraySortWeighted<TPoint, Single>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
 end;
 
 function TPointArrayHelper.Sort(Weights: TDoubleArray; LowToHigh: Boolean): TPointArray;
 begin
-  Result := specialize Sorted<TPoint, Double>(Self, Weights, LowToHigh);
+  Result := Copy(Self);
+  Weights := Copy(Weights);
+
+  specialize TArraySortWeighted<TPoint, Double>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
 end;
 
 function TPointArrayHelper.SortFrom(From: TPoint): TPointArray;
@@ -2301,7 +2313,17 @@ end;
 
 function TPointArrayHelper.Intersection(Other: TPointArray): TPointArray;
 begin
-  Result := Algo_Point_Intersection(Self, Other);
+  Result := specialize TArrayRelationship<TPoint>.Intersection(Self, Other);
+end;
+
+function TPointArrayHelper.SymmetricDifference(Other: TPointArray): TPointArray;
+begin
+  Result := specialize TArrayRelationship<TPoint>.SymmetricDifference(Self, Other);
+end;
+
+function TPointArrayHelper.Difference(Other: TPointArray): TPointArray;
+begin
+  Result := specialize TArrayRelationship<TPoint>.Difference(Self, Other);
 end;
 
 function TPointArrayHelper.DistanceTransform: TSingleMatrix;
@@ -2773,22 +2795,24 @@ function T2DPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): T
 var
   I: Integer;
 begin
+  Weights := Copy(Weights);
   SetLength(Result, Length(Self));
   for I := 0 to High(Result) do
     Result[I] := Copy(Self[I]);
 
-  specialize Sort<TPointArray, Integer>(Result, Weights, LowToHigh);
+  specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
 end;
 
 function T2DPointArrayHelper.Sort(Weights: TDoubleArray; LowToHigh: Boolean): T2DPointArray;
 var
   I: Integer;
 begin
+  Weights := Copy(Weights);
   SetLength(Result, Length(Self));
   for I := 0 to High(Result) do
     Result[I] := Copy(Self[I]);
 
-  specialize Sort<TPointArray, Double>(Result, Weights, LowToHigh);
+  specialize TArraySortWeighted<TPointArray, Double>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
 end;
 
 function T2DPointArrayHelper.SortFromSize(Size: Integer): T2DPointArray;
@@ -2831,7 +2855,7 @@ begin
   for I := 0 to High(Self) do
     Weights[I] := Sqr(From.X - Self[I][0].X) + Sqr(From.Y - Self[I][0].Y);
 
-  specialize Sort<TPointArray, Integer>(Result, Weights, True);
+  specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), True);
 end;
 
 function T2DPointArrayHelper.SortFromFirstPointX(From: TPoint): T2DPointArray;
@@ -2845,7 +2869,7 @@ begin
   for I := 0 to High(Self) do
     Weights[I] := Sqr(From.X - Self[I][0].X);
 
-  specialize Sort<TPointArray, Integer>(Result, Weights, True);
+  specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), True);
 end;
 
 function T2DPointArrayHelper.SortFromFirstPointY(From: TPoint): T2DPointArray;
@@ -2859,7 +2883,7 @@ begin
   for I := 0 to High(Self) do
     Weights[I] := Sqr(From.Y - Self[I][0].Y);
 
-  specialize Sort<TPointArray, Integer>(Result, Weights, True);
+  specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Self), High(Self), True);
 end;
 
 function T2DPointArrayHelper.SortFrom(From: TPoint): T2DPointArray;

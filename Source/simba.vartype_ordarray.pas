@@ -23,6 +23,16 @@ type
     function Sum: Int64;
     function Unique: TIntegerArray;
     procedure Sort;
+
+    function Difference(Other: TIntegerArray): TIntegerArray;
+    function SymmetricDifference(Other: TIntegerArray): TIntegerArray;
+    function Intersection(Other: TIntegerArray): TIntegerArray;
+  end;
+
+  TInt64ArrayHelper = type helper for TInt64Array
+    function Difference(Other: TInt64Array): TInt64Array;
+    function SymmetricDifference(Other: TInt64Array): TInt64Array;
+    function Intersection(Other: TInt64Array): TInt64Array;
   end;
 
   TSingleArrayHelper = type helper for TSingleArray
@@ -51,7 +61,7 @@ implementation
 
 uses
   Math,
-  simba.algo_unique, simba.algo_sort;
+  simba.array_algorithm;
 
 function TIntegerArrayHelper.Equals(Other: TIntegerArray): Boolean;
 begin
@@ -85,12 +95,42 @@ end;
 
 function TIntegerArrayHelper.Unique: TIntegerArray;
 begin
-  Result := specialize Unique<Integer>(Self);
+  Result := specialize TArrayUnique<Integer>.Unique(Self);
 end;
 
 procedure TIntegerArrayHelper.Sort;
 begin
-  specialize QuickSort<Integer>(Self, Low(Self), High(Self));
+  specialize TArraySort<Integer>.QuickSort(Self, Low(Self), High(Self));
+end;
+
+function TIntegerArrayHelper.Difference(Other: TIntegerArray): TIntegerArray;
+begin
+  Result := specialize TArrayRelationship<Integer>.Difference(Self, Other);
+end;
+
+function TIntegerArrayHelper.SymmetricDifference(Other: TIntegerArray): TIntegerArray;
+begin
+  Result := specialize TArrayRelationship<Integer>.SymmetricDifference(Self, Other);
+end;
+
+function TIntegerArrayHelper.Intersection(Other: TIntegerArray): TIntegerArray;
+begin
+  Result := specialize TArrayRelationship<Integer>.Intersection(Self, Other);
+end;
+
+function TInt64ArrayHelper.Difference(Other: TInt64Array): TInt64Array;
+begin
+  Result := specialize TArrayRelationship<Int64>.Difference(Self, Other);
+end;
+
+function TInt64ArrayHelper.SymmetricDifference(Other: TInt64Array): TInt64Array;
+begin
+  Result := specialize TArrayRelationship<Int64>.SymmetricDifference(Self, Other);
+end;
+
+function TInt64ArrayHelper.Intersection(Other: TInt64Array): TInt64Array;
+begin
+  Result := specialize TArrayRelationship<Int64>.Intersection(Self, Other);
 end;
 
 function TSingleArrayHelper.Equals(Other: TSingleArray): Boolean;
@@ -124,13 +164,19 @@ begin
 end;
 
 function TSingleArrayHelper.Unique: TSingleArray;
+
+  function Same(const L,R: Single): Boolean;
+  begin
+    Result := SameValue(L, R);
+  end;
+
 begin
-  Result := specialize Unique<Single>(Self);
+  Result := specialize TArrayUnique<Single>.Unique(Self, @Same);
 end;
 
 procedure TSingleArrayHelper.Sort;
 begin
-  specialize QuickSort<Single>(Self, Low(Self), High(Self));
+  specialize TArraySort<Single>.QuickSort(Self, Low(Self), High(Self));
 end;
 
 function TDoubleArrayHelper.Equals(Other: TDoubleArray): Boolean;
@@ -164,13 +210,19 @@ begin
 end;
 
 function TDoubleArrayHelper.Unique: TDoubleArray;
+
+  function Same(const L, R: Double): Boolean;
+  begin
+    Result := SameValue(L, R);
+  end;
+
 begin
-  Result := specialize Unique<Double>(Self);
+  Result := specialize TArrayUnique<Double>.Unique(Self, @Same);
 end;
 
 procedure TDoubleArrayHelper.Sort;
 begin
-  specialize QuickSort<Double>(Self, Low(Self), High(Self));
+  specialize TArraySort<Double>.QuickSort(Self, Low(Self), High(Self));
 end;
 
 end.

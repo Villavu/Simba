@@ -100,7 +100,7 @@ type
 implementation
 
 uses
-  simba.containers, simba.files, simba.algo_sort, simba.vartype_string;
+  simba.containers, simba.files, simba.array_algorithm, simba.vartype_string;
 
 class function TSimbaStringMap._StrToValue(Str: String; Default: String): String; overload;
 begin
@@ -359,7 +359,7 @@ begin
   for I := 0 to FCount - 1 do
     Weights[I] := FItems[I].KeyHash;
 
-  specialize QuickSort<TItem, UInt32>(FItems, Weights, 0, FCount - 1, True);
+  specialize TArraySortWeighted<TItem, UInt32>.QuickSort(FItems, Weights, 0, FCount - 1, True);
 end;
 
 function TSimbaStringMap.GetKey(Index: Integer): String;

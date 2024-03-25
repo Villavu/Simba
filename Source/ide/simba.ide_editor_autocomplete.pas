@@ -115,7 +115,7 @@ implementation
 
 uses
   ATCanvasPrimitives,
-  simba.algo_sort, simba.ide_editor, simba.ide_theme, simba.fonthelpers,
+  simba.array_algorithm, simba.ide_editor, simba.ide_theme, simba.fonthelpers,
   simba.ide_codetools_setup, simba.ide_codetools_keywords, simba.vartype_string;
 
 {$IFDEF WINDOWS}
@@ -379,7 +379,7 @@ var
       Inc(Count);
     end;
 
-    specialize QuickSort<TDeclaration>(FFilteredDecls, StartIndex, Count - 1, @CompareDeclarations);
+    specialize TArraySortFunc<TDeclaration>.QuickSort(FFilteredDecls, StartIndex, Count - 1, @CompareDeclarations);
   end;
 
   procedure AddFiltered(Decls: TDeclarationArray; StartIndex: Integer);
@@ -402,7 +402,7 @@ var
       end;
     end;
 
-    specialize QuickSort<TDeclaration, Integer>(FFilteredDecls, FFilteredWeights, StartIndex, Count - 1, True);
+    specialize TArraySortWeighted<TDeclaration, Integer>.QuickSort(FFilteredDecls, FFilteredWeights, StartIndex, Count - 1, True);
   end;
 
 var

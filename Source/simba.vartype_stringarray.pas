@@ -25,7 +25,7 @@ implementation
 
 uses
   StrUtils,
-  simba.algo_sort, simba.algo_unique;
+  simba.array_algorithm;
 
 function TStringArrayHelper.IndexOf(Value: String): Integer;
 begin
@@ -39,12 +39,18 @@ end;
 
 function TStringArrayHelper.Unique: TStringArray;
 begin
-  Result := specialize Unique<String>(Self);
+  Result := specialize TArrayUnique<String>.Unique(Self);
 end;
 
 procedure TStringArrayHelper.Sort;
+
+  function Compare(const L, R: String): Integer;
+  begin
+    Result := NaturalCompareText(L, R);
+  end;
+
 begin
-  specialize QuickSort<String>(Self, Low(Self), High(Self), @NaturalCompareText);
+  specialize TArraySortFunc<String>.QuickSort(Self, Low(Self), High(Self), @Compare);
 end;
 
 end.
