@@ -10,12 +10,11 @@ unit simba.form_package;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, stdctrls, extctrls, comctrls, synedit,
-  simba.ide_package, simba.ide_package_components;
+  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, ExtCtrls, ComCtrls, SynEdit, Dialogs,
+  simba.base, simba.ide_package, simba.ide_package_components;
 
 type
   TSimbaPackageForm = class(TForm)
-    Bevel2: TBevel;
     Bevel3: TBevel;
     ImageList: TImageList;
     InstallingButton: TButton;
@@ -23,8 +22,8 @@ type
     LoadingLabel: TLabel;
     Notebook1: TNotebook;
     BottomNotebook: TNotebook;
-    Page1: TPage;
-    Page2: TPage;
+    MainPage: TPage;
+    LoadingPage: TPage;
     PageVersions: TPage;
     PageInstalling: TPage;
     ListPanel: TPanel;
@@ -32,6 +31,7 @@ type
     PanelBottom: TPanel;
     ScrollBox1: TScrollBox;
     OutputSynEdit: TSynEdit;
+    Splitter1: TSplitter;
     ToolBar: TToolBar;
     ButtonRefresh: TToolButton;
     ButtonAddRepository: TToolButton;
@@ -70,7 +70,8 @@ implementation
 
 uses
   simba.form_packageinstall, simba.ide_package_installer, simba.ide_package_autoupdater,
-  simba.base, simba.dialog, simba.threading;
+  simba.dialog, simba.ide_utils, simba.vartype_string, simba.vartype_stringarray,
+  simba.httpclient, simba.files, simba.env, simba.fonthelpers;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin
@@ -79,13 +80,13 @@ end;
 
 procedure TSimbaPackageForm.BeginLoading;
 begin
-  Notebook1.ShowControl(Page2);
+  Notebook1.ShowControl(LoadingPage);
   Application.ProcessMessages();
 end;
 
 procedure TSimbaPackageForm.EndLoading;
 begin
-  Notebook1.ShowControl(Page1);
+  Notebook1.ShowControl(MainPage);
   Application.ProcessMessages();
 end;
 
@@ -97,27 +98,40 @@ end;
 
 procedure TSimbaPackageForm.DoRefresh(Data: PtrInt);
 var
-  Packages: TSimbaPackageArray;
+  URLs: TStringArray;
 
-  procedure Load;
+  procedure DoLoadURLs;
   begin
-    Packages := LoadPackages();
+    URLs := GetRemotePackageURLs() + GetLocalPackageURLs(False);
+    URLs := URLs.Unique();
   end;
 
 var
-  Thread: TThread;
   I: Integer;
+  Packages: TSimbaPackageArray;
+  Procs: array of TProcedureOfObject;
 begin
   BeginLoading();
 
-  Thread := RunInThread(@Load);
-  while (not Thread.Finished) do
-  begin
-    Application.ProcessMessages();
+  Application.RunInThreadAndWait(@DoLoadURLs);
 
-    Sleep(50);
+  SetLength(Packages, Length(URLs));
+  SetLength(Procs, Length(URLs));
+  for I := 0 to High(URLs) do
+  begin
+    Packages[I] := TSimbaPackage.Create(URLs[I]);
+    Procs[I] := @Packages[I].Load;
   end;
-  Thread.Free();
+
+  Application.RunInThreadsAndWait(Procs);
+
+  // reorder so updates are first, then installed, then uninstalled
+  for I := 0 to High(Packages) do
+    if Packages[I].IsInstalled() then
+      specialize MoveElement<TSimbaPackage>(Packages, I, 0);
+  for I := 0 to High(Packages) do
+    if Packages[I].HasUpdate() then
+      specialize MoveElement<TSimbaPackage>(Packages, I, 0);
 
   FListBox.Items.BeginUpdate();
   FListBox.Items.Clear();
@@ -134,13 +148,12 @@ procedure TSimbaPackageForm.ButtonAddRepositoryClick(Sender: TObject);
 var
   Package: TSimbaPackage;
 
-  procedure Load;
+  procedure DoLoad;
   begin
     Package.Load();
   end;
 
 var
-  Thread: TThread;
   URL: String;
 begin
   URL := '';
@@ -154,25 +167,23 @@ begin
     Package := TSimbaPackage.Create(URL);
 
     BeginLoading();
+    try
+      Application.RunInThreadAndWait(@DoLoad);
 
-    Thread := RunInThread(@Load);
-    while (not Thread.Finished) do
-    begin
-      Application.ProcessMessages();
+      if (Package.EndPoint.LastHTTPStatus = EHTTPStatus.OK) then
+      begin
+        Package.InstalledVersion := '';
 
-      Sleep(50);
+        FListBox.ItemIndex := FListBox.Add(Package);
+      end else
+      begin
+        SimbaErrorDlg('Package error', ['Package not found: %s', 'Error: %s'], [URL, ToStr(Package.EndPoint.LastHTTPStatus)]);
+
+        Package.Free();
+      end;
+    finally
+      EndLoading();
     end;
-    Thread.Free();
-
-    if Package.Exists then
-    begin
-      Package.InstalledVersion := '';
-
-      FListBox.ItemIndex := FListBox.Add(Package);
-    end else
-      MessageDlg('Package not found: ' + URL, mtError, [mbOK], 0);
-
-    EndLoading();
   end;
 end;
 
@@ -196,7 +207,7 @@ begin
 
   PageVersions.Show();
 
-  FInfoBox.SetInfo(Package.Info.HomepageURL, Package.InstalledVersion, Package.LatestVersion);
+  FInfoBox.SetInfo(Package.URL, Package.InstalledVersion, Package.LatestVersion);
   FInfoBox.AutoUpdateChecked := Package.AutoUpdateEnabled;
 
   FVersionBox.BeginUpdate();
@@ -207,31 +218,38 @@ end;
 function TSimbaPackageForm.SimpleInstall(Package: TSimbaPackage): Boolean;
 var
   Installer: TSimbaPackageInstaller;
-  Options: TSimbaPackageInstallOptions;
 begin
   Result := False;
 
-  Installer := TSimbaPackageInstaller.Create(Package, OutputSynEdit);
-  if Package.HasReleases() and Installer.GetOptions(Package.Releases[0], Options) then
+  if Package.HasVersions() then
   begin
-    OutputSynEdit.Clear();
+    Installer := TSimbaPackageInstaller.Create(Package, OutputSynEdit);
+    try
+      Installer.Version := Package.Versions[0];
 
-    if SimbaQuestionDlg('Install Package', ['Install package "' + Package.Info.FullName + '" to', '"' + Options.Path + '" ?']) = ESimbaDialogResult.YES then
-    begin
-      InstallingButton.Caption := 'Installing...';
-      InstallingButton.Enabled := False;
+      if Installer.HasRemoteInstallOpts then
+      begin
+        OutputSynEdit.Clear();
 
-      PageInstalling.Show();
+        if SimbaQuestionDlg('Install Package', 'Install package "%s" to "%s" ?', [Package.DisplayName, TSimbaPath.PathExtractRelative(SimbaEnv.SimbaPath, Installer.RemoteInstallOpts.Path)]) = ESimbaDialogResult.YES then
+        begin
+          InstallingButton.Caption := 'Installing...';
+          InstallingButton.Enabled := False;
 
-      Installer.Install(Package.Releases[0], Options);
+          PageInstalling.Show();
 
-      InstallingButton.Caption := 'Close';
-      InstallingButton.Enabled := True;
+          Installer.Install(Installer.RemoteInstallOpts);
+
+          InstallingButton.Caption := 'Close';
+          InstallingButton.Enabled := True;
+        end;
+
+        Result := True;
+      end;
+    finally
+      Installer.Free();
     end;
-
-    Result := True;
   end;
-  Installer.Free();
 end;
 
 procedure TSimbaPackageForm.DoInstallClick(Sender: TObject);
@@ -253,8 +271,6 @@ begin
     end;
 
   FListBox.Enabled := True;
-
-  DoPackageSelectionChanged(Self, True); // update new visible info
 end;
 
 procedure TSimbaPackageForm.DoAdvancedClick(Sender: TObject);
@@ -267,7 +283,7 @@ begin
 
   case Package.IsInstalled() of
     True:
-      case SimbaQuestionDlg('Uninstall Package', ['Uninstall "' + Package.Info.FullName + '"', 'Do you also want to delete the files?',  '*All* files in "' + Package.InstalledPath + '" will be deleted!']) of
+      case SimbaQuestionDlg('Uninstall Package', ['Uninstall "%s" ?', 'Do you also want to delete the files?',  '*All* files in "%s" will be deleted.'], [Package.DisplayName, Package.InstalledPath]) of
         ESimbaDialogResult.YES: Package.UnInstall(True);
         ESimbaDialogResult.NO:  Package.UnInstall(False);
       end;
@@ -319,6 +335,7 @@ begin
 
   ListPanel.Height := Scale96ToScreen(260);
 
+  OutputSynEdit.Font.Size := GetDefaultFontSize();
   {$IFDEF WINDOWS}
   OutputSynEdit.Font.Name := 'Consolas';
   {$ENDIF}

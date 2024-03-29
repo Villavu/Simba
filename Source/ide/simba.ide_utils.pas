@@ -10,10 +10,32 @@ unit simba.ide_utils;
 interface
 
 uses
-  Classes, SysUtils, Menus, Graphics;
+  Classes, SysUtils, Forms, Menus, Graphics,
+  simba.base;
 
 function ImageWidthForDPI(DPI: Integer): Integer;
 procedure MenuItemHeight(Item: TMenuItem; Canvas: TCanvas; var Height: Integer);
+
+type
+  TApplicationHelper = class helper for TApplication
+  public type
+    TProcedureNested = procedure is nested;
+
+    TRunInThread = class(TThread)
+    protected
+      FProcNested: TProcedureNested;
+      FProcOfObject: TProcedureOfObject;
+
+      procedure Execute; override;
+    public
+      constructor Create(ProcNested: TProcedureNested; ProcOfObject: TProcedureOfObject); reintroduce;
+    end;
+  public
+    function RunInThreadAndWait(Proc: TProcedureNested): String; overload;
+    function RunInThreadAndWait(Proc, IdleProc: TProcedureNested): String; overload;
+
+    procedure RunInThreadsAndWait(Procs: array of TProcedureOfObject);
+  end;
 
 implementation
 
@@ -50,6 +72,94 @@ begin
     if (ImgWidth > 16) then
       Height := Round(ImgWidth * 1.3);
   end;
+end;
+
+function TApplicationHelper.RunInThreadAndWait(Proc: TProcedureNested): String;
+begin
+  Result := '';
+
+  if not Assigned(Proc) then
+  begin
+    Result := 'Proc=nil';
+    Exit;
+  end;
+
+  with TRunInThread.Create(Proc, nil) do
+  try
+    while not Finished do
+    begin
+      if (GetCurrentThreadID() = MainThreadID) then
+        ProcessMessages();
+
+      Sleep(50);
+    end;
+
+    if Assigned(FatalException) then
+      Result := FatalException.ToString;
+  finally
+    Free();
+  end;
+end;
+
+function TApplicationHelper.RunInThreadAndWait(Proc, IdleProc: TProcedureNested): String;
+begin
+  Result := '';
+
+  if not Assigned(Proc) then
+    Exit('Proc=nil');
+  if not Assigned(IdleProc) then
+    Exit('IdleProc=nil');
+
+  with TRunInThread.Create(Proc, nil) do
+  try
+    while not Finished do
+      IdleProc();
+
+    if Assigned(FatalException) then
+      Result := FatalException.ToString;
+  finally
+    Free();
+  end;
+end;
+
+procedure TApplicationHelper.RunInThreadsAndWait(Procs: array of TProcedureOfObject);
+var
+  I: Integer;
+  Threads: array of TRunInThread;
+begin
+  SetLength(Threads, Length(Procs));
+  for I := 0 to High(Procs) do
+    Threads[I] := TRunInThread.Create(nil, Procs[I]);
+
+  for I := 0 to High(Threads) do
+  begin
+    while not Threads[I].Finished do
+    begin
+      if (GetCurrentThreadID() = MainThreadID) then
+        ProcessMessages();
+
+      Sleep(25);
+    end;
+
+    Threads[I].Free();
+  end;
+end;
+
+procedure TApplicationHelper.TRunInThread.Execute;
+begin
+  if Assigned(FProcNested) then
+    FProcNested()
+  else
+  if Assigned(FProcOfObject) then
+    FProcOfObject();
+end;
+
+constructor TApplicationHelper.TRunInThread.Create(ProcNested: TProcedureNested; ProcOfObject: TProcedureOfObject);
+begin
+  inherited Create(False, 512*512);
+
+  FProcNested := ProcNested;
+  FProcOfObject := ProcOfObject;
 end;
 
 end.

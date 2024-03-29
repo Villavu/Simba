@@ -11,56 +11,64 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base;
-
-const
-  PACKAGE_SETTINGS_VERSION = 1;
+  simba.base, simba.httpclient;
 
 type
-  TSimbaPackageBranch = record
-    Name: String;
-    DownloadURL: String;
-  end;
-  TSimbaPackageBranchArray = array of TSimbaPackageBranch;
-
-  TSimbaPackageRelease = record
+  TSimbaPackageVersion = record
     Name: String;
     Notes: String;
     Age: String;
     Time: TDateTime;
     DownloadURL: String;
     OptionsURL: String;
+    IsBranch: Boolean;
   end;
-  TSimbaPackageReleaseArray = array of TSimbaPackageRelease;
+  TSimbaPackageVersions = array of TSimbaPackageVersion;
 
-  TSimbaPackageInfo = record
-    Description: String;
-    FullName: String;
+  TSimbaPackageScripts = array of record
+    PackageName: String;
+
     Name: String;
-    HomepageURL: String;
+    Path: String;
   end;
 
   TSimbaPackageEndpoint = class
-  public
-    constructor Create(URL: String); virtual; abstract;
+  protected
+    FURL: String;
+    FLastHTTPStatus: EHTTPStatus; // last http status of GetPage, useful for detecting when a request failed
 
-    function GetInfo: TSimbaPackageInfo; virtual; abstract;
-    function GetReleases: TSimbaPackageReleaseArray; virtual; abstract;
-    function GetBranches: TSimbaPackageBranchArray; virtual; abstract;
+    procedure ParseTime(Str: String; out Time: TDateTime; out PrettyDays: String);
+
+    function GetPage(URL: String): String;
+    function GetVersions: TSimbaPackageVersions; virtual; abstract;
+  public
+    constructor Create(URL: String); virtual;
+
+    procedure DeleteCache; virtual;
+
+    property LastHTTPStatus: EHTTPStatus read FLastHTTPStatus;
+    property Versions: TSimbaPackageVersions read GetVersions;
   end;
 
   TSimbaPackage = class
   protected
     FEndpoint: TSimbaPackageEndpoint;
     FURL: String;
+    FDisplayName: String;
+    FName: String;
     FLoaded: Boolean;
-    FInfo: TSimbaPackageInfo;
-    FReleases: TSimbaPackageReleaseArray;
-    FBranches: TSimbaPackageBranchArray;
+    FVersions: TSimbaPackageVersions;
+
+    FScripts: TSimbaPackageScripts;
+    FScriptsDone: Boolean;
+    FExamplesDone: Boolean;
+    FExamples: TSimbaPackageScripts;
 
     procedure ClearConfig;
     procedure WriteConfig(Key: String; Value: String);
     function ReadConfig(Key: String): String;
+
+    function FindScripts(KeyNeeded: String): TSimbaPackageScripts;
 
     procedure SetAutoUpdateEnabled(AValue: Boolean);
     procedure SetInstalledVersion(Value: String);
@@ -78,14 +86,21 @@ type
     destructor Destroy; override;
 
     procedure Load;
-    function Exists: Boolean;
 
+    function IsInstalled: Boolean;
+    function UnInstall(RemoveFiles: Boolean): Boolean;
+
+    function HasUpdate: Boolean;
+    function HasVersions: Boolean;
+
+    function GetExamples: TSimbaPackageScripts;
+    function GetScripts: TSimbaPackageScripts;
+
+    property DisplayName: String read FDisplayName;
+    property Name: String read FName;
     property URL: String read FURL;
     property EndPoint: TSimbaPackageEndpoint read FEndpoint;
-
-    property Branches: TSimbaPackageBranchArray read FBranches;
-    property Releases: TSimbaPackageReleaseArray read FReleases;
-    property Info: TSimbaPackageInfo read FInfo;
+    property Versions: TSimbaPackageVersions read FVersions;
 
     property InstalledPath: String read GetInstalledPath write SetInstalledPath;
     property InstalledVersion: String read GetInstalledVersion write SetInstalledVersion;
@@ -93,170 +108,123 @@ type
     property LatestVersion: String read GetLatestVersion;
     property LatestVersionTime: TDateTime read GetLatestVersionTime;
     property AutoUpdateEnabled: Boolean read GetAutoUpdateEnabled write SetAutoUpdateEnabled;
-
-    function IsBranchInstalled: Boolean;
-    function IsInstalled: Boolean;
-    function UnInstall(RemoveFiles: Boolean): Boolean;
-
-    function HasUpdate: Boolean;
-    function HasReleases: Boolean;
-
-    // if file extension is ".packageexample.simba" the file is added to the "file > open example" form.
-    function GetExamples: TStringArray;
-    // if file extension is ".packagescript.simba" the file is to simba's main menu bar.
-    function GetScripts: TStringArray;
   end;
   TSimbaPackageArray = array of TSimbaPackage;
 
-  function LoadPackages: TSimbaPackageArray;
-  function GetInstalledPackages: TSimbaPackageArray;
-  procedure FreePackages(Packages: TSimbaPackageArray);
+  function GetRemotePackageURLs: TStringArray;
+  function GetLocalPackageURLs(OnlyInstalled: Boolean): TStringArray;
 
 implementation
 
 uses
-  inifiles, dateutils, fileutil, lazfileutils,
-  simba.env, simba.httpclient,
-  simba.ide_package_endpointgithub, simba.ide_package_endpointcustom, simba.threading,
-  simba.files, simba.vartype_string;
+  IniFiles, DateUtils,
+  simba.env, simba.files, simba.vartype_string,
+  simba.ide_package_endpointgithub, simba.ide_package_endpointcustom;
 
-function LoadPackageURLs: TStringArray;
-var
-  List: TStringList;
-
-  procedure Load;
-  begin
-    List.Text := TSimbaHTTPClient.SimpleGet(SIMBA_PACKAGES_URL, []);
-  end;
-
-var
-  Thread: TThread;
-  I: Integer;
-  Sections: TStringList;
+function GetRemotePackageURLs: TStringArray;
 begin
-  Sections := TStringList.Create();
-
-  List := TStringList.Create();
-  List.CaseSensitive := False;
-
   try
-    Thread := RunInThread(@Load);
-    Thread.WaitFor();
-    Thread.Free();
-
-    with TIniFile.Create(SimbaEnv.PackagesPath + 'packages.ini') do
-    try
-      ReadSections(Sections);
-
-      if (Sections.Count > 0) then
-      begin
-        if (ReadInteger('Settings', 'Version', -1) = PACKAGE_SETTINGS_VERSION) then
-        begin
-          for I := 0 to Sections.Count - 1 do
-            if (Sections[I] <> 'Settings') and (List.IndexOf(Sections[I]) = -1) then
-              List.Add(Sections[I]);
-        end else
-        begin
-          DebugLn('Package setting versions changed (%d). Erasing!', [PACKAGE_SETTINGS_VERSION]);
-          DeleteFile(FileName);
-        end;
-      end;
-    finally
-      Free();
-    end;
+    Result := TSimbaHTTPClient.SimpleGet(SIMBA_PACKAGES_URL, []).Split(#10);
   except
+    Result := [];
   end;
-
-  Result := List.ToStringArray();
-
-  List.Free();
-  Sections.Free();
 end;
 
-function LoadPackages: TSimbaPackageArray;
-var
-  URLs: TStringArray;
-  Threads: specialize TArray<TThread>;
-  I: Integer;
-begin
-  URLs := LoadPackageURLs();
-
-  SetLength(Result, Length(URLs));
-  SetLength(Threads, Length(URLs));
-  for I := 0 to High(URLs) do
-  begin
-    Result[I] := TSimbaPackage.Create(URLs[I]);
-    Threads[I] := RunInThread(@Result[I].Load);
-
-    Sleep(100);
-  end;
-
-  for I := 0 to High(Threads) do
-  begin
-    Threads[I].WaitFor();
-    Threads[I].Free();
-  end;
-
-  // reorder so updates are first, then installed, then uninstalled
-  for I := 0 to High(Result) do
-    if Result[I].IsInstalled() then
-      specialize MoveElement<TSimbaPackage>(Result, I, 0);
-  for I := 0 to High(Result) do
-    if Result[I].HasUpdate() then
-      specialize MoveElement<TSimbaPackage>(Result, I, 0);
-end;
-
-function GetInstalledPackages: TSimbaPackageArray;
+function GetLocalPackageURLs(OnlyInstalled: Boolean): TStringArray;
 var
   Sections: TStringList;
   I: Integer;
 begin
-  Result := [];
-
   Sections := TStringList.Create();
-  try
-    with TIniFile.Create(SimbaEnv.PackagesPath + 'packages.ini') do
-    try
-      ReadSections(Sections);
+  Sections.Duplicates := dupIgnore;
 
-      if (Sections.Count > 0) and (ReadInteger('Settings', 'Version', -1) = PACKAGE_SETTINGS_VERSION) then
-      begin
-        for I := 0 to Sections.Count - 1 do
-        begin
-          if (Sections[I] = 'Settings') or (ReadString(Sections[I], 'InstalledVersion', '') = '') then
-            Continue;
-          if DirectoryExists(ReadString(Sections[I], 'InstalledPath', '')) then
-            Result := Result + [TSimbaPackage.Create(Sections[I])];
-        end;
-      end;
-    finally
-      Free();
-    end;
-  except
+  with TIniFile.Create(SimbaEnv.PackagesPath + 'packages.ini') do
+  try
+    ReadSections(Sections);
+
+    // Remove non installed entries
+    for I := Sections.Count - 1 downto 0 do
+      if OnlyInstalled and (not DirectoryExists(ReadString(Sections[I], 'InstalledPath', ''))) then
+        Sections.Delete(I);
+  finally
+    Free();
   end;
+
+  Result := Sections.ToStringArray();
+
   Sections.Free();
 end;
 
-procedure FreePackages(Packages: TSimbaPackageArray);
+procedure TSimbaPackageEndpoint.ParseTime(Str: String; out Time: TDateTime; out PrettyDays: String);
 var
-  I: Integer;
+  Days: Integer;
 begin
-  for I := 0 to High(Packages) do
-    Packages[I].Free();
+  Time := 0;
+  PrettyDays := '';
+
+  if (Str <> '') then
+  begin
+    if Str.IsInteger() then
+      Time := Str.ToDateTime('unix', 0)
+    else
+      Time := Str.ToDateTime('iso8601', 0);
+
+    if (Time = 0) then
+      PrettyDays := '(unknown)'
+    else
+    begin
+      Days := DaysBetween(Now(), Time);
+
+      if (Days = 0) then
+        PrettyDays := '(today)'
+      else if (Days = 1) then
+        PrettyDays := '(yesterday)'
+      else
+        PrettyDays := '(' + IntToStr(Days) + ' days ago)';
+    end;
+  end;
+end;
+
+function TSimbaPackageEndpoint.GetPage(URL: String): String;
+begin
+  Result := '';
+
+  with TSimbaHTTPClient.Create() do
+  try
+    Result := Get(URL, []);
+    if (ResponseStatus <> EHTTPStatus.OK) then
+      Result := '';
+
+    FLastHTTPStatus := ResponseStatus;
+  finally
+    Free();
+  end;
+end;
+
+constructor TSimbaPackageEndpoint.Create(URL: String);
+begin
+  inherited Create;
+
+  FURL := URL;
+end;
+
+procedure TSimbaPackageEndpoint.DeleteCache;
+begin
+  { nothing }
 end;
 
 function TSimbaPackage.GetLatestVersion: String;
 begin
   Result := '';
-  if HasReleases() then
-    Result := FReleases[0].Name;
+  if HasVersions() then
+    Result := FVersions[0].Name;
 end;
 
 function TSimbaPackage.GetLatestVersionTime: TDateTime;
 begin
   Result := 0;
-  if HasReleases() then
-    Result := FReleases[0].Time;
+  if HasVersions() then
+    Result := FVersions[0].Time;
 end;
 
 function TSimbaPackage.GetInstalledVersionTime: TDateTime;
@@ -318,7 +286,6 @@ begin
   try
     with TIniFile.Create(SimbaEnv.PackagesPath + 'packages.ini') do
     try
-      WriteInteger('Settings', 'Version', PACKAGE_SETTINGS_VERSION);
       WriteString(FURL, Key, Value);
     finally
       Free();
@@ -344,11 +311,59 @@ begin
   end;
 end;
 
+function TSimbaPackage.FindScripts(KeyNeeded: String): TSimbaPackageScripts;
+var
+  Count: Integer = 0;
+
+  procedure Add(Name, Path: String);
+  begin
+    Path := TSimbaPath.PathNormalize(InstalledPath + Path);
+    if not TSimbaFile.FileExists(Path) then
+      Exit;
+
+    Result[Count].PackageName := FDisplayName;
+    Result[Count].Path := Path;
+    Result[Count].Name := Name;
+    Inc(Count);
+  end;
+
+var
+  Sections: TStringList;
+  I: Integer;
+begin
+  Result := [];
+  if not IsInstalled() then
+    Exit;
+
+  if TSimbaFile.FileExists(InstalledPath + '.simbapackagescripts') then
+  begin
+    Sections := TStringList.Create();
+
+    with TIniFile.Create(InstalledPath + '.simbapackagescripts') do
+    try
+      BoolTrueStrings := ['True', 'true'];
+      BoolFalseStrings := ['False', 'false'];
+
+      ReadSections(Sections);
+
+      SetLength(Result, Sections.Count);
+      for I := 0 to Sections.Count - 1 do
+        if ReadBool(Sections[I], KeyNeeded, False) then
+          Add(Sections[I], ReadString(Sections[I], 'Path', ''));
+      SetLength(Result, Count);
+    finally
+      Free();
+    end;
+
+    Sections.Free();
+  end;
+end;
+
 function TSimbaPackage.GetInstalledPath: String;
 begin
   Result := ReadConfig('InstalledPath');
   if (Result <> '') then
-    Result := CleanAndExpandDirectory(Result);
+    Result := TSimbaPath.PathIncludeTrailingSep(TSimbaPath.PathNormalize(Result));
 end;
 
 procedure TSimbaPackage.SetInstalledPath(Value: String);
@@ -366,6 +381,11 @@ begin
   inherited Create();
 
   FURL := AURL;
+  FDisplayName := FURL.TrimRight(['/']);
+  while (FDisplayName.Count('/') > 1) do
+    FDisplayName := FDisplayName.After('/');
+  FName := FDisplayName.After('/');
+
   if ('github.com' in FURL) then
     FEndpoint := TSimbaPackageEndpoint_Github.Create(FURL)
   else
@@ -384,19 +404,7 @@ procedure TSimbaPackage.Load;
 begin
   FLoaded := True;
 
-  FInfo := FEndpoint.GetInfo();
-  FBranches := FEndpoint.GetBranches();
-  FReleases := FEndpoint.GetReleases();
-end;
-
-function TSimbaPackage.Exists: Boolean;
-begin
-  Result := Self.Info.Name <> '';
-end;
-
-function TSimbaPackage.IsBranchInstalled: Boolean;
-begin
-  Result := (InstalledVersion <> '') and (InstalledVersionTime = 0);
+  FVersions := FEndpoint.GetVersions();
 end;
 
 function TSimbaPackage.IsInstalled: Boolean;
@@ -410,8 +418,8 @@ begin
 
   if Result then
   begin
-    if RemoveFiles and PathIsInPath(InstalledPath, SimbaEnv.SimbaPath) then
-      DeleteDirectory(InstalledPath, False);
+    if RemoveFiles and TSimbaPath.PathIsInDir(InstalledPath, SimbaEnv.SimbaPath) then
+      TSimbaDir.DirDelete(InstalledPath, False);
 
     ClearConfig();
   end;
@@ -419,28 +427,34 @@ end;
 
 function TSimbaPackage.HasUpdate: Boolean;
 begin
-  Result := IsInstalled() and (not IsBranchInstalled()) and (LatestVersionTime > InstalledVersionTime);
+  Result := IsInstalled() and (InstalledVersionTime > 0) and (LatestVersionTime > InstalledVersionTime);
 end;
 
-function TSimbaPackage.HasReleases: Boolean;
+function TSimbaPackage.HasVersions: Boolean;
 begin
-  Result := Length(FReleases) > 0;
+  Result := Length(FVersions) > 0;
 end;
 
-function TSimbaPackage.GetExamples: TStringArray;
+function TSimbaPackage.GetExamples: TSimbaPackageScripts;
 begin
-  if IsInstalled() then
-    Result := TSimbaDir.DirSearch(InstalledPath, '*.packageexample.simba', True)
-  else
-    Result := [];
+  if not FExamplesDone then
+  begin
+    FExamplesDone := True;
+    FExamples := FindScripts('IsExample');
+  end;
+
+  Result := FExamples;
 end;
 
-function TSimbaPackage.GetScripts: TStringArray;
+function TSimbaPackage.GetScripts: TSimbaPackageScripts;
 begin
-  if IsInstalled() then
-    Result := TSimbaDir.DirSearch(InstalledPath, '*.packagescript.simba', True)
-  else
-    Result := [];
+  if not FScriptsDone then
+  begin
+    FScriptsDone := True;
+    FScripts := FindScripts('IsScript');
+  end;
+
+  Result := FScripts;
 end;
 
 end.

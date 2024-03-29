@@ -1,41 +1,35 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.ide_package_endpointcustom;
 
 (*
-  ollydev.mooo.com/mypackage
+  1) Base URL, this will be the link inserted by the user:
+    www.something.com/mypackage
 
-  JSON Object:
+  2) Versions are queried by appending "_versions" to the base URL:
+    www.something.com/mypackage_versions
 
-  {
-    "name" : "",
-    "full_name" : "",
-    "description" : "",
-    "homepage_url" : "",
-  }
+    Which should contain a json array of versions:
 
-*)
-
-(*
-  ollydev.mooo.com/mypackageversions
-
-  JSON Array:
-
-  [
-    {
-      "download_url" : "",
-      "options_url" : "",
-      "notes" : "",
-      "time" : "",
-      "name" : ""
-    },
-    {
-      "download_url" : "",
-      "options_url" : "",
-      "notes" : "",
-      "time" : "",
-      "name" : ""
-    }
-  ]
-
+      [
+        {
+          "download_url" : "",
+          "options_url" : "",
+          "notes" : "",
+          "time" : "",
+          "name" : ""
+        },
+        {
+          "download_url" : "",
+          "options_url" : "",
+          "notes" : "",
+          "time" : "",
+          "name" : ""
+        }
+      ]
 *)
 
 {$i simba.inc}
@@ -43,142 +37,62 @@ unit simba.ide_package_endpointcustom;
 interface
 
 uses
-  classes, sysutils,
-  simba.ide_package;
+  Classes, SysUtils,
+  simba.base, simba.ide_package;
 
 type
   TSimbaPackageEndpoint_Custom = class(TSimbaPackageEndpoint)
   protected
-    FURL: String;
+    FVersionsURL: String;
 
-    function GetPage(URL: String): String;
+    function GetVersions: TSimbaPackageVersions; override;
   public
     constructor Create(URL: String); override;
-
-    function GetInfo: TSimbaPackageInfo; override;
-    function GetReleases: TSimbaPackageReleaseArray; override;
-    function GetBranches: TSimbaPackageBranchArray; override;
   end;
 
 implementation
 
 uses
-  dateutils, fpjson,
-  simba.httpclient, simba.base, simba.vartype_string;
-
-function TSimbaPackageEndpoint_Custom.GetPage(URL: String): String;
-begin
-  Result := '';
-
-  try
-    with TSimbaHTTPClient.Create() do
-    try
-      Result := Get(URL, [EHTTPStatus.OK]);
-    finally
-      Free();
-    end;
-  except
-    on E: Exception do
-      DebugLn(URL + ' :: ' + E.ToString());
-  end;
-end;
+  fpjson,
+  simba.vartype_string;
 
 constructor TSimbaPackageEndpoint_Custom.Create(URL: String);
 begin
-  FURL := URL;
-  if FURL.EndsWith('/') then
-    SetLength(FURL, Length(FURL) - 1);
+  inherited Create(URL);
+
+  FVersionsURL := URL + '_versions';
 end;
 
-function TSimbaPackageEndpoint_Custom.GetInfo: TSimbaPackageInfo;
-var
-  Json: TJSONData;
-begin
-  Result := Default(TSimbaPackageInfo);
-
-  Json := GetPage(FURL).ParseJSON();
-  if (Json = nil) then
-    Exit;
-
-  if (Json is TJSONObject) then
-  begin
-    Result.Name := TJSONObject(Json).Get('name', '');
-    Result.FullName := TJSONObject(Json).Get('full_name', '');
-    Result.Description := TJSONObject(Json).Get('description', '');
-    Result.HomepageURL := TJSONObject(Json).Get('homepage_url', '');
-  end;
-
-  JSON.Free();
-end;
-
-function TSimbaPackageEndpoint_Custom.GetReleases: TSimbaPackageReleaseArray;
+function TSimbaPackageEndpoint_Custom.GetVersions: TSimbaPackageVersions;
 var
   JSON: TJSONData;
   I: Integer;
-  Release: TSimbaPackageRelease;
+  Ver: TSimbaPackageVersion;
 begin
   Result := [];
 
-  JSON := GetPage(FURL + 'versions').ParseJSON();
+  JSON := GetPage(FVersionsURL).ParseJSON();
   if (JSON = nil) then
     Exit;
 
   for I := 0 to JSON.Count - 1 do
     if (JSON.Items[I] is TJSONObject) then
       with TJSONObject(JSON.Items[I]) do
-      begin
-        Release := Default(TSimbaPackageRelease);
-        Release.Name := Strings['name'];
-        Release.Notes := Strings['notes'];
-        Release.DownloadURL := Strings['download_url'];
-        Release.OptionsURL := Strings['options_url'];
-        Release.Age := Strings['time'];
+      try
+        Ver := Default(TSimbaPackageVersion);
+        Ver.Name := Strings['name'];
+        Ver.Notes := Strings['notes'];
+        Ver.DownloadURL := Strings['download_url'];
+        Ver.OptionsURL := Strings['options_url'];
+        Ver.Age := Strings['time'];
 
-        if (Release.Notes = '') then
-          Release.Notes := '(no release notes)';
+        if (Ver.Notes = '') then
+          Ver.Notes := '(no version notes)';
 
-        if (Release.Age <> '') then
-        begin
-          if Release.Age.IsInteger() then
-            Release.Time := UnixToDateTime(Release.Age.ToInt64())
-          else
-            Release.Time := ISO8601ToDate(Release.Age);
+        ParseTime(Strings['time'], Ver.Time, Ver.Age);
 
-          case DaysBetween(Now(), Time) of
-            0: Release.Age := '(today)';
-            1: Release.Age := '(yesterday)';
-            else
-              Release.Age := '(' + IntToStr(DaysBetween(Now(), Release.Time)) + ' days ago)';
-          end;
-        end;
-
-        Result := Result + [Release];
-      end;
-
-  JSON.Free();
-end;
-
-function TSimbaPackageEndpoint_Custom.GetBranches: TSimbaPackageBranchArray;
-var
-  JSON: TJSONData;
-  I: Integer;
-  Branch: TSimbaPackageBranch;
-begin
-  Result := [];
-
-  JSON := GetPage(FURL + 'branches').ParseJSON();
-  if (JSON = nil) then
-    Exit;
-
-  for I := 0 to JSON.Count - 1 do
-    if (JSON.Items[I] is TJSONObject) then
-      with TJSONObject(JSON.Items[I]) do
-      begin
-        Branch := Default(TSimbaPackageBranch);
-        Branch.Name := Strings['name'];
-        Branch.DownloadURL := Strings['download_url'];
-
-        Result := Result + [Branch];
+        Result := Result + [Ver];
+      except
       end;
 
   JSON.Free();

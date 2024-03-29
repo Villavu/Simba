@@ -33,7 +33,12 @@ type
     procedure DoSplitterEnterExit(Sender: TObject);
     procedure DoTreeViewSelectionChanged(Sender: TObject);
 
-    procedure AddPackageExamples;
+    procedure UpdateTreeSize;
+
+    procedure AddSimbaExamples;
+  public
+    procedure ClearPackageExamples;
+    procedure AddPackageExamples(PackageName: String; Files: TStringArray);
   end;
 
 var
@@ -45,8 +50,7 @@ implementation
 
 uses
   LCLType, AnchorDocking,
-  simba.form_main, simba.form_tabs, simba.ide_package, simba.files, simba.ide_theme,
-  simba.vartype_string;
+  simba.form_main, simba.form_tabs, simba.files, simba.ide_theme;
 
 function ReadResourceString(ResourceName: String): String;
 begin
@@ -69,62 +73,69 @@ type
     Script: String;
   end;
 
-procedure TSimbaOpenExampleForm.AddPackageExamples;
+procedure TSimbaOpenExampleForm.AddSimbaExamples;
+var
+  SimbaNode: TTreeNode;
 
-  procedure AddNode(const AParentNode: TTreeNode; const AFileName: String);
+  procedure AddNode(const Name, ResourceName: String);
   begin
-    with TExampleNode(TreeView.AddNode(AParentNode, TSimbaPath.PathExtractNameWithoutExt(AFileName), IMG_SIMBA)) do
-      FileName := AFileName;
+    with TExampleNode(TreeView.AddNode(SimbaNode, Name, IMG_SIMBA)) do
+      Script := ReadResourceString(ResourceName);
   end;
 
-var
-  I, MaxWidth: Integer;
-  Node, ParentNode: TTreeNode;
-  FileName: String;
-  Files: TStringArray;
-  Packages: TSimbaPackageArray;
-  Str: String;
 begin
   TreeView.BeginUpdate();
-  for I := 1 to TreeView.Items.TopLvlCount - 1 do // I := 1 to skip Simba node
+
+  SimbaNode := TExampleNode(TreeView.AddNode('Simba', IMG_PACKAGE));
+
+  AddNode('Array',                'EXAMPLE_ARRAY'               );
+  AddNode('Image',                'EXAMPLE_IMAGE'               );
+  AddNode('Function',             'EXAMPLE_FUNCTION'            );
+  AddNode('Loop',                 'EXAMPLE_LOOP'                );
+  AddNode('Stopwatch',            'EXAMPLE_STOPWATCH'           );
+  AddNode('Point Cluster',        'EXAMPLE_CLUSTER_POINTS'      );
+  AddNode('Mouse Teleport Event', 'EXAMPLE_MOUSE_TELEPORT_EVENT');
+  AddNode('Static Method',        'EXAMPLE_STATIC_METHOD'       );
+  AddNode('JSON',                 'EXAMPLE_JSON'                );
+  AddNode('Form',                 'EXAMPLE_FORM'                );
+  AddNode('Image Box',            'EXAMPLE_IMAGEBOX'            );
+  AddNode('IRC',                  'EXAMPLE_IRC'                 );
+  AddNode('Draw Text',            'EXAMPLE_DRAWTEXT'            );
+  AddNode('RandomLeft',           'EXAMPLE_RANDOMLEFT'          );
+
+  TreeView.EndUpdate();
+end;
+
+procedure TSimbaOpenExampleForm.ClearPackageExamples;
+var
+  I: Integer;
+begin
+  for I := TreeView.Items.TopLvlCount - 1 downto 1 do
     TreeView.Items.TopLvlItems[I].Free();
+end;
 
-  Packages := GetInstalledPackages();
-  for I := 0 to High(Packages) do
-  begin
-    Files := Packages[I].GetExamples();
-    if (Length(Files) = 0) then
-      Continue;
+procedure TSimbaOpenExampleForm.AddPackageExamples(PackageName: String; Files: TStringArray);
+var
+  I: Integer;
+  Node: TTreeNode;
+begin
+  TreeView.BeginUpdate();
+  if Assigned(TreeView.Items.FindTopLvlNode(PackageName)) then
+    TreeView.Items.FindTopLvlNode(PackageName).Free();
 
-    Str := Packages[I].URL;
-    while (Str.Count('/') > 1) do
-      Str := Str.After('/');
-
-    ParentNode := TreeView.AddNode(Str, IMG_PACKAGE);
-    for FileName in Files do
-      AddNode(ParentNode, FileName);
-  end;
-  FreePackages(Packages);
+  Node := TreeView.AddNode(PackageName, IMG_PACKAGE);
+  for I := 0 to High(Files) do
+    with TExampleNode(TreeView.AddNode(Node, TSimbaPath.PathExtractNameWithoutExt(Files[I]), IMG_SIMBA)) do
+      FileName := Files[I];
 
   TreeView.EndUpdate();
 
-  MaxWidth := 0;
-  Node := TreeView.Items.GetFirstNode();
-  while Assigned(Node) do
-  begin
-    MaxWidth := Max(MaxWidth, Node.DisplayTextRight);
-
-    Node := Node.GetNext();
-  end;
-
-  LeftPanel.Width := MaxWidth + TreeView.ScrollbarVert.Width+1;
+  UpdateTreeSize();
 end;
 
 procedure TSimbaOpenExampleForm.FormShow(Sender: TObject);
 begin
   Splitter.Width := DockMaster.SplitterWidth;
-
-  AddPackageExamples();
 
   TreeView.ClearSelection();
   TreeView.FullExpand();
@@ -161,15 +172,6 @@ begin
 end;
 
 procedure TSimbaOpenExampleForm.FormCreate(Sender: TObject);
-var
-  SimbaNode: TTreeNode;
-
-  procedure AddNode(const Name, ResourceName: String);
-  begin
-    with TExampleNode(TreeView.AddNode(SimbaNode, Name, IMG_SIMBA)) do
-      Script := ReadResourceString(ResourceName);
-  end;
-
 begin
   Width := Scale96ToScreen(800);
   Height := Scale96ToScreen(600);
@@ -195,22 +197,8 @@ begin
   ButtonPanel.Parent := Self;
   ButtonPanel.ButtonOk.OnClick := @DoButtonOkClick;
 
-  SimbaNode := TExampleNode(TreeView.AddNode('Simba', IMG_PACKAGE));
-
-  AddNode('Array',                'EXAMPLE_ARRAY'               );
-  AddNode('Image',                'EXAMPLE_IMAGE'               );
-  AddNode('Function',             'EXAMPLE_FUNCTION'            );
-  AddNode('Loop',                 'EXAMPLE_LOOP'                );
-  AddNode('Stopwatch',            'EXAMPLE_STOPWATCH'           );
-  AddNode('Point Cluster',        'EXAMPLE_CLUSTER_POINTS'      );
-  AddNode('Mouse Teleport Event', 'EXAMPLE_MOUSE_TELEPORT_EVENT');
-  AddNode('Static Method',        'EXAMPLE_STATIC_METHOD'       );
-  AddNode('JSON',                 'EXAMPLE_JSON'                );
-  AddNode('Form',                 'EXAMPLE_FORM'                );
-  AddNode('Image Box',            'EXAMPLE_IMAGEBOX'            );
-  AddNode('IRC',                  'EXAMPLE_IRC'                 );
-  AddNode('Draw Text',            'EXAMPLE_DRAWTEXT'            );
-  AddNode('RandomLeft',           'EXAMPLE_RANDOMLEFT'          );
+  AddSimbaExamples();
+  UpdateTreeSize();
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);
@@ -234,6 +222,23 @@ begin
       Editor.Visible := False;
   end else
     Editor.Visible := False;
+end;
+
+procedure TSimbaOpenExampleForm.UpdateTreeSize;
+var
+  Node: TTreeNode;
+  MaxWidth: Integer;
+begin
+  MaxWidth := 0;
+
+  Node := TreeView.Items.GetFirstNode();
+  while Assigned(Node) do
+  begin
+    MaxWidth := Max(MaxWidth, Node.DisplayTextRight);
+    Node := Node.GetNext();
+  end;
+
+  LeftPanel.Width := MaxWidth + TreeView.ScrollbarVert.Width + 1;
 end;
 
 end.

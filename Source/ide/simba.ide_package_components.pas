@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls, graphics, stdctrls, extctrls, grids,
-  simba.ide_package;
+  simba.base, simba.ide_package;
 
 type
   TPackageListBox = class(TListBox)
@@ -119,8 +119,8 @@ type
 implementation
 
 uses
-  lcltype, lclintf, themes, lazutf8, synedit,
-  simba.base;
+  LCLType, LCLIntf, LazUTF8, Themes, SynEdit,
+  simba.vartype_string;
 
 const
   pkgGridLineColor = $CCCCCC;
@@ -192,10 +192,10 @@ begin
   try
     Canvas.Font := Self.Font;
 
-    ItemHeight := Round(Canvas.TextHeight('Fj') * 3.6);
+    ItemHeight := Round(Canvas.TextHeight('Fj') * 3.2);
 
-    FButtonWidth := Round(Canvas.TextWidth('Custom Install') * 1.3);
-    FButtonHeight := Round(Canvas.TextHeight('Fj') * 1.4);
+    FButtonWidth := Round(Canvas.TextWidth('Custom Install') * 1.2);
+    FButtonHeight := Round(Canvas.TextHeight('Fj') * 1.2);
   finally
     Free();
   end;
@@ -243,6 +243,7 @@ var
   Package: TSimbaPackage;
   TextStyle: TTextStyle;
   DescRect: TRect;
+  Space: TRect;
 begin
   Package := Items.Objects[Index] as TSimbaPackage;
 
@@ -260,7 +261,8 @@ begin
 
   FBuffer.Canvas.Font.Color := clBlack;
   FBuffer.Canvas.Font.Bold := True;
-  FBuffer.Canvas.TextOut(ImageList.Width + 20, 10, Package.Info.FullName);
+  FBuffer.Canvas.TextOut(ImageList.Width + 20, 5, Package.Name);
+  FBuffer.Canvas.Font.Size := FBuffer.Canvas.Font.Size - 1;
 
   if Package.HasUpdate() then
   begin
@@ -296,19 +298,32 @@ begin
       PaintButton(GetAdvancedButtonRect(ARect), 'Custom Install', tbPushButtonNormal, clBlack, []);
   end;
 
-  DescRect.Top    := 10 + Canvas.TextHeight(Package.Info.Name);
-  DescRect.Left   := 55+1;
-  DescRect.Right  := FBuffer.Width - FButtonWidth - 25;
-  DescRect.Bottom := FBuffer.Height - 10;
+  FBuffer.Canvas.Font.Size := FBuffer.Canvas.Font.Size + 1;
 
-  FBuffer.Canvas.Font.Size := Canvas.Font.Size - 1;
+  Space.Top    := FBuffer.Canvas.TextHeight(Package.Name) + 7;
+  Space.Left   := 55+1;
+  Space.Right  := FBuffer.Width - FButtonWidth - 25;
+  Space.Bottom := FBuffer.Height - 10;
+
+  FBuffer.Canvas.Font.Size := FBuffer.Canvas.Font.Size - 3;
 
   TextStyle := FBuffer.Canvas.TextStyle;
-  TextStyle.Wordbreak := True;
-  TextStyle.SingleLine := False;
+  TextStyle.Layout := tlTop;
 
-  FBuffer.Canvas.TextRect(DescRect, DescRect.Left, DescRect.Top, CropText(Package.Info.Description, DescRect), TextStyle);
-  FBuffer.Canvas.Font.Size := Canvas.Font.Size + 1;
+  DescRect := Space;
+  FBuffer.Canvas.TextRect(DescRect, DescRect.Left, DescRect.Top, 'Latest Version: ' + Package.LatestVersion, TextStyle);
+
+  DescRect.Top += FBuffer.Canvas.TextHeight('Fj') + 1;
+  FBuffer.Canvas.TextRect(DescRect, DescRect.Left, DescRect.Top, 'Installed Version: ' + Package.InstalledVersion, TextStyle);
+
+  //FBuffer.Canvas.Font.Size := Canvas.Font.Size - 1;
+  //
+  //TextStyle := FBuffer.Canvas.TextStyle;
+  //TextStyle.Wordbreak := True;
+  //TextStyle.SingleLine := False;
+  //
+  //FBuffer.Canvas.TextRect(DescRect, DescRect.Left, DescRect.Top, CropText(Package.Info.Description, DescRect), TextStyle);
+  //FBuffer.Canvas.Font.Size := Canvas.Font.Size + 1;
 
   Canvas.Draw(ARect.Left, ARect.Top, FBuffer);
 end;
@@ -699,18 +714,27 @@ procedure TPackageVersionGrid.Fill(Package: TSimbaPackage);
 var
   Header: TVersionHeader;
   Info: TVersionInfo;
-  Version: TSimbaPackageRelease;
-  I: Integer;
+  Version: TSimbaPackageVersion;
+  I, ReleaseCount: Integer;
 begin
   Clear();
 
-  if Package.HasReleases() then
+  // possible branches are always appended
+  ReleaseCount := 0;
+  for I := 0 to High(Package.Versions) do
   begin
-    RowCount := RowCount + Length(Package.Releases) * 2;
+    if Package.Versions[I].IsBranch then
+      Break;
+    Inc(ReleaseCount);
+  end;
+
+  if (ReleaseCount > 0) then
+  begin
+    RowCount := RowCount + ReleaseCount * 2;
 
     for I := FixedRows to RowCount - 1 do
     begin
-      Version := Package.Releases[(I - FixedRows) div 2];
+      Version := Package.Versions[(I - FixedRows) div 2];
 
       case Odd(I - FixedRows) of
         True:

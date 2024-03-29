@@ -276,7 +276,7 @@ procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Point
 
   procedure Execute;
   begin
-    PBoolean(Result)^ := SimbaQuestionDlg(PString(Params^[0])^, PString(Params^[1])^) = ESimbaDialogResult.YES;
+    PBoolean(Result)^ := SimbaQuestionDlg(PString(Params^[0])^, PString(Params^[1])^, []) = ESimbaDialogResult.YES;
   end;
 
 begin

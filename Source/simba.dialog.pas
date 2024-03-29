@@ -15,19 +15,23 @@ uses
 type
   {$PUSH}
   {$SCOPEDENUMS ON}
-  PSimbaDialogResult = ^ESimbaDialogResult;
-  ESimbaDialogResult = (
-    CANCEL,
-    YES,
-    NO
-  );
+  ESimbaDialogResult = (CANCEL, YES, NO);
   {$POP}
 
+function SimbaQuestionDlg(Title: String; Question: String; Args: array of const): ESimbaDialogResult; overload;
+function SimbaQuestionDlg(Title: String; Question: TStringArray; Args: array of const): ESimbaDialogResult; overload;
+
+procedure SimbaErrorDlg(Title: String; Err: String; Args: array of const); overload;
+procedure SimbaErrorDlg(Title: String; Err: TStringArray; Args: array of const); overload;
+
+implementation
+
+type
   TSimbaDialogForm = class(TForm)
     ButtonCancel: TButton;
     ButtonNo: TButton;
     ButtonYes: TButton;
-    Image1: TImage;
+    Image: TImage;
     QuestionLabel: TLabel;
     MessagePanel: TPanel;
     ButtonPanel: TPanel;
@@ -35,22 +39,22 @@ type
     procedure ButtonNoClick(Sender: TObject);
     procedure ButtonYesClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+  protected
+    procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
   public
     DialogResult: ESimbaDialogResult;
   end;
+  TSimbaDialogClass = class of TSimbaDialogForm;
 
-function SimbaQuestionDlg(Title, Question: String): ESimbaDialogResult; overload;
-function SimbaQuestionDlg(Title: String; Question: TStringArray): ESimbaDialogResult; overload;
+  TSimbaQuestionDialogForm = class(TSimbaDialogForm);
+  TSimbaErrorDialogForm = class(TSimbaDialogForm);
 
-implementation
-
-function SimbaQuestionDlg(Title, Question: String): ESimbaDialogResult;
+function ShowDialog(Typ: TSimbaDialogClass; Title, Msg: String; Args: array of const): ESimbaDialogResult;
 begin
-  with TSimbaDialogForm.Create(nil) do
+  with Typ.Create(nil) do
   try
     Caption := Title;
-    QuestionLabel.Caption := Question;
-
+    QuestionLabel.Caption := Format(Msg, Args);
     ShowModal();
 
     Result := DialogResult;
@@ -59,16 +63,33 @@ begin
   end;
 end;
 
-function SimbaQuestionDlg(Title: String; Question: TStringArray): ESimbaDialogResult;
-begin
-  Result := SimbaQuestionDlg(Title, ''.Join(LineEnding, Question));
-end;
-
 procedure TSimbaDialogForm.FormCreate(Sender: TObject);
 begin
-  DialogResult := ESimbaDialogResult.CANCEL; // default, if close button was clicked.
+  if (Self is TSimbaErrorDialogForm) then
+  begin
+    Image.Picture.Bitmap := TBitmap(GetDialogIcon(idDialogError));
 
-  Image1.Picture.Bitmap := TBitmap(GetDialogIcon(idDialogConfirm));
+    ButtonCancel.Hide();
+    ButtonNo.Hide();
+    ButtonYes.Caption := 'Ok';
+  end else
+  if (Self is TSimbaQuestionDialogForm) then
+    Image.Picture.Bitmap := TBitmap(GetDialogIcon(idDialogConfirm));
+
+  DialogResult := ESimbaDialogResult.CANCEL; // default, if close button was clicked.
+end;
+
+type
+  TLabelProtectedAccess = class(TLabel);
+
+procedure TSimbaDialogForm.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
+var
+  W, H: Integer;
+begin
+  inherited CalculatePreferredSize(PreferredWidth, PreferredHeight, WithThemeSpace);
+
+  TLabelProtectedAccess(QuestionLabel).CalculateSize(Monitor.Width div 2, W, H);
+  PreferredWidth := QuestionLabel.Left + QuestionLabel.BorderSpacing.Right + W;
 end;
 
 procedure TSimbaDialogForm.ButtonNoClick(Sender: TObject);
@@ -87,6 +108,26 @@ procedure TSimbaDialogForm.ButtonYesClick(Sender: TObject);
 begin
   DialogResult := ESimbaDialogResult.YES;
   Close();
+end;
+
+function SimbaQuestionDlg(Title: String; Question: String; Args: array of const): ESimbaDialogResult;
+begin
+  Result := ShowDialog(TSimbaQuestionDialogForm, Title, Question, Args);
+end;
+
+function SimbaQuestionDlg(Title: String; Question: TStringArray; Args: array of const): ESimbaDialogResult;
+begin
+  Result := ShowDialog(TSimbaQuestionDialogForm, Title, ''.Join(LineEnding, Question), Args);
+end;
+
+procedure SimbaErrorDlg(Title: String; Err: String; Args: array of const);
+begin
+  ShowDialog(TSimbaErrorDialogForm, Title, Err, Args);
+end;
+
+procedure SimbaErrorDlg(Title: String; Err: TStringArray; Args: array of const);
+begin
+  ShowDialog(TSimbaErrorDialogForm, Title, ''.Join(LineEnding, Err), Args);
 end;
 
 {$R *.lfm}

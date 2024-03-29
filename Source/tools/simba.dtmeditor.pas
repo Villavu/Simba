@@ -485,7 +485,7 @@ end;
 
 procedure TSimbaDTMEditorForm.ButtonDeletePointsClick(Sender: TObject);
 begin
-  if (SimbaQuestionDlg('DTMEditor', 'Clear All Points?') = ESimbaDialogResult.YES) then
+  if (SimbaQuestionDlg('DTMEditor', 'Clear All Points?', []) = ESimbaDialogResult.YES) then
   begin
     ListBox.Clear();
     ListBox.OnSelectionChange(Self, False);

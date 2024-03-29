@@ -29,7 +29,6 @@ procedure RunInMainThread(NestedMethod: TThreadNestedProc); overload;
 
 function RunInThread(Proc: TThreadProc; FreeOnTerminate: Boolean = False): TThread; overload;
 function RunInThread(Method: TThreadMethod; FreeOnTerminate: Boolean = False): TThread; overload;
-function RunInThread(NestedMethod: TThreadNestedProc; FreeOnTerminate: Boolean = False): TThread; overload;
 
 implementation
 
@@ -69,22 +68,19 @@ type
   TThreaded = class(TThread)
   protected
     FProc: TThreadProc;
-    FNestedProc: TThreadNestedProc;
     FMethod: TThreadMethod;
 
     procedure Execute; override;
   public
     constructor Create(Proc: TThreadProc; AFreeOnTerminate: Boolean); reintroduce;
-    constructor Create(NestedProc: TThreadNestedProc; AFreeOnTerminate: Boolean); reintroduce;
     constructor Create(Method: TThreadMethod; AFreeOnTerminate: Boolean); reintroduce;
   end;
 
 procedure TThreaded.Execute;
 begin
   try
-    if Assigned(FMethod)     then FMethod()      else
-    if Assigned(FProc)       then FProc()        else
-    if Assigned(FNestedProc) then FNestedProc();
+    if Assigned(FMethod)     then FMethod() else
+    if Assigned(FProc)       then FProc();
   except
     on E: Exception do
       DebugLn('RunInThread exception: ' + E.Message);
@@ -96,15 +92,6 @@ begin
   inherited Create(False, DefaultStackSize div 2);
 
   FProc := Proc;
-
-  FreeOnTerminate := AFreeOnTerminate;
-end;
-
-constructor TThreaded.Create(NestedProc: TThreadNestedProc; AFreeOnTerminate: Boolean);
-begin
-  inherited Create(False, DefaultStackSize div 2);
-
-  FNestedProc := NestedProc;
 
   FreeOnTerminate := AFreeOnTerminate;
 end;
@@ -148,11 +135,6 @@ end;
 function RunInThread(Method: TThreadMethod; FreeOnTerminate: Boolean): TThread;
 begin
   Result := TThreaded.Create(Method, FreeOnTerminate);
-end;
-
-function RunInThread(NestedMethod: TThreadNestedProc; FreeOnTerminate: Boolean): TThread;
-begin
-  Result := TThreaded.Create(NestedMethod, FreeOnTerminate);
 end;
 
 procedure RunInMainThread(Method: TThreadMethod);

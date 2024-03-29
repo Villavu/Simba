@@ -388,7 +388,7 @@ end;
 
 procedure TSimbaACAForm.ButtonRemoveAllColorsClick(Sender: TObject);
 begin
-  if (SimbaQuestionDlg('ACA', 'Clear All Colors?') = ESimbaDialogResult.YES) then
+  if (SimbaQuestionDlg('ACA', 'Clear All Colors?', []) = ESimbaDialogResult.YES) then
   begin
     ColorListBox.Clear();
     ColorListBox.OnSelectionChange(Sender, False);

@@ -1,167 +1,20 @@
 object SimbaPackageInstallForm: TSimbaPackageInstallForm
-  Left = 4482
-  Height = 488
-  Top = 41
-  Width = 606
-  Caption = 'Package - Advanced Install'
-  ClientHeight = 488
-  ClientWidth = 606
+  Left = -764
+  Height = 552
+  Top = 282
+  Width = 735
+  Caption = 'Package - Custom Install'
+  ClientHeight = 552
+  ClientWidth = 735
   DesignTimePPI = 120
+  OnShow = DoFormShow
   Position = poOwnerFormCenter
   LCLVersion = '3.0.0.3'
-  object OptionsPanel: TPanel
-    Left = 0
-    Height = 266
-    Top = 0
-    Width = 606
-    Align = alTop
-    AutoSize = True
-    BevelOuter = bvNone
-    ClientHeight = 266
-    ClientWidth = 606
-    TabOrder = 0
-    object VersionsList: TComboBox
-      AnchorSideLeft.Control = Label3
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = OptionsPanel
-      AnchorSideRight.Control = OptionsPanel
-      AnchorSideRight.Side = asrBottom
-      Left = 100
-      Height = 33
-      Top = 5
-      Width = 466
-      Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Left = 12
-      BorderSpacing.Top = 5
-      BorderSpacing.Right = 40
-      ItemHeight = 25
-      ReadOnly = True
-      TabOrder = 0
-      OnChange = DoVersionChange
-    end
-    object Label4: TLabel
-      AnchorSideLeft.Control = OptionsPanel
-      AnchorSideTop.Control = VersionsList
-      AnchorSideBottom.Control = VersionsList
-      AnchorSideBottom.Side = asrBottom
-      Left = 5
-      Height = 33
-      Top = 5
-      Width = 58
-      Anchors = [akTop, akLeft, akBottom]
-      BorderSpacing.Left = 5
-      Caption = 'Version'
-      Layout = tlCenter
-      ParentColor = False
-    end
-    object InstallButton: TButton
-      AnchorSideLeft.Control = OptionsPanel
-      AnchorSideTop.Control = IgnoreListMemo
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = OptionsPanel
-      AnchorSideRight.Side = asrBottom
-      AnchorSideBottom.Side = asrBottom
-      Left = 8
-      Height = 35
-      Top = 223
-      Width = 588
-      Anchors = [akTop, akLeft, akRight]
-      AutoSize = True
-      BorderSpacing.Left = 8
-      BorderSpacing.Top = 8
-      BorderSpacing.Right = 10
-      BorderSpacing.Bottom = 8
-      Caption = 'Install'
-      TabOrder = 1
-      OnClick = DoInstallButtonClick
-    end
-    object PathEdit: TFileNameEdit
-      AnchorSideLeft.Control = Label3
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = VersionsList
-      AnchorSideTop.Side = asrBottom
-      AnchorSideRight.Control = OptionsPanel
-      AnchorSideRight.Side = asrBottom
-      Left = 100
-      Height = 33
-      Top = 43
-      Width = 499
-      FilterIndex = 0
-      HideDirectories = False
-      ButtonWidth = 28
-      NumGlyphs = 1
-      Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Left = 12
-      BorderSpacing.Top = 5
-      BorderSpacing.Right = 7
-      MaxLength = 0
-      TabOrder = 2
-    end
-    object Label2: TLabel
-      AnchorSideLeft.Control = OptionsPanel
-      AnchorSideTop.Control = PathEdit
-      AnchorSideBottom.Control = PathEdit
-      AnchorSideBottom.Side = asrBottom
-      Left = 5
-      Height = 33
-      Top = 43
-      Width = 34
-      Anchors = [akTop, akLeft, akBottom]
-      BorderSpacing.Left = 5
-      Caption = 'Path'
-      Layout = tlCenter
-      ParentColor = False
-    end
-    object Label3: TLabel
-      AnchorSideLeft.Control = OptionsPanel
-      AnchorSideTop.Control = FlatCheckbox
-      AnchorSideTop.Side = asrBottom
-      AnchorSideBottom.Side = asrBottom
-      Left = 5
-      Height = 25
-      Top = 115
-      Width = 83
-      BorderSpacing.Left = 5
-      BorderSpacing.Top = 5
-      Caption = 'Ignore List'
-      Layout = tlCenter
-      ParentColor = False
-    end
-    object FlatCheckbox: TCheckBox
-      AnchorSideLeft.Control = OptionsPanel
-      AnchorSideTop.Control = PathEdit
-      AnchorSideTop.Side = asrBottom
-      Left = 5
-      Height = 29
-      Top = 81
-      Width = 106
-      Alignment = taLeftJustify
-      BorderSpacing.Left = 5
-      BorderSpacing.Top = 5
-      Caption = 'Extract Flat'
-      TabOrder = 3
-    end
-    object IgnoreListMemo: TMemo
-      AnchorSideLeft.Control = Label3
-      AnchorSideLeft.Side = asrBottom
-      AnchorSideTop.Control = Label3
-      AnchorSideRight.Control = VersionsList
-      AnchorSideRight.Side = asrBottom
-      Left = 100
-      Height = 100
-      Top = 115
-      Width = 466
-      Anchors = [akTop, akLeft, akRight]
-      BorderSpacing.Left = 12
-      ScrollBars = ssAutoHorizontal
-      TabOrder = 4
-    end
-  end
   inline Output: TSynEdit
     Left = 8
-    Height = 214
+    Height = 278
     Top = 266
-    Width = 590
+    Width = 719
     Align = alClient
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
@@ -172,7 +25,7 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
     Font.Quality = fqCleartypeNatural
     ParentColor = False
     ParentFont = False
-    TabOrder = 1
+    TabOrder = 0
     BorderStyle = bsNone
     Gutter.Color = clWhite
     Gutter.LeftOffset = 5
@@ -217,5 +70,255 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
     LineHighlightColor.Foreground = clNone
     inline SynLeftGutterPartList1: TSynGutterPartList
     end
+  end
+  object Notebook1: TNotebook
+    Left = 0
+    Height = 266
+    Top = 0
+    Width = 735
+    PageIndex = 0
+    Align = alTop
+    AutoSize = True
+    TabOrder = 1
+    object MainPage: TPage
+      object OptionsPanel: TPanel
+        Left = 0
+        Height = 266
+        Top = 0
+        Width = 735
+        Align = alClient
+        AutoSize = True
+        BevelOuter = bvNone
+        ClientHeight = 266
+        ClientWidth = 735
+        TabOrder = 0
+        object VersionsList: TComboBox
+          AnchorSideLeft.Control = Label3
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = OptionsPanel
+          AnchorSideRight.Control = RefreshVersionButton
+          Left = 95
+          Height = 33
+          Top = 5
+          Width = 610
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 7
+          BorderSpacing.Top = 5
+          BorderSpacing.Right = 5
+          ItemHeight = 25
+          ReadOnly = True
+          TabOrder = 0
+          OnChange = DoVersionChange
+        end
+        object Label4: TLabel
+          AnchorSideLeft.Control = OptionsPanel
+          AnchorSideTop.Control = VersionsList
+          AnchorSideBottom.Control = VersionsList
+          AnchorSideBottom.Side = asrBottom
+          Left = 5
+          Height = 33
+          Top = 5
+          Width = 58
+          Anchors = [akTop, akLeft, akBottom]
+          BorderSpacing.Left = 5
+          Caption = 'Version'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object InstallButton: TButton
+          AnchorSideLeft.Control = OptionsPanel
+          AnchorSideTop.Control = IgnoreListMemo
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = OptionsPanel
+          AnchorSideRight.Side = asrBottom
+          AnchorSideBottom.Side = asrBottom
+          Left = 8
+          Height = 35
+          Top = 223
+          Width = 719
+          Anchors = [akTop, akLeft, akRight]
+          AutoSize = True
+          BorderSpacing.Left = 8
+          BorderSpacing.Top = 8
+          BorderSpacing.Right = 8
+          BorderSpacing.Bottom = 8
+          Caption = 'Install'
+          TabOrder = 1
+          OnClick = DoInstallButtonClick
+        end
+        object PathEdit: TFileNameEdit
+          AnchorSideLeft.Control = Label3
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = VersionsList
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = OptionsPanel
+          AnchorSideRight.Side = asrBottom
+          Left = 95
+          Height = 33
+          Top = 43
+          Width = 635
+          FilterIndex = 0
+          HideDirectories = False
+          ButtonWidth = 28
+          NumGlyphs = 1
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 7
+          BorderSpacing.Top = 5
+          BorderSpacing.Right = 5
+          MaxLength = 0
+          Spacing = 5
+          TabOrder = 2
+        end
+        object Label2: TLabel
+          AnchorSideLeft.Control = OptionsPanel
+          AnchorSideTop.Control = PathEdit
+          AnchorSideBottom.Control = PathEdit
+          AnchorSideBottom.Side = asrBottom
+          Left = 5
+          Height = 33
+          Top = 43
+          Width = 34
+          Anchors = [akTop, akLeft, akBottom]
+          BorderSpacing.Left = 5
+          Caption = 'Path'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object Label3: TLabel
+          AnchorSideLeft.Control = OptionsPanel
+          AnchorSideTop.Control = FlatCheckbox
+          AnchorSideTop.Side = asrBottom
+          AnchorSideBottom.Side = asrBottom
+          Left = 5
+          Height = 25
+          Top = 115
+          Width = 83
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 5
+          Caption = 'Ignore List'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object FlatCheckbox: TCheckBox
+          AnchorSideLeft.Control = OptionsPanel
+          AnchorSideTop.Control = PathEdit
+          AnchorSideTop.Side = asrBottom
+          Left = 5
+          Height = 29
+          Top = 81
+          Width = 106
+          Alignment = taLeftJustify
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 5
+          Caption = 'Extract Flat'
+          TabOrder = 3
+        end
+        object IgnoreListMemo: TMemo
+          AnchorSideLeft.Control = Label3
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = Label3
+          AnchorSideRight.Control = VersionsList
+          AnchorSideRight.Side = asrBottom
+          Left = 95
+          Height = 100
+          Top = 115
+          Width = 610
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 7
+          ScrollBars = ssAutoHorizontal
+          TabOrder = 4
+        end
+        object RefreshVersionButton: TSpeedButton
+          AnchorSideTop.Control = VersionsList
+          AnchorSideRight.Control = OptionsPanel
+          AnchorSideRight.Side = asrBottom
+          AnchorSideBottom.Control = VersionsList
+          AnchorSideBottom.Side = asrBottom
+          Left = 710
+          Height = 33
+          Hint = 'Reload versions.'#13#10'If this package is from GitHub branches will also be fetched.'
+          Top = 5
+          Width = 20
+          Anchors = [akTop, akRight, akBottom]
+          BorderSpacing.Right = 5
+          Images = ImageList1
+          ImageIndex = 0
+          OnClick = DoRefreshVersions
+          ShowCaption = False
+          ShowHint = True
+          ParentShowHint = False
+        end
+      end
+    end
+    object LoadingPage: TPage
+      object LoadingLabel: TLabel
+        Left = 0
+        Height = 25
+        Top = 0
+        Width = 735
+        Align = alTop
+        Alignment = taCenter
+        AutoSize = False
+        Caption = 'Loading...'
+        Font.Style = [fsBold]
+        Layout = tlCenter
+        ParentFont = False
+      end
+    end
+  end
+  object ImageList1: TImageList
+    Left = 40
+    Top = 296
+    Bitmap = {
+      4C7A0100000010000000100000002E0100000000000078DAADD3B14BC34014C7
+      F180D2161DC5DDC1C1E4DCDC75B2E0E0A85D9C1D046729D8F4A18B149C454428
+      3A74C8D4FF400A0A8AFE0D0AAD08CEDA2E96E7B7C9519258DB0C1D3E5C2E79BF
+      7B7709515547A7C47174160778410F6F686223437611F760A20FA8E10A1D7BEF
+      16055B5B4410CBCEE319DFD84DAD9BC731FA68D9B90CD68CD55CE2075B63F657
+      B26BD447E4DB38C970C68A3D4B2395CF4DC86DE208657CA01BCF67E81BD8BE09
+      C39AAAA7230499BF7D58EFF654CC276A2AEE99CA6A716C464C2E956F84A36F2A
+      93FB99536ADB89BC7842DF3AD77DF5DDD2BF59DF6C873555EFE24FFE7039CFD8
+      8AD6601F837962CFDE1EFBEEF2FC51656D2E960F86E795A5023537F61DBEE31A
+      E7649FA23EE64ECB2B0B13CF28EE3AF54DBC92FD8A7A9A7DDD7166748AFFEC2F
+      0B0B88DB
+    }
+    BitmapAdv = {
+      4C69020000004C7A010000001800000018000000EA0100000000000078DAC596
+      4D4B024118C7D720250BEAE4418A0E05B9BB1651104421F6DEB1AE9DBA468518
+      52F4B6CE37A8A83C055DBAD7A56E419DA4C8283AF9093AA81D3AA6F8F49F9C72
+      B0DDCD37E8F0C3DD99797EFBEC3CCFA844A4D03FA228D40516C126888059D052
+      07EF10B80164C23B38029E2ABC0EB003F292EF15DC8267F0218D67C06449BC13
+      C440C8C27F2CC53F8009FE4C69BE95C78294589305CBD2FCE8F7B8897B4B729F
+      80469BF7F4827B69FD92180F7E8F95AC1F013931772AE76CF38C26702162F8BE
+      8DD9F893D29E3456502F374888D83498B3F0C7C11BE8A9A2273A849B7B2F2DFC
+      0DC0558193F74980F78F605F78F366FE2A728E599C0DAA933F247AB33C7F5423
+      1BB264A8A19ABE13ECFD444C8FD5C56F68F9C2B5BE474C9D1404E07796ED5AED
+      7611531A2CFC57E23A45DBFE8E8AF364BD3E62DA1BE2E3E67EFF3CE6D3E23E41
+      6CD05D59DEDAA3884D9AFA993F88BD18C7BA0F31764EE1F6A63FDD8AE240CCD9
+      4F3FECFA862DFDFCDED097A5FADE11EBF15AEF096A13D54E8B0E75DDA4BE59D1
+      27A352DC4A711C7B66E86162FD6DC579D4D0D06730F724E572609A03EF6FDE83
+      A57D62A853A25EC5B310D55EBEDE29AA65A4FECD99E65D564FF479E038C473DE
+      7F9D8B423F5FC33D50F3EF7DA4AF19F59946AE6BD8970D7C2ED0B6DAF99FFF3F
+      3E014EECCB054C7A0100000020000000200000004F0200000000000078DAED97
+      3F485B411CC75F1C2A145A225A100A0ED2D6E42E862048D2C50E1674905A2AD8
+      45C4590717910A9ADCDA0CA63443BB3AB956B0938308CE922E051D14311AA518
+      FFFF05BD7EAFEF55EF3D92F72E7AB11D1C3EBC3F77F7FDFEDEFD7EF70BE19C1B
+      FC1E570C833F054360166C800B90073FC057F01A5494C1D70F52E01C700F9640
+      9746EF66B0AEE0EBE43B785244330AD2E2EAE1FD161C3B74E7400FA8033E6B6F
+      5AC038D876CCCD827001DD9C359E73F16E05A792D62F118F629E2EA4753BE0A5
+      63DE558C457428D897E6FD04F525E4ACCDAACBBFEBC5BE10157FBCAB041969CE
+      AAA8FB1BD44D58DA67C10AA852F04F4AE347622F6E51BB11B027E97D53F03F90
+      C6FB359C9F37E052D2ECF5F09FB0C626457D6B3AC329471D7BD5DF63CDFDEB21
+      582ED427CAD02B63604BB54F95C13F5D4A9FFCEFBE3F8136A1C61667C198F6DF
+      59757F41FA1FFADFDDF733B2C9D933AD67B2A89EDD7B558AE1B3165FC3F0F104
+      9D3475E984AB3F23DD57F77172093A6FED1FA70392C781ABBFF93C25C5B38F9C
+      37DD7CCF4361CEE8F1B507FDE8E9FFA1B10AF72BF65A08854BF7A675202BE92C
+      E0F981A7BFB996E0795B1ADBC1BB7665EFD1E073F82D5D7BD35DCE1A039EF567
+      8B1F678D91BCAD1E18FDC459C4EF9EEFE07BDBBA0439E16381572EE72F67CDCB
+      15CC5F82AC396A348FD8C6410B1F0954736654E0DBEA115B1FC6E61D730FA1D1
+      E11AEF1889FEE96BE25A308F2F6AA03D5D629F34CF32A3117DFD23F40E9A8B0A
+      BE67F04DF2E18647DA7BA5E82571D20A8F2FD8DB8C990B726EE56806B91F8477
+      EDFD7F576F7E031CDAA856
+    }
   end
 end

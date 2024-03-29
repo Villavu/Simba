@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.vartype_string;
 
 {$i simba.inc}
@@ -152,6 +157,8 @@ type
     function ToExtended: Extended; overload;
     function ToExtended(Default: Extended): Extended; overload;
 
+    function ToDateTime(Fmt: String; Def: TDateTime): TDateTime;
+
     function ParseJSON: TJSONData;
   end;
 
@@ -162,7 +169,7 @@ type
 implementation
 
 uses
-  RegExpr, StrUtils,
+  RegExpr, StrUtils, DateUtils,
   simba.containers, simba.hash;
 
 function TSimbaCharHelper.IsUpper(): Boolean;
@@ -717,7 +724,7 @@ end;
 
 function TSimbaStringHelper.TrimRight(const TrimChars: array of Char): String;
 
-  function IsTrimChar(C: Char): Boolean; inline;
+  function IsTrimChar(const C: Char): Boolean; inline;
   var
     I: Integer;
   begin
@@ -1036,6 +1043,25 @@ end;
 function TSimbaStringHelper.ToExtended(Default: Extended): Extended;
 begin
   Result := StrToFloatDef(Self, Default);
+end;
+
+function TSimbaStringHelper.ToDateTime(Fmt: String; Def: TDateTime): TDateTime;
+var
+  UnixTime: Integer;
+begin
+  Result := Def;
+
+  case Fmt.ToLower() of
+    '':
+      TryStrToDateTime(Self, Result);
+    'iso':
+      TryISOStrToDateTime(Self, Result);
+    'iso8601':
+      TryISO8601ToDate(Self, Result);
+    'unix':
+      if Self.IsInteger() then
+        Result := UnixToDateTime(Self.ToInt64());
+  end;
 end;
 
 function TSimbaStringHelper.ParseJSON: TJSONData;

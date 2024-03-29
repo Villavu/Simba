@@ -190,9 +190,12 @@ type
 
   PSimbaHTTPClient = ^TSimbaHTTPClient;
 
+  function ToStr(Status: EHTTPStatus): String;
+
 implementation
 
 uses
+  TypInfo,
   simba.zip;
 
 function TSimbaHTTPClient.GetResponseHeaders: TStringList;
@@ -509,6 +512,12 @@ begin
     FreeAndNil(FHTTPClient);
 
   inherited Destroy();
+end;
+
+function ToStr(Status: EHTTPStatus): String;
+begin
+  Result := '';
+  WriteStr(Result, Status);
 end;
 
 end.

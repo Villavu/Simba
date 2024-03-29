@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, synedit, syncobjs,
-  simba.ide_package, simba.httpclient;
+  simba.base, simba.ide_package, simba.httpclient;
 
 type
   TSimbaPackageInstallOptions = record
@@ -24,6 +24,9 @@ type
   TSimbaPackageInstaller = class
   protected
     FPackage: TSimbaPackage;
+    FVersion: TSimbaPackageVersion;
+    FHasRemoteInstallOpts: Boolean;
+    FRemoteInstallOpts: TSimbaPackageInstallOptions;
     FOutput: TSynEdit;
 
     FProgressBufferLock: TCriticalSection;
@@ -46,6 +49,8 @@ type
 
     procedure DoDownloadingFinished(Sender: TObject);
     procedure DoExtractingFinished(Sender: TObject);
+
+    procedure SetVersion(Value: TSimbaPackageVersion);
   public
     OnStartInstall: TNotifyEvent;
     OnEndInstall: TNotifyEvent;
@@ -53,21 +58,23 @@ type
     constructor Create(Package: TSimbaPackage; Output: TSynEdit);
     destructor Destroy; override;
 
-    function GetOptions(Version: TSimbaPackageRelease; out Options: TSimbaPackageInstallOptions): Boolean;
-    function Install(Version: TSimbaPackageRelease; Options: TSimbaPackageInstallOptions): Boolean;
-    function InstallBranch(Branch: TSimbaPackageBranch; Path: String): Boolean;
-    function InstallLatestVersion: Boolean;
+    property Version: TSimbaPackageVersion read FVersion write SetVersion;
+
+    property HasRemoteInstallOpts: Boolean read FHasRemoteInstallOpts;
+    property RemoteInstallOpts: TSimbaPackageInstallOptions read FRemoteInstallOpts;
+
+    function Install(Opts: TSimbaPackageInstallOptions): Boolean;
   end;
 
 implementation
 
 uses
   Forms, FileUtil,
-  simba.base, simba.threading, simba.env;
+  simba.ide_utils, simba.env, simba.threading, simba.files;
 
 function TSimbaPackageInstaller.InternalInstall(URL: String; Path: String; IgnoreList: TStringArray; Flat: Boolean): Boolean;
 
-  procedure Run;
+  procedure DoInstall;
   begin
     with TSimbaHTTPClient.Create() do
     try
@@ -85,9 +92,15 @@ function TSimbaPackageInstaller.InternalInstall(URL: String; Path: String; Ignor
     end;
   end;
 
+  procedure DoIdle;
+  begin
+    FlushLog();
+
+    Sleep(100);
+  end;
+
 var
-  FileName: String;
-  Thread: TThread;
+  FileName, ExceptionMsg: String;
 begin
   Result := False;
   if Assigned(OnStartInstall) then
@@ -111,21 +124,13 @@ begin
     Log('', True);
   end;
 
-  Thread := RunInThread(@Run);
-  while (not Thread.Finished) do
-  begin
-    FlushLog();
-
-    Sleep(100);
-  end;
-
-  Result := Thread.FatalException = nil;
-  if Result then
+  ExceptionMsg := Application.RunInThreadAndWait(@DoInstall, @DoIdle);
+  if (ExceptionMsg = '') then
     Log('Succesfully installed!', True)
   else
-    Log('Installing failed: %s'.Format([Thread.FatalException.ToString()]), True);
+    Log('Installing failed: ' + ExceptionMsg, True);
 
-  Thread.Free();
+  Result := ExceptionMsg = '';
 
   if Assigned(OnEndInstall) then
     OnEndInstall(Self);
@@ -224,6 +229,59 @@ begin
   Log(FExtractProgress.Progress);
 end;
 
+procedure TSimbaPackageInstaller.SetVersion(Value: TSimbaPackageVersion);
+
+  procedure GetRemoteInstallOpts;
+  var
+    Strings: TStringList;
+
+    procedure Run;
+    begin
+      with TSimbaHTTPClient.Create() do
+      try
+        Strings.Text := Get(FVersion.OptionsURL, []);
+        if (ResponseStatus <> EHTTPStatus.OK) then
+          Strings.Text := '';
+      finally
+        Free();
+      end;
+    end;
+
+  var
+    I: Integer;
+  begin
+    Strings := TStringList.Create();
+
+    Application.RunInThreadAndWait(@Run);
+
+    FHasRemoteInstallOpts := Strings.Count > 0;
+    if FHasRemoteInstallOpts then
+    begin
+      FRemoteInstallOpts := Default(TSimbaPackageInstallOptions);
+      FRemoteInstallOpts.Path := Strings.Values['path'];
+      FRemoteInstallOpts.Flat := Strings.Values['flat'] = 'true';
+      FRemoteInstallOpts.AutoUpdate := Strings.Values['autoupdate'] = 'true';
+      for I := 0 to Strings.Count - 1 do
+        if (Strings.Names[I] = 'ignore') then
+          FRemoteInstallOpts.IgnoreList += [Strings.ValueFromIndex[I]];
+
+      if (FRemoteInstallOpts.Path <> '') then // make relative
+        FRemoteInstallOpts.Path := TSimbaPath.PathJoin([SimbaEnv.SimbaPath, TSimbaPath.PathSetSeperators(FRemoteInstallOpts.Path)])
+      else // no path: default to includes under package name
+        FRemoteInstallOpts.Path := TSimbaPath.PathJoin([SimbaEnv.IncludesPath, FPackage.Name]);
+    end;
+
+    Strings.Free();
+  end;
+
+begin
+  FVersion := Value;
+
+  FHasRemoteInstallOpts := False;
+  if (FVersion.OptionsURL <> '') then
+    GetRemoteInstallOpts();
+end;
+
 constructor TSimbaPackageInstaller.Create(Package: TSimbaPackage; Output: TSynEdit);
 begin
   inherited Create();
@@ -245,105 +303,28 @@ begin
   inherited Destroy();
 end;
 
-function TSimbaPackageInstaller.GetOptions(Version: TSimbaPackageRelease; out Options: TSimbaPackageInstallOptions): Boolean;
-var
-  Strings: TStringList;
-
-  procedure Run;
-  begin
-    with TSimbaHTTPClient.Create() do
-    try
-      Strings.Text := Get(Version.OptionsURL, []);
-      if (ResponseStatus <> EHTTPStatus.OK) then
-        Strings.Text := '';
-    finally
-      Free();
-    end;
-  end;
-
-var
-  Thread: TThread;
-  I: Integer;
+function TSimbaPackageInstaller.Install(Opts: TSimbaPackageInstallOptions): Boolean;
 begin
-  Result := False;
-  if (Version.OptionsURL = '') then
-    Exit;
-
-  Options := Default(TSimbaPackageInstallOptions);
-
-  Strings := TStringList.Create();
-  Thread := RunInThread(@Run);
-  while (not Thread.Finished) do
-  begin
-    if (GetCurrentThreadID() = MainThreadID) then
-      Application.ProcessMessages();
-
-    Sleep(500);
-  end;
-
-  Result := Strings.Count > 0;
-  if Result then
-  begin
-    Options.Path := Strings.Values['path'];
-    Options.Flat := Strings.Values['flat'] = 'true';
-    Options.AutoUpdate := Strings.Values['autoupdate'] = 'true';
-    for I := 0 to Strings.Count - 1 do
-      if (Strings.Names[I] = 'ignore') then
-        Options.IgnoreList += [Strings.ValueFromIndex[I]];
-  end;
-
-  if (Options.Path = '') then
-    Options.Path := ConcatPaths([SimbaEnv.IncludesPath, FPackage.Info.Name])
-  else
-    Options.Path := ConcatPaths([SimbaEnv.SimbaPath, SetDirSeparators(Options.Path)]);
-
-  Thread.Free();
-  Strings.Free();
-end;
-
-function TSimbaPackageInstaller.Install(Version: TSimbaPackageRelease; Options: TSimbaPackageInstallOptions): Boolean;
-begin
-  Log('Installing: %s'.Format([FPackage.Info.FullName]));
-  Log('Release: %s'.Format([Version.Name]));
-  Log('Path: %s'.Format([Options.Path]));
+  Log('Installing: %s'.Format([FPackage.DisplayName]));
+  Log('Version: %s'.Format([Version.Name]));
+  Log('Path: %s'.Format([Opts.Path]));
   Log('', True);
 
-  Result := InternalInstall(Version.DownloadURL, Options.Path, Options.IgnoreList, Options.Flat);
+  Result := InternalInstall(Version.DownloadURL, Opts.Path, Opts.IgnoreList, Opts.Flat);
   if Result then
   begin
     FPackage.InstalledVersion     := Version.Name;
-    FPackage.InstalledVersionTime := Version.Time;
-    FPackage.InstalledPath        := Options.Path;
-    FPackage.AutoUpdateEnabled    := Options.AutoUpdate;
+    FPackage.InstalledPath        := Opts.Path;
+
+    if Version.IsBranch then
+      FPackage.InstalledVersionTime := 0
+    else
+      FPackage.InstalledVersionTime := Version.Time;
+
+    FPackage.AutoUpdateEnabled    := Opts.AutoUpdate;
   end;
 
   Log('', True);
-end;
-
-function TSimbaPackageInstaller.InstallBranch(Branch: TSimbaPackageBranch; Path: String): Boolean;
-begin
-  Log('Installing: %s'.Format([FPackage.Info.FullName]));
-  Log('Branch: %s'.Format([Branch.Name]));
-  Log('Path: %s'.Format([Path]));
-  Log('', True);
-
-  Result := InternalInstall(Branch.DownloadURL, Path, [], False);
-  if Result then
-  begin
-    FPackage.InstalledVersion     := Branch.Name;
-    FPackage.InstalledVersionTime := 0;
-    FPackage.InstalledPath        := Path;
-    FPackage.AutoUpdateEnabled    := False;
-  end;
-
-  Log('', True);
-end;
-
-function TSimbaPackageInstaller.InstallLatestVersion: Boolean;
-var
-  Options: TSimbaPackageInstallOptions;
-begin
-  Result := FPackage.HasReleases() and GetOptions(FPackage.Releases[0], Options) and Install(FPackage.Releases[0], Options);
 end;
 
 end.

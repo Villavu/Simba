@@ -1,11 +1,11 @@
 object SimbaPackageForm: TSimbaPackageForm
-  Left = 1486
+  Left = -1009
   Height = 688
-  Top = 323
+  Top = 489
   Width = 978
   Caption = 'Simba Packages'
-  ClientHeight = 688
-  ClientWidth = 978
+  ClientHeight = 0
+  ClientWidth = 0
   Constraints.MinHeight = 312
   Constraints.MinWidth = 312
   DesignTimePPI = 120
@@ -21,7 +21,7 @@ object SimbaPackageForm: TSimbaPackageForm
     PageIndex = 0
     Align = alClient
     TabOrder = 0
-    object Page1: TPage
+    object MainPage: TPage
       object ListPanel: TPanel
         Left = 0
         Height = 393
@@ -31,18 +31,10 @@ object SimbaPackageForm: TSimbaPackageForm
         BevelOuter = bvNone
         TabOrder = 0
       end
-      object Bevel2: TBevel
-        Left = 0
-        Height = 2
-        Top = 393
-        Width = 978
-        Align = alTop
-        Shape = bsTopLine
-      end
       object BottomNotebook: TNotebook
         Left = 0
-        Height = 218
-        Top = 395
+        Height = 214
+        Top = 399
         Width = 978
         PageIndex = 0
         Align = alClient
@@ -50,7 +42,7 @@ object SimbaPackageForm: TSimbaPackageForm
         object PageVersions: TPage
           object ScrollBox1: TScrollBox
             Left = 0
-            Height = 218
+            Height = 214
             Top = 0
             Width = 978
             HorzScrollBar.Page = 1
@@ -174,17 +166,26 @@ object SimbaPackageForm: TSimbaPackageForm
           end
         end
       end
+      object Splitter1: TSplitter
+        Cursor = crVSplit
+        Left = 0
+        Height = 6
+        Top = 393
+        Width = 978
+        Align = alTop
+        ResizeAnchor = akTop
+      end
     end
-    object Page2: TPage
+    object LoadingPage: TPage
       object LoadingLabel: TLabel
-        AnchorSideLeft.Control = Page2
+        AnchorSideLeft.Control = LoadingPage
         AnchorSideLeft.Side = asrCenter
-        AnchorSideTop.Control = Page2
+        AnchorSideTop.Control = LoadingPage
         AnchorSideTop.Side = asrCenter
-        Left = 351
-        Height = 20
-        Top = 300
-        Width = 277
+        Left = 320
+        Height = 25
+        Top = 294
+        Width = 339
         Caption = 'Downloading package list. Please wait...'
         Font.Style = [fsBold]
         ParentColor = False

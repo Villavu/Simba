@@ -2,6 +2,12 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+
+  List releases from Github using RSS feed to detect changes.
+
+  Unauthed Github conditional requests were counting towards the rate limit
+  so RSS updated timestamp is used.
 }
 unit simba.ide_package_endpointgithub;
 
@@ -10,46 +16,91 @@ unit simba.ide_package_endpointgithub;
 interface
 
 uses
-  classes, sysutils,
-  simba.ide_package;
+  Classes, SysUtils,
+  simba.base, simba.ide_package;
 
 type
   TSimbaPackageEndpoint_Github = class(TSimbaPackageEndpoint)
   protected
     FOwner: String;
     FName: String;
-
-    FReleasesAPI: String;
     FBranchesAPI: String;
-    FInfoAPI: String;
+    FReleasesAPI: String;
+    FReleasesRSS: String;
 
-    function GetPageCache(Key: String; URL: String): String;
+    FReleasesCache: String;
+    FBranchesCache: String;
+
+    procedure DebugRateLimit;
+
+    function ReadRSSUpdated(URL: String): String;
+
+    function ParseBranchesAPI(Data: String): TSimbaPackageVersions;
+    function ParseReleasesAPI(Data: String): TSimbaPackageVersions;
+
+    function GetReleases: TSimbaPackageVersions;
+    function GetBranches: TSimbaPackageVersions;
+
+    function GetVersions: TSimbaPackageVersions; override;
   public
     constructor Create(URL: String); override;
 
-    function GetInfo: TSimbaPackageInfo; override;
-    function GetReleases: TSimbaPackageReleaseArray; override;
-    function GetBranches: TSimbaPackageBranchArray; override;
+    procedure DeleteCache; override;
+    procedure DownloadBranches;
   end;
 
 implementation
 
 uses
-  forms, fpjson, dateutils,
-  simba.httpclient, simba.env, simba.base, simba.vartype_string;
+  XMLRead, DOM, fpjson,
+  simba.env, simba.vartype_string, simba.httpclient;
 
 const
-  URL_REPOS            = 'https://api.github.com/repos/%s/%s';                       // {Owner} {Name}
-  URL_RELEASES         = 'https://api.github.com/repos/%s/%s/releases?per_page=100'; // {Owner} {Name}
-  URL_BRANCHES         = 'https://api.github.com/repos/%s/%s/branches?per_page=100'; // {Owner} {Name}
-  URL_DOWNLOAD_BRANCH  = 'https://github.com/%s/%s/archive/refs/heads/%s.zip';       // {Owner} {Name} {Version}
-  URL_DOWNLOAD_RELEASE = 'https://github.com/%s/%s/archive/refs/tags/%s.zip';        // {Owner} {Name} {Version}
-  URL_OPTIONS          = 'https://raw.githubusercontent.com/%s/%s/%s/.simbapackage'; // {Owner} {Name} {Version}
+  URL_RELEASES_RSS = 'https://www.github.com/%s/%s/releases.atom'; // {Owner} {Name}
+
+  URL_BRANCHES_API = 'https://api.github.com/repos/%s/%s/branches?per_page=100'; // {Owner} {Name}
+  URL_RELEASES_API = 'https://api.github.com/repos/%s/%s/releases?per_page=100'; // {Owner} {Name}
+  URL_OPTIONS      = 'https://raw.githubusercontent.com/%s/%s/%s/.simbapackage'; // {Owner} {Name} {Version}
+
+  URL_DOWNLOAD_RELEASE = 'https://github.com/%s/%s/archive/refs/tags/%s.zip';  // {Owner} {Name} {Version}
+  URL_DOWNLOAD_BRANCH  = 'https://github.com/%s/%s/archive/refs/heads/%s.zip'; // {Owner} {Name} {Branch}
+
+function TSimbaPackageEndpoint_Github.ReadRSSUpdated(URL: String): String;
+var
+  Data: String;
+  Doc: TXMLDocument;
+  Node: TDOMNode;
+  Stream: TStringStream;
+begin
+  Result := '';
+
+  Stream := nil;
+  Doc := nil;
+
+  Data := GetPage(URL);
+  if (Data <> '') then
+  try
+    Stream := TStringStream.Create(Data);
+
+    ReadXMLFile(Doc, Stream);
+    if Assigned(Doc.DocumentElement.FindNode('entry')) then
+    begin
+      Node := Doc.DocumentElement.FindNode('updated');
+      if Assigned(Node) then
+        Result := Node.TextContent;
+    end;
+  finally
+    Stream.Free();
+    Doc.Free();
+  end;
+end;
 
 constructor TSimbaPackageEndpoint_Github.Create(URL: String);
 var
   Path: TStringArray;
 begin
+  inherited Create(URL);
+
   Path := URL.Split('/');
   if (Length(Path) < 2) then // Should never happen
     Exit;
@@ -57,177 +108,205 @@ begin
   FOwner := Path[High(Path) - 1];
   FName  := Path[High(Path)];
 
-  FReleasesAPI := Format(URL_RELEASES, [FOwner, FName]);
-  FBranchesAPI := Format(URL_BRANCHES, [FOwner, FName]);
-  FInfoAPI     := Format(URL_REPOS,    [FOwner, FName]);
+  FBranchesAPI := Format(URL_BRANCHES_API, [FOwner, FName]);
+  FReleasesAPI := Format(URL_RELEASES_API, [FOwner, FName]);
+  FReleasesRSS := Format(URL_RELEASES_RSS, [FOwner, FName]);
+
+  FReleasesCache := SimbaEnv.PackagesPath + FOwner + '-' + FName + '.releases';
+  FBranchesCache := SimbaEnv.PackagesPath + FOwner + '-' + FName + '.branches';
 end;
 
-function TSimbaPackageEndpoint_Github.GetInfo: TSimbaPackageInfo;
+procedure TSimbaPackageEndpoint_Github.DeleteCache;
+begin
+  if FileExists(FReleasesCache) then DeleteFile(FReleasesCache);
+  if FileExists(FBranchesCache) then DeleteFile(FBranchesCache);
+end;
+
+function TSimbaPackageEndpoint_Github.ParseBranchesAPI(Data: String): TSimbaPackageVersions;
 var
   Json: TJSONData;
-begin
-  Result := Default(TSimbaPackageInfo);
-
-  Json := GetPageCache('info', FInfoAPI).ParseJSON();
-  if (Json = nil) then
-    Exit;
-
-  if (Json is TJSONObject) then
-  begin
-    Result.Name := TJSONObject(Json).Get('name', '');
-    Result.FullName := TJSONObject(Json).Get('full_name', '');
-    Result.Description := TJSONObject(Json).Get('description', '');
-    Result.HomepageURL := TJSONObject(Json).Get('html_url', '');
-  end;
-
-  JSON.Free();
-end;
-
-function TSimbaPackageEndpoint_Github.GetReleases: TSimbaPackageReleaseArray;
-var
-  JSON: TJSONData;
+  Ver: TSimbaPackageVersion;
   I: Integer;
-  Release: TSimbaPackageRelease;
 begin
   Result := [];
 
-  JSON := GetPageCache('releases', FReleasesAPI).ParseJSON();
-  if (JSON = nil) then
-    Exit;
-
-  for I := 0 to JSON.Count - 1 do
-    if (JSON.Items[I] is TJSONObject) then
-      with TJSONObject(JSON.Items[I]) do
-      begin
-        Release := Default(TSimbaPackageRelease);
-        Release.Age := Strings['published_at'];
-        Release.Name := Strings['tag_name'];
-        Release.Notes := Strings['body'];
-        Release.DownloadURL := URL_DOWNLOAD_RELEASE.Format([FOwner, FName, Strings['tag_name']]);
-        Release.OptionsURL := URL_OPTIONS.Format([FOwner, FName, Strings['tag_name']]);
-
-        if (Release.Notes = '') then
-          Release.Notes := '(no release notes)';
-
-        if (Release.Age <> '') then
+  Json := Data.ParseJSON();
+  if (Json is TJSONArray) then
+  try
+    for I := 0 to Json.Count - 1 do
+      if (Json.Items[I] is TJSONObject) then
+      try
+        with TJSONObject(Json.Items[I]) do
         begin
-          if Release.Age.IsInteger() then
-            Release.Time := UnixToDateTime(Release.Age.ToInt64())
-          else
-            Release.Time := ISO8601ToDate(Release.Age);
+          Ver := Default(TSimbaPackageVersion);
+          Ver.IsBranch := True;
+          Ver.Name := Strings['name'];
+          Ver.DownloadURL := Format(URL_DOWNLOAD_BRANCH, [FOwner, FName, Strings['name']]);
+          Ver.Age := '(branch)';
 
-          case DaysBetween(Now(), Time) of
-            0: Release.Age := '(today)';
-            1: Release.Age := '(yesterday)';
-            else
-              Release.Age := '(' + IntToStr(DaysBetween(Now(), Release.Time)) + ' days ago)';
-          end;
+          Result += [Ver];
         end;
-
-        Result := Result + [Release];
+      except
       end;
-
-  JSON.Free();
+  finally
+    Json.Free();
+  end;
 end;
 
-function TSimbaPackageEndpoint_Github.GetBranches: TSimbaPackageBranchArray;
+function TSimbaPackageEndpoint_Github.ParseReleasesAPI(Data: String): TSimbaPackageVersions;
 var
-  JSON: TJSONData;
+  Json: TJSONData;
+  Ver: TSimbaPackageVersion;
   I: Integer;
-  Branch: TSimbaPackageBranch;
 begin
   Result := [];
 
-  JSON := GetPageCache('branches', FBranchesAPI).ParseJSON();
-  if (JSON = nil) then
-    Exit;
+  Json := Data.ParseJSON();
+  if (Json is TJSONArray) then
+  try
+    for I := 0 to JSON.Count - 1 do
+      if (JSON.Items[I] is TJSONObject) then
+      try
+        with TJSONObject(JSON.Items[I]) do
+        begin
+          Ver := Default(TSimbaPackageVersion);
+          Ver.Name := Strings['tag_name'];
+          Ver.Notes := Strings['body'];
+          Ver.DownloadURL := Format(URL_DOWNLOAD_RELEASE, [FOwner, FName, Strings['tag_name']]);
+          Ver.OptionsURL := Format(URL_OPTIONS, [FOwner, FName, Strings['tag_name']]);
+          if (Ver.Notes = '') then
+            Ver.Notes := '(no version notes)';
 
-  for I := 0 to JSON.Count - 1 do
-    if (JSON.Items[I] is TJSONObject) then
-      with TJSONObject(JSON.Items[I]) do
-      begin
-        Branch := Default(TSimbaPackageBranch);
-        Branch.Name := Strings['name'];
-        Branch.DownloadURL := URL_DOWNLOAD_BRANCH.Format([FOwner, FName, Strings['name']]);
+          ParseTime(Strings['published_at'], Ver.Time, Ver.Age);
 
-        Result := Result + [Branch];
+          Result := Result + [Ver];
+        end;
+      except
       end;
-
-  JSON.Free();
+  finally
+    JSON.Free();
+  end;
 end;
 
-function TSimbaPackageEndpoint_Github.GetPageCache(Key: String; URL: String): String;
+function TSimbaPackageEndpoint_Github.GetReleases: TSimbaPackageVersions;
 var
-  ETag: String;
-  CacheFileName: String;
   Cache: TStringList;
+  RemoteVersion: String;
 
-  function CacheUpToDate: Boolean;
+  function IsCacheUpdated: Boolean;
   begin
-    Result := False;
-
-    if FileExists(CacheFileName) then
-      Cache.LoadFromFile(CacheFileName);
-
-    if (Cache.Count > 0) then
-    begin
-      ETag := Cache[0].After('//');
-
-      if (ETag <> '') then
-      begin
-        with TSimbaHTTPClient.Create() do
-        try
-          RequestHeader['If-None-Match'] := ETag; // ETag is added as a comment on the first line
-
-          Result := Head(URL) = EHTTPStatus.NOT_MODIFIED;
-        finally
-          Free();
-        end;
-      end;
-    end;
+    Result := (Cache.Count > 0) and (Cache[0].After('//') = RemoteVersion);
   end;
 
-  procedure Download;
+  function Download: String;
   var
+    Data: String;
     JsonData: TJSONData;
   begin
-    with TSimbaHTTPClient.Create() do
-    try
-      Cache.Text := Get(URL, [EHTTPStatus.OK]);
+    Result := '';
 
-      ETag := ResponseHeader['ETag'];
-    finally
-      Free();
-    end;
-
-    JsonData := Cache.Text.ParseJSON();
-    if (JsonData <> nil) then
-    try
-      Cache.Text := JsonData.FormatJSON();
-      Cache.Insert(0, '//' + ETag);
-      Cache.SaveToFile(CacheFileName);
-    finally
+    Data := GetPage(FReleasesAPI);
+    if (Data <> '') then
+    begin
+      JsonData := Data.ParseJSON();
+      if (JsonData <> nil) then
+        Result := JsonData.FormatJSON();
       JsonData.Free();
     end;
   end;
 
 begin
-  Result := '';
-
-  CacheFileName := SimbaEnv.PackagesPath + FOwner + '-' + FName + '.' + Key;
   Cache := TStringList.Create();
+  if FileExists(FReleasesCache) then
+    Cache.LoadFromFile(FReleasesCache);
 
-  try
-    if (not CacheUpToDate()) then
-      Download();
+  RemoteVersion := ReadRSSUpdated(FReleasesRSS);
 
-    Result := Cache.Text;
-  except
-    on E: Exception do
-      DebugLn(URL + ' :: ' + E.ToString());
+  if IsCacheUpdated() then
+    Result := ParseReleasesAPI(Cache.Text)
+  else
+  begin
+    Cache.Clear();
+    Cache.Add('//' + RemoteVersion);
+    Cache.Add(Download());
+    Cache.SaveToFile(FReleasesCache);
+
+    Result := ParseReleasesAPI(Cache.Text);
+
+    {$IFDEF DebugRateLimit}
+    DebugRateLimit();
+    {$ENDIF}
   end;
 
   Cache.Free();
+end;
+
+function TSimbaPackageEndpoint_Github.GetBranches: TSimbaPackageVersions;
+var
+  Cache: TStringList;
+begin
+  Result := [];
+
+  Cache := TStringList.Create();
+  if FileExists(FBranchesCache) then
+  begin
+    Cache := TStringList.Create();
+    Cache.LoadFromFile(FBranchesCache);
+
+    Result := ParseBranchesAPI(Cache.Text);
+
+    Cache.Free();
+  end;
+end;
+
+procedure TSimbaPackageEndpoint_Github.DebugRateLimit;
+begin
+  with TSimbaHTTPClient.Create() do
+  try
+    Get('https://api.github.com/rate_limit', []);
+
+    DebugLn('Github rate limit remaining: %s', [ResponseHeader['X-RateLimit-Remaining']]);
+  finally
+    Free();
+  end;
+end;
+
+function TSimbaPackageEndpoint_Github.GetVersions: TSimbaPackageVersions;
+begin
+  Result := GetReleases() + GetBranches();
+end;
+
+procedure TSimbaPackageEndpoint_Github.DownloadBranches;
+
+  function Download: String;
+  var
+    Data: String;
+    JsonData: TJSONData;
+  begin
+    Result := '';
+
+    try
+      Data := TSimbaHTTPClient.SimpleGet(FBranchesAPI, [EHTTPStatus.OK]);
+
+      JsonData := Data.ParseJSON();
+      if (JsonData <> nil) then
+        Result := JsonData.FormatJSON();
+      JsonData.Free();
+    except
+    end;
+  end;
+
+var
+  Cache: TStringList;
+begin
+  Cache := TStringList.Create();
+  Cache.Add(Download());
+  Cache.SaveToFile(FBranchesCache);
+  Cache.Free();
+
+  {$IFDEF DebugRateLimit}
+  DebugRateLimit();
+  {$ENDIF}
 end;
 
 end.
