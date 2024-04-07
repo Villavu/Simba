@@ -757,6 +757,16 @@ begin
 end;
 
 (*
+String.ToDateTime
+-----------------
+> function String.ToDateTime(Fmt: String; Def: TDateTime): TDateTime;
+*)
+procedure _LapeString_ToDateTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateTime(Result)^ := PString(Params^[0])^.ToDateTime(PString(Params^[1])^, PDateTime(Params^[2])^);
+end;
+
+(*
 *
 -
 > operator *(Left: String; Right: Integer): String;
@@ -1033,6 +1043,7 @@ begin
     addGlobalFunc('function String.ToSingle(Default: Single): Single; overload;', @_LapeString_ToSingleDef);
     addGlobalFunc('function String.ToDouble: Double; overload;', @_LapeString_ToDouble);
     addGlobalFunc('function String.ToDouble(Default: Double): Double; overload;', @_LapeString_ToDoubleDef);
+    addGlobalFunc('function String.ToDateTime(Fmt: String; Def: TDateTime): TDateTime;', @_LapeString_ToDateTime);
 
     addGlobalFunc('operator *(Left: String; Right: Integer): String', @_LapeString_MUL_Integer);
     addGlobalFunc('operator in(Left: String; Right: String): Boolean', @_LapeString_IN_String);

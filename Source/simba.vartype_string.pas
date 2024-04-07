@@ -1061,6 +1061,8 @@ begin
     'unix':
       if Self.IsInteger() then
         Result := UnixToDateTime(Self.ToInt64());
+    else
+      SimbaException('String.ToDateTime: Fmt "%s" not recognized', [Fmt]);
   end;
 end;
 

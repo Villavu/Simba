@@ -468,6 +468,16 @@ begin
 end;
 
 (*
+PathIsInDir
+-------------
+> function PathIsInDir(Path, Directory: String): Boolean;
+*)
+procedure _LapePathIsInDir(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := TSimbaPath.PathIsInDir(PString(Params^[0])^, PString(Params^[1])^);
+end;
+
+(*
 DirList
 -------
 > function DirList(Path: String; Recursive: Boolean = False): TStringArray;
@@ -649,6 +659,7 @@ begin
     addGlobalFunc('function PathIncludeLeadingSep(Path: String): String', @_LapePathIncludeLeadingSep);
     addGlobalFunc('function PathExtractRelative(BasePath, DestPath: String): String', @_LapePathExtractRelative);
     addGlobalFunc('function PathChangeExt(Path, NewExt: String): String', @_LapePathChangeExt);
+    addGlobalFunc('function PathIsInDir(Path, Directory: String): Boolean;', @_LapePathIsInDir);
 
     addGlobalFunc('function DirList(Path: String; Recursive: Boolean = False): TStringArray', @_LapeDirList);
     addGlobalFunc('function DirSearch(Path: String; Mask: String; Recursive: Boolean = False): TStringArray', @_LapeDirSearch);

@@ -32,6 +32,8 @@ type
 
   function Point(const X, Y: Integer): TPoint; inline;
 
+  operator > (const Left, Right: TPoint): Boolean;
+  operator < (const Left, Right: TPoint): Boolean;
   operator = (const Left, Right: TPoint): Boolean;
   operator + (const Left, Right: TPoint): TPoint;
   operator - (const Left, Right: TPoint): TPoint;
@@ -117,6 +119,16 @@ function TPointHelper.Random(Value: Integer): TPoint;
 begin
   Result.X := Self.X + System.Random(Value);
   Result.Y := Self.Y + System.Random(Value);
+end;
+
+operator>(const Left, Right: TPoint): Boolean;
+begin
+  Result := Int64(Left) > Int64(Right);
+end;
+
+operator<(const Left, Right: TPoint): Boolean;
+begin
+  Result := Int64(Left) < Int64(Right);
 end;
 
 operator =(const Left, Right: TPoint): Boolean;

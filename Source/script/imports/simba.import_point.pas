@@ -172,6 +172,16 @@ begin
   PPoint(Result)^ := PPoint(Params^[0])^.Random(PInteger(Params^[1])^);
 end;
 
+procedure _LapePoint_LT_Point(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PPoint(Params^[0])^ < PPoint(Params^[1])^;
+end;
+
+procedure _LapePoint_GT_Point(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PPoint(Params^[0])^ > PPoint(Params^[1])^;
+end;
+
 (*
 TPoint +
 --------
@@ -269,6 +279,8 @@ begin
     addGlobalFunc('function TPoint.Random(Min, Max: Integer): TPoint; overload;', @_LapePoint_Random1);
     addGlobalFunc('function TPoint.Random(Value: Integer): TPoint; overload;', @_LapePoint_Random2);
 
+    addGlobalFunc('operator < (L, R: TPoint): Boolean;', @_LapePoint_LT_Point);
+    addGlobalFunc('operator > (L, R: TPoint): Boolean;', @_LapePoint_GT_Point);
     addGlobalFunc('operator + (L, R: TPoint): TPoint;', @_LapePoint_Plus_Point);
     addGlobalFunc('operator += (var L: TPoint; R: TPoint): TPoint;', @_LapePoint_PlusAssign_Point);
     addGlobalFunc('operator - (L, R: TPoint): TPoint;', @_LapePoint_Minus_Point);
