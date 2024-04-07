@@ -491,6 +491,8 @@ begin
 
     FHorzScroll.Position := 0;
     FVertScroll.Position := 0;
+
+    UpdateScrollBars();
   end;
 
   Invalidate();
