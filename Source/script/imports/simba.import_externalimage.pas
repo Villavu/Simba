@@ -37,6 +37,46 @@ begin
 end;
 
 (*
+TExternalImage.GetName
+----------------------
+> function TExternalImage.GetName: String;
+*)
+procedure _LapeExternalImage_Name_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PSimbaExternalImage(Params^[0])^.Name;
+end;
+
+(*
+TExternalImage.SetName
+----------------------
+> procedure TExternalImage.SetName(Value: String);
+*)
+procedure _LapeExternalImage_Name_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.Name := PString(Params^[1])^;
+end;
+
+(*
+TExternalImage.GetDefaultPixel
+------------------------------
+> function TExternalImage.GetDefaultPixel: TColorBGRA;
+*)
+procedure _LapeExternalImage_DefaultPixel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorBGRA(Result)^ := PSimbaExternalImage(Params^[0])^.DefaultPixel;
+end;
+
+(*
+TExternalImage.SetDefaultPixel
+------------------------------
+> procedure TExternalImage.SetDefaultPixel(Value: TColorBGRA);
+*)
+procedure _LapeExternalImage_DefaultPixel_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.DefaultPixel := PColorBGRA(Params^[1])^;
+end;
+
+(*
 TExternalImage.GetFontName
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 > function TExternalImage.GetFontName: String;
@@ -182,38 +222,173 @@ begin
 end;
 
 (*
-TExternalImage.DrawText
-~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TExternalImage.DrawText(Text: String; Position: TPoint; Color: TColor);
+TExternalImage.GetPixel
+-----------------------
+> function TExternalImage.GetPixel(X, Y: Integer): TColor;
 *)
-procedure _LapeExternalImage_DrawText(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeExternalImage_GetPixel(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawText(PString(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
+  PColor(Result)^ := PSimbaExternalImage(Params^[0])^.Pixel[PInteger(Params^[1])^, PInteger(Params^[2])^];
+end;
+
+(*
+TExternalImage.GetAlpha
+-----------------------
+> function TExternalImage.GetAlpha(X, Y: Integer): Byte;
+*)
+procedure _LapeExternalImage_GetAlpha(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByte(Result)^ := PSimbaExternalImage(Params^[0])^.Alpha[PInteger(Params^[1])^, PInteger(Params^[2])^];
+end;
+
+(*
+TExternalImage.SetAlpha
+-----------------------
+> procedure TExternalImage.SetAlpha(X, Y: Integer; Alpha: Byte);
+*)
+procedure _LapeExternalImage_SetAlpha(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.Alpha[PInteger(Params^[1])^, PInteger(Params^[2])^] := PByte(Params^[3])^;
+end;
+
+(*
+TExternalImage.SetPixel
+-----------------------
+> procedure TExternalImage.SetPixel(X, Y: Integer; Color: TColor);
+*)
+procedure _LapeExternalImage_SetPixel(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.Pixel[PInteger(Params^[1])^, PInteger(Params^[2])^] := PColor(Params^[3])^;
+end;
+
+(*
+TExternalImage.SetPixels
+------------------------
+> procedure TExternalImage.SetPixels(Points: TPointArray; Color: TColor);
+*)
+procedure _LapeExternalImage_SetPixels1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.SetPixels(PPointArray(Params^[1])^, PColor(Params^[2])^);
+end;
+
+(*
+TExternalImage.SetPixels
+------------------------
+> procedure TExternalImage.SetPixels(Points: TPointArray; Colors: TColorArray);
+*)
+procedure _LapeExternalImage_SetPixels2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.SetPixels(PPointArray(Params^[1])^, PIntegerArray(Params^[2])^);
+end;
+
+(*
+TExternalImage.GetPixels
+------------------------
+> function TExternalImage.GetPixels(Points: TPointArray): TColorArray;
+*)
+procedure _LapeExternalImage_GetPixels(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorArray(Result)^ := PSimbaExternalImage(Params^[0])^.GetPixels(PPointArray(Params^[1])^);
+end;
+
+(*
+TExternalImage.GetDrawColor
+---------------------------
+> function TExternalImage.GetDrawColor: TColor;
+
+Returns the current drawing color.
+
+```{note}
+Red is the default value.
+```
+*)
+procedure _LapeExternalImage_DrawColor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColor(Result)^ := PSimbaExternalImage(Params^[0])^.DrawColor;
+end;
+
+(*
+TExternalImage.SetDrawColor
+---------------------------
+> procedure TExternalImage.SetDrawColor(Color: TColor);
+
+Sets the current draw color.
+
+```{note}
+Red is the default value.
+```
+*)
+procedure _LapeExternalImage_DrawColor_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.DrawColor := PColor(Params^[1])^;
+end;
+
+(*
+TExternalImage.GetDrawAlpha
+---------------------------
+> function TExternalImage.GetDrawAlpha: Byte;
+
+Returns the current draw alpha.
+0 is completely transparent and 255 is completely opauge.
+
+```{note}
+255 is the default value.
+```
+*)
+procedure _LapeExternalImage_DrawAlpha_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByte(Result)^ := PSimbaExternalImage(Params^[0])^.DrawAlpha;
+end;
+
+(*
+TExternalImage.SetDrawAlpha
+---------------------------
+> procedure TExternalImage.SetDrawAlpha(Value: Byte);
+
+Sets the current draw color. This determines how transparent something is drawn.
+
+```{note}
+255 is the default value.
+```
+*)
+procedure _LapeExternalImage_DrawAlpha_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.DrawAlpha := PByte(Params^[1])^;
 end;
 
 (*
 TExternalImage.DrawText
 ~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TExternalImage.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignmentSet; Color: TColor);
+> procedure TExternalImage.DrawText(Text: String; Position: TPoint);
+*)
+procedure _LapeExternalImage_DrawText(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalImage(Params^[0])^.DrawText(PString(Params^[1])^, PPoint(Params^[2])^);
+end;
+
+(*
+TExternalImage.DrawText
+~~~~~~~~~~~~~~~~~~~~~~~
+> procedure TExternalImage.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignmentSet);
 *)
 procedure _LapeExternalImage_DrawTextEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, EDrawTextAlignSet(Params^[3]^), PColor(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, EDrawTextAlignSet(Params^[3]^));
 end;
 
 (*
 TExternalImage.DrawTextLines
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> procedure TExternalImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);
+> procedure TExternalImage.DrawTextLines(Text: TStringArray; Position: TPoint);
 *)
 procedure _LapeExternalImage_DrawTextLines(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawTextLines(PStringArray(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawTextLines(PStringArray(Params^[1])^, PPoint(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_Fill(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.Fill(PColor(Params^[1])^, PByte(Params^[2])^);
+  PSimbaExternalImage(Params^[0])^.Fill(PColor(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_SetMemory(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -233,17 +408,17 @@ end;
 
 procedure _LapeExternalImage_DrawCircleAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircleAA(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PSingle(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircleAA(PPoint(Params^[1])^, PInteger(Params^[2])^, PSingle(Params^[3])^);
 end;
 
 procedure _LapeExternalImage_DrawLineAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawLineAA(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^, PSingle(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawLineAA(PPoint(Params^[1])^, PPoint(Params^[2])^, PSingle(Params^[3])^);
 end;
 
 procedure _LapeExternalImage_DrawEllipseAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawEllipseAA(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^, PSingle(Params^[5])^);
+  PSimbaExternalImage(Params^[0])^.DrawEllipseAA(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PSingle(Params^[4])^);
 end;
 
 procedure _LapeExternalImage_BeginUpdate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -258,137 +433,127 @@ end;
 
 procedure _LapeExternalImage_DrawImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawImage(PSimbaImage(Params^[1])^, PPoint(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawImage(PSimbaImage(Params^[1])^, PPoint(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawBox(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawBox(PBox(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawBox(PBox(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawBoxFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawBoxFilled(PBox(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawBoxFilled(PBox(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawBoxInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawBoxInverted(PBox(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawBoxInverted(PBox(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawPolygon(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawPolygon(PPointArray(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawPolygon(PPointArray(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawPolygonFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawPolygonFilled(PPointArray(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawPolygonFilled(PPointArray(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawPolygonInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawPolygonInverted(PPointArray(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawPolygonInverted(PPointArray(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawQuad(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawQuad(PQuad(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawQuad(PQuad(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawQuadFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawQuadFilled(PQuad(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawQuadFilled(PQuad(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawQuadInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawQuadInverted(PQuad(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawQuadInverted(PQuad(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawCircleFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawCircleInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawCrosshairs(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCrosshairs(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawCrosshairs(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawCross(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawLine(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^, PByte(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawLineGap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawLineGap(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PByte(Params^[5])^);
+  PSimbaExternalImage(Params^[0])^.DrawLineGap(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^);
 end;
 
-procedure _LapeExternalImageSetAlpha1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeExternalImage_FillWithAlpha(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.SetAlpha(PByte(Params^[1])^);
-end;
-
-procedure _LapeExternalImageSetAlpha2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaExternalImage(Params^[0])^.SetAlpha(PPointArray(Params^[1])^, PByte(Params^[2])^);
-end;
-
-procedure _LapeExternalImageSetAlpha3(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaExternalImage(Params^[0])^.SetAlpha(PColor(Params^[1])^, PByte(Params^[2])^);
+  PSimbaExternalImage(Params^[0])^.FillWithAlpha(PByte(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawATPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawTPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawTPA(PPointArray(Params^[1])^, PColor(Params^[2])^, PByte(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawTPA(PPointArray(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawQuadArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawQuadArray(PQuadArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawQuadArray(PQuadArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 procedure _LapeExternalImage_DrawBoxArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawBoxArray(PBoxArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawBoxArray(PBoxArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 procedure _LapeExternalImage_DrawPolygonArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawPolygonArray(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawPolygonArray(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 procedure _LapeExternalImage_DrawCircleArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^, PColor(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^, PBoolean(Params^[4])^);
 end;
 
 procedure _LapeExternalImage_DrawCrossArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 procedure ImportSimbaExternalImage(Compiler: TSimbaScript_Compiler);
@@ -409,6 +574,8 @@ begin
 
     addClassVar('TExternalImage', 'UserData', 'Pointer', @_LapeExternalImage_GetUserData, @_LapeExternalImage_SetUserData);
 
+    addClassVar('TExternalImage', 'Name', 'String', @_LapeExternalImage_Name_Read, @_LapeExternalImage_Name_Write);
+    addClassVar('TExternalImage', 'DefaultPixel', 'TColorBGRA', @_LapeExternalImage_DefaultPixel_Read, @_LapeExternalImage_DefaultPixel_Write);
     addClassVar('TExternalImage', 'FontName', 'String', @_LapeExternalImage_FontName_Read, @_LapeExternalImage_FontName_Write);
     addClassVar('TExternalImage', 'FontSize', 'Single', @_LapeExternalImage_FontSize_Read, @_LapeExternalImage_FontSize_Write);
     addClassVar('TExternalImage', 'FontAntialiasing', 'Boolean', @_LapeExternalImage_FontAntialiasing_Read, @_LapeExternalImage_FontAntialiasing_Write);
@@ -419,56 +586,66 @@ begin
     addGlobalFunc('function TExternalImage.TextHeight(Text: String): Integer;', @_LapeExternalImage_TextHeight);
     addGlobalFunc('function TExternalImage.TextSize(Text: String): TPoint;', @_LapeExternalImage_TextSize);
 
-    addGlobalFunc('procedure TExternalImage.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeExternalImage_DrawText);
-    addGlobalFunc('procedure TExternalImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload', @_LapeExternalImage_DrawTextEx);
-    addGlobalFunc('procedure TExternalImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);', @_LapeExternalImage_DrawTextLines);
+    addGlobalFunc('function TExternalImage.GetAlpha(X, Y: Integer): Byte;', @_LapeExternalImage_GetAlpha);
+    addGlobalFunc('procedure TExternalImage.SetAlpha(X, Y: Integer; Alpha: Byte);', @_LapeExternalImage_SetAlpha);
 
-    addGlobalFunc('procedure TExternalImage.Fill(Color: TColor; Alpha: Byte)', @_LapeExternalImage_Fill);
+    addGlobalFunc('function TExternalImage.GetPixel(X, Y: Integer): TColor;', @_LapeExternalImage_GetPixel);
+    addGlobalFunc('procedure TExternalImage.SetPixel(X, Y: Integer; Color: TColor);', @_LapeExternalImage_SetPixel);
 
-    addGlobalFunc('procedure TExternalImage.SetAlpha(Value: Byte); overload;', @_LapeExternalImageSetAlpha1);
-    addGlobalFunc('procedure TExternalImage.SetAlpha(Points: TPointArray; Value: Byte); overload;', @_LapeExternalImageSetAlpha2);
-    addGlobalFunc('procedure TExternalImage.SetAlpha(Color: TColor; Value: Byte); overload;', @_LapeExternalImageSetAlpha3);
+    addGlobalFunc('function TExternalImage.GetPixels(Points: TPointArray): TColorArray;', @_LapeExternalImage_GetPixels);
+    addGlobalFunc('procedure TExternalImage.SetPixels(Points: TPointArray; Color: TColor); overload', @_LapeExternalImage_SetPixels1);
+    addGlobalFunc('procedure TExternalImage.SetPixels(Points: TPointArray; Colors: TColorArray); overload', @_LapeExternalImage_SetPixels2);
+
+    addClassVar('TExternalImage', 'DrawColor', 'TColor', @_LapeExternalImage_DrawColor_Read, @_LapeExternalImage_DrawColor_Write);
+    addClassVar('TExternalImage', 'DrawAlpha', 'Byte', @_LapeExternalImage_DrawAlpha_Read, @_LapeExternalImage_DrawAlpha_Write);
+
+    addGlobalFunc('procedure TExternalImage.DrawText(Text: String; Position: TPoint); overload', @_LapeExternalImage_DrawText);
+    addGlobalFunc('procedure TExternalImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlign); overload', @_LapeExternalImage_DrawTextEx);
+    addGlobalFunc('procedure TExternalImage.DrawTextLines(Text: TStringArray; Position: TPoint);', @_LapeExternalImage_DrawTextLines);
+
+    addGlobalFunc('procedure TExternalImage.Fill(Color: TColor)', @_LapeExternalImage_Fill);
+    addGlobalFunc('procedure TExternalImage.FillWithAlpha(Value: Byte);', @_LapeExternalImage_FillWithAlpha);
 
     addGlobalFunc('procedure TExternalImage.Clear; overload', @_LapeExternalImage_Clear1);
     addGlobalFunc('procedure TExternalImage.Clear(Box: TBox); overload;', @_LapeExternalImage_Clear2);
     addGlobalFunc('procedure TExternalImage.ClearInverted(Box: TBox);', @_LapeExternalImage_ClearInverted);
 
-    addGlobalFunc('procedure TExternalImage.DrawATPA(ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0)', @_LapeExternalImage_DrawATPA);
-    addGlobalFunc('procedure TExternalImage.DrawTPA(TPA: TPointArray; Color: TColor; Alpha: Byte = 0)', @_LapeExternalImage_DrawTPA);
+    addGlobalFunc('procedure TExternalImage.DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean = True)', @_LapeExternalImage_DrawATPA);
+    addGlobalFunc('procedure TExternalImage.DrawTPA(TPA: TPointArray)', @_LapeExternalImage_DrawTPA);
 
-    addGlobalFunc('procedure TExternalImage.DrawImage(Image: TImage; Position: TPoint; Alpha: Byte = 0);', @_LapeExternalImage_DrawImage);
+    addGlobalFunc('procedure TExternalImage.DrawImage(Image: TImage; Position: TPoint);', @_LapeExternalImage_DrawImage);
 
-    addGlobalFunc('procedure TExternalImage.DrawBox(B: TBox; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawBox);
-    addGlobalFunc('procedure TExternalImage.DrawBoxFilled(B: TBox; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawBoxFilled);
-    addGlobalFunc('procedure TExternalImage.DrawBoxInverted(B: TBox; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawBoxInverted);
+    addGlobalFunc('procedure TExternalImage.DrawBox(B: TBox);', @_LapeExternalImage_DrawBox);
+    addGlobalFunc('procedure TExternalImage.DrawBoxFilled(B: TBox);', @_LapeExternalImage_DrawBoxFilled);
+    addGlobalFunc('procedure TExternalImage.DrawBoxInverted(B: TBox);', @_LapeExternalImage_DrawBoxInverted);
 
-    addGlobalFunc('procedure TExternalImage.DrawPolygon(Points: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawPolygon);
-    addGlobalFunc('procedure TExternalImage.DrawPolygonFilled(Points: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawPolygonFilled);
-    addGlobalFunc('procedure TExternalImage.DrawPolygonInverted(Points: TPointArray; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawPolygonInverted);
+    addGlobalFunc('procedure TExternalImage.DrawPolygon(Points: TPointArray);', @_LapeExternalImage_DrawPolygon);
+    addGlobalFunc('procedure TExternalImage.DrawPolygonFilled(Points: TPointArray);', @_LapeExternalImage_DrawPolygonFilled);
+    addGlobalFunc('procedure TExternalImage.DrawPolygonInverted(Points: TPointArray);', @_LapeExternalImage_DrawPolygonInverted);
 
-    addGlobalFunc('procedure TExternalImage.DrawQuad(Quad: TQuad; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawQuad);
-    addGlobalFunc('procedure TExternalImage.DrawQuadFilled(Quad: TQuad; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawQuadFilled);
-    addGlobalFunc('procedure TExternalImage.DrawQuadInverted(Quad: TQuad; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawQuadInverted);
+    addGlobalFunc('procedure TExternalImage.DrawQuad(Quad: TQuad);', @_LapeExternalImage_DrawQuad);
+    addGlobalFunc('procedure TExternalImage.DrawQuadFilled(Quad: TQuad);', @_LapeExternalImage_DrawQuadFilled);
+    addGlobalFunc('procedure TExternalImage.DrawQuadInverted(Quad: TQuad);', @_LapeExternalImage_DrawQuadInverted);
 
-    addGlobalFunc('procedure TExternalImage.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0)', @_LapeExternalImage_DrawCircle);
-    addGlobalFunc('procedure TExternalImage.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0)', @_LapeExternalImage_DrawCircleFilled);
-    addGlobalFunc('procedure TExternalImage.DrawCircleInverted(Center: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0)', @_LapeExternalImage_DrawCircleInverted);
+    addGlobalFunc('procedure TExternalImage.DrawCircle(Center: TPoint; Radius: Integer)', @_LapeExternalImage_DrawCircle);
+    addGlobalFunc('procedure TExternalImage.DrawCircleFilled(Center: TPoint; Radius: Integer)', @_LapeExternalImage_DrawCircleFilled);
+    addGlobalFunc('procedure TExternalImage.DrawCircleInverted(Center: TPoint; Radius: Integer)', @_LapeExternalImage_DrawCircleInverted);
 
-    addGlobalFunc('procedure TExternalImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawCrosshairs);
-    addGlobalFunc('procedure TExternalImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawCross);
+    addGlobalFunc('procedure TExternalImage.DrawCrosshairs(ACenter: TPoint; Size: Integer);', @_LapeExternalImage_DrawCrosshairs);
+    addGlobalFunc('procedure TExternalImage.DrawCross(ACenter: TPoint; Radius: Integer);', @_LapeExternalImage_DrawCross);
 
-    addGlobalFunc('procedure TExternalImage.DrawLine(Start, Stop: TPoint; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawLine);
-    addGlobalFunc('procedure TExternalImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor; Alpha: Byte = 0);', @_LapeExternalImage_DrawLineGap);
+    addGlobalFunc('procedure TExternalImage.DrawLine(Start, Stop: TPoint);', @_LapeExternalImage_DrawLine);
+    addGlobalFunc('procedure TExternalImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer);', @_LapeExternalImage_DrawLineGap);
 
-    addGlobalFunc('procedure TExternalImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single = 1.5)', @_LapeExternalImage_DrawCircleAA);
-    addGlobalFunc('procedure TExternalImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single = 1.5)', @_LapeExternalImage_DrawLineAA);
-    addGlobalFunc('procedure TExternalImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single = 1.5)', @_LapeExternalImage_DrawEllipseAA);
+    addGlobalFunc('procedure TExternalImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single = 1.5)', @_LapeExternalImage_DrawCircleAA);
+    addGlobalFunc('procedure TExternalImage.DrawLineAA(Start, Stop: TPoint; Thickness: Single = 1.5)', @_LapeExternalImage_DrawLineAA);
+    addGlobalFunc('procedure TExternalImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single = 1.5)', @_LapeExternalImage_DrawEllipseAA);
 
-    addGlobalFunc('procedure TExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);', @_LapeExternalImage_DrawQuadArray);
-    addGlobalFunc('procedure TExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);', @_LapeExternalImage_DrawBoxArray);
-    addGlobalFunc('procedure TExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);', @_LapeExternalImage_DrawPolygonArray);
-    addGlobalFunc('procedure TExternalImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);', @_LapeExternalImage_DrawCircleArray);
-    addGlobalFunc('procedure TExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor = -1);', @_LapeExternalImage_DrawCrossArray);
+    addGlobalFunc('procedure TExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean);', @_LapeExternalImage_DrawQuadArray);
+    addGlobalFunc('procedure TExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean);', @_LapeExternalImage_DrawBoxArray);
+    addGlobalFunc('procedure TExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean);', @_LapeExternalImage_DrawPolygonArray);
+    addGlobalFunc('procedure TExternalImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean);', @_LapeExternalImage_DrawCircleArray);
+    addGlobalFunc('procedure TExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean);', @_LapeExternalImage_DrawCrossArray);
   end;
 end;
 

@@ -15,7 +15,7 @@ implementation
 uses
   Graphics, Variants,
   lptypes, lpvartypes, lpparser,
-  simba.nativeinterface, simba.env;
+  simba.nativeinterface, simba.env, simba.baseclass;
 
 (*
 Base
@@ -463,6 +463,21 @@ begin
   PVariant(Result)^ := Null;
 end;
 
+procedure _LapeBaseClass_Name_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := TSimbaBaseClass(Params^[0]^).Name;
+end;
+
+procedure _LapeBaseClass_Name_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaBaseClass(Params^[0]^).Name := PString(Params^[1])^;
+end;
+
+procedure _LapeBaseClass_FreeOnTerminate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  TSimbaBaseClass(Params^[0]^).FreeOnTerminate := PBoolean(Params^[1])^;
+end;
+
 procedure ImportBase(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -529,6 +544,10 @@ begin
     addGlobalFunc('function Variant.NULL: Variant; static;', @_LapeVariantNULL);
 
     ImportingSection := '';
+
+    addClass('TBaseClass', 'Pointer');
+    addClassVar('TBaseClass', 'Name', 'String', @_LapeBaseClass_Name_Read, @_LapeBaseClass_Name_Write);
+    addGlobalFunc('procedure TBaseClass.FreeOnTerminate(Value: Boolean);', @_LapeBaseClass_FreeOnTerminate);
   end;
 end;
 

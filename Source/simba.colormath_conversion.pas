@@ -35,35 +35,39 @@ const
 type
   TSimbaColorConversion = class
   public
-    class function ColorToBGRA(const Color: TColor): TColorBGRA; static; inline;
-    class function BGRAToColor(const BGRA: TColorBGRA): TColor; static; inline;
+    class function ColorToBGRA(const Color: TColor; const Alpha: Byte = 0): TColorBGRA; static; inline;
     class function ColorToRGB(const Color: TColor): TColorRGB; static; inline;
-    class function RGBToColor(const RGB: TColorRGB): TColor; static; inline;
+
+    class function BGRAToColor(const BGRA: TColorBGRA): TColor; static; inline;
     class function BGRAToRGB(const RGB: TColorBGRA): TColorRGB; static; inline;
-    class function RGBToBGRA(const RGB: TColorRGB): TColorBGRA; static; inline;
+
+    class function RGBToColor(const RGB: TColorRGB): TColor; static; inline;
     class function RGBToXYZ(const RGB: TColorRGB): TColorXYZ; static; inline;
     class function RGBToLAB(const RGB: TColorRGB): TColorLAB; static; inline;
     class function RGBToLCH(const RGB: TColorRGB): TColorLCH; static; inline;
     class function RGBToHSV(const RGB: TColorRGB): TColorHSV; static; inline;
     class function RGBToHSL(const RGB: TColorRGB): TColorHSL; static; inline;
+
     class function LABToLCH(const LAB: TColorLAB): TColorLCH; static; inline;
-    class function XYZToRGB(const XYZ: TColorXYZ): TColorRGB; static; inline;
     class function LABToRGB(const LAB: TColorLAB): TColorRGB; static; inline;
+    class function LABToXYZ(const LAB: TColorLAB): TColorXYZ; static; inline;
+
     class function HSVToRGB(const HSV: TColorHSV): TColorRGB; static; inline;
     class function HSLToRGB(const HSL: TColorHSL): TColorRGB; static; inline;
     class function LCHToRGB(const LCH: TColorLCH): TColorRGB; static; inline;
     class function LCHToLAB(const LCH: TColorLCH): TColorLAB; static; inline;
-    class function LABToXYZ(const LAB: TColorLAB): TColorXYZ; static; inline;
+
+    class function XYZToRGB(const XYZ: TColorXYZ): TColorRGB; static; inline;
   end;
 
 implementation
 
-class function TSimbaColorConversion.ColorToBGRA(const Color: TColor): TColorBGRA;
+class function TSimbaColorConversion.ColorToBGRA(const Color: TColor; const Alpha: Byte): TColorBGRA;
 begin
-  Result.B := Color shr B_BIT and $FF;
-  Result.G := Color shr G_BIT and $FF;
-  Result.R := Color shr R_BIT and $FF;
-  Result.A := 0;
+  Result.R := (Color and R_MASK) shr R_BIT;
+  Result.G := (Color and G_MASK) shr G_BIT;
+  Result.B := (Color and B_MASK) shr B_BIT;
+  Result.A := Alpha;
 end;
 
 class function TSimbaColorConversion.BGRAToColor(const BGRA: TColorBGRA): TColor;
@@ -88,14 +92,6 @@ begin
   Result.R := RGB.R;
   Result.G := RGB.G;
   Result.B := RGB.B;
-end;
-
-class function TSimbaColorConversion.RGBToBGRA(const RGB: TColorRGB): TColorBGRA;
-begin
-  Result.R := RGB.R;
-  Result.G := RGB.G;
-  Result.B := RGB.B;
-  Result.A := 0;
 end;
 
 class function TSimbaColorConversion.RGBToXYZ(const RGB: TColorRGB): TColorXYZ;

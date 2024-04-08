@@ -204,9 +204,8 @@ begin
     addGlobalFunc(
       'procedure Show(Matrix: TIntegerMatrix); overload;', [
       'begin',
-      '  with TImage.Create(Matrix.Width(), Matrix.Height()) do',
+      '  with TImage.CreateFromMatrix(Matrix) do',
       '  try',
-      '    DrawMatrix(Matrix);',
       '    Show();',
       '  finally',
       '    Free();',
@@ -215,11 +214,10 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure Show(Matrix: TSingleMatrix; ColorMapID: Integer = 0); overload;', [
+      'procedure Show(Matrix: TSingleMatrix; ColorMapType: Integer = 0); overload;', [
       'begin',
-      '  with TImage.Create(Matrix.Width(), Matrix.Height()) do',
+      '  with TImage.CreateFromMatrix(Matrix, ColorMapType) do',
       '  try',
-      '    DrawMatrix(Matrix, ColorMapID);',
       '    Show();',
       '  finally',
       '    Free();',
@@ -249,12 +247,12 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure Show(TPA: TPointArray; Color: Integer = $0000FF); overload;', [
+      'procedure Show(TPA: TPointArray); overload;', [
       'begin',
       '  with TPA.Bounds() do',
       '    with TImage.Create(X1+X2+1, Y1+Y2+1) do',
       '    try',
-      '      DrawTPA(TPA, Color);',
+      '      DrawTPA(TPA);',
       '      Show();',
       '    finally',
       '      Free();',
@@ -344,11 +342,11 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure ShowOnClient(TPA: TPointArray; Color: Integer = $0000FF); overload;', [
+      'procedure ShowOnClient(TPA: TPointArray); overload;', [
       'begin',
       '  with TImage.CreateFromTarget() do',
       '  try',
-      '    DrawTPA(TPA, Color);',
+      '    DrawTPA(TPA);',
       '    Show();',
       '  finally',
       '    Free();',

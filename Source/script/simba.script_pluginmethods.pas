@@ -50,6 +50,7 @@ type
     ExternalImage_Resize: procedure(Img: Pointer; NewWidth, NewHeight: Integer); cdecl;
     ExternalImage_SetUserData: procedure(Img: Pointer; UserData: Pointer); cdecl;
     ExternalImage_GetUserData: function(Img: Pointer): Pointer; cdecl;
+    ExternalImage_SetName: procedure(Img: Pointer; Name: PChar); cdecl;
 
     // Safe to extend this but do not modify!
   end;
@@ -295,6 +296,11 @@ begin
   Result := TSimbaExternalImage(Img).UserData;
 end;
 
+procedure Plugin_ExternalImage_SetName(Img: Pointer; Name: PChar); cdecl;
+begin
+  TSimbaExternalImage(Img).Name := Name;
+end;
+
 initialization
 
   with SimbaPluginMethods do
@@ -327,6 +333,7 @@ initialization
     ExternalImage_Resize      := @Plugin_ExternalImage_Resize;
     ExternalImage_GetUserData := @Plugin_ExternalImage_GetUserData;
     ExternalImage_SetUserData := @Plugin_ExternalImage_SetUserData;
+    ExternalImage_SetName     := @Plugin_ExternalImage_SetName;
   end;
 
 end.

@@ -304,7 +304,9 @@ Move the mouse in a human-like way.
 
 Speed, Gravity and Wind variables affects this.
 
-Note:: The algorithm used is WindMouse. For more details see <https://ben.land/post/2021/04/25/windmouse-human-mouse-movement>
+```{note}
+The algorithm used is WindMouse. For more details see <https://ben.land/post/2021/04/25/windmouse-human-mouse-movement>
+```
 *)
 procedure _LapeInput_MouseMove(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin

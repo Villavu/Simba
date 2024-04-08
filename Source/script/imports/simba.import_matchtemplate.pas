@@ -50,13 +50,13 @@ begin
 end;
 
 (*
-TMatchTemplateCache.FreeOnTerminate
------------------------------------
-> procedure TMatchTemplateCache.FreeOnTerminate(Enable: Boolean);
+TMatchTemplateCache.Free
+------------------------
+> procedure TMatchTemplateCache.Free;
 *)
-procedure _LapeMatchTemplateCache_FreeOnTerminate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeMatchTemplateCache_Free(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMatchTemplateCacheBase(Params^[0])^.FreeOnTerminate := PBoolean(Params^[1])^;
+  PMatchTemplateCacheBase(Params^[0])^.Free();
 end;
 
 (*
@@ -127,12 +127,12 @@ begin
 
     addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @MatchTemplateMultithreadOpts, 'MatchTemplateMultithreadOpts');
 
-    addClass('TMatchTemplateCache');
+    addClass('TMatchTemplateCache', 'TBaseClass');
     addGlobalType('(TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED)', 'ETMFormula');
 
     addGlobalFunc('function TMatchTemplateCache.Create(Image, Template: TIntegerMatrix; Formula: ETMFormula): TMatchTemplateCache; static; overload', @_LapeMatchTemplateCache_Create1);
     addGlobalFunc('function TMatchTemplateCache.Create(Image, Template: TImage; Formula: ETMFormula): TMatchTemplateCache; static; overload', @_LapeMatchTemplateCache_Create2);
-    addGlobalFunc('procedure TMatchTemplateCache.FreeOnTerminate(Enable: Boolean);', @_LapeMatchTemplateCache_FreeOnTerminate);
+    addGlobalFunc('procedure TMatchTemplateCache.Free;', @_LapeMatchTemplateCache_Free);
 
     // TIntegerMatrix
     addGlobalFunc('function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload', @_LapeMatchTemplateMaskCache1);

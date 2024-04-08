@@ -19,9 +19,6 @@ uses
   Classes, SysUtils, Math,
   simba.base, simba.colormath, simba.colormath_conversion;
 
-type
-  TColorDistanceFunc = function(const Color1: Pointer; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
-
 function DistanceRGB_UnRolled(const C1: PColorRGB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 function DistanceHSV_UnRolled(const C1: PColorHSV; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;

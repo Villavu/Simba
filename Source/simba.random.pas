@@ -15,7 +15,7 @@ uses
 
 function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
 function RandomTPA(Amount: Integer; Box: TBox): TPointArray;
-function RandomShapes(Amount: Integer; RandScale: Single = 0.5; RandRotate: Single = 0.1): TSimbaImage;
+function RandomShapes(Amount: Integer; ShapesPerRow: Integer = 5; RandScale: Single = 0.5; RandRotate: Single = 0.1): TSimbaImage;
 
 function Random(Lo, Hi: Double): Double; overload;
 function Random(Lo, Hi: Int64): Int64; overload;
@@ -82,13 +82,12 @@ begin
     Result[i] := Point(RandomRange(Box.X1, Box.X2), RandomRange(Box.Y1, Box.Y2));
 end;
 
-function RandomShapes(Amount: Integer; RandScale: Single; RandRotate: Single): TSimbaImage;
+function RandomShapes(Amount: Integer; ShapesPerRow: Integer; RandScale: Single; RandRotate: Single): TSimbaImage;
 
   function GetRandomShapes: TSimbaImageArray;
   var
     i: Integer;
     tmp: TSimbaImage;
-    ratio: Single;
   begin
     SetLength(Result, Amount);
     for I := 0 to High(Result) do
@@ -122,43 +121,45 @@ function RandomShapes(Amount: Integer; RandScale: Single; RandRotate: Single): T
 
       if (RandScale > 0) then
       begin
-        ratio := 1.0 + Random(-RandScale, RandScale);
-
         tmp := Result[I];
-        Result[I] := tmp.ResizeNN(Round(tmp.Width * ratio), Round(tmp.Height * ratio));
+        Result[I] := tmp.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, 1.0 + Random(-RandScale, RandScale));
         tmp.Free();
       end;
 
       if (RandRotate > 0) then
       begin
         tmp := Result[I];
-        Result[I] := tmp.RotateNN(DegToRad(Random(-360*RandRotate,360*RandRotate)), True);
+        Result[I] := tmp.Rotate(EImageRotateAlgo.NEAREST_NEIGHBOUR, DegToRad(Random(-360*RandRotate,360*RandRotate)), True);
         tmp.Free();
       end;
     end;
   end;
 
 var
-  imgs: TSimbaImageArray;
-  boxes: TBoxArray;
-  i: Integer;
-  maxW, maxH: Integer;
+  ShapeImages: TSimbaImageArray;
+  Boxes: TBoxArray;
+  I, MaxW, MaxH: Integer;
 begin
-  imgs := GetRandomShapes();
-  maxW := imgs[0].Width;
-  maxH := imgs[0].Height;
-  for i:=1 to High(imgs) do
-  begin
-    maxW := Max(maxW, imgs[i].Width);
-    maxH := Max(maxH, imgs[i].Height);
-  end;
-  boxes := TBoxArray.Create(TPoint.ZERO, Amount div 4, 1 + (Amount div (Amount div 4)), maxW, maxH, TPoint.ZERO);
+  if (Amount < 1)       then Amount := 1;
+  if (ShapesPerRow < 1) then ShapesPerRow := 1;
 
-  Result := TSimbaImage.Create(boxes.Merge.Width, boxes.Merge.Height);
-  for i:=0 to High(imgs) do
+  ShapeImages := GetRandomShapes();
+  MaxW := ShapeImages[0].Width;
+  MaxH := ShapeImages[0].Height;
+  for I := 1 to High(ShapeImages) do
   begin
-    Result.DrawImage(imgs[i], boxes[i].Center - imgs[i].Center);
-    imgs[i].Free();
+    MaxW := Max(MaxW, ShapeImages[I].Width);
+    MaxH := Max(MaxH, ShapeImages[I].Height);
+  end;
+
+  Boxes := TBoxArray.Create(TPoint.ZERO, ShapesPerRow, (Amount div ShapesPerRow) + 1, MaxW, MaxH, TPoint.ZERO);
+
+  Result := TSimbaImage.Create(Boxes.Merge.Width, Boxes.Merge.Height);
+  for I := 0 to High(ShapeImages) do
+  begin
+    Result.DrawImage(ShapeImages[I], Boxes[I].Center - ShapeImages[I].Center);
+
+    ShapeImages[I].Free();
   end;
 end;
 

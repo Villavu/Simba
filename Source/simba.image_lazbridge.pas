@@ -40,9 +40,6 @@ implementation
 uses
   TypInfo, FPWritePNG;
 
-var
-  SimbaRawImgDescription: TRawImageDescription;
-
 procedure LazImage_CopyRow_BGR(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGR);
 begin
   while (PtrUInt(Source) < SourceUpper) do
@@ -328,18 +325,20 @@ procedure SimbaImage_FromFPImageReader(SimbaImage: TSimbaImage; ReaderClass: TFP
 var
   Img: TLazIntfImage;
   Reader: TFPCustomImageReader;
+  Desc: TRawImageDescription;
 begin
+  Desc.Init_BPP32_B8G8R8A8_BIO_TTB(0, 0);
+
   Img := nil;
   Reader := nil;
   try
     Reader := ReaderClass.Create();
-
     Img := TLazIntfImage.Create(0, 0);
-    Img.DataDescription := SimbaRawImgDescription;
+    Img.DataDescription := Desc;
 
     Reader.ImageRead(Stream, Img);
 
-    SimbaImage.FromData(Img.Width, Img.Height, PColorBGRA(Img.PixelData), Img.Width);
+    SimbaImage.LoadFromData(Img.Width, Img.Height, PColorBGRA(Img.PixelData), Img.Width);
   finally
     Img.Free();
     Reader.Free();
@@ -350,30 +349,6 @@ function SimbaImage_ToRawImage(SimbaImage: TSimbaImage): TRawImage;
 begin
   Result.Init();
   Result.Description.Init_BPP32_B8G8R8A8_BIO_TTB(SimbaImage.Width, SimbaImage.Height);
-
-  //Result.Description.PaletteColorCount := 0;
-  //Result.Description.MaskBitsPerPixel  := 0;
-  //Result.Description.Width             := SimbaImage.Width;
-  //Result.Description.Height            := SimbaImage.Height;
-  //
-  //Result.Description.Format       := ricfRGBA;
-  //Result.Description.ByteOrder    := riboLSBFirst;
-  //Result.Description.BitOrder     := riboBitsInOrder; // should be fine
-  //Result.Description.Depth        := 32;
-  //Result.Description.BitsPerPixel := 32;
-  //Result.Description.LineOrder    := riloTopToBottom;
-  //Result.Description.LineEnd      := rileDWordBoundary;
-  //
-  //Result.Description.RedPrec   := 8;
-  //Result.Description.GreenPrec := 8;
-  //Result.Description.BluePrec  := 8;
-  //Result.Description.AlphaPrec := 8;
-  //
-  //Result.Description.AlphaShift := 24;
-  //Result.Description.RedShift   := 16;
-  //Result.Description.GreenShift := 8;
-  //Result.Description.BlueShift  := 0;
-
   Result.DataSize := Result.Description.Width * Result.Description.Height * SizeOf(TColorBGRA);
   Result.Data     := PByte(SimbaImage.Data);
 end;
@@ -384,9 +359,6 @@ begin
 
   LazImage_FromData(Result, SimbaImage.Data, SimbaImage.Width, SimbaImage.Height);
 end;
-
-initialization
-  SimbaRawImgDescription.Init_BPP32_B8G8R8A8_BIO_TTB(0, 0); // TColorBGRA format
 
 end.
 

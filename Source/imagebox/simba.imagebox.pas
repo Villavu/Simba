@@ -843,7 +843,7 @@ procedure TSimbaImageBox.SetBackgroundFromFile(FileName: String);
 var
   SimbaImage: TSimbaImage;
 begin
-  SimbaImage := TSimbaImage.CreateFromFile(FileName);
+  SimbaImage := TSimbaImage.Create(FileName);
   try
     LazImage_FromSimbaImage(FBackground, SimbaImage);
   finally

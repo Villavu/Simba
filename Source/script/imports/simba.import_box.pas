@@ -234,7 +234,7 @@ end;
 (*
 TBox.Invert
 -----------
-> function TBox.Invert(Area: TBox): TBoxArray;
+> function TBox.Invert(Space: TBox): TBoxArray;
 *)
 procedure _LapeBox_Invert(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -385,7 +385,7 @@ begin
     addGlobalFunc('function TBox.Offset(X, Y: Integer): TBox; overload;', @_LapeBox_Offset1);
     addGlobalFunc('function TBox.Offset(P: TPoint): TBox; overload;', @_LapeBox_Offset2);
     addGlobalFunc('function TBox.Combine(Other: TBox): TBox;', @_LapeBox_Combine);
-    addGlobalFunc('function TBox.Invert(Area: TBox): TBoxArray;', @_LapeBox_Invert);
+    addGlobalFunc('function TBox.Invert(Space: TBox): TBoxArray;', @_LapeBox_Invert);
     addGlobalFunc('function TBox.ToQuad: TQuad;', @_LapeBox_ToQuad);
 
     addGlobalFunc('function TBox.NearestEdge(P: TPoint): TPoint;', @_LapeBox_NearestEdge);

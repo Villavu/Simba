@@ -98,7 +98,7 @@ end;
 (*
 RandomShapes
 ------------
-> function RandomShapes(Amount: Integer; RandScale: Single = 0.5; RandRotate: Single = 0.1): TSimbaImage;
+> function RandomShapes(Amount: Integer; ShapesPerRow: Integer = 0; RandScale: Single = 0.5; RandRotate: Single = 0.1): TSimbaImage;
 
 Generates an image with x <amount> of random shapes.
 
@@ -108,7 +108,7 @@ Assign a value to `RandSeed` for a constant output of <x> random shapes.
 *)
 procedure _LapeRandomShapes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Result)^ := RandomShapes(PInteger(Params^[0])^, PSingle(Params^[1])^, PSingle(Params^[2])^);
+  PSimbaImage(Result)^ := RandomShapes(PInteger(Params^[0])^, PInteger(Params^[1])^, PSingle(Params^[2])^, PSingle(Params^[3])^);
 end;
 
 (*
@@ -219,7 +219,7 @@ begin
 
     addGlobalFunc('function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray', @_LapeRandomCenterTPA);
     addGlobalFunc('function RandomTPA(Amount: Integer; Box: TBox): TPointArray', @_LapeRandomTPA);
-    addGlobalFunc('function RandomShapes(Amount: Integer; RandScale: Single = 0.5; RandRotate: Single = 0.05): TImage;', @_LapeRandomShapes);
+    addGlobalFunc('function RandomShapes(Amount: Integer; ShapesPerRow: Integer = 5; RandScale: Single = 0.5; RandRotate: Single = 0.05): TImage;', @_LapeRandomShapes);
 
     addGlobalFunc('function RandomLeft(Lo, Hi: Double): Double; overload', @_LapeRandomLeft);
     addGlobalFunc('function RandomLeft(Lo, Hi: Int64): Int64; overload', @_LapeRandomLeftI);

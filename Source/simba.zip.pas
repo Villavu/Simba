@@ -424,7 +424,6 @@ begin
       UnZipper.UnZipAllFiles();
 
       Result := UnZipper.Stream;
-
     finally
       UnZipper.Free();
     end;

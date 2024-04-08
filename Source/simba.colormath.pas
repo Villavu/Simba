@@ -7,10 +7,6 @@
 }
 unit simba.colormath;
 
-{$DEFINE B_BIT := 16}
-{$DEFINE G_BIT := 8}
-{$DEFINE R_BIT := 0}
-
 {$i simba.inc}
 
 interface
@@ -29,6 +25,8 @@ type
   PChannelMultipliers = ^TChannelMultipliers;
   TChannelMultipliers = array[0..2] of Single;
 
+  TColorDistanceFunc = function(const Color1: Pointer; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
+
 const
   DefaultMultipliers: TChannelMultipliers = (1, 1, 1);
   DefaultColorSpace = EColorSpace.RGB;
@@ -39,7 +37,6 @@ type
   end;
 
   // note: TColor stuff should not include alpha
-
   TColor = Graphics.TColor;
   PColor = ^TColor;
 
@@ -58,7 +55,6 @@ type
   end;
 
   TColorRGB_Helper = record helper for TColorRGB
-    function ToBGRA: TColorBGRA;
     function ToXYZ: TColorXYZ;
     function ToLAB: TColorLAB;
     function ToLCH: TColorLCH;
@@ -77,7 +73,6 @@ type
     function ToLCH: TColorLCH;
     function ToHSV: TColorHSV;
     function ToHSL: TColorHSL;
-
     function ToColor: TColor;
   end;
 
@@ -277,11 +272,6 @@ end;
 function TColorBGRA_Helper.EqualsIgnoreAlpha(const Other: TColorBGRA): Boolean;
 begin
   Result := (AsInteger and $FFFFFF) = (Other.AsInteger and $FFFFFF);
-end;
-
-function TColorRGB_Helper.ToBGRA: TColorBGRA;
-begin
-  Result := TSimbaColorConversion.RGBToBGRA(Self);
 end;
 
 function TColorRGB_Helper.ToXYZ: TColorXYZ;

@@ -46,7 +46,7 @@ type
     function Offset(X, Y: Integer): TBox; overload;
     function Offset(P: TPoint): TBox; overload;
     function Combine(Other: TBox): TBox;
-    function Invert(AArea: TBox): TBoxArray;
+    function Invert(Space: TBox): TBoxArray;
     function Partition(Rows, Cols: Integer): TBoxArray;
     function Extract(Points: TPointArray): TPointArray;
     function Exclude(Points: TPointArray): TPointArray;
@@ -205,25 +205,25 @@ begin
   Result.Y2 := Max(Max(Self.Y1, Other.Y2), Max(Other.Y1, Self.Y2));
 end;
 
-function TBoxHelper.Invert(AArea: TBox): TBoxArray;
+function TBoxHelper.Invert(Space: TBox): TBoxArray;
 var
-  lowX, maxX, lowY, maxY: Integer;
+  MinX, MaxX, LowY, MaxY: Integer;
   I: Integer;
 begin
-  lowX := Max(AArea.X1, Self.X1-1);
-  maxX := Min(AArea.X2, Self.X2+1);
-  lowY := Max(AArea.Y1, Self.Y1-1);
-  maxY := Min(AArea.Y2, Self.Y2+1);
+  MinX := Max(Space.X1, Self.X1-1);
+  MaxX := Min(Space.X2, Self.X2+1);
+  LowY := Max(Space.Y1, Self.Y1-1);
+  MaxY := Min(Space.Y2, Self.Y2+1);
 
   Result := [
-    TBox.Create(AArea.X1, AArea.Y1, lowX,     lowY),
-    TBox.Create(AArea.X1, lowY,     lowX,     maxY),
-    TBox.Create(AArea.X1, lowY,     lowX,     AArea.Y2),
-    TBox.Create(lowX,     AArea.Y1, maxX,     lowY),
-    TBox.Create(lowX,     maxY,     maxX,     AArea.Y2),
-    TBox.Create(maxX,     AArea.Y1, AArea.X2, lowY),
-    TBox.Create(maxX,     lowY,     AArea.X2, maxY),
-    TBox.Create(maxX,     lowY,     AArea.X2, AArea.Y2)
+    TBox.Create(Space.X1, Space.Y1, MinX,     LowY),
+    TBox.Create(Space.X1, LowY,     MinX,     MaxY),
+    TBox.Create(Space.X1, LowY,     MinX,     Space.Y2),
+    TBox.Create(MinX,     Space.Y1, MaxX,     LowY),
+    TBox.Create(MinX,     MaxY,     MaxX,     Space.Y2),
+    TBox.Create(MaxX,     Space.Y1, Space.X2, LowY),
+    TBox.Create(MaxX,     LowY,     Space.X2, MaxY),
+    TBox.Create(MaxX,     LowY,     Space.X2, Space.Y2)
   ];
 
   for I := High(Result) downto 0 do

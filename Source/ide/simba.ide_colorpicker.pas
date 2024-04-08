@@ -191,6 +191,7 @@ constructor TSimbaColorPicker.Create(Window: TWindowHandle);
 var
   DesktopWindow: TWindowHandle;
   DesktopBounds: TBox;
+  Temp: TSimbaImage;
 begin
   inherited Create();
 
@@ -224,14 +225,9 @@ begin
     OnMouseUp := @ImageMouseUp;
     OnMouseMove := @ImageMouseMove;
 
-    with TSimbaImage.CreateFromWindow(DesktopWindow) do
-    try
-      Picture.Bitmap.LoadFromRawImage(SimbaImage_ToRawImage(GetSelf() as TSimbaImage), True);
-
-      DataOwner := False;
-    finally
-      Free();
-    end;
+    Temp := TSimbaImage.CreateFromWindow(DesktopWindow);
+    Picture.Bitmap := Temp.ToLazBitmap;
+    Temp.Free();
   end;
 
   FHint := TSimbaColorPickerHint.Create(FForm);

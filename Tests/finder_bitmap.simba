@@ -18,6 +18,7 @@ var
   templBrightnessed: TImage;
   TPA: TPointArray;
   P: TPoint;
+  x,y: Integer;
 begin
   Target.SetImage(img);
 
@@ -43,13 +44,15 @@ begin
   P := Finder.FindImage(templ, 0);
   Assert(TreePoints.Contains(P));
 
-
   // find one, area
   P := Finder.FindImage(templ, 0, [24, 37, 45, 71]);
   Assert(TreePoints.Contains(P));
 
   // test tolerance
   templBrightnessed := templ.Brightness(25);
+  for y:=0 to templ.Height - 1 do
+    for x:=0 to templ.Width - 1 do
+      templBrightnessed.SetAlpha(x,y, templ.GetAlpha(x,y));
 
   // find all with tolerance, entire client
   TPA := Finder.FindImageEx(templBrightnessed, 10, -1);

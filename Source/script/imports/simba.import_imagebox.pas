@@ -379,7 +379,7 @@ begin
     addGlobalFunc('function TImageBoxCanvas.TextHeight(Text: String): Integer;', @_LapeImageBoxCanvas_TextHeight);
     addGlobalFunc('function TImageBoxCanvas.TextSize(Text: String): TPoint;', @_LapeImageBoxCanvas_TextSize);
     addGlobalFunc('procedure TImageBoxCanvas.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeImageBoxCanvas_DrawText);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload', @_LapeImageBoxCanvas_DrawTextEx);
+    addGlobalFunc('procedure TImageBoxCanvas.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlign; Color: TColor); overload', @_LapeImageBoxCanvas_DrawTextEx);
 
     addGlobalFunc('procedure TImageBoxCanvas.DrawLine(Start, Stop: TPoint; Color: TColor);', @_LapeSimbaImageBoxCanvas_DrawLine);
     addGlobalFunc('procedure TImageBoxCanvas.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor);', @_LapeSimbaImageBoxCanvas_DrawLineGap);

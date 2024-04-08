@@ -15,7 +15,7 @@ unit simba.colormath_distance;
 interface
 
 uses
-  Classes, SysUtils, Graphics,
+  Classes, SysUtils,
   simba.base, simba.colormath;
 
 function DistanceRGB(const Color1, Color2: TColorRGB; const mul: TChannelMultipliers): Single; inline;
@@ -220,6 +220,8 @@ begin
     EColorSpace.LCH:    Result := DistanceLCH(Color1.ToLCH(), Color2.ToLCH(), Multipliers) / DistanceLCH_Max(Multipliers) * 100;
     EColorSpace.LAB:    Result := DistanceLAB(Color1.ToLAB(), Color2.ToLAB(), Multipliers) / DistanceLAB_Max(Multipliers) * 100;
     EColorSpace.DeltaE: Result := DistanceDeltaE(Color1.ToLAB(), Color2.ToLAB(), Multipliers) / DistanceDeltaE_Max(Multipliers) * 100;
+    else
+      Result := 100;
   end;
 end;
 

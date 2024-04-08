@@ -48,6 +48,11 @@ type
     function GetFontName: String;
     function GetFontSize: Single;
     function GetUserData: Pointer;
+    function GetPixel(const X, Y: Integer): TColor;
+    function GetAlpha(const X, Y: Integer): Byte;
+    function GetDefaultPixel: TColorBGRA;
+    function GetDrawAlpha: Byte;
+    function GetDrawColor: TColor;
 
     procedure SetUserData(UserData: Pointer);
     procedure SetFontAntialiasing(Value: Boolean);
@@ -55,6 +60,11 @@ type
     procedure SetFontItalic(Value: Boolean);
     procedure SetFontName(Value: String);
     procedure SetFontSize(Value: Single);
+    procedure SetPixel(const X, Y: Integer; const Color: TColor);
+    procedure SetAlpha(const X, Y: Integer; const Value: Byte);
+    procedure SetDefaultPixel(AValue: TColorBGRA);
+    procedure SetDrawAlpha(const AValue: Byte);
+    procedure SetDrawColor(const AValue: TColor);
   public
     constructor Create; reintroduce;
     destructor Destroy; override;
@@ -62,10 +72,21 @@ type
     procedure BeginUpdate;
     procedure EndUpdate;
 
+    property DefaultPixel: TColorBGRA read GetDefaultPixel write SetDefaultPixel;
     property Width: Integer read FWidth;
     property Height: Integer read FHeight;
     property UserData: Pointer read GetUserData write SetUserData;
     property AutoResize: Boolean read FAutoResize write FAutoResize;
+
+    property Pixel[X, Y: Integer]: TColor read GetPixel write SetPixel; default;
+    property Alpha[X, Y: Integer]: Byte read GetAlpha write SetAlpha;
+
+    function GetPixels(Points: TPointArray): TColorArray;
+    procedure SetPixels(Points: TPointArray; Color: TColor); overload;
+    procedure SetPixels(Points: TPointArray; Colors: TColorArray); overload;
+
+    property DrawColor: TColor read GetDrawColor write SetDrawColor;
+    property DrawAlpha: Byte read GetDrawAlpha write SetDrawAlpha;
 
     property FontName: String read GetFontName write SetFontName;
     property FontSize: Single read GetFontSize write SetFontSize;
@@ -76,76 +97,122 @@ type
     procedure SetMemory(Data: PColorBGRA; AWidth, AHeight: Integer);
     procedure Resize(NewWidth, NewHeight: Integer);
 
-    procedure SetAlpha(Value: Byte); overload;
-    procedure SetAlpha(Points: TPointArray; Value: Byte); overload;
-    procedure SetAlpha(Color: TColor; Value: Byte); overload;
-
-    // Point
-    procedure DrawATPA(ATPA: T2DPointArray; Color: TColor = -1; Alpha: Byte = 0);
-    procedure DrawTPA(TPA: TPointArray; Color: TColor; Alpha: Byte = 0);
-
-    // Line
-    procedure DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor; Alpha: Byte = 0);
-    procedure DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
-    procedure DrawLine(Start, Stop: TPoint; Color: TColor; Alpha: Byte = 0);
-    procedure DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor; Alpha: Byte = 0);
+    procedure Fill(Color: TColor);
+    procedure FillWithAlpha(Value: Byte);
 
     procedure Clear; overload;
     procedure Clear(Box: TBox); overload;
     procedure ClearInverted(Box: TBox);
 
-    procedure Fill(Color: TColor; Alpha: Byte = 0);
-
     function TextWidth(Text: String): Integer;
     function TextHeight(Text: String): Integer;
     function TextSize(Text: String): TPoint;
 
-    procedure DrawText(Text: String; Position: TPoint; Color: TColor); overload;
-    procedure DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload;
-    procedure DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);
+    procedure DrawText(Text: String; Position: TPoint); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet); overload;
+    procedure DrawTextLines(Text: TStringArray; Position: TPoint);
 
     // Image
-    procedure DrawImage(Image: TSimbaImage; Location: TPoint; Alpha: Byte = 0);
+    procedure DrawImage(Image: TSimbaImage; Location: TPoint);
+
+    // Point
+    procedure DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean);
+    procedure DrawTPA(TPA: TPointArray);
+
+    // Line
+    procedure DrawCrosshairs(ACenter: TPoint; Size: Integer);
+    procedure DrawCross(ACenter: TPoint; Radius: Integer);
+    procedure DrawLine(Start, Stop: TPoint);
+    procedure DrawLineGap(Start, Stop: TPoint; GapSize: Integer);
 
     // Box
-    procedure DrawBox(Box: TBox; Color: TColor; Alpha: Byte = 0);
-    procedure DrawBoxFilled(Box: TBox; Color: TColor; Alpha: Byte = 0);
-    procedure DrawBoxInverted(Box: TBox; Color: TColor; Alpha: Byte = 0);
+    procedure DrawBox(Box: TBox);
+    procedure DrawBoxFilled(Box: TBox);
+    procedure DrawBoxInverted(Box: TBox);
 
     // Poly
-    procedure DrawPolygon(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
-    procedure DrawPolygonFilled(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
-    procedure DrawPolygonInverted(Points: TPointArray; Color: TColor; Alpha: Byte = 0);
+    procedure DrawPolygon(Points: TPointArray);
+    procedure DrawPolygonFilled(Points: TPointArray);
+    procedure DrawPolygonInverted(Points: TPointArray);
 
     // Quad
-    procedure DrawQuad(Quad: TQuad; Color: TColor; Alpha: Byte = 0);
-    procedure DrawQuadFilled(Quad: TQuad; Color: TColor; Alpha: Byte = 0);
-    procedure DrawQuadInverted(Quad: TQuad; Color: TColor; Alpha: Byte = 0);
+    procedure DrawQuad(Quad: TQuad);
+    procedure DrawQuadFilled(Quad: TQuad);
+    procedure DrawQuadInverted(Quad: TQuad);
 
     // Circle
-    procedure DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
-    procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
-    procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte = 0);
+    procedure DrawCircle(ACenter: TPoint; Radius: Integer);
+    procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer);
+    procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer);
 
     // Antialiased
-    procedure DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single = 1.5);
-    procedure DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single = 1.5);
-    procedure DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single = 1.5);
+    procedure DrawLineAA(Start, Stop: TPoint; Thickness: Single = 1.5);
+    procedure DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single = 1.5);
+    procedure DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single = 1.5);
 
     // Arrays
-    procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor = -1);
-    procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor = -1);
-    procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor = -1);
-    procedure DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor = -1);
-    procedure DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor = -1);
+    procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean = True);
+    procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean = True);
+    procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean = True);
+    procedure DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean = True);
+    procedure DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean = True);
   end;
 
 implementation
 
 uses
   Math,
-  simba.vartype_box, simba.vartype_quad,
-  simba.vartype_pointarray, simba.vartype_boxarray;
+  simba.vartype_box, simba.vartype_quad, simba.vartype_pointarray, simba.vartype_boxarray;
+
+function TSimbaExternalImage.GetPixel(const X, Y: Integer): TColor;
+begin
+  Result := FBackBuffer.Pixel[X, Y];
+end;
+
+function TSimbaExternalImage.GetAlpha(const X, Y: Integer): Byte;
+begin
+  Result := FBackBuffer.Alpha[X, Y];
+end;
+
+function TSimbaExternalImage.GetDrawAlpha: Byte;
+begin
+  Result := FBackBuffer.DrawAlpha;
+end;
+
+function TSimbaExternalImage.GetDrawColor: TColor;
+begin
+  Result := FBackBuffer.DrawColor;
+end;
+
+procedure TSimbaExternalImage.SetPixel(const X, Y: Integer; const Color: TColor);
+begin
+  FBackBuffer.Pixel[X, Y] := Color;
+end;
+
+procedure TSimbaExternalImage.SetAlpha(const X, Y: Integer; const Value: Byte);
+begin
+  FBackBuffer.Alpha[X, Y] := Value;
+end;
+
+procedure TSimbaExternalImage.SetDrawAlpha(const AValue: Byte);
+begin
+  FBackBuffer.DrawAlpha := AValue;
+end;
+
+procedure TSimbaExternalImage.SetDrawColor(const AValue: TColor);
+begin
+  FBackBuffer.DrawColor := AValue;
+end;
+
+function TSimbaExternalImage.GetDefaultPixel: TColorBGRA;
+begin
+  Result := FBackBuffer.DefaultPixel;
+end;
+
+procedure TSimbaExternalImage.SetDefaultPixel(AValue: TColorBGRA);
+begin
+  FBackBuffer.DefaultPixel := AValue;
+end;
 
 procedure TSimbaExternalImage.CheckInUpdate;
 begin
@@ -284,6 +351,21 @@ begin
   FLock.Leave();
 end;
 
+function TSimbaExternalImage.GetPixels(Points: TPointArray): TColorArray;
+begin
+  Result := FBackBuffer.GetPixels(Points);
+end;
+
+procedure TSimbaExternalImage.SetPixels(Points: TPointArray; Color: TColor);
+begin
+  FBackBuffer.SetPixels(Points, Color);
+end;
+
+procedure TSimbaExternalImage.SetPixels(Points: TPointArray; Colors: TColorArray);
+begin
+  FBackBuffer.SetPixels(Points, Colors);
+end;
+
 procedure TSimbaExternalImage.SetMemory(Data: PColorBGRA; AWidth, AHeight: Integer);
 begin
   BeginUpdate();
@@ -318,67 +400,53 @@ begin
   end;
 end;
 
-procedure TSimbaExternalImage.SetAlpha(Value: Byte);
+procedure TSimbaExternalImage.FillWithAlpha(Value: Byte);
 begin
   addAllDirty();
 
-  FBackBuffer.SetAlpha(Value);
+  FBackBuffer.FillWithAlpha(Value);
 end;
 
-procedure TSimbaExternalImage.SetAlpha(Points: TPointArray; Value: Byte);
-begin
-  addAllDirty();
-
-  FBackBuffer.SetAlpha(Points, Value);
-end;
-
-procedure TSimbaExternalImage.SetAlpha(Color: TColor; Value: Byte);
-begin
-  addAllDirty();
-
-  FBackBuffer.SetAlpha(Color, Value);
-end;
-
-procedure TSimbaExternalImage.DrawATPA(ATPA: T2DPointArray; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean);
 begin
   addDirty(ATPA.Bounds());
 
-  FBackBuffer.DrawATPA(ATPA, Color, Alpha);
+  FBackBuffer.DrawATPA(ATPA, RandomColors);
 end;
 
-procedure TSimbaExternalImage.DrawTPA(TPA: TPointArray; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawTPA(TPA: TPointArray);
 begin
   addDirty(TPA.Bounds());
 
-  FBackBuffer.DrawTPA(TPA, Color, Alpha);
+  FBackBuffer.DrawTPA(TPA);
 end;
 
-procedure TSimbaExternalImage.DrawCrosshairs(ACenter: TPoint; Size: Integer; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawCrosshairs(ACenter: TPoint; Size: Integer);
 begin
   addDirty(TBox.Create(ACenter, Size, Size));
 
-  FBackBuffer.DrawCrosshairs(ACenter, Size, Color, Alpha);
+  FBackBuffer.DrawCrosshairs(ACenter, Size);
 end;
 
-procedure TSimbaExternalImage.DrawCross(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawCross(ACenter: TPoint; Radius: Integer);
 begin
   addDirty(TBox.Create(ACenter, Radius, Radius));
 
-  FBackBuffer.DrawCross(ACenter, Radius, Color, Alpha);
+  FBackBuffer.DrawCross(ACenter, Radius);
 end;
 
-procedure TSimbaExternalImage.DrawLine(Start, Stop: TPoint; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawLine(Start, Stop: TPoint);
 begin
   addDirty(TBox.Create(Start.X, Start.Y, Stop.X, Stop.Y));
 
-  FBackBuffer.DrawLine(Start, Stop, Color, Alpha);
+  FBackBuffer.DrawLine(Start, Stop);
 end;
 
-procedure TSimbaExternalImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer);
 begin
   addDirty(TBox.Create(Start.X, Start.Y, Stop.X, Stop.Y));
 
-  FBackBuffer.DrawLineGap(Start, Stop, GapSize, Color, Alpha);
+  FBackBuffer.DrawLineGap(Start, Stop, GapSize);
 end;
 
 procedure TSimbaExternalImage.Clear;
@@ -402,11 +470,11 @@ begin
   FBackBuffer.ClearInverted(Box);
 end;
 
-procedure TSimbaExternalImage.Fill(Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.Fill(Color: TColor);
 begin
   addAllDirty();
 
-  FBackBuffer.Fill(Color, Alpha);
+  FBackBuffer.Fill(Color);
 end;
 
 procedure TSimbaExternalImage.SetUserData(UserData: Pointer);
@@ -434,179 +502,182 @@ begin
   Result := FBackBuffer.TextSize(Text);
 end;
 
-procedure TSimbaExternalImage.DrawText(Text: String; Position: TPoint; Color: TColor);
+type
+  TSimbaImageProtected = class(TSimbaImage);
+
+procedure TSimbaExternalImage.DrawText(Text: String; Position: TPoint);
 begin
   CheckInUpdate();
 
-  FBackBuffer.DrawText(Text, Position, Color);
-  addDirty(FBackBuffer.TextDrawer.DrawnBox);
+  FBackBuffer.DrawText(Text, Position);
+  addDirty(TSimbaImageProtected(FBackBuffer).FTextDrawer.DrawnBox);
 end;
 
-procedure TSimbaExternalImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor);
+procedure TSimbaExternalImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet);
 begin
   CheckInUpdate();
 
-  FBackBuffer.DrawText(Text, Box, Alignments, Color);
-  addDirty(FBackBuffer.TextDrawer.DrawnBox);
+  FBackBuffer.DrawText(Text, Box, Alignments);
+  addDirty(TSimbaImageProtected(FBackBuffer).FTextDrawer.DrawnBox);
 end;
 
-procedure TSimbaExternalImage.DrawTextLines(Text: TStringArray; Position: TPoint; Color: TColor);
+procedure TSimbaExternalImage.DrawTextLines(Text: TStringArray; Position: TPoint);
 begin
   CheckInUpdate();
 
-  FBackBuffer.DrawTextLines(Text, Position, Color);
-  addDirty(FBackBuffer.TextDrawer.DrawnBox);
+  FBackBuffer.DrawTextLines(Text, Position);
+  addDirty(TSimbaImageProtected(FBackBuffer).FTextDrawer.DrawnBox);
 end;
 
-procedure TSimbaExternalImage.DrawImage(Image: TSimbaImage; Location: TPoint; Alpha: Byte);
+procedure TSimbaExternalImage.DrawImage(Image: TSimbaImage; Location: TPoint);
 begin
   addDirty(TBox.Create(Location.X, Location.Y, Location.X + Image.Width, Location.Y + Image.Height));
 
-  FBackBuffer.DrawImage(Image, Location, Alpha);
+  FBackBuffer.DrawImage(Image, Location);
 end;
 
-procedure TSimbaExternalImage.DrawBox(Box: TBox; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawBox(Box: TBox);
 begin
   addDirty(Box);
 
-  FBackBuffer.DrawBox(Box, Color, Alpha);
+  FBackBuffer.DrawBox(Box);
 end;
 
-procedure TSimbaExternalImage.DrawBoxFilled(Box: TBox; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawBoxFilled(Box: TBox);
 begin
   addDirty(Box);
 
-  FBackBuffer.DrawBoxFilled(Box, Color, Alpha);
+  FBackBuffer.DrawBoxFilled(Box);
 end;
 
-procedure TSimbaExternalImage.DrawBoxInverted(Box: TBox; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawBoxInverted(Box: TBox);
 begin
   addAllDirty();
 
-  FBackBuffer.DrawBoxInverted(Box, Color, Alpha);
+  FBackBuffer.DrawBoxInverted(Box);
 end;
 
-procedure TSimbaExternalImage.DrawPolygon(Points: TPointArray; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawPolygon(Points: TPointArray);
 begin
   addDirty(Points.Bounds);
 
-  FBackBuffer.DrawPolygon(Points, Color, Alpha);
+  FBackBuffer.DrawPolygon(Points);
 end;
 
-procedure TSimbaExternalImage.DrawPolygonFilled(Points: TPointArray; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawPolygonFilled(Points: TPointArray);
 begin
   addDirty(Points.Bounds);
 
-  FBackBuffer.DrawPolygonFilled(Points, Color, Alpha);
+  FBackBuffer.DrawPolygonFilled(Points);
 end;
 
-procedure TSimbaExternalImage.DrawPolygonInverted(Points: TPointArray; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawPolygonInverted(Points: TPointArray);
 begin
   addAllDirty();
 
-  FBackBuffer.DrawPolygonInverted(Points, Color, Alpha);
+  FBackBuffer.DrawPolygonInverted(Points);
 end;
 
-procedure TSimbaExternalImage.DrawQuad(Quad: TQuad; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawQuad(Quad: TQuad);
 begin
   addDirty(Quad.Bounds);
 
-  FBackBuffer.DrawQuad(Quad, Color, Alpha);
+  FBackBuffer.DrawQuad(Quad);
 end;
 
-procedure TSimbaExternalImage.DrawQuadFilled(Quad: TQuad; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawQuadFilled(Quad: TQuad);
 begin
   addDirty(Quad.Bounds);
 
-  FBackBuffer.DrawQuadFilled(Quad, Color, Alpha);
+  FBackBuffer.DrawQuadFilled(Quad);
 end;
 
-procedure TSimbaExternalImage.DrawQuadInverted(Quad: TQuad; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawQuadInverted(Quad: TQuad);
 begin
   addAllDirty();
 
-  FBackBuffer.DrawQuadInverted(Quad, Color, Alpha);
+  FBackBuffer.DrawQuadInverted(Quad);
 end;
 
-procedure TSimbaExternalImage.DrawCircle(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawCircle(ACenter: TPoint; Radius: Integer);
 begin
   addDirty(TBox.Create(ACenter, Radius, Radius));
 
-  FBackBuffer.DrawCircle(ACenter, Radius, Color, Alpha);
+  FBackBuffer.DrawCircle(ACenter, Radius);
 end;
 
-procedure TSimbaExternalImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer);
 begin
   addDirty(TBox.Create(ACenter, Radius, Radius));
 
-  FBackBuffer.DrawCircleFilled(ACenter, Radius, Color, Alpha);
+  FBackBuffer.DrawCircleFilled(ACenter, Radius);
 end;
 
-procedure TSimbaExternalImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer; Color: TColor; Alpha: Byte);
+procedure TSimbaExternalImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer);
 begin
   addAllDirty();
 
-  FBackBuffer.DrawCircleInverted(ACenter, Radius, Color, Alpha);
+  FBackBuffer.DrawCircleInverted(ACenter, Radius);
 end;
 
-procedure TSimbaExternalImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single);
+procedure TSimbaExternalImage.DrawLineAA(Start, Stop: TPoint; Thickness: Single);
 begin
   addDirty(TBox.Create(Ceil(Start.X - Thickness), Ceil(Start.Y - Thickness), Ceil(Stop.X - Thickness), Ceil(Stop.Y - Thickness)));
   addDirty(TBox.Create(Ceil(Start.X + Thickness), Ceil(Start.Y + Thickness), Ceil(Stop.X + Thickness), Ceil(Stop.Y + Thickness)));
 
-  FBackBuffer.DrawLineAA(Start, Stop, Color, Thickness);
+  FBackBuffer.DrawLineAA(Start, Stop, Thickness);
 end;
 
-procedure TSimbaExternalImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single);
+procedure TSimbaExternalImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single);
 begin
   addDirty(TBox.Create(ACenter, Ceil(XRadius + Thickness), Ceil(YRadius + Thickness)));
 
-  FBackBuffer.DrawEllipseAA(ACenter, XRadius, YRadius, Color, Thickness);
+  FBackBuffer.DrawEllipseAA(ACenter, XRadius, YRadius, Thickness);
 end;
 
-procedure TSimbaExternalImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single);
+procedure TSimbaExternalImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single);
 begin
   addDirty(TBox.Create(ACenter, Ceil(Radius + Thickness), Ceil(Radius + Thickness)));
 
-  FBackBuffer.DrawCircleAA(ACenter, Radius, Color, Thickness);
+  FBackBuffer.DrawCircleAA(ACenter, Radius, Thickness);
 end;
 
-procedure TSimbaExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; Color: TColor);
+procedure TSimbaExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean);
 var
   I: Integer;
 begin
   for I := 0 to High(Quads) do
     addDirty(Quads[I].Bounds());
 
-  FBackBuffer.DrawQuadArray(Quads, Filled, Color);
+  FBackBuffer.DrawQuadArray(Quads, Filled, RandomColors);
 end;
 
-procedure TSimbaExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; Color: TColor);
+procedure TSimbaExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean);
 begin
   addDirty(Boxes.Merge());
 
-  FBackBuffer.DrawBoxArray(Boxes, Filled, Color);
+  FBackBuffer.DrawBoxArray(Boxes, Filled, RandomColors);
 end;
 
-procedure TSimbaExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; Color: TColor);
+procedure TSimbaExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean);
 begin
   addDirty(Polygons.Bounds());
 
-  FBackBuffer.DrawPolygonArray(Polygons, Filled, Color);
+  FBackBuffer.DrawPolygonArray(Polygons, Filled, RandomColors);
 end;
 
-procedure TSimbaExternalImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; Color: TColor);
+procedure TSimbaExternalImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean);
 begin
   addDirty(Centers.Bounds().Expand(Radius));
 
-  FBackBuffer.DrawCircleArray(Centers, Radius, Filled, Color);
+  FBackBuffer.DrawCircleArray(Centers, Radius, Filled, RandomColors);
 end;
 
-procedure TSimbaExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer; Color: TColor);
+procedure TSimbaExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean);
 begin
   addDirty(Points.Bounds().Expand(Radius));
 
-  FBackBuffer.DrawCrossArray(Points, Radius, Color);
+  FBackBuffer.DrawCrossArray(Points, Radius, RandomColors);
 end;
 
 end.

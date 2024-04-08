@@ -310,7 +310,7 @@ begin
   if GetImageData(ABounds, Data, DataWidth) then
   try
     Result := TSimbaImage.CreateFromData(ABounds.Width, ABounds.Height, Data, DataWidth);
-    Result.SetAlpha(ALPHA_OPAQUE);
+    Result.FillWithAlpha(ALPHA_OPAQUE);
   finally
     FreeImageData(Data);
   end

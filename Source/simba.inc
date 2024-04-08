@@ -8,7 +8,7 @@
 {$IFOPT D+}
   {$DEFINE SIMBA_HAS_DEBUGINFO}
 {$ELSE}
-  {$IFDEF SIMBA_MAX_OPTIMIZATION} // O4 can do "unsafe" optimizations so this is not globally enabled.
+  {$IFDEF SIMBA_MAX_OPTIMIZATION} // -O4 can do "unsafe" optimizations so this is not globally enabled.
     {$OPTIMIZATION LEVEL4}
   {$ENDIF}
 {$ENDIF}
@@ -52,6 +52,11 @@
 {$DEFINE B_BIT := 16}
 {$DEFINE G_BIT := 8}
 {$DEFINE R_BIT := 0}
+
+// masks for color channels
+{$DEFINE B_MASK := $FF0000}
+{$DEFINE G_MASK := $00FF00}
+{$DEFINE R_MASK := $0000FF}
 
 {.$DEFINE PARSER_BENCHMARK}
 {.$DEFINE PARSER_CACHE_DEBUG}

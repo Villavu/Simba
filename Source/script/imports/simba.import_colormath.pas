@@ -33,16 +33,6 @@ Note:: This enum is scoped, which means it must be used like: `EColorSpace.HSL`,
 *)
 
 (*
-TColorRGB.ToBGRA
-----------------
-> function TColorRGB.ToBGRA: TColorBGRA;
-*)
-procedure _LapeColorRGBToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PColorBGRA(Result)^ := PColorRGB(Params^[0])^.ToBGRA();
-end;
-
-(*
 TColorRGB.ToXYZ
 ---------------
 > function TColorRGB.ToXYZ: TColorXYZ;
@@ -642,7 +632,6 @@ begin
       'end;'
     ]);
 
-    addGlobalFunc('function TColorRGB.ToBGRA: TColorBGRA', @_LapeColorRGBToBGRA);
     addGlobalFunc('function TColorRGB.ToXYZ: TColorXYZ', @_LapeColorRGBToXYZ);
     addGlobalFunc('function TColorRGB.ToLAB: TColorLAB', @_LapeColorRGBToLAB);
     addGlobalFunc('function TColorRGB.ToLCH: TColorLCH', @_LapeColorRGBToLCH);
