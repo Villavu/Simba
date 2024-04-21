@@ -118,7 +118,7 @@ implementation
 
 uses
   SynEditMarkupBracket, SynEditMarkupWordGroup,
-  simba.ide_dockinghelpers, simba.fonthelpers,
+  simba.ide_dockinghelpers, simba.misc,
   simba.form_main, simba.form_tabs,  simba.form_settings,
   simba.nativeinterface,
   simba.ide_tab, simba.ide_events, simba.ide_utils;

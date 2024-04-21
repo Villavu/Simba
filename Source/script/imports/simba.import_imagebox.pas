@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes, ffi,
-  simba.imagebox, simba.imagebox_canvas,
+  simba.component_imagebox, simba.component_imageboxcanvas,
   simba.image, simba.image_textdrawer,
   simba.dtm, simba.colormath,
   simba.target;

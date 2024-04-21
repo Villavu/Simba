@@ -7,11 +7,15 @@ unit simba.httpclient;
 
 {$i simba.inc}
 
+{$IFDEF DARWIN}
+  {$MODESWITCH objectivec1}
+{$ENDIF}
+
 interface
 
 uses
-  Classes, SysUtils,
-  simba.base, simba.baseclass, simba.fphttpclient;
+  Classes, SysUtils, fphttpclient, ssockets,
+  simba.base, simba.baseclass;
 
 {$PUSH}
 {$SCOPEDENUMS ON}
@@ -95,7 +99,26 @@ type
 
   TSimbaHTTPClient = class(TSimbaBaseClass)
   protected
-    FHTTPClient: TSimbaFPHTTPClient;
+  type
+    TInternalClient = class(TFPHTTPClient)
+    protected
+      {$IFDEF DARWIN}
+      FResponseCode: Integer;
+      {$ELSE}
+      function ReadResponseHeaders: Integer; override;
+      function GetSocketHandler(const UseSSL: Boolean): TSocketHandler; override;
+      {$ENDIF}
+      procedure DoMethod(const AMethod, AURL: String; Stream: TStream; const AllowedResponseCodes: array of Integer); override;
+    public
+      OnConnecting: TSimbaHTTPConnectingEvent;
+      OnResponseCode: TSimbaHTTPStatusEvent;
+
+      {$IFDEF DARWIN}
+      property ResponseStatusCode read FResponseCode;
+      {$ENDIF}
+    end;
+  protected
+    FHTTPClient: TInternalClient;
     FURL: String;
     FContentType: String;
     FOnDownloadProgress: TSimbaHTTPDownloadingEvent;
@@ -112,9 +135,7 @@ type
     procedure DoExtractProgress(Sender: TObject; FileName: String; Percent: Double);
     procedure DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
     procedure DoRedirect(Sender: TObject; const Source: String; var Dest: String);
-    procedure DoConnecting(Sender: TObject; URL: String);
     procedure DoHeaders(Sender: TObject);
-    procedure DoResponseStatus(Sender: TObject; ResponseStatus: Integer);
 
     function GetResponseHeader(AName: String): String;
     function GetResponseStatus: EHTTPStatus;
@@ -195,8 +216,10 @@ type
 implementation
 
 uses
-  TypInfo,
-  simba.zip;
+  {$IFDEF DARWIN}
+  CocoaAll, CocoaUtils,
+  {$ENDIF}
+  simba.zip, simba.openssl;
 
 function TSimbaHTTPClient.GetResponseHeaders: TStringList;
 begin
@@ -208,23 +231,11 @@ begin
   FURL := Dest;
 end;
 
-procedure TSimbaHTTPClient.DoConnecting(Sender: TObject; URL: String);
-begin
-  if Assigned(OnConnecting) then
-    OnConnecting(Self, URL);
-end;
-
 procedure TSimbaHTTPClient.DoHeaders(Sender: TObject);
 begin
   FContentType := ResponseHeader['Content-Type'];
   if Assigned(OnHeadersReceived) then
     OnHeadersReceived(Self);
-end;
-
-procedure TSimbaHTTPClient.DoResponseStatus(Sender: TObject; ResponseStatus: Integer);
-begin
-  if Assigned(FOnResponseStatus) then
-    FOnResponseStatus(Self, EHTTPStatus(ResponseStatus));
 end;
 
 function TSimbaHTTPClient.GetRequestHeader(AName: String): String;
@@ -495,13 +506,13 @@ constructor TSimbaHTTPClient.Create;
 begin
   inherited Create();
 
-  FHTTPClient := TSimbaFPHTTPClient.Create(nil);
+  FHTTPClient := TInternalClient.Create(nil);
   FHTTPClient.AllowRedirect := True;
   FHTTPClient.OnDataReceived := @DoDownloadProgress;
   FHTTPClient.OnRedirect := @DoRedirect;
-  FHTTPClient.OnConnecting := @DoConnecting;
   FHTTPClient.OnHeaders := @DoHeaders;
-  FHTTPClient.OnResponseCode := @DoResponseStatus;
+  FHTTPClient.OnConnecting := FOnConnecting;
+  FHTTPClient.OnResponseCode := FOnResponseStatus;
 
   UserAgent := Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s)', [SIMBA_VERSION, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}]);
 end;
@@ -513,6 +524,94 @@ begin
 
   inherited Destroy();
 end;
+
+procedure TSimbaHTTPClient.TInternalClient.DoMethod(const AMethod, AURL: String; Stream: TStream; const AllowedResponseCodes: array of Integer);
+{$IFDEF DARWIN}
+var
+  urlRequest: NSMutableURLRequest;
+  requestData: NSMutableData;
+  urlResponse: NSHTTPURLResponse;
+  error: NSError;
+  urlData: NSData;
+  ResponseKeys, ResponseValues: NSArray;
+  LocalPool: NSAutoReleasePool;
+  I: Integer;
+begin
+  FResponseCode := 0;
+  if Assigned(OnConnecting) then
+    OnConnecting(Self, AURL);
+
+  LocalPool := NSAutoReleasePool.alloc.init;
+  try
+    urlRequest := NSMutableURLRequest.requestWithURL_cachePolicy_timeoutInterval(NSURL.URLWithString(NSSTR(AURL)), NSURLRequestUseProtocolCachePolicy, ConnectTimeout div 1000);
+    urlRequest.setHTTPMethod(NSSTR(AMethod));
+
+    if Assigned(RequestBody) and (RequestBody.Size > 0) then
+    begin
+      RequestData := NSMutableData.alloc.initWithLength(RequestBody.Size);
+
+      RequestBody.Position := 0;
+      RequestBody.Write(RequestData.mutableBytes^, RequestBody.Size);
+
+      urlRequest.setHTTPBody(RequestData);
+    end;
+
+    for I := 0 to RequestHeaders.Count - 1 do
+      urlRequest.addValue_forHTTPHeaderField(NSSTR(RequestHeaders.ValueFromIndex[I]), NSSTR(RequestHeaders.Names[I]));
+
+    urlData := NSURLConnection.sendSynchronousRequest_returningResponse_error(urlRequest, @urlResponse, @error);
+    if not Assigned(urlData) then
+      Exit;
+
+    FResponseCode := urlResponse.statusCode;
+    if Assigned(OnResponseCode) then
+      OnResponseCode(Self, EHTTPStatus(FResponseCode));
+
+    ResponseKeys   := urlResponse.allHeaderFields.allKeys;
+    ResponseValues := urlResponse.allHeaderFields.allValues;
+
+    for I := 0 to ResponseKeys.count - 1 do
+    begin
+      ResponseHeaders.AddPair(
+        NSStringToString(NSString(ResponseKeys.objectAtIndex(I))),
+        NSStringToString(NSString(ResponseValues.objectAtIndex(I)))
+      );
+    end;
+
+    if (Stream <> nil) then // Can be nil for HEAD request etc.
+    begin
+      Stream.Position := 0;
+      Stream.Write(urlData.bytes^, urlData.length);
+      Stream.Position := 0;
+    end;
+  finally
+    LocalPool.release;
+  end;
+end;
+{$ELSE}
+begin
+  if Assigned(OnConnecting) then
+    OnConnecting(Self, AURL);
+
+  inherited;
+end;
+
+function TSimbaHTTPClient.TInternalClient.ReadResponseHeaders: Integer;
+begin
+  Result := inherited ReadResponseHeaders();
+
+  if Assigned(OnResponseCode) then
+    OnResponseCode(Self, EHTTPStatus(Result));
+end;
+
+function TSimbaHTTPClient.TInternalClient.GetSocketHandler(const UseSSL: Boolean): TSocketHandler;
+begin
+  if UseSSL then
+    LoadSSL();
+
+  Result := inherited GetSocketHandler(UseSSL);
+end;
+{$ENDIF}
 
 function ToStr(Status: EHTTPStatus): String;
 begin

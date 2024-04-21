@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils, forms, controls,
-  simba.imagebox;
+  simba.component_imagebox;
 
 type
   TSimbaDebugImageForm = class(TForm)

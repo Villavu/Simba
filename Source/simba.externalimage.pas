@@ -15,13 +15,13 @@ interface
 uses
   Classes, SysUtils, Graphics,
   simba.base, simba.baseclass, simba.image, simba.image_utils, simba.image_textdrawer,
-  simba.simplelock;
+  simba.threading;
 
 type
   PSimbaExternalImage = ^TSimbaExternalImage;
   TSimbaExternalImage = class(TSimbaBaseClass)
   protected
-    FLock: TSimpleEnterableLock;
+    FLock: TEnterableLock;
 
     FBackBuffer: TSimbaImage;
 

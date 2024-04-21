@@ -54,8 +54,8 @@ type
     function Copy: TSingleMatrix; overload;
     function Copy(Y1, Y2: Integer): TSingleMatrix; overload;
     function GetValues(Indices: TPointArray): TSingleArray;
-    procedure SetValues(Indices: TPointArray;  Values: TSingleArray);
-    procedure SetValue(Indices: TPointArray;  Value: Single);
+    procedure SetValues(Indices: TPointArray; Values: TSingleArray);
+    procedure SetValue(Indices: TPointArray; Value: Single);
     procedure Fill(Box: TBox; Value: Single); overload;
     procedure Fill(Value: Single); overload;
     function Flatten: TSingleArray;

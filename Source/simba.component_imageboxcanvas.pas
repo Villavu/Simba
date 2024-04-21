@@ -4,7 +4,7 @@
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
   --------------------------------------------------------------------------
 }
-unit simba.imagebox_canvas;
+unit simba.component_imageboxcanvas;
 
 {$i simba.inc}
 
@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, LCLType, FPImage,
-  simba.base, simba.image_lazbridge, simba.imagebox_drawers, simba.image_textdrawer;
+  simba.base, simba.image_lazbridge, simba.component_imageboxdrawers, simba.image_textdrawer;
 
 type
   TSimbaImageBoxCanvas = class;

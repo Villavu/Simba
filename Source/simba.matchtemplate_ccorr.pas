@@ -42,7 +42,7 @@ function MatchTemplateMask_CCORR_Cache(ACache: TMatchTemplateCacheBase; Template
 implementation
 
 uses
-  simba.threadpool, simba.simplelock,
+  simba.threading,
   simba.vartype_floatmatrix, simba.vartype_ordmatrix;
 
 // MatchTemplate_CCORR
@@ -162,7 +162,7 @@ type
       ImgFFT: TRGBComplexMatrix;
     end;
   public
-    Lock: TSimpleEnterableLock;
+    Lock: TEnterableLock;
     SliceCaches: array of TSliceCache;
 
     Img2, Mask2: TRGBMatrix;

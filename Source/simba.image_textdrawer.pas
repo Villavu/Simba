@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, FPImage, LazFreeTypeFPImageDrawer, EasyLazFreeType,
-  simba.base, simba.simplelock;
+  simba.base, simba.threading;
 
 type
   TSimbaFreeTypeFontLoader = class
@@ -25,7 +25,7 @@ type
   protected
     FFonts: TFontCache;
     FFontNames: TStringArray;
-    FLock: TSimpleEnterableLock;
+    FLock: TEnterableLock;
     FSystemFontsLoaded: Boolean;
 
     procedure LoadSystemFonts;
@@ -87,7 +87,7 @@ type
     FCurrentColor: PColorBGRA;
     FSimbaImage: TObject;
 
-    FLock: TSimpleEnterableLock;
+    FLock: TEnterableLock;
     FDrawn: Boolean;
     FDrawnBox: TBox;
 
@@ -113,7 +113,7 @@ implementation
 
 uses
   Forms, FileUtil, LazFileUtils, LazFreeTypeFontCollection,
-  simba.image, simba.image_utils, simba.fonthelpers, simba.vartype_box;
+  simba.image, simba.image_utils, simba.vartype_box;
 
 function TSimbaFreeTypeFontLoader.GetFontNames: TStringArray;
 begin
@@ -333,7 +333,7 @@ constructor TSimbaTextDrawerBase.Create;
 begin
   FSize := 20;
   FFontAntialised := False;
-  FFontName := GetDefaultFontName();
+  //FFontName := GetDefaultFontName();
 end;
 
 procedure TSimbaTextDrawerBase.DrawText(Text: String; Position: TPoint; Color: TColor);

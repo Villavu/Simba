@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils,
   mPasLexTypes, mPasLex,
-  simba.base, simba.ide_codetools_parser, simba.simplelock;
+  simba.base, simba.ide_codetools_parser, simba.threading;
 
 const
   PurgeThreshold = 35; // If cache miss reaches of a include reaches this, remove the cache
@@ -22,7 +22,7 @@ const
 type
   TCodetoolsIncludes = class(TObject)
   protected
-    FLock: TSimpleEnterableLock;
+    FLock: TEnterableLock;
     FParsers: TCodeParserList;
 
     procedure Purge;

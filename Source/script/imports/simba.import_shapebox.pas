@@ -14,7 +14,7 @@ implementation
 
 uses
   controls, stdctrls, extctrls, comctrls, graphics, lptypes, ffi,
-  simba.imagebox, simba.shapebox;
+  simba.component_imagebox, simba.component_shapebox;
 
 type
   PComponent = ^TComponent;

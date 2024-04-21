@@ -216,6 +216,7 @@ var
   c1,c2: array[0..2] of Double;
   p1,q1,p2,q2: TPointF;
   tmp: TPointFArray;
+  CosValue, SinValue: Double;
 begin
   if (Length(Polygon) <= 1) then
     Exit(Polygon);
@@ -227,8 +228,9 @@ begin
   begin
     k := (i+1) mod Length(Polygon);
     theta := ArcTan2(Polygon[i].Y - Polygon[k].Y, Polygon[i].X - Polygon[k].X) + HALF_PI;
-    tmp[i*2]  := PointF(Amount*Cos(theta)+Polygon[i].X, Amount*Sin(theta)+Polygon[i].Y);
-    tmp[i*2+1]:= PointF(Amount*Cos(theta)+Polygon[k].X, Amount*Sin(theta)+Polygon[k].Y);
+    SinCos(theta, CosValue, SinValue);
+    tmp[i*2]  := PointF(Amount*CosValue+Polygon[i].X, Amount*SinValue+Polygon[i].Y);
+    tmp[i*2+1]:= PointF(Amount*CosValue+Polygon[k].X, Amount*SinValue+Polygon[k].Y);
   end;
 
   i := 0;

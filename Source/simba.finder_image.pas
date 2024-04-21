@@ -17,12 +17,12 @@ interface
 uses
   Classes, SysUtils, Graphics,
   simba.base, simba.colormath, simba.colormath_distance, simba.target,
-  simba.image, simba.colormath_distance_unrolled, simba.simplelock;
+  simba.image, simba.colormath_distance_unrolled, simba.threading;
 
 function FindImageOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;
                            Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray;
 
-function FindImageOnBuffer(var Limit: TSimpleThreadsafeLimit;
+function FindImageOnBuffer(var Limit: TLimit;
                            Image: TSimbaImage;
                            ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers;
                            Buffer: PColorBGRA; BufferWidth: Integer;
@@ -37,7 +37,7 @@ var
 implementation
 
 uses
-  simba.containers, simba.threadpool, simba.vartype_pointarray, simba.vartype_box;
+  simba.containers,simba.vartype_pointarray, simba.vartype_box;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
@@ -103,7 +103,7 @@ var
 
   SliceResults: T2DPointArray;
 
-  Limit: TSimpleThreadsafeLimit;
+  Limit: TLimit;
 
   procedure Execute(const Index, Lo, Hi: Integer);
   var
@@ -124,7 +124,7 @@ var
 begin
   Result := [];
 
-  Limit := TSimpleThreadsafeLimit.Create(MaxToFind);
+  Limit := TLimit.Create(MaxToFind);
 
   if Target.GetImageData(Bounds, Buffer, BufferWidth) then
   try
@@ -146,7 +146,7 @@ begin
   end;
 end;
 
-function FindImageOnBuffer(var Limit: TSimpleThreadsafeLimit; Image: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
+function FindImageOnBuffer(var Limit: TLimit; Image: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
 var
   BitmapColors: PByte;
 

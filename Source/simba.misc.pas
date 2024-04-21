@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.fonthelpers;
+unit simba.misc;
 
 {$i simba.inc}
 
@@ -16,7 +16,6 @@ function GetDefaultFontSize: Integer;
 function GetFontSize(Control: TWinControl; IncAmount: Integer = 0): Integer;
 function IsFontFixed(FontName: String): Boolean;
 function GetFixedFonts: TStringArray;
-
 function GetDefaultFontName: String;
 
 implementation
@@ -78,7 +77,6 @@ begin
   Font.lfPitchAndFamily := {$IFDEF LINUX}FIXED_PITCH{$ELSE}0{$ENDIF};
 
   DC := GetDC(0);
-
   try
     Result := EnumFontFamiliesEx(DC, @Font, @FontIsPitched, 0, 0) = 0;
   finally

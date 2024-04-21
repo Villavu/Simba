@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.imagebox;
+unit simba.component_imagebox;
 
 {$i simba.inc}
 
@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
   ATScrollBar, LCLType, LMessages,
-  simba.base, simba.component_statusbar, simba.image_lazbridge, simba.imagebox_canvas,
+  simba.base, simba.component_statusbar, simba.image_lazbridge, simba.component_imageboxcanvas,
   simba.image, simba.dtm, simba.colormath, simba.finder, simba.target;
 
 const

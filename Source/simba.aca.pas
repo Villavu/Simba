@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Dialogs, DividerBevel, Graphics,
   ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox, LMessages,
-  simba.base, simba.imagebox, simba.imagebox_canvas, simba.imagebox_zoom,
+  simba.base, simba.component_imagebox, simba.component_imageboxcanvas, simba.component_imageboxzoom,
   simba.colormath, simba.finder;
 
 type

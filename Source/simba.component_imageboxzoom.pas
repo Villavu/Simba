@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.imagebox_zoom;
+unit simba.component_imageboxzoom;
 
 {$i simba.inc}
 
@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, ExtCtrls, Graphics, StdCtrls,
-  simba.imagebox;
+  simba.component_imagebox;
 
 type
   TSimbaImageBoxZoom = class(TCustomControl)

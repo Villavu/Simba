@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Menus,
-  simba.base, simba.shapebox, simba.env;
+  simba.base, simba.component_shapebox, simba.env;
 
 type
   TSimbaShapeBoxForm = class(TForm)

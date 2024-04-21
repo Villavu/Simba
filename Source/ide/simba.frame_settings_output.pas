@@ -40,7 +40,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.settings, simba.fonthelpers;
+  simba.settings, simba.misc;
 
 procedure TSimbaOutputBoxFrame.FontSizeSpinEditChange(Sender: TObject);
 begin

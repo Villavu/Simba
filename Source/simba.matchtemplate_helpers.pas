@@ -27,7 +27,7 @@ function CrossCorrRGB(Image: TRGBComplexMatrix; Templ: TRGBMatrix): TRGBMatrix; 
 implementation
 
 uses
-  simba.FFTPACK4, simba.threadpool,
+  simba.FFTPACK4, simba.threading,
   simba.vartype_floatmatrix, simba.vartype_ordmatrix;
 
 function DoFFT2(const Matrix: TSingleMatrix; const outW, outH: Integer): TComplexMatrix;

@@ -11,7 +11,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.ipc, simba.base, simba.image, simba.process;
+  simba.base, simba.image, simba.process, simba.ide_ipc;
 
 type
   TSimbaScriptCommunication = class(TSimbaIPCClient)

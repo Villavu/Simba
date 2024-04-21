@@ -71,7 +71,7 @@ implementation
 uses
   simba.form_packageinstall, simba.ide_package_installer, simba.ide_package_autoupdater,
   simba.dialog, simba.ide_utils, simba.vartype_string, simba.vartype_stringarray,
-  simba.httpclient, simba.files, simba.env, simba.fonthelpers;
+  simba.httpclient, simba.files, simba.env, simba.misc;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin

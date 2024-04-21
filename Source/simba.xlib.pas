@@ -20,7 +20,8 @@ unit simba.xlib;
 interface
 
 uses
-  classes, sysutils, x, ctypes;
+  Classes, SysUtils,
+  x, ctypes;
 
 {$PACKRECORDS C}
 

@@ -10,7 +10,7 @@ unit simba.nativeinterface;
 interface
 
 uses
-  classes, sysutils, graphics,
+  Classes, SysUtils,
   simba.base;
 
 type
@@ -65,7 +65,6 @@ type
     procedure OpenDirectory(Path: String); virtual; abstract;
 
     // Not abstract
-
     function WindowHandleToStr(WindowHandle: TWindowHandle): String; virtual;
     function WindowHandleFromStr(Str: String): TWindowHandle; virtual;
     procedure PreciseSleep(Milliseconds: UInt32); virtual;

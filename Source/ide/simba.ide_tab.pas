@@ -147,7 +147,7 @@ uses
   Forms,
   simba.files, simba.settings, simba.ide_events,
   simba.form_main, simba.form_tabs, simba.env, simba.ide_showdeclaration, simba.threading,
-  simba.scriptcommunication, simba.datetime, simba.ide_editor_popupmenu, simba.vartype_string;
+  simba.ide_scriptcommunication, simba.datetime, simba.ide_editor_popupmenu, simba.vartype_string;
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var

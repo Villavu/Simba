@@ -72,8 +72,7 @@ implementation
 
 uses
   simba.matchtemplate_ccorr, simba.matchtemplate_sqdiff, simba.matchtemplate_ccoeff,
-  simba.threadpool,
-  simba.vartype_floatmatrix, simba.vartype_ordmatrix;
+  simba.vartype_floatmatrix, simba.vartype_ordmatrix, simba.threading;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;

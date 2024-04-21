@@ -84,7 +84,7 @@ implementation
 
 uses
   XMLPropStorage, LazConfigStorage,
-  simba.ide_theme, simba.fonthelpers;
+  simba.ide_theme, simba.misc;
 
 procedure TSimbaAnchorDockHeader.ParentFontChanged;
 begin

@@ -1,1 +1,1 @@
-Files only used by the IDE
+Files only used by the IDE part of Simba.

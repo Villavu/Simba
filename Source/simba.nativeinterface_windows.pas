@@ -10,7 +10,7 @@ unit simba.nativeinterface_windows;
 interface
 
 uses
-  classes, sysutils,
+  Classes, SysUtils,
   simba.base, simba.nativeinterface;
 
 type

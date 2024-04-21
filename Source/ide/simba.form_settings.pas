@@ -54,7 +54,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.settings, simba.fonthelpers;
+  simba.settings, simba.misc;
 
 procedure TSimbaSettingsForm.TreeViewSelectionChanged(Sender: TObject);
 begin

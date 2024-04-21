@@ -146,7 +146,7 @@ type
 implementation
 
 uses
-  simba.ide_theme, simba.form_main, simba.fonthelpers,
+  simba.ide_theme, simba.form_main, simba.misc,
   ATCanvasPrimitives;
 
 procedure TSimbaTransparentButton.Paint;

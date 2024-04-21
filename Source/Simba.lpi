@@ -49,9 +49,9 @@
             <Filename Value="../Simba-Win32"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;shapebuilders"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;matchtemplate;imagebox;components;image;hash;ide;tools"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -99,9 +99,9 @@
             <Filename Value="../Simba-Win64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;shapebuilders"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;matchtemplate;imagebox;components;image;hash;ide;tools"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -149,8 +149,8 @@
             <Filename Value="../Simba-Linux64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;shapebuilders"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;matchtemplate;imagebox;components;image;hash;ide;tools"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -197,8 +197,8 @@
             <Filename Value="../Simba-Linux-AArch64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;shapebuilders"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;matchtemplate;imagebox;components;image;hash;ide;tools"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -244,8 +244,8 @@
             <Filename Value="../Simba"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;shapebuilders"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;matchtemplate;imagebox;components;image;hash;ide;tools"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -297,8 +297,8 @@
             <Filename Value="../Simba"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;shapebuilders"/>
-            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;matchtemplate;imagebox;components;image;hash;ide;tools"/>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape"/>
+            <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -709,9 +709,9 @@
       <Filename Value="../Simba-Debug"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;shapebuilders"/>
+      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape"/>
       <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;matchtemplate;imagebox;components;image;hash;ide;tools"/>
+      <OtherUnitFiles Value="$(ProjPath);../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>

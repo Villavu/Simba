@@ -130,19 +130,7 @@ implementation
 
 uses
   Math, Clipbrd,
-  simba.ide_theme, simba.fonthelpers;
-
-type
-  TSimbaEditLabel = class(TLabel)
-  protected
-    // Use parent font size, but use SimbaTheme.FontStyle and font styles if changed
-    procedure CMParentFontChanged(var Message: TLMessage); message CM_PARENTFONTCHANGED;
-  end;
-
-procedure TSimbaEditLabel.CMParentFontChanged(var Message: TLMessage);
-begin
-
-end;
+  simba.ide_theme, simba.misc;
 
 procedure TSimbaEdit.SetHintText(Value: String);
 begin

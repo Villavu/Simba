@@ -11,12 +11,12 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.input, simba.simplelock;
+  simba.base, simba.input, simba.threading;
 
 type
   TSimbaASyncMouseThread = class(TThread)
   protected
-    FLock: TSimpleWaitableLock;
+    FLock: TWaitableLock;
     FMethod: TThreadMethod;
 
     procedure Execute; override;

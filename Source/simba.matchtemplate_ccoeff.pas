@@ -42,8 +42,7 @@ function MatchTemplateMask_CCOEFF_Cache(ACache: TMatchTemplateCacheBase; Templat
 implementation
 
 uses
-  simba.threadpool, simba.simplelock,
-  simba.vartype_floatmatrix, simba.vartype_ordmatrix;
+  simba.threading, simba.vartype_floatmatrix, simba.vartype_ordmatrix;
 
 // MatchTemplate_CCOEFF
 function __MatchTemplate_CCOEFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -192,7 +191,7 @@ type
       ImgNormCorr: TSingleMatrix;
     end;
   public
-    Lock: TSimpleEnterableLock;
+    Lock: TEnterableLock;
     SliceCaches: array of TSliceCache;
 
     ImageChannels: TRGBMatrix;

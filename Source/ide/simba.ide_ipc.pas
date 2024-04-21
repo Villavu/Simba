@@ -5,16 +5,16 @@
 
   Simple inter process communication server & client using regular pipes.
 }
-unit simba.ipc;
+unit simba.ide_ipc;
 
 {$i simba.inc}
 
 interface
 
 uses
-  classes, sysutils,
+  Classes, SysUtils,
   {$IFDEF WINDOWS}
-  windows,
+  Windows,
   {$ENDIF}
   pipes, syncobjs;
 

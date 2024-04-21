@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.shapebox;
+unit simba.component_shapebox;
 
 {$i simba.inc}
 
@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, Graphics, ComCtrls, StdCtrls, ExtCtrls, Dialogs, fgl,
-  simba.base, simba.imagebox, simba.imagebox_canvas;
+  simba.base, simba.component_imagebox, simba.component_imageboxcanvas;
 
 type
   TSimbaShapeBox = class;

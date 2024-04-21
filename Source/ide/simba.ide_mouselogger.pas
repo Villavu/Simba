@@ -13,14 +13,14 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.vartype_windowhandle, simba.simplelock;
+  simba.base, simba.vartype_windowhandle, simba.threading;
 
 type
   TSimbaMouseLogger = class(TThread)
   protected
     FWindowHandle: TWindowHandle;
     FWindowHandleChanged: Boolean;
-    FIdle: TSimpleWaitableLock;
+    FIdle: TWaitableLock;
 
     procedure DoWindowSelected(Sender: TObject);
     procedure DoApplicationMinimized(Sender: TObject);

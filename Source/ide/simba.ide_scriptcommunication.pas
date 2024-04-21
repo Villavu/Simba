@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.scriptcommunication;
+unit simba.ide_scriptcommunication;
 
 {$i simba.inc}
 
@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, ExtCtrls, Graphics,
-  simba.base, simba.ipc, simba.ide_tab;
+  simba.base, simba.ide_ipc, simba.ide_tab;
 
 type
   TSimbaScriptInstanceCommunication = class(TSimbaIPCServer)

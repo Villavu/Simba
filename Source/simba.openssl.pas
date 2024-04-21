@@ -24,8 +24,8 @@ function LoadSSL(Debug: Boolean = False): Boolean;
 implementation
 
 uses
-  LCLType, Forms, openssl,
-  simba.base, simba.gz, simba.settings, simba.env, simba.files, simba.ide_initialization
+  LCLType, Forms, openssl, gz,
+  simba.base, simba.settings, simba.env, simba.files, simba.ide_initialization
   {$IF defined(WINDOWS)},
   windows
   {$ELSEIF defined(LINUX)},

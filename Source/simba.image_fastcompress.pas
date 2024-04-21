@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.image, simba.simplelock;
+  simba.base, simba.image, simba.threading;
 
 procedure SimbaImage_FastCompress(Images: TSimbaImageArray; var Data: Pointer; out DataSize: SizeUInt);
 function SimbaImage_FastDeCompress(Data: Pointer; DataLen: SizeUInt): TSimbaImageArray;
@@ -26,7 +26,7 @@ type
   TImageCompressThread = class(TThread)
   protected
     FOnCompressed: TImageCompressedEvent;
-    FEvent: TSimpleWaitableLock;
+    FEvent: TWaitableLock;
     FImages: TSimbaImageArray;
     FTimeUsed: Double;
 

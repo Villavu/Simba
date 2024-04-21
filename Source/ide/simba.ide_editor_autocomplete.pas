@@ -115,7 +115,7 @@ implementation
 
 uses
   ATCanvasPrimitives,
-  simba.array_algorithm, simba.ide_editor, simba.ide_theme, simba.fonthelpers,
+  simba.array_algorithm, simba.ide_editor, simba.ide_theme, simba.misc,
   simba.ide_codetools_setup, simba.ide_codetools_keywords, simba.vartype_string;
 
 {$IFDEF WINDOWS}

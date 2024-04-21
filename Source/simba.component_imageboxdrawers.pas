@@ -4,7 +4,7 @@
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
   --------------------------------------------------------------------------
 }
-unit simba.imagebox_drawers;
+unit simba.component_imageboxdrawers;
 
 {$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}

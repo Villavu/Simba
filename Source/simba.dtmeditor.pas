@@ -12,7 +12,7 @@ interface
 uses
   classes, sysutils, fileutil, dividerbevel, forms, controls,
   graphics, dialogs, extctrls, comctrls, stdctrls, menus, lcltype,
-  simba.base, simba.dtm, simba.imagebox, simba.imagebox_canvas, simba.imagebox_zoom;
+  simba.base, simba.dtm, simba.component_imagebox, simba.component_imageboxcanvas, simba.component_imageboxzoom;
 
 type
   TSimbaDTMEditorForm = class(TForm)
