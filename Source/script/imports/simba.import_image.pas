@@ -108,7 +108,10 @@ TImage.Free
 *)
 procedure _LapeImage_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.Free();
+  if (PSimbaImage(Params^[0])^ = nil) then
+    SimbaException('Image has either not been created or has already been freed');
+
+  FreeAndNil(PSimbaImage(Params^[0])^);
 end;
 
 (*
@@ -735,14 +738,13 @@ end;
 (*
 TImage.DrawATPA
 ---------------
-> procedure TImage.DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean = True);
+> procedure TImage.DrawATPA(ATPA: T2DPointArray);
 
 Draws every TPA in the ATPA.
-If `RandomColors=True` each TPA will be drawn in a random color else `DrawColor` is used.
 *)
 procedure _LapeImage_DrawATPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^);
 end;
 
 (*
@@ -950,51 +952,51 @@ end;
 (*
 TImage.DrawQuadArray
 --------------------
-> procedure TImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean = True);
+> procedure TImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean);
 *)
 procedure _LapeImage_DrawQuadArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawQuadArray(PQuadArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawQuadArray(PQuadArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
 TImage.DrawBoxArray
 -------------------
-> procedure TImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean = True);
+> procedure TImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);
 *)
 procedure _LapeImage_DrawBoxArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawBoxArray(PBoxArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawBoxArray(PBoxArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
 TImage.DrawPolygonArray
 -----------------------
-> procedure TImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean = True);
+> procedure TImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);
 *)
 procedure _LapeImage_DrawPolygonArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawPolygonArray(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawPolygonArray(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
 TImage.DrawCircleArray
 ----------------------
-> procedure TImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean = True);
+> procedure TImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean);
 *)
 procedure _LapeImage_DrawCircleArray1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^, PBoolean(Params^[4])^);
+  PSimbaImage(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 (*
 TImage.DrawCrossArray
 ---------------------
-> procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean = True);
+> procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer);
 *)
 procedure _LapeImage_DrawCrossArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
+  PSimbaImage(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -1346,7 +1348,7 @@ TImage.SaveUnfreedImagesInDir
 -----------------------------
 > procedure TImage.SaveUnfreedImagesInDir(Directory: String); static;
 
-Saves unfreed images on script terminate.
+On script terminate if any images have not been freed save them to `Directory` for debugging ease.
 
 Example:
 
@@ -1523,7 +1525,7 @@ begin
 
     addGlobalFunc('procedure TImage.DrawImage(Image: TImage; Position: TPoint)', @_LapeImage_DrawImage);
 
-    addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean = True);', @_LapeImage_DrawATPA);
+    addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray);', @_LapeImage_DrawATPA);
     addGlobalFunc('procedure TImage.DrawTPA(TPA: TPointArray);', @_LapeImage_DrawTPA);
 
     addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint)', @_LapeImage_DrawLine);
@@ -1551,11 +1553,11 @@ begin
     addGlobalFunc('procedure TImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single = 1.5);', @_LapeImage_DrawEllipseAA);
     addGlobalFunc('procedure TImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single = 1.5);', @_LapeImage_DrawCircleAA);
 
-    addGlobalFunc('procedure TImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean = True);', @_LapeImage_DrawQuadArray);
-    addGlobalFunc('procedure TImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean = True);', @_LapeImage_DrawBoxArray);
-    addGlobalFunc('procedure TImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean = True);', @_LapeImage_DrawPolygonArray);
-    addGlobalFunc('procedure TImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean = True);', @_LapeImage_DrawCircleArray1);
-    addGlobalFunc('procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean = True);', @_LapeImage_DrawCrossArray);
+    addGlobalFunc('procedure TImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean);', @_LapeImage_DrawQuadArray);
+    addGlobalFunc('procedure TImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);', @_LapeImage_DrawBoxArray);
+    addGlobalFunc('procedure TImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);', @_LapeImage_DrawPolygonArray);
+    addGlobalFunc('procedure TImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean);', @_LapeImage_DrawCircleArray1);
+    addGlobalFunc('procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer);', @_LapeImage_DrawCrossArray);
 
     addGlobalFunc('procedure TImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer)', @_LapeImage_DrawHSLCircle);
 

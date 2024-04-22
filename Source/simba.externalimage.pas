@@ -116,7 +116,7 @@ type
     procedure DrawImage(Image: TSimbaImage; Location: TPoint);
 
     // Point
-    procedure DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean);
+    procedure DrawATPA(ATPA: T2DPointArray);
     procedure DrawTPA(TPA: TPointArray);
 
     // Line
@@ -151,11 +151,11 @@ type
     procedure DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single = 1.5);
 
     // Arrays
-    procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean = True);
-    procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean = True);
-    procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean = True);
-    procedure DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean = True);
-    procedure DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean = True);
+    procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean);
+    procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);
+    procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);
+    procedure DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean);
+    procedure DrawCrossArray(Points: TPointArray; Radius: Integer);
   end;
 
 implementation
@@ -407,11 +407,11 @@ begin
   FBackBuffer.FillWithAlpha(Value);
 end;
 
-procedure TSimbaExternalImage.DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean);
+procedure TSimbaExternalImage.DrawATPA(ATPA: T2DPointArray);
 begin
   addDirty(ATPA.Bounds());
 
-  FBackBuffer.DrawATPA(ATPA, RandomColors);
+  FBackBuffer.DrawATPA(ATPA);
 end;
 
 procedure TSimbaExternalImage.DrawTPA(TPA: TPointArray);
@@ -642,42 +642,42 @@ begin
   FBackBuffer.DrawCircleAA(ACenter, Radius, Thickness);
 end;
 
-procedure TSimbaExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean);
+procedure TSimbaExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean);
 var
   I: Integer;
 begin
   for I := 0 to High(Quads) do
     addDirty(Quads[I].Bounds());
 
-  FBackBuffer.DrawQuadArray(Quads, Filled, RandomColors);
+  FBackBuffer.DrawQuadArray(Quads, Filled);
 end;
 
-procedure TSimbaExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean);
+procedure TSimbaExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);
 begin
   addDirty(Boxes.Merge());
 
-  FBackBuffer.DrawBoxArray(Boxes, Filled, RandomColors);
+  FBackBuffer.DrawBoxArray(Boxes, Filled);
 end;
 
-procedure TSimbaExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean);
+procedure TSimbaExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);
 begin
   addDirty(Polygons.Bounds());
 
-  FBackBuffer.DrawPolygonArray(Polygons, Filled, RandomColors);
+  FBackBuffer.DrawPolygonArray(Polygons, Filled);
 end;
 
-procedure TSimbaExternalImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean);
+procedure TSimbaExternalImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean);
 begin
   addDirty(Centers.Bounds().Expand(Radius));
 
-  FBackBuffer.DrawCircleArray(Centers, Radius, Filled, RandomColors);
+  FBackBuffer.DrawCircleArray(Centers, Radius, Filled);
 end;
 
-procedure TSimbaExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean);
+procedure TSimbaExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer);
 begin
   addDirty(Points.Bounds().Expand(Radius));
 
-  FBackBuffer.DrawCrossArray(Points, Radius, RandomColors);
+  FBackBuffer.DrawCrossArray(Points, Radius);
 end;
 
 end.

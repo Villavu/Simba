@@ -167,7 +167,7 @@ type
     procedure DrawImage(Image: TSimbaImage; Location: TPoint);
 
     // Point
-    procedure DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean = True);
+    procedure DrawATPA(ATPA: T2DPointArray);
     procedure DrawTPA(TPA: TPointArray);
 
     // Line
@@ -202,11 +202,11 @@ type
     procedure DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single = 1.5);
 
     // Arrays
-    procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean = True);
-    procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean = True);
-    procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean = True);
-    procedure DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean = True);
-    procedure DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean = True);
+    procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean);
+    procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);
+    procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);
+    procedure DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean);
+    procedure DrawCrossArray(Points: TPointArray; Radius: Integer);
 
     // Misc
     procedure DrawHSLCircle(ACenter: TPoint; Radius: Integer);
@@ -847,23 +847,21 @@ begin
     SimbaImage_DrawTPAAlpha(Self, TPA);
 end;
 
-procedure TSimbaImage.DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean);
+procedure TSimbaImage.DrawATPA(ATPA: T2DPointArray);
 var
   I: Integer;
   PrevDrawColor: TColor;
 begin
-  if RandomColors then
-    PrevDrawColor := DrawColor;
+  PrevDrawColor := DrawColor;
 
   for I := 0 to High(ATPA) do
   begin
-    if RandomColors then
+    if (PrevDrawColor = -1) then
       DrawColor := GetDistinctColor(I);
     DrawTPA(ATPA[I]);
   end;
 
-  if RandomColors then
-    DrawColor := PrevDrawColor;
+  DrawColor := PrevDrawColor;
 end;
 
 procedure TSimbaImage.DrawCrosshairs(ACenter: TPoint; Size: Integer);
@@ -1015,17 +1013,16 @@ begin
     SimbaImage_DrawQuadInvertedAlpha(Self, Quad);
 end;
 
-procedure TSimbaImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean);
+procedure TSimbaImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean);
 var
   I: Integer;
   PrevDrawColor: TColor;
 begin
-  if RandomColors then
-    PrevDrawColor := DrawColor;
+  PrevDrawColor := DrawColor;
 
   for I := 0 to High(Quads) do
   begin
-    if RandomColors then
+    if (PrevDrawColor = -1) then
       DrawColor := GetDistinctColor(I);
 
     if Filled then
@@ -1034,21 +1031,19 @@ begin
       DrawQuad(Quads[I]);
   end;
 
-  if RandomColors then
-    DrawColor := {%H-}PrevDrawColor;
+  DrawColor := PrevDrawColor;
 end;
 
-procedure TSimbaImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean);
+procedure TSimbaImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);
 var
   I: Integer;
   PrevDrawColor: TColor;
 begin
-  if RandomColors then
-    PrevDrawColor := DrawColor;
+  PrevDrawColor := DrawColor;
 
   for I := 0 to High(Boxes) do
   begin
-    if RandomColors then
+    if (PrevDrawColor = -1) then
       DrawColor := GetDistinctColor(I);
 
     if Filled then
@@ -1057,21 +1052,19 @@ begin
       DrawBox(Boxes[I]);
   end;
 
-  if RandomColors then
-    DrawColor := {%H-}PrevDrawColor;
+  DrawColor := PrevDrawColor;
 end;
 
-procedure TSimbaImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean);
+procedure TSimbaImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);
 var
   I: Integer;
   PrevDrawColor: TColor;
 begin
-  if RandomColors then
-    PrevDrawColor := DrawColor;
+  PrevDrawColor := DrawColor;
 
   for I := 0 to High(Polygons) do
   begin
-    if RandomColors then
+    if (PrevDrawColor = -1) then
       DrawColor := GetDistinctColor(I);
 
     if Filled then
@@ -1080,21 +1073,19 @@ begin
       DrawPolygon(Polygons[I]);
   end;
 
-  if RandomColors then
-    DrawColor := {%H-}PrevDrawColor;
+  DrawColor := PrevDrawColor;
 end;
 
-procedure TSimbaImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean);
+procedure TSimbaImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean);
 var
   I: Integer;
   PrevDrawColor: TColor;
 begin
-  if RandomColors then
-    PrevDrawColor := DrawColor;
+  PrevDrawColor := DrawColor;
 
   for I := 0 to High(Centers) do
   begin
-    if RandomColors then
+    if (PrevDrawColor = -1) then
       DrawColor := GetDistinctColor(I);
 
     if Filled then
@@ -1103,28 +1094,25 @@ begin
       DrawCircle(Centers[I], Radius);
   end;
 
-  if RandomColors then
-    DrawColor := {%H-}PrevDrawColor;
+  DrawColor := PrevDrawColor;
 end;
 
-procedure TSimbaImage.DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean);
+procedure TSimbaImage.DrawCrossArray(Points: TPointArray; Radius: Integer);
 var
   I: Integer;
   PrevDrawColor: TColor;
 begin
-  if RandomColors then
-    PrevDrawColor := DrawColor;
+  PrevDrawColor := DrawColor;
 
   for I := 0 to High(Points) do
   begin
-    if RandomColors then
+    if (PrevDrawColor = -1) then
       DrawColor := GetDistinctColor(I);
 
     DrawCross(Points[I], Radius);
   end;
 
-  if RandomColors then
-    DrawColor := {%H-}PrevDrawColor;
+  DrawColor := PrevDrawColor;
 end;
 
 procedure TSimbaImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer);
@@ -1565,7 +1553,10 @@ end;
 
 function TSimbaImage.GetDrawColorAsBGRA: TColorBGRA;
 begin
-  Result := TSimbaColorConversion.ColorToBGRA(FDrawColor, FDrawAlpha);
+  if (FDrawColor = -1) then
+    Result := TSimbaColorConversion.ColorToBGRA(GetDistinctColor(0), FDrawAlpha)
+  else
+    Result := TSimbaColorConversion.ColorToBGRA(FDrawColor, FDrawAlpha);
 end;
 
 procedure TSimbaImage.SetFontAntialiasing(Value: Boolean);
@@ -1610,12 +1601,12 @@ end;
 
 procedure TSimbaImage.DrawText(Text: String; Position: TPoint);
 begin
-  FTextDrawer.DrawText(Text, Position, DrawColor);
+  FTextDrawer.DrawText(Text, Position, IfThen(DrawColor > -1, DrawColor, GetDistinctColor(0)));
 end;
 
 procedure TSimbaImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet);
 begin
-  FTextDrawer.DrawText(Text, Box, Alignments, DrawColor);
+  FTextDrawer.DrawText(Text, Box, Alignments, IfThen(DrawColor > -1, DrawColor, GetDistinctColor(0)));
 end;
 
 procedure TSimbaImage.DrawTextLines(Text: TStringArray; Position: TPoint);
@@ -1727,7 +1718,7 @@ var
   BGRA: TColorBGRA;
   I: Integer;
 begin
-  BGRA := DrawColorAsBGRA;
+  BGRA := TSimbaColorConversion.ColorToBGRA(Color, ALPHA_OPAQUE);
 
   for I := 0 to High(Points) do
     with Points[I] do
@@ -1927,7 +1918,7 @@ begin
   DefaultPixel.AsInteger := 0;
   DefaultPixel.A := ALPHA_OPAQUE;
 
-  FDrawColor := $0000FF;
+  FDrawColor := -1;
   FDrawAlpha := 255;
 end;
 

@@ -10,7 +10,7 @@ unit simba.form_debugimage;
 interface
 
 uses
-  classes, sysutils, forms, controls,
+  Classes, SysUtils, Forms, Controls,
   simba.component_imagebox;
 
 type

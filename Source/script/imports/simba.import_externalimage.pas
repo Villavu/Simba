@@ -523,7 +523,7 @@ end;
 
 procedure _LapeExternalImage_DrawATPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^);
+  PSimbaExternalImage(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^);
 end;
 
 procedure _LapeExternalImage_DrawTPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -533,27 +533,27 @@ end;
 
 procedure _LapeExternalImage_DrawQuadArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawQuadArray(PQuadArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawQuadArray(PQuadArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawBoxArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawBoxArray(PBoxArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawBoxArray(PBoxArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawPolygonArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawPolygonArray(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawPolygonArray(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 procedure _LapeExternalImage_DrawCircleArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^, PBoolean(Params^[4])^);
+  PSimbaExternalImage(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 procedure _LapeExternalImage_DrawCrossArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalImage(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
+  PSimbaExternalImage(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure ImportSimbaExternalImage(Compiler: TSimbaScript_Compiler);
@@ -610,7 +610,7 @@ begin
     addGlobalFunc('procedure TExternalImage.Clear(Box: TBox); overload;', @_LapeExternalImage_Clear2);
     addGlobalFunc('procedure TExternalImage.ClearInverted(Box: TBox);', @_LapeExternalImage_ClearInverted);
 
-    addGlobalFunc('procedure TExternalImage.DrawATPA(ATPA: T2DPointArray; RandomColors: Boolean = True)', @_LapeExternalImage_DrawATPA);
+    addGlobalFunc('procedure TExternalImage.DrawATPA(ATPA: T2DPointArray)', @_LapeExternalImage_DrawATPA);
     addGlobalFunc('procedure TExternalImage.DrawTPA(TPA: TPointArray)', @_LapeExternalImage_DrawTPA);
 
     addGlobalFunc('procedure TExternalImage.DrawImage(Image: TImage; Position: TPoint);', @_LapeExternalImage_DrawImage);
@@ -641,11 +641,11 @@ begin
     addGlobalFunc('procedure TExternalImage.DrawLineAA(Start, Stop: TPoint; Thickness: Single = 1.5)', @_LapeExternalImage_DrawLineAA);
     addGlobalFunc('procedure TExternalImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single = 1.5)', @_LapeExternalImage_DrawEllipseAA);
 
-    addGlobalFunc('procedure TExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean; RandomColors: Boolean);', @_LapeExternalImage_DrawQuadArray);
-    addGlobalFunc('procedure TExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean; RandomColors: Boolean);', @_LapeExternalImage_DrawBoxArray);
-    addGlobalFunc('procedure TExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean; RandomColors: Boolean);', @_LapeExternalImage_DrawPolygonArray);
-    addGlobalFunc('procedure TExternalImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean; RandomColors: Boolean);', @_LapeExternalImage_DrawCircleArray);
-    addGlobalFunc('procedure TExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer; RandomColors: Boolean);', @_LapeExternalImage_DrawCrossArray);
+    addGlobalFunc('procedure TExternalImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean);', @_LapeExternalImage_DrawQuadArray);
+    addGlobalFunc('procedure TExternalImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);', @_LapeExternalImage_DrawBoxArray);
+    addGlobalFunc('procedure TExternalImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);', @_LapeExternalImage_DrawPolygonArray);
+    addGlobalFunc('procedure TExternalImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean);', @_LapeExternalImage_DrawCircleArray);
+    addGlobalFunc('procedure TExternalImage.DrawCrossArray(Points: TPointArray; Radius: Integer);', @_LapeExternalImage_DrawCrossArray);
   end;
 end;
 
