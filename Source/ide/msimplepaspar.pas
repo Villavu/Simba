@@ -226,6 +226,7 @@ type
     procedure ProcedureMethodName; virtual;
     procedure ProgramBlock; virtual;
     procedure ProgramFile; virtual;
+    procedure PropertyMethodDeclaration; virtual;
     procedure PropertyDefault; virtual;
     procedure PropertyInterface; virtual;
     procedure PropertyName; virtual;
@@ -687,6 +688,24 @@ begin
   end;
 end;
 
+procedure TmwSimplePasPar.PropertyMethodDeclaration;
+begin
+  Expected(tokProperty);
+
+  ObjectNameOfMethod;
+  Expected(tokPoint);
+  FunctionProcedureName;
+  if Lexer.TokenID = tokRoundOpen then
+    FormalParameterList;
+  if Lexer.TokenID = tokColon then
+  begin
+    Expected(tokColon);
+    ReturnType;
+  end;
+
+  FunctionProcedureDirectives;
+end;
+
 procedure TmwSimplePasPar.UnitFile;
 begin
   Expected(tokUnit);
@@ -811,7 +830,7 @@ begin
       begin
         ExportsClause;
       end;
-    tokFunction, tokProcedure, tokOperator:
+    tokFunction, tokProcedure, tokOperator, tokProperty:
       begin
         ProcedureDeclarationSection;
       end;
@@ -3730,6 +3749,9 @@ begin
     NextToken();
 
   case Lexer.TokenID of
+    tokProperty:
+       PropertyMethodDeclaration();
+
     tokConstructor, tokDestructor, tokProcedure:
       begin
         ProcedureMethodDeclaration();

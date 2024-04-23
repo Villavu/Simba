@@ -27,6 +27,7 @@ implementation
 {$R *.lfm}
 
 uses
+  mPasLexTypes,
   simba.base, simba.ide_codetools_parser;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
@@ -46,6 +47,9 @@ begin
 
   ChangeStamp := SynEdit1.ChangeStamp;
 end;
+
+initialization
+  SetupKeywordDictionary();
 
 end.
 

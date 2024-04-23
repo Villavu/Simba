@@ -28,7 +28,7 @@ var
   I: Integer;
 begin
   Bitmap := TImage.Create(500, 500);
-  Bitmap.DrawHSLCircle(Bitmap.Center(), 200);
+  Bitmap.DrawHSLCircle(Bitmap.Center, 200);
 
   Target.SetImage(Bitmap);
 

@@ -361,8 +361,19 @@ var
   Filter: String;
   Count: Integer;
 
-  function IgnoreDeclaration(const Decl: TDeclaration): Boolean; inline;
+  function IgnoreDeclaration(Decls: TDeclarationArray; Index: Integer): Boolean; inline;
+  var
+    Decl: TDeclaration;
+    I: Integer;
   begin
+    Decl := Decls[Index];
+    if Decl.isProperty then
+    begin
+      for I := 0 to Index - 1 do
+        if Decls[I].isProperty and Decls[I].IsName(Decl.Name) then
+          Exit(True);
+    end;
+
     Result := (Decl.Name = '') or Decl.isOverrideMethod or Decl.isOperatorMethod;
   end;
 
@@ -372,9 +383,8 @@ var
   begin
     for I := 0 to High(Decls) do
     begin
-      if IgnoreDeclaration(Decls[I]) then
+      if IgnoreDeclaration(Decls, I) then
         Continue;
-
       FFilteredDecls[Count] := Decls[I];
       Inc(Count);
     end;
@@ -389,9 +399,8 @@ var
   begin
     for I := 0 to High(Decls) do
     begin
-      if IgnoreDeclaration(Decls[I]) then
+      if IgnoreDeclaration(Decls, I) then
         Continue;
-
       DeclName := Decls[I].Name.ToUpper();
       if (DeclName.IndexOf(Filter) > 0) then
       begin
@@ -468,8 +477,48 @@ end;
 function TSimbaAutoComplete.GetHintText(Decl: TDeclaration; IsHint: Boolean): String;
 
   function GetMethodText(Decl: TDeclaration_Method): String;
+  var
+    Params: TDeclarationArray;
+    I: Integer;
   begin
-    Result := Decl.ParamString + Decl.ResultString;
+    if Decl.isProperty then
+    begin
+      Result := '';
+
+      Params := Decl.Items.GetByClass(TDeclaration_Parameter, True, True);
+
+      // getter
+      if Assigned(Decl.ResultType) then
+      begin
+        if (Length(Params) > 0) then
+        begin
+          Result += '[';
+          for I := 0 to High(Params) do
+          begin
+            if (I > 0) then
+              Result += '; ';
+            Result += Params[I].Name + Params[I].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType, ': ');
+          end;
+          Result += ']';
+        end;
+        Result += Decl.ResultString;
+      end else
+      // setter
+      begin
+        if (Length(Params) > 0) then
+        begin
+          Result += '[';
+          for I := 0 to High(Params) - 1 do
+          begin
+            if (I > 0) then
+              Result += '; ';
+            Result += Params[I].Name + Params[I].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType, ': ');
+          end;
+          Result += ']: ' + Params[High(Params)].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType);
+        end;
+      end;
+    end else
+      Result := Decl.ParamString + Decl.ResultString;
   end;
 
   function GetVarText(Decl: TDeclaration_Var): String;
@@ -622,6 +671,7 @@ const
   COLUMN_VAR:     TColumnFormat = (Text: 'var';         Color: $3cb44b);
   COLUMN_FUNC:    TColumnFormat = (Text: 'function';    Color: $ffe119);
   COLUMN_PROC:    TColumnFormat = (Text: 'procedure';   Color: $e632f0);
+  COLUMN_PROP:    TColumnFormat = (Text: 'property';    Color: $ff944d);
   COLUMN_TYPE:    TColumnFormat = (Text: 'type';        Color: $45efbf);
   COLUMN_ENUM:    TColumnFormat = (Text: 'enum';        Color: $3182f5);
   COLUMN_CONST:   TColumnFormat = (Text: 'const';       Color: $b1d8ff);
@@ -630,6 +680,7 @@ const
 var
   Column: TColumnFormat;
 begin
+  if Decl.isProperty    then Column := COLUMN_PROP    else
   if Decl.isFunction    then Column := COLUMN_FUNC    else
   if Decl.isProcedure   then Column := COLUMN_PROC    else
   if Decl.isType        then Column := COLUMN_TYPE    else

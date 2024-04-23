@@ -322,12 +322,22 @@ function TCodeinsight.GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
   function CheckMethods(Decl: TDeclaration; RemoveStaticMethods: Boolean): TDeclarationArray;
   var
     Include: TCodeParser;
+    I, C: Integer;
   begin
     Result := GetTypeMethods(Decl.Name, RemoveStaticMethods);
 
     Include := GetArrayHelpers(Decl);
     if (Include <> nil) then
       Result := Result + Include.Items.ToArray;
+
+    // Move functions to top since we likely want to find them for ParseExpression
+    C := 0;
+    for I := 0 to High(Result) do
+      if (Result[I] is TDeclaration_Method) and Assigned(TDeclaration_Method(Result[I]).ResultType) then
+      begin
+        specialize Swap<TDeclaration>(Result[I], Result[C]);
+        Inc(C);
+      end;
   end;
 
   function GetParent(Decl: TDeclaration): TDeclaration;
@@ -433,7 +443,7 @@ function TCodeinsight.ParseExpression(Expr: TExpressionItems; Flags: EParseExpre
     if Expr.Symbols.Deref then
       Result := DoPointerDeref(Result);
 
-    if (Expr.Symbols.DimCount > 0) then
+    if (Expr.Symbols.DimCount > 0) and (not Decl.isProperty) then
     begin
       Result := DoArrayIndex(Result, Expr.Symbols.DimCount);
       if Expr.Symbols.DerefDim then

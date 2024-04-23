@@ -5,18 +5,22 @@ begin
   myImage := TImage.Create(500,1000);
   myImage.Fill(Colors.DARK_GRAY);
 
-  myImage.SetFontAntialiasing(True);
-  myImage.SetFontSize(20);
+  myImage.FontAntialiasing := True;
+  myImage.FontSize := 20;
 
-  myImage.DrawTextLines(TImage.FontNames, [10,10], Colors.BLACK);
+  myImage.DrawColor := Colors.BLACK;
+  myImage.DrawTextLines(TImage.Fonts, [10,10]);
 
   myBox := [225,25,450,240];
-  myImage.DrawBox(myBox, Colors.RED);
-  myImage.DrawText(FormatDateTime('c', Now()), myBox, [EDrawTextAlign.CENTER, EDrawTextAlign.VERTICAL_CENTER], Colors.BLACK);
+  myImage.DrawColor := Colors.RED;
+  myImage.DrawBox(myBox);
+  myImage.DrawColor := Colors.BLACK;
+  myImage.DrawText(FormatDateTime('c', Now()), myBox, [EDrawTextAlign.CENTER, EDrawTextAlign.VERTICAL_CENTER]);
 
-  myImage.SetFontBold(True);
-  myImage.SetFontSize(50);
-  myImage.DrawText(IntToStr(Random(10000)), [225, 300], Colors.NAVY);
+  myImage.FontBold := True;
+  myImage.FontSize := 50;
+  myImage.DrawColor := Colors.NAVY;
+  myImage.DrawText(IntToStr(Random(10000)), [225, 300]);
 
   myImage.Show();
   myImage.Free();

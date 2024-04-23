@@ -43,7 +43,9 @@ type
 
     function addClassConstructor(Obj, Params: lpString; Func: Pointer): TLapeGlobalVar; virtual;
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
-    procedure addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer = nil; Arr: Boolean = False; ArrType: lpString = 'Integer'); virtual;
+
+    procedure addProperty(Obj, Name, Typ: String; ReadFunc: Pointer; WriteFunc: Pointer = nil);
+    procedure addPropertyIndexed(Obj, Name, Params, Typ: String; ReadFunc: Pointer; WriteFunc: Pointer = nil);
 
     procedure Import; virtual;
     function Compile: Boolean; override;
@@ -59,13 +61,29 @@ uses
   simba.vartype_string,
   simba.script_imports, simba.script_compiler_sleepuntil, simba.script_compiler_rtti, simba.script_compiler_imagefromstring;
 
+procedure TSimbaScript_Compiler.addProperty(Obj, Name, Typ: String; ReadFunc: Pointer; WriteFunc: Pointer);
+begin
+  if (ReadFunc <> nil) then
+    addGlobalFunc('property ' + Obj + '.' + Name + ': ' + Typ + ';', ReadFunc);
+  if (WriteFunc <> nil) then
+    addGlobalFunc('property ' + Obj + '.' + Name + '(Value: ' + Typ + ');', WriteFunc);
+end;
+
+procedure TSimbaScript_Compiler.addPropertyIndexed(Obj, Name, Params, Typ: String; ReadFunc: Pointer; WriteFunc: Pointer);
+begin
+  if (ReadFunc <> nil) then
+    addGlobalFunc('property ' + Obj + '.' + Name + '(' + Params + '):' + Typ + ';', ReadFunc);
+  if (WriteFunc <> nil) then
+    addGlobalFunc('property ' + Obj + '.' + Name + '(' + Params + '; Value: ' + Typ + ');', WriteFunc);
+end;
+
 function TSimbaScript_Compiler.addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method;
 var
   OldState: Pointer;
 begin
   OldState := getTempTokenizerState(LapeDelayedFlags + Header + LineEnding.Join(Body), '!' + Header);
   try
-    Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_Operator]);
+    Expect([tk_kw_Function, tk_kw_Procedure, tk_kw_Operator, tk_kw_Property]);
     Result := ParseMethod(nil, False);
     CheckAfterCompile();
     addDelayedExpression(Result, True, True);
@@ -103,23 +121,6 @@ end;
 procedure TSimbaScript_Compiler.addClass(Name: lpString; Parent: lpString);
 begin
   addGlobalType(Format('strict %s', [Parent]), Name);
-end;
-
-procedure TSimbaScript_Compiler.addClassVar(Obj, Item, Typ: lpString; ARead: Pointer; AWrite: Pointer; Arr: Boolean; ArrType: lpString);
-var
-  Param: lpString = '';
-begin
-  if Arr then
-    Param := 'const Index: ' + ArrType;
-
-  if (ARead <> nil) then
-    addGlobalFunc(Format('function %s.Get%s(%s): %s;', [Obj, Item, Param, Typ]), ARead);
-
-  if Arr then
-    Param += '; ';
-
-  if (AWrite <> nil) then
-    addGlobalFunc(Format('procedure %s.Set%s(%sconst Value: %s);', [Obj, Item, Param, Typ]), AWrite);
 end;
 
 procedure TSimbaScript_Compiler.Import;

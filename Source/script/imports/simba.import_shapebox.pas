@@ -228,9 +228,9 @@ begin
 
     addClassConstructor('TShapeBox', '(Owner: TLazComponent; UserDataSize: Integer = 0)', @_LapeSimbaShapeBox_Create);
 
-    addClassVar('TShapeBox', 'OnSelectionChange', 'TLazNotifyEvent', @_LapeSimbaShapeBox_OnSelectionChange_Read, @_LapeSimbaShapeBox_OnSelectionChange_Write);
-    addClassVar('TShapeBox', 'QueryName', 'Boolean', @_LapeSimbaShapeBox_QueryName_Read, @_LapeSimbaShapeBox_QueryName_Write);
-    addClassVar('TShapeBox', 'SelectedIndex', 'Integer', @_LapeSimbaShapeBox_SelectedIndex_Read, @_LapeSimbaShapeBox_SelectedIndex_Write);
+    addProperty('TShapeBox', 'OnSelectionChange', 'TLazNotifyEvent', @_LapeSimbaShapeBox_OnSelectionChange_Read, @_LapeSimbaShapeBox_OnSelectionChange_Write);
+    addProperty('TShapeBox', 'QueryName', 'Boolean', @_LapeSimbaShapeBox_QueryName_Read, @_LapeSimbaShapeBox_QueryName_Write);
+    addProperty('TShapeBox', 'SelectedIndex', 'Integer', @_LapeSimbaShapeBox_SelectedIndex_Read, @_LapeSimbaShapeBox_SelectedIndex_Write);
 
     addGlobalFunc('function TShapeBox.HasSelection: Boolean', @_LapeSimbaShapeBox_HasSelection);
     addGlobalFunc('function TShapeBox.GetSelectedShape: TShapeBoxShape', @_LapeSimbaShapeBox_GetSelectedShape);

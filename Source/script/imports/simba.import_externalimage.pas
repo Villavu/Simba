@@ -572,15 +572,15 @@ begin
     addGlobalFunc('function TExternalImage.Width: Integer;', @_LapeExternalImage_Width);
     addGlobalFunc('function TExternalImage.Height: Integer;', @_LapeExternalImage_Height);
 
-    addClassVar('TExternalImage', 'UserData', 'Pointer', @_LapeExternalImage_GetUserData, @_LapeExternalImage_SetUserData);
+    addProperty('TExternalImage', 'UserData', 'Pointer', @_LapeExternalImage_GetUserData, @_LapeExternalImage_SetUserData);
 
-    addClassVar('TExternalImage', 'Name', 'String', @_LapeExternalImage_Name_Read, @_LapeExternalImage_Name_Write);
-    addClassVar('TExternalImage', 'DefaultPixel', 'TColorBGRA', @_LapeExternalImage_DefaultPixel_Read, @_LapeExternalImage_DefaultPixel_Write);
-    addClassVar('TExternalImage', 'FontName', 'String', @_LapeExternalImage_FontName_Read, @_LapeExternalImage_FontName_Write);
-    addClassVar('TExternalImage', 'FontSize', 'Single', @_LapeExternalImage_FontSize_Read, @_LapeExternalImage_FontSize_Write);
-    addClassVar('TExternalImage', 'FontAntialiasing', 'Boolean', @_LapeExternalImage_FontAntialiasing_Read, @_LapeExternalImage_FontAntialiasing_Write);
-    addClassVar('TExternalImage', 'FontBold', 'Boolean', @_LapeExternalImage_FontBold_Read, @_LapeExternalImage_FontBold_Write);
-    addClassVar('TExternalImage', 'FontItalic', 'Boolean', @_LapeExternalImage_FontItalic_Read, @_LapeExternalImage_FontItalic_Write);
+    addProperty('TExternalImage', 'Name', 'String', @_LapeExternalImage_Name_Read, @_LapeExternalImage_Name_Write);
+    addProperty('TExternalImage', 'DefaultPixel', 'TColorBGRA', @_LapeExternalImage_DefaultPixel_Read, @_LapeExternalImage_DefaultPixel_Write);
+    addProperty('TExternalImage', 'FontName', 'String', @_LapeExternalImage_FontName_Read, @_LapeExternalImage_FontName_Write);
+    addProperty('TExternalImage', 'FontSize', 'Single', @_LapeExternalImage_FontSize_Read, @_LapeExternalImage_FontSize_Write);
+    addProperty('TExternalImage', 'FontAntialiasing', 'Boolean', @_LapeExternalImage_FontAntialiasing_Read, @_LapeExternalImage_FontAntialiasing_Write);
+    addProperty('TExternalImage', 'FontBold', 'Boolean', @_LapeExternalImage_FontBold_Read, @_LapeExternalImage_FontBold_Write);
+    addProperty('TExternalImage', 'FontItalic', 'Boolean', @_LapeExternalImage_FontItalic_Read, @_LapeExternalImage_FontItalic_Write);
 
     addGlobalFunc('function TExternalImage.TextWidth(Text: String): Integer;', @_LapeExternalImage_TextWidth);
     addGlobalFunc('function TExternalImage.TextHeight(Text: String): Integer;', @_LapeExternalImage_TextHeight);
@@ -596,8 +596,8 @@ begin
     addGlobalFunc('procedure TExternalImage.SetPixels(Points: TPointArray; Color: TColor); overload', @_LapeExternalImage_SetPixels1);
     addGlobalFunc('procedure TExternalImage.SetPixels(Points: TPointArray; Colors: TColorArray); overload', @_LapeExternalImage_SetPixels2);
 
-    addClassVar('TExternalImage', 'DrawColor', 'TColor', @_LapeExternalImage_DrawColor_Read, @_LapeExternalImage_DrawColor_Write);
-    addClassVar('TExternalImage', 'DrawAlpha', 'Byte', @_LapeExternalImage_DrawAlpha_Read, @_LapeExternalImage_DrawAlpha_Write);
+    addProperty('TExternalImage', 'DrawColor', 'TColor', @_LapeExternalImage_DrawColor_Read, @_LapeExternalImage_DrawColor_Write);
+    addProperty('TExternalImage', 'DrawAlpha', 'Byte', @_LapeExternalImage_DrawAlpha_Read, @_LapeExternalImage_DrawAlpha_Write);
 
     addGlobalFunc('procedure TExternalImage.DrawText(Text: String; Position: TPoint); overload', @_LapeExternalImage_DrawText);
     addGlobalFunc('procedure TExternalImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlign); overload', @_LapeExternalImage_DrawTextEx);

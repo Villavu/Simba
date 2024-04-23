@@ -2,15 +2,18 @@ var
   Img: TImage;
 begin
   Img := TImage.Create(500, 500); // Images must explictly created and freed!
-  Img.DrawBox([100,100,400,400], $0000FF);
-  Img.DrawLine([50, 50], [450, 50], $00FFFF);
-  Img.SetPixel(250, 250, $FFFFFF);
-  Img.SetFontSize(25);
-  Img.SetFontAntialiasing(False);
-  Img.DrawText('Hello world', [125, 125], $00FF00);
+  Img.DrawColor := Colors.RED;
+  Img.DrawBox([100,100,400,400]);
+  Img.DrawColor := Colors.YELLOW;
+  Img.DrawLine([50, 50], [450, 50]);
+  Img.Pixel[250, 250] := Colors.WHITE;
+  Img.FontSize := 25;
+  Img.FontAntialiasing := False;
+  Img.DrawText('Hello world', [125, 125]);
 
-  WriteLn('Color at 250,250 is ', '$' + IntToHex(Img.GetPixel(250, 250)));
-  WriteLn('Available fonts: ', Img.FontNames());
+  WriteLn('Color at 0,0 is $' + IntToHex(Img.Pixel[0, 0]));
+  WriteLn('Color at 250,250 is $' + IntToHex(Img.Pixel[250, 250]));
+  WriteLn('Available fonts: ', Img.Fonts);
 
   Img.Show(); // Show on Simba's debug image
   Img.Free(); // Images must be freed

@@ -52,7 +52,7 @@ begin
   templBrightnessed := templ.Brightness(25);
   for y:=0 to templ.Height - 1 do
     for x:=0 to templ.Width - 1 do
-      templBrightnessed.SetAlpha(x,y, templ.GetAlpha(x,y));
+      templBrightnessed.Alpha[x,y] := templ.Alpha[x,y];
 
   // find all with tolerance, entire client
   TPA := Finder.FindImageEx(templBrightnessed, 10, -1);

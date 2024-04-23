@@ -29,6 +29,7 @@ type
     procedure FontChanged(Sender: TObject); override;
     procedure Paint; override;
     procedure DrawMethod(var X, Y: Integer; Method: TDeclaration);
+    procedure DrawProperty(var X, Y: Integer; Method: TDeclaration);
     procedure SetBoldIndex(AValue: Integer);
   public
     procedure Show(ScreenPoint: TPoint; Decls: TDeclarationArray);
@@ -112,12 +113,25 @@ begin
     Canvas.Pen.Color := SimbaTheme.ColorLine;
     Canvas.Rectangle(ClientRect);
   end;
+  if (Length(FMethods) = 0) then
+    Exit;
 
   Y := 2;
   X := 0;
 
+  if FMethods[0].isProperty then
+  begin
+    X := 4;
+    DrawProperty(X, Y, FMethods[0]);
+    if (X > FNeededWidth) then
+      FNeededWidth := X;
+  end
+  else
   for I := 0 to High(FMethods) do
   begin
+    if FMethods[I].isProperty then
+      Continue;
+
     X := 4;
     DrawMethod(X, Y, FMethods[I]);
     if (X > FNeededWidth) then
@@ -226,6 +240,71 @@ begin
   Y := Y + FLineHeight;
 end;
 
+procedure TSimbaParamHintForm.DrawProperty(var X, Y: Integer; Method: TDeclaration);
+var
+  ParamIndex: Integer;
+  ParamCount: Integer;
+
+  procedure DrawText(Str: String; Bold: Boolean = False);
+  begin
+    Canvas.Font.Bold := Bold;
+    if not FMeasuring then
+      Canvas.TextOut(X, Y, Str);
+    Inc(X, Canvas.TextWidth(Str));
+  end;
+
+  procedure DrawParam(Name, VarType: String);
+  var
+    NeedBold: Boolean;
+  begin
+    if FMeasuring then
+      NeedBold := True
+    else
+      NeedBold := (FBoldIndex >= ParamIndex) and (FBoldIndex < ParamIndex + ParamCount);
+
+    DrawText(Name, NeedBold);
+    DrawText(VarType, NeedBold);
+
+    Inc(ParamIndex);
+  end;
+
+var
+  I: Integer;
+  Params: TDeclarationArray;
+begin
+  Params := Method.Items.GetByClass(TDeclaration_Parameter, True, True);
+  ParamCount := Length(Params);
+  ParamIndex := 0;
+  if (ParamCount = 0) then
+    Exit;
+
+  // getter
+  if Assigned(TDeclaration_Method(Method).ResultType) then
+  begin
+    DrawText(TDeclaration_Method(Method).Name + '[');
+    for I := 0 to ParamCount - 1 do
+    begin
+      DrawParam(Params[I].Name, Params[I].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType, ': '));
+      if (I < ParamCount-1) then
+        DrawText('; ');
+    end;
+    DrawText(']' + TDeclaration_Method(Method).ResultString);
+  end else
+  // setter
+  begin
+    DrawText(TDeclaration_Method(Method).Name + '[');
+    for I := 0 to ParamCount - 2 do
+    begin
+      DrawParam(Params[I].Name, Params[I].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType, ': '));
+      if (I < ParamCount-2) then
+        DrawText('; ');
+    end;
+    DrawText(']' + Params[ParamCount - 1].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType, ': '));
+  end;
+
+  Y := Y + FLineHeight;
+end;
+
 procedure TSimbaParamHintForm.Show(ScreenPoint: TPoint; Decls: TDeclarationArray);
 var
   ScreenRect: TRect;
@@ -285,7 +364,7 @@ begin
   Lexer := TmwPasLex.Create(Editor.TextBetweenPoints[FParenthesesPoint, TPoint.Create(Editor.CaretX, Editor.CaretY)]);
   Lexer.NextNoJunk();
   try
-    if (Lexer.TokenID <> tokRoundOpen) then
+    if (not (Lexer.TokenID in [tokRoundOpen, tokSquareOpen])) then
       Exit;
 
     Result := 0;
@@ -360,7 +439,7 @@ end;
 procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
 
   // Go back until we find an unclosed (
-  function FindParenthesesPoint: TPoint;
+  function FindParenthesesPoint(out indexing: Boolean): TPoint;
   var
     Text: String;
     I, InRound: Integer;
@@ -375,13 +454,14 @@ procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Bool
     InRound := 1;
     for I := Editor.SelStart - 1 downto 1 do
       case Text[I] of
-        ')': Inc(InRound);
-        '(':
+        ')', ']': Inc(InRound);
+        '(', '[':
           begin
             Dec(InRound);
             if (InRound = 0) then
             begin
               Result := Editor.CharIndexToRowCol(I-1);
+              Indexing := Text[I] = '[';
               Exit;
             end;
           end;
@@ -391,6 +471,8 @@ procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Bool
 var
   Decl: TDeclaration;
   Decls: TDeclarationArray;
+  IsIndexing: Boolean;
+  I: Integer;
 begin
   if IsParamHintCommand(Command, AChar) and CodetoolsSetup then
     with TSimbaEditor(Editor) do
@@ -399,7 +481,7 @@ begin
       if IsHighlighterAttribute(['Number', 'Comment']) then
         Exit;
 
-      FParenthesesPoint := FindParenthesesPoint();
+      FParenthesesPoint := FindParenthesesPoint(IsIndexing);
 
       FCodeinsight.SetScript(Text, FileName, GetCaretPos(True));
       FCodeinsight.Run();
@@ -416,7 +498,12 @@ begin
       if (Decl is TDeclaration_Method) then
       begin
         FDisplayPoint := FParenthesesPoint.Offset(-Length(Decl.Name), 0);
-        Decls := FCodeinsight.GetOverloads(Decl);
+
+        if IsIndexing and Decl.isProperty then
+          Decls := [Decl]
+        else
+        if not IsIndexing then
+          Decls := FCodeinsight.GetOverloads(Decl);
       end;
 
       if (Length(Decls) > 0) then
@@ -481,7 +568,7 @@ end;
 
 class function TSimbaParamHint.IsParamHintCommand(Command: TSynEditorCommand; AChar: TUTF8Char): Boolean;
 begin
-  Result := (SimbaSettings.CodeTools.ParamHintOpenAutomatically.Value and (Command = ecChar) and (AChar = '(')) or (Command = ParamHintCommand);
+  Result := (SimbaSettings.CodeTools.ParamHintOpenAutomatically.Value and (Command = ecChar) and ((AChar = '(') or (AChar = '['))) or (Command = ParamHintCommand);
 end;
 
 class constructor TSimbaParamHint.Create;

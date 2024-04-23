@@ -21,9 +21,9 @@ end;
 
 procedure DoButtonClick(Sender: TObject);
 begin
-  WriteLn('Button clicked: ', TLazButton(Sender).GetCaption());
+  WriteLn('Button clicked: ', TLazButton(Sender).Caption);
 
-  if (TLazButton(Sender).GetCaption() = 'Close this form') then
+  if (TLazButton(Sender).Caption = 'Close this form') then
     Form.Close();
 end;
 
@@ -34,7 +34,7 @@ end;
 
 procedure DoTabChange(Sender: TObject);
 begin
-  WriteLn('Tab changed to tab #', TLazPageControl(Sender).GetActiveTabIndex());
+  WriteLn('Tab changed to tab #', TLazPageControl(Sender).ActiveTabIndex);
 end;
 
 procedure ShowMyForm;
@@ -52,118 +52,115 @@ var
   Group: TLazGroupBox;
 begin
   Form := TLazForm.Create();
-  Form.SetCaption('Example form');
-  Form.SetOnMouseDown(@FormMouseDown);
-  Form.SetOnMouseUp(@FormMouseUp);
-  Form.SetWidth(700);
-  Form.SetHeight(700);
-  Form.SetPosition(ELazFormPosition.ScreenCenter);
-  Form.SetColor(Colors.DARK_GREY);
-  Form.SetBorderStyle(ELazFormBorderStyle.Single); // Do not allow resizing
+  Form.Caption := 'Example form';
+  Form.OnMouseDown := @FormMouseDown;
+  Form.OnMouseUp := @FormMouseUp;
+  Form.Width := 700;
+  Form.Height := 700;
+  Form.Position := ELazFormPosition.ScreenCenter;
+  Form.Color := Colors.DARK_GREY;
+  Form.BorderStyle := ELazFormBorderStyle.Single; // Do not allow resizing
 
   SimbaImg := TImage.CreateFromTarget([0,0,400,400]);
 
   Group := TLazGroupBox.Create(Form);
-  Group.SetParent(Form);
+  Group.Parent := Form;
   Group.SetBounds(400,200,200,200);
-  Group.SetAutoSize(True);
-  Group.SetCaption('Target image');
-  Group.GetFont().SetSize(15);
+  Group.AutoSize := True;
+  Group.Caption := 'Target image';
+  Group.Font.Size := 15;
 
   Img := TLazImage.Create(Group);
-  Img.SetParent(Group);
+  Img.Parent := Group;
   Img.SetBounds(400,200,200,200);
-  Img.SetStretch(True);
-  Img.GetPicture().SetBitmap(SimbaImg.ToLazBitmap());
-  Img.GetBorderSpacing.SetAround(10);
+  Img.Stretch := True;
+  Img.Picture.Bitmap := SimbaImg.ToLazBitmap();
+  Img.BorderSpacing.Around := 10;
 
   SimbaImg.Free();
 
   Button := TLazButton.Create(Form);
-  Button.SetParent(Form);
-  Button.SetAutoSize(True);
-  Button.SetLeft(300);
-  Button.SetTop(50);
-  Button.SetShowHint(True);
-  Button.SetHint('Mouse over hint');
-  Button.SetCaption('This is a button');
-  Button.GetFont().SetSize(12);
-  Button.SetOnClick(@DoButtonClick);
+  Button.Parent := Form;
+  Button.AutoSize := True;
+  Button.Left := 300;
+  Button.Top := 50;
+  Button.ShowHint := True;
+  Button.Hint := 'Mouse over hint';
+  Button.Caption := 'This is a button';
+  Button.Font.Size := 12;
+  Button.OnClick := @DoButtonClick;
 
   Button := TLazButton.Create(Form);
-  Button.SetParent(Form);
-  Button.SetAutoSize(True);
-  Button.SetLeft(300);
-  Button.SetTop(100);
-  Button.SetCaption('This is a bigger button');
-  Button.GetFont().SetSize(18);
-  Button.SetOnClick(@DoButtonClick);
+  Button.Parent := Form;
+  Button.AutoSize := True;
+  Button.Left := 300;
+  Button.Top := 100;
+  Button.Caption := 'This is a bigger button';
+  Button.Font.Size := 18;
+  Button.OnClick := @DoButtonClick;
 
   Button := TLazButton.Create(Form);
-  Button.SetParent(Form);
-  Button.SetAutoSize(True);
-  Button.SetLeft(25);
-  Button.SetTop(300);
-  Button.SetCaption('Close this form');
-  Button.GetFont().SetSize(12);
-  Button.SetOnClick(@DoButtonClick);
+  Button.Parent := Form;
+  Button.AutoSize := True;
+  Button.Left := 25;
+  Button.Top := 300;
+  Button.Caption := 'Close this form';
+  Button.Font.Size := 12;
+  Button.OnClick := @DoButtonClick;
 
   // Create a panel add a label and listbox in it, which are auto positioned&sized with SetAlign
   Panel := TLazPanel.Create(Form);
-  Panel.SetParent(Form);
-  Panel.SetBounds(25,25, 250,250);
-  Panel.SetBevelOuter(ELazPanelBevel.None);
+  Panel.Parent := Form;
+  Panel.SetBounds(25,25,250,250);
+  Panel.BevelOuter := ELazPanelBevel.None;
 
   Lbl := TLazLabel.Create(Panel);
-  Lbl.SetParent(Panel);
-  Lbl.SetCaption('List box:');
-  Lbl.SetAlign(ELazAlign.Top);
+  Lbl.Parent := Panel;
+  Lbl.Caption := 'List box:';
+  Lbl.Align := ELazAlign.Top;
 
   List := TLazListBox.Create(Panel);
-  List.SetParent(Panel);
-  List.SetAlign(ELazAlign.Client);
-  List.GetItems().Add('Item 1');
-  List.GetItems().Add('Item 2');
-  List.GetItems().Add('Item 3');
-  List.SetOnSelectionChange(@DoSelectionChange);
+  List.Parent := Panel;
+  List.Align := ELazAlign.Client;
+  List.Items.Add('Item 1');
+  List.Items.Add('Item 2');
+  List.Items.Add('Item 3');
+  List.OnSelectionChange := @DoSelectionChange;
 
   Tabs := TLazPageControl.Create(Form);
-  Tabs.SetParent(Form);
-  Tabs.SetTop(450);
-  Tabs.SetLeft(50);
-  Tabs.SetWidth(400);
-  Tabs.SetOnChange(@DoTabChange);
+  Tabs.Parent := Form;
+  Tabs.Top := 450;
+  Tabs.Left := 50;
+  Tabs.Width := 400;
+  Tabs.OnChange := @DoTabChange;
   Tab1 := Tabs.AddTab();
-  Tab1.SetCaption('Tab 1');
+  Tab1.Caption := 'Tab 1';
   Tab2 := Tabs.AddTab();
-  Tab2.SetCaption('Tab 2');
+  Tab2.Caption := 'Tab 2';
 
   Button := TLazButton.Create(Tab1);
-  Button.SetParent(Tab1);
-  Button.SetAutoSize(True);
-  Button.SetCaption('This button is on tab 1!');
-  Button.SetCursor(ELazCursor.SIZE);
+  Button.Parent := Tab1;
+  Button.AutoSize := True;
+  Button.Caption := 'This button is on tab 1!';
+  Button.Cursor := ELazCursor.SIZE;
 
   Button := TLazButton.Create(Tab2);
-  Button.SetParent(Tab2);
-  Button.SetAutoSize(True);
-  Button.SetCaption('This button is on tab 2!');
+  Button.Parent := Tab2;
+  Button.AutoSize := True;
+  Button.Caption := 'This button is on tab 2!';
 
   LazBmp := TLazBitmap.Create();
-  LazBmp.SetWidth(25);
-  LazBmp.SetHeight(25);
-  with LazBmp.GetCanvas() do
-  begin
-    GetPen().SetColor(Colors.RED);
-    GetBrush().SetColor(Colors.WHITE);
-    Rectangle(0,0,25,25);
-  end;
+  LazBmp.Width := 25;
+  LazBmp.Height := 25;
+  LazBmp.Canvas.Pen.Color := Colors.RED;
+  LazBmp.Canvas.Brush.Color := Colors.WHITE;
+  LazBmp.Canvas.Rectangle(0,0,25,25);
 
   SpeedButton := TLazSpeedButton.Create(Form);
-  SpeedButton.SetParent(Form);
+  SpeedButton.Parent := Form;
   SpeedButton.SetBounds(200,350,150,50);
-  SpeedButton.SetCaption('Hello World');
-  SpeedButton.SetGlyph(LazBmp);
+  SpeedButton.Caption := 'Hello World';
+  SpeedButton.Glyph := LazBmp;
 
   Form.ShowModal();
 

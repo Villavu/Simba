@@ -14,20 +14,22 @@ unit simba.container_stringmap;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, Variants,
   simba.base;
 
 type
-  generic TSimbaStringMap<_T> = record
+  PSimbaStringMap = ^TSimbaStringMap;
+  TSimbaStringMap = record
   public type
-    PPair = ^TPair;
-    TPair = record Key: String; Value: _T; end;
-    TValueArray = array of _T;
+    TPair = record
+      Key: String;
+      Value: Variant;
+    end;
   private type
     TItem = record
       KeyHash: UInt32;
       Key: String;
-      Value: _T;
+      Value: Variant;
     end;
     TItemArray = array of TItem;
   private
@@ -35,14 +37,6 @@ type
     FCount: Integer;
     FSorted: Boolean;
     FCaseSens: Boolean;
-
-    class function _StrToValue(Str: String; Default: String): String; overload; static;
-    class function _StrToValue(Str: String; Default: Int64): Int64; overload; static;
-    class function _StrToValue(Str: String; Default: Pointer): Pointer; overload; static;
-
-    class function _ValueToStr(Val: String): String; overload; static;
-    class function _ValueToStr(Val: Int64): String; overload; static;
-    class function _ValueToStr(Val: Pointer): String; overload; static;
 
     class function _BSearch32(var Arr: TItemArray; Hash: UInt32; Lo, Hi: Integer): Integer; static;
     class procedure _Insert32(var Arr: TItemArray; var Index: Integer); static;
@@ -54,26 +48,24 @@ type
 
     function GetPair(Index: Integer): TPair;
     function GetKey(Index: Integer): String;
-    function GetValue(AKey: String): _T;
-    function GetValues(AKey: String): TValueArray;
-
+    function GetValue(Index: Integer): Variant;
     procedure SetKey(Index: Integer; NewKey: String);
-    procedure SetValue(AKey: String; AValue: _T);
+    procedure SetValue(Index: Integer; NewValue: Variant);
     procedure SetSorted(AValue: Boolean);
   public
-    InvalidVal: _T;
-
     property Count: Integer read FCount;
     property CaseSens: Boolean read FCaseSens write FCaseSens;
     property Sorted: Boolean read FSorted write SetSorted;
 
     property Pair[Index: Integer]: TPair read GetPair;
     property Key[Index: Integer]: String read GetKey write SetKey;
-    property Value[AKey: String]: _T read GetValue write SetValue;
-    property Values[AKey: String]: TValueArray read GetValues;
+    property Value[Index: Integer]: Variant read GetValue write SetValue;
+
+    function Get(AKey: String): Variant;
+    function GetAll(AKey: String): TVariantArray;
 
     function Exists(AKey: String): Boolean;
-    function Add(AKey: String; AValue: _T): Integer;
+    function Add(AKey: String; AValue: Variant): Integer;
     function IndexOf(AKey: String): Integer;
     function IndicesOf(AKey: String): TIntegerArray;
     procedure Delete(Index: Integer); overload;
@@ -81,7 +73,7 @@ type
     procedure DeleteAll(AKey: String);
     procedure Clear;
 
-    procedure Load(FileName: String; Sep: String = '=');
+    procedure Load(FileName: String; VarType: EVariantType; Sep: String = '=');
     procedure Save(FileName: String; Sep: String = '=');
 
     function ToString: String;
@@ -89,48 +81,12 @@ type
     class operator Initialize(var Self: TSimbaStringMap);
   end;
 
-  PStringMap = ^TStringMap;
-  PStringPointerMap = ^TStringPointerMap;
-  PStringIntMap = ^TStringIntMap;
-
-  TStringMap = specialize TSimbaStringMap<String>;
-  TStringPointerMap = specialize TSimbaStringMap<Pointer>;
-  TStringIntMap = specialize TSimbaStringMap<Int64>;
-
 implementation
 
 uses
   simba.containers, simba.files, simba.array_algorithm, simba.vartype_string;
 
-class function TSimbaStringMap._StrToValue(Str: String; Default: String): String; overload;
-begin
-  Result := Str;
-end;
-
-class function TSimbaStringMap._StrToValue(Str: String; Default: Int64): Int64; overload;
-begin
-  Result := StrToInt64Def(Str, Default);
-end;
-
-class function TSimbaStringMap._StrToValue(Str: String; Default: Pointer): Pointer; overload;
-begin
-  Result := Pointer(StrToInt64Def(Str.Replace('0x', '$'), Int64(Default)));
-end;
-
-class function TSimbaStringMap._ValueToStr(Val: String): String; overload;
-begin
-  Result := Val;
-end;
-
-class function TSimbaStringMap._ValueToStr(Val: Int64): String; overload;
-begin
-  Result := IntToStr(Val);
-end;
-
-class function TSimbaStringMap._ValueToStr(Val: Pointer): String; overload;
-begin
-  Result := '0x' + IntToHex(PtrUInt(Val), 1);
-end;
+{$WARN 6058 off : Call to subroutine "$1" marked as inline is not inlined}
 
 class function TSimbaStringMap._BSearch32(var Arr: TItemArray; Hash: UInt32; Lo, Hi: Integer): Integer;
 var
@@ -185,6 +141,29 @@ begin
     Sort();
 end;
 
+function TSimbaStringMap.Get(AKey: String): Variant;
+var
+  Index: Integer;
+begin
+  Index := Self.IndexOf(AKey);
+  if (Index = -1) then
+    SimbaException('StringMap: Key "%s" does not exist', [AKey]);
+
+  Result := FItems[Index].Value;
+end;
+
+function TSimbaStringMap.GetAll(AKey: String): TVariantArray;
+var
+  Indices: TIntegerArray;
+  I: Integer;
+begin
+  Indices := Self.IndicesOf(AKey);
+
+  SetLength(Result, Length(Indices));
+  for I := 0 to High(Result) do
+    Result[I] := FItems[Indices[I]].Value;
+end;
+
 function TSimbaStringMap.EqualKeys(const Key1, Key2: String): Boolean;
 begin
   if CaseSens then
@@ -201,39 +180,21 @@ begin
   Result.Value := FItems[Index].Value;
 end;
 
-function TSimbaStringMap.GetValue(AKey: String): _T;
-var
-  Index: Integer;
+function TSimbaStringMap.GetValue(Index: Integer): Variant;
 begin
-  Index := IndexOf(AKey);
-  if (Index > -1) then
-    Result := FItems[Index].Value
-  else
-    Result := InvalidVal;
+  CheckIndex(Index);
+
+  Result := FItems[Index].Value;
 end;
 
-procedure TSimbaStringMap.SetValue(AKey: String; AValue: _T);
-var
-  Index: Integer;
+procedure TSimbaStringMap.SetValue(Index: Integer; NewValue: Variant);
 begin
-  Index := IndexOf(AKey);
-  if (Index > -1) then
-    FItems[Index].Value := AValue;
+  CheckIndex(Index);
+
+  FItems[Index].Value := NewValue;
 end;
 
-function TSimbaStringMap.GetValues(AKey: String): TValueArray;
-var
-  Indices: TIntegerArray;
-  I: Integer;
-begin
-  Indices := Self.IndicesOf(AKey);
-
-  SetLength(Result, Length(Indices));
-  for I := 0 to High(Result) do
-    Result[I] := FItems[Indices[I]].Value;
-end;
-
-function TSimbaStringMap.Add(AKey: String; AValue: _T): Integer;
+function TSimbaStringMap.Add(AKey: String; AValue: Variant): Integer;
 begin
   if (Self.Count >= Length(FItems)) then
     SetLength(FItems, 4 + (FCount * 2));
@@ -374,7 +335,7 @@ begin
   CheckIndex(Index);
 
   if Sorted then
-    SimbaException('Cannot change a key of a sorted map');
+    SimbaException('StringMap: Cannot change a key of a sorted map');
 
   FItems[Index].Key := NewKey;
   FItems[Index].KeyHash := NewKey.Hash();
@@ -383,15 +344,19 @@ end;
 procedure TSimbaStringMap.CheckIndex(const Index: Integer);
 begin
   if (Index < 0) or (Index >= FCount) then
-    SimbaException('StringPairList: Index %d is out of range (%d..%d)', [Index, 0, FCount-1]);
+    SimbaException('StringMap: Index %d is out of range (%d..%d)', [Index, 0, FCount-1]);
 end;
 
-procedure TSimbaStringMap.Load(FileName: String; Sep: String = '=');
+procedure TSimbaStringMap.Load(FileName: String; VarType: EVariantType; Sep: String);
 var
   Line: String;
   Pieces: TStringArray;
   wasSorted: Boolean;
+  Val: Variant;
 begin
+  if (not (VarType in [EVariantType.Boolean, EVariantType.AString..EVariantType.WString, EVariantType.Single..EVariantType.Double, EVariantType.Int8..EVariantType.UInt64])) then
+    SimbaException('StringMap: Cannot load vartype');
+
   Clear();
 
   wasSorted := Sorted;
@@ -402,7 +367,31 @@ begin
   begin
     Pieces := Line.Partition(Sep);
     if (Pieces[0] <> '') and (Pieces[1] <> '') and (Pieces[2] <> '') then
-      Add(Pieces[0], _StrToValue(Pieces[2], InvalidVal));
+    try
+      case VarType of
+        EVariantType.Boolean: Val := Pieces[2].ToBoolean();
+
+        EVariantType.AString: Val := AnsiString(Pieces[2]);
+        EVariantType.UString: Val := UnicodeString(Pieces[2]);
+        EVariantType.WString: Val := WideString(Pieces[2]);
+
+        EVariantType.Single:  Val := Pieces[2].ToSingle();
+        EVariantType.Double:  Val := Pieces[2].ToDouble();
+
+        EVariantType.Int8:    Val := Int8(Pieces[2].ToInt64());
+        EVariantType.Int16:   Val := Int16(Pieces[2].ToInt64());
+        EVariantType.Int32:   Val := Int32(Pieces[2].ToInt64());
+        EVariantType.Int64:   Val := Int64(Pieces[2].ToInt64());
+
+        EVariantType.UInt8:   Val := UInt8(Pieces[2].ToInt64());
+        EVariantType.UInt16:  Val := UInt16(Pieces[2].ToInt64());
+        EVariantType.UInt32:  Val := UInt32(Pieces[2].ToInt64());
+        EVariantType.UInt64:  Val := UInt64(Pieces[2].ToInt64());
+      end;
+
+      Add(Pieces[0], Val);
+    except
+    end;
   end;
 
   if wasSorted then
@@ -415,7 +404,7 @@ var
   Builder: TSimbaStringBuilder;
 begin
   for I := 0 to FCount - 1 do
-    Builder.AppendLine(FItems[I].Key + Sep + _ValueToStr(FItems[I].Value));
+    Builder.AppendLine(FItems[I].Key + Sep + VarToStr(FItems[I].Value));
 
   TSimbaFile.FileWrite(FileName, Builder.Str);
 end;
@@ -429,7 +418,7 @@ begin
   begin
     if (I > 0) then
       Builder.Append(', ');
-    Builder.Append('[Key=' + FItems[I].Key + ', Value=' + _ValueToStr(FItems[I].Value) + ']');
+    Builder.Append('[Key=' + FItems[I].Key + ', Value=' + VarToStr(FItems[I].Value) + ']');
   end;
 
   Result := 'Count=%d, CaseSens=%s, Sorted=%s, Pairs=[%s]'.Format([FCount, FCaseSens.ToString(), FSorted.ToString(), Builder.Str]);
@@ -441,4 +430,3 @@ begin
 end;
 
 end.
-

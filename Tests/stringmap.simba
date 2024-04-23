@@ -14,39 +14,35 @@ begin
   Assert(List.IndexOf('three') > -1);
   Assert(Length(List.IndicesOf('two')) = 2);
 
-  Assert(List.GetValue('one') = '1');
-  Assert(List.GetValue('three') = '3');
-  Assert(Length(List.GetValues('two')) = 2);
+  Assert(List.Get('one') = '1');
+  Assert(List.Get('three') = '3');
+  Assert(Length(List.GetAll('two')) = 2);
 
   List.DeleteAll('two');
-  Assert(Length(List.GetValues('two')) = 0);
+  Assert(Length(List.GetAll('two')) = 0);
 
   List.Delete('three');
   Assert(List.IndexOf('three') = -1);
 
   Assert(List.Count = 1);
-  Assert(List.GetPair(0) = ['one', '1']);
-  Assert(List.GetKey(0) = 'one');
+  Assert(List.Pair[0] = ['one', '1']);
+  Assert(List.Key[0] = 'one');
 end;
 
 var
   List: TStringMap;
 begin
   List.Clear();
-  List.SetSorted(True);
+  List.Sorted := True;
   Test(List);
 
   List.Clear();
-  List.SetSorted(False);
+  List.Sorted := False;
   Test(List);
 
   List.Clear();
-  List.SetCaseSens(True);
+  List.CaseSens := True;
   List.Add('HELLO', 'WORLD');
   Assert(List.Exists('HELLO'));
   Assert(not List.Exists('hello'));
-
-  Assert(List.GetValue('abc') = '');
-  List.InvalidVal := 'Nope';
-  Assert(List.GetValue('abc') = 'Nope');
 end;

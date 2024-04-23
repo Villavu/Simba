@@ -369,11 +369,11 @@ begin
   begin
     addClass('TImageBoxCanvas');
 
-    addClassVar('TImageBoxCanvas', 'FontName', 'String', @_LapeImageBoxCanvas_FontName_Read, @_LapeImageBoxCanvas_FontName_Write);
-    addClassVar('TImageBoxCanvas', 'FontSize', 'Single', @_LapeImageBoxCanvas_FontSize_Read, @_LapeImageBoxCanvas_FontSize_Write);
-    addClassVar('TImageBoxCanvas', 'FontAntialiasing', 'Boolean', @_LapeImageBoxCanvas_FontAntialiasing_Read, @_LapeImageBoxCanvas_FontAntialiasing_Write);
-    addClassVar('TImageBoxCanvas', 'FontBold', 'Boolean', @_LapeImageBoxCanvas_FontBold_Read, @_LapeImageBoxCanvas_FontBold_Write);
-    addClassVar('TImageBoxCanvas', 'FontItalic', 'Boolean', @_LapeImageBoxCanvas_FontItalic_Read, @_LapeImageBoxCanvas_FontItalic_Write);
+    addProperty('TImageBoxCanvas', 'FontName', 'String', @_LapeImageBoxCanvas_FontName_Read, @_LapeImageBoxCanvas_FontName_Write);
+    addProperty('TImageBoxCanvas', 'FontSize', 'Single', @_LapeImageBoxCanvas_FontSize_Read, @_LapeImageBoxCanvas_FontSize_Write);
+    addProperty('TImageBoxCanvas', 'FontAntialiasing', 'Boolean', @_LapeImageBoxCanvas_FontAntialiasing_Read, @_LapeImageBoxCanvas_FontAntialiasing_Write);
+    addProperty('TImageBoxCanvas', 'FontBold', 'Boolean', @_LapeImageBoxCanvas_FontBold_Read, @_LapeImageBoxCanvas_FontBold_Write);
+    addProperty('TImageBoxCanvas', 'FontItalic', 'Boolean', @_LapeImageBoxCanvas_FontItalic_Read, @_LapeImageBoxCanvas_FontItalic_Write);
 
     addGlobalFunc('function TImageBoxCanvas.TextWidth(Text: String): Integer;', @_LapeImageBoxCanvas_TextWidth);
     addGlobalFunc('function TImageBoxCanvas.TextHeight(Text: String): Integer;', @_LapeImageBoxCanvas_TextHeight);
@@ -414,19 +414,19 @@ begin
     addGlobalType('procedure(Sender: TImageBox; Button: ELazMouseButton; Shift: ELazShiftStates; X, Y: Integer) of object', 'TImageBoxMouseEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TImageBox; Shift: ELazShiftStates; X, Y: Integer) of object', 'TImageBoxMouseMoveEvent', FFI_DEFAULT_ABI);
 
-    addClassVar('TImageBox', 'OnImgPaint', 'TImageBoxPaintEvent', @_LapeSimbaImageBox_OnImgPaint_Read, @_LapeSimbaImageBox_OnImgPaint_Write);
-    addClassVar('TImageBox', 'OnImgMouseEnter', 'TImageBoxEvent', @_LapeSimbaImageBox_OnImgMouseEnter_Read, @_LapeSimbaImageBox_OnImgMouseEnter_Write);
-    addClassVar('TImageBox', 'OnImgMouseLeave', 'TImageBoxEvent', @_LapeSimbaImageBox_OnImgMouseLeave_Read, @_LapeSimbaImageBox_OnImgMouseLeave_Write);
-    addClassVar('TImageBox', 'OnImgMouseDown', 'TImageBoxMouseEvent', @_LapeSimbaImageBox_OnImgMouseDown_Read, @_LapeSimbaImageBox_OnImgMouseDown_Write);
-    addClassVar('TImageBox', 'OnImgMouseUp', 'TImageBoxMouseEvent', @_LapeSimbaImageBox_OnImgMouseUp_Read, @_LapeSimbaImageBox_OnImgMouseUp_Write);
-    addClassVar('TImageBox', 'OnImgMouseMove', 'TImageBoxMouseMoveEvent', @_LapeSimbaImageBox_OnImgMouseMove_Read, @_LapeSimbaImageBox_OnImgMouseMove_Write);
-    addClassVar('TImageBox', 'OnImgClick', 'TImageBoxClickEvent', @_LapeSimbaImageBox_OnImgClick_Read, @_LapeSimbaImageBox_OnImgClick_Write);
-    addClassVar('TImageBox', 'OnImgDoubleClick', 'TImageBoxClickEvent', @_LapeSimbaImageBox_OnImgDoubleClick_Read, @_LapeSimbaImageBox_OnImgDoubleClick_Write);
-    addClassVar('TImageBox', 'OnImgKeyDown', 'TImageBoxKeyEvent', @_LapeSimbaImageBox_OnImgKeyDown_Read, @_LapeSimbaImageBox_OnImgKeyDown_Write);
-    addClassVar('TImageBox', 'OnImgKeyUp', 'TImageBoxKeyEvent', @_LapeSimbaImageBox_OnImgKeyUp_Read, @_LapeSimbaImageBox_OnImgKeyUp_Write);
+    addProperty('TImageBox', 'OnImgPaint', 'TImageBoxPaintEvent', @_LapeSimbaImageBox_OnImgPaint_Read, @_LapeSimbaImageBox_OnImgPaint_Write);
+    addProperty('TImageBox', 'OnImgMouseEnter', 'TImageBoxEvent', @_LapeSimbaImageBox_OnImgMouseEnter_Read, @_LapeSimbaImageBox_OnImgMouseEnter_Write);
+    addProperty('TImageBox', 'OnImgMouseLeave', 'TImageBoxEvent', @_LapeSimbaImageBox_OnImgMouseLeave_Read, @_LapeSimbaImageBox_OnImgMouseLeave_Write);
+    addProperty('TImageBox', 'OnImgMouseDown', 'TImageBoxMouseEvent', @_LapeSimbaImageBox_OnImgMouseDown_Read, @_LapeSimbaImageBox_OnImgMouseDown_Write);
+    addProperty('TImageBox', 'OnImgMouseUp', 'TImageBoxMouseEvent', @_LapeSimbaImageBox_OnImgMouseUp_Read, @_LapeSimbaImageBox_OnImgMouseUp_Write);
+    addProperty('TImageBox', 'OnImgMouseMove', 'TImageBoxMouseMoveEvent', @_LapeSimbaImageBox_OnImgMouseMove_Read, @_LapeSimbaImageBox_OnImgMouseMove_Write);
+    addProperty('TImageBox', 'OnImgClick', 'TImageBoxClickEvent', @_LapeSimbaImageBox_OnImgClick_Read, @_LapeSimbaImageBox_OnImgClick_Write);
+    addProperty('TImageBox', 'OnImgDoubleClick', 'TImageBoxClickEvent', @_LapeSimbaImageBox_OnImgDoubleClick_Read, @_LapeSimbaImageBox_OnImgDoubleClick_Write);
+    addProperty('TImageBox', 'OnImgKeyDown', 'TImageBoxKeyEvent', @_LapeSimbaImageBox_OnImgKeyDown_Read, @_LapeSimbaImageBox_OnImgKeyDown_Write);
+    addProperty('TImageBox', 'OnImgKeyUp', 'TImageBoxKeyEvent', @_LapeSimbaImageBox_OnImgKeyUp_Read, @_LapeSimbaImageBox_OnImgKeyUp_Write);
 
-    addClassVar('TImageBox', 'Status', 'String', @_LapeSimbaImageBox_Status_Read, @_LapeSimbaImageBox_Status_Write);
-    addClassVar('TImageBox', 'Background', 'TLazBitmap', @_LapeSimbaImageBox_Background_Read);
+    addProperty('TImageBox', 'Status', 'String', @_LapeSimbaImageBox_Status_Read, @_LapeSimbaImageBox_Status_Write);
+    addProperty('TImageBox', 'Background', 'TLazBitmap', @_LapeSimbaImageBox_Background_Read);
 
     addGlobalFunc('function TImageBox.FindDTM(DTM: TDTM): TPointArray', @_LapeSimbaImageBox_FindDTM);
     addGlobalFunc('function TImageBox.FindColor(Col: TColor; Tol: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray', @_LapeSimbaImageBox_FindColor);

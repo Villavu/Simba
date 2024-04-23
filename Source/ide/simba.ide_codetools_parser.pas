@@ -145,6 +145,7 @@ type
     property isType: Boolean index 13 read GetFlags write SetFlags;
     property isKeyword: Boolean index 14 read GetFlags write SetFlags;
     property isNotFullyDeclared: Boolean index 15 read GetFlags write SetFlags;
+    property isProperty: Boolean index 16 read GetFlags write SetFlags;
 
     constructor Create(AParser: TCodeParser; AOwner: TDeclaration; AStart: Integer; AEnd: Integer); virtual; reintroduce;
     destructor Destroy; override;
@@ -1467,7 +1468,7 @@ begin
     SemiColon();
   end;
 
-  while (Lexer.TokenID in [tokBegin, tokConst, tokFunction, tokOperator, tokLabel, tokProcedure, tokType, tokVar]) do
+  while (Lexer.TokenID in [tokBegin, tokType, tokConst, tokVar, tokFunction, tokProcedure, tokOperator, tokProperty, tokLabel]) do
   begin
     if (Lexer.TokenID = tokBegin) then
     begin
@@ -1734,6 +1735,7 @@ begin
     tokFunction:  Decl.isFunction := True;
     tokProcedure: Decl.isProcedure := True;
     tokOperator:  Decl.isOperatorMethod := True;
+    tokProperty:  Decl.isProperty := True;
   end;
 
   inherited;

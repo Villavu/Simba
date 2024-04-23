@@ -644,8 +644,8 @@ begin
     addGlobalType('procedure(Sender: TObject; URL, ContentType: String; Position, Size: Int64) of object', 'THTTPDownloadingEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TObject; URL: String; Percent: Double) of object', 'THTTPExtractingEvent', FFI_DEFAULT_ABI);
 
-    addClassVar('THTTPClient', 'OnDownloadProgress', 'THTTPDownloadingEvent', @_LapeSimbaHTTPClient_OnDownloadProgress_Read, @_LapeSimbaHTTPClient_OnDownloadProgress_Write);
-    addClassVar('THTTPClient', 'OnExtractProgress', 'THTTPExtractingEvent', @_LapeSimbaHTTPClient_OnExtractProgress_Read, @_LapeSimbaHTTPClient_OnExtractProgress_Write);
+    addProperty('THTTPClient', 'OnDownloadProgress', 'THTTPDownloadingEvent', @_LapeSimbaHTTPClient_OnDownloadProgress_Read, @_LapeSimbaHTTPClient_OnDownloadProgress_Write);
+    addProperty('THTTPClient', 'OnExtractProgress', 'THTTPExtractingEvent', @_LapeSimbaHTTPClient_OnExtractProgress_Read, @_LapeSimbaHTTPClient_OnExtractProgress_Write);
 
     addGlobalFunc('function THTTPClient.Create: THTTPClient; static;', @_LapeSimbaHTTPClient_Create);
 
@@ -701,8 +701,8 @@ begin
     addGlobalFunc('function TInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;', @_LapeSimbaInternetSocket_ReadStringUntil);
     addGlobalFunc('function TInternetSocket.WriteString(Str: String): Integer;', @_LapeSimbaInternetSocket_WriteString);
     addGlobalFunc('function TInternetSocket.LastError: Integer;', @_LapeSimbaInternetSocket_LastError);
-    addClassVar('TInternetSocket', 'ConnectTimeout', 'Integer', @_LapeSimbaInternetSocket_GetConnectTimeout, @_LapeSimbaInternetSocket_SetConnectTimeout);
-    addClassVar('TInternetSocket', 'ReadWriteTimeout', 'Integer', @_LapeSimbaInternetSocket_GetReadWriteTimeout, @_LapeSimbaInternetSocket_SetReadWriteTimeout);
+    addProperty('TInternetSocket', 'ConnectTimeout', 'Integer', @_LapeSimbaInternetSocket_GetConnectTimeout, @_LapeSimbaInternetSocket_SetConnectTimeout);
+    addProperty('TInternetSocket', 'ReadWriteTimeout', 'Integer', @_LapeSimbaInternetSocket_GetReadWriteTimeout, @_LapeSimbaInternetSocket_SetReadWriteTimeout);
 
     addGlobalFunc('function LoadSSL(Debug: Boolean = False): Boolean', @_LapeLoadSSL);
   end;

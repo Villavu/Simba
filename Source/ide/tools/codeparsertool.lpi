@@ -54,7 +54,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);..\.."/>
-      <OtherUnitFiles Value="..;..\..;..\..\finders;..\..\algorithms;..\..\iomanager;..\..\matchtemplate"/>
+      <OtherUnitFiles Value="..;..\..;..\..\..\Third-Party"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>

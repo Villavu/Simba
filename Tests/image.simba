@@ -7,46 +7,46 @@ var
 // make sure alpha is handled correctly too.
 procedure TestPixels;
 begin
-  img.SetPixel(1,1, Colors.AQUA);
-  Assert(img.GetPixel(1,1)=Colors.AQUA);
-  Assert(img.GetAlpha(1,1)=255);
+  img.Pixel[1,1] := Colors.AQUA;
+  Assert(img.Pixel[1,1]=Colors.AQUA);
+  Assert(img.Alpha[1,1]=255);
 
   img.SetPixels([[1,1],[99,99]], [Colors.GOLD, Colors.RED]);
 
-  Assert(img.GetPixel(1,1)=Colors.GOLD);
-  Assert(img.GetAlpha(1,1)=255);
+  Assert(img.Pixel[1,1]=Colors.GOLD);
+  Assert(img.Alpha[1,1]=255);
 
-  Assert(img.GetPixel(99,99)=Colors.RED);
-  Assert(img.GetAlpha(99,99)=255);
+  Assert(img.Pixel[99,99]=Colors.RED);
+  Assert(img.Alpha[99,99]=255);
 
   img.ReplaceColor(0,$FFFFFF);
-  Assert(img.GetAlpha(50,50)=255);
+  Assert(img.Alpha[50,50]=255);
 
-  img.SetDrawColor(Colors.RED);
+  img.DrawColor := Colors.RED;
   img.DrawBox([20,20,40,40]);
-  img.SetDrawColor(Colors.GREEN);
+  img.DrawColor := Colors.GREEN;
   img.DrawBox([60,60,80,80]);
 
   img.ReplaceColor(Colors.RED, Colors.GOLD);
   img.ReplaceColor(Colors.GREEN, Colors.AQUA);
 
-  Assert(img.GetPixel(20,20)=Colors.GOLD);
-  Assert(img.GetAlpha(20,20)=255);
-  Assert(img.GetPixel(60,60)=Colors.AQUA);
-  Assert(img.GetAlpha(60,60)=255);
+  Assert(img.Pixel[20,20]=Colors.GOLD);
+  Assert(img.Alpha[20,20]=255);
+  Assert(img.Pixel[60,60]=Colors.AQUA);
+  Assert(img.Alpha[60,60]=255);
 
   img.Fill(Colors.WHITE);
-  Assert(img.GetPixel(50,50)=Colors.WHITE);
-  Assert(img.GetAlpha(50,50)=255);
+  Assert(img.Pixel[50,50]=Colors.WHITE);
+  Assert(img.Alpha[50,50]=255);
 
   img.Clear();
-  Assert(img.Data()^ = [0,0,0,255]);
+  Assert(img.Data^ = img.DefaultPixel);
 
-  img.SetAlpha(0,0,123);
-  Assert(img.GetAlpha(0,0)=123);
+  img.Alpha[0,0] := 123;
+  Assert(img.Alpha[0,0]=123);
 
   img.FillWithAlpha(0);
-  Assert(img.GetAlpha(50,50)=0);
+  Assert(img.Alpha[50,50]=0);
 end;
 
 procedure TestColors;
@@ -56,12 +56,12 @@ begin
   img.Fill(Colors.WHITE);
 
   Assert(img.Finder.CountColor($FFFFFF, 0) = 100*100);
-  img.SetPixel(img.Center.X, img.Center.Y, 0);
+  img.Pixel[img.Center.X, img.Center.Y] := 0;
   Assert(Length(img.GetColors().Unique()) = 2);
   Assert(img.GetColors().Unique()[0] = 16777215);
   Assert(img.GetColors().Unique()[1] = 0);
 
-  img.SetDrawColor(0);
+  img.DrawColor := 0;
   img.DrawBoxFilled([1,1,img.Width-2,img.Height-2]);
 
   TPA := img.Finder.FindColor(Colors.WHITE,0);
@@ -78,18 +78,18 @@ begin
 
   img.Clear();
   img.Fill($FF);
-  img.SetDrawAlpha(255 div 2);
+  img.DrawAlpha := 255 div 2;
   img.DrawImage(test, [25,25]);
 
-  Assert(img.GetPixel(50,50) = GetBestColor(EColorSpace.RGB, [$FF, $FFFFFF]).Color);
+  Assert(img.Pixel[50,50] = GetBestColor(EColorSpace.RGB, [$FF, $FFFFFF]).Color);
 
   // just check no alpha too
   img.Clear();
   img.Fill($FF);
-  img.SetDrawAlpha(255);
+  img.DrawAlpha := 255;
   img.DrawImage(test, [25,25]);
 
-  Assert(img.GetPixel(50,50) = $FFFFFF);
+  Assert(img.Pixel[50,50] = $FFFFFF);
 
   test.Free();
 end;
@@ -101,7 +101,7 @@ begin
   img1 := TImage.CreateFromString('IMG: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');
   img2 := img1.Copy();
 
-  img2.SetDrawColor(Colors.BLACK);
+  img2.DrawColor := Colors.BLACK;
   img2.DrawBoxFilled([20,20,24,24]);
 
   // Only difference should be the box we just drawn
@@ -138,11 +138,11 @@ end;
 begin
   img := TImage.Create(100,100);
 
-  Assert(img.Width() = 100);
-  Assert(img.Height() = 100);
-  Assert(img.Center() = [50,50]);
-  Assert(img.Data()^ = img.GetDefaultPixel());
-  Assert(img.GetPixel(0,0) = $000000);
+  Assert(img.Width = 100);
+  Assert(img.Height = 100);
+  Assert(img.Center = [50,50]);
+  Assert(img.Data^ = img.DefaultPixel);
+  Assert(img.Pixel[0,0] = $000000);
 
   TestPixels();
   TestColors();

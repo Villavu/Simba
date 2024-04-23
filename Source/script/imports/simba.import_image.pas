@@ -1459,26 +1459,24 @@ begin
     addGlobalFunc('function TImage.CreateFromMatrix(Mat: TSingleMatrix; ColorMapType: Integer = 0): TImage; static; overload', @_LapeImage_CreateFromMatrix2);
     addGlobalFunc('procedure TImage.Free;', @_LapeImage_Free);
 
-    addGlobalFunc('function TImage.Data: PColorBGRA', @_LapeImage_Data_Read);
-    addGlobalFunc('function TImage.Width: Integer', @_LapeImage_Width_Read);
-    addGlobalFunc('function TImage.Height: Integer', @_LapeImage_Height_Read);
-    addGlobalFunc('function TImage.Center: TPoint', @_LapeImage_Center_Read);
+    addProperty('TImage', 'Data', 'PColorBGRA', @_LapeImage_Data_Read);
+    addProperty('TImage', 'Width', 'Integer', @_LapeImage_Width_Read);
+    addProperty('TImage', 'Height', 'Integer', @_LapeImage_Height_Read);
+    addProperty('TImage', 'Center', 'TPoint', @_LapeImage_Center_Read);
 
-    addClassVar('TImage', 'DefaultPixel', 'TColorBGRA', @_LapeImage_DefaultPixel_Read, @_LapeImage_DefaultPixel_Write);
+    addProperty('TImage', 'DefaultPixel', 'TColorBGRA', @_LapeImage_DefaultPixel_Read, @_LapeImage_DefaultPixel_Write);
 
-    addClassVar('TImage', 'DrawColor', 'TColor', @_LapeImage_DrawColor_Read, @_LapeImage_DrawColor_Write);
-    addClassVar('TImage', 'DrawAlpha', 'Byte', @_LapeImage_DrawAlpha_Read, @_LapeImage_DrawAlpha_Write);
+    addProperty('TImage', 'DrawColor', 'TColor', @_LapeImage_DrawColor_Read, @_LapeImage_DrawColor_Write);
+    addProperty('TImage', 'DrawAlpha', 'Byte', @_LapeImage_DrawAlpha_Read, @_LapeImage_DrawAlpha_Write);
 
-    addClassVar('TImage', 'FontName', 'String', @_LapeImage_FontName_Read, @_LapeImage_FontName_Write);
-    addClassVar('TImage', 'FontSize', 'Single', @_LapeImage_FontSize_Read, @_LapeImage_FontSize_Write);
-    addClassVar('TImage', 'FontAntialiasing', 'Boolean', @_LapeImage_FontAntialiasing_Read, @_LapeImage_FontAntialiasing_Write);
-    addClassVar('TImage', 'FontBold', 'Boolean', @_LapeImage_FontBold_Read, @_LapeImage_FontBold_Write);
-    addClassVar('TImage', 'FontItalic', 'Boolean', @_LapeImage_FontItalic_Read, @_LapeImage_FontItalic_Write);
+    addProperty('TImage', 'FontName', 'String', @_LapeImage_FontName_Read, @_LapeImage_FontName_Write);
+    addProperty('TImage', 'FontSize', 'Single', @_LapeImage_FontSize_Read, @_LapeImage_FontSize_Write);
+    addProperty('TImage', 'FontAntialiasing', 'Boolean', @_LapeImage_FontAntialiasing_Read, @_LapeImage_FontAntialiasing_Write);
+    addProperty('TImage', 'FontBold', 'Boolean', @_LapeImage_FontBold_Read, @_LapeImage_FontBold_Write);
+    addProperty('TImage', 'FontItalic', 'Boolean', @_LapeImage_FontItalic_Read, @_LapeImage_FontItalic_Write);
 
-    addGlobalFunc('function TImage.GetAlpha(X, Y: Integer): Byte;', @_LapeImage_GetAlpha);
-    addGlobalFunc('procedure TImage.SetAlpha(X, Y: Integer; Alpha: Byte);', @_LapeImage_SetAlpha);
-    addGlobalFunc('function TImage.GetPixel(X, Y: Integer): TColor;', @_LapeImage_GetPixel);
-    addGlobalFunc('procedure TImage.SetPixel(X, Y: Integer; Color: TColor);', @_LapeImage_SetPixel);
+    addPropertyIndexed('TImage', 'Alpha', 'X, Y: Integer', 'Byte', @_LapeImage_GetAlpha, @_LapeImage_SetAlpha);
+    addPropertyIndexed('TImage', 'Pixel', 'X, Y: Integer', 'TColor', @_LapeImage_GetPixel, @_LapeImage_SetPixel);
 
     addGlobalFunc('function TImage.GetPixels(Points: TPointArray): TColorArray;', @_LapeImage_GetPixels);
     addGlobalFunc('procedure TImage.SetPixels(Points: TPointArray; Color: TColor); overload', @_LapeImage_SetPixels1);

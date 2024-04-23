@@ -22,17 +22,17 @@ var
   ImgBox: TImageBox;
 begin
   Form := TLazForm.Create();
-  Form.SetCaption('ImageBox example');
-  Form.SetWidth(700);
-  Form.SetHeight(500);
-  Form.SetPosition(ELazFormPosition.ScreenCenter);
+  Form.Caption := 'ImageBox example';
+  Form.Width := 700;
+  Form.Height := 500;
+  Form.Position := ELazFormPosition.ScreenCenter;
 
   ImgBox := TImageBox.Create(Form);
-  ImgBox.SetParent(Form);
-  ImgBox.SetAlign(ELazAlign.Client);
+  ImgBox.Parent := Form;
+  ImgBox.Align := ELazAlign.Client;
   ImgBox.SetBackgroundFromTarget(Target);
-  ImgBox.SetOnImgPaint(@ImgBoxPaint);
-  ImgBox.SetOnImgMouseMove(@ImgBoxMouseMove);
+  ImgBox.OnImgPaint := @ImgBoxPaint;
+  ImgBox.OnImgMouseMove := @ImgBoxMouseMove;
 
   Form.ShowModal();
 end;

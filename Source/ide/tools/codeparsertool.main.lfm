@@ -1,19 +1,20 @@
 object Form1: TForm1
-  Left = 1319
-  Height = 654
-  Top = 290
-  Width = 1412
+  Left = -1791
+  Height = 652
+  Top = 471
+  Width = 1508
   Caption = 'CodeParserTool'
-  ClientHeight = 654
-  ClientWidth = 1412
+  ClientHeight = 652
+  ClientWidth = 1508
   DesignTimePPI = 120
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '3.0.0.3'
   inline SynEdit1: TSynEdit
-    Left = 16
-    Height = 536
-    Top = 8
-    Width = 704
-    Anchors = []
+    Left = 5
+    Height = 642
+    Top = 5
+    Width = 825
+    Align = alClient
+    BorderSpacing.Around = 5
     Font.Height = -17
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
@@ -527,11 +528,12 @@ object Form1: TForm1
     end
   end
   object Memo1: TMemo
-    Left = 728
-    Height = 534
-    Top = 8
+    Left = 835
+    Height = 647
+    Top = 5
     Width = 673
-    Anchors = [akTop]
+    Align = alRight
+    BorderSpacing.Top = 5
     Font.Height = -17
     Lines.Strings = (
       'procedure lol(hmm, i: Integer);'
@@ -586,15 +588,16 @@ object Form1: TForm1
   end
   object Timer1: TTimer
     OnTimer = Timer1Timer
-    Left = 16
-    Top = 568
+    Left = 112
+    Top = 520
   end
   object SynPasSyn1: TSynPasSyn
     Enabled = False
     CompilerMode = pcmDelphi
     NestedComments = False
     TypeHelpers = True
-    Left = 104
-    Top = 575
+    StringMultilineMode = []
+    Left = 200
+    Top = 520
   end
 end

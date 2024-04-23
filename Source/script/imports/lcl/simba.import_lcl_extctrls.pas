@@ -253,32 +253,32 @@ begin
 
     addClass('TLazTimer', 'TLazComponent');
     addClassConstructor('TLazTimer', '(AOwner: TLazComponent)', @_LapeTimer_Create);
-    addClassVar('TLazTimer', 'Enabled', 'Boolean', @_LapeTimer_Enabled_Read, @_LapeTimer_Enabled_Write);
-    addClassVar('TLazTimer', 'Interval', 'UInt32', @_LapeTimer_Interval_Read, @_LapeTimer_Interval_Write);
-    addClassVar('TLazTimer', 'OnTimer', 'TLazNotifyEvent', @_LapeTimer_OnTimer_Read, @_LapeTimer_OnTimer_Write);
-    addClassVar('TLazTimer', 'OnStartTimer', 'TLazNotifyEvent', @_LapeTimer_OnStartTimer_Read, @_LapeTimer_OnStartTimer_Write);
-    addClassVar('TLazTimer', 'OnStopTimer', 'TLazNotifyEvent', @_LapeTimer_OnStopTimer_Read, @_LapeTimer_OnStopTimer_Write);
+    addProperty('TLazTimer', 'Enabled', 'Boolean', @_LapeTimer_Enabled_Read, @_LapeTimer_Enabled_Write);
+    addProperty('TLazTimer', 'Interval', 'UInt32', @_LapeTimer_Interval_Read, @_LapeTimer_Interval_Write);
+    addProperty('TLazTimer', 'OnTimer', 'TLazNotifyEvent', @_LapeTimer_OnTimer_Read, @_LapeTimer_OnTimer_Write);
+    addProperty('TLazTimer', 'OnStartTimer', 'TLazNotifyEvent', @_LapeTimer_OnStartTimer_Read, @_LapeTimer_OnStartTimer_Write);
+    addProperty('TLazTimer', 'OnStopTimer', 'TLazNotifyEvent', @_LapeTimer_OnStopTimer_Read, @_LapeTimer_OnStopTimer_Write);
 
     addClass('TLazImage', 'TLazGraphicControl');
     addClassConstructor('TLazImage', '(AOwner: TLazComponent)', @_LapeImage_Create);
     addGlobalFunc('function TLazImage.DestRect: TLazRect;', @_LapeImage_DestRect);
-    addClassVar('TLazImage', 'Center', 'Boolean', @_LapeImage_Center_Read, @_LapeImage_Center_Write);
-    addClassVar('TLazImage', 'Picture', 'TLazPicture', @_LapeImage_Picture_Read, @_LapeImage_Picture_Write);
-    addClassVar('TLazImage', 'Stretch', 'Boolean', @_LapeImage_Stretch_Read, @_LapeImage_Stretch_Write);
-    addClassVar('TLazImage', 'Transparent', 'Boolean', @_LapeImage_Transparent_Read, @_LapeImage_Transparent_Write);
-    addClassVar('TLazImage', 'Proportional', 'Boolean', @_LapeImage_Proportional_Read, @_LapeImage_Proportional_Write);
-    addClassVar('TLazImage', 'OnPictureChanged', 'TLazNotifyEvent', @_LapeImage_OnPictureChanged_Read, @_LapeImage_OnPictureChanged_Write);
-    addClassVar('TLazImage', 'OnMouseDown', 'TLazMouseEvent', nil, @_LapeImage_OnMouseDown_Write);
-    addClassVar('TLazImage', 'OnMouseUp', 'TLazMouseEvent', nil, @_LapeImage_OnMouseUp_Write);
-    addClassVar('TLazImage', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeImage_OnMouseEnter_Read, @_LapeImage_OnMouseEnter_Write);
-    addClassVar('TLazImage', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeImage_OnMouseLeave_Read, @_LapeImage_OnMouseLeave_Write);
-    addClassVar('TLazImage', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeImage_OnMouseMove_Read, @_LapeImage_OnMouseMove_Write);
+    addProperty('TLazImage', 'Center', 'Boolean', @_LapeImage_Center_Read, @_LapeImage_Center_Write);
+    addProperty('TLazImage', 'Picture', 'TLazPicture', @_LapeImage_Picture_Read, @_LapeImage_Picture_Write);
+    addProperty('TLazImage', 'Stretch', 'Boolean', @_LapeImage_Stretch_Read, @_LapeImage_Stretch_Write);
+    addProperty('TLazImage', 'Transparent', 'Boolean', @_LapeImage_Transparent_Read, @_LapeImage_Transparent_Write);
+    addProperty('TLazImage', 'Proportional', 'Boolean', @_LapeImage_Proportional_Read, @_LapeImage_Proportional_Write);
+    addProperty('TLazImage', 'OnPictureChanged', 'TLazNotifyEvent', @_LapeImage_OnPictureChanged_Read, @_LapeImage_OnPictureChanged_Write);
+    addProperty('TLazImage', 'OnMouseDown', 'TLazMouseEvent', nil, @_LapeImage_OnMouseDown_Write);
+    addProperty('TLazImage', 'OnMouseUp', 'TLazMouseEvent', nil, @_LapeImage_OnMouseUp_Write);
+    addProperty('TLazImage', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeImage_OnMouseEnter_Read, @_LapeImage_OnMouseEnter_Write);
+    addProperty('TLazImage', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeImage_OnMouseLeave_Read, @_LapeImage_OnMouseLeave_Write);
+    addProperty('TLazImage', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeImage_OnMouseMove_Read, @_LapeImage_OnMouseMove_Write);
 
     addClass('TLazCustomPanel', 'TLazCustomControl');
-    addClassVar('TLazCustomPanel', 'Alignment', 'ELazAlignment', @_LapeCustomPanel_Alignment_Read, @_LapeCustomPanel_Alignment_Write);
-    addClassVar('TLazCustomPanel', 'BevelInner', 'ELazPanelBevel', @_LapeCustomPanel_BevelInner_Read, @_LapeCustomPanel_BevelInner_Write);
-    addClassVar('TLazCustomPanel', 'BevelOuter', 'ELazPanelBevel', @_LapeCustomPanel_BevelOuter_Read, @_LapeCustomPanel_BevelOuter_Write);
-    addClassVar('TLazCustomPanel', 'BevelWidth', 'Integer', @_LapeCustomPanel_BevelWidth_Read, @_LapeCustomPanel_BevelWidth_Write);
+    addProperty('TLazCustomPanel', 'Alignment', 'ELazAlignment', @_LapeCustomPanel_Alignment_Read, @_LapeCustomPanel_Alignment_Write);
+    addProperty('TLazCustomPanel', 'BevelInner', 'ELazPanelBevel', @_LapeCustomPanel_BevelInner_Read, @_LapeCustomPanel_BevelInner_Write);
+    addProperty('TLazCustomPanel', 'BevelOuter', 'ELazPanelBevel', @_LapeCustomPanel_BevelOuter_Read, @_LapeCustomPanel_BevelOuter_Write);
+    addProperty('TLazCustomPanel', 'BevelWidth', 'Integer', @_LapeCustomPanel_BevelWidth_Read, @_LapeCustomPanel_BevelWidth_Write);
     addClassConstructor('TLazCustomPanel', '(TheOwner: TLazComponent)', @_LapeCustomPanel_Create);
 
     addClass('TLazPanel', 'TLazCustomPanel');

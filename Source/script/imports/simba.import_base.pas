@@ -546,7 +546,7 @@ begin
     ImportingSection := '';
 
     addClass('TBaseClass', 'Pointer');
-    addClassVar('TBaseClass', 'Name', 'String', @_LapeBaseClass_Name_Read, @_LapeBaseClass_Name_Write);
+    addProperty('TBaseClass', 'Name', 'String', @_LapeBaseClass_Name_Read, @_LapeBaseClass_Name_Write);
     addGlobalFunc('procedure TBaseClass.FreeOnTerminate(Value: Boolean);', @_LapeBaseClass_FreeOnTerminate);
   end;
 end;

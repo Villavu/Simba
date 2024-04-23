@@ -796,22 +796,22 @@ begin
   with Compiler do
   begin
     addClass('TLazCustomFloatSpinEdit', 'TLazCustomEdit');
-    addClassVar('TLazCustomFloatSpinEdit', 'DecimalPlaces', 'Integer', @_LapeCustomFloatSpinEdit_DecimalPlaces_Read, @_LapeCustomFloatSpinEdit_DecimalPlaces_Write);
-    addClassVar('TLazCustomFloatSpinEdit', 'Increment', 'Double', @_LapeCustomFloatSpinEdit_Increment_Read, @_LapeCustomFloatSpinEdit_Increment_Write);
-    addClassVar('TLazCustomFloatSpinEdit', 'MinValue', 'Double', @_LapeCustomFloatSpinEdit_MinValue_Read, @_LapeCustomFloatSpinEdit_MinValue_Write);
-    addClassVar('TLazCustomFloatSpinEdit', 'MaxValue', 'Double', @_LapeCustomFloatSpinEdit_MaxValue_Read, @_LapeCustomFloatSpinEdit_MaxValue_Write);
-    addClassVar('TLazCustomFloatSpinEdit', 'Value', 'Double', @_LapeCustomFloatSpinEdit_Value_Read, @_LapeCustomFloatSpinEdit_Value_Write);
-    addClassVar('TLazCustomFloatSpinEdit', 'ValueEmpty', 'Boolean', @_LapeCustomFloatSpinEdit_ValueEmpty_Read, @_LapeCustomFloatSpinEdit_ValueEmpty_Write);
+    addProperty('TLazCustomFloatSpinEdit', 'DecimalPlaces', 'Integer', @_LapeCustomFloatSpinEdit_DecimalPlaces_Read, @_LapeCustomFloatSpinEdit_DecimalPlaces_Write);
+    addProperty('TLazCustomFloatSpinEdit', 'Increment', 'Double', @_LapeCustomFloatSpinEdit_Increment_Read, @_LapeCustomFloatSpinEdit_Increment_Write);
+    addProperty('TLazCustomFloatSpinEdit', 'MinValue', 'Double', @_LapeCustomFloatSpinEdit_MinValue_Read, @_LapeCustomFloatSpinEdit_MinValue_Write);
+    addProperty('TLazCustomFloatSpinEdit', 'MaxValue', 'Double', @_LapeCustomFloatSpinEdit_MaxValue_Read, @_LapeCustomFloatSpinEdit_MaxValue_Write);
+    addProperty('TLazCustomFloatSpinEdit', 'Value', 'Double', @_LapeCustomFloatSpinEdit_Value_Read, @_LapeCustomFloatSpinEdit_Value_Write);
+    addProperty('TLazCustomFloatSpinEdit', 'ValueEmpty', 'Boolean', @_LapeCustomFloatSpinEdit_ValueEmpty_Read, @_LapeCustomFloatSpinEdit_ValueEmpty_Write);
     addClassConstructor('TLazCustomFloatSpinEdit', '(TheOwner: TLazComponent)', @_LapeCustomFloatSpinEdit_Create);
 
     addClass('TLazFloatSpinEdit', 'TLazCustomFloatSpinEdit');
     addClassConstructor('TLazFloatSpinEdit', '(TheOwner: TLazComponent)', @_LapeFloatSpinEdit_Create);
 
     addClass('TLazCustomSpinEdit', 'TLazCustomFloatSpinEdit');
-    addClassVar('TLazCustomSpinEdit', 'Value', 'Integer', @_LapeCustomSpinEdit_Value_Read, @_LapeCustomSpinEdit_Value_Write);
-    addClassVar('TLazCustomSpinEdit', 'MinValue', 'Integer', @_LapeCustomSpinEdit_MinValue_Read, @_LapeCustomSpinEdit_MinValue_Write);
-    addClassVar('TLazCustomSpinEdit', 'MaxValue', 'Integer', @_LapeCustomSpinEdit_MaxValue_Read, @_LapeCustomSpinEdit_MaxValue_Write);
-    addClassVar('TLazCustomSpinEdit', 'Increment', 'Integer', @_LapeCustomSpinEdit_Increment_Read, @_LapeCustomSpinEdit_Increment_Write);
+    addProperty('TLazCustomSpinEdit', 'Value', 'Integer', @_LapeCustomSpinEdit_Value_Read, @_LapeCustomSpinEdit_Value_Write);
+    addProperty('TLazCustomSpinEdit', 'MinValue', 'Integer', @_LapeCustomSpinEdit_MinValue_Read, @_LapeCustomSpinEdit_MinValue_Write);
+    addProperty('TLazCustomSpinEdit', 'MaxValue', 'Integer', @_LapeCustomSpinEdit_MaxValue_Read, @_LapeCustomSpinEdit_MaxValue_Write);
+    addProperty('TLazCustomSpinEdit', 'Increment', 'Integer', @_LapeCustomSpinEdit_Increment_Read, @_LapeCustomSpinEdit_Increment_Write);
     addClassConstructor('TLazCustomSpinEdit', '(TheOwner: TLazComponent)', @_LapeCustomSpinEdit_Create);
 
     addClass('TLazSpinEdit', 'TLazCustomSpinEdit');
@@ -825,7 +825,7 @@ begin
     addClassConstructor('TLazOutputPipeStream', '(AHandle: TLazHandle)', @_LapeOutputPipeStream_Create);
 
     addClass('TLazInputPipeStream', 'TLazHandleStream');
-    addClassVar('TLazInputPipeStream', 'NumBytesAvailable', 'UInt32', @_LapeInputPipeStream_NumBytesAvailable_Read);
+    addProperty('TLazInputPipeStream', 'NumBytesAvailable', 'UInt32', @_LapeInputPipeStream_NumBytesAvailable_Read);
     addClassConstructor('TLazInputPipeStream', '(AHandle: TLazHandle)', @_LapeInputPipeStream_Create);
 
     addClass('TLazProcess', 'TLazComponent');
@@ -834,27 +834,27 @@ begin
     addGlobalFunc('function TLazProcess.Suspend: Integer;', @_LapeProcess_Suspend);
     addGlobalFunc('function TLazProcess.Terminate(AExitCode : Integer): Boolean;', @_LapeProcess_Terminate);
     addGlobalFunc('function TLazProcess.WaitOnExit: Boolean;', @_LapeProcess_WaitOnExit);
-    addClassVar('TLazProcess', 'WindowRect', 'TLazRect', @_LapeProcess_WindowRect_Read, @_LapeProcess_WindowRect_Write);
-    addClassVar('TLazProcess', 'ProcessHandle', 'TLazHandle', @_LapeProcess_ProcessHandle_Read);
-    addClassVar('TLazProcess', 'ThreadHandle', 'TLazHandle', @_LapeProcess_ThreadHandle_Read);
-    addClassVar('TLazProcess', 'ProcessID', 'Integer', @_LapeProcess_ProcessID_Read);
-    addClassVar('TLazProcess', 'ThreadID', 'Integer', @_LapeProcess_ThreadID_Read);
-    addClassVar('TLazProcess', 'Input', 'TLazOutputPipeStream', @_LapeProcess_Input_Read);
-    addClassVar('TLazProcess', 'Output', 'TLazInputPipeStream', @_LapeProcess_Output_Read);
-    addClassVar('TLazProcess', 'Stderr', 'TLazInputPipeStream', @_LapeProcess_Stderr_Read);
-    addClassVar('TLazProcess', 'ExitStatus', 'Integer', @_LapeProcess_ExitStatus_Read);
-    addClassVar('TLazProcess', 'ExitCode', 'Integer', @_LapeProcess_ExitCode_Read);
-    addClassVar('TLazProcess', 'InheritHandles', 'Boolean', @_LapeProcess_InheritHandles_Read, @_LapeProcess_InheritHandles_Write);
-    addClassVar('TLazProcess', 'PipeBufferSize', 'UInt32', @_LapeProcess_PipeBufferSize_Read, @_LapeProcess_PipeBufferSize_Write);
-    addClassVar('TLazProcess', 'Active', 'Boolean', @_LapeProcess_Active_Read, @_LapeProcess_Active_Write);
-    addClassVar('TLazProcess', 'CommandLine', 'String', @_LapeProcess_CommandLine_Read, @_LapeProcess_CommandLine_Write);
-    addClassVar('TLazProcess', 'Executable', 'String', @_LapeProcess_Executable_Read, @_LapeProcess_Executable_Write);
-    addClassVar('TLazProcess', 'Parameters', 'TLazStrings', @_LapeProcess_Parameters_Read, @_LapeProcess_Parameters_Write);
-    addClassVar('TLazProcess', 'CurrentDirectory', 'String', @_LapeProcess_CurrentDirectory_Read, @_LapeProcess_CurrentDirectory_Write);
-    addClassVar('TLazProcess', 'Environment', 'TLazStrings', @_LapeProcess_Environment_Read, @_LapeProcess_Environment_Write);
-    addClassVar('TLazProcess', 'Options', 'TLazProcessOptions', @_LapeProcess_Options_Read, @_LapeProcess_Options_Write);
-    addClassVar('TLazProcess', 'Priority', 'TLazProcessPriority', @_LapeProcess_Priority_Read, @_LapeProcess_Priority_Write);
-    addClassVar('TLazProcess', 'Running', 'Boolean', @_LapeProcess_Running_Read);
+    addProperty('TLazProcess', 'WindowRect', 'TLazRect', @_LapeProcess_WindowRect_Read, @_LapeProcess_WindowRect_Write);
+    addProperty('TLazProcess', 'ProcessHandle', 'TLazHandle', @_LapeProcess_ProcessHandle_Read);
+    addProperty('TLazProcess', 'ThreadHandle', 'TLazHandle', @_LapeProcess_ThreadHandle_Read);
+    addProperty('TLazProcess', 'ProcessID', 'Integer', @_LapeProcess_ProcessID_Read);
+    addProperty('TLazProcess', 'ThreadID', 'Integer', @_LapeProcess_ThreadID_Read);
+    addProperty('TLazProcess', 'Input', 'TLazOutputPipeStream', @_LapeProcess_Input_Read);
+    addProperty('TLazProcess', 'Output', 'TLazInputPipeStream', @_LapeProcess_Output_Read);
+    addProperty('TLazProcess', 'Stderr', 'TLazInputPipeStream', @_LapeProcess_Stderr_Read);
+    addProperty('TLazProcess', 'ExitStatus', 'Integer', @_LapeProcess_ExitStatus_Read);
+    addProperty('TLazProcess', 'ExitCode', 'Integer', @_LapeProcess_ExitCode_Read);
+    addProperty('TLazProcess', 'InheritHandles', 'Boolean', @_LapeProcess_InheritHandles_Read, @_LapeProcess_InheritHandles_Write);
+    addProperty('TLazProcess', 'PipeBufferSize', 'UInt32', @_LapeProcess_PipeBufferSize_Read, @_LapeProcess_PipeBufferSize_Write);
+    addProperty('TLazProcess', 'Active', 'Boolean', @_LapeProcess_Active_Read, @_LapeProcess_Active_Write);
+    addProperty('TLazProcess', 'CommandLine', 'String', @_LapeProcess_CommandLine_Read, @_LapeProcess_CommandLine_Write);
+    addProperty('TLazProcess', 'Executable', 'String', @_LapeProcess_Executable_Read, @_LapeProcess_Executable_Write);
+    addProperty('TLazProcess', 'Parameters', 'TLazStrings', @_LapeProcess_Parameters_Read, @_LapeProcess_Parameters_Write);
+    addProperty('TLazProcess', 'CurrentDirectory', 'String', @_LapeProcess_CurrentDirectory_Read, @_LapeProcess_CurrentDirectory_Write);
+    addProperty('TLazProcess', 'Environment', 'TLazStrings', @_LapeProcess_Environment_Read, @_LapeProcess_Environment_Write);
+    addProperty('TLazProcess', 'Options', 'TLazProcessOptions', @_LapeProcess_Options_Read, @_LapeProcess_Options_Write);
+    addProperty('TLazProcess', 'Priority', 'TLazProcessPriority', @_LapeProcess_Priority_Read, @_LapeProcess_Priority_Write);
+    addProperty('TLazProcess', 'Running', 'Boolean', @_LapeProcess_Running_Read);
     addClassConstructor('TLazProcess', '(AOwner : TLazComponent)', @_LapeProcess_Create);
 
     addClass('TLazMenu', 'TLazComponent');
@@ -877,27 +877,27 @@ begin
     addGlobalFunc('procedure TLazMenuItem.Clear;', @_LapeMenuItem_Clear);
     addGlobalFunc('function TLazMenuItem.HasBitmap: boolean;', @_LapeMenuItem_HasBitmap);
     addGlobalFunc('function TLazMenuItem.AddMenu(s: string): TLazMenuItem;', @_LapeMenuItem_AddMenu);
-    addClassVar('TLazMenuItem', 'Count', 'Integer', @_LapeMenuItem_Count_Read);
-    addClassVar('TLazMenuItem', 'Items', 'TLazMenuItem', @_LapeMenuItem_Items_Read);
-    addClassVar('TLazMenuItem', 'Hint', 'String', @_LapeMenuItem_Hint_Read, @_LapeMenuItem_Hint_Write);
-    addClassVar('TLazMenuItem', 'Checked', 'Boolean', @_LapeMenuItem_Checked_Read, @_LapeMenuItem_Checked_Write);
-    addClassVar('TLazMenuItem', 'MenuIndex', 'Integer', @_LapeMenuItem_MenuIndex_Read, @_LapeMenuItem_MenuIndex_Write);
-    addClassVar('TLazMenuItem', 'Menu', 'TLazMenu', @_LapeMenuItem_Menu_Read);
-    addClassVar('TLazMenuItem', 'Parent', 'TLazMenuItem', @_LapeMenuItem_Parent_Read);
-    addClassVar('TLazMenuItem', 'Command', 'Int16', @_LapeMenuItem_Command_Read);
-    addClassVar('TLazMenuItem', 'AutoCheck', 'boolean', @_LapeMenuItem_AutoCheck_Read, @_LapeMenuItem_AutoCheck_Write);
-    addClassVar('TLazMenuItem', 'Default', 'Boolean', @_LapeMenuItem_Default_Read, @_LapeMenuItem_Default_Write);
-    addClassVar('TLazMenuItem', 'Bitmap', 'TLazBitmap', @_LapeMenuItem_Bitmap_Read, @_LapeMenuItem_Bitmap_Write);
-    addClassVar('TLazMenuItem', 'GroupIndex', 'Byte', @_LapeMenuItem_GroupIndex_Read, @_LapeMenuItem_GroupIndex_Write);
-    addClassVar('TLazMenuItem', 'RadioItem', 'Boolean', @_LapeMenuItem_RadioItem_Read, @_LapeMenuItem_RadioItem_Write);
-    addClassVar('TLazMenuItem', 'OnClick', 'TLazNotifyEvent', @_LapeMenuItem_OnClick_Read, @_LapeMenuItem_OnClick_Write);
-    addClassVar('TLazMenuItem', 'Caption', 'String', @_LapeMenuItem_Caption_Read, @_LapeMenuItem_Caption_Write);
+    addProperty('TLazMenuItem', 'Count', 'Integer', @_LapeMenuItem_Count_Read);
+    addProperty('TLazMenuItem', 'Items', 'TLazMenuItem', @_LapeMenuItem_Items_Read);
+    addProperty('TLazMenuItem', 'Hint', 'String', @_LapeMenuItem_Hint_Read, @_LapeMenuItem_Hint_Write);
+    addProperty('TLazMenuItem', 'Checked', 'Boolean', @_LapeMenuItem_Checked_Read, @_LapeMenuItem_Checked_Write);
+    addProperty('TLazMenuItem', 'MenuIndex', 'Integer', @_LapeMenuItem_MenuIndex_Read, @_LapeMenuItem_MenuIndex_Write);
+    addProperty('TLazMenuItem', 'Menu', 'TLazMenu', @_LapeMenuItem_Menu_Read);
+    addProperty('TLazMenuItem', 'Parent', 'TLazMenuItem', @_LapeMenuItem_Parent_Read);
+    addProperty('TLazMenuItem', 'Command', 'Int16', @_LapeMenuItem_Command_Read);
+    addProperty('TLazMenuItem', 'AutoCheck', 'boolean', @_LapeMenuItem_AutoCheck_Read, @_LapeMenuItem_AutoCheck_Write);
+    addProperty('TLazMenuItem', 'Default', 'Boolean', @_LapeMenuItem_Default_Read, @_LapeMenuItem_Default_Write);
+    addProperty('TLazMenuItem', 'Bitmap', 'TLazBitmap', @_LapeMenuItem_Bitmap_Read, @_LapeMenuItem_Bitmap_Write);
+    addProperty('TLazMenuItem', 'GroupIndex', 'Byte', @_LapeMenuItem_GroupIndex_Read, @_LapeMenuItem_GroupIndex_Write);
+    addProperty('TLazMenuItem', 'RadioItem', 'Boolean', @_LapeMenuItem_RadioItem_Read, @_LapeMenuItem_RadioItem_Write);
+    addProperty('TLazMenuItem', 'OnClick', 'TLazNotifyEvent', @_LapeMenuItem_OnClick_Read, @_LapeMenuItem_OnClick_Write);
+    addProperty('TLazMenuItem', 'Caption', 'String', @_LapeMenuItem_Caption_Read, @_LapeMenuItem_Caption_Write);
     addClassConstructor('TLazMenuItem', '(AOwner: TLazComponent)', @_LapeMenuItem_Create);
 
     addGlobalFunc('function TLazMenu.DispatchCommand(ACommand: Int16): Boolean;', @_LapeMenu_DispatchCommand);
     addGlobalFunc('function TLazMenu.AddMenu(Name: string): TLazMenuItem;', @_LapeMenu_AddMenu);
-    addClassVar('TLazMenu', 'Parent', 'TLazComponent', @_LapeMenu_Parent_Read, @_LapeMenu_Parent_Write);
-    addClassVar('TLazMenu', 'Items', 'TLazMenuItem', @_LapeMenu_Items_Read);
+    addProperty('TLazMenu', 'Parent', 'TLazComponent', @_LapeMenu_Parent_Read, @_LapeMenu_Parent_Write);
+    addProperty('TLazMenu', 'Items', 'TLazMenuItem', @_LapeMenu_Items_Read);
     addClassConstructor('TLazMenu', '(AOwner: TLazComponent)', @_LapeMenu_Create);
 
     addClass('TLazMainMenu', 'TLazMenu');
@@ -905,20 +905,20 @@ begin
 
     addClass('TLazListFilterEdit', 'TLazCustomControl');
     addClassConstructor('TLazListFilterEdit', '(AOwner: TLazComponent)', @_LapeListFilterEdit_Create);
-    addClassVar('TLazListFilterEdit', 'FilteredListBox', 'TLazListBox', @_LapeListFilterEdit_FilteredListBox_Read, @_LapeListFilterEdit_FilteredListBox_Write);
-    addClassVar('TLazListFilterEdit', 'Filter', 'String', @_LapeListFilterEdit_Filter_Read, @_LapeListFilterEdit_Filter_Write);
-    addClassVar('TLazListFilterEdit', 'Flat', 'Boolean', @_LapeListFilterEdit_Flat_Read, @_LapeListFilterEdit_Flat_Write);
-    addClassVar('TLazListFilterEdit', 'ButtonCaption', 'String', @_LapeListFilterEdit_ButtonCaption_Read, @_LapeListFilterEdit_ButtonCaption_Write);
-    addClassVar('TLazListFilterEdit', 'ButtonWidth', 'Integer', @_LapeListFilterEdit_ButtonWidth_Read, @_LapeListFilterEdit_ButtonWidth_Write);
-    addClassVar('TLazListFilterEdit', 'TextHint', 'String', @_LapeListFilterEdit_TextHint_Read, @_LapeListFilterEdit_TextHint_Write);
-    addClassVar('TLazListFilterEdit', 'OnAfterFilter', 'TLazNotifyEvent', @_LapeListFilterEdit_OnAfterFilter_Read, @_LapeListFilterEdit_OnAfterFilter_Write);
-    addClassVar('TLazListFilterEdit', 'OnChange', 'TLazNotifyEvent', @_LapeListFilterEdit_OnChange_Read, @_LapeListFilterEdit_OnChange_Write);
+    addProperty('TLazListFilterEdit', 'FilteredListBox', 'TLazListBox', @_LapeListFilterEdit_FilteredListBox_Read, @_LapeListFilterEdit_FilteredListBox_Write);
+    addProperty('TLazListFilterEdit', 'Filter', 'String', @_LapeListFilterEdit_Filter_Read, @_LapeListFilterEdit_Filter_Write);
+    addProperty('TLazListFilterEdit', 'Flat', 'Boolean', @_LapeListFilterEdit_Flat_Read, @_LapeListFilterEdit_Flat_Write);
+    addProperty('TLazListFilterEdit', 'ButtonCaption', 'String', @_LapeListFilterEdit_ButtonCaption_Read, @_LapeListFilterEdit_ButtonCaption_Write);
+    addProperty('TLazListFilterEdit', 'ButtonWidth', 'Integer', @_LapeListFilterEdit_ButtonWidth_Read, @_LapeListFilterEdit_ButtonWidth_Write);
+    addProperty('TLazListFilterEdit', 'TextHint', 'String', @_LapeListFilterEdit_TextHint_Read, @_LapeListFilterEdit_TextHint_Write);
+    addProperty('TLazListFilterEdit', 'OnAfterFilter', 'TLazNotifyEvent', @_LapeListFilterEdit_OnAfterFilter_Read, @_LapeListFilterEdit_OnAfterFilter_Write);
+    addProperty('TLazListFilterEdit', 'OnChange', 'TLazNotifyEvent', @_LapeListFilterEdit_OnChange_Read, @_LapeListFilterEdit_OnChange_Write);
 
     addClass('TLazButtonPanel', 'TLazCustomPanel');
     addGlobalType('set of enum(OK, Cancel, Close, Help)', 'ELazButtonPanelButtons');
     addClassConstructor('TLazButtonPanel', '(AOwner: TLazComponent)', @_LapeButtonPanel_Create);
-    addClassVar('TLazButtonPanel', 'ShowButtons', 'ELazButtonPanelButtons', @_LapeButtonPanel_ShowButtons_Read, @_LapeButtonPanel_ShowButtons_Write);
-    addClassVar('TLazButtonPanel', 'ShowGlyphs', 'ELazButtonPanelButtons', @_LapeButtonPanel_ShowGlyphs_Read, @_LapeButtonPanel_ShowGlyphs_Write);
+    addProperty('TLazButtonPanel', 'ShowButtons', 'ELazButtonPanelButtons', @_LapeButtonPanel_ShowButtons_Read, @_LapeButtonPanel_ShowButtons_Write);
+    addProperty('TLazButtonPanel', 'ShowGlyphs', 'ELazButtonPanelButtons', @_LapeButtonPanel_ShowGlyphs_Read, @_LapeButtonPanel_ShowGlyphs_Write);
   end;
 end;
 
