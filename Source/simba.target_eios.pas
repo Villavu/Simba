@@ -51,6 +51,7 @@ type
   PEIOSTarget = ^TEIOSTarget;
   TEIOSTarget = record
     Lib: TLibHandle;
+    FileName: ShortString;
     ImageBuffer: PColorBGRA;
     Target: Pointer;
 
@@ -100,22 +101,24 @@ function EIOSTarget_IsValid(Target: Pointer): Boolean;
 implementation
 
 uses
-  simba.script_pluginloader;
+  simba.script_pluginloader, simba.env, simba.files;
 
 const
   MouseButtonToEIOS: array[EMouseButton] of Int32 = (1, 3, 2, 4, 5);
 
 function LoadEIOS(FileName, Args: String): TEIOSTarget;
 begin
+  Result := Default(TEIOSTarget);
+  try
+    Result.Lib := LoadPlugin(FileName);
+    Result.FileName := TSimbaPath.PathExtractRelative(SimbaEnv.SimbaPath, FileName);
+  except
+    on E: Exception do
+      raise Exception.Create('SetTargetEIOS: ' + E.Message);
+  end;
+
   with Result do
   begin
-    try
-      Lib := LoadPlugin(FileName);
-    except
-      on E: Exception do
-        raise Exception.Create('EIOS: ' + E.Message);
-    end;
-
     Pointer(RequestTarget) := GetProcedureAddress(Lib, 'EIOS_RequestTarget');
     Pointer(ReleaseTarget) := GetProcedureAddress(Lib, 'EIOS_ReleaseTarget');
 

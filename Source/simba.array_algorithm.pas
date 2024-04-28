@@ -13,7 +13,8 @@ unit simba.array_algorithm;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.base;
 
 type
   generic TArrayRelationship<_T> = class
@@ -55,6 +56,51 @@ type
     TWeightArr = array of _W;
   public
     class procedure QuickSort(var Arr: TArr; var Weights: TWeightArr; iLo, iHi: SizeInt; SortUp: Boolean); static;
+  end;
+
+  generic TArrayEquals<_T> = class
+  public type
+    TArr = array of _T;
+  public
+    class function Equals(A, B: TArr): Boolean; static; reintroduce;
+  end;
+
+  generic TArrayEqualsFunc<_T> = class
+  public type
+    TArr = array of _T;
+    TEqualFunc = function(const A, B: _T): Boolean is nested;
+  public
+    class function Equals(A, B: TArr; EqualFunc: TEqualFunc): Boolean; static; reintroduce;
+  end;
+
+  generic TArrayIndexOf<_T> = class
+  public type
+    TArr = array of _T;
+  public
+    class function IndexOf(Item: _T; Arr: TArr): Integer; static;
+  end;
+
+  generic TArrayIndexOfFunc<_T> = class
+  public type
+    TArr = array of _T;
+    TEqualFunc = function(const A, B: _T): Boolean is nested;
+  public
+    class function IndexOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): Integer; static;
+  end;
+
+  generic TArrayIndicesOf<_T> = class
+  public type
+    TArr = array of _T;
+  public
+    class function IndicesOf(Item: _T; Arr: TArr): TIntegerArray; static;
+  end;
+
+  generic TArrayIndicesOfFunc<_T> = class
+  public type
+    TArr = array of _T;
+    TEqualFunc = function(const A, B: _T): Boolean is nested;
+  public
+    class function IndicesOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): TIntegerArray; static;
   end;
 
 implementation
@@ -368,6 +414,105 @@ begin
       iHi := Hi;
     end;
   until iLo >= iHi;
+end;
+
+class function TArrayEquals.Equals(A, B: TArr): Boolean;
+begin
+  if (Length(A) <> Length(B)) then
+    Exit(False);
+  if (Length(A) = 0) and (Length(B) = 0) then
+    Exit(True);
+
+  Result := CompareMem(@A[0], @B[0], Length(A) * SizeOf(_T));
+end;
+
+class function TArrayEqualsFunc.Equals(A, B: TArr; EqualFunc: TEqualFunc): Boolean;
+var
+  I: Integer;
+begin
+  if (Length(A) <> Length(B)) then
+    Exit(False);
+  if (Length(A) = 0) and (Length(B) = 0) then
+    Exit(True);
+
+  for I := 0 to High(A) do
+    if not EqualFunc(A[I], B[I]) then
+      Exit(False);
+
+  Result := True;
+end;
+
+class function TArrayIndexOf.IndexOf(Item: _T; Arr: TArr): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  if (Length(Arr) = 0) then
+    Exit;
+
+  // can use these for better code
+  if (not IsManagedType(_T)) and (SizeOf(_T) in [1,2,4,8]) then
+  begin
+    case SizeOf(_T) of
+      1: Result := IndexByte(Arr[0], Length(Arr) * SizeOf(_T), PByte(@Item)^);
+      2: Result := IndexWord(Arr[0], Length(Arr) * SizeOf(_T), PWord(@Item)^);
+      4: Result := IndexDWord(Arr[0], Length(Arr) * SizeOf(_T), PDWord(@Item)^);
+      8: Result := IndexQWord(Arr[0], Length(Arr) * SizeOf(_T), PQWord(@Item)^);
+    end;
+    Exit;
+  end;
+
+  for I := 0 to High(Arr) do
+    if (Arr[I] = Item) then
+      Exit(I);
+end;
+
+class function TArrayIndexOfFunc.IndexOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): Integer;
+var
+  I: Integer;
+begin
+  Result := -1;
+  for I := 0 to High(Arr) do
+    if EqualFunc(Arr[I], Item) then
+      Exit(I);
+end;
+
+class function TArrayIndicesOf.IndicesOf(Item: _T; Arr: TArr): TIntegerArray;
+var
+  I, Count: Integer;
+begin
+  SetLength(Result, 8);
+  Count := 0;
+
+  for I := 0 to High(Arr) do
+    if (Arr[I] = Item) then
+    begin
+      if (Count >= Length(Result)) then
+        SetLength(Result, Length(Result) * 2);
+      Result[Count] := I;
+      Inc(Count);
+    end;
+
+  SetLength(Result, Count);
+end;
+
+class function TArrayIndicesOfFunc.IndicesOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): TIntegerArray;
+var
+  I, Count: Integer;
+begin
+  SetLength(Result, 8);
+  Count := 0;
+
+  for I := 0 to High(Arr) do
+    if EqualFunc(Arr[I], Item) then
+    begin
+      if (Count >= Length(Result)) then
+        SetLength(Result, Length(Result) * 2);
+      Result[Count] := I;
+      Inc(Count);
+    end;
+
+  SetLength(Result, Count);
 end;
 
 end.

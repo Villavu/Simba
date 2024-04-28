@@ -19,7 +19,7 @@ type
   PSimbaPluginTarget = ^TSimbaPluginTarget;
   TSimbaPluginTarget = record
     Lib: TLibHandle;
-    FileName: String;
+    FileName: ShortString;
     Target: Pointer;
     DebugImageThread: TThread;
 
@@ -118,21 +118,19 @@ begin
     SimbaException('SimbaPluginTarget: "' + MethodName + '" is not exported');
 end;
 
-function Load(AFileName: String): TSimbaPluginTarget;
+function Load(FileName: String): TSimbaPluginTarget;
 begin
   Result := Default(TSimbaPluginTarget);
+  try
+    Result.Lib := LoadPlugin(FileName);
+    Result.FileName := TSimbaPath.PathExtractRelative(SimbaEnv.SimbaPath, FileName);
+  except
+    on E: Exception do
+      raise Exception.Create('LoadPluginTarget: ' + E.Message);
+  end;
 
   with Result do
   begin
-    try
-      Lib := LoadPlugin(AFileName);
-    except
-      on E: Exception do
-        raise Exception.Create('LoadPluginTarget: ' + E.Message);
-    end;
-
-    FileName := TSimbaPath.PathExtractRelative(SimbaEnv.SimbaPath, AFileName);
-
     Pointer(Request)               := GetProcedureAddress(Lib, 'SimbaPluginTarget_Request');
     Pointer(RequestWithDebugImage) := GetProcedureAddress(Lib, 'SimbaPluginTarget_RequestWithDebugImage');
     Pointer(Release)               := GetProcedureAddress(Lib, 'SimbaPluginTarget_Release');

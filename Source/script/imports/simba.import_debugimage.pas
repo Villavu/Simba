@@ -97,7 +97,7 @@ ShowOnClient
 (*
 ShowOnClient
 ------------
-> procedure ShowOnClient(TPA: TPointArray; Color: Integer = $0000FF);
+> procedure ShowOnClient(TPA: TPointArray);
 *)
 
 (*

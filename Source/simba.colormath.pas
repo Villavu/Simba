@@ -22,10 +22,67 @@ type
   PColorSpace = ^EColorSpace;
   {$POP}
 
+  TColorRGB = record
+    R,G,B: Byte;
+  end;
+
+  TColorXYZ = record
+    X,Y,Z: Single;
+  end;
+
+  TColorLAB = record
+    L,A,B: Single;
+  end;
+
+  TColorLCH = record
+    L,C,H: Single;
+  end;
+
+  TColorHSV = record
+    H,S,V: Single;
+  end;
+
+  TColorHSL = record
+    H,S,L: Single;
+  end;
+
+  TColorBGR = packed record
+    B,G,R: Byte;
+  end;
+  PColorBGR = ^TColorBGR;
+
+  TColorARGB = packed record
+  case Byte of
+    0: (A, R, G, B: Byte);
+    1: (AsInteger: UInt32);
+  end;
+
+  TColorRGBA = packed record
+  case Byte of
+    0: (R,G,B,A: Byte);
+    1: (AsInteger: UInt32);
+  end;
+
+  PColorARGB = ^TColorARGB;
+  PColorRGB = ^TColorRGB;
+  PColorXYZ = ^TColorXYZ;
+  PColorLAB = ^TColorLAB;
+  PColorLCH = ^TColorLCH;
+  PColorHSV = ^TColorHSV;
+  PColorHSL = ^TColorHSL;
+
   PChannelMultipliers = ^TChannelMultipliers;
   TChannelMultipliers = array[0..2] of Single;
 
   TColorDistanceFunc = function(const Color1: Pointer; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
+
+  PColorTolerance = ^TColorTolerance;
+  TColorTolerance = record
+    Color: TColor;
+    Tolerance: Single;
+    ColorSpace: EColorSpace;
+    Multipliers: TChannelMultipliers;
+  end;
 
 const
   DefaultMultipliers: TChannelMultipliers = (1, 1, 1);

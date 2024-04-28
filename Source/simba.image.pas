@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.base, simba.baseclass, simba.image_textdrawer, simba.colormath;
+  simba.base, simba.baseclass, simba.image_textdrawer, simba.colormath, simba.dtm;
 
 type
   {$PUSH}
@@ -256,6 +256,24 @@ type
     // Laz bridge
     function ToLazBitmap: TBitmap;
     procedure LoadFromLazBitmap(LazBitmap: TBitmap);
+
+    // Finders
+    function MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
+
+    function FindColor(Color: TColor; Tolerance: Single): TPointArray; overload;
+    function FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray; overload;
+    function FindColor(Color: TColorTolerance): TPointArray; overload;
+
+    function FindImage(Image: TSimbaImage; Tolerance: Single; MaxToFind: Integer): TPointArray; overload;
+    function FindImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray; overload;
+    function FindDTM(DTM: TDTM; MaxToFind: Integer): TPointArray;
+    function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer): TPointArray;
+
+    function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray; overload;
+    function FindEdges(MinDiff: Single): TPointArray; overload;
+
+    function PeakBrightness: Integer;
+    function AverageBrightness: Integer;
   end;
 
   PSimbaImage = ^TSimbaImage;
@@ -281,7 +299,12 @@ uses
   simba.zip,
   simba.geometry,
   simba.nativeinterface,
-  simba.containers;
+  simba.containers,
+  simba.threading,
+  simba.finder_color,
+  simba.finder_dtm,
+  simba.finder_image,
+  simba.target;
 
 function TSimbaImage.Copy: TSimbaImage;
 begin
@@ -839,6 +862,145 @@ begin
   TempBitmap.Free();
 end;
 
+function TSimbaImage.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+
+  Result := Target.MatchColor(Color, ColorSpace, Multipliers, TBox.Create(-1,-1,-1,-1));
+end;
+
+function TSimbaImage.FindColor(Color: TColor; Tolerance: Single): TPointArray;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+
+  Result := Target.FindColor(Color, Tolerance, DefaultColorSpace, DefaultMultipliers, TBox.Create(-1,-1,-1,-1));
+end;
+
+function TSimbaImage.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+
+  Result := Target.FindColor(Color, Tolerance, ColorSpace, Multipliers, TBox.Create(-1,-1,-1,-1));
+end;
+
+function TSimbaImage.FindColor(Color: TColorTolerance): TPointArray;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+
+  Result := Target.FindColor(Color.Color, Color.Tolerance, Color.ColorSpace, Color.Multipliers, TBox.Create(-1,-1,-1,-1));
+end;
+
+function TSimbaImage.FindImage(Image: TSimbaImage; Tolerance: Single; MaxToFind: Integer): TPointArray;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+
+  Result := Target.FindImageEx(Image, Tolerance, DefaultColorSpace, DefaultMultipliers, MaxToFind, TBox.Create(-1,-1,-1,-1));
+end;
+
+function TSimbaImage.FindImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+
+  Result := Target.FindImageEx(Image, Tolerance, ColorSpace, Multipliers, MaxToFind, TBox.Create(-1,-1,-1,-1));
+end;
+
+function TSimbaImage.FindDTM(DTM: TDTM; MaxToFind: Integer): TPointArray;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+
+  Result := Target.FindDTMEx(DTM, MaxToFind, TBox.Create(-1,-1,-1,-1));
+end;
+
+function TSimbaImage.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer): TPointArray;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+
+  Result := Target.FindDTMRotatedEx(DTM, StartDegrees, EndDegrees, Step, FoundDegrees, MaxToFind, TBox.Create(-1,-1,-1,-1));
+end;
+
+function TSimbaImage.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
+var
+  X, Y, W, H: Integer;
+  Buffer: TSimbaPointBuffer;
+  First, Second, Third: TColor;
+begin
+  Buffer.Init();
+
+  W := FWidth - 2;
+  H := FHeight - 2;
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      First  := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
+      Second := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + (X+1)]);
+      Third  := TSimbaColorConversion.BGRAToColor(FData[(Y+1) * FWidth + X]);
+
+      if (not SimilarColors(First, Second, MinDiff, ColorSpace, Multipliers)) or
+         (not SimilarColors(First, Third, MinDiff, ColorSpace, Multipliers)) then
+        Buffer.Add(X, Y);
+    end;
+
+  Result := Buffer.ToArray(False);
+end;
+
+function TSimbaImage.FindEdges(MinDiff: Single): TPointArray;
+begin
+  Result := FindEdges(MinDiff, DefaultColorSpace, DefaultMultipliers);
+end;
+
+function TSimbaImage.PeakBrightness: Integer;
+var
+  X, Y: Integer;
+begin
+  Result := 0;
+
+  for Y := 0 to FHeight - 1 do
+    for X := 0 to FWidth - 1 do
+      with FData[Y * FWidth + X] do
+      begin
+        if (R > Result) then Result := R;
+        if (G > Result) then Result := G;
+        if (B > Result) then Result := B;
+      end;
+
+  Result := Round(Result / 255 * 100);
+end;
+
+function TSimbaImage.AverageBrightness: Integer;
+var
+  X, Y, Sum: Integer;
+begin
+  Result := 0;
+
+  for Y := 0 to FHeight - 1 do
+  begin
+    Sum := 0;
+    for X := 0 to FWidth - 1 do
+      with FData[Y * FWidth + X] do
+        Sum += Round((R + G + B) / 3 * 0.392);
+
+    Result += Sum div FWidth;
+  end;
+
+  Result := Round(Result / FHeight);
+end;
+
 procedure TSimbaImage.DrawTPA(TPA: TPointArray);
 begin
   if (FDrawAlpha = ALPHA_OPAQUE) then
@@ -1288,17 +1450,18 @@ end;
 
 function TSimbaImage.GetColors(Box: TBox): TColorArray;
 var
-  I, X, Y: Integer;
+  Count, X, Y: Integer;
 begin
   if (not InImage(Box.X1, Box.Y1)) then RaiseOutOfImageException(Box.X1, Box.Y1);
   if (not InImage(Box.X2, Box.Y2)) then RaiseOutOfImageException(Box.X2, Box.Y2);
 
   SetLength(Result, Box.Width * Box.Height);
+  Count := 0;
   for Y := Box.Y1 to Box.Y2 - 1 do
     for X := Box.X1 to Box.X2 - 1 do
     begin
-      Result[I] := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
-      Inc(I);
+      Result[Count] := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
+      Inc(Count);
     end;
 end;
 

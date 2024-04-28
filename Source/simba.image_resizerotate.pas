@@ -68,7 +68,6 @@ var
 var
   X, Y, W, H: Integer;
   OldX, OldY: Integer;
-  Color: TColorBGRA;
 begin
   Result := TSimbaImage.Create(Image.Width div Scale, Image.Height div Scale);
 
@@ -83,7 +82,6 @@ begin
       OldX := X * Scale;
       OldY := Y * Scale;
 
-      Color := Image.Data[OldY * Image.Width + OldX];
       Result.Data[Y * Result.Width + X] := BlendArea(OldX, OldY, (OldX + Scale) - 1, (OldY + Scale) - 1);
     end;
 end;

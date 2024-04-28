@@ -16,7 +16,8 @@ uses
   clipbrd, dialogs,
   lptypes,
   simba.nativeinterface, simba.settings, simba.compress, simba.env,
-  simba.aca, simba.dtmeditor, simba.dialog, simba.threading, simba.target, simba.finder;
+  simba.aca, simba.dtmeditor, simba.dialog, simba.threading, simba.target, simba.colormath,
+  simba.finder_color, simba.finder_image, simba.matchtemplate;
 
 (*
 Misc
@@ -108,7 +109,7 @@ Simba
 *)
 procedure _LapeSimba(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  DebugLn(DeCompressString('eJzdlEsOgCAMRPcm3sGEZQP3P54h2hb6AzRunGVnnqUleBys1Grf7LpwDY98x8NEaAPJD0Igl7r9UiQxOBZiVcTkSxHInICIjclWWaDTZJZiEgefJBGEngtAHBAk4jPVbEaECRSI7PejWY0a+6HtPoTdu3lFW92NT9g0xfvyQmdR4+fv9VM1K6hTw5/D73IfBBeSKZ0cut7f'));
+  DebugLn(DecompressString('eJzdlEsOgCAMRPcm3sGEZQP3P54h2hb6AzRunGVnnqUleBys1Grf7LpwDY98x8NEaAPJD0Igl7r9UiQxOBZiVcTkSxHInICIjclWWaDTZJZiEgefJBGEngtAHBAk4jPVbEaECRSI7PejWY0a+6HtPoTdu3lFW92NT9g0xfvyQmdR4+fv9VM1K6hTw5/D73IfBBeSKZ0cut7f'));
 end;
 
 (*
@@ -202,7 +203,7 @@ procedure _LapeShowDTMEditor(const Params: PParamArray; const Result: Pointer); 
     Window: TWindowHandle;
   begin
     with PSimbaTarget(Params^[0])^ do
-      Window := GetWindowTarget();
+      Window := TargetWindow;
 
     with TSimbaDTMEditorForm.Create(Window) do
     try
@@ -233,7 +234,7 @@ procedure _LapeShowACA(const Params: PParamArray; const Result: Pointer); LAPE_W
     Window: TWindowHandle;
   begin
     with PSimbaTarget(Params^[0])^ do
-      Window := GetWindowTarget();
+      Window := TargetWindow;
 
     with TSimbaACAForm.Create(Window) do
     try
@@ -403,6 +404,10 @@ begin
   with Compiler do
   begin
     ImportingSection := 'Misc';
+
+    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @ColorFinderMultithreadOpts, 'ColorFinderMultithreadOpts');
+    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @ImageFinderMultithreadOpts, 'ImageFinderMultithreadOpts');
+    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @MatchTemplateMultithreadOpts, 'MatchTemplateMultithreadOpts');
 
     addGlobalType([
       'record',

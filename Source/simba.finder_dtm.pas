@@ -29,10 +29,10 @@ function FindDTMRotatedOnBuffer(var Limit: TLimit;
                                 DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray;
                                 OffsetX, OffsetY: Integer): TPointArray;
 
-function FindDTMOnTarget(Target: TSimbaTarget;
+function FindDTMOnTarget(constref Target: TSimbaTarget;
                          DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
 
-function FindDTMRotatedOnTarget(Target: TSimbaTarget;
+function FindDTMRotatedOnTarget(constref Target: TSimbaTarget;
                                 DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray;
                                 Bounds: TBox; MaxToFind: Integer): TPointArray;
 
@@ -342,7 +342,7 @@ begin
     end;
 end;
 
-function FindDTMOnTarget(Target: TSimbaTarget; DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
+function FindDTMOnTarget(constref Target: TSimbaTarget; DTM: TDTM; Bounds: TBox; MaxToFind: Integer): TPointArray;
 var
   Buffer: PColorBGRA;
   BufferWidth: Integer;
@@ -370,7 +370,7 @@ begin
   end;
 end;
 
-function FindDTMRotatedOnTarget(Target: TSimbaTarget; DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox; MaxToFind: Integer): TPointArray;
+function FindDTMRotatedOnTarget(constref Target: TSimbaTarget; DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox; MaxToFind: Integer): TPointArray;
 var
   Buffer: PColorBGRA;
   BufferWidth: Integer;

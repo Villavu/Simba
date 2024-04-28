@@ -526,6 +526,8 @@ begin
     addGlobalType('record X1, Y1, X2, Y2: Integer; end', 'TBox');
     addGlobalType('array of TBox', 'TBoxArray');
 
+    addGlobalType('record Width, Height: Integer; end', 'TSize');
+
     addGlobalType('(__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__)', 'EComparator');
 
     addGlobalType('enum(Unknown, Unassigned, Null, Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Single, Double, DateTime, Currency, Boolean, Variant, AString, UString, WString)', 'EVariantVarType');

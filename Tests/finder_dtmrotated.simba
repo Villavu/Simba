@@ -25,7 +25,7 @@ begin
   Target.SetImage(imgRotated);
 
   // Find all, entire client
-  TPA := Finder.FindDTMRotatedEx(DTM, 89,91,1, degs, -1);
+  TPA := Target.FindDTMRotatedEx(DTM, 89,91,1, degs, -1);
   TPA := TPA.Unique();
   Assert(TPA.Length() = 8);
   Assert(TPA[0] = TreePoints[0]);
@@ -44,7 +44,7 @@ begin
   Assert(Degs[2] = 92);
 
   // find all, area
-  TPA := Finder.FindDTMRotatedEx(DTM, 89,91,1, degs, -1, [56,5,95,28]);
+  TPA := Target.FindDTMRotatedEx(DTM, 89,91,1, degs, -1, [56,5,95,28]);
   TPA := TPA.Unique();
   Assert(TPA.Length() = 3);
   Assert(TPA[0] = TreePoints[0]);

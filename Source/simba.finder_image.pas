@@ -17,9 +17,9 @@ interface
 uses
   Classes, SysUtils, Graphics,
   simba.base, simba.colormath, simba.colormath_distance, simba.target,
-  simba.image, simba.colormath_distance_unrolled, simba.threading;
+  simba.image, simba.colormath_distance_unrolled, simba.threading, simba.vartype_floatmatrix;
 
-function FindImageOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;
+function FindImageOnTarget(constref Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;
                            Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray;
 
 function FindImageOnBuffer(var Limit: TLimit;
@@ -28,8 +28,11 @@ function FindImageOnBuffer(var Limit: TLimit;
                            Buffer: PColorBGRA; BufferWidth: Integer;
                            SearchWidth, SearchHeight: Integer): TPointArray;
 
+function FindTemplateOnTarget(constref Target: TSimbaTarget; Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
+function HasTemplateOnTarget(constref Target: TSimbaTarget; Templ: TSimbaImage; MinMatch: Single; Bounds: TBox): Boolean;
+
 var
-  BitmapFinderMultithreadOpts: record
+  ImageFinderMultithreadOpts: record
     Enabled: Boolean;
     SliceWidth, SliceHeight: Integer;
   end;
@@ -37,7 +40,7 @@ var
 implementation
 
 uses
-  simba.containers,simba.vartype_pointarray, simba.vartype_box;
+  simba.containers,simba.vartype_pointarray, simba.vartype_box, simba.matchtemplate;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
@@ -46,10 +49,10 @@ var
 begin
   Result := 1;
 
-  if BitmapFinderMultithreadOpts.Enabled and (SearchWidth >= BitmapFinderMultithreadOpts.SliceWidth) and (SearchHeight >= (BitmapFinderMultithreadOpts.SliceHeight * 2)) then // not worth
+  if ImageFinderMultithreadOpts.Enabled and (SearchWidth >= ImageFinderMultithreadOpts.SliceWidth) and (SearchHeight >= (ImageFinderMultithreadOpts.SliceHeight * 2)) then // not worth
   begin
     for I := SimbaThreadPool.ThreadCount - 1 downto 2 do
-      if (SearchHeight div I) > BitmapFinderMultithreadOpts.SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
+      if (SearchHeight div I) > ImageFinderMultithreadOpts.SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
         Exit(I);
   end;
 
@@ -96,7 +99,9 @@ begin
   end;
 end;
 
-function FindImageOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox; Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
+function FindImageOnTarget(constref Target: TSimbaTarget; Image: TSimbaImage;
+  Bounds: TBox; Formula: EColorSpace; Tolerance: Single;
+  Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
 var
   Buffer: PColorBGRA;
   BufferWidth: Integer;
@@ -271,10 +276,39 @@ begin
   end;
 end;
 
+function FindTemplateOnTarget(constref Target: TSimbaTarget; Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
+var
+  Image: TSimbaImage;
+  Mat: TSingleMatrix;
+  Best: TPoint;
+begin
+  Match := 0;
+
+  if Target.GetImageDataAsImage(Bounds, Image) then
+  try
+    Mat := MatchTemplate(Image, Templ, TM_CCOEFF_NORMED);
+
+    Best := Mat.ArgMax();
+    Match := Mat[Best.Y, Best.X];
+    Result := Best + Bounds.TopLeft;
+  finally
+    Image.Free();
+  end;
+end;
+
+function HasTemplateOnTarget(constref Target: TSimbaTarget; Templ: TSimbaImage; MinMatch: Single; Bounds: TBox): Boolean;
+var
+  Match: Single;
+begin
+  FindTemplateOnTarget(Target, Templ, Match, Bounds);
+
+  Result := Match >= MinMatch;
+end;
+
 initialization
-  BitmapFinderMultithreadOpts.Enabled     := True;
-  BitmapFinderMultithreadOpts.SliceHeight := 250;
-  BitmapFinderMultithreadOpts.SliceWidth  := 250;
+  ImageFinderMultithreadOpts.Enabled     := True;
+  ImageFinderMultithreadOpts.SliceHeight := 250;
+  ImageFinderMultithreadOpts.SliceWidth  := 250;
 
 end.
 

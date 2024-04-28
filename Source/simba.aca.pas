@@ -13,7 +13,7 @@ uses
   Classes, SysUtils, Forms, Controls, Dialogs, DividerBevel, Graphics,
   ExtCtrls, ComCtrls, StdCtrls, Menus, ColorBox, LMessages,
   simba.base, simba.component_imagebox, simba.component_imageboxcanvas, simba.component_imageboxzoom,
-  simba.colormath, simba.finder;
+  simba.colormath;
 
 type
   TSimbaACAForm = class(TForm)

@@ -15,6 +15,7 @@ uses
 
 type
   TStringArrayHelper = type helper for TStringArray
+    function Equals(Other: TStringArray): Boolean;
     function IndexOf(Value: String): Integer;
     function IndicesOf(Value: String): TIntegerArray;
     function Unique: TStringArray;
@@ -27,14 +28,19 @@ uses
   StrUtils,
   simba.array_algorithm;
 
+function TStringArrayHelper.Equals(Other: TStringArray): Boolean;
+begin
+  Result := specialize TArrayEquals<String>.Equals(Self, Other);
+end;
+
 function TStringArrayHelper.IndexOf(Value: String): Integer;
 begin
-  Result := specialize IndexOf<String>(Value, Self);
+  Result := specialize TArrayIndexOf<String>.IndexOf(Value, Self);
 end;
 
 function TStringArrayHelper.IndicesOf(Value: String): TIntegerArray;
 begin
-  Result := specialize IndicesOf<String>(Value, Self);
+  Result := specialize TArrayIndicesOf<String>.IndicesOf(Value, Self);
 end;
 
 function TStringArrayHelper.Unique: TStringArray;

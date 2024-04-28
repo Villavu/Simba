@@ -55,7 +55,7 @@ var
 begin
   img.Fill(Colors.WHITE);
 
-  Assert(img.Finder.CountColor($FFFFFF, 0) = 100*100);
+  Assert(Length(img.FindColor($FFFFFF, 0)) = 100*100);
   img.Pixel[img.Center.X, img.Center.Y] := 0;
   Assert(Length(img.GetColors().Unique()) = 2);
   Assert(img.GetColors().Unique()[0] = 16777215);
@@ -64,7 +64,7 @@ begin
   img.DrawColor := 0;
   img.DrawBoxFilled([1,1,img.Width-2,img.Height-2]);
 
-  TPA := img.Finder.FindColor(Colors.WHITE,0);
+  TPA := img.FindColor(Colors.WHITE,0);
   Assert(TPA.Bounds = [0,0,img.Width-1,img.Height-1]);
   Assert(TPA.Length = 396);
 end;

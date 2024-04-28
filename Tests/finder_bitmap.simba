@@ -23,7 +23,7 @@ begin
   Target.SetImage(img);
 
   // find all, entire client
-  TPA := Finder.FindImageEx(templ, 0, -1);
+  TPA := Target.FindImageEx(templ, 0, -1);
   Assert(TPA.Length() = 8);
   Assert(TPA[0] = TreePoints[0]);
   Assert(TPA[1] = TreePoints[1]);
@@ -35,17 +35,17 @@ begin
   Assert(TPA[7] = TreePoints[7]);
 
   // find all, area
-  TPA := Finder.FindImageEx(templ, 0, -1, [24, 37, 45, 71]);
+  TPA := Target.FindImageEx(templ, 0, -1, [24, 37, 45, 71]);
   Assert(TPA.Length() = 2);
   Assert(TPA[0] = TreePoints[3]);
   Assert(TPA[1] = TreePoints[4]);
 
   // find one
-  P := Finder.FindImage(templ, 0);
+  P := Target.FindImage(templ, 0);
   Assert(TreePoints.Contains(P));
 
   // find one, area
-  P := Finder.FindImage(templ, 0, [24, 37, 45, 71]);
+  P := Target.FindImage(templ, 0, [24, 37, 45, 71]);
   Assert(TreePoints.Contains(P));
 
   // test tolerance
@@ -55,7 +55,7 @@ begin
       templBrightnessed.Alpha[x,y] := templ.Alpha[x,y];
 
   // find all with tolerance, entire client
-  TPA := Finder.FindImageEx(templBrightnessed, 10, -1);
+  TPA := Target.FindImageEx(templBrightnessed, 10, -1);
   Assert(TPA.Length() = 8);
   Assert(TPA[0] = TreePoints[0]);
   Assert(TPA[1] = TreePoints[1]);
@@ -67,7 +67,7 @@ begin
   Assert(TPA[7] = TreePoints[7]);
 
   // find all with (too low) tolerance, entire client
-  TPA := Finder.FindImageEx(templBrightnessed, 5);
+  TPA := Target.FindImageEx(templBrightnessed, 5);
   Assert(TPA.Length() = 0);
 
   img.Free();

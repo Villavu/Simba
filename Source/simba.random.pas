@@ -170,7 +170,7 @@ end;
 
 function Random(Lo, Hi: Int64): Int64;
 begin
-  Result := Trunc(Random(Lo, Hi));
+  Result := Trunc(Random(Lo * 1.00, Hi * 1.00));
 end;
 
 function RandomLeft(Lo, Hi: Double): Double;

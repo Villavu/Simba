@@ -241,21 +241,14 @@ end;
 
 function TCodeinsight.GetOverloads(Decl: TDeclaration): TDeclarationArray;
 begin
-  Result := [];
-
-  if Assigned(Decl) then
+  if (Decl is TDeclaration_Method) then
   begin
-    if (Decl is TDeclaration_TypeMethod) then
-      Result := [Decl]
+    if Decl.isObjectMethod then
+      Result := Filter(GetMembersOfType(GetByName(TDeclaration_Method(Decl).ObjectName)), Decl.Name, TDeclaration_Method)
     else
-    if (Decl is TDeclaration_Method) then
-    begin
-      if Decl.isObjectMethod then
-        Result := Filter(GetMembersOfType(GetByName(TDeclaration_Method(Decl).ObjectName)), Decl.Name, TDeclaration_Method)
-      else
-        Result := Filter(GetGlobals() + GetLocals(), Decl.Name, TDeclaration_Method);
-    end;
-  end;
+      Result := Filter(GetGlobals() + GetLocals(), Decl.Name, TDeclaration_Method);
+  end else
+    Result := [];
 end;
 
 function TCodeinsight.GetGlobals: TDeclarationArray;
@@ -335,7 +328,7 @@ function TCodeinsight.GetMembersOfType(Decl: TDeclaration): TDeclarationArray;
     for I := 0 to High(Result) do
       if (Result[I] is TDeclaration_Method) and Assigned(TDeclaration_Method(Result[I]).ResultType) then
       begin
-        specialize Swap<TDeclaration>(Result[I], Result[C]);
+        Swap(Pointer(Result[I]), Pointer(Result[C]));
         Inc(C);
       end;
   end;

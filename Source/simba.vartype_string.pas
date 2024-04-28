@@ -1046,8 +1046,6 @@ begin
 end;
 
 function TSimbaStringHelper.ToDateTime(Fmt: String; Def: TDateTime): TDateTime;
-var
-  UnixTime: Integer;
 begin
   Result := Def;
 

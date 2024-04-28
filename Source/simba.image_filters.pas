@@ -12,7 +12,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.colormath, simba.image;
+  simba.base, simba.image;
 
 function SimbaImage_GreyScale(Image: TSimbaImage): TSimbaImage;
 function SimbaImage_Brightness(Image: TSimbaImage; Value: Integer): TSimbaImage;
@@ -29,7 +29,7 @@ implementation
 
 uses
   Math,
-  simba.image_utils, simba.vartype_ordmatrix, simba.vartype_box, simba.colormath_conversion;
+  simba.image_utils, simba.vartype_ordmatrix;
 
 function SimbaImage_GreyScale(Image: TSimbaImage): TSimbaImage;
 var

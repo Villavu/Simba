@@ -254,7 +254,7 @@ type
   end;
 
 var
-  weights: TIntegerArray;
+  Weights: TIntegerArray;
   I, J: Integer;
   StartWidth, Area, MaxWidth: Integer;
   Width, Height: Integer;

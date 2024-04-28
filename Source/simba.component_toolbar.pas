@@ -59,6 +59,7 @@ type
   TSimbaToolButtonDivider = class(TSimbaToolButton)
   protected
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
+  public
     procedure Paint; override;
   end;
 
@@ -69,10 +70,10 @@ type
     function ScaleToToolbarSize(Value: Integer): Integer;
 
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
-    procedure Paint; override;
   public
     DropdownMenu: TPopupMenu;
 
+    procedure Paint; override;
     procedure Click; override;
   end;
 

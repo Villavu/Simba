@@ -592,6 +592,23 @@ begin
     addGlobalType('enum(RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE)', 'EColorSpace');
     addGlobalType('array [0..2] of Single', 'TChannelMultipliers');
 
+    addGlobalType([
+      'record',
+      '  Color: TColor;',
+      '  Tolerance: Single;',
+      '  ColorSpace: EColorSpace;',
+      '  Multipliers: TChannelMultipliers;',
+      'end;'],
+      'TColorTolerance'
+    );
+
+    addGlobalFunc(
+      'function ColorTolerance(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TColorTolerance;', [
+      'begin',
+      '  Result := [Color, Tolerance, ColorSpace, Multipliers];',
+      'end;']
+    );
+
     addGlobalType('record B,G,R,A: Byte; end;', 'TColorBGRA');
     addGlobalType('record R,G,B: Byte;   end;', 'TColorRGB');
     addGlobalType('record X,Y,Z: Single; end;', 'TColorXYZ');

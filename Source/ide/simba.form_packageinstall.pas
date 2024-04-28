@@ -61,7 +61,7 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.env, simba.misc, simba.dialog, simba.files,
+  simba.env, simba.misc, simba.dialog,
   simba.ide_package_endpointgithub, simba.threading;
 
 constructor TSimbaPackageInstallForm.Create(AOwner: TComponent; APackage: TSimbaPackage);

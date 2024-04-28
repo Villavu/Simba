@@ -312,6 +312,8 @@ type
     function GetParamString: String;
     function GetResultString: String;
     function GetHeaderString: String;
+    function GetParamCount: Integer;
+    function GetParamVarTypes: TStringArray;
   public
     ObjectName: String;
 
@@ -321,6 +323,8 @@ type
     property ParamString: String read GetParamString;
     property ResultString: String read GetResultString;
     property HeaderString: String read GetHeaderString;
+    property ParamCount: Integer read GetParamCount;
+    property ParamVarTypes: TStringArray read GetParamVarTypes;
   end;
 
   TDeclaration_MethodResult = class(TDeclaration_Var)
@@ -472,6 +476,7 @@ type
   TCodeParserList = specialize TSimbaObjectList<TCodeParser>;
 
   function Filter(Decls: TDeclarationArray; Name: String; DeclClass: TDeclarationClass = nil): TDeclarationArray;
+  function FilterByClass(Decls: TDeclarationArray; DeclClass: TDeclarationClass): TDeclarationArray;
 
 implementation
 
@@ -489,6 +494,22 @@ begin
       Inc(Count);
     end;
 
+  SetLength(Result, Count);
+end;
+
+function FilterByClass(Decls: TDeclarationArray; DeclClass: TDeclarationClass): TDeclarationArray;
+var
+  I, Count: Integer;
+begin
+  Count := 0;
+
+  SetLength(Result, Length(Decls));
+  for I := 0 to High(Decls) do
+    if (Decls[I].ClassType = DeclClass) then
+    begin
+      Result[Count] := Decls[I];
+      Inc(Count);
+    end;
   SetLength(Result, Count);
 end;
 
@@ -794,6 +815,36 @@ begin
   end;
 
   Result := FHeaderString.Value;
+end;
+
+function TDeclaration_Method.GetParamCount: Integer;
+var
+  Decl: TDeclaration;
+begin
+  Result := 0;
+
+  Decl := Items.GetByClassFirst(TDeclaration_ParamList);
+  if (Decl <> nil) then
+    for Decl in Decl.Items.GetByClass(TDeclaration_ParamGroup) do
+      Inc(Result, Length(Decl.Items.GetByClass(TDeclaration_Parameter)));
+end;
+
+function TDeclaration_Method.GetParamVarTypes: TStringArray;
+var
+  Decl, Param: TDeclaration;
+  I: Integer;
+begin
+  SetLength(Result, ParamCount);
+  I := 0;
+
+  Decl := Items.GetByClassFirst(TDeclaration_ParamList);
+  if (Decl <> nil) then
+    for Decl in Decl.Items.GetByClass(TDeclaration_ParamGroup) do
+      for Param in Decl.Items.GetByClass(TDeclaration_Parameter) do
+      begin
+        Result[I] := Param.Items.GetTextOfClass(TDeclaration_VarType);
+        Inc(I);
+      end;
 end;
 
 function TDeclaration_Parameter.Dump: String;

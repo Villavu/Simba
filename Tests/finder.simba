@@ -7,8 +7,8 @@ procedure Test(Color: TColor; ExpectedPeak, ExpectedAverage: Integer);
 begin
   Bitmap.Fill(Color);
 
-  Assert(Finder.PeakBrightness() = ExpectedPeak);
-  Assert(Finder.AverageBrightness() = ExpectedAverage);
+  Assert(Target.PeakBrightness() = ExpectedPeak);
+  Assert(Target.AverageBrightness() = ExpectedAverage);
 end;
 
 begin

@@ -18,10 +18,13 @@ function IsFontFixed(FontName: String): Boolean;
 function GetFixedFonts: TStringArray;
 function GetDefaultFontName: String;
 
+generic function GetEnumDecl<EnumType>(IsScoped, HasGaps: Boolean): String;
+
 implementation
 
 uses
-  Graphics, LCLIntf, LCLType;
+  Graphics, LCLIntf, LCLType,
+  simba.containers;
 
 var
   DefaultFontName: String;
@@ -131,6 +134,34 @@ begin
       Free();
     end;
   end;
+end;
+
+generic function GetEnumDecl<EnumType>(IsScoped, HasGaps: Boolean): String;
+var
+  Builder: TSimbaStringBuilder;
+  Name: String;
+  I: EnumType;
+begin
+  {$PUSH}
+  {$I-}
+  Result := '';
+  Name := '';
+  for I := Low(EnumType) to High(EnumType) do
+  begin
+    WriteStr(Name, EnumType(I));
+    if (IOResult = 0) then
+    begin
+      if (Builder.Count > 0) then
+        Builder.AppendLine(',');
+      Builder.Append(Name);
+      if HasGaps then
+        Builder.Append(' = ' + IntToStr(Integer(I)));
+    end;
+  end;
+  Result := '(' + Builder.Str + ');';
+  if IsScoped then
+    Result := 'enum' + Result;
+  {$POP}
 end;
 
 end.

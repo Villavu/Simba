@@ -52,7 +52,7 @@ implementation
 
 uses
   LCLType,
-  simba.image, simba.vartype_windowhandle, simba.image_lazbridge,
+  simba.image, simba.vartype_windowhandle,
   simba.form_colorpickhistory, simba.threading, simba.ide_dockinghelpers,
   simba.colormath;
 

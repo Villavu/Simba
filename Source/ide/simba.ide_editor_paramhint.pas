@@ -17,6 +17,8 @@ uses
 
 type
   TSimbaParamHintForm = class(THintWindow)
+  protected const
+    BORDER_SIZE = 4;
   protected
     FMethods: TDeclarationArray;
     FBoldIndex: Integer;
@@ -24,15 +26,19 @@ type
     FNeededHeight: Integer;
     FMeasuring: Boolean;
     FLineHeight: Integer;
+    FIndexing: Boolean;
 
     procedure DoHide; override;
-    procedure FontChanged(Sender: TObject); override;
     procedure Paint; override;
-    procedure DrawMethod(var X, Y: Integer; Method: TDeclaration);
-    procedure DrawProperty(var X, Y: Integer; Method: TDeclaration);
+    procedure FontChanged(Sender: TObject); override;
+
+    // Returns the width drawn
+    function DrawMethod(var Y: Integer; Method: TDeclaration): Integer;
+    function DrawProperty(var Y: Integer; Method: TDeclaration): Integer;
+
     procedure SetBoldIndex(AValue: Integer);
   public
-    procedure Show(ScreenPoint: TPoint; Decls: TDeclarationArray);
+    procedure Show(ScreenPoint: TPoint; Decls: TDeclarationArray; IsIndexing: Boolean);
 
     property BoldIndex: Integer read FBoldIndex write SetBoldIndex;
   end;
@@ -43,6 +49,8 @@ type
     FParenthesesPoint: TPoint;
     FDisplayPoint: TPoint;
     FCodeinsight: TCodeinsight;
+
+    function GetProperties(Decls: TDeclarationArray): TDeclarationArray;
 
     function IsShowing: Boolean;
     function GetParameterIndexAtCaret: Integer;
@@ -70,8 +78,8 @@ implementation
 
 uses
   mPasLexTypes, mPasLex,
-  simba.ide_editor, simba.ide_codetools_setup, simba.ide_theme,
-  simba.vartype_point;
+  simba.ide_editor, simba.misc, simba.ide_codetools_setup, simba.ide_theme,
+  simba.vartype_point, simba.vartype_stringarray;
 
 procedure TSimbaParamHintForm.SetBoldIndex(AValue: Integer);
 begin
@@ -82,7 +90,7 @@ end;
 
 procedure TSimbaParamHintForm.DoHide;
 begin
-  FMethods := nil;
+  FMethods := [];
 
   inherited DoHide();
 end;
@@ -94,9 +102,9 @@ begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := Round(Abs(GetFontData(Canvas.Font.Handle).Height) * 72 / Canvas.Font.PixelsPerInch) + 1; // Measure on larger font size - Font size can be 0
+    Canvas.Font.Size := GetFontSize(Self, 1);
 
-    FLineHeight := Canvas.TextHeight('Tay');
+    FLineHeight := Canvas.TextHeight('Fj');
   finally
     Free();
   end;
@@ -104,8 +112,7 @@ end;
 
 procedure TSimbaParamHintForm.Paint;
 var
-  I: Integer;
-  X, Y: Integer;
+  I, Y: Integer;
 begin
   if (not FMeasuring) then
   begin
@@ -113,36 +120,22 @@ begin
     Canvas.Pen.Color := SimbaTheme.ColorLine;
     Canvas.Rectangle(ClientRect);
   end;
-  if (Length(FMethods) = 0) then
-    Exit;
 
-  Y := 2;
-  X := 0;
-
-  if FMethods[0].isProperty then
-  begin
-    X := 4;
-    DrawProperty(X, Y, FMethods[0]);
-    if (X > FNeededWidth) then
-      FNeededWidth := X;
-  end
-  else
-  for I := 0 to High(FMethods) do
-  begin
-    if FMethods[I].isProperty then
-      Continue;
-
-    X := 4;
-    DrawMethod(X, Y, FMethods[I]);
-    if (X > FNeededWidth) then
-      FNeededWidth := X;
+  Y := BORDER_SIZE div 2;
+  case FIndexing of
+    True:
+      for I := 0 to High(FMethods) do
+        FNeededWidth := Max(FNeededWidth, DrawProperty(Y, FMethods[I]));
+    False:
+      for I := 0 to High(FMethods) do
+        FNeededWidth := Max(FNeededWidth, DrawMethod(Y, FMethods[I]));
   end;
 
-  FNeededWidth := FNeededWidth + 4;
-  FNeededHeight := Y + 2;
+  FNeededWidth := FNeededWidth + BORDER_SIZE;
+  FNeededHeight := Y + BORDER_SIZE div 2;
 end;
 
-procedure TSimbaParamHintForm.DrawMethod(var X, Y: Integer; Method: TDeclaration);
+function TSimbaParamHintForm.DrawMethod(var Y: Integer; Method: TDeclaration): Integer;
 var
   ParamIndex: Integer;
 
@@ -150,8 +143,8 @@ var
   begin
     Canvas.Font.Bold := Bold;
     if not FMeasuring then
-      Canvas.TextOut(X, Y, Str);
-    Inc(X, Canvas.TextWidth(Str));
+      Canvas.TextOut(Result, Y, Str);
+    Inc(Result, Canvas.TextWidth(Str));
   end;
 
   procedure DrawGroup(Group: TDeclaration);
@@ -169,14 +162,10 @@ var
     else
       NeedBold := (FBoldIndex >= ParamIndex) and (FBoldIndex < ParamIndex + Length(Decls));
 
-    with TDeclaration_Parameter(Decls[0]) do
-    begin
-      case ParamType of
-        tokVar: DrawText('var ', NeedBold);
-        tokOut: DrawText('out ', NeedBold);
-        tokConst: if (VarTypeString = '') then DrawText('const ', NeedBold);
-        tokConstRef: if (VarTypeString = '') then DrawText('constref ', NeedBold);
-      end;
+    // Dont clutter with const/constref when it doesn't change anything
+    case TDeclaration_Parameter(Decls[0]).ParamType of
+      tokVar: DrawText('var ', NeedBold);
+      tokOut: DrawText('out ', NeedBold);
     end;
 
     for I := 0 to High(Decls) do
@@ -204,6 +193,8 @@ var
   Decls: TDeclarationArray;
   I: Integer;
 begin
+  Result := BORDER_SIZE;
+
   NameString := '';
   ResultString := '';
 
@@ -240,17 +231,16 @@ begin
   Y := Y + FLineHeight;
 end;
 
-procedure TSimbaParamHintForm.DrawProperty(var X, Y: Integer; Method: TDeclaration);
+function TSimbaParamHintForm.DrawProperty(var Y: Integer; Method: TDeclaration): Integer;
 var
-  ParamIndex: Integer;
-  ParamCount: Integer;
+  ParamIndex, ParamCount: Integer;
 
   procedure DrawText(Str: String; Bold: Boolean = False);
   begin
     Canvas.Font.Bold := Bold;
     if not FMeasuring then
-      Canvas.TextOut(X, Y, Str);
-    Inc(X, Canvas.TextWidth(Str));
+      Canvas.TextOut(Result, Y, Str);
+    Inc(Result, Canvas.TextWidth(Str));
   end;
 
   procedure DrawParam(Name, VarType: String);
@@ -272,13 +262,15 @@ var
   I: Integer;
   Params: TDeclarationArray;
 begin
+  Result := BORDER_SIZE;
+
   Params := Method.Items.GetByClass(TDeclaration_Parameter, True, True);
   ParamCount := Length(Params);
   ParamIndex := 0;
   if (ParamCount = 0) then
     Exit;
 
-  // getter
+  // build header from getter
   if Assigned(TDeclaration_Method(Method).ResultType) then
   begin
     DrawText(TDeclaration_Method(Method).Name + '[');
@@ -290,7 +282,7 @@ begin
     end;
     DrawText(']' + TDeclaration_Method(Method).ResultString);
   end else
-  // setter
+  // build header from setter
   begin
     DrawText(TDeclaration_Method(Method).Name + '[');
     for I := 0 to ParamCount - 2 do
@@ -305,16 +297,21 @@ begin
   Y := Y + FLineHeight;
 end;
 
-procedure TSimbaParamHintForm.Show(ScreenPoint: TPoint; Decls: TDeclarationArray);
+procedure TSimbaParamHintForm.Show(ScreenPoint: TPoint; Decls: TDeclarationArray; IsIndexing: Boolean);
 var
   ScreenRect: TRect;
   MaxRight: Integer;
   I: Integer;
 begin
+  FIndexing := IsIndexing;
   FMethods := [];
   for I := 0 to High(Decls) do
   begin
     if Decls[I].isOverrideMethod then
+      Continue;
+    if (FIndexing <> Decls[I].isProperty) then
+      Continue;
+    if FIndexing and (Length(Decls[I].Items.GetByClass(TDeclaration_ParamList)) = 0) then
       Continue;
 
     FMethods := FMethods + [Decls[I]];
@@ -336,7 +333,7 @@ begin
   ScreenRect.Left := ScreenPoint.X;
   ScreenRect.Width := FNeededWidth;
   ScreenRect.Height := FNeededHeight;
-  ScreenRect.Offset(-4, -ScreenRect.Height);
+  ScreenRect.Offset(-BORDER_SIZE, -ScreenRect.Height);
 
   // Either clip to screen right or main form right, whatever is more right.
   MaxRight := Max(Application.MainForm.BoundsRect.Right, Monitor.BoundsRect.Right);
@@ -344,6 +341,53 @@ begin
     ScreenRect.Right := MaxRight;
 
   ActivateWithBounds(ScreenRect, '');
+end;
+
+// We do not need read and write methods just one of them.
+function TSimbaParamHint.GetProperties(Decls: TDeclarationArray): TDeclarationArray;
+var
+  Count: Integer = 0;
+
+  function HasReadMethod(Decl: TDeclaration): Boolean;
+  var
+    I: Integer;
+    Params: TStringArray;
+  begin
+    // Get param types and remove the trailing `value` param
+    Params := TDeclaration_Method(Decl).ParamVarTypes;
+    SetLength(Params, Length(Params) - 1);
+
+    for I := 0 to Count - 1 do
+      if (TDeclaration_Method(Decls[I]).ResultType <> nil) and TDeclaration_Method(Decls[I]).ParamVarTypes.Equals(Params) then
+        Exit(True);
+    Result := False;
+  end;
+
+var
+  I: Integer;
+begin
+  Decls := FilterByClass(Decls, TDeclaration_Method);
+  SetLength(Result, Length(Decls));
+
+  // Collect read methods
+  for I := 0 to High(Decls) do
+    if Decls[I].isProperty and (TDeclaration_Method(Decls[I]).ResultType <> nil) then
+    begin
+      Result[Count] := Decls[I];
+      Inc(Count);
+    end;
+
+  // Add write methods if read version doesn't exist
+  for I := 0 to High(Decls) do
+    if Decls[I].isProperty and (TDeclaration_Method(Decls[I]).ResultType = nil) then
+    begin
+      if HasReadMethod(Decls[I]) then
+        Continue;
+      Result[Count] := Decls[I];
+      Inc(Count);
+    end;
+
+  SetLength(Result, Count);
 end;
 
 function TSimbaParamHint.IsShowing: Boolean;
@@ -419,12 +463,7 @@ end;
 procedure TSimbaParamHint.DoEditorTopLineChanged(Sender: TObject; Changes: TSynStatusChanges);
 begin
   if IsShowing then
-  begin
-    if (Editor.CaretY < Editor.TopLine) or (Editor.CaretY > Editor.ScreenRowToRow(Max(0, Editor.LinesInWindow - 1))) then
-      FHintForm.Visible := False
-    else
-      FHintForm.Show(Editor.ClientToScreen(Editor.RowColumnToPixels(Editor.LogicalToPhysicalPos(FDisplayPoint))), TDeclarationArray(FHintForm.FMethods));
-  end;
+    FHintForm.Hide;
 end;
 
 procedure TSimbaParamHint.DoEditorCaretMove(Sender: TObject);
@@ -438,12 +477,13 @@ end;
 
 procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Boolean; var Handled: Boolean; var Command: TSynEditorCommand; var AChar: TUTF8Char; Data: Pointer; HandlerData: Pointer);
 
-  // Go back until we find an unclosed (
-  function FindParenthesesPoint(out indexing: Boolean): TPoint;
+  // Go back until we find an unclosed `(` or `[` if indexing
+  function FindParenthesesPoint(out IsIndexing: Boolean): TPoint;
   var
     Text: String;
     I, InRound: Integer;
   begin
+    IsIndexing := False;
     Result.X := -1;
     Result.Y := -1;
 
@@ -460,19 +500,34 @@ procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Bool
             Dec(InRound);
             if (InRound = 0) then
             begin
-              Result := Editor.CharIndexToRowCol(I-1);
-              Indexing := Text[I] = '[';
+              Result := Editor.CharIndexToRowCol(I-1){%H-};
+              IsIndexing := Text[I] = '[';
               Exit;
             end;
           end;
       end;
   end;
 
+  function DoMethodType(Decl: TDeclaration): TDeclarationArray;
+  begin
+    Result := [Decl];
+  end;
+
+  function DoMethod(Decl: TDeclaration): TDeclarationArray;
+  begin
+    Result := FCodeinsight.GetOverloads(Decl);
+  end;
+
+  function DoProperties(Decl: TDeclaration): TDeclarationArray;
+  begin
+    Result := GetProperties(FCodeinsight.GetOverloads(Decl))
+  end;
+
 var
   Decl: TDeclaration;
   Decls: TDeclarationArray;
   IsIndexing: Boolean;
-  I: Integer;
+  P: TPoint;
 begin
   if IsParamHintCommand(Command, AChar) and CodetoolsSetup then
     with TSimbaEditor(Editor) do
@@ -481,7 +536,12 @@ begin
       if IsHighlighterAttribute(['Number', 'Comment']) then
         Exit;
 
-      FParenthesesPoint := FindParenthesesPoint(IsIndexing);
+      P := FindParenthesesPoint(IsIndexing);
+      if ((P.X = -1) and (P.Y = -1)) or (IsShowing and IsIndexing) then
+        Exit;
+
+      FParenthesesPoint := P;
+      FDisplayPoint := P;
 
       FCodeinsight.SetScript(Text, FileName, GetCaretPos(True));
       FCodeinsight.Run();
@@ -489,29 +549,24 @@ begin
       Decl := FCodeinsight.ParseExpression(GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);
       Decls := [];
 
+      if IsIndexing then
+        Decls := DoProperties(Decl)
+      else
       if (Decl is TDeclaration_TypeMethod) then
-      begin
-        FDisplayPoint := FParenthesesPoint;
-        Decls := [Decl];
-      end
+        Decls := DoMethodType(Decl)
       else
       if (Decl is TDeclaration_Method) then
-      begin
-        FDisplayPoint := FParenthesesPoint.Offset(-Length(Decl.Name), 0);
+        Decls := DoMethod(Decl);
 
-        if IsIndexing and Decl.isProperty then
-          Decls := [Decl]
-        else
-        if not IsIndexing then
-          Decls := FCodeinsight.GetOverloads(Decl);
-      end;
+      if (Decl is TDeclaration_Method) then
+        FDisplayPoint.X := FDisplayPoint.X - Length(Decl.Name);
 
       if (Length(Decls) > 0) then
       begin
         FHintForm.Font := Font;
         FHintForm.Font.Color := Editor.Highlighter.IdentifierAttribute.Foreground;
         FHintForm.BoldIndex := GetParameterIndexAtCaret();
-        FHintForm.Show(ClientToScreen(RowColumnToPixels(LogicalToPhysicalPos(FDisplayPoint))), Decls);
+        FHintForm.Show(ClientToScreen(RowColumnToPixels(LogicalToPhysicalPos(FDisplayPoint))), Decls, IsIndexing);
       end else
         FHintForm.Hide();
     end;

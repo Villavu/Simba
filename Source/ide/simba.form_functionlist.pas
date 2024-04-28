@@ -820,8 +820,6 @@ begin
   MoveToTop('T2DPointArray');
   MoveToTop('TCircle');
   MoveToTop('TQuad');
-  MoveToTop('Finder');
-  MoveToTop('Input');
   MoveToTop('Target');
   MoveToTop('Image');
   MoveToTop('Debug Image');

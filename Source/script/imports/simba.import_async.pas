@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes, ffi,
-  simba.input, simba.http_async, simba.input_async;
+  simba.target, simba.http_async, simba.input_async;
 
 procedure _LapeASyncHTTP_Get1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -39,11 +39,11 @@ end;
 (*
 ASyncMouse.Move
 ---------------
-> procedure ASyncMouse.Move(Input: TSimbaInput; Dest: TPoint; Accuracy: Double = 1);
+> procedure ASyncMouse.Move(Target: TTarget; Dest: TPoint; Accuracy: Double = 1);
 *)
 procedure _LapeASyncMouse_Move(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncMouse.Move(PSimbaInput(Params^[0])^, PPoint(Params^[1])^, PDouble(Params^[2])^);
+  ASyncMouse.Move(PSimbaTarget(Params^[0])^, PPoint(Params^[1])^, PDouble(Params^[2])^);
 end;
 
 (*
@@ -95,23 +95,16 @@ begin
     addGlobalType('record end;', 'ASyncHTTPClient');
 
     ImportingSection := 'ASync';
-    addGlobalFunc('procedure ASyncMouse.Move(Input: TInput; Dest: TPoint; Accuracy: Double = 1); static;', @_LapeASyncMouse_Move);
+    addGlobalFunc('procedure ASyncMouse.Move(constref Target: TTarget; Dest: TPoint; Accuracy: Double = 1); static; overload;', @_LapeASyncMouse_Move);
     addGlobalFunc('procedure ASyncMouse.ChangeDest(Dest: TPoint); static;', @_LapeASyncMouse_ChangeDest);
     addGlobalFunc('function ASyncMouse.IsMoving: Boolean; static;', @_LapeASyncMouse_IsMoving);
     addGlobalFunc('procedure ASyncMouse.WaitMoving; static;', @_LapeASyncMouse_WaitMoving);
     addGlobalFunc('procedure ASyncMouse.Stop; static;', @_LapeASyncMouse_Stop);
 
     addGlobalFunc(
-      'procedure ASyncMouse.Move(Input: TInput; Dest: TPoint; Accuracy: Double = 1); static; override;', [
+      'procedure ASyncMouse.Move(Dest: TPoint; Accuracy: Double = 1); static; overload;', [
       'begin',
-      '  if Input.Target.IsDefault() then',
-      '  try',
-      '    Input.Target := System.Target;',
-      '    {$IFDECL Result}Result:={$ENDIF}inherited();',
-      '  finally',
-      '    Input.Target := [];',
-      '  end else',
-      '    {$IFDECL Result}Result:={$ENDIF}inherited();',
+      '  ASyncMouse.Move(System.Target, Dest, Accuracy);',
       'end;'
     ]);
 

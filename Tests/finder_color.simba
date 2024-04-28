@@ -34,8 +34,8 @@ begin
 
   for I := 0 to High(TESTS) do
   begin
-    WriteLn(Finder.CountColor(TESTS[I]), ' vs ', TEST_RESULTS[i]);
-    Assert(Finder.CountColor(TESTS[I]) = TEST_RESULTS[I]);
+    WriteLn(Target.CountColor(TESTS[I]), ' vs ', TEST_RESULTS[i]);
+    Assert(Target.CountColor(TESTS[I]) = TEST_RESULTS[I]);
   end;
 
   Bitmap.Free();

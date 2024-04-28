@@ -191,6 +191,11 @@ begin
   PCustomForm(Params^[0])^.ShowOnTop();
 end;
 
+procedure _LapeCustomForm_ProcessMessages(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Application.ProcessMessages();
+end;
+
 procedure _LapeCustomForm_Active_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomForm(Params^[0])^.Active;
@@ -1028,6 +1033,7 @@ begin
     addGlobalFunc('procedure TLazCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: Integer);', @_LapeCustomForm_SetRestoredBounds);
     addGlobalFunc('function TLazCustomForm.ShowModal: Integer;', @_LapeCustomForm_ShowModal);
     addGlobalFunc('procedure TLazCustomForm.ShowOnTop;', @_LapeCustomForm_ShowOnTop);
+    addGlobalFunc('procedure TLazCustomForm.ProcessMessages; static;', @_LapeCustomForm_ProcessMessages);
     addProperty('TLazCustomForm', 'BorderStyle', 'ELazFormBorderStyle', @_LapeCustomForm_Read_BorderStyle, @_LapeCustomForm_Write_BorderStyle);
     addProperty('TLazCustomForm', 'BorderIcons', 'ELazFormBorderIcons', @_LapeCustomForm_Read_BorderIcons, @_LapeCustomForm_Write_BorderIcons);
     addProperty('TLazCustomForm', 'Active', 'Boolean', @_LapeCustomForm_Active_Read);

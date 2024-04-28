@@ -49,7 +49,7 @@ implementation
 
 uses
   simba.form_main, simba.form_debugimage, simba.image_lazbridge,
-  simba.threading, simba.ide_maintoolbar, simba.process;
+  simba.threading, simba.ide_maintoolbar, simba.process, simba.colormath;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
 var

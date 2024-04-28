@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics, GraphType, IntfGraphics, FPImage,
-  simba.base, simba.image;
+  simba.base, simba.image, simba.colormath;
 
 {$scopedenums on}
 type

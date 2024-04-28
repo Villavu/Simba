@@ -22,10 +22,9 @@ uses
   simba.import_quad, simba.import_box, simba.import_boxarray, simba.import_point,
   simba.import_circle, simba.import_timing, simba.import_tpa, simba.import_atpa,
   simba.import_encoding, simba.import_file, simba.import_process, simba.import_internal,
-  simba.import_target, simba.import_finder, simba.import_math, simba.import_misc,
-  simba.import_input, simba.import_slacktree, simba.import_string, simba.import_random,
-  simba.import_debugimage, simba.import_web, simba.import_threading, simba.import_pointbuffer,
-  simba.import_stringmap, simba.import_async,
+  simba.import_target, simba.import_math, simba.import_misc, simba.import_slacktree, simba.import_string,
+  simba.import_random, simba.import_debugimage, simba.import_web, simba.import_threading,
+  simba.import_pointbuffer, simba.import_stringmap, simba.import_async,
 
   // Simba classes
   simba.import_image, simba.import_externalimage, simba.import_dtm, simba.import_matchtemplate,
@@ -57,9 +56,9 @@ begin
   ImportLCLComCtrls(Compiler);
   ImportLCLMisc(Compiler);
 
+  ImportDTM(Compiler);
   ImportSimbaImage(Compiler);
   ImportSimbaExternalImage(Compiler);
-  ImportDTM(Compiler);
   ImportMatchTemplate(Compiler);
   ImportJSON(Compiler);
 
@@ -71,9 +70,7 @@ begin
   ImportProcess(Compiler);
   ImportInternal(Compiler);
   ImportTarget(Compiler);
-  ImportFinder(Compiler);
   ImportMath(Compiler);
-  ImportInput(Compiler);
   ImportSlackTree(Compiler);
   ImportString(Compiler);
   ImportRandom(Compiler);

@@ -15,7 +15,7 @@ implementation
 uses
   Graphics,
   lptypes,
-  simba.image, simba.image_textdrawer;
+  simba.image, simba.image_textdrawer, simba.colormath, simba.dtm;
 
 type
   PBitmap = ^TBitmap;
@@ -1385,6 +1385,66 @@ begin
   PStringArray(Result)^ := TSimbaImage.Fonts();
 end;
 
+procedure _LapeImage_FindEdges1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindEdges(PSingle(Params^[1])^, PColorSpace(Params^[2])^, PChannelMultipliers(Params^[3])^);
+end;
+
+procedure _LapeImage_FindEdges2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindEdges(PSingle(Params^[1])^);
+end;
+
+procedure _LapeImage_PeakBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaImage(Params^[0])^.PeakBrightness();
+end;
+
+procedure _LapeImage_AverageBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaImage(Params^[0])^.AverageBrightness();
+end;
+
+procedure _LapeImage_MatchColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingleMatrix(Result)^ := PSimbaImage(Params^[0])^.MatchColor(PColor(Params^[1])^, PColorSpace(Params^[2])^, PChannelMultipliers(Params^[3])^);
+end;
+
+procedure _LapeImage_FindColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindColor(PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^);
+end;
+
+procedure _LapeImage_FindColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindColor(PColor(Params^[1])^, PSingle(Params^[2])^);
+end;
+
+procedure _LapeImage_FindColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindColor(PColorTolerance(Params^[1])^);
+end;
+
+procedure _LapeImage_FindImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindImage(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^, PInteger(Params^[5])^);
+end;
+
+procedure _LapeImage_FindImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindImage(PSimbaImage(Params^[1])^, PSingle(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure _LapeImage_FindDTM(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindDTM(PDTM(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeImage_FindDTMRotated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindDTMRotated(PDTM(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^, PDoubleArray(Params^[5])^, PInteger(Params^[6])^);
+end;
+
 (*
 TImage.Finder
 -------------
@@ -1599,6 +1659,23 @@ begin
     addGlobalFunc('function TImage.LoadFontsInDir(Dir: String): Boolean; static;', @_LapeImage_LoadFontsInDir);
 
     addGlobalFunc('procedure TImage.SaveUnfreedImagesInDir(Directory: String); static;', @_LapeImage_SaveUnfreedImagesInDir);
+
+    addGlobalFunc('function TImage.PeakBrightness: Integer;', @_LapeImage_PeakBrightness);
+    addGlobalFunc('function TImage.AverageBrightness: Integer;', @_LapeImage_AverageBrightness);
+
+    addGlobalFunc('function TImage.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;', @_LapeImage_MatchColor);
+
+    addGlobalFunc('function TImage.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray; overload;', @_LapeImage_FindColor1);
+    addGlobalFunc('function TImage.FindColor(Color: TColor; Tolerance: Single): TPointArray; overload;', @_LapeImage_FindColor2);
+    addGlobalFunc('function TImage.FindColor(Color: TColorTolerance): TPointArray; overload;', @_LapeImage_FindColor3);
+
+    addGlobalFunc('function TImage.FindImage(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray; overload;', @_LapeImage_FindImage1);
+    addGlobalFunc('function TImage.FindImage(Image: TImage; Tolerance: Single; MaxToFind: Integer = -1): TPointArray; overload;', @_LapeImage_FindImage2);
+    addGlobalFunc('function TImage.FindDTM(DTM: TDTM; MaxToFind: Integer = -1): TPointArray;', @_LapeImage_FindDTM);
+    addGlobalFunc('function TImage.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = -1): TPointArray;', @_LapeImage_FindDTMRotated);
+
+    addGlobalFunc('function TImage.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray; overload;', @_LapeImage_FindEdges1);
+    addGlobalFunc('function TImage.FindEdges(MinDiff: Single): TPointArray; overload;', @_LapeImage_FindEdges2);
 
     ImportingSection := '';
   end;

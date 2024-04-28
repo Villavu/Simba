@@ -20,13 +20,13 @@ uses
   Classes, SysUtils, Math, Graphics,
   simba.base, simba.colormath, simba.colormath_distance, simba.target, simba.threading;
 
-function FindColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
+function FindColorsOnTarget(constref Target: TSimbaTarget; Bounds: TBox;
                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
 
 function FindColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer): TPointArray;
 
-function CountColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
+function CountColorsOnTarget(constref Target: TSimbaTarget; Bounds: TBox;
                              Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
                              MaxToFind: Integer = -1): Integer;
 
@@ -34,11 +34,21 @@ function CountColorsOnBuffer(var Limit: TLimit;
                              Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
                              Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
 
+function MatchColorsOnTarget(constref Target: TSimbaTarget; Bounds: TBox;
+                             Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
+
 function MatchColorsOnBuffer(Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers;
                              Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
 
-function MatchColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
-                             Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
+function GetColorOnTarget(constref Target: TSimbaTarget; P: TPoint): TColor;
+
+function GetColorsOnBuffer(Points: TPointArray; Offset: TPoint; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TColorArray;
+
+function GetColorsOnTarget(constref Target: TSimbaTarget; Points: TPointArray): TColorArray;
+
+function GetColorsMatrixOnBuffer(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TIntegerMatrix;
+
+function GetColorsMatrixOnTarget(constref Target: TSimbaTarget; Bounds: TBox): TIntegerMatrix;
 
 var
   ColorFinderMultithreadOpts: record
@@ -49,7 +59,7 @@ var
 implementation
 
 uses
-  simba.containers, simba.colormath_distance_unrolled,
+  simba.containers, simba.colormath_conversion, simba.colormath_distance_unrolled,
   simba.vartype_pointarray, simba.vartype_floatmatrix, simba.datetime, simba.vartype_box;
 
 // How much to "Slice" (vertically) the image up for multithreading.
@@ -219,7 +229,7 @@ function CountColorsOnBuffer(var Limit: TLimit;
   }
   MACRO_FINDCOLORS
 
-function FindColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
+function FindColorsOnTarget(constref Target: TSimbaTarget; Bounds: TBox;
                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
 var
   Buffer: PColorBGRA;
@@ -259,7 +269,7 @@ begin
   end;
 end;
 
-function CountColorsOnTarget(Target: TSimbaTarget; Bounds: TBox; Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): Integer;
+function CountColorsOnTarget(constref Target: TSimbaTarget; Bounds: TBox; Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer): Integer;
 var
   Limit: TLimit;
 
@@ -317,7 +327,7 @@ function MatchColorsOnBuffer(Formula: EColorSpace; Color: TColor; Multipliers: T
   }
   MACRO_FINDCOLORS
 
-function MatchColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
+function MatchColorsOnTarget(constref Target: TSimbaTarget; Bounds: TBox;
                              Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
 var
   Buffer: PColorBGRA;
@@ -417,6 +427,99 @@ begin
   end;
 
   Result := Limit.Reached;
+end;
+
+function GetColorOnTarget(constref Target: TSimbaTarget; P: TPoint): TColor;
+var
+  B: TBox;
+  Data: PColorBGRA;
+  DataWidth: Integer;
+begin
+  Result := -1;
+
+  B.X1 := P.X; B.Y1 := P.Y;
+  B.X2 := P.X; B.Y2 := P.Y;
+
+  if Target.GetImageData(B, Data, DataWidth) then
+  try
+    Result := TSimbaColorConversion.BGRAToColor(Data^);
+  finally
+    Target.FreeImageData(Data);
+  end;
+end;
+
+function GetColorsOnBuffer(Points: TPointArray; Offset: TPoint; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TColorArray;
+var
+  Count, I, X, Y: Integer;
+begin
+  Count := 0;
+
+  SetLength(Result, Length(Points));
+  for I := 0 to High(Points) do
+  begin
+    X := Points[I].X + Offset.X;
+    Y := Points[I].Y + Offset.Y;
+    if (X >= 0) and (Y >= 0) and (X < SearchWidth) and (Y < SearchHeight) then
+    begin
+      Result[Count] := TSimbaColorConversion.BGRAToColor(Buffer[Y * BufferWidth + X]);
+      Inc(Count);
+    end;
+  end;
+  SetLength(Result, Count);
+end;
+
+function GetColorsOnTarget(constref Target: TSimbaTarget; Points: TPointArray): TColorArray;
+var
+  Bounds, SearchBounds: TBox;
+  Buffer: PColorBGRA;
+  BufferWidth: Integer;
+begin
+  Bounds := Points.Bounds;
+  SearchBounds := Bounds;
+
+  if Target.GetImageData(SearchBounds, Buffer, BufferWidth) then
+  try
+    Result := GetColorsOnBuffer(Points, TPoint.Create(-Bounds.X1, -Bounds.Y1), Buffer, BufferWidth, SearchBounds.Width, SearchBounds.Height);
+  finally
+    Target.FreeImageData(Buffer);
+  end;
+end;
+
+function GetColorsMatrixOnBuffer(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TIntegerMatrix;
+var
+  RowPtr, Ptr: PColorBGRA;
+  X, Y: Integer;
+begin
+  SetLength(Result, SearchHeight, SearchWidth);
+  Dec(SearchWidth);
+  Dec(SearchHeight);
+
+  RowPtr := Buffer;
+  for Y := 0 to SearchHeight do
+  begin
+    Ptr := RowPtr;
+
+    for X := 0 to SearchWidth do
+    begin
+      Result[Y, X] := TSimbaColorConversion.BGRAToColor(Ptr^);
+      Inc(Ptr);
+    end;
+
+    Inc(RowPtr, BufferWidth);
+  end;
+end;
+
+function GetColorsMatrixOnTarget(constref Target: TSimbaTarget; Bounds: TBox): TIntegerMatrix;
+var
+  Buffer: PColorBGRA;
+  BufferWidth: Integer;
+begin
+  if Target.GetImageData(Bounds, Buffer, BufferWidth) then
+  try
+    Result := GetColorsMatrixOnBuffer(Buffer, BufferWidth, Bounds.Width, Bounds.Height);
+  finally
+    Target.FreeImageData(Buffer);
+  end;
 end;
 
 initialization

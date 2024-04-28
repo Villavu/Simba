@@ -42,8 +42,6 @@ begin
   APIFiles += ['Source\script\imports\simba.import_windowhandle.pas',  'TWindowHandle'  ];
   APIFiles += ['Source\script\imports\simba.import_debugimage.pas',    'Debug Image'    ];
   APIFiles += ['Source\script\imports\simba.import_random.pas',        'Random'         ];
-  APIFiles += ['Source\script\imports\simba.import_input.pas',         'Input'          ];
-  APIFiles += ['Source\script\imports\simba.import_finder.pas',        'Finder'         ];
   APIFiles += ['Source\script\imports\simba.import_target.pas',        'Target'         ];
   APIFiles += ['Source\script\imports\simba.import_web.pas',           'Web'            ];
   APIFiles += ['Source\script\imports\simba.import_file.pas',          'File'           ];

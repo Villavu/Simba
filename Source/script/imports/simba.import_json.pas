@@ -16,7 +16,6 @@ uses
   lptypes,
   simba.json;
 
-
 (*
 JSON
 ====
@@ -536,10 +535,10 @@ begin
     addGlobalFunc('function TJSONElement.HasKey(Keys: TStringArray): Boolean; overload', @_LapeJSONElement_HasKey2);
     addGlobalFunc('function TJSONElement.HasKeys(Keys: TStringArray): Boolean', @_LapeJSONElement_HasKeys);
 
-    addGlobalFunc(
-      'function ToString(constref Element: TJSONElement): String; override;', [
+    addDelayedCode([
+      'function ToString(constref Param: TJSONElement): String; override;',
       'begin',
-      '  Result := Element.AsString();',
+      '  Result := Param.AsString();',
       'end;'
     ]);
 

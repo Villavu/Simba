@@ -125,8 +125,6 @@ begin
   begin
     ImportingSection := 'Match Template';
 
-    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @MatchTemplateMultithreadOpts, 'MatchTemplateMultithreadOpts');
-
     addClass('TMatchTemplateCache', 'TBaseClass');
     addGlobalType('(TM_CCORR, TM_CCORR_NORMED, TM_CCOEFF, TM_CCOEFF_NORMED, TM_SQDIFF, TM_SQDIFF_NORMED)', 'ETMFormula');
 

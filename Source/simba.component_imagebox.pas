@@ -13,7 +13,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
   ATScrollBar, LCLType, LMessages,
   simba.base, simba.component_statusbar, simba.image_lazbridge, simba.component_imageboxcanvas,
-  simba.image, simba.dtm, simba.colormath, simba.finder, simba.target;
+  simba.image, simba.dtm, simba.colormath, simba.target;
 
 const
   ZOOM_LEVELS: TIntegerArray = (
@@ -766,14 +766,11 @@ end;
 
 function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;
 var
-  Finder: TSimbaFinder;
   Img: TSimbaImage;
 begin
   Img := LazImage_ToSimbaImage(FBackground);
   try
-    Finder.Target.SetImage(Img);
-
-    Result := Finder.FindDTMEx(DTM, -1, TBox.Create(-1, -1, -1, -1));
+    Result := Img.FindDTM(DTM, -1);
   finally
     Img.Free();
   end;
@@ -781,14 +778,11 @@ end;
 
 function TSimbaImageBox.FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
 var
-  Finder: TSimbaFinder;
   Img: TSimbaImage;
 begin
   Img := LazImage_ToSimbaImage(FBackground);
   try
-    Finder.Target.SetImage(Img);
-
-    Result := Finder.FindColor(AColor, Tolerance, ColorSpace, Multipliers, TBox.Create(-1, -1, -1, -1));
+    Result := Img.FindColor(AColor, Tolerance, ColorSpace, Multipliers);
   finally
     Img.Free();
   end;
@@ -796,14 +790,11 @@ end;
 
 function TSimbaImageBox.MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
 var
-  Finder: TSimbaFinder;
   Img: TSimbaImage;
 begin
   Img := LazImage_ToSimbaImage(FBackground);
   try
-    Finder.Target.SetImage(Img);
-
-    Result := Finder.MatchColor(AColor, ColorSpace, Multipliers, TBox.Create(-1, -1, -1, -1));
+    Result := Img.MatchColor(AColor, ColorSpace, Multipliers);
   finally
     Img.Free();
   end;

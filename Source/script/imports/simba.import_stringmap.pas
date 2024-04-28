@@ -151,8 +151,7 @@ begin
     if (getGlobalType('TStringMap').Size <> SizeOf(TSimbaStringMap)) then
       SimbaException('SizeOf(TStringMap) is wrong!');
 
-    addGlobalFunc('function ToString(constref Param: TStringMap): String; override;', @_LapeStringMap_ToString);
-
+    addGlobalFunc('function TStringMap.ToString: String', @_LapeStringMap_ToString);
     addGlobalFunc('function TStringMap.Add(Key: String; Value: Variant): Integer;', @_LapeStringMap_Add);
     addGlobalFunc('function TStringMap.Get(Key: String): Variant;', @_LapeStringMap_Get);
     addGlobalFunc('function TStringMap.GetAll(Key: String): TVariantArray;', @_LapeStringMap_GetAll);
@@ -172,6 +171,13 @@ begin
     addPropertyIndexed('TStringMap', 'Pair', 'Index: Integer', 'TStringMapPair', @_LapeStringMap_GetPair);
     addPropertyIndexed('TStringMap', 'Key', 'Index: Integer', 'String', @_LapeStringMap_GetKey, @_LapeStringMap_SetKey);
     addPropertyIndexed('TStringMap', 'Value', 'Index: Integer', 'Variant', @_LapeStringMap_GetValue, @_LapeStringMap_SetValue);
+
+    addDelayedCode([
+      'function ToString(constref Param: TStringMap): String; override;',
+      'begin',
+      '  Result := Param.ToString();',
+      'end;'
+    ]);
 
     // Image map, just wrap above
     addDelayedCode([
@@ -284,7 +290,7 @@ begin
       '',
       'function ToString(constref Param: TImageMap): String; override;',
       'begin',
-      '  Result := ToString(Param.StringMap);',
+      '  Result := Param.StringMap.ToString();',
       'end;'
     ], 'ImageMap');
   end;

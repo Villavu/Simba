@@ -13,7 +13,7 @@ unit simba.base;
 interface
 
 uses
-  Classes, SysUtils, Graphics;
+  Classes, SysUtils, Graphics, Types;
 
 {$PUSH}
 {$SCOPEDENUMS ON}
@@ -192,9 +192,6 @@ type
     SCROLL_DOWN
   );
 
-  PKeyCode = ^EKeyCode;
-  PMouseButton = ^EMouseButton;
-
   ESimbaProcessType = (UNKNOWN, IDE, SCRIPT, SCRIPT_WITH_COMMUNICATION);
   ESimbaScriptState = (STATE_PAUSED, STATE_STOP, STATE_RUNNING, STATE_NONE);
 
@@ -206,62 +203,12 @@ type
   );
 {$POP}
 
-  // Colors
-  TColorRGB = record
-    R,G,B: Byte;
-  end;
-
-  TColorXYZ = record
-    X,Y,Z: Single;
-  end;
-
-  TColorLAB = record
-    L,A,B: Single;
-  end;
-
-  TColorLCH = record
-    L,C,H: Single;
-  end;
-
-  TColorHSV = record
-    H,S,V: Single;
-  end;
-
-  TColorHSL = record
-    H,S,L: Single;
-  end;
-
-  TColorBGR = packed record
-    B,G,R: Byte;
-  end;
-  PColorBGR = ^TColorBGR;
-
-  TColorARGB = packed record
-  case Byte of
-    0: (A, R, G, B: Byte);
-    1: (AsInteger: UInt32);
-  end;
-
+  PColorBGRA = ^TColorBGRA;
   TColorBGRA = packed record
   case Byte of
     0: (B, G, R, A: Byte);
     1: (AsInteger: UInt32);
   end;
-
-  TColorRGBA = packed record
-  case Byte of
-    0: (R,G,B,A: Byte);
-    1: (AsInteger: UInt32);
-  end;
-
-  PColorARGB = ^TColorARGB;
-  PColorBGRA = ^TColorBGRA;
-  PColorRGB = ^TColorRGB;
-  PColorXYZ = ^TColorXYZ;
-  PColorLAB = ^TColorLAB;
-  PColorLCH = ^TColorLCH;
-  PColorHSV = ^TColorHSV;
-  PColorHSL = ^TColorHSL;
 
   TColorArray = array of TColor;
   PColorArray = ^TColorArray;
@@ -271,12 +218,16 @@ type
   PWindowHandle = ^TWindowHandle;
   PWindowHandleArray = ^TWindowHandleArray;
 
+  TStringArray = array of string;
   PStringArray = ^TStringArray;
+
+  TSize = Types.TSize;
+  PSize = Types.PSize;
 
   TPointF = record X, Y: Double; end;
   TPointFArray = array of TPointF;
 
-  PPoint = ^TPoint;
+  PPoint = Types.PPoint;
   PPointArray = ^TPointArray;
   TPointArray = array of TPoint;
   P2DPointArray = ^T2DPointArray;
@@ -317,7 +268,6 @@ type
   EComparator = (__LT__, __GT__, __EQ__, __LE__, __GE__, __NE__);
   PComparator = ^EComparator;
 
-  // Box
   TBox = record
   case Integer of
     0: (X1, Y1, X2, Y2: Integer);
@@ -328,7 +278,6 @@ type
   PBox = ^TBox;
   PBoxArray = ^TBoxArray;
 
-type
   TQuad = record
     Top: TPoint;
     Right: TPoint;
@@ -345,10 +294,7 @@ type
     Y: Integer;
     Radius: Integer;
   end;
-  TCircleArray = array of TCircle;
-
   PCircle = ^TCircle;
-  PCircleArray = ^TCircleArray;
 
 {$PUSH}
 {$SCOPEDENUMS ON}
@@ -370,43 +316,36 @@ procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String; Args: array of 
 function FlagsToString(const Flags: EDebugLnFlags): String;
 function FlagsFromString(var Str: String): EDebugLnFlags;
 
-function InRange(const AValue, AMin, AMax: Integer): Boolean; overload;
-function InRange(const AValue, AMin, AMax: Int64): Boolean; overload;
-function InRange(const AValue, AMin, AMax: Single): Boolean; overload;
-function InRange(const AValue, AMin, AMax: Double): Boolean; overload;
+function InRange(const AValue, AMin, AMax: Integer): Boolean; inline; overload;
+function InRange(const AValue, AMin, AMax: Int64): Boolean; inline; overload;
+function InRange(const AValue, AMin, AMax: Single): Boolean; inline; overload;
+function InRange(const AValue, AMin, AMax: Double): Boolean; inline; overload;
 
-function Min(const A, B: Int64): Int64; overload;
-function Max(const A, B: Int64): Int64; overload;
-function Min(const A, B: Single): Single; overload;
-function Max(const A, B: Single): Single; overload;
-function Min(const A, B: Double): Double; overload;
-function Max(const A, B: Double): Double; overload;
+function Min(const A, B: Int64): Int64; inline; overload;
+function Max(const A, B: Int64): Int64; inline; overload;
+function Min(const A, B: Single): Single; inline; overload;
+function Max(const A, B: Single): Single; inline; overload;
+function Min(const A, B: Double): Double; inline; overload;
+function Max(const A, B: Double): Double; inline; overload;
 
-procedure Swap(var A, B: Byte); overload;
-procedure Swap(var A, B: Integer); overload;
-procedure Swap(var A, B: Single); overload;
-procedure Swap(var A, B: Double); overload;
-procedure Swap(var A, B: Pointer); overload;
-procedure Swap(var A, B: TPoint); overload;
-procedure Swap(var A, B: TColorBGRA); overload;
+procedure Swap(var A, B: Integer); inline; overload;
+procedure Swap(var A, B: Single); inline; overload;
+procedure Swap(var A, B: Double); inline; overload;
+procedure Swap(var A, B: TColorBGRA); inline; overload;
+procedure Swap(var A, B: Pointer); inline; overload;
 
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String overload;
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: Int64): Int64; overload;
-function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String; inline; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Int64): Int64; inline; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Double): Double; inline; overload;
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean; inline; overload;
 
 // Generic helpers
-generic function Min<_T>(const A, B: _T): _T;
-generic function Max<_T>(const A, B: _T): _T;
-generic procedure Swap<_T>(var A, B: _T);
 generic procedure MoveElement<_T>(var Arr: specialize TArray<_T>; AFrom, ATo: Integer);
 generic function MinA<_T>(const Arr: specialize TArray<_T>): _T;
 generic function MaxA<_T>(const Arr: specialize TArray<_T>): _T;
 generic function Sum<_T, _R>(var AValues: specialize TArray<_T>): _R;
 generic procedure Reverse<_T>(var Arr: specialize TArray<_T>);
 generic function Reversed<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
-generic function Equals<_T>(const A, B: specialize TArray<_T>): Boolean;
-generic function IndexOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): Integer;
-generic function IndicesOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
 
 type
   TBooleanHelper = type helper for Boolean
@@ -428,7 +367,7 @@ type
   PVariantArray = ^TVariantArray;
   TVariantArray = array of Variant;
   TVariantHelper = type helper for Variant
-    function VarType: EVariantType;
+    function VarType: EVariantType; inline;
   end;
 
 type
@@ -569,67 +508,95 @@ end;
 
 function Min(const A, B: Int64): Int64;
 begin
-  Result := specialize Min<Int64>(A, B);
+  if (A < B) then
+    Result := A
+  else
+    Result := B;
 end;
 
 function Max(const A, B: Int64): Int64;
 begin
-  Result := specialize Max<Int64>(A, B);
+  if (A > B) then
+    Result := A
+  else
+    Result := B;
 end;
 
 function Min(const A, B: Single): Single;
 begin
-  Result := specialize Min<Single>(A, B);
+  if (A < B) then
+    Result := A
+  else
+    Result := B;
 end;
 
 function Max(const A, B: Single): Single;
 begin
-  Result := specialize Max<Single>(A, B);
+  if (A > B) then
+    Result := A
+  else
+    Result := B;
 end;
 
 function Min(const A, B: Double): Double;
 begin
-  Result := specialize Min<Double>(A, B);
+  if (A < B) then
+    Result := A
+  else
+    Result := B;
 end;
 
 function Max(const A, B: Double): Double;
 begin
-  Result := specialize Max<Double>(A, B);
-end;
-
-procedure Swap(var A, B: Byte);
-begin
-  specialize Swap<Byte>(A, B);
+  if (A > B) then
+    Result := A
+  else
+    Result := B;
 end;
 
 procedure Swap(var A, B: Integer);
+var
+  Temp: Integer;
 begin
-  specialize Swap<Integer>(A, B);
+  Temp := A;
+  A := B;
+  B := Temp;
 end;
 
 procedure Swap(var A, B: Single);
+var
+  Temp: Single;
 begin
-  specialize Swap<Single>(A, B);
+  Temp := A;
+  A := B;
+  B := Temp;
 end;
 
 procedure Swap(var A, B: Double);
+var
+  Temp: Double;
 begin
-  specialize Swap<Double>(A, B);
-end;
-
-procedure Swap(var A, B: Pointer);
-begin
-  specialize Swap<Pointer>(A, B);
-end;
-
-procedure Swap(var A, B: TPoint);
-begin
-  specialize Swap<TPoint>(A, B);
+  Temp := A;
+  A := B;
+  B := Temp;
 end;
 
 procedure Swap(var A, B: TColorBGRA);
+var
+  Temp: TColorBGRA;
 begin
-  specialize Swap<TColorBGRA>(A, B);
+  Temp := A;
+  A := B;
+  B := Temp;
+end;
+
+procedure Swap(var A, B: Pointer);
+var
+  Temp: Pointer;
+begin
+  Temp := A;
+  A := B;
+  B := Temp;
 end;
 
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String;
@@ -642,35 +609,14 @@ begin
   Result := specialize IfThen<Int64>(Val, IfTrue, IfFalse);
 end;
 
+function IfThen(const Val: Boolean; const IfTrue, IfFalse: Double): Double;
+begin
+  Result := specialize IfThen<Double>(Val, IfTrue, IfFalse);
+end;
+
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: Boolean): Boolean;
 begin
   Result := specialize IfThen<Boolean>(Val, IfTrue, IfFalse);
-end;
-
-generic function Min<_T>(const A, B: _T): _T;
-begin
-  if (A < B) then
-    Result := A
-  else
-    Result := B;
-end;
-
-generic function Max<_T>(const A, B: _T): _T;
-begin
-  if (A > B) then
-    Result := A
-  else
-    Result := B;
-end;
-
-generic procedure Swap<_T>(var A, B: _T);
-var
-  C: _T;
-begin
-  C := A;
-
-  A := B;
-  B := C;
 end;
 
 generic procedure MoveElement<_T>(var Arr: specialize TArray<_T>; AFrom, ATo: Integer);
@@ -740,115 +686,6 @@ begin
       Inc(r);
     end;
   end;
-end;
-
-generic function Equals<_T>(const A, B: specialize TArray<_T>): Boolean;
-var
-  VarType: (OTHER, SINGLE, DOUBLE);
-
-  function IsEquals(constref A, B: _T): Boolean; inline;
-  begin
-    case VarType of
-      SINGLE: Result := SameValue(PSingle(@A)^, PSingle(@B)^);
-      DOUBLE: Result := SameValue(PDouble(@A)^, PDouble(@B)^);
-      OTHER:  Result := (A = B);
-    end;
-  end;
-
-var
-  I: Integer;
-begin
-  if (Length(A) <> Length(B)) then
-    Exit(False);
-  if (Length(A) = 0) and (Length(B) = 0) then
-    Exit(True);
-
-  case GetTypeData(TypeInfo(_T))^.FloatType of
-    ftSingle: VarType := SINGLE;
-    ftDouble: VarType := DOUBLE;
-    else
-      VarType := OTHER;
-  end;
-
-  for I := 0 to High(A) do
-    if not IsEquals(A[I], B[I]) then
-      Exit(False);
-
-  Result := True;
-end;
-
-generic function IndexOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): Integer;
-var
-  VarType: (OTHER, SINGLE, DOUBLE);
-
-  function IsEquals(constref A, B: _T): Boolean; inline;
-  begin
-    case VarType of
-      SINGLE: Result := SameValue(PSingle(@A)^, PSingle(@B)^);
-      DOUBLE: Result := SameValue(PDouble(@A)^, PDouble(@B)^);
-      OTHER:  Result := (A = B);
-    end;
-  end;
-
-var
-  I: Integer;
-begin
-  Result := -1;
-  if (Length(Arr) = 0) then
-    Exit;
-
-  case GetTypeData(TypeInfo(_T))^.FloatType of
-    ftSingle: VarType := SINGLE;
-    ftDouble: VarType := DOUBLE;
-    else
-      VarType := OTHER;
-  end;
-
-  for I := 0 to High(Arr) do
-    if IsEquals(Arr[I], Item) then
-      Exit(I);
-end;
-
-generic function IndicesOf<_T>(const Item: _T; const Arr: specialize TArray<_T>): TIntegerArray;
-var
-  VarType: (OTHER, SINGLE, DOUBLE);
-
-  function IsEquals(constref A, B: _T): Boolean; inline;
-  begin
-    case VarType of
-      SINGLE: Result := SameValue(PSingle(@A)^, PSingle(@B)^);
-      DOUBLE: Result := SameValue(PDouble(@A)^, PDouble(@B)^);
-      OTHER:  Result := (A = B);
-    end;
-  end;
-
-var
-  I, Count: Integer;
-begin
-  Result := [];
-  if (Length(Arr) = 0) then
-    Exit;
-
-  case GetTypeData(TypeInfo(_T))^.FloatType of
-    ftSingle: VarType := SINGLE;
-    ftDouble: VarType := DOUBLE;
-    else
-      VarType := OTHER;
-  end;
-
-  SetLength(Result, 8);
-  Count := 0;
-
-  for I := 0 to High(Arr) do
-    if IsEquals(Arr[I], Item) then
-    begin
-      if (Count >= Length(Result)) then
-        SetLength(Result, Length(Result) * 2);
-      Result[Count] := I;
-      Inc(Count);
-    end;
-
-  SetLength(Result, Count);
 end;
 
 generic function MinA<_T>(const Arr: specialize TArray<_T>): _T;

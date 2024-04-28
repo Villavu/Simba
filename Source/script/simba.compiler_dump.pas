@@ -52,6 +52,7 @@ type
     function addGlobalType(Typ: TLapeType; AName: lpString; ACopy: Boolean): TLapeType; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
 
+    function addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar; override;
     function addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar; override;
     function addGlobalVar(AVar: TLapeGlobalVar; AName: lpString = ''): TLapeGlobalVar; override;
 
@@ -275,6 +276,14 @@ begin
   AddType(AName, Str);
 end;
 
+function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
+begin
+  Result := inherited addGlobalVar(Typ, Value, AName);
+
+  if (AName <> '') then
+    AddCode('var ' + AName + ': ' + Typ);
+end;
+
 function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: lpString; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Typ, Value, AName);
@@ -303,17 +312,14 @@ begin
         Continue;
       if DocPos.FileName.StartsWith('!') then
         Continue;
+      if not IsConstant then
+        Continue;
 
-      if isConstant then
-      begin
-        Str := 'const ' + UpperCase(Name) + ': ' + VarType.Name;
-
-        if (VarType.BaseType in LapeCharTypes) then
-          Str := Str + ' = "' + AsString + '";'
-        else
-          Str := Str + ' = ' + AsString + ';';
-      end else
-        Str := 'var ' + Name + ': ' + VarType.Name + ';';
+      Str := 'const ' + UpperCase(Name) + ': ' + VarType.Name;
+      if (VarType.BaseType in LapeCharTypes) then
+        Str := Str + ' = "' + AsString + '";'
+      else
+        Str := Str + ' = ' + AsString + ';';
 
       Add(DocPos.FileName, Str);
     end;

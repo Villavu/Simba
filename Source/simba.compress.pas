@@ -15,11 +15,11 @@ uses
 
 // TByteArray
 function CompressBytes(Data: TByteArray): TByteArray;
-function DeCompressBytes(Data: TByteArray): TByteArray;
+function DecompressBytes(Data: TByteArray): TByteArray;
 
 // String
 function CompressString(S: String; Encoding: BaseEncoding = BaseEncoding.b64): String;
-function DeCompressString(S: String; Encoding: BaseEncoding = BaseEncoding.b64): String;
+function DecompressString(S: String; Encoding: BaseEncoding = BaseEncoding.b64): String;
 
 implementation
 
@@ -74,7 +74,7 @@ begin
   Result := BaseEncodeBytes(Encoding, CompressBytes(GetRawStringBytes(S)));
 end;
 
-function DeCompressString(S: String; Encoding: BaseEncoding): String;
+function DecompressString(S: String; Encoding: BaseEncoding): String;
 begin
   Result := GetRawStringFromBytes(DeCompressBytes(BaseDecodeBytes(Encoding, S)));
 end;

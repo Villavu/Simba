@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.input, simba.threading;
+  simba.base, simba.threading, simba.target;
 
 type
   TSimbaASyncMouseThread = class(TThread)
@@ -30,11 +30,11 @@ type
   TSimbaASyncMouse = class(TObject)
   protected
     FThread: TSimbaASyncMouseThread;
-    FInput: TSimbaInput;
+    FTarget: TSimbaTarget;
     FDest: TPoint;
     FStop: Boolean;
 
-    procedure DoMouseMoving(var Input: TSimbaInput; var X, Y, DestX, DestY: Double; var Stop: Boolean);
+    procedure DoMouseMoving(Target: Pointer; var X, Y, DestX, DestY: Double; var Stop: Boolean);
     procedure Execute;
   public
     constructor Create;
@@ -45,7 +45,7 @@ type
     procedure WaitMoving;
     procedure Stop;
 
-    procedure Move(Input: TSimbaInput; Dest: TPoint; Accuracy: Double = 1);
+    procedure Move(constref Target: TSimbaTarget; Dest: TPoint; Accuracy: Double = 1);
   end;
 
 var
@@ -87,7 +87,7 @@ begin
   FLock.Unlock();
 end;
 
-procedure TSimbaASyncMouse.DoMouseMoving(var Input: TSimbaInput; var X, Y, DestX, DestY: Double; var Stop: Boolean);
+procedure TSimbaASyncMouse.DoMouseMoving(Target: Pointer; var X, Y, DestX, DestY: Double; var Stop: Boolean);
 begin
   DestX := FDest.X;
   DestY := FDest.Y;
@@ -97,7 +97,7 @@ end;
 
 procedure TSimbaASyncMouse.Execute;
 begin
-  FInput.MouseMove(FDest);
+  FTarget.MouseMove(FDest);
 end;
 
 constructor TSimbaASyncMouse.Create;
@@ -135,14 +135,14 @@ begin
     Sleep(15);
 end;
 
-procedure TSimbaASyncMouse.Move(Input: TSimbaInput; Dest: TPoint; Accuracy: Double);
+procedure TSimbaASyncMouse.Move(constref Target: TSimbaTarget; Dest: TPoint; Accuracy: Double);
 begin
   FStop := False;
   FDest := Dest;
 
-  FInput := Input.Copy(); // ensure arrays are copies
-  FInput.MouseAccuracy := Accuracy;
-  FInput.AddOnMouseMoving(@DoMouseMoving);
+  FTarget := Target.Copy(); // ensure arrays are copies
+  FTarget.MouseOptions.Accuracy := Accuracy;
+  FTarget.AddMouseEvent(@DoMouseMoving);
 
   FThread.Wake();
 end;

@@ -36,7 +36,6 @@ type
 
     function addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method; virtual; overload;
     function addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar; virtual; overload;
-    procedure addGlobalFuncOverride(Header: lpString; Body: TStringArray); virtual;
 
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
     function addGlobalType(Str: TStringArray; Name: String): TLapeType; virtual; overload;
@@ -191,12 +190,6 @@ end;
 procedure TSimbaScript_Compiler.InitBaseVariant;
 begin
   { nothing, we import our own variant later }
-end;
-
-procedure TSimbaScript_Compiler.addGlobalFuncOverride(Header: lpString; Body: TStringArray);
-begin
-  Header := Header.Replace('; overload', '').Trim([' ', ';']) + '; override;';
-  addGlobalFunc(Header, Body);
 end;
 
 procedure TSimbaScript_Compiler.InitBaseDefinitions;

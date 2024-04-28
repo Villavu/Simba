@@ -536,17 +536,17 @@ end;
 
 function TPointArrayHelper.IndexOf(P: TPoint): Integer;
 begin
-  Result := specialize IndexOf<TPoint>(P, Self);
+  Result := specialize TArrayIndexOf<TPoint>.IndexOf(P, Self);
 end;
 
 function TPointArrayHelper.IndicesOf(P: TPoint): TIntegerArray;
 begin
-  Result := specialize IndicesOf<TPoint>(P, Self);
+  Result := specialize TArrayIndicesOf<TPoint>.IndicesOf(P, Self);
 end;
 
 function TPointArrayHelper.Equals(Other: TPointArray): Boolean;
 begin
-  Result := specialize Equals<TPoint>(Self, Other);
+  Result := specialize TArrayEquals<TPoint>.Equals(Self, Other);
 end;
 
 function TPointArrayHelper.Sum: TPoint;
@@ -676,7 +676,7 @@ var
   Matrix: TIntegerMatrix;
   Adj: TPointArray;
   Start, Prev, Finish: TPoint;
-  Area: TBox;
+  B: TBox;
   Buffer: TSimbaPointBuffer;
 label
   IsSet;
@@ -685,22 +685,22 @@ begin
 
   if Length(Self) > 0 then
   begin
-    Area := Self.Bounds();
-    Area.X2 := (Area.X2 - Area.X1) + 3; // Width
-    Area.Y2 := (Area.Y2 - Area.Y1) + 3; // Height
-    Area.X1 := Area.X1 - 1;
-    Area.Y1 := Area.Y1 - 1;
+    B := Self.Bounds();
+    B.X2 := (B.X2 - B.X1) + 3; // Width
+    B.Y2 := (B.Y2 - B.Y1) + 3; // Height
+    B.X1 := B.X1 - 1;
+    B.Y1 := B.Y1 - 1;
 
-    Start := Point(Area.X2, Area.Y2);
+    Start := Point(B.X2, B.Y2);
 
-    Matrix.SetSize(Area.X2+1, Area.Y2+1);
+    Matrix.SetSize(B.X2+1, B.Y2+1);
     for I := 0 to High(Self) do
-      Matrix[Self[I].Y - Area.Y1, Self[I].X - Area.X1] := 1;
+      Matrix[Self[I].Y - B.Y1, Self[I].X - B.X1] := 1;
 
     // find first starting Y coord.
-    Start := Point(Area.X2, Area.Y2);
-    for Y := 0 to Area.Y2 - 1 do
-      for X := 0 to Area.X2 - 1 do
+    Start := Point(B.X2, B.Y2);
+    for Y := 0 to B.Y2 - 1 do
+      for X := 0 to B.X2 - 1 do
         if Matrix[Y][X] <> 0 then
         begin
           Start := Point(X, Y);
@@ -732,14 +732,14 @@ begin
       begin
         X := Adj[J].X;
         Y := Adj[J].Y;
-        if (X < 0) or (Y < 0) or (X >= Area.X2) or (Y >= Area.Y2) then
+        if (X < 0) or (Y < 0) or (X >= B.X2) or (Y >= B.Y2) then
           Continue;
 
         if Matrix[Y][X] <= 0 then
         begin
           if Matrix[Y][X] = 0 then
           begin
-            Buffer.Add(Point(Adj[J].X + Area.X1, Adj[J].Y + Area.Y1));
+            Buffer.Add(Point(Adj[J].X + B.X1, Adj[J].Y + B.Y1));
 
             Dec(Matrix[Y][X]);
           end;
