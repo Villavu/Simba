@@ -24,7 +24,7 @@ function GetLoadedPlugins: TStringArray;
 implementation
 
 uses
-  simba.files, simba.env;
+  simba.fs, simba.env;
 
 var
   LoadedPlugins: array of record

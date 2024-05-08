@@ -70,7 +70,7 @@ implementation
 
 uses
   Forms, FileUtil,
-  simba.ide_utils, simba.env, simba.threading, simba.files;
+  simba.ide_utils, simba.env, simba.threading, simba.fs;
 
 function TSimbaPackageInstaller.InternalInstall(URL: String; Path: String; IgnoreList: TStringArray; Flat: Boolean): Boolean;
 

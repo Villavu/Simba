@@ -74,7 +74,7 @@ var
 implementation
 
 uses
-  simba.env, simba.files, simba.plugin_dump;
+  simba.env, simba.fs, simba.plugin_dump;
 
 procedure TCodetoolsInclude.OnIncludeDirect(Sender: TmwBasePasLex);
 var

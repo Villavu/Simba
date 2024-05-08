@@ -379,7 +379,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="62">
+    <Units Count="63">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -685,6 +685,10 @@
         <Filename Value="simba.target_movemouse.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit61>
+      <Unit62>
+        <Filename Value="simba.fs_async.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit62>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

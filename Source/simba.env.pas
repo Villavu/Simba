@@ -51,7 +51,7 @@ implementation
 
 uses
   Forms,
-  simba.files;
+  simba.fs;
 
 class function SimbaEnv.FindPlugin(FileName: String; ExtraSearchDirs: TStringArray): String;
 const

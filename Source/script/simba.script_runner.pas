@@ -38,7 +38,7 @@ implementation
 
 uses
   Forms, FileUtil,
-  simba.env, simba.files, simba.datetime, simba.script_communication;
+  simba.env, simba.fs, simba.datetime, simba.script_communication, simba.vartype_string;
 
 procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; Text: String);
 begin
@@ -88,8 +88,9 @@ begin
     with lpException(E) do
     begin
       for Line in StackTrace.Split(LineEnding) do
-        if (Line <> '') then
-          DoDebugLn([EDebugLn.RED, EDebugLn.FOCUS], Line);
+        DoDebugLn([EDebugLn.RED, EDebugLn.FOCUS], Line);
+      for Line in Hint.Split(LineEnding) do
+        DoDebugLn([EDebugLn.YELLOW, EDebugLn.FOCUS], Line);
 
       if (FScript.SimbaCommunication <> nil) then
         FScript.SimbaCommunication.ScriptError(Message, DocPos.Line, DocPos.Col, DocPos.FileName);

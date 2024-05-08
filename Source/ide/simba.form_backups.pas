@@ -44,7 +44,7 @@ implementation
 
 uses
   AnchorDocking,
-  simba.env, simba.files, simba.ide_theme, simba.form_main, simba.form_tabs;
+  simba.env, simba.fs, simba.ide_theme, simba.form_main, simba.form_tabs;
 
 type
   TBackupNode = class(TTreeNode)

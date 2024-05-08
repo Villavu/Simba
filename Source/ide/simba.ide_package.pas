@@ -118,7 +118,7 @@ implementation
 
 uses
   IniFiles, DateUtils,
-  simba.env, simba.files, simba.vartype_string,
+  simba.env, simba.fs, simba.vartype_string,
   simba.ide_package_endpointgithub, simba.ide_package_endpointcustom;
 
 function GetRemotePackageURLs: TStringArray;

@@ -23,10 +23,11 @@ type
     TimeUsed: Double;
   end;
   TASyncHTTPFinishedEvent = procedure(constref Result: TASyncHTTPResult) of object;
+  TASyncHTTPProgressEvent = procedure(URL, ContentType: String; Position, Size: Int64) of object;
 
   ASyncHTTP = class
-    class procedure Get(URL: String; OnFinished: TASyncHTTPFinishedEvent); static;
-    class procedure Get(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent); static;
+    class procedure Get(URL: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); static;
+    class procedure Get(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); static;
     class procedure Post(URL, PostData: String; OnFinished: TASyncHTTPFinishedEvent); static;
     class procedure Post(URL, PostData: String; Headers: TStringArray; OnFinished: TASyncHTTPFinishedEvent); static;
   end;
@@ -42,11 +43,14 @@ type
     FURL: String;
     FDestFile: String;
     FOnFinished: TASyncHTTPFinishedEvent;
+    FOnProgress: TASyncHTTPProgressEvent;
+
+    procedure DoProgress(Sender: TObject; URL, ContentType: String; Position, Size: Int64);
 
     procedure Execute; override;
   public
-    constructor Create(URL: String; OnFinished: TASyncHTTPFinishedEvent); reintroduce;
-    constructor Create(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent); reintroduce;
+    constructor Create(URL: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); reintroduce;
+    constructor Create(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); reintroduce;
   end;
 
   TURLPostInBackground = class(TThread)
@@ -103,14 +107,14 @@ begin
     FOnFinished(Result);
 end;
 
-class procedure ASyncHTTP.Get(URL: String; OnFinished: TASyncHTTPFinishedEvent);
+class procedure ASyncHTTP.Get(URL: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
 begin
-  TURLFetchInBackground.Create(URL, OnFinished);
+  TURLFetchInBackground.Create(URL, OnFinished, OnProgress);
 end;
 
-class procedure ASyncHTTP.Get(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent);
+class procedure ASyncHTTP.Get(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
 begin
-  TURLFetchInBackground.Create(URL, DestFile, OnFinished);
+  TURLFetchInBackground.Create(URL, DestFile, OnFinished, OnProgress);
 end;
 
 class procedure ASyncHTTP.Post(URL, PostData: String; OnFinished: TASyncHTTPFinishedEvent);
@@ -121,6 +125,12 @@ end;
 class procedure ASyncHTTP.Post(URL, PostData: String; Headers: TStringArray; OnFinished: TASyncHTTPFinishedEvent);
 begin
   TURLPostInBackground.Create(URL, PostData, Headers, OnFinished);
+end;
+
+procedure TURLFetchInBackground.DoProgress(Sender: TObject; URL, ContentType: String; Position, Size: Int64);
+begin
+  if Assigned(FOnProgress) then
+    FOnProgress(URL, ContentType, Position, Size);
 end;
 
 procedure TURLFetchInBackground.Execute;
@@ -134,6 +144,8 @@ begin
   try
     with TSimbaHTTPClient.Create() do
     try
+      OnDownloadProgress := @DoProgress;
+
       if (FDestFile <> '') then
       begin
         GetFile(FURL, FDestFile, []);
@@ -158,7 +170,7 @@ begin
     FOnFinished(Result);
 end;
 
-constructor TURLFetchInBackground.Create(URL: String; OnFinished: TASyncHTTPFinishedEvent);
+constructor TURLFetchInBackground.Create(URL: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
 begin
   inherited Create(False, 512*512);
 
@@ -166,9 +178,10 @@ begin
 
   FURL := URL;
   FOnFinished := OnFinished;
+  FOnProgress := OnProgress;
 end;
 
-constructor TURLFetchInBackground.Create(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent);
+constructor TURLFetchInBackground.Create(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
 begin
   inherited Create(False, 512*512);
 
@@ -177,6 +190,7 @@ begin
   FDestFile := DestFile;
   FURL := URL;
   FOnFinished := OnFinished;
+  FOnProgress := OnProgress;
 end;
 
 end.

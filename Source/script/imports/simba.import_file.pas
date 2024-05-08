@@ -19,7 +19,7 @@ implementation
 
 uses
   lptypes,
-  simba.files, simba.zip;
+  simba.fs, simba.zip;
 
 (*
 File

@@ -101,7 +101,7 @@ function EIOSTarget_IsValid(Target: Pointer): Boolean;
 implementation
 
 uses
-  simba.script_pluginloader, simba.env, simba.files;
+  simba.script_pluginloader, simba.env, simba.fs;
 
 const
   MouseButtonToEIOS: array[EMouseButton] of Int32 = (1, 3, 2, 4, 5);

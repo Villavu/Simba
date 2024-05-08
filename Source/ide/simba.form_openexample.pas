@@ -50,7 +50,7 @@ implementation
 
 uses
   LCLType, AnchorDocking,
-  simba.form_main, simba.form_tabs, simba.files, simba.ide_theme;
+  simba.form_main, simba.form_tabs, simba.fs, simba.ide_theme;
 
 function ReadResourceString(ResourceName: String): String;
 begin

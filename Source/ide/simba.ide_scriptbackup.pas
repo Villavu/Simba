@@ -37,7 +37,7 @@ type
 implementation
 
 uses
-  simba.zip, simba.files, simba.env, simba.ide_initialization, simba.form_tabs, simba.threading, simba.hash;
+  simba.zip, simba.fs, simba.env, simba.ide_initialization, simba.form_tabs, simba.threading, simba.hash;
 
 procedure TSimbaScriptBackup.DoFileCollecting(Sender: TObject);
 var

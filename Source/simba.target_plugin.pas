@@ -66,7 +66,7 @@ function PluginTarget_IsValid(Target: Pointer): Boolean;
 implementation
 
 uses
-  simba.env, simba.files, simba.script_pluginloader;
+  simba.env, simba.fs, simba.script_pluginloader;
 
 type
   TUpdateDebugImageThread = class(TThread)

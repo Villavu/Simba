@@ -84,7 +84,7 @@ type
 implementation
 
 uses
-  simba.containers, simba.files, simba.array_algorithm, simba.vartype_string;
+  simba.containers, simba.fs, simba.array_algorithm, simba.vartype_string;
 
 {$WARN 6058 off : Call to subroutine "$1" marked as inline is not inlined}
 

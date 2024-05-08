@@ -25,7 +25,7 @@ implementation
 
 uses
   LCLType, Forms, openssl, gz,
-  simba.base, simba.settings, simba.env, simba.files, simba.ide_initialization
+  simba.base, simba.settings, simba.env, simba.fs, simba.ide_initialization
   {$IF defined(WINDOWS)},
   windows
   {$ELSEIF defined(LINUX)},

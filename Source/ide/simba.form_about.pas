@@ -38,7 +38,7 @@ implementation
 
 uses
   lclintf, lazversion,
-  simba.files;
+  simba.fs;
 
 procedure TSimbaAboutForm.DoFirstShow(Sender: TObject);
 begin

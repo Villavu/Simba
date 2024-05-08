@@ -40,7 +40,7 @@ implementation
 uses
   simba.ide_package, simba.ide_package_installer, simba.ide_maintoolbar, simba.ide_initialization, simba.ide_mainmenubar,
   simba.form_main, simba.form_package, simba.form_output, simba.form_tabs, simba.form_openexample,
-  simba.vartype_string, simba.files;
+  simba.vartype_string, simba.fs;
 
 type
   TPackagePopupMenu = class(TPopupMenu)

@@ -90,7 +90,7 @@ implementation
 
 uses
   LazFileUtils,
-  simba.threading, simba.ide_theme, simba.files, simba.settings, simba.form_tabs;
+  simba.threading, simba.ide_theme, simba.fs, simba.settings, simba.form_tabs;
 
 procedure TResultsMemo.AddFileLine(FileName: String);
 var

@@ -67,7 +67,7 @@ type
 implementation
 
 uses
-  simba.env, simba.files, simba.datetime, simba.target, simba.vartype_windowhandle,
+  simba.env, simba.fs, simba.datetime, simba.target, simba.vartype_windowhandle,
   simba.script_pluginloader;
 
 function TSimbaScript.DoCompilerPreprocessorFunc(Sender: TLapeCompiler; Name, Argument: lpString; out Value: lpString): Boolean;
