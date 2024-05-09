@@ -95,7 +95,7 @@ begin
   FTreeView.FilterVisible := False;
   FTreeView.OnSelectionChange := @DoSelectionChange;
   if (SIMBA_COMMIT <> '') then
-    FTreeView.OnGetNodeColor := @DoGetNodeColor;
+    {%H-}FTreeView.OnGetNodeColor := @DoGetNodeColor;
 
   FDownloadButton := TSimbaButton.Create(Self);
   FDownloadButton.Parent := Panel2;
@@ -195,7 +195,7 @@ begin
     try
       OnDownloadProgress := @DoDownloadProgress;
 
-      GetFile(FDownloadURL, FDownloadFileName, [EHTTPStatus.OK]);
+      GetFile(FDownloadURL, FDownloadFileName);
     finally
       Free();
     end;
@@ -217,25 +217,25 @@ var
   I: Integer;
   Count: Integer;
 begin
-  Lines := TSimbaHTTPClient.SimpleGet(URL_BUILD_ARCHIVE_README, []).Split(#10);
+  Lines := URLFetch(URL_BUILD_ARCHIVE_README).Split(#10);
 
   SetLength(FData, Length(Lines));
   Count := 0;
 
   for I := 5 to High(Lines) do
   begin
-    str := Lines[I].Split(' | ');
-    if Length(Str) = 4 then
+    Str := Lines[I].Split(' | ');
+    if (Length(Str) = 4) then
     begin
       Str[2] := Str[2].Between('[', ']');
       Str[3] := Str[3].Between('(', ')');
 
       with FData[Count] do
       begin
-        Date := Str[0];
+        Date   := Str[0];
         Branch := Str[1];
         Commit := Str[2];
-        Link := Str[3];
+        Link   := Str[3];
       end;
       Inc(Count);
     end;

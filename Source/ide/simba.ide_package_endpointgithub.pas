@@ -263,7 +263,7 @@ procedure TSimbaPackageEndpoint_Github.DebugRateLimit;
 begin
   with TSimbaHTTPClient.Create() do
   try
-    Get('https://api.github.com/rate_limit', []);
+    Get('https://api.github.com/rate_limit');
 
     DebugLn('Github rate limit remaining: %s', [ResponseHeader['X-RateLimit-Remaining']]);
   finally
@@ -286,7 +286,7 @@ procedure TSimbaPackageEndpoint_Github.DownloadBranches;
     Result := '';
 
     try
-      Data := TSimbaHTTPClient.SimpleGet(FBranchesAPI, [EHTTPStatus.OK]);
+      Data := URLFetch(FBranchesAPI);
 
       JsonData := Data.ParseJSON();
       if (JsonData <> nil) then

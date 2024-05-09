@@ -323,7 +323,7 @@ var
 begin
   if InputQuery('Simba - Editor Colors', 'Enter URL', Value) then
   try
-    Contents := TSimbaHTTPClient.SimpleGet(Value, [EHTTPStatus.OK]);
+    Contents := URLFetch(Value);
     if (Contents <> '') then
       FEditor.Attributes.LoadFromStream(TStringStream.Create(Contents), True);
   except

@@ -42,6 +42,11 @@ begin
   ASyncHTTP.Get(PString(Params^[0])^, PString(Params^[1])^, TASyncHTTPFinishedEvent(Params^[2]^), TASyncHTTPProgressEvent(Params^[3]^));
 end;
 
+procedure _LapeASyncHTTP_GetZip(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  ASyncHTTP.GetZip(PString(Params^[0])^, PString(Params^[1])^, TASyncHTTPFinishedEvent(Params^[2]^), TASyncHTTPProgressEvent(Params^[3]^));
+end;
+
 (*
 ASyncHTTP.Post
 -------------
@@ -157,9 +162,10 @@ begin
       'TASyncHTTPResult');
 
     addGlobalType('procedure(constref Result: TASyncHTTPResult) of object', 'TASyncHTTPFinishedEvent', FFI_DEFAULT_ABI);
-    addGlobalType('procedure(URL, ContentType: String; Position, Size: Int64) of object', 'TASyncHTTPProgressEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(URL: String; Position, Size: Int64) of object', 'TASyncHTTPProgressEvent', FFI_DEFAULT_ABI);
     addGlobalFunc('procedure ASyncHTTPClient.Get(URL: String; OnFetched: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent = nil); static; overload;', @_LapeASyncHTTP_Get1);
     addGlobalFunc('procedure ASyncHTTPClient.Get(URL, DestFile: String; OnFetched: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent = nil); static; overload;', @_LapeASyncHTTP_Get2);
+    addGlobalFunc('procedure ASyncHTTPClient.GetZip(URL, DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent = nil); static;', @_LapeASyncHTTP_GetZip);
     addGlobalFunc('procedure ASyncHTTPClient.Post(URL, PostData: String); static; overload;', @_LapeASyncHTTP_Post1);
     addGlobalFunc('procedure ASyncHTTPClient.Post(URL, PostData: String; Headers: TStringArray); static; overload;', @_LapeASyncHTTP_Post2);
 

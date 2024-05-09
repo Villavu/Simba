@@ -16,6 +16,10 @@ uses
   lptypes,
   simba.json;
 
+type
+  PSimbaJSONElement = ^TSimbaJSONElement;
+  PSimbaJSONParser = ^TSimbaJSONParser;
+
 (*
 JSON
 ====

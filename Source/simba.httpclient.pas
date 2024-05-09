@@ -8,14 +8,14 @@ unit simba.httpclient;
 {$i simba.inc}
 
 {$IFDEF DARWIN}
-  {$MODESWITCH objectivec1}
+  {$ModeSwitch objectivec1}
 {$ENDIF}
 
 interface
 
 uses
   Classes, SysUtils, fphttpclient, ssockets,
-  simba.base, simba.baseclass;
+  simba.base, simba.baseclass, simba.json;
 
 {$PUSH}
 {$SCOPEDENUMS ON}
@@ -85,15 +85,17 @@ type
     GATEWAY_TIMEOUT = 504,
     VERSION_NOT_SUPPORTED = 505
    );
-   THTTPStatusArray = array of EHTTPStatus;
-
-   PHTTPStatus = ^EHTTPStatus;
-   PHTTPStatusArray = ^THTTPStatusArray;
 {$POP}
 
 type
+  EHTTPStatusHelper = type helper for EHTTPStatus
+  public
+    function AsInteger: Integer;
+    function AsString: String;
+  end;
+
   TSimbaHTTPConnectingEvent  = procedure(Sender: TObject; URL: String) of object;
-  TSimbaHTTPExtractingEvent  = procedure(Sender: TObject; URL: String; Percent: Double) of object;
+  TSimbaHTTPExtractingEvent  = procedure(Sender: TObject; URL: String; Pos, Size: Int64) of object;
   TSimbaHTTPStatusEvent      = procedure(Sender: TObject; ResponseStatus: EHTTPStatus) of object;
   TSimbaHTTPDownloadingEvent = procedure(Sender: TObject; URL, ContentType: String; Position, Size: Int64) of object;
 
@@ -129,28 +131,30 @@ type
     FDownloadingFinished: TNotifyEvent;
     FExtractingFinished: TNotifyEvent;
 
-    function StatusCodesToIntegerArray(StatusCodes: THTTPStatusArray): TIntegerArray;
     function SetURL(URL: String): String;
 
-    procedure DoExtractProgress(Sender: TObject; FileName: String; Percent: Double);
+    procedure DoExtractProgress(Sender: TObject; FileName: String; Pos, Size: Int64);
     procedure DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
     procedure DoRedirect(Sender: TObject; const Source: String; var Dest: String);
     procedure DoHeaders(Sender: TObject);
 
+    function GetConnectTimeout: Integer;
+    function GetReadWriteTimeout: Integer;
     function GetResponseHeader(AName: String): String;
     function GetResponseStatus: EHTTPStatus;
     function GetResponseHeaders: TStringList;
     function GetRequestHeader(AName: String): String;
     function GetRequestHeaders: TStringList;
     function GetCookies: TStringList;
-    function GetRequestContentType: String;
-    function GetUserAgent: String;
 
-    procedure SetUserAgent(Value: String);
-    procedure SetRequestContentType(Value: String);
+    procedure SetConnectTimeout(AValue: Integer);
+    procedure SetReadWriteTimeout(AValue: Integer);
     procedure SetRequestHeader(AName: String; Value: String);
     procedure SetCookies(Value: TStringList);
   public
+    property ConnectTimeout: Integer read GetConnectTimeout write SetConnectTimeout;
+    property ReadWriteTimeout: Integer read GetReadWriteTimeout write SetReadWriteTimeout;
+
     property OnDownloadProgress: TSimbaHTTPDownloadingEvent read FOnDownloadProgress write FOnDownloadProgress;
     property OnExtractProgress: TSimbaHTTPExtractingEvent read FOnExtractProgress write FOnExtractProgress;
     property OnConnecting: TSimbaHTTPConnectingEvent read FOnConnecting write FOnConnecting;
@@ -165,53 +169,50 @@ type
 
     property RequestHeader[AName: String]: String read GetRequestHeader write SetRequestHeader;
     property RequestHeaders: TStringList read GetRequestHeaders;
-    property RequestContentType: String read GetRequestContentType write SetRequestContentType;
 
     property Cookies: TStringList read GetCookies write SetCookies;
-    property UserAgent: String read GetUserAgent write SetUserAgent;
-
-    procedure SetProxy(Host: String; Port: Integer; UserName, Password: String);
-    procedure ClearProxy;
 
     // Clear cookies and request data
     procedure Reset;
 
     // Header request, returns response code
+    // Use ResponseHeader after
     function Head(URL: String): EHTTPStatus;
 
     // Writes page contents to result
-    function Get(URL: String; AllowedStatusCodes: THTTPStatusArray): String;
+    function Get(URL: String): String;
+
+    // Parses page contents as json and returns
+    function GetJson(URL: String): TSimbaJSONParser;
 
     // Writes page contents to a file.
-    procedure GetFile(URL, LocalFileName: String; AllowedStatusCodes: THTTPStatusArray);
+    function GetFile(URL, LocalFileName: String): Boolean;
 
     // Extracts page contents to file treating contents as .zip
-    procedure GetZip(URL, OutputPath: String; Flat: Boolean; IgnoreList: TStringArray);
-
-    // Post data in request body returns response
-    function Post(URL, PostData: String): String;
+    procedure GetZip(URL, OutputPath: String; Flat: Boolean = False; IgnoreList: TStringArray = nil);
 
     // Post Form data (www-urlencoded) in request body.
     // Return response
     function PostForm(URL, Data: String): String;
-    // Post a file
-    // Return respose
     function PostFormFile(URL, FieldName, FileName: string): String;
 
+    // Other http requests with `data` being sent in request body.
+    function Post(URL, Data: String): String;
     function Patch(URL, Data: String): String;
     function Put(URL, Data: String): String;
     function Delete(URL, Data: String): String;
+    function Options(URL, Data: String): String;
 
-    class function SimpleGet(URL: String; AllowedStatusCodes: THTTPStatusArray): String; static;
-    class procedure SimpleGetFile(URL, LocalFileName: String; AllowedStatusCodes: THTTPStatusArray); static;
-
-    constructor Create;
+    constructor Create; reintroduce;
+    constructor CreateWithProxy(Host: String; User: String = ''; Pass: String = ''); reintroduce;
     destructor Destroy; override;
   end;
 
-  PSimbaHTTPClient = ^TSimbaHTTPClient;
+  function URLFetch(URL: String): String;
+  function URLFetchToFile(URL, DestFile: String): Boolean;
 
-  function ToStr(Status: EHTTPStatus): String;
+  function URLEncode(URL: String): String;
+  function URLDecode(URL: String): String;
 
 implementation
 
@@ -219,7 +220,18 @@ uses
   {$IFDEF DARWIN}
   CocoaAll, CocoaUtils,
   {$ENDIF}
-  simba.zip, simba.openssl;
+  simba.zip, simba.openssl, simba.vartype_string;
+
+function EHTTPStatusHelper.AsInteger: Integer;
+begin
+  Result := Integer(Self);
+end;
+
+function EHTTPStatusHelper.AsString: String;
+begin
+  Result := '';
+  WriteStr(Result, Self);
+end;
 
 function TSimbaHTTPClient.GetResponseHeaders: TStringList;
 begin
@@ -258,26 +270,11 @@ begin
   FHTTPClient.AddHeader(AName, Value);
 end;
 
-procedure TSimbaHTTPClient.SetProxy(Host: String; Port: Integer; UserName, Password: String);
-begin
-  FHTTPClient.Proxy.Host := Host;
-  FHTTPClient.Proxy.Port := Port;
-  FHTTPClient.Proxy.UserName := UserName;
-  FHTTPClient.Proxy.Password := Password;
-end;
-
-procedure TSimbaHTTPClient.ClearProxy;
-begin
-  FHTTPClient.Proxy.Host := '';
-  FHTTPClient.Proxy.Port := 0;
-  FHTTPClient.Proxy.UserName := '';
-  FHTTPClient.Proxy.Password := '';
-end;
-
 procedure TSimbaHTTPClient.Reset;
 begin
   FHTTPClient.Cookies.Clear();
   FHTTPClient.RequestHeaders.Clear();
+  FHTTPClient.AddHeader('User-Agent', Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s)', [SIMBA_VERSION, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}]));
 end;
 
 function TSimbaHTTPClient.Head(URL: String): EHTTPStatus;
@@ -287,38 +284,29 @@ begin
   Result := GetResponseStatus();
 end;
 
-function TSimbaHTTPClient.GetRequestContentType: String;
-begin
-  Result := RequestHeader['Content-Type'];
-end;
-
-procedure TSimbaHTTPClient.SetRequestContentType(Value: String);
-begin
-  RequestHeader['Content-Type'] := Value;
-end;
-
 procedure TSimbaHTTPClient.SetCookies(Value: TStringList);
 begin
   FHTTPClient.Cookies := Value;
 end;
 
-function TSimbaHTTPClient.GetUserAgent: String;
+function TSimbaHTTPClient.GetConnectTimeout: Integer;
 begin
-  Result := RequestHeader['User-Agent'];
+  Result := FHTTPClient.ConnectTimeout;
 end;
 
-procedure TSimbaHTTPClient.SetUserAgent(Value: String);
+function TSimbaHTTPClient.GetReadWriteTimeout: Integer;
 begin
-  RequestHeader['User-Agent'] := Value;
+  Result := FHTTPClient.IOTimeout;
 end;
 
-function TSimbaHTTPClient.StatusCodesToIntegerArray(StatusCodes: THTTPStatusArray): TIntegerArray;
-var
-  I: Integer;
+procedure TSimbaHTTPClient.SetConnectTimeout(AValue: Integer);
 begin
-  SetLength(Result, Length(StatusCodes));
-  for I := 0 to High(StatusCodes) do
-    Result[I] := Ord(StatusCodes[I]);
+  FHTTPClient.ConnectTimeout := AValue;
+end;
+
+procedure TSimbaHTTPClient.SetReadWriteTimeout(AValue: Integer);
+begin
+  FHTTPClient.IOTimeout := AValue;
 end;
 
 function TSimbaHTTPClient.SetURL(URL: String): String;
@@ -330,10 +318,10 @@ begin
   Result := FURL;
 end;
 
-procedure TSimbaHTTPClient.DoExtractProgress(Sender: TObject; FileName: String; Percent: Double);
+procedure TSimbaHTTPClient.DoExtractProgress(Sender: TObject; FileName: String; Pos, Size: Int64);
 begin
   if (FOnExtractProgress <> nil) then
-    FOnExtractProgress(Self, FileName, Percent);
+    FOnExtractProgress(Self, FileName, Pos, Size);
 end;
 
 procedure TSimbaHTTPClient.DoDownloadProgress(Sender: TObject; const Size, Position: Int64);
@@ -352,13 +340,15 @@ begin
   Result := EHTTPStatus(FHTTPClient.ResponseStatusCode);
 end;
 
-function TSimbaHTTPClient.Get(URL: String; AllowedStatusCodes: THTTPStatusArray): String;
+function TSimbaHTTPClient.Get(URL: String): String;
 var
   Stream: TRawByteStringStream;
 begin
+  Result := '';
+
   Stream := TRawByteStringStream.Create();
   try
-    FHTTPClient.HTTPMethod('GET', SetURL(URL), Stream, StatusCodesToIntegerArray(AllowedStatusCodes));
+    FHTTPClient.HTTPMethod('GET', SetURL(URL), Stream, []);
 
     Result := Stream.DataString;
   finally
@@ -366,13 +356,22 @@ begin
   end;
 end;
 
-procedure TSimbaHTTPClient.GetFile(URL, LocalFileName: String; AllowedStatusCodes: THTTPStatusArray);
+function TSimbaHTTPClient.GetJson(URL: String): TSimbaJSONParser;
+begin
+  Result := TSimbaJSONParser.Create(Get(URL));
+end;
+
+function TSimbaHTTPClient.GetFile(URL, LocalFileName: String): Boolean;
 var
   Stream: TFileStream;
 begin
+  Result := False;
+
   Stream := TFileStream.Create(LocalFileName, fmCreate);
   try
-    FHTTPClient.HTTPMethod('GET', SetURL(URL), Stream, StatusCodesToIntegerArray(AllowedStatusCodes));
+    FHTTPClient.HTTPMethod('GET', SetURL(URL), Stream, []);
+
+    Result := Stream.Size > 0;
   finally
     Stream.Free();
   end;
@@ -388,18 +387,21 @@ begin
   try
     FHTTPClient.HTTPMethod('GET', SetURL(URL), Stream, [200]);
 
-    Extractor := TSimbaZipExtractor.Create();
-    Extractor.OnProgress := @DoExtractProgress;
-    Extractor.OnExtractingFinished := FExtractingFinished;
-    Extractor.InputStream := Stream;
-    Extractor.OutputPath := OutputPath;
-    Extractor.Flat := Flat;
-    Extractor.IgnoreList.AddStrings(IgnoreList);
+    if (FHTTPClient.ResponseStatusCode = 200) then
+    begin
+      Extractor := TSimbaZipExtractor.Create();
+      Extractor.OnProgress := @DoExtractProgress;
+      Extractor.OnExtractingFinished := FExtractingFinished;
+      Extractor.InputStream := Stream;
+      Extractor.OutputPath := OutputPath;
+      Extractor.Flat := Flat;
+      Extractor.IgnoreList.AddStrings(IgnoreList);
 
-    try
-      Extractor.Extract();
-    finally
-      Extractor.Free();
+      try
+        Extractor.Extract();
+      finally
+        Extractor.Free();
+      end;
     end;
   finally
     if (Stream <> nil) then
@@ -407,9 +409,9 @@ begin
   end;
 end;
 
-function TSimbaHTTPClient.Post(URL, PostData: String): String;
+function TSimbaHTTPClient.Post(URL, Data: String): String;
 begin
-  FHTTPClient.RequestBody := TStringStream.Create(PostData);
+  FHTTPClient.RequestBody := TStringStream.Create(Data);
   try
     Result := FHTTPClient.Post(SetURL(URL));
   finally
@@ -480,25 +482,14 @@ begin
   end;
 end;
 
-class function TSimbaHTTPClient.SimpleGet(URL: String; AllowedStatusCodes: THTTPStatusArray): String;
+function TSimbaHTTPClient.Options(URL, Data: String): String;
 begin
-  Result := '';
-
-  with TSimbaHTTPClient.Create() do
+  FHTTPClient.RequestBody := TStringStream.Create(Data);
   try
-    Result := Get(URL, AllowedStatusCodes);
+    Result := FHTTPClient.Options(SetURL(URL));
   finally
-    Free();
-  end;
-end;
-
-class procedure TSimbaHTTPClient.SimpleGetFile(URL, LocalFileName: String; AllowedStatusCodes: THTTPStatusArray);
-begin
-  with TSimbaHTTPClient.Create() do
-  try
-    GetFile(URL, LocalFileName, AllowedStatusCodes);
-  finally
-    Free();
+    FHTTPClient.RequestBody.Free();
+    FHTTPClient.RequestBody := nil;
   end;
 end;
 
@@ -514,7 +505,20 @@ begin
   FHTTPClient.OnConnecting := FOnConnecting;
   FHTTPClient.OnResponseCode := FOnResponseStatus;
 
-  UserAgent := Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s)', [SIMBA_VERSION, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}]);
+  Reset();
+end;
+
+constructor TSimbaHTTPClient.CreateWithProxy(Host: String; User: String; Pass: String);
+begin
+  Create();
+
+  with FHTTPClient.Proxy do
+  begin
+    Host := Host.Before(':');
+    Port := Host.After(':').ToInteger();
+    UserName := User;
+    Password := Pass;
+  end;
 end;
 
 destructor TSimbaHTTPClient.Destroy;
@@ -613,10 +617,34 @@ begin
 end;
 {$ENDIF}
 
-function ToStr(Status: EHTTPStatus): String;
+function URLFetch(URL: String): String;
 begin
-  Result := '';
-  WriteStr(Result, Status);
+  with TSimbaHTTPClient.Create() do
+  try
+    Result := Get(URL);
+  finally
+    Free();
+  end;
+end;
+
+function URLFetchToFile(URL, DestFile: String): Boolean;
+begin
+  with TSimbaHTTPClient.Create() do
+  try
+    Result := GetFile(URL, DestFile);
+  finally
+    Free();
+  end;
+end;
+
+function URLEncode(URL: String): String;
+begin
+  Result := EncodeURLElement(URL);
+end;
+
+function URLDecode(URL: String): String;
+begin
+  Result := DecodeURLElement(URL);
 end;
 
 end.

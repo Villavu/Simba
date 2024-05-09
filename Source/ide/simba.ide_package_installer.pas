@@ -44,7 +44,7 @@ type
 
     procedure DoConnectingProgress(Sender: TObject; URL: String);
     procedure DoDownloadingProgress(Sender: TObject; URL, ContentType: String; Pos, Size: Int64);
-    procedure DoExtractingProgress(Sender: TObject; FileName: String; Percent: Double);
+    procedure DoExtractingProgress(Sender: TObject; FileName: String; Pos, Size: Int64);
     procedure DoResponseStatus(Sender: TObject; Code: EHTTPStatus);
 
     procedure DoDownloadingFinished(Sender: TObject);
@@ -204,9 +204,9 @@ begin
   Log(FDownloadProgress.Progress);
 end;
 
-procedure TSimbaPackageInstaller.DoExtractingProgress(Sender: TObject; FileName: String; Percent: Double);
+procedure TSimbaPackageInstaller.DoExtractingProgress(Sender: TObject; FileName: String; Pos, Size: Int64);
 begin
-  FExtractProgress.Progress := 'Extracting: %d%%'.Format([Round(Percent)]);
+  FExtractProgress.Progress := 'Extracting: %f%%'.Format([Pos / Size * 100.0]);
   if (GetTickCount64() - FExtractProgress.Time) < 500 then
     Exit;
   FExtractProgress.Time := GetTickCount64();
@@ -239,7 +239,7 @@ procedure TSimbaPackageInstaller.SetVersion(Value: TSimbaPackageVersion);
     begin
       with TSimbaHTTPClient.Create() do
       try
-        Strings.Text := Get(FVersion.OptionsURL, []);
+        Strings.Text := Get(FVersion.OptionsURL);
         if (ResponseStatus <> EHTTPStatus.OK) then
           Strings.Text := '';
       finally

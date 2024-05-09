@@ -130,6 +130,11 @@ function LoadSSL(Debug: Boolean): Boolean;
   {$ENDIF}
 
 begin
+  {$IF defined(DARWIN)}
+  Result := True;
+  if Debug then
+    DebugLn('We dont use OpenSSL on MacOS');
+  {$ELSE}
   Result := InitSSLInterface();
 
   if Debug then
@@ -140,6 +145,7 @@ begin
       DebugLn('SSLUtil: ' + LibPath(SSLUtilHandle));
     end else
       DebugLn('SSL is not loaded: ' + GetLoadErrorStr());
+  {$ENDIF}
 end;
 
 initialization

@@ -124,7 +124,7 @@ uses
 function GetRemotePackageURLs: TStringArray;
 begin
   try
-    Result := TSimbaHTTPClient.SimpleGet(SIMBA_PACKAGES_URL, []).Split(#10);
+    Result := URLFetch(SIMBA_PACKAGES_URL).Split(#10);
   except
     Result := [];
   end;
@@ -191,7 +191,7 @@ begin
 
   with TSimbaHTTPClient.Create() do
   try
-    Result := Get(URL, []);
+    Result := Get(URL);
     if (ResponseStatus <> EHTTPStatus.OK) then
       Result := '';
 

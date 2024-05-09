@@ -19,7 +19,6 @@ uses
 type
   ESimbaJSONValueType = (UNKNOWN, NULL, INT, FLOAT, STR, BOOL);
 
-  PSimbaJSONElement = ^TSimbaJSONElement;
   TSimbaJSONElement = record
   private
     FData: TJSONData;
@@ -72,7 +71,6 @@ type
     property AsString: String read GetAsString;
   end;
 
-  PSimbaJSONParser = ^TSimbaJSONParser;
   TSimbaJSONParser = class(TSimbaBaseClass)
   protected
     FRoot: TSimbaJSONElement;

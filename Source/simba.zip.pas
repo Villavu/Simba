@@ -17,7 +17,7 @@ type
   TSimbaZipExtractor = class
   public
   type
-    TProgressEvent = procedure(Sender: TObject; FileName: String; Percent: Double) of object;
+    TProgressEvent = procedure(Sender: TObject; FileName: String; Pos, Size: Int64) of object;
   protected
     FInputStream: TStream;
     FOutputPath: String;
@@ -69,7 +69,7 @@ uses
 procedure TSimbaZipExtractor.DoProgress(Sender: TObject; const ATotPos, ATotSize: Int64);
 begin
   if (FOnProgress <> nil) then
-    FOnProgress(Self, FCurrentFile, ATotPos / ATotSize * 100.0);
+    FOnProgress(Self, FCurrentFile, ATotPos, ATotSize);  // ATotPos / ATotSize * 100.0
 end;
 
 procedure TSimbaZipExtractor.DoStartFile(Sender: TObject; const AFileName: String);

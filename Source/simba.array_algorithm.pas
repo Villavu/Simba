@@ -417,13 +417,23 @@ begin
 end;
 
 class function TArrayEquals.Equals(A, B: TArr): Boolean;
+var
+  I: Integer;
 begin
   if (Length(A) <> Length(B)) then
     Exit(False);
   if (Length(A) = 0) and (Length(B) = 0) then
     Exit(True);
 
-  Result := CompareMem(@A[0], @B[0], Length(A) * SizeOf(_T));
+  if (not IsManagedType(_T)) then
+    Result := CompareMem(@A[0], @B[0], Length(A) * SizeOf(_T))
+  else
+  begin
+    for I := 0 to High(A) do
+      if (A[I] <> B[I]) then
+        Exit(False);
+    Exit(True);
+  end;
 end;
 
 class function TArrayEqualsFunc.Equals(A, B: TArr; EqualFunc: TEqualFunc): Boolean;

@@ -177,7 +177,7 @@ begin
         FListBox.ItemIndex := FListBox.Add(Package);
       end else
       begin
-        SimbaErrorDlg('Package error', ['Package not found: %s', 'Error: %s'], [URL, ToStr(Package.EndPoint.LastHTTPStatus)]);
+        SimbaErrorDlg('Package error', ['Package not found: %s', 'Error: %s'], [URL, Package.EndPoint.LastHTTPStatus.AsString]);
 
         Package.Free();
       end;
