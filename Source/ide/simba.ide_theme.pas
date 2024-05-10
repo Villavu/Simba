@@ -131,5 +131,8 @@ end;
 initialization
   SimbaTheme := TSimbaTheme.Create();
 
+finalization
+  FreeAndNil(SimbaTheme);
+
 end.
 

@@ -39,7 +39,7 @@ type
     function ParseReleasesAPI(Data: String): TSimbaPackageVersions;
 
     function GetReleases: TSimbaPackageVersions;
-    function GetBranches: TSimbaPackageVersions;
+    function GetBranches: TSimbaPackageVersions; // only loads cache, requires DownloadBraches to be used
 
     function GetVersions: TSimbaPackageVersions; override;
   public
@@ -132,7 +132,6 @@ begin
 
   Json := Data.ParseJSON();
   if (Json is TJSONArray) then
-  try
     for I := 0 to Json.Count - 1 do
       if (Json.Items[I] is TJSONObject) then
       try
@@ -148,9 +147,7 @@ begin
         end;
       except
       end;
-  finally
-    Json.Free();
-  end;
+  Json.Free();
 end;
 
 function TSimbaPackageEndpoint_Github.ParseReleasesAPI(Data: String): TSimbaPackageVersions;
@@ -163,7 +160,6 @@ begin
 
   Json := Data.ParseJSON();
   if (Json is TJSONArray) then
-  try
     for I := 0 to JSON.Count - 1 do
       if (JSON.Items[I] is TJSONObject) then
       try
@@ -183,9 +179,7 @@ begin
         end;
       except
       end;
-  finally
-    JSON.Free();
-  end;
+  JSON.Free();
 end;
 
 function TSimbaPackageEndpoint_Github.GetReleases: TSimbaPackageVersions;
@@ -247,7 +241,6 @@ var
 begin
   Result := [];
 
-  Cache := TStringList.Create();
   if FileExists(FBranchesCache) then
   begin
     Cache := TStringList.Create();

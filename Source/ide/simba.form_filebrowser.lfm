@@ -1,14 +1,14 @@
 object SimbaFileBrowserForm: TSimbaFileBrowserForm
-  Left = 349
+  Left = 535
   Height = 309
-  Top = 672
-  Width = 1824
+  Top = 758
+  Width = 1389
   Caption = 'File Browser'
   DesignTimePPI = 120
   ShowInTaskBar = stAlways
   LCLVersion = '3.0.0.3'
   object Popup: TPopupMenu
-    Images = SimbaForm.Images
+    Images = SimbaMainForm.Images
     OnMeasureItem = PopupMeasureItem
     OnPopup = PopupPopup
     Left = 110

@@ -413,4 +413,7 @@ end;
 initialization
   SimbaDockMaster := TSimbaDockMaster.Create();
 
+finalization
+  FreeAndNil(SimbaDockMaster);
+
 end.

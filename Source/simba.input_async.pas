@@ -115,6 +115,7 @@ begin
     Stop();
     FThread.WaitFor();
   end;
+  FThread.Free();
 
   inherited Destroy();
 end;

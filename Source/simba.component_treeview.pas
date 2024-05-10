@@ -177,7 +177,7 @@ begin
   FTree.FScrollbarVert := FScrollbarVert;
   FTree.FScrollbarHorz := FScrollbarHorz;
   FTree.BorderStyle := bsNone;
-  FTree.Options := FTree.Options + [tvoReadOnly, tvoAutoItemHeight, tvoNoDoubleClickExpand] - [tvoToolTips, tvoThemedDraw];
+  FTree.Options := FTree.Options + [tvoReadOnly, tvoAutoItemHeight, tvoNoDoubleClickExpand, tvoRightClickSelect] - [tvoToolTips, tvoThemedDraw];
 
   FTree.ExpandSignType := tvestArrow;
   FTree.ExpandSignColor := clWhite;

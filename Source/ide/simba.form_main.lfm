@@ -465,6 +465,7 @@ object SimbaMainForm: TSimbaMainForm
     Top = 220
   end
   object Images: TImageList
+    ShareImages = True
     OnGetWidthForPPI = ImagesGetWidthForPPI
     Left = 60
     Top = 50

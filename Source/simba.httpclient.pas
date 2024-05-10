@@ -8,7 +8,7 @@ unit simba.httpclient;
 {$i simba.inc}
 
 {$IFDEF DARWIN}
-  {$ModeSwitch objectivec1}
+  {$MODESWITCH objectivec1}
 {$ENDIF}
 
 interface

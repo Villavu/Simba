@@ -1,8 +1,8 @@
 object SimbaFunctionListForm: TSimbaFunctionListForm
-  Left = -943
-  Height = 301
-  Top = 765
-  Width = 765
+  Left = -838
+  Height = 579
+  Top = 278
+  Width = 535
   Caption = 'Function List'
   DesignTimePPI = 120
   PopupMenu = ContextMenu

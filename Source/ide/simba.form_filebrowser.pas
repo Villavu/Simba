@@ -223,13 +223,14 @@ var
 begin
   Node := TSimbaFileBrowserNode(FTreeView.Selected);
 
+  PopupMenu_Open.Caption := 'Open';
+  PopupMenu_Open.Enabled := False;
+  PopupMenu_OpenExternally.Caption := 'Open Externally';
+  PopupMenu_OpenExternally.Enabled := False;
+
   if (Node is TSimbaFileBrowserNode) then
   begin
-    if Node.IsDirectory then
-    begin
-      PopupMenu_Open.Caption := 'Open';
-      PopupMenu_Open.Enabled := False;
-    end else
+    if Node.IsSimbaScript then
     begin
       PopupMenu_Open.Caption := 'Open "' + Node.Text + '"';
       PopupMenu_Open.Enabled := True;
@@ -237,12 +238,7 @@ begin
 
     PopupMenu_Open.Caption := 'Open "' + Node.Text + '"';
     PopupMenu_OpenExternally.Caption := 'Open Externally "' + Node.Text + '"';
-  end else
-  begin
-    PopupMenu_Open.Caption := 'Open';
-    PopupMenu_Open.Enabled := False;
-    PopupMenu_OpenExternally.Caption := 'Open Externally';
-    PopupMenu_OpenExternally.Enabled := False;
+    PopupMenu_OpenExternally.Enabled := True;
   end;
 end;
 

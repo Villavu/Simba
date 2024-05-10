@@ -703,12 +703,34 @@ begin
 end;
 
 function TDeclaration_Var.GetVarDefaultString: String;
+
+  function ReplaceunPrintable(const Str: String): String;
+  var
+    I: Integer = 1;
+  begin
+    Result := Str;
+    while (I <= Length(Result)) do
+    begin
+      if (Result[I] < #32) then
+      begin
+        Insert(IntToStr(Byte(Result[I])), Result, I+1);
+        Result[I] := '#';
+      end;
+
+      Inc(I);
+    end;
+  end;
+
 begin
   if FVarDefaultString.IsNull then
+  begin
     case DefToken of
       tokAssign: FVarDefaultString.Value := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarDefault, ' := ');
       tokEqual:  FVarDefaultString.Value := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarDefault, ' = ');
     end;
+
+    FVarDefaultString.Value := ReplaceunPrintable(FVarDefaultString.Value);
+  end;
 
   Result := FVarDefaultString.Value;
 end;
