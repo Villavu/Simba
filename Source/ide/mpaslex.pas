@@ -460,8 +460,11 @@ begin
   case Name of
     'CODETOOLS':
       begin
-        if (Value = 'OFF') then EnterDefineBlock(False) else
-        if (Value = 'ON')  then ExitDefineBlock();
+        if (Value = 'OFF') then
+          EnterDefineBlock(IsDefined('!CODETOOLS')) // ifdef !CODETOOLS
+        else
+        if (Value = 'ON') then
+          ExitDefineBlock();                        // endif !CODETOOLS
       end;
   end;
 end;

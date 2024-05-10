@@ -10,8 +10,8 @@ unit simba.form_filebrowser;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, Menus,
-  simba.base, simba.component_treeview, LCLType, Graphics;
+  Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Menus,
+  simba.base, simba.component_treeview;
 
 type
   TSimbaFileBrowserNode = class(TTreeNode)
@@ -75,8 +75,8 @@ implementation
 {$R *.lfm}
 
 uses
-  FileUtil, LazFileUtils, Clipbrd,
-  simba.form_main, simba.form_tabs, simba.nativeinterface, simba.ide_utils;
+  Clipbrd,
+  simba.form_main, simba.form_tabs, simba.nativeinterface, simba.ide_utils, simba.fs;
 
 procedure TSimbaFileBrowserForm.DoFindFiles;
 
@@ -90,27 +90,24 @@ procedure TSimbaFileBrowserForm.DoFindFiles;
 
   procedure Build(const Node: PDirectoryInfo);
   var
-    Files, Directories: TStringList;
+    Files, Directories: TStringArray;
     I: Integer;
   begin
-    Files := FindAllFiles(Node^.Info.FileName, '', False);
-    Directories := FindAllDirectories(Node^.Info.FileName, False);
+    Files := TSimbaDir.DirListFiles(Node^.Info.FileName);
+    Directories := TSimbaDir.DirListDirectories(Node^.Info.FileName);
 
-    SetLength(Node^.Files, Files.Count);
-    SetLength(Node^.Directories, Directories.Count);
+    SetLength(Node^.Files, Length(Files));
+    SetLength(Node^.Directories, Length(Directories));
 
-    for I := 0 to Directories.Count - 1 do
+    for I := 0 to High(Directories) do
     begin
       Node^.Directories[I].Info := FileInfo(Directories[I], True);
 
       Build(@Node^.Directories[I]);
     end;
 
-    for I := 0 to Files.Count - 1 do
+    for I := 0 to High(Files) do
       Node^.Files[I] := FileInfo(Files[I], False);
-
-    Files.Free();
-    Directories.Free();
   end;
 
 begin
@@ -172,8 +169,8 @@ end;
 
 function TSimbaFileBrowserForm.DoGetNodeHint(const Node: TTreeNode): String;
 begin
-  if (Node is TSimbaFileBrowserNode) then
-    Result := CreateRelativePath(TSimbaFileBrowserNode(Node).FileName, Application.Location)
+  if (Node is TSimbaFileBrowserNode) and (Node.Level > 1) then
+    Result := TSimbaPath.PathExtractRelative(Application.Location, TSimbaFileBrowserNode(Node).FileName)
   else
     Result := '';
 end;
@@ -199,7 +196,7 @@ begin
       Clipboard.AsText := Node.FileName
     else
     if (Sender = PopupMenu_CopyRelativePath) then
-      Clipboard.AsText := CreateRelativePath(Node.FileName, Application.Location)
+      Clipboard.AsText := TSimbaPath.PathExtractRelative(Application.Location, Node.FileName)
     else
     if (Sender = PopupMenu_Open) then
       SimbaTabsForm.Open(Node.FileName)

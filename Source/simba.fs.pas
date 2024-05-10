@@ -75,6 +75,7 @@ type
   public
     class function DirList(Path: String; Recursive: Boolean = False): TStringArray;
     class function DirListFiles(Path: String; Recursive: Boolean = False): TStringArray;
+    class function DirListDirectories(Path: String; Recursive: Boolean = False): TStringArray;
     class function DirSearch(Path: String; Mask: String; Recursive: Boolean = False): TStringArray;
     class function DirDelete(Path: String; OnlyChildren: Boolean): Boolean;
     class function DirCreate(Path: String): Boolean;
@@ -152,6 +153,37 @@ var
           Get(Path + SearchRec.Name);
 
         if (SearchRec.Attr <> faDirectory) then
+          Buffer.Add(Path + SearchRec.Name);
+      end;
+    until (FindNext(SearchRec) <> 0);
+
+    SysUtils.FindClose(SearchRec);
+  end;
+
+begin
+  Get(Path);
+
+  Result := Buffer.ToArray(False);
+end;
+
+class function TSimbaDir.DirListDirectories(Path: String; Recursive: Boolean): TStringArray;
+var
+  Buffer: TSimbaStringBuffer;
+
+  procedure Get(Path: String);
+  var
+    SearchRec: TSearchRec;
+  begin
+    Path := CleanAndExpandDirectory(Path);
+
+    if (FindFirst(Path + '*', faDirectory, SearchRec) = 0) then
+    repeat
+      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+      begin
+        if (SearchRec.Attr = faDirectory) and Recursive then
+          Get(Path + SearchRec.Name);
+
+        if (SearchRec.Attr = faDirectory) then
           Buffer.Add(Path + SearchRec.Name);
       end;
     until (FindNext(SearchRec) <> 0);

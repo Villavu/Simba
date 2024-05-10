@@ -100,7 +100,7 @@ implementation
 
 uses
   simba.base, simba.ide_codetools_includes, simba.ide_codetools_arrayhelpers,
-  simba.containers;
+  simba.containers, simba.settings;
 
 function TCodeinsight.GetIncludesHash: String;
 begin
@@ -185,6 +185,8 @@ begin
   Reset();
 
   FScriptParser.SetScript(Script, FileName);
+  if SimbaSettings.CodeTools.IgnoreIDEDirective.Value then
+    FScriptParser.Lexer.AddDefine('!CODETOOLS');
   FScriptParser.Lexer.CaretPos := CaretPos;
 end;
 

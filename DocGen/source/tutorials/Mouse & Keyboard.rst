@@ -13,9 +13,9 @@ There are two ways to move the mouse, these are:
 
 For :code:`TTarget.MouseMove` there are variables to control the movement, these are:
 
-- :code:`TTarget.MouseWind` - Strength pulling the position in random directions.
-- :code:`TTarget.MouseGravity` - Strength pulling the position towards the destination.
-- :code:`TTarget.MouseSpeed` - Speed of the mouse movement.
+- :code:`TTarget.MouseOptions.Wind` - Strength pulling the position in random directions.
+- :code:`TTarget.MouseOptions.Gravity` - Strength pulling the position towards the destination.
+- :code:`TTarget.MouseOptions.Speed` - Speed of the mouse movement.
 
 You can read a more in depth article about the algorithm used (WindMouse) `here <https://ben.land/post/2021/04/25/windmouse-human-mouse-movement>`_
 
