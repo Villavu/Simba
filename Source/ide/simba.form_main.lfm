@@ -318,6 +318,14 @@ object SimbaMainForm: TSimbaMainForm
       ShortCut = 32851
       OnClick = DoMenuItemStopClick
     end
+    object Separator2: TMenuItem
+      Caption = '-'
+    end
+    object MenuItemShowCompilerHints: TMenuItem
+      Caption = 'Show Compiler Hints'
+      ShowAlwaysCheckable = True
+      OnClick = DoMenuItemShowCompilerHintsClick
+    end
   end
   object MainMenuTools: TPopupMenu
     Images = Images

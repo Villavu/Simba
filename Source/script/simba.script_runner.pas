@@ -30,8 +30,8 @@ type
     procedure Execute; override;
   public
     constructor Create;
-    constructor Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly: Boolean); reintroduce; overload;
-    constructor Create(SimbaCommunication, TargetWindow: String; CompileOnly: Boolean); reintroduce; overload;
+    constructor Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly, Hints: Boolean); reintroduce; overload;
+    constructor Create(SimbaCommunication, TargetWindow: String; CompileOnly, Hints: Boolean); reintroduce; overload;
   end;
 
 implementation
@@ -138,7 +138,7 @@ begin
   OnTerminate := @DoApplicationTerminate;
 end;
 
-constructor TSimbaScriptRunner.Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly: Boolean);
+constructor TSimbaScriptRunner.Create(FileName: String; SimbaCommunication, TargetWindow: String; CompileOnly, Hints: Boolean);
 begin
   Create();
 
@@ -152,9 +152,10 @@ begin
   FScript.Script := TSimbaFile.FileRead(FileName);
   FScript.ScriptFileName := FileName;
   FScript.TargetWindow := TargetWindow;
+  FScript.Hints := Hints;
 end;
 
-constructor TSimbaScriptRunner.Create(SimbaCommunication, TargetWindow: String; CompileOnly: Boolean);
+constructor TSimbaScriptRunner.Create(SimbaCommunication, TargetWindow: String; CompileOnly, Hints: Boolean);
 begin
   Create();
 
@@ -162,6 +163,7 @@ begin
 
   FScript := TSimbaScript.Create(TSimbaScriptCommunication.Create(SimbaCommunication));
   FScript.TargetWindow := TargetWindow;
+  FScript.Hints := Hints;
 end;
 
 end.

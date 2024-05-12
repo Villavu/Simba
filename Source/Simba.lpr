@@ -79,7 +79,8 @@ begin
       TSimbaScriptRunner.Create(
         Application.GetOptionValue('simbacommunication'),
         Application.GetOptionValue('target'),
-        Application.HasOption('compile')
+        Application.HasOption('compile'),
+        Application.HasOption('hints')
       );
     end else
     // Script will be loaded from file
@@ -94,7 +95,8 @@ begin
         Application.Params[Application.ParamCount],
         Application.GetOptionValue('simbacommunication'),
         Application.GetOptionValue('target'),
-        Application.HasOption('compile')
+        Application.HasOption('compile'),
+        Application.HasOption('hints')
       );
     end;
   end else

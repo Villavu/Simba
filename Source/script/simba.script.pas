@@ -22,6 +22,7 @@ type
     FState: TInitBool;
     FUserTerminated: Boolean;
     FTargetWindow: TWindowHandle;
+    FHints: Boolean;
 
     FScript: String;
     FScriptFileName: String;
@@ -51,6 +52,7 @@ type
     property SimbaCommunication: TSimbaScriptCommunication read FSimbaCommunication;
 
     property TargetWindow: String write SetTargetWindow;
+    property Hints: Boolean write FHints;
 
     function Compile: Boolean;
     function Run: Boolean;
@@ -168,6 +170,10 @@ end;
 function TSimbaScript.Compile: Boolean;
 begin
   FCompiler := TSimbaScript_Compiler.Create(TLapeTokenizerString.Create(FScript, FScriptFileName));
+  if FHints then
+    FCompiler.Options := FCompiler.Options + [lcoHints]
+  else
+    FCompiler.Options := FCompiler.Options - [lcoHints];
 
   FCompiler.addPreprocessorMacro('FINDLIBPATH', @DoCompilerMacro);
   FCompiler.addPreprocessorMacro('LOADEDLIBPATH', @DoCompilerMacro);

@@ -67,6 +67,7 @@ type
   TSimbaMainForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
+    MenuItemShowCompilerHints: TMenuItem;
     MenuItemDownloadSimba: TMenuItem;
     MenuItemSelectLine: TMenuItem;
     MenuItemSelectWord: TMenuItem;
@@ -154,6 +155,7 @@ type
     MainMenuSearchSep2: TMenuItem;
     MainMenuSearchSep3: TMenuItem;
     Separator1: TMenuItem;
+    Separator2: TMenuItem;
     TrayIcon: TTrayIcon;
     TrayPopup: TPopupMenu;
     TrayPopupExit: TMenuItem;
@@ -203,6 +205,7 @@ type
     procedure MenuItemReportBugClick(Sender: TObject);
     procedure MenuItemResetLayoutClick(Sender: TObject);
     procedure MenuItemSettingsClick(Sender: TObject);
+    procedure DoMenuItemShowCompilerHintsClick(Sender: TObject);
     procedure MenuItemTrayIconClick(Sender: TObject);
     procedure MenuItemUppercaseClick(Sender: TObject);
     procedure MenuNewTemplateClick(Sender: TObject);
@@ -230,6 +233,7 @@ type
     procedure DoSettingChanged_CustomFontSize(Setting: TSimbaSetting);
     procedure DoSettingChanged_LockLayout(Setting: TSimbaSetting);
     procedure DoSettingChanged_TrayIconVisible(Setting: TSimbaSetting);
+    procedure DoSettingChanged_ShowCompilerHints(Setting: TSimbaSetting);
 
     procedure HandleRecentFileClick(Sender: TObject);
     procedure HandleException(Sender: TObject; E: Exception);
@@ -575,6 +579,7 @@ begin
     RegisterChangeHandler(Self, General.CustomFontSize, @DoSettingChanged_CustomFontSize, True);
     RegisterChangeHandler(Self, General.LockLayout, @DoSettingChanged_LockLayout, True);
     RegisterChangeHandler(Self, General.TrayIconVisible, @DoSettingChanged_TrayIconVisible, True);
+    RegisterChangeHandler(Self, Compiler.ShowHints, @DoSettingChanged_ShowCompilerHints, True);
   end;
 
   // Create things
@@ -751,6 +756,11 @@ end;
 procedure TSimbaMainForm.DoSettingChanged_TrayIconVisible(Setting: TSimbaSetting);
 begin
   SetTrayIconVisible(Setting.Value);
+end;
+
+procedure TSimbaMainForm.DoSettingChanged_ShowCompilerHints(Setting: TSimbaSetting);
+begin
+  MenuItemShowCompilerHints.Checked := Setting.Value;
 end;
 
 procedure TSimbaMainForm.MenuCloseTabClick(Sender: TObject);
@@ -1012,6 +1022,11 @@ end;
 procedure TSimbaMainForm.MenuItemSettingsClick(Sender: TObject);
 begin
   SimbaSettingsForm.ShowModal();
+end;
+
+procedure TSimbaMainForm.DoMenuItemShowCompilerHintsClick(Sender: TObject);
+begin
+  SimbaSettings.Compiler.ShowHints.Value := not SimbaSettings.Compiler.ShowHints.Value;
 end;
 
 procedure TSimbaMainForm.TrayIconClick(Sender: TObject);

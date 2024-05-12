@@ -225,6 +225,9 @@ begin
   FStartTime := GetTickCount64();
 
   FProcess.Parameters.Add('--simbacommunication=%s', [TSimbaScriptInstanceCommunication.Create(Self).ClientID]);
+  if SimbaSettings.Compiler.ShowHints.Value then
+    FProcess.Parameters.Add('--hints');
+
   FProcess.Parameters.AddStrings(Args);
   if (FScriptFile <> '') then
     FProcess.Parameters.Add(FScriptFile);

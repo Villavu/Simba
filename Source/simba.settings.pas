@@ -168,6 +168,10 @@ type
       HiddenSimbaSections: TSimbaSetting;
     end;
 
+    Compiler: record
+      ShowHints: TSimbaSetting;
+    end;
+
     property FirstLaunch: Boolean read FFirstLaunch;
     property IsLoading: Boolean read FIsLoading;
 
@@ -531,6 +535,7 @@ begin
   Editor.AutoCompleteWidth := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteWidth', 400);
   Editor.AutoCompleteLines := TSimbaSetting_Integer.Create(Self, 'Editor', 'AutoCompleteLines', 8);
 
+  // Codetools
   CodeTools.IgnoreIDEDirective          := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'IgnoreIDEDirective', False);
 
   CodeTools.CompletionAddKeywords       := TSimbaSetting_Boolean.Create(Self, 'CodeTools', 'CompletionAddKeywords', True);
@@ -542,16 +547,22 @@ begin
   CodeTools.ParamHintKey                := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'ParamHintKey', VK_SPACE);
   CodeTools.ParamHintKeyModifiers       := TSimbaSetting_Integer.Create(Self, 'CodeTools', 'ParamHintKeyModifiers', Integer(TShiftState([ssCtrl, ssShift])));
 
+  // Output
   OutputBox.FontSize        := TSimbaSetting_Integer.Create(Self, 'OutputBox', 'FontSize', Editor.FontSize.DefaultValue);
   OutputBox.FontName        := TSimbaSetting_String.Create(Self,  'OutputBox', 'FontName', Editor.FontName.DefaultValue);
   OutputBox.FontAntiAliased := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'FontAntiAliased', Editor.AntiAliased.DefaultValue);
   OutputBox.ClearOnCompile  := TSimbaSetting_Boolean.Create(Self, 'OutputBox', 'OutputClearOnCompile', False);
 
+  // Script Backup
   ScriptBackup.Enabled  := TSimbaSetting_Boolean.Create(Self, 'ScriptBackup', 'Enabled', True);
   ScriptBackup.Interval := TSimbaSetting_Integer.Create(Self, 'ScriptBackup', 'Interval', 3);
 
+  // Function List
   FunctionList.ShowMouseoverHint := TSimbaSetting_Boolean.Create(Self, 'FunctionList', 'ShowMouseoverHint', True);
   FunctionList.HiddenSimbaSections := TSimbaSetting_BinaryString.Create(Self, 'FunctionList', 'HiddenSimbaSections', '');
+
+  // Compiler
+  Compiler.ShowHints := TSimbaSetting_Boolean.Create(Self, 'Compiler', 'ShowHints', False);
 end;
 
 destructor TSimbaSettings.Destroy;
