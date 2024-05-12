@@ -440,12 +440,15 @@ begin
   B.X1 := P.X; B.Y1 := P.Y;
   B.X2 := P.X; B.Y2 := P.Y;
 
+  writeln(Format('%d,%d,%d,%d', [b.x1, b.y1, b.x2, b.y2]));
   if Target.GetImageData(B, Data, DataWidth) then
   try
+    Writeln('yes');
     Result := TSimbaColorConversion.BGRAToColor(Data^);
   finally
     Target.FreeImageData(Data);
-  end;
+  end else
+    Writeln('no');
 end;
 
 function GetColorsOnBuffer(Points: TPointArray; Offset: TPoint; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TColorArray;

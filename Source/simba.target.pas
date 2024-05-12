@@ -211,8 +211,7 @@ type
     function HasColor(Color: TColor; Tolerance: Single; MinCount: Integer; ABounds: TBox): Boolean; overload;
     function HasColor(Color: TColorTolerance; MinCount: Integer; ABounds: TBox): Boolean; overload;
 
-    function GetColor(P: TPoint): TColor; overload;
-    function GetColor(X, Y: Integer): TColor; overload;
+    function GetColor(P: TPoint): TColor;
     function GetColors(Points: TPointArray): TColorArray;
     function GetColorsMatrix(ABounds: TBox): TIntegerMatrix;
 
@@ -495,11 +494,6 @@ end;
 function TSimbaTarget.GetColor(P: TPoint): TColor;
 begin
   Result := GetColorOnTarget(Self, P);
-end;
-
-function TSimbaTarget.GetColor(X, Y: Integer): TColor;
-begin
-  Result := GetColorOnTarget(Self, TPoint.Create(X, Y));
 end;
 
 function TSimbaTarget.GetColors(Points: TPointArray): TColorArray;

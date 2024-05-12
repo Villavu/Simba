@@ -279,8 +279,9 @@ end;
 function TSimbaCompilerDump.addGlobalVar(Typ: lpString; Value: Pointer; AName: lpString): TLapeGlobalVar;
 begin
   Result := inherited addGlobalVar(Typ, Value, AName);
+  Result._DocPos.FileName := ImportingSection;
 
-  if (AName <> '') then
+  if (AName <> '') and (Result.VarType.Name = '') then
     AddCode('var ' + AName + ': ' + Typ);
 end;
 
@@ -312,16 +313,19 @@ begin
         Continue;
       if DocPos.FileName.StartsWith('!') then
         Continue;
-      if not IsConstant then
-        Continue;
 
-      Str := 'const ' + UpperCase(Name) + ': ' + VarType.Name;
-      if (VarType.BaseType in LapeCharTypes) then
-        Str := Str + ' = "' + AsString + '";'
+      if IsConstant then
+        Str := 'const ' + UpperCase(Name) + ': ' + VarType.Name
       else
-        Str := Str + ' = ' + AsString + ';';
+        Str := 'var ' + Name + ': ' + VarType.Name;
 
-      Add(DocPos.FileName, Str);
+      if IsConstant then
+        if (VarType.BaseType in LapeCharTypes) then
+          Str := Str + ' = "' + AsString + '"'
+        else
+          Str := Str + ' = ' + AsString;
+
+      Add(DocPos.FileName, Str + ';');
     end;
 
   Move('type TBox = record X1, Y1, X2, Y2: Integer; end;', 'Base', 'TBox');

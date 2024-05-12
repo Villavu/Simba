@@ -671,19 +671,9 @@ end;
 (*
 TTarget.GetColor
 ----------------
-> function TTarget.GetColor(X, Y: Integer): TColor;
-*)
-procedure _LapeTarget_GetColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PColor(Result)^ := PSimbaTarget(Params^[0])^.GetColor(PInteger(Params^[1])^, PInteger(Params^[1])^);
-end;
-
-(*
-TTarget.GetColor
-----------------
 > function TTarget.GetColor(P: TPoint): TColor;
 *)
-procedure _LapeTarget_GetColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_GetColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColor(Result)^ := PSimbaTarget(Params^[0])^.GetColor(PPoint(Params^[1])^);
 end;
@@ -1045,8 +1035,7 @@ begin
     addGlobalFunc('function TTarget.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload', @_LapeTarget_HasColor2);
     addGlobalFunc('function TTarget.HasColor(Color: TColorTolerance; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload;', @_LapeTarget_HasColor3);
 
-    addGlobalFunc('function TTarget.GetColor(X, Y: Integer): TColor; overload', @_LapeTarget_GetColor1);
-    addGlobalFunc('function TTarget.GetColor(P: TPoint): TColor; overload', @_LapeTarget_GetColor2);
+    addGlobalFunc('function TTarget.GetColor(P: TPoint): TColor; overload', @_LapeTarget_GetColor);
     addGlobalFunc('function TTarget.GetColors(Points: TPointArray): TColorArray', @_LapeTarget_GetColors);
     addGlobalFunc('function TTarget.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix', @_LapeTarget_GetColorsMatrix);
 

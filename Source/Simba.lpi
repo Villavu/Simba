@@ -379,7 +379,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="63">
+    <Units Count="64">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -689,6 +689,10 @@
         <Filename Value="simba.fs_async.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit62>
+      <Unit63>
+        <Filename Value="simba.container_imagemap.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit63>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -720,7 +724,7 @@
     </Linking>
     <Other>
       <CompilerMessages>
-        <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
+        <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
       </CompilerMessages>
       <CustomOptions Value="-CfSSE64
 -dStaticFFI

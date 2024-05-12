@@ -18,13 +18,7 @@ uses
   simba.base;
 
 type
-  PSimbaStringMap = ^TSimbaStringMap;
   TSimbaStringMap = record
-  public type
-    TPair = record
-      Key: String;
-      Value: Variant;
-    end;
   private type
     TItem = record
       KeyHash: UInt32;
@@ -37,8 +31,9 @@ type
     FCount: Integer;
     FSorted: Boolean;
     FCaseSens: Boolean;
+    FAllowDuplicates: Boolean;
 
-    class function _BSearch32(var Arr: TItemArray; Hash: UInt32; Lo, Hi: Integer): Integer; static;
+    class function _BSearch32(var Arr: TItemArray; const Hash: UInt32; Lo, Hi: Integer): Integer; static;
     class procedure _Insert32(var Arr: TItemArray; var Index: Integer); static;
 
     procedure CheckIndex(const Index: Integer); inline;
@@ -46,31 +41,33 @@ type
 
     procedure Sort;
 
-    function GetPair(Index: Integer): TPair;
-    function GetKey(Index: Integer): String;
-    function GetValue(Index: Integer): Variant;
-    procedure SetKey(Index: Integer; NewKey: String);
-    procedure SetValue(Index: Integer; NewValue: Variant);
+    function GetValue(Key: String): Variant;
+    function GetValues(Key: String): TVariantArray;
+    function GetKeyFromIndex(Index: Integer): String;
+    function GetValueFromIndex(Index: Integer): Variant;
+
+    procedure SetKeyFromIndex(Index: Integer; AValue: String);
+    procedure SetValueFromIndex(Index: Integer; AValue: Variant);
+    procedure SetValue(Key: String; AValue: Variant);
     procedure SetSorted(AValue: Boolean);
   public
     property Count: Integer read FCount;
     property CaseSens: Boolean read FCaseSens write FCaseSens;
     property Sorted: Boolean read FSorted write SetSorted;
+    property AllowDuplicates: Boolean read FAllowDuplicates write FAllowDuplicates;
 
-    property Pair[Index: Integer]: TPair read GetPair;
-    property Key[Index: Integer]: String read GetKey write SetKey;
-    property Value[Index: Integer]: Variant read GetValue write SetValue;
+    property Value[Key: String]: Variant read GetValue write SetValue;
+    property Values[Key: String]: TVariantArray read GetValues;
+    property KeyFromIndex[Index: Integer]: String read GetKeyFromIndex write SetKeyFromIndex;
+    property ValueFromIndex[Index: Integer]: Variant read GetValueFromIndex write SetValueFromIndex;
 
-    function Get(AKey: String): Variant;
-    function GetAll(AKey: String): TVariantArray;
-
-    function Exists(AKey: String): Boolean;
-    function Add(AKey: String; AValue: Variant): Integer;
     function IndexOf(AKey: String): Integer;
     function IndicesOf(AKey: String): TIntegerArray;
+
+    function Exists(AKey: String): Boolean;
+    procedure Add(AKey: String; AValue: Variant);
     procedure Delete(Index: Integer); overload;
     procedure Delete(AKey: String); overload;
-    procedure DeleteAll(AKey: String);
     procedure Clear;
 
     procedure Load(FileName: String; VarType: EVariantType; Sep: String = '=');
@@ -88,7 +85,7 @@ uses
 
 {$WARN 6058 off : Call to subroutine "$1" marked as inline is not inlined}
 
-class function TSimbaStringMap._BSearch32(var Arr: TItemArray; Hash: UInt32; Lo, Hi: Integer): Integer;
+class function TSimbaStringMap._BSearch32(var Arr: TItemArray; const Hash: UInt32; Lo, Hi: Integer): Integer;
 var
   mVal: UInt32;
   mIndex: Integer;
@@ -126,10 +123,74 @@ begin
     if (Index < 0) then
       Index := -(Index + 1);
 
-    for i := Hi downto Index + 1 do
-      Arr[i] := Arr[i-1];
+    for I := Hi downto Index + 1 do
+      Arr[I] := Arr[I-1];
     Arr[Index] := Item;
   end;
+end;
+
+function TSimbaStringMap.GetValue(Key: String): Variant;
+var
+  Index: Integer;
+begin
+  Index := Self.IndexOf(Key);
+  if (Index = -1) then
+    SimbaException('Key "%s" does not exist', [Key]);
+
+  Result := FItems[Index].Value;
+end;
+
+function TSimbaStringMap.GetValues(Key: String): TVariantArray;
+var
+  Indices: TIntegerArray;
+  I: Integer;
+begin
+  Indices := Self.IndicesOf(Key);
+
+  SetLength(Result, Length(Indices));
+  for I := 0 to High(Result) do
+    Result[I] := FItems[Indices[I]].Value;
+end;
+
+function TSimbaStringMap.GetKeyFromIndex(Index: Integer): String;
+begin
+  CheckIndex(Index);
+
+  Result := FItems[Index].Key;
+end;
+
+function TSimbaStringMap.GetValueFromIndex(Index: Integer): Variant;
+begin
+  CheckIndex(Index);
+
+  Result := FItems[Index].Value;
+end;
+
+procedure TSimbaStringMap.SetKeyFromIndex(Index: Integer; AValue: String);
+begin
+  if FSorted then
+    SimbaException('Cannot change the key of a sorted map');
+  CheckIndex(Index);
+
+  FItems[Index].Key := AValue;
+end;
+
+procedure TSimbaStringMap.SetValueFromIndex(Index: Integer; AValue: Variant);
+begin
+  CheckIndex(Index);
+
+  FItems[Index].Value := AValue;
+end;
+
+procedure TSimbaStringMap.SetValue(Key: String; AValue: Variant);
+var
+  Index: Integer;
+begin
+  Index := IndexOf(Key);
+  if (Index = -1) then
+    SimbaException('Key "%s" does not exist', [Key]);
+
+  FItems[Index].Value := AValue;
 end;
 
 procedure TSimbaStringMap.SetSorted(AValue: Boolean);
@@ -141,76 +202,12 @@ begin
     Sort();
 end;
 
-function TSimbaStringMap.Get(AKey: String): Variant;
-var
-  Index: Integer;
-begin
-  Index := Self.IndexOf(AKey);
-  if (Index = -1) then
-    SimbaException('StringMap: Key "%s" does not exist', [AKey]);
-
-  Result := FItems[Index].Value;
-end;
-
-function TSimbaStringMap.GetAll(AKey: String): TVariantArray;
-var
-  Indices: TIntegerArray;
-  I: Integer;
-begin
-  Indices := Self.IndicesOf(AKey);
-
-  SetLength(Result, Length(Indices));
-  for I := 0 to High(Result) do
-    Result[I] := FItems[Indices[I]].Value;
-end;
-
 function TSimbaStringMap.EqualKeys(const Key1, Key2: String): Boolean;
 begin
   if CaseSens then
     Result := (Key1 = Key2)
   else
     Result := SameText(Key1, Key2);
-end;
-
-function TSimbaStringMap.GetPair(Index: Integer): TPair;
-begin
-  CheckIndex(Index);
-
-  Result.Key := FItems[Index].Key;
-  Result.Value := FItems[Index].Value;
-end;
-
-function TSimbaStringMap.GetValue(Index: Integer): Variant;
-begin
-  CheckIndex(Index);
-
-  Result := FItems[Index].Value;
-end;
-
-procedure TSimbaStringMap.SetValue(Index: Integer; NewValue: Variant);
-begin
-  CheckIndex(Index);
-
-  FItems[Index].Value := NewValue;
-end;
-
-function TSimbaStringMap.Add(AKey: String; AValue: Variant): Integer;
-begin
-  if (Self.Count >= Length(FItems)) then
-    SetLength(FItems, 4 + (FCount * 2));
-
-  Result := FCount;
-
-  Inc(FCount);
-  if CaseSens then
-    FItems[Result].KeyHash := AKey.Hash()
-  else
-    FItems[Result].KeyHash := AKey.ToUpper().Hash();
-  FItems[Result].Key := AKey;
-  FItems[Result].Value := AValue;
-
-  if FSorted then
-    _Insert32(FItems, Result);
 end;
 
 function TSimbaStringMap.IndexOf(AKey: String): Integer;
@@ -285,15 +282,6 @@ var
   I: Integer;
 begin
   I := IndexOf(AKey);
-  if (I > -1) then
-    Delete(I);
-end;
-
-procedure TSimbaStringMap.DeleteAll(AKey: String);
-var
-  I: Integer;
-begin
-  I := IndexOf(AKey);
   while (I > -1) do
   begin
     Delete(I);
@@ -311,6 +299,27 @@ begin
   Result := IndexOf(AKey) > -1;
 end;
 
+procedure TSimbaStringMap.Add(AKey: String; AValue: Variant);
+var
+  Index: Integer;
+begin
+  if (FCount >= Length(FItems)) then
+    SetLength(FItems, 4 + (FCount * 2));
+
+  Index := FCount;
+
+  Inc(FCount);
+  if CaseSens then
+    FItems[Index].KeyHash := AKey.Hash()
+  else
+    FItems[Index].KeyHash := AKey.ToUpper().Hash();
+  FItems[Index].Key := AKey;
+  FItems[Index].Value := AValue;
+
+  if FSorted then
+    _Insert32(FItems, Index);
+end;
+
 procedure TSimbaStringMap.Sort;
 var
   Weights: array of UInt32;
@@ -323,28 +332,10 @@ begin
   specialize TArraySortWeighted<TItem, UInt32>.QuickSort(FItems, Weights, 0, FCount - 1, True);
 end;
 
-function TSimbaStringMap.GetKey(Index: Integer): String;
-begin
-  CheckIndex(Index);
-
-  Result := FItems[Index].Key;
-end;
-
-procedure TSimbaStringMap.SetKey(Index: Integer; NewKey: String);
-begin
-  CheckIndex(Index);
-
-  if Sorted then
-    SimbaException('StringMap: Cannot change a key of a sorted map');
-
-  FItems[Index].Key := NewKey;
-  FItems[Index].KeyHash := NewKey.Hash();
-end;
-
 procedure TSimbaStringMap.CheckIndex(const Index: Integer);
 begin
   if (Index < 0) or (Index >= FCount) then
-    SimbaException('StringMap: Index %d is out of range (%d..%d)', [Index, 0, FCount-1]);
+    SimbaException('Index %d is out of range (%d..%d)', [Index, 0, FCount-1]);
 end;
 
 procedure TSimbaStringMap.Load(FileName: String; VarType: EVariantType; Sep: String);
@@ -355,7 +346,7 @@ var
   Val: Variant;
 begin
   if (not (VarType in [EVariantType.Boolean, EVariantType.AString..EVariantType.WString, EVariantType.Single..EVariantType.Double, EVariantType.Int8..EVariantType.UInt64])) then
-    SimbaException('StringMap: Cannot load vartype');
+    SimbaException('Cannot load vartype');
 
   Clear();
 
@@ -389,7 +380,7 @@ begin
         EVariantType.UInt64:  Val := UInt64(Pieces[2].ToInt64());
       end;
 
-      Add(Pieces[0], Val);
+      Value[Pieces[0]] := Val;
     except
     end;
   end;
@@ -417,11 +408,13 @@ begin
   for I := 0 to FCount - 1 do
   begin
     if (I > 0) then
-      Builder.Append(', ');
-    Builder.Append('[Key=' + FItems[I].Key + ', Value=' + VarToStr(FItems[I].Value) + ']');
+      Builder.Append(LineEnding);
+    Builder.Append('  [Key=' + FItems[I].Key + ', Value=' + VarToStr(FItems[I].Value) + ']');
   end;
 
-  Result := 'Count=%d, CaseSens=%s, Sorted=%s, Pairs=[%s]'.Format([FCount, FCaseSens.ToString(), FSorted.ToString(), Builder.Str]);
+  Result := Format('Count=%d, CaseSens=%s, Sorted=%s, AllowDuplicates=%s', [FCount, FCaseSens.ToString(), FSorted.ToString(), FAllowDuplicates.ToString()]);
+  if (FCount > 0) then
+    Result := Result + LineEnding + 'Items:' + LineEnding + Builder.Str;
 end;
 
 class operator TSimbaStringMap.Initialize(var Self: TSimbaStringMap);
