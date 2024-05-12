@@ -73,9 +73,19 @@ TJSONElement.AddArray
 ---------------------
 > function TJSONElement.AddArray(Key: String): TJSONElement;
 *)
-procedure _LapeJSONElement_AddArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeJSONElement_AddArray1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaJSONElement(Result)^ := PSimbaJSONElement(Params^[0])^.AddArray(PString(Params^[1])^);
+end;
+
+(*
+TJSONElement.AddArray
+---------------------
+> function TJSONElement.AddArray(Key: String; Values: TVariantArray): TJSONElement;
+*)
+procedure _LapeJSONElement_AddArray2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaJSONElement(Result)^ := PSimbaJSONElement(Params^[0])^.AddArray(PString(Params^[1])^, PVariantArray(Params^[2])^);
 end;
 
 (*
@@ -264,6 +274,11 @@ begin
   PBoolean(Result)^ := PSimbaJSONElement(Params^[0])^.HasKeys(PStringArray(Params^[1])^);
 end;
 
+procedure _LapeJSONElement_Values(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PVariantArray(Result)^ := PSimbaJSONElement(Params^[0])^.Values;
+end;
+
 (*
 TJSONParser.Create
 ------------------
@@ -363,9 +378,19 @@ TJSONParser.AddArray
 --------------------
 > function TJSONParser.AddArray(Key: String): TJSONElement;
 *)
-procedure _LapeJSONParser_AddArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeJSONParser_AddArray1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaJSONElement(Result)^ := PSimbaJSONParser(Params^[0])^.AddArray(PString(Params^[1])^);
+end;
+
+procedure _LapeJSONParser_AddArray2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaJSONElement(Result)^ := PSimbaJSONParser(Params^[0])^.AddArray(PString(Params^[1])^, PVariantArray(Params^[2])^);
+end;
+
+procedure _LapeJSONParser_GetValues(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PVariantArray(Result)^ := PSimbaJSONParser(Params^[0])^.Values;
 end;
 
 (*
@@ -519,7 +544,8 @@ begin
     addGlobalFunc('function TJSONElement.Count: Integer', @_LapeJSONElement_Count);
     addGlobalFunc('function TJSONElement.GetItem(Index: Integer): TJSONElement', @_LapeJSONElement_GetItem);
     addGlobalFunc('procedure TJSONElement.AddValue(Key: String; Value: Variant)', @_LapeJSONElement_AddValue);
-    addGlobalFunc('function TJSONElement.AddArray(Key: String): TJSONElement', @_LapeJSONElement_AddArray);
+    addGlobalFunc('function TJSONElement.AddArray(Key: String): TJSONElement; overload;', @_LapeJSONElement_AddArray1);
+    addGlobalFunc('function TJSONElement.AddArray(Key: String; Values: TVariantArray): TJSONElement; overload;', @_LapeJSONElement_AddArray2);
     addGlobalFunc('function TJSONElement.AddObject(Key: String): TJSONElement', @_LapeJSONElement_AddObject);
     addGlobalFunc('procedure TJSONElement.AddElement(Key: String; Element: TJSONElement)', @_LapeJSONElement_AddElement);
     addGlobalFunc('function TJSONElement.AddNull(Key: String): TJSONElement', @_LapeJSONElement_AddNull);
@@ -538,6 +564,8 @@ begin
     addGlobalFunc('function TJSONElement.HasKey(Key: String): Boolean; overload', @_LapeJSONElement_HasKey1);
     addGlobalFunc('function TJSONElement.HasKey(Keys: TStringArray): Boolean; overload', @_LapeJSONElement_HasKey2);
     addGlobalFunc('function TJSONElement.HasKeys(Keys: TStringArray): Boolean', @_LapeJSONElement_HasKeys);
+
+    addGlobalFunc('function TJSONElement.Values: TVariantArray', @_LapeJSONElement_Values);
 
     addDelayedCode([
       'function ToString(constref Param: TJSONElement): String; override;',
@@ -558,7 +586,8 @@ begin
     addGlobalFunc('function TJSONParser.HasKeys(Keys: TStringArray): Boolean', @_LapeJSONParser_HasKeys);
     addGlobalFunc('function TJSONParser.AddNull(Key: String): TJSONElement', @_LapeJSONParser_AddNull);
     addGlobalFunc('procedure TJSONParser.AddValue(Key: String; Value: Variant)', @_LapeJSONParser_AddValue);
-    addGlobalFunc('function TJSONParser.AddArray(Key: String): TJSONElement;', @_LapeJSONParser_AddArray);
+    addGlobalFunc('function TJSONParser.AddArray(Key: String): TJSONElement; overload;', @_LapeJSONParser_AddArray1);
+    addGlobalFunc('function TJSONParser.AddArray(Key: String; Values: TVariantArray): TJSONElement; overload;', @_LapeJSONParser_AddArray2);
     addGlobalFunc('function TJSONParser.AddObject(Key: String): TJSONElement;', @_LapeJSONParser_AddObject);
     addGlobalFunc('procedure TJSONParser.AddElement(Key: String; Element: TJSONElement)', @_LapeJSONParser_AddElement);
     addGlobalFunc('function TJSONParser.Count: Integer', @_LapeJSONParser_Count);
@@ -568,6 +597,8 @@ begin
     addGlobalFunc('procedure TJSONParser.Delete(Key: String); overload;', @_LapeJSONParser_Delete1);
     addGlobalFunc('procedure TJSONParser.Delete(Index: Integer); overload;', @_LapeJSONParser_Delete2);
     addGlobalFunc('function TJSONParser.FindPath(Path: String; out Element: TJSONElement): Boolean;', @_LapeJSONParser_FindPath);
+
+    addGlobalFunc('function TJSONParser.Values: TVariantArray', @_LapeJSONParser_GetValues);
 
     ImportingSection := '';
   end;

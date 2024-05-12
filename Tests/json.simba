@@ -29,7 +29,24 @@ const
           '  "apple_clone" : "red"'                        + LINE_SEP +
           '}';
 
+  TEST3 = '['           + LINE_SEP +
+          '  1,'        + LINE_SEP +
+          '  2,'        + LINE_SEP +
+          '  3,'        + LINE_SEP +
+          '  "four"'    + LINE_SEP +
+          ']';
+
+  TEST4 = '{'           + LINE_SEP +
+          '  "arr" : [' + LINE_SEP +
+          '    1,'      + LINE_SEP +
+          '    2,'      + LINE_SEP +
+          '    true,'   + LINE_SEP +
+          '    false'   + LINE_SEP +
+          '  ]'         + LINE_SEP +
+          '}';
+
 var
+  Expected: String;
   Parser: TJSONParser;
   Element: TJSONElement;
 begin
@@ -71,6 +88,18 @@ begin
   Parser.Delete('fruits');
 
   Assert(Parser.AsString = TEST2);
+
+  Parser.Clear();
+  Parser.AddArray('', [1,2,3,'four']);
+
+  Assert(Parser.AsString = TEST3);
+  Assert(ToStr(Parser.Values) = '[1, 2, 3, four]');
+
+  Parser.Clear();
+  Parser.AddArray('arr', [1,2,True,False]);
+
+  Assert(Parser.AsString = TEST4);
+  Assert(ToStr(Parser.GetItem(0).Values) = '[1, 2, True, False]');
 
   Parser.Free();
 end;
