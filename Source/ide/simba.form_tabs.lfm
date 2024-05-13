@@ -61,6 +61,7 @@ object SimbaTabsForm: TSimbaTabsForm
     end
   end
   object TabPopupMenu: TPopupMenu
+    Images = SimbaMainForm.Images
     OnMeasureItem = TabPopupMenuMeasureItem
     Left = 320
     Top = 20

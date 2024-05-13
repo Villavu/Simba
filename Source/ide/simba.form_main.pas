@@ -67,6 +67,7 @@ type
   TSimbaMainForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
+    MenuItemRunLast: TMenuItem;
     MenuItemShowCompilerHints: TMenuItem;
     MenuItemDownloadSimba: TMenuItem;
     MenuItemSelectLine: TMenuItem;
@@ -186,6 +187,7 @@ type
     procedure MenuGotoClick(Sender: TObject);
     procedure MenuItemDownloadSimbaClick(Sender: TObject);
     procedure MenuItemFindInFilesClick(Sender: TObject);
+    procedure MenuItemRunLastClick(Sender: TObject);
     procedure MenuItemSelectLineClick(Sender: TObject);
     procedure MenuItemSelectWordClick(Sender: TObject);
     procedure MenuItemBackupsClick(Sender: TObject);
@@ -805,6 +807,12 @@ end;
 procedure TSimbaMainForm.MenuItemFindInFilesClick(Sender: TObject);
 begin
   SimbaFindInFilesForm.ShowModal();
+end;
+
+procedure TSimbaMainForm.MenuItemRunLastClick(Sender: TObject);
+begin
+  if Assigned(SimbaTabsForm.PreviousTab) then
+    SimbaTabsForm.PreviousTab.Run(SimbaMainToolBar.WindowSelection);
 end;
 
 procedure TSimbaMainForm.MenuItemSelectLineClick(Sender: TObject);

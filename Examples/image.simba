@@ -7,13 +7,12 @@ begin
   Img.DrawColor := Colors.YELLOW;
   Img.DrawLine([50, 50], [450, 50]);
   Img.Pixel[250, 250] := Colors.WHITE;
-  Img.FontSize := 25;
-  Img.FontAntialiasing := False;
-  Img.DrawText('Hello world', [125, 125]);
+
+  Img.DrawColor := Colors.LIME;
+  Img.DrawPolygonFilled(TPointArray.CreateFromSimplePolygon([175,175], 7, 35, False));
 
   WriteLn('Color at 0,0 is $' + IntToHex(Img.Pixel[0, 0]));
   WriteLn('Color at 250,250 is $' + IntToHex(Img.Pixel[250, 250]));
-  WriteLn('Available fonts: ', Img.Fonts);
 
   Img.Show(); // Show on Simba's debug image
   Img.Free(); // Images must be freed

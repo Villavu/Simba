@@ -380,7 +380,7 @@ begin
         EVariantType.UInt64:  Val := UInt64(Pieces[2].ToInt64());
       end;
 
-      Value[Pieces[0]] := Val;
+      Add(Pieces[0], Val);
     except
     end;
   end;

@@ -77,11 +77,10 @@ begin
   SelectedColor := Color[Selected];
   with SelectedColor.ToRGB(), SelectedColor.ToHSL() do
   begin
-    StringGrid.Cells[1, 0] := Format('%d', [SelectedColor]);
-    StringGrid.Cells[1, 1] := Format('$%s', [HexStr(SelectedColor, 6)]);
-    StringGrid.Cells[1, 2] := Format('%d, %d, %d', [R, G, B]);
-    StringGrid.Cells[1, 3] := Format('%.2f, %.2f, %.2f', [H, S, L]);
-    StringGrid.Cells[1, 4] := Format('%d, %d', [Point[Selected].X, Point[Selected].Y]);
+    StringGrid.Cells[1, 0] := Format('%s', [ColorToStr(SelectedColor)]);
+    StringGrid.Cells[1, 1] := Format('%d, %d, %d', [R, G, B]);
+    StringGrid.Cells[1, 2] := Format('%.2f, %.2f, %.2f', [H, S, L]);
+    StringGrid.Cells[1, 3] := Format('%d, %d', [Point[Selected].X, Point[Selected].Y]);
   end;
 end;
 
@@ -114,10 +113,6 @@ var
 begin
   Width := Scale96ToScreen(500);
   Height := Scale96ToScreen(350);
-
-  StringGrid.FocusRectVisible := False;
-  StringGrid.EditorBorderStyle := bsNone;
-  StringGrid.Editor.Color := clForm;
 
   ColorListBox.Options := ColorListBox.Options - [lboDrawFocusRect];
 

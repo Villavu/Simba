@@ -318,6 +318,12 @@ object SimbaMainForm: TSimbaMainForm
       ShortCut = 32851
       OnClick = DoMenuItemStopClick
     end
+    object MenuItemRunLast: TMenuItem
+      Caption = 'Run Last Script'
+      ShortCut = 41042
+      Visible = False
+      OnClick = MenuItemRunLastClick
+    end
     object Separator2: TMenuItem
       Caption = '-'
     end

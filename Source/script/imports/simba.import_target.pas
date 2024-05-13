@@ -1035,7 +1035,7 @@ begin
     addGlobalFunc('function TTarget.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload', @_LapeTarget_HasColor2);
     addGlobalFunc('function TTarget.HasColor(Color: TColorTolerance; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload;', @_LapeTarget_HasColor3);
 
-    addGlobalFunc('function TTarget.GetColor(P: TPoint): TColor; overload', @_LapeTarget_GetColor);
+    addGlobalFunc('function TTarget.GetColor(P: TPoint): TColor', @_LapeTarget_GetColor);
     addGlobalFunc('function TTarget.GetColors(Points: TPointArray): TColorArray', @_LapeTarget_GetColors);
     addGlobalFunc('function TTarget.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix', @_LapeTarget_GetColorsMatrix);
 

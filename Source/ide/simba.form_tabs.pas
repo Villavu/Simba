@@ -40,6 +40,7 @@ type
     procedure TabPopupMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
   protected
     FTabControl: TSimbaTabControl;
+    FPreviousTab: TSimbaScriptTab;
 
     FEditorReplace: TSimbaEditorReplace;
     FEditorFind: TSimbaEditorFind;
@@ -77,6 +78,7 @@ type
     property TabCount: Integer read GetTabCount;
     property Tabs[Index: Integer]: TSimbaScriptTab read GetTab;
 
+    property PreviousTab: TSimbaScriptTab read FPreviousTab;
     property CurrentTab: TSimbaScriptTab read GetCurrentTab write SetCurrentTab;
     property CurrentEditor: TSimbaEditor read GetCurrentEditor;
 
@@ -311,6 +313,9 @@ end;
 
 procedure TSimbaTabsForm.DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
 begin
+  if (OldTab is TSimbaScriptTab) then
+    FPreviousTab := TSimbaScriptTab(OldTab);
+
   if Assigned(OldTab) then
     SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_BEFORECHANGE, OldTab);
 end;
@@ -326,6 +331,9 @@ end;
 procedure TSimbaTabsForm.DoTabClosed(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean);
 begin
   CanClose := TSimbaScriptTab(Tab).CanClose();
+  if CanClose then
+    FPreviousTab := nil;
+
   if CanClose and (FTabControl.TabCount <= 1) and FTabControl.IsClickingCloseButton then
     AddTab();
 end;
