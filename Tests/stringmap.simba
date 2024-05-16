@@ -1,5 +1,20 @@
 {$assertions on}
 
+procedure Test_CaseSens;
+var
+  List: TStringMap;
+begin
+  List.CaseSens := True;
+
+  List.Add('one', 1);
+  List.Add('One', 11);
+  List.Add('ONE', 111);
+
+  Assert(List.Value['one'] = 1);
+  Assert(List.Value['One'] = 11);
+  Assert(List.Value['ONE'] = 111);
+end;
+
 procedure Test_NoDuplicate(var List: TStringMap);
 var
   Err: String;
@@ -14,6 +29,14 @@ begin
   Assert(Err = 'Key "nothing" does not exist');
 
   List.Add('one', '1');
+
+  try
+    List.Add('one', '1');
+  except
+    Err := GetExceptionMessage();
+  end;
+  Assert(Err = 'Key "one" already exists');
+
   List.Add('two', '2');
   List.Add('three', '3');
 
@@ -80,4 +103,6 @@ begin
 
   List.Sorted := False;
   Test_Duplicate(List);
+
+  Test_CaseSens();
 end;

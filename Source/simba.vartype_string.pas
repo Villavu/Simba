@@ -122,9 +122,7 @@ type
     function CountAll(const Values: TStringArray): TIntegerArray;
 
     function Join(const Values: TStringArray): String;
-    function Split(const Seperators: TStringArray): TStringArray; overload;
-    function Split(const Seperator: String): TStringArray; overload;
-
+    function Split(const Seperator: String): TStringArray;
     function SplitLines: TStringArray;
 
     function Copy: String;
@@ -214,15 +212,8 @@ begin
 end;
 
 function TSimbaCharHelper.Join(const Values: TStringArray): String;
-var i: Integer;
 begin
-  Result := '';
-  for i:=0 to High(values) do
-  begin
-    Result += Values[i];
-    if i <> High(values) then
-      Result += Self;
-  end;
+  Result := String(Self).Join(Values);
 end;
 
 
@@ -392,6 +383,8 @@ var
   end;
 
 begin
+  Result := [];
+
   RegExpr := TRegExpr.Create(Pattern);
   try
     if RegExpr.Exec(Self) then
@@ -753,16 +746,16 @@ end;
 function TSimbaStringHelper.StartsWith(const Value: String; CaseSenstive: Boolean): Boolean;
 begin
   case CaseSenstive of
-    False: Result := SameText(System.Copy(Self, 1, Length(Value)), Value);
-    True:  Result := System.Copy(Self, 1, Length(Value)) = Value;
+    False: Result := (Length(Value) > 0) and SameText(System.Copy(Self, 1, Length(Value)), Value);
+    True:  Result := (Length(Value) > 0) and (System.Copy(Self, 1, Length(Value)) = Value);
   end;
 end;
 
 function TSimbaStringHelper.EndsWith(const Value: String; CaseSenstive: Boolean): Boolean;
 begin
   case CaseSenstive of
-    False: Result := SameText(System.Copy(Self, Length(Self) - Length(Value) + 1), Value);
-    True:  Result := System.Copy(Self, Length(Self) - Length(Value) + 1) = Value;
+    False: Result := (Length(Value) > 0) and SameText(System.Copy(Self, Length(Self) - Length(Value) + 1), Value);
+    True:  Result := (Length(Value) > 0) and (System.Copy(Self, Length(Self) - Length(Value) + 1) = Value);
   end;
 end;
 
@@ -834,78 +827,164 @@ begin
 end;
 
 function TSimbaStringHelper.Join(const Values: TStringArray): String;
-var i: Integer;
-begin
-  Result := '';
-  for i:=0 to High(values) do
-  begin
-    Result += Values[i];
-    if i <> High(values) then
-      Result += Self;
-  end;
-end;
-
-function TSimbaStringHelper.Split(const Seperators: TStringArray): TStringArray;
 var
-  Len: SizeInt;
-
-  function NextSep(const StartIndex: SizeInt; out SepIndex: SizeInt): SizeInt;
-  var
-    I: Integer;
-  begin
-    Result := 0;
-
-    for I := 0 to High(Seperators) do
-    begin
-      Result := Self.IndexOf(Seperators[I], StartIndex);
-      if (Result > 0) then
-      begin
-        SepIndex := I;
-        Exit;
-      end;
-    end;
-  end;
-
-  procedure Add(const S: String);
-  begin
-    if (Len >= Length(Result)) then
-      SetLength(Result, Length(Result) * 2);
-    Result[Len] := S;
-    Inc(Len);
-  end;
-
-var
-  Sep, SepIndex, LastSep: SizeInt;
+  Builder: TSimbaStringBuilder;
+  i: Integer;
 begin
-  SetLength(Result, 16);
-
-  Len := 0;
-  LastSep := 1;
-  Sep := NextSep(1, SepIndex);
-  while (Sep > 0) do
+  if (Length(Values) = 0) then
+    Result := ''
+  else
+  if (Length(Values) = 1) then
+    Result := Values[0]
+  else
   begin
-    Add(System.Copy(Self, LastSep, Sep - LastSep));
-    LastSep := Sep + Length(Seperators[SepIndex]);
-    Sep := NextSep(LastSep, SepIndex);
+    Builder.Append(Values[0]);
+    for I := 1 to High(Values) - 1 do
+      Builder.Append(Self + Values[I]);
+    Builder.Append(Self + Values[High(Values)]);
+
+    Result := Builder.Str;
   end;
-
-  if (LastSep <= Length(Self)) then
-    Add(System.Copy(Self, LastSep, MaxInt));
-
-  if (Len > 0) and (Result[Len - 1] = '') then
-    Dec(Len);
-
-  SetLength(Result, Len);
 end;
 
 function TSimbaStringHelper.Split(const Seperator: String): TStringArray;
+
+  function DoSplit(const Str, Seperator: String): TStringArray;
+  var
+    StrLen, SepLen, MaxLen, ResultCount: SizeInt;
+
+    procedure Add(const Index, Count: Integer);
+    begin
+      if (ResultCount >= Length(Result)) then
+        SetLength(Result, 4 + (Length(Result) * 2));
+      Result[ResultCount] := System.Copy(Str, Index, Count);
+      Inc(ResultCount);
+    end;
+
+    function NextSep(const StartIndex: SizeInt): SizeInt;
+    var
+      I: SizeInt;
+      Ptr: PChar;
+    begin
+      if (StartIndex <= StrLen) then
+      begin
+        Ptr := @Str[StartIndex];
+        I := StartIndex - 1;
+        while (I <= MaxLen) do
+        begin
+          Inc(I);
+          if (PChar(Seperator)^ = Ptr^) and (CompareByte(PChar(Seperator)^, Ptr^, SepLen) = 0) then
+            Exit(I);
+          Inc(Ptr);
+        end;
+      end;
+
+      Result := -1;
+    end;
+
+  var
+    FoundSep, LastSep: SizeInt;
+  begin
+    if (Length(Seperator) = 0) then
+      Result := [Str]
+    else
+    begin
+      Result := [];
+      ResultCount := 0;
+
+      StrLen := Length(Str);
+      SepLen := Length(Seperator);
+      MaxLen := StrLen - SepLen;
+
+      LastSep := 1;
+      FoundSep := NextSep(1);
+      while (FoundSep > 0) do
+      begin
+        if (FoundSep - LastSep > 0) then
+          Add(LastSep, FoundSep - LastSep);
+        LastSep := FoundSep + SepLen;
+        FoundSep := NextSep(LastSep);
+      end;
+      if (LastSep <= StrLen) then
+        Add(LastSep, MaxInt);
+
+      SetLength(Result, ResultCount);
+    end;
+  end;
+
 begin
-  Result := Split([Seperator]);
+  Result := DoSplit(Self, Seperator);
 end;
 
 function TSimbaStringHelper.SplitLines: TStringArray;
+
+  function DoSplit(const Str: String): TStringArray;
+  var
+    StrLen, MaxLen, ResultCount: SizeInt;
+
+    procedure Add(const Index, Count: Integer);
+    begin
+      if (ResultCount >= Length(Result)) then
+        SetLength(Result, 4 + (Length(Result) * 2));
+      Result[ResultCount] := System.Copy(Str, Index, Count);
+      Inc(ResultCount);
+    end;
+
+    function NextSep(const StartIndex: SizeInt): SizeInt;
+    var
+      I: SizeInt;
+      Ptr: PChar;
+      LastWasReturn: Boolean = False;
+    begin
+      if (StartIndex <= StrLen) then
+      begin
+        Ptr := @Str[StartIndex];
+        I := StartIndex - 1;
+        while (I <= MaxLen) do
+        begin
+          Inc(I);
+          if (Ptr^ = #10) then
+          begin
+            if LastWasReturn then
+              Exit(I-1)
+            else
+              Exit(I);
+          end;
+          LastWasReturn := (Ptr^ = #13);
+
+          Inc(Ptr);
+        end;
+      end;
+
+      Result := -1;
+    end;
+
+  var
+    FoundSep, LastSep: SizeInt;
+  begin
+    Result := [];
+    ResultCount := 0;
+
+    StrLen := Length(Str);
+    MaxLen := StrLen - 1;
+
+    LastSep := 1;
+    FoundSep := NextSep(1);
+    while (FoundSep > 0) do
+    begin
+      if (FoundSep - LastSep > 0) then
+        Add(LastSep, FoundSep - LastSep);
+      LastSep := FoundSep + 1;
+      FoundSep := NextSep(LastSep);
+    end;
+    if (LastSep <= StrLen) then
+      Add(LastSep, MaxInt);
+
+    SetLength(Result, ResultCount);
+  end;
+
 begin
-  Result := Split([#13#10, #10]);
+  Result := DoSplit(Self);
 end;
 
 function TSimbaStringHelper.Copy: String;
@@ -1117,9 +1196,10 @@ end;
 
 operator *(const Left: Char; Right: Int32): String;
 var
-  i: Integer;
+  I: Integer;
 begin
-  for i:=0 to Right-1 do
+  Result := '';
+  for I:=0 to Right-1 do
     Result += Left;
 end;
 

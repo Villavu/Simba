@@ -78,6 +78,8 @@ begin
     'LIBLOADED': Value := BoolToStr(FindLoadedPlugin(SimbaEnv.FindPlugin(Argument, [Sender.Tokenizer.FileName])) <> '', True);
     'LIBEXISTS': Value := BoolToStr(SimbaEnv.HasPlugin(Argument, [Sender.Tokenizer.FileName]), True);
   end;
+
+  Result := Value <> '';
 end;
 
 function TSimbaScript.DoCompilerMacro(Sender: TLapeCompiler; Name, Argument: lpString; out Value: lpString): Boolean;

@@ -168,7 +168,7 @@ begin
   Result.X := -1;
   Result.Y := -1;
 
-  Arr := ColorListBox.Items[Index].Between('(', ')').Split([', ']);
+  Arr := ColorListBox.Items[Index].Between('(', ')').Split(', ');
   if (Length(Arr) = 2) then
   begin
     Result.X := StrToIntDef(Arr[0], -1);

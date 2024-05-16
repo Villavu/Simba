@@ -212,36 +212,37 @@ end;
 
 procedure TSimbaDownloadSimbaForm.DoPopulate;
 var
-  Lines: TStringArray;
-  str: TStringArray;
-  I: Integer;
-  Count: Integer;
+  Lines, Str: TStringArray;
+  I, Count: Integer;
 begin
-  Lines := URLFetch(URL_BUILD_ARCHIVE_README).Split(#10);
+  Lines := URLFetch(URL_BUILD_ARCHIVE_README).SplitLines();
 
-  SetLength(FData, Length(Lines));
-  Count := 0;
-
-  for I := 5 to High(Lines) do
+  if (Length(Lines) > 0) then
   begin
-    Str := Lines[I].Split(' | ');
-    if (Length(Str) = 4) then
+    SetLength(FData, Length(Lines));
+    Count := 0;
+
+    for I := 4 to High(Lines) do
     begin
-      Str[2] := Str[2].Between('[', ']');
-      Str[3] := Str[3].Between('(', ')');
-
-      with FData[Count] do
+      Str := Lines[I].Split(' | ');
+      if (Length(Str) = 4) then
       begin
-        Date   := Str[0];
-        Branch := Str[1];
-        Commit := Str[2];
-        Link   := Str[3];
-      end;
-      Inc(Count);
-    end;
-  end;
+        Str[2] := Str[2].Between('[', ']');
+        Str[3] := Str[3].Between('(', ')');
 
-  SetLength(FData, Count);
+        with FData[Count] do
+        begin
+          Date   := Str[0];
+          Branch := Str[1];
+          Commit := Str[2];
+          Link   := Str[3];
+        end;
+        Inc(Count);
+      end;
+    end;
+
+    SetLength(FData, Count);
+  end;
 end;
 
 procedure TSimbaDownloadSimbaForm.DoPopulated(Sender: TObject);

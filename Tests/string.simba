@@ -28,6 +28,24 @@ begin
   TestString := 'Hello World 1,2,3';
   Assert(ToString(TestString.Split(' ')) = '[Hello, World, 1,2,3]');
 
+  TestString := '|1|2|3|';
+  Assert(ToString(TestString.Split('|')) = '[1, 2, 3]');
+
+  TestString := 'WorldHelloWorldHelloWorldWorld';
+  Assert(ToString(TestString.Split('World')) = '[Hello, Hello]');
+
+  TestString := '@ @@@@@@';
+  Assert(ToString(TestString.Split('@@@@@')) = '[@ , @]');
+
+  TestString := 'abcdef';
+  Assert(ToString(TestString.Split('nothin')) = '[abcdef]');
+
+  TestString := 'abcdef';
+  Assert(ToString(TestString.Split('f')) = '[abcde]');
+
+  TestString := 'Hello'+#13#10+'World'+#10#10+'1'+#10+'2'+#13#10+#13#10;
+  Assert(ToString(TestString.SplitLines()) = '[Hello, World, 1, 2]');
+
   TestString := 'abc abc xyz xyz';
   Assert(TestString.Extract(['x', 'y', 'z']) = 'xyzxyz');
 
@@ -48,4 +66,12 @@ begin
   Assert(String.LowerChars.IsUpper() = False);
 
   Assert(String.AlphaChars.IsAlphaNum() = True);
+
+  Assert(#32.Join(['a']) = 'a');
+  Assert(#32.Join(['a','b']) = 'a b');
+  Assert(#32.Join(['a','b','c','d']) = 'a b c d');
+
+  Assert(String(' ').Join(['a']) = 'a');
+  Assert(String(' ').Join(['a','b']) = 'a b');
+  Assert(String(' ').Join(['a','b','c','d']) = 'a b c d');
 end;

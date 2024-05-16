@@ -303,6 +303,9 @@ procedure TSimbaStringMap.Add(AKey: String; AValue: Variant);
 var
   Index: Integer;
 begin
+  if (not FAllowDuplicates) and Exists(AKey) then
+    SimbaException('Key "%s" already exists', [AKey]);
+
   if (FCount >= Length(FItems)) then
     SetLength(FItems, 4 + (FCount * 2));
 
@@ -357,8 +360,9 @@ begin
   for Line in TSimbaFile.FileReadLines(FileName) do
   begin
     Pieces := Line.Partition(Sep);
+
     if (Pieces[0] <> '') and (Pieces[1] <> '') and (Pieces[2] <> '') then
-    try
+    begin
       case VarType of
         EVariantType.Boolean: Val := Pieces[2].ToBoolean();
 
@@ -381,7 +385,6 @@ begin
       end;
 
       Add(Pieces[0], Val);
-    except
     end;
   end;
 
