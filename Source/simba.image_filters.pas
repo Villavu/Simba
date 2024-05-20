@@ -18,12 +18,12 @@ function SimbaImage_GreyScale(Image: TSimbaImage): TSimbaImage;
 function SimbaImage_Brightness(Image: TSimbaImage; Value: Integer): TSimbaImage;
 function SimbaImage_Invert(Image: TSimbaImage): TSimbaImage;
 function SimbaImage_Posterize(Image: TSimbaImage; Value: Integer): TSimbaImage;
-function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Inv: Boolean; Method: EImageThreshMethod; K: Integer): TSimbaImage;
-function SimbaImage_ThresholdSauvola(Image: TSimbaImage; Radius: Integer; Inv: Boolean = False; R: Single = 128; K: Single = 0.5): TSimbaImage;
 function SimbaImage_Sobel(Image: TSimbaImage): TSimbaImage;
 function SimbaImage_Enhance(Image: TSimbaImage; Enchantment: Byte; C: Single): TSimbaImage;
-function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Single): TSimbaImage;
-function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Single): TSimbaImage;
+function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Integer): TSimbaImage;
+function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Integer): TSimbaImage;
+function SimbaImage_Threshold(Image: TSimbaImage; Invert: Boolean): TSimbaImage;
+function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Invert: Boolean; Radius: Integer; K: Single): TSimbaImage;
 
 implementation
 
@@ -125,154 +125,6 @@ begin
   end;
 end;
 
-function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Inv: Boolean; Method: EImageThreshMethod; K: Integer): TSimbaImage;
-var
-  I: Integer;
-  vMin, vMax, Threshold: UInt8;
-  Counter: Int64;
-  Tab: array[0..256] of TColorBGRA;
-  Upper: PtrUInt;
-  SrcPtr, DestPtr: PColorBGRA;
-  HitColor, MissColor: TColorBGRA;
-begin
-  Result := TSimbaImage.Create(Image.Width, Image.Height);
-
-  //Finding the threshold - While at it convert image to grayscale.
-  Threshold := 0;
-  case Method of
-    //Find the Arithmetic Mean / Average.
-    EImageThreshMethod.MEAN:
-      begin
-        SrcPtr := Image.Data;
-        DestPtr := Result.Data;
-        Upper := PtrUInt(@Image.Data[Image.Width * Image.Height]);
-
-        Counter := 0;
-
-        while (PtrUInt(SrcPtr) < Upper) do
-        begin
-          DestPtr^.R := (SrcPtr^.B + SrcPtr^.G + SrcPtr^.R) div 3;
-
-          Counter += DestPtr^.R;
-
-          Inc(SrcPtr);
-          Inc(DestPtr);
-        end;
-
-        Threshold := (Counter div ((Image.Width * Image.Height) - 1)) + K;
-      end;
-
-    //Middle of Min- and Max-value
-    EImageThreshMethod.MIN_MAX:
-      begin
-        vMin := 255;
-        vMax := 0;
-
-        SrcPtr := Image.Data;
-        DestPtr := Result.Data;
-        Upper := PtrUInt(@Image.Data[Image.Width * Image.Height]);
-
-        while (PtrUInt(SrcPtr) < Upper) do
-        begin
-          DestPtr^.R := (SrcPtr^.B + SrcPtr^.G + SrcPtr^.R) div 3;
-
-          if (DestPtr^.R < vMin) then vMin := DestPtr^.R else
-          if (DestPtr^.R > vMax) then vMax := DestPtr^.R;
-
-          Inc(SrcPtr);
-          Inc(DestPtr)
-        end;
-
-        Threshold := ((vMax + Integer(vMin)) shr 1) + K;
-      end;
-  end;
-
-  HitColor.AsInteger := 0;
-  HitColor.A := ALPHA_OPAQUE;
-  MissColor.AsInteger := $FFFFFF;
-  MissColor.A := ALPHA_OPAQUE;
-
-  if Inv then Swap(MissColor, HitColor);
-  for I := 0 to Threshold - 1 do Tab[I] := MissColor;
-  for I := Threshold to 255   do Tab[I] := HitColor;
-
-  Upper := PtrUInt(@Result.Data[Result.Width * Result.Height]);
-  DestPtr := Result.Data;
-  while (PtrUInt(DestPtr) < Upper) do
-  begin
-    DestPtr^ := Tab[DestPtr^.R];
-
-    Inc(DestPtr);
-  end;
-end;
-
-{
-  Radius = Window size
-  Invert = Invert output
-  R      = dynamic range of standard deviation (default = 128)
-  K      = constant value in range 0.2..0.5 (default = 0.5)
-}
-function SimbaImage_ThresholdSauvola(Image: TSimbaImage; Radius: Integer; Inv: Boolean; R: Single; K: Single): TSimbaImage;
-var
-  Mat: TByteMatrix;
-  Integral: TSimbaIntegralImageF;
-  X,Y,W,H: Integer;
-  Left, Right, Top, Bottom: Integer;
-  Count: Integer;
-  Sum, SumSquares: Double;
-  Mean, Stdev, Threshold: Double;
-  HitColor, MissColor: TColorBGRA;
-begin
-  Result := TSimbaImage.Create(Image.Width, Image.Height);
-
-  Mat := Image.ToGreyMatrix();
-  Mat.GetSize(W, H);
-
-  Dec(W);
-  Dec(H);
-
-  Radius := (Radius - 1) div 2;
-  Integral := TSimbaIntegralImageF.Create(Mat);
-
-  HitColor.AsInteger := $FFFFFF;
-  HitColor.A := ALPHA_OPAQUE;
-  MissColor.AsInteger := 0;
-  MissColor.A := ALPHA_OPAQUE;
-  if Inv then
-    Swap(HitColor, MissColor);
-
-  for Y := 0 to H do
-    for X := 0 to W do
-    begin
-      Left   := Max(X-Radius, 0);
-      Right  := Min(X+Radius, W);
-      Top    := Max(Y-Radius, 0);
-      Bottom := Min(Y+Radius, H);
-
-      //Sum := 0;
-      //SumSquares := 0;
-      //
-      //for y := top to bottom do
-      //  for x := left to right do
-      //  begin
-      //    Sum += mat[y,x];
-      //    SumSquares += mat[y,x]*mat[y,x];
-      //  end;
-
-      Integral.Query(Left, Top, Right, Bottom, Sum, SumSquares);
-
-      Count := (Bottom - Top + 1) * (Right - Left + 1);
-      Mean := Sum / Count;
-      Stdev := Sqrt((SumSquares / Count) - Sqr(Mean));
-      Threshold := Mean * (1.0 + K * ((Stdev / R) - 1.0));
-
-      if Mat[Y, X] < Threshold then
-        Result.Data[Y * Image.Width + X] := MissColor
-      else
-        Result.Data[Y * Image.Width + X] := HitColor;
-    end;
-end;
-
 function SimbaImage_Sobel(Image: TSimbaImage): TSimbaImage;
 var
   x,y,xx,yy,W,H,gx,gy:Int32;
@@ -369,7 +221,7 @@ begin
     end;
 end;
 
-function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Single): TSimbaImage;
+function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Integer): TSimbaImage;
 var
   X, Y, XX, YY, W, H: Integer;
   Size: Integer;
@@ -377,24 +229,18 @@ var
   Sum: record
     R,G,B: UInt64;
   end;
-  Rad: Integer;
   UseIntergal: Boolean;
   IntegralImage: TSimbaIntegralImageRGB;
 begin
+  if (Radius <= 1) or (not Odd(Radius)) then
+    SimbaException('Blur: Radius(%d) must be odd (1,3,5 etc).', [Radius]);
+
+  UseIntergal := Radius >= 9;
+  Radius := Radius div 2;
+
   Result := TSimbaImage.Create(Image.Width, Image.Height);
   if (Result.Width = 0) or (Result.Height = 0) then
     Exit;
-
-  //if (Radius <= 1) or (not Odd(Radius)) then
-  //  SimbaException('TSimbaImage.BlockBlur: Radius(%d) must be odd (1,3,5 etc).', [Radius]);
-
-  UseIntergal := Radius >= 9;
-
-  Rad := Round(Radius);
-  if Odd(Rad) then
-    Rad := Rad div 2
-  else
-    Rad := (Rad + 1) div 2;
 
   W := Image.Width - 1;
   H := Image.Height - 1;
@@ -406,10 +252,10 @@ begin
     for Y := 0 to H do
       for X := 0 to W do
       begin
-        B.X1 := Max(X-Rad, 0);
-        B.Y1 := Max(Y-Rad, 0);
-        B.X2 := Min(X+Rad, Image.Width) - 1;
-        B.Y2 := Min(Y+Rad, Image.Height) - 1;
+        B.X1 := Max(X-Radius, 0);
+        B.Y1 := Max(Y-Radius, 0);
+        B.X2 := Min(X+Radius, Image.Width - 1);
+        B.Y2 := Min(Y+Radius, Image.Height - 1);
         Size := ((B.X2-B.X1) + 1) * ((B.Y2-B.Y1) + 1);
 
         IntegralImage.Query(B.X1, B.Y1, B.X2, B.Y2, Sum.R, Sum.G, Sum.B);
@@ -418,7 +264,6 @@ begin
           R := Sum.R div Size;
           G := Sum.G div Size;
           B := Sum.B div Size;
-          A := ALPHA_OPAQUE;
         end;
       end;
   end else
@@ -426,10 +271,10 @@ begin
     for Y := 0 to H do
       for X := 0 to W do
       begin
-        B.X1 := Max(X-Rad, 0);
-        B.Y1 := Max(Y-Rad, 0);
-        B.X2 := Min(X+Rad, Image.Width) - 1;
-        B.Y2 := Min(Y+Rad, Image.Height) - 1;
+        B.X1 := Max(X-Radius, 0);
+        B.Y1 := Max(Y-Radius, 0);
+        B.X2 := Min(X+Radius, Image.Width - 1);
+        B.Y2 := Min(Y+Radius, Image.Height - 1);
         Size := ((B.X2-B.X1) + 1) * ((B.Y2-B.Y1) + 1);
 
         Sum.R := 0;
@@ -450,162 +295,192 @@ begin
           R := Sum.R div Size;
           G := Sum.G div Size;
           B := Sum.B div Size;
-          A := ALPHA_OPAQUE;
         end;
       end;
   end;
 end;
 
 // https://blog.ivank.net/fastest-gaussian-blur.html
-function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Single): TSimbaImage;
+procedure GaussBlurApprox(var Src, Dst: TByteArray; w, h, r: Integer);
+var
+  Hi: Integer;
 
-  function boxesForGauss(sigma: Double; n: Integer): TIntegerArray;
-  var
-    wIdeal: Double;
-    wl, wu: Integer;
-    mIdeal, m: Double;
-    i: Integer;
+  function OutOfRange(const Index: Integer): Boolean; inline;
   begin
-    wIdeal := Sqrt((12 * sigma * sigma / n) + 1); // Ideal averaging filter width
-    wl := Floor(wIdeal);
-    if (wl mod 2 = 0) then
+    Result := (Index < 0) or (Index > Hi);
+  end;
+
+  procedure DoPass(var scl, tcl: TByteArray; w, h, r: Integer);
+
+    procedure Horz(var scl, tcl: TByteArray; w, h, r: Integer);
+    var
+      i, j, ti, li, ri, fv, lv, val: Integer;
+      iarr: Double;
+    begin
+      hi := High(scl);
+      iarr := 1 / (r+r+1);
+
+      for i := 0 to h - 1 do
+      begin
+        ti := i * w;
+        li := ti;
+        ri := ti + r;
+        fv := scl[li];
+        lv := scl[ti + (w - 1)];
+        val := (r + 1) * fv;
+
+        for j := 0 to r - 1 do
+        begin
+          if OutOfRange(ti + j) then
+            Continue;
+
+          val := val + scl[ti + j];
+        end;
+
+        for j := 0 to r do
+        begin
+          if OutOfRange(ri) or OutOfRange(ti) then
+            Continue;
+
+          val := val + scl[ri] - fv;
+          tcl[ti] := Round(val * iarr);
+          ri := ri + 1;
+          ti := ti + 1;
+        end;
+
+        for j := r + 1 to w - r - 1 do
+        begin
+          if OutOfRange(ri) or OutOfRange(li) then
+            Continue;
+
+          val := val + scl[ri] - scl[li];
+          tcl[ti] := Round(val * iarr);
+          li := li + 1;
+          ri := ri + 1;
+          ti := ti + 1;
+        end;
+
+        for j := w - r to w - 1 do
+        begin
+          if OutOfRange(li) or OutOfRange(ti) then
+            Continue;
+
+          val := val + lv - scl[li];
+          tcl[ti] := Round(val * iarr);
+          li := li + 1;
+          ti := ti + 1;
+        end;
+      end;
+    end;
+
+    procedure Vert(var scl, tcl: TByteArray; w, h, r: Integer);
+    var
+      i, j, ti, li, ri, fv, lv, val: Integer;
+      iarr: Double;
+    begin
+      hi := High(scl);
+      iarr := 1 / (r+r+1);
+
+      for i := 0 to w - 1 do
+      begin
+        ti := i;
+        li := ti;
+        ri := ti + r * w;
+        fv := scl[ti];
+        lv := scl[ti + w * (h - 1)];
+        val := (r + 1) * fv;
+
+        for j := 0 to r - 1 do
+        begin
+          if OutOfRange(ti + j * w) then
+            Continue;
+          val := val + scl[ti + j * w];
+        end;
+
+        for j := 0 to r do
+        begin
+          if OutOfRange(ri) or OutOfRange(ti) then
+            Continue;
+
+          val := val + scl[ri] - fv;
+          tcl[ti] := Round(val * iarr);
+          ri := ri + w;
+          ti := ti + w;
+        end;
+
+        for j := r + 1 to h - r - 1 do
+        begin
+          if OutOfRange(ri) or OutOfRange(li) or OutOfRange(ti) then
+            Continue;
+
+          val := val + scl[ri] - scl[li];
+          tcl[ti] := Round(val * iarr);
+          li := li + w;
+          ri := ri + w;
+          ti := ti + w;
+        end;
+
+        for j := h - r to h - 1 do
+        begin
+          if OutOfRange(li) or OutOfRange(ti) then
+            Continue;
+
+          val := val + lv - scl[li];
+          tcl[ti] := Round(val * iarr);
+          li := li + w;
+          ti := ti + w;
+        end;
+      end;
+    end;
+
+  begin
+    tcl := Copy(scl);
+
+    Horz(tcl, scl, w, h, r);
+    Vert(scl, tcl, w, h, r);
+  end;
+
+  function BoxesForGauss(sigma: Double): TIntegerArray;
+  const
+    N = 3;
+  var
+    wl, wu, m, i: Integer;
+  begin
+    wl := Floor(Sqrt((12 * sigma * sigma / n) + 1));
+    if wl mod 2 = 0 then
       wl := wl - 1;
     wu := wl + 2;
 
-    mIdeal := (12 * sigma * sigma - n * wl * wl - 4 * n * wl - 3 * n) / (-4 * wl - 4);
-    m := Round(mIdeal);
+    m := Round((12 * sigma * sigma - (wl * wl * n) - 4.0 * n * wl - 3.0 * n) / (-4.0 * wl - 4));
 
-    SetLength(Result, n);
-    for i := 0 to n - 1 do
-    begin
-      if i < m then
+    SetLength(Result, N);
+    for i := 0 to N - 1 do
+      if (i < m) then
         Result[i] := wl
       else
         Result[i] := wu;
-    end;
-  end;
-
-  procedure boxBlurH_4(var scl, tcl: TByteArray; w, h: Integer; r: Integer);
-  var
-    iarr: Double;
-    i,j: Integer;
-    ti, li, ri, fv, lv: Integer;
-    val: Double;
-  begin
-    iarr := 1.0 / (r + r + 1);
-
-    for i := 0 to h-1 do
-    begin
-      ti := i * w;
-      li := ti;
-      ri := Round(ti + r);
-      fv := scl[ti];
-      lv := scl[ti + w - 1];
-      val := (r + 1) * fv;
-
-      for j := 0 to r-1 do
-        val += scl[ti + j];
-
-      for j := 0 to r do
-      begin
-        val += scl[ri] - fv;
-        inc(ri);
-        tcl[ti] := Round(val * iarr);
-        Inc(ti);
-      end;
-
-      for j := r + 1 to (w - r) - 1  do
-      begin
-        val += scl[ri] - scl[li];
-        inc(ri);
-        inc(li);
-        tcl[ti] := Round(val * iarr);
-        inc(ti);
-      end;
-
-      for j := w - r to w-1 do
-      begin
-        val += lv - scl[li];
-        inc(li);
-        tcl[ti] := Round(val * iarr);
-        inc(ti);
-      end;
-    end;
-  end;
-
-  procedure boxBlurT_4(var scl, tcl: TByteArray;  w, h: Integer; r: Integer);
-  var
-    iarr: Double;
-    i,j: Integer;
-    ti, li, ri, fv, lv: Integer;
-    val: Double;
-  begin
-    iarr := 1.0 / (r + r + 1);
-
-    for i := 0 to w-1 do
-    begin
-      ti := i;
-      li := ti;
-      ri := Round(ti + r * w);
-      fv := scl[ti];
-      lv := scl[ti + w * (h - 1)];
-      val := (r + 1) * fv;
-
-      for j := 0 to r-1 do
-        val += scl[ti + j * w];
-
-      for j := 0 to r do
-      begin
-        val += scl[ri] - fv;
-        tcl[ti] := Round(val * iarr);
-        ri += w;
-        ti += w;
-      end;
-
-      for j := r + 1 to (h-r)-1 do
-      begin
-        val += scl[ri] - scl[li];
-        tcl[ti] := Round(val * iarr);
-        li += w;
-        ri += w;
-        ti += w;
-      end;
-
-      for j := h - r to h-1 do
-      begin
-        val += lv - scl[li];
-        tcl[ti] := Round(val * iarr);
-        li += w;
-        ti += w;
-      end;
-    end;
-  end;
-
-  procedure boxBlur_4(var scl, tcl: TByteArray; w,h: Integer; r: Integer);
-  begin
-    Move(scl[0], tcl[0], Length(scl) * SizeOf(Byte));
-
-    boxBlurH_4(tcl, scl, w, h, r);
-    boxBlurT_4(scl, tcl, w, h, r);
-  end;
-
-  procedure gaussBlur_4(var scl, tcl: TByteArray; w,h: Integer; r: Double; bxs: TIntegerArray);
-  begin
-    boxBlur_4(scl, tcl, w, h, (bxs[0] - 1) div 2);
-    boxBlur_4(tcl, scl, w, h, (bxs[1] - 1) div 2);
-    boxBlur_4(scl, tcl, w, h, (bxs[2] - 1) div 2);
   end;
 
 var
+  Temp: TByteArray;
+  Boxes: TIntegerArray;
+begin
+  Temp := Copy(Src);
+  Hi := High(Src);
+  Boxes := BoxesForGauss(r);
+
+  DoPass(Temp, Dst, w, h, (Boxes[0] - 1) div 2);
+  DoPass(Dst, Temp, w, h, (Boxes[1] - 1) div 2);
+  DoPass(Temp, Dst, w, h, (Boxes[2] - 1) div 2);
+end;
+
+function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Integer): TSimbaImage;
+var
   inR, inG, inB: TByteArray;
   outR, outG, outB: TByteArray;
-  boxes: TIntegerArray;
-  Ptr: PColorBGRA;
-  PtrR, PtrG, PtrB: PByte;
-  Upper: PtrUInt;
 begin
   Result := TSimbaImage.Create(Image.Width, Image.Height);
-  if (Image.Width = 0) or (Image.Height = 0) then
+  if (Result.Width = 0) or (Result.Height = 0) then
     Exit;
 
   Image.SplitChannels(inB, inG, inR);
@@ -614,30 +489,163 @@ begin
   SetLength(outG, Length(inG));
   SetLength(outB, Length(inB));
 
-  boxes := boxesForGauss(radius, 3);
+  GaussBlurApprox(inR, outR, Image.Width, Image.Height, radius);
+  GaussBlurApprox(inG, outG, Image.Width, Image.Height, radius);
+  GaussBlurApprox(inB, outB, Image.Width, Image.Height, radius);
 
-  gaussBlur_4(inR, outR, Image.Width, Image.Height, radius, boxes);
-  gaussBlur_4(inG, outG, Image.Width, Image.Height, radius, boxes);
-  gaussBlur_4(inB, outB, Image.Width, Image.Height, radius, boxes);
+  Result.FromChannels(outB, outG, outR, Result.Width, Result.Height);
+end;
 
-  Ptr := Result.Data;
-  PtrB := @OutB[0];
-  PtrG := @OutG[0];
-  PtrR := @OutR[0];
+// https://github.com/galfar/imaginglib/blob/master/Extensions/ImagingBinary.pas#L79
+function SimbaImage_Threshold(Image: TSimbaImage; Invert: Boolean): TSimbaImage;
+var
+  Histogram: array[Byte] of Single;
+  Level, Max, Min, I, J, NumPixels: Integer;
+  Mean, Variance: Single;
+  Mu, Omega, LevelMean, LargestMu: Single;
+  Upper: PtrUInt;
+  Ptr: PColorBGRA;
+begin
+  Result := Image.GreyScale();
 
+  FillByte(Histogram, SizeOf(Histogram), 0);
+  Min := 255;
+  Max := 0;
+  Level := 0;
+  NumPixels := Result.Width * Result.Height;
+
+  // Compute histogram and determine min and max pixel values
   Upper := PtrUInt(Result.Data) + Result.DataSize;
+  Ptr := Result.Data;
   while (PtrUInt(Ptr) < Upper) do
   begin
-    Ptr^.A := ALPHA_OPAQUE;
-    Ptr^.B := PtrB^;
-    Ptr^.G := PtrG^;
-    Ptr^.R := PtrR^;
+    Histogram[Ptr^.R] := Histogram[Ptr^.R] + 1.0;
+    if (Ptr^.R < Min) then
+      Min := Ptr^.R;
+    if (Ptr^.R > Max) then
+      Max := Ptr^.R;
+    Inc(Ptr);
+  end;
+
+  // Normalize histogram
+  for I := 0 to 255 do
+    Histogram[I] := Histogram[I] / NumPixels;
+
+  // Compute image mean and variance
+  Mean := 0.0;
+  Variance := 0.0;
+  for I := 0 to 255 do
+    Mean := Mean + (I + 1) * Histogram[I];
+  for I := 0 to 255 do
+    Variance := Variance + Sqr(I + 1 - Mean) * Histogram[I];
+
+  // Now finally compute threshold level
+  LargestMu := 0;
+
+  for I := 0 to 255 do
+  begin
+    Omega := 0.0;
+    LevelMean := 0.0;
+
+    for J := 0 to I - 1 do
+    begin
+      Omega := Omega + Histogram[J];
+      LevelMean := LevelMean + (J + 1) * Histogram[J];
+    end;
+
+    Mu := Sqr(Mean * Omega - LevelMean);
+    Omega := Omega * (1.0 - Omega);
+
+    if Omega > 0.0 then
+      Mu := Mu / Omega
+    else
+      Mu := 0;
+
+    if Mu > LargestMu then
+    begin
+      LargestMu := Mu;
+      Level := I;
+    end;
+  end;
+
+  // Do thresholding using computed level
+  Ptr := Result.Data;
+  while (PtrUInt(Ptr) < Upper) do
+  begin
+    if (Invert and (Ptr^.R <= Level)) or ((not Invert) and (Ptr^.R >= Level)) then
+      Ptr^.AsInteger := $FFFFFFFF
+    else
+      Ptr^.AsInteger := $FF000000;
 
     Inc(Ptr);
-    Inc(PtrB);
-    Inc(PtrG);
-    Inc(PtrR);
   end;
+end;
+
+{
+  Sauvola binarization computes a local threshold based on
+  the local average and square average.  It takes two constants:
+  the window size for the measurment at each pixel and a
+  parameter that determines the amount of normalized local
+  standard deviation to subtract from the local average value.
+
+  Invert = Invert output
+  Radius = Window size (default = 25)
+  K      = Constant value (default = 0.2). Typical values are between 0.2 and 0.5.
+}
+function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Invert: Boolean; Radius: Integer; K: Single): TSimbaImage;
+var
+  Mat: TByteMatrix;
+  Integral: TSimbaIntegralImageF;
+  X, Y, W, H: Integer;
+  Left, Right, Top, Bottom: Integer;
+  Count: Integer;
+  Sum, SumSquares: Double;
+  Mean, Stdev, Threshold: Double;
+begin
+  if (Radius <= 1) or (not Odd(Radius)) then
+    SimbaException('ThresholdAdaptive: Radius(%d) must be odd (1,3,5 etc).', [Radius]);
+  Radius := Radius div 2;
+
+  Result := TSimbaImage.Create(Image.Width, Image.Height);
+  if (Result.Width = 0) or (Result.Height = 0) then
+    Exit;
+
+  Mat := Image.ToGreyMatrix();
+  Mat.GetSize(W, H);
+
+  Dec(W);
+  Dec(H);
+
+  Integral := TSimbaIntegralImageF.Create(Mat);
+
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      Left   := Max(X-Radius, 0);
+      Right  := Min(X+Radius, W);
+      Top    := Max(Y-Radius, 0);
+      Bottom := Min(Y+Radius, H);
+
+      //Sum := 0;
+      //SumSquares := 0;
+      //
+      //for y := top to bottom do
+      //  for x := left to right do
+      //  begin
+      //    Sum += mat[y,x];
+      //    SumSquares += mat[y,x]*mat[y,x];
+      //  end;
+
+      Integral.Query(Left, Top, Right, Bottom, Sum, SumSquares);
+
+      Count := (Bottom - Top + 1) * (Right - Left + 1);
+      Mean := Sum / Count;
+      Stdev := Sqrt((SumSquares / Count) - Sqr(Mean));
+      Threshold := Mean * (1.0 + K * ((Stdev / 128.0) - 1.0));
+
+      if (Invert and (Mat[Y, X] <= Threshold)) or ((not Invert) and (Mat[Y, X] >= Threshold)) then
+        Result.Data[Y * Image.Width + X].AsInteger := $FFFFFFFF;
+    end;
 end;
 
 end.

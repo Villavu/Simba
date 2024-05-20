@@ -141,6 +141,7 @@ type
 
     procedure SplitChannels(var B,G,R,A: TByteArray); overload;
     procedure SplitChannels(var B,G,R: TByteArray); overload;
+    procedure FromChannels(const B,G,R: TByteArray; W, H: Integer);
 
     procedure ReplaceColor(OldColor, NewColor: TColor); overload;
     procedure ReplaceColor(OldColor, NewColor: TColor; Tolerance: Single); overload;
@@ -219,16 +220,17 @@ type
     function Brightness(Value: Integer): TSimbaImage;
     function Invert: TSimbaImage;
     function Posterize(Value: Integer): TSimbaImage;
-    function ThresholdAdaptive(Inv: Boolean; Method: EImageThreshMethod; K: Integer): TSimbaImage;
-    function ThresholdSauvola(Radius: Integer; Inv: Boolean = False; R: Single = 128; K: Single = 0.5): TSimbaImage;
+    function Threshold(Inv: Boolean): TSimbaImage;
+    function ThresholdAdaptive(Inv: Boolean; Radius: Integer; C: Double): TSimbaImage;
     function Blend(Points: TPointArray; Radius: Integer): TSimbaImage; overload;
     function Blend(Points: TPointArray; Radius: Integer; IgnorePoints: TPointArray): TSimbaImage; overload;
-    function Blur(Algo: EImageBlurAlgo; Radius: Single): TSimbaImage;
+    function Blur(Algo: EImageBlurAlgo; Radius: Integer): TSimbaImage;
 
     // Matrix
     procedure LoadFromMatrix(Matrix: TIntegerMatrix); overload;
     procedure LoadFromMatrix(Matrix: TSingleMatrix; ColorMapType: Integer = 0); overload;
 
+    function ToGreyArray: TByteArray;
     function ToGreyMatrix: TByteMatrix;
     function ToMatrix: TIntegerMatrix; overload;
     function ToMatrix(Box: TBox): TIntegerMatrix; overload;
@@ -345,6 +347,16 @@ end;
 function TSimbaImage.ToLazBitmap: TBitmap;
 begin
   Result := SimbaImage_ToLazImage(Self);
+end;
+
+function TSimbaImage.ToGreyArray: TByteArray;
+var
+  I: Integer;
+begin
+  SetLength(Result, FWidth * FHeight);
+  for I := 0 to High(Result) do
+    with FData[I] do
+      Result[I] := Round(R * 0.299 + G * 0.587 + B * 0.114);
 end;
 
 function TSimbaImage.ToGreyMatrix: TByteMatrix;
@@ -1431,6 +1443,36 @@ begin
   end;
 end;
 
+procedure TSimbaImage.FromChannels(const B,G,R: TByteArray; W, H: Integer);
+var
+  Dst: PColorBGRA;
+  SrcB, SrcG, SrcR: PByte;
+  Upper: PtrUInt;
+begin
+  SetSize(W, H);
+  if (Length(B) <> W*H) or (Length(G) <> W*H) or (Length(R) <> W*H) then
+    SimbaException('Channel size does not match image size');
+
+  Dst := FData;
+  SrcB := @B[0];
+  SrcG := @G[0];
+  SrcR := @R[0];
+
+  Upper := PtrUInt(FData) + FDataSize;
+  while (PtrUInt(Dst) < Upper) do
+  begin
+    Dst^.A := ALPHA_OPAQUE;
+    Dst^.B := SrcB^;
+    Dst^.G := SrcG^;
+    Dst^.R := SrcR^;
+
+    Inc(Dst);
+    Inc(SrcB);
+    Inc(SrcG);
+    Inc(SrcR);
+  end;
+end;
+
 procedure TSimbaImage.DrawImage(Image: TSimbaImage; Location: TPoint);
 begin
   if (FDrawAlpha = ALPHA_OPAQUE) then
@@ -1527,6 +1569,11 @@ end;
 function TSimbaImage.Posterize(Value: Integer): TSimbaImage;
 begin
   Result := SimbaImage_Posterize(Self, Value);
+end;
+
+function TSimbaImage.Threshold(Inv: Boolean): TSimbaImage;
+begin
+  Result := SimbaImage_Threshold(Self, Inv);
 end;
 
 function TSimbaImage.Convolute(Matrix: TDoubleMatrix): TSimbaImage;
@@ -1850,7 +1897,7 @@ begin
   end;
 end;
 
-function TSimbaImage.Blur(Algo: EImageBlurAlgo; Radius: Single): TSimbaImage;
+function TSimbaImage.Blur(Algo: EImageBlurAlgo; Radius: Integer): TSimbaImage;
 begin
   case Algo of
     EImageBlurAlgo.BOX:   Result := SimbaImage_BlurBox(Self, Radius);
@@ -1910,14 +1957,9 @@ begin
     end;
 end;
 
-function TSimbaImage.ThresholdAdaptive(Inv: Boolean; Method: EImageThreshMethod; K: Integer): TSimbaImage;
+function TSimbaImage.ThresholdAdaptive(Inv: Boolean; Radius: Integer; C: Double): TSimbaImage;
 begin
-  Result := SimbaImage_ThresholdAdaptive(Self, Inv, Method, K);
-end;
-
-function TSimbaImage.ThresholdSauvola(Radius: Integer; Inv: Boolean; R: Single; K: Single): TSimbaImage;
-begin
-  Result := SimbaImage_ThresholdSauvola(Self, Radius, Inv, R, K);
+  Result := SimbaImage_ThresholdAdaptive(Self, Inv, Radius, C);
 end;
 
 procedure TSimbaImage.DrawData(TheData: PColorBGRA; DataW, DataH: Integer; P: TPoint);

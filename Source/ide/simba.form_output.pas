@@ -388,7 +388,7 @@ var
   Line: String;
   Flags: EDebugLnFlags;
 begin
-  Arr := S.Split(LineEnding);
+  Arr := S.Split(LineEnding, False);
   if (Length(Arr) = 0) then
     Result := ''
   else

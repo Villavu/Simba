@@ -62,7 +62,6 @@ begin
   Spacing.Y += Height;
 
   SetLength(Result, Columns * Rows);
-
   for I := 0 to High(Result) do
   begin
     Result[I].X1 := Start.X + I mod Columns * Spacing.X - Width div 2;
@@ -185,7 +184,7 @@ function TBoxArrayHelper.Merge: TBox;
 var
   I: Integer;
 begin
-  if Length(Self) = 0 then
+  if (Length(Self) = 0) then
     Exit(TBox.ZERO);
 
   Result := Self[0];

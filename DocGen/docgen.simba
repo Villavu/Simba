@@ -74,16 +74,18 @@ var
   I: Integer;
   Lines: TStringArray;
 begin
-  Lines := Str.Split(LINE_SEP);
+  Lines := Str.SplitLines;
   while (I < Length(Lines)) do
   begin
     if Lines[I].StartsWith('> ') then
     begin
-      Lines[I].Delete(1,2);
+      Lines[I].Delete(1, 2);
       Lines.Insert('```', I);
       Lines.Insert('```', I+2);
+
       Inc(I, 2);
     end;
+
     Inc(I);
   end;
 

@@ -1091,28 +1091,31 @@ begin
 end;
 
 (*
-TImage.ThresholdAdaptive
-------------------------
-> function TImage.ThresholdAdaptive(Inv: Boolean; Method: EImageThreshMethod; k: Integer): TImage;
+TImage.Threshold
+----------------
+> function TImage.Threshold(Inv: Boolean): TImage;
+
+Otsu threshold algorithm.
 *)
-procedure _LapeImage_ThresholdAdaptive(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_Threshold(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdAdaptive(PBoolean(Params^[0])^, EImageThreshMethod(Params^[1]^), PInteger(Params^[2])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Threshold(PBoolean(Params^[1])^);
 end;
 
 (*
-TImage.ThresholdSauvola
------------------------
-> function TImage.ThresholdSauvola(Radius: Integer; Invert: Boolean; R: Single = 128; K: Single = 0.5): TImage;
+TImage.ThresholdAdaptive
+------------------------
+> function TImage.ThresholdAdaptive(Inv: Boolean; Radius: Integer = 25; C: Double = 0.1): TImage;
 
-  Radius = Window size
-  Invert = Invert output
-  R      = dynamic range of standard deviation (default = 128)
-  K      = constant value in range 0.2..0.5 (default = 0.5)
+Sauvola binarization algorithm.
+
+Invert = Invert output
+Radius = Window size (default = 25)
+K      = Constant value (default = 0.1). Typical values are between 0.1 and 0.5.
 *)
-procedure _LapeImage_ThresholdSauvola(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_ThresholdAdaptive(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdSauvola(PInteger(Params^[1])^, PBoolean(Params^[2])^, PSingle(Params^[3])^, PSingle(Params^[4])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdAdaptive(PBoolean(Params^[1])^, PInteger(Params^[2])^, PDouble(Params^[3])^);
 end;
 
 (*
@@ -1140,11 +1143,19 @@ end;
 (*
 TImage.Blur
 -----------
-> function TImage.Blur(Algo: EImageBlurAlgo; Radius: Single): TSimbaImage;
+> function TImage.Blur(Algo: EImageBlurAlgo; Radius: Integer): TSimbaImage;
+
+Algo can be either EImageBlurAlgo.BOX, EImageBlurAlgo.GAUSS.
+
+```{note}
+EImageBlurAlgo.GAUSS is not true gaussian blur it's an approximation (in linear time).
+
+<https://blog.ivank.net/fastest-gaussian-blur.html>
+```
 *)
 procedure _LapeImage_Blur(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Blur(EImageBlurAlgo(Params^[1]^), PSingle(Params^[2])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Blur(EImageBlurAlgo(Params^[1]^), PInteger(Params^[2])^);
 end;
 
 (*
@@ -1504,7 +1515,6 @@ begin
 
     addGlobalType('array of TImage', 'TImageArray');
     addGlobalType('enum(WIDTH, HEIGHT, LINE)', 'EImageMirrorStyle');
-    addGlobalType('enum(MEAN, MIN_MAX)', 'EImageThreshMethod');
     addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR)', 'EImageResizeAlgo');
     addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR)', 'EImageRotateAlgo');
     addGlobalType('enum(BOX, GAUSS)', 'EImageBlurAlgo');
@@ -1626,11 +1636,11 @@ begin
     addGlobalFunc('function TImage.Invert: TImage', @_LapeImage_Invert);
     addGlobalFunc('function TImage.Posterize(Value: Integer): TImage', @_LapeImage_Posterize);
     addGlobalFunc('function TImage.Convolute(Matrix: TDoubleMatrix): TImage', @_LapeImage_Convolute);
-    addGlobalFunc('function TImage.ThresholdAdaptive(Inv: Boolean; Method: EImageThreshMethod; k: Integer): TImage', @_LapeImage_ThresholdAdaptive);
-    addGlobalFunc('function TImage.ThresholdSauvola(Radius: Integer; Invert: Boolean = False; R: Single = 128; K: Single = 0.5): TImage', @_LapeImage_ThresholdSauvola);
+    addGlobalFunc('function TImage.Threshold(Inv: Boolean): TImage', @_LapeImage_Threshold);
+    addGlobalFunc('function TImage.ThresholdAdaptive(Inv: Boolean; Radius: Integer = 25; C: Double = 0.1): TImage', @_LapeImage_ThresholdAdaptive);
     addGlobalFunc('function TImage.Blend(Points: TPointArray; Radius: Integer): TImage; overload', @_LapeImage_Blend1);
     addGlobalFunc('function TImage.Blend(Points: TPointArray; Radius: Integer; IgnorePoints: TPointArray): TImage; overload', @_LapeImage_Blend2);
-    addGlobalFunc('function TImage.Blur(Algo: EImageBlurAlgo; Radius: Single): TImage;', @_LapeImage_Blur);
+    addGlobalFunc('function TImage.Blur(Algo: EImageBlurAlgo; Radius: Integer): TImage;', @_LapeImage_Blur);
 
     addGlobalFunc('function TImage.ToMatrix: TIntegerMatrix; overload', @_LapeImage_ToMatrix1);
     addGlobalFunc('function TImage.ToMatrix(Box: TBox): TIntegerMatrix; overload', @_LapeImage_ToMatrix2);

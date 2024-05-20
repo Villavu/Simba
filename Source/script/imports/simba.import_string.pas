@@ -175,11 +175,11 @@ end;
 (*
 String.Split
 ------------
-> function String.Split(Seperator: String): TStringArray;
+> function String.Split(Seperator: String; ExcludeEmpty: Boolean = True): TStringArray;
 *)
 procedure _LapeString_Split(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PStringArray(Result)^ := PString(Params^[0])^.Split(PString(Params^[1])^);
+  PStringArray(Result)^ := PString(Params^[0])^.Split(PString(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -1019,7 +1019,7 @@ begin
     addGlobalFunc('function String.CountAll(Values: TStringArray): TIntegerArray;', @_LapeString_CountAll);
 
     addGlobalFunc('function String.Join(Values: TStringArray): String;', @_LapeString_Join);
-    addGlobalFunc('function String.Split(Seperator: String): TStringArray;', @_LapeString_Split);
+    addGlobalFunc('function String.Split(Seperator: String; ExcludeEmpty: Boolean = True): TStringArray;', @_LapeString_Split);
     addGlobalFunc('function String.SplitLines: TStringArray;', @_LapeString_SplitLines);
 
     addGlobalFunc('function String.CopyRange(StartIndex, EndIndex: Integer): String;', @_LapeString_CopyRange);

@@ -122,7 +122,7 @@ type
     function CountAll(const Values: TStringArray): TIntegerArray;
 
     function Join(const Values: TStringArray): String;
-    function Split(const Seperator: String): TStringArray;
+    function Split(const Seperator: String; ExcludeEmpty: Boolean = True): TStringArray;
     function SplitLines: TStringArray;
 
     function Copy: String;
@@ -847,7 +847,7 @@ begin
   end;
 end;
 
-function TSimbaStringHelper.Split(const Seperator: String): TStringArray;
+function TSimbaStringHelper.Split(const Seperator: String; ExcludeEmpty: Boolean): TStringArray;
 
   function DoSplit(const Str, Seperator: String): TStringArray;
   var
@@ -855,6 +855,9 @@ function TSimbaStringHelper.Split(const Seperator: String): TStringArray;
 
     procedure Add(const Index, Count: Integer);
     begin
+      if ExcludeEmpty and (Count = 0) then
+        Exit;
+
       if (ResultCount >= Length(Result)) then
         SetLength(Result, 4 + (Length(Result) * 2));
       Result[ResultCount] := System.Copy(Str, Index, Count);
@@ -900,8 +903,7 @@ function TSimbaStringHelper.Split(const Seperator: String): TStringArray;
       FoundSep := NextSep(1);
       while (FoundSep > 0) do
       begin
-        if (FoundSep - LastSep > 0) then
-          Add(LastSep, FoundSep - LastSep);
+        Add(LastSep, FoundSep - LastSep);
         LastSep := FoundSep + SepLen;
         FoundSep := NextSep(LastSep);
       end;
@@ -930,28 +932,22 @@ function TSimbaStringHelper.SplitLines: TStringArray;
       Inc(ResultCount);
     end;
 
-    function NextSep(const StartIndex: SizeInt): SizeInt;
+    function NextSep(const StartIndex: SizeInt; out HasReturn: Boolean): SizeInt;
     var
       I: SizeInt;
       Ptr: PChar;
-      LastWasReturn: Boolean = False;
     begin
       if (StartIndex <= StrLen) then
       begin
+        HasReturn := False;
         Ptr := @Str[StartIndex];
         I := StartIndex - 1;
         while (I <= MaxLen) do
         begin
           Inc(I);
           if (Ptr^ = #10) then
-          begin
-            if LastWasReturn then
-              Exit(I-1)
-            else
-              Exit(I);
-          end;
-          LastWasReturn := (Ptr^ = #13);
-
+            Exit(I);
+          HasReturn := Ptr^ = #13;
           Inc(Ptr);
         end;
       end;
@@ -961,6 +957,7 @@ function TSimbaStringHelper.SplitLines: TStringArray;
 
   var
     FoundSep, LastSep: SizeInt;
+    HasReturn: Boolean;
   begin
     Result := [];
     ResultCount := 0;
@@ -969,13 +966,20 @@ function TSimbaStringHelper.SplitLines: TStringArray;
     MaxLen := StrLen - 1;
 
     LastSep := 1;
-    FoundSep := NextSep(1);
+    FoundSep := NextSep(1, HasReturn);
     while (FoundSep > 0) do
     begin
-      if (FoundSep - LastSep > 0) then
+      if HasReturn then
+      begin
+        Dec(FoundSep);
         Add(LastSep, FoundSep - LastSep);
-      LastSep := FoundSep + 1;
-      FoundSep := NextSep(LastSep);
+        LastSep := FoundSep + 2;
+      end else
+      begin
+        Add(LastSep, FoundSep - LastSep);
+        LastSep := FoundSep + 1;
+      end;
+      FoundSep := NextSep(LastSep, HasReturn);
     end;
     if (LastSep <= StrLen) then
       Add(LastSep, MaxInt);
