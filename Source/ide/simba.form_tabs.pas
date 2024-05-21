@@ -60,6 +60,8 @@ type
 
     function CanAnchorDocking(X, Y: Integer): Boolean;
 
+    // Menu shortcuts without modifier key don't seem to work
+    procedure DoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoFindPanelVisibleChanged(Sender: TObject);
     procedure DoTabCanChange(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean);
     procedure DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
@@ -303,6 +305,12 @@ begin
   Result := FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging) and (Abs(X - FMouseDownX) > 10) and (Abs(Y - FMouseDownY) > 10);
 end;
 
+procedure TSimbaTabsForm.DoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (Key = VK_F3) and FindPanel.Visible then
+    FindNext();
+end;
+
 procedure TSimbaTabsForm.DoFindPanelVisibleChanged(Sender: TObject);
 begin
   if (not FindPanel.Visible) and (CurrentEditor <> nil) and CurrentEditor.CanSetFocus() then
@@ -503,6 +511,8 @@ end;
 function TSimbaTabsForm.AddTab: TSimbaScriptTab;
 begin
   Result := FTabControl.AddTab() as TSimbaScriptTab;
+  // apparently shortcuts
+  Result.Editor.RegisterBeforeKeyDownHandler(@DoKeyDown);
 end;
 
 function TSimbaTabsForm.CloseTab(Tab: TSimbaScriptTab; KeepOne: Boolean): Boolean;
