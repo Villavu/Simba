@@ -5,19 +5,20 @@ var
 begin
   b := TBox.Create(100, 100, 200, 200);
 
-  Assert(b.Width() = 101);
-  Assert(b.Height() = 101);
-  Assert(b.Area() = b.Width()*b.Height);
-  Assert(b.Center() = [150, 150]);
+  Assert(b.Width = 101);
+  Assert(b.Height = 101);
+  Assert(b.Size = [101,101]);
+  Assert(b.Area = b.Width*b.Height);
+  Assert(b.Center = [150, 150]);
 
-  Assert(b.Contains(100,100) = True);
-  Assert(b.Contains(200,200) = True);
+  Assert(b.Contains([100,100]) = True);
+  Assert(b.Contains([200,200]) = True);
 
-  Assert(b.Contains(99,99)   = False);
-  Assert(b.Contains(201,201) = False);
+  Assert(b.Contains([99,99])   = False);
+  Assert(b.Contains([201,201]) = False);
 
   Assert(b.Expand(50) = [50,50,250,250]);
   Assert(b.Expand(50, 100) = [50,0,250,300]);
 
-  Assert(b.Offset(-10, 10) = [90, 110, 190, 210]);
+  Assert(b.Offset([-10, 10]) = [90, 110, 190, 210]);
 end.

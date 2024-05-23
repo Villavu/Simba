@@ -68,23 +68,23 @@ begin
 end;
 
 (*
-TBox.EqualDimensions
---------------------
-> function TBox.EqualDimensions(Other: TBox): Boolean;
-*)
-procedure _LapeBox_EqualDimensions(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PBox(Params^[0])^.EqualDimensions(PBox(Params^[1])^);
-end;
-
-(*
 TBox.Area
 ---------
-> function TBox.Area: Integer;
+> property TBox.Area: Integer;
 *)
 procedure _LapeBox_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PBox(Params^[0])^.Area();
+  PInteger(Result)^ := PBox(Params^[0])^.Area;
+end;
+
+(*
+TBox.Size
+---------
+> property TBox.Size: TSize;
+*)
+procedure _LapeBox_Size_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSize(Result)^ := PBox(Params^[0])^.Size;
 end;
 
 (*
@@ -174,19 +174,9 @@ end;
 (*
 TBox.Contains
 -------------
-> function TBox.Contains(X, Y: Integer): Boolean;
-*)
-procedure _LapeBox_Contains3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PBox(Params^[0])^.Contains(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-TBox.Contains
--------------
 > function TBox.Contains(Other: TQuad): Boolean;
 *)
-procedure _LapeBox_Contains4(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBox_Contains3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PBox(Params^[0])^.Contains(PQuad(Params^[1])^);
 end;
@@ -204,19 +194,9 @@ end;
 (*
 TBox.Offset
 -----------
-> function TBox.Offset(X, Y: Integer): TBox;
-*)
-procedure _LapeBox_Offset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBox(Result)^ := PBox(Params^[0])^.Offset(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-TBox.Offset
------------
 > function TBox.Offset(P: TPoint): TBox;
 *)
-procedure _LapeBox_Offset2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBox_Offset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBox(Result)^ := PBox(Params^[0])^.Offset(PPoint(Params^[1])^);
 end;
@@ -369,8 +349,6 @@ begin
     addGlobalFunc('function TBox.Create(X1, Y1, X2, Y2: Integer): TBox; static; overload;', @_LapeBox_Create1);
     addGlobalFunc('function TBox.Create(Center: TPoint; XRad, YRad: Integer): TBox; static; overload;', @_LapeBox_Create2);
 
-    addGlobalFunc('function TBox.EqualDimensions(Other: TBox): Boolean;', @_LapeBox_EqualDimensions);
-    addGlobalFunc('function TBox.Area: Integer;', @_LapeBox_Area);
     addGlobalFunc('function TBox.Expand(SizeMod: Integer): TBox; overload;', @_LapeBox_Expand1);
     addGlobalFunc('function TBox.Expand(SizeMod: Integer; MaxBounds: TBox): TBox; overload;', @_LapeBox_Expand3);
     addGlobalFunc('function TBox.Expand(WidMod, HeiMod: Integer): TBox; overload;', @_LapeBox_Expand2);
@@ -379,11 +357,9 @@ begin
     addGlobalFunc('function TBox.Exclude(Points: TPointArray): TPointArray', @_LapeBox_Exclude);
     addGlobalFunc('function TBox.Contains(Other: TBox): Boolean; overload;', @_LapeBox_Contains1);
     addGlobalFunc('function TBox.Contains(Other: TPoint): Boolean; overload;', @_LapeBox_Contains2);
-    addGlobalFunc('function TBox.Contains(X, Y: Integer): Boolean; overload;', @_LapeBox_Contains3);
-    addGlobalFunc('function TBox.Contains(Other: TQuad): Boolean; overload;', @_LapeBox_Contains4);
+    addGlobalFunc('function TBox.Contains(Other: TQuad): Boolean; overload;', @_LapeBox_Contains3);
     addGlobalFunc('function TBox.Partition(Rows, Cols: Integer): TBoxArray;', @_LapeBox_Partition);
-    addGlobalFunc('function TBox.Offset(X, Y: Integer): TBox; overload;', @_LapeBox_Offset1);
-    addGlobalFunc('function TBox.Offset(P: TPoint): TBox; overload;', @_LapeBox_Offset2);
+    addGlobalFunc('function TBox.Offset(P: TPoint): TBox; overload;', @_LapeBox_Offset1);
     addGlobalFunc('function TBox.Combine(Other: TBox): TBox;', @_LapeBox_Combine);
     addGlobalFunc('function TBox.Invert(Space: TBox): TBoxArray;', @_LapeBox_Invert);
     addGlobalFunc('function TBox.ToQuad: TQuad;', @_LapeBox_ToQuad);
@@ -395,9 +371,11 @@ begin
     addGlobalFunc('function TBox.Normalize: TBox', @_LapeBox_Normalize);
     addGlobalFunc('function TBox.Corners: TPointArray;', @_LapeBox_Corners);
 
-    addGlobalFunc('function TBox.Width: Integer;', @_LapeBox_Width);
-    addGlobalFunc('function TBox.Height: Integer;', @_LapeBox_Height);
-    addGlobalFunc('function TBox.Center: TPoint;', @_LapeBox_Center);
+    addProperty('TBox', 'Width', 'Integer', @_LapeBox_Width);
+    addProperty('TBox', 'Height', 'Integer', @_LapeBox_Height);
+    addProperty('TBox', 'Center', 'TPoint', @_LapeBox_Center);
+    addProperty('TBox', 'Area', 'Integer', @_LapeBox_Area);
+    addProperty('TBox', 'Size', 'TSize', @_LapeBox_Size_Read);
 
     addGlobalFunc('function TBox.RandomPoint: TPoint', @_LapeBox_RandomPoint);
     addGlobalFunc('function TBox.RandomPointCenter: TPoint', @_LapeBox_RandomPointCenter);

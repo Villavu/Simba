@@ -292,7 +292,6 @@ function TSimbaNativeInterface_Darwin.GetWindowBounds(Window: TWindowHandle; out
 var
   windowIds, windows: CFArrayRef;
   Rect: CGRect;
-  B: TBox;
 begin
   windowIds := CFArrayCreateMutable(nil, 1, nil);
   CFArrayAppendValue(windowIds, Pointer(Window));
@@ -674,7 +673,7 @@ begin
     if (Windows[I] in Exclude) then
       Continue;
 
-    if GetWindowBounds(Windows[I]).Contains(MousePos.X, MousePos.Y) then
+    if GetWindowBounds(Windows[I]).Contains(MousePos) then
     begin
       Result := Windows[I];
 

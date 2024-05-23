@@ -738,7 +738,7 @@ end;
 
 procedure TSimbaShapeBoxShape_Box.Offset(X, Y: Integer);
 begin
-  FBox := FBox.Offset(X, Y);
+  FBox := FBox.Offset(TPoint.Create(X, Y));
 end;
 
 function TSimbaShapeBoxShape_Box.Center: TPoint;
@@ -840,10 +840,10 @@ begin
   case FDraggingCorner of
     DCENTER:
         begin
-          FBox := FBox.Offset(
+          FBox := FBox.Offset(TPoint.Create(
             (MousePoint.X - FDragStart.X) - FBox.X1,
             (MousePoint.Y - FDragStart.Y) - FBox.Y1
-          );
+          ));
         end;
     TL: begin
           FBox.X1 := MousePoint.X;

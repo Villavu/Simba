@@ -445,9 +445,28 @@ Speed, Gravity and Wind variables affects this.
 The algorithm used is WindMouse. For more details see <https://ben.land/post/2021/04/25/windmouse-human-mouse-movement>
 ```
 *)
-procedure _LapeTarget_MouseMove(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_MouseMove1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTarget(Params^[0])^.MouseMove(PPoint(Params^[1])^);
+end;
+
+(*
+TTarget.MouseMove
+-----------------
+> procedure MouseMove(Box: TBox; ForcedMove: Boolean = False); overload;
+> procedure MouseMove(Quad: TQuad; ForcedMove: Boolean = False); overload;
+
+`MouseMove` overloads.
+Use `ForcedMove` to determine if the mouse will still move if it's already inside the box/quad.
+*)
+procedure _LapeTarget_MouseMove2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.MouseMove(PBox(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+procedure _LapeTarget_MouseMove3(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTarget(Params^[0])^.MouseMove(PQuad(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -1006,7 +1025,9 @@ begin
     addGlobalFunc('procedure TTarget.MouseDown(Button: EMouseButton)', @_LapeTarget_MouseDown);
     addGlobalFunc('procedure TTarget.MouseUp(Button: EMouseButton)', @_LapeTarget_MouseUp);
     addGlobalFunc('procedure TTarget.MouseScroll(Scrolls: Integer)', @_LapeTarget_MouseScroll);
-    addGlobalFunc('procedure TTarget.MouseMove(Dest: TPoint);', @_LapeTarget_MouseMove);
+    addGlobalFunc('procedure TTarget.MouseMove(Dest: TPoint); overload', @_LapeTarget_MouseMove1);
+    addGlobalFunc('procedure TTarget.MouseMove(Box: TBox; ForcedMove: Boolean = False); overload', @_LapeTarget_MouseMove2);
+    addGlobalFunc('procedure TTarget.MouseMove(Quad: TQuad; ForcedMove: Boolean = False); overload', @_LapeTarget_MouseMove3);
     addGlobalFunc('function TTarget.MousePressed(Button: EMouseButton): Boolean', @_LapeTarget_MousePressed);
 
     addProperty('TTarget', 'MouseXY', 'TPoint', @_LapeTarget_MouseXY_Read, @_LapeTarget_MouseXY_Write);
@@ -1046,16 +1067,16 @@ begin
     addGlobalFunc('function TTarget.HasImage(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeTarget_HasImage1);
     addGlobalFunc('function TTarget.HasImage(Image: TImage; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeTarget_HasImage2);
 
-    addGlobalFunc('function TTarget.FindTemplate(Templ: TImage; out Match: Single; Bounds: TBox): TPoint', @_LapeTarget_FindTemplate);
-    addGlobalFunc('function TTarget.HasTemplate(Templ: TImage; MinMatch: Single; Bounds: TBox): Boolean', @_LapeTarget_HasTemplate);
+    addGlobalFunc('function TTarget.FindTemplate(Templ: TImage; out Match: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeTarget_FindTemplate);
+    addGlobalFunc('function TTarget.HasTemplate(Templ: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): Boolean', @_LapeTarget_HasTemplate);
 
     addGlobalFunc('function TTarget.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeTarget_FindDTM);
     addGlobalFunc('function TTarget.FindDTMEx(DTM: TDTM; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeTarget_FindDTMEx);
     addGlobalFunc('function TTarget.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeTarget_FindDTMRotated);
     addGlobalFunc('function TTarget.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeTarget_FindDTMRotatedEx);
 
-    addGlobalFunc('function TTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TPointArray; overload;', @_LapeFinder_FindEdges1);
-    addGlobalFunc('function TTarget.FindEdges(MinDiff: Single; Bounds: TBox): TPointArray; overload;', @_LapeFinder_FindEdges2);
+    addGlobalFunc('function TTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeFinder_FindEdges1);
+    addGlobalFunc('function TTarget.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeFinder_FindEdges2);
 
     addGlobalFunc('function TTarget.GetPixelDifference(WaitTime: Integer; Area: TBox): Integer; overload;', @_LapeFinder_GetPixelDifference1);
     addGlobalFunc('function TTarget.GetPixelDifference(WaitTime: Integer; Tolerance: Single; Area: TBox): Integer; overload;', @_LapeFinder_GetPixelDifference2);

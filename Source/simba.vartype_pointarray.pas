@@ -308,7 +308,7 @@ class function TPointArrayHelper.CreateFromCircle(Center: TPoint; Radius: Intege
     B := TBox.Create(Center.X - Radius, Center.Y - Radius,
                      Center.X + Radius, Center.Y + Radius);
 
-    Buffer.Init(B.Area());
+    Buffer.Init(B.Area);
     for y := B.Y1 to B.Y2 do
       for x := B.X1 to B.X2 do
         if Sqr(X - Center.X) + Sqr(Y - Center.Y) < d then
@@ -408,7 +408,7 @@ class function TPointArrayHelper.CreateFromEllipse(Center: TPoint; RadiusX, Radi
     B := TBox.Create(Center.X - RadiusX, Center.Y - RadiusY,
                      Center.X + RadiusX, Center.Y + RadiusY);
 
-    Buffer.Init(B.Area());
+    Buffer.Init(B.Area);
     for y:= B.Y1 to B.Y2 do
       for x:= B.X1 to B.X2 do
         if (Sqr(X - Center.X) * SqY) + (Sqr(Y - Center.Y) * SqX) < d then
@@ -429,7 +429,7 @@ class function TPointArrayHelper.CreateFromBox(Box: TBox; Filled: Boolean): TPoi
   var
     X, Y, Count: integer;
   begin
-    SetLength(Result, Box.Area());
+    SetLength(Result, Box.Area);
     Count := 0;
     for x := Box.X1 to Box.X2 do
       for y := Box.Y1 to Box.Y2 do
@@ -584,7 +584,7 @@ var
   I, W, H, X, Y: Integer;
   Buffer: TSimbaPointBuffer;
 begin
-  Buffer.Init(ABounds.Area() div 2);
+  Buffer.Init(ABounds.Area div 2);
 
   Matrix.SetSize(ABounds.Width, ABounds.Height);
   for i := 0 to High(Self) do

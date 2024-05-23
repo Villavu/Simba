@@ -31,10 +31,9 @@ type
     function LongSideLen: Integer;
     function Mean: TPoint;
     function Rotate(Radians: Double): TQuad;
-    function Contains(P: TPoint): Boolean; overload; inline;
-    function Contains(X, Y: Integer): Boolean; overload; inline;
-    function Offset(P: TPoint): TQuad; overload;
+    function Contains(P: TPoint): Boolean;
     function Offset(X, Y: Integer): TQuad; overload;
+    function Offset(P: TPoint): TQuad; overload;
     function Extract(Points: TPointArray): TPointArray;
     function Exclude(Points: TPointArray): TPointArray;
     function Expand(Amount: Double): TQuad;
@@ -155,11 +154,6 @@ end;
 function TQuadHelper.Contains(P: TPoint): Boolean;
 begin
   Result := TSimbaGeometry.PointInQuad(P, Self.Top, Self.Right, Self.Bottom, Self.Left);
-end;
-
-function TQuadHelper.Contains(X, Y: Integer): Boolean;
-begin
-  Result := TSimbaGeometry.PointInQuad(TPoint.Create(X, Y), Self.Top, Self.Right, Self.Bottom, Self.Left);
 end;
 
 function TQuadHelper.Offset(P: TPoint): TQuad;

@@ -1,11 +1,10 @@
 object EditorDefaultFrame: TEditorDefaultFrame
   Left = 0
-  Height = 388
+  Height = 310
   Top = 0
-  Width = 552
-  ClientHeight = 388
-  ClientWidth = 552
-  DesignTimePPI = 120
+  Width = 442
+  ClientHeight = 310
+  ClientWidth = 442
   ParentFont = False
   TabOrder = 0
   DesignLeft = -631
@@ -16,9 +15,9 @@ object EditorDefaultFrame: TEditorDefaultFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 88
+    Height = 58
     Top = 0
-    Width = 552
+    Width = 442
     Anchors = [akTop, akLeft, akRight]
     AutoFill = True
     AutoSize = True
@@ -30,8 +29,8 @@ object EditorDefaultFrame: TEditorDefaultFrame
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 58
-    ClientWidth = 548
+    ClientHeight = 38
+    ClientWidth = 438
     Items.Strings = (
       'Load File'
       'Set Script'
@@ -48,12 +47,12 @@ object EditorDefaultFrame: TEditorDefaultFrame
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 290
-    Top = 98
-    Width = 552
+    Height = 244
+    Top = 66
+    Width = 442
     PageIndex = 1
     Anchors = [akTop, akLeft, akRight, akBottom]
-    BorderSpacing.Top = 10
+    BorderSpacing.Top = 8
     TabOrder = 1
     object PageLoadFile: TPage
       object FileNameEdit1: TFileNameEdit
@@ -62,18 +61,18 @@ object EditorDefaultFrame: TEditorDefaultFrame
         AnchorSideTop.Control = PageLoadFile
         AnchorSideRight.Control = PageLoadFile
         AnchorSideRight.Side = asrBottom
-        Left = 103
-        Height = 33
+        Left = 70
+        Height = 23
         Top = 0
-        Width = 444
+        Width = 368
         FileName = 'FileNameEdit1'
         FilterIndex = 0
         HideDirectories = False
-        ButtonWidth = 29
+        ButtonWidth = 23
         NumGlyphs = 1
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Left = 5
-        BorderSpacing.Right = 5
+        BorderSpacing.Left = 4
+        BorderSpacing.Right = 4
         MaxLength = 0
         TabOrder = 0
         Text = 'FileNameEdit1'
@@ -83,37 +82,39 @@ object EditorDefaultFrame: TEditorDefaultFrame
         AnchorSideTop.Control = FileNameEdit1
         AnchorSideBottom.Control = FileNameEdit1
         AnchorSideBottom.Side = asrBottom
-        Left = 5
-        Height = 33
+        Left = 4
+        Height = 23
         Top = 0
-        Width = 93
+        Width = 62
         Anchors = [akTop, akLeft, akBottom]
-        BorderSpacing.Left = 5
+        BorderSpacing.Left = 4
         Caption = 'File To Load'
         Layout = tlCenter
       end
     end
     object PageSetScript: TPage
       object Label1: TLabel
-        Left = 5
-        Height = 25
+        Left = 4
+        Height = 15
         Top = 0
-        Width = 547
+        Width = 438
         Align = alTop
-        BorderSpacing.Left = 5
+        BorderSpacing.Left = 4
         Caption = 'Script'
       end
       object Memo1: TMemo
-        Left = 5
-        Height = 255
-        Top = 30
-        Width = 542
+        Left = 4
+        Height = 221
+        Top = 19
+        Width = 434
         Align = alClient
-        BorderSpacing.Around = 5
+        BorderSpacing.Around = 4
         Lines.Strings = (
           'Memo1'
         )
+        ScrollBars = ssAutoBoth
         TabOrder = 0
+        WordWrap = False
       end
     end
   end

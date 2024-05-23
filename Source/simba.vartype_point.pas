@@ -30,8 +30,6 @@ type
     function Random(Value: Integer): TPoint; overload;
   end;
 
-  function Point(const X, Y: Integer): TPoint; inline;
-
   operator > (const Left, Right: TPoint): Boolean;
   operator < (const Left, Right: TPoint): Boolean;
   operator = (const Left, Right: TPoint): Boolean;
@@ -117,8 +115,7 @@ end;
 
 function TPointHelper.Random(Value: Integer): TPoint;
 begin
-  Result.X := Self.X + System.Random(Value);
-  Result.Y := Self.Y + System.Random(Value);
+  Result := Random(-Value, Value);
 end;
 
 operator>(const Left, Right: TPoint): Boolean;
@@ -163,12 +160,6 @@ end;
 operator in(const Left: TPoint; const Right: TBox): Boolean;
 begin
   Result := Left.InBox(Right);
-end;
-
-function Point(const X, Y: Integer): TPoint;
-begin
-  Result.X := X;
-  Result.Y := Y;
 end;
 
 end.

@@ -22,6 +22,8 @@ type
     function GetCenter: TPoint; inline;
     function GetWidth: Integer; inline;
     function GetHeight: Integer; inline;
+    function GetSize: TSize;
+    function GetArea: Integer;
   public
     const ZERO: TBox = (X1: 0; Y1: 0; X2: 0; Y2: 0);
 
@@ -33,18 +35,15 @@ type
 
     function ToQuad: TQuad;
     function EqualDimensions(Other: TBox): Boolean;
-    function Area: Integer;
     function Expand(SizeMod: Integer): TBox; overload;
     function Expand(SizeMod: Integer; MaxBounds: TBox): TBox; overload;
     function Expand(WidMod, HeiMod: Integer): TBox; overload;
     function Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox; overload;
     function Contains(Other: TBox): Boolean; overload; inline;
     function Contains(Other: TPoint): Boolean; overload; inline;
-    function Contains(X, Y: Integer): Boolean; overload; inline;
     function Contains(Other: TQuad): Boolean; overload; inline;
 
-    function Offset(X, Y: Integer): TBox; overload;
-    function Offset(P: TPoint): TBox; overload;
+    function Offset(P: TPoint): TBox;
     function Combine(Other: TBox): TBox;
     function Invert(Space: TBox): TBoxArray;
     function Partition(Rows, Cols: Integer): TBoxArray;
@@ -61,6 +60,8 @@ type
     property Width: Integer read GetWidth;
     property Height: Integer read GetHeight;
     property Center: TPoint read GetCenter;
+    property Area: Integer read GetArea;
+    property Size: TSize read GetSize;
   end;
 
   operator = (const Left, Right: TBox): Boolean;
@@ -85,6 +86,12 @@ end;
 function TBoxHelper.GetHeight: Integer;
 begin
   Result := (Self.Y2 - Self.Y1) + 1;
+end;
+
+function TBoxHelper.GetSize: TSize;
+begin
+  Result.Width := Width;
+  Result.Height := Height;
 end;
 
 class function TBoxHelper.Create(const X1, Y1, X2, Y2: Integer): TBox;
@@ -128,7 +135,7 @@ begin
   Result := (Self.Width = Other.Width) and (Self.Height = Other.Height);
 end;
 
-function TBoxHelper.Area: Integer;
+function TBoxHelper.GetArea: Integer;
 begin
   Result := (Width * Height);
 end;
@@ -171,22 +178,9 @@ begin
   Result := (Other.X >= Self.X1) and (Other.Y >= Self.Y1) and (Other.X <= Self.X2) and (Other.Y <= Self.Y2);
 end;
 
-function TBoxHelper.Contains(X, Y: Integer): Boolean;
-begin
-  Result := (X >= Self.X1) and (Y >= Self.Y1) and (X <= Self.X2) and (Y <= Self.Y2);
-end;
-
 function TBoxHelper.Contains(Other: TQuad): Boolean;
 begin
   Result := Contains(Other.Left) and Contains(Other.Right) and Contains(Other.Top) and Contains(Other.Bottom);
-end;
-
-function TBoxHelper.Offset(X, Y: Integer): TBox;
-begin
-  Result.X1 := Self.X1 + X;
-  Result.Y1 := Self.Y1 + Y;
-  Result.X2 := Self.X2 + X;
-  Result.Y2 := Self.Y2 + Y;
 end;
 
 function TBoxHelper.Offset(P: TPoint): TBox;

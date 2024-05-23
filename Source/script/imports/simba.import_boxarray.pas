@@ -127,19 +127,9 @@ TBoxArray.Offset
 ----------------
 > function TBoxArray.Offset(P: TPoint): TBoxArray;
 *)
-procedure _LapeBoxArray_Offset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBoxArray_Offset(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoxArray(Result)^ := PBoxArray(Params^[0])^.Offset(PPoint(Params^[1])^);
-end;
-
-(*
-TBoxArray.Offset
-----------------
-> function TBoxArray.Offset(X, Y: Integer): TBoxArray;
-*)
-procedure _LapeBoxArray_Offset2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoxArray(Result)^ := PBoxArray(Params^[0])^.Offset(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -253,8 +243,7 @@ begin
 
     addGlobalFunc('function TBoxArray.Merge: TBox;', @_LapeBoxArray_Merge);
     addGlobalFunc('function TBoxArray.Centers: TPointArray;', @_LapeBoxArray_Centers);
-    addGlobalFunc('function TBoxArray.Offset(P: TPoint): TBoxArray; overload;', @_LapeBoxArray_Offset1);
-    addGlobalFunc('function TBoxArray.Offset(X, Y: Integer): TBoxArray; overload;', @_LapeBoxArray_Offset2);
+    addGlobalFunc('function TBoxArray.Offset(P: TPoint): TBoxArray;', @_LapeBoxArray_Offset);
 
     addGlobalFunc('function TBoxArray.Expand(SizeMod: Integer): TBoxArray; overload;', @_LapeBoxArray_Expand1);
     addGlobalFunc('function TBoxArray.Expand(WidMod, HeiMod: Integer): TBoxArray; overload;', @_LapeBoxArray_Expand2);

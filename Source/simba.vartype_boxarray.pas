@@ -38,8 +38,7 @@ type
 
     function Merge: TBox;
     function Centers: TPointArray;
-    function Offset(P: TPoint): TBoxArray; overload;
-    function Offset(X, Y: Integer): TBoxArray; overload;
+    function Offset(P: TPoint): TBoxArray;
 
     function Expand(SizeMod: Integer): TBoxArray; overload;
     function Expand(WidMod, HeiMod: Integer): TBoxArray; overload;
@@ -208,15 +207,6 @@ begin
   SetLength(Result, Length(Self));
   for I := 0 to High(Result) do
     Result[I] := Self[I].Offset(P);
-end;
-
-function TBoxArrayHelper.Offset(X, Y: Integer): TBoxArray;
-var
-  I: Integer;
-begin
-  SetLength(Result, Length(Self));
-  for I := 0 to High(Result) do
-    Result[I] := Self[I].Offset(X, Y);
 end;
 
 function TBoxArrayHelper.Expand(SizeMod: Integer): TBoxArray;

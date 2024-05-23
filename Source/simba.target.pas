@@ -176,7 +176,9 @@ type
     procedure RemoveMouseEvent(Event: TMouseTeleportEvent); overload;
     procedure RemoveMouseEvent(Event: TMouseMovingEvent); overload;
 
-    procedure MouseMove(Dest: TPoint);
+    procedure MouseMove(Dest: TPoint); overload;
+    procedure MouseMove(Box: TBox; ForcedMove: Boolean = False); overload;
+    procedure MouseMove(Quad: TQuad; ForcedMove: Boolean = False); overload;
     procedure MouseClick(Button: EMouseButton);
     procedure MouseTeleport(P: TPoint);
     procedure MouseDown(Button: EMouseButton);
@@ -251,7 +253,7 @@ type
 implementation
 
 uses
-  simba.nativeinterface, simba.vartype_box, simba.target_movemouse, simba.random,
+  simba.nativeinterface, simba.vartype_box, simba.vartype_quad, simba.target_movemouse, simba.random,
   simba.finder_color, simba.finder_image, simba.finder_dtm;
 
 type
@@ -289,6 +291,18 @@ end;
 procedure TSimbaTarget.MouseMove(Dest: TPoint);
 begin
   MoveMouseOnTarget(Self, Dest);
+end;
+
+procedure TSimbaTarget.MouseMove(Box: TBox; ForcedMove: Boolean);
+begin
+  if ForcedMove or (not Box.Contains(MouseXY)) then
+    MouseMove(Box.RandomPointCenter());
+end;
+
+procedure TSimbaTarget.MouseMove(Quad: TQuad; ForcedMove: Boolean);
+begin
+  if ForcedMove or (not Quad.Contains(MouseXY)) then
+    MouseMove(Quad.RandomPointCenter());
 end;
 
 procedure TSimbaTarget.MouseClick(Button: EMouseButton);

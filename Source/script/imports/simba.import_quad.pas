@@ -135,16 +135,6 @@ begin
 end;
 
 (*
-TQuad.Contains
---------------
-> function TQuad.Contains(X, Y: Integer): Boolean;
-*)
-procedure _LapeQuad_Contains2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PQuad(Params^[0])^.Contains(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
 TQuad.Offset
 ------------
 > function TQuad.Offset(P: TPoint): TQuad;
@@ -278,7 +268,6 @@ begin
     addGlobalFunc('function TQuad.Mean: TPoint', @_LapeQuad_Mean);
     addGlobalFunc('function TQuad.Rotate(Angle: Double): TQuad', @_LapeQuad_Rotate);
     addGlobalFunc('function TQuad.Contains(P: TPoint): Boolean; overload', @_LapeQuad_Contains1);
-    addGlobalFunc('function TQuad.Contains(X, Y: Integer): Boolean; overload', @_LapeQuad_Contains2);
     addGlobalFunc('function TQuad.Offset(P: TPoint): TQuad; overload', @_LapeQuad_Offset1);
     addGlobalFunc('function TQuad.Offset(X, Y: Integer): TQuad; overload', @_LapeQuad_Offset2);
     addGlobalFunc('function TQuad.Extract(Points: TPointArray): TPointArray', @_LapeQuad_Extract);
