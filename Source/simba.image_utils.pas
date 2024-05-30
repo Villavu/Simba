@@ -23,7 +23,8 @@ type
     Data: TDataMatrix;
 
     class function Create(const From: TByteMatrix): TSimbaIntegralImageF; static;
-    procedure Query(const Left, Top, Right, Bottom: Integer; out Value, ValueSqr: Double);
+    procedure Query(const Left, Top, Right, Bottom: Integer; out Value, ValueSqr: Double); overload;
+    function Query(const Left, Top, Right, Bottom: Integer): Double; overload;
   end;
 
   TSimbaIntegralImageRGB = record
@@ -115,6 +116,13 @@ begin
 
   Value    := D.Value - B.Value - C.Value + A.Value;
   ValueSqr := D.ValueSqr - B.ValueSqr - C.ValueSqr + A.ValueSqr;
+end;
+
+function TSimbaIntegralImageF.Query(const Left, Top, Right, Bottom: Integer): Double;
+var
+  _: Double;
+begin
+  Query(Left, Top, Right, Bottom, Result, _);
 end;
 
 class function TSimbaIntegralImageRGB.Create(const From: TSimbaImage): TSimbaIntegralImageRGB;

@@ -546,21 +546,21 @@ end;
 (*
 TImage.SplitChannels
 --------------------
-> procedure TImage.SplitChannels(var B,G,R,A: TByteArray);
+> procedure TImage.SplitChannels(var B,G,R: TByteArray);
 *)
-procedure _LapeImage_SplitChannels1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_SplitChannels(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.SplitChannels(PByteArray(Params^[1])^, PByteArray(Params^[2])^, PByteArray(Params^[3])^, PByteArray(Params^[4])^);
+  PSimbaImage(Params^[0])^.SplitChannels(PByteArray(Params^[1])^, PByteArray(Params^[2])^, PByteArray(Params^[3])^);
 end;
 
 (*
-TImage.SplitChannels
+TImage.FromChannels
 --------------------
-> procedure TImage.SplitChannels(var B,G,R: TByteArray);
+> procedure TImage.FromChannels(const B,G,R: TByteArray; W, H: Integer);
 *)
-procedure _LapeImage_SplitChannels2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_FromChannels(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.SplitChannels(PByteArray(Params^[1])^, PByteArray(Params^[2])^, PByteArray(Params^[3])^);
+  PSimbaImage(Params^[0])^.FromChannels(PByteArray(Params^[1])^, PByteArray(Params^[2])^, PByteArray(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
 end;
 
 (*
@@ -1093,29 +1093,48 @@ end;
 (*
 TImage.Threshold
 ----------------
-> function TImage.Threshold(Inv: Boolean): TImage;
+> function TImage.Threshold(Invert: Boolean = False; C: Integer = 0): TImage;
 
 Otsu threshold algorithm.
+
+Invert = Invert output
+C = Constant value to add to computed threshold
 *)
 procedure _LapeImage_Threshold(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Threshold(PBoolean(Params^[1])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.Threshold(PBoolean(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
 TImage.ThresholdAdaptive
-------------------------
-> function TImage.ThresholdAdaptive(Inv: Boolean; Radius: Integer = 25; C: Double = 0.1): TImage;
+----------'-------------
+> function TImage.ThresholdAdaptive(Invert: Boolean = False; Radius: Integer = 25; C: Integer = 0): TImage;
+
+Adapative thresholding using local average.
+
+Invert = Invert output
+Radius = Window size, must be odd (default = 25)
+C      = Constant value to add to computed threshold
+*)
+procedure _LapeImage_ThresholdAdaptive(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdAdaptive(PBoolean(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+(*
+TImage.ThresholdAdaptiveSauvola
+-------------------------------
+> function TImage.ThresholdAdaptiveSauvola(Invert: Boolean = False; Radius: Integer = 25; C: Single = 0.2): TImage;
 
 Sauvola binarization algorithm.
 
 Invert = Invert output
-Radius = Window size (default = 25)
-K      = Constant value (default = 0.1). Typical values are between 0.1 and 0.5.
+Radius = Window size, must be odd (default = 25)
+C      = Constant value (default = 0.2). Typical values are between 0.2 and 0.5.
 *)
-procedure _LapeImage_ThresholdAdaptive(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_ThresholdAdaptiveSauvola(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdAdaptive(PBoolean(Params^[1])^, PInteger(Params^[2])^, PDouble(Params^[3])^);
+  PSimbaImage(Result)^ := PSimbaImage(Params^[0])^.ThresholdAdaptiveSauvola(PBoolean(Params^[1])^, PInteger(Params^[2])^, PSingle(Params^[3])^);
 end;
 
 (*
@@ -1159,6 +1178,16 @@ begin
 end;
 
 (*
+TImage.ToGreyMatrix
+-------------------
+> function TImage.ToGreyMatrix: TByteMatrix;
+*)
+procedure _LapeImage_ToGreyMatrix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByteMatrix(Result)^ := PSimbaImage(Params^[0])^.ToGreyMatrix();
+end;
+
+(*
 TImage.ToMatrix
 ---------------
 > function TImage.ToMatrix: TIntegerMatrix;
@@ -1187,7 +1216,7 @@ Resizes the image to the matrix dimensions and draws the matrix.
 *)
 procedure _LapeImage_FromMatrix1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromMatrix(PIntegerMatrix(Params^[1])^);
+  PSimbaImage(Params^[0])^.FromMatrix(PIntegerMatrix(Params^[1])^);
 end;
 
 (*
@@ -1196,6 +1225,7 @@ TImage.FromMatrix
 > procedure TImage.FromMatrix(Matrix: TSingleMatrix; ColorMapType: Integer = 0);
 
 Resizes the image to the matrix dimensions and draws the matrix.
+
 ColorMapType can be:
   0: cold blue to red
   1: black -> blue -> red
@@ -1205,7 +1235,7 @@ ColorMapType can be:
 *)
 procedure _LapeImage_FromMatrix2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromMatrix(PSingleMatrix(Params^[1])^, PInteger(Params^[2])^);
+  PSimbaImage(Params^[0])^.FromMatrix(PSingleMatrix(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -1215,7 +1245,7 @@ TImage.FromString
 *)
 procedure _LapeImage_FromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromString(PString(Params^[1])^);
+  PSimbaImage(Params^[0])^.FromString(PString(Params^[1])^);
 end;
 
 (*
@@ -1225,7 +1255,7 @@ TImage.FromData
 *)
 procedure _LapeImage_FromData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromData(PInteger(Params^[1])^, PInteger(Params^[2])^, PPointer(Params^[3])^, PInteger(Params^[4])^);
+  PSimbaImage(Params^[0])^.FromData(PInteger(Params^[1])^, PInteger(Params^[2])^, PPointer(Params^[3])^, PInteger(Params^[4])^);
 end;
 
 (*
@@ -1235,7 +1265,7 @@ TImage.Load
 *)
 procedure _LapeImage_Load1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromFile(PString(Params^[1])^);
+  PSimbaImage(Params^[0])^.Load(PString(Params^[1])^);
 end;
 
 (*
@@ -1245,7 +1275,7 @@ TImage.Load
 *)
 procedure _LapeImage_Load2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromFile(PString(Params^[1])^, PBox(Params^[2])^);
+  PSimbaImage(Params^[0])^.Load(PString(Params^[1])^, PBox(Params^[2])^);
 end;
 
 (*
@@ -1255,7 +1285,7 @@ TImage.Save
 *)
 procedure _LapeImage_Save(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImage(Params^[0])^.SaveToFile(PString(Params^[1])^, PBoolean(Params^[2])^);
+  PBoolean(Result)^ := PSimbaImage(Params^[0])^.Save(PString(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -1345,13 +1375,13 @@ begin
 end;
 
 (*
-TImage.LoadFromLazBitmap
-------------------------
-> procedure TImage.LoadFromLazBitmap(LazBitmap: TLazBitmap);
+TImage.FromLazBitmap
+--------------------
+> procedure TImage.FromLazBitmap(LazBitmap: TLazBitmap);
 *)
-procedure _LapeImage_LoadFromLazBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_FromLazBitmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.LoadFromLazBitmap(PBitmap(Params^[1])^);
+  PSimbaImage(Params^[0])^.FromLazBitmap(PBitmap(Params^[1])^);
 end;
 
 (*
@@ -1568,8 +1598,8 @@ begin
     addGlobalFunc('procedure TImage.Pad(Amount: Integer)', @_LapeImage_Pad);
     addGlobalFunc('procedure TImage.Offset(X,Y: Integer)', @_LapeImage_Offset);
 
-    addGlobalFunc('procedure TImage.SplitChannels(var B,G,R,A: TByteArray); overload', @_LapeImage_SplitChannels1);
-    addGlobalFunc('procedure TImage.SplitChannels(var B,G,R: TByteArray); overload', @_LapeImage_SplitChannels2);
+    addGlobalFunc('procedure TImage.SplitChannels(var B,G,R: TByteArray); overload', @_LapeImage_SplitChannels);
+    addGlobalFunc('procedure TImage.FromChannels(const B,G,R: TByteArray; W, H: Integer);', @_LapeImage_FromChannels);
 
     addGlobalFunc('function TImage.GetColors: TColorArray; overload', @_LapeImage_GetColors1);
     addGlobalFunc('function TImage.GetColors(Box: TBox): TColorArray; overload', @_LapeImage_GetColors2);
@@ -1636,12 +1666,14 @@ begin
     addGlobalFunc('function TImage.Invert: TImage', @_LapeImage_Invert);
     addGlobalFunc('function TImage.Posterize(Value: Integer): TImage', @_LapeImage_Posterize);
     addGlobalFunc('function TImage.Convolute(Matrix: TDoubleMatrix): TImage', @_LapeImage_Convolute);
-    addGlobalFunc('function TImage.Threshold(Inv: Boolean): TImage', @_LapeImage_Threshold);
-    addGlobalFunc('function TImage.ThresholdAdaptive(Inv: Boolean; Radius: Integer = 25; C: Double = 0.1): TImage', @_LapeImage_ThresholdAdaptive);
+    addGlobalFunc('function TImage.Threshold(Invert: Boolean = False; C: Integer = 0): TImage', @_LapeImage_Threshold);
+    addGlobalFunc('function TImage.ThresholdAdaptive(Invert: Boolean = False; Radius: Integer = 25; C: Integer = 0): TImage', @_LapeImage_ThresholdAdaptive);
+    addGlobalFunc('function TImage.ThresholdAdaptiveSauvola(Invert: Boolean = False; Radius: Integer = 25; C: Single = 0.2): TImage', @_LapeImage_ThresholdAdaptiveSauvola);
     addGlobalFunc('function TImage.Blend(Points: TPointArray; Radius: Integer): TImage; overload', @_LapeImage_Blend1);
     addGlobalFunc('function TImage.Blend(Points: TPointArray; Radius: Integer; IgnorePoints: TPointArray): TImage; overload', @_LapeImage_Blend2);
     addGlobalFunc('function TImage.Blur(Algo: EImageBlurAlgo; Radius: Integer): TImage;', @_LapeImage_Blur);
 
+    addGlobalFunc('function TImage.ToGreyMatrix: TByteMatrix', @_LapeImage_ToGreyMatrix);
     addGlobalFunc('function TImage.ToMatrix: TIntegerMatrix; overload', @_LapeImage_ToMatrix1);
     addGlobalFunc('function TImage.ToMatrix(Box: TBox): TIntegerMatrix; overload', @_LapeImage_ToMatrix2);
     addGlobalFunc('procedure TImage.FromMatrix(Matrix: TIntegerMatrix); overload', @_LapeImage_FromMatrix1);
@@ -1663,7 +1695,7 @@ begin
     addGlobalFunc('function TImage.PixelDifferenceTPA(Other: TImage; Tolerance: Single): TPointArray; overload', @_LapeImage_PixelDifferenceToleranceTPA);
 
     addGlobalFunc('function TImage.ToLazBitmap: TLazBitmap;', @_LapeImage_ToLazBitmap);
-    addGlobalFunc('procedure TImage.LoadFromLazBitmap(LazBitmap: TLazBitmap);', @_LapeImage_LoadFromLazBitmap);
+    addGlobalFunc('procedure TImage.FromLazBitmap(LazBitmap: TLazBitmap);', @_LapeImage_FromLazBitmap);
 
     addGlobalFunc('function TImage.Fonts: TStringArray; static;', @_LapeImage_Fonts);
     addGlobalFunc('function TImage.LoadFontsInDir(Dir: String): Boolean; static;', @_LapeImage_LoadFontsInDir);

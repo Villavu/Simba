@@ -22,8 +22,9 @@ function SimbaImage_Sobel(Image: TSimbaImage): TSimbaImage;
 function SimbaImage_Enhance(Image: TSimbaImage; Enchantment: Byte; C: Single): TSimbaImage;
 function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Integer): TSimbaImage;
 function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Integer): TSimbaImage;
-function SimbaImage_Threshold(Image: TSimbaImage; Invert: Boolean): TSimbaImage;
-function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Invert: Boolean; Radius: Integer; K: Single): TSimbaImage;
+function SimbaImage_Threshold(Image: TSimbaImage; Invert: Boolean; C: Integer): TSimbaImage;
+function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Integer): TSimbaImage;
+function SimbaImage_ThresholdAdaptiveSauvola(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Single): TSimbaImage;
 
 implementation
 
@@ -497,7 +498,7 @@ begin
 end;
 
 // https://github.com/galfar/imaginglib/blob/master/Extensions/ImagingBinary.pas#L79
-function SimbaImage_Threshold(Image: TSimbaImage; Invert: Boolean): TSimbaImage;
+function SimbaImage_Threshold(Image: TSimbaImage; Invert: Boolean; C: Integer): TSimbaImage;
 var
   Histogram: array[Byte] of Single;
   Level, Max, Min, I, J, NumPixels: Integer;
@@ -568,6 +569,8 @@ begin
     end;
   end;
 
+  Level := Level - C;
+
   // Do thresholding using computed level
   Ptr := Result.Data;
   while (PtrUInt(Ptr) < Upper) do
@@ -581,6 +584,42 @@ begin
   end;
 end;
 
+function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Integer): TSimbaImage;
+var
+  Mat: TByteMatrix;
+  Integral: TSimbaIntegralImageF;
+  X, Y, W, H, Left, Right, Top, Bottom, Count: Integer;
+  Threshold: Double;
+begin
+  if (Radius <= 1) or (not Odd(Radius)) then
+    SimbaException('ThresholdAdaptive: Radius(%d) must be odd and not negative (1,3,5 etc).', [Radius]);
+  Radius := Radius div 2;
+
+  Result := TSimbaImage.Create(Image.Width, Image.Height);
+  if (Result.Width = 0) or (Result.Height = 0) then
+    Exit;
+
+  Mat := Image.ToGreyMatrix();
+  Integral := TSimbaIntegralImageF.Create(Mat);
+
+  W := Image.Width - 1;
+  H := Image.Height - 1;
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      Left   := Max(X-Radius, 0);
+      Right  := Min(X+Radius, W);
+      Top    := Max(Y-Radius, 0);
+      Bottom := Min(Y+Radius, H);
+
+      Count := (Bottom - Top + 1) * (Right - Left + 1);
+      Threshold := (Integral.Query(Left, Top, Right, Bottom) / Count) - C;
+
+      if (Invert and (Mat[Y, X] <= Threshold)) or ((not Invert) and (Mat[Y, X] >= Threshold)) then
+        Result.Data[Y * Image.Width + X].AsInteger := $FFFFFFFF;
+    end;
+end;
+
 {
   Sauvola binarization computes a local threshold based on
   the local average and square average.  It takes two constants:
@@ -590,9 +629,9 @@ end;
 
   Invert = Invert output
   Radius = Window size (default = 25)
-  K      = Constant value (default = 0.2). Typical values are between 0.2 and 0.5.
+  C      = Constant value (default = 0.2). Typical values are between 0.2 and 0.5.
 }
-function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Invert: Boolean; Radius: Integer; K: Single): TSimbaImage;
+function SimbaImage_ThresholdAdaptiveSauvola(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Single): TSimbaImage;
 var
   Mat: TByteMatrix;
   Integral: TSimbaIntegralImageF;
@@ -603,7 +642,7 @@ var
   Mean, Stdev, Threshold: Double;
 begin
   if (Radius <= 1) or (not Odd(Radius)) then
-    SimbaException('ThresholdAdaptive: Radius(%d) must be odd (1,3,5 etc).', [Radius]);
+    SimbaException('ThresholdAdaptive: Radius(%d) must be odd and not negative (1,3,5 etc).', [Radius]);
   Radius := Radius div 2;
 
   Result := TSimbaImage.Create(Image.Width, Image.Height);
@@ -625,6 +664,7 @@ begin
       Right  := Min(X+Radius, W);
       Top    := Max(Y-Radius, 0);
       Bottom := Min(Y+Radius, H);
+      Count := (Bottom - Top + 1) * (Right - Left + 1);
 
       //Sum := 0;
       //SumSquares := 0;
@@ -637,16 +677,51 @@ begin
       //  end;
 
       Integral.Query(Left, Top, Right, Bottom, Sum, SumSquares);
-
-      Count := (Bottom - Top + 1) * (Right - Left + 1);
       Mean := Sum / Count;
       Stdev := Sqrt((SumSquares / Count) - Sqr(Mean));
-      Threshold := Mean * (1.0 + K * ((Stdev / 128.0) - 1.0));
+      Threshold := Mean * (1.0 + C * ((Stdev / 128.0) - 1.0));
 
       if (Invert and (Mat[Y, X] <= Threshold)) or ((not Invert) and (Mat[Y, X] >= Threshold)) then
         Result.Data[Y * Image.Width + X].AsInteger := $FFFFFFFF;
     end;
 end;
+
+{
+function SimbaImage_ThresholdAdaptive_Mean(Image: TImage; Radius: Integer; Invert: Boolean; C: Integer): TImage;
+var
+  X, Y, XX, YY: Integer;
+  W, H: Integer;
+  Left, Right, Top, Bottom: Integer;
+  Sum: UInt64;
+  Count, Thresh: Integer;
+  grey: TImage;
+begin
+  Result := TImage.Create(Image.Width, Image.Height);
+  grey := Image.GreyScale();
+
+  W := grey.Width-1;
+  H := grey.Height-1;
+
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      Left   := Max(X-Radius, 0);
+      Right  := Min(X+Radius, W);
+      Top    := Max(Y-Radius, 0);
+      Bottom := Min(Y+Radius, H);
+      Count := (Bottom - Top + 1) * (Right - Left + 1);
+
+      Sum := 0;
+      for YY := Top to Bottom do
+        for XX := Left to Right do
+          Sum += grey.Pixel[XX, YY].R;
+      Thresh := (Sum div Count) - C;
+
+      if (grey.Pixel[X, Y].R >= thresh) then
+        Result.Pixel[X, Y] := $FFFFFF;
+    end;
+end;
+}
 
 end.
 

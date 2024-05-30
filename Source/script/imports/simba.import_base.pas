@@ -285,19 +285,6 @@ DumpCallStack
 > function DumpCallStack(Start: Integer = 0): String;
 *)
 
-type
-  {$SCOPEDENUMS ON}
-  PVariantType = ^EVariantType;
-  EVariantType = (
-    Unknown, Unassigned, Null,
-    Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64,
-    Single, Double, DateTime, Currency,
-    Boolean,
-    Variant,
-    AString, UString, WString
-  );
-  {$SCOPEDENUMS OFF}
-
 (*
 Variant.VarType
 ---------------
@@ -313,42 +300,8 @@ Example:
 ```
 *)
 procedure _LapeVariantVarType(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-
-  function GetVarType(const v: Variant): EVariantType;
-  begin
-    case VarType(v) of
-      varEmpty:    Result := EVariantType.Unassigned;
-      varNull:     Result := EVariantType.Null;
-
-      varBoolean:  Result := EVariantType.Boolean;
-
-      varShortInt: Result := EVariantType.Int8;
-      varSmallInt: Result := EVariantType.Int16;
-      varInteger:  Result := EVariantType.Int32;
-      varInt64:    Result := EVariantType.Int64;
-
-      varByte:     Result := EVariantType.UInt8;
-      varWord:     Result := EVariantType.UInt16;
-      varLongWord: Result := EVariantType.UInt32;
-      varQWord:    Result := EVariantType.UInt64;
-
-      varSingle:   Result := EVariantType.Single;
-      varDouble:   Result := EVariantType.Double;
-      varDate:     Result := EVariantType.DateTime;
-      varCurrency: Result := EVariantType.Currency;
-
-      varOleStr:   Result := EVariantType.WString;
-      varUString:  Result := EVariantType.UString;
-      varString:   Result := EVariantType.AString;
-
-      varVariant:  Result := EVariantType.Variant;
-      else
-        Result := EVariantType.Unknown;
-    end;
-  end;
-
 begin
-  PVariantType(Result)^ := GetVarType(PVariant(Params^[0])^);
+  PVariantType(Result)^ := PVariant(Params^[0])^.VarType;
 end;
 
 (*

@@ -139,8 +139,7 @@ type
     function GetColors: TColorArray; overload;
     function GetColors(Box: TBox): TColorArray; overload;
 
-    procedure SplitChannels(var B,G,R,A: TByteArray); overload;
-    procedure SplitChannels(var B,G,R: TByteArray); overload;
+    procedure SplitChannels(var B,G,R: TByteArray);
     procedure FromChannels(const B,G,R: TByteArray; W, H: Integer);
 
     procedure ReplaceColor(OldColor, NewColor: TColor); overload;
@@ -220,28 +219,28 @@ type
     function Brightness(Value: Integer): TSimbaImage;
     function Invert: TSimbaImage;
     function Posterize(Value: Integer): TSimbaImage;
-    function Threshold(Inv: Boolean): TSimbaImage;
-    function ThresholdAdaptive(Inv: Boolean; Radius: Integer; C: Double): TSimbaImage;
+    function Threshold(Inv: Boolean; C: Integer): TSimbaImage;
+    function ThresholdAdaptive(Inv: Boolean; Radius: Integer; C: Integer): TSimbaImage;
+    function ThresholdAdaptiveSauvola(Inv: Boolean; Radius: Integer; C: Single): TSimbaImage;
     function Blend(Points: TPointArray; Radius: Integer): TSimbaImage; overload;
     function Blend(Points: TPointArray; Radius: Integer; IgnorePoints: TPointArray): TSimbaImage; overload;
     function Blur(Algo: EImageBlurAlgo; Radius: Integer): TSimbaImage;
 
     // Matrix
-    procedure LoadFromMatrix(Matrix: TIntegerMatrix); overload;
-    procedure LoadFromMatrix(Matrix: TSingleMatrix; ColorMapType: Integer = 0); overload;
+    procedure FromMatrix(Matrix: TIntegerMatrix); overload;
+    procedure FromMatrix(Matrix: TSingleMatrix; ColorMapType: Integer = 0); overload;
 
-    function ToGreyArray: TByteArray;
     function ToGreyMatrix: TByteMatrix;
     function ToMatrix: TIntegerMatrix; overload;
     function ToMatrix(Box: TBox): TIntegerMatrix; overload;
 
     // Load & Save
-    procedure LoadFromStream(Stream: TStream; FileName: String);
-    procedure LoadFromString(Str: String);
-    procedure LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
-    procedure LoadFromFile(FileName: String); overload;
-    procedure LoadFromFile(FileName: String; Area: TBox); overload;
-    function SaveToFile(FileName: String; OverwriteIfExists: Boolean = False): Boolean;
+    procedure FromStream(Stream: TStream; FileName: String);
+    procedure FromString(Str: String);
+    procedure FromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
+    procedure Load(FileName: String); overload;
+    procedure Load(FileName: String; Area: TBox); overload;
+    function Save(FileName: String; OverwriteIfExists: Boolean = False): Boolean;
     function SaveToString: String;
 
     // Difference
@@ -257,7 +256,7 @@ type
 
     // Laz bridge
     function ToLazBitmap: TBitmap;
-    procedure LoadFromLazBitmap(LazBitmap: TBitmap);
+    procedure FromLazBitmap(LazBitmap: TBitmap);
 
     // Finders
     function MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
@@ -349,16 +348,6 @@ begin
   Result := SimbaImage_ToLazImage(Self);
 end;
 
-function TSimbaImage.ToGreyArray: TByteArray;
-var
-  I: Integer;
-begin
-  SetLength(Result, FWidth * FHeight);
-  for I := 0 to High(Result) do
-    with FData[I] do
-      Result[I] := Round(R * 0.299 + G * 0.587 + B * 0.114);
-end;
-
 function TSimbaImage.ToGreyMatrix: TByteMatrix;
 var
   X, Y: Integer;
@@ -399,7 +388,7 @@ begin
       Result[Y-Box.Y1, X-Box.X1] := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
 end;
 
-procedure TSimbaImage.LoadFromMatrix(Matrix: TIntegerMatrix);
+procedure TSimbaImage.FromMatrix(Matrix: TIntegerMatrix);
 var
   X, Y, W, H: Integer;
 begin
@@ -412,7 +401,7 @@ begin
       FData[Y * FWidth + X] := TSimbaColorConversion.ColorToBGRA(Matrix[Y,X], ALPHA_OPAQUE);
 end;
 
-procedure TSimbaImage.LoadFromMatrix(Matrix: TSingleMatrix; ColorMapType: Integer = 0);
+procedure TSimbaImage.FromMatrix(Matrix: TSingleMatrix; ColorMapType: Integer = 0);
 var
   X,Y, W,H: TColor;
   Normed: TSingleMatrix;
@@ -462,23 +451,23 @@ begin
     end;
 end;
 
-procedure TSimbaImage.LoadFromStream(Stream: TStream; FileName: String);
+procedure TSimbaImage.FromStream(Stream: TStream; FileName: String);
 var
   ReaderClass: TFPCustomImageReaderClass;
 begin
   ReaderClass := TFPCustomImage.FindReaderFromFileName(FileName);
   if (ReaderClass = nil) then
-    SimbaException('TSimbaImage.LoadFromStream: Unknown image format "%s"', [FileName]);
+    SimbaException('TSimbaImage.FromStream: Unknown image format "%s"', [FileName]);
 
   SimbaImage_FromFPImageReader(Self, ReaderClass, Stream);
 end;
 
-procedure TSimbaImage.LoadFromString(Str: String);
+procedure TSimbaImage.FromString(Str: String);
 begin
   SimbaImage_FromString(Self, Str);
 end;
 
-procedure TSimbaImage.LoadFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
+procedure TSimbaImage.FromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
 var
   Y: Integer;
 begin
@@ -493,7 +482,7 @@ begin
     Move(AData^, FData^, FWidth * FHeight * SizeOf(TColorBGRA));
 end;
 
-procedure TSimbaImage.LoadFromFile(FileName: String);
+procedure TSimbaImage.Load(FileName: String);
 var
   ReaderClass: TFPCustomImageReaderClass;
   Stream: TFileStream;
@@ -513,7 +502,7 @@ begin
   end;
 end;
 
-procedure TSimbaImage.LoadFromFile(FileName: String; Area: TBox);
+procedure TSimbaImage.Load(FileName: String; Area: TBox);
 
   procedure LoadBitmapArea(Image: TSimbaImage; FileName: String; Area: TBox);
   var
@@ -598,7 +587,7 @@ begin
     LoadBitmapArea(Self, FileName, Area)
   else
   begin // else just load then crop
-    LoadFromFile(FileName);
+    Load(FileName);
 
     Area := Area.Clip(TBox.Create(0, 0, FWidth - 1, FHeight - 1));
     if (Area.Width > 1) and (Area.Height > 1) then
@@ -606,7 +595,7 @@ begin
   end;
 end;
 
-function TSimbaImage.SaveToFile(FileName: String; OverwriteIfExists: Boolean): Boolean;
+function TSimbaImage.Save(FileName: String; OverwriteIfExists: Boolean): Boolean;
 var
   Stream: TFileStream;
   WriterClass: TFPCustomImageWriterClass;
@@ -858,7 +847,7 @@ begin
   Result := Buffer.ToArray(False);
 end;
 
-procedure TSimbaImage.LoadFromLazBitmap(LazBitmap: TBitmap);
+procedure TSimbaImage.FromLazBitmap(LazBitmap: TBitmap);
 var
   TempBitmap: TSimbaImage;
 begin
@@ -1381,39 +1370,6 @@ begin
   Self.Clear(TBox.Create(Box.X2 + 1, Box.Y2 + 1, FWidth-1,   FHeight - 1)); //Btm Right
 end;
 
-procedure TSimbaImage.SplitChannels(var B,G,R,A: TByteArray);
-var
-  Upper: PtrUInt;
-  Src: PColorBGRA;
-  DestB, DestG, DestR, DestA: PByte;
-begin
-  SetLength(B, FWidth*FHeight);
-  SetLength(G, FWidth*FHeight);
-  SetLength(R, FWidth*FHeight);
-  SetLength(A, FWidth*FHeight);
-
-  DestB := @B[0];
-  DestG := @G[0];
-  DestR := @R[0];
-  DestA := @A[0];
-
-  Src := FData;
-  Upper := PtrUInt(FData) + FDataSize;
-  while (PtrUInt(Src) < Upper) do
-  begin
-    DestB^ := Src^.B;
-    DestG^ := Src^.G;
-    DestR^ := Src^.R;
-    DestA^ := Src^.A;
-
-    Inc(Src);
-    Inc(DestB);
-    Inc(DestG);
-    Inc(DestR);
-    Inc(DestA);
-  end;
-end;
-
 procedure TSimbaImage.SplitChannels(var B,G,R: TByteArray);
 var
   Upper: PtrUInt;
@@ -1571,9 +1527,19 @@ begin
   Result := SimbaImage_Posterize(Self, Value);
 end;
 
-function TSimbaImage.Threshold(Inv: Boolean): TSimbaImage;
+function TSimbaImage.Threshold(Inv: Boolean; C: Integer): TSimbaImage;
 begin
-  Result := SimbaImage_Threshold(Self, Inv);
+  Result := SimbaImage_Threshold(Self, Inv, C);
+end;
+
+function TSimbaImage.ThresholdAdaptive(Inv: Boolean; Radius: Integer; C: Integer): TSimbaImage;
+begin
+  Result := SimbaImage_ThresholdAdaptive(Self, Inv, Radius, C);
+end;
+
+function TSimbaImage.ThresholdAdaptiveSauvola(Inv: Boolean; Radius: Integer; C: Single): TSimbaImage;
+begin
+  Result := SimbaImage_ThresholdAdaptiveSauvola(Self, Inv, Radius, C);
 end;
 
 function TSimbaImage.Convolute(Matrix: TDoubleMatrix): TSimbaImage;
@@ -1957,11 +1923,6 @@ begin
     end;
 end;
 
-function TSimbaImage.ThresholdAdaptive(Inv: Boolean; Radius: Integer; C: Double): TSimbaImage;
-begin
-  Result := SimbaImage_ThresholdAdaptive(Self, Inv, Radius, C);
-end;
-
 procedure TSimbaImage.DrawData(TheData: PColorBGRA; DataW, DataH: Integer; P: TPoint);
 var
   W, H: Integer;
@@ -2055,7 +2016,7 @@ begin
 
   if (SaveUnfreedImages <> '') then
   try
-    SaveToFile(IncludeTrailingPathDelimiter(SetDirSeparators(SaveUnfreedImages)) + IntToStr(PtrUInt(Self)) + '.bmp');
+    Save(IncludeTrailingPathDelimiter(SetDirSeparators(SaveUnfreedImages)) + IntToStr(PtrUInt(Self)) + '.bmp');
   except
     on E: Exception do
       DebugLn(E.ToString);
@@ -2138,7 +2099,7 @@ constructor TSimbaImage.Create(FileName: String);
 begin
   Create();
 
-  LoadFromFile(FileName);
+  Load(FileName);
 end;
 
 constructor TSimbaImage.CreateFromZip(ZipFileName, ZipEntry: String);
@@ -2149,7 +2110,7 @@ begin
 
   Stream := ZipExtractEntry(ZipFileName, ZipEntry);
   try
-    LoadFromStream(Stream, ZipEntry);
+    FromStream(Stream, ZipEntry);
   finally
     Stream.Free();
   end;
@@ -2159,14 +2120,14 @@ constructor TSimbaImage.CreateFromString(Str: String);
 begin
   Create();
 
-  LoadFromString(Str);
+  FromString(Str);
 end;
 
 constructor TSimbaImage.CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
 begin
   Create();
 
-  LoadFromData(AWidth, AHeight, AData, ADataWidth);
+  FromData(AWidth, AHeight, AData, ADataWidth);
 end;
 
 constructor TSimbaImage.CreateFromWindow(Window: TWindowHandle);
@@ -2179,7 +2140,7 @@ begin
   if SimbaNativeInterface.GetWindowBounds(Window, B) and
      SimbaNativeInterface.GetWindowImage(Window, 0, 0, B.Width - 1, B.Height - 1, ImageData) then
   try
-    LoadFromData(B.Width - 1, B.Height - 1, ImageData, B.Width - 1);
+    FromData(B.Width - 1, B.Height - 1, ImageData, B.Width - 1);
   finally
     FreeMem(ImageData);
   end;
@@ -2189,14 +2150,14 @@ constructor TSimbaImage.CreateFromMatrix(Mat: TIntegerMatrix);
 begin
   Create();
 
-  LoadFromMatrix(Mat);
+  FromMatrix(Mat);
 end;
 
 constructor TSimbaImage.CreateFromMatrix(Mat: TSingleMatrix; ColorMapType: Integer);
 begin
   Create();
 
-  LoadFromMatrix(Mat, ColorMapType);
+  FromMatrix(Mat, ColorMapType);
 end;
 
 destructor TSimbaImage.Destroy;

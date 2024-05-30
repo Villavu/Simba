@@ -338,7 +338,7 @@ begin
 
     Reader.ImageRead(Stream, Img);
 
-    SimbaImage.LoadFromData(Img.Width, Img.Height, PColorBGRA(Img.PixelData), Img.Width);
+    SimbaImage.FromData(Img.Width, Img.Height, PColorBGRA(Img.PixelData), Img.Width);
   finally
     Img.Free();
     Reader.Free();

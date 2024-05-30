@@ -551,6 +551,7 @@ begin
 
     addGlobalType('array of TSingleArray', 'TSingleMatrix');
     addGlobalType('array of TDoubleArray', 'TDoubleMatrix');
+    addGlobalType('array of TByteArray', 'TByteMatrix');
     addGlobalType('array of TIntegerArray', 'TIntegerMatrix');
     addGlobalType('array of TBooleanArray', 'TBooleanMatrix');
 

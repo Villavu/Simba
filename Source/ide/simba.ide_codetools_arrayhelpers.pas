@@ -96,7 +96,7 @@ begin
     'function <ArrayName>.Median: Double; external;',
     'function <ArrayName>.Mean: Double; external;',
     'function <ArrayName>.Variance: Double; external;',
-    'function <ArrayName>.Stddev: Double; external;',
+    'function <ArrayName>.Stdev: Double; external;',
     'function <ArrayName>.Slice(Start, Stop, Step: Integer): <ArrayName>; external;',
     'function <ArrayName>.Remove(Value: <ArrayVarType>): Boolean; external;',
     'function <ArrayName>.RemoveAll(Value: <ArrayVarType>): Integer; external;',
@@ -140,7 +140,7 @@ begin
     'function <ArrayName>.Median: Double; external;',
     'function <ArrayName>.Mean: Double; external;',
     'function <ArrayName>.Variance: Double; external;',
-    'function <ArrayName>.Stddev: Double; external;',
+    'function <ArrayName>.Stdev: Double; external;',
     'function <ArrayName>.Slice(Start, Stop, Step: Integer): <ArrayName>; external;'
   ]);
 end;
