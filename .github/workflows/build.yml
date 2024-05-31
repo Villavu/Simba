@@ -9,8 +9,8 @@ on:
       - '**'
 
 env:
-  FPC_VER: release_3_2_2
-  LAZ_VER: lazarus_3_0
+  FPC_VER: fixes_3_2
+  LAZ_VER: lazarus_3_4
       
 jobs:
   build:

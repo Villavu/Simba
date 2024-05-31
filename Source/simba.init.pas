@@ -54,23 +54,38 @@ end;
 {$ENDIF}
 
 {$IFDEF WINDOWS}
+uses
+  Windows;
+
+var
+  AttachedToParentConsole: Boolean = False;
+
 procedure WindowsInitialization;
-
-  function HasOption(Option: String): Boolean;
-  var
-    I: Integer;
-  begin
-    for I := 0 to ParamCount do
-      if (ParamStr(I) = Option) then
-        Exit(True);
-    Exit(False);
-  end;
-
 begin
-  if (not HasOption('--open')) and (HasOption('--run') or HasOption('--compile')) then
+  if AttachConsole(ATTACH_PARENT_PROCESS) then
   begin
+    AttachedToParentConsole := True;
     IsConsole := True;
     SysInitStdIO();
+  end;
+end;
+
+procedure WindowsFinalization;
+var
+  InputRec: TINPUTRECORD;
+  _: DWord;
+begin
+  if AttachedToParentConsole then
+  begin
+    InputRec.EventType := KEY_EVENT;
+    InputRec.Event.KeyEvent.bKeyDown := True;
+    InputRec.Event.KeyEvent.AsciiChar := Char(VK_RETURN);
+    InputRec.Event.KeyEvent.wVirtualKeyCode := VK_RETURN;
+    InputRec.Event.KeyEvent.wVirtualScanCode := MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC);
+    InputRec.Event.KeyEvent.wRepeatCount := 1;
+    InputRec.Event.KeyEvent.dwControlKeyState := 0;
+
+    WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), InputRec, 1, _{%H-});
   end;
 end;
 {$ENDIF}
@@ -98,6 +113,10 @@ initialization
 finalization
   {$IFDEF DARWIN}
   DarwinFinalization();
+  {$ENDIF}
+
+  {$IFDEF WINDOWS}
+  WindowsFinalization();
   {$ENDIF}
 
 end.

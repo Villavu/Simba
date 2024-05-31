@@ -302,7 +302,7 @@ begin
   FProcess := TProcess.Create(Self);
   FProcess.PipeBufferSize := 16 * 1024;
   FProcess.CurrentDirectory := Application.Location;
-  FProcess.Options := FProcess.Options + [poUsePipes, poStderrToOutPut];
+  FProcess.Options := FProcess.Options + [poUsePipes, poStderrToOutPut, poDetached];
   FProcess.Executable := Application.ExeName;
 end;
 

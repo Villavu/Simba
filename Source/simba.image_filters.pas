@@ -686,42 +686,5 @@ begin
     end;
 end;
 
-{
-function SimbaImage_ThresholdAdaptive_Mean(Image: TImage; Radius: Integer; Invert: Boolean; C: Integer): TImage;
-var
-  X, Y, XX, YY: Integer;
-  W, H: Integer;
-  Left, Right, Top, Bottom: Integer;
-  Sum: UInt64;
-  Count, Thresh: Integer;
-  grey: TImage;
-begin
-  Result := TImage.Create(Image.Width, Image.Height);
-  grey := Image.GreyScale();
-
-  W := grey.Width-1;
-  H := grey.Height-1;
-
-  for Y := 0 to H do
-    for X := 0 to W do
-    begin
-      Left   := Max(X-Radius, 0);
-      Right  := Min(X+Radius, W);
-      Top    := Max(Y-Radius, 0);
-      Bottom := Min(Y+Radius, H);
-      Count := (Bottom - Top + 1) * (Right - Left + 1);
-
-      Sum := 0;
-      for YY := Top to Bottom do
-        for XX := Left to Right do
-          Sum += grey.Pixel[XX, YY].R;
-      Thresh := (Sum div Count) - C;
-
-      if (grey.Pixel[X, Y].R >= thresh) then
-        Result.Pixel[X, Y] := $FFFFFF;
-    end;
-end;
-}
-
 end.
 
