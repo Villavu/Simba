@@ -154,9 +154,10 @@ var
   end;
 
 var
-  URL: String;
+  URL, ExceptionMsg: String;
 begin
   URL := '';
+  ExceptionMsg := '';
 
   if InputQuery('Add Package', 'Enter package URL', URL) then
   begin
@@ -168,16 +169,16 @@ begin
 
     BeginLoading();
     try
-      Application.RunInThreadAndWait(@DoLoad);
+      ExceptionMsg := Application.RunInThreadAndWait(@DoLoad);
 
-      if (Package.EndPoint.LastHTTPStatus = EHTTPStatus.OK) then
+      if (ExceptionMsg = '') and (Package.EndPoint.LastHTTPStatus = EHTTPStatus.OK) then
       begin
         Package.InstalledVersion := '';
 
         FListBox.ItemIndex := FListBox.Add(Package);
       end else
       begin
-        SimbaErrorDlg('Package error', ['Package not found: %s', 'Error: %s'], [URL, Package.EndPoint.LastHTTPStatus.AsString]);
+        SimbaErrorDlg('Package error', ['Package not found: %s', 'Error: %s'], [URL, IfThen(ExceptionMsg <> '', ExceptionMsg, Package.EndPoint.LastHTTPStatus.AsString)]);
 
         Package.Free();
       end;

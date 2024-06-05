@@ -62,12 +62,9 @@ var
 
 procedure WindowsInitialization;
 begin
-  if AttachConsole(ATTACH_PARENT_PROCESS) then
-  begin
-    AttachedToParentConsole := True;
-    IsConsole := True;
-    SysInitStdIO();
-  end;
+  AttachedToParentConsole := AttachConsole(ATTACH_PARENT_PROCESS);
+  IsConsole := True;
+  SysInitStdIO();
 end;
 
 procedure WindowsFinalization;
@@ -120,5 +117,3 @@ finalization
   {$ENDIF}
 
 end.
-
-

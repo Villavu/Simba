@@ -62,7 +62,7 @@ implementation
 
 uses
   simba.env, simba.misc, simba.dialog,
-  simba.ide_package_endpointgithub, simba.threading;
+  simba.ide_package_endpointgithub, simba.ide_utils, simba.threading;
 
 constructor TSimbaPackageInstallForm.Create(AOwner: TComponent; APackage: TSimbaPackage);
 begin
@@ -114,17 +114,28 @@ begin
 end;
 
 procedure TSimbaPackageInstallForm.DoRefreshVersions(Sender: TObject);
+
+  procedure DoRun;
+  begin
+    FPackage.EndPoint.DeleteCache();
+    if (FPackage.EndPoint is TSimbaPackageEndpoint_Github) then
+      TSimbaPackageEndpoint_Github(FPackage.EndPoint).DownloadBranches();
+    FPackage.Load();
+  end;
+
+var
+  ExceptionMsg: String;
 begin
   BeginLoading();
 
-  FPackage.EndPoint.DeleteCache();
-  if (FPackage.EndPoint is TSimbaPackageEndpoint_Github) then
-    TSimbaPackageEndpoint_Github(FPackage.EndPoint).DownloadBranches();
-  FPackage.Load();
+  ExceptionMsg := Application.RunInThreadAndWait(@DoRun);
+  if (ExceptionMsg = '') then
+  begin
+    Log('Found %d versions', [Length(FPackage.Versions)]);
 
-  Log('Found %d versions', [Length(FPackage.Versions)]);
-
-  AddVersions();
+    AddVersions();
+  end else
+    Log(ExceptionMsg, []);
 
   EndLoading();
 end;

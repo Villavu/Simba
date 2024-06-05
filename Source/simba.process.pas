@@ -168,7 +168,7 @@ begin
   try
     Process.CurrentDirectory := Directory;
     Process.Executable := Executable;
-    Process.Options := Process.Options + [poStderrToOutPut, poDetached];
+    Process.Options := Process.Options + [poStderrToOutPut];
     Process.Parameters.AddStrings(Commands);
     Process.Execute();
 
@@ -193,7 +193,7 @@ begin
   try
     Process.CurrentDirectory := Application.Location;
     Process.Executable := Executable;
-    Process.Options := Process.Options + [poStderrToOutPut, poDetached];
+    Process.Options := Process.Options + [poStderrToOutPut];
     Process.Parameters.AddStrings(Commands);
     Process.Execute();
 

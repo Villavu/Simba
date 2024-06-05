@@ -220,6 +220,7 @@ uses
   {$IFDEF DARWIN}
   CocoaAll, CocoaUtils,
   {$ENDIF}
+  TypInfo,
   simba.zip, simba.openssl, simba.vartype_string;
 
 function EHTTPStatusHelper.AsInteger: Integer;
@@ -229,8 +230,9 @@ end;
 
 function EHTTPStatusHelper.AsString: String;
 begin
-  Result := '';
-  WriteStr(Result, Self);
+  Result := GetEnumName(TypeInfo(EHTTPStatusHelper), AsInteger);
+  if (Result = '') then
+    Result := 'EHTTPStatus(' + IntToStr(AsInteger) + ')';
 end;
 
 function TSimbaHTTPClient.GetResponseHeaders: TStringList;

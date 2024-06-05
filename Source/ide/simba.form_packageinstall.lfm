@@ -1,25 +1,24 @@
 object SimbaPackageInstallForm: TSimbaPackageInstallForm
   Left = -764
-  Height = 552
+  Height = 442
   Top = 282
-  Width = 735
+  Width = 588
   Caption = 'Package - Custom Install'
-  ClientHeight = 552
-  ClientWidth = 735
-  DesignTimePPI = 120
+  ClientHeight = 442
+  ClientWidth = 588
   OnShow = DoFormShow
   Position = poOwnerFormCenter
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.4.0.0'
   inline Output: TSynEdit
-    Left = 8
-    Height = 278
-    Top = 266
-    Width = 719
+    Left = 6
+    Height = 198
+    Top = 238
+    Width = 576
     Align = alClient
-    BorderSpacing.Left = 8
-    BorderSpacing.Right = 8
-    BorderSpacing.Bottom = 8
-    Font.Height = -13
+    BorderSpacing.Left = 6
+    BorderSpacing.Right = 6
+    BorderSpacing.Bottom = 6
+    Font.Height = -10
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
     Font.Quality = fqCleartypeNatural
@@ -73,9 +72,9 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
   end
   object Notebook1: TNotebook
     Left = 0
-    Height = 266
+    Height = 238
     Top = 0
-    Width = 735
+    Width = 588
     PageIndex = 0
     Align = alTop
     AutoSize = True
@@ -83,28 +82,28 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
     object MainPage: TPage
       object OptionsPanel: TPanel
         Left = 0
-        Height = 266
+        Height = 238
         Top = 0
-        Width = 735
+        Width = 588
         Align = alClient
         AutoSize = True
         BevelOuter = bvNone
-        ClientHeight = 266
-        ClientWidth = 735
+        ClientHeight = 238
+        ClientWidth = 588
         TabOrder = 0
         object VersionsList: TComboBox
           AnchorSideLeft.Control = Label3
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Control = OptionsPanel
           AnchorSideRight.Control = RefreshVersionButton
-          Left = 95
+          Left = 93
           Height = 33
-          Top = 5
-          Width = 610
+          Top = 4
+          Width = 471
           Anchors = [akTop, akLeft, akRight]
-          BorderSpacing.Left = 7
-          BorderSpacing.Top = 5
-          BorderSpacing.Right = 5
+          BorderSpacing.Left = 6
+          BorderSpacing.Top = 4
+          BorderSpacing.Right = 4
           ItemHeight = 25
           ReadOnly = True
           TabOrder = 0
@@ -115,12 +114,12 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
           AnchorSideTop.Control = VersionsList
           AnchorSideBottom.Control = VersionsList
           AnchorSideBottom.Side = asrBottom
-          Left = 5
+          Left = 4
           Height = 33
-          Top = 5
+          Top = 4
           Width = 58
           Anchors = [akTop, akLeft, akBottom]
-          BorderSpacing.Left = 5
+          BorderSpacing.Left = 4
           Caption = 'Version'
           Layout = tlCenter
           ParentColor = False
@@ -132,16 +131,16 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
           AnchorSideRight.Control = OptionsPanel
           AnchorSideRight.Side = asrBottom
           AnchorSideBottom.Side = asrBottom
-          Left = 8
+          Left = 6
           Height = 35
-          Top = 223
-          Width = 719
+          Top = 197
+          Width = 576
           Anchors = [akTop, akLeft, akRight]
           AutoSize = True
-          BorderSpacing.Left = 8
-          BorderSpacing.Top = 8
-          BorderSpacing.Right = 8
-          BorderSpacing.Bottom = 8
+          BorderSpacing.Left = 6
+          BorderSpacing.Top = 6
+          BorderSpacing.Right = 6
+          BorderSpacing.Bottom = 6
           Caption = 'Install'
           TabOrder = 1
           OnClick = DoInstallButtonClick
@@ -153,18 +152,18 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
           AnchorSideTop.Side = asrBottom
           AnchorSideRight.Control = OptionsPanel
           AnchorSideRight.Side = asrBottom
-          Left = 95
+          Left = 93
           Height = 33
-          Top = 43
-          Width = 635
+          Top = 41
+          Width = 491
           FilterIndex = 0
           HideDirectories = False
-          ButtonWidth = 28
+          ButtonWidth = 22
           NumGlyphs = 1
           Anchors = [akTop, akLeft, akRight]
-          BorderSpacing.Left = 7
-          BorderSpacing.Top = 5
-          BorderSpacing.Right = 5
+          BorderSpacing.Left = 6
+          BorderSpacing.Top = 4
+          BorderSpacing.Right = 4
           MaxLength = 0
           Spacing = 5
           TabOrder = 2
@@ -174,12 +173,12 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
           AnchorSideTop.Control = PathEdit
           AnchorSideBottom.Control = PathEdit
           AnchorSideBottom.Side = asrBottom
-          Left = 5
+          Left = 4
           Height = 33
-          Top = 43
+          Top = 41
           Width = 34
           Anchors = [akTop, akLeft, akBottom]
-          BorderSpacing.Left = 5
+          BorderSpacing.Left = 4
           Caption = 'Path'
           Layout = tlCenter
           ParentColor = False
@@ -189,12 +188,12 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
           AnchorSideTop.Control = FlatCheckbox
           AnchorSideTop.Side = asrBottom
           AnchorSideBottom.Side = asrBottom
-          Left = 5
+          Left = 4
           Height = 25
-          Top = 115
+          Top = 111
           Width = 83
-          BorderSpacing.Left = 5
-          BorderSpacing.Top = 5
+          BorderSpacing.Left = 4
+          BorderSpacing.Top = 4
           Caption = 'Ignore List'
           Layout = tlCenter
           ParentColor = False
@@ -203,13 +202,13 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
           AnchorSideLeft.Control = OptionsPanel
           AnchorSideTop.Control = PathEdit
           AnchorSideTop.Side = asrBottom
-          Left = 5
+          Left = 4
           Height = 29
-          Top = 81
-          Width = 106
+          Top = 78
+          Width = 103
           Alignment = taLeftJustify
-          BorderSpacing.Left = 5
-          BorderSpacing.Top = 5
+          BorderSpacing.Left = 4
+          BorderSpacing.Top = 4
           Caption = 'Extract Flat'
           TabOrder = 3
         end
@@ -219,12 +218,12 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
           AnchorSideTop.Control = Label3
           AnchorSideRight.Control = VersionsList
           AnchorSideRight.Side = asrBottom
-          Left = 95
-          Height = 100
-          Top = 115
-          Width = 610
+          Left = 93
+          Height = 80
+          Top = 111
+          Width = 471
           Anchors = [akTop, akLeft, akRight]
-          BorderSpacing.Left = 7
+          BorderSpacing.Left = 6
           ScrollBars = ssAutoHorizontal
           TabOrder = 4
         end
@@ -234,13 +233,13 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
           AnchorSideRight.Side = asrBottom
           AnchorSideBottom.Control = VersionsList
           AnchorSideBottom.Side = asrBottom
-          Left = 710
+          Left = 568
           Height = 33
           Hint = 'Reload versions.'#13#10'If this package is from GitHub branches will also be fetched.'
-          Top = 5
-          Width = 20
+          Top = 4
+          Width = 16
           Anchors = [akTop, akRight, akBottom]
-          BorderSpacing.Right = 5
+          BorderSpacing.Right = 4
           Images = ImageList1
           ImageIndex = 0
           OnClick = DoRefreshVersions
@@ -253,7 +252,7 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
     object LoadingPage: TPage
       object LoadingLabel: TLabel
         Left = 0
-        Height = 25
+        Height = 20
         Top = 0
         Width = 735
         Align = alTop
@@ -267,8 +266,8 @@ object SimbaPackageInstallForm: TSimbaPackageInstallForm
     end
   end
   object ImageList1: TImageList
-    Left = 40
-    Top = 296
+    Left = 32
+    Top = 237
     Bitmap = {
       4C7A0100000010000000100000002E0100000000000078DAADD3B14BC34014C7
       F180D2161DC5DDC1C1E4DCDC75B2E0E0A85D9C1D046729D8F4A18B149C454428
