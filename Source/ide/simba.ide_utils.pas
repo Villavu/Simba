@@ -95,7 +95,10 @@ begin
     end;
 
     if Assigned(FatalException) then
-      Result := FatalException.ToString;
+      if (FatalException is Exception) then
+        Result := Exception(FatalException).Message
+      else
+        Result := FatalException.ToString;
   finally
     Free();
   end;
@@ -116,7 +119,10 @@ begin
       IdleProc();
 
     if Assigned(FatalException) then
-      Result := FatalException.ToString;
+      if (FatalException is Exception) then
+        Result := Exception(FatalException).Message
+      else
+        Result := FatalException.ToString;
   finally
     Free();
   end;

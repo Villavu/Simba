@@ -120,7 +120,7 @@ implementation
 
 uses
   LCLType, LCLIntf, LazUTF8, Themes, SynEdit,
-  simba.vartype_string;
+  simba.vartype_string, simba.misc;
 
 const
   pkgGridLineColor = $CCCCCC;
@@ -191,11 +191,15 @@ begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
+    Canvas.Font.Size := GetFontSize(Self, 2);
 
-    ItemHeight := Round(Canvas.TextHeight('Fj') * 3.2);
+    with Canvas.TextExtent('Custom Install') do
+    begin
+      ItemHeight := Round(Height * 2.8);
 
-    FButtonWidth := Round(Canvas.TextWidth('Custom Install') * 1.2);
-    FButtonHeight := Round(Canvas.TextHeight('Fj') * 1.2);
+      FButtonWidth := Width;
+      FButtonHeight := Height;
+    end;
   finally
     Free();
   end;
