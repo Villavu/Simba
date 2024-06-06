@@ -492,7 +492,7 @@ begin
   General.Layout             := TSimbaSetting_BinaryString.Create(Self, 'General', 'Layout', '');
   General.Notes              := TSimbaSetting_BinaryString.Create(Self, 'General', 'Notes', '');
   General.RecentFiles        := TSimbaSetting_BinaryString.Create(Self, 'General', 'RecentFiles', '');
-  General.CustomFontSize     := TSimbaSetting_Integer.Create(Self, 'General', 'CustomFontSize', GetDefaultFontSize() + 1);
+  General.CustomFontSize     := TSimbaSetting_Integer.Create(Self, 'General', 'CustomFontSize', GetDefaultFontSize());
   General.ToolbarSize        := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSize', 24);
   General.ToolbarPosition    := TSimbaSetting_String.Create(Self, 'General', 'ToolbarPosition', 'Top');
   General.ToolbarSpacing     := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSpacing', 2);

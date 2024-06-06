@@ -10,7 +10,7 @@ unit simba.ide_package_components;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, stdctrls, extctrls, grids,
+  classes, sysutils, forms, controls, graphics, stdctrls, extctrls, grids, LMessages,
   simba.base, simba.ide_package;
 
 type
@@ -97,6 +97,8 @@ type
     FHomepageHovered: Boolean;
     FOnAutoUpdateChange: TNotifyEvent;
 
+    procedure WMMouseWheel(var Message: TLMMouseEvent); message LM_MOUSEWHEEL;
+
     procedure SetAutoUpdateChecked(AValue: Boolean);
     procedure DoAutoUpdateChanged(Sender: TObject);
     procedure GetAutoFillColumnInfo(const Index: Integer; var aMin, aMax, aPriority: Integer); override;
@@ -137,16 +139,16 @@ end;
 
 function TPackageListBox.GetInstallButtonRect(Rect: TRect): TRect;
 begin
-  Result.Top    := Rect.CenterPoint.Y - 2 - FButtonHeight;
-  Result.Bottom := Rect.CenterPoint.Y - 2;
+  Result.Top    := Rect.CenterPoint.Y - 1 - FButtonHeight;
+  Result.Bottom := Rect.CenterPoint.Y - 1;
   Result.Left   := Rect.Right - FButtonWidth - 10;
   Result.Right  := Rect.Right - 10;
 end;
 
 function TPackageListBox.GetAdvancedButtonRect(Rect: TRect): TRect;
 begin
-  Result.Top    := Rect.CenterPoint.Y + 2;
-  Result.Bottom := Rect.CenterPoint.Y + 2 + FButtonHeight;
+  Result.Top    := Rect.CenterPoint.Y + 1;
+  Result.Bottom := Rect.CenterPoint.Y + 1 + FButtonHeight;
   Result.Left   := Rect.Right - FButtonWidth - 10;
   Result.Right  := Rect.Right - 10;
 end;
@@ -191,15 +193,18 @@ begin
   with TBitmap.Create() do
   try
     Canvas.Font := Self.Font;
-    Canvas.Font.Size := GetFontSize(Self, 2);
+    Canvas.Font.Size := GetFontSize(Self, 1);
 
     with Canvas.TextExtent('Custom Install') do
     begin
-      ItemHeight := Round(Height * 2.8);
-
-      FButtonWidth := Width;
-      FButtonHeight := Height;
+      FButtonWidth := Width + 10;
+      FButtonHeight := Height + 4;
     end;
+
+    ItemHeight := Canvas.TextHeight('TaylorSwift') * 2;
+    Canvas.Font.Bold := True;
+    Canvas.Font.Size := Canvas.Font.Size + 1;
+    ItemHeight := ItemHeight + Canvas.TextHeight('MyPackage');
   finally
     Free();
   end;
@@ -226,27 +231,9 @@ procedure TPackageListBox.DoDrawItem(Control: TWinControl; Index: Integer; ARect
     FBuffer.Canvas.TextRect(ButtonRect, ButtonRect.Left, ButtonRect.Top, ButtonText, TextStyle);
   end;
 
-  function CropText(Text: String; Area: TRect): String;
-  var
-    Test: TRect;
-  begin
-    Result := Text;
-
-    while Length(Result) > 0 do
-    begin
-      Test := Area;
-      DrawText(FBuffer.Canvas.Handle, PChar(Result), Length(Result), Test, DT_LEFT or DT_CALCRECT or DT_WORDBREAK);
-      if Test.Bottom <= Area.Bottom then
-        Break;
-
-      SetLength(Result, Result.LastIndexOf(' ') - 1);
-    end;
-  end;
-
 var
   Package: TSimbaPackage;
   TextStyle: TTextStyle;
-  DescRect: TRect;
   Space: TRect;
 begin
   Package := Items.Objects[Index] as TSimbaPackage;
@@ -265,7 +252,7 @@ begin
 
   FBuffer.Canvas.Font.Color := clBlack;
   FBuffer.Canvas.Font.Bold := True;
-  FBuffer.Canvas.TextOut(ImageList.Width + 20, 5, Package.Name);
+  FBuffer.Canvas.TextOut(ImageList.Width + 20, 3, Package.Name);
   FBuffer.Canvas.Font.Size := FBuffer.Canvas.Font.Size - 1;
 
   if Package.HasUpdate() then
@@ -304,30 +291,22 @@ begin
 
   FBuffer.Canvas.Font.Size := FBuffer.Canvas.Font.Size + 1;
 
-  Space.Top    := FBuffer.Canvas.TextHeight(Package.Name) + 7;
+  Space.Top    := FBuffer.Canvas.TextHeight(Package.Name) + 3;
   Space.Left   := 55+1;
   Space.Right  := FBuffer.Width - FButtonWidth - 25;
-  Space.Bottom := FBuffer.Height - 10;
-
-  FBuffer.Canvas.Font.Size := FBuffer.Canvas.Font.Size - 3;
+  Space.Bottom := FBuffer.Height - 3;
 
   TextStyle := FBuffer.Canvas.TextStyle;
+  TextStyle.SingleLine := False;
   TextStyle.Layout := tlTop;
 
-  DescRect := Space;
-  FBuffer.Canvas.TextRect(DescRect, DescRect.Left, DescRect.Top, 'Latest Version: ' + Package.LatestVersion, TextStyle);
-
-  DescRect.Top += FBuffer.Canvas.TextHeight('Fj') + 1;
-  FBuffer.Canvas.TextRect(DescRect, DescRect.Left, DescRect.Top, 'Installed Version: ' + Package.InstalledVersion, TextStyle);
-
-  //FBuffer.Canvas.Font.Size := Canvas.Font.Size - 1;
-  //
-  //TextStyle := FBuffer.Canvas.TextStyle;
-  //TextStyle.Wordbreak := True;
-  //TextStyle.SingleLine := False;
-  //
-  //FBuffer.Canvas.TextRect(DescRect, DescRect.Left, DescRect.Top, CropText(Package.Info.Description, DescRect), TextStyle);
-  //FBuffer.Canvas.Font.Size := Canvas.Font.Size + 1;
+  FBuffer.Canvas.Font.Size := FBuffer.Canvas.Font.Size - 1;
+  FBuffer.Canvas.TextRect(
+    Space, Space.Left, Space.Top,
+    'Latest Version: ' + Package.LatestVersion + LineEnding +
+    'Installed Version: ' + Package.InstalledVersion,
+    TextStyle
+  );
 
   Canvas.Draw(ARect.Left, ARect.Top, FBuffer);
 end;
@@ -415,6 +394,12 @@ end;
 function TPackageListBox.Add(Package: TSimbaPackage): Integer;
 begin
   Result := Items.AddObject('', Package);
+end;
+
+procedure TPackageInfoGrid.WMMouseWheel(var Message: TLMMouseEvent);
+begin
+  if Assigned(Parent) then
+    Parent.Dispatch(Message);
 end;
 
 procedure TPackageInfoGrid.SetAutoUpdateChecked(AValue: Boolean);
@@ -516,11 +501,12 @@ begin
 
   Height := CellRect(ColCount - 1, RowCount - 1).Bottom;
 
-  with CellRect(1, 4) do
-  begin
-    FCheckBox.Top  := CenterPoint.Y - (FCheckBox.Height div 2);
-    FCheckBox.Left := Left + 5;
-  end;
+  if (FCheckBox <> nil) then
+    with CellRect(1, 4) do
+    begin
+      FCheckBox.Top  := CenterPoint.Y - (FCheckBox.Height div 2) + 1;
+      FCheckBox.Left := Left + 5;
+    end;
 end;
 
 constructor TPackageInfoGrid.Create(AOwner: TComponent);
@@ -687,7 +673,6 @@ begin
   ColCount := 1;
 
   Cells[0, 0] := 'Package Version History';
-
   DoFontCalculate();
 end;
 

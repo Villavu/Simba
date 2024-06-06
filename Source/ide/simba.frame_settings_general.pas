@@ -52,7 +52,7 @@ type
 implementation
 
 uses
-  ATScrollBar, simba.settings;
+  simba.settings;
 
 {$R *.lfm}
 
@@ -60,11 +60,7 @@ procedure TSimbaGeneralFrame.FontSizeTrackBarChange(Sender: TObject);
 begin
   SimbaSettings.General.CustomFontSize.Value := FontSizeTrackBar.Position;
 
-  FontSizeLabel.Caption := IfThen(
-    SimbaSettings.General.CustomFontSize.IsDefault(),
-    'Font Size: Default',
-    'Font Size: ' + IntToStr(FontSizeTrackBar.Position)
-  );
+  FontSizeLabel.Caption := 'Font Size: ' + IntToStr(FontSizeTrackBar.Position);
 end;
 
 procedure TSimbaGeneralFrame.ToolbarPositionComboBoxChange(Sender: TObject);

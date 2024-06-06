@@ -280,7 +280,7 @@ uses
   simba.ide_tab,
   simba.aca, simba.dtmeditor, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
   simba.ide_simpleformatter, simba.ide_theme,
-  simba.threading, simba.ide_editor, simba.vartype_string;
+  simba.threading, simba.ide_editor, simba.vartype_string, simba.misc;
 
 procedure TSimbaMainForm.HandleException(Sender: TObject; E: Exception);
 
@@ -349,9 +349,11 @@ procedure TSimbaMainForm.SetCustomFontSize(Value: Integer);
 var
   I: Integer;
 begin
-  HandleNeeded();
   for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    Screen.CustomForms[I].HandleNeeded();
     Screen.CustomForms[I].Font.Size := Value;
+  end;
 end;
 
 procedure TSimbaMainForm.SetLayoutLocked(Value: Boolean);
