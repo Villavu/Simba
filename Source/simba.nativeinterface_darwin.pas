@@ -823,7 +823,7 @@ end;
 
 procedure TSimbaNativeInterface_Darwin.OpenDirectory(Path: String);
 begin
-  SimbaProcess.RunCommand('open', [Path]);
+  RunProcess('open', [Path]);
 end;
 
 procedure TSimbaNativeInterface_Darwin.BuildKeyMap;

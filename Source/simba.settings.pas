@@ -481,7 +481,7 @@ begin
 
   if Screen.Fonts.IndexOf('Cascadia Code Semilight') > -1 then
     SynDefaultFontName := 'Cascadia Code Semilight';
-  SynDefaultFontSize  := SynDefaultFontSize + 1;
+  SynDefaultFontSize := SynDefaultFontSize + 1;
 
   FFirstLaunch := True;
   FList := TSettingList.Create();

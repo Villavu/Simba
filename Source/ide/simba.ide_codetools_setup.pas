@@ -14,7 +14,7 @@ implementation
 
 uses
   simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight,
-  simba.ide_initialization, simba.process, simba.env, simba.ide_events;
+  simba.ide_initialization, simba.ide_utils, simba.env, simba.ide_events;
 
 procedure SetupCodeTools;
 var
@@ -25,7 +25,7 @@ begin
   List := nil;
 
   try
-    List := SimbaProcess.RunDump(Application.ExeName, ['--dumpcompiler']);
+    List := RunDump(Application.ExeName, ['--dumpcompiler']);
 
     for I := 0 to List.Count - 1 do
     begin

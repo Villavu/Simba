@@ -13,23 +13,13 @@ procedure ImportLCLMisc(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  process, spin, pipes, menus, graphics, ListFilterEdit, StdCtrls, Buttons, ButtonPanel,
+  Spin, Menus, Graphics, ListFilterEdit, StdCtrls, Buttons, ButtonPanel,
   lptypes, ffi;
 
 type
   PBitmap = ^TBitmap;
   PNotifyEvent = ^TNotifyEvent;
-  PRect = ^TRect;
-  PHandle = ^THandle;
   PComponent = ^TComponent;
-  PSeekOrigin = ^TSeekOrigin;
-  PStrings = ^TStrings;
-  PInputPipeStream = ^TInputPipeStream;
-  POutputPipeStream = ^TOutputPipeStream;
-  PProcess = ^TProcess;
-  PProcessOptions = ^TProcessOptions;
-  PProcessPriority = ^TProcessPriority;
-  PStartupOptions = ^TStartupOptions;
 
   PCustomFloatSpinEdit = ^TCustomFloatSpinEdit;
   PCustomSpinEdit = ^TCustomSpinEdit;
@@ -44,246 +34,6 @@ type
   PListBox = ^TListBox;
   PButtonPanel = ^TButtonPanel;
   PPanelButtons = ^TPanelButtons;
-
-procedure _LapeOutputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  Pint64(Result)^ := POutputPipeStream(Params^[0])^.Seek(Pint64(Params^[1])^, PSeekOrigin(Params^[2])^);
-end;
-
-procedure _LapeOutputPipeStream_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := POutputPipeStream(Params^[0])^.Read(PPointer(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeOutputPipeStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  POutputPipeStream(Result)^ := TOutputPipeStream.Create(PHandle(Params^[0])^);
-end;
-
-procedure _LapeInputPipeStream_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PInputPipeStream(Params^[0])^.Write(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeInputPipeStream_Seek(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  Pint64(Result)^ := PInputPipeStream(Params^[0])^.Seek(Pint64(Params^[1])^, PSeekOrigin(Params^[2])^);
-end;
-
-procedure _LapeInputPipeStream_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PInputPipeStream(Params^[0])^.Read(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-procedure _LapeInputPipeStream_NumBytesAvailable_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PUInt32(Result)^ := PInputPipeStream(Params^[0])^.NumBytesAvailable;
-end;
-
-procedure _LapeInputPipeStream_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInputPipeStream(Result)^ := TInputPipeStream.Create(PHandle(Params^[0])^);
-end;
-
-procedure _LapeProcess_Execute(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.Execute();
-end;
-
-procedure _LapeProcess_Resume(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PProcess(Params^[0])^.Resume();
-end;
-
-procedure _LapeProcess_Suspend(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PProcess(Params^[0])^.Suspend();
-end;
-
-procedure _LapeProcess_Terminate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PProcess(Params^[0])^.Terminate(PInteger(Params^[1])^);
-end;
-
-procedure _LapeProcess_WaitOnExit(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PProcess(Params^[0])^.WaitOnExit();
-end;
-
-procedure _LapeProcess_WindowRect_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PRect(Result)^ := PProcess(Params^[0])^.WindowRect;
-end;
-
-procedure _LapeProcess_WindowRect_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.WindowRect := PRect(Params^[1])^;
-end;
-
-procedure _LapeProcess_ProcessHandle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PHandle(Result)^ := PProcess(Params^[0])^.ProcessHandle;
-end;
-
-procedure _LapeProcess_ThreadHandle_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PHandle(Result)^ := PProcess(Params^[0])^.ThreadHandle;
-end;
-
-procedure _LapeProcess_ProcessID_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PProcess(Params^[0])^.ProcessID;
-end;
-
-procedure _LapeProcess_ThreadID_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PProcess(Params^[0])^.ThreadID;
-end;
-
-procedure _LapeProcess_ExitStatus_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PProcess(Params^[0])^.ExitStatus;
-end;
-
-procedure _LapeProcess_InheritHandles_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PProcess(Params^[0])^.InheritHandles;
-end;
-
-procedure _LapeProcess_InheritHandles_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.InheritHandles := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeProcess_PipeBufferSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  Pcardinal(Result)^ := PProcess(Params^[0])^.PipeBufferSize;
-end;
-
-procedure _LapeProcess_PipeBufferSize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.PipeBufferSize := Pcardinal(Params^[1])^;
-end;
-
-procedure _LapeProcess_Active_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PProcess(Params^[0])^.Active;
-end;
-
-procedure _LapeProcess_Active_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.Active := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeProcess_CommandLine_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PProcess(Params^[0])^.CommandLine;
-end;
-
-procedure _LapeProcess_CommandLine_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.CommandLine := PString(Params^[1])^;
-end;
-
-procedure _LapeProcess_Executable_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PProcess(Params^[0])^.Executable;
-end;
-
-procedure _LapeProcess_Executable_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.Executable := PString(Params^[1])^;
-end;
-
-procedure _LapeProcess_Parameters_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStrings(Result)^ := PProcess(Params^[0])^.Parameters;
-end;
-
-procedure _LapeProcess_Parameters_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.Parameters := PStrings(Params^[1])^;
-end;
-
-procedure _LapeProcess_CurrentDirectory_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PProcess(Params^[0])^.CurrentDirectory;
-end;
-
-procedure _LapeProcess_CurrentDirectory_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.CurrentDirectory := PString(Params^[1])^;
-end;
-
-procedure _LapeProcess_Environment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStrings(Result)^ := PProcess(Params^[0])^.Environment;
-end;
-
-procedure _LapeProcess_Environment_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.Environment := PStrings(Params^[1])^;
-end;
-
-procedure _LapeProcess_Options_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcessOptions(Result)^ := PProcess(Params^[0])^.Options;
-end;
-
-procedure _LapeProcess_Options_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.Options := PProcessOptions(Params^[1])^;
-end;
-
-procedure _LapeProcess_Priority_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcessPriority(Result)^ := PProcess(Params^[0])^.Priority;
-end;
-
-procedure _LapeProcess_Priority_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.Priority := PProcessPriority(Params^[1])^;
-end;
-
-procedure _LapeProcess_StartupOptions_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PStartupOptions(Result)^ := PProcess(Params^[0])^.StartupOptions;
-end;
-
-procedure _LapeProcess_StartupOptions_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Params^[0])^.StartupOptions := PStartupOptions(Params^[1])^;
-end;
-
-procedure _LapeProcess_Running_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PProcess(Params^[0])^.Running;
-end;
-
-procedure _LapeProcess_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PProcess(Result)^ := TProcess.Create(PComponent(Params^[0])^);
-end;
-
-procedure _LapeProcess_Input_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  POutputPipeStream(Result)^ := PProcess(Params^[0])^.Input;
-end;
-
-procedure _LapeProcess_Output_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInputPipeStream(Result)^ := PProcess(Params^[0])^.Output;
-end;
-
-procedure _LapeProcess_Stderr_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInputPipeStream(Result)^ := PProcess(Params^[0])^.Stderr;
-end;
-
-procedure _LapeProcess_ExitCode_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PProcess(Params^[0])^.ExitCode;
-end;
 
 procedure _LapeCustomFloatSpinEdit_DecimalPlaces_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -817,46 +567,6 @@ begin
     addClass('TLazSpinEdit', 'TLazCustomSpinEdit');
     addClassConstructor('TLazSpinEdit', '(TheOwner: TLazComponent)', @_LapeSpinEdit_Create);
 
-    addGlobalType('(poRunSuspended,poWaitOnExit,poUsePipes,poStderrToOutPut,poNoConsole,poNewConsole,poDefaultErrorMode,poNewProcessGroup,poDebugProcess,poDebugOnlyThisProcess,poDetached,poPassInput,poRunIdle)', 'TLazProcessOption');
-    addGlobalType('(ppHigh,ppIdle,ppNormal,ppRealTime)', 'TLazProcessPriority');
-    addGlobalType('set of TLazProcessOption', 'TLazProcessOptions');
-
-    addClass('TLazOutputPipeStream', 'TLazHandleStream');
-    addClassConstructor('TLazOutputPipeStream', '(AHandle: TLazHandle)', @_LapeOutputPipeStream_Create);
-
-    addClass('TLazInputPipeStream', 'TLazHandleStream');
-    addProperty('TLazInputPipeStream', 'NumBytesAvailable', 'UInt32', @_LapeInputPipeStream_NumBytesAvailable_Read);
-    addClassConstructor('TLazInputPipeStream', '(AHandle: TLazHandle)', @_LapeInputPipeStream_Create);
-
-    addClass('TLazProcess', 'TLazComponent');
-    addGlobalFunc('procedure TLazProcess.Execute;', @_LapeProcess_Execute);
-    addGlobalFunc('function TLazProcess.Resume: Integer;', @_LapeProcess_Resume);
-    addGlobalFunc('function TLazProcess.Suspend: Integer;', @_LapeProcess_Suspend);
-    addGlobalFunc('function TLazProcess.Terminate(AExitCode : Integer): Boolean;', @_LapeProcess_Terminate);
-    addGlobalFunc('function TLazProcess.WaitOnExit: Boolean;', @_LapeProcess_WaitOnExit);
-    addProperty('TLazProcess', 'WindowRect', 'TLazRect', @_LapeProcess_WindowRect_Read, @_LapeProcess_WindowRect_Write);
-    addProperty('TLazProcess', 'ProcessHandle', 'TLazHandle', @_LapeProcess_ProcessHandle_Read);
-    addProperty('TLazProcess', 'ThreadHandle', 'TLazHandle', @_LapeProcess_ThreadHandle_Read);
-    addProperty('TLazProcess', 'ProcessID', 'Integer', @_LapeProcess_ProcessID_Read);
-    addProperty('TLazProcess', 'ThreadID', 'Integer', @_LapeProcess_ThreadID_Read);
-    addProperty('TLazProcess', 'Input', 'TLazOutputPipeStream', @_LapeProcess_Input_Read);
-    addProperty('TLazProcess', 'Output', 'TLazInputPipeStream', @_LapeProcess_Output_Read);
-    addProperty('TLazProcess', 'Stderr', 'TLazInputPipeStream', @_LapeProcess_Stderr_Read);
-    addProperty('TLazProcess', 'ExitStatus', 'Integer', @_LapeProcess_ExitStatus_Read);
-    addProperty('TLazProcess', 'ExitCode', 'Integer', @_LapeProcess_ExitCode_Read);
-    addProperty('TLazProcess', 'InheritHandles', 'Boolean', @_LapeProcess_InheritHandles_Read, @_LapeProcess_InheritHandles_Write);
-    addProperty('TLazProcess', 'PipeBufferSize', 'UInt32', @_LapeProcess_PipeBufferSize_Read, @_LapeProcess_PipeBufferSize_Write);
-    addProperty('TLazProcess', 'Active', 'Boolean', @_LapeProcess_Active_Read, @_LapeProcess_Active_Write);
-    addProperty('TLazProcess', 'CommandLine', 'String', @_LapeProcess_CommandLine_Read, @_LapeProcess_CommandLine_Write);
-    addProperty('TLazProcess', 'Executable', 'String', @_LapeProcess_Executable_Read, @_LapeProcess_Executable_Write);
-    addProperty('TLazProcess', 'Parameters', 'TLazStrings', @_LapeProcess_Parameters_Read, @_LapeProcess_Parameters_Write);
-    addProperty('TLazProcess', 'CurrentDirectory', 'String', @_LapeProcess_CurrentDirectory_Read, @_LapeProcess_CurrentDirectory_Write);
-    addProperty('TLazProcess', 'Environment', 'TLazStrings', @_LapeProcess_Environment_Read, @_LapeProcess_Environment_Write);
-    addProperty('TLazProcess', 'Options', 'TLazProcessOptions', @_LapeProcess_Options_Read, @_LapeProcess_Options_Write);
-    addProperty('TLazProcess', 'Priority', 'TLazProcessPriority', @_LapeProcess_Priority_Read, @_LapeProcess_Priority_Write);
-    addProperty('TLazProcess', 'Running', 'Boolean', @_LapeProcess_Running_Read);
-    addClassConstructor('TLazProcess', '(AOwner : TLazComponent)', @_LapeProcess_Create);
-
     addClass('TLazMenu', 'TLazComponent');
     addClass('TLazMenuItem', 'TLazComponent');
     addGlobalFunc('function TLazMenuItem.Find(const ACaption: string): TLazMenuItem;', @_LapeMenuItem_Find);
@@ -871,11 +581,11 @@ begin
     addGlobalFunc('procedure TLazMenuItem.Delete(Index: Integer);', @_LapeMenuItem_Delete);
     addGlobalFunc('procedure TLazMenuItem.Insert(Index: Integer; Item: TLazMenuItem);', @_LapeMenuItem_Insert);
     addGlobalFunc('procedure TLazMenuItem.Remove(Item: TLazMenuItem);', @_LapeMenuItem_Remove);
-    addGlobalFunc('function TLazMenuItem.IsCheckItem: boolean;', @_LapeMenuItem_IsCheckItem);
+    addGlobalFunc('function TLazMenuItem.IsCheckItem: Boolean;', @_LapeMenuItem_IsCheckItem);
     addGlobalFunc('function TLazMenuItem.IsLine: Boolean;', @_LapeMenuItem_IsLine);
-    addGlobalFunc('function TLazMenuItem.IsInMenuBar: boolean;', @_LapeMenuItem_IsInMenuBar);
+    addGlobalFunc('function TLazMenuItem.IsInMenuBar: Boolean;', @_LapeMenuItem_IsInMenuBar);
     addGlobalFunc('procedure TLazMenuItem.Clear;', @_LapeMenuItem_Clear);
-    addGlobalFunc('function TLazMenuItem.HasBitmap: boolean;', @_LapeMenuItem_HasBitmap);
+    addGlobalFunc('function TLazMenuItem.HasBitmap: Boolean;', @_LapeMenuItem_HasBitmap);
     addGlobalFunc('function TLazMenuItem.AddMenu(s: string): TLazMenuItem;', @_LapeMenuItem_AddMenu);
     addProperty('TLazMenuItem', 'Count', 'Integer', @_LapeMenuItem_Count_Read);
     addProperty('TLazMenuItem', 'Items', 'TLazMenuItem', @_LapeMenuItem_Items_Read);
@@ -885,7 +595,7 @@ begin
     addProperty('TLazMenuItem', 'Menu', 'TLazMenu', @_LapeMenuItem_Menu_Read);
     addProperty('TLazMenuItem', 'Parent', 'TLazMenuItem', @_LapeMenuItem_Parent_Read);
     addProperty('TLazMenuItem', 'Command', 'Int16', @_LapeMenuItem_Command_Read);
-    addProperty('TLazMenuItem', 'AutoCheck', 'boolean', @_LapeMenuItem_AutoCheck_Read, @_LapeMenuItem_AutoCheck_Write);
+    addProperty('TLazMenuItem', 'AutoCheck', 'Boolean', @_LapeMenuItem_AutoCheck_Read, @_LapeMenuItem_AutoCheck_Write);
     addProperty('TLazMenuItem', 'Default', 'Boolean', @_LapeMenuItem_Default_Read, @_LapeMenuItem_Default_Write);
     addProperty('TLazMenuItem', 'Bitmap', 'TLazBitmap', @_LapeMenuItem_Bitmap_Read, @_LapeMenuItem_Bitmap_Write);
     addProperty('TLazMenuItem', 'GroupIndex', 'Byte', @_LapeMenuItem_GroupIndex_Read, @_LapeMenuItem_GroupIndex_Write);
@@ -923,3 +633,4 @@ begin
 end;
 
 end.
+

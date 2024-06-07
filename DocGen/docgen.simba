@@ -145,7 +145,7 @@ begin
   CleanAPI();
   BuildAPI();
 
-  WriteLn('Sphinx exit code: ', RunCommand('sphinx-build', ['-q', '-E', 'DocGen/source', 'DocGen/build'], SphinxOutput));
+  WriteLn('Sphinx exit code: ', RunProcess('sphinx-build', ['-q', '-E', 'DocGen/source', 'DocGen/build'], SphinxOutput));
   if (SphinxOutput <> '') then
     WriteLn(SphinxOutput);
 

@@ -16,6 +16,9 @@ uses
   simba.script, simba.image, simba.process,
   simba.vartype_pointarray, simba.vartype_ordarray, simba.vartype_stringarray;
 
+type
+  PProcessID = ^TProcessID;
+
 procedure _LapeWrite(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   Debug(PString(Params^[0])^);

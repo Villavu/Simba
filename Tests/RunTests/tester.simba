@@ -6,7 +6,7 @@ begin
   begin
     WriteLn('Testing: ' + PathExtractNameWithoutExt(FileName));
 
-    if RunScript(FileName, ['--silent=true'], Output) = 0 then
+    if RunSimbaScript(FileName, ['--silent=true'], Output) then
     begin
       WriteLn('Passed');
 

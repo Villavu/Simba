@@ -834,7 +834,7 @@ end;
 
 procedure TSimbaNativeInterface_Linux.OpenDirectory(Path: String);
 begin
-  SimbaProcess.RunCommand('xdg-open', [Path]);
+  RunProcess('xdg-open', [Path]);
 end;
 
 end.

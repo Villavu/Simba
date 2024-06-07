@@ -10,304 +10,397 @@ unit simba.process;
 interface
 
 uses
-  classes, sysutils,
-  simba.base;
+  Classes, SysUtils, Process,
+  simba.base, simba.baseclass;
 
 type
-  PProcessID = ^TProcessID;
-  PProcessExitStatus = ^TProcessExitStatus;
-
   TProcessID = type Integer;
-  TProcessExitStatus = type Integer;
+  TProcessExitCode = type Integer;
 
-  TSimbaProcess = record
-    function GetScriptPID: TProcessID;
-    function GetScriptParameters: TStringArray;
-    function GetScriptParameter(Name: String): String;
+  TRunningProcess = class(TSimbaBaseClass)
+  protected
+    FProcess: TProcess;
+    FPID: TProcessID;
 
-    function IsProcess64Bit(PID: TProcessID): Boolean;
-    function IsProcessRunning(PID: TProcessID): Boolean;
-    function GetProcessPath(PID: TProcessID): String;
-    function GetProcessMemUsage(PID: TProcessID): Int64;
-    function GetProcessStartTime(PID: TProcessID): TDateTime;
-    function GetProcessRunnningTime(PID: TProcessID): UInt64;
-    procedure TerminateProcess(PID: TProcessID);
+    function GetExitCode: TProcessExitCode;
+    function GetRunning: Boolean;
+  public
+    constructor Create(Process: TProcess); reintroduce;
+    destructor Destroy; override;
 
-    function RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload;
-    function RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID; overload;
+    function WaitOnExit: Boolean; overload;
+    function WaitOnExit(Timeout: Integer): Boolean; overload;
+    function Terminate(AExitCode: Integer): Boolean;
 
-    function RunCommand(Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus; overload;
-    function RunCommand(Executable: String; Commands: TStringArray): TProcessID; overload;
+    procedure WaitUntilFinishedOrTimeout(Timeout: Integer = 0);
 
-    function RunCommandTimeout(Executable: String; Commands: TStringArray; out Output: String; Timeout: Int32): Boolean;
-
-    function RunDump(FileName: String; Commands: TStringArray): TStringList;
-
-    function RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus; overload;
-    function RunScript(Script: String; Parameters: TStringArray): TProcessID; overload;
-    function RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID;
+    property Running: Boolean read GetRunning;
+    property PID: TProcessID read FPID;
+    property ExitCode: TProcessExitCode read GetExitCode;
   end;
 
-var
-  SimbaProcess: TSimbaProcess;
+  TRunningProcessPiped = class(TRunningProcess)
+  protected
+    function GetReadBytesAvailable: Integer;
+  public
+    // read from stdout
+    function Read(Buf: PByte; Count: Integer): Integer;
+    function ReadString: String;
+
+    // write to stdin
+    function Write(Buf: PByte; Count: Integer): Integer;
+    function WriteString(Str: String): Integer;
+
+    function WaitUntilFinishedOrTimeout(Timeout: Integer = 0): String; reintroduce;
+
+    property ReadBytesAvailable: Integer read GetReadBytesAvailable;
+  end;
+
+  function StartProcess(Executable: String; Params: TStringArray): TRunningProcess; overload;
+  function StartProcess(Executable: String; Params: TStringArray; Cwd: String; Env: TStringArray): TRunningProcess; overload;
+
+  function StartProcessPiped(Executable: String; Params: TStringArray): TRunningProcessPiped; overload;
+  function StartProcessPiped(Executable: String; Params: TStringArray; Cwd: String; Env: TStringArray): TRunningProcessPiped; overload;
+
+  function RunProcess(Executable: String; Params: TStringArray): TProcessExitCode;
+  function RunProcess(Executable: String; Params: TStringArray; out Output: String): TProcessExitCode;
+
+  function RunProcessInDir(Directory, Executable: String; Params: TStringArray): TProcessExitCode; overload;
+  function RunProcessInDir(Directory, Executable: String; Params: TStringArray; out Output: String): TProcessExitCode; overload;
+
+  function RunProcessTimeout(Executable: String; Params: TStringArray; Timeout: Integer): Boolean; overload;
+  function RunProcessTimeout(Executable: String; Params: TStringArray; Timeout: Integer; out Output: String): Boolean; overload;
+
+  function IsProcess64Bit(PID: TProcessID): Boolean;
+  function IsProcessRunning(PID: TProcessID): Boolean;
+  function GetProcessPath(PID: TProcessID): String;
+  function GetProcessMemUsage(PID: TProcessID): Int64;
+  function GetProcessStartTime(PID: TProcessID): TDateTime;
+  function GetProcessAge(PID: TProcessID): UInt64;
+  procedure TerminateProcess(PID: TProcessID);
+
+  function RunScript(Script: String; Params: TStringArray): Boolean; overload;
+  function RunScript(Script: String; Params: TStringArray; out Output: String): Boolean; overload;
+
+  function StartScript(Script: String; Params: TStringArray): TRunningProcess;
+  function StartScriptPiped(Script: String; Params: TStringArray): TRunningProcessPiped;
 
 implementation
 
 uses
-  Forms, Process, DateUtils,
-  simba.env, simba.fs, simba.nativeinterface, simba.vartype_string;
+  Forms, DateUtils,
+  simba.env, simba.nativeinterface, simba.vartype_string;
 
-type
-  TProcessTimeout = class(TProcess)
-  public
-    Timeout: UInt64;
-
-    procedure Idle(Sender, Context: TObject; Status: TRunCommandEventCode; const Message: string);
-  end;
-
-procedure TProcessTimeout.Idle(Sender, Context: TObject; Status: TRunCommandEventCode; const Message: string);
-begin
-  if (Status = RunCommandIdle) then
-  begin
-    if (GetTickCount64() > Timeout) then
-      Terminate(255);
-
-    Sleep(RunCommandSleepTime);
-  end;
-end;
-
-function RunCommandTimeout(Executable: TProcessString; Commands: array of TProcessString; out OutputString: String; Timeout: Int32): Boolean;
-Var
-  Process: TProcessTimeout;
-  ExitStatus: Int32;
-  ErrorString: String;
-  Command: TProcessString;
-begin
-  Process := TProcessTimeout.Create(nil);
-  Process.OnRunCommandEvent := @Process.Idle;
-  Process.Timeout := GetTickCount64() + Timeout;
-  Process.Options := Process.Options + [poRunIdle, poStderrToOutPut];
-  Process.Executable := Executable;
-
-  for Command in Commands do
-    Process.Parameters.Add(Command);
-
-  try
-    Result := (Process.RunCommandLoop(OutputString, ErrorString, ExitStatus) = 0) and (ExitStatus = 0) and (GetTickCount64() < Process.Timeout);
-  finally
-    Process.Free();
-  end;
-end;
-
-function TSimbaProcess.GetScriptPID: TProcessID;
-begin
-  Result := GetProcessID();
-end;
-
-function TSimbaProcess.GetScriptParameters: TStringArray;
-var
-  I: Integer;
-begin
-  SetLength(Result, ParamCount + 1);
-  for I := 0 to ParamCount do
-    Result[I] := ParamStr(I);
-end;
-
-function TSimbaProcess.GetScriptParameter(Name: String): String;
-begin
-  Result := Application.GetOptionValue(Name);
-end;
-
-function TSimbaProcess.IsProcess64Bit(PID: TProcessID): Boolean;
+function IsProcess64Bit(PID: TProcessID): Boolean;
 begin
   Result := SimbaNativeInterface.IsProcess64Bit(PID);
 end;
 
-function TSimbaProcess.IsProcessRunning(PID: TProcessID): Boolean;
+function IsProcessRunning(PID: TProcessID): Boolean;
 begin
   Result := SimbaNativeInterface.IsProcessRunning(PID);
 end;
 
-function TSimbaProcess.GetProcessPath(PID: TProcessID): String;
+function GetProcessPath(PID: TProcessID): String;
 begin
   Result := SimbaNativeInterface.GetProcessPath(PID);
 end;
 
-function TSimbaProcess.GetProcessMemUsage(PID: TProcessID): Int64;
+function GetProcessMemUsage(PID: TProcessID): Int64;
 begin
   Result := SimbaNativeInterface.GetProcessMemUsage(PID);
 end;
 
-function TSimbaProcess.GetProcessStartTime(PID: TProcessID): TDateTime;
+function GetProcessStartTime(PID: TProcessID): TDateTime;
 begin
   Result := SimbaNativeInterface.GetProcessStartTime(PID);
 end;
 
-function TSimbaProcess.GetProcessRunnningTime(PID: TProcessID): UInt64;
+function GetProcessAge(PID: TProcessID): UInt64;
 begin
   Result := MillisecondsBetween(GetProcessStartTime(PID), Now());
 end;
 
-procedure TSimbaProcess.TerminateProcess(PID: TProcessID);
+procedure TerminateProcess(PID: TProcessID);
 begin
   SimbaNativeInterface.TerminateProcess(PID);
 end;
 
-function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;
-begin
-  Process.RunCommandInDir(Directory, Executable, Commands, Output, Result, [poStderrToOutPut]);
-end;
-
-function TSimbaProcess.RunCommandInDir(Directory, Executable: String; Commands: TStringArray): TProcessID;
+procedure CheckScriptParams(var Params: TStringArray);
 var
-  Process: TProcess;
+  I: Integer;
 begin
-  Result := 0;
+  for I := 0 to High(Params) do
+    if (Params[I] <> '') then
+    begin
+      if (Length(Params[I].Split('=')) <> 2) then
+        raise Exception.Create('RunScript: Invalid parameter "' + Params[I] + '". Expected "name=value"');
 
-  Process := TProcess.Create(nil);
-  try
-    Process.CurrentDirectory := Directory;
-    Process.Executable := Executable;
-    Process.Options := Process.Options + [poStderrToOutPut];
-    Process.Parameters.AddStrings(Commands);
-    Process.Execute();
-
-    Result := Process.ProcessID;
-  finally
-    Process.Free();
-  end;
+      while (not Params[I].StartsWith('--')) do
+        Params[I] := '-' + Params[I]
+    end;
 end;
 
-function TSimbaProcess.RunCommand(Executable: String; Commands: TStringArray; out Output: String): TProcessExitStatus;
+function RunScript(Script: String; Params: TStringArray): Boolean;
 begin
-  Process.RunCommandInDir(Application.Location, Executable, Commands, Output, Result, [poStderrToOutPut]);
+  CheckScriptParams(Params);
+
+  Result := RunProcessInDir(Application.Location, Application.ExeName, Params + ['--run', Script]) = 0;
 end;
 
-function TSimbaProcess.RunCommand(Executable: String; Commands: TStringArray): TProcessID;
+function RunScript(Script: String; Params: TStringArray; out Output: String): Boolean;
+begin
+  CheckScriptParams(Params);
+
+  Result := RunProcessInDir(Application.Location, Application.ExeName, Params + ['--run', Script], Output) = 0;
+end;
+
+function StartScript(Script: String; Params: TStringArray): TRunningProcess;
+begin
+  Result := StartProcess(Application.ExeName, Params + ['--run', Script], Application.Location, []);
+end;
+
+function StartScriptPiped(Script: String; Params: TStringArray): TRunningProcessPiped;
+begin
+  Result := StartProcessPiped(Application.ExeName, Params + ['--run', Script], Application.Location, []);
+end;
+
+function TRunningProcess.GetRunning: Boolean;
+begin
+  Result := FProcess.Running;
+end;
+
+function TRunningProcess.GetExitCode: TProcessExitCode;
+begin
+  Result := FProcess.ExitCode;
+end;
+
+constructor TRunningProcess.Create(Process: TProcess);
+begin
+  inherited Create();
+
+  FProcess := Process;
+  FPID := FProcess.ProcessID;
+end;
+
+destructor TRunningProcess.Destroy;
+begin
+  FreeAndNil(FProcess);
+
+  inherited Destroy();
+end;
+
+function TRunningProcess.WaitOnExit: Boolean;
+begin
+  Result := FProcess.WaitOnExit();
+end;
+
+function TRunningProcess.WaitOnExit(Timeout: Integer): Boolean;
+begin
+  Result := FProcess.WaitOnExit(Timeout);
+end;
+
+function TRunningProcess.Terminate(AExitCode: Integer): Boolean;
+begin
+  Result := FProcess.Terminate(AExitCode);
+end;
+
+procedure TRunningProcess.WaitUntilFinishedOrTimeout(Timeout: Integer);
 var
-  Process: TProcess;
+  T: UInt64;
 begin
-  Result := 0;
-
-  Process := TProcess.Create(nil);
-  try
-    Process.CurrentDirectory := Application.Location;
-    Process.Executable := Executable;
-    Process.Options := Process.Options + [poStderrToOutPut];
-    Process.Parameters.AddStrings(Commands);
-    Process.Execute();
-
-    Result := Process.ProcessID;
-  finally
-    Process.Free();
-  end;
+  T := GetTickCount64() + Timeout;
+  while ((Timeout = 0) or (T > GetTickCount64())) and (not WaitOnExit(1000)) do
+    { nothing };
 end;
 
-function TSimbaProcess.RunCommandTimeout(Executable: String; Commands: TStringArray; out Output: String; Timeout: Int32): Boolean;
-var
-  Process: TProcessTimeout;
-  ExitStatus: Int32;
-  ErrorOutput: String;
-  Command: TProcessString;
+function TRunningProcessPiped.GetReadBytesAvailable: Integer;
 begin
-  Process := TProcessTimeout.Create(nil);
-  Process.OnRunCommandEvent := @Process.Idle;
-  Process.Timeout := GetTickCount64() + Timeout;
-  Process.Options := Process.Options + [poRunIdle, poStderrToOutPut];
-  Process.Executable := Executable;
-
-  for Command in Commands do
-    Process.Parameters.Add(Command);
-
-  try
-    Result := (Process.RunCommandLoop(Output, ErrorOutput, ExitStatus) = 0) and (ExitStatus = 0) and (GetTickCount64() < Process.Timeout);
-  finally
-    Process.Free();
-  end;
+  Result := FProcess.Output.NumBytesAvailable;
 end;
 
-function TSimbaProcess.RunDump(FileName: String; Commands: TStringArray): TStringList;
-var
-  DumpFileName, ProcessOutput: String;
+function TRunningProcessPiped.Read(Buf: PByte; Count: Integer): Integer;
 begin
-  DumpFileName := SimbaEnv.DumpsPath + TSimbaFile.FileHash(FileName);
+  if (Count > 0) then
+    Result := FProcess.Output.Read(Buf^, Count)
+  else
+    Result := 0;
+end;
 
-  Result := TStringList.Create();
-  Result.LineBreak := #0;
+function TRunningProcessPiped.ReadString: String;
 
-  if FileExists(DumpFileName) then
+  function MaybeRead: String;
   begin
-    Result.LoadFromFile(DumpFileName);
-
-    Exit;
+    SetLength(Result, 1024);
+    SetLength(Result, FProcess.Output.Read(Result[1], 1024));
   end;
 
-  try
-    if not SimbaProcess.RunCommandTimeout(Application.ExeName, Commands + [DumpFileName], ProcessOutput, 5000) then
-      raise Exception.Create('Timed out');
-
-    Result.LoadFromFile(DumpFileName);
-  except
-    on E: Exception do
-      raise Exception.Create(E.Message + ' :: ' + ProcessOutput);
-  end;
+var
+  Str: String;
+begin
+  Result := '';
+  repeat
+    Str := MaybeRead();
+    Result := Result + Str;
+  until (Length(Str) = 0);
 end;
 
-function TSimbaProcess.RunScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus;
-var
-  I: Integer;
+function TRunningProcessPiped.Write(Buf: PByte; Count: Integer): Integer;
 begin
-  for I := 0 to High(Parameters) do
-    if (Parameters[I] <> '') then
-    begin
-      if (Length(Parameters[I].Split('=')) <> 2) then
-        raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
-
-      while (not Parameters[I].StartsWith('--')) do
-        Parameters[I] := '-' + Parameters[I]
-    end;
-
-  Result := Self.RunCommandInDir(Application.Location, Application.ExeName, Parameters + ['--run', Script], Output);
+  if (Count > 0) then
+    Result := FProcess.Input.Write(Buf^, Count)
+  else
+    Result := 0;
 end;
 
-function TSimbaProcess.RunScript(Script: String; Parameters: TStringArray): TProcessID;
-var
-  I: Integer;
+function TRunningProcessPiped.WriteString(Str: String): Integer;
 begin
-  for I := 0 to High(Parameters) do
-    if (Parameters[I] <> '') then
-    begin
-      if (Length(Parameters[I].Split('=')) <> 2) then
-        raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
-
-      while (not Parameters[I].StartsWith('--')) do
-        Parameters[I] := '-' + Parameters[I]
-    end;
-
-  Result := Self.RunCommandInDir(Application.Location, Application.ExeName, Parameters + ['--run', Script]);
+  if (Length(Str) > 0) then
+    Result := FProcess.Input.Write(Str[1], Length(Str))
+  else
+    Result := 0;
 end;
 
-function TSimbaProcess.RunScriptOutputToFile(Script: String; Parameters: TStringArray; OutputFileName: String): TProcessID;
+function TRunningProcessPiped.WaitUntilFinishedOrTimeout(Timeout: Integer): String;
 var
-  I: Integer;
+  T: UInt64;
 begin
-  for I := 0 to High(Parameters) do
-    if (Parameters[I] <> '') then
-    begin
-      if (Length(Parameters[I].Split('=')) <> 2) then
-        raise Exception.Create('TSimbaProcess.RunScript: Invalid parameter "' + Parameters[I] + '". Expected "name=value"');
+  T := GetTickCount64() + Timeout;
+  Result := '';
+  while ((Timeout = 0) or (T > GetTickCount64())) and (not WaitOnExit(1000)) do
+    Result := Result + ReadString();
+  Result := Result + ReadString();
+end;
 
-      while (not Parameters[I].StartsWith('--')) do
-        Parameters[I] := '-' + Parameters[I];
-    end;
+function StartProcess(Executable: String; Params: TStringArray): TRunningProcess;
+var
+  Proc: TProcess;
+begin
+  Proc := TProcess.Create(nil);
+  Proc.Options := Proc.Options + [poStderrToOutPut];
+  Proc.Executable := Executable;
+  Proc.Parameters.AddStrings(Params);
+  Proc.Execute();
 
-  {$IFDEF UNIX}
-  Result := Self.RunCommandInDir(Application.Location, GetEnvironmentVariable('SHELL'), ['-c', Application.ExeName + ' ' + ' '.Join(Parameters) + ' --run ' + Script + ' > ' + OutputFileName]);
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  Result := Self.RunCommandInDir(Application.Location, GetEnvironmentVariable('COMSPEC'), ['/c', Application.ExeName + ' ' + ' '.Join(Parameters) + ' --run ' + Script + ' > ' + OutputFileName]);
-  {$ENDIF}
+  Result := TRunningProcess.Create(Proc);
+end;
+
+function StartProcess(Executable: String; Params: TStringArray; Cwd: String; Env: TStringArray): TRunningProcess;
+var
+  Proc: TProcess;
+begin
+  Proc := TProcess.Create(nil);
+  Proc.Options := Proc.Options + [poStderrToOutPut];
+  Proc.Executable := Executable;
+  Proc.CurrentDirectory := Cwd;
+  Proc.Environment.AddStrings(Env);
+  Proc.Parameters.AddStrings(Params);
+  Proc.Execute();
+
+  Result := TRunningProcess.Create(Proc);
+end;
+
+function StartProcessPiped(Executable: String; Params: TStringArray): TRunningProcessPiped;
+var
+  Proc: TProcess;
+begin
+  Proc := TProcess.Create(nil);
+  Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes];
+  Proc.Executable := Executable;
+  Proc.Parameters.AddStrings(Params);
+  Proc.Execute();
+
+  Result := TRunningProcessPiped.Create(Proc);
+end;
+
+function StartProcessPiped(Executable: String; Params: TStringArray; Cwd: String; Env: TStringArray): TRunningProcessPiped;
+var
+  Proc: TProcess;
+begin
+  Proc := TProcess.Create(nil);
+  Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes];
+  Proc.Executable := Executable;
+  Proc.CurrentDirectory := Cwd;
+  Proc.Environment.AddStrings(Env);
+  Proc.Parameters.AddStrings(Params);
+  Proc.Execute();
+
+  Result := TRunningProcessPiped.Create(Proc);
+end;
+
+function RunProcess(Executable: String; Params: TStringArray): TProcessExitCode;
+var
+  Proc: TRunningProcess;
+begin
+  Proc := StartProcess(Executable, Params);
+  Proc.WaitOnExit();
+
+  Result := Proc.ExitCode;
+
+  Proc.Free();
+end;
+
+function RunProcess(Executable: String; Params: TStringArray; out Output: String): TProcessExitCode;
+var
+  Proc: TRunningProcessPiped;
+begin
+  Proc := StartProcessPiped(Executable, Params);
+  Output := Proc.WaitUntilFinishedOrTimeout();
+  Result := Proc.ExitCode;
+
+  Proc.Free();
+end;
+
+function RunProcessInDir(Directory, Executable: String; Params: TStringArray): TProcessExitCode;
+var
+  Proc: TRunningProcess;
+begin
+  Proc := StartProcess(Executable, Params, Directory, []);
+  Proc.WaitOnExit();
+
+  Result := Proc.ExitCode;
+
+  Proc.Free();
+end;
+
+function RunProcessInDir(Directory, Executable: String; Params: TStringArray; out Output: String): TProcessExitCode;
+var
+  Proc: TRunningProcessPiped;
+begin
+  Proc := StartProcessPiped(Executable, Params, Directory, []);
+  Output := Proc.WaitUntilFinishedOrTimeout();
+  Result := Proc.ExitCode;
+
+  Proc.Free();
+end;
+
+function RunProcessTimeout(Executable: String; Params: TStringArray; Timeout: Integer): Boolean;
+var
+  Proc: TRunningProcess;
+begin
+  Proc := StartProcess(Executable, Params);
+  Proc.WaitUntilFinishedOrTimeout(Timeout);
+
+  Result := (not Proc.Running) and (Proc.ExitCode = 0);
+  if Proc.Running then
+    Proc.Terminate(255);
+
+  Proc.Free();
+end;
+
+function RunProcessTimeout(Executable: String; Params: TStringArray; Timeout: Integer; out Output: String): Boolean;
+var
+  Proc: TRunningProcessPiped;
+begin
+  Proc := StartProcessPiped(Executable, Params);
+  Output := Proc.WaitUntilFinishedOrTimeout(Timeout);
+  Result := (not Proc.Running) and (Proc.ExitCode = 0);
+  if Proc.Running then
+    Proc.Terminate(255);
+
+  Proc.Free();
 end;
 
 end.
+
 

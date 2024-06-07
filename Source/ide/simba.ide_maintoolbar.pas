@@ -221,8 +221,8 @@ begin
     DebugLn([EDebugLn.FOCUS], ' - Dimensions: %dx%d', [FWindowSelection.GetBounds().Width - 1, FWindowSelection.GetBounds().Height - 1]);
     DebugLn([EDebugLn.FOCUS], ' - Title: "%s"',       [FWindowSelection.GetTitle()]);
     DebugLn([EDebugLn.FOCUS], ' - Class: "%s"',       [FWindowSelection.GetClassName()]);
-    DebugLn([EDebugLn.FOCUS], ' - PID: %d (%s)',      [FWindowSelection.GetPID(), BoolToStr(SimbaProcess.IsProcess64Bit(FWindowSelection.GetPID()), '64 bit', '32 bit')]);
-    DebugLn([EDebugLn.FOCUS], ' - Executable: "%s"',  [SimbaProcess.GetProcessPath(FWindowSelection.GetPID())]);
+    DebugLn([EDebugLn.FOCUS], ' - PID: %d (%s)',      [FWindowSelection.GetPID(), BoolToStr(IsProcess64Bit(FWindowSelection.GetPID()), '64 bit', '32 bit')]);
+    DebugLn([EDebugLn.FOCUS], ' - Executable: "%s"',  [GetProcessPath(FWindowSelection.GetPID())]);
 
     SimbaIDEEvents.Notify(SimbaIDEEvent.WINDOW_SELECTED, Self);
   except

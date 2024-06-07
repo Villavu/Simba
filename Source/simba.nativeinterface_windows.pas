@@ -882,7 +882,7 @@ end;
 
 procedure TSimbaNativeInterface_Windows.OpenDirectory(Path: String);
 begin
-  SimbaProcess.RunCommand('explorer.exe', ['/root,"' + Path + '"']);
+  RunProcess('explorer.exe', ['/root,"' + Path + '"']);
 end;
 
 procedure TSimbaNativeInterface_Windows.PlaySound(Path: String);

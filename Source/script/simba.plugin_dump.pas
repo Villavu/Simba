@@ -20,7 +20,8 @@ function DumpPluginInAnotherProcess(FileName: String): String;
 implementation
 
 uses
-  simba.base, simba.process, simba.script_plugin;
+  simba.base, simba.script_plugin,
+  simba.ide_utils;
 
 function DumpPlugin(Plugin: String): TStringList;
 begin
@@ -37,7 +38,7 @@ begin
 
   List := nil;
   try
-    List := SimbaProcess.RunDump(FileName, ['--dumpplugin=' + FileName]);
+    List := RunDump(FileName, ['--dumpplugin=' + FileName]);
 
     Result := List.Text;
   except

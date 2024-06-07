@@ -16,6 +16,8 @@ uses
 function ImageWidthForDPI(DPI: Integer): Integer;
 procedure MenuItemHeight(Item: TMenuItem; Canvas: TCanvas; var Height: Integer);
 
+function RunDump(FileName: String; Commands: TStringArray): TStringList;
+
 type
   TApplicationHelper = class helper for TApplication
   public type
@@ -40,7 +42,7 @@ type
 implementation
 
 uses
-  simba.settings;
+  simba.settings, simba.process, simba.fs, simba.env;
 
 function ImageWidthForDPI(DPI: Integer): Integer;
 begin
@@ -71,6 +73,34 @@ begin
     ImgWidth := ImageWidthForDPI(Canvas.Font.PixelsPerInch);
     if (ImgWidth > 16) then
       Height := Round(ImgWidth * 1.3);
+  end;
+end;
+
+function RunDump(FileName: String; Commands: TStringArray): TStringList;
+var
+  DumpFileName, Output: String;
+begin
+  DumpFileName := SimbaEnv.DumpsPath + TSimbaFile.FileHash(FileName);
+
+  Result := TStringList.Create();
+  Result.LineBreak := #0;
+
+  if FileExists(DumpFileName) then
+    Result.LoadFromFile(DumpFileName)
+  else
+  begin
+    try
+      if not RunProcessTimeout(Application.ExeName, Commands + [DumpFileName], 5000, Output) then
+        SimbaException('Timed out');
+
+      Result.LoadFromFile(DumpFileName);
+    except
+      on E: Exception do
+        if (Output <> '') then
+          SimbaException(E.Message + ': ' + Output)
+        else
+          SimbaException(E.Message);
+    end;
   end;
 end;
 
