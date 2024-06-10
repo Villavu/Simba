@@ -790,7 +790,7 @@ begin
     B := Self.Bounds;
     B.x1 := B.x1 - 2;
     B.y1 := B.y1 - 2;
-    Matrix.SetSize(B.Height + 2, B.Width + 2);
+    Matrix.SetSize(B.Width + 2, B.Height + 2);
 
     SetLength(PTS, H + 1);
     for i:=0 to H do
