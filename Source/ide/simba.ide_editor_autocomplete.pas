@@ -364,17 +364,10 @@ var
   function IgnoreDeclaration(Decls: TDeclarationArray; Index: Integer): Boolean; inline;
   var
     Decl: TDeclaration;
-    I: Integer;
   begin
     Decl := Decls[Index];
-    if Decl.isProperty then
-    begin
-      for I := 0 to Index - 1 do
-        if Decls[I].isProperty and Decls[I].IsName(Decl.Name) then
-          Exit(True);
-    end;
 
-    Result := (Decl.Name = '') or Decl.isOverrideMethod or Decl.isOperatorMethod;
+    Result := (Decl.Name = '') or ((Decl is TDeclaration_Method) and (TDeclaration_Method(Decl).isOverride or TDeclaration_Method(Decl).isOperator));
   end;
 
   procedure AddSorted(Decls: TDeclarationArray; StartIndex: Integer);
@@ -477,47 +470,10 @@ end;
 function TSimbaAutoComplete.GetHintText(Decl: TDeclaration; IsHint: Boolean): String;
 
   function GetMethodText(Decl: TDeclaration_Method): String;
-  var
-    Params: TDeclarationArray;
-    I: Integer;
   begin
     if Decl.isProperty then
-    begin
-      Result := '';
-
-      Params := Decl.Items.GetByClass(TDeclaration_Parameter, True, True);
-
-      // getter
-      if Assigned(Decl.ResultType) then
-      begin
-        if (Length(Params) > 0) then
-        begin
-          Result += '[';
-          for I := 0 to High(Params) do
-          begin
-            if (I > 0) then
-              Result += '; ';
-            Result += Params[I].Name + Params[I].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType, ': ');
-          end;
-          Result += ']';
-        end;
-        Result += Decl.ResultString;
-      end else
-      // setter
-      begin
-        if (Length(Params) > 0) then
-        begin
-          Result += '[';
-          for I := 0 to High(Params) - 1 do
-          begin
-            if (I > 0) then
-              Result += '; ';
-            Result += Params[I].Name + Params[I].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType, ': ');
-          end;
-          Result += ']: ' + Params[High(Params)].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType);
-        end;
-      end;
-    end else
+      Result := PropertyHeader(Decl as TDeclaration_Property, False)
+    else
       Result := Decl.ParamString + Decl.ResultString;
   end;
 
@@ -531,16 +487,17 @@ function TSimbaAutoComplete.GetHintText(Decl: TDeclaration; IsHint: Boolean): St
 
   function GetEnumElementText(Decl: TDeclaration_EnumElement): String;
   var
-    OwnerDecl: TDeclaration;
+    ParentDecl: TDeclaration;
   begin
     Result := '';
 
-    OwnerDecl := Decl.GetOwnerByClass(TDeclaration_TypeSet);
-    if (OwnerDecl = nil) then
-      OwnerDecl := Decl.Owner;
+    ParentDecl := nil;
+    ParentDecl := Decl.ParentByClass[TDeclaration_TypeSet];
+    if (ParentDecl = nil) then
+      ParentDecl := Decl.Parent;
 
-    if (OwnerDecl <> nil) and (OwnerDecl.Name <> '') then
-      Result := ': ' + OwnerDecl.Name;
+    if (ParentDecl <> nil) and (ParentDecl.Name <> '') then
+      Result := ': ' + ParentDecl.Name;
   end;
 
   function GetTypeText(Decl: TDeclaration_Type): String;
@@ -587,6 +544,7 @@ procedure TSimbaAutoComplete.DoEditorCommand(Sender: TObject; AfterProcessing: B
 var
   Expression, Filter: String;
   LastDot: Integer;
+  d: TDeclaration;
   StartPoint: TPoint;
 begin
   if IsAutoCompleteCommand(Command, AChar) and CodetoolsSetup then
@@ -613,7 +571,16 @@ begin
         end else
           Filter := '';
 
-        FDecls := FCodeinsight.GetMembersOfType(FCodeinsight.ParseExpression(Expression, [EParseExpressionFlag.WantMethodResult, EParseExpressionFlag.WantVarType]));
+        d := FCodeinsight.ParseExpr(Expression);
+        if (d is TDeclaration_Method) then
+          d := FCodeinsight.ResolveVarType(TDeclaration_Method(d).ResultType);
+
+        if (d is TDeclaration_Var) then
+          d := FCodeinsight.ResolveVarType(TDeclaration_Var(d).VarType);
+        if (d is TDeclaration_Type) then
+          FDecls := FCodeinsight.GetTypeMembers(d as TDeclaration_Type, True);
+
+        FDecls := RemoveDuplicateProperties(FDecls);
       end else
       begin
         Filter := Expression;
@@ -680,16 +647,18 @@ const
 var
   Column: TColumnFormat;
 begin
-  if Decl.isProperty    then Column := COLUMN_PROP    else
-  if Decl.isFunction    then Column := COLUMN_FUNC    else
-  if Decl.isProcedure   then Column := COLUMN_PROC    else
-  if Decl.isType        then Column := COLUMN_TYPE    else
-  if Decl.isVar         then Column := COLUMN_VAR     else
-  if Decl.isField       then Column := COLUMN_VAR     else
-  if Decl.isConst       then Column := COLUMN_CONST   else
-  if Decl.isEnumElement then Column := COLUMN_ENUM    else
-  if Decl.isKeyword     then Column := COLUMN_KEYWORD else
-                             Column := COLUMN_UNKNOWN;
+  case DeclarationKind(Decl) of
+    'property':    Column := COLUMN_PROP;
+    'function':    Column := COLUMN_FUNC;
+    'procedure':   Column := COLUMN_PROC;
+    'type':        Column := COLUMN_TYPE;
+    'const':       Column := COLUMN_CONST;
+    'var':         Column := COLUMN_VAR;
+    'enumelement': Column := COLUMN_ENUM;
+    'keyword':     Column := COLUMN_KEYWORD;
+    else
+      Column := COLUMN_UNKNOWN;
+  end;
 
   Canvas.Font.Color := Column.Color;
   Canvas.TextRect(R, R.Left, R.Top, Column.Text);

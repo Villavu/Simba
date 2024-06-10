@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.ide_codetools_parser, simba.ide_initialization;
+  simba.base, simba.ide_codetools_base, simba.ide_codetools_parser, simba.ide_initialization;
 
 function GetArrayHelpers(Decl: TDeclaration): TCodeParser;
 
@@ -206,7 +206,7 @@ begin
     if (ArrType = '') then
       Exit;
 
-    if TDeclaration_TypeArray(Decl).IsStatic then
+    if (Decl is TDeclaration_TypeStaticArray) then
       Result := Run(FStaticHelpers, ArrName, ArrType)
     else
       Result := Run(FDynHelpers, ArrName, ArrType);

@@ -121,7 +121,7 @@ uses
   simba.ide_dockinghelpers, simba.misc,
   simba.form_main, simba.form_tabs,  simba.form_settings,
   simba.nativeinterface,
-  simba.ide_tab, simba.ide_events, simba.ide_utils;
+  simba.ide_tab, simba.ide_events, simba.ide_utils, simba.ide_codetools_base;
 
 type
   TSimbaOutputTab = class(TSimbaTab)
@@ -579,8 +579,7 @@ end;
 
 procedure TSimbaOutputForm.MenuItemCustomizeClick(Sender: TObject);
 begin
-  SimbaSettingsForm.TreeView.Selected := SimbaSettingsForm.TreeView.Items.FindNodeWithText('Output Box');
-  SimbaSettingsForm.ShowModal();
+  SimbaSettingsForm.Open('Output Box');
 end;
 
 function TSimbaOutputForm.CanAnchorDocking(X, Y: Integer): Boolean;
@@ -634,6 +633,7 @@ begin
 
   FSimbaOutputBox := AddSimbaOutput();
 
+  SetCodetoolsMessageHandler(@DebugLn);
   OnDebugLn := @DebugLn;
 
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE, @DoScriptTabChange);

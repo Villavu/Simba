@@ -1,49 +1,151 @@
-{ + --------------------------------------------------------------------------+
-  | Class:       TmwPasLex
-  | Created:     07.98 - 10.98
-  | Author:      Martin Waldenburg
-  | Description: A very fast Pascal tokenizer.
-  | Version:     1.32
-  | Copyright (c) 1998, 1999 Martin Waldenburg
-  | All rights reserved.
-  |
-  | DISCLAIMER:
-  |
-  | THIS SOFTWARE IS PROVIDED BY THE AUTHOR 'AS IS'.
-  |
-  | ALL EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-  | THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-  | PARTICULAR PURPOSE ARE DISCLAIMED.
-  |
-  | IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-  | INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  | (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-  | OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  | INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-  | WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  | NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-  | THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  |
-  |  Martin.Waldenburg@T-Online.de
-  +--------------------------------------------------------------------------+ }
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
+unit simba.ide_codetools_paslexer;
 
-// Heavily modified over the years for Simba
-
-unit mPasLex;
-
-{$i simba.Inc}
+{$i simba.inc}
 
 interface
 
 uses
-  SysUtils, Classes,
-  simba.base, simba.containers,
-  mPasLexTypes;
+  SysUtils, Classes, TypInfo,
+  simba.base,
+  simba.containers,
+  simba.ide_codetools_base;
 
 type
-  TmwBasePasLex = class;
-  TDirectiveEvent = procedure(Sender: TmwBasePasLex) of object;
-  TErrorMessageEvent = procedure(Sender: TmwBasePasLex; Message: String) of object;
+  ELexerToken = (
+    tokUnknown,
+
+    tokAdd,
+    tokAddressOp,
+    tokAnd,
+    tokAnsiComment,
+    tokArray,
+    tokAs,
+    tokAsciiChar,
+    tokAssign,
+    tokAt,
+    tokBegin,
+    tokBorComment,
+    tokBraceClose,
+    tokBraceOpen,
+    tokCase,
+    tokColon,
+    tokComma,
+    tokCompilerDirective,
+    tokConst,
+    tokConstRef,
+    tokDefineDirect,
+    tokDeprecated,
+    tokDiv,
+    tokDo,
+    tokDotDot,
+    tokDoubleAddressOp,
+    tokDownto,
+    tokElse,
+    tokElseDirect,
+    tokEnd,
+    tokEndIfDirect,
+    tokEnum,
+    tokEqual,
+    tokExcept,
+    tokExternal,
+    tokFinally,
+    tokFloat,
+    tokFor,
+    tokForward,
+    tokFunction,
+    tokGoto,
+    tokGreater,
+    tokGreaterEqual,
+    tokIdentifier,
+    tokIf,
+    tokIfDirect,
+    tokElseIfDirect,
+    tokIfDefDirect,
+    tokIfNDefDirect,
+    tokIfOptDirect,
+    tokIDEDirective,
+    tokIn,
+    tokIncludeDirect,
+    tokIncludeOnceDirect,
+    tokLibraryDirect,
+    tokIntegerConst,
+    tokIs,
+    tokLabel,
+    tokLower,
+    tokLowerEqual,
+    tokMinus,
+    tokMod,
+    tokNot,
+    tokNotEqual,
+    tokNull,
+    tokObject,
+    tokOf,
+    tokOperator,
+    tokOr,
+    tokOut,
+    tokOverload,
+    tokOverride,
+    tokPacked,
+    tokPlus,
+    tokPoint,
+    tokPointerSymbol,
+    tokPrivate,
+    tokProcedure,
+    tokProgram,
+    tokProperty,
+    tokRaise,
+    tokRecord,
+    tokUnion,
+    tokRepeat,
+    tokRoundClose,
+    tokRoundOpen,
+    tokSemiColon,
+    tokSet,
+    tokShl,
+    tokShr,
+    tokSlash,
+    tokSlashesComment,
+    tokWhiteSpace,
+    tokSquareClose,
+    tokSquareOpen,
+    tokStar,
+    tokStarStar,
+    tokStatic,
+    tokStrict,
+    tokStringConst,
+    tokThen,
+    tokTo,
+    tokTry,
+    tokType,
+    tokUndefDirect,
+    tokUntil,
+    tokVar,
+    tokWhile,
+    tokWith,
+    tokXor,
+    tokNative,
+    tokDivAsgn,
+    tokMulAsgn,
+    tokPlusAsgn,
+    tokMinusAsgn,
+    tokPowAsgn
+  );
+
+  TCommentState = (csAnsi, csBor, csNo);
+
+  TDocPos = record
+    Line: Integer;
+    Col: Integer;
+    FileName: String;
+  end;
+
+  TPasLexer = class;
+  TDirectiveEvent = procedure(Sender: TPasLexer) of object;
 
   PDefineRec = ^TDefineRec;
   TDefineRec = record
@@ -60,8 +162,9 @@ type
     Defines: string;
   end;
 
-  TmwBasePasLex = class(TObject)
+  TPasLexer = class(TObject)
   protected
+    fAheadLexer: TPasLexer;
     fCommentState: TCommentState;
     fDoc: String;
     fFileName: String;
@@ -69,9 +172,8 @@ type
     fRun: Integer;
     fTokenPos: Integer;
     fLineNumber: Integer;
-    FTokenID: TptTokenKind;
+    fTokenID: ELexerToken;
     fLinePos: Integer;
-    fExID: TptTokenKind;
     fOnCompilerDirective: TDirectiveEvent;
     fOnIDEDirective: TDirectiveEvent;
     fOnElseDirect: TDirectiveEvent;
@@ -85,7 +187,6 @@ type
     fOnIfDirect: TDirectiveEvent;
     fOnElseIfDirect: TDirectiveEvent;
 	  fOnUnDefDirect: TDirectiveEvent;
-    fOnErrorMessage: TErrorMessageEvent;
 
     FDirectiveParamOrigin: PAnsiChar;
 
@@ -102,10 +203,9 @@ type
 
     function getChar(const Pos: Integer): Char; inline;
 
-    function GetPosXY: TTokenPoint;
+    function getDocPos: TDocPos;
     procedure SetRunPos(Value: Integer);
     procedure AddressOpProc;
-    procedure AmpersandOpProc;
     procedure AsciiCharProc;
     procedure AnsiProc;
     procedure BorProc;
@@ -113,12 +213,10 @@ type
     procedure BraceOpenProc;
     procedure ColonProc;
     procedure CommaProc;
-    procedure CRProc;
     procedure EqualProc;
     procedure GreaterProc;
     procedure IdentProc;
     procedure IntegerProc;
-    procedure LFProc;
     procedure LowerProc;
     procedure MinusProc;
     procedure NullProc;
@@ -136,39 +234,39 @@ type
     procedure StarProc;
     procedure StringProc;
     procedure StringDQProc;
-    procedure SymbolProc;
     procedure UnknownProc;
     function GetToken: string;
     function GetTokenLen: Integer;
     function GetCompilerDirective: string;
-    function GetDirectiveKind: TptTokenKind;
+    function GetDirectiveKind: ELexerToken;
     function GetDirectiveParam: string;
     function GetDirectiveParamOriginal: string;
     function GetDirectiveParamAsFileName: string;
     function GetIsJunk: Boolean;
-    function GetIsSpace: Boolean;
 
     procedure EnterDefineBlock(ADefined: Boolean);
     procedure ExitDefineBlock;
-  protected
-    procedure Error(Message: String); virtual;
+
+    function GetAheadTokenID: ELexerToken;
   public
-    OnErrorMessage: TErrorMessageEvent;
-
-    CaretPos: Integer;
-
     constructor Create(Doc: String; AFileName: String = ''); virtual;
     constructor CreateFromFile(AFileName: String); virtual;
     destructor Destroy; override;
-    procedure Next; inline;
-    procedure NextNoJunk; inline;
+
+    procedure Next;
+    procedure NextNoJunk;
+
+    procedure InitAhead;
+    procedure AheadNext;
+    property AheadTokenID: ELexerToken read GetAheadTokenID;
+    property Doc: String read fDoc;
 
     function CopyDoc(const StartPos, EndPos: Integer): String;
 
     procedure AddDefine(const ADefine: string);
     procedure RemoveDefine(const ADefine: string);
     procedure ClearDefines;
-    procedure CloneDefinesFrom(ALexer: TmwBasePasLex);
+    procedure CloneDefinesFrom(ALexer: TPasLexer);
     function SaveDefines: TSaveDefinesRec;
     procedure LoadDefines(From: TSaveDefinesRec);
     function IsDefined(const ADefine: string): Boolean;
@@ -180,16 +278,15 @@ type
     property DirectiveParamOriginal: string read GetDirectiveParamOriginal;
     property DirectiveParamAsFileName: string read GetDirectiveParamAsFileName;
 	  property IsJunk: Boolean read GetIsJunk;
-    property IsSpace: Boolean read GetIsSpace;
+
     property LineNumber: Integer read fLineNumber write fLineNumber;
     property LinePos: Integer read fLinePos write fLinePos;
-    property PosXY: TTokenPoint read GetPosXY;
+    property DocPos: TDocPos read GetDocPos;
     property RunPos: Integer read fRun write SetRunPos;
     property Token: string read GetToken;
     property TokenLen: Integer read GetTokenLen;
     property TokenPos: Integer read fTokenPos;
-    property TokenID: TptTokenKind read FTokenID;
-    property ExID: TptTokenKind read fExID;
+    property TokenID: ELexerToken read FTokenID;
 
     property OnCompilerDirective: TDirectiveEvent read fOnCompilerDirective write fOnCompilerDirective;
     property OnIDEDirective: TDirectiveEvent read fOnIDEDirective write fOnIDEDirective;
@@ -208,34 +305,31 @@ type
     property DirectiveParamOrigin: PAnsiChar read FDirectiveParamOrigin;
 
     property UseDefines: Boolean read FUseDefines write FUseDefines;
-
     property Defines: TStringList read FDefines;
   end;
 
-  TmwPasLex = class(TmwBasePasLex)
-  private
-    fAheadLex: TmwBasePasLex;
+  TLexerStack = specialize TSimbaStack<TPasLexer>;
+  TLexerList = specialize TSimbaObjectList<TPasLexer>;
 
-    function GetAheadExID: TptTokenKind;
-    function GetAheadToken: string;
-    function GetAheadTokenID: TptTokenKind;
-  public
-    constructor Create(Doc: String; AFileName: String = ''); override;
-    destructor Destroy; override;
-    procedure InitAhead;
-    procedure AheadNext;
-    property AheadLex: TmwBasePasLex read fAheadLex;
-    property AheadToken: string read GetAheadToken;
-    property AheadTokenID: TptTokenKind read GetAheadTokenID;
-    property AheadExID: TptTokenKind read GetAheadExID;
-  end;
+const
+  KeywordTokens = [
+    tokIf, tokDo, tokAnd, tokAs, tokOf, tokEnd, tokIn, tokCase, tokIs, tokLabel, tokMod, tokOr, tokTo, tokDiv, tokBegin, tokFor, tokShl, tokPacked, tokVar, tokElse, tokSet, tokShr, tokThen, tokNot, tokEnum, tokObject, tokOut, tokWhile, tokXor, tokGoto, tokWith, tokArray, tokTry, tokRecord, tokRepeat, tokType, tokConst, tokNative, tokStatic, tokExcept, tokUnion, tokUntil, tokFinally, tokDeprecated, tokForward, tokProgram, tokStrict, tokDownto, tokOverload, tokOverride, tokExternal, tokConstref, tokFunction, tokProcedure, tokOperator, tokProperty, tokRaise
+  ];
 
-  TLexerStack = specialize TSimbaStack<TmwPasLex>;
-  TLexerList = specialize TSimbaObjectList<TmwPasLex>;
+  JunkTokens = [
+    tokAnsiComment, tokBorComment, tokSlashesComment,
+    tokWhiteSpace,
+    tokIfDirect, tokElseIfDirect, tokIfDefDirect, tokIfNDefDirect, tokEndIfDirect, tokIfOptDirect, tokUndefDirect
+  ];
+
+  function TokenName(const Value: ELexerToken): String;
 
 implementation
 
-procedure TmwBasePasLex.ClearDefines;
+var
+  KeywordDict: specialize TKeywordDictionary<ELexerToken>;
+
+procedure TPasLexer.ClearDefines;
 var
   Frame: PDefineRec;
 begin
@@ -250,7 +344,7 @@ begin
   FTopDefineRec := nil;
 end;
 
-procedure TmwBasePasLex.CloneDefinesFrom(ALexer: TmwBasePasLex);
+procedure TPasLexer.CloneDefinesFrom(ALexer: TPasLexer);
 var
   Frame, LastFrame, SourceFrame: PDefineRec;
 begin
@@ -278,7 +372,7 @@ begin
     Frame^.Next := nil;
 end;
 
-function TmwBasePasLex.SaveDefines: TSaveDefinesRec;
+function TPasLexer.SaveDefines: TSaveDefinesRec;
 var
   Frame: PDefineRec;
 begin
@@ -295,7 +389,7 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.LoadDefines(From: TSaveDefinesRec);
+procedure TPasLexer.LoadDefines(From: TSaveDefinesRec);
 var
   Frame, LastFrame: PDefineRec;
   i: Integer;
@@ -322,7 +416,7 @@ begin
     Frame^.Next := nil;
 end;
 
-function TmwBasePasLex.getChar(const Pos: Integer): Char;
+function TPasLexer.getChar(const Pos: Integer): Char;
 begin
   if (Pos >= 1) and (Pos <= Length(fDoc)) then
     Result := fDoc[Pos]
@@ -330,13 +424,14 @@ begin
     Result := #0;
 end;
 
-function TmwBasePasLex.GetPosXY: TTokenPoint;
+function TPasLexer.getDocPos: TDocPos;
 begin
-  Result.X := FTokenPos - FLinePos;
-  Result.Y := FLineNumber;
+  Result.Col := fTokenPos - fLinePos;
+  Result.Line := fLineNumber;
+  Result.FileName := fFileName;
 end;
 
-constructor TmwBasePasLex.Create(Doc: String; AFileName: String = '');
+constructor TPasLexer.Create(Doc: String; AFileName: String = '');
 begin
   inherited Create();
 
@@ -347,20 +442,16 @@ begin
   if (fFileName <> '') and FileExists(fFileName) then
     fFileAge := SysUtils.FileAge(fFileName);
 
-  fExID := tokUnKnown;
-
-  FIdentBuffer := GetMem(MaxTokenNameLength + 1);
-  FIdentBufferUpper := PtrUInt(@FIdentBuffer[MaxTokenNameLength]);
+  FIdentBuffer := GetMem(KeywordDict.MaxKeyLength + 1);
+  FIdentBufferUpper := PtrUInt(@FIdentBuffer[KeywordDict.MaxKeyLength]);
 
   FUseDefines := True;
   FDefines := TStringList.Create();
   FDefines.UseLocale := False;
   FDefines.Duplicates := dupIgnore;
-
-  CaretPos := -1;
 end;
 
-constructor TmwBasePasLex.CreateFromFile(AFileName: String);
+constructor TPasLexer.CreateFromFile(AFileName: String);
 var
   Contents: String;
 begin
@@ -378,28 +469,31 @@ begin
   Create(Contents, AFileName);
 end;
 
-destructor TmwBasePasLex.Destroy;
+destructor TPasLexer.Destroy;
 begin
   ClearDefines();
-  FDefines.Free();
-
-  FreeMem(FIdentBuffer);
+  if (FDefines <> nil) then
+    FreeAndNil(FDefines);
+  if (FIdentBuffer <> nil) then
+    FreeMemAndNil(FIdentBuffer);
+  if (fAheadLexer <> nil) then
+    FreeAndNil(fAheadLexer);
 
   inherited Destroy();
 end;
 
-procedure TmwBasePasLex.SetRunPos(Value: Integer);
+procedure TPasLexer.SetRunPos(Value: Integer);
 begin
   fRun := Value;
   Next;
 end;
 
-procedure TmwBasePasLex.AddDefine(const ADefine: string);
+procedure TPasLexer.AddDefine(const ADefine: string);
 begin
   FDefines.Add(ADefine);
 end;
 
-procedure TmwBasePasLex.AddressOpProc;
+procedure TPasLexer.AddressOpProc;
 begin
   case getChar(fRun + 1) of
     '@':
@@ -415,7 +509,7 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.AsciiCharProc;
+procedure TPasLexer.AsciiCharProc;
 begin
   fTokenID := tokAsciiChar;
   Inc(fRun);
@@ -430,15 +524,15 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.BraceCloseProc;
+procedure TPasLexer.BraceCloseProc;
 begin
   Inc(fRun);
   fTokenId := tokNull;
 
-  Error('Illegal character');
+  //Error('Illegal character');
 end;
 
-procedure TmwBasePasLex.MaybeHandleCompilerDirective(Name, Value: String);
+procedure TPasLexer.MaybeHandleCompilerDirective(Name, Value: String);
 begin
   case Name of
     'SCOPEDENUMS', 'S':
@@ -455,7 +549,7 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.MaybeHandleIDEDirective(Name, Value: String);
+procedure TPasLexer.MaybeHandleIDEDirective(Name, Value: String);
 begin
   case Name of
     'CODETOOLS':
@@ -469,7 +563,7 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.BraceOpenProc;
+procedure TPasLexer.BraceOpenProc;
 var
   Param, Def: string;
 begin
@@ -613,7 +707,7 @@ begin
   Next();
 end;
 
-procedure TmwBasePasLex.ColonProc;
+procedure TPasLexer.ColonProc;
 begin
   if (getChar(fRun + 1) = '=') then
   begin
@@ -626,32 +720,13 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.CommaProc;
+procedure TPasLexer.CommaProc;
 begin
   Inc(fRun);
   fTokenID := tokComma;
 end;
 
-procedure TmwBasePasLex.CRProc;
-begin
-  case fCommentState of
-    csBor: fTokenID := tokCRLFCo;
-    csAnsi: fTokenID := tokCRLFCo;
-    else
-      fTokenID := tokCRLF;
-  end;
-
-  case getChar(fRun + 1) of
-    #10: Inc(fRun, 2);
-    else
-      Inc(fRun);
-  end;
-
-  Inc(fLineNumber);
-  fLinePos := fRun;
-end;
-
-procedure TmwBasePasLex.EnterDefineBlock(ADefined: Boolean);
+procedure TPasLexer.EnterDefineBlock(ADefined: Boolean);
 var
   StackFrame: PDefineRec;
 begin
@@ -664,13 +739,13 @@ begin
     Inc(FDefineStack);
 end;
 
-procedure TmwBasePasLex.EqualProc;
+procedure TPasLexer.EqualProc;
 begin
   Inc(fRun);
   fTokenID := tokEqual;
 end;
 
-procedure TmwBasePasLex.ExitDefineBlock;
+procedure TPasLexer.ExitDefineBlock;
 var
   StackFrame: PDefineRec;
 begin
@@ -683,7 +758,7 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.GreaterProc;
+procedure TPasLexer.GreaterProc;
 begin
   case getChar(fRun + 1) of
     '=':
@@ -699,28 +774,17 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.Error(Message: String);
-begin
-  if Assigned(OnErrorMessage) then
-    OnErrorMessage(Self, Message)
-  else
-  if (FileName <> '') then
-    DebugLn('[Codetools]: "%s" at line %d, column %d in file "%s"', [Message, PosXY.Y + 1, PosXY.X, FileName])
-  else
-    DebugLn('[Codetools]: "%s" at line %d, column %d', [Message, PosXY.Y + 1, PosXY.X]);
-end;
-
-procedure TmwBasePasLex.IdentProc;
+procedure TPasLexer.IdentProc;
 var
   Ptr: PChar;
 begin
   Ptr := FIdentBuffer;
-  while (getChar(fRun) in ['0'..'9', 'A'..'Z', '_', 'a'..'z']) do
+  while (getChar(fRun) in ['_', '0'..'9', 'A'..'Z', 'a'..'z']) do
   begin
     if (PtrUInt(Ptr) < FIdentBufferUpper) then
     begin
       Ptr^ := getChar(fRun);
-      if (Ptr^ in [#65..#90]) then // change to lowercase
+      if (Ptr^ in [#65..#90]) then // change to lowercase (keyword dict is built that way)
         Ptr^ := Char(Ord(Ptr^) + 32);
       Inc(Ptr);
     end;
@@ -729,41 +793,26 @@ begin
   end;
   Ptr^ := #0;
 
-  fTokenID := KeywordDictionary[FIdentBuffer];
-  if (fTokenID in ExTokens) then
-  begin
-    fExID := fTokenID;
+  if (fRun - fTokenPos <= KeywordDict.MaxKeyLength) then
+    fTokenID := KeywordDict[FIdentBuffer]
+  else
     fTokenID := tokIdentifier;
-  end;
 end;
 
-procedure TmwBasePasLex.IntegerProc;
+procedure TPasLexer.IntegerProc;
 begin
   Inc(fRun);
   fTokenID := tokIntegerConst;
-  while getChar(fRun) in ['0'..'9', 'A'..'F', 'a'..'f'] do
+  while getChar(fRun) in ['_', '0'..'9', 'A'..'F', 'a'..'f'] do
     Inc(fRun);
 end;
 
-function TmwBasePasLex.IsDefined(const ADefine: string): Boolean;
+function TPasLexer.IsDefined(const ADefine: string): Boolean;
 begin
   Result := FDefines.IndexOf(ADefine) > -1;
 end;
 
-procedure TmwBasePasLex.LFProc;
-begin
-  case fCommentState of
-	  csBor: fTokenID := tokCRLFCo;
-	  csAnsi: fTokenID := tokCRLFCo;
-    else
-      fTokenID := tokCRLF;
-  end;
-  Inc(fRun);
-  Inc(fLineNumber);
-  fLinePos := fRun;
-end;
-
-procedure TmwBasePasLex.LowerProc;
+procedure TPasLexer.LowerProc;
 begin
   case getChar(fRun + 1) of
     '=':
@@ -784,7 +833,7 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.MinusProc;
+procedure TPasLexer.MinusProc;
 begin
   Inc(fRun);
   if getChar(fRun) = '=' then
@@ -795,28 +844,29 @@ begin
     fTokenID := tokMinus;
 end;
 
-procedure TmwBasePasLex.NullProc;
+procedure TPasLexer.NullProc;
 begin
   fTokenID := tokNull;
 end;
 
-procedure TmwBasePasLex.NumberProc;
+procedure TPasLexer.NumberProc;
 begin
   Inc(fRun);
   fTokenID := tokIntegerConst;
-  while getChar(fRun) in ['0'..'9', '.', 'e', 'E'] do
+  while getChar(fRun) in ['_', '0'..'9', '.', 'e', 'E'] do
   begin
     case getChar(fRun) of
       '.':
         if getChar(fRun + 1) = '.' then
-          break
-        else fTokenID := tokFloat
+          Break
+        else
+          fTokenID := tokFloat
     end;
     Inc(fRun);
   end;
 end;
 
-procedure TmwBasePasLex.PlusProc;
+procedure TPasLexer.PlusProc;
 begin
   Inc(fRun);
   if getChar(fRun) = '=' then
@@ -827,13 +877,13 @@ begin
     fTokenID := tokPlus;
 end;
 
-procedure TmwBasePasLex.PointerSymbolProc;
+procedure TPasLexer.PointerSymbolProc;
 begin
   Inc(fRun);
   fTokenID := tokPointerSymbol;
 end;
 
-procedure TmwBasePasLex.PointProc;
+procedure TPasLexer.PointProc;
 begin
   case getChar(fRun + 1) of
     '.':
@@ -854,7 +904,7 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.RemoveDefine(const ADefine: string);
+procedure TPasLexer.RemoveDefine(const ADefine: string);
 var
   I: Integer;
 begin
@@ -863,13 +913,13 @@ begin
     FDefines.Delete(I);
 end;
 
-procedure TmwBasePasLex.RoundCloseProc;
+procedure TPasLexer.RoundCloseProc;
 begin
   Inc(fRun);
   fTokenID := tokRoundClose;
 end;
 
-procedure TmwBasePasLex.AnsiProc;
+procedure TPasLexer.AnsiProc;
 var
   Depth: Integer = 0;
 begin
@@ -924,7 +974,7 @@ begin
   fCommentState := csNo;
 end;
 
-procedure TmwBasePasLex.BorProc;
+procedure TPasLexer.BorProc;
 var
   Depth: Integer = 0;
 begin
@@ -971,7 +1021,7 @@ begin
   fCommentState := csNo;
 end;
 
-procedure TmwBasePasLex.RoundOpenProc;
+procedure TPasLexer.RoundOpenProc;
 begin
   if (getChar(fRun + 1) = '*') then
   begin
@@ -984,13 +1034,13 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.SemiColonProc;
+procedure TPasLexer.SemiColonProc;
 begin
   Inc(fRun);
   fTokenID := tokSemiColon;
 end;
 
-procedure TmwBasePasLex.SlashProc;
+procedure TPasLexer.SlashProc;
 begin
   case getChar(fRun + 1) of
     '/':
@@ -1018,27 +1068,46 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.SpaceProc;
+procedure TPasLexer.SpaceProc;
 begin
   Inc(fRun);
-  fTokenID := tokSpace;
-  while getChar(fRun) in [#1..#9, #11, #12, #14..#32] do
-    Inc(fRun);
+  fTokenID := tokWhiteSpace;
+  while getChar(fRun) in [#1..#32] do
+    case getChar(fRun) of
+      #10:
+   		  begin
+   			  Inc(fRun);
+   			  Inc(fLineNumber);
+   			  fLinePos := fRun;
+   		  end;
+
+   	  #13:
+   		  begin
+   			  Inc(fRun);
+   			  if getChar(fRun) = #10 then
+             Inc(fRun);
+   			  Inc(fLineNumber);
+   			  fLinePos := fRun;
+         end;
+
+      else
+        Inc(fRun);
+    end;
 end;
 
-procedure TmwBasePasLex.SquareCloseProc;
+procedure TPasLexer.SquareCloseProc;
 begin
   Inc(fRun);
   fTokenID := tokSquareClose;
 end;
 
-procedure TmwBasePasLex.SquareOpenProc;
+procedure TPasLexer.SquareOpenProc;
 begin
   Inc(fRun);
   fTokenID := tokSquareOpen;
 end;
 
-procedure TmwBasePasLex.StarProc;
+procedure TPasLexer.StarProc;
 begin
   Inc(fRun);
   case getChar(fRun)  of
@@ -1062,7 +1131,7 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.StringProc;
+procedure TPasLexer.StringProc;
 begin
   fTokenID := tokStringConst;
   repeat
@@ -1070,7 +1139,7 @@ begin
     case getChar(fRun) of
       #0, #10, #13:
         begin
-          Error('Unterminated string');
+          //Error('Unterminated string');
           Break;
         end;
       #39:
@@ -1087,22 +1156,15 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.SymbolProc;
-begin
-  Inc(fRun);
-  fTokenID := tokSymbol;
-end;
-
-procedure TmwBasePasLex.UnknownProc;
+procedure TPasLexer.UnknownProc;
 begin
   Inc(fRun);
   fTokenID := tokUnknown;
-  Error('Unknown Character');
+  //Error('Unknown Character');
 end;
 
-procedure TmwBasePasLex.Next;
+procedure TPasLexer.Next;
 begin
-  fExID := tokUnknown;
   fTokenPos := fRun;
 
   case fCommentState of
@@ -1112,9 +1174,7 @@ begin
       begin
         case getChar(fRun) of
           #0: NullProc();
-          #10: LFProc();
-          #13: CRProc();
-          #1..#9, #11, #12, #14..#32: SpaceProc();
+          #1..#32: SpaceProc();
           #34: StringDQProc();
           #39: StringProc();
           '0'..'9': NumberProc();
@@ -1139,51 +1199,69 @@ begin
           ']': SquareCloseProc();
           '^': PointerSymbolProc();
           '#': AsciiCharProc();
-          '$': IntegerProc();
-          '?', '`', '!', '%', '&', '\': SymbolProc();
+          '$', '%': IntegerProc();
           else
             UnknownProc();
         end;
     end;
   end;
-
-  //if (MaxPos > -1) and (fTokenPos > MaxPos) and (not IsJunk) then
-  // fTokenID := tok_DONE;
 end;
 
-function TmwBasePasLex.GetIsJunk: Boolean;
+function TPasLexer.GetIsJunk: Boolean;
 begin
-  result := (fTokenID in JunkTokens) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull){ and (TokenID <> tok_DONE)});
+  result := (fTokenID in JunkTokens) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull));
 end;
 
-function TmwBasePasLex.GetIsSpace: Boolean;
-begin
-  Result := fTokenID in [tokCRLF, tokSpace];
-end;
-
-function TmwBasePasLex.GetToken: string;
+function TPasLexer.GetToken: string;
 begin
   Result := Copy(FDoc, FTokenPos, GetTokenLen);
 end;
 
-function TmwBasePasLex.GetTokenLen: Integer;
+function TPasLexer.GetTokenLen: Integer;
 begin
   Result := fRun - fTokenPos;
 end;
 
-procedure TmwBasePasLex.NextNoJunk;
+procedure TPasLexer.NextNoJunk;
 begin
   repeat
     Next;
   until not IsJunk;
 end;
 
-function TmwBasePasLex.CopyDoc(const StartPos, EndPos: Integer): String;
+procedure TPasLexer.InitAhead;
+begin
+  if (fAheadLexer = nil) then
+    fAheadLexer := TPasLexer.Create(fDoc, fFileName);
+
+  fAheadLexer.RunPos := RunPos;
+  fAheadLexer.fLineNumber := FLineNumber;
+  fAheadLexer.fLinePos := FLinePos;
+  fAheadLexer.CloneDefinesFrom(Self);
+  while fAheadLexer.IsJunk do
+    fAheadLexer.Next;
+end;
+
+procedure TPasLexer.AheadNext;
+begin
+  if (fAheadLexer <> nil) then
+    fAheadLexer.NextNoJunk;
+end;
+
+function TPasLexer.GetAheadTokenID: ELexerToken;
+begin
+  if (fAheadLexer <> nil) then
+    Result := fAheadLexer.TokenID
+  else
+    Result := tokNull;
+end;
+
+function TPasLexer.CopyDoc(const StartPos, EndPos: Integer): String;
 begin
   Result := Copy(FDoc, StartPos, EndPos - StartPos);
 end;
 
-function TmwBasePasLex.GetCompilerDirective: string;
+function TPasLexer.GetCompilerDirective: string;
 var
   StartPos, EndPos: Integer;
 begin
@@ -1201,7 +1279,7 @@ begin
   end;
 end;
 
-function TmwBasePasLex.GetDirectiveKind: TptTokenKind;
+function TPasLexer.GetDirectiveKind: ELexerToken;
 var
   StartPos, EndPos: Integer;
   Directive: String;
@@ -1243,7 +1321,7 @@ begin
   end;
 end;
 
-function TmwBasePasLex.GetDirectiveParamOriginal: string;
+function TPasLexer.GetDirectiveParamOriginal: string;
 var
   StartPos, EndPos: Integer;
 begin
@@ -1262,12 +1340,12 @@ begin
     Result := '';
 end;
 
-function TmwBasePasLex.GetDirectiveParam: string;
+function TPasLexer.GetDirectiveParam: string;
 begin
   Result := UpperCase(GetDirectiveParamOriginal());
 end;
 
-function TmwBasePasLex.GetDirectiveParamAsFileName: string;
+function TPasLexer.GetDirectiveParamAsFileName: string;
 var
   i: Integer;
 begin
@@ -1282,58 +1360,16 @@ begin
     {$ENDIF}
 end;
 
-constructor TmwPasLex.Create(Doc: String; AFileName: String = '');
-begin
-  inherited;
-  fAheadLex := TmwBasePasLex.Create(Doc, AFileName);
-end;
-
-destructor TmwPasLex.Destroy;
-begin
-  fAheadLex.Free;
-  inherited Destroy;
-end;
-
-procedure TmwPasLex.AheadNext;
-begin
-  fAheadLex.NextNoJunk;
-end;
-
-function TmwPasLex.GetAheadExID: TptTokenKind;
-begin
-  Result := fAheadLex.ExID;
-end;
-
-function TmwPasLex.GetAheadToken: string;
-begin
-  Result := fAheadLex.Token;
-end;
-
-function TmwPasLex.GetAheadTokenID: TptTokenKind;
-begin
-  Result := fAheadLex.TokenID;
-end;
-
-procedure TmwPasLex.InitAhead;
-begin
-  fAheadLex.RunPos := RunPos;
-  FAheadLex.fLineNumber := FLineNumber;
-  FAheadLex.FLinePos := FLinePos;
-  FAheadLex.CloneDefinesFrom(Self);
-  while fAheadLex.IsJunk do
-    fAheadLex.Next;
-end;
-
-procedure TmwBasePasLex.StringDQProc;
+procedure TPasLexer.StringDQProc;
 begin
   fTokenID := tokStringConst;
   repeat
     Inc(fRun);
     case getChar(fRun) of
-      #0{, #10, #13}:
+      #0:
         begin
-          Error('Unterminated string');
-          break;
+          //Error('Unterminated string');
+          Break;
         end;
       #34:
         while (getChar(fRun) = #34) and (getChar(fRun + 1) = #34) do
@@ -1349,14 +1385,25 @@ begin
   end;
 end;
 
-procedure TmwBasePasLex.AmpersandOpProc;
+function TokenName(const Value: ELexerToken): String;
 begin
-  FTokenID := tokAmpersand;
-  Inc(fRun);
-  while getChar(fRun) in ['a'..'z', 'A'..'Z','0'..'9'] do
-    Inc(fRun);
-  FTokenID := tokIdentifier;
+  Result := Copy(GetEnumName(TypeInfo(ELexerToken), Ord(Value)), 4);
 end;
+
+procedure InitKeywordDictionary;
+var
+  Tok: ELexerToken;
+begin
+  KeywordDict := specialize TKeywordDictionary<ELexerToken>.Create();
+  KeywordDict.Seed := 123;
+  KeywordDict.Size := 1024;
+  KeywordDict.InvalidVal := tokIdentifier;
+  for Tok in KeywordTokens do
+    KeywordDict.Add(TokenName(Tok), Tok);
+end;
+
+initialization
+  InitKeywordDictionary();
 
 end.
 

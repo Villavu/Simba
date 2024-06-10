@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.ide_codetools_parser, simba.ide_initialization;
+  simba.base, simba.ide_codetools_base, simba.ide_codetools_parser, simba.ide_initialization;
 
 function GetKeywords: TDeclarationArray;
 

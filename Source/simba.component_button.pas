@@ -298,7 +298,7 @@ begin
     with TBitmap.Create() do
     try
       Canvas.Font := Self.Font;
-      Canvas.Font.Size := GetFontSize(Self, 1);
+      Canvas.Font.Size := GetFontSize(Self, 2);
 
       Result.X := Canvas.TextWidth(Caption) + (BorderWidth * 2);
       Result.Y := Canvas.TextHeight('Fj') + (BorderWidth * 2);
@@ -390,7 +390,6 @@ begin
     Canvas.Font.Color := SimbaTheme.ColorFont;
 
     R := ClientRect;
-    R.Bottom -= 2;
     if HasImage then
       R.Left := ImageSize.X + XPadding;
 

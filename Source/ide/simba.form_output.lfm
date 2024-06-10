@@ -9,7 +9,7 @@ object SimbaOutputForm: TSimbaOutputForm
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove
   ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.4.0.0'
   object ContextMenu: TPopupMenu
     OnMeasureItem = ContextMenuMeasureItem
     Left = 40
