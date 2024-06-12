@@ -26,7 +26,9 @@ begin
   try
     // Simple HTTP request - nothing extra is sent.
     // Only used for logging very basic (ide) launch count.
-    Get(SIMBA_ANALYTICS_URL, []);
+    RequestHeader['User-Agent'] := Format('Mozilla/5.0 (compatible; Simba/%d; Target/%s; Commit/%s)', [SIMBA_VERSION, {$I %FPCTARGETOS%} + '-' + {$I %FPCTARGETCPU%}, SIMBA_COMMIT]);
+
+    Get(SIMBA_ANALYTICS_URL);
   finally
     Free();
   end;

@@ -17,7 +17,7 @@ uses
   simba.form_notes, simba.form_settings, simba.form_openexample, simba.form_shapebox,
   simba.form_backups, simba.form_findinfiles, simba.form_downloadsimba, simba.form_package,
   simba.compiler_dump, simba.plugin_dump, simba.script_runner,
-  simba.ide_initialization;
+  simba.ide_initialization, simba.ide_analytics;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
