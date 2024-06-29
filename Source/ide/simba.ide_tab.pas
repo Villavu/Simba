@@ -90,6 +90,7 @@ type
     FOutputBox: TSimbaOutputBox;
 
     procedure LoadDefaultScript;
+    procedure FindDeclarationAtCaretASync(Data: PtrInt);
 
     // Keep output tab in sync
     procedure TextChanged; override;
@@ -372,9 +373,14 @@ begin
   Result := FScriptFileName;
 end;
 
-procedure TSimbaScriptTab.FindDeclarationAtCaret;
+procedure TSimbaScriptTab.FindDeclarationAtCaretASync(Data: PtrInt);
 begin
   FindAndShowDeclaration(Script, ScriptFileName, Editor.GetCaretPos(True), Editor.GetExpressionEx(FEditor.CaretX, FEditor.CaretY));
+end;
+
+procedure TSimbaScriptTab.FindDeclarationAtCaret;
+begin
+  Application.QueueAsyncCall(@FindDeclarationAtCaretASync, 0); // queue the event to let synedit finishing painting
 end;
 
 procedure TSimbaScriptTab.DoEditorModified(Sender: TObject);
@@ -636,8 +642,8 @@ end;
 
 destructor TSimbaScriptTab.Destroy;
 begin
+  Application.RemoveAsyncCalls(Self);
   SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_CLOSED, Self);
-
   if Assigned(SimbaOutputForm) then
     SimbaOutputForm.RemoveTab(FOutputBox);
 

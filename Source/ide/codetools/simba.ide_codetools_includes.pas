@@ -13,8 +13,8 @@ interface
 
 uses
   Classes, SysUtils,
-  mPasLexTypes, mPasLex,
-  simba.base, simba.ide_codetools_parser, simba.threading;
+  simba.base, simba.threading,
+  simba.ide_codetools_base, simba.ide_codetools_paslexer, simba.ide_codetools_parser;
 
 const
   PurgeThreshold = 35; // If cache miss reaches of a include reaches this, remove the cache
@@ -31,10 +31,10 @@ type
     destructor Destroy; override;
 
     function GetInclude(Defines: TSaveDefinesRec; IncludedFiles: TStringList; FileName: String): TCodeParser; overload;
-    function GetInclude(Lexer: TmwBasePasLex; IncludedFiles: TStringList): TCodeParser; overload;
+    function GetInclude(Lexer: TPasLexer; IncludedFiles: TStringList): TCodeParser; overload;
 
     function GetPlugin(FileName: String): TCodeParser; overload;
-    function GetPlugin(Lexer: TmwBasePasLex): TCodeParser; overload;
+    function GetPlugin(Lexer: TPasLexer): TCodeParser; overload;
 
     procedure Release(List: TCodeParserList);
   end;
@@ -47,8 +47,8 @@ type
     FRefCount: Integer;
     FLastUsed: Integer;
 
-    procedure OnIncludeDirect(Sender: TmwBasePasLex); override;
-    procedure OnLibraryDirect(Sender: TmwBasePasLex); override;
+    procedure OnIncludeDirect(Sender: TPasLexer); override;
+    procedure OnLibraryDirect(Sender: TPasLexer); override;
 
     function GetPlugins: TStringArray;
     function GetHash: String; override; // Add InDefines to hash
@@ -61,6 +61,7 @@ type
     function IsOutdated: Boolean;
     function IncRef: TCodetoolsInclude;
     function DecRef: TCodetoolsInclude;
+
   end;
 
   TCodetoolsPlugin = class(TCodetoolsInclude)
@@ -76,7 +77,7 @@ implementation
 uses
   simba.env, simba.fs, simba.plugin_dump;
 
-procedure TCodetoolsInclude.OnIncludeDirect(Sender: TmwBasePasLex);
+procedure TCodetoolsInclude.OnIncludeDirect(Sender: TPasLexer);
 var
   FilePath: String;
 begin
@@ -88,13 +89,13 @@ begin
   if (FIncludedFiles <> nil) and (FIncludedFiles.IndexOf(FilePath) > -1) then
     Exit;
 
-  PushLexer(TmwPasLex.CreateFromFile(FilePath));
+  PushLexer(TPasLexer.CreateFromFile(FilePath));
 
   if (FIncludedFiles <> nil) then
     FIncludedFiles.Add(FilePath);
 end;
 
-procedure TCodetoolsInclude.OnLibraryDirect(Sender: TmwBasePasLex);
+procedure TCodetoolsInclude.OnLibraryDirect(Sender: TPasLexer);
 var
   FilePath: String;
 begin
@@ -114,15 +115,17 @@ end;
 
 function TCodetoolsInclude.GetHash: String;
 begin
-  if FHash.IsNull then
-    FHash.Value := inherited + FInDefines.Defines + IntToStr(FInDefines.Stack) + FPlugins.Text;
+  if FHash.Empty then
+    FHash := inherited + FInDefines.Defines + IntToStr(FInDefines.Stack) + FPlugins.Text;
 
-  Result := FHash.Value;
+  Result := FHash;
 end;
 
 constructor TCodetoolsInclude.Create(AFileName: String; InDefines: TSaveDefinesRec; IncludedFiles: TStringList);
 begin
   inherited Create();
+
+  FSourceType := EParserSourceType.INCLUDE;
 
   FPlugins := TStringList.Create();
   FIncludedFiles := IncludedFiles;
@@ -180,6 +183,8 @@ constructor TCodetoolsPlugin.Create(AFileName: String);
 begin
   inherited Create(AFileName, Default(TSaveDefinesRec), nil);
 
+  FSourceType := EParserSourceType.PLUGIN;
+
   SetScript(DumpPluginInAnotherProcess(AFileName), AFileName);
 end;
 
@@ -225,7 +230,7 @@ begin
   end;
 end;
 
-function TCodetoolsIncludes.GetPlugin(Lexer: TmwBasePasLex): TCodeParser;
+function TCodetoolsIncludes.GetPlugin(Lexer: TPasLexer): TCodeParser;
 var
   FileName: String;
 begin
@@ -320,7 +325,7 @@ begin
   end;
 end;
 
-function TCodetoolsIncludes.GetInclude(Lexer: TmwBasePasLex; IncludedFiles: TStringList): TCodeParser;
+function TCodetoolsIncludes.GetInclude(Lexer: TPasLexer; IncludedFiles: TStringList): TCodeParser;
 var
   FileName: String;
 begin

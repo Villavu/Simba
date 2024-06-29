@@ -11,7 +11,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, Menus, StrUtils,
-  simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight, simba.component_treeview, simba.container_dict;
+  simba.base, simba.ide_codetools_base, simba.ide_codetools_parser, simba.ide_codetools_insight,
+  simba.component_treeview, simba.container_dict;
 
 type
   ENodeType = (ntUnknown, ntSimbaSection, ntDecl, ntSimbaDecl, ntPluginDecl, ntIncludes, ntPlugins, ntIncludeFile, ntPluginFile);
@@ -89,9 +90,9 @@ type
     procedure AddIncludesNode(Includes: TCodeParserList; Hash: String);
     procedure PurgeNodes;
 
-    function AddDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
-    function AddSimbaDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
-    function AddPluginDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
+    procedure AddDecl(ParentNode: TTreeNode; Decl: TDeclaration);
+    procedure AddSimbaDecl(ParentNode: TTreeNode; Decl: TDeclaration);
+    procedure AddPluginDecl(ParentNode: TTreeNode; Decl: TDeclaration);
 
     function ShouldSimbaNodeBeHidden(S: String): Boolean;
     procedure SetSimbaNodeShouldBeHidden(S: String; Hidden: Boolean);
@@ -118,46 +119,20 @@ uses
 
 function GetImage(const Decl: TDeclaration): Integer;
 begin
-  if (Decl is TDeclaration_Method)           then Result := IMG_FUNC   else
-  if (Decl is TDeclaration_EnumElement)      then Result := IMG_ENUM   else
-  if (Decl is TDeclaration_Type)             then Result := IMG_TYPE   else
-  if (Decl is TDeclaration_Const)            then Result := IMG_CONST  else
-  if (Decl is TDeclaration_Var)              then Result := IMG_VAR    else
-  if (Decl is TDeclaration_Anchor)           then Result := IMG_ANCHOR else
-  if (Decl is TDeclaration_IncludeDirective) then Result := IMG_FILE   else
-    Result := -1;
+  Result := DeclarationImage(Decl);
 end;
 
 function GetText(const Decl: TDeclaration): String;
 begin
-  if (Decl is TDeclaration_Method) and Decl.isObjectMethod then
-    Result := TDeclaration_Method(Decl).ObjectName + '.' + TDeclaration_Method(Decl).Name
-  else
-  if (Decl is TDeclaration_EnumElement) then
-    if (Decl.Owner is TDeclaration_TypeEnumScoped) then
-      Result := Decl.Owner.Name + '.' + Decl.Name
-    else
-      Result := Decl.Name
-  else
-    Result := Decl.Name;
+  Result := Decl.FullName;
 end;
 
 function GetHint(const Decl: TDeclaration): String;
 begin
-  if (Decl is TDeclaration_EnumElement) then
-    if (Decl.Owner is TDeclaration_TypeEnumScoped) then
-      Result := Decl.Owner.Name + '.' + Decl.Name
-    else
-      Result := Decl.Name
+  if (Decl is TDeclaration_Property) then
+    Result := PropertyHeader(Decl as TDeclaration_Property)
   else
-  if (Decl is TDeclaration_Method)           then Result := TDeclaration_Method(Decl).HeaderString                                                                  else
-  if (Decl is TDeclaration_Type)             then Result := 'type '    + Decl.Name + ' = ' + Decl.TextNoCommentsSingleLine                                          else
-  if (Decl is TDeclaration_Const)            then Result := 'const '   + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
-  if (Decl is TDeclaration_Var)              then Result := 'var '     + Decl.Name + TDeclaration_Var(Decl).VarTypeString + TDeclaration_Var(Decl).VarDefaultString else
-  if (Decl is TDeclaration_Anchor)           then Result := 'Anchor "' + Decl.Name + '"'                                                                            else
-  if (Decl is TDeclaration_IncludeDirective) then Result := TDeclaration_IncludeDirective(Decl).FileName
-  else
-    Result := '';
+    Result := Decl.Header;
 end;
 
 function GetURL(const Section: String): String;
@@ -494,7 +469,7 @@ var
   end;
 
 var
-  I: Integer;
+  I, J: Integer;
   Node, ParentNode: TTreeNode;
   Decl: TDeclaration;
 begin
@@ -524,9 +499,12 @@ begin
         Hint := Plugins[I].Lexer.FileName;
       end;
 
-      for Decl in Plugins[I].Items.ToArray do
+      for J := 0 to Plugins[I].Items.Count - 1 do
+      begin
+        Decl := Plugins[I].Items[J];
         if (Decl.Name <> '') then
           AddPluginDecl(ParentNode, Decl);
+      end;
     end;
   end;
 end;
@@ -558,7 +536,7 @@ var
   end;
 
 var
-  I: Integer;
+  I, J: Integer;
   CurrentFile: String;
   CurrentNode: TTreeNode;
   Decl: TDeclaration;
@@ -580,11 +558,15 @@ begin
 
     for I := 0 to Includes.Count - 1 do
     begin
-      for Decl in Includes[I].Items.ToArray do
+      for J := 0 to Includes[I].Items.Count - 1 do
       begin
-        if (CurrentFile <> Decl.Lexer.FileName) then
+        Decl := Includes[I].Items[J];
+
+        // includes are flattened
+        // so add a new node when file changes
+        if (CurrentFile <> Decl.DocPos.FileName) then
         begin
-          CurrentFile := Decl.Lexer.FileName;
+          CurrentFile := Decl.DocPos.FileName;
           CurrentNode := FTreeView.AddNode(IncludesNode, ChangeFileExt(ExtractFileName(CurrentFile), ''), IMG_FILE);
 
           with TSimbaFunctionListNode(CurrentNode) do
@@ -595,8 +577,7 @@ begin
           end;
         end;
 
-        if (Decl.Name <> '') then
-          AddDecl(CurrentNode, Decl);
+        AddDecl(CurrentNode, Decl);
       end;
     end;
   end;
@@ -647,20 +628,23 @@ begin
   SimbaIDEEvents.Notify(SimbaIDEEvent.FUNCTIONLIST_SELECTION, FTreeView.Selected);
 end;
 
-function TSimbaFunctionListForm.AddDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
+procedure TSimbaFunctionListForm.AddDecl(ParentNode: TTreeNode; Decl: TDeclaration);
 var
+  Node: TTreeNode;
   I: Integer;
 begin
-  Result := FTreeView.AddNode(ParentNode, Decl.Name);
+  if (Decl.Name = '') then
+    Exit;
 
-  with TSimbaFunctionListNode(Result) do
+  Node := FTreeView.AddNode(ParentNode, Decl.Name);
+  with TSimbaFunctionListNode(Node) do
   begin
     NodeType := ntDecl;
 
-    FileName := Decl.Lexer.FileName;
+    FileName := Decl.DocPos.FileName;
     StartPos := Decl.StartPos;
     EndPos   := Decl.EndPos;
-    Line     := Decl.Line;
+    Line     := Decl.DocPos.Line;
 
     Text := GetText(Decl);
     ImageIndex := GetImage(Decl);
@@ -668,23 +652,27 @@ begin
 
     if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
       for I := 0 to Decl.Items.Count - 1 do
-        AddDecl(Result, Decl.Items[I])
+        AddDecl(Node, Decl.Items[I])
     else
       Hint := GetHint(Decl);
   end;
 end;
 
-function TSimbaFunctionListForm.AddSimbaDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
+procedure TSimbaFunctionListForm.AddSimbaDecl(ParentNode: TTreeNode; Decl: TDeclaration);
 var
+  Node: TTreeNode;
   I: Integer;
 begin
-  Result := FTreeView.AddNode(ParentNode, Decl.Name);
+  // skip empty names or methods that start with _ or overrides
+  if (Decl.Name = '') or ((Decl is TDeclaration_Method) and ((Decl.Name[1] = '_') or TDeclaration_Method(Decl).isOverride)) then
+    Exit;
 
-  with TSimbaFunctionListNode(Result) do
+  Node := FTreeView.AddNode(ParentNode, Decl.Name);
+  with TSimbaFunctionListNode(Node) do
   begin
     NodeType := ntSimbaDecl;
 
-    FileName := Decl.Lexer.FileName;
+    FileName := Decl.DocPos.FileName;
 
     Text := GetText(Decl);
     ImageIndex := GetImage(Decl);
@@ -692,23 +680,26 @@ begin
 
     if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
       for I := 0 to Decl.Items.Count - 1 do
-        AddSimbaDecl(Result, Decl.Items[I])
+        AddSimbaDecl(Node, Decl.Items[I])
     else
       Hint := GetHint(Decl);
   end;
 end;
 
-function TSimbaFunctionListForm.AddPluginDecl(ParentNode: TTreeNode; Decl: TDeclaration): TTreeNode;
+procedure TSimbaFunctionListForm.AddPluginDecl(ParentNode: TTreeNode; Decl: TDeclaration);
 var
+  Node: TTreeNode;
   I: Integer;
 begin
-  Result := FTreeView.AddNode(ParentNode, Decl.Name);
+  if (Decl.Name = '') then
+    Exit;
 
-  with TSimbaFunctionListNode(Result) do
+  Node := FTreeView.AddNode(ParentNode, Decl.Name);
+  with TSimbaFunctionListNode(Node) do
   begin
     NodeType := ntPluginDecl;
 
-    FileName := Decl.Lexer.FileName;
+    FileName := Decl.DocPos.FileName;
 
     Text := GetText(Decl);
     ImageIndex := GetImage(Decl);
@@ -716,7 +707,7 @@ begin
 
     if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
       for I := 0 to Decl.Items.Count - 1 do
-        AddPluginDecl(Result, Decl.Items[I])
+        AddPluginDecl(Node, Decl.Items[I])
     else
       Hint := GetHint(Decl);
   end;
@@ -767,9 +758,8 @@ begin
         Hint := Text + ' (double click to open online docs)';
     end;
 
-    for Decl in Parser.Items.ToArray do
-      if (Decl.Name <> '') and (not Decl.isOverrideMethod) and (Decl.Name[1] <> '_') then
-        AddSimbaDecl(ParentNode, Decl);
+    for Decl in RemoveDuplicateProperties(Parser.Items.ToArray) do
+      AddSimbaDecl(ParentNode, Decl);
 
     ParentNode.CustomSort(@CompareNodes);
     if ShouldSimbaNodeBeHidden(ParentNode.Text) then
@@ -884,7 +874,7 @@ begin
   FSimbaNode  := FTreeView.AddNode('Simba',  IMG_FOLDER);
 
   FCodeinsight := TCodeinsight.Create();
-  FCodeinsight.ScriptParser.NoErrorMessages := True;
+  FCodeinsight.ScriptParser.SkipErrorMessages := True;
 
   FSavedStates := TFunctionListStateDict.Create();
 

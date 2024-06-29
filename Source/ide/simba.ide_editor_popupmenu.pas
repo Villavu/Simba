@@ -28,6 +28,7 @@ type
     FReplace: TMenuItem;
     FDocComment: TMenuItem;
     FSelectAll: TMenuItem;
+    FCodetoolsSymbols: TMenuItem;
 
     procedure DoFindDeclaration(Sender: TObject);
     procedure DoOpenFileDir(Sender: TObject);
@@ -47,6 +48,8 @@ type
     procedure DoReplace(Sender: TObject);
     procedure DoDocComment(Sender: TObject);
 
+    procedure DoCodetoolsSymbols(Sender: TObject);
+
     procedure DoPopup(Sender: TObject); override;
     procedure DoMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
   public
@@ -58,7 +61,7 @@ implementation
 uses
   LCLType,
   simba.base, simba.form_main, simba.ide_editor, simba.ide_editor_docgenerator, simba.nativeinterface,
-  simba.ide_tab, simba.form_tabs, simba.ide_utils;
+  simba.ide_tab, simba.form_tabs, simba.ide_utils, simba.ide_codetools_debug;
 
 type
   TSimbaTabPopupMenuHelper = class helper for TSimbaTabPopupMenu
@@ -138,6 +141,11 @@ begin
   ScriptTab.Editor.ExecuteSimpleCommand(TSimbaEditorPlugin_DocGenerator.EditorCommand);
 end;
 
+procedure TSimbaTabPopupMenu.DoCodetoolsSymbols(Sender: TObject);
+begin
+  DebugSymbolTable(ScriptTab.Script, ScriptTab.ScriptFileName);
+end;
+
 procedure TSimbaTabPopupMenu.DoPopup(Sender: TObject);
 begin
   with ScriptTab.Editor do
@@ -205,6 +213,8 @@ begin
                  AddLine();
 
   FDocComment := Add('Add Documentation Comment', IMG_NONE,       ShortCut(VK_D,       [ssCtrl]),          @DoDocComment);
+
+  FCodetoolsSymbols  := Add('View Codetools symbols', IMG_NONE, 0, @DoCodetoolsSymbols);
 end;
 
 end.

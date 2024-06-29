@@ -2,6 +2,9 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+
+  Displays method parameters at the caret.
 }
 unit simba.ide_editor_paramhint;
 
@@ -12,8 +15,10 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, LCLType,
   SynEdit, SynEditTypes, SynEditKeyCmds,
-  simba.base, simba.settings,
-  simba.ide_codetools_insight, simba.ide_codetools_parser;
+  simba.base,
+  simba.settings,
+  simba.ide_codetools_insight,
+  simba.ide_codetools_parser;
 
 type
   TSimbaParamHintForm = class(THintWindow)
@@ -50,8 +55,6 @@ type
     FDisplayPoint: TPoint;
     FCodeinsight: TCodeinsight;
 
-    function GetProperties(Decls: TDeclarationArray): TDeclarationArray;
-
     function IsShowing: Boolean;
     function GetParameterIndexAtCaret: Integer;
 
@@ -77,9 +80,11 @@ type
 implementation
 
 uses
-  mPasLexTypes, mPasLex,
-  simba.ide_editor, simba.misc, simba.ide_codetools_setup, simba.ide_theme,
-  simba.vartype_point, simba.vartype_stringarray;
+  simba.ide_codetools_setup,
+  simba.ide_codetools_paslexer,
+  simba.ide_editor,
+  simba.ide_theme,
+  simba.misc;
 
 procedure TSimbaParamHintForm.SetBoldIndex(AValue: Integer);
 begin
@@ -203,8 +208,6 @@ begin
     NameString := TDeclaration_Method(Method).Name;
     ResultString := TDeclaration_Method(Method).ResultString;
   end;
-  if (Method is TDeclaration_TypeMethod) then
-    ResultString := TDeclaration_TypeMethod(Method).ResultString;
 
   Decl := Method.Items.GetByClassFirst(TDeclaration_ParamList);
   if (Decl = nil) then
@@ -301,27 +304,9 @@ procedure TSimbaParamHintForm.Show(ScreenPoint: TPoint; Decls: TDeclarationArray
 var
   ScreenRect: TRect;
   MaxRight: Integer;
-  I: Integer;
 begin
   FIndexing := IsIndexing;
-  FMethods := [];
-  for I := 0 to High(Decls) do
-  begin
-    if Decls[I].isOverrideMethod then
-      Continue;
-    if (FIndexing <> Decls[I].isProperty) then
-      Continue;
-    if FIndexing and (Length(Decls[I].Items.GetByClass(TDeclaration_ParamList)) = 0) then
-      Continue;
-
-    FMethods := FMethods + [Decls[I]];
-  end;
-
-  if (Length(FMethods) = 0) then
-  begin
-    Hide();
-    Exit;
-  end;
+  FMethods := Decls;
 
   FNeededHeight := 0;
   FNeededWidth := 0;
@@ -343,53 +328,6 @@ begin
   ActivateWithBounds(ScreenRect, '');
 end;
 
-// We do not need read and write methods just one of them.
-function TSimbaParamHint.GetProperties(Decls: TDeclarationArray): TDeclarationArray;
-var
-  Count: Integer = 0;
-
-  function HasReadMethod(Decl: TDeclaration): Boolean;
-  var
-    I: Integer;
-    Params: TStringArray;
-  begin
-    // Get param types and remove the trailing `value` param
-    Params := TDeclaration_Method(Decl).ParamVarTypes;
-    SetLength(Params, Length(Params) - 1);
-
-    for I := 0 to Count - 1 do
-      if (TDeclaration_Method(Decls[I]).ResultType <> nil) and TDeclaration_Method(Decls[I]).ParamVarTypes.Equals(Params) then
-        Exit(True);
-    Result := False;
-  end;
-
-var
-  I: Integer;
-begin
-  Decls := FilterByClass(Decls, TDeclaration_Method);
-  SetLength(Result, Length(Decls));
-
-  // Collect read methods
-  for I := 0 to High(Decls) do
-    if Decls[I].isProperty and (TDeclaration_Method(Decls[I]).ResultType <> nil) then
-    begin
-      Result[Count] := Decls[I];
-      Inc(Count);
-    end;
-
-  // Add write methods if read version doesn't exist
-  for I := 0 to High(Decls) do
-    if Decls[I].isProperty and (TDeclaration_Method(Decls[I]).ResultType = nil) then
-    begin
-      if HasReadMethod(Decls[I]) then
-        Continue;
-      Result[Count] := Decls[I];
-      Inc(Count);
-    end;
-
-  SetLength(Result, Count);
-end;
-
 function TSimbaParamHint.IsShowing: Boolean;
 begin
   Result := FHintForm.Visible;
@@ -397,7 +335,7 @@ end;
 
 function TSimbaParamHint.GetParameterIndexAtCaret: Integer;
 var
-  Lexer: TmwPasLex;
+  Lexer: TPasLexer;
   BracketCount: Integer;
 begin
   Result := -1;
@@ -405,7 +343,7 @@ begin
      ((Editor.CaretX < FParenthesesPoint.X) and (Editor.CaretY = FParenthesesPoint.Y)) then
     Exit;
 
-  Lexer := TmwPasLex.Create(Editor.TextBetweenPoints[FParenthesesPoint, TPoint.Create(Editor.CaretX, Editor.CaretY)]);
+  Lexer := TPasLexer.Create(Editor.TextBetweenPoints[FParenthesesPoint, TPoint.Create(Editor.CaretX, Editor.CaretY)]);
   Lexer.NextNoJunk();
   try
     if (not (Lexer.TokenID in [tokRoundOpen, tokSquareOpen])) then
@@ -508,19 +446,21 @@ procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Bool
       end;
   end;
 
-  function DoMethodType(Decl: TDeclaration): TDeclarationArray;
+  function FilterProperties(Decls: TDeclarationArray; IsIndexing: Boolean): TDeclarationArray;
+  var
+    I: Integer;
   begin
-    Result := [Decl];
-  end;
-
-  function DoMethod(Decl: TDeclaration): TDeclarationArray;
-  begin
-    Result := FCodeinsight.GetOverloads(Decl);
-  end;
-
-  function DoProperties(Decl: TDeclaration): TDeclarationArray;
-  begin
-    Result := GetProperties(FCodeinsight.GetOverloads(Decl))
+    if IsIndexing then
+      Result := RemoveDuplicateProperties(Decls)
+    else
+    begin
+      // for `obj.Prop(` to be valid syntax it must return a method
+      Result := [];
+      for I := 0 to High(Decls) do
+        if FCodeinsight.ResolveVarType(TDeclaration_Property(Decls[I]).ResultType) is TDeclaration_TypeMethod then
+          Result.Add(Decls[I]);
+      Result := RemoveDuplicateProperties(Result);
+    end;
   end;
 
 var
@@ -546,23 +486,48 @@ begin
       FCodeinsight.SetScript(Text, FileName, GetCaretPos(True));
       FCodeinsight.Run();
 
-      Decl := FCodeinsight.ParseExpression(GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y), [EParseExpressionFlag.WantVarType]);
       Decls := [];
+      Decl := FCodeinsight.ParseExpr(GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y));
 
-      if IsIndexing then
-        Decls := DoProperties(Decl)
-      else
-      if (Decl is TDeclaration_TypeMethod) then
-        Decls := DoMethodType(Decl)
-      else
-      if (Decl is TDeclaration_Method) then
-        Decls := DoMethod(Decl);
+      if (Decl <> nil) then
+      begin
+        // function pointer
+        if (Decl is TDeclaration_Var) then
+        begin
+          Decl := FCodeinsight.ResolveVarType(TDeclaration_Var(Decl).VarType);
+          if (Decl is TDeclaration_TypeMethod) then
+            Decls := [TDeclaration_TypeMethod(Decl).Method];
+        end else
+        // properties
+        if (Decl is TDeclaration_Property) then
+        begin
+          Decls := FCodeinsight.SymbolTable.Get(TDeclaration_MethodOfType(Decl).ObjectName).GetByClassAndName(Decl.Name, TDeclaration_Property);
+          Decls := FilterProperties(Decls, IsIndexing);
+        end else
+        // method of type
+        if (Decl is TDeclaration_MethodOfType) then
+        begin
+          Decls := FCodeinsight.SymbolTable.Get(TDeclaration_MethodOfType(Decl).ObjectName).GetByClassAndName(Decl.Name, TDeclaration_MethodOfType);
+        end else
+        // regular methods
+        if (Decl is TDeclaration_Method) then
+        begin
+          Decls := FCodeinsight.SymbolTable.Get(Decl.Name).GetByClassAndName(Decl.Name, TDeclaration_Method, True);
+        end;
 
-      if (Decl is TDeclaration_Method) then
-        FDisplayPoint.X := FDisplayPoint.X - Length(Decl.Name);
+        // if indexing remove non-indexable properties
+        if IsIndexing then
+          Decls := IndexableProperties(Decls);
+
+        // remove overrides
+        Decls := RemoveOverridenMethods(Decls);
+      end;
 
       if (Length(Decls) > 0) then
       begin
+        if (Decl is TDeclaration_Method) then
+          FDisplayPoint.X := FDisplayPoint.X - Length(Decl.Name);
+
         FHintForm.Font := Font;
         FHintForm.Font.Color := Editor.Highlighter.IdentifierAttribute.Foreground;
         FHintForm.BoldIndex := GetParameterIndexAtCaret();

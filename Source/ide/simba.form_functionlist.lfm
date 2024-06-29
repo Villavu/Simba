@@ -7,7 +7,7 @@ object SimbaFunctionListForm: TSimbaFunctionListForm
   DesignTimePPI = 120
   PopupMenu = ContextMenu
   ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.4.0.0'
   object ContextMenu: TPopupMenu
     OnPopup = ContextMenuPopup
     Left = 55

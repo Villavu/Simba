@@ -12,7 +12,8 @@ interface
 uses
   Classes, SysUtils,
   simba.base,
-  simba.ide_codetools_parser, simba.ide_codetools_insight, simba.ide_codetools_includes;
+  simba.ide_codetools_parser,
+  simba.ide_codetools_insight;
 
 procedure FindAndShowDeclaration(Script, ScriptFileName: String; CaretPos: Integer; What: String);
 
@@ -26,11 +27,155 @@ procedure ShowDeclarationDialog(Decls: TDeclarationArray);
 implementation
 
 uses
-  simba.form_tabs, simba.form_showdeclaration;
+  Forms, Controls, Graphics, ATListbox,
+  simba.env,
+  simba.ide_theme,
+  simba.component_buttonpanel,
+  simba.form_main,
+  simba.form_tabs;
+
+type
+  TShowDeclarationForm = class
+  private
+    FDecls: TDeclarationArray;
+    FForm: TForm;
+    FListBox: TATListBox;
+
+    procedure DoOpenDeclaration(Sender: TObject);
+    procedure DoDrawItem(Sender: TObject; C: TCanvas; AIndex: integer; const ARect: TRect);
+  public
+    constructor Create(Decls: TDeclarationArray);
+  end;
+
+procedure TShowDeclarationForm.DoOpenDeclaration(Sender: TObject);
+begin
+  if (FListBox.ItemIndex >= 0) and (FListBox.ItemIndex <= High(FDecls)) then
+    ShowDeclaration(FDecls[FListBox.ItemIndex]);
+
+  if (Sender = FListBox) then
+    FForm.Close();
+end;
+
+procedure TShowDeclarationForm.DoDrawItem(Sender: TObject; C: TCanvas; AIndex: integer; const ARect: TRect);
+var
+  NIndentTop, NIndentLeft: Integer;
+begin
+  FListBox.DoDefaultDrawItem(C, AIndex, ARect);
+
+  NIndentTop := (FListBox.ItemHeight - SimbaMainForm.Images.Height) div 2;
+  NIndentLeft := ARect.Left - FListBox.ScrollHorz;
+  NIndentLeft := NIndentLeft + (FListBox.ColumnWidth[0] - SimbaMainForm.Images.Width) div 2;
+
+  SimbaMainForm.Images.Draw(C, NIndentLeft, ARect.Top + NIndentTop, DeclarationImage(FDecls[AIndex]));
+end;
+
+constructor TShowDeclarationForm.Create(Decls: TDeclarationArray);
+var
+  Items: array of record
+    Decl: TDeclaration;
+    Header: String;
+    FileName: String;
+    Line: Integer;
+  end;
+  MaxHeaderWidth, MaxFileWidth, MaxLineLength: Integer;
+
+  procedure InitItems;
+  var
+    I, TextWidth: Integer;
+    Bitmap: TBitmap;
+  begin
+    Bitmap := TBitmap.Create();
+    Bitmap.Canvas.Font := FForm.Font;
+
+    MaxHeaderWidth := Bitmap.Canvas.TextWidth('123456');
+    MaxFileWidth   := MaxHeaderWidth;
+    MaxLineLength  := MaxHeaderWidth;
+
+    SetLength(Items, Length(FDecls));
+    for I := 0 to High(FDecls) do
+    begin
+      Items[I].Decl := FDecls[I];
+      Items[I].Header := FDecls[I].Header;
+      Items[I].FileName := ExtractRelativePath(SimbaEnv.SimbaPath, FDecls[I].DocPos.FileName);
+      Items[I].Line := FDecls[I].DocPos.Line;
+
+      TextWidth := Bitmap.Canvas.TextWidth(Items[I].Header);
+      if (TextWidth > MaxHeaderWidth) then
+        MaxHeaderWidth := TextWidth;
+      TextWidth := Bitmap.Canvas.TextWidth(Items[I].FileName);
+      if (TextWidth > MaxFileWidth) then
+        MaxFileWidth := TextWidth;
+    end;
+
+    Bitmap.Free();
+  end;
+
+var
+  I: Integer;
+  Cols: TATIntArray;
+begin
+  FDecls := Decls;
+
+  FForm := TForm.Create(nil);
+  FForm.Position := poMainFormCenter;
+  FForm.Caption := 'Open Declaration';
+
+  with TSimbaButtonPanel.Create(FForm) do
+  begin
+    Parent := FForm;
+    ButtonOk.Caption := 'Open';
+    ButtonOk.OnClick := @DoOpenDeclaration;
+  end;
+
+  FListBox := TATListbox.Create(FForm);
+  FListBox.Parent := FForm;
+  FListBox.Align := alClient;
+  FListBox.CanGetFocus := True;
+  FListBox.OwnerDrawn := True;
+  FListBox.IndentLeft := 4;
+  FListBox.OnDblClick := @DoOpenDeclaration;
+
+  InitItems();
+
+  Cols := [
+    SimbaMainForm.Images.Width + FListBox.IndentLeft * 2,
+    MaxHeaderWidth             + FListBox.IndentLeft * 4,
+    MaxLineLength              + FListBox.IndentLeft * 4,
+    MaxFileWidth               + FListBox.IndentLeft * 4
+  ];
+
+  FListBox.ColumnSizes := Cols;
+  FListBox.ColumnSeparator := '|';
+  FListBox.VirtualMode := False;
+  FListBox.HeaderText := '|Header|Line|File';
+  FListBox.OnDrawItem := @DoDrawItem;
+  FListBox.ColorBgListbox := SimbaTheme.ColorBackground;
+  FListBox.ColorBgListboxHeader := SimbaTheme.ColorFrame;
+  FListBox.ColorBgListboxSel := SimbaTheme.ColorActive;
+  FListBox.ColorFontListbox := SimbaTheme.ColorFont;
+  FListBox.ColorFontListboxHeader := SimbaTheme.ColorFont;
+  FListBox.ColorFontListboxSel := SimbaTheme.ColorFont;
+  FListBox.ColorSeparators := SimbaTheme.ColorLine;
+
+  for I := 0 to High(Items) do
+    with Items[I] do
+      FListBox.Items.Add('|' + Header + '|' + IntToStr(Line) + '|' + FileName);
+
+  FForm.Width := FForm.Scale96ToScreen(650);
+  FForm.Height := FForm.Scale96ToScreen(350);
+  FForm.ShowModal();
+  FForm.Free();
+end;
+
+procedure ShowDeclarationDialog(Decls: TDeclarationArray);
+begin
+  TShowDeclarationForm.Create(Decls).Free();
+end;
 
 procedure FindAndShowDeclaration(Script, ScriptFileName: String; CaretPos: Integer; What: String);
 var
   Decl: TDeclaration;
+  Decls: TDeclarationArray;
   Codeinsight: TCodeinsight;
 begin
   Codeinsight := TCodeinsight.Create();
@@ -39,27 +184,32 @@ begin
     Codeinsight.SetScript(Script, ScriptFileName, CaretPos);
     Codeinsight.Run();
 
-    Decl := Codeinsight.ScriptParser.Items.GetByPosition(CaretPos);
-    if (Decl is TDeclaration_IncludeDirective) then
+    Decl := Codeinsight.ParseExpr(What);
+    if (Decl = nil) then
+      Exit;
+
+    // need to need to check for overloads
+    if (Decl is TDeclaration_Method) then
     begin
-      SimbaTabsForm.Open(TDeclaration_IncludeDirective(Decl).FileName);
+      Decls := Codeinsight.Get(TDeclaration_MethodOfType(Decl).ObjectName).GetByClass(TDeclaration_Type);
+      if (Length(Decls) > 0) then
+        Decls := Codeinsight.GetTypeMembers(Decls[0] as TDeclaration_Type).GetByClassAndName(Decl.Name, TDeclaration_MethodOfType)
+      else
+        Decls := Codeinsight.Get(Decl.Name).GetByClassAndName(Decl.Name, TDeclaration_Method, True);
+
+      if (Length(Decls) > 1) then
+        ShowDeclarationDialog(Decls)
+      else
+      if (Length(Decls) = 1) then
+        ShowDeclaration(Decls[0]);
+
       Exit;
     end;
 
-    Decl := Codeinsight.ParseExpression(What, []);
-    if (Decl <> nil) then
-    begin
-      if (Decl.ClassType = TDeclaration_Method) and (Length(Codeinsight.GetOverloads(Decl)) > 1) then
-        ShowDeclarationDialog(Codeinsight.GetOverloads(Decl))
-      else
-        ShowDeclaration(Decl);
-    end;
-  except
-    on E: Exception do
-      DebugLn('FindAndShowDeclaration: ' + E.ToString());
+    ShowDeclaration(Decl);
+  finally
+    Codeinsight.Free();
   end;
-
-  Codeinsight.Free();
 end;
 
 procedure ShowDeclaration(StartPos, EndPos, Line: Integer; FileName: String);
@@ -78,37 +228,25 @@ begin
 end;
 
 procedure ShowDeclaration(Declaration: TDeclaration);
-
-  function GetDeclarationText: String;
-  begin
-    if (Declaration is TDeclaration_Method) then
-      Result := TDeclaration_Method(Declaration).HeaderString
-    else
-    if (Declaration is TDeclaration_Var) then
-      Result := TDeclaration_Var(Declaration).Name + TDeclaration_Var(Declaration).VarTypeString + TDeclaration_Var(Declaration).VarDefaultString
-    else
-      Result := Declaration.Text;
-  end;
-
 begin
-  if (Declaration.Parser is TCodetoolsPlugin) then
+  if (Declaration.Parser.SourceType = EParserSourceType.PLUGIN) then
   begin
-    DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [Declaration.Lexer.FileName]);
-    DebugLn([EDebugLn.FOCUS], GetDeclarationText());
+    DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [Declaration.DocPos.FileName]);
+    DebugLn([EDebugLn.FOCUS], Declaration.Header);
 
     Exit;
   end;
 
-  if (Declaration.Lexer.FileName = '') or FileExists(Declaration.Lexer.FileName) then
+  if (Declaration.DocPos.FileName = '') or FileExists(Declaration.DocPos.FileName) then
   begin
-    if FileExists(Declaration.Lexer.FileName) then
-      SimbaTabsForm.Open(Declaration.Lexer.FileName);
+    if FileExists(Declaration.DocPos.FileName) then
+      SimbaTabsForm.Open(Declaration.DocPos.FileName);
 
     with SimbaTabsForm.CurrentEditor do
     begin
       SelStart := Declaration.StartPos;
       SelEnd := Declaration.EndPos;
-      TopLine := (Declaration.Line + 1) - (LinesInWindow div 2);
+      TopLine := (Declaration.DocPos.Line + 1) - (LinesInWindow div 2);
       if CanSetFocus() then
         SetFocus();
     end;
@@ -116,8 +254,8 @@ begin
     Exit;
   end;
 
-  DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [Declaration.Lexer.FileName]);
-  DebugLn([EDebugLn.FOCUS], GetDeclarationText());
+  DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [Declaration.DocPos.FileName]);
+  DebugLn([EDebugLn.FOCUS], Declaration.Header);
 end;
 
 procedure ShowSimbaDeclaration(Header: String; FileName: String);
@@ -136,16 +274,6 @@ begin
 
   DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [FileName]);
   DebugLn([EDebugLn.FOCUS], 'Declaration: %s', [Header]);
-end;
-
-procedure ShowDeclarationDialog(Decls: TDeclarationArray);
-begin
-  with TShowDeclarationForm.Create(nil) do
-  try
-    Execute(Decls);
-  finally
-    Free();
-  end;
 end;
 
 end.

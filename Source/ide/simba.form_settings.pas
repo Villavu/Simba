@@ -30,6 +30,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure OKButtonClick(Sender: TObject);
     procedure TreeViewSelectionChanged(Sender: TObject);
+    procedure DoOpenPage(Data: PtrInt);
   public
     SimbaGeneralFrame: TSimbaGeneralFrame;
     SimbaCodetoolsFrame: TSimbaCodetoolsFrame;
@@ -42,6 +43,7 @@ type
     EditorDefaultFrame: TEditorDefaultFrame;
 
     procedure ShowPage(Title: String);
+    procedure Open(Page: String);
 
     constructor Create(AOwner: TComponent); override;
   end;
@@ -62,9 +64,22 @@ begin
     Notebook.ShowControl(TPage(TreeView.Selected.Data));
 end;
 
+procedure TSimbaSettingsForm.DoOpenPage(Data: PtrInt);
+begin
+  TreeView.Selected := TTreeNode(Pointer(PtrUInt(Data)));
+end;
+
 procedure TSimbaSettingsForm.ShowPage(Title: String);
 begin
   TreeView.Selected := TreeView.Items.FindNodeWithText(Title);
+end;
+
+procedure TSimbaSettingsForm.Open(Page: String);
+begin
+  if (TreeView.Items.FindNodeWithText(Page) <> nil) then
+    Application.QueueAsyncCall(@DoOpenPage, PtrInt(TreeView.Items.FindNodeWithText(Page)));
+
+  ShowModal();
 end;
 
 procedure TSimbaSettingsForm.FormShow(Sender: TObject);

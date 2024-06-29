@@ -404,6 +404,7 @@ function TSimbaEditor.GetExpression(X, Y: Integer): String;
 var
   Line: String;
   InRound, InSquare: Integer;
+  I: Integer;
 begin
   Result := '';
 
@@ -417,9 +418,9 @@ begin
   InRound := 0;
   InSquare := 0;
 
-  for X := X downto 1 do
+  for I := X downto 1 do
   begin
-    case Line[X] of
+    case Line[I] of
       ')': Inc(InRound);
       ']': Inc(InSquare);
       '(':
@@ -434,19 +435,18 @@ begin
           if (InSquare < 0) then
             Break;
         end;
-
       else
       begin
-        if (Line[X] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '.', '^']) then
+        if (Line[I] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '.', '^']) then
           // in identifier
         else
         if (InRound <= 0) and (InSquare <= 0) then
           Break;
       end;
     end;
-
-    Result := Line[X] + Result;
   end;
+
+  Result := Copy(Line, I+1, X-I);
 end;
 
 function TSimbaEditor.GetExpressionEx(X, Y: Integer): String;
@@ -480,7 +480,7 @@ begin
 
   Highlighter := TSynFreePascalSyn.Create(Self);
 
-  FScreenCaretPainterClass := TSynEditScreenCaretPainterInternal;
+  FScreenCaretPainterClass {%H-}:= TSynEditScreenCaretPainterInternal;
   if (FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal) then
     FScreenCaret.ChangePainter(TSynEditScreenCaretPainterInternal);
 

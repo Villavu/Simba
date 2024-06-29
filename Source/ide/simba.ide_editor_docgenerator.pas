@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  simba.ide_codetools_parser, simba.settings;
+  simba.ide_codetools_base, simba.ide_codetools_parser, simba.settings;
 
 procedure TSimbaEditorPlugin_DocGenerator.DoEditorAdded(Value: TCustomSynEdit);
 begin
@@ -65,21 +65,13 @@ end;
 procedure TSimbaEditorPlugin_DocGenerator.InsertDocumentation;
 
   procedure InsertDocAtMethod(Decl: TDeclaration);
-  var
-    FullName: String;
   begin
     if (Decl is TDeclaration_Method) then
       with TDeclaration_Method(Decl) do
       begin
         Editor.CaretXY := Editor.CharIndexToRowCol(StartPos - 1);
-
-        if isObjectMethod then
-          FullName := ObjectName + '.' + Name
-        else
-          FullName := Name;
-
         Editor.InsertTextAtCaret(
-          Format(SimbaSettings.Editor.DocumentationComment.Value, [FullName, StringOfChar('-', Length(FullName)), HeaderString])
+          Format(SimbaSettings.Editor.DocumentationComment.Value, [Decl.FullName, StringOfChar('-', Length(Decl.FullName)), Header])
         );
       end;
   end;
@@ -102,7 +94,7 @@ begin
       if (Decl is TDeclaration_Method) then
         InsertDocAtMethod(Decl)
       else
-        InsertDocAtMethod(Decl.GetOwnerByClass(TDeclaration_Method));
+        InsertDocAtMethod(Decl.ParentByClass[TDeclaration_Method]);
     end;
   except
   end;
