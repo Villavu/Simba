@@ -142,6 +142,7 @@ type
 
     function Format(Args: array of const): String;
 
+    function ToBytes: TByteArray;
     function ToBoolean: Boolean; overload;
     function ToBoolean(Default: Boolean): Boolean; overload;
     function ToInteger: Integer; overload;
@@ -1066,6 +1067,16 @@ end;
 function TSimbaStringHelper.Format(Args: array of const): String;
 begin
   Result := SysUtils.Format(Self, Args);
+end;
+
+function TSimbaStringHelper.ToBytes: TByteArray;
+var
+  Len: Integer;
+begin
+  Len := Length(Self);
+  SetLength(Result, Len);
+  if (Len > 0) then
+    Move(Self[1], Result[0], Len);
 end;
 
 function TSimbaStringHelper.ToBoolean: Boolean;

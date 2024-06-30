@@ -13,7 +13,8 @@ interface
 
 uses
   Classes, SysUtils, ssockets,
-  simba.base, simba.baseclass, simba.openssl;
+  simba.base, simba.baseclass, simba.openssl,
+  simba.vartype_string, simba.vartype_ordarray;
 
 type
   PSimbaInternetSocket = ^TSimbaInternetSocket;
@@ -38,6 +39,9 @@ type
 
     function HasData: Boolean;
 
+    function Read(MaxLen: Integer = 8192): TByteArray;
+    function ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;
+    function Write(Data: TByteArray): Integer;
     function ReadString(MaxLen: Integer = 8192): String;
     function ReadStringUntil(Seq: String; Timeout: Integer): String;
     function WriteString(Str: String): Integer;
@@ -140,39 +144,60 @@ begin
   end;
 end;
 
-function TSimbaInternetSocket.WriteString(Str: String): Integer;
+function TSimbaInternetSocket.Write(Data: TByteArray): Integer;
 begin
-  if (Length(Str) > 0) then
-    Result := FSocket.Write(Str[1], Length(Str))
+  if (Length(Data) > 0) then
+    Result := FSocket.Write(Data[0], Length(Data))
   else
     Result := 0;
 end;
 
 function TSimbaInternetSocket.ReadString(MaxLen: Integer): String;
 begin
-  SetLength(Result, MaxLen);
-  SetLength(Result, FSocket.Read(Result[1], MaxLen));
+  Result := Read(MaxLen).ToString();
 end;
 
 function TSimbaInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;
-var
-  Read: String;
-  T: Integer;
 begin
-  T := FSocket.IOTimeout;
-  FSocket.IOTimeout := Timeout;
+  Result := ReadUntil(Seq.ToBytes(), Timeout).ToString();
+end;
 
-  Result := '';
-  while not Result.EndsWith(Seq) do
+function TSimbaInternetSocket.WriteString(Str: String): Integer;
+begin
+  Result := Write(Str.ToBytes());
+end;
+
+function TSimbaInternetSocket.Read(MaxLen: Integer): TByteArray;
+begin
+  SetLength(Result, MaxLen);
+  SetLength(Result, FSocket.Read(Result[0], MaxLen));
+end;
+
+function TSimbaInternetSocket.ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;
+var
+  SeqLen: Integer;
+
+  function EndsWithSeq(const Data: TByteArray): Boolean;
   begin
-    Read := ReadString();
-    if (Length(Read) = 0) then
-      Break;
-
-    Result += Read;
+    Result := (Length(Data) >= SeqLen) and CompareMem(@Seq[0], @Data[High(Data) - SeqLen], SeqLen);
   end;
 
-  FSocket.IOTimeout := T;
+var
+  T: UInt64;
+begin
+  Result := [];
+
+  SeqLen := Length(Seq);
+  if (SeqLen > 0) then
+  begin
+    T := GetTickCount64() + Timeout;
+    repeat
+      if HasData() then
+        Result += Read()
+      else
+        Sleep(50);
+    until EndsWithSeq(Result) or (GetTickCount64() > T);
+  end;
 end;
 
 end.

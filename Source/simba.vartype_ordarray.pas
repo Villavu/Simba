@@ -14,6 +14,11 @@ uses
   simba.base;
 
 type
+  TByteArrayHelper = type helper for TByteArray
+    function ToString: String;
+    procedure FromString(Value: String);
+  end;
+
   TIntegerArrayHelper = type helper for TIntegerArray
     function Equals(Other: TIntegerArray): Boolean;
     function IndexOf(Value: Integer): Integer;
@@ -62,6 +67,20 @@ implementation
 uses
   Math,
   simba.array_algorithm;
+
+function TByteArrayHelper.ToString: String;
+begin
+  SetLength(Result, Length(Self));
+  if (Length(Result) > 0) then
+    Move(Self[0], Result[1], Length(Self));
+end;
+
+procedure TByteArrayHelper.FromString(Value: String);
+begin
+  SetLength(Self, Length(Value));
+  if (Length(Self) > 0) then
+    Move(Value[1], Self[0], Length(Value));
+end;
 
 function TIntegerArrayHelper.Equals(Other: TIntegerArray): Boolean;
 begin

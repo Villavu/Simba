@@ -15,7 +15,7 @@ implementation
 uses
   Graphics, Variants,
   lptypes, lpvartypes, lpparser,
-  simba.nativeinterface, simba.env, simba.baseclass;
+  simba.nativeinterface, simba.env, simba.baseclass, simba.vartype_ordarray;
 
 (*
 Base
@@ -431,6 +431,16 @@ begin
   TSimbaBaseClass(Params^[0]^).FreeOnTerminate := PBoolean(Params^[1])^;
 end;
 
+procedure _LapeByteArray_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PByteArray(Params^[0])^.ToString();
+end;
+
+procedure _LapeByteArray_FromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByteArray(Params^[0])^.FromString(PString(Params^[1])^);
+end;
+
 procedure ImportBase(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -497,6 +507,9 @@ begin
     addGlobalFunc('function Variant.IsNull: Boolean;', @_LapeVariantIsNull);
 
     addGlobalFunc('function Variant.NULL: Variant; static;', @_LapeVariantNULL);
+
+    addGlobalFunc('function TByteArray.ToString: String;', @_LapeByteArray_ToString);
+    addGlobalFunc('procedure TByteArray.FromString(Str: String);', @_LapeByteArray_FromString);
 
     ImportingSection := '';
 

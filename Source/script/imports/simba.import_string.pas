@@ -657,6 +657,16 @@ begin
 end;
 
 (*
+String.ToBytes
+--------------
+> function String.ToBytes: TByteArray;
+*)
+procedure _LapeString_ToBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByteArray(Result)^ := PString(Params^[0])^.ToBytes();
+end;
+
+(*
 String.ToBoolean
 ----------------
 > function String.ToBoolean: Boolean;
@@ -1033,6 +1043,7 @@ begin
 
     addGlobalFunc('function String.Format(Args: TVariantArray): String;', @_LapeString_Format);
 
+    addGlobalFunc('function String.ToBytes: TByteArray; overload;', @_LapeString_ToBytes);
     addGlobalFunc('function String.ToBoolean: Boolean; overload;', @_LapeString_ToBoolean);
     addGlobalFunc('function String.ToBoolean(Default: Boolean): Boolean; overload;', @_LapeString_ToBooleanDef);
     addGlobalFunc('function String.ToInteger: Integer; overload;', @_LapeString_ToInteger);
