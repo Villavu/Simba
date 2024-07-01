@@ -11,166 +11,116 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.ide_codetools_base, simba.ide_codetools_parser, simba.ide_initialization;
+  simba.base, simba.ide_codetools_parser;
 
-function GetArrayHelpers(Decl: TDeclaration): TCodeParser;
+const
+  HELPERS_STRING =
+    'procedure <ArrayName>.SetLength(NewLength: Integer); external;' + LineEnding +
+    'function <ArrayName>.Length: Integer; external;' + LineEnding +
+    'function <ArrayName>.Copy: <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <ArrayName>; external;' + LineEnding +
+    'procedure <ArrayName>.Delete(StartIndex: Integer; Count: Integer = High(Integer)); external;' + LineEnding +
+    'function <ArrayName>.First: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Last: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Pop: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Pop(Index: Integer): <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.RandomValue: <ArrayVarType>; external;' + LineEnding +
+    'procedure <ArrayName>.Reverse; external;' + LineEnding +
+    'function <ArrayName>.Reversed: <ArrayName>; external;' + LineEnding +
+    'procedure <ArrayName>.Clear; external;';
+
+  HELPERS_DYNARRAY =
+    'function <ArrayName>.Low: Integer; external;' + LineEnding +
+    'function <ArrayName>.High: Integer; external;' + LineEnding +
+    'function <ArrayName>.Contains(Value: <ArrayVarType>): Boolean; external;' + LineEnding +
+    'procedure <ArrayName>.Swap(FromIndex, ToIndex: Integer); external;' + LineEnding +
+    'function <ArrayName>.Unique: <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.IndexOf(Value: <ArrayVarType>): Integer; external;' + LineEnding +
+    'function <ArrayName>.IndicesOf(Value: <ArrayVarType>): TIntegerArray; external;' + LineEnding +
+    'procedure <ArrayName>.Sort; external;' + LineEnding +
+    'procedure <ArrayName>.Sort(CompareFunc: function(constref L, R: <ArrayVarType>): Integer); external;' + LineEnding +
+    'procedure <ArrayName>.Sort(Weights: TIntegerArray; LowToHigh: Boolean); external;' + LineEnding +
+    'function <ArrayName>.Sorted: <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Sorted(CompareFunc: function(constref L, R: <ArrayVarType>): Integer): <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Sorted(Weights: TIntegerArray; LowToHigh: Boolean): <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Length: Integer; external;' + LineEnding +
+    'function <ArrayName>.Copy: <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.First: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Last: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.RandomValue: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Reversed: <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Min: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Max: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Sum: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Mode: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Median: Double; external;' + LineEnding +
+    'function <ArrayName>.Mean: Double; external;' + LineEnding +
+    'function <ArrayName>.Variance: Double; external;' + LineEnding +
+    'function <ArrayName>.Stdev: Double; external;' + LineEnding +
+    'function <ArrayName>.Slice(Start, Stop, Step: Integer): <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Remove(Value: <ArrayVarType>): Boolean; external;' + LineEnding +
+    'function <ArrayName>.RemoveAll(Value: <ArrayVarType>): Integer; external;' + LineEnding +
+    'procedure <ArrayName>.Delete(Index: Integer; Count: Integer = High(Integer)); external;' + LineEnding +
+    'procedure <ArrayName>.Insert(Item: <ArrayVarType>; Index: Integer); external;' + LineEnding +
+    'procedure <ArrayName>.SetLength(NewLength: Integer); external;' + LineEnding +
+    'function <ArrayName>.Pop: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Pop(Index: Integer): <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.RandomValue: <ArrayVarType>; external;' + LineEnding +
+    'procedure <ArrayName>.Reverse; external;' + LineEnding +
+    'procedure <ArrayName>.Clear; external;' + LineEnding +
+    'procedure <ArrayName>.Append(Value: <ArrayVarType>); external;' + LineEnding +
+    'procedure <ArrayName>.Extend(Value: <ArrayName>); external;';
+
+  HELPERS_STATICARRAY =
+    'function <ArrayName>.Low: Integer; external;' + LineEnding +
+    'function <ArrayName>.High: Integer; external;' + LineEnding +
+    'function <ArrayName>.Contains(Value: <ArrayVarType>): Boolean; external;' + LineEnding +
+    'procedure <ArrayName>.Swap(FromIndex, ToIndex: Integer); external;' + LineEnding +
+    'function <ArrayName>.Unique: <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.IndexOf(Value: <ArrayVarType>): Integer; external;' + LineEnding +
+    'function <ArrayName>.IndicesOf(Value: <ArrayVarType>): TIntegerArray; external;' + LineEnding +
+    'procedure <ArrayName>.Sort; external;' + LineEnding +
+    'procedure <ArrayName>.Sort(CompareFunc: function(constref L, R: <ArrayVarType>): Integer); external;' + LineEnding +
+    'procedure <ArrayName>.Sort(Weights: TIntegerArray; LowToHigh: Boolean); external;' + LineEnding +
+    'function <ArrayName>.Sorted: <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Sorted(CompareFunc: function(constref L, R: <ArrayVarType>): Integer): <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Sorted(Weights: TIntegerArray; LowToHigh: Boolean): <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Length: Integer; external;' + LineEnding +
+    'function <ArrayName>.Copy: <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.First: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Last: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.RandomValue: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Reversed: <ArrayName>; external;' + LineEnding +
+    'function <ArrayName>.Min: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Max: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Sum: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Mode: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Median: Double; external;' + LineEnding +
+    'function <ArrayName>.Mean: Double; external;' + LineEnding +
+    'function <ArrayName>.Variance: Double; external;' + LineEnding +
+    'function <ArrayName>.Stdev: Double; external;' + LineEnding +
+    'function <ArrayName>.Slice(Start, Stop, Step: Integer): <ArrayName>; external;';
+
+function GetArrayHelpers(Decl: TDeclaration): TDeclarationArray;
 
 implementation
 
-uses
-  simba.containers, simba.vartype_string;
-
-type
-  TArrayHelperGenerator = class(TObject)
-  protected
-  type
-    TList = specialize TSimbaObjectList<TCodeParser>;
-  protected
-    FStringHelpers: String;
-    FDynHelpers: String;
-    FStaticHelpers: String;
-
-    FHelpers: TList;
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    function Get(Decl: TDeclaration): TCodeParser;
-  end;
-
 var
-  ArrayHelperGenerator: TArrayHelperGenerator;
+  ArrayHelperParsers: TCodeParserList;
 
-function GetArrayHelpers(Decl: TDeclaration): TCodeParser;
-begin
-  Result := ArrayHelperGenerator.Get(Decl);
-end;
-
-constructor TArrayHelperGenerator.Create;
-begin
-  inherited Create();
-
-  FHelpers := TList.Create(True);
-
-  FStringHelpers := LineEnding.Join([
-    'procedure <ArrayName>.SetLength(NewLength: Integer); external;',
-    'function <ArrayName>.Length: Integer; external;',
-    'function <ArrayName>.Copy: <ArrayName>; external;',
-    'function <ArrayName>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <ArrayName>; external;',
-    'procedure <ArrayName>.Delete(StartIndex: Integer; Count: Integer = High(Integer)); external;',
-    'function <ArrayName>.First: <ArrayVarType>; external;',
-    'function <ArrayName>.Last: <ArrayVarType>; external;',
-    'function <ArrayName>.Pop: <ArrayVarType>; external;',
-    'function <ArrayName>.Pop(Index: Integer): <ArrayVarType>; external;',
-    'function <ArrayName>.RandomValue: <ArrayVarType>; external;',
-    'procedure <ArrayName>.Reverse; external;',
-    'function <ArrayName>.Reversed: <ArrayName>; external;',
-    'procedure <ArrayName>.Clear; external;'
-  ]);
-
-  FDynHelpers := LineEnding.Join([
-    'function <ArrayName>.Low: Integer; external;',
-    'function <ArrayName>.High: Integer; external;',
-    'function <ArrayName>.Contains(Value: <ArrayVarType>): Boolean; external;',
-    'procedure <ArrayName>.Swap(FromIndex, ToIndex: Integer); external;',
-    'function <ArrayName>.Unique: <ArrayName>; external;',
-    'function <ArrayName>.IndexOf(Value: <ArrayVarType>): Integer; external;',
-    'function <ArrayName>.IndicesOf(Value: <ArrayVarType>): TIntegerArray; external;',
-    'procedure <ArrayName>.Sort; external;',
-    'procedure <ArrayName>.Sort(CompareFunc: function(constref L, R: <ArrayVarType>): Integer); external;',
-    'procedure <ArrayName>.Sort(Weights: TIntegerArray; LowToHigh: Boolean); external;',
-    'function <ArrayName>.Sorted: <ArrayName>; external;',
-    'function <ArrayName>.Sorted(CompareFunc: function(constref L, R: <ArrayVarType>): Integer): <ArrayName>; external;',
-    'function <ArrayName>.Sorted(Weights: TIntegerArray; LowToHigh: Boolean): <ArrayName>; external;',
-    'function <ArrayName>.Length: Integer; external;',
-    'function <ArrayName>.Copy: <ArrayName>; external;',
-    'function <ArrayName>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <ArrayName>; external;',
-    'function <ArrayName>.First: <ArrayVarType>; external;',
-    'function <ArrayName>.Last: <ArrayVarType>; external;',
-    'function <ArrayName>.RandomValue: <ArrayVarType>; external;',
-    'function <ArrayName>.Reversed: <ArrayName>; external;',
-    'function <ArrayName>.Min: <ArrayVarType>; external;',
-    'function <ArrayName>.Max: <ArrayVarType>; external;',
-    'function <ArrayName>.Sum: <ArrayVarType>; external;',
-    'function <ArrayName>.Mode: <ArrayVarType>; external;',
-    'function <ArrayName>.Median: Double; external;',
-    'function <ArrayName>.Mean: Double; external;',
-    'function <ArrayName>.Variance: Double; external;',
-    'function <ArrayName>.Stdev: Double; external;',
-    'function <ArrayName>.Slice(Start, Stop, Step: Integer): <ArrayName>; external;',
-    'function <ArrayName>.Remove(Value: <ArrayVarType>): Boolean; external;',
-    'function <ArrayName>.RemoveAll(Value: <ArrayVarType>): Integer; external;',
-    'procedure <ArrayName>.Delete(Index: Integer; Count: Integer = High(Integer)); external;',
-    'procedure <ArrayName>.Insert(Item: <ArrayVarType>; Index: Integer); external;',
-    'procedure <ArrayName>.SetLength(NewLength: Integer); external;',
-    'function <ArrayName>.Pop: <ArrayVarType>; external;',
-    'function <ArrayName>.Pop(Index: Integer): <ArrayVarType>; external;',
-    'function <ArrayName>.RandomValue: <ArrayVarType>; external;',
-    'procedure <ArrayName>.Reverse; external;',
-    'procedure <ArrayName>.Clear; external;',
-    'procedure <ArrayName>.Append(Value: <ArrayVarType>); external;',
-    'procedure <ArrayName>.Extend(Value: <ArrayName>); external;'
-  ]);
-
-  FStaticHelpers := LineEnding.Join([
-    'function <ArrayName>.Low: Integer; external;',
-    'function <ArrayName>.High: Integer; external;',
-    'function <ArrayName>.Contains(Value: <ArrayVarType>): Boolean; external;',
-    'procedure <ArrayName>.Swap(FromIndex, ToIndex: Integer); external;',
-    'function <ArrayName>.Unique: <ArrayName>; external;',
-    'function <ArrayName>.IndexOf(Value: <ArrayVarType>): Integer; external;',
-    'function <ArrayName>.IndicesOf(Value: <ArrayVarType>): TIntegerArray; external;',
-    'procedure <ArrayName>.Sort; external;',
-    'procedure <ArrayName>.Sort(CompareFunc: function(constref L, R: <ArrayVarType>): Integer); external;',
-    'procedure <ArrayName>.Sort(Weights: TIntegerArray; LowToHigh: Boolean); external;',
-    'function <ArrayName>.Sorted: <ArrayName>; external;',
-    'function <ArrayName>.Sorted(CompareFunc: function(constref L, R: <ArrayVarType>): Integer): <ArrayName>; external;',
-    'function <ArrayName>.Sorted(Weights: TIntegerArray; LowToHigh: Boolean): <ArrayName>; external;',
-    'function <ArrayName>.Length: Integer; external;',
-    'function <ArrayName>.Copy: <ArrayName>; external;',
-    'function <ArrayName>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <ArrayName>; external;',
-    'function <ArrayName>.First: <ArrayVarType>; external;',
-    'function <ArrayName>.Last: <ArrayVarType>; external;',
-    'function <ArrayName>.RandomValue: <ArrayVarType>; external;',
-    'function <ArrayName>.Reversed: <ArrayName>; external;',
-    'function <ArrayName>.Min: <ArrayVarType>; external;',
-    'function <ArrayName>.Max: <ArrayVarType>; external;',
-    'function <ArrayName>.Sum: <ArrayVarType>; external;',
-    'function <ArrayName>.Mode: <ArrayVarType>; external;',
-    'function <ArrayName>.Median: Double; external;',
-    'function <ArrayName>.Mean: Double; external;',
-    'function <ArrayName>.Variance: Double; external;',
-    'function <ArrayName>.Stdev: Double; external;',
-    'function <ArrayName>.Slice(Start, Stop, Step: Integer): <ArrayName>; external;'
-  ]);
-end;
-
-destructor TArrayHelperGenerator.Destroy;
-begin
-  if (FHelpers <> nil) then
-    FreeAndNil(FHelpers);
-
-  inherited Destroy;
-end;
-
-function TArrayHelperGenerator.Get(Decl: TDeclaration): TCodeParser;
-var
-  FileName: String;
+function GetArrayHelpers(Decl: TDeclaration): TDeclarationArray;
 
   function Run(Helpers, ArrayName, ArrayVarType: String): TCodeParser;
   var
     I: Integer;
+    FileName: String;
   begin
-    if (ArrayVarType = '') then
-      Exit(nil);
-
     FileName := '!ArrayHelper::' + ArrayName + '::' + ArrayVarType;
-    for I := 0 to FHelpers.Count - 1 do
-      if (FHelpers[I].Lexer.FileName = FileName) then
-      begin
-        Result := FHelpers[I];
-        Exit;
-      end;
+    for I := 0 to ArrayHelperParsers.Count - 1 do
+      if (ArrayHelperParsers[I].Lexer.FileName = FileName) then
+        Exit(ArrayHelperParsers[I]);
 
     Helpers := Helpers.Replace('<ArrayName>', ArrayName);
     Helpers := Helpers.Replace('<ArrayVarType>', ArrayVarType);
@@ -179,50 +129,51 @@ var
     Result.SetScript(Helpers, FileName);
     Result.Run();
 
-    FHelpers.Add(Result);
+    ArrayHelperParsers.Add(Result);
   end;
 
 var
+  Parser: TCodeParser;
   ArrName, ArrType: String;
 begin
-  Result := nil;
+  Parser := nil;
 
-  if (Decl is TDeclaration_TypeAlias) then
-  begin
-    case Decl.Name.ToUpper() of
-      'STRING':        Result := Run(FStringHelpers, 'String', 'Char');
-      'ANSISTRING':    Result := Run(FStringHelpers, 'AnsiString', 'Char');
-      'WIDESTRING':    Result := Run(FStringHelpers, 'WideString', 'WideChar');
-      'UNICODESTRING': Result := Run(FStringHelpers, 'UnicodeString', 'UnicodeChar');
-    end;
-  end
-  else
   if (Decl is TDeclaration_TypeArray) then
   begin
     ArrName := Decl.Name;
     if (ArrName = '') then
       ArrName := 'Array';
+
     ArrType := Decl.Items.GetTextOfClass(TDeclaration_VarType);
-    if (ArrType = '') then
-      Exit;
-
-    if (Decl is TDeclaration_TypeStaticArray) then
-      Result := Run(FStaticHelpers, ArrName, ArrType)
-    else
-      Result := Run(FDynHelpers, ArrName, ArrType);
+    if (ArrType <> '') then
+      if (Decl is TDeclaration_TypeStaticArray) then
+        Parser := Run(HELPERS_STATICARRAY, ArrName, ArrType)
+      else
+        Parser := Run(HELPERS_DYNARRAY, ArrName, ArrType);
+  end
+  else if (Decl is TDeclaration_TypeAlias) then
+  begin
+    case UpperCase(Decl.Name) of
+      'STRING':        Parser := Run(HELPERS_STRING, 'String', 'Char');
+      'ANSISTRING':    Parser := Run(HELPERS_STRING, 'AnsiString', 'Char');
+      'WIDESTRING':    Parser := Run(HELPERS_STRING, 'WideString', 'WideChar');
+      'UNICODESTRING': Parser := Run(HELPERS_STRING, 'UnicodeString', 'UnicodeChar');
+    end;
   end;
-end;
 
-procedure CreateArrayHelperGenerator;
-begin
-  ArrayHelperGenerator := TArrayHelperGenerator.Create();
+  if (Parser <> nil) then
+    Result := Parser.Items.ToArray
+  else
+    Result := [];
 end;
 
 initialization
-  SimbaIDEInitialization_AddBeforeCreate(@CreateArrayHelperGenerator, 'Codetools ArrayHelper Generator');
+  ArrayHelperParsers := TCodeParserList.Create(True);
 
 finalization
-  if (ArrayHelperGenerator <> nil) then
-    FreeAndNil(ArrayHelperGenerator);
+  FreeAndNil(ArrayHelperParsers);
 
 end.
+
+
+
