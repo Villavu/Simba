@@ -334,7 +334,7 @@ var
 begin
   Result := [];
   for i := 0 to FLocalSymbolTable.Count - 1 do
-    Result := Result + FLocalSymbolTable.Items[i].Decls;
+    Result := Result + Copy(FLocalSymbolTable.Items[i].Decls, 0, FLocalSymbolTable.Items[i].Count);
 end;
 
 function TCodeinsight.ResolveVarType(Decl: TDeclaration): TDeclaration_Type;
