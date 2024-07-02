@@ -13,54 +13,87 @@ interface
 
 uses
   Classes, SysUtils, ssockets,
-  simba.base, simba.baseclass, simba.openssl,
-  simba.vartype_string, simba.vartype_ordarray;
+  simba.base, simba.baseclass, simba.threading;
 
 type
-  PSimbaInternetSocket = ^TSimbaInternetSocket;
-  TSimbaInternetSocket = class(TSimbaBaseClass)
+  TInternetSocket = class(TSimbaBaseClass)
   protected
     FSocket: TInetSocket;
     FHost: String;
     FPort: UInt16;
     FUseSSL: Boolean;
+    FReadWriteLock: TEnterableLock;
 
-    function GetLastError: Integer;
-    function GetConnectTimeout: Integer;
-    function GetReadWriteTimeout: Integer;
+    // these should be used and not FSocket.Read/Write
+    function DoReadBytes(const MaxLen: Integer = 8192): TByteArray; virtual;
+    function DoWriteBytes(const Data: TByteArray): Integer; virtual;
 
-    procedure SetConnectTimeout(Value: Integer);
-    procedure SetReadWriteTimeout(Value: Integer);
+    function GetLastError: Integer; virtual;
+    function GetConnectTimeout: Integer; virtual;
+    function GetReadWriteTimeout: Integer; virtual;
+    function GetLocalAddress: String; virtual;
+    function GetRemoteAddress: String; virtual;
+
+    procedure SetConnectTimeout(Value: Integer); virtual;
+    procedure SetReadWriteTimeout(Value: Integer); virtual;
   public
     constructor Create(AHost: String; APort: UInt16; UseSSL: Boolean); reintroduce;
     destructor Destroy; override;
 
-    procedure Connect;
+    procedure Connect; virtual;
+    procedure Close; virtual;
 
-    function HasData: Boolean;
+    function HasData: Boolean; virtual;
 
-    function Read(MaxLen: Integer = 8192): TByteArray;
-    function ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;
-    function Write(Data: TByteArray): Integer;
-    function ReadString(MaxLen: Integer = 8192): String;
-    function ReadStringUntil(Seq: String; Timeout: Integer): String;
-    function WriteString(Str: String): Integer;
+    function Read(MaxLen: Integer = 8192): TByteArray; virtual;
+    function ReadString(MaxLen: Integer = 8192): String; virtual;
+    function ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray; virtual;
+    function ReadStringUntil(Seq: String; Timeout: Integer): String; virtual;
+
+    function Write(Data: TByteArray): Integer; virtual;
+    function WriteString(Str: String): Integer; virtual;
 
     property ReadWriteTimeout: Integer read GetReadWriteTimeout Write SetReadWriteTimeout;
     property ConnectTimeout: Integer read GetConnectTimeout Write SetConnectTimeout;
     property LastError: Integer read GetLastError;
+    property LocalAddress: String read GetLocalAddress;
+    property RemoteAddress: String read GetRemoteAddress;
+  end;
+
+  TInternetSocketASync = class(TInternetSocket)
+  public type
+    TDataEvent = procedure(Socket: TInternetSocketASync) of object;
+    TDisconnectEvent = procedure(Socket: TInternetSocketASync) of object;
+  protected
+    FDataEvent: TDataEvent;
+    FDisconnectEvent: TDisconnectEvent;
+    FRunning: TWaitableLock;
+
+    procedure DoExecute;
+
+    function GetRunning: Boolean; virtual;
+  public
+    procedure Connect; override;
+
+    property OnData: TDataEvent read FDataEvent write FDataEvent;
+    property OnDisconnect: TDisconnectEvent read FDisconnectEvent write FDisconnectEvent;
+    property Running: Boolean read GetRunning;
   end;
 
 implementation
 
 uses
-{$ifdef unix}
+  {$IFDEF UNIX}
   BaseUnix,
-{$endif}
-{$ifdef windows}
+  {$ENDIF}
+  {$IFDEF WINDOWS}
   WinSock2,
-{$endif}
-  opensslsockets, sockets;
+  {$ENDIF}
+  opensslsockets,
+  sockets,
+  simba.vartype_string,
+  simba.vartype_ordarray,
+  simba.openssl;
 
 // is protected
 type
@@ -73,107 +106,134 @@ begin
   Result := inherited SetSocketBlockingMode(ASocket, ABlockMode, AFDSPtr);
 end;
 
-function TSimbaInternetSocket.GetLastError: Integer;
+function TInternetSocket.GetLocalAddress: String;
+begin
+  Result := NetAddrToStr(FSocket.LocalAddress.sin_addr);
+end;
+
+function TInternetSocket.GetRemoteAddress: String;
+begin
+  Result := NetAddrToStr(FSocket.RemoteAddress.sin_addr);
+end;
+
+function TInternetSocket.DoReadBytes(const MaxLen: Integer): TByteArray;
+begin
+  FReadWriteLock.Enter();
+  try
+    SetLength(Result, MaxLen);
+    SetLength(Result, FSocket.Read(Result[0], MaxLen));
+  finally
+    FReadWriteLock.Leave();
+  end;
+end;
+
+function TInternetSocket.DoWriteBytes(const Data: TByteArray): Integer;
+begin
+  FReadWriteLock.Enter();
+  try
+    if (Length(Data) > 0) then
+      Result := FSocket.Write(Data[0], Length(Data))
+    else
+      Result := 0;
+  finally
+    FReadWriteLock.Leave();
+  end;
+end;
+
+function TInternetSocket.GetLastError: Integer;
 begin
   Result := FSocket.LastError;
 end;
 
-function TSimbaInternetSocket.GetConnectTimeout: Integer;
+function TInternetSocket.GetConnectTimeout: Integer;
 begin
   Result := FSocket.ConnectTimeout;
 end;
 
-function TSimbaInternetSocket.GetReadWriteTimeout: Integer;
+function TInternetSocket.GetReadWriteTimeout: Integer;
 begin
   Result := FSocket.IOTimeout;
 end;
 
-procedure TSimbaInternetSocket.SetConnectTimeout(Value: Integer);
+procedure TInternetSocket.SetConnectTimeout(Value: Integer);
 begin
   FSocket.ConnectTimeout := Value;
 end;
 
-procedure TSimbaInternetSocket.SetReadWriteTimeout(Value: Integer);
+procedure TInternetSocket.SetReadWriteTimeout(Value: Integer);
 begin
   FSocket.IOTimeout := Value;
 end;
 
-constructor TSimbaInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean);
+constructor TInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean);
 begin
   inherited Create();
 
   FHost := AHost;
   FPort := APort;
   FUseSSL := UseSSL;
+end;
+
+destructor TInternetSocket.Destroy;
+begin
+  if (FSocket <> nil) then
+  begin
+    Close();
+
+    FreeAndNil(FSocket);
+  end;
+
+  inherited Destroy;
+end;
+
+procedure TInternetSocket.Connect;
+begin
+  if FUseSSL then
+    LoadSSL();
+
+  if (FSocket <> nil) then
+    FreeAndNil(FSocket);
 
   if FUseSSL then
     FSocket := TInetSocket.Create(FHost, FPort, TOpenSSLSocketHandler.GetDefaultHandler())
   else
     FSocket := TInetSocket.Create(FHost, FPort, TSocketHandler.Create());
-end;
-
-destructor TSimbaInternetSocket.Destroy;
-begin
-  if (FSocket <> nil) then
-    FreeAndNil(FSocket);
-
-  inherited Destroy;
-end;
-
-procedure TSimbaInternetSocket.Connect;
-begin
-  if FUseSSL then
-    LoadSSL();
 
   FSocket.Connect();
 end;
 
-function TSimbaInternetSocket.HasData: Boolean;
+procedure TInternetSocket.Close;
+begin
+  CloseSocket(FSocket.Handle);
+end;
+
+function TInternetSocket.HasData: Boolean;
 var
   FDS: TFDSet;
-  b: Byte;
+  B: Byte;
 begin
   FSocket.SetSocketBlockingMode(FSocket.Handle, bmNonBlocking, @FDS);
   FSocket.ReadFlags := MSG_PEEK;
 
   try
-    Result := FSocket.Read(b{%H-}, 1) > 0;
+    Result := FSocket.Read(B{%H-}, 1) > 0;
   finally
     FSocket.SetSocketBlockingMode(FSocket.Handle, bmBlocking, @FDS);
     FSocket.ReadFlags := 0;
   end;
 end;
 
-function TSimbaInternetSocket.Write(Data: TByteArray): Integer;
+function TInternetSocket.Read(MaxLen: Integer): TByteArray;
 begin
-  if (Length(Data) > 0) then
-    Result := FSocket.Write(Data[0], Length(Data))
-  else
-    Result := 0;
+  Result := DoReadBytes(MaxLen);
 end;
 
-function TSimbaInternetSocket.ReadString(MaxLen: Integer): String;
+function TInternetSocket.ReadString(MaxLen: Integer): String;
 begin
   Result := Read(MaxLen).ToString();
 end;
 
-function TSimbaInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;
-begin
-  Result := ReadUntil(Seq.ToBytes(), Timeout).ToString();
-end;
-
-function TSimbaInternetSocket.WriteString(Str: String): Integer;
-begin
-  Result := Write(Str.ToBytes());
-end;
-
-function TSimbaInternetSocket.Read(MaxLen: Integer): TByteArray;
-begin
-  SetLength(Result, MaxLen);
-  SetLength(Result, FSocket.Read(Result[0], MaxLen));
-end;
-
-function TSimbaInternetSocket.ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;
+function TInternetSocket.ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;
 var
   SeqLen: Integer;
 
@@ -198,6 +258,66 @@ begin
         Sleep(50);
     until EndsWithSeq(Result) or (GetTickCount64() > T);
   end;
+end;
+
+function TInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;
+begin
+  Result := ReadUntil(Seq.ToBytes(), Timeout).ToString();
+end;
+
+function TInternetSocket.Write(Data: TByteArray): Integer;
+begin
+  Result := DoWriteBytes(Data);
+end;
+
+function TInternetSocket.WriteString(Str: String): Integer;
+begin
+  Result := Write(Str.ToBytes());
+end;
+
+procedure TInternetSocketASync.Connect;
+begin
+  if Running then
+    Exit;
+  if (not Assigned(FDataEvent)) then
+    SimbaException('OnData cannot be nil');
+
+  inherited Connect();
+
+  RunInThread(@DoExecute, True);
+end;
+
+function TInternetSocketASync.GetRunning: Boolean;
+begin
+  Result := FRunning.IsLocked;
+end;
+
+procedure TInternetSocketASync.DoExecute;
+
+  function HasDataAndRunning: Boolean;
+  var
+    B: Byte;
+  begin
+    FReadWriteLock.Enter();
+    try
+      FSocket.ReadFlags := MSG_PEEK;
+
+      Result := FSocket.Read(B{%H-}, SizeOf(Byte)) = SizeOf(Byte);
+    finally
+      FSocket.ReadFlags := 0;
+      FReadWriteLock.Leave();
+    end;
+  end;
+
+begin
+  FRunning.Lock();
+  while HasDataAndRunning() and Assigned(FDataEvent) do
+    FDataEvent(Self);
+  Close();
+  FRunning.Unlock();
+
+  if Assigned(FDisconnectEvent) then
+    FDisconnectEvent(Self);
 end;
 
 end.

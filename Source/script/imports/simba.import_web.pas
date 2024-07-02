@@ -19,6 +19,8 @@ uses
 type
   PSimbaHTTPClient = ^TSimbaHTTPClient;
   PHTTPStatus = ^EHTTPStatus;
+  PInternetSocket = ^TInternetSocket;
+  PInternetSocketASync = ^TInternetSocketASync;
 
 (*
 Web
@@ -27,6 +29,26 @@ Internet HTTP request/post methods.
 
 - There is a pre-defined variable `HTTPClient` to use.
 *)
+
+(*
+EHTTPStatus.AsInteger
+---------------------
+> property EHTTPStatus.AsInteger: Integer;
+*)
+procedure _LapeHTTPStatus_AsInteger_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PHTTPStatus(Params^[0])^.AsInteger;
+end;
+
+(*
+EHTTPStatus.AsString
+--------------------
+> property EHTTPStatus.AsString: String;
+*)
+procedure _LapeHTTPStatus_AsString_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PHTTPStatus(Params^[0])^.AsString;
+end;
 
 (*
 TSimbaHTTPClient.Create
@@ -396,48 +418,60 @@ begin
 end;
 
 (*
-TSimbaInternetSocket.Create
----------------------------
-> function TSimbaInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean): TSimbaInternetSocket; static;
+TInternetSocket.Create
+----------------------
+> function TInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean): TInternetSocket; static;
 
 Basic internet socket functionality.
-The socket is blocking which means Read calls will wait for data to arrive.
+The socket is blocking which means `Read` calls will wait for data to arrive.
 
-Use either SetReadWriteTimeout() / HasData() / ReadStringUntil() to avoid hanging.
+Use either ReadWriteTimeout() / HasData() / ReadStringUntil() to avoid hanging.
 *)
 procedure _LapeSimbaInternetSocket_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaInternetSocket(Result)^ := TSimbaInternetSocket.Create(PString(Params^[0])^, PUInt16(Params^[1])^, PBoolean(Params^[2])^);
+  PInternetSocket(Result)^ := TInternetSocket.Create(PString(Params^[0])^, PUInt16(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
-TSimbaInternetSocket.Connect
-----------------------------
-> procedure TSimbaInternetSocket.Connect;
+TInternetSocket.Connect
+-----------------------
+> procedure TInternetSocket.Connect;
 
 Connects to the host and port.
 *)
 procedure _LapeSimbaInternetSocket_Connect(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaInternetSocket(Params^[0])^.Connect();
+  PInternetSocket(Params^[0])^.Connect();
 end;
 
 (*
-TSimbaInternetSocket.HasData
-----------------------------
-> function TSimbaInternetSocket.HasData: Boolean;
+TInternetSocket.Close
+---------------------
+> procedure TInternetSocket.Close;
+
+Closes the socket
+*)
+procedure _LapeSimbaInternetSocket_Close(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocket(Params^[0])^.Close();
+end;
+
+(*
+TInternetSocket.HasData
+-----------------------
+> function TInternetSocket.HasData: Boolean;
 
 Returns true if there is data waiting to be read.
 *)
 procedure _LapeSimbaInternetSocket_HasData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaInternetSocket(Params^[0])^.HasData();
+  PBoolean(Result)^ := PInternetSocket(Params^[0])^.HasData();
 end;
 
 (*
-TSimbaInternetSocket.Read
--------------------------
-> function TSimbaInternetSocket.Read(MaxLen: Integer = 8192): TByteArray;
+TInternetSocket.Read
+--------------------
+> function TInternetSocket.Read(MaxLen: Integer = 8192): TByteArray;
 
 Read bytes from the socket up to `MaxLen` bytes.
 
@@ -448,117 +482,191 @@ To change this behavior use `ReadWriteTimeout` or use `HasData`.
 *)
 procedure _LapeSimbaInternetSocket_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PByteArray(Result)^ := PSimbaInternetSocket(Params^[0])^.Read(PInteger(Params^[1])^);
+  PByteArray(Result)^ := PInternetSocket(Params^[0])^.Read(PInteger(Params^[1])^);
 end;
 
 (*
-TSimbaInternetSocket.ReadUntil
-------------------------------
-> function TSimbaInternetSocket.ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;
+TInternetSocket.ReadUntil
+-------------------------
+> function TInternetSocket.ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;
 
 Reads until the data ends with `Seq` or `Timeout` (in milliseconds) is reached.
 This is useful if you are reading data which is terminated with consistent endings.
 *)
 procedure _LapeSimbaInternetSocket_ReadUntil(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PByteArray(Result)^ := PSimbaInternetSocket(Params^[0])^.ReadUntil(PByteArray(Params^[1])^, PInteger(Params^[2])^);
+  PByteArray(Result)^ := PInternetSocket(Params^[0])^.ReadUntil(PByteArray(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
-TSimbaInternetSocket.Write
+TInternetSocket.ReadString
 --------------------------
-> function TSimbaInternetSocket.Write(Data: TByteArray): Integer;
-
-Write bytes to the socket.
-*)
-procedure _LapeSimbaInternetSocket_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PSimbaInternetSocket(Params^[0])^.Write(PByteArray(Params^[1])^);
-end;
-
-(*
-TSimbaInternetSocket.ReadString
--------------------------------
-> function TSimbaInternetSocket.ReadString(MaxLen: Integer = 8192): String;
+> function TInternetSocket.ReadString(MaxLen: Integer = 8192): String;
 
 ReadString a string from the socket up to `MaxLen` bytes.
 *)
 procedure _LapeSimbaInternetSocket_ReadString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := PSimbaInternetSocket(Params^[0])^.ReadString(PInteger(Params^[1])^);
+  PString(Result)^ := PInternetSocket(Params^[0])^.ReadString(PInteger(Params^[1])^);
 end;
 
 (*
-TSimbaInternetSocket.ReadStringUntil
-------------------------------------
-> function TSimbaInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;
+TInternetSocket.ReadStringUntil
+-------------------------------
+> function TInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;
 
 Reads a string until the data ends with `Seq` or `Timeout` (in milliseconds) is reached.
 This is useful if you are ReadStringing data which is terminated with consistent endings.
 *)
 procedure _LapeSimbaInternetSocket_ReadStringUntil(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := PSimbaInternetSocket(Params^[0])^.ReadStringUntil(PString(Params^[1])^, PInteger(Params^[2])^);
+  PString(Result)^ := PInternetSocket(Params^[0])^.ReadStringUntil(PString(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
-TSimbaInternetSocket.WriteString
---------------------------------
-> function TSimbaInternetSocket.WriteString(Str: String): Integer;
+TInternetSocket.Write
+---------------------
+> function TInternetSocket.Write(Data: TByteArray): Integer;
+
+Write bytes to the socket.
+*)
+procedure _LapeSimbaInternetSocket_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PInternetSocket(Params^[0])^.Write(PByteArray(Params^[1])^);
+end;
+
+(*
+TInternetSocket.WriteString
+---------------------------
+> function TInternetSocket.WriteString(Str: String): Integer;
 
 Write a string to the socket.
 *)
 procedure _LapeSimbaInternetSocket_WriteString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaInternetSocket(Params^[0])^.WriteString(PString(Params^[1])^);
+  PInteger(Result)^ := PInternetSocket(Params^[0])^.WriteString(PString(Params^[1])^);
 end;
 
 (*
-TSimbaInternetSocket.ReadWriteTimeout
--------------------------------------
-> property TSimbaInternetSocket.ReadWriteTimeout: Integer
-> property TSimbaInternetSocket.ReadWriteTimeout(Value: Integer)
+TInternetSocket.LocalAddress
+----------------------------
+> property TInternetSocket.LocalAddress: String;
+*)
+procedure _LapeSimbaInternetSocket_LocalAddress_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PInternetSocket(Params^[0])^.LocalAddress;
+end;
+
+(*
+TInternetSocket.RemoteAddress
+-----------------------------
+> property TInternetSocket.RemoteAddress: String;
+*)
+procedure _LapeSimbaInternetSocket_RemoteAddress_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PInternetSocket(Params^[0])^.RemoteAddress;
+end;
+
+(*
+TInternetSocket.ReadWriteTimeout
+--------------------------------
+> property TInternetSocket.ReadWriteTimeout: Integer
+> property TInternetSocket.ReadWriteTimeout(Value: Integer)
 
 Timeout (in milliseconds) on Read/Write operations.
 *)
 procedure _LapeSimbaInternetSocket_ReadWriteTimeout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaInternetSocket(Params^[0])^.ReadWriteTimeout;
+  PInteger(Result)^ := PInternetSocket(Params^[0])^.ReadWriteTimeout;
 end;
 
 procedure _LapeSimbaInternetSocket_ReadWriteTimeout_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaInternetSocket(Params^[0])^.ReadWriteTimeout := PInteger(Params^[1])^;
+  PInternetSocket(Params^[0])^.ReadWriteTimeout := PInteger(Params^[1])^;
 end;
 
 (*
-TSimbaInternetSocket.ConnectTimeout
------------------------------------
-> function TSimbaInternetSocket.ConnectTimeout: Integer;
-> function TSimbaInternetSocket.ConnectTimeout(Value: Integer);
+TInternetSocket.ConnectTimeout
+------------------------------
+> property TInternetSocket.ConnectTimeout: Integer;
+> property TInternetSocket.ConnectTimeout(Value: Integer);
 
 Connect timeout (in milliseconds).
 *)
 procedure _LapeSimbaInternetSocket_ConnectTimeout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaInternetSocket(Params^[0])^.ConnectTimeout;
+  PInteger(Result)^ := PInternetSocket(Params^[0])^.ConnectTimeout;
 end;
 
 procedure _LapeSimbaInternetSocket_ConnectTimeout_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaInternetSocket(Params^[0])^.ConnectTimeout := PInteger(Params^[1])^;
+  PInternetSocket(Params^[0])^.ConnectTimeout := PInteger(Params^[1])^;
 end;
 
 (*
-TSimbaInternetSocket.LastError
-------------------------------
-> property TSimbaInternetSocket.LastError: Integer;
+TInternetSocket.LastError
+-------------------------
+> property TInternetSocket.LastError: Integer;
 
 Returns the sockets last error code.
 *)
 procedure _LapeSimbaInternetSocket_LastError_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PSimbaInternetSocket(Params^[0])^.LastError;
+  PInteger(Result)^ := PInternetSocket(Params^[0])^.LastError;
+end;
+
+(*
+TInternetSocketASync.Create
+---------------------------
+> function TInternetSocketASync.Create(AHost: String; APort: UInt16; UseSSL: Boolean): TInternetSocketASync; static;
+
+Internet socket but runs in the background and calls the OnData callback when data arrives.
+*)
+procedure _LapeInternetSocketASync_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocketASync(Result)^ := TInternetSocketASync.Create(PString(Params^[0])^, PUInt16(Params^[1])^, PBoolean(Params^[2])^);
+end;
+
+(*
+TInternetSocketASync.OnData
+---------------------------
+> property TInternetSocketASync.OnData: TSocketDataEvent;
+> property TInternetSocketASync.OnData(Value: TSocketDataEvent);
+*)
+procedure _LapeInternetSocketASync_DataEvent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TInternetSocketASync.TDataEvent(Result^) := PInternetSocketASync(Params^[0])^.OnData;
+end;
+
+procedure _LapeInternetSocketASync_DataEvent_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocketASync(Params^[0])^.OnData := TInternetSocketASync.TDataEvent(Params^[1]^);
+end;
+
+(*
+TInternetSocketASync.OnDisconnect
+---------------------------------
+> property TInternetSocketASync.OnDisconnect: TSocketDisconnectEvent;
+> property TInternetSocketASync.OnDisconnect(Value: TSocketDisconnectEvent);
+*)
+procedure _LapeInternetSocketASync_DisconnectEvent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TInternetSocketASync.TDisconnectEvent(Result^) := PInternetSocketASync(Params^[0])^.OnDisconnect;
+end;
+
+procedure _LapeInternetSocketASync_DisconnectEvent_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocketASync(Params^[0])^.OnDisconnect := TInternetSocketASync.TDisconnectEvent(Params^[1]^);
+end;
+
+(*
+TInternetSocketASync.Running
+----------------------------
+> property TInternetSocketASync.Running: Boolean;
+*)
+procedure _LapeInternetSocketASync_Running_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PInternetSocketASync(Params^[0])^.Running;
 end;
 
 (*
@@ -566,7 +674,7 @@ LoadSSL
 -------
 > function LoadSSL(Debug: Boolean = False): Boolean;
 
-Loads SSL. This is automatically done on demand but is useful for debugging errors relating to loading openssl.
+Loads SSL. This is automatically done on demand but is useful for debugging errors relating to loading OpenSSL.
 *)
 procedure _LapeLoadSSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -580,18 +688,8 @@ begin
     ImportingSection := 'Web';
 
     addGlobalType(specialize GetEnumDecl<EHTTPStatus>(True, True), 'EHTTPStatus');
-    addGlobalFunc(
-      'function EHTTPStatus.AsInteger: Integer;', [
-      'begin',
-      '  Result := Integer(Self);',
-      'end;'
-    ]);
-    addGlobalFunc(
-      'function EHTTPStatus.AsString: String;', [
-      'begin',
-      '  Result := Copy(ToString(Self), 13);',
-      'end;'
-    ]);
+    addGlobalFunc('property EHTTPStatus.AsInteger: Integer', @_LapeHTTPStatus_AsInteger_Read);
+    addGlobalFunc('property EHTTPStatus.AsString: String', @_LapeHTTPStatus_AsString_Read);
 
     addClass('THTTPClient');
 
@@ -647,17 +745,30 @@ begin
     addClass('TInternetSocket');
     addGlobalFunc('function TInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean = False): TInternetSocket; static;', @_LapeSimbaInternetSocket_Create);
     addGlobalFunc('procedure TInternetSocket.Connect;', @_LapeSimbaInternetSocket_Connect);
+    addGlobalFunc('procedure TInternetSocket.Close;', @_LapeSimbaInternetSocket_Close);
     addGlobalFunc('function TInternetSocket.HasData: Boolean', @_LapeSimbaInternetSocket_HasData);
+
     addGlobalFunc('function TInternetSocket.Read(MaxLen: Integer = 8192): TByteArray;', @_LapeSimbaInternetSocket_Read);
     addGlobalFunc('function TInternetSocket.ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;', @_LapeSimbaInternetSocket_ReadUntil);
-    addGlobalFunc('function TInternetSocket.Write(Data: TByteArray): Integer;', @_LapeSimbaInternetSocket_Write);
     addGlobalFunc('function TInternetSocket.ReadString(MaxLen: Integer = 8192): String;', @_LapeSimbaInternetSocket_ReadString);
     addGlobalFunc('function TInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;', @_LapeSimbaInternetSocket_ReadStringUntil);
+
+    addGlobalFunc('function TInternetSocket.Write(Data: TByteArray): Integer;', @_LapeSimbaInternetSocket_Write);
     addGlobalFunc('function TInternetSocket.WriteString(Str: String): Integer;', @_LapeSimbaInternetSocket_WriteString);
 
+    addProperty('TInternetSocket', 'LocalAddress', 'String', @_LapeSimbaInternetSocket_LocalAddress_Read);
+    addProperty('TInternetSocket', 'RemoteAddress', 'String', @_LapeSimbaInternetSocket_RemoteAddress_Read);
     addProperty('TInternetSocket', 'LastError', 'Integer', @_LapeSimbaInternetSocket_LastError_Read);
     addProperty('TInternetSocket', 'ConnectTimeout', 'Integer', @_LapeSimbaInternetSocket_ConnectTimeout_Read, @_LapeSimbaInternetSocket_ConnectTimeout_Write);
     addProperty('TInternetSocket', 'ReadWriteTimeout', 'Integer', @_LapeSimbaInternetSocket_ReadWriteTimeout_Read, @_LapeSimbaInternetSocket_ReadWriteTimeout_Write);
+
+    addClass('TInternetSocketASync', 'TInternetSocket');
+    addGlobalType('procedure(Socket: TInternetSocketASync) of object', 'TSocketDataEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Socket: TInternetSocketASync) of object', 'TSocketDisconnectEvent', FFI_DEFAULT_ABI);
+    addGlobalFunc('function TInternetSocketASync.Create(AHost: String; APort: UInt16; UseSSL: Boolean = False): TInternetSocketASync; static;', @_LapeInternetSocketASync_Create);
+    addProperty('TInternetSocketASync', 'OnData', 'TSocketDataEvent', @_LapeInternetSocketASync_DataEvent_Read, @_LapeInternetSocketASync_DataEvent_Write);
+    addProperty('TInternetSocketASync', 'OnDisconnect', 'TSocketDisconnectEvent', @_LapeInternetSocketASync_DisconnectEvent_Read, @_LapeInternetSocketASync_DisconnectEvent_Write);
+    addProperty('TInternetSocketASync', 'Running', 'Boolean', @_LapeInternetSocketASync_Running_Read);
 
     addGlobalFunc('function LoadSSL(Debug: Boolean = False): Boolean', @_LapeLoadSSL);
   end;
