@@ -464,10 +464,10 @@ begin
   if (not IsManagedType(_T)) and (SizeOf(_T) in [1,2,4,8]) then
   begin
     case SizeOf(_T) of
-      1: Result := IndexByte(Arr[0], Length(Arr) * SizeOf(_T), PByte(@Item)^);
-      2: Result := IndexWord(Arr[0], Length(Arr) * SizeOf(_T), PWord(@Item)^);
-      4: Result := IndexDWord(Arr[0], Length(Arr) * SizeOf(_T), PDWord(@Item)^);
-      8: Result := IndexQWord(Arr[0], Length(Arr) * SizeOf(_T), PQWord(@Item)^);
+      1: Result := IndexByte(Arr[0], Length(Arr), PByte(@Item)^);
+      2: Result := IndexWord(Arr[0], Length(Arr), PWord(@Item)^);
+      4: Result := IndexDWord(Arr[0], Length(Arr), PDWord(@Item)^);
+      8: Result := IndexQWord(Arr[0], Length(Arr), PQWord(@Item)^);
     end;
     Exit;
   end;
