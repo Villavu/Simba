@@ -115,7 +115,8 @@ implementation
 
 uses
   simba.form_main, simba.ide_events, simba.threading, simba.settings,
-  simba.form_tabs, simba.ide_tab, simba.ide_showdeclaration, simba.nativeinterface;
+  simba.form_tabs, simba.ide_tab, simba.ide_showdeclaration, simba.nativeinterface,
+  simba.vartype_string;
 
 function GetImage(const Decl: TDeclaration): Integer;
 begin
@@ -150,7 +151,7 @@ begin
     'TQuad':          Result := ROOT + 'TQuad.html';
     'Random':         Result := ROOT + 'Random.html';
     'T2DPointArray':  Result := ROOT + 'T2DPointArray.html';
-    'Debug Image':    Result := ROOT + 'Debug Image.html';
+    'Date & Time':    Result := ROOT + 'Date %26 Time';
     'TWindowHandle':  Result := ROOT + 'TWindowHandle.html';
     'Image':          Result := ROOT + 'Image.html';
     'Finder':         Result := ROOT + 'Finder.html';
@@ -801,8 +802,7 @@ begin
   MoveToTop('File');
   MoveToTop('String');
   MoveToTop('Random');
-  MoveToTop('Timing');
-  MoveToTop('DateTime');
+  MoveToTop('Date & Time');
   MoveToTop('TBox');
   MoveToTop('TBoxArray');
   MoveToTop('TPoint');
@@ -829,21 +829,35 @@ function TSimbaFunctionListForm.CompareNodes(A, B: TTreeNode): Integer;
 begin
   Result := NaturalCompareText(A.Text, B.Text);
 
+  if ((A.ImageIndex = IMG_FUNC) or (A.ImageIndex = IMG_PROC) or (A.ImageIndex = IMG_PROPERTY)) and
+     ((B.ImageIndex = IMG_FUNC) or (B.ImageIndex = IMG_PROC) or (B.ImageIndex = IMG_PROPERTY)) then
+  begin
+    if ('.' in A.Text) then Dec(Result, 100);
+    if ('.' in B.Text) then Inc(Result, 100);
+  end;
+
   case A.ImageIndex of
-    IMG_TYPE:  Dec(Result, 2000);
-    IMG_CONST: Dec(Result, 1500);
-    IMG_VAR:   Dec(Result, 1000);
-    IMG_PROC:  Dec(Result, 500);
-    IMG_FUNC:  Dec(Result, 500);
+    IMG_TYPE:     Dec(Result, 500);
+    IMG_CONST:    Dec(Result, 400);
+    IMG_VAR:      Dec(Result, 300);
+    IMG_PROC:     Dec(Result, 200);
+    IMG_FUNC:     Dec(Result, 200);
+    IMG_PROPERTY: Dec(Result, 200);
   end;
 
   case B.ImageIndex of
-    IMG_TYPE:  Inc(Result, 2000);
-    IMG_CONST: Inc(Result, 1500);
-    IMG_VAR:   Inc(Result, 1000);
-    IMG_PROC:  Inc(Result, 500);
-    IMG_FUNC:  Inc(Result, 500);
+    IMG_TYPE:     Inc(Result, 500);
+    IMG_CONST:    Inc(Result, 400);
+    IMG_VAR:      Inc(Result, 300);
+    IMG_PROC:     Inc(Result, 200);
+    IMG_FUNC:     Inc(Result, 200);
+    IMG_PROPERTY: Inc(Result, 200);
   end;
+
+  if (A.ImageIndex = IMG_PROPERTY) and (A.Text.Before('.') = B.Text.Before('.')) then
+    Inc(Result, 100);
+  if (B.ImageIndex = IMG_PROPERTY) and (A.Text.Before('.') = B.Text.Before('.')) then
+    Dec(Result, 100);
 end;
 
 procedure TSimbaFunctionListForm.DoIdleBegin(Sender: TObject);

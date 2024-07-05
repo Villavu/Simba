@@ -20,7 +20,7 @@ uses
   // Simba
   simba.import_base, simba.import_colormath,simba.import_matrix, simba.import_windowhandle,
   simba.import_quad, simba.import_box, simba.import_boxarray, simba.import_point,
-  simba.import_circle, simba.import_timing, simba.import_tpa, simba.import_atpa,
+  simba.import_circle, simba.import_datetime, simba.import_tpa, simba.import_atpa,
   simba.import_encoding, simba.import_file, simba.import_process, simba.import_internal,
   simba.import_target, simba.import_math, simba.import_misc, simba.import_slacktree, simba.import_string,
   simba.import_random, simba.import_debugimage, simba.import_web, simba.import_threading,
@@ -62,7 +62,7 @@ begin
   ImportMatchTemplate(Compiler);
   ImportJSON(Compiler);
 
-  ImportTiming(Compiler);
+  ImportDateTime(Compiler);
   ImportTPA(Compiler);
   ImportATPA(Compiler);
   ImportEncoding(Compiler);

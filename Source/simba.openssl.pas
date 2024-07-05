@@ -16,7 +16,7 @@ unit simba.openssl;
 interface
 
 uses
-  classes, sysutils;
+  Classes, SysUtils;
 
 procedure ExtractOpenSSL;
 function LoadSSL(Debug: Boolean = False): Boolean;

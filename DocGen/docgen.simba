@@ -46,7 +46,7 @@ begin
   APIFiles += ['Source\script\imports\simba.import_web.pas',           'Web'            ];
   APIFiles += ['Source\script\imports\simba.import_file.pas',          'File'           ];
   APIFiles += ['Source\script\imports\simba.import_encoding.pas',      'Encoding'       ];
-  APIFiles += ['Source\script\imports\simba.import_timing.pas',        'Timing'         ];
+  APIFiles += ['Source\script\imports\simba.import_datetime.pas',      'Date & Time'    ];
   APIFiles += ['Source\script\imports\simba.import_string.pas',        'String'         ];
   APIFiles += ['Source\script\imports\simba.import_process.pas',       'Process'        ];
   APIFiles += ['Source\script\imports\simba.import_math.pas',          'Math'           ];

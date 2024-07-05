@@ -2,8 +2,6 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-
-  Timing (in milliseconds) functions.
 }
 unit simba.datetime;
 
@@ -12,7 +10,74 @@ unit simba.datetime;
 interface
 
 uses
-  classes, sysutils;
+  Classes, SysUtils,
+  simba.base;
+
+type
+  TDateTimeHelper = type helper for TDateTime
+  private
+    function GetDate: TDateTime;
+    function GetTime: TDateTime;
+    function GetDay: Integer;
+    function GetHour: Integer;
+    function GetMillisecond: Integer;
+    function GetMinute: Integer;
+    function GetMonth: Integer;
+    function GetSecond: Integer;
+    function GetYear: Integer;
+
+    procedure SetDate(AValue: TDateTime);
+    procedure SetTime(AValue: TDateTime);
+    procedure SetDay(AValue: Integer);
+    procedure SetHour(AValue: Integer);
+    procedure SetMillisecond(AValue: Integer);
+    procedure SetMinute(AValue: Integer);
+    procedure SetMonth(AValue: Integer);
+    procedure SetSecond(AValue: Integer);
+    procedure SetYear(AValue: Integer);
+  public
+    class function Create(AYear, AMonth, ADay, AHour, AMinute, ASecond, AMillisecond: Integer): TDateTime; static; overload;
+    class function Create(AYear, AMonth, ADay: Integer): TDateTime; static; overload;
+    class function Create(AHour, AMin, ASecond, AMillisecond: Integer): TDateTime; static; overload;
+    class function CreateFromUnix(UnixTime: Int64): TDateTime; static;
+    class function CreateFromString(Value: String): TDateTime; static; overload;
+    class function CreateFromString(Fmt, Value: String): TDateTime; static; overload;
+
+    class function Now: TDateTime; static;
+    class function NowUTC: TDateTime; static;
+
+    function ToUnix(IsUTC: Boolean = True): Int64;
+    function ToString(Fmt: String): String;
+    function ToString: String;
+
+    function AddYears(Amount: Integer = 1): TDateTime;
+    function AddMonths(Amount: Integer = 1): TDateTime;
+    function AddDays(Amount: Integer = 1): TDateTime;
+    function AddHours(Amount: Int64 = 1): TDateTime;
+    function AddMinutes(Amount: Int64 = 1): TDateTime;
+    function AddSeconds(Amount: Int64 = 1): TDateTime;
+    function AddMilliseconds(Amount: Int64 = 1): TDateTime;
+
+    function YearsBetween(Other: TDateTime): Integer;
+    function MonthsBetween(Other: TDateTime): Integer;
+    function WeeksBetween(Other: TDateTime): Integer;
+    function DaysBetween(Other: TDateTime): Integer;
+    function HoursBetween(Other: TDateTime): Int64;
+    function MinutesBetween(Other: TDateTime): Int64;
+    function SecondsBetween(Other: TDateTime): Int64;
+    function MilliSecondsBetween(Other: TDateTime): Int64;
+
+    property Date: TDateTime read GetDate write SetDate;
+    property Time: TDateTime read GetTime write SetTime;
+
+    property Year: Integer read GetYear write SetYear;
+    property Month: Integer read GetMonth write SetMonth;
+    property Day: Integer read GetDay write SetDay;
+    property Hour: Integer read GetHour write SetHour;
+    property Minute: Integer read GetMinute write SetMinute;
+    property Second: Integer read GetSecond write SetSecond;
+    property Millisecond: Integer read GetMillisecond write SetMillisecond;
+  end;
 
 function MillisecondsToTime(Time: UInt64; out Days, Hours, Mins, Secs: Integer): Integer; overload;
 function MillisecondsToTime(Time: UInt64; out Years, Months, Weeks, Days, Hours, Mins, Secs: Integer): Integer; overload;
@@ -25,7 +90,238 @@ function HighResolutionTime: Double;
 implementation
 
 uses
+  DateUtils,
   simba.nativeinterface;
+
+function TDateTimeHelper.GetDate: TDateTime;
+begin
+  Result := DateOf(Self);
+end;
+
+function TDateTimeHelper.GetDay: Integer;
+begin
+  Result := DayOf(Self);
+end;
+
+function TDateTimeHelper.GetHour: Integer;
+begin
+  Result := HourOf(Self);
+end;
+
+function TDateTimeHelper.GetMillisecond: Integer;
+begin
+  Result := MilliSecondOf(Self);
+end;
+
+function TDateTimeHelper.GetMinute: Integer;
+begin
+  Result := MinuteOf(Self);
+end;
+
+function TDateTimeHelper.GetMonth: Integer;
+begin
+  Result := MonthOf(Self);
+end;
+
+function TDateTimeHelper.GetSecond: Integer;
+begin
+  Result := SecondOf(Self);
+end;
+
+function TDateTimeHelper.GetTime: TDateTime;
+begin
+  Result := TimeOf(Self);
+end;
+
+function TDateTimeHelper.GetYear: Integer;
+begin
+  Result := YearOf(Self);
+end;
+
+procedure TDateTimeHelper.SetDate(AValue: TDateTime);
+begin
+  ReplaceDate(Self, AValue);
+end;
+
+procedure TDateTimeHelper.SetTime(AValue: TDateTime);
+begin
+  ReplaceTime(Self, AValue);
+end;
+
+procedure TDateTimeHelper.SetDay(AValue: Integer);
+begin
+  Self := RecodeDay(Self, AValue);
+end;
+
+procedure TDateTimeHelper.SetHour(AValue: Integer);
+begin
+  Self := RecodeHour(Self, AValue);
+end;
+
+procedure TDateTimeHelper.SetMillisecond(AValue: Integer);
+begin
+  Self := RecodeMilliSecond(Self, AValue);
+end;
+
+procedure TDateTimeHelper.SetMinute(AValue: Integer);
+begin
+  Self := RecodeMinute(Self, AValue);
+end;
+
+procedure TDateTimeHelper.SetMonth(AValue: Integer);
+begin
+  Self := RecodeMonth(Self, AValue);
+end;
+
+procedure TDateTimeHelper.SetSecond(AValue: Integer);
+begin
+  Self := RecodeSecond(Self, AValue);
+end;
+
+procedure TDateTimeHelper.SetYear(AValue: Integer);
+begin
+  Self := RecodeYear(Self, AValue);
+end;
+
+class function TDateTimeHelper.Create(AYear, AMonth, ADay, AHour, AMinute, ASecond, AMillisecond: Integer): TDateTime;
+begin
+  Result := EncodeDateTime(AYear, AMonth, ADay, Ahour, AMinute, ASecond, AMillisecond);
+end;
+
+class function TDateTimeHelper.Create(AYear, AMonth, ADay: Integer): TDateTime;
+begin
+  Result := EncodeDate(AYear, AMonth, ADay);
+end;
+
+class function TDateTimeHelper.Create(AHour, AMin, ASecond, AMillisecond: Integer): TDateTime;
+begin
+  Result := EncodeTime(AHour, AMin, ASecond, AMillisecond);
+end;
+
+class function TDateTimeHelper.CreateFromUnix(UnixTime: Int64): TDateTime;
+begin
+  Result := UnixToDateTime(UnixTime);
+end;
+
+class function TDateTimeHelper.CreateFromString(Value: String): TDateTime;
+begin
+  Result := StrToDateTime(Value);
+end;
+
+class function TDateTimeHelper.CreateFromString(Fmt, Value: String): TDateTime;
+begin
+  case Fmt of
+    'iso':
+      if not TryISOStrToDateTime(Value, Result) then
+        raise EConvertError.CreateFmt('Invalid ISO value ""', [Value]);
+    'iso8601':
+      Result := ISO8601ToDate(Value);
+    'unix':
+      Result := UnixToDateTime(StrToInt64(Value));
+    else
+      Result := ScanDateTime(Fmt, Value);
+  end;
+end;
+
+class function TDateTimeHelper.Now: TDateTime;
+begin
+  Result := SysUtils.Now();
+end;
+
+class function TDateTimeHelper.NowUTC: TDateTime;
+begin
+  Result := IncMinute(SysUtils.Now(), GetLocalTimeOffset());
+end;
+
+function TDateTimeHelper.ToUnix(IsUTC: Boolean): Int64;
+begin
+  Result := DateTimeToUnix(Self, IsUTC);
+end;
+
+function TDateTimeHelper.ToString(Fmt: String): String;
+begin
+  Result := FormatDateTime(Fmt, Self);
+end;
+
+function TDateTimeHelper.ToString: String;
+begin
+  Result := DateToStr(Self);
+end;
+
+function TDateTimeHelper.AddYears(Amount: Integer): TDateTime;
+begin
+  Result := IncYear(Amount);
+end;
+
+function TDateTimeHelper.AddMonths(Amount: Integer): TDateTime;
+begin
+  Result := IncMonth(Amount);
+end;
+
+function TDateTimeHelper.AddDays(Amount: Integer): TDateTime;
+begin
+  Result := IncDay(Amount);
+end;
+
+function TDateTimeHelper.AddHours(Amount: Int64): TDateTime;
+begin
+  Result := IncHour(Amount);
+end;
+
+function TDateTimeHelper.AddMinutes(Amount: Int64): TDateTime;
+begin
+  Result := IncMinute(Amount);
+end;
+
+function TDateTimeHelper.AddSeconds(Amount: Int64): TDateTime;
+begin
+  Result := IncSecond(Amount);
+end;
+
+function TDateTimeHelper.AddMilliseconds(Amount: Int64): TDateTime;
+begin
+  Result := IncMilliSecond(Amount);
+end;
+
+function TDateTimeHelper.YearsBetween(Other: TDateTime): Integer;
+begin
+  Result := DateUtils.YearsBetween(Self, Other);
+end;
+
+function TDateTimeHelper.MonthsBetween(Other: TDateTime): Integer;
+begin
+  Result := DateUtils.MonthsBetween(Self, Other);
+end;
+
+function TDateTimeHelper.WeeksBetween(Other: TDateTime): Integer;
+begin
+  Result := DateUtils.WeeksBetween(Self, Other);
+end;
+
+function TDateTimeHelper.DaysBetween(Other: TDateTime): Integer;
+begin
+  Result := DateUtils.DaysBetween(Self, Other);
+end;
+
+function TDateTimeHelper.HoursBetween(Other: TDateTime): Int64;
+begin
+  Result := DateUtils.HoursBetween(Self, Other);
+end;
+
+function TDateTimeHelper.MinutesBetween(Other: TDateTime): Int64;
+begin
+  Result := DateUtils.MinutesBetween(Self, Other);
+end;
+
+function TDateTimeHelper.SecondsBetween(Other: TDateTime): Int64;
+begin
+  Result := DateUtils.SecondsBetween(Self, Other);
+end;
+
+function TDateTimeHelper.MilliSecondsBetween(Other: TDateTime): Int64;
+begin
+  Result := DateUtils.MilliSecondsBetween(Self, Other);
+end;
 
 function MillisecondsToTime(Time: UInt64; out Days, Hours, Mins, Secs: Integer): Integer;
 begin
@@ -104,7 +400,7 @@ begin
              case p-q of
                1: Include(Flags, fmtYearsNoPad);
                2: Include(Flags, fmtYears);
-               else raise Exception.CreateFmt('FormatMilliseconds: Illegal format "%s"', [Fmt]);
+               else SimbaException('Illegal format "%s"', [Fmt]);
              end;
            end;
       'M': begin
@@ -112,7 +408,7 @@ begin
              case p-q of
                1: Include(Flags, fmtMonthsNoPad);
                2: Include(Flags, fmtMonths);
-               else raise Exception.CreateFmt('FormatMilliseconds: Illegal format "%s"', [Fmt]);
+               else SimbaException('Illegal format "%s"', [Fmt]);
              end;
            end;
       'W': begin
@@ -120,7 +416,7 @@ begin
              case p-q of
                1: Include(Flags, fmtWeeksNoPad);
                2: Include(Flags, fmtWeeks);
-               else raise Exception.CreateFmt('FormatMilliseconds: Illegal format "%s"', [Fmt]);
+               else SimbaException('Illegal format "%s"', [Fmt]);
              end;
            end;
       'D': begin
@@ -128,7 +424,7 @@ begin
              case p-q of
                1: Include(Flags, fmtDaysNoPad);
                2: Include(Flags, fmtDays);
-               else raise Exception.CreateFmt('FormatMilliseconds: Illegal format "%s"', [Fmt]);
+               else SimbaException('Illegal format "%s"', [Fmt]);
              end;
            end;
       'h': begin
@@ -136,7 +432,7 @@ begin
              case p-q of
                1: Include(Flags, fmtHoursNoPad);
                2: Include(Flags, fmtHours);
-               else raise Exception.CreateFmt('FormatMilliseconds: Illegal format "%s"', [Fmt]);
+               else SimbaException('Illegal format "%s"', [Fmt]);
              end;
            end;
       'm': begin
@@ -144,7 +440,7 @@ begin
              case p-q of
                1: Include(Flags, fmtMinutesNoPad);
                2: Include(Flags, fmtMinutes);
-               else raise Exception.CreateFmt('FormatMilliseconds: Illegal format "%s"', [Fmt]);
+               else SimbaException('Illegal format "%s"', [Fmt]);
              end;
            end;
       's': begin
@@ -152,7 +448,7 @@ begin
              case p-q of
                1: Include(Flags, fmtSecondsNoPad);
                2: Include(Flags, fmtSeconds);
-               else raise Exception.CreateFmt('FormatMilliseconds: Illegal format "%s"', [Fmt]);
+               else SimbaException('Illegal format "%s"', [Fmt]);
              end;
            end;
       'u': begin
@@ -160,7 +456,7 @@ begin
              case p-q of
                1: Include(Flags, fmtMillisecondsNoPad);
                2: Include(Flags, fmtMilliseconds);
-               else raise Exception.CreateFmt('FormatMilliseconds: Illegal format "%s"', [Fmt]);
+               else SimbaException('Illegal format "%s"', [Fmt]);
              end;
            end;
       else
