@@ -15,19 +15,28 @@ uses
 
 type
   TCircleHelper = type helper for TCircle
+  private
+    function GetCenter: TPoint;
+    function GetEdge: TPointArray;
+    function GetFilled: TPointArray;
+    function GetBounds: TBox;
+    function GetArea: Double;
+    function GetCircumference: Double;
   public const
     ZERO: TCircle = (X: 0; Y: 0; Radius: 0);
   public
     class function Create(AX, AY: Integer; ARadius: Integer): TCircle; static;
     class function CreateFromPoints(Points: TPointArray): TCircle; static;
 
-    function Center: TPoint; inline;
+    property Edge: TPointArray read GetEdge;
+    property Filled: TPointArray read GetFilled;
+    property Center: TPoint read GetCenter;
+    property Bounds: TBox read GetBounds;
+    property Area: Double read GetArea;
+    property Circumference: Double read GetCircumference;
+
     function Contains(const P: TPoint): Boolean;
-    function Bounds: TBox;
-    function ToTPA(Filled: Boolean): TPointArray;
     function PointAtDegrees(Degrees: Double): TPoint;
-    function Circumference: Double;
-    function Area: Double;
     function Expand(Amount: Integer): TCircle;
     function Offset(P: TPoint): TCircle;
     function Extract(Points: TPointArray): TPointArray;
@@ -46,6 +55,37 @@ uses
   simba.math, simba.vartype_pointarray, simba.random, simba.containers, simba.geometry,
   simba.vartype_box;
 
+function TCircleHelper.GetCenter: TPoint;
+begin
+  Result.X := X;
+  Result.Y := Y;
+end;
+
+function TCircleHelper.GetEdge: TPointArray;
+begin
+  Result := TPointArray.CreateFromCircle(Center, Radius, False);
+end;
+
+function TCircleHelper.GetFilled: TPointArray;
+begin
+  Result := TPointArray.CreateFromCircle(Center, Radius, True);
+end;
+
+function TCircleHelper.GetBounds: TBox;
+begin
+  Result := TBox.Create(Center, Radius, Radius);
+end;
+
+function TCircleHelper.GetCircumference: Double;
+begin
+  Result := 2 * PI * Self.Radius;
+end;
+
+function TCircleHelper.GetArea: Double;
+begin
+  Result := PI * Sqr(Self.Radius);
+end;
+
 class function TCircleHelper.Create(AX, AY: Integer; ARadius: Integer): TCircle;
 begin
   Result.X := AX;
@@ -58,22 +98,6 @@ begin
   Result := Points.MinAreaCircle();
 end;
 
-function TCircleHelper.Center: TPoint;
-begin
-  Result.X := X;
-  Result.Y := Y;
-end;
-
-function TCircleHelper.Bounds: TBox;
-begin
-  Result := TBox.Create(Center, Radius, Radius);
-end;
-
-function TCircleHelper.ToTPA(Filled: Boolean): TPointArray;
-begin
-  Result := TPointArray.CreateFromCircle(Center, Radius, Filled);
-end;
-
 function TCircleHelper.Contains(const P: TPoint): Boolean;
 begin
   Result := Distance(X, Y, P.X, P.Y) <= Radius;
@@ -83,16 +107,6 @@ function TCircleHelper.PointAtDegrees(Degrees: Double): TPoint;
 begin
   Result.X := Round(Self.Radius * Cos(DegToRad(Degrees) - PI/2)) + Self.Center.X;
   Result.Y := Round(Self.Radius * Sin(DegToRad(Degrees) - PI/2)) + Self.Center.Y;
-end;
-
-function TCircleHelper.Circumference: Double;
-begin
-  Result := 2 * PI * Self.Radius;
-end;
-
-function TCircleHelper.Area: Double;
-begin
-  Result := PI * Sqr(Self.Radius);
 end;
 
 function TCircleHelper.Expand(Amount: Integer): TCircle;
@@ -173,7 +187,7 @@ begin
   Smallest := $FFFFFF;
   for I := 0 to High(Hull) do
   begin
-    Test := TSimbaGeometry.DistToLine(Self.Center(), Hull[I], Hull[(I+1) mod Length(Hull)]);
+    Test := TSimbaGeometry.DistToLine(Self.Center, Hull[I], Hull[(I+1) mod Length(Hull)]);
     if (Test < Smallest) then
       Smallest := Test;
   end;

@@ -89,19 +89,9 @@ TQuad.Offset
 ------------
 > function TQuad.Offset(P: TPoint): TQuad;
 *)
-procedure _LapeQuad_Offset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeQuad_Offset(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PQuad(Result)^ := PQuad(Params^[0])^.Offset(PPoint(Params^[1])^);
-end;
-
-(*
-TQuad.Offset
-------------
-> function TQuad.Offset(X, Y: Integer): TQuad;
-*)
-procedure _LapeQuad_Offset2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PQuad(Result)^ := PQuad(Params^[0])^.Offset(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -264,8 +254,7 @@ begin
 
     addGlobalFunc('function TQuad.Rotate(Angle: Double): TQuad', @_LapeQuad_Rotate);
     addGlobalFunc('function TQuad.Contains(P: TPoint): Boolean; overload', @_LapeQuad_Contains1);
-    addGlobalFunc('function TQuad.Offset(P: TPoint): TQuad; overload', @_LapeQuad_Offset1);
-    addGlobalFunc('function TQuad.Offset(X, Y: Integer): TQuad; overload', @_LapeQuad_Offset2);
+    addGlobalFunc('function TQuad.Offset(P: TPoint): TQuad', @_LapeQuad_Offset);
     addGlobalFunc('function TQuad.Extract(Points: TPointArray): TPointArray', @_LapeQuad_Extract);
     addGlobalFunc('function TQuad.Exclude(Points: TPointArray): TPointArray', @_LapeQuad_Exclude);
     addGlobalFunc('function TQuad.Expand(Amount: Double): TQuad', @_LapeQuad_Expand);

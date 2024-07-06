@@ -34,8 +34,7 @@ type
 
     function Rotate(Radians: Double): TQuad;
     function Contains(P: TPoint): Boolean;
-    function Offset(X, Y: Integer): TQuad; overload;
-    function Offset(P: TPoint): TQuad; overload;
+    function Offset(P: TPoint): TQuad;
     function Extract(Points: TPointArray): TPointArray;
     function Exclude(Points: TPointArray): TPointArray;
     function Expand(Amount: Double): TQuad;
@@ -175,11 +174,6 @@ end;
 function TQuadHelper.Offset(P: TPoint): TQuad;
 begin
   Result := TQuad.Create(Top.Offset(P), Right.Offset(P), Bottom.Offset(P), Left.Offset(P));
-end;
-
-function TQuadHelper.Offset(X, Y: Integer): TQuad;
-begin
-  Result := TQuad.Create(Top.Offset(X, Y), Right.Offset(X, Y), Bottom.Offset(X, Y), Left.Offset(X, Y));
 end;
 
 function TQuadHelper.Extract(Points: TPointArray): TPointArray;
