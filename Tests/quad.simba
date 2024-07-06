@@ -1,0 +1,25 @@
+{$assertions on}
+
+var
+  q: TQuad;
+begin
+  q := TQuad.CreateFromBox([100,100,400,200]);
+
+  Assert(q.ShortSideLen = 100);
+  Assert(q.LongSideLen = 300);
+  Assert(q.Area = 30000);
+  Assert(q.Bounds = [100,100,400,200]);
+  Assert(q.Mean = [250, 150]);
+  Assert(q.Corners[0] = [100,100]);
+  Assert(q.Corners[1] = [400,100]);
+  Assert(q.Corners[2] = [400,200]);
+  Assert(q.Corners[3] = [100,200]);
+
+  q := q.Rotate(120);
+
+  Assert(q.ShortSideLen = 100);
+  Assert(q.LongSideLen = 300);
+  Assert(q.Area = 30000);
+  Assert(q.Bounds = [99, 22, 401, 278]);
+  Assert(q.Mean = [250, 150]);
+end.

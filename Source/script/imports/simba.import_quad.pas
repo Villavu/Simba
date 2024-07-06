@@ -65,56 +65,6 @@ begin
 end;
 
 (*
-TQuad.ToTPA
------------
-> function TQuad.ToTPA: TPointArray;
-*)
-procedure _LapeQuad_ToTPA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PQuad(Params^[0])^.ToTPA();
-end;
-
-(*
-TQuad.Bounds
-------------
-> function TQuad.Bounds: TBox;
-*)
-procedure _LapeQuad_Bounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBox(Result)^ := PQuad(Params^[0])^.Bounds();
-end;
-
-(*
-TQuad.ShortSideLen
-------------------
-> function TQuad.ShortSideLen: Integer;
-*)
-procedure _LapeQuad_ShortSideLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PQuad(Params^[0])^.ShortSideLen();
-end;
-
-(*
-TQuad.LongSideLen
------------------
-> function TQuad.LongSideLen: Integer;
-*)
-procedure _LapeQuad_LongSideLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PQuad(Params^[0])^.LongSideLen();
-end;
-
-(*
-TQuad.Mean
-----------
-> function TQuad.Mean: TPoint;
-*)
-procedure _LapeQuad_Mean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPoint(Result)^ := PQuad(Params^[0])^.Mean();
-end;
-
-(*
 TQuad.Rotate
 ------------
 > function TQuad.Rotate(Angle: Double): TQuad;
@@ -199,16 +149,6 @@ begin
 end;
 
 (*
-TQuad.Area
-----------
-> function TQuad.Area: Integer;
-*)
-procedure _LapeQuad_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PQuad(Params^[0])^.Area();
-end;
-
-(*
 TQuad.Normalize
 ---------------
 > function TQuad.Normalize: TQuad;
@@ -243,6 +183,66 @@ begin
 end;
 
 (*
+TQuad.Area
+----------
+> property TQuad.Area: Integer;
+*)
+procedure _LapeQuad_Area_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PQuad(Params^[0])^.Area;
+end;
+
+(*
+TQuad.Corners
+-------------
+> property TQuad.Corners: TPointArray;
+*)
+procedure _LapeQuad_Corners_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PQuad(Params^[0])^.Corners;
+end;
+
+(*
+TQuad.Bounds
+------------
+> property TQuad.Bounds: TBox;
+*)
+procedure _LapeQuad_Bounds_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBox(Result)^ := PQuad(Params^[0])^.Bounds;
+end;
+
+(*
+TQuad.ShortSideLen
+------------------
+> property TQuad.ShortSideLen: Integer;
+*)
+procedure _LapeQuad_ShortSideLen_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PQuad(Params^[0])^.ShortSideLen;
+end;
+
+(*
+TQuad.LongSideLen
+-----------------
+> property TQuad.LongSideLen: Integer;
+*)
+procedure _LapeQuad_LongSideLen_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PQuad(Params^[0])^.LongSideLen;
+end;
+
+(*
+TQuad.Mean
+----------
+> property TQuad.Mean: TPoint;
+*)
+procedure _LapeQuad_Mean_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PQuad(Params^[0])^.Mean;
+end;
+
+(*
 in
 --
 > operator in(Left: TPoint; Right: TQuad): Boolean;
@@ -261,11 +261,7 @@ begin
     addGlobalFunc('function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static; overload', @_LapeQuad_Create);
     addGlobalFunc('function TQuad.CreateFromBox(Box: TBox): TQuad; static; overload', @_LapeQuad_CreateFromBox);
     addGlobalFunc('function TQuad.CreateFromPoints(Points: TPointArray): TQuad; static; overload', @_LapeQuad_CreateFromPoints);
-    addGlobalFunc('function TQuad.ToTPA: TPointArray', @_LapeQuad_ToTPA);
-    addGlobalFunc('function TQuad.Bounds: TBox', @_LapeQuad_Bounds);
-    addGlobalFunc('function TQuad.ShortSideLen: Integer', @_LapeQuad_ShortSideLen);
-    addGlobalFunc('function TQuad.LongSideLen: Integer', @_LapeQuad_LongSideLen);
-    addGlobalFunc('function TQuad.Mean: TPoint', @_LapeQuad_Mean);
+
     addGlobalFunc('function TQuad.Rotate(Angle: Double): TQuad', @_LapeQuad_Rotate);
     addGlobalFunc('function TQuad.Contains(P: TPoint): Boolean; overload', @_LapeQuad_Contains1);
     addGlobalFunc('function TQuad.Offset(P: TPoint): TQuad; overload', @_LapeQuad_Offset1);
@@ -274,11 +270,16 @@ begin
     addGlobalFunc('function TQuad.Exclude(Points: TPointArray): TPointArray', @_LapeQuad_Exclude);
     addGlobalFunc('function TQuad.Expand(Amount: Double): TQuad', @_LapeQuad_Expand);
     addGlobalFunc('function TQuad.NearestEdge(P: TPoint): TPoint', @_LapeQuad_NearestEdge);
-    addGlobalFunc('function TQuad.Area: Integer', @_LapeQuad_Area);
     addGlobalFunc('function TQuad.Normalize: TQuad', @_LapeQuad_Normalize);
-
     addGlobalFunc('function TQuad.RandomPoint: TPoint', @_LapeQuad_RandomPoint);
     addGlobalFunc('function TQuad.RandomPointCenter: TPoint', @_LapeQuad_RandomPointCenter);
+
+    addProperty('TQuad', 'Area', 'Integer', @_LapeQuad_Area_Read);
+    addProperty('TQuad', 'Corners', 'TPointArray', @_LapeQuad_Corners_Read);
+    addProperty('TQuad', 'Bounds', 'TBox', @_LapeQuad_Bounds_Read);
+    addProperty('TQuad', 'ShortSideLen', 'Integer', @_LapeQuad_ShortSideLen_Read);
+    addProperty('TQuad', 'LongSideLen', 'Integer', @_LapeQuad_LongSideLen_Read);
+    addProperty('TQuad', 'Mean', 'TPoint', @_LapeQuad_Mean_Read);
 
     addGlobalFunc('operator in(Left: TPoint; Right: TQuad): Boolean;', @_LapeQuad_IN_Quad);
 

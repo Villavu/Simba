@@ -647,7 +647,7 @@ var
   I: Integer;
 begin
   for I := 0 to High(Quads) do
-    addDirty(Quads[I].Bounds());
+    addDirty(Quads[I].Bounds);
 
   FBackBuffer.DrawQuadArray(Quads, Filled);
 end;

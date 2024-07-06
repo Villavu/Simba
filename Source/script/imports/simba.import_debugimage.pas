@@ -281,7 +281,7 @@ begin
       '  Quad: TQuad;',
       'begin',
       '  for Quad in Quads do',
-      '    Boxes += Quad.Bounds();',
+      '    Boxes += Quad.Bounds;',
       '',
       '  with Boxes.Merge() do',
       '    with TImage.Create(X1+X2+1, Y1+Y2+1) do',

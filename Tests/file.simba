@@ -19,7 +19,7 @@ begin
   Assert(FileWrite(TESTFILE, 'Write'));
   Assert(FileRead(TESTFILE) = 'Write');
 
-  Assert(TDateTime.Now().MilliSecondsBetween(FileLastWriteTime(TESTFILE)) < 1000);
+  Assert(Now().MilliSecondsBetween(FileLastWriteTime(TESTFILE)) < 1000);
 
   Assert(FileSize(TESTFILE) = Length('Write'));
   Assert(FileWrite(TESTFILE, '0' * Round(0.25 * (1024 * 1024))));

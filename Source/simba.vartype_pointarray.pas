@@ -2984,7 +2984,7 @@ var
 begin
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
-    Weights[I] := Self[I].MinAreaRect().ShortSideLen();
+    Weights[I] := Self[I].MinAreaRect().ShortSideLen;
 
   Result := Sort(Weights, LowToHigh);
 end;
@@ -2996,7 +2996,7 @@ var
 begin
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
-    Weights[I] := Self[I].MinAreaRect().LongSideLen();
+    Weights[I] := Self[I].MinAreaRect().LongSideLen;
 
   Result := Sort(Weights, LowToHigh);
 end;

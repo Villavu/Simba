@@ -503,7 +503,7 @@ var
   X,Y: Integer;
 begin
   BGRA := Image.DrawColorAsBGRA;
-  B := Quad.Bounds().Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
+  B := Quad.Bounds.Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
@@ -518,7 +518,7 @@ var
   X,Y: Integer;
 begin
   BGRA := Image.DrawColorAsBGRA;
-  B := Quad.Bounds().Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
+  B := Quad.Bounds.Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do

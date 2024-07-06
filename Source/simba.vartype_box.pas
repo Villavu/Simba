@@ -282,7 +282,7 @@ begin
       if (P.X - Self.X1 > Self.X2 - P.X) then
         Result.X := Self.X2;
     end else
-     begin
+    begin
       Result.Y := Self.Y1;
       if (P.Y - Self.Y1 > Self.Y2 - P.Y) then
         Result.Y := Self.Y2;

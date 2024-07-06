@@ -87,26 +87,6 @@ begin
 end;
 
 (*
-TDateTime.Now
--------------
-> function TDateTime.Now: TDateTime; static;
-*)
-procedure _LapeDateTime_Now(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDateTime(Result)^ := TDateTime.Now();
-end;
-
-(*
-TDateTime.NowUTC
-----------------
-> function TDateTime.NowUTC: TDateTime; static;
-*)
-procedure _LapeDateTime_NowUTC(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDateTime(Result)^ := TDateTime.NowUTC();
-end;
-
-(*
 TDateTime.ToUnix
 ----------------
 > function TDateTime.ToUnix(IsUTC: Boolean = True): Int64;
@@ -433,6 +413,26 @@ begin
 end;
 
 (*
+Now
+---
+> function Now: TDateTime;
+*)
+procedure _LapeNow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateTime(Result)^ := TDateTime.Now();
+end;
+
+(*
+NowUTC
+------
+> function NowUTC: TDateTime;
+*)
+procedure _LapeNowUTC(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateTime(Result)^ := TDateTime.NowUTC();
+end;
+
+(*
 UnixTime
 --------
 > function UnixTime: Int64;
@@ -446,6 +446,8 @@ end;
 LocalTimeOffset
 ---------------
 > function LocalTimeOffset: Integer;
+
+Returns the local timezone offset in minutes. This is the difference between UTC time and local time.
 *)
 procedure _LapeLocalTimeOffset(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -526,9 +528,6 @@ begin
     addGlobalFunc('function TDateTime.CreateFromString(Value: String): TDateTime; static; overload;', @_LapeDateTime_CreateFromString1);
     addGlobalFunc('function TDateTime.CreateFromString(Fmt, Value: String): TDateTime; static; overload;', @_LapeDateTime_CreateFromString2);
 
-    addGlobalFunc('function TDateTime.Now: TDateTime; static', @_LapeDateTime_Now);
-    addGlobalFunc('function TDateTime.NowUTC: TDateTime; static', @_LapeDateTime_NowUTC);
-
     addGlobalFunc('function TDateTime.ToUnix(IsUTC: Boolean = True): Int64', @_LapeDateTime_ToUnix);
     addGlobalFunc('function TDateTime.ToString(Fmt: String): String; overload', @_LapeDateTime_ToString1);
     addGlobalFunc('function TDateTime.ToString: String; overload', @_LapeDateTime_ToString2);
@@ -559,6 +558,9 @@ begin
     addProperty('TDateTime', 'Minute', 'Integer', @_LapeDateTime_Minute_Read, @_LapeDateTime_Minute_Write);
     addProperty('TDateTime', 'Second', 'Integer', @_LapeDateTime_Second_Read, @_LapeDateTime_Second_Write);
     addProperty('TDateTime', 'Millisecond', 'Integer', @_LapeDateTime_Millisecond_Read, @_LapeDateTime_Millisecond_Write);
+
+    addGlobalFunc('function Now: TDateTime;', @_LapeNow);
+    addGlobalFunc('function NowUTC: TDateTime;', @_LapeNowUTC);
 
     addGlobalFunc('function UnixTime: Int64;', @_LapeUnixTime);
     addGlobalFunc('function LocalTimeOffset: Integer', @_LapeLocalTimeOffset);

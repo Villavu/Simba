@@ -15,7 +15,14 @@ uses
 
 type
   TQuadHelper = type helper for TQuad
-  const
+  private
+    function GetCorners: TPointArray;
+    function GetMean: TPoint;
+    function GetArea: Integer;
+    function GetBounds: TBox;
+    function GetShortSideLen: Integer;
+    function GetLongSideLen: Integer;
+  public const
     EMPTY: TQuad = (Top: (X:0; Y:0); Right: (X:0; Y:0); Bottom: (X:0; Y:0); Left: (X:0; Y:0));
   public
     class function Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static; overload;
@@ -25,11 +32,6 @@ type
     function RandomPoint: TPoint;
     function RandomPointCenter: TPoint;
 
-    function ToTPA: TPointArray;
-    function Bounds: TBox;
-    function ShortSideLen: Integer;
-    function LongSideLen: Integer;
-    function Mean: TPoint;
     function Rotate(Radians: Double): TQuad;
     function Contains(P: TPoint): Boolean;
     function Offset(X, Y: Integer): TQuad; overload;
@@ -38,8 +40,14 @@ type
     function Exclude(Points: TPointArray): TPointArray;
     function Expand(Amount: Double): TQuad;
     function NearestEdge(P: TPoint): TPoint;
-    function Area: Integer;
     function Normalize: TQuad;
+
+    property Corners: TPointArray read GetCorners;
+    property Mean: TPoint read GetMean;
+    property Area: Integer read GetArea;
+    property Bounds: TBox read GetBounds;
+    property ShortSideLen: Integer read GetShortSideLen;
+    property LongSideLen: Integer read GetLongSideLen;
   end;
 
   operator in(const P: TPoint; const Quad: TQuad): Boolean;
@@ -112,35 +120,43 @@ begin
   Result := Result.Rotate(a, TPoint.Create(Round(X), Round(Y)));
 end;
 
-function TQuadHelper.ToTPA: TPointArray;
+function TQuadHelper.GetCorners: TPointArray;
 begin
   Result := [Top, Right, Bottom, Left];
 end;
 
-function TQuadHelper.Bounds: TBox;
+function TQuadHelper.GetBounds: TBox;
 begin
-  Result := ToTPA().Bounds();
+  Result.X1 := Min(Min(Left.X, Right.X), Min(Top.X, Bottom.X));
+  Result.X2 := Max(Max(Left.X, Right.X), Max(Top.X, Bottom.X));
+  Result.Y1 := Min(Min(Left.Y, Right.Y), Min(Top.Y, Bottom.Y));
+  Result.Y2 := Max(Max(Left.Y, Right.Y), Max(Top.Y, Bottom.Y));
 end;
 
-function TQuadHelper.ShortSideLen: Integer;
+function TQuadHelper.GetShortSideLen: Integer;
 begin
   Result := Round(Min(Hypot(Left.Y-Top.Y, Left.X-Top.X), Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X)));
 end;
 
-function TQuadHelper.LongSideLen: Integer;
+function TQuadHelper.GetLongSideLen: Integer;
 begin
   Result := Round(Max(Hypot(Left.Y-Top.Y, Left.X-Top.X), Hypot(Left.Y-Bottom.Y, Left.X-Bottom.X)));
 end;
 
-function TQuadHelper.Mean: TPoint;
+function TQuadHelper.GetMean: TPoint;
 begin
   Result.X := (Self.Top.X + Self.Right.X + Self.Bottom.X + Self.Left.X) div 4;
   Result.Y := (Self.Top.Y + Self.Right.Y + Self.Bottom.Y + Self.Left.Y) div 4;
 end;
 
+function TQuadHelper.GetArea: Integer;
+begin
+  Result := Round(Distance(Self.Bottom, Self.Right)) * Round(Distance(Self.Bottom, Self.Left));
+end;
+
 function TQuadHelper.Rotate(Radians: Double): TQuad;
 begin
-  with Self.Mean() do
+  with Self.Mean do
   begin
     Result.Top    := TSimbaGeometry.RotatePoint(Self.Top,    Radians, X, Y);
     Result.Right  := TSimbaGeometry.RotatePoint(Self.Right,  Radians, X, Y);
@@ -238,18 +254,13 @@ begin
     end;
 end;
 
-function TQuadHelper.Area: Integer;
-begin
-  Result := Round(Distance(Self.Bottom, Self.Right)) * Round(Distance(Self.Bottom, Self.Left));
-end;
-
 function TQuadHelper.Normalize: TQuad;
 var
   I, T: Integer;
   Points: TPointArray;
 begin
   T := 0;
-  Points := Self.ToTPA();
+  Points := Self.Corners;
   for I := 1 to High(Points) do
     if (Points[I].Y < Points[T].Y) or ((Points[I].Y = Points[T].Y) and (Points[I].X < Points[T].X)) then
       T := I;
