@@ -182,11 +182,18 @@ type
   TDict = specialize TDictionary<_T, Int32>;
 var
   dict: TDict;
+  tmp: TArr;
   i,c: Int32;
 begin
   c      := 0;
   Result := nil;
   dict   := TDict.Create();
+  if Length(x) > Length(y) then
+  begin
+    tmp := x;
+    x   := y;
+    y   := tmp;
+  end;
 
   SetLength(Result, Min(Length(y),Length(x)));
   for i:=0 to High(x) do dict[x[i]] := 1;
