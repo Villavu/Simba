@@ -181,41 +181,24 @@ class function TArrayRelationship.Intersection(x, y: TArr): TArr;
 type
   TDict = specialize TDictionary<_T, Int32>;
 var
-  dict, dupes: TDict;
+  dict: TDict;
   i,c: Int32;
 begin
+  c      := 0;
   Result := nil;
-  dict  := TDict.Create();
-  dupes := TDict.Create();
+  dict   := TDict.Create();
+
+  SetLength(Result, Min(Length(y),Length(x)));
   for i:=0 to High(x) do dict[x[i]] := 1;
   for i:=0 to High(y) do
-  begin
-    if dupes.GetDef(y[i], 0) = 1 then continue;
-    dict[y[i]] := dict.GetDef(y[i], 0) + 1;
-    dupes[y[i]] := 1;
-  end;
-
-  c := 0;
-  SetLength(Result, Length(x)+Length(y));
-  for i:=0 to High(x) do
-    if dict.GetDef(x[i], 0) = 2 then
+    if dict.Contains(y[i]) then
     begin
-      dict[x[i]] := $FFFFFF;
-      Result[c] := x[i];
-      Inc(c);
-    end;
-
-  for i:=0 to High(y) do
-    if dict.GetDef(y[i], 0) = 2 then
-    begin
-      dict[y[i]] := $FFFFFF;
       Result[c] := y[i];
       Inc(c);
     end;
 
   SetLength(Result, c);
   dict.Free();
-  dupes.Free();
 end;
 
 class function TArrayUnique.Unique(Arr: TArr): TArr;
