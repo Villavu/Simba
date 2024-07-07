@@ -1,4 +1,6 @@
 {$assertions on}
+// these tests are not really reliable when algorithm changes
+// as they expect a specific order output.
 
 procedure TestIntegerArray;
 var
@@ -8,7 +10,7 @@ begin
   b := [3,2,1];
   Assert(ToString(a.Difference(b)) = '[]');
   Assert(ToString(a.SymmetricDifference(b)) = '[]');
-  Assert(ToString(a.Intersection(b)) = '[1, 2, 3]');
+  Assert(ToString(a.Intersection(b)) = '[3, 2, 1]');
 
   a := [1,2,3,4];
   b := [5,4,3];
@@ -25,7 +27,7 @@ begin
   b := [3,2,1];
   Assert(ToString(a.Difference(b)) = '[]');
   Assert(ToString(a.SymmetricDifference(b)) = '[]');
-  Assert(ToString(a.Intersection(b)) = '[1, 2, 3]');
+  Assert(ToString(a.Intersection(b)) = '[3, 2, 1]');
 
   a := [1,2,3,4];
   b := [5,4,3];
@@ -42,7 +44,7 @@ begin
   b := [[3,3],[2,2],[1,1]];
   Assert(ToString(a.Difference(b)) = '[]');
   Assert(ToString(a.SymmetricDifference(b)) = '[]');
-  Assert(ToString(a.Intersection(b)) = '[{X = 1, Y = 1}, {X = 2, Y = 2}, {X = 3, Y = 3}]');
+  Assert(ToString(a.Intersection(b)) = '[{X = 3, Y = 3}, {X = 2, Y = 2}, {X = 1, Y = 1}]');
 
   a := [[1,2],[2,3],[3,4]];
   b := [[1,2],[2,3]];
@@ -60,7 +62,7 @@ begin
 
   Assert(ToString(a.Difference(b)) = '[]');
   Assert(ToString(a.SymmetricDifference(b)) = '[]');
-  Assert(ToString(a.Intersection(b)) = '[{X1 = 1, Y1 = 1, X2 = 1, Y2 = 1}, {X1 = 2, Y1 = 2, X2 = 2, Y2 = 2}, {X1 = 3, Y1 = 3, X2 = 3, Y2 = 3}]');
+  Assert(ToString(a.Intersection(b)) = '[{X1 = 3, Y1 = 3, X2 = 3, Y2 = 3}, {X1 = 2, Y1 = 2, X2 = 2, Y2 = 2}, {X1 = 1, Y1 = 1, X2 = 1, Y2 = 1}]');
 
   a := [[1,1,1,1],[2,2,2,2],[3,3,3,3]];
   b := [[1,1,1,1],[2,2,2,2]];
