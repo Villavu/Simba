@@ -3237,36 +3237,16 @@ end;
 
 function T2DPointArrayHelper.Intersection: TPointArray;
 var
-  Matrix, DupMatrix: TIntegerMatrix;
-  I, J: Integer;
-  X, Y, Target: Integer;
-  Buffer: TSimbaPointBuffer;
+  I: Integer;
 begin
-  with Self.Bounds() do
+  Result := Self[0].Intersection(Self[1]);
+
+  if (Length(Result) > 0) and (Length(Self) > 1) then
   begin
-    Matrix.SetSize(Width, Height);
-    DupMatrix.SetSize(Width, Height);
-
-    Target := High(Self);
-
-    for I := 0 to High(Self) do
-      for J := 0 to High(Self[I]) do
-      begin
-        X := Self[I, J].X - X1;
-        Y := Self[I, J].Y - Y1;
-
-        if DupMatrix[Y, X] <> I then
-        begin
-          DupMatrix[Y,X] := I;
-
-          Matrix[Y, X] += 1;
-          if (Matrix[Y, X] = Target) then
-            Buffer.Add(Self[I, J]);
-        end;
-      end;
+    for I := 2 to High(Self) do
+      Result := Result + Result.Intersection(Self[i]);
+    Result := Result.Unique();
   end;
-
-  Result := Buffer.ToArray(False);;
 end;
 
 end.

@@ -72,9 +72,23 @@ begin
   Assert(ToString(a.Intersection(b)) = '[{X1 = 1, Y1 = 1, X2 = 1, Y2 = 1}, {X1 = 2, Y1 = 2, X2 = 2, Y2 = 2}]');
 end;
 
+procedure TestATPA;
+var
+  a: T2DPointArray;
+begin
+  a += [[0,0],[1,1],[2,2],[3,3]];
+  a += [[1,1],[2,2],[3,3],[50,50],[-1,-1]];
+  a += [[0,0]];
+  a += [];
+  a += [[1,1],[2,2],[3,3],[-1,-1]];
+
+  Assert(ToString(a.Intersection()) = '[{X = 1, Y = 1}, {X = 2, Y = 2}, {X = 3, Y = 3}]');
+end;
+
 begin
   TestIntegerArray();
   TestInt64Array();
   TestPointArray();
   TestBoxArray();
+  TestATPA();
 end;
