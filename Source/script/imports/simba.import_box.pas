@@ -70,11 +70,11 @@ end;
 (*
 TBox.Area
 ---------
-> property TBox.Area: Integer;
+> property TBox.Area: Int64;
 *)
 procedure _LapeBox_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PBox(Params^[0])^.Area;
+  PInt64(Result)^ := PBox(Params^[0])^.Area;
 end;
 
 (*
@@ -374,7 +374,7 @@ begin
     addProperty('TBox', 'Width', 'Integer', @_LapeBox_Width);
     addProperty('TBox', 'Height', 'Integer', @_LapeBox_Height);
     addProperty('TBox', 'Center', 'TPoint', @_LapeBox_Center);
-    addProperty('TBox', 'Area', 'Integer', @_LapeBox_Area);
+    addProperty('TBox', 'Area', 'Int64', @_LapeBox_Area);
     addProperty('TBox', 'Size', 'TSize', @_LapeBox_Size_Read);
 
     addGlobalFunc('function TBox.RandomPoint: TPoint', @_LapeBox_RandomPoint);

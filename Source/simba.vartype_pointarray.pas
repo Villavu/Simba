@@ -1292,30 +1292,46 @@ end;
 
 function TPointArrayHelper.Unique: TPointArray;
 var
-  Matrix: TBooleanMatrix;
-  I, Count: Integer;
+  Area, Width, Index: Integer;
+  Box: TBox;
+  Seen: TBooleanArray;
+  SrcPtr, DstPtr: PPoint;
+  SrcUpper: PtrUInt;
 begin
-  if (Length(Self) > 0) then
+  if (High(Self) < 0) then Exit([]);
+  if (High(Self) = 0) then Exit([Self[0]]);
+
+  { Fallback to safe dictionary:
+     * Fewer than 1 in area of 5000
+     * Larger than 512MB in memory (approx 25K*25K area)
+  }
+  Box := Self.Bounds;
+  Area := Box.Area;
+  Width := Box.Width;
+  if (Area * SizeOf(TPoint) > $20000000) or
+     (Length(Self) / Area < 0.0002) then
+    Exit(specialize TArrayUnique<TPoint>.Unique(Self));
+
+  SetLength(Result, Length(Self));
+  SetLength(Seen, Area);
+
+  SrcUpper := PtrUInt(@Self[High(Self)]);
+  SrcPtr := @Self[0];
+  DstPtr := @Result[0];
+
+  while (PtrUInt(SrcPtr) <= SrcUpper) do
   begin
-    SetLength(Result, Length(Self));
-
-    Count := 0;
-    with Self.Bounds() do
+    Index := (SrcPtr^.Y - Box.Y1) * Width + (SrcPtr^.X - Box.X1);
+    if not Seen[Index] then
     begin
-      Matrix.SetSize(Width, Height);
+      Seen[Index] := True;
 
-      for I := 0 to High(Self) do
-        if not Matrix[Self[I].Y - Y1, Self[I].X - X1] then
-        begin
-          Matrix[Self[I].Y - Y1, Self[I].X - X1] := True;
-          Result[Count] := Self[I];
-          Inc(Count);
-        end;
+      DstPtr^ := SrcPtr^;
+      Inc(DstPtr);
     end;
-
-    SetLength(Result, Count);
-  end else
-    Result := [];
+    Inc(SrcPtr);
+  end;
+  SetLength(Result, (PtrUInt(DstPtr) - PtrUInt(@Result[0])) div SizeOf(TPoint));
 end;
 
 function TPointArrayHelper.ReduceByDistance(Dist: Integer): TPointArray;

@@ -22,8 +22,8 @@ type
     function GetCenter: TPoint; inline;
     function GetWidth: Integer; inline;
     function GetHeight: Integer; inline;
-    function GetSize: TSize;
-    function GetArea: Integer;
+    function GetSize: TSize; inline;
+    function GetArea: Int64; inline;
   public
     const ZERO: TBox = (X1: 0; Y1: 0; X2: 0; Y2: 0);
 
@@ -60,7 +60,7 @@ type
     property Width: Integer read GetWidth;
     property Height: Integer read GetHeight;
     property Center: TPoint read GetCenter;
-    property Area: Integer read GetArea;
+    property Area: Int64 read GetArea;
     property Size: TSize read GetSize;
   end;
 
@@ -135,7 +135,7 @@ begin
   Result := (Self.Width = Other.Width) and (Self.Height = Other.Height);
 end;
 
-function TBoxHelper.GetArea: Integer;
+function TBoxHelper.GetArea: Int64;
 begin
   Result := (Width * Height);
 end;
