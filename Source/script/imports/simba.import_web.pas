@@ -21,6 +21,7 @@ type
   PHTTPStatus = ^EHTTPStatus;
   PInternetSocket = ^TInternetSocket;
   PInternetSocketASync = ^TInternetSocketASync;
+  PInternetSocketServer = ^TInternetSocketServer;
 
 (*
 Web
@@ -670,6 +671,94 @@ begin
 end;
 
 (*
+TInternetSocketServer.Create
+----------------------------
+> function TInternetSocketServer.Create(APort: Integer): TInternetSocketServer;
+> function TInternetSocketServer.Create(AHost: String; APort: Integer): TInternetSocketServer;
+*)
+procedure _LapeInternetSocketServer_Create1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocketServer(Result)^ := TInternetSocketServer.Create(PInteger(Params^[0])^);
+end;
+
+procedure _LapeInternetSocketServer_Create2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocketServer(Result)^ := TInternetSocketServer.Create(PString(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+(*
+TInternetSocketServer.Start
+---------------------------
+> procedure TInternetSocketServer.Start;
+*)
+procedure _LapeInternetSocketServer_Start(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocketServer(Params^[0])^.Start();
+end;
+
+(*
+TInternetSocketServer.Stop
+--------------------------
+> procedure TInternetSocketServer.Stop;
+*)
+procedure _LapeInternetSocketServer_Stop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocketServer(Params^[0])^.Stop();
+end;
+
+(*
+TInternetSocketServer.Running
+-----------------------------
+> function TInternetSocketServer.Running: Boolean;
+*)
+procedure _LapeInternetSocketServer_Running_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PInternetSocketServer(Params^[0])^.Running;
+end;
+
+(*
+TInternetSocketServer.ConnectionCount
+-------------------------------------
+> property TInternetSocketServer.ConnectionCount: Integer;
+*)
+procedure _LapeInternetSocketServer_ConnectionCount_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PInternetSocketServer(Params^[0])^.ConnectionCount;
+end;
+
+(*
+TInternetSocketServer.OnHandleClient
+------------------------------------
+> property TInternetSocketServer.OnHandleClient: THandleClientEvent;
+> property TInternetSocketServer.OnHandleClient(Value: THandleClientEvent);
+*)
+procedure _LapeInternetSocketServer_OnHandleClient_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TInternetSocketServer.THandleClientEvent(Result^) := PInternetSocketServer(Params^[0])^.OnHandleClient;
+end;
+
+procedure _LapeInternetSocketServer_OnHandleClient_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocketServer(Params^[0])^.OnHandleClient := TInternetSocketServer.THandleClientEvent(Params^[1]^);
+end;
+
+(*
+TInternetSocketServer.OnAllowClient
+-----------------------------------
+> property TInternetSocketServer.OnAllowClient: TAllowClientEvent;
+> property TInternetSocketServer.OnAllowClient(Value: TAllowClientEvent);
+*)
+procedure _LapeInternetSocketServer_OnAllowClient_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TInternetSocketServer.TAllowClientEvent(Result^) := PInternetSocketServer(Params^[0])^.OnAllowClient;
+end;
+
+procedure _LapeInternetSocketServer_OnAllowClient_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInternetSocketServer(Params^[0])^.OnAllowClient := TInternetSocketServer.TAllowClientEvent(Params^[1]^);
+end;
+
+(*
 LoadSSL
 -------
 > function LoadSSL(Debug: Boolean = False): Boolean;
@@ -769,6 +858,18 @@ begin
     addProperty('TInternetSocketASync', 'OnData', 'TSocketDataEvent', @_LapeInternetSocketASync_DataEvent_Read, @_LapeInternetSocketASync_DataEvent_Write);
     addProperty('TInternetSocketASync', 'OnDisconnect', 'TSocketDisconnectEvent', @_LapeInternetSocketASync_DisconnectEvent_Read, @_LapeInternetSocketASync_DisconnectEvent_Write);
     addProperty('TInternetSocketASync', 'Running', 'Boolean', @_LapeInternetSocketASync_Running_Read);
+
+    addClass('TInternetSocketServer');
+    addClassConstructor('TInternetSocketServer', '(Port: Integer)', @_LapeInternetSocketServer_Create1);
+    addClassConstructor('TInternetSocketServer', '(AHost: String; APort: Integer)', @_LapeInternetSocketServer_Create2, True);
+    addGlobalType('procedure(Sender: TInternetSocketServer; Sock: TInternetSocket) of object', 'THandleClientEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TInternetSocketServer; Address: String; ConnectionCount: Integer; var Allow: Boolean) of object', 'TAllowClientEvent', FFI_DEFAULT_ABI);
+    addGlobalFunc('procedure TInternetSocketServer.Start', @_LapeInternetSocketServer_Start);
+    addGlobalFunc('procedure TInternetSocketServer.Stop', @_LapeInternetSocketServer_Stop);
+    addProperty('TInternetSocketServer', 'Running', 'Boolean', @_LapeInternetSocketServer_Running_Read);
+    addProperty('TInternetSocketServer', 'ConnectionCount', 'Integer', @_LapeInternetSocketServer_ConnectionCount_Read);
+    addProperty('TInternetSocketServer', 'OnHandleClient', 'THandleClientEvent', @_LapeInternetSocketServer_OnHandleClient_Read, @_LapeInternetSocketServer_OnHandleClient_Write);
+    addProperty('TInternetSocketServer', 'OnAllowClient', 'TAllowClientEvent', @_LapeInternetSocketServer_OnAllowClient_Read, @_LapeInternetSocketServer_OnAllowClient_Write);
 
     addGlobalFunc('function LoadSSL(Debug: Boolean = False): Boolean', @_LapeLoadSSL);
   end;

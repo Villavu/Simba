@@ -29,7 +29,7 @@ begin
       tx(Sock, 'JOIN ' + CHANNEL_TO_JOIN);
 
     if ('!date' in Line) then
-      tx(Sock, 'PRIVMSG ' + CHANNEL_TO_JOIN + ' :' + FormatDateTime('c', Now()));
+      tx(Sock, 'PRIVMSG ' + CHANNEL_TO_JOIN + ' :' + Now().ToString('c'));
   end;
 end;
 

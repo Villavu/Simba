@@ -10,7 +10,7 @@ unit simba.script_compiler;
 interface
 
 uses
-  Classes, SysUtils, TypInfo,
+  Classes, SysUtils,
   ffi, lpffi, lpcompiler, lptypes, lpvartypes, lpparser, lptree, lpffiwrappers, lpinterpreter,
   simba.base;
 
@@ -40,7 +40,7 @@ type
     function addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType; virtual; overload;
     function addGlobalType(Str: TStringArray; Name: String): TLapeType; virtual; overload;
 
-    function addClassConstructor(Obj, Params: lpString; Func: Pointer): TLapeGlobalVar; virtual;
+    function addClassConstructor(Obj, Params: lpString; Func: Pointer; IsOverload: Boolean = False): TLapeGlobalVar; virtual;
     procedure addClass(Name: lpString; Parent: lpString = 'TObject'); virtual;
 
     procedure addProperty(Obj, Name, Typ: String; ReadFunc: Pointer; WriteFunc: Pointer = nil);
@@ -104,7 +104,7 @@ end;
 
 function TSimbaScript_Compiler.addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType;
 begin
-  Result := addGlobalType(Format('native(type %s, %s)', [Str, GetEnumName(TypeInfo(TFFIABI), Ord(ABI))]), AName);
+  Result := addGlobalType('native(type ' + Str + ', ffi_' + ABIToStr(ABI) + ')', AName);
 end;
 
 function TSimbaScript_Compiler.addGlobalType(Str: TStringArray; Name: String): TLapeType;
@@ -112,14 +112,20 @@ begin
   Result := addGlobalType(LineEnding.Join(Str), Name);
 end;
 
-function TSimbaScript_Compiler.addClassConstructor(Obj, Params: lpString; Func: Pointer): TLapeGlobalVar;
+function TSimbaScript_Compiler.addClassConstructor(Obj, Params: lpString; Func: Pointer; IsOverload: Boolean): TLapeGlobalVar;
+var
+  Directives: String;
 begin
-  Result := addGlobalFunc(Format('function %s.Create%s: %s; static;', [Obj, Params, Obj]), Func);
+  Directives := 'static;';
+  if IsOverload then
+    Directives := Directives + ' overload;';
+
+  Result := addGlobalFunc('function ' + Obj + '.Create' + Params + ': ' + Obj + ';' + Directives, Func);
 end;
 
 procedure TSimbaScript_Compiler.addClass(Name: lpString; Parent: lpString);
 begin
-  addGlobalType(Format('strict %s', [Parent]), Name);
+  addGlobalType('strict ' + Parent, Name);
 end;
 
 procedure TSimbaScript_Compiler.Import;

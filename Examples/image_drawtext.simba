@@ -15,7 +15,7 @@ begin
   myImage.DrawColor := Colors.RED;
   myImage.DrawBox(myBox);
   myImage.DrawColor := Colors.BLACK;
-  myImage.DrawText(FormatDateTime('c', Now()), myBox, [EDrawTextAlign.CENTER, EDrawTextAlign.VERTICAL_CENTER]);
+  myImage.DrawText(Now.ToString('c'), myBox, [EDrawTextAlign.CENTER, EDrawTextAlign.VERTICAL_CENTER]);
 
   myImage.FontBold := True;
   myImage.FontSize := 50;

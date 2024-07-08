@@ -2,8 +2,9 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
 
-  Basic internet socket to connect to and read/write strings.
+  Basic internet socket functionally.
 }
 unit simba.internetsocket;
 
@@ -37,7 +38,8 @@ type
     procedure SetConnectTimeout(Value: Integer); virtual;
     procedure SetReadWriteTimeout(Value: Integer); virtual;
   public
-    constructor Create(AHost: String; APort: UInt16; UseSSL: Boolean); reintroduce;
+    constructor Create(AHost: String; APort: UInt16; UseSSL: Boolean); reintroduce; overload;
+    constructor Create(Sock: TInetSocket); reintroduce; overload;
     destructor Destroy; override;
 
     procedure Connect; virtual;
@@ -78,6 +80,57 @@ type
     property OnData: TDataEvent read FDataEvent write FDataEvent;
     property OnDisconnect: TDisconnectEvent read FDisconnectEvent write FDisconnectEvent;
     property Running: Boolean read GetRunning;
+  end;
+
+  TInternetSocketServer = class(TSimbaBaseClass)
+  protected
+  type
+    TServerThread = class(TThread)
+    protected
+      FServer: TInternetSocketServer;
+
+      procedure Execute; override;
+    public
+      constructor Create(AServer: TInternetSocketServer); reintroduce;
+      destructor Destroy; override;
+    end;
+
+    TClientThread = class(TThread)
+    protected
+      FServer: TInternetSocketServer;
+      FSock: TInternetSocket;
+
+      procedure Execute; override;
+    public
+      constructor Create(Server: TInternetSocketServer; Sock: TInternetSocket); reintroduce;
+      destructor Destroy; override;
+    end;
+  public type
+    THandleClientEvent = procedure(Sender: TInternetSocketServer; Sock: TInternetSocket) of object;
+    TAllowClientEvent = procedure(Sender: TInternetSocketServer; Address: String; ConnectionCount: Integer; var Allow: Boolean) of object;
+  protected
+    FRunning: TWaitableLock;
+    FConnectionCount: Integer;
+    FServer: TInetServer;
+    FOnHandleClient: THandleClientEvent;
+    FOnAllowClient: TAllowClientEvent;
+
+    procedure DoConnection(Sender: TObject; Data: TSocketStream);
+    procedure DoAllowConnection(Sender: TObject; ASocket: Longint; var Allow: Boolean);
+
+    function GetRunning: Boolean;
+  public
+    constructor Create(AHost: String; APort: Integer); reintroduce; overload;
+    constructor Create(APort: Integer); reintroduce; overload;
+    destructor Destroy; override;
+
+    procedure Start;
+    procedure Stop;
+
+    property Running: Boolean read GetRunning;
+    property ConnectionCount: Integer read FConnectionCount;
+    property OnHandleClient: THandleClientEvent read FOnHandleClient write FOnHandleClient;
+    property OnAllowClient: TAllowClientEvent read FOnAllowClient write FOnAllowClient;
   end;
 
 implementation
@@ -172,6 +225,13 @@ begin
   FHost := AHost;
   FPort := APort;
   FUseSSL := UseSSL;
+end;
+
+constructor TInternetSocket.Create(Sock: TInetSocket);
+begin
+  inherited Create();
+
+  FSocket := Sock;
 end;
 
 destructor TInternetSocket.Destroy;
@@ -318,6 +378,113 @@ begin
 
   if Assigned(FDisconnectEvent) then
     FDisconnectEvent(Self);
+end;
+
+procedure TInternetSocketServer.DoConnection(Sender: TObject; Data: TSocketStream);
+begin
+  TClientThread.Create(Self, TInternetSocket.Create(TInetSocket(Data)));
+end;
+
+procedure TInternetSocketServer.DoAllowConnection(Sender: TObject; ASocket: Longint; var Allow: Boolean);
+var
+  Len: TSockLen;
+  Addr: TSockAddr;
+begin
+  if Assigned(FOnAllowClient) then
+  begin
+    Len := SizeOf(TSockAddr);
+    if fpGetPeerName(ASocket, @Addr, @Len) <> 0 then
+      Addr := Default(TSockAddr);
+
+    FOnAllowClient(Self, NetAddrToStr(Addr.sin_addr), FConnectionCount, Allow);
+  end;
+end;
+
+function TInternetSocketServer.GetRunning: Boolean;
+begin
+  Result := FRunning.IsLocked;
+end;
+
+constructor TInternetSocketServer.Create(AHost: String; APort: Integer);
+begin
+  FServer := TInetServer.Create(AHost, APort, TSocketHandler.Create());
+  FServer.MaxConnections := -1;
+  FServer.OnConnect := @DoConnection;
+  FServer.OnConnectQuery := @DoAllowConnection;
+end;
+
+constructor TInternetSocketServer.Create(APort: Integer);
+begin
+  Create('127.0.0.1', APort);
+end;
+
+destructor TInternetSocketServer.Destroy;
+begin
+  FreeAndNil(FServer);
+
+  inherited Destroy();
+end;
+
+procedure TInternetSocketServer.Start;
+begin
+  if FRunning.IsLocked() then
+    SimbaException('Already running');
+
+  RunInThread(@FServer.StartAccepting, True);
+end;
+
+procedure TInternetSocketServer.Stop;
+begin
+  if FRunning.IsLocked() then
+    FServer.StopAccepting(True);
+end;
+
+procedure TInternetSocketServer.TServerThread.Execute;
+begin
+  FServer.FServer.StartAccepting();
+end;
+
+constructor TInternetSocketServer.TServerThread.Create(AServer: TInternetSocketServer);
+begin
+  inherited Create(False, 512*512);
+
+  FreeOnTerminate := True;
+
+  FServer := AServer;
+  FServer.FRunning.Lock();
+end;
+
+destructor TInternetSocketServer.TServerThread.Destroy;
+begin
+  FServer.FRunning.Unlock();
+
+  inherited Destroy();
+end;
+
+procedure TInternetSocketServer.TClientThread.Execute;
+begin
+  if Assigned(FServer.FOnHandleClient) then
+    FServer.FOnHandleClient(FServer, FSock);
+end;
+
+constructor TInternetSocketServer.TClientThread.Create(Server: TInternetSocketServer; Sock: TInternetSocket);
+begin
+  inherited Create(False, 512*512);
+
+  FreeOnTerminate := True;
+
+  FServer := Server;
+  FSock := Sock;
+
+  Inc(FServer.FConnectionCount);
+end;
+
+destructor TInternetSocketServer.TClientThread.Destroy;
+begin
+  Dec(FServer.FConnectionCount);
+  FreeAndNil(FSock);
+
+  inherited Destroy();
 end;
 
 end.
