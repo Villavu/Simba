@@ -83,6 +83,16 @@ begin
 end;
 
 (*
+String.Similarity
+-----------------
+> function String.Similarity(Other: String): Double;
+*)
+procedure _LapeString_Similarity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDouble(Result)^ := PString(Params^[0])^.Similarity(PString(Params^[1])^);
+end;
+
+(*
 String.Hash
 -----------
 > function String.Hash(Seed: UInt32 = 0): UInt32;
@@ -966,6 +976,7 @@ begin
     addGlobalFunc('function String.Equals(Other: String): Boolean;', @_LapeString_Equals);
     addGlobalFunc('function String.EqualsIgnoreCase(Other: String): Boolean;', @_LapeString_EqualsIgnoreCase);
     addGlobalFunc('function String.Compare(Other: String): Integer;', @_LapeString_Compare);
+    addGlobalFunc('function String.Similarity(Other: String): Double;', @_LapeString_Similarity);
     addGlobalFunc('function String.Hash(Seed: UInt32 = 0): UInt32;', @_LapeString_Hash);
 
     addGlobalFunc('function String.IsUpper(): Boolean;', @_LapeString_IsUpper);

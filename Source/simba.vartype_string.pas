@@ -3,6 +3,13 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
+
+{
+ avk959 - https://github.com/avk959/LGenerics
+
+  - SimRatio (used in String.Similarity)
+}
+
 unit simba.vartype_string;
 
 {$i simba.inc}
@@ -60,6 +67,7 @@ type
     function Equals(Other: String): Boolean;
     function EqualsIgnoreCase(Other: String): Boolean;
     function Compare(Other: String): Integer;
+    function Similarity(Other: String): Double;
     function Hash(Seed: UInt32 = 0): UInt32;
 
     function IsUpper(): Boolean;
@@ -509,6 +517,105 @@ end;
 function TSimbaStringHelper.Compare(Other: String): Integer;
 begin
   Result := CompareText(Self, Other);
+end;
+
+function TSimbaStringHelper.Similarity(Other: String): Double;
+
+  function LevDistanceImpl(pL, pR: PByte; aLenL, aLenR: SizeInt): SizeInt;
+
+    function SkipPrefix(var pL, pR: PByte; var aLenL, aLenR: SizeInt): SizeInt; inline;
+    begin
+      //implied aLenL <= aLenR
+      Result := 0;
+      while (Result < aLenL) and (pL[Result] = pR[Result]) do
+        Inc(Result);
+
+      pL += Result;
+      pR += Result;
+      aLenL -= Result;
+      aLenR -= Result;
+    end;
+
+    function SkipSuffix(pL, pR: PByte; var aLenL, aLenR: SizeInt): SizeInt; inline;
+    begin
+      //implied aLenL <= aLenR
+      Result := 0;
+      while (aLenL > 0) and (pL[Pred(aLenL)] = pR[Pred(aLenR)]) do
+      begin
+        Dec(aLenL);
+        Dec(aLenR);
+        Inc(Result);
+      end;
+    end;
+
+  const
+    MAX_STATIC = 512;
+  var
+    StBuf: array[0..Pred(MAX_STATIC)] of SizeInt;
+    Buf: array of SizeInt = nil;
+    I, J, Prev, Next: SizeInt;
+    Dist: PSizeInt;
+    b: Byte;
+  begin
+    //here aLenL <= aLenR
+    if pL = pR then
+      Exit(aLenR - aLenL);
+
+    SkipSuffix(pL, pR, aLenL, aLenR);
+    SkipPrefix(pL, pR, aLenL, aLenR);
+
+    if aLenL = 0 then
+      Exit(aLenR);
+
+    if aLenR < MAX_STATIC then
+      Dist := @StBuf[0]
+    else begin
+      System.SetLength(Buf, Succ(aLenR));
+      Dist := Pointer(Buf);
+    end;
+    for I := 0 to aLenR do
+      Dist[I] := I;
+
+    for I := 1 to aLenL do
+    begin
+      Prev := I;
+      b := pL[I-1];
+      for J := 1 to aLenR do
+      begin
+        if pR[J-1] = b then
+          Next := Dist[J-1]
+        else
+          Next := Succ(Min(Min(Dist[J-1], Prev), Dist[J]));
+        Dist[J-1] := Prev;
+        Prev := Next;
+      end;
+      Dist[aLenR] := Prev;
+    end;
+
+    Result := Dist[aLenR];
+  end;
+
+  function LevDistance(const L, R: ansistring): SizeInt;
+  begin
+    if System.Length(L) = 0 then
+      Exit(System.Length(R))
+    else if System.Length(R) = 0 then
+      Exit(System.Length(L));
+
+    if System.Length(L) <= System.Length(R) then
+      Result := LevDistanceImpl(Pointer(L), Pointer(R), System.Length(L), System.Length(R))
+    else
+      Result := LevDistanceImpl(Pointer(R), Pointer(L), System.Length(R), System.Length(L));
+  end;
+
+var
+  MaxLen: SizeInt;
+begin
+  if (Self = '') and (Other = '') then
+    Exit(Double(1.0));
+
+  MaxLen := Max(System.Length(Self), System.Length(Other));
+  Result := Double(MaxLen - LevDistance(Self, Other)) / Double(MaxLen);
 end;
 
 function TSimbaStringHelper.Hash(Seed: UInt32 = 0): UInt32;
