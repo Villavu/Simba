@@ -2393,13 +2393,13 @@ function TPointArrayHelper.DistanceTransform: TSingleMatrix;
 
   function EucSep(const i,j, ii,jj:Int32): Int32; inline;
   begin
-    Result := Round((sqr(j) - sqr(i) + sqr(jj) - sqr(ii)) / (2*(j-i)));
+    Result := Trunc((sqr(j) - sqr(i) + sqr(jj) - sqr(ii)) / (2*(j-i)));
   end;
 
   function Transform(const binIm:TIntegerArray; m,n:Int32): TSingleMatrix;
   var
     x,y,h,w,i,wid:Int32;
-    tmp,s,t:TIntegerArray;
+    tmp,s,t: TIntegerArray;
   begin
     // first pass
     SetLength(tmp, m*n);
