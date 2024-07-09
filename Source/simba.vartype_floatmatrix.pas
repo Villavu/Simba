@@ -75,7 +75,8 @@ type
     function Equals(Other: TSingleMatrix; Epsilon: Single = 0): Boolean;
     procedure ReplaceNaNAndInf(const ReplaceWith: Single);
     function Rot90: TSingleMatrix;
-    function ArgExtrema(Count: Int32; HiLo: Boolean = True): TPointArray;
+    function ArgExtrema(Count: Int32; HiLo: Boolean = True; XYIntersection: Boolean = True): TPointArray;
+
   end;
 
   TDoubleMatrixHelper = type helper for TDoubleMatrix
@@ -655,7 +656,7 @@ begin
         Result[X, Y] := Self[Y, X];
 end;
 
-function TSingleMatrixHelper.ArgExtrema(Count: Int32; HiLo: Boolean = True): TPointArray;
+function TSingleMatrixHelper.ArgExtrema(Count: Int32; HiLo: Boolean = True; XYIntersection: Boolean = True): TPointArray;
 var
   W, H: Integer;
   Buffer: TSimbaPointBuffer;
@@ -708,9 +709,16 @@ begin
   H := Self.Height();
 
   Buffer.Init(Math.Max(2, Ceil(Sqrt(W * H))));
-
-  Result := pass_x().Intersection(pass_y());
-
+  
+  if XYIntersection then
+  begin
+    Result := pass_x().Intersection(pass_y());
+  end else begin
+    Result := pass_x();
+    Result += pass_y();
+    Result := Result.Unique();
+  end;
+  
   // just use sort, since there arn't that many peaks
   SetLength(Weights, Length(Result));
   for I := 0 to High(Result) do

@@ -489,7 +489,7 @@ TSingleMatrix.ArgExtrema
 *)
 procedure _LapeSingleMatrix_ArgExtrema(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PSingleMatrix(Params^[0])^.ArgExtrema(PInteger(Params^[1])^, PBoolean(Params^[2])^);
+  PPointArray(Result)^ := PSingleMatrix(Params^[0])^.ArgExtrema(PInteger(Params^[1])^, PBoolean(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 // Double
@@ -583,7 +583,7 @@ begin
     addGlobalFunc('function TSingleMatrix.Copy: TSingleMatrix; overload', @_LapeSingleMatrix_Copy1);
     addGlobalFunc('function TSingleMatrix.Copy(Y1, Y2: Integer): TSingleMatrix; overload', @_LapeSingleMatrix_Copy2);
     addGlobalFunc('function TSingleMatrix.Rot90: TSingleMatrix;', @_LapeSingleMatrix_Rot90);
-    addGlobalFunc('function TSingleMatrix.ArgExtrema(Count: Int32; HiLo: Boolean = True): TPointArray;', @_LapeSingleMatrix_ArgExtrema);
+    addGlobalFunc('function TSingleMatrix.ArgExtrema(Count: Int32; HiLo: Boolean = True; XYIntersection: Boolean = True): TPointArray;', @_LapeSingleMatrix_ArgExtrema);
 
     //double
     addGlobalFunc('function TDoubleMatrix.Width: Integer;', @_LapeDoubleMatrix_Width);
