@@ -19,7 +19,6 @@ type
   PSimbaScript = ^TSimbaScript;
   TSimbaScript = class(TObject)
   protected
-    FState: TInitBool;
     FUserTerminated: Boolean;
     FTargetWindow: TWindowHandle;
     FHints: Boolean;
@@ -28,6 +27,7 @@ type
     FScriptFileName: String;
 
     FCompiler: TSimbaScript_Compiler;
+    FCodeRunner: TLapeCodeRunner;
     FCompileTime: Double;
     FRunningTime: Double;
 
@@ -155,12 +155,14 @@ end;
 
 function TSimbaScript.GetState: ESimbaScriptState;
 begin
-  case FState of
-    bTrue:  Result := ESimbaScriptState.STATE_RUNNING;
-    bFalse: Result := ESimbaScriptState.STATE_STOP;
-    else
-      Result := ESimbaScriptState.STATE_PAUSED;
-  end;
+  if (FCodeRunner = nil) then
+    Result := ESimbaScriptState.STATE_NONE
+  else if FCodeRunner.isRunning then
+    Result := ESimbaScriptState.STATE_RUNNING
+  else if FCodeRunner.isStopped then
+    Result := ESimbaScriptState.STATE_STOP
+  else if FCodeRunner.isPaused then
+    Result := ESimbaScriptState.STATE_PAUSED;
 end;
 
 procedure TSimbaScript.SetTargetWindow(Value: String);
@@ -213,15 +215,16 @@ begin
 
   FRunningTime := HighResolutionTime();
   try
-    RunCode(FCompiler.Emitter, FState);
+    FCodeRunner := TLapeCodeRunner.Create(FCompiler.Emitter);
+    FCodeRunner.Run();
   finally
     FRunningTime := HighResolutionTime() - FRunningTime;
 
     FPlugins.CallOnStop();
 
     if FUserTerminated then
-      FCompiler.CallProc('_CallOnUserTerminate', True);
-    FCompiler.CallProc('_CallOnTerminate', True);
+      FCompiler.CallProc('_CallOnUserTerminate');
+    FCompiler.CallProc('_CallOnTerminate');
   end;
 
   Result := True;
@@ -231,8 +234,6 @@ constructor TSimbaScript.Create(Communication: TSimbaScriptCommunication);
 begin
   inherited Create();
 
-  FState := bTrue;
-
   FSimbaCommunication := Communication;
   FScript := FSimbaCommunication.GetScript(FScriptFileName);
 end;
@@ -240,8 +241,6 @@ end;
 constructor TSimbaScript.Create(FileName: String; Communication: TSimbaScriptCommunication);
 begin
   inherited Create();
-
-  FState := bTrue;
 
   FSimbaCommunication := Communication;
 
@@ -268,33 +267,36 @@ begin
   end;
   if (FSimbaCommunication <> nil) then
     FreeAndNil(FSimbaCommunication);
+  if (FCodeRunner <> nil) then
+    FreeAndNil(FCodeRunner);
 
   inherited Destroy();
 end;
 
 procedure TSimbaScript.SetState(Value: ESimbaScriptState);
 begin
+  if (FCodeRunner = nil) then
+    Exit;
+
   case Value of
     ESimbaScriptState.STATE_RUNNING:
       begin
         FPlugins.CallOnResume();
-        FCompiler.CallProc('_CallOnResume', True);
-
-        FState := bTrue;
+        FCompiler.CallProc('_CallOnResume');
+        FCodeRunner.Resume();
       end;
 
     ESimbaScriptState.STATE_PAUSED:
       begin
-        FState := bUnknown;
-
+        FCodeRunner.Pause();
         FPlugins.CallOnPause();
-        FCompiler.CallProc('_CallOnPause', True);
+        FCompiler.CallProc('_CallOnPause');
       end;
 
     ESimbaScriptState.STATE_STOP:
       begin
         FUserTerminated := True;
-        FState := bFalse;
+        FCodeRunner.Stop();
       end;
   end;
 

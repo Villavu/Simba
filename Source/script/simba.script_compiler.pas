@@ -49,7 +49,7 @@ type
     procedure Import; virtual;
     function Compile: Boolean; override;
 
-    procedure CallProc(ProcName: String; UseFFI: Boolean);
+    procedure CallProc(ProcName: String);
     property ImportingSection: String read GetImportingSection write FImportingSection;
   end;
 
@@ -159,7 +159,7 @@ begin
   Result := inherited Compile();
 end;
 
-procedure TSimbaScript_Compiler.CallProc(ProcName: String; UseFFI: Boolean);
+procedure TSimbaScript_Compiler.CallProc(ProcName: String);
 var
   Method: TLapeGlobalVar;
 begin
@@ -168,16 +168,12 @@ begin
      (TLapeType_Method(Method.VarType).Res <> nil) or (TLapeType_Method(Method.VarType).Params.Count <> 0) then
     SimbaException('CallProc: Invalid procedure "%s"', [ProcName]);
 
-  if UseFFI then
-  begin
-    with LapeExportWrapper(Method) do
-    try
-      TProcedure(Func)();
-    finally
-      Free();
-    end;
-  end else
-    RunCode(FEmitter, [], PCodePos(Method.Ptr)^);
+  with TLapeCodeRunner.Create(Emitter) do
+  try
+    Run([], PCodePos(Method.Ptr)^);
+  finally
+    Free();
+  end;
 end;
 
 function TSimbaScript_Compiler.GetImportingSection: String;
@@ -294,23 +290,23 @@ begin
 
   addGlobalFunc('function CompareStr(s1, s2: string): Int32;', @_LapeCompareStr);
   addGlobalFunc('function CompareText(s1, s2: string): Int32;', @_LapeCompareText);
-  addGlobalFunc('function SameText(s1, s2: string): EvalBool;', @_LapeSameText);
+  addGlobalFunc('function SameText(s1, s2: string): Boolean;', @_LapeSameText);
 
   // Uses current user locale
   addGlobalFunc('function AnsiUpperCase(s: string): string;', @_LapeAnsiUpperCase);
   addGlobalFunc('function AnsiLowerCase(s: string): string;', @_LapeAnsiLowerCase);
   addGlobalFunc('function AnsiCompareStr(s1, s2: string): Int32;', @_LapeAnsiCompareStr);
   addGlobalFunc('function AnsiCompareText(s1, s2: string): Int32;', @_LapeAnsiCompareText);
-  addGlobalFunc('function AnsiSameText(s1,s2: string): EvalBool;', @_LapeAnsiSameText);
-  addGlobalFunc('function AnsiSameStr(s1,s2: string): EvalBool;', @_LapeAnsiSameStr);
+  addGlobalFunc('function AnsiSameText(s1,s2: string): Boolean;', @_LapeAnsiSameText);
+  addGlobalFunc('function AnsiSameStr(s1,s2: string): Boolean;', @_LapeAnsiSameStr);
 
   // Uses current user locale
   addGlobalFunc('function WideUpperCase(s: WideString): WideString;', @_LapeWideUpperCase);
   addGlobalFunc('function WideLowerCase(s: WideString): WideString;', @_LapeWideLowerCase);
   addGlobalFunc('function WideCompareStr(s1, s2: WideString): Int32;', @_LapeWideCompareStr);
   addGlobalFunc('function WideCompareText(s1, s2: WideString): Int32;', @_LapeWideCompareText);
-  addGlobalFunc('function WideSameText(s1,s2: WideString): EvalBool;', @_LapeWideSameText);
-  addGlobalFunc('function WideSameStr(s1,s2: WideString): EvalBool;', @_LapeWideSameStr);
+  addGlobalFunc('function WideSameText(s1,s2: WideString): Boolean;', @_LapeWideSameText);
+  addGlobalFunc('function WideSameStr(s1,s2: WideString): Boolean;', @_LapeWideSameStr);
   addGlobalFunc('function WideFormat(Fmt: WideString; Args: array of Variant): WideString;', @_LapeWideFormat);
 
   addGlobalFunc('function Pos(Substr, Source: AnsiString): SizeInt; overload;', @_LapePosA);
@@ -342,10 +338,10 @@ begin
   addGlobalFunc('function StrToFloat(s: string; Def: Double): Double; overload;', @_LapeStrToFloatDef);
   addGlobalFunc('function StrToCurr(s: string): Currency; overload;', @_LapeStrToCurr);
   addGlobalFunc('function StrToCurr(s: string; Def: Currency): Currency; overload;', @_LapeStrToCurrDef);
-  addGlobalFunc('function StrToBool(s: string): EvalBool; overload;', @_LapeStrToBool);
-  addGlobalFunc('function StrToBool(s: string; Default: EvalBool): EvalBool; overload;', @_LapeStrToBoolDef);
+  addGlobalFunc('function StrToBool(s: string): Boolean; overload;', @_LapeStrToBool);
+  addGlobalFunc('function StrToBool(s: string; Default: Boolean): Boolean; overload;', @_LapeStrToBoolDef);
 
-  addGlobalFunc('function BoolToStr(B: EvalBool; TrueS: string = ''True''; FalseS: string = ''False''): string;', @_LapeBoolToStr);
+  addGlobalFunc('function BoolToStr(B: Boolean; TrueS: string = ''True''; FalseS: string = ''False''): string;', @_LapeBoolToStr);
   addGlobalFunc('function FloatToStr(f: Double): string;', @_LapeToString_Double);
   addGlobalFunc('function CurrToStr(Value: Currency): string;', @_LapeToString_Currency);
 
