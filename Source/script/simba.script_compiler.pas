@@ -170,7 +170,7 @@ begin
 
   with TLapeCodeRunner.Create(Emitter) do
   try
-    Run([], PCodePos(Method.Ptr)^);
+    Run(PCodePos(Method.Ptr)^);
   finally
     Free();
   end;

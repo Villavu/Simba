@@ -191,7 +191,11 @@ begin
     // need to need to check for overloads
     if (Decl is TDeclaration_Method) then
     begin
-      Decls := Codeinsight.Get(TDeclaration_MethodOfType(Decl).ObjectName).GetByClass(TDeclaration_Type);
+      if (Decl is TDeclaration_MethodOfType) then
+        Decls := Codeinsight.Get(TDeclaration_MethodOfType(Decl).ObjectName).GetByClass(TDeclaration_Type)
+      else
+        Decls := [];
+
       if (Length(Decls) > 0) then
         Decls := Codeinsight.GetTypeMembers(Decls[0] as TDeclaration_Type).GetByClassAndName(Decl.Name, TDeclaration_MethodOfType)
       else
