@@ -764,6 +764,16 @@ begin
 end;
 
 (*
+TPointArray.DistanceTransform
+-----------------------------
+> function TPointArray.DistanceTransform: TSingleMatrix;
+*)
+procedure _LapeTPAQuickSkeleton(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PPointArray(Params^[0])^.QuickSkeleton();
+end;
+
+(*
 TPointArray.Circularity
 -----------------------
 > function TPointArray.Circularity: Double;
@@ -923,7 +933,8 @@ begin
     addGlobalFunc('function TPointArray.SymmetricDifference(Other: TPointArray): TPointArray', @_Lape_Point_SymmetricDifference);
 
     addGlobalFunc('function TPointArray.DistanceTransform: TSingleMatrix;', @_LapeTPADistanceTransform);
-
+    addGlobalFunc('function TPointArray.QuickSkeleton(): TPointArray;', @_LapeTPAQuickSkeleton);
+    
     addGlobalFunc('function TPointArray.Circularity: Double;', @_LapeTPACircularity);
 
     addGlobalFunc('function TPointArray.DouglasPeucker(Epsilon: Double): TPointArray;', @_LapeTPADouglasPeucker);

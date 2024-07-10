@@ -22,6 +22,7 @@
   - RotateEx
   - PartitionEx
   - DistanceTransform
+  - QuickSkeleton
 }
 
 {
@@ -149,6 +150,7 @@ type
     function Difference(Other: TPointArray): TPointArray;
 
     function DistanceTransform: TSingleMatrix;
+    function QuickSkeleton(): TPointArray;
 
     function Circularity: Double;
 
@@ -218,7 +220,7 @@ uses
   simba.container_slacktree,
   simba.vartype_ordarray, simba.vartype_ordmatrix,
   simba.vartype_box, simba.vartype_point, simba.vartype_quad, simba.vartype_circle,
-  simba.array_algorithm;
+  simba.array_algorithm, simba.vartype_floatmatrix;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
 begin
@@ -233,6 +235,22 @@ begin
 
   Adj[3].X := P.X;
   Adj[3].Y := P.Y + 1;
+end;
+
+procedure GetAdjacent8(var Adj: TPointArray; const P: TPoint); inline;
+begin
+  GetAdjacent4(adj, p);
+  Adj[4].X := P.X - 1;
+  Adj[4].Y := P.Y + 1;
+
+  Adj[5].X := P.X - 1;
+  Adj[5].Y := P.Y - 1;
+
+  Adj[6].X := P.X + 1;
+  Adj[6].Y := P.Y - 1;
+
+  Adj[7].X := P.X + 1;
+  Adj[7].Y := P.Y + 1;
 end;
 
 procedure RotatingAdjecent(var Adj: TPointArray; const Curr:TPoint; const Prev: TPoint); inline;
@@ -2482,6 +2500,118 @@ begin
     Data[(Self[i].y-B.Y1)*w+(Self[i].x-B.X1)] := 1;
 
   Result := Transform(data,w,h);
+end;
+
+function TPointArrayHelper.QuickSkeleton(): TPointArray;
+var
+  skeletonCore,close,adjacent: TPointArray;
+  binary: TIntegerMatrix;
+  dt: TSingleMatrix;
+  i,j,c,h,w,distance: Int32;
+  p,n,b: TPoint;
+  base: single;
+  validTip,growing: Boolean;
+  Res: TSimbaPointBuffer;
+begin
+  b   := Self.Bounds.Corners[0];
+  dt  := Self.DistanceTransform();
+  skeletonCore := dt.ArgExtrema($FFFFFFF, True, False);
+
+  // patch skeleton connectivity by examining tip of branches
+  // we first have to fine them!
+  // Once found we can actually just pick the neighbour pixel that has highest
+  // distance score then itself, repeat unless it's in the skeletal core.
+
+  Res.Init();
+
+  SetLength(adjacent, 8);
+  SetLength(close, 3);
+  binary.SetSize(dt.Width, dt.Height);
+  binary.SetValue(skeletonCore, 1);
+  w := dt.Width;
+  h := dt.Height;
+  for i:=0 to High(skeletonCore) do
+  begin
+    // check if p is a tip of a branch
+    // a tip can at most have two neighbours if the two points are nect to each other
+    // otherwise a tip will always have one or less neighbours
+    p := skeletonCore[i];
+
+    GetAdjacent8(adjacent, p);
+    c := 0;
+    validTip := True;
+    for j:=0 to High(adjacent) do
+      if (adjacent[j].y >= 0) and (adjacent[j].y < H) and (adjacent[j].x >= 0) and (adjacent[j].x < W) and
+         (binary[adjacent[j].y, adjacent[j].x] = 1) then
+      begin
+        close[c] := adjacent[j];
+        Inc(c);
+
+        if c = 3 then
+        begin
+         validTip := False;
+         break;
+        end;
+
+        if (c = 2) then
+          if (Abs(close[0].x-close[1].x) + Abs(close[0].y-close[1].y) <= 1) then
+            validTip := True
+          else begin
+            validTip := False;
+            break;
+          end;
+      end;
+
+    if not validTip then continue;
+
+    // Now lets check if we can grow this tip further by looking at neighbours.
+    //
+    // We trace so long as dt-value is larger, or until we hit an already existing branch
+    // Tracing is a simple 8-way pt scan
+    growing  := True;
+    distance := 0;
+    while growing do
+    begin
+      growing := False;
+
+      GetAdjacent8(adjacent, p);
+      base := dt[p.y,p.x];
+      for n in adjacent do
+        if (n.y >= 0) and (n.y < H) and (n.x >= 0) and (n.x < W) and
+           (dt[n.y,n.x] > base) then
+        begin
+          base := dt[n.y,n.x];
+
+          // if this pt already exists then we dont want it, we might be finished now.
+          if (binary[n.y,n.x] = 1) then
+          begin
+            // this little snippet kills of side-by-side skeltons
+            // we are 1 or more distance away from inital growth, might have hit
+            // a new branch, if so, we can stop growing
+            if (distance >= 1) then
+            begin
+              growing := False;
+              break;
+            end;
+            continue;
+          end else begin
+            p := n;
+            growing := True;
+          end;
+
+        end;
+      if growing then
+      begin
+        binary[p.y,p.x] := 1;
+        Res.Add(p);
+        Inc(distance);
+      end;
+    end;
+  end;
+
+  Res.Add(skeletonCore);
+  Result := Res.ToArray();
+  Result := Result.Offset(b.x-1,b.y-1); //disttransform offsets
 end;
 
 function TPointArrayHelper.Circularity: Double;
