@@ -68,6 +68,7 @@ type
   TSimbaMainForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
+    MenuItemBackup: TMenuItem;
     MenuItemRunLast: TMenuItem;
     MenuItemShowCompilerHints: TMenuItem;
     MenuItemDownloadSimba: TMenuItem;
@@ -615,6 +616,7 @@ begin
     DockMaster.MakeDockable(SimbaNotesForm, MenuItemNotes);
     DockMaster.MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
     DockMaster.MakeDockable(SimbaColorPickHistoryForm, MenuItemColourHistory);
+    DockMaster.MakeDockable(SimbaBackupsForm, MenuItemBackup);
 
     if (SimbaSettings.General.Layout.Value <> '') then
     begin
@@ -839,7 +841,9 @@ end;
 
 procedure TSimbaMainForm.MenuItemBackupsClick(Sender: TObject);
 begin
-  SimbaBackupsForm.ShowModal();
+  MenuItemBackup.Checked := True;
+  if Assigned(MenuItemBackup.OnClick) then
+    MenuItemBackup.OnClick(MenuItemBackup);
 end;
 
 procedure TSimbaMainForm.MenuItemShapeBoxClick(Sender: TObject);

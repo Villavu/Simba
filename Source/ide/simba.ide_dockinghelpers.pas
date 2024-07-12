@@ -84,7 +84,7 @@ implementation
 
 uses
   XMLPropStorage, LazConfigStorage,
-  simba.ide_theme, simba.misc;
+  simba.ide_theme, simba.misc, simba.ide_events;
 
 procedure TSimbaAnchorDockHeader.ParentFontChanged;
 begin
@@ -210,6 +210,12 @@ end;
 
 procedure TSimbaAnchorDockHostSite.SetParent(Value: TWinControl);
 begin
+  if (SimbaIDEEvents <> nil) then
+    if (Value = nil) then
+      SimbaIDEEvents.Notify(SimbaIDEEvent.FORM_UNDOCK, Self)
+    else
+      SimbaIDEEvents.Notify(SimbaIDEEvent.FORM_DOCK, Self);
+
   if (Value <> nil) then
     ShowInTaskBar := stNever
   else

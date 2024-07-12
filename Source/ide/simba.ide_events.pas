@@ -28,6 +28,9 @@ type
     TAB_BEFORECHANGE,
     TAB_CHANGE,
     TAB_CLOSED,
+    // Event called on a form dock/undock
+    FORM_DOCK,
+    FORM_UNDOCK,
     // Event called when a tabs script state changes. Sender=TSimbaScriptTab
     TAB_SCRIPTSTATE_CHANGE,
     // Event called on mouselogger change. Sender=TSimbaMouseLogger

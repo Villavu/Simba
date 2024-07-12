@@ -434,6 +434,10 @@ object SimbaMainForm: TSimbaMainForm
       AutoCheck = True
       Caption = 'Output'
     end
+    object MenuItemBackup: TMenuItem
+      AutoCheck = True
+      Caption = 'Backups'
+    end
     object MenuItem3: TMenuItem
       Caption = '-'
     end

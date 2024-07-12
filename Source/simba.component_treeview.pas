@@ -60,6 +60,8 @@ type
     FNodeClass: TTreeNodeClass;
     FOnAfterFilter: TNotifyEvent;
     FTempBackgroundColor: TColor;
+    FFilterOnlyTopLevel: Boolean;
+    FFilterCollapseOnClear: Boolean;
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -127,6 +129,8 @@ type
     property ScrolledTop: Integer read GetScrolledTop write SetScrolledTop;
     property TopLevelCount: Integer read GetTopLevelCount;
     property FilterVisible: Boolean read GetFilterVisible write SetFilterVisible;
+    property FilterOnlyTopLevel: Boolean read FFilterOnlyTopLevel write FFilterOnlyTopLevel;
+    property FilterCollapseOnClear: Boolean read FFilterCollapseOnClear write FFilterCollapseOnClear;
 
     property ScrollbarHorz: TSimbaScrollBar read FScrollbarHorz;
     property ScrollbarVert: TSimbaScrollBar read FScrollbarVert;
@@ -216,6 +220,8 @@ begin
   FFilterClearButton.Hint := 'Clear Filter';
   FFilterClearButton.ShowHint := True;
   FFilterClearButton.Image := ESimbaButtonImage.CLEAR_FILTER;
+  FFilterClearButton.BorderSpacing.Around := 2;
+  FFilterClearButton.XPadding := 3;
 
   with SimbaSettings do
     RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize);
@@ -360,7 +366,6 @@ begin
   FilterText := LowerCase(FFilterEdit.Text);
 
   Items.BeginUpdate();
-
   try
     Node := Items.GetFirstNode();
     while Assigned(Node) do
@@ -388,8 +393,14 @@ begin
         end;
       end;
 
-      Node := Node.GetNext();
+      if FFilterOnlyTopLevel then
+        Node := Node.GetNextSkipChildren()
+      else
+        Node := Node.GetNext();
     end;
+
+    if (FilterText = '') and FFilterCollapseOnClear then
+      FullCollapse();
 
     if Assigned(FOnAfterFilter) then
       FOnAfterFilter(Self);

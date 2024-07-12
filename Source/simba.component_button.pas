@@ -51,6 +51,7 @@ type
     FDown: Boolean;
     FXPadding: Integer;
     FYPadding: Integer;
+    FImageSpacing: Integer;
 
     function HasImage: Boolean;
     function ImageSize: TPoint;
@@ -68,6 +69,7 @@ type
     procedure SetDown(AValue: Boolean);
     procedure SetXPadding(AValue: Integer);
     procedure SetYPadding(AValue: Integer);
+    procedure SetImageSpacing(AValue: Integer);
 
     procedure SetImage(Img: ESimbaButtonImage);
     procedure SetImageIndex(Index: Integer);
@@ -81,6 +83,7 @@ type
     property ImageIndex: Integer read FImageIndex write SetImageIndex;
     property Image: ESimbaButtonImage read FImage write SetImage;
 
+    property ImageSpacing: Integer read FImageSpacing write SetImageSpacing;
     property Down: Boolean read FDown write SetDown;
     property XPadding: Integer read FXPadding write SetXPadding;
     property YPadding: Integer read FYPadding write SetYPadding;
@@ -270,6 +273,14 @@ begin
   AdjustSize();
 end;
 
+procedure TSimbaButton.SetImageSpacing(AValue: Integer);
+begin
+  if FImageSpacing=AValue then Exit;
+  FImageSpacing := Scale96ToScreen(AValue);
+
+  AdjustSize();
+end;
+
 function TSimbaButton.HasImage: Boolean;
 begin
   Result := (FImage <> ESimbaButtonImage.NONE) or (FImageIndex > -1);
@@ -298,7 +309,6 @@ begin
     with TBitmap.Create() do
     try
       Canvas.Font := Self.Font;
-      Canvas.Font.Size := GetFontSize(Self, 2);
 
       Result.X := Canvas.TextWidth(Caption) + (BorderWidth * 2);
       Result.Y := Canvas.TextHeight('Fj') + (BorderWidth * 2);
@@ -308,6 +318,7 @@ begin
 
   if HasImage then
   begin
+    Result.X += FImageSpacing;
     Result.X += ImageSize.X;
     if ImageSize.Y > Result.Y then
       Result.Y := ImageSize.Y;
@@ -363,16 +374,22 @@ begin
   Canvas.FillRect(ClientRect);
   CanvasPaintRoundedCorners(Canvas, ClientRect, [acckLeftTop, acckRightTop, acckLeftBottom, acckRightBottom], SimbaTheme.ColorFrame, Canvas.Brush.Color, Canvas.Brush.Color);
 
+  R := ClientRect;
+  R.Left += XPadding;
+  R.Right -= XPadding;
+  R.Top += YPadding;
+  R.Bottom -= YPadding;
+
   if HasImage then
   begin
     if (Caption = '') then
     begin
-      ImgPoint.X := (ClientWidth div 2) - (ImageSize.X div 2);
-      ImgPoint.Y := (ClientHeight div 2) - (ImageSize.Y div 2);
+      ImgPoint.X := R.Left + (R.Width div 2) - (ImageSize.X div 2);
+      ImgPoint.Y := R.Top + (R.Height div 2) - (ImageSize.Y div 2);
     end else
     begin
-      ImgPoint.X := XPadding;
-      ImgPoint.Y := (ClientHeight div 2) - (ImageSize.Y div 2);
+      ImgPoint.X := R.Left;
+      ImgPoint.Y := R.CenterPoint.Y - (ImageSize.Y div 2);
     end;
 
     if (FImage <> ESimbaButtonImage.NONE) then
@@ -383,7 +400,7 @@ begin
 
   Style := Canvas.TextStyle;
   Style.Layout := tlCenter;
-  Style.Alignment:= taCenter;
+  Style.Alignment := taCenter;
 
   if (Caption <> '') then
   begin
@@ -391,7 +408,7 @@ begin
 
     R := ClientRect;
     if HasImage then
-      R.Left := ImageSize.X + XPadding;
+      R.Left += ImageSize.X + FImageSpacing;
 
     Canvas.TextRect(R, 0,0, Caption, Style);
   end;
@@ -414,8 +431,9 @@ begin
   FImageList := SimbaMainForm.Images;
   FImageIndex := -1;
 
-  XPadding := 6;
-  YPadding := 1;
+  ImageSpacing := 4;
+  XPadding := 10;
+  YPadding := 3;
 end;
 
 procedure TSimbaButton.SetImage(Img: ESimbaButtonImage);

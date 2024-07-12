@@ -11,7 +11,7 @@ object SimbaBackupsForm: TSimbaBackupsForm
   OnShow = FormShow
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.4.0.0'
   object LeftPanel: TPanel
     Left = 0
     Height = 450
@@ -37,5 +37,6 @@ object SimbaBackupsForm: TSimbaBackupsForm
     BevelOuter = bvNone
     Caption = '(no file selected)'
     TabOrder = 2
+    OnClick = RightPanelClick
   end
 end

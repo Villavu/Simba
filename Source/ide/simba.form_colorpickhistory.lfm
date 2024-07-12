@@ -1,7 +1,7 @@
 object SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm
-  Left = -1403
+  Left = -1034
   Height = 396
-  Top = 942
+  Top = 893
   Width = 830
   ActiveControl = ColorListBox
   Caption = 'Color Picker History'
@@ -11,14 +11,14 @@ object SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.4.0.0'
   object ColorListBox: TColorListBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = ColorPanel
     AnchorSideBottom.Control = ButtonDelete
     Left = 5
-    Height = 346
+    Height = 351
     Top = 5
     Width = 535
     ColorRectWidth = 5
@@ -39,9 +39,9 @@ object SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 5
-    Height = 35
-    Top = 356
-    Width = 76
+    Height = 30
+    Top = 361
+    Width = 70
     Anchors = [akLeft, akBottom]
     AutoSize = True
     BorderSpacing.Left = 5
@@ -55,10 +55,10 @@ object SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm
     AnchorSideLeft.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 86
-    Height = 35
-    Top = 356
-    Width = 65
+    Left = 80
+    Height = 30
+    Top = 361
+    Width = 60
     Align = alCustom
     Anchors = [akLeft, akBottom]
     AutoSize = True
@@ -80,8 +80,8 @@ object SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm
     TabOrder = 3
     object ButtonExit: TButton
       Left = 5
-      Height = 35
-      Top = 356
+      Height = 30
+      Top = 361
       Width = 280
       Align = alBottom
       AutoSize = True
@@ -94,8 +94,8 @@ object SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm
     end
     object ButtonPickColor: TButton
       Left = 5
-      Height = 35
-      Top = 316
+      Height = 30
+      Top = 326
       Width = 280
       Align = alBottom
       AutoSize = True
@@ -113,7 +113,7 @@ object SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonPickColor
       Left = 5
-      Height = 311
+      Height = 321
       Top = 5
       Width = 280
       Align = alTop
