@@ -14,6 +14,8 @@ uses
   simba.base, simba.component_button;
 
 type
+  TSimbaToolbarButtonGroup = class(TCustomControl);
+
   TSimbaToolbar = class(TCustomControl)
   protected
     FFlowPanel: TFlowPanel;
@@ -30,6 +32,8 @@ type
     procedure SetButtonSize(Value: Integer);
   public
     constructor Create(AOwner: TComponent); override;
+
+    function AddGroup: TSimbaToolbarButtonGroup;
 
     function AddButton(ImageIndex: Integer; HintText: String = ''; AOnClick: TNotifyEvent = nil): TSimbaTransparentButton;
     function AddDropdownButton(HintText: String = ''; APopupMenu: TPopupMenu = nil): TSimbaTransparentButton;
@@ -112,9 +116,14 @@ begin
 end;
 
 procedure TSimbaToolButton.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
+var
+  I: Integer;
 begin
   PreferredWidth  := Round(FToolbar.FButtonSize * 1.5);
   PreferredHeight := Round(FToolbar.FButtonSize * 1.5);
+
+  for I := 0 to ControlCount - 1 do
+    PreferredWidth := PreferredWidth + Controls[I].Width;
 end;
 
 constructor TSimbaToolButton.Create(AOwner: TComponent);
@@ -148,6 +157,18 @@ begin
 end;
 
 procedure TSimbaToolbar.SetButtonSize(Value: Integer);
+
+  procedure DoUpdate(Control: TWinControl);
+  var
+    I: Integer;
+  begin
+    Control.InvalidatePreferredSize();
+    Control.AdjustSize();
+    for I := 0 to Control.ControlCount - 1 do
+      if Control.Controls[I] is TWinControl then
+        DoUpdate(TWinControl(Control.Controls[I]));
+  end;
+
 var
   I: Integer;
 begin
@@ -156,10 +177,8 @@ begin
   FButtonSize := Value;
 
   for I := 0 to FFlowPanel.ControlCount - 1 do
-  begin
-    FFlowPanel.Controls[I].InvalidatePreferredSize();
-    FFlowPanel.Controls[I].AdjustSize();
-  end;
+    if FFlowPanel.Controls[I] is TWinControl then
+      DoUpdate(TWinControl(FFlowPanel.Controls[I]));
 end;
 
 procedure TSimbaToolbar.SetVertical(Value: Boolean);
@@ -237,6 +256,13 @@ begin
   AutoSize := True;
   Spacing := 3;
   Color := SimbaTheme.ColorFrame;
+end;
+
+function TSimbaToolbar.AddGroup: TSimbaToolbarButtonGroup;
+begin
+  Result := TSimbaToolbarButtonGroup.Create(Self);
+  Result.Parent := FFlowPanel;
+  Result.AutoSize := True;
 end;
 
 end.

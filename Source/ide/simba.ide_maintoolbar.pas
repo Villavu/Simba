@@ -257,6 +257,8 @@ begin
 end;
 
 constructor TSimbaMainToolBar.Create;
+var
+  group: TSimbaToolbarButtonGroup;
 begin
   inherited Create(nil);
 
@@ -265,10 +267,19 @@ begin
   FToolBar.Align := alClient;
 
   FButtonNew := FToolBar.AddButton(IMG_NEW, 'New File (Ctrl + N)', @DoClickFileButton);
+
+  group := FToolbar.AddGroup();
+
   FButtonOpen := FToolBar.AddButton(IMG_OPEN, 'Open File (Ctrl + O)', @DoClickFileButton);
+  FButtonOpen.Parent := group;
+  FButtonOpen.Align := alClient;
   FButtonOpen.BorderSpacing.Right := 0;
+
   FButtonOpenDrop := FToolBar.AddDropdownButton('Open Recent File', SimbaMainForm.RecentFilesPopup);
+  FButtonOpenDrop.Parent := group;
+  FButtonOpenDrop.Align := alRight;
   FButtonOpenDrop.BorderSpacing.Left := 0;
+
   FButtonSave := FToolBar.AddButton(IMG_SAVE, 'Save Script (Ctrl + S)', @DoClickFileButton);
   FButtonSaveAll := FToolBar.AddButton(IMG_SAVE_ALL, 'Save All', @DoClickFileButton);
 
