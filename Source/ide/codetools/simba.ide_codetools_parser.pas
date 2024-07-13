@@ -2320,7 +2320,8 @@ begin
         end;
         Result += ']';
       end;
-      Result += ': ' + Params[High(Params)].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType);
+      if Length(Params) > 0 then
+        Result += ': ' + Params[High(Params)].Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType);
     end;
   end;
 end;

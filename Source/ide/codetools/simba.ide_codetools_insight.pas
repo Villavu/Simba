@@ -75,7 +75,9 @@ type
 
     function Get(Name: String): TDeclarationArray;
     function GetTypeMembers(Decl: TDeclaration_Type; Methods: Boolean = True): TDeclarationArray;
-    function ParseExpr(Expr: String): TDeclaration;
+
+    function ParseExpr(Expr: String; out Members: TDeclarationArray): TDeclaration; overload;
+    function ParseExpr(Expr: String): TDeclaration; overload;
 
     constructor Create;
     destructor Destroy; override;
@@ -417,9 +419,16 @@ begin
   end;
 end;
 
-function TCodeinsight.ParseExpr(Expr: String): TDeclaration;
+function TCodeinsight.ParseExpr(Expr: String; out Members: TDeclarationArray): TDeclaration;
 begin
-  Result := ParseExpression(Self, Expr);
+  Result := ParseExpression(Self, Expr, Members);
+end;
+
+function TCodeinsight.ParseExpr(Expr: String): TDeclaration;
+var
+  _: TDeclarationArray;
+begin
+  Result := ParseExpression(Self, Expr, _);
 end;
 
 constructor TCodeinsight.Create;

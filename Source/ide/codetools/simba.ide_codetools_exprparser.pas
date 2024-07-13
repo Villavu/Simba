@@ -13,7 +13,7 @@ uses
   Classes, SysUtils,
   simba.ide_codetools_base, simba.ide_codetools_insight, simba.ide_codetools_parser;
 
-function ParseExpression(Codeinsight: TCodeinsight; Expr: String): TDeclaration;
+function ParseExpression(Codeinsight: TCodeinsight; Expr: String; out Members: TDeclarationArray): TDeclaration;
 
 implementation
 
@@ -117,46 +117,40 @@ begin
   end;
 end;
 
-function ParseExpression(Codeinsight: TCodeinsight; Expr: String): TDeclaration;
+function ParseExpression(Codeinsight: TCodeinsight; Expr: String; out Members: TDeclarationArray): TDeclaration;
 
-  function Resolve(decls: TDeclarationArray; what: String; DoResolveType: Boolean = True): TDeclaration;
+  function Resolve(decls: TDeclarationArray; var Item: TExpressionItem): TDeclaration;
   var
     I, J: Integer;
   begin
     Result := nil;
 
-    for i := 0 to High(decls) do
-      if decls[i].IsName(what) then
+    for i := 0 to High(Decls) do
+      if Decls[i].IsName(Item.Text) then
       begin
-        if not DoResolveType then
-        begin
-          Result := Decls[i];
-          // ideally return a func if there are multiple matches as that result type might be wanted
-          for J := I+1 to High(Decls) do
-            if Decls[J].IsName(what) and (Decls[J] is TDeclaration_Method) and (TDeclaration_Method(Decls[J]).ResultType <> nil) then
-            begin
-              Result := Decls[J];
-              Break;
-            end;
-          Exit;
-        end;
-
-        if decls[i] is TDeclaration_Type then
+        if Decls[i] is TDeclaration_Type then
         begin
           Result := Decls[i];
           Exit;
         end;
 
-        if decls[i] is TDeclaration_Method then
-          if TDeclaration_Method(decls[i]).ResultType <> nil then
+        if Decls[i] is TDeclaration_Method then
+          if TDeclaration_Method(Decls[i]).ResultType <> nil then
           begin
-            Result := Codeinsight.ResolveVarType(TDeclaration_Method(decls[i]).ResultType);
+            // indexable property.. clear symbol.
+            if (Decls[i] is TDeclaration_Property) and (TDeclaration_Property(Decls[i]).ParamCount > 1) then
+            begin
+              Item.Symbols.DimCount := 0;
+              Item.HasSymbols := Item.Symbols.Deref or Item.Symbols.DerefDim;
+            end;
+
+            Result := Codeinsight.ResolveVarType(TDeclaration_Method(Decls[i]).ResultType);
             Exit;
           end;
 
-        if (decls[i] is TDeclaration_Var) then
+        if (Decls[i] is TDeclaration_Var) then
         begin
-          Result := Codeinsight.ResolveVarType(TDeclaration_Var(decls[i]).VarType);
+          Result := Codeinsight.ResolveVarType(TDeclaration_Var(Decls[i]).VarType);
           Exit;
         end;
       end;
@@ -213,6 +207,7 @@ function ParseExpression(Codeinsight: TCodeinsight; Expr: String): TDeclaration;
 
   begin
     Result := Decl;
+
     if Item.HasSymbols then
     begin
       if Item.Symbols.Deref        then Result := DoPointerDerefence(Result);
@@ -224,24 +219,25 @@ function ParseExpression(Codeinsight: TCodeinsight; Expr: String): TDeclaration;
 var
   Items: TExpressionItems;
   Decl: TDeclaration;
-  Decls: TDeclarationArray;
-  i: Integer;
+  I: Integer;
+  Last: TExpressionItem;
 begin
   Result := nil;
 
   Items := StringToExpression(Expr);
   if Length(Items) = 0 then
     Exit;
-  Decls := Codeinsight.Get(Items[0].Text);
+  Members := Codeinsight.Get(Items[0].Text);
 
   for i := 0 to High(Items) - 1 do
   begin
-    Decl := Resolve(Decls, Items[I].Text);
+    Decl := Resolve(Members, Items[I]);
     if (Decl = nil) then
     begin
       CodetoolsMessage('Failed resolving ' + Items[I].Text);
       Break;
     end;
+
     Decl := ResolveSymbols(Decl, Items[I]);
     if (Decl = nil) then
     begin
@@ -249,14 +245,29 @@ begin
       Break;
     end;
 
-    if Decl is TDeclaration_Type then
-      Decls := Codeinsight.GetTypeMembers(Decl as TDeclaration_Type)
+    if (Decl is TDeclaration_Type) then
+      Members := Codeinsight.GetTypeMembers(Decl as TDeclaration_Type)
     else
-      Decls := Codeinsight.Get(Decl.Name);
+      Members := Codeinsight.Get(Decl.Name);
   end;
 
-  Result := Resolve(Decls, Items[High(Items)].Text, Items[High(Items)].HasSymbols);
-  Result := ResolveSymbols(Result, Items[High(Items)]);
+  // last item is special
+  Last := Items[High(Items)];
+  for I := 0 to High(Members) do
+    if Members[I].IsName(Last.Text) then
+    begin
+      if (Members[I] is TDeclaration_Property) and (TDeclaration_Property(Members[I]).ParamCount > 1) then
+      begin
+        Last.Symbols.DimCount := 0;
+        Last.HasSymbols := Last.Symbols.Deref or Last.Symbols.DerefDim;
+      end;
+
+      Result := Members[I];
+      Break;
+    end;
+
+  if (Result <> nil) and Last.HasSymbols then
+    Result := ResolveSymbols(Result, Last);
 end;
 
 end.

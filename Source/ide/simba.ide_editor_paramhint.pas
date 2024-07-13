@@ -465,7 +465,7 @@ procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Bool
 
 var
   Decl: TDeclaration;
-  Decls: TDeclarationArray;
+  Members, Decls: TDeclarationArray;
   IsIndexing: Boolean;
   P: TPoint;
 begin
@@ -487,7 +487,7 @@ begin
       FCodeinsight.Run();
 
       Decls := [];
-      Decl := FCodeinsight.ParseExpr(GetExpression(FParenthesesPoint.X -1, FParenthesesPoint.Y));
+      Decl := FCodeinsight.ParseExpr(GetExpression(FParenthesesPoint.X - 1, FParenthesesPoint.Y), Members);
 
       if (Decl <> nil) then
       begin
@@ -501,13 +501,13 @@ begin
         // properties
         if (Decl is TDeclaration_Property) then
         begin
-          Decls := FCodeinsight.SymbolTable.Get(TDeclaration_MethodOfType(Decl).ObjectName).GetByClassAndName(Decl.Name, TDeclaration_Property);
+          Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_Property);
           Decls := FilterProperties(Decls, IsIndexing);
         end else
         // method of type
         if (Decl is TDeclaration_MethodOfType) then
         begin
-          Decls := FCodeinsight.SymbolTable.Get(TDeclaration_MethodOfType(Decl).ObjectName).GetByClassAndName(Decl.Name, TDeclaration_MethodOfType);
+          Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_MethodOfType);
         end else
         // regular methods
         if (Decl is TDeclaration_Method) then
