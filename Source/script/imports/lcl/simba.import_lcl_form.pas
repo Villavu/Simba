@@ -13,7 +13,7 @@ procedure ImportLCLForm(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  controls, extctrls, comctrls, graphics, forms, dialogs, lptypes, ffi;
+  IniPropStorage, controls, extctrls, comctrls, graphics, forms, dialogs, lptypes, ffi;
 
 type
   PStrings = ^TStrings;
@@ -348,6 +348,52 @@ begin
 
   PForm(Result)^ := TForm.CreateNew(PComponent(Params^[0])^);
   PForm(Result)^.ShowInTaskBar := stAlways;
+end;
+
+procedure _LapeForm_SaveSession(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+
+  function ArrToSessionProperties(const Arr: TStringArray): String;
+  var
+    I: Integer;
+  begin
+    Result := '';
+    for I := 0 to High(Arr) do
+      Result := Result + Arr[I] + ';';
+  end;
+
+begin
+  PForm(Params^[0])^.SessionProperties := ArrToSessionProperties(PStringArray(Params^[2])^);
+
+  with TIniPropStorage.Create(PForm(Params^[0])^) do
+  try
+    IniFileName := PString(Params^[1])^;
+    Save();
+  finally
+    Free();
+  end;
+end;
+
+procedure _LapeForm_RestoreSession(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+
+  function ArrToSessionProperties(const Arr: TStringArray): String;
+  var
+    I: Integer;
+  begin
+    Result := '';
+    for I := 0 to High(Arr) do
+      Result := Result + Arr[I] + ';';
+  end;
+
+begin
+  PForm(Params^[0])^.SessionProperties := ArrToSessionProperties(PStringArray(Params^[2])^);
+
+  with TIniPropStorage.Create(PForm(Params^[0])^) do
+  try
+    IniFileName := PString(Params^[1])^;
+    Restore();
+  finally
+    Free();
+  end;
 end;
 
 procedure _LapeForm_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -1056,6 +1102,8 @@ begin
 
     addClass('TLazForm', 'TLazCustomForm');
     addClassConstructor('TLazForm', '(AOwner: TLazComponent = nil)', @_LapeForm_Create);
+    addGlobalFunc('procedure TLazForm.SaveSession(FileName: String; Things: TStringArray);', @_LapeForm_SaveSession);
+    addGlobalFunc('procedure TLazForm.RestoreSession(FileName: String; Things: TStringArray);', @_LapeForm_RestoreSession);
 
     addProperty('TLazForm', 'OnActivate', 'TLazNotifyEvent', @_LapeForm_OnActivate_Read, @_LapeForm_OnActivate_Write);
     addProperty('TLazForm', 'OnClose', 'TLazCloseEvent', @_LapeForm_OnClose_Read, @_LapeForm_OnClose_Write);
