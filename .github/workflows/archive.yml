@@ -13,24 +13,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:     
       - name: Download artifacts
-        uses: actions/github-script@v3.1.0
+        uses: actions/github-script@v6
         with:
           script: |
-            var fs = require('fs');
-            var artifacts = await github.actions.listWorkflowRunArtifacts({
+            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
-               run_id: ${{ github.event.workflow_run.id }},
+               run_id: context.payload.workflow_run.id,
             });
-            for (artifact of artifacts.data.artifacts) {
-              var download = await github.actions.downloadArtifact({
+            for (artifact of allArtifacts.data.artifacts) {
+              let download = await github.rest.actions.downloadArtifact({
                  owner: context.repo.owner,
                  repo: context.repo.repo,
                  artifact_id: artifact.id,
                  archive_format: 'zip',
               });
+              let fs = require('fs');
               fs.writeFileSync(artifact.name + '.zip', Buffer.from(download.data));
-
               console.log('Downloaded: ' + artifact.name);
             }
 

@@ -26,28 +26,28 @@ jobs:
     runs-on: windows-latest
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == 'Villavu/Simba' && github.event.workflow_run.head_branch == 'simba2000'
     steps:
-      - uses: actions/checkout@v3.0.2
+      - uses: actions/checkout@v4.1.7
         with:
           ref: ${{ github.event.workflow_run.head_branch }}      
       - name: Download artifact
-        uses: actions/github-script@v3.1.0
+        uses: actions/github-script@v6
         with:
           script: |
-            var artifacts = await github.actions.listWorkflowRunArtifacts({
+            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
                owner: context.repo.owner,
                repo: context.repo.repo,
-               run_id: ${{github.event.workflow_run.id }},
+               run_id: context.payload.workflow_run.id,
             });
-            var matchArtifact = artifacts.data.artifacts.filter((artifact) => {
+            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "Simba-Win32.exe"
             })[0];
-            var download = await github.actions.downloadArtifact({
+            let download = await github.rest.actions.downloadArtifact({
                owner: context.repo.owner,
                repo: context.repo.repo,
                artifact_id: matchArtifact.id,
                archive_format: 'zip',
             });
-            var fs = require('fs');
+            let fs = require('fs');
             fs.writeFileSync('Simba-Win32.zip', Buffer.from(download.data));
 
       - name: Build files

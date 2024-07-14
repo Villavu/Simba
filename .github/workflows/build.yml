@@ -8,10 +8,6 @@ on:
     branches:
       - '**'
 
-env:
-  FPC_VER: fixes_3_2
-  LAZ_VER: lazarus_3_4
-      
 jobs:
   build:
     name: ${{ matrix.config.name }}
@@ -40,11 +36,6 @@ jobs:
             build-mode: LINUX64
             binary: Simba-Linux64
             test: Simba-Linux64
-          
-          - name: Linux AArch64  
-            runs-on: ubuntu-20.04
-            build-mode: LINUX-AARCH64
-            binary: Simba-Linux-AArch64
             
           - name: MacOS 64
             runs-on: macos-latest
@@ -53,28 +44,53 @@ jobs:
             test: Simba
 
           - name: MacOS AArch64
-            runs-on: macos-latest
+            runs-on: macos-14
             build-mode: MACOS-AARCH64
             binary: Simba-MacOS-AArch64.dmg
+            #test: Simba MatchTemplateMask test fails, investigate later
             
     steps:
-      - name: Install Lazarus
-        uses: ollydev/setup-lazarus-fpcup@v3.3
-        with:
-          laz: ${{ env.LAZ_VER }}
-          fpc: ${{ env.FPC_VER }}
-
-      - uses: actions/checkout@v3.5.3 
+      - uses: actions/checkout@v4.1.7
         with: 
           submodules: true
+
+      - name: Install Lazarus (MacOS)
+        if: startsWith(matrix.config.name, 'MacOS') == true
+        uses: ollydev/setup-lazarus@v3.3
+        with:
+          laz-url: https://sourceforge.net/projects/lazarus/files/Lazarus%20macOS%20x86-64/Lazarus%203.4/Lazarus-3.4-macosx-x86_64.pkg
+          fpc-url: |
+            https://sourceforge.net/projects/lazarus/files/Lazarus%20macOS%20x86-64/Lazarus%203.4/fpc-3.2.2.intelarm64-macosx.dmg
+            https://sourceforge.net/projects/lazarus/files/Lazarus%20macOS%20x86-64/Lazarus%203.4/fpc-src-3.2.2-20210709-macosx.dmg
+
+      - name: Install Lazarus (Linux)
+        if: startsWith(matrix.config.name, 'Linux') == true
+        uses: ollydev/setup-lazarus@v3.3
+        with:
+          laz-url: https://sourceforge.net/projects/lazarus/files/Lazarus%20Linux%20amd64%20DEB/Lazarus%203.4/lazarus-project_3.4.0-0_amd64.deb
+          fpc-url: |
+            https://sourceforge.net/projects/lazarus/files/Lazarus%20Linux%20amd64%20DEB/Lazarus%203.4/fpc-laz_3.2.2-210709_amd64.deb
+            https://sourceforge.net/projects/lazarus/files/Lazarus%20Linux%20amd64%20DEB/Lazarus%203.4/fpc-src_3.2.2-210709_amd64.deb
+
+      - name: Install Lazarus (Windows 32)
+        if: startsWith(matrix.config.name, 'Windows 32') == true
+        uses: ollydev/setup-lazarus@v3.3
+        with:
+          laz-url: https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2032%20bits/Lazarus%203.4/lazarus-3.4-fpc-3.2.2-win32.exe
+
+      - name: Install Lazarus (Windows 64)
+        if: startsWith(matrix.config.name, 'Windows 64') == true
+        uses: ollydev/setup-lazarus@v3.3
+        with:
+          laz-url: https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2064%20bits/Lazarus%203.4/lazarus-3.4-fpc-3.2.2-win64.exe
 
       - name: Build Simba
         run: |
           export GITHUB_SHORT_SHA=$(git rev-parse --short HEAD)
           lazbuild --build-mode=${{ matrix.config.build-mode }} "Source/Simba.lpi"
 
-      - name: Sign MacOS App Bundle
-        if: matrix.config.runs-on == 'macos-latest'
+      - name: Create MacOS Image
+        if: startsWith(matrix.config.name, 'MacOS') == true
         env: 
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
@@ -109,7 +125,7 @@ jobs:
           ./${{ matrix.config.test }} --run "Tests/RunTests/tester.simba"
           
       - name: Upload Simba Binary 
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4.3.4
         with:
           name: ${{ matrix.config.binary }}
           path: ${{ matrix.config.binary }}
