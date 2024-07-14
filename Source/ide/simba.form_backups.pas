@@ -55,6 +55,7 @@ type
     procedure DoFormUndocked(Sender: TObject);
 
     procedure Activate; override;
+    procedure Fill;
   public
     TreeView: TSimbaTreeView;
     Editor: TSimbaEditor;
@@ -185,19 +186,30 @@ end;
 procedure TSimbaBackupsForm.DoFormDocked(Sender: TObject);
 begin
   if (Sender = HostDockSite) then
+  begin
     ButtonPanel.ButtonCancel.Visible := False;
+    Fill();
+  end;
 end;
 
 procedure TSimbaBackupsForm.DoFormUndocked(Sender: TObject);
 begin
   if (Sender = HostDockSite) then
+  begin
     ButtonPanel.ButtonCancel.Visible := True;
+    Fill();
+  end;
 end;
 
 procedure TSimbaBackupsForm.Activate;
 begin
   inherited Activate();
 
+  Fill();
+end;
+
+procedure TSimbaBackupsForm.Fill;
+begin
   if ((GetTickCount64() - FLastUpdate) > 60000) then
   begin
     TThread.ExecuteInThread(@DoLoadBackups, @DoBackupsLoaded);
