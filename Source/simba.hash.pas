@@ -15,12 +15,12 @@ uses
 
 type
   {$SCOPEDENUMS ON}
-  HashAlgo = (SHA1, SHA256, SHA384, SHA512, MD5);
+  EHashAlgo = (SHA1, SHA256, SHA384, SHA512, MD5);
   {$SCOPEDENUMS OFF}
 
-  function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: Integer): String;
-  function HashString(Algo: HashAlgo; const S: String): String;
-  function HashFile(Algo: HashAlgo; const FileName: String): String;
+  function HashBuffer(Algo: EHashAlgo; Buf: PByte; Len: Integer): String;
+  function HashString(Algo: EHashAlgo; const S: String): String;
+  function HashFile(Algo: EHashAlgo; const FileName: String): String;
 
   function Hash32(Data: PByte; Len: Int32; Seed: UInt32 = 0): UInt32; overload;
   function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload;
@@ -39,21 +39,21 @@ uses
   simba.hash_md5,
   simba.hash_murmur;
 
-function HashBuffer(Algo: HashAlgo; Buf: PByte; Len: Integer): String;
+function HashBuffer(Algo: EHashAlgo; Buf: PByte; Len: Integer): String;
 begin
   Result := '';
 
   if (Len > 0) then
     case Algo of
-      HashAlgo.SHA1:   Result := Hash_SHA1(Buf, Len);
-      HashAlgo.SHA256: Result := Hash_SHA256(Buf, Len);
-      HashAlgo.SHA384: Result := Hash_SHA384(Buf, Len);
-      HashAlgo.SHA512: Result := Hash_SHA512(Buf, Len);
-      HashAlgo.MD5:    Result := Hash_MD5(Buf, Len);
+      EHashAlgo.SHA1:   Result := Hash_SHA1(Buf, Len);
+      EHashAlgo.SHA256: Result := Hash_SHA256(Buf, Len);
+      EHashAlgo.SHA384: Result := Hash_SHA384(Buf, Len);
+      EHashAlgo.SHA512: Result := Hash_SHA512(Buf, Len);
+      EHashAlgo.MD5:    Result := Hash_MD5(Buf, Len);
     end;
 end;
 
-function HashString(Algo: HashAlgo; const S: String): String;
+function HashString(Algo: EHashAlgo; const S: String): String;
 begin
   if (Length(S) > 0) then
     Result := HashBuffer(Algo, @S[1], Length(S))
@@ -61,7 +61,7 @@ begin
     Result := '';
 end;
 
-function HashFile(Algo: HashAlgo; const FileName: String): String;
+function HashFile(Algo: EHashAlgo; const FileName: String): String;
 var
   Bytes: TBytes;
 begin

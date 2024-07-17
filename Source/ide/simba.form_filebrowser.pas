@@ -61,6 +61,8 @@ type
     function DoGetNodeHint(const Node: TTreeNode): String;
     procedure DoDoubleClick(Sender: TObject);
     procedure DoAfterFilter(Sender: TObject);
+
+    function CanOpenInSimba(FileName: String): Boolean;
   public
     constructor Create(AOwner: TComponent); override;
 
@@ -227,7 +229,7 @@ begin
 
   if (Node is TSimbaFileBrowserNode) then
   begin
-    if Node.IsSimbaScript then
+    if CanOpenInSimba(TSimbaFileBrowserNode(Node).FileName) then
     begin
       PopupMenu_Open.Caption := 'Open "' + Node.Text + '"';
       PopupMenu_Open.Enabled := True;
@@ -255,7 +257,7 @@ begin
     if Node.IsDirectory then
       SimbaNativeInterface.OpenDirectory(Node.FileName)
     else
-    if Node.IsSimbaScript then
+    if CanOpenInSimba(Node.FileName) then
       SimbaTabsForm.Open(Node.FileName)
     else
       SimbaNativeInterface.OpenFile(Node.FileName);
@@ -270,6 +272,11 @@ begin
     if Assigned(FTreeView.Items.GetFirstNode()) then
       FTreeView.Items.GetFirstNode.Expanded := True;
   end;
+end;
+
+function TSimbaFileBrowserForm.CanOpenInSimba(FileName: String): Boolean;
+begin
+  Result := TSimbaPath.PathHasExt(FileName, ['.simba', '.txt', '.inc', '.pas', '.ini', '.md']);
 end;
 
 constructor TSimbaFileBrowserForm.Create(AOwner: TComponent);

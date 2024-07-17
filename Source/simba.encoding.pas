@@ -15,14 +15,14 @@ uses
 
 {$scopedenums on}
 type
-  BaseEncoding = (b64URL, b64, b32, b32Hex, b16);
+  EBaseEncoding = (b64URL, b64, b32, b32Hex, b16);
 {$scopedenums off}
 
-function BaseEncode(Encoding: BaseEncoding; const Data: String): String;
-function BaseDecode(Encoding: BaseEncoding; const Data: String): String;
+function BaseEncode(Encoding: EBaseEncoding; const Data: String): String;
+function BaseDecode(Encoding: EBaseEncoding; const Data: String): String;
 
-function BaseEncodeBytes(Encoding: BaseEncoding; Bytes: TBytes): String;
-function BaseDecodeBytes(Encoding: BaseEncoding; const Data: String): TBytes;
+function BaseEncodeBytes(Encoding: EBaseEncoding; Bytes: TBytes): String;
+function BaseDecodeBytes(Encoding: EBaseEncoding; const Data: String): TBytes;
 
 function HOTPCalculateToken(const aSecret: String; const Counter: Integer): Integer;
 function TOTPCalculateToken(const aSecret: String): Integer;
@@ -33,48 +33,48 @@ uses
   SHA1, HMAC, DateUtils,
   basenenc_simba;
 
-function BaseEncode(Encoding: BaseEncoding; const Data: String): String;
+function BaseEncode(Encoding: EBaseEncoding; const Data: String): String;
 begin
   if (Length(Data) > 0) then
   begin
     case Encoding of
-      BaseEncoding.b64:    Result := Base64.Encode(Data);
-      BaseEncoding.b64URL: Result := Base64URL.Encode(Data);
-      BaseEncoding.b32:    Result := Base32.Encode(Data);
-      BaseEncoding.b32Hex: Result := Base32Hex.Encode(Data);
-      BaseEncoding.b16:    Result := Base16.Encode(Data);
+      EBaseEncoding.b64:    Result := Base64.Encode(Data);
+      EBaseEncoding.b64URL: Result := Base64URL.Encode(Data);
+      EBaseEncoding.b32:    Result := Base32.Encode(Data);
+      EBaseEncoding.b32Hex: Result := Base32Hex.Encode(Data);
+      EBaseEncoding.b16:    Result := Base16.Encode(Data);
     end;
   end else
     Result := '';
 end;
 
-function BaseEncodeBytes(Encoding: BaseEncoding; Bytes: TBytes): String;
+function BaseEncodeBytes(Encoding: EBaseEncoding; Bytes: TBytes): String;
 begin
   if (Length(Bytes) > 0) then
   begin
     case Encoding of
-      BaseEncoding.b64:    Result := Base64.Encode(Bytes);
-      BaseEncoding.b64URL: Result := Base64URL.Encode(Bytes);
-      BaseEncoding.b32:    Result := Base32.Encode(Bytes);
-      BaseEncoding.b32Hex: Result := Base32Hex.Encode(Bytes);
-      BaseEncoding.b16:    Result := Base16.Encode(Bytes);
+      EBaseEncoding.b64:    Result := Base64.Encode(Bytes);
+      EBaseEncoding.b64URL: Result := Base64URL.Encode(Bytes);
+      EBaseEncoding.b32:    Result := Base32.Encode(Bytes);
+      EBaseEncoding.b32Hex: Result := Base32Hex.Encode(Bytes);
+      EBaseEncoding.b16:    Result := Base16.Encode(Bytes);
     end;
   end else
     Result := '';
 end;
 
-function BaseDecode(Encoding: BaseEncoding; const Data: String): String;
+function BaseDecode(Encoding: EBaseEncoding; const Data: String): String;
 var
   Bytes: TBytes;
 begin
   if (Length(Data) > 0) then
   begin
     case Encoding of
-      BaseEncoding.b64:    Bytes := Base64.Decode(Data);
-      BaseEncoding.b64URL: Bytes := Base64URL.Decode(Data);
-      BaseEncoding.b32:    Bytes := Base32.Decode(Data);
-      BaseEncoding.b32Hex: Bytes := Base32Hex.Decode(Data);
-      BaseEncoding.b16:    Bytes := Base16.Decode(Data);
+      EBaseEncoding.b64:    Bytes := Base64.Decode(Data);
+      EBaseEncoding.b64URL: Bytes := Base64URL.Decode(Data);
+      EBaseEncoding.b32:    Bytes := Base32.Decode(Data);
+      EBaseEncoding.b32Hex: Bytes := Base32Hex.Decode(Data);
+      EBaseEncoding.b16:    Bytes := Base16.Decode(Data);
     end;
 
     Result := GetRawStringFromBytes(Bytes);
@@ -82,16 +82,16 @@ begin
     Result := '';
 end;
 
-function BaseDecodeBytes(Encoding: BaseEncoding; const Data: String): TBytes;
+function BaseDecodeBytes(Encoding: EBaseEncoding; const Data: String): TBytes;
 begin
   if (Length(Data) > 0) then
   begin
     case Encoding of
-      BaseEncoding.b64:    Result := Base64.Decode(Data);
-      BaseEncoding.b64URL: Result := Base64URL.Decode(Data);
-      BaseEncoding.b32:    Result := Base32.Decode(Data);
-      BaseEncoding.b32Hex: Result := Base32Hex.Decode(Data);
-      BaseEncoding.b16:    Result := Base16.Decode(Data);
+      EBaseEncoding.b64:    Result := Base64.Decode(Data);
+      EBaseEncoding.b64URL: Result := Base64URL.Decode(Data);
+      EBaseEncoding.b32:    Result := Base32.Decode(Data);
+      EBaseEncoding.b32Hex: Result := Base32Hex.Decode(Data);
+      EBaseEncoding.b16:    Result := Base16.Decode(Data);
     end;
   end else
     Result := [];

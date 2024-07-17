@@ -23,53 +23,53 @@ Encoding & Hashing
 *)
 
 (*
-HashAlgo
+EHashAlgo
 --------
-> type HashAlgo = enum(SHA1, SHA256, SHA384, SHA512, MD5);
+> type EHashAlgo = enum(SHA1, SHA256, SHA384, SHA512, MD5);
 
 ```{note}
-This enum is scoped, so must be used like `HashAlgo.SHA512`
+This enum is scoped, so must be used like `EHashAlgo.SHA512`
 ```
 *)
 
 (*
-BaseEncoding
+EBaseEncoding
 ------------
-> type BaseEncoding = enum(b64URL, b64, b32, b32Hex, b16);
+> type EBaseEncoding = enum(b64URL, b64, b32, b32Hex, b16);
 
 ```{note}
-This enum is scoped, so must be used like `BaseEncoding.b64`
+This enum is scoped, so must be used like `EBaseEncoding.b64`
 ```
 *)
 
 (*
 HashData
 --------
-> function HashData(Algo: HashAlgo; Buf: PByte; Len: Int32): String;
+> function HashData(Algo: EHashAlgo; Buf: PByte; Len: Int32): String;
 *)
 procedure _LapeHashData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashBuffer(HashAlgo(Params^[0]^), PPointer(Params^[1])^, PInteger(Params^[2])^);
+  PString(Result)^ := HashBuffer(EHashAlgo(Params^[0]^), PPointer(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
 HashString
 ----------
-> function HashString(Algo: HashAlgo; S: String): String;
+> function HashString(Algo: EHashAlgo; S: String): String;
 *)
 procedure _LapeHashString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashString(HashAlgo(Params^[0]^), PString(Params^[1])^);
+  PString(Result)^ := HashString(EHashAlgo(Params^[0]^), PString(Params^[1])^);
 end;
 
 (*
 HashFile
 --------
-> function HashFile(Algo: HashAlgo; FileName: String): String;
+> function HashFile(Algo: EHashAlgo; FileName: String): String;
 *)
 procedure _LapeHashFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashFile(HashAlgo(Params^[0]^), PString(Params^[1])^);
+  PString(Result)^ := HashFile(EHashAlgo(Params^[0]^), PString(Params^[1])^);
 end;
 
 (*
@@ -115,21 +115,21 @@ end;
 (*
 BaseEncode
 ----------
-> function BaseEncode(Encoding: BaseEncoding; const Data: String): String;
+> function BaseEncode(Encoding: EBaseEncoding; const Data: String): String;
 *)
 procedure _LapeBaseEncode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := BaseEncode(BaseEncoding(Params^[0]^), PString(Params^[1])^);
+  PString(Result)^ := BaseEncode(EBaseEncoding(Params^[0]^), PString(Params^[1])^);
 end;
 
 (*
 BaseDecode
 ----------
-> function BaseDecode(Encoding: BaseEncoding; const Data: String): String;
+> function BaseDecode(Encoding: EBaseEncoding; const Data: String): String;
 *)
 procedure _LapeBaseDecode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := BaseDecode(BaseEncoding(Params^[0]^), PString(Params^[1])^);
+  PString(Result)^ := BaseDecode(EBaseEncoding(Params^[0]^), PString(Params^[1])^);
 end;
 
 (*
@@ -218,7 +218,7 @@ end;
 (*
 CompressString
 --------------
-> function CompressString(Data: String; Encoding: BaseEncoding = BaseEncoding.b64): String;
+> function CompressString(Data: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
 
 ```{note}
 Zlib compression is used.
@@ -226,13 +226,13 @@ Zlib compression is used.
 *)
 procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := CompressString(PString(Params^[0])^, BaseEncoding(Params^[1]^));
+  PString(Result)^ := CompressString(PString(Params^[0])^, EBaseEncoding(Params^[1]^));
 end;
 
 (*
 DecompressBytes
 ---------------
-> function DeCompressString(Data: String; Encoding: BaseEncoding = BaseEncoding.b64): String;
+> function DeCompressString(Data: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
 
 ```{note}
 Zlib compression is used.
@@ -240,7 +240,7 @@ Zlib compression is used.
 *)
 procedure _LapeDeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := DeCompressString(PString(Params^[0])^, BaseEncoding(Params^[1]^));
+  PString(Result)^ := DeCompressString(PString(Params^[0])^, EBaseEncoding(Params^[1]^));
 end;
 
 (*
@@ -309,18 +309,18 @@ begin
   begin
     ImportingSection := 'Encoding';
 
-    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5)', 'HashAlgo');
-    addGlobalType('enum(b64URL, b64, b32, b32Hex, b16)', 'BaseEncoding');
+    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5)', 'EHashAlgo');
+    addGlobalType('enum(b64URL, b64, b32, b32Hex, b16)', 'EBaseEncoding');
 
     addGlobalFunc('function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer', @_LapeHOTPCalculateToken);
     addGlobalFunc('function TOTPCalculateToken(const Secret: String): Integer', @_LapeTOTPCalculateToken);
 
-    addGlobalFunc('function BaseEncode(Encoding: BaseEncoding; const S: String): String', @_LapeBaseEncode);
-    addGlobalFunc('function BaseDecode(Encoding: BaseEncoding; const S: String): String', @_LapeBaseDecode);
+    addGlobalFunc('function BaseEncode(Encoding: EBaseEncoding; const S: String): String', @_LapeBaseEncode);
+    addGlobalFunc('function BaseDecode(Encoding: EBaseEncoding; const S: String): String', @_LapeBaseDecode);
 
-    addGlobalFunc('function HashData(Algo: HashAlgo; Data: Pointer; Len: Int32): String', @_LapeHashData);
-    addGlobalFunc('function HashString(Algo: HashAlgo; S: String): String', @_LapeHashString);
-    addGlobalFunc('function HashFile(Algo: HashAlgo; FileName: String): String', @_LapeHashFile);
+    addGlobalFunc('function HashData(Algo: EHashAlgo; Data: Pointer; Len: Int32): String', @_LapeHashData);
+    addGlobalFunc('function HashString(Algo: EHashAlgo; S: String): String', @_LapeHashString);
+    addGlobalFunc('function HashFile(Algo: EHashAlgo; FileName: String): String', @_LapeHashFile);
 
     addGlobalFunc('function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32);
     addGlobalFunc('function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32String);
@@ -330,8 +330,8 @@ begin
     addGlobalFunc('function CompressBytes(Bytes: TByteArray): TByteArray', @_LapeCompressBytes);
     addGlobalFunc('function DecompressBytes(Bytes: TByteArray): TByteArray', @_LapeDecompressBytes);
 
-    addGlobalFunc('function CompressString(S: String; Encoding: BaseEncoding = BaseEncoding.b64): String', @_LapeCompressString);
-    addGlobalFunc('function DecompressString(S: String; Encoding: BaseEncoding = BaseEncoding.b64): String', @_LapeDeCompressString);
+    addGlobalFunc('function CompressString(S: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String', @_LapeCompressString);
+    addGlobalFunc('function DecompressString(S: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String', @_LapeDeCompressString);
 
     addGlobalFunc('function SynLZCompressDestLen(Len: Integer): Integer', @_LapeSynLZCompressDestLen);
     addGlobalFunc('function SynLZDecompressDestLen(Src: Pointer): Integer', @_LapeSynLZDecompressDestLen);

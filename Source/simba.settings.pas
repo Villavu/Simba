@@ -242,12 +242,12 @@ end;
 
 procedure TSimbaSetting_BinaryString.ReadValue(INI: TINIFile);
 begin
-  Value := BaseDecode(BaseEncoding.b64, INI.ReadString(FSection, FName, Value));
+  Value := BaseDecode(EBaseEncoding.b64, INI.ReadString(FSection, FName, Value));
 end;
 
 procedure TSimbaSetting_BinaryString.WriteValue(INI: TINIFile);
 begin
-  INI.WriteString(FSection, FName, BaseEncode(BaseEncoding.b64, Value));
+  INI.WriteString(FSection, FName, BaseEncode(EBaseEncoding.b64, Value));
 end;
 
 procedure TSimbaSetting_String.CheckValue(AValue: Variant);

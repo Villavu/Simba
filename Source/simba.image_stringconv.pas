@@ -48,7 +48,7 @@ begin
 
   Stream := nil;
   try
-    Stream := TStringStream.Create(BaseDecode(BaseEncoding.b64, Str));
+    Stream := TStringStream.Create(BaseDecode(EBaseEncoding.b64, Str));
     Stream.Read(Header, SizeOf(TImageStringHeader));
 
     Image.Name := Header.Name;
@@ -79,7 +79,7 @@ begin
 
     SimbaImage_ToFPImageWriter(Image, TFPWriterPNG, ImageStream);
 
-    Result := HeaderPrefix + BaseEncode(BaseEncoding.b64, HeaderStream.DataString + ImageStream.DataString);
+    Result := HeaderPrefix + BaseEncode(EBaseEncoding.b64, HeaderStream.DataString + ImageStream.DataString);
   finally
     HeaderStream.Free();
     ImageStream.Free();

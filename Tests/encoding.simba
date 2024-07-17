@@ -1,17 +1,17 @@
 {$assertions on}
 
-procedure Test(encoding: BaseEncoding; input, output: String);
+procedure Test(encoding: EBaseEncoding; input, output: String);
 begin
   Assert(BaseEncode(encoding, input) = output);
   Assert(BaseDecode(encoding, output) = input);
 end;
 
 begin
-  Test(BaseEncoding.b16, 'subjects?_d', '7375626A656374733F5F64');
+  Test(EBaseEncoding.b16, 'subjects?_d', '7375626A656374733F5F64');
 
-  Test(BaseEncoding.b32, 'subjects?_d', 'ON2WE2TFMN2HGP27MQ======');
-  Test(BaseEncoding.b32Hex, 'subjects?_d', 'EDQM4QJ5CDQ76FQVCG======');
+  Test(EBaseEncoding.b32, 'subjects?_d', 'ON2WE2TFMN2HGP27MQ======');
+  Test(EBaseEncoding.b32Hex, 'subjects?_d', 'EDQM4QJ5CDQ76FQVCG======');
 
-  Test(BaseEncoding.b64, 'subjects?_d', 'c3ViamVjdHM/X2Q=');
-  Test(BaseEncoding.b64URL, 'subjects?_d', 'c3ViamVjdHM_X2Q=');
+  Test(EBaseEncoding.b64, 'subjects?_d', 'c3ViamVjdHM/X2Q=');
+  Test(EBaseEncoding.b64URL, 'subjects?_d', 'c3ViamVjdHM_X2Q=');
 end;

@@ -67,16 +67,16 @@ begin
   Element := Element.AddObject('ArrayObject');
   Element.AddValue('Key', 'Value');
 
-  Assert(Parser.AsString() = TEST);
+  Assert(Parser.AsString = TEST);
 
   Assert(Parser.FindPath('ThisIsAArray[1]', Element));
-  Assert(Element.IsValue());
-  Assert(Element.GetValue() = '2');
+  Assert(Element.IsValue);
+  Assert(Element.Value = '2');
 
   Assert(Parser.FindPath('ThisIsAObject.ObjectKey', Element));
-  Assert(Element.IsValue());
+  Assert(Element.IsValue);
   Assert(Element.ValueType = EJSONValueType.STR);
-  Assert(Element.GetValue() = 'ObjectValue');
+  Assert(Element.Value = 'ObjectValue');
 
   Parser.Clear();
   Parser.AddObject('fruits').AddValue('apple', 'red');
@@ -84,7 +84,7 @@ begin
   Element.AddValue('bananna', 'yellow');
 
   Parser.AddElement('fruits_clone', Element.Clone());
-  Parser.AddElement('apple_clone', Element.GetItem(0).Clone());
+  Parser.AddElement('apple_clone', Element.Item[0].Clone());
   Parser.Delete('fruits');
 
   Assert(Parser.AsString = TEST2);
@@ -99,7 +99,7 @@ begin
   Parser.AddArray('arr', [1,2,True,False]);
 
   Assert(Parser.AsString = TEST4);
-  Assert(ToStr(Parser.GetItem(0).Values) = '[1, 2, True, False]');
+  Assert(ToStr(Parser.Item[0].Values) = '[1, 2, True, False]');
 
   Parser.Free();
 end;

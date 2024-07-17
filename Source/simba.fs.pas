@@ -47,7 +47,7 @@ type
     class function FileSize(FileName: String): Int64;
     class function FileSizeInMegaBytes(FileName: String): Single;
 
-    class function FileHash(FileName: String; Algo: HashAlgo = HashAlgo.SHA1): String;
+    class function FileHash(FileName: String; Algo: EHashAlgo = EHashAlgo.SHA1): String;
   end;
 
   TSimbaPath = class
@@ -69,6 +69,7 @@ type
     class function PathExtractRelative(BasePath, DestPath: String): String;
     class function PathChangeExt(Path, NewExt: String): String;
     class function PathIsInDir(Path, Directory: String): Boolean;
+    class function PathHasExt(Path: String; Extensions: array of String): Boolean;
   end;
 
   TSimbaDir = class
@@ -345,6 +346,19 @@ begin
   Result := PathIsInPath(Path, Directory);
 end;
 
+class function TSimbaPath.PathHasExt(Path: String; Extensions: array of String): Boolean;
+var
+  Ext: String;
+  I: Integer;
+begin
+  Ext := PathExtractExt(Path);
+  for I := 0 to High(Extensions) do
+    if (Ext = Extensions[I]) then
+      Exit(True);
+
+  Result := False;
+end;
+
 class function TSimbaFile.DoFileRead(const FileName: String; var Buffer; const Len: Integer; Offset: Integer): Boolean;
 var
   Stream: TFileStream;
@@ -563,7 +577,7 @@ begin
   Result := FileUtil.FileSize(FileName) / (1024 * 1024);
 end;
 
-class function TSimbaFile.FileHash(FileName: String; Algo: HashAlgo): String;
+class function TSimbaFile.FileHash(FileName: String; Algo: EHashAlgo): String;
 begin
   Result := HashFile(Algo, FileName);
 end;

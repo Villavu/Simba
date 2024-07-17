@@ -18,26 +18,26 @@ begin
 
   for I := 0 to JSONParser.Count - 1 do
   begin
-    Element := JsonParser.GetItem(I);
-    if Element.IsObject() then
+    Element := JsonParser.Item[I];
+    if Element.IsObject then
     begin
       WriteLn('Item[',I,'] is a json object:');
       WriteLn('Keys: ', Element.Keys);
       for J := 0 to Element.Count - 1 do
-        WriteLn('  ', Element.GetItem(J).ValueType, ' -> ', Element.GetItem(J).GetValue());
+        WriteLn('  ', Element.Item[J].ValueType, ' -> ', Element.Item[J].Value);
     end;
 
-    if Element.IsArray() then
+    if Element.IsArray then
     begin
       WriteLn('Item[',I,'] is a json array:');
       for J := 0 to Element.Count - 1 do
-        WriteLn('  ', Element.GetItem(J).ValueType, ' -> ', Element.GetItem(J).GetValue());
+        WriteLn('  ', Element.Item[J].ValueType, ' -> ', Element.Item[J].Value);
     end;
   end;
 
   // change `john` name to `james`
   if JsonParser.Find('person', Element) then
-    Element.GetItem(0).SetValue('james');
+    Element.Item[0].Value := 'james';
 
   // Add another employee
   Element := JsonParser.AddObject('anotherEmployee');
@@ -46,7 +46,7 @@ begin
   Element.AddValue('car', True);
 
   // Get our updated json string
-  WriteLn JsonParser.AsString();
+  WriteLn JsonParser.AsString;
 
   // JSON paths are also useful
   if JsonParser.FindPath('employee.name', Element) then
