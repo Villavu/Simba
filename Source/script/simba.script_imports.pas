@@ -82,7 +82,6 @@ begin
   ImportPointBuffer(Compiler);
 
   ImportStringMap(Compiler);
-  ImportImageMap(Compiler);
 
   ImportSimbaImageBox(Compiler);
   ImportSimbaShapeBox(Compiler);

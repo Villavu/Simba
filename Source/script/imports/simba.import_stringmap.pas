@@ -9,7 +9,6 @@ uses
   simba.base, simba.script_compiler;
 
 procedure ImportStringMap(Compiler: TSimbaScript_Compiler);
-procedure ImportImageMap(Compiler: TSimbaScript_Compiler);
 
 implementation
 
@@ -18,7 +17,6 @@ uses
   simba.container_stringmap, simba.container_imagemap, simba.image;
 
 type
-  PSimbaImageMap = ^TSimbaImageMap;
   PSimbaStringMap = ^TSimbaStringMap;
 
 procedure _LapeStringMap_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -141,51 +139,6 @@ begin
   PSimbaStringMap(Params^[0])^.AllowDuplicates := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeImageMap_Count(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PSimbaImageMap(Params^[0])^.Count;
-end;
-
-procedure _LapeImageMap_Image_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImage(Result)^ := PSimbaImageMap(Params^[0])^.Image[PString(Params^[1])^];
-end;
-
-procedure _LapeImageMap_Image_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageMap(Params^[0])^.Image[PString(Params^[1])^] := PSimbaImage(Params^[2])^;
-end;
-
-procedure _LapeImageMap_Images_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageArray(Result)^ := PSimbaImageMap(Params^[0])^.Images[PString(Params^[1])^];
-end;
-
-procedure _LapeImageMap_Exists(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PSimbaImageMap(Params^[0])^.Exists(PString(Params^[1])^);
-end;
-
-procedure _LapeImageMap_Clear(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageMap(Params^[0])^.Clear();
-end;
-
-procedure _LapeImageMap_Delete(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageMap(Params^[0])^.Delete(PString(Params^[1])^);
-end;
-
-procedure _LapeImageMap_Add(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageMap(Params^[0])^.Add(PString(Params^[1])^, PSimbaImage(Params^[2])^);
-end;
-
-procedure _LapeImageMap_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PSimbaImageMap(Params^[0])^.ToString();
-end;
-
 procedure ImportStringMap(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -228,41 +181,6 @@ begin
 
     addDelayedCode([
       'function ToString(constref Param: TStringMap): String; override;',
-      'begin',
-      '  Result := Param.ToString();',
-      'end;'
-    ]);
-  end;
-end;
-
-procedure ImportImageMap(Compiler: TSimbaScript_Compiler);
-begin
-  with Compiler do
-  begin
-    addGlobalType([
-      'record',
-      '  {%CODETOOLS OFF}',
-      '  FItems: array of record KeyHash: UInt32; Key: String; Value: TImage; end;',
-      '  FCount: Integer;',
-      '  {%CODETOOLS ON}',
-      'end;'],
-      'TImageMap'
-    );
-    if (getGlobalType('TImageMap').Size <> SizeOf(TSimbaImageMap)) then
-      SimbaException('SizeOf(TImageMap) is wrong!');
-
-    addGlobalFunc('function TImageMap.ToString: String', @_LapeImageMap_ToString);
-    addGlobalFunc('procedure TImageMap.Add(Key: String; Img: TImage);', @_LapeImageMap_Add);
-    addGlobalFunc('procedure TImageMap.Clear;', @_LapeImageMap_Clear);
-    addGlobalFunc('procedure TImageMap.Delete(Key: String);', @_LapeImageMap_Delete);
-    addGlobalFunc('function TImageMap.Exists(Key: String): Boolean;', @_LapeImageMap_Exists);
-
-    addProperty('TImageMap', 'Count', 'Integer', @_LapeImageMap_Count);
-    addPropertyIndexed('TImageMap', 'Image', 'Key: String', 'TImage', @_LapeImageMap_Image_Read, @_LapeImageMap_Image_Write);
-    addPropertyIndexed('TImageMap', 'Images', 'Key: String', 'TImageArray', @_LapeImageMap_Images_Read);
-
-    addDelayedCode([
-      'function ToString(constref Param: TImageMap): String; override;',
       'begin',
       '  Result := Param.ToString();',
       'end;'

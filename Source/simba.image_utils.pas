@@ -42,7 +42,7 @@ type
 // https://sashamaps.net/docs/resources/20-colors/
 const
   DISTINCT_COLORS: TColorArray = (
-    $4B19E6, $4BB43C, $19E1FF, $D86343, $3182F5, $B41E91, $F4D442,
+    $0000FF, $4BB43C, $19E1FF, $D86343, $3182F5, $B41E91, $F4D442,
     $E632F0, $45EFBF, $D4BEFA, $909946, $FFBEDC, $24639A, $C8FAFF,
     $000080, $C3FFAA, $008080, $B1D8FF, $750000, $A9A9A9
   );
