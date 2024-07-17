@@ -8,7 +8,6 @@
  Jarl Holta - https://github.com/slackydev/SimbaExt
 
   - CreateFromSimplePolygon
-  - CreateFromCircle
   - ConvexHull
   - ConcaveHull
   - ConvexityDefects
@@ -272,64 +271,60 @@ end;
 
 class function TPointArrayHelper.CreateFromLine(Start, Stop: TPoint): TPointArray;
 var
-  dx,dy,step,I: Integer;
-  rx,ry,x,y: Single;
+  Buffer: TSimbaPointBuffer;
+
+  procedure Create;
+
+    procedure _Pixel(const X, Y: Integer); inline;
+    begin
+      Buffer.Add(X, Y);
+    end;
+
+    {$i shapebuilder_line.inc}
+
+  begin
+    _BuildLine(Start, Stop);
+  end;
+
 begin
-  dx := (Stop.X - Start.X);
-  dy := (Stop.Y - Start.Y);
-  if (Abs(dx) > Abs(dy)) then
-    step := Abs(dx)
-  else
-    step := Abs(dy);
+  Create();
 
-  SetLength(Result, step + 1);
-
-  if (step = 0) then
-  begin
-    rx := dx;
-    ry := dy;
-  end else
-  begin
-    rx := dx / step;
-    ry := dy / step;
-  end;
-  x := Start.X;
-  y := Start.Y;
-
-  Result[0] := TPoint.Create(Round(x), Round(y));
-  for I := 1 to step do
-  begin
-    x := x + rx;
-    y := y + ry;
-
-    Result[I] := TPoint.Create(Round(x), Round(y));
-  end;
+  Result := Buffer.ToArray(False);
 end;
 
 class function TPointArrayHelper.CreateFromCircle(Center: TPoint; Radius: Integer; Filled: Boolean): TPointArray;
+var
+  Buffer: TSimbaPointBuffer;
 
   procedure Create;
+
+    procedure _Pixel(const X, Y: Integer); inline;
+    begin
+      Buffer.Add(X, Y);
+    end;
+
+    {$i shapebuilder_circle.inc}
+
   begin
-    Result := CreateFromEllipse(Center, Radius, Radius, False);
+    _BuildCircle(Center.X, Center.Y, Radius);
   end;
 
   procedure CreateFilled;
-  var
-    x,y: Integer;
-    d: Single;
-    B: TBox;
-    Buffer: TSimbaPointBuffer;
-  begin
-    d := Trunc(Sqr(Radius + 0.5));
-    B := TBox.Create(Center.X - Radius, Center.Y - Radius,
-                     Center.X + Radius, Center.Y + Radius);
 
-    Buffer.Init(B.Area);
-    for y := B.Y1 to B.Y2 do
-      for x := B.X1 to B.X2 do
-        if Sqr(X - Center.X) + Sqr(Y - Center.Y) < d then
-          Buffer.Add(X, Y);
-    Result := Buffer.ToArray(False);
+    procedure _Row(const Y: Integer; const X1, X2: Integer);
+    var
+      X: Integer;
+    begin
+      for X := X1 to X2 do
+        Buffer.Add(X, Y);
+    end;
+
+    {$i shapebuilder_circlefilled.inc}
+
+  begin
+    Buffer.Init(Radius * Radius);
+
+    _BuildCircleFilled(Center.X, Center.Y, Radius);
   end;
 
 begin
@@ -337,6 +332,8 @@ begin
     True:  CreateFilled();
     False: Create();
   end;
+
+  Result := Buffer.ToArray(False);
 end;
 
 class function TPointArrayHelper.CreateFromEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Filled: Boolean): TPointArray;
@@ -358,7 +355,7 @@ var
 
   procedure CreateFilled;
 
-    procedure _Row(const Y: Integer; X1, X2: Integer);
+    procedure _Row(const Y: Integer; const X1, X2: Integer);
     var
       X: Integer;
     begin
@@ -384,56 +381,40 @@ begin
 end;
 
 class function TPointArrayHelper.CreateFromBox(Box: TBox; Filled: Boolean): TPointArray;
+var
+  Buffer: TSimbaPointBuffer;
+
+  procedure _Pixel(const X, Y: Integer); inline;
+  begin
+    Buffer.Add(X, Y);
+  end;
+
+  procedure _Row(const Y: Integer; const X1, X2: Integer); inline;
+  var
+    X: Integer;
+  begin
+    for X := X1 to X2 do
+      Buffer.Add(X, Y);
+  end;
 
   procedure CreateFilled;
-  var
-    X, Y, Count: integer;
-  begin
-    SetLength(Result, Box.Area);
-    Count := 0;
-    for x := Box.X1 to Box.X2 do
-      for y := Box.Y1 to Box.Y2 do
-      begin
-        Result[Count].x := x;
-        Result[Count].y := y;
 
-        Inc(Count);
-      end;
+    {$i shapebuilder_boxfilled.inc}
+
+  begin
+    Buffer.Init(Box.Area);
+
+    _BuildBoxFilled(Box);
   end;
 
   procedure Create;
-  var
-    X, Y, Count: Integer;
+
+    {$i shapebuilder_boxedge.inc}
+
   begin
-    Result := [];
+    Buffer.Init((Box.Width * 2) + (Box.Height * 2));
 
-    if (Box.X1 = Box.X2) and (Box.Y1 = Box.Y2) then
-      Result := [TPoint.Create(Box.X1, Box.Y1)]
-    else
-    begin
-      SetLength(Result, (Max(2, (Box.X2 - Box.X1) * 2)) + (Max(2, (Box.Y2 - Box.Y1) * 2)));
-      Count := 0;
-
-      for X := Box.X1 to Box.X2 do
-      begin
-        Result[Count].X := X;
-        Result[Count].Y := Box.Y1;
-        Result[Count + 1].X := X;
-        Result[Count + 1].Y := Box.Y2;
-
-        Inc(Count, 2);
-      end;
-
-      for Y := Box.Y1 + 1 to Box.Y2 - 1 do
-      begin
-        Result[Count].X := Box.X1;
-        Result[Count].Y := Y;
-        Result[Count + 1].X := Box.X2;
-        Result[Count + 1].Y := Y;
-
-        Inc(Count, 2);
-      end;
-    end;
+    _BuildBoxEdge(Box);
   end;
 
 begin
@@ -441,13 +422,41 @@ begin
     True:  CreateFilled();
     False: Create();
   end;
+
+  Result := Buffer.ToArray(False);
 end;
 
 class function TPointArrayHelper.CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray;
+
+  procedure Create;
+  begin
+    Result := Poly.Connect();
+  end;
+
+  procedure CreateFilled;
+  var
+    Buffer: TSimbaPointBuffer;
+
+    procedure _Row(const Y: Integer; const X1, X2: Integer);
+    var
+      X: Integer;
+    begin
+      for X := X1 to X2 do
+        Buffer.Add(X, Y);
+    end;
+
+    {$i shapebuilder_polygonfilled.inc}
+
+  begin
+    _BuildPolygonFilled(Poly, TRect(Poly.Bounds), TPoint.Create(0,0));
+
+    Result := Buffer.ToArray(False);
+  end;
+
 begin
   case Filled of
-    True:  Result := Poly.Connect().ShapeFill();
-    False: Result := Poly.Connect();
+    True:  CreateFilled();
+    False: Create();
   end;
 end;
 
