@@ -8,7 +8,6 @@
  Jarl Holta - https://github.com/slackydev/SimbaExt
 
   - CreateFromSimplePolygon
-  - CreateFromEllipse
   - CreateFromCircle
   - ConvexHull
   - ConcaveHull
@@ -165,8 +164,7 @@ type
 
   T2DPointArrayHelper = type helper for T2DPointArray
   public
-    function Offset(P: TPoint): T2DPointArray; overload;
-    function Offset(X, Y: Integer): T2DPointArray; overload;
+    function Offset(P: TPoint): T2DPointArray;
 
     function Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): T2DPointArray; overload;
     function Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): T2DPointArray; overload;
@@ -341,97 +339,39 @@ begin
   end;
 end;
 
-{*
- Creates all the points needed to define a Ellipse's cirumsphere.
- Algorithm is based on Bresenham's circle algorithm.
-*}
 class function TPointArrayHelper.CreateFromEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Filled: Boolean): TPointArray;
+var
+  Buffer: TSimbaPointBuffer;
 
   procedure Create;
-  var
-    RadXSQ, RadYSQ, TwoSQX, TwoSQY, p, x, y, px, py: Integer;
-    Buffer: TSimbaPointBuffer;
-  begin
-    Buffer.Init();
 
-    if (RadiusX > -1) and (RadiusY > -1) then
+    procedure _Pixel(const X, Y: Integer); inline;
     begin
-      RadXSQ := (radiusX * radiusX);
-      RadYSQ := (radiusY * radiusY);
-      TwoSQX := (2 * RadXSQ);
-      TwoSQY := (2 * RadYSQ);
-      x := 0;
-      y := radiusY;
-      px := 0;
-      py := (twoSQX * y);
-
-      Buffer.Add(center.X + x, center.Y + y);
-      Buffer.Add(center.X - x, center.Y + y);
-      Buffer.Add(center.X + x, center.Y - y);
-      Buffer.Add(center.X - x, center.Y - y);
-      p := Round(RadYSQ - (RadXSQ * RadiusY) + (0.25 * RadXSQ));
-      while (px < py) do
-      begin
-        Inc(x);
-        px := (px + twoSQY);
-        case (p > -1) of
-          True:
-          begin
-            Dec(y);
-            py := (py - twoSQX);
-            p := (p + (RadYSQ + px - py));
-          end;
-          False: p := (p + (RadYSQ + px));
-        end;
-        Buffer.Add(center.X + x, center.Y + y);
-        Buffer.Add(center.X - x, center.Y + y);
-        Buffer.Add(center.X + x, center.Y - y);
-        Buffer.Add(center.X - x, center.Y - y);
-      end;
-      P := Round(RadYSQ * Sqr(x + 0.5) + RadXSQ * Sqr(y - 1) - RadXSQ * RadYSQ);
-
-      while (y > 0) do
-      begin
-        Dec(y);
-        py := (py - twoSQX);
-        case (p < 1) of
-          True:
-          begin
-            Inc(x);
-            px := (px + twoSQY);
-            p := (p + (RadXSQ - py + px));
-          end;
-          False: p := (p + (RadXSQ - py));
-        end;
-        Buffer.Add(center.X + x, center.Y + y);
-        Buffer.Add(center.X - x, center.Y + y);
-        Buffer.Add(center.X + x, center.Y - y);
-        Buffer.Add(center.X - x, center.Y - y);
-      end;
+      Buffer.Add(X, Y);
     end;
 
-    Result := Buffer.ToArray(False);
+    {$i shapebuilder_ellipse.inc}
+
+  begin
+    _BuildEllipse(Center.X, Center.Y, RadiusX, RadiusY);
   end;
 
   procedure CreateFilled;
-  var
-    x,y: Integer;
-    sqy,sqx,d:Single;
-    B: TBox;
-    Buffer: TSimbaPointBuffer;
-  begin
-    SqY := Trunc(Sqr(RadiusY+0.5));
-    SqX := Trunc(Sqr(RadiusX+0.5));
-    d := SqX * SqY;
-    B := TBox.Create(Center.X - RadiusX, Center.Y - RadiusY,
-                     Center.X + RadiusX, Center.Y + RadiusY);
 
-    Buffer.Init(B.Area);
-    for y:= B.Y1 to B.Y2 do
-      for x:= B.X1 to B.X2 do
-        if (Sqr(X - Center.X) * SqY) + (Sqr(Y - Center.Y) * SqX) < d then
-          Buffer.Add(X, Y);
-    Result := Buffer.ToArray(False);
+    procedure _Row(const Y: Integer; X1, X2: Integer);
+    var
+      X: Integer;
+    begin
+      for X := X1 to X2 do
+        Buffer.Add(X, Y);
+    end;
+
+    {$i shapebuilder_ellipsefilled.inc}
+
+  begin
+    Buffer.Init(RadiusX * RadiusY);
+
+    _BuildEllipseFilled(Center.X, Center.Y, RadiusX, RadiusY);
   end;
 
 begin
@@ -439,6 +379,8 @@ begin
     True:  CreateFilled();
     False: Create();
   end;
+
+  Result := Buffer.ToArray(False);
 end;
 
 class function TPointArrayHelper.CreateFromBox(Box: TBox; Filled: Boolean): TPointArray;
@@ -3094,15 +3036,6 @@ begin
   SetLength(Result, Length(Self));
   for I := 0 to High(Result) do
     Result[I] := Self[I].Offset(P);
-end;
-
-function T2DPointArrayHelper.Offset(X, Y: Integer): T2DPointArray;
-var
-  I: Integer;
-begin
-  SetLength(Result, Length(Self));
-  for I := 0 to High(Result) do
-    Result[I] := Self[I].Offset(X, Y);
 end;
 
 function T2DPointArrayHelper.SortByArea(LowToHigh: Boolean): T2DPointArray;

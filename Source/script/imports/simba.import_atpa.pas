@@ -33,16 +33,6 @@ begin
 end;
 
 (*
-T2DPointArray.Offset
---------------------
-> function T2DPointArray.Offset(X, Y: Integer): T2DPointArray;
-*)
-procedure _LapeATPA_Offset2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  P2DPointArray(Result)^ := P2DPointArray(Params^[0])^.Offset(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
 T2DPointArray.Sort
 ------------------
 > function T2DPointArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): T2DPointArray;
@@ -360,8 +350,7 @@ begin
   begin
     ImportingSection := 'T2DPointArray';
 
-    addGlobalFunc('function T2DPointArray.Offset(P: TPoint): T2DPointArray; overload', @_LapeATPA_Offset1);
-    addGlobalFunc('function T2DPointArray.Offset(X, Y: Integer): T2DPointArray; overload', @_LapeATPA_Offset2);
+    addGlobalFunc('function T2DPointArray.Offset(P: TPoint): T2DPointArray', @_LapeATPA_Offset1);
 
     addGlobalFunc('function T2DPointArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): T2DPointArray; overload', @_LapeATPA_Sort1);
     addGlobalFunc('function T2DPointArray.Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): T2DPointArray; overload', @_LapeATPA_Sort2);
