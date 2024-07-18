@@ -57,6 +57,7 @@ begin
   APIFiles += ['Source\script\imports\simba.import_image.pas',         'Image'          ];
   APIFiles += ['Source\script\imports\simba.import_dtm.pas',           'DTM'            ];
   APIFiles += ['Source\script\imports\simba.import_async.pas',         'ASync'          ];
+  APIFiles += ['Source\script\imports\simba.import_stringmap.pas',     'String Map'     ];
 end;
 
 procedure H2ToH3(Dir: String);

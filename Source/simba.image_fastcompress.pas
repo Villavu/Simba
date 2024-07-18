@@ -43,8 +43,6 @@ type
     property OnCompressed: TImageCompressedEvent read FOnCompressed write FOnCompressed;
   end;
 
-  PImageCompressThread = ^TImageCompressThread;
-
 implementation
 
 uses
@@ -129,23 +127,25 @@ var
 begin
   Data := nil;
 
-  while not Terminated do
-  begin
-    FEvent.WaitLocked(); // unlocked = we have images to compress
-    if Terminated then
-      Break;
+  try
+    while not Terminated do
+    begin
+      FEvent.WaitLocked(); // unlocked = we have images to compress
+      if Terminated then
+        Break;
 
-    T := HighResolutionTime();
-    SimbaImage_FastCompress(FImages, Data, DataSize);
-    FTimeUsed := HighResolutionTime() - T;
+      T := HighResolutionTime();
+      SimbaImage_FastCompress(FImages, Data, DataSize);
+      FTimeUsed := HighResolutionTime() - T;
 
-    if Assigned(FOnCompressed) then
-      FOnCompressed(Self, FImages, Data, DataSize);
+      if Assigned(FOnCompressed) then
+        FOnCompressed(Self, FImages, Data, DataSize);
 
-    FEvent.Lock(); // lock, and wait for unlock again
+      FEvent.Lock(); // lock, and wait for unlock again
+    end;
+  finally
+    FreeMem(Data);
   end;
-
-  FreeMem(Data);
 end;
 
 procedure TImageCompressThread.Push(Images: TSimbaImageArray);

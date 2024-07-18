@@ -16,6 +16,9 @@ uses
   lptypes, ffi,
   simba.encoding, simba.hash, simba.compress, simba.image, simba.image_fastcompress;
 
+type
+  PImageCompressThread = ^TImageCompressThread;
+
 (*
 Encoding
 ========
@@ -162,12 +165,12 @@ begin
   PImageCompressThread(Params^[0])^.Push(PSimbaImageArray(Params^[1])^);
 end;
 
-procedure _LapeImageCompressThread_SetOnCompressed(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageCompressThread_OnCompressed_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PImageCompressThread(Params^[0])^.OnCompressed := TImageCompressedEvent(Params^[1]^);
 end;
 
-procedure _LapeImageCompressThread_GetOnCompressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageCompressThread_OnCompressed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   TImageCompressedEvent(Result^) := PImageCompressThread(Params^[0])^.OnCompressed;
 end;
@@ -347,11 +350,10 @@ begin
     addClassConstructor('TImageCompressThread', '', @_LapeImageCompressThread_Create);
     addGlobalType('procedure(Sender: TImageCompressThread; Images: TImageArray; Data: Pointer; DataSize: SizeUInt) of object', 'TImageCompressedEvent', FFI_DEFAULT_ABI);
     addGlobalFunc('procedure TImageCompressThread.Push(Images: TImageArray)', @_LapeImageCompressThread_Push);
-    addGlobalFunc('procedure TImageCompressThread.SetOnCompressed(Value: TImageCompressedEvent)', @_LapeImageCompressThread_SetOnCompressed);
-    addGlobalFunc('function TImageCompressThread.GetOnCompressed: TImageCompressedEvent', @_LapeImageCompressThread_GetOnCompressed);
     addGlobalFunc('function TImageCompressThread.TimeUsed: Double', @_LapeImageCompressThread_TimeUsed);
     addGlobalFunc('function TImageCompressThread.IsCompressing: Boolean', @_LapeImageCompressThread_IsCompressing);
     addGlobalFunc('procedure TImageCompressThread.WaitCompressing;', @_LapeImageCompressThread_WaitCompressing);
+    addProperty('TImageCompressThread', 'OnCompressed', 'TImageCompressedEvent', @_LapeImageCompressThread_OnCompressed_Read, @_LapeImageCompressThread_OnCompressed_Write);
   end;
 end;
 

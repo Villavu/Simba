@@ -29,7 +29,9 @@ EColorSpace
 
 Enum of color spaces Simba supports.
 
-Note:: This enum is scoped, which means it must be used like: `EColorSpace.HSL`, or `EColorSpace.RGB` etc.
+```{note}
+This enum is scoped, which means it must be used like: `EColorSpace.HSL`, or `EColorSpace.RGB` etc.
+```
 *)
 
 (*

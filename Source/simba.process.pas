@@ -277,7 +277,7 @@ var
   Proc: TProcess;
 begin
   Proc := TProcess.Create(nil);
-  Proc.Options := Proc.Options + [poStderrToOutPut];
+  Proc.Options := Proc.Options + [poStderrToOutPut, poNoConsole];
   Proc.Executable := Executable;
   Proc.Parameters.AddStrings(Params);
   Proc.Execute();
@@ -290,7 +290,7 @@ var
   Proc: TProcess;
 begin
   Proc := TProcess.Create(nil);
-  Proc.Options := Proc.Options + [poStderrToOutPut];
+  Proc.Options := Proc.Options + [poStderrToOutPut, poNoConsole];
   Proc.Executable := Executable;
   Proc.CurrentDirectory := Cwd;
   Proc.Environment.AddStrings(Env);
@@ -305,7 +305,7 @@ var
   Proc: TProcess;
 begin
   Proc := TProcess.Create(nil);
-  Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes];
+  Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes, poNoConsole];
   Proc.Executable := Executable;
   Proc.Parameters.AddStrings(Params);
   Proc.Execute();
@@ -318,7 +318,7 @@ var
   Proc: TProcess;
 begin
   Proc := TProcess.Create(nil);
-  Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes];
+  Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes, poNoConsole];
   Proc.Executable := Executable;
   Proc.CurrentDirectory := Cwd;
   Proc.Environment.AddStrings(Env);
