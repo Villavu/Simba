@@ -32,6 +32,8 @@ type
     procedure InitBaseString; override;
     procedure InitBaseDateTime; override;
   public
+    procedure pushCode(Code: String);
+
     procedure addDelayedCode(Code: TStringArray; AFileName: lpString = ''); virtual; overload;
 
     function addGlobalFunc(Header: lpString; Body: TStringArray): TLapeTree_Method; virtual; overload;
@@ -377,6 +379,11 @@ begin
   addGlobalFunc('procedure Sleep(MilliSeconds: UInt32);', @_LapeSleep);
 
   ImportingSection := '';
+end;
+
+procedure TSimbaScript_Compiler.pushCode(Code: String);
+begin
+  pushTokenizer(TLapeTokenizerString.Create(Code));
 end;
 
 procedure TSimbaScript_Compiler.addDelayedCode(Code: TStringArray; AFileName: lpString);

@@ -11,28 +11,29 @@ interface
 
 uses
   Classes, SysUtils, dynlibs,
-  simba.base, simba.script_compiler, simba.script_pluginmethods;
+  simba.base,
+  simba.containers,
+  simba.script_compiler,
+  simba.script_pluginmethods;
 
 type
   PSimbaPluginInfo = ^TSimbaPluginInfo;
   TSimbaPluginInfo = packed record
-    SimbaVersion: Integer;
-    SimbaMajor: Integer;
-
+    SimbaVersion: Int32;
+    SimbaMajor: Int32;
     FileName: PChar;
-
     Compiler: Pointer;
 
     // Extend this but do not remove, reorder or change datatypes.
   end;
 
   TSimbaPluginExports = packed record
-    GetFunctionInfo: function(Index: Integer; var Address: Pointer; var Header: PChar): Integer; cdecl;
-    GetFunctionCount: function: Integer; cdecl;
-    GetTypeInfo: function(Index: Integer; var Name: PChar; var Str: PChar): Integer; cdecl;
-    GetTypeCount: function: Integer; cdecl;
+    GetFunctionInfo: function(Index: Int32; var Address: Pointer; var Header: PChar): Int32; cdecl;
+    GetFunctionCount: function: Int32; cdecl;
+    GetTypeInfo: function(Index: Int32; var Name: PChar; var Str: PChar): Int32; cdecl;
+    GetTypeCount: function: Int32; cdecl;
     GetCode: procedure(var Code: PChar); cdecl;
-    GetCodeLength: function: Integer; cdecl;
+    GetCodeLength: function: Int32; cdecl;
     SetPluginMemManager: procedure(MemoryManager: TMemoryManager); cdecl;
 
     RegisterSimbaPlugin: procedure(Info: PSimbaPluginInfo; Methods: PSimbaPluginMethods); cdecl;
@@ -74,17 +75,14 @@ type
     procedure Import(Compiler: TSimbaScript_Compiler);
     procedure Load;
 
-    constructor Create(FileName: String; ExtraSearchDirs: TStringArray = nil);
-    destructor Destroy; override;
-  end;
-
-  TSimbaScriptPluginArray = array of TSimbaScriptPlugin;
-  TSimbaScriptPluginArrayHelper = type helper for TSimbaScriptPluginArray
-  public
     procedure CallOnPause;
     procedure CallOnResume;
     procedure CallOnStop;
+
+    constructor Create(FileName: String; ExtraSearchDirs: TStringArray = nil);
+    destructor Destroy; override;
   end;
+  TSimbaScriptPluginList = specialize TSimbaObjectList<TSimbaScriptPlugin>;
 
 implementation
 
@@ -109,7 +107,7 @@ procedure TSimbaScriptPlugin.Load;
     end;
   end;
 
-  function LoadMethod(Index: Integer): TSimbaScriptPluginMethod;
+  function LoadMethod(Index: Int32): TSimbaScriptPluginMethod;
   var
     Buffer: PChar;
   begin
@@ -137,7 +135,7 @@ procedure TSimbaScriptPlugin.Load;
     end;
   end;
 
-  function LoadType(Index: Integer): TSimbaScriptPluginType;
+  function LoadType(Index: Int32): TSimbaScriptPluginType;
   var
     Buffer: record
       Name: PChar;
@@ -162,7 +160,7 @@ procedure TSimbaScriptPlugin.Load;
   end;
 
 var
-  Index: Integer;
+  Index: Int32;
 begin
   with FExports do
   begin
@@ -205,9 +203,24 @@ begin
     FExports.OnAttach(nil);
 end;
 
+procedure TSimbaScriptPlugin.CallOnPause;
+begin
+  if Assigned(FExports.OnPause) then FExports.OnPause();
+end;
+
+procedure TSimbaScriptPlugin.CallOnResume;
+begin
+  if Assigned(FExports.OnResume) then FExports.OnResume();
+end;
+
+procedure TSimbaScriptPlugin.CallOnStop;
+begin
+  if Assigned(FExports.OnStop) then FExports.OnStop();
+end;
+
 function TSimbaScriptPlugin.Dump: TStringList;
 var
-  I: Integer;
+  I: Int32;
 begin
   Result := TStringList.Create();
 
@@ -222,7 +235,7 @@ end;
 
 procedure TSimbaScriptPlugin.Import(Compiler: TSimbaScript_Compiler);
 var
-  I: Integer;
+  I: Int32;
 begin
   for I := 0 to High(FTypes) do
     Compiler.addGlobalType(FTypes[I].Str, FTypes[I].Name);
@@ -236,7 +249,7 @@ begin
   end;
 
   if (FCode <> '') then
-    Compiler.addDelayedCode(FCode, '!' + FFileName, False);
+    Compiler.pushCode(FCode);
 
   GetMemoryManager(FMemoryManager);
   if Assigned(FExports.SetPluginMemManager) then
@@ -273,33 +286,6 @@ begin
     FreeLibrary(FHandle);
 
   inherited Destroy();
-end;
-
-procedure TSimbaScriptPluginArrayHelper.CallOnPause;
-var
-  I: Integer;
-begin
-  for I := 0 to High(Self) do
-    if Assigned(Self[I].FExports.OnPause) then
-      Self[I].FExports.OnPause();
-end;
-
-procedure TSimbaScriptPluginArrayHelper.CallOnResume;
-var
-  I: Integer;
-begin
-  for I := 0 to High(Self) do
-    if Assigned(Self[I].FExports.OnResume) then
-      Self[I].FExports.OnResume();
-end;
-
-procedure TSimbaScriptPluginArrayHelper.CallOnStop;
-var
-  I: Integer;
-begin
-  for I := 0 to High(Self) do
-    if Assigned(Self[I].FExports.OnStop) then
-      Self[I].FExports.OnStop();
 end;
 
 end.

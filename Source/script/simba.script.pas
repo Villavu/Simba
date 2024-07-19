@@ -13,7 +13,9 @@ uses
   Classes, SysUtils,
   lptypes, lpvartypes, lpcompiler, lpparser, lpinterpreter, lpmessages,
   simba.base,
-  simba.script_compiler, simba.script_communication, simba.script_plugin;
+  simba.script_compiler,
+  simba.script_communication,
+  simba.script_plugin;
 
 type
   PSimbaScript = ^TSimbaScript;
@@ -31,7 +33,7 @@ type
     FCompileTime: Double;
     FRunningTime: Double;
 
-    FPlugins: TSimbaScriptPluginArray;
+    FPlugins: TSimbaScriptPluginList;
     FSimbaCommunication: TSimbaScriptCommunication;
 
     function DoCompilerPreprocessorFunc(Sender: TLapeCompiler; Name, Argument: lpString; out Value: lpString): Boolean;
@@ -61,8 +63,9 @@ type
     property Script: String read FScript write FScript;
     property ScriptFileName: String read FScriptFileName write FScriptFileName;
 
-    constructor Create(Communication: TSimbaScriptCommunication); reintroduce; overload;
-    constructor Create(FileName: String; Communication: TSimbaScriptCommunication = nil); reintroduce; overload;
+    constructor Create; overload;
+    constructor Create(Communication: TSimbaScriptCommunication); overload;
+    constructor Create(FileName: String; Communication: TSimbaScriptCommunication = nil); overload;
     destructor Destroy; override;
   end;
 
@@ -74,12 +77,12 @@ uses
 
 function TSimbaScript.DoCompilerPreprocessorFunc(Sender: TLapeCompiler; Name, Argument: lpString; out Value: lpString): Boolean;
 begin
+  Value := '';
+
   case Name of
     'LIBLOADED': Value := BoolToStr(FindLoadedPlugin(SimbaEnv.FindPlugin(Argument, [Sender.Tokenizer.FileName])) <> '', True);
     'LIBEXISTS': Value := BoolToStr(SimbaEnv.HasPlugin(Argument, [Sender.Tokenizer.FileName]), True);
   end;
-
-  Result := Value <> '';
 end;
 
 function TSimbaScript.DoCompilerMacro(Sender: TLapeCompiler; Name, Argument: lpString; out Value: lpString): Boolean;
@@ -144,7 +147,7 @@ begin
           Plugin := TSimbaScriptPlugin.Create(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]);
           Plugin.Import(FCompiler);
 
-          FPlugins := FPlugins + [Plugin];
+          FPlugins.Add(Plugin);
         end;
     end;
   except
@@ -155,14 +158,15 @@ end;
 
 function TSimbaScript.GetState: ESimbaScriptState;
 begin
-  if (FCodeRunner = nil) then
-    Result := ESimbaScriptState.STATE_NONE
-  else if FCodeRunner.isRunning then
-    Result := ESimbaScriptState.STATE_RUNNING
-  else if FCodeRunner.isStopped then
-    Result := ESimbaScriptState.STATE_STOP
-  else if FCodeRunner.isPaused then
-    Result := ESimbaScriptState.STATE_PAUSED;
+  Result := ESimbaScriptState.STATE_NONE;
+
+  if (FCodeRunner <> nil) then
+    if FCodeRunner.isRunning then
+      Result := ESimbaScriptState.STATE_RUNNING
+    else if FCodeRunner.isStopped then
+      Result := ESimbaScriptState.STATE_STOP
+    else if FCodeRunner.isPaused then
+      Result := ESimbaScriptState.STATE_PAUSED;
 end;
 
 procedure TSimbaScript.SetTargetWindow(Value: String);
@@ -203,6 +207,8 @@ begin
 end;
 
 function TSimbaScript.Run: Boolean;
+var
+  I: Integer;
 begin
   if (FTargetWindow = 0) or (not FTargetWindow.IsValid()) then
     FTargetWindow := GetDesktopWindow();
@@ -220,7 +226,8 @@ begin
   finally
     FRunningTime := HighResolutionTime() - FRunningTime;
 
-    FPlugins.CallOnStop();
+    for I := 0 to FPlugins.Count - 1 do
+      FPlugins[I].CallOnStop();
 
     if FUserTerminated then
       FCompiler.CallProc('_CallOnUserTerminate');
@@ -230,9 +237,16 @@ begin
   Result := True;
 end;
 
-constructor TSimbaScript.Create(Communication: TSimbaScriptCommunication);
+constructor TSimbaScript.Create;
 begin
   inherited Create();
+
+  FPlugins := TSimbaScriptPluginList.Create(True);
+end;
+
+constructor TSimbaScript.Create(Communication: TSimbaScriptCommunication);
+begin
+  Create();
 
   FSimbaCommunication := Communication;
   FScript := FSimbaCommunication.GetScript(FScriptFileName);
@@ -240,7 +254,7 @@ end;
 
 constructor TSimbaScript.Create(FileName: String; Communication: TSimbaScriptCommunication);
 begin
-  inherited Create();
+  Create();
 
   FSimbaCommunication := Communication;
 
@@ -249,13 +263,7 @@ begin
 end;
 
 destructor TSimbaScript.Destroy;
-var
-  Plugin: TSimbaScriptPlugin;
 begin
-  for Plugin in FPlugins do
-    Plugin.Free();
-  FPlugins := nil;
-
   if (FCompiler <> nil) then
   begin
     if (FCompiler.Globals['HTTPClient'] <> nil) then
@@ -265,15 +273,16 @@ begin
 
     FreeAndNil(FCompiler);
   end;
-  if (FSimbaCommunication <> nil) then
-    FreeAndNil(FSimbaCommunication);
-  if (FCodeRunner <> nil) then
-    FreeAndNil(FCodeRunner);
+  FreeAndNil(FPlugins);
+  FreeAndNil(FSimbaCommunication);
+  FreeAndNil(FCodeRunner);
 
   inherited Destroy();
 end;
 
 procedure TSimbaScript.SetState(Value: ESimbaScriptState);
+var
+  I: Integer;
 begin
   if (FCodeRunner = nil) then
     Exit;
@@ -281,7 +290,8 @@ begin
   case Value of
     ESimbaScriptState.STATE_RUNNING:
       begin
-        FPlugins.CallOnResume();
+        for I := 0 to FPlugins.Count - 1 do
+          FPlugins[I].CallOnResume();
         FCompiler.CallProc('_CallOnResume');
         FCodeRunner.Resume();
       end;
@@ -289,7 +299,8 @@ begin
     ESimbaScriptState.STATE_PAUSED:
       begin
         FCodeRunner.Pause();
-        FPlugins.CallOnPause();
+        for I := 0 to FPlugins.Count - 1 do
+          FPlugins[I].CallOnPause();
         FCompiler.CallProc('_CallOnPause');
       end;
 
