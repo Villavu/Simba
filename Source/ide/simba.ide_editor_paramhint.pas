@@ -446,23 +446,6 @@ procedure TSimbaParamHint.DoEditorCommand(Sender: TObject; AfterProcessing: Bool
       end;
   end;
 
-  function FilterProperties(Decls: TDeclarationArray; IsIndexing: Boolean): TDeclarationArray;
-  var
-    I: Integer;
-  begin
-    if IsIndexing then
-      Result := RemoveDuplicateProperties(Decls)
-    else
-    begin
-      // for `obj.Prop(` to be valid syntax it must return a method
-      Result := [];
-      for I := 0 to High(Decls) do
-        if FCodeinsight.ResolveVarType(TDeclaration_Property(Decls[I]).ResultType) is TDeclaration_TypeMethod then
-          Result.Add(Decls[I]);
-      Result := RemoveDuplicateProperties(Result);
-    end;
-  end;
-
 var
   Decl: TDeclaration;
   Members, Decls: TDeclarationArray;
@@ -491,36 +474,42 @@ begin
 
       if (Decl <> nil) then
       begin
-        // function pointer
-        if (Decl is TDeclaration_Var) then
-        begin
-          Decl := FCodeinsight.ResolveVarType(TDeclaration_Var(Decl).VarType);
-          if (Decl is TDeclaration_TypeMethod) then
-            Decls := [TDeclaration_TypeMethod(Decl).Method];
-        end else
-        // properties
-        if (Decl is TDeclaration_Property) then
-        begin
-          Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_Property);
-          Decls := FilterProperties(Decls, IsIndexing);
-        end else
-        // method of type
-        if (Decl is TDeclaration_MethodOfType) then
-        begin
-          Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_MethodOfType);
-        end else
-        // regular methods
-        if (Decl is TDeclaration_Method) then
-        begin
-          Decls := FCodeinsight.SymbolTable.Get(Decl.Name).GetByClassAndName(Decl.Name, TDeclaration_Method, True);
-        end;
-
-        // if indexing remove non-indexable properties
+        // property indexing
         if IsIndexing then
-          Decls := IndexableProperties(Decls);
+        begin
+          if (Decl is TDeclaration_Property) then
+          begin
+            Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_Property);
+            Decls := RemoveDuplicateProperties(Decls);
+          end;
+        end else
+        begin
+          // function pointer
+          if (Decl is TDeclaration_Var) then
+          begin
+            Decl := FCodeinsight.ResolveVarType(TDeclaration_Var(Decl).VarType);
+            if (Decl is TDeclaration_TypeMethod) then
+              Decls := [TDeclaration_TypeMethod(Decl).Method];
+          end else
+          // method of type
+          if (Decl is TDeclaration_MethodOfType) then
+          begin
+            Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_MethodOfType, True);
+          end else
+          // regular methods
+          if (Decl is TDeclaration_Method) then
+          begin
+            Decls := FCodeinsight.SymbolTable.Get(Decl.Name).GetByClassAndName(Decl.Name, TDeclaration_Method, True);
+          end;
+        end;
 
         // remove overrides
         Decls := RemoveOverridenMethods(Decls);
+
+        // if declarating a new method such as "procedure foo(hello," remove it.
+        Decl := FCodeinsight.ScriptParser.Items.GetByPosition(FCodeinsight.ScriptParser.CaretPos);
+        if (Decl is TDeclaration_ParamList) and (Decl.Parent is TDeclaration_Method) then
+          Decls.Remove(Decl.Parent);
       end;
 
       if (Length(Decls) > 0) then

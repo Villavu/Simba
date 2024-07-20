@@ -89,7 +89,8 @@ uses
   simba.settings,
   simba.ide_codetools_includes,
   simba.ide_codetools_exprparser,
-  simba.ide_codetools_arrayhelpers;
+  simba.ide_codetools_arrayhelpers,
+  simba.ide_codetools_generics;
 
 function TCodeinsight.GetIncludesHash: String;
 begin
@@ -387,7 +388,7 @@ var
   Depth, I: Integer;
   Decls: TDeclarationArray;
 begin
-  Result := GetArrayHelpers(Decl); // start with (possible) array helpers
+  Result := GetArrayHelpers(Decl) + GetGeneric(Decl); // start with (possible) array helpers
 
   Depth := 0;
   while (Decl <> nil) and (Depth < 20) do // max depth of 20 for safety

@@ -1,0 +1,23 @@
+{$assertions on}
+
+var
+  Map: Map(Int32,String);
+begin
+  Map.Value[123] := '123';
+  Map.Value[456] := '456';
+  Assert(Map.Count = 2);
+  Assert(Map.Value[123] = '123');
+  Assert(Map.Value[456] = '456');
+  Assert(ToString(Map.Values) = '[123, 456]');
+  Assert(ToString(Map.Keys) = '[123, 456]');
+  Assert(Map.IndexOf(123) = 0);
+  Assert(Map.IndexOf(456) = 1);
+
+  Map.Value[123] := 'test';
+  Assert(Map.Count = 2);
+  Assert(Map.Value[123] = 'test');
+
+  Assert(Map.Value[9999] = '');
+  Map.InvalidVal := '*Invalid*';
+  Assert(Map.Value[9999] = '*Invalid*');
+end;

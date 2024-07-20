@@ -60,7 +60,13 @@ implementation
 uses
   lpeval,
   simba.vartype_string,
-  simba.script_imports, simba.script_compiler_sleepuntil, simba.script_compiler_rtti, simba.script_compiler_imagefromstring;
+  simba.script_imports,
+  simba.script_compiler_sleepuntil,
+  simba.script_compiler_rtti,
+  simba.script_compiler_imagefromstring,
+  simba.script_genericmap,
+  simba.script_genericstringmap,
+  simba.script_genericheap;
 
 procedure TSimbaScript_Compiler.addProperty(Obj, Name, Typ: String; ReadFunc: Pointer; WriteFunc: Pointer);
 begin
@@ -141,6 +147,9 @@ begin
     InitializeSleepUntil(Self);
     InitializeFFI(Self);
     InitializeRTTI(Self);
+    InitializeMap(Self);
+    InitializeStringMap(Self);
+    InitializeHeap(Self);
 
     AddSimbaImports(Self);
   finally
