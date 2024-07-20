@@ -113,6 +113,7 @@ type
   public
     procedure Add(const Decl: TDeclaration); overload;
     procedure Add(const Decls: TDeclarationArray); overload;
+    procedure Remove(const Decl: TDeclaration);
 
     function GetByName(Name: String): TDeclarationArray;
     function GetByClassAndName(Name: String; DeclClass: TDeclarationClass; ExactClass: Boolean = False): TDeclarationArray;
@@ -245,6 +246,7 @@ type
     property Method: TDeclaration_Method read GetMethod;
   end;
 
+  TDeclaration_TypeFakeGeneric = class(TDeclaration_Type);
   TDeclaration_TypeNativeMethod = class(TDeclaration_Type);
 
   TDeclaration_TypeRange = class(TDeclaration_Type);
@@ -455,7 +457,6 @@ type
     procedure MethodDirective; override;
     procedure Method; override;
     procedure MethodOfType; override;
-    procedure MethodBlock; override;
     procedure MethodName; override;
     procedure MethodTypeName; override;
     procedure MethodResultType; override;
@@ -489,6 +490,8 @@ type
 
     // types - native
     procedure NativeType; override;
+
+    procedure FakeGenericType; override;
 
     // types = record
     procedure UnionType; override;
@@ -906,6 +909,18 @@ end;
 procedure TDeclarationArrayHelper.Add(const Decls: TDeclarationArray);
 begin
   Self += Decls;
+end;
+
+procedure TDeclarationArrayHelper.Remove(const Decl: TDeclaration);
+var
+  I: Integer;
+begin
+  for I := 0 to High(Self) do
+    if (Self[I] = Decl) then
+    begin
+      Delete(Self, I, 1);
+      Exit;
+    end;
 end;
 
 function TDeclarationArrayHelper.GetByName(Name: String): TDeclarationArray;
@@ -1801,15 +1816,6 @@ begin
   VarName();
 end;
 
-procedure TCodeParser.MethodBlock;
-begin
-  //if (FStack.Top is TDeclaration_Method) then
-  //  if (fLastNoJunkTok <> tokSemiColon) then
-  //    TDeclaration_Method(FStack.Top).isNotFullyDeclared := True;
-
-  inherited;
-end;
-
 procedure TCodeParser.Method;
 var
   Decl: TDeclaration_Method;
@@ -1928,6 +1934,13 @@ end;
 procedure TCodeParser.NativeType;
 begin
   PushStack(TDeclaration_TypeNativeMethod);
+  inherited;
+  PopStack();
+end;
+
+procedure TCodeParser.FakeGenericType;
+begin
+  PushStack(TDeclaration_TypeFakeGeneric);
   inherited;
   PopStack();
 end;
@@ -2272,11 +2285,28 @@ begin
   SetLength(Result, Length(Decls));
   for I := 0 to High(Decls) do
   begin
-    if (Decls[I] is TDeclaration_Property) and HasProperty(TDeclaration_Property(Decls[I]), Result, Count) then
+    if (Decls[I] is TDeclaration_Property) then
       Continue;
     Result[Count] := Decls[I];
     Inc(Count);
   end;
+
+  // add write first, they're more useful
+  for I := 0 to High(Decls) do
+    if (Decls[I] is TDeclaration_Property) and TDeclaration_Property(Decls[I]).IsWrite then
+    begin
+      Result[Count] := Decls[I];
+      Inc(Count);
+    end;
+  // add read if write does not exist
+  for I := 0 to High(Decls) do
+     if (Decls[I] is TDeclaration_Property) and TDeclaration_Property(Decls[I]).IsRead and
+        (not HasProperty(Decls[I] as TDeclaration_Property, Result, Count)) then
+     begin
+       Result[Count] := Decls[I];
+       Inc(Count);
+     end;
+
   SetLength(Result, Count);
 end;
 

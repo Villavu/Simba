@@ -121,7 +121,7 @@ function ParseExpression(Codeinsight: TCodeinsight; Expr: String; out Members: T
 
   function Resolve(decls: TDeclarationArray; var Item: TExpressionItem): TDeclaration;
   var
-    I, J: Integer;
+    I: Integer;
   begin
     Result := nil;
 
@@ -138,7 +138,7 @@ function ParseExpression(Codeinsight: TCodeinsight; Expr: String; out Members: T
           if TDeclaration_Method(Decls[i]).ResultType <> nil then
           begin
             // indexable property.. clear symbol.
-            if (Decls[i] is TDeclaration_Property) and (TDeclaration_Property(Decls[i]).ParamCount > 1) then
+            if (Decls[i] is TDeclaration_Property) and (TDeclaration_Property(Decls[i]).ParamCount > 0) then
             begin
               Item.Symbols.DimCount := 0;
               Item.HasSymbols := Item.Symbols.Deref or Item.Symbols.DerefDim;
@@ -253,21 +253,17 @@ begin
 
   // last item is special
   Last := Items[High(Items)];
-  for I := 0 to High(Members) do
-    if Members[I].IsName(Last.Text) then
-    begin
-      if (Members[I] is TDeclaration_Property) and (TDeclaration_Property(Members[I]).ParamCount > 1) then
+  if Last.HasSymbols then
+    Result := ResolveSymbols(Resolve(Members, Last), Last)
+  else
+  begin
+    for I := 0 to High(Members) do
+      if Members[I].IsName(Last.Text) then
       begin
-        Last.Symbols.DimCount := 0;
-        Last.HasSymbols := Last.Symbols.Deref or Last.Symbols.DerefDim;
+        Result := Members[I];
+        Break;
       end;
-
-      Result := Members[I];
-      Break;
-    end;
-
-  if (Result <> nil) and Last.HasSymbols then
-    Result := ResolveSymbols(Result, Last);
+  end;
 end;
 
 end.

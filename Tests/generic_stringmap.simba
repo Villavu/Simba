@@ -1,0 +1,84 @@
+{$assertions on}
+
+type
+  TStringIntMap = StringMap(Int32);
+
+procedure Test_CaseSens;
+var
+  Map: TStringIntMap;
+begin
+  Map.CaseSens := True;
+
+  Map.Value['one'] := 1;
+  Map.Value['One'] := 11;
+  Map.Value['ONE'] := 111;
+
+  Assert(Map.Count = 3);
+  Assert(Map.Value['one'] = 1);
+  Assert(Map.Value['One'] = 11);
+  Assert(Map.Value['ONE'] = 111);
+  Assert(Map.Value['onE'] = 0);
+  Assert(Map.IndexOf('OnE') = -1);
+  Assert(Map.Exists('OnE') = False);
+
+  Map.Delete('ONE');
+  Assert(ToString(Map.Keys) = '[one, One]');
+  Assert(ToString(Map.Values) = '[1, 11]');
+end;
+
+procedure Test_NoCaseSens;
+var
+  Map: TStringIntMap;
+begin
+  Map.CaseSens := False;
+
+  Map.Value['one'] := 1;
+  Map.Value['One'] := 11;
+  Map.Value['ONE'] := 111;
+
+  Assert(Map.Count = 1);
+  Assert(Map.Value['one'] = 111);
+  Assert(Map.Value['One'] = 111);
+  Assert(Map.Value['ONE'] = 111);
+  Assert(Map.IndexOf('OnE') = 0);
+  Assert(Map.Exists('OnE') = True);
+
+  Map.Delete('ONE');
+  Assert(ToString(Map.Keys) = '[]');
+  Assert(ToString(Map.Values) = '[]');
+
+  Map.Clear();
+  Assert(Map.Count = 0);
+  Map.Value['abc'] := 999;
+  Map.Value['xyz'] := 9999;
+
+  Map.Delete('xyz');
+  Assert(Map.Count = 1);
+  Assert(Map.Value['abc'] = 999);
+  Assert(Map.Value['xyz'] = 0);
+
+  Map.Delete('abc');
+  Assert(Map.Count = 0);
+  Assert(Map.Value['abc'] = 0);
+  Assert(Map.Value['xyz'] = 0);
+end;
+
+procedure Test_Arr;
+var
+  Map: StringMap(TIntegerArray);
+begin
+  Map.Value['a'] := [1,2,3];
+  Map.Value['b'] := [100,101,102];
+
+  Map.Value['a'] += 999;
+  Assert(ToString(Map.Value['a']) = '[1, 2, 3, 999]');
+
+  Map.Value['b'] := [0];
+  Assert(ToString(Map.Value['b']) = '[0]');
+end;
+
+begin
+  Test_CaseSens();
+  Test_NoCaseSens();
+  Test_Arr();
+end;
