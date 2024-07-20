@@ -1,108 +1,69 @@
 {$assertions on}
 
+type
+  TStringIntMap = StringMap(Int32);
+
 procedure Test_CaseSens;
 var
-  List: TStringMap;
+  Map: TStringIntMap;
 begin
-  List.CaseSens := True;
+  Map.CaseSens := True;
 
-  List.Add('one', 1);
-  List.Add('One', 11);
-  List.Add('ONE', 111);
+  Map.Value['one'] := 1;
+  Map.Value['One'] := 11;
+  Map.Value['ONE'] := 111;
 
-  Assert(List.Value['one'] = 1);
-  Assert(List.Value['One'] = 11);
-  Assert(List.Value['ONE'] = 111);
+  Assert(Map.Count = 3);
+  Assert(Map.Value['one'] = 1);
+  Assert(Map.Value['One'] = 11);
+  Assert(Map.Value['ONE'] = 111);
+  Assert(Map.Value['onE'] = 0);
+  Assert(Map.IndexOf('OnE') = -1);
+  Assert(Map.Exists('OnE') = False);
+
+  Map.Delete('ONE');
+  Assert(ToString(Map.Keys) = '[one, One]');
+  Assert(ToString(Map.Values) = '[1, 11]');
 end;
 
-procedure Test_NoDuplicate(var List: TStringMap);
+procedure Test_NoCaseSens;
 var
-  Err: String;
+  Map: TStringIntMap;
 begin
-  List.Clear();
+  Map.CaseSens := False;
 
-  try
-    List.Value['nothing'];
-  except
-    Err := GetExceptionMessage();
-  end;
-  Assert(Err = 'Key "nothing" does not exist');
+  Map.Value['one'] := 1;
+  Map.Value['One'] := 11;
+  Map.Value['ONE'] := 111;
 
-  List.Add('one', '1');
+  Assert(Map.Count = 1);
+  Assert(Map.Value['one'] = 111);
+  Assert(Map.Value['One'] = 111);
+  Assert(Map.Value['ONE'] = 111);
+  Assert(Map.IndexOf('OnE') = 0);
+  Assert(Map.Exists('OnE') = True);
 
-  try
-    List.Add('one', '1');
-  except
-    Err := GetExceptionMessage();
-  end;
-  Assert(Err = 'Key "one" already exists');
-
-  List.Add('two', '2');
-  List.Add('three', '3');
-
-  Assert(List.Count = 3);
-  Assert(List.IndexOf('zero') = -1);
-  Assert(List.IndexOf('one') > -1);
-  Assert(List.IndexOf('two') > -1);
-  Assert(List.IndexOf('three') > -1);
-
-  Assert(List.Value['one'] = '1');
-  Assert(List.Value['two'] = '2');
-  Assert(List.Value['three'] = '3');
-
-  Assert(ToStr(List.Values['one']) = '[1]');
-  Assert(ToStr(List.Values['two']) = '[2]');
-  Assert(ToStr(List.Values['three']) = '[3]');
-
-  List.Delete('two');
-  List.Delete('three');
-
-  Assert(List.Count = 1);
-  Assert(List.KeyFromIndex[0] = 'one');
-  Assert(List.ValueFromIndex[0] = '1');
-
-  List.Clear();
-  Assert(List.Count = 0);
-  Assert(List.IndexOf('1') = -1);
-  Assert(List.Exists('1') = False);
-  Assert(Length(List.IndicesOf('1')) = 0);
+  Map.Delete('ONE');
+  Assert(ToString(Map.Keys) = '[]');
+  Assert(ToString(Map.Values) = '[]');
 end;
 
-procedure Test_Duplicate(var List: TStringMap);
-begin
-  List.Clear();
-
-  List.Add('one', '1');
-  List.Add('two', '2');
-  List.Add('one', '11');
-  List.Add('one', '111');
-
-  Assert(ToStr(List.Values['one']) = '[1, 11, 111]');
-  Assert(ToStr(List.Values['two']) = '[2]');
-
-  List.Delete('one');
-
-  Assert(List.Count = 1);
-  Assert(List.KeyFromIndex[0] = 'two');
-  Assert(List.ValueFromIndex[0] = '2');
-end;
-
+procedure Test_Arr;
 var
-  List: TStringMap;
+  Map: StringMap(TIntegerArray);
 begin
-  List.Sorted := True;
-  Test_NoDuplicate(List);
+  Map.Value['a'] := [1,2,3];
+  Map.Value['b'] := [100,101,102];
 
-  List.Sorted := False;
-  Test_NoDuplicate(List);
+  Map.Value['a'] += 999;
+  Assert(ToString(Map.Value['a']) = '[1, 2, 3, 999]');
 
-  List.AllowDuplicates := True;
+  Map.Value['b'] := [0];
+  Assert(ToString(Map.Value['b']) = '[0]');
+end;
 
-  List.Sorted := True;
-  Test_Duplicate(List);
-
-  List.Sorted := False;
-  Test_Duplicate(List);
-
+begin
   Test_CaseSens();
+  Test_NoCaseSens();
+  Test_Arr();
 end;

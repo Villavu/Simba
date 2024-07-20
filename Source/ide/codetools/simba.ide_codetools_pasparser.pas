@@ -96,6 +96,7 @@ type
     procedure OrdinalType; virtual;
     procedure ParseFile; virtual;
     procedure PointerType; virtual;
+    procedure FakeGenericType; virtual;
 
     procedure Method; virtual;
     procedure MethodOfType; virtual;
@@ -132,8 +133,6 @@ type
     procedure SkipBorComment; virtual;
     procedure SkipSlashesComment; virtual;
     procedure SkipSpace; virtual;
-    //procedure SkipCRLFco; virtual;
-    //procedure SkipCRLF; virtual;
     procedure Statement; virtual;
     procedure StatementList; virtual;
     procedure StringType; virtual;
@@ -356,10 +355,8 @@ end;
 
 procedure TPasParser.Block;
 begin
-  while (fLexer.TokenID in [tokConst, tokFunction, tokLabel, tokProcedure, tokType, tokVar, tokSquareOpen]) do
-  begin
+  while (fLexer.TokenID in [tokConst, tokFunction, tokLabel, tokProcedure, tokType, tokVar]) do
     DeclarationSection;
-  end;
   CompoundStatement;
 end;
 
@@ -1575,6 +1572,12 @@ begin
   TypeIdentifer;
 end;
 
+procedure TPasParser.FakeGenericType;
+begin
+  TypeIdentifer;
+  Parameters;
+end;
+
 procedure TPasParser.Method;
 var
   Typ: ELexerToken;
@@ -1752,15 +1755,14 @@ begin
   end else
     NextToken();
 
-  if (fLexer.TokenID in [tokType, tokStrict]) then
+  if (fLexer.TokenID = tokIdentifier) then
   begin
-    TypeCopy;
-    Exit;
-  end;
-  if (fLexer.TokenID = tokIdentifier) and (fLexer.TokenID <> tokPrivate) then
-  begin
-    TypeAlias;
-    Exit;
+    fLexer.InitAhead;
+    if fLexer.AheadTokenID = tokSemiColon then
+    begin
+      TypeAlias;
+      Exit;
+    end;
   end;
 
   TypeKind;
@@ -1784,16 +1786,34 @@ end;
 
 procedure TPasParser.TypeKind;
 begin
-  if (fLexer.TokenID = tokNative) then
-  begin
-    NativeType;
-    Exit;
-  end;
-
   if (fLexer.TokenID = tokIdentifier) and (fLexer.TokenID = tokPrivate) then
     NextToken;
 
   case fLexer.TokenID of
+    tokNative:
+      begin
+        NativeType;
+      end;
+    tokType:
+      begin
+        TypeCopy;
+      end;
+    tokStrict:
+      begin
+        TypeCopy;
+      end;
+    tokIdentifier:
+      begin
+        if (LowerCase(fLexer.Token) = 'stringmap') then
+        begin
+          fLexer.InitAhead;
+          if fLexer.AheadTokenID = tokRoundOpen then
+            FakeGenericType
+          else
+            TypeIdentifer;
+        end else
+          TypeIdentifer;
+      end;
     tokAsciiChar, tokFloat, tokIntegerConst, tokMinus, tokPlus, tokSquareOpen, tokStringConst, tokRoundOpen, tokEnum:
       begin
         SimpleType;
@@ -1806,10 +1826,6 @@ begin
       begin
         ProceduralType;
       end;
-    tokIdentifier:
-      begin
-        TypeIdentifer;
-      end;
     tokPointerSymbol:
       begin
         fLexer.InitAhead;
@@ -1820,11 +1836,6 @@ begin
           TypeKind;
         end else
           PointerType;
-      end;
-    tokStrict:
-      begin
-        NextToken;
-        TypeKind;
       end;
   end;
 end;

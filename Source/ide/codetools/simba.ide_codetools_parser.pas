@@ -245,6 +245,7 @@ type
     property Method: TDeclaration_Method read GetMethod;
   end;
 
+  TDeclaration_TypeFakeGeneric = class(TDeclaration_Type);
   TDeclaration_TypeNativeMethod = class(TDeclaration_Type);
 
   TDeclaration_TypeRange = class(TDeclaration_Type);
@@ -489,6 +490,8 @@ type
 
     // types - native
     procedure NativeType; override;
+
+    procedure FakeGenericType; override;
 
     // types = record
     procedure UnionType; override;
@@ -1932,6 +1935,13 @@ begin
   PopStack();
 end;
 
+procedure TCodeParser.FakeGenericType;
+begin
+  PushStack(TDeclaration_TypeFakeGeneric);
+  inherited;
+  PopStack();
+end;
+
 procedure TCodeParser.RecordType;
 begin
   PushStack(TDeclaration_TypeRecord);
@@ -2272,11 +2282,28 @@ begin
   SetLength(Result, Length(Decls));
   for I := 0 to High(Decls) do
   begin
-    if (Decls[I] is TDeclaration_Property) and HasProperty(TDeclaration_Property(Decls[I]), Result, Count) then
+    if (Decls[I] is TDeclaration_Property) then
       Continue;
     Result[Count] := Decls[I];
     Inc(Count);
   end;
+
+  // add write first, they're more useful
+  for I := 0 to High(Decls) do
+    if (Decls[I] is TDeclaration_Property) and TDeclaration_Property(Decls[I]).IsWrite then
+    begin
+      Result[Count] := Decls[I];
+      Inc(Count);
+    end;
+  // add read if write does not exist
+  for I := 0 to High(Decls) do
+     if (Decls[I] is TDeclaration_Property) and TDeclaration_Property(Decls[I]).IsRead and
+        (not HasProperty(Decls[I] as TDeclaration_Property, Result, Count)) then
+     begin
+       Result[Count] := Decls[I];
+       Inc(Count);
+     end;
+
   SetLength(Result, Count);
 end;
 

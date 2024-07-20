@@ -491,33 +491,41 @@ begin
 
       if (Decl <> nil) then
       begin
-        // function pointer
-        if (Decl is TDeclaration_Var) then
-        begin
-          Decl := FCodeinsight.ResolveVarType(TDeclaration_Var(Decl).VarType);
-          if (Decl is TDeclaration_TypeMethod) then
-            Decls := [TDeclaration_TypeMethod(Decl).Method];
-        end else
         // properties
-        if (Decl is TDeclaration_Property) then
-        begin
-          Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_Property);
-          Decls := FilterProperties(Decls, IsIndexing);
-        end else
-        // method of type
-        if (Decl is TDeclaration_MethodOfType) then
-        begin
-          Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_MethodOfType);
-        end else
-        // regular methods
-        if (Decl is TDeclaration_Method) then
-        begin
-          Decls := FCodeinsight.SymbolTable.Get(Decl.Name).GetByClassAndName(Decl.Name, TDeclaration_Method, True);
-        end;
-
-        // if indexing remove non-indexable properties
         if IsIndexing then
-          Decls := IndexableProperties(Decls);
+        begin
+          if (Decl is TDeclaration_Property) then
+          begin
+            Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_Property);
+            Decls := FilterProperties(Decls, IsIndexing);
+            Decls := IndexableProperties(Decls);
+          end;
+        end else
+        begin
+          // function pointer
+          if (Decl is TDeclaration_Var) then
+          begin
+            Decl := FCodeinsight.ResolveVarType(TDeclaration_Var(Decl).VarType);
+            if (Decl is TDeclaration_TypeMethod) then
+              Decls := [TDeclaration_TypeMethod(Decl).Method];
+          end else
+          // properties
+          if (Decl is TDeclaration_Property) then
+          begin
+            Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_Property);
+            //Decls := FilterProperties(Decls, IsIndexing);
+          end else
+          // method of type
+          if (Decl is TDeclaration_MethodOfType) then
+          begin
+            Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_MethodOfType, True);
+          end else
+          // regular methods
+          if (Decl is TDeclaration_Method) then
+          begin
+            Decls := FCodeinsight.SymbolTable.Get(Decl.Name).GetByClassAndName(Decl.Name, TDeclaration_Method, True);
+          end;
+        end;
 
         // remove overrides
         Decls := RemoveOverridenMethods(Decls);
