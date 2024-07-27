@@ -217,17 +217,22 @@ end;
 (*
 TriangulatePolygon
 -----------
-> function TriangulatePolygon(Polygon: TPointArray): TTriangleArray;
+> function TriangulatePolygon(Polygon: TPointArray; MinArea: Double=0; MaxDepth: Int32=0): TTriangleArray;
 
 Break the polygon into triangles, the smallest possible polygon. The order of the
 input does matter, if it fails, try to reverse the Poly with Poly.Reversed()
 
 This is a custom algorithm by slacky, based around the concept of trimming "ears",
 if you dont like the output, you may have more luck with rolling the Polygon before calling.
+
+Two default params exists as well, `MinArea` and `MaxDepth`, they work in tandom,
+`MinArea` parameter is for setting a minimum size of triangles added to result, and as this method
+works iteratively, removing triangles in a circle around the shape over and over, `MaxDepth` refers
+to the max number of rounds it has moved around the shape before it ignores `MinArea` paramater.
 *)
 procedure _LapeTriangulatePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PTriangleArray(Result)^ := TSimbaGeometry.TriangulatePolygon(PPointArray(Params^[0])^);
+  PTriangleArray(Result)^ := TSimbaGeometry.TriangulatePolygon(PPointArray(Params^[0])^, PSingle(Params^[1])^, PInt32(Params^[2])^);
 end;
 
 (*
@@ -428,7 +433,7 @@ begin
     addGlobalFunc('function Modulo(const X, Y: Double): Double; overload', @_LapeModuloF);
     
     addGlobalFunc('function IsConvexPolygon(const Polygon: TPointArray): Boolean', @_LapeIsConvexPolygon);
-    addGlobalFunc('function TriangulatePolygon(const Polygon: TPointArray): TTriangleArray', @_LapeTriangulatePolygon);
+    addGlobalFunc('function TriangulatePolygon(const Polygon: TPointArray; MinArea: Single=0; MaxDepth: Int32=0): TTriangleArray', @_LapeTriangulatePolygon);
     addGlobalFunc('function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean', @_LapeLineInPolygon);
     
     addGlobalFunc('function DeltaAngle(const DegreesA, DegreesB: Double; R: Double = 360): Double', @_LapeDeltaAngle);

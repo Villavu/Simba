@@ -48,7 +48,7 @@ type
 
     class function IsConvexPolygon(const Polygon: TPointArray): Boolean;
     class function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean;
-    class function TriangulatePolygon(Polygon: TPointArray): TTriangleArray;
+    class function TriangulatePolygon(Polygon: TPointArray; MinArea: Single=0; MaxDepth: Int32=0): TTriangleArray;
     class function PolygonArea(const Polygon: TPointArray): Double; static; inline;
     class function ExpandPolygon(const Polygon: TPointArray; Amount: Integer): TPointArray; static;
     class function CrossProduct(const r, p, q: TPoint): Int64; static; overload; inline;
@@ -394,9 +394,9 @@ begin
   Result := True;
 end; 
 
-class function TSimbaGeometry.TriangulatePolygon(Polygon: TPointArray): TTriangleArray;
+class function TSimbaGeometry.TriangulatePolygon(Polygon: TPointArray; MinArea: Single=0; MaxDepth: Int32=0): TTriangleArray;
 var
-  i,rshift: Int32;
+  i,j,rshift: Int32;
   A,B,C: TPoint;
   tmp1,tmp2: TPointArray;
   valid: Boolean;
@@ -407,6 +407,7 @@ begin
   rshift := 0;
   while Length(tmp1) > 3 do
   begin
+    Inc(j);
     valid := False;
     i := 0;
     rshift := 0;
@@ -418,10 +419,13 @@ begin
 
       if (CrossProduct(A,B,C) >= 0) and LineInPolygon(A,C, Polygon) then
       begin
-        SetLength(Result, Length(Result)+1);
-        Result[High(Result)].A := A;
-        Result[High(Result)].B := B;
-        Result[High(Result)].C := C;
+        if (j >= MaxDepth) or (PolygonArea([A,B,C]) > MinArea) then
+        begin
+          SetLength(Result, Length(Result)+1);
+          Result[High(Result)].A := A;
+          Result[High(Result)].B := B;
+          Result[High(Result)].C := C;
+        end;
 
         tmp2[rshift+i]   := A;
         tmp2[rshift+i+1] := C;
