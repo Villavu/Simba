@@ -43,6 +43,8 @@ type
   public
     class constructor Create;
 
+    class function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean;
+    class function TriangulatePolygon(Polygon: TPointArray): TTriangleArray;
     class function PolygonArea(const Polygon: TPointArray): Double; static; inline;
     class function ExpandPolygon(const Polygon: TPointArray; Amount: Integer): TPointArray; static;
     class function CrossProduct(const r, p, q: TPoint): Int64; static; overload; inline;
@@ -72,6 +74,9 @@ type
   end;
 
 implementation
+
+uses
+  simba.vartype_pointarray;
 
 class constructor TSimbaGeometry.Create;
 var
@@ -342,6 +347,87 @@ begin
 
   Result := (Sqr(X) * Sqr(YRadius)) + (Sqr(Y) * Sqr(XRadius)) <= (Sqr(YRadius) * Sqr(XRadius));
 end;
+
+class function TSimbaGeometry.LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean;
+var
+  i: Int32;
+  p1, p2: TPoint;
+begin
+  for i:=0 to High(Polygon)-1 do
+  begin
+    p1 := Polygon[i];
+    p2 := Polygon[i + 1];
+    if LinesIntersect(a1, a2, p1, p2) and not ((a1 = p1) or (a1 = p2) or (a2 = p1) or (a2 = p2)) then
+      Exit(False);
+  end;
+  
+  p1 := Polygon[High(Polygon)];
+  p2 := Polygon[0];
+  if LinesIntersect(a1, a2, p1, p2) and not ((a1 = p1) or (a1 = p2) or (a2 = p1) or (a2 = p2)) then
+    Exit(False);
+  
+  Result := True;
+end; 
+
+class function TSimbaGeometry.TriangulatePolygon(Polygon: TPointArray): TTriangleArray;
+var
+  i,rshift: Int32;
+  A,B,C: TPoint;
+  tmp1,tmp2: TPointArray;
+  valid: Boolean;
+begin
+  tmp1 := specialize Reversed<TPoint>(Polygon);
+  SetLength(tmp2, Length(Polygon));
+
+  rshift := 0;
+  while Length(tmp1) > 3 do
+  begin
+    valid := False;
+    i := 0;
+    rshift := 0;
+    while i < Length(tmp1) do
+    begin
+      A := tmp1[i];
+      B := tmp1[(i+1) mod Length(tmp1)];
+      C := tmp1[(i+2) mod Length(tmp1)];
+
+      if (CrossProduct(A,B,C) >= 0) and LineInPolygon(A,C, Polygon) then
+      begin
+        SetLength(Result, Length(Result)+1);
+        Result[High(Result)].A := A;
+        Result[High(Result)].B := B;
+        Result[High(Result)].C := C;
+
+        tmp2[rshift+i]   := A;
+        tmp2[rshift+i+1] := C;
+        valid  := True;
+        Inc(i,2);
+        if (B = tmp1[0]) then Inc(rshift);
+      end else
+      begin
+        tmp2[rshift+i] := A;
+        Inc(i);
+      end;
+    end;
+
+    if not valid then Exit();
+    //Remove all duplicates without changing order
+    //This is actually not bad here.
+    if (i-rshift) > Length(tmp1) then SetLength(tmp1, i-rshift);
+    Move(tmp2[rshift], tmp1[0], (i-rshift)*SizeOf(TPoint));
+
+    tmp1 := tmp1.Unique();
+  end;
+
+  if Length(tmp1) = 3 then
+  begin
+    SetLength(Result, Length(Result)+1);
+    Result[High(Result)].A := tmp1[0];
+    Result[High(Result)].B := tmp1[1];
+    Result[High(Result)].C := tmp1[2];
+  end;
+end;
+
 
 class function TSimbaGeometry.PolygonArea(const Polygon: TPointArray): Double;
 var

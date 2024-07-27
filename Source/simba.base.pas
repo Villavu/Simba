@@ -278,6 +278,13 @@ type
   PBox = ^TBox;
   PBoxArray = ^TBoxArray;
 
+  TTriangle = record
+    A,B,C: TPoint;
+  end;
+  TTriangleArray = array of TTriangle;
+  PTriangle = ^TTriangle;
+  PTriangleArray = ^TTriangleArray;
+
   TQuad = record
     Top: TPoint;
     Right: TPoint;

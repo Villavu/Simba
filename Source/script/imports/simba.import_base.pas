@@ -483,6 +483,9 @@ begin
     addGlobalType('array of TPoint', 'TPointArray');
     addGlobalType('array of TPointArray', 'T2DPointArray');
 
+    addGlobalType('record A, B, C: TPoint; end;', 'TTriangle');
+    addGlobalType('array of TTriangle', 'TTriangleArray');
+
     addGlobalType('record Top, Right, Bottom, Left: TPoint; end;', 'TQuad');
     addGlobalType('array of TQuad', 'TQuadArray');
 

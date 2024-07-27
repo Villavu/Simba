@@ -203,6 +203,26 @@ begin
 end;
 
 (*
+PolygonArea
+-----------
+> function TriangulatePolygon(Polygon: TPointArray): TTriangleArray;
+*)
+procedure _LapeTriangulatePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTriangleArray(Result)^ := TSimbaGeometry.TriangulatePolygon(PPointArray(Params^[0])^);
+end;
+
+(*
+PolygonArea
+-----------
+> function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean;
+*)
+procedure _LapeLineInPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := TSimbaGeometry.LineInPolygon(PPoint(Params^[0])^, PPoint(Params^[1])^, PPointArray(Params^[2])^);
+end;
+
+(*
 CrossProduct
 ------------
 > function CrossProduct(const r, p, q: TPoint): Int64;
@@ -267,9 +287,19 @@ PointInTriangle
 ---------------
 > function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean;
 *)
-procedure _LapePointInTriangle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapePointInTriangle1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := TSimbaGeometry.PointInTriangle(PPoint(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^, PPoint(Params^[3])^);
+end;
+
+(*
+PointInTriangle
+---------------
+> function PointInTriangle(const P: TPoint; const Triangle: TTriangle): Boolean;
+*)
+procedure _LapePointInTriangle2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := TSimbaGeometry.PointInTriangle(PPoint(Params^[0])^, PTriangle(Params^[1])^.A, PTriangle(Params^[1])^.B, PTriangle(Params^[1])^.C);
 end;
 
 (*
@@ -376,7 +406,10 @@ begin
 
     addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);
     addGlobalFunc('function Modulo(const X, Y: Double): Double; overload', @_LapeModuloF);
-
+  
+    addGlobalFunc('function TriangulatePolygon(const Polygon: TPointArray): TTriangleArray', @_LapeTriangulatePolygon);
+    addGlobalFunc('function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean', @_LapeLineInPolygon);
+    
     addGlobalFunc('function DeltaAngle(const DegreesA, DegreesB: Double; R: Double = 360): Double', @_LapeDeltaAngle);
     addGlobalFunc('function PolygonArea(const Polygon: TPointArray): Double', @_LapePolygonArea);
     addGlobalFunc('function ExpandPolygon(const Polygon: TPointArray; Amount: Integer): TPointArray', @_LapeExpandPolygon);
@@ -387,8 +420,10 @@ begin
 
     addGlobalFunc('function DistToLine(const P, P1, P2: TPoint; out Nearest: TPoint): Double; overload', @_LapeDistToLine1);
     addGlobalFunc('function DistToLine(const P, P1, P2: TPoint): Double; overload', @_LapeDistToLine2);
-
-    addGlobalFunc('function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean', @_LapePointInTriangle);
+    
+    addGlobalFunc('function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean; overload', @_LapePointInTriangle1);
+    addGlobalFunc('function PointInTriangle(const P: TPoint; const Triangle: TTriangle): Boolean; overload', @_LapePointInTriangle2);
+    
     addGlobalFunc('function PointInBox(const P: TPoint; const Box: TBox): Boolean', @_LapePointInBox);
     addGlobalFunc('function PointInQuad(const P: TPoint; const A,B,C,D: TPoint): Boolean', @_LapePointInQuad);
     addGlobalFunc('function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean', @_LapePointInPolygon);
