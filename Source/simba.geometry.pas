@@ -11,6 +11,9 @@
   - PointInEllipse
   - AngleBetween
   - DeltaAngle
+  - IsConvexPolygon
+  - LineInPolygon
+  - TriangulatePolygon
 }
 
 {
@@ -43,6 +46,7 @@ type
   public
     class constructor Create;
 
+    class function IsConvexPolygon(const Polygon: TPointArray): Boolean;
     class function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean;
     class function TriangulatePolygon(Polygon: TPointArray): TTriangleArray;
     class function PolygonArea(const Polygon: TPointArray): Double; static; inline;
@@ -346,6 +350,27 @@ begin
   Y := P.Y - Center.Y;
 
   Result := (Sqr(X) * Sqr(YRadius)) + (Sqr(Y) * Sqr(XRadius)) <= (Sqr(YRadius) * Sqr(XRadius));
+end;
+
+class function TSimbaGeometry.IsConvexPolygon(const Polygon: TPointArray): Boolean;
+var
+  i,d: Int32;
+  a,b,c: TPoint;
+begin
+  if Length(Polygon) = 0 then Exit(False);
+
+  d := CrossProduct(Polygon[i],Polygon[(i+1) mod Length(Polygon)],Polygon[(i+2) mod Length(Polygon)]);
+  for i:=0 to High(Polygon) do
+  begin
+    A := Polygon[i];
+    B := Polygon[(i+1) mod Length(Polygon)];
+    C := Polygon[(i+2) mod Length(Polygon)];
+
+    if CrossProduct(A,B,C)*d <= 0 then
+      Exit(False);
+  end;
+
+  Result := True;
 end;
 
 class function TSimbaGeometry.LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean;

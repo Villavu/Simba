@@ -203,9 +203,27 @@ begin
 end;
 
 (*
-PolygonArea
+IsConvexPolygon
+-----------
+> function IsConvexPolygon(Polygon: TPointArray): Boolean;
+
+Returns if the polygon is convex, order does not matter. A concave polygon will return False.
+*)
+procedure _LapeIsConvexPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := TSimbaGeometry.IsConvexPolygon(PPointArray(Params^[0])^);
+end;
+
+(*
+TriangulatePolygon
 -----------
 > function TriangulatePolygon(Polygon: TPointArray): TTriangleArray;
+
+Break the polygon into triangles, the smallest possible polygon. The order of the
+input does matter, if it fails, try to reverse the Poly with Poly.Reversed()
+
+This is a custom algorithm by slacky, based around the concept of trimming "ears",
+if you dont like the output, you may have more luck with rolling the Polygon before calling.
 *)
 procedure _LapeTriangulatePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -213,9 +231,11 @@ begin
 end;
 
 (*
-PolygonArea
+LineInPolygon
 -----------
-> function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean;
+> function LineInPolygon(p,q: TPoint; const Polygon: TPointArray): Boolean;
+
+Returns True if the line fits within the bounds of the polygon.
 *)
 procedure _LapeLineInPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -406,7 +426,8 @@ begin
 
     addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);
     addGlobalFunc('function Modulo(const X, Y: Double): Double; overload', @_LapeModuloF);
-  
+    
+    addGlobalFunc('function IsConvexPolygon(const Polygon: TPointArray): Boolean', @_LapeIsConvexPolygon);
     addGlobalFunc('function TriangulatePolygon(const Polygon: TPointArray): TTriangleArray', @_LapeTriangulatePolygon);
     addGlobalFunc('function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean', @_LapeLineInPolygon);
     
