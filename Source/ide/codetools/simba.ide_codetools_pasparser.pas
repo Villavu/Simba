@@ -1785,6 +1785,15 @@ begin
 end;
 
 procedure TPasParser.TypeKind;
+
+  function isMaybeFakeGeneric: Boolean;
+  var
+    S: String;
+  begin
+    S := UpperCase(fLexer.Token);
+    Result := (S = 'STRINGMAP') or (S = 'MAP');
+  end;
+
 begin
   if (fLexer.TokenID = tokIdentifier) and (fLexer.TokenID = tokPrivate) then
     NextToken;
@@ -1804,7 +1813,7 @@ begin
       end;
     tokIdentifier:
       begin
-        if (LowerCase(fLexer.Token) = 'stringmap') then
+        if isMaybeFakeGeneric() then
         begin
           fLexer.InitAhead;
           if fLexer.AheadTokenID = tokRoundOpen then

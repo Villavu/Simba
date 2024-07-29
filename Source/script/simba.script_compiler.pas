@@ -64,6 +64,7 @@ uses
   simba.script_compiler_sleepuntil,
   simba.script_compiler_rtti,
   simba.script_compiler_imagefromstring,
+  simba.script_genericmap,
   simba.script_genericstringmap;
 
 procedure TSimbaScript_Compiler.addProperty(Obj, Name, Typ: String; ReadFunc: Pointer; WriteFunc: Pointer);
@@ -145,6 +146,7 @@ begin
     InitializeSleepUntil(Self);
     InitializeFFI(Self);
     InitializeRTTI(Self);
+    InitializeMap(Self);
     InitializeStringMap(Self);
 
     AddSimbaImports(Self);

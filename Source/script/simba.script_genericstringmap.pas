@@ -314,8 +314,8 @@ begin
     Builder.addParam('Val', ValueType);
     Builder.Body := [
       'if (Index < 0) or (Index >= FCount) then',
-       '  RangeCheckException(Index);',
-       'FItems[Index].Value := Val;'
+      '  RangeCheckException(Index);',
+      'FItems[Index].Value := Val;'
     ];
     Builder.isProperty := True;
     Builder.Build();
@@ -340,7 +340,7 @@ begin
       'if (Index < 0) or (Index >= FCount) then',
       '  RangeCheckException(Index);',
       'var Temp: TItem := FItems[Index];',
-      'Self.Delete(Index);',
+      'Self.DeleteIndex(Index);',
       'Self.Value[Key] := Temp.Value;'
     ];
     Builder.isProperty := True;
@@ -416,17 +416,18 @@ begin
     ];
     Builder.Build();
 
-    // Delete(Index: Int32);
-    Builder.Name := 'Delete';
+    // DeleteIndex(Index: Int32);
+    Builder.Name := 'DeleteIndex';
     Builder.addParam('Index', FCompiler.getBaseType(ltInt32));
     Builder.Body := [
       'if (Index < 0) or (Index >= FCount) then',
       '  RangeCheckException(Index);',
-      'Dec(FCount);',
-      'if (Index < FCount) then',
-      '  Move(FItems[Index + 1], FItems[Index], (FCount - Index) * SizeOf(TItem));'
+      '',
+      'FItems[Index] := [];',
+      'if (Index < FCount - 1) then',
+      '  Move(FItems[Index + 1], FItems[Index], (FCount - Index) * SizeOf(TItem));',
+      'Dec(FCount);'
     ];
-    Builder.isOverload := True;
     Builder.Build();
 
     // Delete(Key: String);
@@ -435,9 +436,8 @@ begin
     Builder.Body := [
       'var i := IndexOf(Key);',
       'if (i > -1) then',
-      '  Delete(i);'
+      '  DeleteIndex(i);'
     ];
-    Builder.isOverload := True;
     Builder.Build();
 
     // Load(FileName: String; Sep: String; StrToValue: function(Str: String): _T)

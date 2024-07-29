@@ -46,6 +46,21 @@ begin
   Map.Delete('ONE');
   Assert(ToString(Map.Keys) = '[]');
   Assert(ToString(Map.Values) = '[]');
+
+  Map.Clear();
+  Assert(Map.Count = 0);
+  Map.Value['abc'] := 999;
+  Map.Value['xyz'] := 9999;
+
+  Map.Delete('xyz');
+  Assert(Map.Count = 1);
+  Assert(Map.Value['abc'] = 999);
+  Assert(Map.Value['xyz'] = 0);
+
+  Map.Delete('abc');
+  Assert(Map.Count = 0);
+  Assert(Map.Value['abc'] = 0);
+  Assert(Map.Value['xyz'] = 0);
 end;
 
 procedure Test_Arr;

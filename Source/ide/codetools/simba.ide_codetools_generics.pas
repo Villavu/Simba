@@ -22,22 +22,22 @@ const
     'procedure <MapName>.Clear; external;'                                             + LineEnding +
     'function <MapName>.IndexOf(Key: <KeyType>): Integer; external;'                   + LineEnding +
     'procedure <MapName>.Delete(Key: <KeyType>); external;'                            + LineEnding +
-    'procedure <MapName>.Delete(Index: Integer); external;'                            + LineEnding +
+    'procedure <MapName>.DeleteIndex(Index: Integer); external;'                       + LineEnding +
     'function <MapName>.ToString: String; external;'                                   + LineEnding +
     'property <MapName>.ValueFromIndex(Index: Integer): <ValueType>; external;'        + LineEnding +
     'property <MapName>.ValueFromIndex(Index: Integer; Value: <ValueType>); external;' + LineEnding +
     'property <MapName>.KeyFromIndex(Index: Integer): <KeyType>; external;'            + LineEnding +
     'property <MapName>.KeyFromIndex(Index: Integer; Key: <KeyType>); external;'       + LineEnding +
     'property <MapName>.Values: array of <ValueType>; external;'                       + LineEnding +
-    'property <MapName>.Keys: array of <KeyType>; external;'                           + LineEnding;
+    'property <MapName>.Keys: array of <KeyType>; external;'                           + LineEnding +
+    'property <MapName>.InvalidVal: <ValueType>; external;'                            + LineEnding +
+    'property <MapName>.InvalidVal(Value: <ValueType>); external;'                     + LineEnding;
 
   STRINGMAP_METHODS = MAP_METHODS +
     'procedure <MapName>.Load(FileName: String; Sep: String; StrToValue: function(Str: String): <ValueType>); external;'   + LineEnding +
     'procedure <MapName>.Save(FileName: String; Sep: String; ValueToStr: function(Value: <ValueType>): String); external;' + LineEnding +
     'property <MapName>.CaseSens: Boolean; external;'                                                                      + LineEnding +
-    'property <MapName>.CaseSens(Value: Boolean); external;'                                                               + LineEnding +
-    'property <MapName>.InvalidVal: <ValueType>; external;'                                                                + LineEnding +
-    'property <MapName>.InvalidVal(Value: <ValueType>); external;'                                                         + LineEnding;
+    'property <MapName>.CaseSens(Value: Boolean); external;'                                                               + LineEnding;
 
   HEAP_METHODS =
     'procedure <HeapName>.Push(Value: <ValueType>; Index: SizeInt; LoHi: Boolean); external;'             + LineEnding +
@@ -53,7 +53,7 @@ var
 
 function GetGeneric(Decl: TDeclaration): TDeclarationArray;
 
-  function RunStrMap(Name, Value: String): TCodeParser;
+  function RunStrMap(Name, Key, Value: String): TCodeParser;
   var
     I: Integer;
     Methods, FileName: String;
@@ -63,8 +63,9 @@ function GetGeneric(Decl: TDeclaration): TDeclarationArray;
       if (GenericParsers[I].Lexer.FileName = FileName) then
         Exit(GenericParsers[I]);
 
-    Methods := MAP_METHODS;
+    Methods := STRINGMAP_METHODS;
     Methods := Methods.Replace('<MapName>', Name);
+    Methods := Methods.Replace('<KeyType>', Key);
     Methods := Methods.Replace('<ValueType>', Value);
 
     Result := TCodeParser.Create();
@@ -84,7 +85,7 @@ function GetGeneric(Decl: TDeclaration): TDeclarationArray;
       if (GenericParsers[I].Lexer.FileName = FileName) then
         Exit(GenericParsers[I]);
 
-    Methods := STRINGMAP_METHODS;
+    Methods := MAP_METHODS;
     Methods := Methods.Replace('<MapName>', Name);
     Methods := Methods.Replace('<KeyType>', Key);
     Methods := Methods.Replace('<ValueType>', Value);
@@ -136,7 +137,7 @@ begin
         begin
           Params := Decl.Items.GetByClass(TDeclaration_Parameter, True, True);
           if Length(Params) = 1 then
-            Parser := RunMap(Name, 'String', Params[0].Name);
+            Parser := RunStrMap(Name, 'String', Params[0].Name);
         end;
 
       'map':
