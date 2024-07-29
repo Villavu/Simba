@@ -396,7 +396,7 @@ end;
 
 class function TSimbaGeometry.TriangulatePolygon(Polygon: TPointArray; MinArea: Single=0; MaxDepth: Int32=0): TTriangleArray;
 var
-  i,j,rshift: Int32;
+  i,j: Int32;
   A,B,C: TPoint;
   tmp1,tmp2: TPointArray;
   valid: Boolean;
@@ -404,14 +404,12 @@ begin
   tmp1 := specialize Reversed<TPoint>(Polygon);
   SetLength(tmp2, Length(Polygon));
 
-  rshift := 0;
   while Length(tmp1) > 3 do
   begin
     Inc(j);
     valid := False;
     i := 0;
-    rshift := 0;
-    while i < Length(tmp1) do
+    while i < High(tmp1) do
     begin
       A := tmp1[i];
       B := tmp1[(i+1) mod Length(tmp1)];
@@ -426,15 +424,14 @@ begin
           Result[High(Result)].B := B;
           Result[High(Result)].C := C;
         end;
-
-        tmp2[rshift+i]   := A;
-        tmp2[rshift+i+1] := C;
+        
+        tmp2[i]   := A;
+        tmp2[i+1] := C;
         valid  := True;
         Inc(i,2);
-        if (B = tmp1[0]) then Inc(rshift);
       end else
       begin
-        tmp2[rshift+i] := A;
+        tmp2[i] := A;
         Inc(i);
       end;
     end;
@@ -442,12 +439,12 @@ begin
     if not valid then Exit();
     //Remove all duplicates without changing order
     //This is actually not bad here.
-    if (i-rshift) > Length(tmp1) then SetLength(tmp1, i-rshift);
-    Move(tmp2[rshift], tmp1[0], (i-rshift)*SizeOf(TPoint));
+    if (i) > Length(tmp1) then SetLength(tmp1, i);
+    Move(tmp2[0], tmp1[0], i*SizeOf(TPoint));
 
     tmp1 := tmp1.Unique();
   end;
-
+  
   if Length(tmp1) = 3 then
   begin
     SetLength(Result, Length(Result)+1);
