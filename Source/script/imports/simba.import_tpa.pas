@@ -826,7 +826,7 @@ Finds the defects in relation to a convex hull of the given concave hull.
 *)
 procedure _LapeTPAConvexityDefects(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PPointArray(Params^[0])^.ConvexityDefects(PDouble(Params^[1])^, EConvexityDefects(Params^[2]^));
+  PPointArray(Result)^ := PPointArray(Params^[0])^.ConvexityDefects(PSingle(Params^[1])^, EConvexityDefects(Params^[2]^));
 end;
 
 procedure _LapeTPAToAxes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
