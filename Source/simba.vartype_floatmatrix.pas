@@ -673,7 +673,7 @@ var
       while (X < W) do
       begin
         while (X < W) and (Self[Y,X] >= Self[Y,X-1]) do Inc(X);
-        Buffer.Add(X-1,Y);
+        if (X < W) then Buffer.Add(X-1,Y);
         while (X < W) and (Self[Y,X] <= Self[Y,X-1]) do Inc(X);
       end;
     end;
@@ -693,7 +693,7 @@ var
       while (Y < H) do
       begin
         while (Y < H) and (Self[Y,X] >= Self[Y-1,X]) do Inc(Y);
-        Buffer.Add(X,Y-1);
+        if (Y < H) then Buffer.Add(X,Y-1);
         while (Y < H) and (Self[Y,X] <= Self[Y-1,X]) do Inc(Y);
       end;
     end;
