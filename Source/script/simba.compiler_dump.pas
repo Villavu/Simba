@@ -132,6 +132,10 @@ begin
   Add('Base', 'function GetScriptMethodName(Address: Pointer): String; external;');
   Add('Base', 'function DumpCallStack(Start: Integer = 0): String; external;');
 
+  Add('Base', 'function Map(KeyType: T; ValueType: V): Map; external;');
+  Add('Base', 'function StringMap(ValueType: V): StringMap; external;');
+  Add('Base', 'function Heap(ValueType: V): Heap; external;');
+
   ImportingSection := '';
 end;
 

@@ -41,6 +41,7 @@ type
 constructor TMapType.Create(ACompiler: TLapeCompilerBase; AKeyType, AValueType: TLapeType);
 var
   Rec: TLapeType_Record;
+  Range: TLapeRange;
 begin
   inherited Create(ACompiler, nil);
 
@@ -54,6 +55,10 @@ begin
   Rec.addField(FKeyType, 'Key');
   Rec.addField(FValueType, 'Value');
 
+  Range.Lo := 0;
+  Range.Hi := Rec.Size;
+
+  addField(FCompiler.addManagedType(TLapeType_StaticArray.Create(Range, FCompiler.getBaseType(ltUInt8), FCompiler)), 'FBuffer');
   addField(FCompiler.addManagedType(TLapeType_DynArray.Create(Rec, FCompiler)), 'FItems');
 end;
 

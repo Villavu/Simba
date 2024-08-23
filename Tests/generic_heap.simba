@@ -1,0 +1,60 @@
+{$assertions on}
+
+function MaxValues(Mat: TIntegerMatrix; count: Integer): TPointArray;
+var
+  X,Y,I: Integer;
+  Heap: Heap(Single);
+  Errored: Boolean;
+begin
+  for Y := 0 to Mat.Height - 1 do
+    for X := 0 to Mat.Width - 1 do
+      if (Heap.Count < Count) or (mat[Y, X] > Heap.Peek.Value) then
+      begin
+        if (Heap.Count = Count) then
+          Heap.Pop;
+
+        Heap.Push(Mat[Y, X], Y*Mat.Width+X);
+      end;
+
+  SetLength(Result, Heap.Count);
+  for I := 0 to High(Result) do
+  begin
+    Result[I].Y := Heap.Items[I].Index div Mat.Width;
+    Result[I].X := Heap.Items[I].Index mod Mat.Width;
+  end;
+
+  Assert(Heap.Count = 3);
+  Heap.Pop;
+  Heap.Pop;
+  Heap.Pop;
+  Assert(Heap.Count = 0);
+
+  try
+    Heap.Pop;
+    Errored := False;
+  except
+    Errored := True;
+  end;
+  Assert(Errored);
+
+  try
+    Heap.Peek;
+    Errored := False;
+  except
+    Errored := TRue;
+  end;
+  Assert(Errored);
+end;
+
+var Mat: TIntegerMatrix;
+begin
+  Mat.SetSize(10,20);
+  Mat[1,1] := 50;
+  Mat[2,2] := 10;
+  Mat[3,3] := 100;
+  Mat[4,4] := 25;
+  Mat[5,5] := 5;
+  Mat[6,6] := 200;
+
+  Assert(ToString(Mat.GetValues(MaxValues(Mat, 3))) = '[50, 100, 200]');
+end.

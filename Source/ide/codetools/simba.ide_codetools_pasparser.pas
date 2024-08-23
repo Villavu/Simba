@@ -1791,7 +1791,7 @@ procedure TPasParser.TypeKind;
     S: String;
   begin
     S := UpperCase(fLexer.Token);
-    Result := (S = 'STRINGMAP') or (S = 'MAP');
+    Result := (S = 'STRINGMAP') or (S = 'MAP') or (S = 'HEAP');
   end;
 
 begin

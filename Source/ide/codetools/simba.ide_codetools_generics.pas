@@ -40,9 +40,13 @@ const
     'property <MapName>.CaseSens(Value: Boolean); external;'                                                               + LineEnding;
 
   HEAP_METHODS =
-    'procedure <HeapName>.Push(Value: <ValueType>; Index: SizeInt; LoHi: Boolean); external;'             + LineEnding +
-    'procedure <HeapName>.Pop(LoHi: Boolean); external;'                                                  + LineEnding +
-    'function <HeapName>.Peek(LoHi: Boolean): record Value: <ValueType>; Index: SizeInt; end; external;';
+    'procedure <HeapName>.Push(Value: <ValueType>; Index: Integer); external;'                      + LineEnding +
+    'property <HeapName>.Pop: record Value: <ValueType>; Index: Integer; end; external;'            + LineEnding +
+    'property <HeapName>.Peek: record Value: <ValueType>; Index: Integer; end; external;'           + LineEnding +
+    'property <HeapName>.Items: array of record Value: <ValueType>; Index: Integer; end; external;' + LineEnding +
+    'property <HeapName>.Count: Integer; external;'                                                 + LineEnding +
+    'procedure <HeapName>.Clear; external;'                                                         + LineEnding +
+    'function <HeapName>.ToString: String; external;'                                               + LineEnding;
 
 function GetGeneric(Decl: TDeclaration): TDeclarationArray;
 

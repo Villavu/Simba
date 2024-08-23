@@ -113,6 +113,7 @@ type
   public
     procedure Add(const Decl: TDeclaration); overload;
     procedure Add(const Decls: TDeclarationArray); overload;
+    procedure Remove(const Decl: TDeclaration);
 
     function GetByName(Name: String): TDeclarationArray;
     function GetByClassAndName(Name: String; DeclClass: TDeclarationClass; ExactClass: Boolean = False): TDeclarationArray;
@@ -456,7 +457,6 @@ type
     procedure MethodDirective; override;
     procedure Method; override;
     procedure MethodOfType; override;
-    procedure MethodBlock; override;
     procedure MethodName; override;
     procedure MethodTypeName; override;
     procedure MethodResultType; override;
@@ -909,6 +909,18 @@ end;
 procedure TDeclarationArrayHelper.Add(const Decls: TDeclarationArray);
 begin
   Self += Decls;
+end;
+
+procedure TDeclarationArrayHelper.Remove(const Decl: TDeclaration);
+var
+  I: Integer;
+begin
+  for I := 0 to High(Self) do
+    if (Self[I] = Decl) then
+    begin
+      Delete(Self, I, 1);
+      Exit;
+    end;
 end;
 
 function TDeclarationArrayHelper.GetByName(Name: String): TDeclarationArray;
@@ -1802,15 +1814,6 @@ end;
 procedure TCodeParser.ConstantName;
 begin
   VarName();
-end;
-
-procedure TCodeParser.MethodBlock;
-begin
-  //if (FStack.Top is TDeclaration_Method) then
-  //  if (fLastNoJunkTok <> tokSemiColon) then
-  //    TDeclaration_Method(FStack.Top).isNotFullyDeclared := True;
-
-  inherited;
 end;
 
 procedure TCodeParser.Method;
