@@ -25,7 +25,9 @@ String methods
 (*
 String.Before
 -------------
-> function String.Before(Value: String): String;
+```
+function String.Before(Value: String): String;
+```
 *)
 procedure _LapeString_Before(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -35,7 +37,9 @@ end;
 (*
 String.After
 ------------
-> function String.After(Value: String): String;
+```
+function String.After(Value: String): String;
+```
 *)
 procedure _LapeString_After(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -45,7 +49,9 @@ end;
 (*
 String.StartsWith
 -----------------
-> function String.StartsWith(Value: String; CaseSenstive: Boolean = True): Boolean;
+```
+function String.StartsWith(Value: String; CaseSenstive: Boolean = True): Boolean;
+```
 *)
 procedure _LapeString_StartsWith(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -55,7 +61,9 @@ end;
 (*
 String.Equals
 -------------
-> function String.Equals(Other: String): Boolean;
+```
+function String.Equals(Other: String): Boolean;
+```
 *)
 procedure _LapeString_Equals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -65,7 +73,9 @@ end;
 (*
 String.EqualsIgnoreCase
 -----------------------
-> function String.EqualsIgnoreCase(Other: String): Boolean;
+```
+function String.EqualsIgnoreCase(Other: String): Boolean;
+```
 *)
 procedure _LapeString_EqualsIgnoreCase(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -75,7 +85,9 @@ end;
 (*
 String.Compare
 --------------
-> function String.Compare(Other: String): Integer;
+```
+function String.Compare(Other: String): Integer;
+```
 *)
 procedure _LapeString_Compare(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -85,7 +97,9 @@ end;
 (*
 String.Similarity
 -----------------
-> function String.Similarity(Other: String): Double;
+```
+function String.Similarity(Other: String): Double;
+```
 *)
 procedure _LapeString_Similarity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -95,7 +109,9 @@ end;
 (*
 String.Hash
 -----------
-> function String.Hash(Seed: UInt32 = 0): UInt32;
+```
+function String.Hash(Seed: UInt32 = 0): UInt32;
+```
 *)
 procedure _LapeString_Hash(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -105,7 +121,9 @@ end;
 (*
 String.EndsWith
 ---------------
-> function String.EndsWith(Value: String; CaseSenstive: Boolean = True): Boolean;
+```
+function String.EndsWith(Value: String; CaseSenstive: Boolean = True): Boolean;
+```
 *)
 procedure _LapeString_EndsWith(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -115,7 +133,9 @@ end;
 (*
 String.IsUpper
 --------------
-> function String.IsUpper(): Boolean;
+```
+function String.IsUpper(): Boolean;
+```
 *)
 procedure _LapeString_IsUpper(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -125,7 +145,9 @@ end;
 (*
 String.IsLower
 --------------
-> function String.IsLower(): Boolean;
+```
+function String.IsLower(): Boolean;
+```
 *)
 procedure _LapeString_IsLower(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -135,7 +157,9 @@ end;
 (*
 String.ToUpper
 --------------
-> function String.ToUpper(): String;
+```
+function String.ToUpper(): String;
+```
 *)
 procedure _LapeString_ToUpper(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -145,7 +169,9 @@ end;
 (*
 String.ToLower
 --------------
-> function String.ToLower(): String;
+```
+function String.ToLower(): String;
+```
 *)
 procedure _LapeString_ToLower(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -155,7 +181,9 @@ end;
 (*
 String.Capitalize
 -----------------
-> function String.Capitalize(): String;
+```
+function String.Capitalize(): String;
+```
 *)
 procedure _LapeString_Capitalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -165,7 +193,9 @@ end;
 (*
 String.SwapCase
 ---------------
-> function String.SwapCase(): String;
+```
+function String.SwapCase(): String;
+```
 *)
 procedure _LapeString_SwapCase(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -175,7 +205,9 @@ end;
 (*
 String.Join
 -----------
-> function String.Join(Values: TStringArray): String;
+```
+function String.Join(Values: TStringArray): String;
+```
 *)
 procedure _LapeString_Join(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -185,7 +217,9 @@ end;
 (*
 String.Split
 ------------
-> function String.Split(Seperator: String; ExcludeEmpty: Boolean = True): TStringArray;
+```
+function String.Split(Seperator: String; ExcludeEmpty: Boolean = True): TStringArray;
+```
 *)
 procedure _LapeString_Split(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -195,7 +229,9 @@ end;
 (*
 String.SplitLines
 -----------------
-> function String.SplitLines: TStringArray;
+```
+function String.SplitLines: TStringArray;
+```
 *)
 procedure _LapeString_SplitLines(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -205,7 +241,9 @@ end;
 (*
 String.PadLeft
 --------------
-> function String.PadLeft(Count: Integer; PaddingChar: Char = #32): String;
+```
+function String.PadLeft(Count: Integer; PaddingChar: Char = #32): String;
+```
 *)
 procedure _LapeString_PadLeft(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -215,7 +253,9 @@ end;
 (*
 String.PadRight
 ---------------
-> function String.PadRight(Count: Integer; PaddingChar: Char = #32): String;
+```
+function String.PadRight(Count: Integer; PaddingChar: Char = #32): String;
+```
 *)
 procedure _LapeString_PadRight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -225,7 +265,9 @@ end;
 (*
 String.Partition
 ----------------
-> function String.Partition(Value: String): TStringArray;
+```
+function String.Partition(Value: String): TStringArray;
+```
 *)
 procedure _LapeString_Partition(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -235,7 +277,9 @@ end;
 (*
 String.Replace
 --------------
-> function String.Replace(OldValue: String; NewValue: String): String;
+```
+function String.Replace(OldValue: String; NewValue: String): String;
+```
 *)
 procedure _LapeString_Replace(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -245,7 +289,9 @@ end;
 (*
 String.Replace
 --------------
-> function String.Replace(OldValue: String; NewValue: String; ReplaceFlags: TReplaceFlags): String;
+```
+function String.Replace(OldValue: String; NewValue: String; ReplaceFlags: TReplaceFlags): String;
+```
 *)
 procedure _LapeString_ReplaceEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 type
@@ -257,7 +303,9 @@ end;
 (*
 String.Trim
 -----------
-> function String.Trim: String;
+```
+function String.Trim: String;
+```
 *)
 procedure _LapeString_Trim(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -267,7 +315,9 @@ end;
 (*
 String.TrimLeft
 ---------------
-> function String.TrimLeft: String;
+```
+function String.TrimLeft: String;
+```
 *)
 procedure _LapeString_TrimLeft(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -277,7 +327,9 @@ end;
 (*
 String.TrimRight
 ----------------
-> function String.TrimRight: String;
+```
+function String.TrimRight: String;
+```
 *)
 procedure _LapeString_TrimRight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -287,7 +339,9 @@ end;
 (*
 String.Trim
 -----------
-> function String.Trim(TrimChars: array of Char): String;
+```
+function String.Trim(TrimChars: array of Char): String;
+```
 *)
 procedure _LapeString_TrimEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 type
@@ -299,7 +353,9 @@ end;
 (*
 String.TrimLeft
 ---------------
-> function String.TrimLeft(TrimChars: array of Char): String;
+```
+function String.TrimLeft(TrimChars: array of Char): String;
+```
 *)
 procedure _LapeString_TrimLeftEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 type
@@ -311,7 +367,9 @@ end;
 (*
 String.TrimRight
 ----------------
-> function String.TrimRight(TrimChars: array of Char): String;
+```
+function String.TrimRight(TrimChars: array of Char): String;
+```
 *)
 procedure _LapeString_TrimRightEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 type
@@ -323,7 +381,9 @@ end;
 (*
 String.RegExprSplit
 -------------------
-> function String.RegExprSplit(Pattern: String): TStringArray;
+```
+function String.RegExprSplit(Pattern: String): TStringArray;
+```
 *)
 procedure _LapeString_RegExprSplit(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -333,7 +393,9 @@ end;
 (*
 String.RegExprFind
 ------------------
-> function String.RegExprFind(Pattern: String): TRegExprMatch;
+```
+function String.RegExprFind(Pattern: String): TRegExprMatch;
+```
 *)
 procedure _LapeString_RegExprFind(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -343,7 +405,9 @@ end;
 (*
 String.RegExprFindAll
 ---------------------
-> function String.RegExprFindAll(Pattern: String): TRegExprMatchArray;
+```
+function String.RegExprFindAll(Pattern: String): TRegExprMatchArray;
+```
 *)
 procedure _LapeString_RegExprFindAll(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -353,7 +417,9 @@ end;
 (*
 String.RegExprExists
 --------------------
-> function String.RegExprExists(Pattern: String): Boolean;
+```
+function String.RegExprExists(Pattern: String): Boolean;
+```
 *)
 procedure _LapeString_RegExprExists(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -363,7 +429,9 @@ end;
 (*
 String.CopyRange
 ----------------
-> function String.CopyRange(StartIndex, EndIndex: Integer): String;
+```
+function String.CopyRange(StartIndex, EndIndex: Integer): String;
+```
 *)
 procedure _LapeString_CopyRange(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -373,7 +441,9 @@ end;
 (*
 String.DeleteRange
 ------------------
-> procedure String.DeleteRange(StartIndex, EndIndex: Integer);
+```
+procedure String.DeleteRange(StartIndex, EndIndex: Integer);
+```
 *)
 procedure _LapeString_DeleteRange(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -383,7 +453,9 @@ end;
 (*
 String.Remove
 -------------
-> function String.Remove(Value: String): Boolean;
+```
+function String.Remove(Value: String): Boolean;
+```
 *)
 procedure _LapeString_Remove(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -393,7 +465,9 @@ end;
 (*
 String.RemoveAll
 ----------------
-> function String.RemoveAll(Value: String): Integer;
+```
+function String.RemoveAll(Value: String): Integer;
+```
 *)
 procedure _LapeString_RemoveAll(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -403,7 +477,9 @@ end;
 (*
 String.IndexOf
 --------------
-> function String.IndexOf(Value: String): Integer;
+```
+function String.IndexOf(Value: String): Integer;
+```
 *)
 procedure _LapeString_IndexOf(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -413,7 +489,9 @@ end;
 (*
 String.IndexOf
 --------------
-> function String.IndexOf(Value: String; Offset: Integer): Integer;
+```
+function String.IndexOf(Value: String; Offset: Integer): Integer;
+```
 *)
 procedure _LapeString_IndexOfEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -423,7 +501,9 @@ end;
 (*
 String.LastIndexOf
 ------------------
-> function String.LastIndexOf(Value: String): Integer;
+```
+function String.LastIndexOf(Value: String): Integer;
+```
 *)
 procedure _LapeString_LastIndexOf(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -433,7 +513,9 @@ end;
 (*
 String.LastIndexOf
 ------------------
-> function String.LastIndexOf(Value: String; Offset: Integer): Integer;
+```
+function String.LastIndexOf(Value: String; Offset: Integer): Integer;
+```
 *)
 procedure _LapeString_LastIndexOfEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -443,7 +525,9 @@ end;
 (*
 String.IndicesOf
 ----------------
-> function String.IndicesOf(Value: String): TIntegerArray;
+```
+function String.IndicesOf(Value: String): TIntegerArray;
+```
 *)
 procedure _LapeString_IndicesOf(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -453,7 +537,9 @@ end;
 (*
 String.IndicesOf
 ----------------
-> function String.IndicesOf(Value: String; Offset: Integer): TIntegerArray;
+```
+function String.IndicesOf(Value: String; Offset: Integer): TIntegerArray;
+```
 *)
 procedure _LapeString_IndicesOfEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -463,7 +549,9 @@ end;
 (*
 String.Between
 --------------
-> function String.Between(S1, S2: String): String;
+```
+function String.Between(S1, S2: String): String;
+```
 *)
 procedure _LapeString_Between(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -473,7 +561,9 @@ end;
 (*
 String.BetweenAll
 -----------------
-> function String.BetweenAll(S1, S2: String): TStringArray;
+```
+function String.BetweenAll(S1, S2: String): TStringArray;
+```
 *)
 procedure _LapeString_BetweenAll(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -483,7 +573,9 @@ end;
 (*
 String.NumberChars
 ------------------
-> function String.NumberChars: String; static;
+```
+function String.NumberChars: String; static;
+```
 *)
 procedure _LapeString_NumberChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -493,7 +585,9 @@ end;
 (*
 String.LowerChars
 -----------------
-> function String.LowerChars: String; static;
+```
+function String.LowerChars: String; static;
+```
 *)
 procedure _LapeString_LowerChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -503,7 +597,9 @@ end;
 (*
 String.UpperChars
 -----------------
-> function String.UpperChars: String; static;
+```
+function String.UpperChars: String; static;
+```
 *)
 procedure _LapeString_UpperChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -513,7 +609,9 @@ end;
 (*
 String.AlphaChars
 -----------------
-> function String.AlphaChars: String; static;
+```
+function String.AlphaChars: String; static;
+```
 *)
 procedure _LapeString_AlphaChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -523,7 +621,9 @@ end;
 (*
 String.AlphaNumChars
 --------------------
-> function String.AlphaNumChars: String; static;
+```
+function String.AlphaNumChars: String; static;
+```
 *)
 procedure _LapeString_AlphaNumChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -533,7 +633,9 @@ end;
 (*
 String.Extract
 --------------
-> function String.Extract(Chars: array of Char): String;
+```
+function String.Extract(Chars: array of Char): String;
+```
 *)
 procedure _LapeString_Extract(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 type
@@ -545,7 +647,9 @@ end;
 (*
 String.ExtractInteger
 ---------------------
-> function String.ExtractInteger(Default: Int64 = -1): Int64;
+```
+function String.ExtractInteger(Default: Int64 = -1): Int64;
+```
 *)
 procedure _LapeString_ExtractInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -555,7 +659,9 @@ end;
 (*
 String.ExtractFloat
 -------------------
-> function String.ExtractFloat(Default: Double = -1): Double;
+```
+function String.ExtractFloat(Default: Double = -1): Double;
+```
 *)
 procedure _LapeString_ExtractFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -565,7 +671,9 @@ end;
 (*
 String.IsAlphaNum
 -----------------
-> function String.IsAlphaNum(): Boolean;
+```
+function String.IsAlphaNum(): Boolean;
+```
 *)
 procedure _LapeString_IsAlphaNum(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -575,7 +683,9 @@ end;
 (*
 String.IsInteger
 ----------------
-> function String.IsInteger(): Boolean;
+```
+function String.IsInteger(): Boolean;
+```
 *)
 procedure _LapeString_IsInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -585,7 +695,9 @@ end;
 (*
 String.IsFloat
 --------------
-> function String.IsFloat(): Boolean;
+```
+function String.IsFloat(): Boolean;
+```
 *)
 procedure _LapeString_IsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -595,7 +707,9 @@ end;
 (*
 String.Count
 ------------
-> function String.Count(Value: String): Integer;
+```
+function String.Count(Value: String): Integer;
+```
 *)
 procedure _LapeString_Count(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -605,7 +719,9 @@ end;
 (*
 String.CountAll
 ---------------
-> function String.CountAll(Values: TStringArray): TIntegerArray;
+```
+function String.CountAll(Values: TStringArray): TIntegerArray;
+```
 *)
 procedure _LapeString_CountAll(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -615,7 +731,9 @@ end;
 (*
 String.Contains
 ---------------
-> function String.Contains(Value: String; CaseSenstive: Boolean = True): Boolean;
+```
+function String.Contains(Value: String; CaseSenstive: Boolean = True): Boolean;
+```
 *)
 procedure _LapeString_Contains(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -625,7 +743,9 @@ end;
 (*
 String.ContainsAny
 ------------------
-> function String.ContainsAny(Values: TStringArray; CaseSenstive: Boolean = True): Boolean;
+```
+function String.ContainsAny(Values: TStringArray; CaseSenstive: Boolean = True): Boolean;
+```
 *)
 procedure _LapeString_ContainsAny(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -635,7 +755,9 @@ end;
 (*
 String.IndexOfAny
 -----------------
-> function String.IndexOfAny(Values: TStringArray): Integer;
+```
+function String.IndexOfAny(Values: TStringArray): Integer;
+```
 *)
 procedure _LapeString_IndexOfAny(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -645,7 +767,9 @@ end;
 (*
 String.IndexOfAny
 -----------------
-> function String.IndexOfAny(Values: TStringArray; Offset: Integer): Integer;
+```
+function String.IndexOfAny(Values: TStringArray; Offset: Integer): Integer;
+```
 *)
 procedure _LapeString_IndexOfAnyEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -655,7 +779,9 @@ end;
 (*
 String.Format
 -------------
-> function String.Format(Args: TVariantArray): String;
+```
+function String.Format(Args: TVariantArray): String;
+```
 *)
 procedure _LapeString_Format(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 type
@@ -669,7 +795,9 @@ end;
 (*
 String.ToBytes
 --------------
-> function String.ToBytes: TByteArray;
+```
+function String.ToBytes: TByteArray;
+```
 *)
 procedure _LapeString_ToBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -679,7 +807,9 @@ end;
 (*
 String.ToBoolean
 ----------------
-> function String.ToBoolean: Boolean;
+```
+function String.ToBoolean: Boolean;
+```
 *)
 procedure _LapeString_ToBoolean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -689,7 +819,9 @@ end;
 (*
 String.ToBoolean
 ----------------
-> function String.ToBoolean(Default: Boolean): Boolean;
+```
+function String.ToBoolean(Default: Boolean): Boolean;
+```
 *)
 procedure _LapeString_ToBooleanDef(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -699,7 +831,9 @@ end;
 (*
 String.ToInteger
 ----------------
-> function String.ToInteger: Integer;
+```
+function String.ToInteger: Integer;
+```
 *)
 procedure _LapeString_ToInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -709,7 +843,9 @@ end;
 (*
 String.ToInteger
 ----------------
-> function String.ToInteger(Default: Integer): Integer;
+```
+function String.ToInteger(Default: Integer): Integer;
+```
 *)
 procedure _LapeString_ToIntegerDef(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -719,7 +855,9 @@ end;
 (*
 String.ToInt64
 --------------
-> function String.ToInt64: Int64;
+```
+function String.ToInt64: Int64;
+```
 *)
 procedure _LapeString_ToInt64(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -729,7 +867,9 @@ end;
 (*
 String.ToInt64
 --------------
-> function String.ToInt64(Default: Int64): Int64;
+```
+function String.ToInt64(Default: Int64): Int64;
+```
 *)
 procedure _LapeString_ToInt64Def(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -739,7 +879,9 @@ end;
 (*
 String.ToSingle
 ---------------
-> function String.ToSingle: Single;
+```
+function String.ToSingle: Single;
+```
 *)
 procedure _LapeString_ToSingle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -749,7 +891,9 @@ end;
 (*
 String.ToSingle
 ---------------
-> function String.ToSingle(Default: Single): Single;
+```
+function String.ToSingle(Default: Single): Single;
+```
 *)
 procedure _LapeString_ToSingleDef(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -759,7 +903,9 @@ end;
 (*
 String.ToDouble
 ---------------
-> function String.ToDouble: Double;
+```
+function String.ToDouble: Double;
+```
 *)
 procedure _LapeString_ToDouble(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -769,7 +915,9 @@ end;
 (*
 String.ToDouble
 ---------------
-> function String.ToDouble(Default: Double): Double;
+```
+function String.ToDouble(Default: Double): Double;
+```
 *)
 procedure _LapeString_ToDoubleDef(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -779,7 +927,9 @@ end;
 (*
 String.ToDateTime
 -----------------
-> function String.ToDateTime(Fmt: String; Def: TDateTime): TDateTime;
+```
+function String.ToDateTime(Fmt: String; Def: TDateTime): TDateTime;
+```
 *)
 procedure _LapeString_ToDateTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -789,7 +939,9 @@ end;
 (*
 *
 -
-> operator *(Left: String; Right: Integer): String;
+```
+operator *(Left: String; Right: Integer): String;
+```
 *)
 procedure _LapeString_MUL_Integer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -799,7 +951,9 @@ end;
 (*
 in
 --
-> operator in(Left: String; Right: String): Boolean;
+```
+operator in(Left: String; Right: String): Boolean;
+```
 *)
 procedure _LapeString_IN_String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -809,7 +963,9 @@ end;
 (*
 in
 --
-> operator in(Left: String; Right: TStringArray): Boolean;
+```
+operator in(Left: String; Right: TStringArray): Boolean;
+```
 *)
 procedure _LapeString_IN_StringArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -823,7 +979,9 @@ end;
 (*
 Char.IsAlphaNum
 ---------------
-> function Char.IsAlphaNum(): Boolean;
+```
+function Char.IsAlphaNum(): Boolean;
+```
 *)
 procedure _LapeChar_IsAlphaNum(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -833,7 +991,9 @@ end;
 (*
 Char.IsInteger
 --------------
-> function Char.IsInteger(): Boolean;
+```
+function Char.IsInteger(): Boolean;
+```
 *)
 procedure _LapeChar_IsInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -843,7 +1003,9 @@ end;
 (*
 Char.IsFloat
 ------------
-> function Char.IsFloat(): Boolean;
+```
+function Char.IsFloat(): Boolean;
+```
 *)
 procedure _LapeChar_IsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -853,7 +1015,9 @@ end;
 (*
 Char.IsUpper
 ------------
-> function Char.IsUpper(): Boolean;
+```
+function Char.IsUpper(): Boolean;
+```
 *)
 procedure _LapeChar_IsUpper(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -863,7 +1027,9 @@ end;
 (*
 Char.IsLower
 ------------
-> function Char.IsLower(): Boolean;
+```
+function Char.IsLower(): Boolean;
+```
 *)
 procedure _LapeChar_IsLower(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -873,7 +1039,9 @@ end;
 (*
 Char.ToUpper
 ------------
-> function Char.ToUpper(): String;
+```
+function Char.ToUpper(): String;
+```
 *)
 procedure _LapeChar_ToUpper(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -883,7 +1051,9 @@ end;
 (*
 Char.ToLower
 ------------
-> function Char.ToLower(): String;
+```
+function Char.ToLower(): String;
+```
 *)
 procedure _LapeChar_ToLower(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -893,7 +1063,9 @@ end;
 (*
 Char.Capitalize
 ---------------
-> function Char.Capitalize(): String;
+```
+function Char.Capitalize(): String;
+```
 *)
 procedure _LapeChar_Capitalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -903,7 +1075,9 @@ end;
 (*
 Char.Join
 ---------
-> function Char.Join(Values: TStringArray): String;
+```
+function Char.Join(Values: TStringArray): String;
+```
 *)
 procedure _LapeChar_Join(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -913,7 +1087,9 @@ end;
 (*
 *
 -
-> operator *(Left: Char; Right: Integer): String;
+```
+operator *(Left: Char; Right: Integer): String;
+```
 *)
 procedure _LapeChar_MUL_Integer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -923,7 +1099,9 @@ end;
 (*
 in
 --
-> operator in(Left: Char; Right: String): Boolean;
+```
+operator in(Left: Char; Right: String): Boolean;
+```
 *)
 procedure _LapeChar_IN_String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -933,7 +1111,9 @@ end;
 (*
 in
 --
-> operator in(Left: Char; Right: TStringArray): Boolean;
+```
+operator in(Left: Char; Right: TStringArray): Boolean;
+```
 *)
 procedure _LapeChar_IN_StringArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -1090,4 +1270,3 @@ begin
 end;
 
 end.
-

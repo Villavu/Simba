@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, StdCtrls, Graphics,
-  SynEdit, SynEditTypes, SynEditFoldedView, SynEditTextBuffer, SynEditMarkupSelection, SynEditWrappedView,
+  SynEdit, SynEditTypes, SynEditFoldedView, SynEditTextBuffer, SynEditMarkupSelection, {%H-}SynEditWrappedView,
   LazSynEditText,
   simba.ide_theme, simba.component_scrollbar;
 

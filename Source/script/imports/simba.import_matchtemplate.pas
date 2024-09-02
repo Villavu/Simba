@@ -32,7 +32,9 @@ Note:: These functions outputs are equal to OpenCV's matchTemplate.
 (*
 TMatchTemplateCache.Create
 --------------------------
-> function TMatchTemplateCache.Create(Image, Template: TIntegerMatrix; Formula: ETMFormula): TMatchTemplateCache; static;
+```
+function TMatchTemplateCache.Create(Image, Template: TIntegerMatrix; Formula: ETMFormula): TMatchTemplateCache; static;
+```
 *)
 procedure _LapeMatchTemplateCache_Create1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -42,7 +44,9 @@ end;
 (*
 TMatchTemplateCache.Create
 --------------------------
-> function TMatchTemplateCache.Create(Image, Template: TImage; Formula: ETMFormula): TMatchTemplateCache; static;
+```
+function TMatchTemplateCache.Create(Image, Template: TImage; Formula: ETMFormula): TMatchTemplateCache; static;
+```
 *)
 procedure _LapeMatchTemplateCache_Create2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -52,7 +56,9 @@ end;
 (*
 TMatchTemplateCache.Free
 ------------------------
-> procedure TMatchTemplateCache.Free;
+```
+procedure TMatchTemplateCache.Free;
+```
 *)
 procedure _LapeMatchTemplateCache_Free(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -62,7 +68,9 @@ end;
 (*
 MatchTemplateMask
 -----------------
-> function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+```
+function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+```
 *)
 procedure _LapeMatchTemplateMaskCache1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -72,7 +80,9 @@ end;
 (*
 MatchTemplateMask
 -----------------
-> function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+```
+function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+```
 *)
 procedure _LapeMatchTemplateMask1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -82,7 +92,9 @@ end;
 (*
 MatchTemplate
 -------------
-> function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+```
+function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+```
 *)
 procedure _LapeMatchTemplate1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -92,7 +104,9 @@ end;
 (*
 MatchTemplateMask
 -----------------
-> function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TImage; Formula: ETMFormula): TSingleMatrix;
+```
+function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TImage; Formula: ETMFormula): TSingleMatrix;
+```
 *)
 procedure _LapeMatchTemplateMaskCache2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -102,7 +116,9 @@ end;
 (*
 MatchTemplate
 -------------
-> function MatchTemplate(Image, Template: TImage; Formula: ETMFormula): TSingleMatrix;
+```
+function MatchTemplate(Image, Template: TImage; Formula: ETMFormula): TSingleMatrix;
+```
 *)
 procedure _LapeMatchTemplate2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -112,7 +128,9 @@ end;
 (*
 MatchTemplateMask
 -----------------
-> function MatchTemplateMask(Image, Template: TImage; Formula: ETMFormula): TSingleMatrix;
+```
+function MatchTemplateMask(Image, Template: TImage; Formula: ETMFormula): TSingleMatrix;
+```
 *)
 procedure _LapeMatchTemplateMask2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin

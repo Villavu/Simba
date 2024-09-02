@@ -84,7 +84,7 @@ type
     FCount: Integer;
     FArr: TArr;
 
-    procedure EnsureGrowth(const Len: Integer = 1); inline;
+    procedure Grow(const Len: Integer = 1);
     function GetItem(const Index: Integer): _T; inline;
   public
     property Size: Integer read FLength;
@@ -255,26 +255,24 @@ begin
   Result := FArr[FCount];
 end;
 
-procedure TSimbaArrayBuffer.EnsureGrowth(const Len: Integer);
+procedure TSimbaArrayBuffer.Grow(const Len: Integer);
 begin
-  if (FCount + Len >= FLength) then
-  begin
-    FLength := FLength + Len;
-    if (FLength < 32) then
-      FLength := 32
-    else
-    if (FLength > 256000) then
-      FLength := FLength * 4
-    else
-      FLength := FLength * 2;
+  FLength := FLength + Len;
+  if (FLength < 32) then
+    FLength := 32
+  else
+  if (FLength > 256000) then
+    FLength := FLength * 4
+  else
+    FLength := FLength * 2;
 
-    SetLength(FArr, FLength);
-  end;
+  SetLength(FArr, FLength);
 end;
 
 procedure TSimbaPointBufferHelper.Add(const X, Y: Integer);
 begin
-  EnsureGrowth();
+  if (FCount+1 >= FLength) then
+    Grow();
 
   FArr[FCount].X := X;
   FArr[FCount].Y := Y;
@@ -310,7 +308,8 @@ end;
 
 procedure TSimbaArrayBuffer.Add(const Value: _T);
 begin
-  EnsureGrowth();
+  if (FCount >= FLength) then
+    Grow();
 
   FArr[FCount] := Value;
   Inc(FCount);
@@ -324,7 +323,8 @@ begin
 
   if (Len > 0) then
   begin
-    EnsureGrowth(Len);
+    if (FCount + Len >= FLength) then
+      Grow(Len);
     Move(Values[0], FArr[FCount], Len * SizeOf(_T));
     Inc(FCount, Len);
   end;

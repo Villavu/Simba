@@ -25,7 +25,9 @@ Date & Time
 (*
 TDateTime.Create
 ----------------
-> function TDateTime.Create(AYear, AMonth, ADay, AHour, AMinute, ASecond, AMillisecond: Integer): TDateTime; static;
+```
+function TDateTime.Create(AYear, AMonth, ADay, AHour, AMinute, ASecond, AMillisecond: Integer): TDateTime; static;
+```
 *)
 procedure _LapeDateTime_Create1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -35,7 +37,9 @@ end;
 (*
 TDateTime.Create
 ----------------
-> function TDateTime.Create(AYear, AMonth, ADay: Integer): TDateTime; static;
+```
+function TDateTime.Create(AYear, AMonth, ADay: Integer): TDateTime; static;
+```
 
 Creates just the date part.
 *)
@@ -47,7 +51,9 @@ end;
 (*
 TDateTime.Create
 ----------------
-> function TDateTime.Create(AHour, AMin, ASecond, AMillisecond: Integer): TDateTime; static;
+```
+function TDateTime.Create(AHour, AMin, ASecond, AMillisecond: Integer): TDateTime; static;
+```
 
 Creates just the time part.
 *)
@@ -59,7 +65,9 @@ end;
 (*
 TDateTime.CreateFromUnix
 ------------------------
-> function TDateTime.CreateFromUnix(UnixTime: Int64): TDateTime; static;
+```
+function TDateTime.CreateFromUnix(UnixTime: Int64): TDateTime; static;
+```
 *)
 procedure _LapeDateTime_CreateFromUnix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -69,7 +77,9 @@ end;
 (*
 TDateTime.CreateFromString
 --------------------------
-> function TDateTime.CreateFromString(Value: String): TDateTime; static;
+```
+function TDateTime.CreateFromString(Value: String): TDateTime; static;
+```
 *)
 procedure _LapeDateTime_CreateFromString1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -79,7 +89,9 @@ end;
 (*
 TDateTime.CreateFromString
 --------------------------
-> function TDateTime.CreateFromString(Fmt, Value: String): TDateTime; static;
+```
+function TDateTime.CreateFromString(Fmt, Value: String): TDateTime; static;
+```
 *)
 procedure _LapeDateTime_CreateFromString2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -89,7 +101,9 @@ end;
 (*
 TDateTime.ToUnix
 ----------------
-> function TDateTime.ToUnix(IsUTC: Boolean = True): Int64;
+```
+function TDateTime.ToUnix(IsUTC: Boolean = True): Int64;
+```
 *)
 procedure _LapeDateTime_ToUnix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -99,7 +113,9 @@ end;
 (*
 TDateTime.ToString
 ------------------
-> function TDateTime.ToString(Fmt: String): String;
+```
+function TDateTime.ToString(Fmt: String): String;
+```
 *)
 procedure _LapeDateTime_ToString1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -109,7 +125,9 @@ end;
 (*
 TDateTime.ToString
 ------------------
-> function TDateTime.ToString: String;
+```
+function TDateTime.ToString: String;
+```
 *)
 procedure _LapeDateTime_ToString2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -119,7 +137,9 @@ end;
 (*
 TDateTime.AddYears
 ------------------
-> function TDateTime.AddYears(Amount: Integer = 1): TDateTime;
+```
+function TDateTime.AddYears(Amount: Integer = 1): TDateTime;
+```
 *)
 procedure _LapeDateTime_AddYears(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -129,7 +149,9 @@ end;
 (*
 TDateTime.AddMonths
 -------------------
-> function TDateTime.AddMonths(Amount: Integer = 1): TDateTime;
+```
+function TDateTime.AddMonths(Amount: Integer = 1): TDateTime;
+```
 *)
 procedure _LapeDateTime_AddMonths(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -139,7 +161,9 @@ end;
 (*
 TDateTime.AddDays
 -----------------
-> function TDateTime.AddDays(Amount: Integer = 1): TDateTime;
+```
+function TDateTime.AddDays(Amount: Integer = 1): TDateTime;
+```
 *)
 procedure _LapeDateTime_AddDays(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -149,7 +173,9 @@ end;
 (*
 TDateTime.AddHours
 ------------------
-> function TDateTime.AddHours(Amount: Int64 = 1): TDateTime;
+```
+function TDateTime.AddHours(Amount: Int64 = 1): TDateTime;
+```
 *)
 procedure _LapeDateTime_AddHours(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -159,7 +185,9 @@ end;
 (*
 TDateTime.AddMinutes
 --------------------
-> function TDateTime.AddMinutes(Amount: Int64 = 1): TDateTime;
+```
+function TDateTime.AddMinutes(Amount: Int64 = 1): TDateTime;
+```
 *)
 procedure _LapeDateTime_AddMinutes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -169,7 +197,9 @@ end;
 (*
 TDateTime.AddSeconds
 --------------------
-> function TDateTime.AddSeconds(Amount: Int64 = 1): TDateTime;
+```
+function TDateTime.AddSeconds(Amount: Int64 = 1): TDateTime;
+```
 *)
 procedure _LapeDateTime_AddSeconds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -179,7 +209,9 @@ end;
 (*
 TDateTime.AddMilliseconds
 -------------------------
-> function TDateTime.AddMilliseconds(Amount: Int64 = 1): TDateTime;
+```
+function TDateTime.AddMilliseconds(Amount: Int64 = 1): TDateTime;
+```
 *)
 procedure _LapeDateTime_AddMilliseconds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -189,7 +221,9 @@ end;
 (*
 TDateTime.YearsBetween
 ----------------------
-> function TDateTime.YearsBetween(Other: TDateTime): Integer;
+```
+function TDateTime.YearsBetween(Other: TDateTime): Integer;
+```
 *)
 procedure _LapeDateTime_YearsBetween(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -199,7 +233,9 @@ end;
 (*
 TDateTime.MonthsBetween
 -----------------------
-> function TDateTime.MonthsBetween(Other: TDateTime): Integer;
+```
+function TDateTime.MonthsBetween(Other: TDateTime): Integer;
+```
 *)
 procedure _LapeDateTime_MonthsBetween(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -209,7 +245,9 @@ end;
 (*
 TDateTime.WeeksBetween
 ----------------------
-> function TDateTime.WeeksBetween(Other: TDateTime): Integer;
+```
+function TDateTime.WeeksBetween(Other: TDateTime): Integer;
+```
 *)
 procedure _LapeDateTime_WeeksBetween(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -219,7 +257,9 @@ end;
 (*
 TDateTime.DaysBetween
 ---------------------
-> function TDateTime.DaysBetween(Other: TDateTime): Integer;
+```
+function TDateTime.DaysBetween(Other: TDateTime): Integer;
+```
 *)
 procedure _LapeDateTime_DaysBetween(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -229,7 +269,9 @@ end;
 (*
 TDateTime.HoursBetween
 ----------------------
-> function TDateTime.HoursBetween(Other: TDateTime): Int64;
+```
+function TDateTime.HoursBetween(Other: TDateTime): Int64;
+```
 *)
 procedure _LapeDateTime_HoursBetween(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -239,7 +281,9 @@ end;
 (*
 TDateTime.MinutesBetween
 ------------------------
-> function TDateTime.MinutesBetween(Other: TDateTime): Int64;
+```
+function TDateTime.MinutesBetween(Other: TDateTime): Int64;
+```
 *)
 procedure _LapeDateTime_MinutesBetween(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -249,7 +293,9 @@ end;
 (*
 TDateTime.SecondsBetween
 ------------------------
-> function TDateTime.SecondsBetween(Other: TDateTime): Int64;
+```
+function TDateTime.SecondsBetween(Other: TDateTime): Int64;
+```
 *)
 procedure _LapeDateTime_SecondsBetween(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -259,7 +305,9 @@ end;
 (*
 TDateTime.MilliSecondsBetween
 -----------------------------
-> function TDateTime.MilliSecondsBetween(Other: TDateTime): Int64;
+```
+function TDateTime.MilliSecondsBetween(Other: TDateTime): Int64;
+```
 *)
 procedure _LapeDateTime_MilliSecondsBetween(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -269,8 +317,12 @@ end;
 (*
 TDateTime.Date
 --------------
-> property TDateTime.Date: TDateTime
-> property TDateTime.Date(NewValue: TDateTime)
+```
+property TDateTime.Date: TDateTime
+```
+```
+property TDateTime.Date(NewValue: TDateTime)
+```
 
 Read or write just the date part.
 *)
@@ -287,8 +339,12 @@ end;
 (*
 TDateTime.Time
 --------------
-> property TDateTime.Time: TDateTime
-> property TDateTime.Time(NewValue: TDateTime)
+```
+property TDateTime.Time: TDateTime
+```
+```
+property TDateTime.Time(NewValue: TDateTime)
+```
 *)
 procedure _LapeDateTime_Time_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -303,8 +359,12 @@ end;
 (*
 TDateTime.Year
 --------------
-> property TDateTime.Year: Integer
-> property TDateTime.Year(NewValue: Integer)
+```
+property TDateTime.Year: Integer
+```
+```
+property TDateTime.Year(NewValue: Integer)
+```
 *)
 procedure _LapeDateTime_Year_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -319,8 +379,12 @@ end;
 (*
 TDateTime.Month
 --------------
-> property TDateTime.Month: Integer
-> property TDateTime.Month(NewValue: Integer)
+```
+property TDateTime.Month: Integer
+```
+```
+property TDateTime.Month(NewValue: Integer)
+```
 *)
 procedure _LapeDateTime_Month_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -335,8 +399,12 @@ end;
 (*
 TDateTime.Day
 --------------
-> property TDateTime.Day: Integer
-> property TDateTime.Day(NewValue: Integer)
+```
+property TDateTime.Day: Integer
+```
+```
+property TDateTime.Day(NewValue: Integer)
+```
 *)
 procedure _LapeDateTime_Day_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -351,8 +419,12 @@ end;
 (*
 TDateTime.Hour
 --------------
-> property TDateTime.Hour: Integer
-> property TDateTime.Hour(NewValue: Integer)
+```
+property TDateTime.Hour: Integer
+```
+```
+property TDateTime.Hour(NewValue: Integer)
+```
 *)
 procedure _LapeDateTime_Hour_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -367,8 +439,12 @@ end;
 (*
 TDateTime.Minute
 ----------------
-> property TDateTime.Minute: Integer
-> property TDateTime.Minute(NewValue: Integer)
+```
+property TDateTime.Minute: Integer
+```
+```
+property TDateTime.Minute(NewValue: Integer)
+```
 *)
 procedure _LapeDateTime_Minute_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -383,8 +459,12 @@ end;
 (*
 TDateTime.Second
 ----------------
-> property TDateTime.Second: Integer
-> property TDateTime.Second(NewValue: Integer)
+```
+property TDateTime.Second: Integer
+```
+```
+property TDateTime.Second(NewValue: Integer)
+```
 *)
 procedure _LapeDateTime_Second_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -399,8 +479,12 @@ end;
 (*
 TDateTime.Millisecond
 ---------------------
-> property TDateTime.Millisecond: Integer
-> property TDateTime.Millisecond(NewValue: Integer)
+```
+property TDateTime.Millisecond: Integer
+```
+```
+property TDateTime.Millisecond(NewValue: Integer)
+```
 *)
 procedure _LapeDateTime_Millisecond_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -415,7 +499,9 @@ end;
 (*
 Now
 ---
-> function Now: TDateTime;
+```
+function Now: TDateTime;
+```
 *)
 procedure _LapeNow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -425,7 +511,9 @@ end;
 (*
 NowUTC
 ------
-> function NowUTC: TDateTime;
+```
+function NowUTC: TDateTime;
+```
 *)
 procedure _LapeNowUTC(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -435,7 +523,9 @@ end;
 (*
 UnixTime
 --------
-> function UnixTime: Int64;
+```
+function UnixTime: Int64;
+```
 *)
 procedure _LapeUnixTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -445,7 +535,9 @@ end;
 (*
 LocalTimeOffset
 ---------------
-> function LocalTimeOffset: Integer;
+```
+function LocalTimeOffset: Integer;
+```
 
 Returns the local timezone offset in minutes. This is the difference between UTC time and local time.
 *)
@@ -458,7 +550,9 @@ end;
 (*
 PreciseSleep
 ------------
-> procedure PreciseSleep(Milliseconds: UInt32);
+```
+procedure PreciseSleep(Milliseconds: UInt32);
+```
 *)
 procedure _LapePreciseSleep(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -468,7 +562,9 @@ end;
 (*
 MillisecondsToTime
 ------------------
-> function MillisecondsToTime(Time: UInt64; out Days, Hours, Mins, Secs: Integer): Integer;
+```
+function MillisecondsToTime(Time: UInt64; out Days, Hours, Mins, Secs: Integer): Integer;
+```
 *)
 procedure _LapeMillisecondsToTime1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -478,7 +574,9 @@ end;
 (*
 MillisecondsToTime
 ------------------
-> function MillisecondsToTime(Time: UInt64; out Years, Months, Weeks, Days, Hours, Mins, Secs: Integer): Integer;
+```
+function MillisecondsToTime(Time: UInt64; out Years, Months, Weeks, Days, Hours, Mins, Secs: Integer): Integer;
+```
 *)
 procedure _LapeMillisecondsToTime2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -488,7 +586,9 @@ end;
 (*
 PerformanceTimer
 ----------------
-> function PerformanceTimer: Double;
+```
+function PerformanceTimer: Double;
+```
 *)
 procedure _LapePerformanceTimer(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -498,7 +598,9 @@ end;
 (*
 FormatMilliseconds
 ------------------
-> function FormatMilliseconds(Time: Double; Format: String): String;
+```
+function FormatMilliseconds(Time: Double; Format: String): String;
+```
 *)
 procedure _LapeFormatMilliseconds1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -508,7 +610,9 @@ end;
 (*
 FormatMilliseconds
 ------------------
-> function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String;
+```
+function FormatMilliseconds(Time: Double; TimeSymbols: Boolean = False): String;
+```
 *)
 procedure _LapeFormatMilliseconds2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -615,5 +719,4 @@ begin
 end;
 
 end.
-
 

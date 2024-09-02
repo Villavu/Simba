@@ -36,27 +36,26 @@ uses
 
 type
   TSimbaGeometry = class
-  public
-  class var
+  public class var
     CosTable: array[0..359] of Double;
     SinTable: array[0..359] of Double;
   public
     class constructor Create;
 
-    class function PolygonArea(const Polygon: TPointArray): Double; static; inline;
+    class function PolygonArea(const Polygon: TPointArray): Double; static;
     class function ExpandPolygon(const Polygon: TPointArray; Amount: Integer): TPointArray; static;
     class function CrossProduct(const r, p, q: TPoint): Int64; static; overload; inline;
     class function CrossProduct(const rx,ry, px,py, qx,qy: Double): Double; static; overload; inline;
-    class function LinesIntersect(const P1, P2, Q1, Q2: TPoint): Boolean; static; overload; inline;
-    class function LinesIntersect(const P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean; static; overload; inline;
-    class function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean; static; inline;
-    class function PointInBox(const P: TPoint; const Box: TBox): Boolean; static; inline;
-    class function PointInQuad(const P: TPoint; const A,B,C,D: TPoint): Boolean; static; overload; inline;
-    class function PointInQuad(const X, Y: Integer; const A,B,C,D: TPoint): Boolean; static; overload; inline;
-    class function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean; static; overload; inline;
-    class function PointInPolygon(const X, Y: Integer; const Polygon: TPointArray): Boolean; static; overload; inline;
-    class function PointInCircle(const X, Y, CenterX, CenterY: Integer; const Radius: Double): Boolean; static; overload; inline;
-    class function PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean; static; overload; inline;
+    class function LinesIntersect(const P1, P2, Q1, Q2: TPoint): Boolean; static; overload;
+    class function LinesIntersect(const P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean; static; overload;
+    class function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean; static;
+    class function PointInBox(const P: TPoint; const Box: TBox): Boolean; static;
+    class function PointInQuad(const P: TPoint; const A,B,C,D: TPoint): Boolean; static; overload;
+    class function PointInQuad(const X, Y: Integer; const A,B,C,D: TPoint): Boolean; static; overload;
+    class function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean; static; overload;
+    class function PointInPolygon(const X, Y: Integer; const Polygon: TPointArray): Boolean; static; overload;
+    class function PointInCircle(const X, Y, CenterX, CenterY: Integer; const Radius: Double): Boolean; static; overload;
+    class function PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean; static; overload;
     class function PointInEllipse(const P, Center: TPoint; const YRadius, XRadius: Double): Boolean; static;
 
     class function RotatePointFast(const P: TPoint; Degrees: Integer; X, Y: Double): TPoint; static;
@@ -65,7 +64,7 @@ type
     class function RotatePoint(const P: TPoint; Radians, X, Y: Double): TPoint; static;
     class function RotatePoints(const Points: TPointArray; Radians, X, Y: Double): TPointArray; static;
 
-    class function AngleBetween(const P1, P2: TPoint): Double; static; inline;
+    class function AngleBetween(const P1, P2: TPoint): Double; static;
     class function DeltaAngle(const DegreesA, DegreesB: Double; R: Double = 360): Double; static;
     class function DistToLine(const P, P1, P2: TPoint; out Nearest: TPoint): Double; static; overload;
     class function DistToLine(const P, P1, P2: TPoint): Double; static; overload;

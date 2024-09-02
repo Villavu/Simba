@@ -28,7 +28,9 @@ Encoding & Hashing
 (*
 EHashAlgo
 --------
-> type EHashAlgo = enum(SHA1, SHA256, SHA384, SHA512, MD5);
+```
+type EHashAlgo = enum(SHA1, SHA256, SHA384, SHA512, MD5);
+```
 
 ```{note}
 This enum is scoped, so must be used like `EHashAlgo.SHA512`
@@ -38,7 +40,9 @@ This enum is scoped, so must be used like `EHashAlgo.SHA512`
 (*
 EBaseEncoding
 ------------
-> type EBaseEncoding = enum(b64URL, b64, b32, b32Hex, b16);
+```
+type EBaseEncoding = enum(b64URL, b64, b32, b32Hex, b16);
+```
 
 ```{note}
 This enum is scoped, so must be used like `EBaseEncoding.b64`
@@ -48,7 +52,9 @@ This enum is scoped, so must be used like `EBaseEncoding.b64`
 (*
 HashData
 --------
-> function HashData(Algo: EHashAlgo; Buf: PByte; Len: Int32): String;
+```
+function HashData(Algo: EHashAlgo; Buf: PByte; Len: Int32): String;
+```
 *)
 procedure _LapeHashData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -58,7 +64,9 @@ end;
 (*
 HashString
 ----------
-> function HashString(Algo: EHashAlgo; S: String): String;
+```
+function HashString(Algo: EHashAlgo; S: String): String;
+```
 *)
 procedure _LapeHashString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -68,7 +76,9 @@ end;
 (*
 HashFile
 --------
-> function HashFile(Algo: EHashAlgo; FileName: String): String;
+```
+function HashFile(Algo: EHashAlgo; FileName: String): String;
+```
 *)
 procedure _LapeHashFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -78,7 +88,9 @@ end;
 (*
 Hash32
 ------
-> function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32;
+```
+function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32;
+```
 *)
 procedure _LapeHash32(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -88,7 +100,9 @@ end;
 (*
 Hash32
 ------
-> function Hash32(S: String; Seed: UInt32 = 0): UInt32;
+```
+function Hash32(S: String; Seed: UInt32 = 0): UInt32;
+```
 *)
 procedure _LapeHash32String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -98,7 +112,9 @@ end;
 (*
 Hash64
 ------
-> function Hash64(Data: PByte; Len: Int32; Seed: UInt64 = 0): UInt64;
+```
+function Hash64(Data: PByte; Len: Int32; Seed: UInt64 = 0): UInt64;
+```
 *)
 procedure _LapeHash64(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -108,7 +124,9 @@ end;
 (*
 Hash64
 ------
-> function Hash64(S: String; Seed: UInt64 = 0): UInt64;
+```
+function Hash64(S: String; Seed: UInt64 = 0): UInt64;
+```
 *)
 procedure _LapeHash64String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -118,7 +136,9 @@ end;
 (*
 BaseEncode
 ----------
-> function BaseEncode(Encoding: EBaseEncoding; const Data: String): String;
+```
+function BaseEncode(Encoding: EBaseEncoding; const Data: String): String;
+```
 *)
 procedure _LapeBaseEncode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -128,7 +148,9 @@ end;
 (*
 BaseDecode
 ----------
-> function BaseDecode(Encoding: EBaseEncoding; const Data: String): String;
+```
+function BaseDecode(Encoding: EBaseEncoding; const Data: String): String;
+```
 *)
 procedure _LapeBaseDecode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -138,7 +160,9 @@ end;
 (*
 HOTPCalculateToken
 ------------------
-> function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer;
+```
+function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer;
+```
 *)
 procedure _LapeHOTPCalculateToken(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -148,7 +172,9 @@ end;
 (*
 TOTPCalculateToken
 ------------------
-> function TOTPCalculateToken(const Secret: String): Integer;
+```
+function TOTPCalculateToken(const Secret: String): Integer;
+```
 *)
 procedure _LapeTOTPCalculateToken(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -193,7 +219,9 @@ end;
 (*
 CompressBytes
 -------------
-> function CompressBytes(Bytes: TByteArray): TByteArray;
+```
+function CompressBytes(Bytes: TByteArray): TByteArray;
+```
 
 ```{note}
 Zlib compression is used.
@@ -207,7 +235,9 @@ end;
 (*
 DecompressBytes
 ---------------
-> function DecompressBytes(Bytes: TByteArray): TByteArray;
+```
+function DecompressBytes(Bytes: TByteArray): TByteArray;
+```
 
 ```{note}
 Zlib compression is used.
@@ -221,7 +251,9 @@ end;
 (*
 CompressString
 --------------
-> function CompressString(Data: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
+```
+function CompressString(Data: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
+```
 
 ```{note}
 Zlib compression is used.
@@ -235,7 +267,9 @@ end;
 (*
 DecompressBytes
 ---------------
-> function DeCompressString(Data: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
+```
+function DeCompressString(Data: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
+```
 
 ```{note}
 Zlib compression is used.
@@ -249,7 +283,9 @@ end;
 (*
 SynLZCompress
 -------------
-> function SynLZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
+```
+function SynLZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
+```
 *)
 procedure _LapeSynLZCompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -259,7 +295,9 @@ end;
 (*
 SynLZDecompress
 ---------------
-> function SynLZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
+```
+function SynLZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
+```
 *)
 procedure _LapeSynLZDecompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -269,7 +307,9 @@ end;
 (*
 SynLZCompressDestLen
 --------------------
-> function SynLZCompressDestLen(Len: Integer): Integer;
+```
+function SynLZCompressDestLen(Len: Integer): Integer;
+```
 *)
 procedure _LapeSynLZCompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -279,7 +319,9 @@ end;
 (*
 SynLZDecompressDestLen
 ----------------------
-> function SynLZDecompressDestLen(Src: Pointer): Integer;
+```
+function SynLZDecompressDestLen(Src: Pointer): Integer;
+```
 *)
 procedure _LapeSynLZDecompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -289,7 +331,9 @@ end;
 (*
 FastCompressImage
 -----------------
-> procedure FastCompressImages(Images: TSimbaImageArray; var Data: Pointer; out DataSize: SizeUInt);
+```
+procedure FastCompressImages(Images: TSimbaImageArray; var Data: Pointer; out DataSize: SizeUInt);
+```
 *)
 procedure _LapeFastCompressImages(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -299,7 +343,9 @@ end;
 (*
 FastDeCompressImages
 --------------------
-> function FastDeCompressImages(Data: Pointer; DataLen: SizeUInt): TSimbaImageArray;
+```
+function FastDeCompressImages(Data: Pointer; DataLen: SizeUInt): TSimbaImageArray;
+```
 *)
 procedure _LapeFastDeCompressImages(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -358,4 +404,3 @@ begin
 end;
 
 end.
-

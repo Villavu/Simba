@@ -1261,8 +1261,9 @@ end;
 
 function TPointArrayHelper.Unique: TPointArray;
 var
-  Area, Width, Index: Integer;
+  Width, Index: Integer;
   Box: TBox;
+  BoxArea: Int64;
   Seen: TBooleanArray;
   SrcPtr, DstPtr: PPoint;
   SrcUpper: PtrUInt;
@@ -1275,14 +1276,14 @@ begin
      * Larger than 512MB in memory (approx 25K*25K area)
   }
   Box := Self.Bounds;
-  Area := Box.Area;
+  BoxArea := Box.Area;
   Width := Box.Width;
-  if (Area * SizeOf(TPoint) > $20000000) or
-     (Length(Self) / Area < 0.0002) then
+  if (BoxArea * SizeOf(TPoint) > $20000000) or
+     (Length(Self) / BoxArea < 0.0002) then
     Exit(specialize TArrayUnique<TPoint>.Unique(Self));
 
   SetLength(Result, Length(Self));
-  SetLength(Seen, Area);
+  SetLength(Seen, BoxArea);
 
   SrcUpper := PtrUInt(@Self[High(Self)]);
   SrcPtr := @Self[0];
@@ -3327,6 +3328,11 @@ function T2DPointArrayHelper.Intersection: TPointArray;
 var
   I: Integer;
 begin
+  if (Length(Self) = 0) then
+    Exit(Default(TPointArray));
+  if (Length(Self) = 1) then
+    Exit(Self[0]);
+
   Result := Self[0].Intersection(Self[1]);
 
   if (Length(Result) > 0) and (Length(Self) > 1) then

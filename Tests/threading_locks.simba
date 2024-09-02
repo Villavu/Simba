@@ -1,0 +1,55 @@
+{$assertions on}
+
+var
+  lock: TLock := TLock.Create();
+  counter, errors: Integer;
+
+procedure TestWithLocks;
+var
+  expected: Integer;
+begin
+  while GetTimeRunning() < 1000 do
+  begin
+    lock.Enter();
+    expected := counter;
+    sleep(10);
+    if (counter <> expected) then
+      Inc(errors);
+    inc(counter);
+    lock.Leave();
+  end;
+end;
+
+procedure TestWithoutLocks;
+var
+  expected: Integer;
+begin
+  while GetTimeRunning() < 1000 do
+  begin
+    expected := counter;
+    sleep(10);
+    if (counter <> expected) then
+      Inc(errors);
+    inc(counter);
+  end;
+end;
+
+begin
+  counter := 0;
+  errors := 0;
+  RunInThread(@TestWithoutLocks);
+  RunInThread(@TestWithoutLocks);
+  RunInThread(@TestWithoutLocks);
+  Sleep(1500);
+  Assert(errors > 0);
+
+  counter := 0;
+  errors := 0;
+  RunInThread(@TestWithoutLocks);
+  RunInThread(@TestWithoutLocks);
+  RunInThread(@TestWithoutLocks);
+  Sleep(1500);
+  Assert(errors = 0);
+
+  lock.Free();
+end;

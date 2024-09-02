@@ -1,4 +1,4 @@
-// some monstrosity
+// some monstrosity, adds doc headers to lape wrappers
 
 var
   Contents, NewContents, Import, WrapperName, Header, DocComment, Line: String;
@@ -24,32 +24,26 @@ begin
   HeaderName := Header.After(' ');
   HeaderName := HeaderName.CopyRange(1, HeaderName.IndexOfAny(['(',':',';']) - 1);
 
-  Doc := '(*%s%s%s%s%s> %s%s*)'.format([LINE_SEP, HeaderName, LINE_SEP, '~' * Length(HeaderName), LINE_SEP, Header, LINE_SEP]);
+  Doc := '(*'  + LINE_SEP +
+         '%s'  + LINE_SEP +
+         '%s'  + LINE_SEP +
+         '```' + LINE_SEP +
+         '%s'  + LINE_SEP +
+         '```' + LINE_SEP +
+         '*)';
+
+  Doc := Format(Doc, [HeaderName, '-' * Length(HeaderName), Header]);
+
   Map += [WrapperName, Doc];
 end;
 
 begin
-  Contents := FileRead('Source/script/imports/simba/simba.import_dialogs.pas');
-
+  Contents := FileRead('Source\script\imports\simba.import_threading.pas');
   for DocComment in Contents.BetweenAll('(*','*)') do
   begin
     if DocComment.Contains('===') then // section title
       Continue;
     Contents := Contents.Replace('(*' + DocComment + '*)' + LINE_SEP, '');
-  end;
-
-  for Import in Contents.BetweenAll("addClassVar(", ");" + LINE_SEP) do
-  begin
-    ReadWrapperName := Import.Between('@', '_Read');
-    WriteWrapperName := Import.Between('_Read, @', '_Write');
-
-    Params := Import.BetweenAll(#39, #39);
-    Params.RemoveAll(', ');
-
-    if (ReadWrapperName <> '') then
-      Add('function ' + Params[0] + '.Get' + Params[1] + ': ' + Params[2], ReadWrapperName + '_Read');
-     if (WriteWrapperName <> '') then
-      Add('procedure ' + Params[0] + '.Set' + Params[1] + '(Value: ' + Params[2] + ')', WriteWrapperName + '_Write');
   end;
 
   for Import in Contents.BetweenAll("addGlobalFunc(", ");" + LINE_SEP) do
@@ -60,7 +54,7 @@ begin
       Add(Header, WrapperName);
   end;
 
-  for Line in Contents.Split(LINE_SEP) do
+  for Line in Contents.Split(LINE_SEP, False) do
   begin
     for I := 0 to High(Map) do
       if (Line.Contains('procedure ' + Map[i].WrapperName + '(')) then

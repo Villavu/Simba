@@ -514,8 +514,8 @@ begin
 
       if (Length(Decls) > 0) then
       begin
-        if (Decl is TDeclaration_Method) then
-          FDisplayPoint.X := FDisplayPoint.X - Length(Decl.Name);
+        if (Decls[0] is TDeclaration_Method) and (Length(Decls[0].Name) > 0) then
+          FDisplayPoint.X := FDisplayPoint.X - Length(Decls[0].Name);
 
         FHintForm.Font := Font;
         FHintForm.Font.Color := Editor.Highlighter.IdentifierAttribute.Foreground;

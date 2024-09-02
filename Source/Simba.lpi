@@ -238,6 +238,9 @@
         </CompilerOptions>
       </Item5>
       <Item6 Name="MACOS64">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -263,9 +266,7 @@
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <GenerateDebugInfo Value="False"/>
               <DebugInfoType Value="dsDwarf2Set"/>
-              <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
             <Options>
@@ -291,6 +292,9 @@
         </CompilerOptions>
       </Item6>
       <Item7 Name="MACOS-AARCH64">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -343,7 +347,7 @@
         </CompilerOptions>
       </Item7>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="760724751738" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item1 ID="760724751738" Modes="MACOS64,MACOS-AARCH64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

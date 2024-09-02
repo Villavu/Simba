@@ -31,7 +31,9 @@ Process related things.
 (*
 GetProcessID
 ------------
-> function GetProcessID: TProcessID;
+```
+function GetProcessID: TProcessID;
+```
 
 Returns the process ID of the running script.
 *)
@@ -43,7 +45,9 @@ end;
 (*
 GetProcessArgs
 --------------
-> function GetProcessArgs: TStringArray;
+```
+function GetProcessArgs: TStringArray;
+```
 
 Returns all process arguments.
 *)
@@ -65,7 +69,9 @@ end;
 (*
 GetProcessArg
 -------------
-> function GetProcessArg(Key: String): String;
+```
+function GetProcessArg(Key: String): String;
+```
 
 Argument should be passed as a key-pair value: `Name=Value`
 *)
@@ -77,7 +83,9 @@ end;
 (*
 IsProcessRunning
 ----------------
-> function IsProcessRunning(PID: TProcessID): Boolean;
+```
+function IsProcessRunning(PID: TProcessID): Boolean;
+```
 *)
 procedure _LapeIsProcessRunning(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -87,7 +95,9 @@ end;
 (*
 IsProcess64Bit
 --------------
-> function IsProcess64Bit(PID: TProcessID): Boolean;
+```
+function IsProcess64Bit(PID: TProcessID): Boolean;
+```
 *)
 procedure _LapeIsProcess64Bit(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -97,7 +107,9 @@ end;
 (*
 GetProcessPath
 --------------
-> function GetProcessPath(PID: TProcessID): String;
+```
+function GetProcessPath(PID: TProcessID): String;
+```
 *)
 procedure _LapeGetProcessPath(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -107,7 +119,9 @@ end;
 (*
 GetProcessMemUsage
 ------------------
-> function GetProcessMemUsage(PID: TProcessID): Int64;
+```
+function GetProcessMemUsage(PID: TProcessID): Int64;
+```
 *)
 procedure _LapeGetProcessMemUsage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -117,7 +131,9 @@ end;
 (*
 GetProcessStartTime
 -------------------
-> function GetProcessStartTime(PID: TProcessID): TDateTime;
+```
+function GetProcessStartTime(PID: TProcessID): TDateTime;
+```
 *)
 procedure _LapeGetProcessStartTime(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -127,7 +143,9 @@ end;
 (*
 GetProcessAge
 -------------
-> function GetProcessAge(PID: TProcessID): UInt64;
+```
+function GetProcessAge(PID: TProcessID): UInt64;
+```
 *)
 procedure _LapeGetProcessAge(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -137,7 +155,9 @@ end;
 (*
 TerminateProcess
 ----------------
-> procedure TerminateProcess(PID: TProcessID);
+```
+procedure TerminateProcess(PID: TProcessID);
+```
 *)
 procedure _LapeTerminateProcess(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -147,7 +167,9 @@ end;
 (*
 GetEnvVar
 ---------
-> function GetEnvVar(Name: String): String
+```
+function GetEnvVar(Name: String): String
+```
 *)
 procedure _LapeGetEnvVar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -157,7 +179,9 @@ end;
 (*
 GetEnvVars
 ----------
-> function GetEnvVars: TStringArray
+```
+function GetEnvVars: TStringArray
+```
 *)
 procedure _LapeGetEnvVars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
@@ -193,8 +217,12 @@ end;
 (*
 TRunningProcess.WaitOnExit
 --------------------------
-> function WaitOnExit: Boolean; overload;
-> function WaitOnExit(Timeout: Integer): Boolean; overload;
+```
+function WaitOnExit: Boolean; overload;
+```
+```
+function WaitOnExit(Timeout: Integer): Boolean; overload;
+```
 *)
 procedure _LapeRunningProcess_WaitOnExit1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -209,7 +237,9 @@ end;
 (*
 TRunningProcess.Terminate
 -------------------------
-> function Terminate(AExitCode: Integer): Boolean;
+```
+function Terminate(AExitCode: Integer): Boolean;
+```
 *)
 procedure _LapeRunningProcess_Terminate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -219,7 +249,9 @@ end;
 (*
 TRunningProcess.Running
 ------------------------
-> property TRunningProcess.Running: Boolean
+```
+property TRunningProcess.Running: Boolean
+```
 *)
 procedure _LapeRunningProcess_Running_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -229,7 +261,9 @@ end;
 (*
 TRunningProcess.PID
 -------------------
-> property TRunningProcess.PID: TProcessID
+```
+property TRunningProcess.PID: TProcessID
+```
 *)
 procedure _LapeRunningProcess_PID_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -239,7 +273,9 @@ end;
 (*
 TRunningProcess.ExitCode
 ------------------------
-> property TRunningProcess.ExitCode: TProcessExitCode
+```
+property TRunningProcess.ExitCode: TProcessExitCode
+```
 *)
 procedure _LapeRunningProcess_ExitCode_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -249,7 +285,9 @@ end;
 (*
 TRunningProcessPiped.Read
 -------------------------
-> function TRunningProcessPiped.Read(Buf: PByte; Count: Integer): Integer;
+```
+function TRunningProcessPiped.Read(Buf: PByte; Count: Integer): Integer;
+```
 *)
 procedure _LapeRunningProcessPiped_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -259,7 +297,9 @@ end;
 (*
 TRunningProcessPiped.ReadString
 -------------------------------
-> function TRunningProcessPiped.ReadString: String;
+```
+function TRunningProcessPiped.ReadString: String;
+```
 *)
 procedure _LapeRunningProcessPiped_ReadString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -269,7 +309,9 @@ end;
 (*
 TRunningProcessPiped.Write
 --------------------------
-> function TRunningProcessPiped.Write(Buf: PByte; Count: Integer): Integer;
+```
+function TRunningProcessPiped.Write(Buf: PByte; Count: Integer): Integer;
+```
 *)
 procedure _LapeRunningProcessPiped_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -279,7 +321,9 @@ end;
 (*
 TRunningProcessPiped.WriteString
 --------------------------------
-> function TRunningProcessPiped.WriteString(Str: String): Integer;
+```
+function TRunningProcessPiped.WriteString(Str: String): Integer;
+```
 *)
 procedure _LapeRunningProcessPiped_WriteString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -289,7 +333,9 @@ end;
 (*
 TRunningProcessPiped.ReadBytesAvailable
 ---------------------------------------
-> property TRunningProcessPiped.ReadBytesAvailable: Integer
+```
+property TRunningProcessPiped.ReadBytesAvailable: Integer
+```
 *)
 procedure _LapeRunningProcessPiped_ReadBytesAvailable_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -299,8 +345,12 @@ end;
 (*
 StartProcess
 ------------
-> function StartProcess(Executable: String; Params: TStringArray): TRunningProcess;
-> function StartProcess(Executable: String; Params: TStringArray; Cwd: String; Env: TStringArray = []): TRunningProcess;
+```
+function StartProcess(Executable: String; Params: TStringArray): TRunningProcess;
+```
+```
+function StartProcess(Executable: String; Params: TStringArray; Cwd: String; Env: TStringArray = []): TRunningProcess;
+```
 *)
 procedure _LapeStartProcess1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -315,8 +365,12 @@ end;
 (*
 StartProcessPiped
 -----------------
-> function StartProcessPiped(Executable: String; Params: TStringArray): TRunningProcessPiped;
-> function StartProcessPiped(Executable: String; Params: TStringArray; Cwd: String; Env: TStringArray = []): TRunningProcessPiped;
+```
+function StartProcessPiped(Executable: String; Params: TStringArray): TRunningProcessPiped;
+```
+```
+function StartProcessPiped(Executable: String; Params: TStringArray; Cwd: String; Env: TStringArray = []): TRunningProcessPiped;
+```
 *)
 procedure _LapeStartProcessPiped1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -331,8 +385,12 @@ end;
 (*
 RunProcess
 ------------
-> function RunProcess(Executable: String; Params: TStringArray): TProcessExitCode;
-> function RunProcess(Executable: String; Params: TStringArray; out Output: String): TProcessExitCode;
+```
+function RunProcess(Executable: String; Params: TStringArray): TProcessExitCode;
+```
+```
+function RunProcess(Executable: String; Params: TStringArray; out Output: String): TProcessExitCode;
+```
 *)
 procedure _LapeRunProcess1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -347,8 +405,12 @@ end;
 (*
 RunSimbaScript
 --------------
-> function RunSimbaScript(Script: String; Parameters: TStringArray): TProcessExitStatus;
-> function RunSimbaScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus;
+```
+function RunSimbaScript(Script: String; Parameters: TStringArray): TProcessExitStatus;
+```
+```
+function RunSimbaScript(Script: String; Parameters: TStringArray; out Output: String): TProcessExitStatus;
+```
 
 Runs a simba script and **will wait** until the script has finished.
 *)
@@ -365,7 +427,9 @@ end;
 (*
 StartSimbaScript
 ----------------
-> function StartSimbaScript(Script: String; Params: TStringArray): TRunningProcess;
+```
+function StartSimbaScript(Script: String; Params: TStringArray): TRunningProcess;
+```
 
 Start a simba script.
 *)
@@ -377,7 +441,9 @@ end;
 (*
 StartSimbaScriptPiped
 ---------------------
-> function StartSimbaScriptPiped(Script: String; Params: TStringArray): TRunningProcessPiped;
+```
+function StartSimbaScriptPiped(Script: String; Params: TStringArray): TRunningProcessPiped;
+```
 
 Start a simba script (with piped input & output)
 *)
@@ -445,4 +511,3 @@ begin
 end;
 
 end.
-

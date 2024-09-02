@@ -31,7 +31,9 @@ Target related methods.
 (*
 TTarget.SetDesktop
 ------------------
-> procedure TTarget.SetDesktop;
+```
+procedure TTarget.SetDesktop;
+```
 
 Sets the desktop as the target.
 *)
@@ -43,7 +45,9 @@ end;
 (*
 TTarget.SetImage
 ----------------
-> procedure TTarget.SetImage(TImage: TImage);
+```
+procedure TTarget.SetImage(TImage: TImage);
+```
 
 Sets the TSimbaImage as a target.
 
@@ -59,7 +63,9 @@ end;
 (*
 TTarget.SetWindow
 -----------------
-> procedure TTarget.SetWindow(Window: TWindowHandle);
+```
+procedure TTarget.SetWindow(Window: TWindowHandle);
+```
 
 Sets a window handle as a target.
 *)
@@ -71,7 +77,9 @@ end;
 (*
 TTarget.SetEIOS
 ---------------
-> procedure TTarget.SetEIOS(Plugin, Args: String);
+```
+procedure TTarget.SetEIOS(Plugin, Args: String);
+```
 
 Sets a plugin (via EIOS API) as the target.
 *)
@@ -83,7 +91,9 @@ end;
 (*
 TTarget.SetPlugin
 -----------------
-> procedure TTarget.SetPlugin(FileName, Args: String);
+```
+procedure TTarget.SetPlugin(FileName, Args: String);
+```
 
 Sets a plugin (via SimbaPluginTarget API) as the target.
 For more details about the API see <http://villavu.github.io/Simba/tutorials/plugins/plugin-target.html>
@@ -96,7 +106,9 @@ end;
 (*
 TTarget.SetPlugin
 -----------------
-> procedure TTarget.SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalImage);
+```
+procedure TTarget.SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalImage);
+```
 
 Overloaded version that returns a external image to draw on.
 *)
@@ -108,7 +120,9 @@ end;
 (*
 TTarget.RemoveTargetInvalidEvent
 --------------------------------
-> procedure TTarget.RemoveTargetInvalidEvent(Event: TTargetEvent);
+```
+procedure TTarget.RemoveTargetInvalidEvent(Event: TTargetEvent);
+```
 *)
 procedure _Lape_Target_RemoveTargetInvalidEvent(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -118,7 +132,9 @@ end;
 (*
 TTarget.AddTargetChangeEvent
 ----------------------------
-> function TTarget.AddTargetChangeEvent(Event: TTargetEvent): TTargetEvent;
+```
+function TTarget.AddTargetChangeEvent(Event: TTargetEvent): TTargetEvent;
+```
 *)
 procedure _Lape_Target_AddTargetChangeEvent(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -128,7 +144,9 @@ end;
 (*
 TTarget.RemoveTargetChangeEvent
 -------------------------------
-> procedure TTarget.RemoveTargetChangeEvent(Event: TTargetEvent);
+```
+procedure TTarget.RemoveTargetChangeEvent(Event: TTargetEvent);
+```
 *)
 procedure _Lape_Target_RemoveTargetChangeEvent(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -138,7 +156,9 @@ end;
 (*
 TTarget.FreezeImage
 -------------------
-> procedure TTarget.FreezeImage(ABounds: TBox);
+```
+procedure TTarget.FreezeImage(ABounds: TBox);
+```
 *)
 procedure _LapeTarget_FreezeImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -148,7 +168,9 @@ end;
 (*
 TTarget.UnFreezeImage
 ---------------------
-> procedure TTarget.UnFreezeImage;
+```
+procedure TTarget.UnFreezeImage;
+```
 *)
 procedure _LapeTarget_UnFreezeImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -158,7 +180,9 @@ end;
 (*
 TTarget.IsImageFrozen
 ---------------------
-> function TTarget.IsImageFrozen: Boolean;
+```
+function TTarget.IsImageFrozen: Boolean;
+```
 *)
 procedure _LapeTarget_IsImageFrozen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -168,7 +192,9 @@ end;
 (*
 TTarget.GetImage
 ----------------
-> function TTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage;
+```
+function TTarget.GetImage(Bounds: TBox = [-1,-1,-1,-1]): TImage;
+```
 *)
 procedure _LapeTarget_GetImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -178,7 +204,9 @@ end;
 (*
 TTarget.IsValid
 ---------------
-> function TTarget.IsValid: Boolean;
+```
+function TTarget.IsValid: Boolean;
+```
 *)
 procedure _LapeTarget_IsValid(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -188,7 +216,9 @@ end;
 (*
 TTarget.IsFocused
 -----------------
-> function TTarget.IsFocused: Boolean;
+```
+function TTarget.IsFocused: Boolean;
+```
 *)
 procedure _LapeTarget_IsFocused(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -198,7 +228,9 @@ end;
 (*
 TTarget.Focus
 -------------
-> function TTarget.Focus: Boolean;
+```
+function TTarget.Focus: Boolean;
+```
 *)
 procedure _LapeTarget_Focus(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -208,7 +240,9 @@ end;
 (*
 TTarget.ToString
 ----------------
-> function TTarget.ToString: String;
+```
+function TTarget.ToString: String;
+```
 *)
 procedure _LapeTarget_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -218,7 +252,9 @@ end;
 (*
 TTarget.TargetKind
 ------------------
-> property TTarget.TargetKind: ETargetKind;
+```
+property TTarget.TargetKind: ETargetKind;
+```
 *)
 procedure _LapeTarget_GetTargetKind(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -228,7 +264,9 @@ end;
 (*
 TTarget.TargetWindow
 --------------------
-> property TTarget.TargetWindow: TWindowHandle;
+```
+property TTarget.TargetWindow: TWindowHandle;
+```
 *)
 procedure _LapeTarget_GetTargetWindow(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -238,7 +276,9 @@ end;
 (*
 TTarget.TargetImage
 -------------------
-> property TTarget.TargetImage: TImage;
+```
+property TTarget.TargetImage: TImage;
+```
 *)
 procedure _LapeTarget_GetTargetImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -248,8 +288,12 @@ end;
 (*
 TTarget.CustomClientArea
 ------------------------
-> property TTarget.CustomClientArea: TBox;
-> property TTarget.CustomClientArea(Value: TBox);
+```
+property TTarget.CustomClientArea: TBox;
+```
+```
+property TTarget.CustomClientArea(Value: TBox);
+```
 
 Set a custom client area within the bounds of the target.
 
@@ -271,8 +315,12 @@ end;
 (*
 TTarget.AutoFocus
 -----------------
-> property TTarget.AutoFocus(Value: Boolean);
-> property TTarget.AutoFocus: Boolean;
+```
+property TTarget.AutoFocus(Value: Boolean);
+```
+```
+property TTarget.AutoFocus: Boolean;
+```
 *)
 procedure _LapeTarget_SetAutoFocus(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -287,7 +335,9 @@ end;
 (*
 TTarget.Bounds
 --------------
-> property TTarget.Bounds: TBox;
+```
+property TTarget.Bounds: TBox;
+```
 *)
 procedure _LapeTarget_Bounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -297,7 +347,9 @@ end;
 (*
 TTarget.Width
 -------------
-> property TTarget.Width: Integer;
+```
+property TTarget.Width: Integer;
+```
 *)
 procedure _LapeTarget_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -307,7 +359,9 @@ end;
 (*
 TTarget.Height
 --------------
-> property TTarget.Height: Integer;
+```
+property TTarget.Height: Integer;
+```
 *)
 procedure _LapeTarget_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -317,7 +371,9 @@ end;
 (*
 TTarget.Size
 ------------
-> property TTarget.Size: TSize;
+```
+property TTarget.Size: TSize;
+```
 
 Returns the targets dimensions as in a TSize.
 *)
@@ -329,9 +385,15 @@ end;
 (*
 TTarget.AddMouseEvent
 ---------------------
-> function TTarget.AddMouseEvent(Event: TMouseButtonEvent): TMouseButtonEvent;
-> function TTarget.AddMouseEvent(Event: TMouseTeleportEvent): TMouseTeleportEvent;
-> function TTarget.AddMouseEvent(Event: TMouseMovingEvent): TMouseMovingEvent;
+```
+function TTarget.AddMouseEvent(Event: TMouseButtonEvent): TMouseButtonEvent;
+```
+```
+function TTarget.AddMouseEvent(Event: TMouseTeleportEvent): TMouseTeleportEvent;
+```
+```
+function TTarget.AddMouseEvent(Event: TMouseMovingEvent): TMouseMovingEvent;
+```
 *)
 procedure _LapeTarget_AddMouseEvent1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -351,9 +413,15 @@ end;
 (*
 TTarget.RemoveMouseEvent
 ------------------------
-> procedure TTarget.RemoveMouseEvent(Event: TMouseButtonEvent); overload;
-> procedure TTarget.RemoveMouseEvent(Event: TMouseTeleportEvent); overload;
-> procedure TTarget.RemoveMouseEvent(Event: TMouseMovingEvent); overload;
+```
+procedure TTarget.RemoveMouseEvent(Event: TMouseButtonEvent); overload;
+```
+```
+procedure TTarget.RemoveMouseEvent(Event: TMouseTeleportEvent); overload;
+```
+```
+procedure TTarget.RemoveMouseEvent(Event: TMouseMovingEvent); overload;
+```
 *)
 procedure _LapeTarget_RemoveMouseEvent1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -373,7 +441,9 @@ end;
 (*
 TTarget.MouseTeleport
 ---------------------
-> procedure TTarget.MouseTeleport(P: TPoint);
+```
+procedure TTarget.MouseTeleport(P: TPoint);
+```
 
 Instantly moves the mouse to `P`
 *)
@@ -385,7 +455,9 @@ end;
 (*
 TTarget.MouseClick
 ------------------
-> procedure TTarget.MouseClick(Button: EMouseButton);
+```
+procedure TTarget.MouseClick(Button: EMouseButton);
+```
 *)
 procedure _LapeTarget_MouseClick(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -395,7 +467,9 @@ end;
 (*
 TTarget.MouseDown
 -----------------
-> procedure TTarget.MouseDown(Button: EMouseButton);
+```
+procedure TTarget.MouseDown(Button: EMouseButton);
+```
 *)
 procedure _LapeTarget_MouseDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -405,7 +479,9 @@ end;
 (*
 TTarget.MouseUp
 ---------------
-> procedure TTarget.MouseUp(Button: EMouseButton);
+```
+procedure TTarget.MouseUp(Button: EMouseButton);
+```
 *)
 procedure _LapeTarget_MouseUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -415,7 +491,9 @@ end;
 (*
 TTarget.MouseScroll
 -------------------
-> procedure TTarget.MouseScroll(Scrolls: Integer);
+```
+procedure TTarget.MouseScroll(Scrolls: Integer);
+```
 *)
 procedure _LapeTarget_MouseScroll(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -425,7 +503,9 @@ end;
 (*
 TTarget.MousePressed
 --------------------
-> function TTarget.MousePressed(Button: EMouseButton): Boolean;
+```
+function TTarget.MousePressed(Button: EMouseButton): Boolean;
+```
 *)
 procedure _LapeTarget_MousePressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -435,7 +515,9 @@ end;
 (*
 TTarget.MouseMove
 -----------------
-> procedure TTarget.MouseMove(Dest: TPoint);
+```
+procedure TTarget.MouseMove(Dest: TPoint);
+```
 
 Move the mouse in a human-like way.
 
@@ -453,8 +535,12 @@ end;
 (*
 TTarget.MouseMove
 -----------------
-> procedure MouseMove(Box: TBox; ForcedMove: Boolean = False); overload;
-> procedure MouseMove(Quad: TQuad; ForcedMove: Boolean = False); overload;
+```
+procedure MouseMove(Box: TBox; ForcedMove: Boolean = False); overload;
+```
+```
+procedure MouseMove(Quad: TQuad; ForcedMove: Boolean = False); overload;
+```
 
 `MouseMove` overloads.
 Use `ForcedMove` to determine if the mouse will still move if it's already inside the box/quad.
@@ -472,8 +558,12 @@ end;
 (*
 TTarget.MouseXY
 ---------------
-> property TTarget.MouseXY: TPoint;
-> property TTarget.MouseXY(Value: TPoint);
+```
+property TTarget.MouseXY: TPoint;
+```
+```
+property TTarget.MouseXY(Value: TPoint);
+```
 *)
 procedure _LapeTarget_MouseXY_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -488,8 +578,12 @@ end;
 (*
 TTarget.MouseX
 --------------
-> property TTarget.MouseX: Integer;
-> property TTarget.MouseX(Value: Integer);
+```
+property TTarget.MouseX: Integer;
+```
+```
+property TTarget.MouseX(Value: Integer);
+```
 *)
 procedure _LapeTarget_MouseX_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -504,8 +598,12 @@ end;
 (*
 TTarget.MouseY
 --------------
-> property TTarget.MouseY: Integer;
-> property TTarget.MouseY(Value: Integer);
+```
+property TTarget.MouseY: Integer;
+```
+```
+property TTarget.MouseY(Value: Integer);
+```
 *)
 procedure _LapeTarget_MouseY_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -520,7 +618,9 @@ end;
 (*
 TTarget.AddTargetInvalidEvent
 -----------------------------
-> function TTarget.AddTargetInvalidEvent(Event: TTargetEvent): TTargetEvent;
+```
+function TTarget.AddTargetInvalidEvent(Event: TTargetEvent): TTargetEvent;
+```
 *)
 procedure _Lape_Target_AddTargetInvalidEvent(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -530,7 +630,9 @@ end;
 (*
 TTarget.KeySend
 ---------------
-> procedure TTarget.KeySend(Text: String);
+```
+procedure TTarget.KeySend(Text: String);
+```
 *)
 procedure _LapeTarget_KeySend(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -540,7 +642,9 @@ end;
 (*
 TTarget.KeyDown
 ---------------
-> procedure TTarget.KeyDown(Key: EKeyCode);
+```
+procedure TTarget.KeyDown(Key: EKeyCode);
+```
 *)
 procedure _LapeTarget_KeyDown(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -550,7 +654,9 @@ end;
 (*
 TTarget.KeyUp
 -------------
-> procedure TTarget.KeyUp(Key: EKeyCode);
+```
+procedure TTarget.KeyUp(Key: EKeyCode);
+```
 *)
 procedure _LapeTarget_KeyUp(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -560,7 +666,9 @@ end;
 (*
 TTarget.KeyPress
 ----------------
-> procedure TTarget.KeyPress(Key: EKeyCode);
+```
+procedure TTarget.KeyPress(Key: EKeyCode);
+```
 *)
 procedure _LapeTarget_KeyPress(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -570,7 +678,9 @@ end;
 (*
 TTarget.KeyPressed
 ------------------
-> function TTarget.KeyPressed(Key: EKeyCode): Boolean;
+```
+function TTarget.KeyPressed(Key: EKeyCode): Boolean;
+```
 *)
 procedure _LapeTarget_KeyPressed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -580,7 +690,9 @@ end;
 (*
 TTarget.KeyCodeFromChar
 -----------------------
-> function TTarget.KeyCodeFromChar(C: Char): EKeyCode;
+```
+function TTarget.KeyCodeFromChar(C: Char): EKeyCode;
+```
 *)
 procedure _LapeTarget_KeyCodeFromChar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -590,7 +702,9 @@ end;
 (*
 TTarget.MatchColor
 ------------------
-> function TTarget.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
+```
+function TTarget.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
+```
 *)
 procedure _LapeTarget_MatchColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -600,7 +714,9 @@ end;
 (*
 TTarget.FindColor
 -----------------
-> function TTarget.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeTarget_FindColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -610,7 +726,9 @@ end;
 (*
 TTarget.FindColor
 -----------------
-> function TTarget.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeTarget_FindColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -620,7 +738,9 @@ end;
 (*
 TTarget.FindColor
 -----------------
-> function TTarget.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeTarget_FindColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -630,7 +750,9 @@ end;
 (*
 TTarget.CountColor
 ------------------
-> function TTarget.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer;
+```
+function TTarget.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer;
+```
 *)
 procedure _LapeTarget_CountColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -640,7 +762,9 @@ end;
 (*
 TTarget.CountColor
 ------------------
-> function TTarget.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): Integer;
+```
+function TTarget.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): Integer;
+```
 *)
 procedure _LapeTarget_CountColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -650,7 +774,9 @@ end;
 (*
 TTarget.CountColor
 ------------------
-> function TTarget.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer;
+```
+function TTarget.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer;
+```
 *)
 procedure _LapeTarget_CountColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -660,7 +786,9 @@ end;
 (*
 TTarget.HasColor
 ----------------
-> function TTarget.HasColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
+```
+function TTarget.HasColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
+```
 *)
 procedure _LapeTarget_HasColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -670,7 +798,9 @@ end;
 (*
 TTarget.HasColor
 ----------------
-> function TTarget.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
+```
+function TTarget.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
+```
 *)
 procedure _LapeTarget_HasColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -680,7 +810,9 @@ end;
 (*
 TTarget.HasColor
 ----------------
-> function TTarget.HasColor(Color: TColorTolerance; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload;
+```
+function TTarget.HasColor(Color: TColorTolerance; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload;
+```
 *)
 procedure _LapeTarget_HasColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -690,7 +822,9 @@ end;
 (*
 TTarget.GetColor
 ----------------
-> function TTarget.GetColor(P: TPoint): TColor;
+```
+function TTarget.GetColor(P: TPoint): TColor;
+```
 *)
 procedure _LapeTarget_GetColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -700,7 +834,9 @@ end;
 (*
 TTarget.GetColors
 -----------------
-> function TTarget.GetColors(Points: TPointArray): TColorArray;
+```
+function TTarget.GetColors(Points: TPointArray): TColorArray;
+```
 *)
 procedure _LapeTarget_GetColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -710,7 +846,9 @@ end;
 (*
 TTarget.GetColorsMatrix
 -----------------------
-> function TTarget.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix;
+```
+function TTarget.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix;
+```
 *)
 procedure _LapeTarget_GetColorsMatrix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -720,7 +858,9 @@ end;
 (*
 TTarget.HasImage
 ----------------
-> function TTarget.HasImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer = 1; Bounds: TBox  = [-1,-1,-1,-1]): Boolean;
+```
+function TTarget.HasImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer = 1; Bounds: TBox  = [-1,-1,-1,-1]): Boolean;
+```
 *)
 procedure _LapeTarget_HasImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -730,7 +870,9 @@ end;
 (*
 TTarget.HasImage
 ----------------
-> function TTarget.HasImage(Image: TSimbaImage; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox  = [-1,-1,-1,-1]): Boolean;
+```
+function TTarget.HasImage(Image: TSimbaImage; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox  = [-1,-1,-1,-1]): Boolean;
+```
 *)
 procedure _LapeTarget_HasImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -740,7 +882,9 @@ end;
 (*
 TTarget.FindImage
 -----------------
-> function TTarget.FindImage(Image: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
+function TTarget.FindImage(Image: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
 *)
 procedure _LapeTarget_FindImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -750,7 +894,9 @@ end;
 (*
 TTarget.FindImage
 -----------------
-> function TTarget.FindImage(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
+function TTarget.FindImage(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
 *)
 procedure _LapeTarget_FindImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -760,7 +906,9 @@ end;
 (*
 TTarget.FindImageEx
 -------------------
-> function TTarget.FindImageEx(Image: TImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.FindImageEx(Image: TImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeTarget_FindImageEx1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -770,7 +918,9 @@ end;
 (*
 TTarget.FindImageEx
 -------------------
-> function TTarget.FindImageEx(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.FindImageEx(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeTarget_FindImageEx2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -780,7 +930,9 @@ end;
 (*
 TTarget.FindTemplate
 --------------------
-> function TTarget.FindTemplate(Image: TImage; out Match: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
+function TTarget.FindTemplate(Image: TImage; out Match: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
 *)
 procedure _LapeTarget_FindTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -790,7 +942,9 @@ end;
 (*
 TTarget.HasTemplate
 --------------------
-> function TTarget.HasTemplate(Image: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
+```
+function TTarget.HasTemplate(Image: TImage; MinMatch: Single; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
+```
 *)
 procedure _LapeTarget_HasTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -800,7 +954,9 @@ end;
 (*
 TTarget.FindDTM
 ---------------
-> function TTarget.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
+function TTarget.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
 *)
 procedure _LapeTarget_FindDTM(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -810,7 +966,9 @@ end;
 (*
 TTarget.FindDTMEx
 -----------------
-> function TTarget.FindDTMEx(DTM: TDTM; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.FindDTMEx(DTM: TDTM; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeTarget_FindDTMEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -820,7 +978,9 @@ end;
 (*
 TTarget.FindDTMRotated
 ----------------------
-> function TTarget.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
+function TTarget.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
+```
 *)
 procedure _LapeTarget_FindDTMRotated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -830,7 +990,9 @@ end;
 (*
 TTarget.FindDTMRotatedEx
 ------------------------
-> function TTarget.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeTarget_FindDTMRotatedEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -840,7 +1002,9 @@ end;
 (*
 TTarget.FindEdges
 -----------------
-> function TTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeFinder_FindEdges1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -850,7 +1014,9 @@ end;
 (*
 TTarget.FindEdges
 -----------------
-> function TTarget.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeFinder_FindEdges2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -860,7 +1026,9 @@ end;
 (*
 TTarget.GetPixelDifference
 --------------------------
-> function TTarget.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer;
+```
+function TTarget.GetPixelDifference(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): Integer;
+```
 *)
 procedure _LapeFinder_GetPixelDifference1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -870,7 +1038,9 @@ end;
 (*
 TTarget.GetPixelDifference
 --------------------------
-> function TTarget.GetPixelDifference(WaitTime, Tolerance: Single; Area: TBox = [-1,-1,-1,-1]): Integer;
+```
+function TTarget.GetPixelDifference(WaitTime, Tolerance: Single; Area: TBox = [-1,-1,-1,-1]): Integer;
+```
 *)
 procedure _LapeFinder_GetPixelDifference2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -880,7 +1050,9 @@ end;
 (*
 TTarget.GetPixelDifferenceTPA
 -----------------------------
-> function TTarget.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.GetPixelDifferenceTPA(WaitTime: Integer; Area: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeFinder_GetPixelDifferenceTPA1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -890,7 +1062,9 @@ end;
 (*
 TTarget.GetPixelDifferenceTPA
 -----------------------------
-> function TTarget.GetPixelDifferenceTPA(WaitTime, Tolerance: Single; Area: TBox = [-1,-1,-1,-1]): TPointArray;
+```
+function TTarget.GetPixelDifferenceTPA(WaitTime, Tolerance: Single; Area: TBox = [-1,-1,-1,-1]): TPointArray;
+```
 *)
 procedure _LapeFinder_GetPixelDifferenceTPA2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -900,7 +1074,9 @@ end;
 (*
 TTarget.AverageBrightness
 -------------------------
-> function TTarget.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer;
+```
+function TTarget.AverageBrightness(Area: TBox = [-1,-1,-1,-1]): Integer;
+```
 *)
 procedure _LapeFinder_AverageBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -910,7 +1086,9 @@ end;
 (*
 TTarget.PeakBrightness
 ----------------------
-> function TTarget.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer;
+```
+function TTarget.PeakBrightness(Area: TBox = [-1,-1,-1,-1]): Integer;
+```
 *)
 procedure _LapeFinder_PeakBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin

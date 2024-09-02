@@ -30,7 +30,9 @@ The `TBox` type is a record which defines a box from top left and bottom right c
 (*
 Box
 ---
-> function Box(X1, Y1, X2, Y2: Integer): TBox;
+```
+function Box(X1, Y1, X2, Y2: Integer): TBox;
+```
 *)
 procedure _LapeBox1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -40,7 +42,9 @@ end;
 (*
 Box
 ---
-> function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
+```
+function Box(Mid: TPoint; XRad, YRad: Integer): TBox;
+```
 *)
 procedure _LapeBox2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -50,7 +54,9 @@ end;
 (*
 TBox.Create
 -----------
-> function TBox.Create(X1, Y1, X2, Y2: Integer): TBox; static;
+```
+function TBox.Create(X1, Y1, X2, Y2: Integer): TBox; static;
+```
 *)
 procedure _LapeBox_Create1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -60,7 +66,9 @@ end;
 (*
 TBox.Create
 -----------
-> function TBox.Create(Center: TPoint; XRad, YRad: Integer): TBox; static;
+```
+function TBox.Create(Center: TPoint; XRad, YRad: Integer): TBox; static;
+```
 *)
 procedure _LapeBox_Create2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -70,7 +78,9 @@ end;
 (*
 TBox.Area
 ---------
-> property TBox.Area: Int64;
+```
+property TBox.Area: Int64;
+```
 *)
 procedure _LapeBox_Area(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -80,7 +90,9 @@ end;
 (*
 TBox.Size
 ---------
-> property TBox.Size: TSize;
+```
+property TBox.Size: TSize;
+```
 *)
 procedure _LapeBox_Size_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -90,7 +102,9 @@ end;
 (*
 TBox.Expand
 -----------
-> function TBox.Expand(SizeMod: Integer): TBox;
+```
+function TBox.Expand(SizeMod: Integer): TBox;
+```
 *)
 procedure _LapeBox_Expand1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -100,7 +114,9 @@ end;
 (*
 TBox.Expand
 -----------
-> function TBox.Expand(WidMod, HeiMod: Integer): TBox;
+```
+function TBox.Expand(WidMod, HeiMod: Integer): TBox;
+```
 *)
 procedure _LapeBox_Expand2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -110,7 +126,9 @@ end;
 (*
 TBox.Expand
 -----------
-> function TBox.Expand(SizeMod: Integer; MaxBounds: TBox): TBox;
+```
+function TBox.Expand(SizeMod: Integer; MaxBounds: TBox): TBox;
+```
 *)
 procedure _LapeBox_Expand3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -120,7 +138,9 @@ end;
 (*
 TBox.Expand
 -----------
-> function TBox.Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox;
+```
+function TBox.Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox;
+```
 *)
 procedure _LapeBox_Expand4(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -130,7 +150,9 @@ end;
 (*
 TBox.Extract
 ------------
-> function TBox.Extract(Points: TPointArray): TPointArray;
+```
+function TBox.Extract(Points: TPointArray): TPointArray;
+```
 
 Returns all points that *are inside* the box.
 *)
@@ -142,7 +164,9 @@ end;
 (*
 TBox.Exclude
 ------------
-> function TBox.Exclude(Points: TPointArray): TPointArray;
+```
+function TBox.Exclude(Points: TPointArray): TPointArray;
+```
 
 Returns all points that are *not inside* the box.
 *)
@@ -154,7 +178,9 @@ end;
 (*
 TBox.Contains
 -------------
-> function TBox.Contains(Other: TBox): Boolean;
+```
+function TBox.Contains(Other: TBox): Boolean;
+```
 *)
 procedure _LapeBox_Contains1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -164,7 +190,9 @@ end;
 (*
 TBox.Contains
 -------------
-> function TBox.Contains(Other: TPoint): Boolean;
+```
+function TBox.Contains(Other: TPoint): Boolean;
+```
 *)
 procedure _LapeBox_Contains2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -174,7 +202,9 @@ end;
 (*
 TBox.Contains
 -------------
-> function TBox.Contains(Other: TQuad): Boolean;
+```
+function TBox.Contains(Other: TQuad): Boolean;
+```
 *)
 procedure _LapeBox_Contains3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -184,7 +214,9 @@ end;
 (*
 TBox.Partition
 --------------
-> function TBox.Partition(Rows, Cols: Integer): TBoxArray;
+```
+function TBox.Partition(Rows, Cols: Integer): TBoxArray;
+```
 *)
 procedure _LapeBox_Partition(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -194,7 +226,9 @@ end;
 (*
 TBox.Offset
 -----------
-> function TBox.Offset(P: TPoint): TBox;
+```
+function TBox.Offset(P: TPoint): TBox;
+```
 *)
 procedure _LapeBox_Offset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -204,7 +238,9 @@ end;
 (*
 TBox.Combine
 ------------
-> function TBox.Combine(Other: TBox): TBox;
+```
+function TBox.Combine(Other: TBox): TBox;
+```
 *)
 procedure _LapeBox_Combine(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -214,7 +250,9 @@ end;
 (*
 TBox.Invert
 -----------
-> function TBox.Invert(Space: TBox): TBoxArray;
+```
+function TBox.Invert(Space: TBox): TBoxArray;
+```
 *)
 procedure _LapeBox_Invert(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -224,7 +262,9 @@ end;
 (*
 TBox.NearestEdge
 ----------------
-> function TBox.NearestEdge(P: TPoint): TPoint;
+```
+function TBox.NearestEdge(P: TPoint): TPoint;
+```
 *)
 procedure _LapeBox_NearestEdge(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -234,7 +274,9 @@ end;
 (*
 TBox.Intersect
 --------------
-> function TBox.Intersect(P: TPoint): TPoint;
+```
+function TBox.Intersect(P: TPoint): TPoint;
+```
 *)
 procedure _LapeBox_Intersect(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -244,7 +286,9 @@ end;
 (*
 TBox.Clip
 ---------
-> function TBox.Clip(Other: TBox): TBox;
+```
+function TBox.Clip(Other: TBox): TBox;
+```
 *)
 procedure _LapeBox_Clip(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -254,7 +298,9 @@ end;
 (*
 TBox.Normalize
 --------------
-> function TBox.Normalize: TBox;
+```
+function TBox.Normalize: TBox;
+```
 *)
 procedure _LapeBox_Normalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -264,7 +310,9 @@ end;
 (*
 TBox.Width
 ----------
-> function TBox.Width: Integer;
+```
+function TBox.Width: Integer;
+```
 *)
 procedure _LapeBox_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -274,7 +322,9 @@ end;
 (*
 TBox.Height
 -----------
-> function TBox.Height: Integer;
+```
+function TBox.Height: Integer;
+```
 *)
 procedure _LapeBox_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -284,7 +334,9 @@ end;
 (*
 TBox.Center
 -----------
-> function TBox.Center: TPoint;
+```
+function TBox.Center: TPoint;
+```
 *)
 procedure _LapeBox_Center(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -294,7 +346,9 @@ end;
 (*
 TBox.Corners
 ------------
-> function TBox.Corners: TPointArray;
+```
+function TBox.Corners: TPointArray;
+```
 *)
 procedure _LapeBox_Corners(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -304,7 +358,9 @@ end;
 (*
 TBox.ToQuad
 -----------
-> function TBox.ToQuad: TQuad;
+```
+function TBox.ToQuad: TQuad;
+```
 
 Converts the TBox to a TQuad type.
 *)
@@ -316,7 +372,9 @@ end;
 (*
 TBox.RandomPoint
 ----------------
-> function TBox.RandomPoint: TPoint;
+```
+function TBox.RandomPoint: TPoint;
+```
 
 Returns a completely random point in the box.
 *)
@@ -328,7 +386,9 @@ end;
 (*
 TBox.RandomPointCenter
 ----------------------
-> function TBox.RandomPointCenter: TPoint;
+```
+function TBox.RandomPointCenter: TPoint;
+```
 
 Returns a random point in the box which is weighted towards the box center.
 *)

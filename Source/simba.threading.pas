@@ -108,7 +108,16 @@ type
 var
   SimbaThreadPool: TSimbaThreadPool = nil;
 
+  SimbaCPUInfo: record
+    CoreCount: Integer;
+    ThreadCount: Integer;
+    PhysicalMemory: Integer;
+  end;
+
 implementation
+
+uses
+  NumCPULib;
 
 procedure TLimit.Inc;
 begin
@@ -487,10 +496,11 @@ begin
 end;
 
 initialization
-  if (TThread.ProcessorCount > 10) then
-    SimbaThreadPool := TSimbaThreadPool.Create(Round(TThread.ProcessorCount * 0.75)) // dont go crazy if we have >8 cores.
-  else
-    SimbaThreadPool := TSimbaThreadPool.Create(TThread.ProcessorCount);
+  SimbaCPUInfo.ThreadCount    := TNumCPULib.GetLogicalCPUCount();
+  SimbaCPUInfo.CoreCount      := TNumCPULib.GetPhysicalCPUCount();
+  SimbaCPUInfo.PhysicalMemory := TNumCPULib.GetTotalPhysicalMemory();
+
+  SimbaThreadPool := TSimbaThreadPool.Create(SimbaCPUInfo.CoreCount);
 
 finalization
   FreeAndNil(SimbaThreadPool);
