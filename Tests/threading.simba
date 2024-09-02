@@ -1,0 +1,140 @@
+{$assertions on}
+
+var
+  i: Integer;
+  myThread: TThread;
+
+procedure MyProc;
+begin
+  while not CurrentThread.IsTerminated do
+  begin
+    if (i < 10) then
+      i := i + 1;
+    Sleep(25);
+  end;
+end;
+
+procedure MyProcTerminated(thread: TThread);
+begin
+  Assert(i = 10);
+  Assert(Thread.Name = 'Test1');
+  Assert(Thread.FatalException = '');
+end;
+
+procedure Integer.MyProc;
+begin
+  while not CurrentThread.IsTerminated do
+  begin
+    if (Self < 10) then
+      Self := Self + 1;
+    Sleep(25);
+  end;
+end;
+
+procedure Integer.MyProcTerminated(thread: TThread);
+begin
+  Assert(Self = 10);
+  Assert(Thread.Name = 'Test2');
+  Assert(Thread.FatalException = '');
+end;
+
+begin
+  i := 0;
+  myThread := TThread.Create(@MyProc, @MyProcTerminated);
+  myThread.Name := 'Test1';
+  Sleep(1000);
+  myThread.Terminate();
+  myThread.WaitForTerminate();
+  myThread.Free();
+
+  i := 0;
+  myThread := TThread.Create(@i.MyProc, @i.MyProcTerminated);
+  myThread.Name := 'Test2';
+  Sleep(1000);
+  myThread.Terminate();
+  myThread.WaitForTerminate();
+  myThread.Free();
+end;
+
+procedure MyProcWithParams(Params: TPointerArray);
+begin
+  Assert(Length(Params) = 2);
+  Assert(Params[0] = @i);
+  Assert(Params[1] = Pointer(1));
+
+  while not CurrentThread.IsTerminated do
+  begin
+    if (Integer(Params[0]^) < 10) then
+      Integer(Params[0]^) := Integer(Params[0]^) + 1;
+    Sleep(25);
+  end;
+end;
+
+procedure MyProcTerminatedWithParam(thread: TThread; Params: TPointerArray);
+begin
+  Assert(Length(Params) = 2);
+  Assert(Params[0] = @i);
+  Assert(Params[1] = Pointer(1));
+  Assert(Thread.Name = 'Test3');
+  Assert(Thread.FatalException = '');
+end;
+
+begin
+  i := 0;
+  myThread := TThread.CreateEx(@MyProcWithParams, @MyProcTerminatedWithParam, [@i, Pointer(1)]);
+  myThread.Name := 'Test3';
+  Sleep(1000);
+  myThread.Terminate();
+  myThread.WaitForTerminate();
+  myThread.Free();
+end;
+
+procedure Integer.MyProcWithParams(Params: TPointerArray);
+begin
+  Assert(Length(Params) = 2);
+  Assert(Params[0] = @i);
+  Assert(Params[1] = Pointer(1));
+
+  while not CurrentThread.IsTerminated do
+  begin
+    if (Integer(Params[0]^) < 10) then
+      Integer(Params[0]^) := Integer(Params[0]^) + 1;
+    Sleep(25);
+  end;
+end;
+
+procedure Integer.MyProcTerminatedWithParam(thread: TThread; Params: TPointerArray);
+begin
+  Assert(Self = 10);
+  Assert(Length(Params) = 2);
+  Assert(Params[0] = @i);
+  Assert(Params[1] = Pointer(1));
+  Assert(Thread.Name = 'Test4');
+  Assert(Thread.FatalException = '');
+end;
+
+begin
+  i := 0;
+  myThread := TThread.CreateEx(@i.MyProcWithParams, @i.MyProcTerminatedWithParam, [@i, Pointer(1)]);
+  myThread.Name := 'Test4';
+  Sleep(1000);
+  myThread.Terminate();
+  myThread.WaitForTerminate();
+  myThread.Free();
+end;
+
+procedure TestExceptionInThread;
+begin
+  raise 'Exception in thread: ' + ToString(CurrentThread.ThreadID);
+end;
+
+begin
+  with TThread.Create(@TestExceptionInThread) do
+  try
+    WaitForTerminate();
+    Assert(FatalException = 'Exception in thread: ' + ToString(ThreadID));
+  finally
+    Free();
+  end;
+end;
+

@@ -1,0 +1,21 @@
+{$assertions on}
+
+var
+  myVar: Integer;
+
+procedure counter;
+begin
+  Inc(myVar);
+end;
+
+begin
+  ASync.ScheduleEvery("counter", @counter, 1000);
+  Sleep(3000);
+  Assert(ToString(ASync.Schedules) = "[counter]");
+  ASync.ScheduleStop("counter");
+
+  Assert(myVar > 1);
+  Assert(ToString(ASync.Schedules) = "[]");
+
+  Sleep(1000);
+end.

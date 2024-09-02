@@ -57,7 +57,7 @@ begin
   APIFiles += ['Source\script\imports\simba.import_image.pas',         'Image'          ];
   APIFiles += ['Source\script\imports\simba.import_dtm.pas',           'DTM'            ];
   APIFiles += ['Source\script\imports\simba.import_async.pas',         'ASync'          ];
-  APIFiles += ['Source\script\imports\simba.import_stringmap.pas',     'String Map'     ];
+  APIFiles += ['Source\script\imports\simba.import_threading.pas',     'Threading'      ];
 end;
 
 procedure H2ToH3(Dir: String);
@@ -66,31 +66,6 @@ var
 begin
   for FileName in DirList(Dir) do
     FileWrite(FileName, FileRead(FileName).Replace('h2', 'h3', [rfReplaceAll]));
-end;
-
-// The one non sphinx/markdown we change is this:
-//  - Change lines that begin with '> ' to codeblocks.
-procedure RightArrowToCodeBlock(var Str: String);
-var
-  I: Integer;
-  Lines: TStringArray;
-begin
-  Lines := Str.SplitLines;
-  while (I < Length(Lines)) do
-  begin
-    if Lines[I].StartsWith('> ') then
-    begin
-      Lines[I].Delete(1, 2);
-      Lines.Insert('```', I);
-      Lines.Insert('```', I+2);
-
-      Inc(I, 2);
-    end;
-
-    Inc(I);
-  end;
-
-  Str := LINE_SEP.Join(Lines);
 end;
 
 // Delete old api generation
@@ -124,12 +99,8 @@ procedure BuildAPI;
 
     Result := Length(Comments) > 0;
     if Result then
-    begin
-      RightArrowToCodeBlock(Comments);
-
       FileWrite('DocGen/source/api/' + Name + '.md', Comments);
     end;
-  end;
 
 var
   I: Integer;

@@ -38,13 +38,13 @@ jobs:
             test: Simba-Linux64
             
           - name: MacOS 64
-            runs-on: macos-latest
+            runs-on: macos-13
             build-mode: MACOS64
             binary: Simba-MacOS.dmg
             test: Simba
 
           - name: MacOS AArch64
-            runs-on: macos-14
+            runs-on: macos-13
             build-mode: MACOS-AARCH64
             binary: Simba-MacOS-AArch64.dmg
             #test: Simba MatchTemplateMask test fails, investigate later
@@ -96,15 +96,15 @@ jobs:
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output certificate.p12
-          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          # echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output certificate.p12
+          # security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          # security default-keychain -s build.keychain
+          # security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          # security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          # security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
 
-          codesign --deep --sign "7ACAD7EE0AA3A0783CE9592567098A3F08FC0B0B" Simba.app  
-          codesign -v Simba.app
+          # codesign --deep --sign "7ACAD7EE0AA3A0783CE9592567098A3F08FC0B0B" Simba.app  
+          # codesign -v Simba.app
 
           brew install create-dmg
           

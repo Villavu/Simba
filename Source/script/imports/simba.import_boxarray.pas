@@ -25,7 +25,9 @@ TBoxArray methods
 (*
 TBoxArray.Create
 ----------------
-> function TBoxArray.Create(Start: TPoint; Columns, Rows, Width, Height: Integer; Spacing: TPoint): TBoxArray; static;
+```
+function TBoxArray.Create(Start: TPoint; Columns, Rows, Width, Height: Integer; Spacing: TPoint): TBoxArray; static;
+```
 *)
 procedure _LapeBoxArray_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -35,7 +37,9 @@ end;
 (*
 TBoxArray.Pack
 --------------
-> function TBoxArray.Pack: TBoxArray;
+```
+function TBoxArray.Pack: TBoxArray;
+```
 *)
 procedure _LapeBoxArray_Pack(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -45,7 +49,9 @@ end;
 (*
 TBoxArray.SortFrom
 ------------------
-> function TBoxArray.SortFrom(From: TPoint): TBoxArray;
+```
+function TBoxArray.SortFrom(From: TPoint): TBoxArray;
+```
 *)
 procedure _LapeBoxArray_SortFrom(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -55,7 +61,9 @@ end;
 (*
 TBoxArray.SortByX
 -----------------
-> function TBoxArray.SortByX(LowToHigh: Boolean): TBoxArray;
+```
+function TBoxArray.SortByX(LowToHigh: Boolean): TBoxArray;
+```
 *)
 procedure _LapeBoxArray_SortByX(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -65,7 +73,9 @@ end;
 (*
 TBoxArray.SortByY
 -----------------
-> function TBoxArray.SortByY(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
+```
+function TBoxArray.SortByY(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
+```
 *)
 procedure _LapeBoxArray_SortByY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -75,7 +85,9 @@ end;
 (*
 TBoxArray.SortByWidth
 ---------------------
-> function TBoxArray.SortByWidth(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
+```
+function TBoxArray.SortByWidth(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
+```
 *)
 procedure _LapeBoxArray_SortByWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -85,7 +97,9 @@ end;
 (*
 TBoxArray.SortByHeight
 ----------------------
-> function TBoxArray.SortByHeight(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
+```
+function TBoxArray.SortByHeight(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
+```
 *)
 procedure _LapeBoxArray_SortByHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -95,7 +109,9 @@ end;
 (*
 TBoxArray.SortByArea
 --------------------
-> function TBoxArray.SortByArea(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
+```
+function TBoxArray.SortByArea(LowToHigh: Boolean; const Result: Pointer): TBoxArray;
+```
 *)
 procedure _LapeBoxArray_SortByArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -105,7 +121,9 @@ end;
 (*
 TBoxArray.Merge
 ---------------
-> function TBoxArray.Merge: TBox;
+```
+function TBoxArray.Merge: TBox;
+```
 *)
 procedure _LapeBoxArray_Merge(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -115,7 +133,9 @@ end;
 (*
 TBoxArray.Centers
 -----------------
-> function TBoxArray.Centers: TPointArray;
+```
+function TBoxArray.Centers: TPointArray;
+```
 *)
 procedure _LapeBoxArray_Centers(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -125,7 +145,9 @@ end;
 (*
 TBoxArray.Offset
 ----------------
-> function TBoxArray.Offset(P: TPoint): TBoxArray;
+```
+function TBoxArray.Offset(P: TPoint): TBoxArray;
+```
 *)
 procedure _LapeBoxArray_Offset(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -135,7 +157,9 @@ end;
 (*
 TBoxArray.Expand
 ----------------
-> function TBoxArray.Expand(SizeMod: Integer): TBoxArray;
+```
+function TBoxArray.Expand(SizeMod: Integer): TBoxArray;
+```
 *)
 procedure _LapeBoxArray_Expand1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -145,7 +169,9 @@ end;
 (*
 TBoxArray.Expand
 ----------------
-> function TBoxArray.Expand(WidMod, HeiMod: Integer): TBoxArray;
+```
+function TBoxArray.Expand(WidMod, HeiMod: Integer): TBoxArray;
+```
 *)
 procedure _LapeBoxArray_Expand2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -155,7 +181,9 @@ end;
 (*
 TBoxArray.ContainsPoint
 -----------------------
-> function TBoxArray.ContainsPoint(P: TPoint; out Index: Integer): Boolean;
+```
+function TBoxArray.ContainsPoint(P: TPoint; out Index: Integer): Boolean;
+```
 *)
 procedure _LapeBoxArray_ContainsPoint1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -165,7 +193,9 @@ end;
 (*
 TBoxArray.ContainsPoint
 -----------------------
-> function TBoxArray.ContainsPoint(P: TPoint): Boolean; overload;
+```
+function TBoxArray.ContainsPoint(P: TPoint): Boolean; overload;
+```
 *)
 procedure _LapeBoxArray_ContainsPoint2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -175,7 +205,9 @@ end;
 (*
 TBoxArray.Sort
 --------------
-> function TBoxArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TBoxArray
+```
+function TBoxArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TBoxArray
+```
 *)
 procedure _LapeBoxArray_Sort1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -185,7 +217,9 @@ end;
 (*
 TBoxArray.Sort
 --------------
-> function TBoxArray.Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): TBoxArray
+```
+function TBoxArray.Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): TBoxArray
+```
 *)
 procedure _LapeBoxArray_Sort2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -195,7 +229,9 @@ end;
 (*
 TBoxArray.SymmetricDifference
 -----------------------------
-> function TBoxArray.SymmetricDifference(Other: TBoxArray): TBoxArray;
+```
+function TBoxArray.SymmetricDifference(Other: TBoxArray): TBoxArray;
+```
 *)
 procedure _Lape_Box_SymmetricDifference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -205,7 +241,9 @@ end;
 (*
 TBoxArray.Difference
 --------------------
-> function TBoxArray.Difference(Other: TBoxArray): TBoxArray;
+```
+function TBoxArray.Difference(Other: TBoxArray): TBoxArray;
+```
 *)
 procedure _Lape_Box_Difference(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -215,7 +253,9 @@ end;
 (*
 TBoxArray.Intersection
 ----------------------
-> function TBoxArray.Intersection(Other: TBoxArray): TBoxArray;
+```
+function TBoxArray.Intersection(Other: TBoxArray): TBoxArray;
+```
 *)
 procedure _Lape_Box_Intersection(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin

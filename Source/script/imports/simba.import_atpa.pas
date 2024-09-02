@@ -25,7 +25,9 @@ Methods relating to arrays of TPointArray.
 (*
 T2DPointArray.Offset
 --------------------
-> function T2DPointArray.Offset(P: TPoint): T2DPointArray;
+```
+function T2DPointArray.Offset(P: TPoint): T2DPointArray;
+```
 *)
 procedure _LapeATPA_Offset1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -35,7 +37,9 @@ end;
 (*
 T2DPointArray.Sort
 ------------------
-> function T2DPointArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): T2DPointArray;
+```
+function T2DPointArray.Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): T2DPointArray;
+```
 *)
 procedure _LapeATPA_Sort1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -45,7 +49,9 @@ end;
 (*
 T2DPointArray.Sort
 ------------------
-> function T2DPointArray.Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): T2DPointArray;
+```
+function T2DPointArray.Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): T2DPointArray;
+```
 *)
 procedure _LapeATPA_Sort2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -55,7 +61,9 @@ end;
 (*
 T2DPointArray.SortFromSize
 --------------------------
-> function T2DPointArray.SortFromSize(Size: Integer): T2DPointArray;
+```
+function T2DPointArray.SortFromSize(Size: Integer): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortFromSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -65,7 +73,9 @@ end;
 (*
 T2DPointArray.SortFromIndex
 ---------------------------
-> function T2DPointArray.SortFromIndex(From: TPoint; Index: Integer = 0): T2DPointArray;
+```
+function T2DPointArray.SortFromIndex(From: TPoint; Index: Integer = 0): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortFromIndex(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -75,7 +85,9 @@ end;
 (*
 T2DPointArray.SortFromFirstPoint
 --------------------------------
-> function T2DPointArray.SortFromFirstPoint(From: TPoint): T2DPointArray;
+```
+function T2DPointArray.SortFromFirstPoint(From: TPoint): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortFromFirstPoint(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -85,7 +97,9 @@ end;
 (*
 T2DPointArray.SortFromFirstPointX
 ---------------------------------
-> function T2DPointArray.SortFromFirstPointX(From: TPoint): T2DPointArray;
+```
+function T2DPointArray.SortFromFirstPointX(From: TPoint): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortFromFirstPointX(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -95,7 +109,9 @@ end;
 (*
 T2DPointArray.SortFromFirstPointY
 ---------------------------------
-> function T2DPointArray.SortFromFirstPointY(From: TPoint): T2DPointArray;
+```
+function T2DPointArray.SortFromFirstPointY(From: TPoint): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortFromFirstPointY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -105,7 +121,9 @@ end;
 (*
 T2DPointArray.SortFrom
 ----------------------
-> function T2DPointArray.SortFrom(From: TPoint): T2DPointArray;
+```
+function T2DPointArray.SortFrom(From: TPoint): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortFrom(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -115,7 +133,9 @@ end;
 (*
 T2DPointArray.SortByArea
 ------------------------
-> function T2DPointArray.SortByArea(LowToHigh: Boolean): T2DPointArray;
+```
+function T2DPointArray.SortByArea(LowToHigh: Boolean): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortByArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -125,7 +145,9 @@ end;
 (*
 T2DPointArray.SortBySize
 ------------------------
-> function T2DPointArray.SortBySize(LowToHigh: Boolean): T2DPointArray;
+```
+function T2DPointArray.SortBySize(LowToHigh: Boolean): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortBySize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -135,7 +157,9 @@ end;
 (*
 T2DPointArray.SortByDensity
 ---------------------------
-> function T2DPointArray.SortByDensity(LowToHigh: Boolean): T2DPointArray;
+```
+function T2DPointArray.SortByDensity(LowToHigh: Boolean): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortByDensity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -145,7 +169,9 @@ end;
 (*
 T2DPointArray.SortByX
 ---------------------
-> function T2DPointArray.SortByX(LowToHigh: Boolean): T2DPointArray;
+```
+function T2DPointArray.SortByX(LowToHigh: Boolean): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortByX(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -155,7 +181,9 @@ end;
 (*
 T2DPointArray.SortByY
 ---------------------
-> function T2DPointArray.SortByY(LowToHigh: Boolean): T2DPointArray;
+```
+function T2DPointArray.SortByY(LowToHigh: Boolean): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortByY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -165,7 +193,9 @@ end;
 (*
 T2DPointArray.SortByShortSide
 -----------------------------
-> function T2DPointArray.SortByShortSide(LowToHigh: Boolean): T2DPointArray;
+```
+function T2DPointArray.SortByShortSide(LowToHigh: Boolean): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortByShortSide(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -175,7 +205,9 @@ end;
 (*
 T2DPointArray.SortByLongSide
 ----------------------------
-> function T2DPointArray.SortByLongSide(LowToHigh: Boolean): T2DPointArray;
+```
+function T2DPointArray.SortByLongSide(LowToHigh: Boolean): T2DPointArray;
+```
 *)
 procedure _LapeATPA_SortByLongSide(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -185,7 +217,9 @@ end;
 (*
 T2DPointArray.ExtractSize
 -------------------------
-> function T2DPointArray.ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+```
+function T2DPointArray.ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+```
 *)
 procedure _LapeATPA_ExtractSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -195,7 +229,9 @@ end;
 (*
 T2DPointArray.ExtractSizeEx
 ---------------------------
-> function T2DPointArray.ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+```
+function T2DPointArray.ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+```
 *)
 procedure _LapeATPA_ExtractSizeEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -205,7 +241,9 @@ end;
 (*
 T2DPointArray.ExtractDimensions
 -------------------------------
-> function T2DPointArray.ExtractDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+```
+function T2DPointArray.ExtractDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+```
 *)
 procedure _LapeATPA_ExtractDimensions(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -215,7 +253,9 @@ end;
 (*
 T2DPointArray.ExtractDimensionsEx
 ---------------------------------
-> function T2DPointArray.ExtractDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
+```
+function T2DPointArray.ExtractDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
+```
 *)
 procedure _LapeATPA_ExtractDimensionsEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -225,7 +265,9 @@ end;
 (*
 T2DPointArray.ExcludeSize
 -------------------------
-> function T2DPointArray.ExcludeSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+```
+function T2DPointArray.ExcludeSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+```
 *)
 procedure _LapeATPA_ExcludeSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -235,7 +277,9 @@ end;
 (*
 T2DPointArray.ExcludeSizeEx
 ---------------------------
-> function T2DPointArray.ExcludeSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+```
+function T2DPointArray.ExcludeSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
+```
 *)
 procedure _LapeATPA_ExcludeSizeEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -245,7 +289,9 @@ end;
 (*
 T2DPointArray.ExcludeDimensions
 -------------------------------
-> function T2DPointArray.ExcludeDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+```
+function T2DPointArray.ExcludeDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
+```
 *)
 procedure _LapeATPA_ExcludeDimensions(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -255,7 +301,9 @@ end;
 (*
 T2DPointArray.ExcludeDimensionsEx
 ---------------------------------
-> function T2DPointArray.ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
+```
+function T2DPointArray.ExcludeDimensionsEx(MinShortSide, MinLongSide: Integer): T2DPointArray;
+```
 *)
 procedure _LapeATPA_ExcludeDimensionsEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -265,7 +313,9 @@ end;
 (*
 T2DPointArray.Smallest
 ----------------------
-> function T2DPointArray.Smallest: TPointArray;
+```
+function T2DPointArray.Smallest: TPointArray;
+```
 *)
 procedure _LapeATPA_Smallest(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -275,7 +325,9 @@ end;
 (*
 T2DPointArray.Largest
 ---------------------
-> function T2DPointArray.Largest: TPointArray;
+```
+function T2DPointArray.Largest: TPointArray;
+```
 *)
 procedure _LapeATPA_Largest(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -285,7 +337,9 @@ end;
 (*
 T2DPointArray.Bounds
 --------------------
-> function T2DPointArray.Bounds: TBox;
+```
+function T2DPointArray.Bounds: TBox;
+```
 *)
 procedure _LapeATPA_Bounds(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -295,7 +349,9 @@ end;
 (*
 T2DPointArray.BoundsArray
 -------------------------
-> function T2DPointArray.BoundsArray: TBoxArray;
+```
+function T2DPointArray.BoundsArray: TBoxArray;
+```
 *)
 procedure _LapeATPA_BoundsArray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -305,7 +361,9 @@ end;
 (*
 T2DPointArray.Mean
 ------------------
-> function T2DPointArray.Mean: TPoint;
+```
+function T2DPointArray.Mean: TPoint;
+```
 *)
 procedure _LapeATPA_Mean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -315,7 +373,9 @@ end;
 (*
 T2DPointArray.Means
 -------------------
-> function T2DPointArray.Means: TPointArray;
+```
+function T2DPointArray.Means: TPointArray;
+```
 *)
 procedure _LapeATPA_Means(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -325,7 +385,9 @@ end;
 (*
 T2DPointArray.Merge
 -------------------
-> function T2DPointArray.Merge: TPointArray;
+```
+function T2DPointArray.Merge: TPointArray;
+```
 *)
 procedure _LapeATPA_Merge(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -335,7 +397,9 @@ end;
 (*
 T2DPointArray.Intersection
 --------------------------
-> function T2DPointArray.Intersection: TPointArray;
+```
+function T2DPointArray.Intersection: TPointArray;
+```
 
 Returns the points which exist in all arrays.
 *)

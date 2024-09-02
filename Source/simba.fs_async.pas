@@ -21,12 +21,12 @@ type
     Exception: String;
     TimeUsed: Double;
   end;
-  TASyncUnzipFinishedEvent = procedure(constref Result: TASyncUnzipResult) of object;
+  TASyncUnzipFinishEvent = procedure(constref Result: TASyncUnzipResult) of object;
   TASyncUnzipProgressEvent = procedure(Position, Total: Int64) of object;
 
   ASyncUnzip = class
     class procedure Unzip(ZipFile, DestPath: String;
-                          OnFinished: TASyncUnzipFinishedEvent;
+                          OnFinished: TASyncUnzipFinishEvent;
                           OnProgress: TASyncUnzipProgressEvent); static;
   end;
 
@@ -41,16 +41,16 @@ type
     FZipFile: String;
     FDestPath: String;
     FOnProgress: TASyncUnzipProgressEvent;
-    FOnFinished: TASyncUnzipFinishedEvent;
+    FOnFinished: TASyncUnzipFinishEvent;
 
     procedure DoProgress(Sender: TObject; Const ATotPos, ATotSize: Int64);
 
     procedure Execute; override;
   public
-    constructor Create(ZipFile, DestPath: String; OnProgress: TASyncUnzipProgressEvent; OnFinished: TASyncUnzipFinishedEvent); reintroduce;
+    constructor Create(ZipFile, DestPath: String; OnProgress: TASyncUnzipProgressEvent; OnFinished: TASyncUnzipFinishEvent); reintroduce;
   end;
 
-class procedure ASyncUnzip.Unzip(ZipFile, DestPath: String; OnFinished: TASyncUnzipFinishedEvent; OnProgress: TASyncUnzipProgressEvent);
+class procedure ASyncUnzip.Unzip(ZipFile, DestPath: String; OnFinished: TASyncUnzipFinishEvent; OnProgress: TASyncUnzipProgressEvent);
 begin
   TUnzipInBackground.Create(ZipFile, DestPath, OnProgress, OnFinished);
 end;
@@ -96,7 +96,7 @@ begin
     FOnFinished(Result);
 end;
 
-constructor TUnzipInBackground.Create(ZipFile, DestPath: String; OnProgress: TASyncUnzipProgressEvent; OnFinished: TASyncUnzipFinishedEvent);
+constructor TUnzipInBackground.Create(ZipFile, DestPath: String; OnProgress: TASyncUnzipProgressEvent; OnFinished: TASyncUnzipFinishEvent);
 begin
   inherited Create(False, 512*512);
 

@@ -14,7 +14,7 @@ implementation
 
 uses
   Graphics, Variants,
-  lptypes, lpvartypes, lpparser,
+  lptypes, lpvartypes, lpparser, ffi,
   simba.nativeinterface, simba.env, simba.baseclass, simba.vartype_ordarray;
 
 (*
@@ -26,269 +26,365 @@ Base methods and types.
 (*
 GetMem
 ------
-> function GetMem(i: SizeInt): Pointer;
+```
+function GetMem(i: SizeInt): Pointer;
+```
 *)
 
 (*
 AllocMem
 --------
-> function AllocMem(i: SizeInt): Pointer;
+```
+function AllocMem(i: SizeInt): Pointer;
+```
 *)
 
 (*
 FreeMem
 -------
-> procedure FreeMem(p: Pointer);
+```
+procedure FreeMem(p: Pointer);
+```
 *)
 
 (*
 ReallocMem
 ----------
-> procedure ReallocMem(var p: Pointer; s: SizeInt);
+```
+procedure ReallocMem(var p: Pointer; s: SizeInt);
+```
 *)
 
 (*
 FillMem
 -------
-> procedure FillMem(var p; s: SizeInt; b: UInt8 = 0);
+```
+procedure FillMem(var p; s: SizeInt; b: UInt8 = 0);
+```
 *)
 
 (*
 Move
 ----
-> procedure Move(constref Src; var Dst; s: SizeInt);
+```
+procedure Move(constref Src; var Dst; s: SizeInt);
+```
 *)
 
 (*
 CompareMem
 ----------
-> function CompareMem(constref p1, p2; Length: SizeInt): EvalBool;
+```
+function CompareMem(constref p1, p2; Length: SizeInt): EvalBool;
+```
 *)
 
 (*
 Assigned
 --------
-> function Assigned(constref p): EvalBool;
+```
+function Assigned(constref p): EvalBool;
+```
 *)
 
 (*
 Delete
 ------
-> procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A));
+```
+procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A));
+```
 *)
 
 (*
 Insert
 ------
-> procedure Insert(Item: Anything; A: array; Index: Int32);
+```
+procedure Insert(Item: Anything; A: array; Index: Int32);
+```
 *)
 
 (*
 Copy
 ----
-> procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A));
+```
+procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A));
+```
 *)
 
 (*
 SetLength
 ---------
-> procedure SetLength(A: array; Length: Int32);
+```
+procedure SetLength(A: array; Length: Int32);
+```
 *)
 
 (*
 Low
 ---
-> function Low(A: array): Int32;
+```
+function Low(A: array): Int32;
+```
 *)
 
 (*
 High
 ----
-> function High(A: array): Int32;
+```
+function High(A: array): Int32;
+```
 *)
 
 (*
 Length
 ------
-> function Length(A: array): Int32;
+```
+function Length(A: array): Int32;
+```
 *)
 
 (*
 WriteLn
 -------
-> procedure WriteLn(Args: Anything);
+```
+procedure WriteLn(Args: Anything);
+```
 *)
 
 (*
 Write
 -----
-> procedure Write(Args: Anything);
+```
+procedure Write(Args: Anything);
+```
 *)
 
 (*
 Swap
 ----
-> procedure Swap(var A, B: Anything);
+```
+procedure Swap(var A, B: Anything);
+```
 *)
 
 (*
 SizeOf
 ------
-> function SizeOf(A: Anything): Int32;
+```
+function SizeOf(A: Anything): Int32;
+```
 *)
 
 (*
 ToString
 --------
-> function ToString(A: Anything): String;
+```
+function ToString(A: Anything): String;
+```
 *)
 
 (*
 ToStr
 -----
-> function ToStr(A: Anything): String;
+```
+function ToStr(A: Anything): String;
+```
 *)
 
 (*
 Inc
 ---
-> function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal;
+```
+function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal;
+```
 *)
 
 (*
 Dec
 ---
-> function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal;
+```
+function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal;
+```
 *)
 
 (*
 Ord
 ---
-> function Ord(X: Ordinal): Int32;
+```
+function Ord(X: Ordinal): Int32;
+```
 *)
 
 (*
 SleepUntil
 ----------
-> function SleepUntil(Condition: BoolExpr; Interval, Timeout: Int32): Boolean;
+```
+function SleepUntil(Condition: BoolExpr; Interval, Timeout: Int32): Boolean;
+```
 *)
 
 (*
 Default
 -------
-> function Default(T: AnyType): AnyType;
+```
+function Default(T: AnyType): AnyType;
+```
 *)
 
 (*
 Sort
 ----
-> procedure Sort(var A: array);
-> procedure Sort(var A: array; Weights: array of Ordinal; LowToHigh: Boolean);
-> procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32);
+```
+procedure Sort(var A: array);
+```
+```
+procedure Sort(var A: array; Weights: array of Ordinal; LowToHigh: Boolean);
+```
+```
+procedure Sort(var A: array; CompareFunc: function(constref L, R: Anything): Int32);
+```
 *)
 
 (*
 Sorted
 ------
-> function Sorted(const A: array): array; overload;
-> function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array;
-> function Sorted(const A: array; Weights: array of Ordinal; LowToHigh: Boolean): array;
+```
+function Sorted(const A: array): array; overload;
+```
+```
+function Sorted(const A: array; CompareFunc: function(constref L, R: Anything): Int32): array;
+```
+```
+function Sorted(const A: array; Weights: array of Ordinal; LowToHigh: Boolean): array;
+```
 *)
 
 (*
 Unique
 ------
-> function Unique(const A: array): array;
+```
+function Unique(const A: array): array;
+```
 *)
 
 (*
 Reverse
 -------
-> procedure Reverse(var A: array);
+```
+procedure Reverse(var A: array);
+```
 *)
 
 (*
 Reversed
 --------
-> function Reversed(const A: array): array;
+```
+function Reversed(const A: array): array;
+```
 *)
 
 (*
 IndexOf
 -------
-> function IndexOf(const Item: T; const A: array): Integer;
+```
+function IndexOf(const Item: T; const A: array): Integer;
+```
 *)
 
 (*
 IndicesOf
 ---------
-> function IndicesOf(const Item: T; const A: array): TIntegerArray;
+```
+function IndicesOf(const Item: T; const A: array): TIntegerArray;
+```
 *)
 
 (*
 Contains
 --------
-> function Contains(const Item: T; const A: array): Boolean;
+```
+function Contains(const Item: T; const A: array): Boolean;
+```
 *)
 
 (*
 GetCallerAddress
 ----------------
-> function GetCallerAddress: Pointer;
+```
+function GetCallerAddress: Pointer;
+```
 *)
 
 (*
 GetCallerName
 -------------
-> function GetCallerName: String;
+```
+function GetCallerName: String;
+```
 *)
 
 (*
 GetCallerLocation
 -----------------
-> function GetCallerLocation: Pointer;
+```
+function GetCallerLocation: Pointer;
+```
 *)
 
 (*
 GetCallerLocationStr
 --------------------
-> function GetCallerLocationStr: String;
+```
+function GetCallerLocationStr: String;
+```
 *)
 
 (*
 GetExceptionLocation
 --------------------
-> function GetExceptionLocation: Pointer;
+```
+function GetExceptionLocation: Pointer;
+```
 *)
 
 (*
 GetExceptionLocationStr
 -----------------------
-> function GetExceptionLocationStr: String;
+```
+function GetExceptionLocationStr: String;
+```
 *)
 
 (*
 GetExceptionMessage
 -------------------
-> function GetExceptionMessage: String;
+```
+function GetExceptionMessage: String;
+```
 *)
 
 (*
 GetScriptMethodName
 -------------------
-> function GetScriptMethodName(Address: Pointer): String;
+```
+function GetScriptMethodName(Address: Pointer): String;
+```
 *)
 
 (*
 DumpCallStack
 -------------
-> function DumpCallStack(Start: Integer = 0): String;
+```
+function DumpCallStack(Start: Integer = 0): String;
+```
 *)
 
 (*
 Variant.VarType
 ---------------
-> function Variant.VarType: EVariantVarType;
+```
+function Variant.VarType: EVariantVarType;
+```
 
 Returns the variants var type.
 
@@ -307,7 +403,9 @@ end;
 (*
 Variant.IsNumeric
 -----------------
-> function Variant.IsNumeric: Boolean;
+```
+function Variant.IsNumeric: Boolean;
+```
 
 Is integer or float?
 *)
@@ -319,7 +417,9 @@ end;
 (*
 Variant.IsString
 ----------------
-> function Variant.IsString: Boolean;
+```
+function Variant.IsString: Boolean;
+```
 *)
 procedure _LapeVariantIsString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -329,7 +429,9 @@ end;
 (*
 Variant.IsInteger
 -----------------
-> function Variant.IsInteger: Boolean;
+```
+function Variant.IsInteger: Boolean;
+```
 *)
 procedure _LapeVariantIsInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -339,7 +441,9 @@ end;
 (*
 Variant.IsFloat
 ---------------
-> function Variant.IsFloat: Boolean;
+```
+function Variant.IsFloat: Boolean;
+```
 *)
 procedure _LapeVariantIsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -349,7 +453,9 @@ end;
 (*
 Variant.IsBoolean
 -----------------
-> function Variant.IsBoolean: Boolean;
+```
+function Variant.IsBoolean: Boolean;
+```
 *)
 procedure _LapeVariantIsBoolean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -359,7 +465,9 @@ end;
 (*
 Variant.IsVariant
 -----------------
-> function Variant.IsVariant: Boolean;
+```
+function Variant.IsVariant: Boolean;
+```
 
 The variant holds another variant!
 *)
@@ -371,7 +479,9 @@ end;
 (*
 Variant.IsAssigned
 ------------------
-> function Variant.IsAssigned: Boolean;
+```
+function Variant.IsAssigned: Boolean;
+```
 
 Example:
 
@@ -390,7 +500,9 @@ end;
 (*
 Variant.IsNull
 --------------
-> function Variant.IsNull: Boolean;
+```
+function Variant.IsNull: Boolean;
+```
 *)
 procedure _LapeVariantIsNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -400,7 +512,9 @@ end;
 (*
 Variant.NULL
 ------------
-> function Variant.NULL: Variant; static;
+```
+function Variant.NULL: Variant; static;
+```
 
 Static method that returns a null variant variable.
 
@@ -478,6 +592,7 @@ begin
     addGlobalType('array of Int64', 'TInt64Array');
     addGlobalType('array of Byte', 'TByteArray');
     addGlobalType('array of Variant', 'TVariantArray');
+    addGlobalType('array of Pointer', 'TPointerArray');
 
     addGlobalType('record X, Y: Integer; end', 'TPoint');
     addGlobalType('array of TPoint', 'TPointArray');
@@ -523,4 +638,3 @@ begin
 end;
 
 end.
-

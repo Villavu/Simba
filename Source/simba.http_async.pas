@@ -22,15 +22,13 @@ type
     Exception: String;
     TimeUsed: Double;
   end;
-  TASyncHTTPFinishedEvent = procedure(constref Result: TASyncHTTPResult) of object;
+  TASyncHTTPFinishEvent = procedure(constref Result: TASyncHTTPResult) of object;
   TASyncHTTPProgressEvent = procedure(URL: String; Position, Size: Int64) of object;
 
   ASyncHTTP = class
-    class procedure Get(URL: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); static;
-    class procedure Get(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); static;
-    class procedure GetZip(URL, DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); static;
-    class procedure Post(URL, PostData: String; OnFinished: TASyncHTTPFinishedEvent); static;
-    class procedure Post(URL, PostData: String; Headers: TStringArray; OnFinished: TASyncHTTPFinishedEvent); static;
+    class procedure Get(URL: String; RequestHeaders: TStringArray; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent); static;
+    class procedure Post(URL: String; RequestHeaders: TStringArray; Data: String; OnFinish: TASyncHTTPFinishEvent); static;
+    class procedure GetFile(URL: String; RequestHeaders: TStringArray; DestFile: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent); static;
   end;
 
 implementation
@@ -43,102 +41,31 @@ type
   protected
     FURL: String;
     FDestFile: String;
-    FOnFinished: TASyncHTTPFinishedEvent;
+    FRequestHeaders: TStringArray;
+    FOnFinished: TASyncHTTPFinishEvent;
     FOnProgress: TASyncHTTPProgressEvent;
 
     procedure DoProgress(Sender: TObject; URL, ContentType: String; Position, Size: Int64);
 
     procedure Execute; override;
   public
-    constructor Create(URL: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); reintroduce;
-    constructor Create(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); reintroduce;
-  end;
-
-  TURLFetchZipInBackground = class(TThread)
-  protected
-    FURL: String;
-    FDestFile: String;
-    FOnFinished: TASyncHTTPFinishedEvent;
-    FOnProgress: TASyncHTTPProgressEvent;
-
-    procedure DoProgress(Sender: TObject; URL, ContentType: String; Position, Size: Int64);
-    procedure DoExtract(Sender: TObject; FileName: String; Position, Size: Int64);
-
-    procedure Execute; override;
-  public
-    constructor Create(URL, DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); reintroduce;
+    constructor Create(URL: String; RequestHeaders: TStringArray; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent); reintroduce;
+    constructor Create(URL: String; RequestHeaders: TStringArray; DestFile: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent); reintroduce;
   end;
 
   TURLPostInBackground = class(TThread)
   protected
     FURL: String;
     FPostData: String;
-    FHeaders: TStringArray;
-    FOnFinished: TASyncHTTPFinishedEvent;
+    FRequestHeaders: TStringArray;
+    FOnFinished: TASyncHTTPFinishEvent;
 
     procedure Execute; override;
   public
-    constructor Create(URL, PostData: String; Headers: TStringArray; OnFinished: TASyncHTTPFinishedEvent); reintroduce;
+    constructor Create(URL, PostData: String; RequestHeaders: TStringArray; OnFinish: TASyncHTTPFinishEvent); reintroduce;
   end;
 
-procedure TURLFetchZipInBackground.DoProgress(Sender: TObject; URL, ContentType: String; Position, Size: Int64);
-begin
-  if Assigned(FOnProgress) then
-    FOnProgress(URL, Position, Size);
-end;
-
-procedure TURLFetchZipInBackground.DoExtract(Sender: TObject; FileName: String; Position, Size: Int64);
-begin
-  if Assigned(FOnProgress) then
-    FOnProgress('extract', Position, Size);
-end;
-
-procedure TURLFetchZipInBackground.Execute;
-var
-  Result: TASyncHTTPResult;
-begin
-  Result := Default(TASyncHTTPResult);
-  Result.URL := FURL;
-  Result.TimeUsed := HighResolutionTime();
-  Result.Data := FDestFile;
-
-  try
-    with TSimbaHTTPClient.Create() do
-    try
-      OnDownloadProgress := @DoProgress;
-      OnExtractProgress := @DoExtract;
-
-      GetZip(FURL, FDestFile, False, []);
-
-      Result.Response := ResponseStatus;
-      Result.Headers := ResponseHeaders.ToStringArray;
-    finally
-      Free();
-    end;
-  except
-    on E: Exception do
-      Result.Exception := E.Message;
-  end;
-
-  Result.TimeUsed := HighResolutionTime() - Result.TimeUsed;
-
-  if Assigned(FOnFinished) then
-    FOnFinished(Result);
-end;
-
-constructor TURLFetchZipInBackground.Create(URL, DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
-begin
-  inherited Create(False, 512*512);
-
-  FreeOnTerminate := True;
-
-  FURL := URL;
-  FDestFile := DestFile;
-  FOnFinished := OnFinished;
-  FOnProgress := OnProgress;
-end;
-
-constructor TURLPostInBackground.Create(URL, PostData: String; Headers: TStringArray; OnFinished: TASyncHTTPFinishedEvent);
+constructor TURLPostInBackground.Create(URL, PostData: String; RequestHeaders: TStringArray; OnFinish: TASyncHTTPFinishEvent);
 begin
   inherited Create(False, 512*512);
 
@@ -146,13 +73,14 @@ begin
 
   FURL := URL;
   FPostData := PostData;
-  FHeaders := Headers;
-  FOnFinished := OnFinished;
+  FRequestHeaders := RequestHeaders;
+  FOnFinished := OnFinish;
 end;
 
 procedure TURLPostInBackground.Execute;
 var
   Result: TASyncHTTPResult;
+  I: Integer;
 begin
   Result := Default(TASyncHTTPResult);
   Result.URL := FURL;
@@ -161,7 +89,12 @@ begin
   try
     with TSimbaHTTPClient.Create() do
     try
-      RequestHeaders.AddStrings(FHeaders);
+      I := 0;
+      while (I < High(FRequestHeaders)) do
+      begin
+        RequestHeader[FRequestHeaders[i]] := FRequestHeaders[i+1];
+        I += 2;
+      end;
 
       Result.Data := Post(FURL, FPostData);
       Result.Response := ResponseStatus;
@@ -180,29 +113,19 @@ begin
     FOnFinished(Result);
 end;
 
-class procedure ASyncHTTP.Get(URL: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
+class procedure ASyncHTTP.Get(URL: String; RequestHeaders: TStringArray; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent);
 begin
-  TURLFetchInBackground.Create(URL, OnFinished, OnProgress);
+  TURLFetchInBackground.Create(URL, RequestHeaders, OnFinish, OnProgress);
 end;
 
-class procedure ASyncHTTP.Get(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
+class procedure ASyncHTTP.GetFile(URL: String; RequestHeaders: TStringArray; DestFile: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent);
 begin
-  TURLFetchInBackground.Create(URL, DestFile, OnFinished, OnProgress);
+  TURLFetchInBackground.Create(URL, RequestHeaders, DestFile, OnFinish, OnProgress);
 end;
 
-class procedure ASyncHTTP.GetZip(URL, DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
+class procedure ASyncHTTP.Post(URL: String; RequestHeaders: TStringArray; Data: String; OnFinish: TASyncHTTPFinishEvent);
 begin
-  TURLFetchZipInBackground.Create(URL, DestFile, OnFinished, OnProgress);
-end;
-
-class procedure ASyncHTTP.Post(URL, PostData: String; OnFinished: TASyncHTTPFinishedEvent);
-begin
-  TURLPostInBackground.Create(URL, PostData, [], OnFinished);
-end;
-
-class procedure ASyncHTTP.Post(URL, PostData: String; Headers: TStringArray; OnFinished: TASyncHTTPFinishedEvent);
-begin
-  TURLPostInBackground.Create(URL, PostData, Headers, OnFinished);
+  TURLPostInBackground.Create(URL, Data, RequestHeaders, OnFinish);
 end;
 
 procedure TURLFetchInBackground.DoProgress(Sender: TObject; URL, ContentType: String; Position, Size: Int64);
@@ -214,6 +137,7 @@ end;
 procedure TURLFetchInBackground.Execute;
 var
   Result: TASyncHTTPResult;
+  I: Integer;
 begin
   Result := Default(TASyncHTTPResult);
   Result.URL := FURL;
@@ -223,6 +147,13 @@ begin
     with TSimbaHTTPClient.Create() do
     try
       OnDownloadProgress := @DoProgress;
+
+      I := 0;
+      while (I < High(FRequestHeaders)) do
+      begin
+        RequestHeader[FRequestHeaders[i]] := FRequestHeaders[i+1];
+        I += 2;
+      end;
 
       if (FDestFile <> '') then
       begin
@@ -248,27 +179,23 @@ begin
     FOnFinished(Result);
 end;
 
-constructor TURLFetchInBackground.Create(URL: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
+constructor TURLFetchInBackground.Create(URL: String; RequestHeaders: TStringArray; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent);
 begin
   inherited Create(False, 512*512);
 
   FreeOnTerminate := True;
 
   FURL := URL;
-  FOnFinished := OnFinished;
+  FOnFinished := OnFinish;
   FOnProgress := OnProgress;
+  FRequestHeaders := RequestHeaders;
 end;
 
-constructor TURLFetchInBackground.Create(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent);
+constructor TURLFetchInBackground.Create(URL: String; RequestHeaders: TStringArray; DestFile: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent);
 begin
-  inherited Create(False, 512*512);
-
-  FreeOnTerminate := True;
+  Create(URL, RequestHeaders, OnFinish, OnProgress);
 
   FDestFile := DestFile;
-  FURL := URL;
-  FOnFinished := OnFinished;
-  FOnProgress := OnProgress;
 end;
 
 end.

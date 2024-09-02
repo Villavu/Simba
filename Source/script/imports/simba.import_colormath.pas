@@ -25,7 +25,9 @@ Colors and conversion into different formats.
 (*
 EColorSpace
 -----------
-> EColorSpace = enum(RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE)
+```
+EColorSpace = enum(RGB, HSV, HSL, XYZ, LAB, LCH, DELTAE)
+```
 
 Enum of color spaces Simba supports.
 
@@ -37,7 +39,9 @@ This enum is scoped, which means it must be used like: `EColorSpace.HSL`, or `EC
 (*
 TColorRGB.ToXYZ
 ---------------
-> function TColorRGB.ToXYZ: TColorXYZ;
+```
+function TColorRGB.ToXYZ: TColorXYZ;
+```
 *)
 procedure _LapeColorRGBToXYZ(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -47,7 +51,9 @@ end;
 (*
 TColorRGB.ToLAB
 ---------------
-> function TColorRGB.ToLAB: TColorLAB;
+```
+function TColorRGB.ToLAB: TColorLAB;
+```
 *)
 procedure _LapeColorRGBToLAB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -57,7 +63,9 @@ end;
 (*
 TColorRGB.ToLCH
 ---------------
-> function TColorRGB.ToLCH: TColorLCH;
+```
+function TColorRGB.ToLCH: TColorLCH;
+```
 *)
 procedure _LapeColorRGBToLCH(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -67,7 +75,9 @@ end;
 (*
 TColorRGB.ToHSV
 ---------------
-> function TColorRGB.ToHSV: TColorHSV;
+```
+function TColorRGB.ToHSV: TColorHSV;
+```
 *)
 procedure _LapeColorRGBToHSV(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -77,7 +87,9 @@ end;
 (*
 TColorRGB.ToHSL
 ---------------
-> function TColorRGB.ToHSL: TColorHSL;
+```
+function TColorRGB.ToHSL: TColorHSL;
+```
 *)
 procedure _LapeColorRGBToHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -87,7 +99,9 @@ end;
 (*
 TColorRGB.ToColor
 -----------------
-> function TColorRGB.ToColor: TColor;
+```
+function TColorRGB.ToColor: TColor;
+```
 *)
 procedure _LapeColorRGBToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -97,7 +111,9 @@ end;
 (*
 TColor.ToBGRA
 -------------
-> function TColor.ToBGRA: TColorBGRA;
+```
+function TColor.ToBGRA: TColorBGRA;
+```
 *)
 procedure _LapeTColorToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -107,7 +123,9 @@ end;
 (*
 TColor.ToRGB
 ------------
-> function TColor.ToRGB: TColorRGB;
+```
+function TColor.ToRGB: TColorRGB;
+```
 *)
 procedure _LapeTColorToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -117,7 +135,9 @@ end;
 (*
 TColor.ToXYZ
 ------------
-> function TColor.ToXYZ: TColorXYZ;
+```
+function TColor.ToXYZ: TColorXYZ;
+```
 *)
 procedure _LapeTColorToXYZ(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -127,7 +147,9 @@ end;
 (*
 TColor.ToLAB
 ------------
-> function TColor.ToLAB: TColorLAB;
+```
+function TColor.ToLAB: TColorLAB;
+```
 *)
 procedure _LapeTColorToLAB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -137,7 +159,9 @@ end;
 (*
 TColor.ToLCH
 ------------
-> function TColor.ToLCH: TColorLCH;
+```
+function TColor.ToLCH: TColorLCH;
+```
 *)
 procedure _LapeTColorToLCH(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -147,7 +171,9 @@ end;
 (*
 TColor.ToHSV
 ------------
-> function TColor.ToHSV: TColorHSV;
+```
+function TColor.ToHSV: TColorHSV;
+```
 *)
 procedure _LapeTColorToHSV(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -157,7 +183,9 @@ end;
 (*
 TColor.ToHSL
 ------------
-> function TColor.ToHSL: TColorHSL;
+```
+function TColor.ToHSL: TColorHSL;
+```
 *)
 procedure _LapeTColorToHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -167,7 +195,9 @@ end;
 (*
 TColorHSL.ToRGB
 ---------------
-> function TColorHSL.ToRGB: TColorRGB;
+```
+function TColorHSL.ToRGB: TColorRGB;
+```
 *)
 procedure _LapeColorHSLToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -177,7 +207,9 @@ end;
 (*
 TColorHSL.ToColor
 -----------------
-> function TColorHSL.ToColor: TColor;
+```
+function TColorHSL.ToColor: TColor;
+```
 *)
 procedure _LapeColorHSLToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -187,7 +219,9 @@ end;
 (*
 TColorHSV.ToRGB
 ---------------
-> function TColorHSV.ToRGB: TColorRGB;
+```
+function TColorHSV.ToRGB: TColorRGB;
+```
 *)
 procedure _LapeColorHSVToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -197,7 +231,9 @@ end;
 (*
 TColorHSV.ToColor
 -----------------
-> function TColorHSV.ToColor: TColor;
+```
+function TColorHSV.ToColor: TColor;
+```
 *)
 procedure _LapeColorHSVToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -207,7 +243,9 @@ end;
 (*
 TColorXYZ.ToRGB
 ---------------
-> function TColorXYZ.ToRGB: TColorRGB;
+```
+function TColorXYZ.ToRGB: TColorRGB;
+```
 *)
 procedure _LapeColorXYZToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -217,7 +255,9 @@ end;
 (*
 TColorXYZ.ToColor
 -----------------
-> function TColorXYZ.ToColor: TColor;
+```
+function TColorXYZ.ToColor: TColor;
+```
 *)
 procedure _LapeColorXYZToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -227,7 +267,9 @@ end;
 (*
 TColorLAB.ToRGB
 ---------------
-> function TColorLAB.ToRGB: TColorRGB;
+```
+function TColorLAB.ToRGB: TColorRGB;
+```
 *)
 procedure _LapeColorLABToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -237,7 +279,9 @@ end;
 (*
 TColorLAB.ToColor
 -----------------
-> function TColorLAB.ToColor: TColor;
+```
+function TColorLAB.ToColor: TColor;
+```
 *)
 procedure _LapeColorLABToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -247,7 +291,9 @@ end;
 (*
 TColorLCH.ToRGB
 ---------------
-> function TColorLCH.ToRGB: TColorRGB;
+```
+function TColorLCH.ToRGB: TColorRGB;
+```
 *)
 procedure _LapeColorLCHToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -257,7 +303,9 @@ end;
 (*
 TColorLCH.ToColor
 -----------------
-> function TColorLCH.ToColor: TColor;
+```
+function TColorLCH.ToColor: TColor;
+```
 *)
 procedure _LapeColorLCHToColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -267,7 +315,9 @@ end;
 (*
 ColorIntensity
 --------------
-> function ColorIntensity(Color: TColor): Byte;
+```
+function ColorIntensity(Color: TColor): Byte;
+```
 *)
 procedure _LapeColorIntensity(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -277,7 +327,9 @@ end;
 (*
 ColorToGray
 -----------
-> function ColorToGray(Color: TColor): Byte;
+```
+function ColorToGray(Color: TColor): Byte;
+```
 *)
 procedure _LapeColorToGray(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -287,7 +339,9 @@ end;
 (*
 ColorToRGB
 ----------
-> function ColorToRGB(Color: TColor): TColorRGB;
+```
+function ColorToRGB(Color: TColor): TColorRGB;
+```
 *)
 procedure _LapeColorToRGB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -297,7 +351,9 @@ end;
 (*
 ColorToBGRA
 -----------
-> function ColorToBGRA(Color: TColor): TColorBGRA;
+```
+function ColorToBGRA(Color: TColor): TColorBGRA;
+```
 *)
 procedure _LapeColorToBGRA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -307,7 +363,9 @@ end;
 (*
 ColorToHSL
 ----------
-> function ColorToHSL(Color: TColor): TColorHSL;
+```
+function ColorToHSL(Color: TColor): TColorHSL;
+```
 *)
 procedure _LapeColorToHSL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -317,7 +375,9 @@ end;
 (*
 ColorToHSV
 ----------
-> function ColorToHSV(Color: TColor): TColorHSV;
+```
+function ColorToHSV(Color: TColor): TColorHSV;
+```
 *)
 procedure _LapeColorToHSV(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -327,7 +387,9 @@ end;
 (*
 ColorToXYZ
 ----------
-> function ColorToXYZ(Color: TColor): TColorXYZ;
+```
+function ColorToXYZ(Color: TColor): TColorXYZ;
+```
 *)
 procedure _LapeColorToXYZ(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -337,7 +399,9 @@ end;
 (*
 ColorToLAB
 ----------
-> function ColorToLAB(Color: TColor): TColorLAB;
+```
+function ColorToLAB(Color: TColor): TColorLAB;
+```
 *)
 procedure _LapeColorToLAB(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -347,7 +411,9 @@ end;
 (*
 ColorToLCH
 ----------
-> function ColorToLCH(Color: TColor): TColorLCH;
+```
+function ColorToLCH(Color: TColor): TColorLCH;
+```
 *)
 procedure _LapeColorToLCH(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -357,7 +423,9 @@ end;
 (*
 SimilarColors
 -------------
-> function SimilarColors(Color1, Color2: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): Boolean;
+```
+function SimilarColors(Color1, Color2: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): Boolean;
+```
 *)
 procedure _LapeSimilarColors1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -367,7 +435,9 @@ end;
 (*
 SimilarColors
 -------------
-> function SimilarColors(Color1, Color2: TColor; Tolerance: Single): Boolean;
+```
+function SimilarColors(Color1, Color2: TColor; Tolerance: Single): Boolean;
+```
 *)
 procedure _LapeSimilarColors2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -377,7 +447,9 @@ end;
 (*
 ColorDistance
 -------------
-> function ColorDistance(const Color1, Color2: TColor; const ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Single;
+```
+function ColorDistance(const Color1, Color2: TColor; const ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Single;
+```
 *)
 procedure _LapeColorDistance1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -387,7 +459,9 @@ end;
 (*
 ColorDistance
 -------------
-> function ColorDistance(const Color1, Color2: TColor): Single;
+```
+function ColorDistance(const Color1, Color2: TColor): Single;
+```
 *)
 procedure _LapeColorDistance2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -397,7 +471,9 @@ end;
 (*
 GetBestColor
 ------------
-> function GetBestColor(ColorSpace: EColorSpace; Colors: TColorArray): TBestColor;
+```
+function GetBestColor(ColorSpace: EColorSpace; Colors: TColorArray): TBestColor;
+```
 *)
 procedure _LapeGetBestColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -407,7 +483,9 @@ end;
 (*
 TColor.R
 --------
-> function TColor.R: Byte;
+```
+function TColor.R: Byte;
+```
 
 Return the red channel value of a TColor
 *)
@@ -415,7 +493,9 @@ Return the red channel value of a TColor
 (*
 TColor.G
 --------
-> function TColor.G: Byte;
+```
+function TColor.G: Byte;
+```
 
 Return the green channel value of a TColor
 *)
@@ -423,7 +503,9 @@ Return the green channel value of a TColor
 (*
 TColor.B
 --------
-> function TColor.B: Byte;
+```
+function TColor.B: Byte;
+```
 
 Return the blue channel value of a TColor
 *)
@@ -895,4 +977,3 @@ begin
 end;
 
 end.
-

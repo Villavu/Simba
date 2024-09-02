@@ -37,7 +37,9 @@ See: <https://en.wikipedia.org/wiki/Quadrilateral>
 (*
 TQuad.Create
 ------------
-> function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static;
+```
+function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static;
+```
 *)
 procedure _LapeQuad_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -47,7 +49,9 @@ end;
 (*
 TQuad.Create
 ------------
-> function TQuad.Create(Box: TBox): TQuad; static;
+```
+function TQuad.Create(Box: TBox): TQuad; static;
+```
 *)
 procedure _LapeQuad_CreateFromBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -57,7 +61,9 @@ end;
 (*
 TQuad.Create
 ------------
-> function TQuad.Create(Points: TPointArray): TQuad; static;
+```
+function TQuad.Create(Points: TPointArray): TQuad; static;
+```
 *)
 procedure _LapeQuad_CreateFromPoints(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -67,7 +73,9 @@ end;
 (*
 TQuad.Rotate
 ------------
-> function TQuad.Rotate(Angle: Double): TQuad;
+```
+function TQuad.Rotate(Angle: Double): TQuad;
+```
 *)
 procedure _LapeQuad_Rotate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -77,7 +85,9 @@ end;
 (*
 TQuad.Contains
 --------------
-> function TQuad.Contains(P: TPoint): Boolean;
+```
+function TQuad.Contains(P: TPoint): Boolean;
+```
 *)
 procedure _LapeQuad_Contains1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -87,7 +97,9 @@ end;
 (*
 TQuad.Offset
 ------------
-> function TQuad.Offset(P: TPoint): TQuad;
+```
+function TQuad.Offset(P: TPoint): TQuad;
+```
 *)
 procedure _LapeQuad_Offset(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -97,7 +109,9 @@ end;
 (*
 TQuad.Extract
 -------------
-> function TQuad.Extract(Points: TPointArray): TPointArray;
+```
+function TQuad.Extract(Points: TPointArray): TPointArray;
+```
 
 Returns all points that are in the quad.
 *)
@@ -109,7 +123,9 @@ end;
 (*
 TQuad.Exclude
 -------------
-> function TQuad.Exclude(Points: TPointArray): TPointArray;
+```
+function TQuad.Exclude(Points: TPointArray): TPointArray;
+```
 
 Returns all points that are *not inside* the quad.
 *)
@@ -121,7 +137,9 @@ end;
 (*
 TQuad.Expand
 ------------
-> function TQuad.Expand(Amount: Double): TQuad;
+```
+function TQuad.Expand(Amount: Double): TQuad;
+```
 *)
 procedure _LapeQuad_Expand(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -131,7 +149,9 @@ end;
 (*
 TQuad.NearestEdge
 -----------------
-> function TQuad.NearestEdge(P: TPoint): TPoint;
+```
+function TQuad.NearestEdge(P: TPoint): TPoint;
+```
 *)
 procedure _LapeQuad_NearestEdge(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -141,7 +161,9 @@ end;
 (*
 TQuad.Normalize
 ---------------
-> function TQuad.Normalize: TQuad;
+```
+function TQuad.Normalize: TQuad;
+```
 *)
 procedure _LapeQuad_Normalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -151,7 +173,9 @@ end;
 (*
 TQuad.RandomPoint
 -----------------
-> function TQuad.RandomPoint: TPoint;
+```
+function TQuad.RandomPoint: TPoint;
+```
 
 Returns a completely random point in the quad.
 *)
@@ -163,7 +187,9 @@ end;
 (*
 TQuad.RandomPointCenter
 -----------------------
-> function TQuad.RandomPointCenter: TPoint;
+```
+function TQuad.RandomPointCenter: TPoint;
+```
 
 Returns a random point in the quad which is weighted torwards the quad's center.
 *)
@@ -175,7 +201,9 @@ end;
 (*
 TQuad.Area
 ----------
-> property TQuad.Area: Integer;
+```
+property TQuad.Area: Integer;
+```
 *)
 procedure _LapeQuad_Area_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -185,7 +213,9 @@ end;
 (*
 TQuad.Corners
 -------------
-> property TQuad.Corners: TPointArray;
+```
+property TQuad.Corners: TPointArray;
+```
 *)
 procedure _LapeQuad_Corners_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -195,7 +225,9 @@ end;
 (*
 TQuad.Bounds
 ------------
-> property TQuad.Bounds: TBox;
+```
+property TQuad.Bounds: TBox;
+```
 *)
 procedure _LapeQuad_Bounds_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -205,7 +237,9 @@ end;
 (*
 TQuad.ShortSideLen
 ------------------
-> property TQuad.ShortSideLen: Integer;
+```
+property TQuad.ShortSideLen: Integer;
+```
 *)
 procedure _LapeQuad_ShortSideLen_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -215,7 +249,9 @@ end;
 (*
 TQuad.LongSideLen
 -----------------
-> property TQuad.LongSideLen: Integer;
+```
+property TQuad.LongSideLen: Integer;
+```
 *)
 procedure _LapeQuad_LongSideLen_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -225,7 +261,9 @@ end;
 (*
 TQuad.Mean
 ----------
-> property TQuad.Mean: TPoint;
+```
+property TQuad.Mean: TPoint;
+```
 *)
 procedure _LapeQuad_Mean_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -235,7 +273,9 @@ end;
 (*
 in
 --
-> operator in(Left: TPoint; Right: TQuad): Boolean;
+```
+operator in(Left: TPoint; Right: TQuad): Boolean;
+```
 *)
 procedure _LapeQuad_IN_Quad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin

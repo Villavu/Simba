@@ -121,8 +121,14 @@ begin
 end;
 
 procedure _LapeCustomForm_EnsureVisible(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+
+  procedure Execute;
+  begin
+    PCustomForm(Params^[0])^.EnsureVisible(PBoolean(Params^[1])^);
+  end;
+
 begin
-  PCustomForm(Params^[0])^.EnsureVisible(PBoolean(Params^[1])^);
+  RunInMainThread(@Execute);
 end;
 
 procedure _LapeCustomForm_FocusControl(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -177,23 +183,36 @@ begin
 end;
 
 procedure _LapeCustomForm_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+
+  procedure Execute;
+  begin
+    PCustomForm(Params^[0])^.Show();
+  end;
+
 begin
-  PCustomForm(Params^[0])^.Show();
+  RunInMainThread(@Execute);
 end;
 
 procedure _LapeCustomForm_ShowModal(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+
+  procedure Execute;
+  begin
+    PInteger(Result)^ := PCustomForm(Params^[0])^.ShowModal();
+  end;
+
 begin
-  PInteger(Result)^ := PCustomForm(Params^[0])^.ShowModal();
+  RunInMainThread(@Execute);
 end;
 
 procedure _LapeCustomForm_ShowOnTop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomForm(Params^[0])^.ShowOnTop();
-end;
 
-procedure _LapeCustomForm_ProcessMessages(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+  procedure Execute;
+  begin
+    PCustomForm(Params^[0])^.ShowOnTop();
+  end;
+
 begin
-  Application.ProcessMessages();
+  RunInMainThread(@Execute);
 end;
 
 procedure _LapeCustomForm_Active_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -343,11 +362,28 @@ end;
 
 procedure _LapeForm_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  if not IsMainThread() then
-    SimbaException('Forms must be created and run on the main thread, use RunInMainThread');
-
   PForm(Result)^ := TForm.CreateNew(PComponent(Params^[0])^);
   PForm(Result)^.ShowInTaskBar := stAlways;
+end;
+
+procedure _LapeFormThread_Run(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  RunInMainThread(TThreadMethod(Params^[0]^));
+end;
+
+procedure _LapeFormThread_Queue(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  QueueOnMainThread(TThreadMethod(Params^[0]^));
+end;
+
+procedure _LapeFormThread_IsCurrentThread(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := IsMainThread();
+end;
+
+procedure _LapeFormThread_ProcessMessages(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Application.ProcessMessages();
 end;
 
 procedure _LapeForm_SaveSession(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -394,41 +430,6 @@ begin
   finally
     Free();
   end;
-end;
-
-procedure _LapeForm_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Show();
-end;
-
-procedure _LapeForm_Close(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Close();
-end;
-
-procedure _LapeForm_Hide(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Hide();
-end;
-
-procedure _LapeForm_ClientWidth_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PForm(Params^[0])^.ClientWidth;
-end;
-
-procedure _LapeForm_ClientWidth_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.ClientWidth := PInteger(Params^[1])^;
-end;
-
-procedure _LapeForm_ClientHeight_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PForm(Params^[0])^.ClientHeight;
-end;
-
-procedure _LapeForm_ClientHeight_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.ClientHeight := PInteger(Params^[1])^;
 end;
 
 procedure _LapeForm_OnActivate_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -639,96 +640,6 @@ end;
 procedure _LapeForm_OnResize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PForm(Params^[0])^.OnResize := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeForm_Enabled_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PForm(Params^[0])^.Enabled;
-end;
-
-procedure _LapeForm_Enabled_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Enabled := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeForm_Font_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PFont(Result)^ := PForm(Params^[0])^.Font;
-end;
-
-procedure _LapeForm_Font_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Font := PFont(Params^[1])^;
-end;
-
-procedure _LapeForm_Visible_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PForm(Params^[0])^.Visible;
-end;
-
-procedure _LapeForm_Visible_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Visible := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeForm_Canvas_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCanvas(Result)^ := PForm(Params^[0])^.Canvas;
-end;
-
-procedure _LapeForm_Canvas_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Canvas := PCanvas(Params^[1])^;
-end;
-
-procedure _LapeForm_Left_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PForm(Params^[0])^.Left;
-end;
-
-procedure _LapeForm_Left_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Left := PInteger(Params^[1])^;
-end;
-
-procedure _LapeForm_Height_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PForm(Params^[0])^.Height;
-end;
-
-procedure _LapeForm_Height_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Height := PInteger(Params^[1])^;
-end;
-
-procedure _LapeForm_Top_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PForm(Params^[0])^.Top;
-end;
-
-procedure _LapeForm_Top_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Top := PInteger(Params^[1])^;
-end;
-
-procedure _LapeForm_Width_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PForm(Params^[0])^.Width;
-end;
-
-procedure _LapeForm_Width_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Width := PInteger(Params^[1])^;
-end;
-
-procedure _LapeForm_Caption_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PForm(Params^[0])^.Caption;
-end;
-
-procedure _LapeForm_Caption_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PForm(Params^[0])^.Caption := PString(Params^[1])^;
 end;
 
 procedure _LapeCustomForm_Position_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1079,7 +990,6 @@ begin
     addGlobalFunc('procedure TLazCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: Integer);', @_LapeCustomForm_SetRestoredBounds);
     addGlobalFunc('function TLazCustomForm.ShowModal: Integer;', @_LapeCustomForm_ShowModal);
     addGlobalFunc('procedure TLazCustomForm.ShowOnTop;', @_LapeCustomForm_ShowOnTop);
-    addGlobalFunc('procedure TLazCustomForm.ProcessMessages; static;', @_LapeCustomForm_ProcessMessages);
     addProperty('TLazCustomForm', 'BorderStyle', 'ELazFormBorderStyle', @_LapeCustomForm_Read_BorderStyle, @_LapeCustomForm_Write_BorderStyle);
     addProperty('TLazCustomForm', 'BorderIcons', 'ELazFormBorderIcons', @_LapeCustomForm_Read_BorderIcons, @_LapeCustomForm_Write_BorderIcons);
     addProperty('TLazCustomForm', 'Active', 'Boolean', @_LapeCustomForm_Active_Read);
@@ -1102,6 +1012,14 @@ begin
 
     addClass('TLazForm', 'TLazCustomForm');
     addClassConstructor('TLazForm', '(AOwner: TLazComponent = nil)', @_LapeForm_Create);
+
+    addGlobalType('record end;', 'LazFormThread');
+    addGlobalType('procedure() of object', 'TLazFormThreadMethod', FFI_DEFAULT_ABI);
+    addGlobalFunc('procedure LazFormThread.Run(Method: TLazFormThreadMethod); static', @_LapeFormThread_Run);
+    addGlobalFunc('procedure LazFormThread.Queue(Method: TLazFormThreadMethod); static', @_LapeFormThread_Queue);
+    addGlobalFunc('function LazFormThread.IsCurrentThread: Boolean; static', @_LapeFormThread_IsCurrentThread);
+    addGlobalFunc('procedure LazFormThread.ProcessMessages; static', @_LapeFormThread_ProcessMessages);
+
     addGlobalFunc('procedure TLazForm.SaveSession(FileName: String; Things: TStringArray);', @_LapeForm_SaveSession);
     addGlobalFunc('procedure TLazForm.RestoreSession(FileName: String; Things: TStringArray);', @_LapeForm_RestoreSession);
 

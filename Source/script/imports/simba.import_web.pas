@@ -34,7 +34,9 @@ Internet HTTP request/post methods.
 (*
 EHTTPStatus.AsInteger
 ---------------------
-> property EHTTPStatus.AsInteger: Integer;
+```
+property EHTTPStatus.AsInteger: Integer;
+```
 *)
 procedure _LapeHTTPStatus_AsInteger_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -44,7 +46,9 @@ end;
 (*
 EHTTPStatus.AsString
 --------------------
-> property EHTTPStatus.AsString: String;
+```
+property EHTTPStatus.AsString: String;
+```
 *)
 procedure _LapeHTTPStatus_AsString_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -54,7 +58,9 @@ end;
 (*
 TSimbaHTTPClient.Create
 -----------------------
-> function TSimbaHTTPClient.Create: TSimbaHTTPClient; static;
+```
+function TSimbaHTTPClient.Create: TSimbaHTTPClient; static;
+```
 
 Create a SimbaHTTPClient. This must be freed.
 
@@ -78,7 +84,9 @@ end;
 (*
 TSimbaHTTPClient.CreateWithProxy
 --------------------------------
-> function TSimbaHTTPClient.CreateWithProxy(Host: String; User: String = ''; Pass: String = ''): THTTPClient; static;
+```
+function TSimbaHTTPClient.CreateWithProxy(Host: String; User: String = ''; Pass: String = ''): THTTPClient; static;
+```
 
 Variant which uses a proxy for all connections.
 *)
@@ -90,7 +98,9 @@ end;
 (*
 TSimbaHTTPClient.OnDownloadProgress
 -----------------------------------
-> property TSimbaHTTPClient.OnDownloadProgress: TSimbaHTTPDownloadingEvent;
+```
+property TSimbaHTTPClient.OnDownloadProgress: TSimbaHTTPDownloadingEvent;
+```
 *)
 procedure _LapeSimbaHTTPClient_OnDownloadProgress_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -105,7 +115,9 @@ end;
 (*
 TSimbaHTTPClient.OnExtractProgress
 ----------------------------------
-> property TSimbaHTTPClient.OnExtractProgress: TSimbaHTTPExtractingEvent;
+```
+property TSimbaHTTPClient.OnExtractProgress: TSimbaHTTPExtractingEvent;
+```
 *)
 procedure _LapeSimbaHTTPClient_OnExtractProgress_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -120,7 +132,9 @@ end;
 (*
 TSimbaHTTPClient.ConnectTimeout
 -------------------------------
-> property TSimbaHTTPClient.ConnectTimeout: Integer;
+```
+property TSimbaHTTPClient.ConnectTimeout: Integer;
+```
 *)
 procedure _LapeSimbaHTTPClient_ConnectTimeout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -135,7 +149,9 @@ end;
 (*
 TSimbaHTTPClient.ReadWriteTimeout
 ------------------------
-> property TSimbaHTTPClient.ReadWriteTimeout: Integer;
+```
+property TSimbaHTTPClient.ReadWriteTimeout: Integer;
+```
 *)
 procedure _LapeSimbaHTTPClient_ReadWriteTimeout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -150,7 +166,9 @@ end;
 (*
 TSimbaHTTPClient.Cookies
 ------------------------
-> property TSimbaHTTPClient.Cookies: TStringArray;
+```
+property TSimbaHTTPClient.Cookies: TStringArray;
+```
 *)
 procedure _LapeSimbaHTTPClient_Cookies_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -165,7 +183,9 @@ end;
 (*
 TSimbaHTTPClient.ResponseStatus
 -------------------------------
-> property TSimbaHTTPClient.ResponseStatus: EHTTPStatus;
+```
+property TSimbaHTTPClient.ResponseStatus: EHTTPStatus;
+```
 
 Returns the response status of the last response.
 
@@ -182,7 +202,9 @@ end;
 (*
 TSimbaHTTPClient.ResponseHeaders
 --------------------------------
-> function TSimbaHTTPClient.ResponseHeaders: TStringArray;
+```
+function TSimbaHTTPClient.ResponseHeaders: TStringArray;
+```
 *)
 procedure _LapeSimbaHTTPClient_ResponseHeaders_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -192,7 +214,9 @@ end;
 (*
 TSimbaHTTPClient.ResponseHeader
 -------------------------------
-> property TSimbaHTTPClient.ResponseHeader[Name: String]: String;
+```
+property TSimbaHTTPClient.ResponseHeader[Name: String]: String;
+```
 *)
 procedure _LapeSimbaHTTPClient_ResponseHeader_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -202,7 +226,9 @@ end;
 (*
 TSimbaHTTPClient.RequestHeader
 ------------------------------
-> property TSimbaHTTPClient.RequestHeader[Name: String]: String;
+```
+property TSimbaHTTPClient.RequestHeader[Name: String]: String;
+```
 *)
 procedure _LapeSimbaHTTPClient_RequestHeader_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -217,7 +243,9 @@ end;
 (*
 TSimbaHTTPClient.Reset
 ----------------------
-> procedure TSimbaHTTPClient.Reset;
+```
+procedure TSimbaHTTPClient.Reset;
+```
 *)
 procedure _LapeSimbaHTTPClient_Reset(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -227,7 +255,9 @@ end;
 (*
 TSimbaHTTPClient.Get
 --------------------
-> function TSimbaHTTPClient.Get(URL: String): String;
+```
+function TSimbaHTTPClient.Get(URL: String): String;
+```
 
 Return a webpages content as a string.
 *)
@@ -239,7 +269,9 @@ end;
 (*
 TSimbaHTTPClient.GetJson
 ------------------------
-> function TSimbaHTTPClient.GetJson(URL: String): TSimbaJSONParser;
+```
+function TSimbaHTTPClient.GetJson(URL: String): TSimbaJSONParser;
+```
 *)
 procedure _LapeSimbaHTTPClient_GetJson(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -249,7 +281,9 @@ end;
 (*
 TSimbaHTTPClient.GetFile
 ------------------------
-> procedure TSimbaHTTPClient.GetFile(URL, LocalFileName: String);
+```
+procedure TSimbaHTTPClient.GetFile(URL, LocalFileName: String);
+```
 
 Save a webpages content to a local file.
 *)
@@ -261,7 +295,9 @@ end;
 (*
 TSimbaHTTPClient.GetZip
 -----------------------
-> procedure TSimbaHTTPClient.GetZip(URL: String; OutputPath: String);
+```
+procedure TSimbaHTTPClient.GetZip(URL: String; OutputPath: String);
+```
 *)
 procedure _LapeSimbaHTTPClient_GetZIP(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -271,7 +307,9 @@ end;
 (*
 TSimbaHTTPClient.Head
 ---------------------
-> function TSimbaHTTPClient.Head(URL: String): EHTTPStatus;
+```
+function TSimbaHTTPClient.Head(URL: String): EHTTPStatus;
+```
 
 Header request. Headers will be written to `HTTPClient.GetResponseHeaders()`
 *)
@@ -283,7 +321,9 @@ end;
 (*
 TSimbaHTTPClient.Post
 ---------------------
-> function TSimbaHTTPClient.Post(URL: String; Data: String): String;
+```
+function TSimbaHTTPClient.Post(URL: String; Data: String): String;
+```
 
 HTTP post request.
 
@@ -297,7 +337,9 @@ end;
 (*
 TSimbaHTTPClient.Patch
 ----------------------
-> function TSimbaHTTPClient.Patch(URL, Data: String): String;
+```
+function TSimbaHTTPClient.Patch(URL, Data: String): String;
+```
 *)
 procedure _LapeSimbaHTTPClient_Patch(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -307,7 +349,9 @@ end;
 (*
 TSimbaHTTPClient.Put
 --------------------
-> function TSimbaHTTPClient.Put(URL, Data: String): String;
+```
+function TSimbaHTTPClient.Put(URL, Data: String): String;
+```
 *)
 procedure _LapeSimbaHTTPClient_Put(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -317,7 +361,9 @@ end;
 (*
 TSimbaHTTPClient.Delete
 -----------------------
-> function TSimbaHTTPClient.Delete(URL, Data: String): String;
+```
+function TSimbaHTTPClient.Delete(URL, Data: String): String;
+```
 *)
 procedure _LapeSimbaHTTPClient_Delete(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -327,7 +373,9 @@ end;
 (*
 TSimbaHTTPClient.Options
 -----------------------
-> function TSimbaHTTPClient.Options(URL, Data: String): String;
+```
+function TSimbaHTTPClient.Options(URL, Data: String): String;
+```
 *)
 procedure _LapeSimbaHTTPClient_Options(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -337,7 +385,9 @@ end;
 (*
 TSimbaHTTPClient.PostForm
 -------------------------
-> function TSimbaHTTPClient.PostForm(URL: String; Data: String): String;
+```
+function TSimbaHTTPClient.PostForm(URL: String; Data: String): String;
+```
 
 Post form data (www-urlencoded)
 *)
@@ -349,7 +399,9 @@ end;
 (*
 TSimbaHTTPClient.PostFormFile
 -----------------------------
-> function TSimbaHTTPClient.PostFormFile(const URL, FieldName, FileName: string): String;
+```
+function TSimbaHTTPClient.PostFormFile(const URL, FieldName, FileName: string): String;
+```
 
 Post form with a local file file
 *)
@@ -361,7 +413,9 @@ end;
 (*
 URLOpenInBrowser
 ----------------
-> procedure URLOpenInBrowser(URL: String);
+```
+procedure URLOpenInBrowser(URL: String);
+```
 
 Opens a URL in the systems default internet browser.
 *)
@@ -373,7 +427,9 @@ end;
 (*
 URLFetch
 --------
-> function URLFetch(URL: String): String;
+```
+function URLFetch(URL: String): String;
+```
 
 Simple method to return the contents of a webpage.
 *)
@@ -385,7 +441,9 @@ end;
 (*
 URLFetchToFile
 --------------
-> function URLFetchToFile(URL, FileName: String): Boolean;
+```
+function URLFetchToFile(URL, FileName: String): Boolean;
+```
 
 Simple method to download the contents of a webpage to a file.
 *)
@@ -397,7 +455,9 @@ end;
 (*
 URLEncode
 ---------
-> function URLEncode(S: String): String;
+```
+function URLEncode(S: String): String;
+```
 
 URL encode a string. For example a space character is changed to `%20`.
 *)
@@ -409,7 +469,9 @@ end;
 (*
 URLDecode
 ---------
-> function URLDecode(S: String): String;
+```
+function URLDecode(S: String): String;
+```
 
 Inverse of EncodeURLElement.
 *)
@@ -421,7 +483,9 @@ end;
 (*
 TInternetSocket.Create
 ----------------------
-> function TInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean): TInternetSocket; static;
+```
+function TInternetSocket.Create(AHost: String; APort: UInt16; UseSSL: Boolean): TInternetSocket; static;
+```
 
 Basic internet socket functionality.
 The socket is blocking which means `Read` calls will wait for data to arrive.
@@ -436,7 +500,9 @@ end;
 (*
 TInternetSocket.Connect
 -----------------------
-> procedure TInternetSocket.Connect;
+```
+procedure TInternetSocket.Connect;
+```
 
 Connects to the host and port.
 *)
@@ -448,7 +514,9 @@ end;
 (*
 TInternetSocket.Close
 ---------------------
-> procedure TInternetSocket.Close;
+```
+procedure TInternetSocket.Close;
+```
 
 Closes the socket
 *)
@@ -460,7 +528,9 @@ end;
 (*
 TInternetSocket.HasData
 -----------------------
-> function TInternetSocket.HasData: Boolean;
+```
+function TInternetSocket.HasData: Boolean;
+```
 
 Returns true if there is data waiting to be read.
 *)
@@ -472,7 +542,9 @@ end;
 (*
 TInternetSocket.Read
 --------------------
-> function TInternetSocket.Read(MaxLen: Integer = 8192): TByteArray;
+```
+function TInternetSocket.Read(MaxLen: Integer = 8192): TByteArray;
+```
 
 Read bytes from the socket up to `MaxLen` bytes.
 
@@ -489,7 +561,9 @@ end;
 (*
 TInternetSocket.ReadUntil
 -------------------------
-> function TInternetSocket.ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;
+```
+function TInternetSocket.ReadUntil(Seq: TByteArray; Timeout: Integer): TByteArray;
+```
 
 Reads until the data ends with `Seq` or `Timeout` (in milliseconds) is reached.
 This is useful if you are reading data which is terminated with consistent endings.
@@ -502,7 +576,9 @@ end;
 (*
 TInternetSocket.ReadString
 --------------------------
-> function TInternetSocket.ReadString(MaxLen: Integer = 8192): String;
+```
+function TInternetSocket.ReadString(MaxLen: Integer = 8192): String;
+```
 
 ReadString a string from the socket up to `MaxLen` bytes.
 *)
@@ -514,7 +590,9 @@ end;
 (*
 TInternetSocket.ReadStringUntil
 -------------------------------
-> function TInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;
+```
+function TInternetSocket.ReadStringUntil(Seq: String; Timeout: Integer): String;
+```
 
 Reads a string until the data ends with `Seq` or `Timeout` (in milliseconds) is reached.
 This is useful if you are ReadStringing data which is terminated with consistent endings.
@@ -527,7 +605,9 @@ end;
 (*
 TInternetSocket.Write
 ---------------------
-> function TInternetSocket.Write(Data: TByteArray): Integer;
+```
+function TInternetSocket.Write(Data: TByteArray): Integer;
+```
 
 Write bytes to the socket.
 *)
@@ -539,7 +619,9 @@ end;
 (*
 TInternetSocket.WriteString
 ---------------------------
-> function TInternetSocket.WriteString(Str: String): Integer;
+```
+function TInternetSocket.WriteString(Str: String): Integer;
+```
 
 Write a string to the socket.
 *)
@@ -551,7 +633,9 @@ end;
 (*
 TInternetSocket.LocalAddress
 ----------------------------
-> property TInternetSocket.LocalAddress: String;
+```
+property TInternetSocket.LocalAddress: String;
+```
 *)
 procedure _LapeSimbaInternetSocket_LocalAddress_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -561,7 +645,9 @@ end;
 (*
 TInternetSocket.RemoteAddress
 -----------------------------
-> property TInternetSocket.RemoteAddress: String;
+```
+property TInternetSocket.RemoteAddress: String;
+```
 *)
 procedure _LapeSimbaInternetSocket_RemoteAddress_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -571,8 +657,12 @@ end;
 (*
 TInternetSocket.ReadWriteTimeout
 --------------------------------
-> property TInternetSocket.ReadWriteTimeout: Integer
-> property TInternetSocket.ReadWriteTimeout(Value: Integer)
+```
+property TInternetSocket.ReadWriteTimeout: Integer
+```
+```
+property TInternetSocket.ReadWriteTimeout(Value: Integer)
+```
 
 Timeout (in milliseconds) on Read/Write operations.
 *)
@@ -589,8 +679,12 @@ end;
 (*
 TInternetSocket.ConnectTimeout
 ------------------------------
-> property TInternetSocket.ConnectTimeout: Integer;
-> property TInternetSocket.ConnectTimeout(Value: Integer);
+```
+property TInternetSocket.ConnectTimeout: Integer;
+```
+```
+property TInternetSocket.ConnectTimeout(Value: Integer);
+```
 
 Connect timeout (in milliseconds).
 *)
@@ -607,7 +701,9 @@ end;
 (*
 TInternetSocket.LastError
 -------------------------
-> property TInternetSocket.LastError: Integer;
+```
+property TInternetSocket.LastError: Integer;
+```
 
 Returns the sockets last error code.
 *)
@@ -619,7 +715,9 @@ end;
 (*
 TInternetSocketASync.Create
 ---------------------------
-> function TInternetSocketASync.Create(AHost: String; APort: UInt16; UseSSL: Boolean): TInternetSocketASync; static;
+```
+function TInternetSocketASync.Create(AHost: String; APort: UInt16; UseSSL: Boolean): TInternetSocketASync; static;
+```
 
 Internet socket but runs in the background and calls the OnData callback when data arrives.
 *)
@@ -631,8 +729,12 @@ end;
 (*
 TInternetSocketASync.OnData
 ---------------------------
-> property TInternetSocketASync.OnData: TSocketDataEvent;
-> property TInternetSocketASync.OnData(Value: TSocketDataEvent);
+```
+property TInternetSocketASync.OnData: TSocketDataEvent;
+```
+```
+property TInternetSocketASync.OnData(Value: TSocketDataEvent);
+```
 *)
 procedure _LapeInternetSocketASync_DataEvent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -647,8 +749,12 @@ end;
 (*
 TInternetSocketASync.OnDisconnect
 ---------------------------------
-> property TInternetSocketASync.OnDisconnect: TSocketDisconnectEvent;
-> property TInternetSocketASync.OnDisconnect(Value: TSocketDisconnectEvent);
+```
+property TInternetSocketASync.OnDisconnect: TSocketDisconnectEvent;
+```
+```
+property TInternetSocketASync.OnDisconnect(Value: TSocketDisconnectEvent);
+```
 *)
 procedure _LapeInternetSocketASync_DisconnectEvent_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -663,7 +769,9 @@ end;
 (*
 TInternetSocketASync.Running
 ----------------------------
-> property TInternetSocketASync.Running: Boolean;
+```
+property TInternetSocketASync.Running: Boolean;
+```
 *)
 procedure _LapeInternetSocketASync_Running_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -673,8 +781,12 @@ end;
 (*
 TInternetSocketServer.Create
 ----------------------------
-> function TInternetSocketServer.Create(APort: Integer): TInternetSocketServer;
-> function TInternetSocketServer.Create(AHost: String; APort: Integer): TInternetSocketServer;
+```
+function TInternetSocketServer.Create(APort: Integer): TInternetSocketServer;
+```
+```
+function TInternetSocketServer.Create(AHost: String; APort: Integer): TInternetSocketServer;
+```
 *)
 procedure _LapeInternetSocketServer_Create1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -689,7 +801,9 @@ end;
 (*
 TInternetSocketServer.Start
 ---------------------------
-> procedure TInternetSocketServer.Start;
+```
+procedure TInternetSocketServer.Start;
+```
 *)
 procedure _LapeInternetSocketServer_Start(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -699,7 +813,9 @@ end;
 (*
 TInternetSocketServer.Stop
 --------------------------
-> procedure TInternetSocketServer.Stop;
+```
+procedure TInternetSocketServer.Stop;
+```
 *)
 procedure _LapeInternetSocketServer_Stop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -709,7 +825,9 @@ end;
 (*
 TInternetSocketServer.Running
 -----------------------------
-> function TInternetSocketServer.Running: Boolean;
+```
+function TInternetSocketServer.Running: Boolean;
+```
 *)
 procedure _LapeInternetSocketServer_Running_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -719,7 +837,9 @@ end;
 (*
 TInternetSocketServer.ConnectionCount
 -------------------------------------
-> property TInternetSocketServer.ConnectionCount: Integer;
+```
+property TInternetSocketServer.ConnectionCount: Integer;
+```
 *)
 procedure _LapeInternetSocketServer_ConnectionCount_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -729,8 +849,12 @@ end;
 (*
 TInternetSocketServer.OnHandleClient
 ------------------------------------
-> property TInternetSocketServer.OnHandleClient: THandleClientEvent;
-> property TInternetSocketServer.OnHandleClient(Value: THandleClientEvent);
+```
+property TInternetSocketServer.OnHandleClient: THandleClientEvent;
+```
+```
+property TInternetSocketServer.OnHandleClient(Value: THandleClientEvent);
+```
 *)
 procedure _LapeInternetSocketServer_OnHandleClient_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -745,8 +869,12 @@ end;
 (*
 TInternetSocketServer.OnAllowClient
 -----------------------------------
-> property TInternetSocketServer.OnAllowClient: TAllowClientEvent;
-> property TInternetSocketServer.OnAllowClient(Value: TAllowClientEvent);
+```
+property TInternetSocketServer.OnAllowClient: TAllowClientEvent;
+```
+```
+property TInternetSocketServer.OnAllowClient(Value: TAllowClientEvent);
+```
 *)
 procedure _LapeInternetSocketServer_OnAllowClient_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -761,7 +889,9 @@ end;
 (*
 LoadSSL
 -------
-> function LoadSSL(Debug: Boolean = False): Boolean;
+```
+function LoadSSL(Debug: Boolean = False): Boolean;
+```
 
 Loads SSL. This is automatically done on demand but is useful for debugging errors relating to loading OpenSSL.
 *)

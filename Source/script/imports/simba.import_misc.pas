@@ -53,7 +53,9 @@ WriteLn(SimbaEnv.ScriptsPath);
 (*
 ClearSimbaOutput
 ----------------
-> procedure ClearSimbaOutput;
+```
+procedure ClearSimbaOutput;
+```
 
 Clear the scripts output box in Simba.
 *)
@@ -65,7 +67,9 @@ end;
 (*
 SetSimbaSetting
 ---------------
-> function SetSimbaSetting(Name: String; DefValue: String = ''): String;
+```
+function SetSimbaSetting(Name: String; DefValue: String = ''): String;
+```
 *)
 procedure _LapeGetSimpleSetting(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -75,7 +79,9 @@ end;
 (*
 GetSimbaSetting
 ---------------
-> procedure GetSimbaSetting(Name, Value: String);
+```
+procedure GetSimbaSetting(Name, Value: String);
+```
 *)
 procedure _LapeSetSimpleSetting(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -85,7 +91,9 @@ end;
 (*
 PlaySound
 ---------
-> procedure PlaySound(Sound: String);
+```
+procedure PlaySound(Sound: String);
+```
 *)
 procedure _LapePlaySound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -95,7 +103,9 @@ end;
 (*
 StopSound
 ---------
-> procedure StopSound;
+```
+procedure StopSound;
+```
 *)
 procedure _LapeStopSound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -105,7 +115,9 @@ end;
 (*
 Simba
 -----
-> procedure Simba;
+```
+procedure Simba;
+```
 *)
 procedure _LapeSimba(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -115,7 +127,9 @@ end;
 (*
 SetClipBoard
 ------------
-> procedure SetClipBoard(Data: string);
+```
+procedure SetClipBoard(Data: string);
+```
 
 Sets the systems clipboard string.
 *)
@@ -130,7 +144,9 @@ end;
 (*
 GetClipBoard
 ------------
-> function GetClipBoard: String;
+```
+function GetClipBoard: String;
+```
 
 Returns the systems clipboard string.
 *)
@@ -145,7 +161,9 @@ end;
 (*
 ShowComboDialog
 ---------------
-> function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer;
+```
+function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer;
+```
 *)
 procedure _LapeInputCombo(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
@@ -161,7 +179,9 @@ end;
 (*
 ShowQueryDialog
 ---------------
-> function ShowQueryDialog(Caption, Prompt: String; var Value: String): Boolean;
+```
+function ShowQueryDialog(Caption, Prompt: String; var Value: String): Boolean;
+```
 *)
 procedure _LapeInputQuery(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
@@ -177,7 +197,9 @@ end;
 (*
 ShowMessage
 -----------
-> procedure ShowMessage(Message: String);
+```
+procedure ShowMessage(Message: String);
+```
 *)
 procedure _LapeShowMessage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 
@@ -193,8 +215,12 @@ end;
 (*
 ShowDTMEditor
 -------------
-> function ShowDTMEditor(Target: TTarget; Title: String): String;
-> function ShowDTMEditor(Title: String): String;
+```
+function ShowDTMEditor(Target: TTarget; Title: String): String;
+```
+```
+function ShowDTMEditor(Title: String): String;
+```
 *)
 procedure _LapeShowDTMEditor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
@@ -224,8 +250,12 @@ end;
 (*
 ShowACA
 -------
-> function ShowACA(Target: TTarget; Title: String): TColorTolerance;
-> function ShowACA(Title: String): TColorTolerance;
+```
+function ShowACA(Target: TTarget; Title: String): TColorTolerance;
+```
+```
+function ShowACA(Title: String): TColorTolerance;
+```
 *)
 procedure _LapeShowACA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
@@ -255,7 +285,9 @@ end;
 (*
 ShowDirectoryDialog
 -------------------
-> function ShowDirectoryDialog(Title, InitialDirectory: String; out Directory: String): Boolean;
+```
+function ShowDirectoryDialog(Title, InitialDirectory: String; out Directory: String): Boolean;
+```
 *)
 procedure _LapeSelectDirectory(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
@@ -271,7 +303,9 @@ end;
 (*
 ShowQuestionDialog
 ------------------
-> function ShowQuestionDialog(Title, Question: String): Boolean;
+```
+function ShowQuestionDialog(Title, Question: String): Boolean;
+```
 *)
 procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
@@ -287,19 +321,25 @@ end;
 (*
 ShowTrayNotification
 --------------------
-> procedure ShowTrayNotification(Title, Message: String; Timeout: Integer = 3000);
+```
+procedure ShowTrayNotification(Title, Message: String; Timeout: Integer = 3000);
+```
 *)
 
 (*
 SetSimbaTitle
 --------------
-> procedure SetSimbaTitle(S: String);
+```
+procedure SetSimbaTitle(S: String);
+```
 *)
 
 (*
 GetSimbaPID
 -----------
-> function GetSimbaPID: TProcessID;
+```
+function GetSimbaPID: TProcessID;
+```
 
 Returns the Simba's PID this script is running in.
 *)
@@ -307,7 +347,9 @@ Returns the Simba's PID this script is running in.
 (*
 GetSimbaTargetPID
 ------------------
-> function GetSimbaTargetPID: TProcessID;
+```
+function GetSimbaTargetPID: TProcessID;
+```
 
 Returns the current Simba target PID (what is selected with the crosshair)
 *)
@@ -315,7 +357,9 @@ Returns the current Simba target PID (what is selected with the crosshair)
 (*
 GetSimbaTargetWindow
 --------------------
-> function GetSimbaTargetWindow: TWindowHandle;
+```
+function GetSimbaTargetWindow: TWindowHandle;
+```
 
 Returns the current Simba target window (what is selected with the crosshair)
 *)
@@ -323,7 +367,9 @@ Returns the current Simba target window (what is selected with the crosshair)
 (*
 SaveScreenshot
 --------------
-> function SaveScreenshot: String;
+```
+function SaveScreenshot: String;
+```
 
 Saves a screenshot of the current target.
 Returns the screenshot path, which will be in Simba's Screenshots directory.
@@ -332,7 +378,9 @@ Returns the screenshot path, which will be in Simba's Screenshots directory.
 (*
 SaveScreenshot
 --------------
-> function SaveScreenshot(FileName: String): String;
+```
+function SaveScreenshot(FileName: String): String;
+```
 
 Saves a screenshot of the current target to the given filename.
 *)
@@ -340,8 +388,12 @@ Saves a screenshot of the current target to the given filename.
 (*
 AddOnTerminate
 --------------
-> procedure AddOnTerminate(Proc: procedure);
-> procedure AddOnTerminate(Proc: procedure of object);
+```
+procedure AddOnTerminate(Proc: procedure);
+```
+```
+procedure AddOnTerminate(Proc: procedure of object);
+```
 
 Adds a procedure to be called when the script is terminated.
 *)
@@ -349,8 +401,12 @@ Adds a procedure to be called when the script is terminated.
 (*
 AddOnUserTerminate
 ------------------
-> procedure AddOnUserTerminate(Proc: procedure);
-> procedure AddOnUserTerminate(Proc: procedure of object);
+```
+procedure AddOnUserTerminate(Proc: procedure);
+```
+```
+procedure AddOnUserTerminate(Proc: procedure of object);
+```
 
 Adds a procedure to be called when the script is terminated with the stop button being clicked.
 *)
@@ -358,8 +414,12 @@ Adds a procedure to be called when the script is terminated with the stop button
 (*
 AddOnPause
 ----------
-> procedure AddOnPause(Proc: procedure);
-> procedure AddOnPause(Proc: procedure of object);
+```
+procedure AddOnPause(Proc: procedure);
+```
+```
+procedure AddOnPause(Proc: procedure of object);
+```
 
 Adds a procedure to be called when the script is paused.
 *)
@@ -367,8 +427,12 @@ Adds a procedure to be called when the script is paused.
 (*
 AddOnResume
 -----------
-> procedure AddOnResume(Proc: procedure);
-> procedure AddOnResume(Proc: procedure of object);
+```
+procedure AddOnResume(Proc: procedure);
+```
+```
+procedure AddOnResume(Proc: procedure of object);
+```
 
 Adds a procedure to be called when the script is resumed from pause.
 *)
@@ -376,8 +440,12 @@ Adds a procedure to be called when the script is resumed from pause.
 (*
 AddOnResume
 -----------
-> procedure AddOnResume(Proc: procedure);
-> procedure AddOnResume(Proc: procedure of object);
+```
+procedure AddOnResume(Proc: procedure);
+```
+```
+procedure AddOnResume(Proc: procedure of object);
+```
 
 Adds a procedure to be called when the script is resumed from pause.
 *)
@@ -385,8 +453,12 @@ Adds a procedure to be called when the script is resumed from pause.
 (*
 TerminateScript
 ---------------
-> procedure TerminateScript;
-> procedure TerminateScript(Reason: String);
+```
+procedure TerminateScript;
+```
+```
+procedure TerminateScript(Reason: String);
+```
 
 Instantly terminates the script!
 *)
@@ -394,7 +466,9 @@ Instantly terminates the script!
 (*
 PauseScript
 -----------
-> procedure PauseScript;
+```
+procedure PauseScript;
+```
 
 Programmatically pauses the script. The only way for the script to resumed is by the user clicking the play button.
 *)
@@ -661,4 +735,3 @@ begin
 end;
 
 end.
-

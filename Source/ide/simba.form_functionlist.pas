@@ -171,6 +171,8 @@ begin
     'Misc':           Result := ROOT + 'Misc.html';
     'DTM':            Result := ROOT + 'DTM.html';
     'TCircle':        Result := ROOT + 'TCircle.html';
+    'Threading':      Result := ROOT + 'Threading.html';
+    'ASync':          Result := ROOT + 'ASync.html';
   end;
 end;
 

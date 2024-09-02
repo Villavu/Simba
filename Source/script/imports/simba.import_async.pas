@@ -20,57 +20,101 @@ uses
 ASync
 =====
 Things that run in the background.
+
+```
+procedure ThisIsCalledWhenFinished(constref Result: TASyncHTTPResult);
+begin
+  WriteLn(Result.Response);
+  WriteLn(Result.Data);
+end;
+
+begin
+  ASync.HTTPGet('httpbin.org/get', @ThisIsCalledWhenFinished);
+
+  Sleep(5000); // give some time to complete
+end;
+```
 *)
 
 (*
-ASyncHTTP.Get
+ASync.HTTPGet
 -------------
-> procedure ASyncHTTP.Get(URL: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); static;
+```
+procedure ASync.HTTPGet(URL: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent = nil); static;
+```
 *)
 procedure _LapeASyncHTTP_Get1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncHTTP.Get(PString(Params^[0])^, TASyncHTTPFinishedEvent(Params^[1]^), TASyncHTTPProgressEvent(Params^[3]^));
+  ASyncHTTP.Get(PString(Params^[0])^, [], TASyncHTTPFinishEvent(Params^[1]^), TASyncHTTPProgressEvent(Params^[3]^));
 end;
 
 (*
-ASyncHTTP.Get
+ASync.HTTPGet
 -------------
-> procedure ASyncHTTP.Get(URL: String; DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent); static;
+```
+procedure ASync.HTTPGet(URL: String; RequestHeaders: TStringArray; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent = nil); static;
+```
 *)
 procedure _LapeASyncHTTP_Get2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncHTTP.Get(PString(Params^[0])^, PString(Params^[1])^, TASyncHTTPFinishedEvent(Params^[2]^), TASyncHTTPProgressEvent(Params^[3]^));
-end;
-
-procedure _LapeASyncHTTP_GetZip(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  ASyncHTTP.GetZip(PString(Params^[0])^, PString(Params^[1])^, TASyncHTTPFinishedEvent(Params^[2]^), TASyncHTTPProgressEvent(Params^[3]^));
+  ASyncHTTP.Get(PString(Params^[0])^, PStringArray(Params^[1])^, TASyncHTTPFinishEvent(Params^[2]^), TASyncHTTPProgressEvent(Params^[3]^));
 end;
 
 (*
-ASyncHTTP.Post
--------------
-> procedure ASyncHTTP.Post(URL, PostData: String; OnFinished: TASyncHTTPFinishedEvent); static;
+ASync.HTTPGetFile
+-----------------
+```
+procedure ASync.HTTPGetFile(URL: String; DestFile: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent = nil); static;
+```
+*)
+procedure _LapeASyncHTTP_GetFile1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  ASyncHTTP.GetFile(PString(Params^[0])^, [], PString(Params^[1])^, TASyncHTTPFinishEvent(Params^[2]^), TASyncHTTPProgressEvent(Params^[3]^));
+end;
+
+(*
+ASync.HTTPGetFile
+-----------------
+```
+procedure ASync.HTTPGetFile(URL: String; RequestHeaders: TStringArray; DestFile: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent = nil); static;
+```
+*)
+procedure _LapeASyncHTTP_GetFile2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  ASyncHTTP.GetFile(PString(Params^[0])^, PStringArray(Params^[1])^, PString(Params^[2])^,TASyncHTTPFinishEvent(Params^[3]^), TASyncHTTPProgressEvent(Params^[4]^));
+end;
+
+
+(*
+ASync.HTTPPost
+--------------
+```
+procedure ASync.HTTPPost(URL, Data: String; OnFinish: TASyncHTTPFinishEvent); static;
+```
 *)
 procedure _LapeASyncHTTP_Post1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncHTTP.Post(PString(Params^[0])^, PString(Params^[1])^, TASyncHTTPFinishedEvent(Params^[2]^));
+  ASyncHTTP.Post(PString(Params^[0])^, [], PString(Params^[1])^, TASyncHTTPFinishEvent(Params^[2]^));
 end;
 
 (*
-ASyncHTTP.Post
--------------
-> procedure ASyncHTTP.Post(URL, PostData: String; Headers: TStringArray; OnFinished: TASyncHTTPFinishedEvent); static;
+ASync.HTTPPost
+--------------
+```
+procedure ASync.HTTPPost(URL: String; RequestHeaders: TStringArray; Data: String; RequestHeaders: TStringArray; OnFinish: TASyncHTTPFinishEvent); static;
+```
 *)
 procedure _LapeASyncHTTP_Post2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncHTTP.Post(PString(Params^[0])^, PString(Params^[1])^, PStringArray(Params^[2])^, TASyncHTTPFinishedEvent(Params^[3]^));
+  ASyncHTTP.Post(PString(Params^[0])^, PStringArray(Params^[1])^, PString(Params^[2])^, TASyncHTTPFinishEvent(Params^[3]^));
 end;
 
 (*
-ASyncMouse.Move
+ASync.MouseMove
 ---------------
-> procedure ASyncMouse.Move(Target: TTarget; Dest: TPoint; Accuracy: Double = 1);
+```
+procedure ASync.MouseMove(Target: TTarget; Dest: TPoint; Accuracy: Double = 1);
+```
 *)
 procedure _LapeASyncMouse_Move(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -78,19 +122,23 @@ begin
 end;
 
 (*
-ASyncMouse.ChangeDest
+ASync.MouseChangeDest
 ---------------------
-> procedure TASyncMouse.ChangeDest(Dest: TPoint);
+```
+procedure ASync.MouseChangeDest(Dest: TPoint);
+```
 *)
-procedure _LapeASyncMouse_ChangeDest(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeASyncMouse_MouseChangeDest(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   ASyncMouse.ChangeDest(PPoint(Params^[0])^);
 end;
 
 (*
-ASyncMouse.IsMoving
--------------------
-> function TASyncMouse.IsMoving: Boolean;
+ASync.MouseMoving
+-----------------
+```
+function ASync.MouseMoving: Boolean;
+```
 *)
 procedure _LapeASyncMouse_IsMoving(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -98,9 +146,11 @@ begin
 end;
 
 (*
-ASyncMouse.WaitMoving
+ASync.MouseWaitMoving
 ---------------------
-> procedure TASyncMouse.WaitMoving;
+```
+procedure ASync.MouseWaitMoving;
+```
 *)
 procedure _LapeASyncMouse_WaitMoving(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -108,9 +158,11 @@ begin
 end;
 
 (*
-ASyncMouse.Stop
+ASync.MouseStop
 ---------------
-> procedure TASyncMouse.Stop;
+```
+procedure ASync.MouseStop;
+```
 *)
 procedure _LapeASyncMouse_Stop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -118,37 +170,36 @@ begin
 end;
 
 (*
-ASyncUnZip.Unzip
-----------------
-> procedure ASyncUnZip.Unzip(ZipFile, DestPath: String; OnFinished: TASyncUnzipFinishedEvent; OnProgress: TASyncUnzipProgressEvent = nil); static;
+ASync.FileUnzip
+---------------
+```
+procedure ASync.FileUnzip(ZipFile, DestPath: String; OnFinish: TASyncUnzipFinishEvent; OnProgress: TASyncUnzipProgressEvent = nil); static;
+```
 *)
 procedure _LapeASyncUnZip_Unzip(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncUnzip.Unzip(PString(Params^[0])^, PString(Params^[1])^, TASyncUnzipFinishedEvent(Params^[2]^), TASyncUnzipProgressEvent(Params^[3]^));
+  ASyncUnzip.Unzip(PString(Params^[0])^, PString(Params^[1])^, TASyncUnzipFinishEvent(Params^[2]^), TASyncUnzipProgressEvent(Params^[3]^));
 end;
 
 procedure ImportASync(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
   begin
-    // Empty "namespaces"
-    addGlobalType('record end;', 'ASyncMouse');
-    addGlobalType('record end;', 'ASyncHTTPClient');
-    addGlobalType('record end;', 'ASyncUnZip');
-
     ImportingSection := 'ASync';
-    addGlobalFunc('procedure ASyncMouse.Move(constref Target: TTarget; Dest: TPoint; Accuracy: Double = 1); static; overload;', @_LapeASyncMouse_Move);
-    addGlobalFunc('procedure ASyncMouse.ChangeDest(Dest: TPoint); static;', @_LapeASyncMouse_ChangeDest);
-    addGlobalFunc('function ASyncMouse.IsMoving: Boolean; static;', @_LapeASyncMouse_IsMoving);
-    addGlobalFunc('procedure ASyncMouse.WaitMoving; static;', @_LapeASyncMouse_WaitMoving);
-    addGlobalFunc('procedure ASyncMouse.Stop; static;', @_LapeASyncMouse_Stop);
 
-    addGlobalFunc(
-      'procedure ASyncMouse.Move(Dest: TPoint; Accuracy: Double = 1); static; overload;', [
-      'begin',
-      '  ASyncMouse.Move(System.Target, Dest, Accuracy);',
-      'end;'
-    ]);
+    // namespace
+    addGlobalType('record end;', 'ASync');
+
+    addGlobalFunc('procedure ASync.MouseMove(constref Target: TTarget; Dest: TPoint; Accuracy: Double = 1); static; overload;', @_LapeASyncMouse_Move);
+    addGlobalFunc('procedure ASync.MouseMove(Dest: TPoint; Accuracy: Double = 1); static; overload;', [
+                  'begin',
+                  '  ASync.MouseMove(System.Target, Dest, Accuracy);',
+                  'end;'
+                 ]);
+    addGlobalFunc('procedure ASync.MouseChangeDest(Dest: TPoint); static;', @_LapeASyncMouse_MouseChangeDest);
+    addGlobalFunc('function ASync.MouseMoving: Boolean; static;', @_LapeASyncMouse_IsMoving);
+    addGlobalFunc('procedure ASync.MouseWaitMoving; static;', @_LapeASyncMouse_WaitMoving);
+    addGlobalFunc('procedure ASync.MouseStop; static;', @_LapeASyncMouse_Stop);
 
     addGlobalType([
       'record',
@@ -161,13 +212,15 @@ begin
       'end;'],
       'TASyncHTTPResult');
 
-    addGlobalType('procedure(constref Result: TASyncHTTPResult) of object', 'TASyncHTTPFinishedEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(constref Result: TASyncHTTPResult) of object', 'TASyncHTTPFinishEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(URL: String; Position, Size: Int64) of object', 'TASyncHTTPProgressEvent', FFI_DEFAULT_ABI);
-    addGlobalFunc('procedure ASyncHTTPClient.Get(URL: String; OnFetched: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent = nil); static; overload;', @_LapeASyncHTTP_Get1);
-    addGlobalFunc('procedure ASyncHTTPClient.Get(URL, DestFile: String; OnFetched: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent = nil); static; overload;', @_LapeASyncHTTP_Get2);
-    addGlobalFunc('procedure ASyncHTTPClient.GetZip(URL, DestFile: String; OnFinished: TASyncHTTPFinishedEvent; OnProgress: TASyncHTTPProgressEvent = nil); static;', @_LapeASyncHTTP_GetZip);
-    addGlobalFunc('procedure ASyncHTTPClient.Post(URL, PostData: String); static; overload;', @_LapeASyncHTTP_Post1);
-    addGlobalFunc('procedure ASyncHTTPClient.Post(URL, PostData: String; Headers: TStringArray); static; overload;', @_LapeASyncHTTP_Post2);
+
+    addGlobalFunc('procedure ASync.HTTPGet(URL: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent = nil); static; overload;', @_LapeASyncHTTP_Get1);
+    addGlobalFunc('procedure ASync.HTTPGet(URL: String; RequestHeaders: TStringArray; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent = nil); static; overload;', @_LapeASyncHTTP_Get2);
+    addGlobalFunc('procedure ASync.HTTPGetFile(URL: String; DestFile: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent = nil); static; overload;', @_LapeASyncHTTP_GetFile1);
+    addGlobalFunc('procedure ASync.HTTPGetFile(URL: String; RequestHeaders: TStringArray; DestFile: String; OnFinish: TASyncHTTPFinishEvent; OnProgress: TASyncHTTPProgressEvent = nil); static; overload;', @_LapeASyncHTTP_GetFile2);
+    addGlobalFunc('procedure ASync.HTTPPost(URL, Data: String; OnFinish: TASyncHTTPFinishEvent = nil); static; overload;', @_LapeASyncHTTP_Post1);
+    addGlobalFunc('procedure ASync.HTTPPost(URL: String; RequestHeaders: TStringArray; Data: String; OnFinish: TASyncHTTPFinishEvent = nil); static; overload;', @_LapeASyncHTTP_Post2);
 
     addGlobalType([
       'record',
@@ -179,10 +232,35 @@ begin
       'end;'],
       'TASyncUnzipResult');
 
-    addGlobalType('procedure(constref Result: TASyncUnzipResult) of object', 'TASyncUnzipFinishedEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(constref Result: TASyncUnzipResult) of object', 'TASyncUnzipFinishEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Position, Total: Int64) of object', 'TASyncUnzipProgressEvent', FFI_DEFAULT_ABI);
 
-    addGlobalFunc('procedure ASyncUnZip.Unzip(ZipFile, DestPath: String; OnFinished: TASyncUnzipFinishedEvent; OnProgress: TASyncUnzipProgressEvent = nil); static;', @_LapeASyncUnZip_Unzip);
+    addGlobalFunc('procedure ASync.FileUnZip(ZipFile, DestPath: String; OnFinish: TASyncUnzipFinishEvent; OnProgress: TASyncUnzipProgressEvent = nil); static;', @_LapeASyncUnZip_Unzip);
+
+    addGlobalFunc(
+      'function ASync.Schedules: TStringArray; static;', [
+      'begin',
+      '  Result := _ScheduleNames();',
+      'end;'
+    ]);
+    addGlobalFunc(
+      'procedure ASync.ScheduleEvery(Name: String; Method: procedure of object; Interval: Integer); static; overload;', [
+      'begin',
+      '  _ScheduleEvery(Name, @Method, Interval);',
+      'end;'
+    ]);
+    addGlobalFunc(
+      'procedure ASync.ScheduleEvery(Name: String; Method: procedure(Params: TPointerArray) of object; Params: TPointerArray; Interval: Integer); static; overload;', [
+      'begin',
+      '  _ScheduleEveryEx(Name, @Method, Params, Interval);',
+      'end;'
+    ]);
+    addGlobalFunc(
+      'procedure ASync.ScheduleStop(Name: String); static;', [
+      'begin',
+      '  _ScheduleStop(Name);',
+      'end;'
+    ]);
 
     ImportingSection := '';
   end;

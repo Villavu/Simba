@@ -39,26 +39,36 @@ Methods relating to generating random numbers.
 (*
 Random
 ------
-> function Random: Double;'
+```
+function Random: Double;'
+```
 *)
 
 (*
 Random
 ------
-> function Random(l: Int64): Int64;
+```
+function Random(l: Int64): Int64;
+```
 *)
 
 (*
 Random
 ------
-> function Random(min, max: Int64): Int64;
-> function Random(min, max: Double): Double;
+```
+function Random(min, max: Int64): Int64;
+```
+```
+function Random(min, max: Double): Double;
+```
 *)
 
 (*
 RandSeed
 --------
-> var RandSeed: UInt32;
+```
+var RandSeed: UInt32;
+```
 
 The random seed used for all random number generation.
 *)
@@ -66,7 +76,9 @@ The random seed used for all random number generation.
 (*
 RandCutoff
 ----------
-> var RandCutoff: Double;
+```
+var RandCutoff: Double;
+```
 
 Cutoff for `RandomLeft`, `RandomRight`, `RandomMode`, `RandomMean`
 *)
@@ -74,7 +86,9 @@ Cutoff for `RandomLeft`, `RandomRight`, `RandomMode`, `RandomMean`
 (*
 RandomCenterTPA
 ---------------
-> function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
+```
+function RandomCenterTPA(Amount: Integer; Box: TBox): TPointArray;
+```
 
 Generates random points in `Box` weighted towards the center.
 *)
@@ -86,7 +100,9 @@ end;
 (*
 RandomTPA
 ---------
-> function RandomTPA(Amount: Integer; Box: TBox): TPointArray;
+```
+function RandomTPA(Amount: Integer; Box: TBox): TPointArray;
+```
 
 Generates random points in `Box`.
 *)
@@ -98,7 +114,9 @@ end;
 (*
 RandomShapes
 ------------
-> function RandomShapes(Amount: Integer; ShapesPerRow: Integer = 0; RandScale: Single = 0.5; RandRotate: Single = 0.1): TSimbaImage;
+```
+function RandomShapes(Amount: Integer; ShapesPerRow: Integer = 0; RandScale: Single = 0.5; RandRotate: Single = 0.1): TSimbaImage;
+```
 
 Generates an image with x <amount> of random shapes.
 
@@ -114,8 +132,12 @@ end;
 (*
 RandomLeft
 ----------
-> function RandomLeft(Lo, Hi: Double): Double;
-> function RandomLeft(Lo, Hi: Int64): Int64;
+```
+function RandomLeft(Lo, Hi: Double): Double;
+```
+```
+function RandomLeft(Lo, Hi: Int64): Int64;
+```
 
 Generates a random number between `Lo` and `Hi` weighted towards `Lo`
 *)
@@ -132,8 +154,12 @@ end;
 (*
 RandomRight
 -----------
-> function RandomRight(Lo, Hi: Double): Double;
-> function RandomRight(Lo, Hi: Int64): Int64;
+```
+function RandomRight(Lo, Hi: Double): Double;
+```
+```
+function RandomRight(Lo, Hi: Int64): Int64;
+```
 
 Generates a random number between `Lo` and `Hi` weighted towards `Hi`
 *)
@@ -150,8 +176,12 @@ end;
 (*
 RandomMean
 ----------
-> function RandomMean(Lo, Hi: Double): Double;
-> function RandomMean(Lo, Hi: Int64): Int64;
+```
+function RandomMean(Lo, Hi: Double): Double;
+```
+```
+function RandomMean(Lo, Hi: Int64): Int64;
+```
 
 Generates a random number between `Lo` and `Hi` weighted towards the mean of Lo,Hi
 *)
@@ -168,8 +198,12 @@ end;
 (*
 RandomMode
 ----------
-> function RandomMode(Mode, Lo, Hi: Double): Double;
-> function RandomMode(Mode, Lo, Hi: Int64): Int64;
+```
+function RandomMode(Mode, Lo, Hi: Double): Double;
+```
+```
+function RandomMode(Mode, Lo, Hi: Int64): Int64;
+```
 
 Generates a random number between `Lo` and `Hi` weighted torwards `Mode`
 *)
@@ -186,7 +220,9 @@ end;
 (*
 GaussRand
 ---------
-> function GaussRand(Mean, Dev: Double): Double;
+```
+function GaussRand(Mean, Dev: Double): Double;
+```
 
 Generates a random gaussian/normal number.
 *)
@@ -198,7 +234,9 @@ end;
 (*
 Randomize
 ---------
-> procedure Randomize;
+```
+procedure Randomize;
+```
 
 Generates a new `RandSeed`
 *)
