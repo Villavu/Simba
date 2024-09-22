@@ -185,9 +185,8 @@ begin
     Locals := [];
 
     if (Decl is TDeclaration_Method) then
-      CheckMethod(Decl)
-    else
-      CheckMethod(Decl.ParentByClass[TDeclaration_Method]);
+      CheckMethod(Decl);
+    CheckMethod(Decl.ParentByClass[TDeclaration_Method]);
 
     if (Decl is TDeclaration_WithStatement) then
       CheckWith(Decl)

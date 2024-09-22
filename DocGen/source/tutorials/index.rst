@@ -5,6 +5,7 @@ Tutorials
 
    Random Numbers.rst
    Color Finding.rst
+   Image Finding.rst
    Sleep Until.rst
    Targets.rst
    Mouse & Keyboard.rst

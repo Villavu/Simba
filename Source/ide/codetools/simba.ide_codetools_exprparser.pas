@@ -185,12 +185,6 @@ function ParseExpression(Codeinsight: TCodeinsight; Expr: String; out Members: T
     begin
       Result := nil;
 
-      if (Decl is TDeclaration_TypeAlias) and (Decl.IsName('String') or Decl.IsName('UnicodeString') or Decl.IsName('WideString')) then
-      begin
-        Result := DoStringIndex(Decl);
-        Exit;
-      end;
-
       while (Decl is TDeclaration_TypeArray) and (Dimensions > 0) do
       begin
         Result := Codeinsight.ResolveVarType(TDeclaration_TypeArray(Decl).VarType);
@@ -201,8 +195,9 @@ function ParseExpression(Codeinsight: TCodeinsight; Expr: String; out Members: T
         Decl := Result;
       end;
 
-      if (Decl is TDeclaration_TypeAlias) and (Decl.IsName('String') or Decl.IsName('UnicodeString') or Decl.IsName('WideString')) then
-        Result := DoStringIndex(Decl);
+      if (Dimensions = 1) then
+        if (Decl is TDeclaration_TypeAlias) and (Decl.IsName('String') or Decl.IsName('UnicodeString') or Decl.IsName('WideString')) then
+          Result := DoStringIndex(Decl);
     end;
 
   begin

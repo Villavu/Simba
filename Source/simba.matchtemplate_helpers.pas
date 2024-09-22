@@ -104,7 +104,7 @@ begin
   H := Templ.Height - 1;
   for Y := 0 to H do
     for X := 0 to W do
-      if (Templ[Y, X] and $FFFFFF) <> 0 then // Mask out alpha
+      if (PByte(@Templ[Y, X])^ <> 0) then // Alpha=0 is transparent. Data is flipped (TIntegerMatrix cast) so check first byte.
         Result.R[Y, X] := 1;
 end;
 
