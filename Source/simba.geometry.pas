@@ -104,7 +104,7 @@ begin
   SinValue := SinTable[Degrees];
   CosValue := CosTable[Degrees];
 
-  Result.X := Trunc(X + CosValue * (P.X - X) - SinValue * (P.Y - Y));
+  Result.X := Round(X + CosValue * (P.X - X) - SinValue * (P.Y - Y));
   Result.Y := Round(Y + SinValue * (P.X - X) + CosValue * (P.Y - Y));
 end;
 

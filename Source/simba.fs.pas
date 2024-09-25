@@ -46,8 +46,8 @@ type
     class function FileLastWriteTime(FileName: String): TDateTime;
     class function FileSize(FileName: String): Int64;
     class function FileSizeInMegaBytes(FileName: String): Single;
-
     class function FileHash(FileName: String; Algo: EHashAlgo = EHashAlgo.SHA1): String;
+    class function FileIsText(FileName: String): Boolean;
   end;
 
   TSimbaPath = class
@@ -580,6 +580,11 @@ end;
 class function TSimbaFile.FileHash(FileName: String; Algo: EHashAlgo): String;
 begin
   Result := HashFile(Algo, FileName);
+end;
+
+class function TSimbaFile.FileIsText(FileName: String): Boolean;
+begin
+  Result := LazFileUtils.FileIsText(FileName);
 end;
 
 function INIFileWrite(FileName: String; Section, Key, Value: String): Boolean;

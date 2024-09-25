@@ -38,5 +38,5 @@ begin
 end;
 
 begin
-  RunInMainThread(@ShowMyForm);
+  ShowMyForm();
 end.

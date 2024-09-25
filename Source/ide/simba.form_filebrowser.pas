@@ -16,9 +16,8 @@ uses
 type
   TSimbaFileBrowserNode = class(TTreeNode)
   public
-    FileName: String;
+    Path: String;
     IsDirectory: Boolean;
-    IsSimbaScript: Boolean;
   end;
 
   TSimbaFileBrowserForm = class(TForm)
@@ -39,10 +38,9 @@ type
   protected
   type
     TFileInfo = record
-      FileName: String;
+      Path: String;
       Name: String;
-      IsDirectory: Boolean;
-      IsSimbaScript: Boolean;
+      Image: Integer;
     end;
 
     PDirectoryInfo = ^TDirectoryInfo;
@@ -61,8 +59,6 @@ type
     function DoGetNodeHint(const Node: TTreeNode): String;
     procedure DoDoubleClick(Sender: TObject);
     procedure DoAfterFilter(Sender: TObject);
-
-    function CanOpenInSimba(FileName: String): Boolean;
   public
     constructor Create(AOwner: TComponent); override;
 
@@ -84,10 +80,14 @@ procedure TSimbaFileBrowserForm.DoFindFiles;
 
   function FileInfo(const FileName: String; const IsDirectory: Boolean): TFileInfo; inline;
   begin
-    Result.FileName := FileName;
+    Result.Path := FileName;
     Result.Name := ExtractFileName(ExcludeTrailingPathDelimiter(FileName));
-    Result.IsDirectory := IsDirectory;
-    Result.IsSimbaScript := FileName.EndsWith('.simba');
+    if IsDirectory then
+      Result.Image := IMG_FOLDER
+    else if FileName.EndsWith('.simba') then
+      Result.Image := IMG_SIMBA
+    else
+      Result.Image := IMG_FILE;
   end;
 
   procedure Build(const Node: PDirectoryInfo);
@@ -95,8 +95,8 @@ procedure TSimbaFileBrowserForm.DoFindFiles;
     Files, Directories: TStringArray;
     I: Integer;
   begin
-    Files := TSimbaDir.DirListFiles(Node^.Info.FileName);
-    Directories := TSimbaDir.DirListDirectories(Node^.Info.FileName);
+    Files := TSimbaDir.DirListFiles(Node^.Info.Path);
+    Directories := TSimbaDir.DirListDirectories(Node^.Info.Path);
 
     SetLength(Node^.Files, Length(Files));
     SetLength(Node^.Directories, Length(Directories));
@@ -120,21 +120,14 @@ end;
 
 procedure TSimbaFileBrowserForm.DoPopluateTreeView(Sender: TObject);
 
-  function Add(ParentNode: TTreeNode; AName, AFileName: String; AIsDirectory, AIsSimbaScript: Boolean): TTreeNode;
+  function Add(const ParentNode: TTreeNode; const Info: TFileInfo): TTreeNode;
   begin
-    Result := FTreeView.AddNode(ParentNode, AName);
-
+    Result := FTreeView.AddNode(ParentNode, Info.Name);
     with TSimbaFileBrowserNode(Result) do
     begin
-      FileName := AFileName;
-      IsDirectory := AIsDirectory;
-      IsSimbaScript := AIsSimbaScript;
-
-      if IsDirectory   then ImageIndex := IMG_FOLDER else
-      if IsSimbaScript then ImageIndex := IMG_SIMBA  else
-                            ImageIndex := IMG_FILE;
-
-      SelectedIndex := ImageIndex;
+      Path := Info.Path;
+      ImageIndex := Info.Image;
+      SelectedIndex := Info.Image;
     end;
   end;
 
@@ -142,17 +135,12 @@ procedure TSimbaFileBrowserForm.DoPopluateTreeView(Sender: TObject);
   var
     I: Integer;
   begin
-    ParentNode := Add(ParentNode, Dir.Info.Name, Dir.Info.FileName, True, False);
+    ParentNode := Add(ParentNode, Dir.Info);
     for I := 0 to High(Dir.Directories) do
       Populate(ParentNode, Dir.Directories[i]);
 
     for I := 0 to High(Dir.Files) do
-    begin
-      if Dir.Files[I].IsSimbaScript then
-        Add(ParentNode, Dir.Files[I].Name, Dir.Files[I].FileName, False, True)
-      else
-        Add(ParentNode, Dir.Files[I].Name, Dir.Files[I].FileName, False, False);
-    end;
+      Add(ParentNode, Dir.Files[I]);
   end;
 
 begin
@@ -172,7 +160,7 @@ end;
 function TSimbaFileBrowserForm.DoGetNodeHint(const Node: TTreeNode): String;
 begin
   if (Node is TSimbaFileBrowserNode) and (Node.Level > 1) then
-    Result := TSimbaPath.PathExtractRelative(Application.Location, TSimbaFileBrowserNode(Node).FileName)
+    Result := TSimbaPath.PathExtractRelative(Application.Location, TSimbaFileBrowserNode(Node).Path)
   else
     Result := '';
 end;
@@ -195,19 +183,19 @@ begin
   if (Node is TSimbaFileBrowserNode) then
   begin
     if (Sender = PopupMenu_CopyFullPath) then
-      Clipboard.AsText := Node.FileName
+      Clipboard.AsText := Node.Path
     else
     if (Sender = PopupMenu_CopyRelativePath) then
-      Clipboard.AsText := TSimbaPath.PathExtractRelative(Application.Location, Node.FileName)
+      Clipboard.AsText := TSimbaPath.PathExtractRelative(Application.Location, Node.Path)
     else
     if (Sender = PopupMenu_Open) then
-      SimbaTabsForm.Open(Node.FileName)
+      SimbaTabsForm.Open(Node.Path)
     else
     if (Sender = PopupMenu_OpenExternally) and Node.IsDirectory then
-      SimbaNativeInterface.OpenDirectory(Node.FileName)
+      SimbaNativeInterface.OpenDirectory(Node.Path)
     else
     if (Sender = PopupMenu_OpenExternally) then
-      SimbaNativeInterface.OpenFile(Node.FileName);
+      SimbaNativeInterface.OpenFile(Node.Path);
   end;
 end;
 
@@ -229,7 +217,7 @@ begin
 
   if (Node is TSimbaFileBrowserNode) then
   begin
-    if CanOpenInSimba(TSimbaFileBrowserNode(Node).FileName) then
+    if (not Node.IsDirectory) then
     begin
       PopupMenu_Open.Caption := 'Open "' + Node.Text + '"';
       PopupMenu_Open.Enabled := True;
@@ -255,12 +243,9 @@ begin
   if (Node is TSimbaFileBrowserNode) then
   begin
     if Node.IsDirectory then
-      SimbaNativeInterface.OpenDirectory(Node.FileName)
-    else
-    if CanOpenInSimba(Node.FileName) then
-      SimbaTabsForm.Open(Node.FileName)
-    else
-      SimbaNativeInterface.OpenFile(Node.FileName);
+      SimbaNativeInterface.OpenDirectory(Node.Path)
+    else if TSimbaFile.FileIsText(Node.Path) then
+      SimbaTabsForm.Open(Node.Path);
   end;
 end;
 
@@ -272,11 +257,6 @@ begin
     if Assigned(FTreeView.Items.GetFirstNode()) then
       FTreeView.Items.GetFirstNode.Expanded := True;
   end;
-end;
-
-function TSimbaFileBrowserForm.CanOpenInSimba(FileName: String): Boolean;
-begin
-  Result := TSimbaPath.PathHasExt(FileName, ['.simba', '.txt', '.inc', '.pas', '.ini', '.md']);
 end;
 
 constructor TSimbaFileBrowserForm.Create(AOwner: TComponent);
