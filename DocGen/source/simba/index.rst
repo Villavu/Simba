@@ -5,3 +5,4 @@ Simba
    :maxdepth: 2
 
    codetools.rst
+   multicaret.rst

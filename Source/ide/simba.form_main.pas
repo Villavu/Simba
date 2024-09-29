@@ -68,6 +68,7 @@ type
   TSimbaMainForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
+    MenuItemFindInFiles: TMenuItem;
     MenuItemBackup: TMenuItem;
     MenuItemRunLast: TMenuItem;
     MenuItemShowCompilerHints: TMenuItem;
@@ -77,7 +78,7 @@ type
     MenuItemFind: TMenuItem;
     MenuItemFindNext: TMenuItem;
     MenuItemFindPrev: TMenuItem;
-    MenuItemFindInFiles: TMenuItem;
+    MenuItemSearchFindInFiles: TMenuItem;
     MenuItemReplace: TMenuItem;
     MenuItemGoto: TMenuItem;
     MenuItemLowercase: TMenuItem;
@@ -188,7 +189,7 @@ type
     procedure MenuFindClick(Sender: TObject);
     procedure MenuGotoClick(Sender: TObject);
     procedure MenuItemDownloadSimbaClick(Sender: TObject);
-    procedure MenuItemFindInFilesClick(Sender: TObject);
+    procedure MenuItemSearchFindInFilesClick(Sender: TObject);
     procedure MenuItemRunLastClick(Sender: TObject);
     procedure MenuItemSelectLineClick(Sender: TObject);
     procedure MenuItemSelectWordClick(Sender: TObject);
@@ -617,6 +618,7 @@ begin
     DockMaster.MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
     DockMaster.MakeDockable(SimbaColorPickHistoryForm, MenuItemColourHistory);
     DockMaster.MakeDockable(SimbaBackupsForm, MenuItemBackup);
+    DockMaster.MakeDockable(SimbaFindInFilesForm, MenuItemFindInFiles);
 
     if (SimbaSettings.General.Layout.Value <> '') then
     begin
@@ -809,9 +811,11 @@ begin
   SimbaDownloadSimbaForm.ShowModal();
 end;
 
-procedure TSimbaMainForm.MenuItemFindInFilesClick(Sender: TObject);
+procedure TSimbaMainForm.MenuItemSearchFindInFilesClick(Sender: TObject);
 begin
-  SimbaFindInFilesForm.ShowModal();
+  MenuItemFindInFiles.Checked := True;
+  if Assigned(MenuItemFindInFiles.OnClick) then
+    MenuItemFindInFiles.OnClick(MenuItemFindInFiles);
 end;
 
 procedure TSimbaMainForm.MenuItemRunLastClick(Sender: TObject);

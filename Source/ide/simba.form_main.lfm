@@ -1,7 +1,7 @@
 object SimbaMainForm: TSimbaMainForm
-  Left = 4007
+  Left = -1136
   Height = 539
-  Top = 508
+  Top = 461
   Width = 1015
   Caption = 'Simba'
   ClientHeight = 539
@@ -437,6 +437,10 @@ object SimbaMainForm: TSimbaMainForm
     object MenuItemBackup: TMenuItem
       AutoCheck = True
       Caption = 'Backups'
+    end
+    object MenuItemFindInFiles: TMenuItem
+      AutoCheck = True
+      Caption = 'Find In Files'
     end
     object MenuItem3: TMenuItem
       Caption = '-'
@@ -2807,11 +2811,11 @@ object SimbaMainForm: TSimbaMainForm
     object MainMenuSearchSep1: TMenuItem
       Caption = '-'
     end
-    object MenuItemFindInFiles: TMenuItem
+    object MenuItemSearchFindInFiles: TMenuItem
       Caption = 'Find in Files ...'
       ImageIndex = 59
       ShortCut = 24646
-      OnClick = MenuItemFindInFilesClick
+      OnClick = MenuItemSearchFindInFilesClick
     end
     object MainMenuSearchSep2: TMenuItem
       Caption = '-'

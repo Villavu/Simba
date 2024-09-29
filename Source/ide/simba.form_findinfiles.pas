@@ -53,7 +53,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure DialogSelectDirClose(Sender: TObject);
-    procedure FormShow(Sender: TObject);
   private
     Searcher: TSynEditSearch;
     ButtonFind: TSimbaButton;
@@ -260,13 +259,6 @@ end;
 procedure TSimbaFindInFilesForm.DialogSelectDirClose(Sender: TObject);
 begin
   EditLocation.Edit.Text := DialogSelectDir.FileName;
-end;
-
-procedure TSimbaFindInFilesForm.FormShow(Sender: TObject);
-begin
-  ActiveControl := EditSearch;
-  if EditSearch.CanSetFocus() then
-    EditSearch.SetFocus();
 end;
 
 procedure TSimbaFindInFilesForm.DoSearching;

@@ -10,10 +10,9 @@ object SimbaFindInFilesForm: TSimbaFindInFilesForm
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnShow = FormShow
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.4.0.0'
   object PanelMatches: TPanel
     Left = 12
     Height = 167
@@ -30,7 +29,7 @@ object SimbaFindInFilesForm: TSimbaFindInFilesForm
     TabOrder = 0
     object MatchesLabel: TLabel
       Left = 0
-      Height = 25
+      Height = 20
       Top = 7
       Width = 726
       Align = alTop
