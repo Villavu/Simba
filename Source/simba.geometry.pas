@@ -48,26 +48,22 @@ type
 
     class function IsConvexPolygon(const Polygon: TPointArray): Boolean;
     class function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean;
-    class function TriangulatePolygon(Polygon: TPointArray; MinArea: Single=0; MaxDepth: Int32=0): TTriangleArray;
+    class function TriangulatePolygon(Polygon: TPointArray; MinArea: Single = 0; MaxDepth: Int32 = 0): TTriangleArray;
     class function PolygonArea(const Polygon: TPointArray): Double; static; inline;
     class function ExpandPolygon(const Polygon: TPointArray; Amount: Integer): TPointArray; static;
     class function CrossProduct(const r, p, q: TPoint): Int64; static; overload; inline;
     class function CrossProduct(const rx,ry, px,py, qx,qy: Double): Double; static; overload; inline;
-    class function LinesIntersect(const P1, P2, Q1, Q2: TPoint): Boolean; static; overload; inline;
-    class function LinesIntersect(const P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean; static; overload; inline;
+    class function LinesIntersect(const P1, P2, Q1, Q2: TPoint): Boolean; static; overload;
+    class function LinesIntersect(const P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean; static; overload;
     class function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean; static; inline;
     class function PointInBox(const P: TPoint; const Box: TBox): Boolean; static; inline;
-    class function PointInQuad(const P: TPoint; const A,B,C,D: TPoint): Boolean; static; overload; inline;
-    class function PointInQuad(const X, Y: Integer; const A,B,C,D: TPoint): Boolean; static; overload; inline;
-    class function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean; static; overload; inline;
-    class function PointInPolygon(const X, Y: Integer; const Polygon: TPointArray): Boolean; static; overload; inline;
-    class function PointInCircle(const X, Y, CenterX, CenterY: Integer; const Radius: Double): Boolean; static; overload; inline;
-    class function PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean; static; overload; inline;
+    class function PointInQuad(const P: TPoint; const A,B,C,D: TPoint): Boolean; static;
+    class function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean; static;
+    class function PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean; static; inline;
     class function PointInEllipse(const P, Center: TPoint; const YRadius, XRadius: Double): Boolean; static;
 
     class function RotatePointFast(const P: TPoint; Degrees: Integer; X, Y: Double): TPoint; static;
     class function RotatePointsFast(const Points: TPointArray; Degrees: Integer; X, Y: Double): TPointArray; static;
-
     class function RotatePoint(const P: TPoint; Radians, X, Y: Double): TPoint; static;
     class function RotatePoints(const Points: TPointArray; Radians, X, Y: Double): TPointArray; static;
 
@@ -276,7 +272,7 @@ end;
 
 class function TSimbaGeometry.PointInTriangle(const P, P1, P2, P3: TPoint): Boolean;
 
-  function Orientation(const P1, P2, P: TPoint): Integer; inline;
+  function Orientation(const P1, P2, P: TPoint): Integer;
   var
     Orin: Double;
   begin
@@ -322,21 +318,6 @@ begin
   Result := PointInTriangle(P, A,C,B) or PointInTriangle(P, A,D,C);
 end;
 
-class function TSimbaGeometry.PointInQuad(const X, Y: Integer; const A, B, C, D: TPoint): Boolean;
-var
-  P: TPoint;
-begin
-  P.X := X;
-  P.Y := Y;
-
-  Result := PointInTriangle(P, A,C,B) or PointInTriangle(P, A,D,C);
-end;
-
-class function TSimbaGeometry.PointInCircle(const X, Y, CenterX, CenterY: Integer; const Radius: Double): Boolean;
-begin
-  Result := Sqr(X - CenterX) + Sqr(Y - CenterY) <= Sqr(Radius);
-end;
-
 class function TSimbaGeometry.PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean;
 begin
   Result := Sqr(P.X - Center.X) + Sqr(P.Y - Center.Y) <= Sqr(Radius);
@@ -357,9 +338,9 @@ var
   i,d: Int32;
   a,b,c: TPoint;
 begin
-  if Length(Polygon) = 0 then Exit(False);
+  if Length(Polygon) < 3 then Exit(False);
 
-  d := CrossProduct(Polygon[i],Polygon[(i+1) mod Length(Polygon)],Polygon[(i+2) mod Length(Polygon)]);
+  d := CrossProduct(Polygon[0], Polygon[1 mod Length(Polygon)], Polygon[2 mod Length(Polygon)]);
   for i:=0 to High(Polygon) do
   begin
     A := Polygon[i];
@@ -404,6 +385,7 @@ begin
   tmp1 := specialize Reversed<TPoint>(Polygon);
   SetLength(tmp2, Length(Polygon));
 
+  j := 0;
   while Length(tmp1) > 3 do
   begin
     Inc(j);
@@ -672,29 +654,6 @@ begin
       begin
         (* compute the edge-ray intersect at the x-coordinate *)
         if (P.X - Polygon[I].X < ((Polygon[J].X - Polygon[I].X) * (P.Y - Polygon[I].Y) / (Polygon[J].Y - Polygon[I].Y))) then
-          Result := not Result;
-      end;
-      J := I;
-    end;
-  end;
-end;
-
-class function TSimbaGeometry.PointInPolygon(const X, Y: Integer; const Polygon: TPointArray): Boolean;
-var
-  I, J: Integer;
-begin
-  Result := False;
-
-  if (Length(Polygon) >= 3) then
-  begin
-    J := Length(Polygon) - 1;
-    for I := 0 to J do
-    begin
-      if ((Polygon[I].Y <= Y) and (Y < Polygon[J].Y)) or    // an upward crossing
-         ((Polygon[J].Y <= Y) and (Y < Polygon[I].Y)) then  // a downward crossing
-      begin
-        (* compute the edge-ray intersect at the x-coordinate *)
-        if (X - Polygon[I].X < ((Polygon[J].X - Polygon[I].X) * (Y - Polygon[I].Y) / (Polygon[J].Y - Polygon[I].Y))) then
           Result := not Result;
       end;
       J := I;

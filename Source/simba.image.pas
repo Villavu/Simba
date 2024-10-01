@@ -302,9 +302,6 @@ uses
   simba.nativeinterface,
   simba.containers,
   simba.threading,
-  simba.finder_color,
-  simba.finder_dtm,
-  simba.finder_image,
   simba.target;
 
 function TSimbaImage.Copy: TSimbaImage;

@@ -304,7 +304,7 @@ end;
 
 procedure RunInMainThread(Method: TThreadMethod);
 var
-  SyncObject: TSyncObject;
+  {%H-}SyncObject: TSyncObject;
 begin
   if (not IsMainThread()) then
   begin
@@ -318,7 +318,7 @@ end;
 
 procedure RunInMainThread(NestedMethod: TThreadNestedProc);
 var
-  SyncObject: TSyncObject;
+  {%H-}SyncObject: TSyncObject;
 begin
   if (not IsMainThread()) then
   begin

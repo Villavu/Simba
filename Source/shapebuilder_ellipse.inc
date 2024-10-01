@@ -5,7 +5,7 @@
 procedure _BuildEllipse(centerX, centerY, radiusX, radiusY: Integer);
 var
  RadX, RadY, DeltaX, DeltaY, R, RX, RY: Integer;
- X1, X2, Y1, Y2, Bpp, OldY: Integer;
+ X1, X2, Y1, Y2: Integer;
 begin
   X1 := CenterX - RadiusX;
   X2 := CenterX + RadiusX;
@@ -17,7 +17,6 @@ begin
 
   Y1 := Y1 + RadY;
   Y2 := Y1;
-  OldY := Y1;
 
   DeltaX := (RadX * RadX);
   DeltaY := (RadY * RadY);

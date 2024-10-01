@@ -132,7 +132,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4055="True"/>
+              <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
             </CompilerMessages>
             <CustomOptions Value="-CfSSE64
 -dStaticFFI
@@ -181,7 +181,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
+              <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
             </CompilerMessages>
             <CustomOptions Value="-CfSSE64
 -dLape_CDECL
@@ -229,7 +229,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
+              <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL
 -dLape_NoExtended"/>
@@ -277,7 +277,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
+              <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
             </CompilerMessages>
             <CustomOptions Value="-CfSSE64
 -dLape_CDECL
@@ -333,7 +333,7 @@
           </Linking>
           <Other>
             <CompilerMessages>
-              <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True"/>
+              <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
             </CompilerMessages>
             <CustomOptions Value="-dLape_CDECL
 -dLape_NoExtended"/>
@@ -765,7 +765,7 @@
     </Linking>
     <Other>
       <CompilerMessages>
-        <IgnoredMessages idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
+        <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
       </CompilerMessages>
       <CustomOptions Value="-CfSSE64
 -dStaticFFI

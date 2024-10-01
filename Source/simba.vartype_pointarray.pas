@@ -448,7 +448,7 @@ class function TPointArrayHelper.CreateFromPolygon(Poly: TPointArray; Filled: Bo
     {$i shapebuilder_polygonfilled.inc}
 
   begin
-    _BuildPolygonFilled(Poly, TRect(Poly.Bounds), TPoint.Create(0,0));
+    _BuildPolygonFilled(Poly, TRect(Poly.Bounds), TPoint.ZERO);
 
     Result := Buffer.ToArray(False);
   end;
@@ -995,7 +995,7 @@ var
   Ptr: PPoint;
   Upper: PtrUInt;
 begin
-  Result := TPoint.Create(0, 0);
+  Result := TPoint.ZERO;
   if (Length(Self) = 0) then
     Exit;
 
@@ -1529,7 +1529,7 @@ begin
       Inc(Ptr);
     end;
   end else
-    Result := [TPoint.Create(0,0), TPoint.Create(0,0), TPoint.Create(0,0), TPoint.Create(0,0)];
+    Result := [TPoint.ZERO, TPoint.ZERO, TPoint.ZERO, TPoint.ZERO];
 end;
 
 function TPointArrayHelper.Rotate(Radians: Double; Center: TPoint): TPointArray;
@@ -1653,20 +1653,22 @@ var
   I: Integer;
   Dist, BestDist: Double;
 begin
-  if Length(Self) = 0 then
-    Exit(TPoint.Create(0, 0));
-
-  BestDist := Double.MaxValue;
-  for I := 0 to High(Self) do
+  if (Length(Self) > 0) then
   begin
-    Dist := Self[I].DistanceTo(Other);
-    if (Dist < BestDist) then
-    begin
-      BestDist := Dist;
+    BestDist := Self[0].DistanceTo(Other);
+    Result := Self[0];
 
-      Result := Self[I];
+    for I := 1 to High(Self) do
+    begin
+      Dist := Self[I].DistanceTo(Other);
+      if (Dist < BestDist) then
+      begin
+        BestDist := Dist;
+        Result := Self[I];
+      end;
     end;
-  end;
+  end else
+    Result := TPoint.ZERO;
 end;
 
 function TPointArrayHelper.Sort(Weights: TIntegerArray; LowToHigh: Boolean): TPointArray;

@@ -11,7 +11,7 @@ object SimbaAboutForm: TSimbaAboutForm
   DesignTimePPI = 120
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.4.0.0'
   object AboutMemo: TMemo
     AnchorSideTop.Control = VersionLabel
     AnchorSideTop.Side = asrBottom
@@ -41,8 +41,8 @@ object SimbaAboutForm: TSimbaAboutForm
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 190
-    Height = 35
-    Top = 599
+    Height = 30
+    Top = 604
     Width = 586
     Anchors = [akLeft, akRight, akBottom]
     AutoSize = True

@@ -60,7 +60,7 @@ implementation
 
 uses
   simba.containers, simba.colormath_conversion, simba.colormath_distance_unrolled,
-  simba.vartype_pointarray, simba.vartype_floatmatrix, simba.datetime, simba.vartype_box;
+  simba.vartype_pointarray, simba.vartype_floatmatrix, simba.vartype_box;
 
 // How much to "Slice" (vertically) the image up for multithreading.
 function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;

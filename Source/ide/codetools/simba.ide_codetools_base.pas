@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.containers;
+  simba.base;
 
 type
   // "Perfect Hashing"

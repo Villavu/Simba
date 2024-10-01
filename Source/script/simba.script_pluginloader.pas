@@ -48,11 +48,12 @@ var
   OrginalFileName: String;
   I: Integer;
 begin
+  OrginalFileName := FileName;
+
   FileName := SimbaEnv.FindPlugin(FileName, ExtraSearchDirs);
   if (FileName = '') then
-    SimbaException('Plugin "%s" not found', [FileName]);
+    SimbaException('Plugin "%s" not found', [OrginalFileName]);
 
-  OrginalFileName := FileName;
   for I := 0 to High(LoadedPlugins) do
     if (LoadedPlugins[I].OrginalFileName = OrginalFileName) then
     begin

@@ -53,7 +53,7 @@ implementation
 
 uses
   simba.image_utils, simba.array_algorithm, simba.geometry,
-  simba.vartype_box, simba.vartype_quad, simba.vartype_pointarray;
+  simba.vartype_point, simba.vartype_box, simba.vartype_quad, simba.vartype_pointarray;
 
 procedure SimbaImage_DrawTPA(Image: TSimbaImage; TPA: TPointArray);
 var
@@ -350,7 +350,7 @@ begin
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInCircle(X, Y, ACenter.X, ACenter.Y, Radius) then
+      if Sqr(X - ACenter.X) + Sqr(Y - ACenter.Y) > Sqr(Radius) then
         Image.Data[Y * Image.Width + X] := BGRA;
 end;
 
@@ -369,7 +369,7 @@ begin
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInCircle(X, Y, ACenter.X, ACenter.Y, Radius) then
+      if Sqr(X - ACenter.X) + Sqr(Y - ACenter.Y) > Sqr(Radius) then
         BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
 end;
 
@@ -477,7 +477,7 @@ begin
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInPolygon(X, Y, Points) then
+      if not TSimbaGeometry.PointInPolygon(TPoint.Create(X, Y), Points) then
         Image.Data[Y * Image.Width + X] := BGRA;
 end;
 
@@ -492,7 +492,7 @@ begin
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInPolygon(X, Y, Points) then
+      if not TSimbaGeometry.PointInPolygon(TPoint.Create(X, Y), Points) then
         BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
 end;
 
@@ -507,7 +507,7 @@ begin
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInQuad(X, Y, Quad.Top, Quad.Right, Quad.Bottom, Quad.Left) then
+      if not TSimbaGeometry.PointInQuad(TPoint.Create(X, Y), Quad.Top, Quad.Right, Quad.Bottom, Quad.Left) then
         Image.Data[Y * Image.Width + X] := BGRA;
 end;
 
@@ -522,7 +522,7 @@ begin
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInQuad(X, Y, Quad.Top, Quad.Right, Quad.Bottom, Quad.Left) then
+      if not TSimbaGeometry.PointInQuad(TPoint.Create(X, Y), Quad.Top, Quad.Right, Quad.Bottom, Quad.Left) then
         BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
 end;
 

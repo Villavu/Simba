@@ -18,7 +18,6 @@ implementation
 
 uses
   Controls, ComCtrls, Forms,
-  simba.form_main,
   simba.component_treeview,
   simba.ide_codetools_insight,
   simba.ide_codetools_parser;

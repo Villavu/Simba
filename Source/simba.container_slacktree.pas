@@ -82,7 +82,7 @@ var
   l,r:Int32;
   tmp,mid:TPoint;
 begin
-  if stop-start < 0 then Exit();
+  if stop-start < 0 then Exit(TPoint.ZERO);
 
   while (start < stop) do
   begin

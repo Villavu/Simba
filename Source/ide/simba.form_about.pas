@@ -16,6 +16,9 @@ uses
 
 type
   TSimbaAboutForm = class(TForm)
+  protected
+    procedure DoFirstShow; override;
+  published
     AboutMemo: TMemo;
     ButtonExit: TButton;
     ImageSimba: TImage;
@@ -23,7 +26,6 @@ type
     LabelTitle: TLabel;
     procedure ButtonExitClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure DoFirstShow(Sender: TObject);
     procedure VersionLabelClick(Sender: TObject);
     procedure VersionLabelMouseEnter(Sender: TObject);
     procedure VersionLabelMouseLeave(Sender: TObject);
@@ -40,7 +42,7 @@ uses
   lclintf, lazversion,
   simba.fs;
 
-procedure TSimbaAboutForm.DoFirstShow(Sender: TObject);
+procedure TSimbaAboutForm.DoFirstShow;
 begin
   LabelTitle.Caption := Format('Simba %d', [SIMBA_VERSION]);
   if (SIMBA_COMMIT <> '') then
@@ -72,10 +74,8 @@ end;
 
 procedure TSimbaAboutForm.FormCreate(Sender: TObject);
 begin
-  AddHandlerFirstShow(@DoFirstShow, True);
-
-  Width := 550;
-  Height := 450;
+  Width := Scale96ToScreen(550);
+  Height := Scale96ToScreen(450);
 end;
 
 procedure TSimbaAboutForm.VersionLabelClick(Sender: TObject);

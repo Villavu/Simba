@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.datetime;
+  simba.base;
 
 type
   TProcedureOfObject = procedure of object;
@@ -94,70 +94,45 @@ end;
 procedure SimbaIDEInitialization_CallBeforeCreate;
 var
   Method: TInitializationMethod;
-  T: Double;
 begin
   for Method in BeforeCreateMethods do
-  begin
-    try
-      T := HighResolutionTime();
-
-      if Assigned(Method.Proc)    then Method.Proc() else
-      if Assigned(Method.ProcObj) then Method.ProcObj();
-
-      //DebugLn('[SimbaIDEInitialization]: %s (%f ms)', [Method.Name, HighResolutionTime() - T]);
-    except
-      on E: Exception do
-        DebugLn('[SimbaIDEInitialization]: %s (exception: %s)', [Method.Name, E.Message]);
-    end;
+  try
+    if Assigned(Method.Proc)    then Method.Proc() else
+    if Assigned(Method.ProcObj) then Method.ProcObj();
+  except
+    on E: Exception do
+      DebugLn('[SimbaIDEInitialization]: %s (exception: %s)', [Method.Name, E.Message]);
   end;
 end;
 
 procedure SimbaIDEInitialization_CallBeforeShow_Background;
 var
   Method: TInitializationMethod;
-  T: Double;
 begin
   for Method in BeforeShowMethods do
-  begin
-    if not Method.BackgroundTask then
-      Continue;
-
+    if Method.BackgroundTask then
     try
-      T := HighResolutionTime();
-
       if Assigned(Method.Proc)    then Method.Proc() else
       if Assigned(Method.ProcObj) then Method.ProcObj();
-
-      //DebugLn('[SimbaIDEInitialization]: %s (%f ms in background)', [Method.Name, HighResolutionTime() - T]);
     except
       on E: Exception do
         DebugLn('[SimbaIDEInitialization]: %s (exception: %s)', [Method.Name, E.Message]);
     end;
-  end;
 end;
 
 procedure SimbaIDEInitialization_CallBeforeShow;
 var
   Method: TInitializationMethod;
-  T: Double;
 begin
   for Method in BeforeShowMethods do
-  begin
-    if Method.BackgroundTask then
-      Continue;
-
+    if not Method.BackgroundTask then
     try
-      T := HighResolutionTime();
-
       if Assigned(Method.Proc)    then Method.Proc() else
       if Assigned(Method.ProcObj) then Method.ProcObj();
-
-      //DebugLn('[SimbaIDEInitialization]: %s (%f ms)', [Method.Name, HighResolutionTime() - T]);
     except
       on E: Exception do
         DebugLn('[SimbaIDEInitialization]: %s (exception: %s)', [Method.Name, E.Message]);
     end;
-  end;
 
   RunInThread(@SimbaIDEInitialization_CallBeforeShow_Background, True);
 end;

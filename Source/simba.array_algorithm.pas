@@ -451,7 +451,7 @@ begin
     Exit;
 
   // can use these for better code
-  if (not IsManagedType(_T)) and (SizeOf(_T) in [1,2,4,8]) then
+  if (not IsManagedType(_T)) and ((SizeOf(_T) = 1) or (SizeOf(_T) = 2) or (SizeOf(_T) = 4) or (SizeOf(_T) = 8)) then
   begin
     case SizeOf(_T) of
       1: Result := IndexByte(Arr[0], Length(Arr), PByte(@Item)^);

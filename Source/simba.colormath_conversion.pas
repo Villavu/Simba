@@ -42,22 +42,22 @@ type
     class function BGRAToRGB(const RGB: TColorBGRA): TColorRGB; static; inline;
 
     class function RGBToColor(const RGB: TColorRGB): TColor; static; inline;
-    class function RGBToXYZ(const RGB: TColorRGB): TColorXYZ; static; inline;
-    class function RGBToLAB(const RGB: TColorRGB): TColorLAB; static; inline;
-    class function RGBToLCH(const RGB: TColorRGB): TColorLCH; static; inline;
-    class function RGBToHSV(const RGB: TColorRGB): TColorHSV; static; inline;
-    class function RGBToHSL(const RGB: TColorRGB): TColorHSL; static; inline;
+    class function RGBToXYZ(const RGB: TColorRGB): TColorXYZ; static;
+    class function RGBToLAB(const RGB: TColorRGB): TColorLAB; static;
+    class function RGBToLCH(const RGB: TColorRGB): TColorLCH; static;
+    class function RGBToHSV(const RGB: TColorRGB): TColorHSV; static;
+    class function RGBToHSL(const RGB: TColorRGB): TColorHSL; static;
 
-    class function LABToLCH(const LAB: TColorLAB): TColorLCH; static; inline;
-    class function LABToRGB(const LAB: TColorLAB): TColorRGB; static; inline;
-    class function LABToXYZ(const LAB: TColorLAB): TColorXYZ; static; inline;
+    class function LABToLCH(const LAB: TColorLAB): TColorLCH; static;
+    class function LABToRGB(const LAB: TColorLAB): TColorRGB; static;
+    class function LABToXYZ(const LAB: TColorLAB): TColorXYZ; static;
 
-    class function HSVToRGB(const HSV: TColorHSV): TColorRGB; static; inline;
-    class function HSLToRGB(const HSL: TColorHSL): TColorRGB; static; inline;
-    class function LCHToRGB(const LCH: TColorLCH): TColorRGB; static; inline;
-    class function LCHToLAB(const LCH: TColorLCH): TColorLAB; static; inline;
+    class function HSVToRGB(const HSV: TColorHSV): TColorRGB; static;
+    class function HSLToRGB(const HSL: TColorHSL): TColorRGB; static;
+    class function LCHToRGB(const LCH: TColorLCH): TColorRGB; static;
+    class function LCHToLAB(const LCH: TColorLCH): TColorLAB; static;
 
-    class function XYZToRGB(const XYZ: TColorXYZ): TColorRGB; static; inline;
+    class function XYZToRGB(const XYZ: TColorXYZ): TColorRGB; static;
   end;
 
 implementation
