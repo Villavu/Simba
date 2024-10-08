@@ -83,8 +83,6 @@ var
 
 implementation
 
-{$WARN 4046 ERROR} // stop compiling on creating a class with an abstract method
-
 {$IF (NOT DEFINED(WINDOWS)) and (NOT DEFINED(LINUX)) and (NOT DEFINED(DARWIN)))}
   {$ERROR This platform has no native interface!}
 {$ENDIF}

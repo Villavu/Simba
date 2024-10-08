@@ -46,8 +46,12 @@ type
   public
     procedure Clear; override;
     procedure Delete(Index: Integer); override;
+    procedure Delete(Item: _T); overload;
+    function IndexOf(Item: _T): Integer;
 
-    constructor Create(FreeObjects: Boolean = False); reintroduce;
+    property FreeObjects: Boolean read FFreeObjects write FFreeObjects;
+
+    constructor Create(AFreeObjects: Boolean = False); reintroduce;
     destructor Destroy; override;
   end;
 
@@ -140,6 +144,7 @@ type
 
 implementation
 
+// List
 procedure TSimbaList.SetItem(Index: Integer; AValue: _T);
 begin
   if (Index < 0) or (Index >= FCount) then
@@ -148,7 +153,6 @@ begin
   FArr[Index] := AValue;
 end;
 
-// List
 function TSimbaList.GetItem(Index: Integer): _T;
 begin
   if (Index < 0) or (Index >= FCount) then
@@ -204,16 +208,36 @@ procedure TSimbaObjectList.Delete(Index: Integer);
 begin
   if (Index < 0) or (Index >= FCount) then
     SimbaException('%s.Delete: Index %d out of bounds', [ClassName, Index]);
-  FArr[Index].Free();
+  if FFreeObjects then
+    FArr[Index].Free();
 
   inherited Delete(Index);
 end;
 
-constructor TSimbaObjectList.Create(FreeObjects: Boolean);
+procedure TSimbaObjectList.Delete(Item: _T);
+var
+  Index: Integer;
+begin
+  Index := IndexOf(Item);
+  if (Index > -1) then
+    Delete(Index);
+end;
+
+function TSimbaObjectList.IndexOf(Item: _T): Integer;
+var
+  I: Integer;
+begin
+  for I := 0 to FCount - 1 do
+    if (FArr[I] = Item) then
+      Exit(I);
+  Result := -1;
+end;
+
+constructor TSimbaObjectList.Create(AFreeObjects: Boolean);
 begin
   inherited Create();
 
-  FFreeObjects := FreeObjects;
+  FFreeObjects := AFreeObjects;
 end;
 
 destructor TSimbaObjectList.Destroy;

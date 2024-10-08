@@ -10,7 +10,8 @@ unit simba.baseclass;
 interface
 
 uses
-  classes, sysutils;
+  Classes, SysUtils,
+  simba.base, simba.containers;
 
 type
   TSimbaBaseClass = class
@@ -32,32 +33,83 @@ type
     property FreeOnTerminate: Boolean read FFreeOnTerminate write FFreeOnTerminate;
   end;
 
-  TSimbaObjectTracker = class
+  TSimbaBaseThread = class(TThread)
   protected
-    FList: TList;
-    FDestroying: Boolean;
-  public
-    procedure Add(Obj: TSimbaBaseClass);
-    procedure Remove(Obj: TSimbaBaseClass);
+    FName: String;
 
-    constructor Create;
+    procedure NotifyUnfreed; virtual; // also used for unfinished
+  public
+    constructor Create; reintroduce; virtual;
     destructor Destroy; override;
   end;
 
-var
-  SimbaObjectTracker: TSimbaObjectTracker;
+  procedure PrintUnfreedObjects;
+  procedure PrintUnfinishedThreads;
+  procedure PrintUnfreedThreads;
 
 implementation
 
-uses
-  simba.base;
+var
+  TrackedObjects: specialize TSimbaObjectList<TSimbaBaseClass>;
+  TrackedThreads: specialize TSimbaObjectList<TSimbaBaseThread>;
+
+procedure PrintUnfreedObjects;
+var
+  I: Integer;
+begin
+  for I := 0 to TrackedObjects.Count - 1 do
+    if not TrackedObjects[I].FreeOnTerminate then
+    begin
+      DebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
+      Break;
+    end;
+
+  while (TrackedObjects.Count > 0) do
+  begin
+    if not TrackedObjects[0].FreeOnTerminate then
+      TrackedObjects[0].NotifyUnfreed();
+    TrackedObjects[0].Free();
+  end;
+end;
+
+procedure PrintUnfinishedThreads;
+var
+  I: Integer;
+begin
+  for I := 0 to TrackedThreads.Count - 1 do
+    if not TrackedThreads[I].Finished then
+    begin
+      DebugLn([EDebugLn.YELLOW], 'The following threads were still running:');
+      Break;
+    end;
+
+  for I := 0 to TrackedThreads.Count - 1 do
+    if not TrackedThreads[I].Finished then
+      TrackedThreads[I].NotifyUnfreed();
+end;
+
+procedure PrintUnfreedThreads;
+var
+  I: Integer;
+begin
+  for I := 0 to TrackedThreads.Count - 1 do
+    if TrackedThreads[I].Finished and (not TrackedThreads[I].FreeOnTerminate) then
+    begin
+      DebugLn([EDebugLn.YELLOW], 'The following threads were not freed:');
+      Break;
+    end;
+
+  while (TrackedThreads.Count > 0) do
+  begin
+    if not TrackedThreads[0].FreeOnTerminate then
+      TrackedThreads[0].NotifyUnfreed();
+    TrackedThreads[0].Free();
+  end;
+end;
 
 procedure TSimbaBaseClass.NotifyUnfreed;
 begin
-  if (Name <> '') then
-    DebugLn([EDebugLn.YELLOW], '  %s (%s) "%s"'.Format([ClassName, HexStr(Self), Name]))
-  else
-    DebugLn([EDebugLn.YELLOW], '  %s (%s)'.Format([ClassName, HexStr(Self)]));
+  DebugLn([EDebugLn.YELLOW], '  ' + ClassName + ' (' + HexStr(Self) + ')' + IfThen(Name <> '', ' "' + Name + '"', ''));
 end;
 
 function TSimbaBaseClass.GetName: String;
@@ -74,14 +126,14 @@ constructor TSimbaBaseClass.Create;
 begin
   inherited Create();
 
-  if (SimbaObjectTracker <> nil) then
-    SimbaObjectTracker.Add(Self);
+  if (TrackedObjects <> nil) then
+    TrackedObjects.Add(Self);
 end;
 
 destructor TSimbaBaseClass.Destroy;
 begin
-  if (SimbaObjectTracker <> nil) then
-    SimbaObjectTracker.Remove(Self);
+  if (TrackedObjects <> nil) then
+    TrackedObjects.Delete(Self);
 
   inherited Destroy();
 end;
@@ -91,70 +143,39 @@ begin
   Result := Self;
 end;
 
-procedure TSimbaObjectTracker.Add(Obj: TSimbaBaseClass);
+procedure TSimbaBaseThread.NotifyUnfreed;
 begin
-  FList.Add(Obj);
+  DebugLn([EDebugLn.YELLOW], '  ' + ClassName + ' (' + HexStr(Self) + ')' + IfThen(FName <> '', ' "' + FName + '"', ''));
 end;
 
-procedure TSimbaObjectTracker.Remove(Obj: TSimbaBaseClass);
+constructor TSimbaBaseThread.Create;
 begin
-  if FDestroying then
-  begin
-    if (FList.IndexOf(Obj) > -1) then
-      FList[FList.IndexOf(Obj)] := nil;
-  end else
-    FList.Remove(Obj);
+  inherited Create(True, DefaultStackSize div 2);
+
+  if (TrackedThreads <> nil) then
+    TrackedThreads.Add(Self);
 end;
 
-constructor TSimbaObjectTracker.Create;
+destructor TSimbaBaseThread.Destroy;
 begin
-  inherited Create();
-
-  FList := TList.Create();
-end;
-
-destructor TSimbaObjectTracker.Destroy;
-var
-  I: Integer;
-  HasUnfreed: Boolean;
-begin
-  FDestroying := True;
-
-  if (FList <> nil) then
-  begin
-    if (FList.Count > 0) then
-    begin
-      for I := FList.Count - 1 downto 0 do
-        if (FList[I] <> nil) and TSimbaBaseClass(FList[I]).FreeOnTerminate then
-          TSimbaBaseClass(FList[I]).Free();
-
-      HasUnfreed := False;
-      for I := 0 to FList.Count - 1 do
-        if (FList[I] <> nil) then
-        begin
-          if not HasUnfreed then
-          begin
-            DebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
-
-            HasUnfreed := True;
-          end;
-
-          TSimbaBaseClass(FList[I]).NotifyUnfreed();
-          TSimbaBaseClass(FList[I]).Free();
-        end;
-    end;
-
-    FreeAndNil(FList);
-  end;
-
   inherited Destroy();
+
+  if (TrackedThreads <> nil) then
+    TrackedThreads.Delete(Self);
 end;
 
 initialization
-  SimbaObjectTracker := TSimbaObjectTracker.Create();
+  TrackedObjects := specialize TSimbaObjectList<TSimbaBaseClass>.Create();
+  TrackedThreads := specialize TSimbaObjectList<TSimbaBaseThread>.Create();
 
 finalization
-  SimbaObjectTracker.Free();
+  while (TrackedObjects.Count > 0) do
+    TrackedObjects[0].Free();
+  TrackedObjects.Free();
+
+  while (TrackedThreads.Count > 0) do
+    TrackedThreads[0].Free();
+  TrackedThreads.Free();
 
 end.
 

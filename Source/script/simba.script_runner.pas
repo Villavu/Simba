@@ -38,7 +38,8 @@ implementation
 
 uses
   Forms, FileUtil,
-  simba.env, simba.fs, simba.datetime, simba.script_communication, simba.vartype_string;
+  simba.env, simba.fs, simba.datetime, simba.script_communication, simba.vartype_string,
+  simba.baseclass;
 
 procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; Text: String);
 begin
@@ -125,6 +126,10 @@ begin
       on E: Exception do
         DoError(E);
     end;
+
+    PrintUnfinishedThreads();
+    PrintUnfreedThreads();
+    PrintUnfreedObjects();
   finally
     FScript.Free(); // Free the script in thread so it hopefully doesn't nuke the process
   end;

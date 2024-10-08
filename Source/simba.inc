@@ -13,6 +13,8 @@
   {$ENDIF}
 {$ENDIF}
 
+{$WARN 4046 ERROR} // stop compiling on creating a class with an abstract method
+
 // Set in project options > custom options.. "-CfSSE"
 //{$IF Defined(CPU386)}
 //  {$FPUTYPE SSE3}
