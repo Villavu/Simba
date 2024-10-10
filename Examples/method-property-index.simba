@@ -1,0 +1,25 @@
+type
+  TMyRecord = record
+    Arr: array[0..5] of String;
+  end;
+
+property TMyRecord.SomeValue(Index: Integer): String;
+begin
+  Result := Self.Arr[Index];
+end;
+
+property TMyRecord.SomeValue(Index: Integer; Value: String);
+begin
+  Self.Arr[Index] := Value;
+end;
+
+var
+  myRecord: TMyRecord;
+
+begin
+  myRecord.SomeValue[0] := "zero";
+  myRecord.SomeValue[1] := "one";
+
+  WriteLn myRecord.SomeValue[0];
+  WriteLn myRecord.SomeValue[1];
+end;

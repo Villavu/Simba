@@ -79,6 +79,7 @@ type
     function ToUpper(): String;
     function ToLower(): String;
     function Capitalize(): String;
+    function CapitalizeWords(): String;
     function SwapCase(): String;
 
     function Before(const Value: String): String;
@@ -662,6 +663,17 @@ begin
       Result[I] := UpCase(Self[I])
     else
       Result[I] := LowerCase(Self[I]);
+end;
+
+function TSimbaStringHelper.CapitalizeWords(): String;
+var
+  Temp: TStringArray;
+  I: Integer;
+begin
+  Temp := Self.Split(' ', False);
+  for I := 0 to High(Temp) do
+    Temp[I] := Temp[I].Capitalize();
+  Result := ' '.Join(Temp);
 end;
 
 function TSimbaStringHelper.SwapCase(): String;

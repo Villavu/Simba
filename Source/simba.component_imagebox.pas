@@ -109,6 +109,9 @@ type
     FMouseX: Integer;
     FMouseY: Integer;
 
+    FShowStatusBar: Boolean;
+    FShowScrollBars: Boolean;
+
     FOnImgKeyDown: TImageBoxKeyEvent;
     FOnImgKeyUp: TImageBoxKeyEvent;
 
@@ -138,8 +141,13 @@ type
     function GetMousePoint: TPoint;
     function GetCursor: TCursor; override;
     function GetStatus: String;
+    function GetShowScrollbars: Boolean;
+    function GetShowStatusBar: Boolean;
+
     procedure SetCursor(Value: TCursor); override;
     procedure SetStatus(Value: String);
+    procedure SetShowScrollbars(AValue: Boolean);
+    procedure SetShowStatusBar(AValue: Boolean);
   public
     constructor Create(AOwner: TComponent); override;
 
@@ -157,6 +165,9 @@ type
     procedure SetBackgroundFromWindow(Window: TWindowHandle);
     procedure SetBackgroundFromTarget(Target: TSimbaTarget; Bounds: TBox); overload;
     procedure SetBackgroundFromTarget(Target: TSimbaTarget); overload;
+
+    property ShowStatusBar: Boolean read GetShowStatusBar write SetShowStatusBar;
+    property ShowScrollbars: Boolean read GetShowScrollbars write SetShowScrollbars;
 
     property LastPaintTime: Double read GetLastPaintTime;
     property StatusBar: TSimbaStatusBar read FStatusBar;
@@ -624,7 +635,8 @@ begin
     FVertScroll.LargeChange := FZoomPixels;
     FVertScroll.PageSize := ClientHeight - FHorzScroll.Height;
     FVertScroll.Max := Max(0, ((H - ClientHeight) + FHorzScroll.Height) + FVertScroll.PageSize);
-    FVertScroll.Invalidate;
+    if FVertScroll.Visible then
+      FVertScroll.Invalidate;
   end;
 
   if Assigned(FHorzScroll) then
@@ -633,7 +645,8 @@ begin
     FHorzScroll.LargeChange := FZoomPixels;
     FHorzScroll.PageSize := ClientWidth - FVertScroll.Width;
     FHorzScroll.Max := Max(0, ((W - ClientWidth) + FVertScroll.Width) + FHorzScroll.PageSize);
-    FHorzScroll.Invalidate;
+    if FHorzScroll.Visible then
+      FHorzScroll.Invalidate;
   end;
 end;
 
@@ -697,7 +710,10 @@ end;
 function TSimbaImageScrollBox.IsPointVisible(ImageXY: TPoint): Boolean;
 begin
   with ImageToScreen(ImageXY) do
-    Result := (X >= 0) and (Y >= 0) and (X < ClientWidth - FVertScroll.Width) and (Y < ClientHeight - FHorzScroll.Height);
+    Result := (X >= 0) and
+              (Y >= 0) and
+              (X < ClientWidth - IfThen(FVertScroll.Visible, FVertScroll.Width, 0)) and
+              (Y < ClientHeight - IfThen(FHorzScroll.Visible, FHorzScroll.Height, 0));
 end;
 
 constructor TSimbaImageScrollBox.Create(AOwner: TComponent);
@@ -753,7 +769,6 @@ begin
   FStatusBar := TSimbaStatusBar.Create(Self);
   FStatusBar.Parent := Self;
   FStatusBar.Align := alBottom;
-
   FStatusBar.PanelCount := 4;
   FStatusBar.PanelTextMeasure[0] := '(1235, 1234)';
   FStatusBar.PanelTextMeasure[1] := '1234 x 1234';
@@ -762,6 +777,9 @@ begin
 
   FBackground := FImageScrollBox.Background;
   FPixelFormat := LazImage_PixelFormat(FBackground);
+
+  FShowStatusBar := True;
+  FShowScrollBars := True;
 end;
 
 function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;
@@ -879,6 +897,31 @@ begin
   finally
     Image.Free();
   end;
+end;
+
+function TSimbaImageBox.GetShowScrollbars: Boolean;
+begin
+  Result := FShowScrollBars;
+end;
+
+function TSimbaImageBox.GetShowStatusBar: Boolean;
+begin
+  Result := FShowStatusBar;
+end;
+
+procedure TSimbaImageBox.SetShowScrollbars(AValue: Boolean);
+begin
+  FShowScrollBars := AValue;
+
+  FImageScrollBox.FVertScroll.Visible := FShowScrollBars;
+  FImageScrollBox.FHorzScroll.Visible := FShowScrollBars;
+end;
+
+procedure TSimbaImageBox.SetShowStatusBar(AValue: Boolean);
+begin
+  FShowStatusBar := AValue;
+
+  FStatusBar.Visible := FShowStatusBar;
 end;
 
 procedure TSimbaImageBox.Paint;

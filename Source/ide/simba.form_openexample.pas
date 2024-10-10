@@ -24,6 +24,7 @@ type
     RightPanel: TPanel;
     Splitter: TSplitter;
     ButtonPanel: TSimbaButtonPanel;
+    SimbaNode: TTreeNode;
 
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -49,7 +50,7 @@ implementation
 {$R *.lfm}
 
 uses
-  LCLType, AnchorDocking,
+  LCLType, AnchorDocking, simba.vartype_string,
   simba.form_main, simba.form_tabs, simba.fs, simba.ide_theme;
 
 function ReadResourceString(ResourceName: String): String;
@@ -73,36 +74,25 @@ type
     Script: String;
   end;
 
-procedure TSimbaOpenExampleForm.AddSimbaExamples;
+function AddExamplesFromResources(ModuleHandle: TFPResourceHMODULE; ResourceType, ResourceName: PChar; lParam: PtrInt): LongBool; stdcall;
 var
-  SimbaNode: TTreeNode;
-
-  procedure AddNode(const Name, ResourceName: String);
+  Name: String;
+begin
+  Name := ResourceName;
+  if (Name.StartsWith('EXAMPLE_')) then
   begin
-    with TExampleNode(TreeView.AddNode(SimbaNode, Name, IMG_SIMBA)) do
+    Name := Name.After('EXAMPLE_').Replace('-', ' ').Replace('_', ' ').CapitalizeWords();
+    with TExampleNode(SimbaOpenExampleForm.TreeView.AddNode(SimbaOpenExampleForm.SimbaNode, Name, IMG_SIMBA)) do
       Script := ReadResourceString(ResourceName);
   end;
 
+  Result := True;
+end;
+
+procedure TSimbaOpenExampleForm.AddSimbaExamples;
 begin
   TreeView.BeginUpdate();
-
-  SimbaNode := TExampleNode(TreeView.AddNode('Simba', IMG_PACKAGE));
-
-  AddNode('Array',                'EXAMPLE_ARRAY'               );
-  AddNode('Image',                'EXAMPLE_IMAGE'               );
-  AddNode('Function',             'EXAMPLE_FUNCTION'            );
-  AddNode('Loop',                 'EXAMPLE_LOOP'                );
-  AddNode('Stopwatch',            'EXAMPLE_STOPWATCH'           );
-  AddNode('Point Cluster',        'EXAMPLE_CLUSTER_POINTS'      );
-  AddNode('Mouse Teleport Event', 'EXAMPLE_MOUSE_TELEPORT_EVENT');
-  AddNode('Static Method',        'EXAMPLE_STATIC_METHOD'       );
-  AddNode('JSON',                 'EXAMPLE_JSON'                );
-  AddNode('Form',                 'EXAMPLE_FORM'                );
-  AddNode('Image Box',            'EXAMPLE_IMAGEBOX'            );
-  AddNode('IRC',                  'EXAMPLE_IRC'                 );
-  AddNode('Draw Text',            'EXAMPLE_DRAWTEXT'            );
-  AddNode('RandomLeft',           'EXAMPLE_RANDOMLEFT'          );
-
+  EnumResourceNames(HINSTANCE, RT_RCDATA, @AddExamplesFromResources, 0);
   TreeView.EndUpdate();
 end;
 
@@ -196,6 +186,8 @@ begin
   ButtonPanel := TSimbaButtonPanel.Create(Self);
   ButtonPanel.Parent := Self;
   ButtonPanel.ButtonOk.OnClick := @DoButtonOkClick;
+
+  SimbaNode := TreeView.AddNode('Simba', IMG_PACKAGE);
 
   AddSimbaExamples();
   UpdateTreeSize();

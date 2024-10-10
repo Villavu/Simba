@@ -205,8 +205,10 @@ procedure TSimbaStatusBar.InvalidatePanelASync(Data: PtrInt);
 var
   R: TRect;
 begin
-  R := PanelRect(Data);
+  if not HandleAllocated then
+    Exit;
 
+  R := PanelRect(Data);
   InvalidateRect(Handle, @R, False);
 end;
 

@@ -498,26 +498,6 @@ begin
   PWinControl(Params^[0])^.Handle := PHandle(Params^[1])^;
 end;
 
-procedure _LapeWinControl_TabOrder_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PWinControl(Params^[0])^.TabOrder;
-end;
-
-procedure _LapeWinControl_TabOrder_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PWinControl(Params^[0])^.TabOrder := PInteger(Params^[1])^;
-end;
-
-procedure _LapeWinControl_TabStop_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PWinControl(Params^[0])^.TabStop;
-end;
-
-procedure _LapeWinControl_TabStop_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PWinControl(Params^[0])^.TabStop := PBoolean(Params^[1])^;
-end;
-
 procedure _LapeWinControl_OnEnter_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PNotifyEvent(Result)^ := PWinControl(Params^[0])^.OnEnter;
@@ -893,8 +873,6 @@ begin
     addPropertyIndexed('TLazWinControl', 'Control', 'Index: Integer', 'TLazControl', @_LapeWinControl_Control_Read);
     addProperty('TLazWinControl', 'DoubleBuffered', 'Boolean', @_LapeWinControl_DoubleBuffered_Read, @_LapeWinControl_DoubleBuffered_Write);
     addProperty('TLazWinControl', 'Handle', 'TLazHandle', @_LapeWinControl_Handle_Read, @_LapeWinControl_Handle_Write);
-    addProperty('TLazWinControl', 'TabOrder', 'Integer', @_LapeWinControl_TabOrder_Read, @_LapeWinControl_TabOrder_Write);
-    addProperty('TLazWinControl', 'TabStop', 'Boolean', @_LapeWinControl_TabStop_Read, @_LapeWinControl_TabStop_Write);
     addProperty('TLazWinControl', 'OnEnter', 'TLazNotifyEvent', @_LapeWinControl_OnEnter_Read, @_LapeWinControl_OnEnter_Write);
     addProperty('TLazWinControl', 'OnExit', 'TLazNotifyEvent', @_LapeWinControl_OnExit_Read, @_LapeWinControl_OnExit_Write);
     addProperty('TLazWinControl', 'OnKeyDown', 'TLazKeyEvent', nil, @_LapeWinControl_OnKeyDown_Write);

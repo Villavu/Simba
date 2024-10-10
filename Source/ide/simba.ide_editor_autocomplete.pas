@@ -8,6 +8,7 @@
 unit simba.ide_editor_autocomplete;
 
 {$i simba.inc}
+{$WARN 4046 OFF} // stop compiling on creating a class with an abstract method
 
 interface
 

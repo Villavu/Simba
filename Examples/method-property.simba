@@ -1,0 +1,24 @@
+type
+  TMyRecord = record
+    Str: String;
+  end;
+
+property TMyRecord.SomeValue: Integer;
+begin
+  Result := StrToInt(Self.Str);
+end;
+
+property TMyRecord.SomeValue(NewValue: Integer);
+begin
+  Self.Str := IntToStr(NewValue);
+end;
+
+var
+  myRecord: TMyRecord;
+
+begin
+  myRecord.SomeValue := 123;
+  WriteLn myRecord.SomeValue;
+end;
+
+

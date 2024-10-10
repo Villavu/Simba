@@ -17,7 +17,7 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="14">
+      <Resources Count="16">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
         <Resource_2 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
@@ -29,9 +29,11 @@
         <Resource_8 FileName="..\Examples\json.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON"/>
         <Resource_9 FileName="..\Examples\form.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM"/>
         <Resource_10 FileName="..\Examples\irc.simba" Type="RCDATA" ResourceName="EXAMPLE_IRC"/>
-        <Resource_11 FileName="..\Examples\image_drawtext.simba" Type="RCDATA" ResourceName="EXAMPLE_DRAWTEXT"/>
-        <Resource_12 FileName="..\Examples\form_imagebox.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGEBOX"/>
-        <Resource_13 FileName="..\Examples\randomleft.simba" Type="RCDATA" ResourceName="EXAMPLE_RANDOMLEFT"/>
+        <Resource_11 FileName="..\Examples\image_drawtext.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE-DRAW-TEXT"/>
+        <Resource_12 FileName="..\Examples\form_imagebox.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM-IMAGEBOX"/>
+        <Resource_13 FileName="..\Examples\randomleft.simba" Type="RCDATA" ResourceName="EXAMPLE_RANDOM-LEFT"/>
+        <Resource_14 FileName="..\Examples\method-property.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD-PROPERTY"/>
+        <Resource_15 FileName="..\Examples\method-property-index.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD-PROPERTY-INDEX"/>
       </Resources>
     </General>
     <VersionInfo>

@@ -12,7 +12,7 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
   OnCreate = FormCreate
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.6.0.0'
   object LeftPanel: TPanel
     Left = 0
     Height = 750
