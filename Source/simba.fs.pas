@@ -26,7 +26,8 @@ type
   public
     // Read/Write String
     class function FileRead(FileName: String): String;
-    class function FileReadEx(FileName: String; Offset: Integer): String;
+    class function FileReadEx(FileName: String; Offset: Integer): String; overload;
+    class function FileReadEx(FileName: String; Offset, Len: Integer): String; overload;
     class function FileWrite(FileName: String; Text: String): Boolean;
     class function FileAppend(FileName: String; Text: String): Boolean;
     class function FileReadLines(FileName: String): TStringArray;
@@ -367,7 +368,7 @@ begin
   try
     Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
     Stream.Seek(Offset, soBeginning);
-    Stream.ReadBuffer(Buffer, Len);
+    Stream.ReadBuffer(Buffer, Min(Len, Stream.Size - Offset));
 
     Result := True;
   except
@@ -439,6 +440,13 @@ class function TSimbaFile.FileReadEx(FileName: String; Offset: Integer): String;
 begin
   SetLength(Result, FileSize(FileName) - Offset);
   if (Length(Result) > 0) and (not DoFileRead(FileName, Result[1], Length(Result), Offset)) then
+    Result := '';
+end;
+
+class function TSimbaFile.FileReadEx(FileName: String; Offset, Len: Integer): String;
+begin
+  SetLength(Result, Len);
+  if (Length(Result) > 0) and (not DoFileRead(FileName, Result[1], Len, Offset)) then
     Result := '';
 end;
 

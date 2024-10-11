@@ -25,13 +25,6 @@ type
   end;
   TSimbaPackageVersions = array of TSimbaPackageVersion;
 
-  TSimbaPackageScripts = array of record
-    PackageName: String;
-
-    Name: String;
-    Path: String;
-  end;
-
   TSimbaPackageEndpoint = class
   protected
     FURL: String;
@@ -58,23 +51,20 @@ type
     FName: String;
     FLoaded: Boolean;
     FVersions: TSimbaPackageVersions;
-
-    FScripts: TSimbaPackageScripts;
-    FScriptsDone: Boolean;
-    FExamplesDone: Boolean;
-    FExamples: TSimbaPackageScripts;
+    FExampleFiles: TStringArray;
+    FScriptFiles: TSTringArray;
 
     procedure ClearConfig;
     procedure WriteConfig(Key: String; Value: String);
     function ReadConfig(Key: String): String;
-
-    function FindScripts(KeyNeeded: String): TSimbaPackageScripts;
 
     procedure SetAutoUpdateEnabled(AValue: Boolean);
     procedure SetInstalledVersion(Value: String);
     procedure SetInstalledVersionTime(Value: TDateTime);
     procedure SetInstalledPath(Value: String);
 
+    function GetExampleFiles: TStringArray;
+    function GetScriptFiles: TStringArray;
     function GetAutoUpdateEnabled: Boolean;
     function GetInstalledPath: String;
     function GetInstalledVersion: String;
@@ -85,6 +75,8 @@ type
     constructor Create(AURL: String);
     destructor Destroy; override;
 
+    function FindFilesWithStartingComment(Comment: String): TStringArray;
+
     procedure Load;
 
     function IsInstalled: Boolean;
@@ -92,9 +84,6 @@ type
 
     function HasUpdate: Boolean;
     function HasVersions: Boolean;
-
-    function GetExamples: TSimbaPackageScripts;
-    function GetScripts: TSimbaPackageScripts;
 
     property DisplayName: String read FDisplayName;
     property Name: String read FName;
@@ -108,6 +97,9 @@ type
     property LatestVersion: String read GetLatestVersion;
     property LatestVersionTime: TDateTime read GetLatestVersionTime;
     property AutoUpdateEnabled: Boolean read GetAutoUpdateEnabled write SetAutoUpdateEnabled;
+
+    property ExampleFiles: TStringArray read GetExampleFiles;
+    property ScriptFiles: TStringArray read GetScriptFiles;
   end;
   TSimbaPackageArray = array of TSimbaPackage;
 
@@ -311,54 +303,6 @@ begin
   end;
 end;
 
-function TSimbaPackage.FindScripts(KeyNeeded: String): TSimbaPackageScripts;
-var
-  Count: Integer = 0;
-
-  procedure Add(Name, Path: String);
-  begin
-    Path := TSimbaPath.PathNormalize(InstalledPath + Path);
-    if not TSimbaFile.FileExists(Path) then
-      Exit;
-
-    Result[Count].PackageName := FDisplayName;
-    Result[Count].Path := Path;
-    Result[Count].Name := Name;
-    Inc(Count);
-  end;
-
-var
-  Sections: TStringList;
-  I: Integer;
-begin
-  Result := [];
-  if not IsInstalled() then
-    Exit;
-
-  if TSimbaFile.FileExists(InstalledPath + '.simbapackagescripts') then
-  begin
-    Sections := TStringList.Create();
-
-    with TIniFile.Create(InstalledPath + '.simbapackagescripts') do
-    try
-      BoolTrueStrings := ['True', 'true'];
-      BoolFalseStrings := ['False', 'false'];
-
-      ReadSections(Sections);
-
-      SetLength(Result, Sections.Count);
-      for I := 0 to Sections.Count - 1 do
-        if ReadBool(Sections[I], KeyNeeded, False) then
-          Add(Sections[I], ReadString(Sections[I], 'Path', ''));
-      SetLength(Result, Count);
-    finally
-      Free();
-    end;
-
-    Sections.Free();
-  end;
-end;
-
 function TSimbaPackage.GetInstalledPath: String;
 begin
   Result := ReadConfig('InstalledPath');
@@ -369,6 +313,22 @@ end;
 procedure TSimbaPackage.SetInstalledPath(Value: String);
 begin
   WriteConfig('InstalledPath', Value);
+end;
+
+function TSimbaPackage.GetExampleFiles: TStringArray;
+begin
+  if (FExampleFiles = nil) then
+    FExampleFiles := FindFilesWithStartingComment('!PACKAGE EXAMPLE');
+
+  Result := FExampleFiles;
+end;
+
+function TSimbaPackage.GetScriptFiles: TStringArray;
+begin
+  if (FScriptFiles = nil) then
+    FScriptFiles := FindFilesWithStartingComment('!PACKAGE SCRIPT');
+
+  Result := FScriptFiles;
 end;
 
 procedure TSimbaPackage.SetInstalledVersion(Value: String);
@@ -398,6 +358,33 @@ begin
     FreeAndNil(FEndpoint);
 
   inherited Destroy();
+end;
+
+function TSimbaPackage.FindFilesWithStartingComment(Comment: String): TStringArray;
+const
+  COMMENT_PREFIX = UInt16(12079); // UInt16 representation of //
+var
+  FileName, Buffer: String;
+begin
+  Result := [];
+
+  if IsInstalled() then
+  begin
+    SetLength(Buffer, 128);
+    for FileName in TSimbaDir.DirSearch(InstalledPath, '*.simba', True) do
+      with TFileStream.Create(FileName, fmOpenRead) do
+      try
+        if (Size > 2) and (ReadWord() = COMMENT_PREFIX) then
+        begin
+          FillChar(Buffer[1], Length(Buffer), #32);
+          Read(Buffer[1], Min(Length(Buffer), Size));
+          if (Comment in Buffer) then
+            Result := Result + [FileName];
+        end;
+      finally
+        Free();
+      end;
+  end;
 end;
 
 procedure TSimbaPackage.Load;
@@ -433,28 +420,6 @@ end;
 function TSimbaPackage.HasVersions: Boolean;
 begin
   Result := Length(FVersions) > 0;
-end;
-
-function TSimbaPackage.GetExamples: TSimbaPackageScripts;
-begin
-  if not FExamplesDone then
-  begin
-    FExamplesDone := True;
-    FExamples := FindScripts('IsExample');
-  end;
-
-  Result := FExamples;
-end;
-
-function TSimbaPackage.GetScripts: TSimbaPackageScripts;
-begin
-  if not FScriptsDone then
-  begin
-    FScriptsDone := True;
-    FScripts := FindScripts('IsScript');
-  end;
-
-  Result := FScripts;
 end;
 
 end.

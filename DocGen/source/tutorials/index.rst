@@ -10,5 +10,6 @@ Tutorials
    Targets.rst
    Mouse & Keyboard.rst
    Variant Data Type.rst
+   Properties.rst
 
    plugins/index.rst

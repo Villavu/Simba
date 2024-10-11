@@ -40,7 +40,7 @@ implementation
 uses
   simba.ide_package, simba.ide_package_installer, simba.ide_maintoolbar, simba.ide_initialization, simba.ide_mainmenubar,
   simba.form_main, simba.form_package, simba.form_output, simba.form_tabs, simba.form_openexample,
-  simba.vartype_string, simba.fs;
+  simba.vartype_string, simba.fs, simba.vartype_stringarray;
 
 type
   TPackagePopupMenu = class(TPopupMenu)
@@ -117,10 +117,7 @@ procedure TPackageUpdater.BuildMenu;
   begin
     for Menu in SimbaMainMenuBar.MenuBar.Menus do
       if (Menu is TPackagePopupMenu) and (TPackagePopupMenu(Menu).PackageFullName = PackageFullName) then
-      begin
-        Result := TPackagePopupMenu(Menu);
-        Exit;
-      end;
+        Exit(TPackagePopupMenu(Menu));
 
     Result := TPackagePopupMenu.Create(SimbaMainMenuBar.MenuBar);
   end;
@@ -131,41 +128,36 @@ var
   MenuItemOpen, MenuItemRun: TPackageMenuItem;
   SubMenu: TMenuItem;
   Package: TSimbaPackage;
-  Scripts: TSimbaPackageScripts;
-  S: String;
-  ScriptsHash: UInt32;
+  Hash: UInt32;
+  Files: TStringArray;
 begin
   for Package in FPackages do
   begin
-    Scripts := Package.GetScripts();
-    if (Length(Scripts) = 0) then
+    Files := Package.ScriptFiles;
+    if (Length(Files) = 0) then
       Continue;
 
-    S := '';
-    for I := 0 to High(Scripts) do
-      S += Scripts[I].Path + Scripts[I].Name;
-    ScriptsHash := S.Hash();
-
+    Hash := ''.Join(Files).Hash();
     Menu := GetMenu(Package.Name);
-    if (Menu.Hash = ScriptsHash) then // Already built and no changes
+    if (Menu.Hash = Hash) then // Already built and no changes
       Continue;
 
     Menu.PackageFullName := Package.Name;
-    Menu.Hash := ScriptsHash;
+    Menu.Hash := Hash;
     Menu.Items.Clear();
 
-    for I := 0 to High(Scripts) do
+    for I := 0 to High(Files) do
     begin
       SubMenu := TMenuItem.Create(Menu);
-      SubMenu.Caption := TSimbaPath.PathExtractNameWithoutExt(Scripts[I].Path);
+      SubMenu.Caption := TSimbaPath.PathExtractNameWithoutExt(Files[I]);
 
       MenuItemOpen := TPackageMenuItem.Create(SubMenu);
       MenuItemOpen.Caption := 'Open';
-      MenuItemOpen.FileName := Scripts[I].Path;
+      MenuItemOpen.FileName := Files[I];
 
       MenuItemRun := TPackageMenuItem.Create(SubMenu);
       MenuItemRun.Caption := 'Run';
-      MenuItemRun.FileName := Scripts[I].Path;
+      MenuItemRun.FileName := Files[I];
 
       SubMenu.Add(MenuItemOpen);
       SubMenu.Add(MenuItemRun);
@@ -180,19 +172,13 @@ end;
 procedure TPackageUpdater.BuildExamples;
 var
   Package: TSimbaPackage;
-  Examples: TSimbaPackageScripts;
   Files: TStringArray;
-  I: Integer;
 begin
   for Package in FPackages do
   begin
-    Examples := Package.GetExamples();
-    if (Length(Examples) = 0) then
+    Files := Package.ExampleFiles;
+    if (Length(Files) = 0) then
       Continue;
-
-    SetLength(Files, Length(Examples));
-    for I := 0 to High(Files) do
-      Files[I] := Examples[I].Path;
 
     SimbaOpenExampleForm.AddPackageExamples(Package.Name, Files);
   end;
@@ -279,11 +265,11 @@ begin
     if FPackages[I].HasUpdate() then
       FUpdates.Add('%s can be updated to version %s', [FPackages[I].Name, FPackages[I].LatestVersion]);
 
-  // Cache these
+  // find in this thread - these are cached.
   for I := 0 to High(FPackages) do
   begin
-    FPackages[I].GetScripts();
-    FPackages[I].GetExamples();
+    FPackages[I].ScriptFiles;
+    FPackages[I].ExampleFiles;
   end;
 end;
 

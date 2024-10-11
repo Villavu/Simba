@@ -6,3 +6,4 @@ Simba
 
    codetools.rst
    multicaret.rst
+   backups.rst
