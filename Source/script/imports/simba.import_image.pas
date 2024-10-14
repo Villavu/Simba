@@ -835,12 +835,12 @@ end;
 TImage.DrawText
 ---------------
 ```
-procedure TImage.DrawText(Text: String; Box: TBox; Alignments: ETextDrawAlignmentSet; Color: TColor);
+procedure TImage.DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign; Color: TColor);
 ```
 *)
 procedure _LapeImage_DrawTextEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, EDrawTextAlignSet(Params^[3]^));
+  PSimbaImage(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, EImageTextAlign(Params^[3]^));
 end;
 
 (*
@@ -1816,7 +1816,7 @@ begin
     addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR)', 'EImageResizeAlgo');
     addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR)', 'EImageRotateAlgo');
     addGlobalType('enum(BOX, GAUSS)', 'EImageBlurAlgo');
-    addGlobalType('set of enum(LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM)', 'EDrawTextAlign');
+    addGlobalType('set of enum(LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM)', 'EImageTextAlign');
 
     addGlobalFunc('function TImage.Create: TImage; static; overload', @_LapeImage_Create1);
     addGlobalFunc('function TImage.Create(Width, Height: Integer): TImage; static; overload', @_LapeImage_Create2);
@@ -1886,7 +1886,7 @@ begin
     addGlobalFunc('function TImage.TextHeight(Text: String): Integer;', @_LapeImage_TextHeight);
     addGlobalFunc('function TImage.TextSize(Text: String): TPoint;', @_LapeImage_TextSize);
     addGlobalFunc('procedure TImage.DrawText(Text: String; Position: TPoint); overload', @_LapeImage_DrawText);
-    addGlobalFunc('procedure TImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlign); overload', @_LapeImage_DrawTextEx);
+    addGlobalFunc('procedure TImage.DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign); overload', @_LapeImage_DrawTextEx);
     addGlobalFunc('procedure TImage.DrawTextLines(Text: TStringArray; Position: TPoint);', @_LapeImage_DrawTextLines);
 
     addGlobalFunc('procedure TImage.DrawImage(Image: TImage; Position: TPoint)', @_LapeImage_DrawImage);

@@ -109,7 +109,7 @@ type
     function TextSize(Text: String): TPoint;
 
     procedure DrawText(Text: String; Position: TPoint); overload;
-    procedure DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign); overload;
     procedure DrawTextLines(Text: TStringArray; Position: TPoint);
 
     // Image
@@ -513,7 +513,7 @@ begin
   addDirty(TSimbaImageProtected(FBackBuffer).FTextDrawer.DrawnBox);
 end;
 
-procedure TSimbaExternalImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet);
+procedure TSimbaExternalImage.DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign);
 begin
   CheckInUpdate();
 

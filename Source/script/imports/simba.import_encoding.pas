@@ -16,9 +16,6 @@ uses
   lptypes, ffi,
   simba.encoding, simba.hash, simba.compress, simba.image, simba.image_fastcompress;
 
-type
-  PImageCompressThread = ^TImageCompressThread;
-
 (*
 Encoding
 ========
@@ -181,41 +178,6 @@ begin
   PInteger(Result)^ := TOTPCalculateToken(PString(Params^[0])^);
 end;
 
-procedure _LapeImageCompressThread_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PImageCompressThread(Result)^ := TImageCompressThread.Create();
-end;
-
-procedure _LapeImageCompressThread_Push(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PImageCompressThread(Params^[0])^.Push(PSimbaImageArray(Params^[1])^);
-end;
-
-procedure _LapeImageCompressThread_OnCompressed_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PImageCompressThread(Params^[0])^.OnCompressed := TImageCompressedEvent(Params^[1]^);
-end;
-
-procedure _LapeImageCompressThread_OnCompressed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  TImageCompressedEvent(Result^) := PImageCompressThread(Params^[0])^.OnCompressed;
-end;
-
-procedure _LapeImageCompressThread_TimeUsed(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDouble(Result)^ := PImageCompressThread(Params^[0])^.TimeUsed;
-end;
-
-procedure _LapeImageCompressThread_IsCompressing(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PImageCompressThread(Params^[0])^.IsCompressing;
-end;
-
-procedure _LapeImageCompressThread_WaitCompressing(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PImageCompressThread(Params^[0])^.WaitCompressing();
-end;
-
 (*
 CompressBytes
 -------------
@@ -281,49 +243,49 @@ begin
 end;
 
 (*
-SynLZCompress
--------------
+FastCompress
+------------
 ```
-function SynLZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
+function FastCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
 ```
 *)
-procedure _LapeSynLZCompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFastCompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SynLZcompress(PPointer(Params^[0])^, PInteger(Params^[1])^, PPointer(Params^[2])^);
 end;
 
 (*
-SynLZDecompress
----------------
+FastDecompress
+--------------
 ```
-function SynLZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
+function FastDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
 ```
 *)
-procedure _LapeSynLZDecompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFastDecompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SynLZdecompress(PPointer(Params^[0])^, PInteger(Params^[1])^, PPointer(Params^[2])^);
 end;
 
 (*
-SynLZCompressDestLen
---------------------
+FastCompressDestLen
+-------------------
 ```
-function SynLZCompressDestLen(Len: Integer): Integer;
+function FastCompressDestLen(Len: Integer): Integer;
 ```
 *)
-procedure _LapeSynLZCompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFastCompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SynLZcompressdestlen(PInteger(Params^[0])^);
 end;
 
 (*
-SynLZDecompressDestLen
-----------------------
+FastDecompressDestLen
+---------------------
 ```
-function SynLZDecompressDestLen(Src: Pointer): Integer;
+function FastDecompressDestLen(Src: Pointer): Integer;
 ```
 *)
-procedure _LapeSynLZDecompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFastDecompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := SynLZdecompressdestlen(PPointer(Params^[0])^);
 end;
@@ -341,15 +303,15 @@ begin
 end;
 
 (*
-FastDeCompressImages
+FastDecompressImages
 --------------------
 ```
-function FastDeCompressImages(Data: Pointer; DataLen: SizeUInt): TSimbaImageArray;
+function FastDecompressImages(Data: Pointer; DataLen: SizeUInt): TSimbaImageArray;
 ```
 *)
-procedure _LapeFastDeCompressImages(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFastDecompressImages(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  TSimbaImageArray(Result^) := SimbaImage_FastDeCompress(PPointer(Params^[0])^, PSizeUInt(Params^[1])^);
+  TSimbaImageArray(Result^) := SimbaImage_FastDecompress(PPointer(Params^[0])^, PSizeUInt(Params^[1])^);
 end;
 
 procedure ImportEncoding(Compiler: TSimbaScript_Compiler);
@@ -382,24 +344,15 @@ begin
     addGlobalFunc('function CompressString(S: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String', @_LapeCompressString);
     addGlobalFunc('function DecompressString(S: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String', @_LapeDeCompressString);
 
-    addGlobalFunc('function SynLZCompressDestLen(Len: Integer): Integer', @_LapeSynLZCompressDestLen);
-    addGlobalFunc('function SynLZDecompressDestLen(Src: Pointer): Integer', @_LapeSynLZDecompressDestLen);
-    addGlobalFunc('function SynLZCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZCompress);
-    addGlobalFunc('function SynLZDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeSynLZDecompress);
+    addGlobalFunc('function FastCompressDestLen(Len: Integer): Integer', @_LapeFastCompressDestLen);
+    addGlobalFunc('function FastDecompressDestLen(Src: Pointer): Integer', @_LapeFastDecompressDestLen);
+    addGlobalFunc('function FastCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeFastCompress);
+    addGlobalFunc('function FastDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeFastDecompress);
 
     addGlobalFunc('procedure FastCompressImages(Images: TImageArray; var Data: Pointer; out DataSize: SizeUInt);', @_LapeFastCompressImages);
-    addGlobalFunc('function FastDeCompressImages(Data: Pointer; out DataLen: SizeUInt): TImageArray', @_LapeFastDeCompressImages);
+    addGlobalFunc('function FastDecompressImages(Data: Pointer; out DataLen: SizeUInt): TImageArray', @_LapeFastDecompressImages);
 
     ImportingSection := '';
-
-    addClass('TImageCompressThread');
-    addClassConstructor('TImageCompressThread', '', @_LapeImageCompressThread_Create);
-    addGlobalType('procedure(Sender: TImageCompressThread; Images: TImageArray; Data: Pointer; DataSize: SizeUInt) of object', 'TImageCompressedEvent', FFI_DEFAULT_ABI);
-    addGlobalFunc('procedure TImageCompressThread.Push(Images: TImageArray)', @_LapeImageCompressThread_Push);
-    addGlobalFunc('function TImageCompressThread.TimeUsed: Double', @_LapeImageCompressThread_TimeUsed);
-    addGlobalFunc('function TImageCompressThread.IsCompressing: Boolean', @_LapeImageCompressThread_IsCompressing);
-    addGlobalFunc('procedure TImageCompressThread.WaitCompressing;', @_LapeImageCompressThread_WaitCompressing);
-    addProperty('TImageCompressThread', 'OnCompressed', 'TImageCompressedEvent', @_LapeImageCompressThread_OnCompressed_Read, @_LapeImageCompressThread_OnCompressed_Write);
   end;
 end;
 

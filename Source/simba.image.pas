@@ -160,7 +160,7 @@ type
 
     // text draw
     procedure DrawText(Text: String; Position: TPoint); overload;
-    procedure DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign); overload;
     procedure DrawTextLines(Text: TStringArray; Position: TPoint);
 
     // Image
@@ -1777,7 +1777,7 @@ begin
   FTextDrawer.DrawText(Text, Position, IfThen(DrawColor > -1, DrawColor, GetDistinctColor(0)));
 end;
 
-procedure TSimbaImage.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet);
+procedure TSimbaImage.DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign);
 begin
   FTextDrawer.DrawText(Text, Box, Alignments, IfThen(DrawColor > -1, DrawColor, GetDistinctColor(0)));
 end;

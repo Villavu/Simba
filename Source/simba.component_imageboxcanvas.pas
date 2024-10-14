@@ -72,7 +72,7 @@ type
     property FontItalic: Boolean read GetFontItalic write SetFontItalic;
 
     procedure DrawText(Text: String; Position: TPoint; Color: TColor); overload;
-    procedure DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign; Color: TColor); overload;
 
     function TextWidth(Text: String): Integer;
     function TextHeight(Text: String): Integer;
@@ -260,7 +260,7 @@ begin
   FTextDrawer.DrawText(Text, Position.Offset(FOffset), Color);
 end;
 
-procedure TSimbaImageBoxCanvas.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor);
+procedure TSimbaImageBoxCanvas.DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign; Color: TColor);
 begin
   FTextDrawer.DrawText(Text, Box.Offset(FOffset), Alignments, Color);
 end;

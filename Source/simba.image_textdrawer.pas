@@ -39,8 +39,7 @@ type
   end;
 
   {$scopedenums on}
-  EDrawTextAlign = (LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM);
-  EDrawTextAlignSet = set of EDrawTextAlign;
+  EImageTextAlign = set of (LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM);
   {$scopedenums off}
 
   TSimbaTextDrawerBase = class(TFPImageFreeTypeDrawer)
@@ -64,7 +63,7 @@ type
     constructor Create; reintroduce;
 
     procedure DrawText(Text: String; Position: TPoint; Color: TColor); overload;
-    procedure DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor); overload;
+    procedure DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign; Color: TColor); overload;
 
     function TextWidth(Text: String): Integer;
     function TextHeight(Text: String): Integer;
@@ -346,7 +345,7 @@ begin
   end;
 end;
 
-procedure TSimbaTextDrawerBase.DrawText(Text: String; Box: TBox; Alignments: EDrawTextAlignSet; Color: TColor);
+procedure TSimbaTextDrawerBase.DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign; Color: TColor);
 var
   FreeTypeAlignments: TFreeTypeAlignments absolute Alignments;
 begin
