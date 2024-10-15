@@ -311,7 +311,7 @@ end;
 TBox.Width
 ----------
 ```
-function TBox.Width: Integer;
+property TBox.Width: Integer;
 ```
 *)
 procedure _LapeBox_Width(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -323,7 +323,7 @@ end;
 TBox.Height
 -----------
 ```
-function TBox.Height: Integer;
+property TBox.Height: Integer;
 ```
 *)
 procedure _LapeBox_Height(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -335,7 +335,7 @@ end;
 TBox.Center
 -----------
 ```
-function TBox.Center: TPoint;
+property TBox.Center: TPoint;
 ```
 *)
 procedure _LapeBox_Center(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -397,6 +397,54 @@ begin
   PPoint(Result)^ := PBox(Params^[0])^.RandomPointCenter();
 end;
 
+(*
+TBox.TopLeft
+------------
+```
+property TBox.TopLeft: TPoint;
+```
+*)
+procedure _LapeBox_TopLeft(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PBox(Params^[0])^.TopLeft;
+end;
+
+(*
+TBox.TopRight
+-------------
+```
+property TBox.TopRight: TPoint;
+```
+*)
+procedure _LapeBox_TopRight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PBox(Params^[0])^.TopRight;
+end;
+
+(*
+TBox.BottomLeft
+---------------
+```
+property TBox.BottomLeft: TPoint;
+```
+*)
+procedure _LapeBox_BottomLeft(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PBox(Params^[0])^.BottomLeft;
+end;
+
+(*
+TBox.BottomRight
+----------------
+```
+property TBox.BottomRight: TPoint;
+```
+*)
+procedure _LapeBox_BottomRight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PBox(Params^[0])^.BottomRight;
+end;
+
 procedure ImportBox(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -439,6 +487,11 @@ begin
 
     addGlobalFunc('function TBox.RandomPoint: TPoint', @_LapeBox_RandomPoint);
     addGlobalFunc('function TBox.RandomPointCenter: TPoint', @_LapeBox_RandomPointCenter);
+
+    addGlobalFunc('property TBox.TopLeft: TPoint;', @_LapeBox_TopLeft);
+    addGlobalFunc('property TBox.TopRight: TPoint;', @_LapeBox_TopRight);
+    addGlobalFunc('property TBox.BottomLeft: TPoint;', @_LapeBox_BottomLeft);
+    addGlobalFunc('property TBox.BottomRight: TPoint;', @_LapeBox_BottomRight);
 
     ImportingSection := '';
   end;

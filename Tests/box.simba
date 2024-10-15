@@ -21,4 +21,9 @@ begin
   Assert(b.Expand(50, 100) = [50,0,250,300]);
 
   Assert(b.Offset([-10, 10]) = [90, 110, 190, 210]);
+
+  Assert(b.TopLeft = [100,100]);
+  Assert(b.TopRight = [200,100]);
+  Assert(b.BottomLeft = [100,200]);
+  Assert(b.BottomRight = [200,200]);
 end.

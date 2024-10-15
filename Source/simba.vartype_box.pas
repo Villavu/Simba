@@ -19,6 +19,8 @@ uses
 type
   TBoxHelper = record helper for TBox
   private
+    function GetTopRight: TPoint; inline;
+    function GetBottomLeft: TPoint; inline;
     function GetCenter: TPoint; inline;
     function GetWidth: Integer; inline;
     function GetHeight: Integer; inline;
@@ -57,6 +59,8 @@ type
     function Clip(Other: TBox): TBox;
     function Normalize: TBox;
 
+    property TopRight: TPoint read GetTopRight;
+    property BottomLeft: TPoint read GetBottomLeft;
     property Width: Integer read GetWidth;
     property Height: Integer read GetHeight;
     property Center: TPoint read GetCenter;
@@ -71,6 +75,18 @@ implementation
 uses
   Math,
   simba.random, simba.containers, simba.geometry;
+
+function TBoxHelper.GetTopRight: TPoint;
+begin
+  Result.X := X2;
+  Result.Y := Y1;
+end;
+
+function TBoxHelper.GetBottomLeft: TPoint;
+begin
+  Result.X := X1;
+  Result.Y := Y2;
+end;
 
 function TBoxHelper.GetCenter: TPoint;
 begin
