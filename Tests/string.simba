@@ -74,4 +74,8 @@ begin
   Assert(String(' ').Join(['a']) = 'a');
   Assert(String(' ').Join(['a','b']) = 'a b');
   Assert(String(' ').Join(['a','b','c','d']) = 'a b c d');
+
+  Assert(String(' ').Join(['aaa', 'bb', 'c']) = 'aaa bb c');
+  Assert(String(' ').Join(['aaa', '', 'bb', '', 'c']) = 'aaa  bb  c');
+  Assert(String(' ').Join(['aaa', '', 'bb', '', 'c', '']) = 'aaa  bb  c ');
 end;

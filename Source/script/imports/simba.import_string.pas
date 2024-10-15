@@ -6,6 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
+  lptypes,
   simba.base, simba.script_compiler;
 
 procedure ImportString(Compiler: TSimbaScript_Compiler);
@@ -13,8 +14,7 @@ procedure ImportString(Compiler: TSimbaScript_Compiler);
 implementation
 
 uses
-  simba.vartype_string,
-  lptypes;
+  simba.vartype_string, simba.vartype_stringarray;
 
 (*
 String
@@ -1120,6 +1120,11 @@ begin
   PBoolean(Result)^ := PChar(Params^[0])^ in PStringArray(Params^[1])^;
 end;
 
+procedure _LapeStringArray_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PStringArray(Params^[0])^.ToString(PString(Params^[1])^);
+end;
+
 procedure ImportString(Compiler: TSimbaScript_Compiler);
 begin
   with Compiler do
@@ -1246,6 +1251,8 @@ begin
     addGlobalFunc('function String.ToDouble: Double; overload;', @_LapeString_ToDouble);
     addGlobalFunc('function String.ToDouble(Default: Double): Double; overload;', @_LapeString_ToDoubleDef);
     addGlobalFunc('function String.ToDateTime(Fmt: String; Def: TDateTime): TDateTime;', @_LapeString_ToDateTime);
+
+    addGlobalFunc('function TStringArray.ToString(Sep: String): String;', @_LapeStringArray_ToString);
 
     addGlobalFunc('operator *(Left: String; Right: Integer): String', @_LapeString_MUL_Integer);
     addGlobalFunc('operator in(Left: String; Right: String): Boolean', @_LapeString_IN_String);

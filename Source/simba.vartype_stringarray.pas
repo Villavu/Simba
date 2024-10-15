@@ -20,13 +20,14 @@ type
     function IndicesOf(Value: String): TIntegerArray;
     function Unique: TStringArray;
     procedure Sort;
+    function ToString(Sep: String): String;
   end;
 
 implementation
 
 uses
   StrUtils,
-  simba.array_algorithm;
+  simba.array_algorithm, simba.vartype_string;
 
 function TStringArrayHelper.Equals(Other: TStringArray): Boolean;
 begin
@@ -57,6 +58,11 @@ procedure TStringArrayHelper.Sort;
 
 begin
   specialize TArraySortFunc<String>.QuickSort(Self, Low(Self), High(Self), @Compare);
+end;
+
+function TStringArrayHelper.ToString(Sep: String): String;
+begin
+  Result := Sep.Join(Self);
 end;
 
 end.

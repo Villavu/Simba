@@ -949,21 +949,30 @@ end;
 function TSimbaStringHelper.Join(const Values: TStringArray): String;
 var
   Builder: TSimbaStringBuilder;
-  i: Integer;
+  I, Current, Total: Integer;
 begin
-  if (Length(Values) = 0) then
-    Result := ''
-  else
-  if (Length(Values) = 1) then
-    Result := Values[0]
-  else
-  begin
-    Builder.Append(Values[0]);
-    for I := 1 to High(Values) - 1 do
-      Builder.Append(Self + Values[I]);
-    Builder.Append(Self + Values[High(Values)]);
+  if (Length(Values) = 0) then Exit('');
+  if (Length(Values) = 1) then Exit(Values[0]);
 
-    Result := Builder.Str;
+  Total := High(Values) * Length(Self);
+  for I := 0 to High(Values) do
+    Total += Length(Values[I]);
+  SetLength(Result, Total);
+
+  Current := 1;
+  for I := 0 to High(Values) do
+  begin
+    if (Values[I] <> '') then
+    begin
+      Move(Values[I][1], Result[Current], Length(Values[I]));
+      Inc(Current, Length(Values[I]));
+    end;
+
+    if (I < High(Values)) then
+    begin
+      Move(Self[1], Result[Current], Length(Self));
+      Inc(Current, Length(Self));
+    end;
   end;
 end;
 
