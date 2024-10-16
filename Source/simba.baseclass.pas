@@ -55,56 +55,50 @@ var
 
 procedure PrintUnfreedObjects;
 var
+  NeedHeader: Boolean = True;
   I: Integer;
 begin
   for I := 0 to TrackedObjects.Count - 1 do
     if not TrackedObjects[I].FreeOnTerminate then
     begin
-      DebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
-      Break;
-    end;
+      if NeedHeader then
+        DebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
+      NeedHeader := False;
 
-  while (TrackedObjects.Count > 0) do
-  begin
-    if not TrackedObjects[0].FreeOnTerminate then
-      TrackedObjects[0].NotifyUnfreed();
-    TrackedObjects[0].Free();
-  end;
+      TrackedObjects[I].NotifyUnfreed();
+    end;
 end;
 
 procedure PrintUnfinishedThreads;
 var
+  NeedHeader: Boolean = True;
   I: Integer;
 begin
   for I := 0 to TrackedThreads.Count - 1 do
-    if not TrackedThreads[I].Finished then
+    if (not TrackedThreads[I].Finished) then
     begin
-      DebugLn([EDebugLn.YELLOW], 'The following threads were still running:');
-      Break;
-    end;
+      if NeedHeader then
+        DebugLn([EDebugLn.YELLOW], 'The following threads were still running:');
+      NeedHeader := False;
 
-  for I := 0 to TrackedThreads.Count - 1 do
-    if not TrackedThreads[I].Finished then
       TrackedThreads[I].NotifyUnfreed();
+    end;
 end;
 
 procedure PrintUnfreedThreads;
 var
+  NeedHeader: Boolean = True;
   I: Integer;
 begin
   for I := 0 to TrackedThreads.Count - 1 do
     if TrackedThreads[I].Finished and (not TrackedThreads[I].FreeOnTerminate) then
     begin
-      DebugLn([EDebugLn.YELLOW], 'The following threads were not freed:');
-      Break;
-    end;
+      if NeedHeader then
+        DebugLn([EDebugLn.YELLOW], 'The following threads were not freed:');
+      NeedHeader := False;
 
-  while (TrackedThreads.Count > 0) do
-  begin
-    if not TrackedThreads[0].FreeOnTerminate then
-      TrackedThreads[0].NotifyUnfreed();
-    TrackedThreads[0].Free();
-  end;
+      TrackedThreads[I].NotifyUnfreed();
+    end;
 end;
 
 procedure TSimbaBaseClass.NotifyUnfreed;
@@ -164,18 +158,32 @@ begin
     TrackedThreads.Delete(Self);
 end;
 
+procedure FreeObjects;
+var
+  Obj: TSimbaBaseClass;
+begin
+  for Obj in TrackedObjects.ToArray() do // use ToArray so not to worry about when Free removes from TrackedObjects list.
+    Obj.Free();
+end;
+
+procedure FreeThreads;
+var
+  Thread: TSimbaBaseThread;
+begin
+  for Thread in TrackedThreads.ToArray() do // ..
+    if Thread.FreeOnTerminate then
+      Thread.Terminate()
+    else
+      Thread.Free();
+end;
+
 initialization
   TrackedObjects := specialize TSimbaObjectList<TSimbaBaseClass>.Create();
   TrackedThreads := specialize TSimbaObjectList<TSimbaBaseThread>.Create();
 
 finalization
-  while (TrackedObjects.Count > 0) do
-    TrackedObjects[0].Free();
-  TrackedObjects.Free();
-
-  while (TrackedThreads.Count > 0) do
-    TrackedThreads[0].Free();
-  TrackedThreads.Free();
+  FreeObjects();
+  FreeThreads();
 
 end.
 

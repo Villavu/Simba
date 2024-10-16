@@ -1825,7 +1825,6 @@ begin
     tokFunction:  Decl.FMethodType := mtFunc;
     tokProcedure: Decl.FMethodType := mtProc;
     tokOperator:  Decl.FMethodType := mtOperator;
-    tokProperty:  Decl.FMethodType := mtProperty;
   end;
 
   inherited;
