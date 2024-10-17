@@ -10,7 +10,7 @@ unit simba.ide_codetools_parser;
 interface
 
 uses
-  SysUtils, Classes,
+  SysUtils, Classes, nullable,
   simba.base,
   simba.containers,
   simba.ide_codetools_base,
@@ -25,7 +25,8 @@ type
   TDeclarationArray = array of TDeclaration;
 
   TDeclarationStack = specialize TSimbaStack<TDeclaration>;
-  TDeclarationCache = specialize TCache<TDeclarationArray>;
+  TDeclarationCache = specialize TNullable<TDeclarationArray>;
+  TStringCache = specialize TNullable<String>;
 
   TDeclarationList = class(TObject)
   protected
@@ -722,7 +723,7 @@ end;
 
 function TDeclaration.GetText: String;
 begin
-  if FText.Empty then
+  if FText.IsNull then
     FText := FLexer.CopyDoc(FStartPos, FEndPos);
 
   Result := FText;
@@ -750,7 +751,7 @@ function TDeclaration.GetTextNoComments: String;
   end;
 
 begin
-  if FTextNoComments.Empty then
+  if FTextNoComments.IsNull then
     FTextNoComments := Filter(FLexer.CopyDoc(FStartPos, FEndPos));
 
   Result := FTextNoComments;
@@ -786,7 +787,7 @@ function TDeclaration.GetTextNoCommentsSingleLine: String;
   end;
 
 begin
-  if FTextNoCommentsSingleLine.Empty then
+  if FTextNoCommentsSingleLine.IsNull then
     FTextNoCommentsSingleLine := Filter(FLexer.CopyDoc(FStartPos, FEndPos));
 
   Result := FTextNoCommentsSingleLine;
@@ -794,10 +795,7 @@ end;
 
 function TDeclaration.GetName: String;
 begin
-  if FName.Empty then
-    Result := ''
-  else
-    Result := FName;
+  Result := FName.ValueOrDefault;
 end;
 
 function TDeclaration.GetFullName: String;
@@ -1002,31 +1000,23 @@ end;
 
 function TDeclaration_Anchor.GetHeader: String;
 begin
-  if FHeader.Empty then
-  begin
-    Result := 'Anchor "' + Name + '"';
-
-    FHeader := Result;
-  end;
+  if FHeader.IsNull then
+    FHeader := 'Anchor "' + Name + '"';
 
   Result := FHeader;
 end;
 
 function TDeclaration_Type.GetHeader: String;
 begin
-  if FHeader.Empty then
-  begin
-    Result := 'type ' + Name + ' = ' + TextNoCommentsSingleLine;
-
-    FHeader := Result;
-  end;
+  if FHeader.IsNull then
+    FHeader := 'type ' + Name + ' = ' + TextNoCommentsSingleLine;
 
   Result := FHeader;
 end;
 
 function TDeclaration_EnumElement.GetName: string;
 begin
-  if FName.Empty then
+  if FName.IsNull then
     FName := Items.GetTextOfClass(TDeclaration_EnumElementName);
 
   Result := inherited;
@@ -1042,13 +1032,10 @@ end;
 
 function TDeclaration_EnumElement.GetHeader: String;
 begin
-  if FHeader.Empty then
-  begin
-    if (FParent is TDeclaration_TypeEnumScoped) then
-      Result := FParent.Name + '.' + Name
-    else
-      Result := Name;
-  end;
+  if FHeader.IsNull then
+    FHeader := IfThen(FParent is TDeclaration_TypeEnumScoped, FParent.Name + '.' + Name, Name);
+
+  Result := FHeader;
 end;
 
 function TDeclaration_TypeAlias.Dump: String;
@@ -1098,36 +1085,24 @@ end;
 
 function TDeclaration_TypeRecord.GetFields: TDeclarationArray;
 begin
-  if FFields.Empty then
-  begin
-    Result := Items.GetByClass(TDeclaration_Field);
-
-    FFields := Result;
-  end;
+  if FFields.IsNull then
+    FFields := Items.GetByClass(TDeclaration_Field, True);
 
   Result := FFields;
 end;
 
 function TDeclaration_TypeRecord.GetConsts: TDeclarationArray;
 begin
-  if FConsts.Empty then
-  begin
-    Result := Items.GetByClass(TDeclaration_Const);
-
-    FConsts := Result;
-  end;
+  if FConsts.IsNull then
+    FConsts := Items.GetByClass(TDeclaration_Const, True);
 
   Result := FConsts;
 end;
 
 function TDeclaration_Var.GetHeader: String;
 begin
-  if FHeader.Empty then
-  begin
-    Result := 'var ' + Name + VarTypeString + VarDefaultString;
-
-    FHeader := Result;
-  end;
+  if FHeader.IsNull then
+    FHeader := 'var ' + Name + VarTypeString + VarDefaultString;
 
   Result := FHeader;
 end;
@@ -1139,7 +1114,7 @@ end;
 
 function TDeclaration_Var.GetVarTypeString: String;
 begin
-  if FVarTypeString.Empty then
+  if FVarTypeString.IsNull then
     FVarTypeString := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarType, ': ');
 
   Result := FVarTypeString;
@@ -1147,7 +1122,7 @@ end;
 
 function TDeclaration_Var.GetVarDefaultString: String;
 
-  function ReplaceunPrintable(const Str: String): String;
+  function ReplaceUnPrintable(const Str: String): String;
   var
     I: Integer = 1;
   begin
@@ -1165,14 +1140,15 @@ function TDeclaration_Var.GetVarDefaultString: String;
   end;
 
 begin
-  if FVarDefaultString.Empty then
+  if FVarDefaultString.IsNull then
   begin
     case DefToken of
       tokAssign: FVarDefaultString := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarDefault, ' := ');
       tokEqual:  FVarDefaultString := Items.GetTextOfClassNoCommentsSingleLine(TDeclaration_VarDefault, ' = ');
+      else
+        FVarDefaultString := '';
     end;
-
-    FVarDefaultString := ReplaceunPrintable(FVarDefaultString);
+    FVarDefaultString := ReplaceUnPrintable(FVarDefaultString);
   end;
 
   Result := FVarDefaultString;
@@ -1180,12 +1156,8 @@ end;
 
 function TDeclaration_Const.GetHeader: String;
 begin
-  if FHeader.Empty then
-  begin
-    Result := 'const ' + Name + VarDefaultString;
-
-    FHeader := Result;
-  end;
+  if FHeader.IsNull then
+    FHeader := 'const ' + Name + VarDefaultString;
 
   Result := FHeader;
 end;
@@ -1199,7 +1171,7 @@ end;
 
 function TDeclaration_EnumElementName.GetName: string;
 begin
-  if FName.Empty then
+  if FName.IsNull then
     FName := Text;
 
   Result := FName;
@@ -1207,24 +1179,16 @@ end;
 
 function TDeclaration_TypeEnum.GetElements: TDeclarationArray;
 begin
-  if FElements.Empty then
-  begin
-    Result := FItems.GetByClass(TDeclaration_EnumElement);
-
-    FElements := Result;
-  end;
+  if FElements.IsNull then
+    FElements := FItems.GetByClass(TDeclaration_EnumElement);
 
   Result := FElements;
 end;
 
 function TDeclaration_TypeSet.GetEnumElements: TDeclarationArray;
 begin
-  if FEnumElements.Empty then
-  begin
-    Result := FItems.GetByClass(TDeclaration_EnumElement);
-
-    FEnumElements := Result;
-  end;
+  if FEnumElements.IsNull then
+    FEnumElements := FItems.GetByClass(TDeclaration_EnumElement);
 
   Result := FEnumElements;
 end;
@@ -1301,7 +1265,7 @@ end;
 
 function TDeclaration_Method.GetParamString: String;
 begin
-  if FParamString.Empty then
+  if FParamString.IsNull then
     FParamString := FItems.GetTextOfClassNoCommentsSingleLine(TDeclaration_ParamList);
 
   Result := FParamString;
@@ -1309,7 +1273,7 @@ end;
 
 function TDeclaration_Method.GetResultString: String;
 begin
-  if FResultString.Empty then
+  if FResultString.IsNull then
     FResultString := FItems.GetTextOfClassNoCommentsSingleLine(TDeclaration_MethodResult, ': ');
 
   Result := FResultString;
@@ -1319,7 +1283,7 @@ function TDeclaration_Method.GetHeader: String;
 var
   Builder: TSimbaStringBuilder;
 begin
-  if FHeader.Empty then
+  if FHeader.IsNull then
   begin
     if isFunc     then Builder.Append('function')  else
     if isProc     then Builder.Append('procedure') else
@@ -1346,16 +1310,14 @@ function TDeclaration_Method.GetParams: TDeclarationArray;
 var
   Decl: TDeclaration;
 begin
-  Result := [];
-
-  if FParams.Empty then
+  if FParams.IsNull then
   begin
+    FParams := [];
+
     Decl := Items.GetByClassFirst(TDeclaration_ParamList);
     if (Decl <> nil) then
       for Decl in Decl.Items.GetByClass(TDeclaration_ParamGroup) do
-        Result.Add(Decl.Items.GetByClass(TDeclaration_Parameter));
-
-    FParams := Result;
+        FParams.Value.Add(Decl.Items.GetByClass(TDeclaration_Parameter));
   end;
 
   Result := FParams;
@@ -1370,7 +1332,7 @@ function TDeclaration_MethodOfType.GetHeader: String;
 var
   Builder: TSimbaStringBuilder;
 begin
-  if FHeader.Empty then
+  if FHeader.IsNull then
   begin
     if isFunc     then Builder.Append('function')  else
     if isProc     then Builder.Append('procedure') else
@@ -1488,7 +1450,7 @@ var
   Builder: TSimbaStringBuilder;
   I: Integer;
 begin
-  if FHash.Empty then
+  if FHash.IsNull then
   begin
     with Lexer.SaveDefines() do
       Builder.Append(Defines + IntToStr(Stack));
@@ -2037,7 +1999,7 @@ procedure TCodeParser.Reset;
 begin
   inherited Reset();
 
-  FHash.Empty := True;
+  FHash.Clear();
   FManagedItems.Clear(True);
 
   FRoot.Items.Clear();

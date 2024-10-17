@@ -38,24 +38,6 @@ type
     property Value[Key: PChar]: _T read getValue; default;
   end;
 
-  // not initialized, so only "safe" to use when used within a class
-  generic TCache<_T> = record
-  type
-    TSelf = specialize TCache<_T>;
-  private
-    FValue: _T;
-    FCached: Boolean;
-
-    function getEmpty: Boolean;
-    procedure setEmpty(Value: Boolean);
-  public
-    property Empty: Boolean read getEmpty write setEmpty;
-
-    class operator := (AValue: _T): TSelf;
-    class operator := (AValue: TSelf): _T;
-  end;
-  TStringCache = specialize TCache<String>;
-
   {$IFDEF PARSER_LEAK_CHECKS}
   TLeakChecker = class(TObject)
   protected
@@ -124,27 +106,6 @@ begin
 
   FBuckets[Bucket].Key := Key;
   FBuckets[Bucket].Value := Value;
-end;
-
-function TCache.getEmpty: Boolean;
-begin
-  Result := not FCached;
-end;
-
-procedure TCache.setEmpty(Value: Boolean);
-begin
-  FCached := Value;
-end;
-
-class operator TCache.:=(AValue: _T): TSelf;
-begin
-  Result.FValue := AValue;
-  Result.FCached := True;
-end;
-
-class operator TCache.:=(AValue: TSelf): _T;
-begin
-  Result := AValue.FValue;
 end;
 
 {$IFDEF PARSER_LEAK_CHECKS}

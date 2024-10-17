@@ -61,7 +61,6 @@ type
     function IsOutdated: Boolean;
     function IncRef: TCodetoolsInclude;
     function DecRef: TCodetoolsInclude;
-
   end;
 
   TCodetoolsPlugin = class(TCodetoolsInclude)
@@ -115,7 +114,7 @@ end;
 
 function TCodetoolsInclude.GetHash: String;
 begin
-  if FHash.Empty then
+  if FHash.IsNull then
     FHash := inherited + FInDefines.Defines + IntToStr(FInDefines.Stack) + FPlugins.Text;
 
   Result := FHash;
