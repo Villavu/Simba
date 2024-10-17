@@ -769,8 +769,8 @@ function TDeclaration.GetTextNoCommentsSingleLine: String;
     while (Lexer.TokenID <> tokNull) do
     begin
       case Lexer.TokenID of
-        //tokCRLF, tokCRLFCo: Builder.Append(' ');
-        tokSlashesComment, tokAnsiComment, tokBorComment: { nothing };
+        tokWhiteSpace: Builder.Append(' ');
+        tokAnsiComment, tokBorComment, tokSlashesComment: { nothing, dont add comments };
         else
           Builder.Append(Lexer.Token);
       end;
@@ -780,10 +780,6 @@ function TDeclaration.GetTextNoCommentsSingleLine: String;
     Lexer.Free();
 
     Result := Builder.Str;
-
-    while Result.Contains('  ') do
-      Result := Result.Replace('  ', ' ');
-    Result := Result.Replace('( ', '(').Replace(' )', ')');
   end;
 
 begin
