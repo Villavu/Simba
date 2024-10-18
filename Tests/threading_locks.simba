@@ -7,8 +7,9 @@ var
 procedure TestWithLocks;
 var
   expected: Integer;
+  timeout: UInt64 := GetTickCount() + 1000;
 begin
-  while GetTimeRunning() < 1000 do
+  while Timeout > GetTickCount() do
   begin
     lock.Enter();
     expected := counter;
@@ -23,8 +24,9 @@ end;
 procedure TestWithoutLocks;
 var
   expected: Integer;
+  timeout: UInt64 := GetTickCount() + 1000;
 begin
-  while GetTimeRunning() < 1000 do
+  while Timeout > GetTickCount() do
   begin
     expected := counter;
     sleep(10);
@@ -35,21 +37,21 @@ begin
 end;
 
 begin
+  lock.FreeOnTerminate := True;
+
   counter := 0;
   errors := 0;
   RunInThread(@TestWithoutLocks);
   RunInThread(@TestWithoutLocks);
   RunInThread(@TestWithoutLocks);
-  Sleep(1500);
+  Sleep(2500);
   Assert(errors > 0);
 
   counter := 0;
   errors := 0;
-  RunInThread(@TestWithoutLocks);
-  RunInThread(@TestWithoutLocks);
-  RunInThread(@TestWithoutLocks);
-  Sleep(1500);
+  RunInThread(@TestWithLocks);
+  RunInThread(@TestWithLocks);
+  RunInThread(@TestWithLocks);
+  Sleep(2500);
   Assert(errors = 0);
-
-  lock.Free();
 end;

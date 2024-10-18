@@ -763,10 +763,13 @@
       <Checks>
         <RangeChecks Value="True"/>
       </Checks>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <DebugInfoType Value="dsDwarf2Set"/>
+        <DebugInfoType Value="dsDwarf3"/>
       </Debugging>
     </Linking>
     <Other>

@@ -208,7 +208,7 @@ begin
   SetLength(VarStack, SizeOf(Pointer) + (Length(Params) * SizeOf(Pointer)));
   PPointer(@VarStack[0])^ := Method.Data;
   for I := 0 to High(Params) do
-    PPointer(@VarStack[SizeOf(Pointer) * (I+1)])^ := Params[I];
+    PPointer(@VarStack[SizeOf(Pointer) * (I + 1)])^ := Params[I];
 
   FCodeRunner.Run(TCodePos(Method.Code), VarStack);
 end;

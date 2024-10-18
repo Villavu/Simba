@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.containers;
+  simba.base, simba.containers, simba.threading;
 
 type
   TSimbaBaseClass = class
@@ -41,6 +41,8 @@ type
   public
     constructor Create; reintroduce; virtual;
     destructor Destroy; override;
+
+    property Terminated;
   end;
 
   procedure PrintUnfreedObjects;
@@ -49,24 +51,33 @@ type
 
 implementation
 
+type
+  TTrackedObjects = specialize TSimbaThreadsafeObjectList<TSimbaBaseClass>;
+  TTrackedThreads = specialize TSimbaThreadsafeObjectList<TSimbaBaseThread>;
+
 var
-  TrackedObjects: specialize TSimbaObjectList<TSimbaBaseClass>;
-  TrackedThreads: specialize TSimbaObjectList<TSimbaBaseThread>;
+  TrackedObjects: TTrackedObjects;
+  TrackedThreads: TTrackedThreads;
 
 procedure PrintUnfreedObjects;
 var
   NeedHeader: Boolean = True;
   I: Integer;
 begin
-  for I := 0 to TrackedObjects.Count - 1 do
-    if not TrackedObjects[I].FreeOnTerminate then
-    begin
-      if NeedHeader then
-        DebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
-      NeedHeader := False;
+  TrackedObjects.Lock();
+  try
+    for I := 0 to TrackedObjects.Count - 1 do
+      if not TrackedObjects[I].FreeOnTerminate then
+      begin
+        if NeedHeader then
+          DebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
+        NeedHeader := False;
 
-      TrackedObjects[I].NotifyUnfreed();
-    end;
+        TrackedObjects[I].NotifyUnfreed();
+      end;
+  finally
+    TrackedObjects.Unlock();
+  end;
 end;
 
 procedure PrintUnfinishedThreads;
@@ -74,15 +85,20 @@ var
   NeedHeader: Boolean = True;
   I: Integer;
 begin
-  for I := 0 to TrackedThreads.Count - 1 do
-    if (not TrackedThreads[I].Finished) then
-    begin
-      if NeedHeader then
-        DebugLn([EDebugLn.YELLOW], 'The following threads were still running:');
-      NeedHeader := False;
+  TrackedThreads.Lock();
+  try
+    for I := 0 to TrackedThreads.Count - 1 do
+      if not TrackedThreads[I].Finished then
+      begin
+        if NeedHeader then
+          DebugLn([EDebugLn.YELLOW], 'The following threads were still running:');
+        NeedHeader := False;
 
-      TrackedThreads[I].NotifyUnfreed();
-    end;
+        TrackedThreads[I].NotifyUnfreed();
+      end;
+  finally
+    TrackedThreads.Unlock();
+  end;
 end;
 
 procedure PrintUnfreedThreads;
@@ -90,15 +106,20 @@ var
   NeedHeader: Boolean = True;
   I: Integer;
 begin
-  for I := 0 to TrackedThreads.Count - 1 do
-    if TrackedThreads[I].Finished and (not TrackedThreads[I].FreeOnTerminate) then
-    begin
-      if NeedHeader then
-        DebugLn([EDebugLn.YELLOW], 'The following threads were not freed:');
-      NeedHeader := False;
+  TrackedThreads.Lock();
+  try
+    for I := 0 to TrackedThreads.Count - 1 do
+      if TrackedThreads[I].Finished and (not TrackedThreads[I].FreeOnTerminate) then
+      begin
+        if NeedHeader then
+          DebugLn([EDebugLn.YELLOW], 'The following threads were not freed:');
+        NeedHeader := False;
 
-      TrackedThreads[I].NotifyUnfreed();
-    end;
+        TrackedThreads[I].NotifyUnfreed();
+      end;
+  finally
+    TrackedThreads.Unlock();
+  end;
 end;
 
 procedure TSimbaBaseClass.NotifyUnfreed;
@@ -160,26 +181,34 @@ end;
 
 procedure FreeObjects;
 var
-  Obj: TSimbaBaseClass;
+  List: TTrackedObjects;
+  Thread: TSimbaBaseThread;
+  I: Integer;
 begin
-  for Obj in TrackedObjects.ToArray() do // use ToArray so not to worry about when Free removes from TrackedObjects list.
-    Obj.Free();
+  List := TrackedObjects;
+  TrackedObjects := nil;
+  for I := 0 to List.Count - 1 do
+    List[I].Free();
 end;
 
 procedure FreeThreads;
 var
+  List: TTrackedThreads;
   Thread: TSimbaBaseThread;
+  I: Integer;
 begin
-  for Thread in TrackedThreads.ToArray() do // ..
-    if Thread.FreeOnTerminate then
-      Thread.Terminate()
+  List := TrackedThreads;
+  TrackedThreads := nil;
+  for I := 0 to List.Count - 1 do
+    if List[I].FreeOnTerminate then
+      List[I].Terminate()
     else
-      Thread.Free();
+      List[I].Free();
 end;
 
 initialization
-  TrackedObjects := specialize TSimbaObjectList<TSimbaBaseClass>.Create();
-  TrackedThreads := specialize TSimbaObjectList<TSimbaBaseThread>.Create();
+  TrackedObjects := TTrackedObjects.Create();
+  TrackedThreads := TTrackedThreads.Create();
 
 finalization
   FreeObjects();

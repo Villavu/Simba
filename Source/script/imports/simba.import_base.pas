@@ -540,7 +540,12 @@ begin
   TSimbaBaseClass(Params^[0]^).Name := PString(Params^[1])^;
 end;
 
-procedure _LapeBaseClass_FreeOnTerminate(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBaseClass_FreeOnTerminate_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := TSimbaBaseClass(Params^[0]^).FreeOnTerminate;
+end;
+
+procedure _LapeBaseClass_FreeOnTerminate_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   TSimbaBaseClass(Params^[0]^).FreeOnTerminate := PBoolean(Params^[1])^;
 end;
@@ -633,7 +638,7 @@ begin
 
     addClass('TBaseClass', 'Pointer');
     addProperty('TBaseClass', 'Name', 'String', @_LapeBaseClass_Name_Read, @_LapeBaseClass_Name_Write);
-    addGlobalFunc('procedure TBaseClass.FreeOnTerminate(Value: Boolean);', @_LapeBaseClass_FreeOnTerminate);
+    addProperty('TBaseClass', 'FreeOnTerminate', 'Boolean', @_LapeBaseClass_FreeOnTerminate_Read, @_LapeBaseClass_FreeOnTerminate_Write);
   end;
 end;
 

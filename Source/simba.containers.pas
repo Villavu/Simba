@@ -17,11 +17,14 @@ unit simba.containers;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, syncobjs,
   simba.base;
 
 type
   generic TSimbaList<_T> = class(TObject)
+  private
+    function GetFirst: _T;
+    function GetLast: _T;
   public type
     TArr = array of _T;
   protected
@@ -38,6 +41,9 @@ type
 
     property Count: Integer read FCount;
     property Items[Index: Integer]: _T read GetItem write SetItem; default;
+
+    property First: _T read GetFirst;
+    property Last: _T read GetLast;
   end;
 
   generic TSimbaObjectList<_T: class> = class(specialize TSimbaList<_T>)
@@ -52,6 +58,33 @@ type
     property FreeObjects: Boolean read FFreeObjects write FFreeObjects;
 
     constructor Create(AFreeObjects: Boolean = False); reintroduce;
+    destructor Destroy; override;
+  end;
+
+  generic TSimbaThreadsafeObjectList<_T: class> = class(TObject)
+  protected type
+    TList = specialize TSimbaObjectList<_T>;
+  protected
+    FList: TList;
+    FLock: TCriticalSection;
+
+    function GetCount: Integer;
+    function GetFirst: _T;
+    function GetLast: _T;
+    function GetItem(Index: Integer): _T;
+  public
+    procedure Add(Item: _T);
+    procedure Delete(Item: _T);
+
+    procedure Lock;
+    procedure UnLock;
+
+    property Count: Integer read GetCount;
+    property Items[Index: Integer]: _T read GetItem; default;
+    property First: _T read GetFirst;
+    property Last: _T read GetLast;
+
+    constructor Create; reintroduce;
     destructor Destroy; override;
   end;
 
@@ -153,6 +186,20 @@ begin
   FArr[Index] := AValue;
 end;
 
+function TSimbaList.GetFirst: _T;
+begin
+  if (FCount = 0) then
+    SimbaException('%s.GetItem: Index %d out of bounds', [ClassName, 0]);
+  Result := FArr[0];
+end;
+
+function TSimbaList.GetLast: _T;
+begin
+  if (FCount = 0) then
+    SimbaException('%s.GetItem: Index %d out of bounds', [ClassName, 0]);
+  Result := FArr[FCount - 1];
+end;
+
 function TSimbaList.GetItem(Index: Integer): _T;
 begin
   if (Index < 0) or (Index >= FCount) then
@@ -243,6 +290,85 @@ end;
 destructor TSimbaObjectList.Destroy;
 begin
   Clear();
+
+  inherited Destroy();
+end;
+
+function TSimbaThreadsafeObjectList.GetCount: Integer;
+begin
+  Result := FList.Count;
+end;
+
+function TSimbaThreadsafeObjectList.GetFirst: _T;
+begin
+  FLock.Enter();
+  try
+    Result := FList.First;
+  finally
+    FLock.Leave();
+  end;
+end;
+
+function TSimbaThreadsafeObjectList.GetLast: _T;
+begin
+  FLock.Enter();
+  try
+    Result := FList.Last;
+  finally
+    FLock.Leave();
+  end;
+end;
+
+function TSimbaThreadsafeObjectList.GetItem(Index: Integer): _T;
+begin
+  FLock.Enter();
+  try
+    Result := FList[Index];
+  finally
+    FLock.Leave();
+  end;
+end;
+
+procedure TSimbaThreadsafeObjectList.Add(Item: _T);
+begin
+  FLock.Enter();
+  try
+    FList.Add(Item);
+  finally
+    FLock.Leave();
+  end;
+end;
+
+procedure TSimbaThreadsafeObjectList.Delete(Item: _T);
+begin
+  FLock.Enter();
+  try
+    FList.Delete(Item);
+  finally
+    FLock.Leave();
+  end;
+end;
+
+procedure TSimbaThreadsafeObjectList.Lock;
+begin
+  FLock.Enter();
+end;
+
+procedure TSimbaThreadsafeObjectList.UnLock;
+begin
+  FLock.Leave();
+end;
+
+constructor TSimbaThreadsafeObjectList.Create;
+begin
+  FList := TList.Create();
+  FLock := TCriticalSection.Create();
+end;
+
+destructor TSimbaThreadsafeObjectList.Destroy;
+begin
+  FreeAndNil(FList);
+  FreeAndNil(FLock);
 
   inherited Destroy();
 end;
