@@ -42,6 +42,7 @@ type
 
     FData: PColorBGRA;
     FDataSize: SizeUInt;
+    FDataOwner: Boolean;
 
     FLineStarts: TSimbaImageLineStarts;
 
@@ -95,6 +96,7 @@ type
 
     property Data: PColorBGRA read FData;
     property DataSize: SizeUInt read FDataSize;
+    property DataOwner: Boolean read FDataOwner;
     property Width: Integer read FWidth;
     property Height: Integer read FHeight;
     property Center: TPoint read FCenter;
@@ -118,6 +120,8 @@ type
     function InImage(const X, Y: Integer): Boolean;
 
     procedure SetSize(NewWidth, NewHeight: Integer);
+    procedure SetExternalData(NewData: PColorBGRA; DataWidth, DataHeight: Integer);
+    procedure ResetExternalData(NewWidth, NewHeight: Integer);
 
     procedure Fill(Color: TColor);
     procedure FillWithAlpha(Value: Byte);
@@ -1803,6 +1807,9 @@ var
   NewData: PColorBGRA;
   I, MinW, MinH: Integer;
 begin
+  if not FDataOwner then
+    SimbaException('Cannot resize image with external data.');
+
   if (NewWidth <> FWidth) or (NewHeight <> FHeight) then
   begin
     if (NewWidth * NewHeight <> 0) then
@@ -1833,6 +1840,29 @@ begin
     for I := 0 to High(FLineStarts) do
       FLineStarts[I] := @FData[FWidth * I];
   end;
+end;
+
+procedure TSimbaImage.SetExternalData(NewData: PColorBGRA; DataWidth, DataHeight: Integer);
+begin
+  SetSize(0, 0);
+
+  FDataOwner := False;
+  FData := NewData;
+  FWidth := DataWidth;
+  FHeight := DataHeight;
+end;
+
+procedure TSimbaImage.ResetExternalData(NewWidth, NewHeight: Integer);
+begin
+  if FDataOwner then
+    Exit;
+
+  FDataOwner := True;
+  FData := nil;
+  FWidth := 0;
+  FHeight := 0;
+
+  SetSize(NewWidth, NewHeight);
 end;
 
 function TSimbaImage.Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer): TSimbaImage;
@@ -2076,6 +2106,7 @@ constructor TSimbaImage.Create;
 begin
   inherited Create();
 
+  FDataOwner := True;
   FTextDrawer := TSimbaTextDrawer.Create(Self);
 
   DefaultPixel.AsInteger := 0;
@@ -2159,7 +2190,8 @@ end;
 
 destructor TSimbaImage.Destroy;
 begin
-  SetSize(0, 0);
+  if FDataOwner then
+    SetSize(0, 0);
 
   FreeAndNil(FTextDrawer);
 

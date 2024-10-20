@@ -504,6 +504,35 @@ begin
 end;
 
 (*
+TImage.SetExternalData
+----------------------
+```
+procedure TImage.SetExternalData(NewData: PColorBGRA; DataWidth, DataHeight: Integer);
+```
+
+Point the image data to external data (ie. not data allocated by the image itself).
+*)
+procedure _LapeImage_SetExternalData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.SetExternalData(PPointer(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+(*
+TImage.ResetExternalData
+------------------------
+```
+procedure TImage.ResetExternalData;
+```
+
+Remove the effects of `SetExternalData`.
+*)
+procedure _LapeImage_ResetExternalData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImage(Params^[0])^.ResetExternalData(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+
+(*
 TImage.Fill
 -----------
 ```
@@ -1852,7 +1881,9 @@ begin
 
     addGlobalFunc('function TImage.InImage(X, Y: Integer): Boolean', @_LapeImage_InImage);
 
-    addGlobalFunc('procedure TImage.SetSize(AWidth, AHeight: Integer);', @_LapeImage_SetSize);
+    addGlobalFunc('procedure TImage.SetSize(NewWidth, NewHeight: Integer);', @_LapeImage_SetSize);
+    addGlobalFunc('procedure TImage.SetExternaData(Data: PColorBGRA; DataWidth, DataHeight: Integer);', @_LapeImage_SetExternalData);
+    addGlobalFunc('procedure TImage.ResetExternaData(NewWidth, NewHeight: Integer);', @_LapeImage_ResetExternalData);
 
     addGlobalFunc('procedure TImage.Fill(Color: TColor);', @_LapeImage_Fill);
     addGlobalFunc('procedure TImage.FillWithAlpha(Value: Byte);', @_LapeImage_FillWithAlpha);
