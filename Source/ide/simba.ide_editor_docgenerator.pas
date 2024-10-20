@@ -18,7 +18,9 @@ const
     '(*'   + LineEnding +
     '%s'   + LineEnding +
     '%s'   + LineEnding +
-    '> %s' + LineEnding +
+    '```'  + LineEnding +
+    '%s'   + LineEnding +
+    '```'  + LineEnding +
     '*)'   + LineEnding;
 
 type
@@ -36,7 +38,8 @@ type
 implementation
 
 uses
-  simba.ide_codetools_base, simba.ide_codetools_parser, simba.settings;
+  simba.ide_codetools_base, simba.ide_codetools_parser, simba.settings,
+  simba.dialog;
 
 procedure TSimbaEditorPlugin_DocGenerator.DoEditorAdded(Value: TCustomSynEdit);
 begin
@@ -97,6 +100,8 @@ begin
         InsertDocAtMethod(Decl.ParentByClass[TDeclaration_Method]);
     end;
   except
+    on E: Exception do
+      SimbaErrorDlg('Simba', 'Insert documentation error: %s', [E.Message]);
   end;
   if (Parser <> nil) then
     Parser.Free();

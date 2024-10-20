@@ -72,47 +72,48 @@ const
     'procedure <ArrayName>.Append(Value: <ArrayVarType>); external;' + LineEnding +
     'procedure <ArrayName>.Extend(Value: <ArrayName>); external;';
 
+  // var x: array of SomeType;
   HELPERS_DYNARRAY_UNTYPED =
     'function <ArrayName>.Low: Integer; external;' + LineEnding +
     'function <ArrayName>.High: Integer; external;' + LineEnding +
-    'function <ArrayName>.Contains(Value: array of <ArrayVarType>): Boolean; external;' + LineEnding +
+    'function <ArrayName>.Contains(Value: <ArrayVarType>): Boolean; external;' + LineEnding +
     'procedure <ArrayName>.Swap(FromIndex, ToIndex: Integer); external;' + LineEnding +
     'function <ArrayName>.Unique: array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.IndexOf(Value: array of <ArrayVarType>): Integer; external;' + LineEnding +
-    'function <ArrayName>.IndicesOf(Value: array of <ArrayVarType>): TIntegerArray; external;' + LineEnding +
+    'function <ArrayName>.IndexOf(Value: <ArrayVarType>): Integer; external;' + LineEnding +
+    'function <ArrayName>.IndicesOf(Value: <ArrayVarType>): TIntegerArray; external;' + LineEnding +
     'procedure <ArrayName>.Sort; external;' + LineEnding +
-    'procedure <ArrayName>.Sort(CompareFunc: function(constref L, R: array of <ArrayVarType>): Integer); external;' + LineEnding +
+    'procedure <ArrayName>.Sort(CompareFunc: function(constref L, R: <ArrayVarType>): Integer); external;' + LineEnding +
     'procedure <ArrayName>.Sort(Weights: TIntegerArray; LowToHigh: Boolean); external;' + LineEnding +
     'function <ArrayName>.Sorted: array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.Sorted(CompareFunc: function(constref L, R: array of <ArrayVarType>): Integer): array of <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Sorted(CompareFunc: function(constref L, R: <ArrayVarType>): Integer): array of <ArrayVarType>; external;' + LineEnding +
     'function <ArrayName>.Sorted(Weights: TIntegerArray; LowToHigh: Boolean): array of <ArrayVarType>; external;' + LineEnding +
     'function <ArrayName>.Length: Integer; external;' + LineEnding +
     'function <ArrayName>.Copy: array of <ArrayVarType>; external;' + LineEnding +
     'function <ArrayName>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.First: array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.Last: array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.RandomValue: array of <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.First: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Last: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.RandomValue: <ArrayVarType>; external;' + LineEnding +
     'function <ArrayName>.Reversed: array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.Min: array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.Max: array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.Sum: array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.Mode: array of <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Min: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Max: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Sum: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Mode: <ArrayVarType>; external;' + LineEnding +
     'function <ArrayName>.Median: Double; external;' + LineEnding +
     'function <ArrayName>.Mean: Double; external;' + LineEnding +
     'function <ArrayName>.Variance: Double; external;' + LineEnding +
     'function <ArrayName>.Stdev: Double; external;' + LineEnding +
     'function <ArrayName>.Slice(Start, Stop, Step: Integer): array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.Remove(Value: array of <ArrayVarType>): Boolean; external;' + LineEnding +
-    'function <ArrayName>.RemoveAll(Value: array of <ArrayVarType>): Integer; external;' + LineEnding +
+    'function <ArrayName>.Remove(Value: <ArrayVarType>): Boolean; external;' + LineEnding +
+    'function <ArrayName>.RemoveAll(Value: <ArrayVarType>): Integer; external;' + LineEnding +
     'procedure <ArrayName>.Delete(Index: Integer; Count: Integer = High(Integer)); external;' + LineEnding +
-    'procedure <ArrayName>.Insert(Item: array of <ArrayVarType>; Index: Integer); external;' + LineEnding +
+    'procedure <ArrayName>.Insert(Item: <ArrayVarType>; Index: Integer); external;' + LineEnding +
     'procedure <ArrayName>.SetLength(NewLength: Integer); external;' + LineEnding +
-    'function <ArrayName>.Pop: array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.Pop(Index: Integer): array of <ArrayVarType>; external;' + LineEnding +
-    'function <ArrayName>.RandomValue: array of <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Pop: <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.Pop(Index: Integer): <ArrayVarType>; external;' + LineEnding +
+    'function <ArrayName>.RandomValue: <ArrayVarType>; external;' + LineEnding +
     'procedure <ArrayName>.Reverse; external;' + LineEnding +
     'procedure <ArrayName>.Clear; external;' + LineEnding +
-    'procedure <ArrayName>.Append(Value: array of <ArrayVarType>); external;' + LineEnding +
+    'procedure <ArrayName>.Append(Value: <ArrayVarType>); external;' + LineEnding +
     'procedure <ArrayName>.Extend(Value: array of <ArrayVarType>); external;';
 
   HELPERS_STATICARRAY =
