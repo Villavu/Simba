@@ -71,7 +71,7 @@ type
 implementation
 
 uses
-  x, xatom, keysym, baseunix, unix, linux, lcltype, ctypes,
+  x, keysym, baseunix, unix, linux, lcltype, ctypes,
   simba.process, simba.xlib, simba.vartype_windowhandle, simba.vartype_box;
 
 const
@@ -278,7 +278,6 @@ begin
     Exit;
 
   SimbaXLib.XSync(False);
-
   if SimbaXLib.XGetWindowProperty(Window, Prop, 0, 2, False, AnyPropertyType, @Atom, @Format, @Count, @Bytes, @Data) and (Data <> nil) then
   try
     Result := Data^;
@@ -287,9 +286,9 @@ begin
   end;
 end;
 
-function HasWindowProperty(Window: TWindow; Name: String): Boolean;
+function HasWindowProperty(Window: TWindow; Prop: TAtom): Boolean;
 begin
-  Result := GetWindowProperty(Window, SimbaXLib.XInternAtom(PChar(Name), False)) > 0;
+  Result := GetWindowProperty(Window, Prop) > 0;
 end;
 
 function TSimbaNativeInterface_Linux.GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean;
@@ -588,7 +587,6 @@ begin
               (Stream.ReadByte() = $02);
   except
   end;
-
   Stream.Free();
 end;
 
@@ -660,34 +658,44 @@ begin
 end;
 
 function TSimbaNativeInterface_Linux.GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle;
+
+  function ShouldReturnWindow(Window: TWindow): Boolean;
+  var
+    B: TBox;
+  begin
+    B := GetWindowBounds(Window);
+    Result := (not (Window in Exclude)) and
+              (B.Width > 5) and (B.Height > 5) and
+              (GetWindowTitle(Window) <> '') and
+              (GetWindowClass(Window) <> '');
+  end;
+
 var
   Root, Child: TWindow;
   x_root, y_root, x, y: Integer;
   mask: UInt32;
+  I: Integer;
+  Windows: array[UInt8] of TWindow;
+  WindowCount: Integer;
 begin
+  Result := 0;
+  WindowCount := 0;
+
   SimbaXLib.XQueryPointer(GetDesktopWindow(), @Root, @Child, @x_root, @y_root, @x, @y, @mask);
-
-  Result := Child;
-  while (Child <> 0) do
+  while SimbaXLib.XQueryPointer(Child, @Root, @Child, @x_root, @y_root, @x, @y, @mask) do
   begin
-    Result := Child;
-
-    SimbaXLib.XQueryPointer(Result, @Root, @Child, @x_root, @y_root, @x, @y, @mask);
-    if (GetWindowPID(Child) = 0) then
+    if (Child = 0) then
       Break;
+    Windows[WindowCount] := Child;
+    Inc(WindowCount);
+    if (WindowCount > High(Windows)) then
+      Exit;
   end;
 
-  // Check if first child is the client window, since that stores the caption and such...
-  if (GetWindowPID(Result) = 0) then
-    for Child in GetWindowChildren(Result, False) do
-      if HasWindowProperty(Child, 'WM_STATE') then
-      begin
-        Result := Child;
-        Break;
-      end;
-
-  if (Result in Exclude) then
-    Result := 0;
+  // now go back until we find something worthwhile
+  for I := WindowCount - 1 downto 0 do
+    if ShouldReturnWindow(Windows[I]) then
+      Exit(Windows[I])
 end;
 
 function TSimbaNativeInterface_Linux.GetDesktopWindow: TWindowHandle;
@@ -697,7 +705,7 @@ end;
 
 function TSimbaNativeInterface_Linux.GetActiveWindow: TWindowHandle;
 begin
-  Result := GetWindowProperty(GetDesktopWindow(), SimbaXLib.XInternAtom('_NET_ACTIVE_WINDOW', False));
+  Result := GetWindowProperty(GetDesktopWindow(), SimbaXLib._NET_ACTIVE_WINDOW);
 end;
 
 function TSimbaNativeInterface_Linux.IsWindowActive(Window: TWindowHandle): Boolean;
@@ -714,12 +722,12 @@ end;
 
 function TSimbaNativeInterface_Linux.IsWindowVisible(Window: TWindowHandle): Boolean;
 begin
-  Result := HasWindowProperty(GetRootWindow(Window), 'WM_STATE');
+  Result := HasWindowProperty(GetRootWindow(Window), SimbaXLib.WM_STATE);
 end;
 
 function TSimbaNativeInterface_Linux.GetWindowPID(Window: TWindowHandle): Integer;
 begin
-  Result := GetWindowProperty(GetRootWindow(Window), SimbaXLib.XInternAtom(PChar('_NET_WM_PID'), False));
+  Result := GetWindowProperty(GetRootWindow(Window), SimbaXLib._NET_WM_PID);
 end;
 
 function TSimbaNativeInterface_Linux.GetWindowClass(Window: TWindowHandle): WideString;
@@ -764,7 +772,7 @@ var
   Count: Integer;
 begin
   Result := Window;
-  if (Result = 0) or HasWindowProperty(Result, 'WM_STATE') then
+  if (Result = 0) or HasWindowProperty(Result, SimbaXLib.WM_STATE) then
     Exit;
 
   while (Window > 0) and SimbaXLib.XQueryTree(Window, @Root, @Parent, @Children, @Count) do
@@ -772,7 +780,7 @@ begin
     if (Children <> nil) then
       SimbaXLib.XFree(Children);
 
-    if (Parent > 0) and HasWindowProperty(Parent, 'WM_STATE') then
+    if (Parent > 0) and HasWindowProperty(Parent, SimbaXLib.WM_STATE) then
     begin
       Result := Parent;
       Exit;
@@ -794,7 +802,7 @@ begin
   Event._Type := ClientMessage;
   Event.Display := SimbaXLib.Display;
   Event.Window := GetRootWindow(Window);
-  Event.Message_Type := SimbaXLib.XInternAtom('_NET_ACTIVE_WINDOW', False);
+  Event.Message_Type := SimbaXLib._NET_ACTIVE_WINDOW;
   Event.Format := 32;
   Event.Data.L[0] := 2;
   Event.Data.L[1] := CurrentTime;

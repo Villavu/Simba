@@ -220,6 +220,21 @@ type
     _XTestFakeKeyEvent: function(Display: PDisplay; KeyCode: UInt32; Is_Press: TBool; Delay: UInt32): Integer; cdecl;
     _XTestFakeButtonEvent: function(Display: PDisplay; Button: UInt32; Is_Press: TBool; Delay: UInt32): Integer; cdecl;
   public
+    // Atom mappings
+    _NET_ACTIVE_WINDOW: TAtom;
+    _NET_WM_PID: TAtom;
+    _NET_WM_WINDOW_TYPE: TAtom;
+    _NET_WM_WINDOW_TYPE_DESKTOP: TAtom;
+    _NET_WM_WINDOW_TYPE_DOCK: TAtom;
+    _NET_WM_WINDOW_TYPE_TOOLBAR: TAtom;
+    _NET_WM_WINDOW_TYPE_MENU: TAtom;
+    _NET_WM_WINDOW_TYPE_UTILITY: TAtom;
+    _NET_WM_WINDOW_TYPE_SPLASH: TAtom;
+    _NET_WM_WINDOW_TYPE_DIALOG: TAtom;
+    _NET_WM_WINDOW_TYPE_NORMAL: TAtom;
+
+    WM_STATE: TAtom; // For top level window detection
+  public
     Display: PDisplay;
 
     function XGetWindowAttributes(para2:TWindow; para3:PXWindowAttributes): Boolean;
@@ -470,6 +485,20 @@ begin
   Result.Display := Result._XOpenDisplay(nil);
   if (Result.Display = nil) then
     raise Exception.Create('TSimbaLib.Create: Unable to open display');
+
+  Result._NET_WM_WINDOW_TYPE               := Result.XInternAtom('_NET_WM_WINDOW_TYPE', False);
+  Result._NET_WM_WINDOW_TYPE_DESKTOP       := Result.XInternAtom('_NET_WM_WINDOW_TYPE_DESKTOP', False);
+  Result._NET_WM_WINDOW_TYPE_DOCK          := Result.XInternAtom('_NET_WM_WINDOW_TYPE_DOCK', False);
+  Result._NET_WM_WINDOW_TYPE_TOOLBAR       := Result.XInternAtom('_NET_WM_WINDOW_TYPE_TOOLBAR', False);
+  Result._NET_WM_WINDOW_TYPE_MENU          := Result.XInternAtom('_NET_WM_WINDOW_TYPE_MENU', False);
+  Result._NET_WM_WINDOW_TYPE_UTILITY       := Result.XInternAtom('_NET_WM_WINDOW_TYPE_UTILITY', False);
+  Result._NET_WM_WINDOW_TYPE_SPLASH        := Result.XInternAtom('_NET_WM_WINDOW_TYPE_SPLASH', False);
+  Result._NET_WM_WINDOW_TYPE_DIALOG        := Result.XInternAtom('_NET_WM_WINDOW_TYPE_DIALOG', False);
+  Result._NET_WM_WINDOW_TYPE_NORMAL        := Result.XInternAtom('_NET_WM_WINDOW_TYPE_NORMAL', False);
+  Result._NET_WM_PID                       := Result.XInternAtom('_NET_WM_PID', False);
+  Result._NET_ACTIVE_WINDOW                := Result.XInternAtom('_NET_ACTIVE_WINDOW', False);
+
+  Result.WM_STATE                          := Result.XInternAtom('WM_STATE', False);
 end;
 
 procedure TSimbaXLib.Free;
