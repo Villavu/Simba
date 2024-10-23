@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.externalimage,
+  simba.base, simba.externalcanvas,
   lpcompiler;
 
 type
@@ -270,35 +270,35 @@ end;
 
 function Plugin_ExternalImage_Create(AutoResize: Boolean): Pointer; cdecl;
 begin
-  Result := TSimbaExternalImage.Create();
+  Result := TSimbaExternalCanvas.Create();
 
-  TSimbaExternalImage(Result).FreeOnTerminate := True;
-  TSimbaExternalImage(Result).AutoResize := AutoResize;
+  TSimbaExternalCanvas(Result).AutoResize := AutoResize;
+  TSimbaExternalCanvas(Result).FreeOnTerminate := True;
 end;
 
 procedure Plugin_ExternalImage_SetMemory(Img: Pointer; Data: PColorBGRA; AWidth, AHeight: Integer); cdecl;
 begin
-  TSimbaExternalImage(Img).SetMemory(Data, AWidth, AHeight);
+  TSimbaExternalCanvas(Img).SetMemory(Data, AWidth, AHeight);
 end;
 
 procedure Plugin_ExternalImage_Resize(Img: Pointer; NewWidth, NewHeight: Integer); cdecl;
 begin
-  TSimbaExternalImage(Img).Resize(NewWidth, NewHeight);
+  TSimbaExternalCanvas(Img).Resize(NewWidth, NewHeight);
 end;
 
 procedure Plugin_ExternalImage_SetUserData(Img: Pointer; UserData: Pointer); cdecl;
 begin
-  TSimbaExternalImage(Img).UserData := UserData;
+  TSimbaExternalCanvas(Img).UserData := UserData;
 end;
 
 function Plugin_ExternalImage_GetUserData(Img: Pointer): Pointer; cdecl;
 begin
-  Result := TSimbaExternalImage(Img).UserData;
+  Result := TSimbaExternalCanvas(Img).UserData;
 end;
 
 procedure Plugin_ExternalImage_SetName(Img: Pointer; Name: PChar); cdecl;
 begin
-  TSimbaExternalImage(Img).Name := Name;
+  TSimbaExternalCanvas(Img).Name := Name;
 end;
 
 initialization

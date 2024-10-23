@@ -27,7 +27,7 @@ uses
   simba.import_pointbuffer, simba.import_async,
 
   // Simba classes
-  simba.import_image, simba.import_externalimage, simba.import_dtm, simba.import_matchtemplate,
+  simba.import_image, simba.import_externalcanvas, simba.import_dtm, simba.import_matchtemplate,
   simba.import_json, simba.import_imagebox, simba.import_shapebox,
 
   // LCL
@@ -58,7 +58,7 @@ begin
 
   ImportDTM(Compiler);
   ImportSimbaImage(Compiler);
-  ImportSimbaExternalImage(Compiler);
+  ImportExternalCanvas(Compiler);
   ImportMatchTemplate(Compiler);
   ImportJSON(Compiler);
 

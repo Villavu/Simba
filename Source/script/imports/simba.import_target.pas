@@ -16,7 +16,7 @@ uses
   TypInfo,
   lptypes, lpvartypes, ffi,
   simba.colormath, simba.dtm, simba.misc,
-  simba.image, simba.target, simba.externalimage, simba.finder_image, simba.finder_color;
+  simba.image, simba.target, simba.externalcanvas, simba.finder_image, simba.finder_color;
 
 type
   PMouseButton = ^EMouseButton;
@@ -107,14 +107,14 @@ end;
 TTarget.SetPlugin
 -----------------
 ```
-procedure TTarget.SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalImage);
+procedure TTarget.SetPlugin(FileName, Args: String; out DebugImage: TExternalCanvas);
 ```
 
-Overloaded version that returns a external image to draw on.
+Overloaded version that returns a "external canvas" to draw on.
 *)
 procedure _LapeTarget_SetPlugin2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaTarget(Params^[0])^.SetPlugin(PString(Params^[1])^, PString(Params^[2])^, PSimbaExternalImage(Params^[3])^);
+  PSimbaTarget(Params^[0])^.SetPlugin(PString(Params^[1])^, PString(Params^[2])^, TSimbaExternalCanvas(Params^[3]^));
 end;
 
 (*
@@ -1160,7 +1160,7 @@ begin
     addGlobalFunc('procedure TTarget.SetWindow(Window: TWindowHandle)', @_LapeTarget_SetWindow);
     addGlobalFunc('procedure TTarget.SetEIOS(Plugin, Args: String)', @_LapeTarget_SetEIOS);
     addGlobalFunc('procedure TTarget.SetPlugin(Plugin, Args: String); overload', @_LapeTarget_SetPlugin1);
-    addGlobalFunc('procedure TTarget.SetPlugin(Plugin, Args: String; out DebugImage: TExternalImage); overload', @_LapeTarget_SetPlugin2);
+    addGlobalFunc('procedure TTarget.SetPlugin(Plugin, Args: String; out DebugImage: TExternalCanvas); overload', @_LapeTarget_SetPlugin2);
 
     addGlobalFunc('function TTarget.AddTargetChangeEvent(Event: TTargetEvent): TTargetEvent', @_Lape_Target_AddTargetChangeEvent);
     addGlobalFunc('function TTarget.AddTargetInvalidEvent(Event: TTargetEvent): TTargetEvent', @_Lape_Target_AddTargetInvalidEvent);

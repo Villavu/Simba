@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils, DynLibs,
-  simba.base, simba.externalimage;
+  simba.base, simba.externalcanvas;
 
 type
   PSimbaPluginTarget = ^TSimbaPluginTarget;
@@ -24,7 +24,7 @@ type
     DebugImageThread: TThread;
 
     Request: function(Args: PChar): Pointer; cdecl;
-    RequestWithDebugImage: function(Args: PChar; out DebugImage: TSimbaExternalImage): Pointer; cdecl;
+    RequestWithDebugImage: function(Args: PChar; out DebugImage: TSimbaExternalCanvas): Pointer; cdecl;
     Release: procedure(Target: Pointer); cdecl;
 
     GetDimensions: procedure(Target: Pointer; out W, H: Int32); cdecl;
@@ -44,7 +44,7 @@ type
   end;
 
 function LoadPluginTarget(FileName, Args: String): TSimbaPluginTarget; overload;
-function LoadPluginTarget(FileName, Args: String; out DebugImage: TSimbaExternalImage): TSimbaPluginTarget; overload;
+function LoadPluginTarget(FileName, Args: String; out DebugImage: TSimbaExternalCanvas): TSimbaPluginTarget; overload;
 
 procedure PluginTarget_GetDimensions(Target: Pointer; out W, H: Integer);
 function PluginTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; var Data: PColorBGRA; var DataWidth: Integer): Boolean;
@@ -72,11 +72,11 @@ type
   TUpdateDebugImageThread = class(TThread)
   protected
     FTarget: TSimbaPluginTarget;
-    FImg: TSimbaExternalImage;
+    FImg: TSimbaExternalCanvas;
 
     procedure Execute; override;
   public
-    constructor Create(Target: TSimbaPluginTarget; Img: TSimbaExternalImage); reintroduce;
+    constructor Create(Target: TSimbaPluginTarget; Img: TSimbaExternalCanvas); reintroduce;
   end;
 
 procedure TUpdateDebugImageThread.Execute;
@@ -102,7 +102,7 @@ begin
   end;
 end;
 
-constructor TUpdateDebugImageThread.Create(Target: TSimbaPluginTarget; Img: TSimbaExternalImage);
+constructor TUpdateDebugImageThread.Create(Target: TSimbaPluginTarget; Img: TSimbaExternalCanvas);
 begin
   inherited Create(False, 512*512);
 
@@ -163,7 +163,7 @@ begin
   end;
 end;
 
-function LoadPluginTarget(FileName, Args: String; out DebugImage: TSimbaExternalImage): TSimbaPluginTarget;
+function LoadPluginTarget(FileName, Args: String; out DebugImage: TSimbaExternalCanvas): TSimbaPluginTarget;
 begin
   Result := Load(FileName);
   with Result do

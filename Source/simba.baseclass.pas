@@ -62,19 +62,22 @@ var
 procedure PrintUnfreedObjects;
 var
   NeedHeader: Boolean = True;
-  I: Integer;
 begin
   TrackedObjects.Lock();
   try
-    for I := 0 to TrackedObjects.Count - 1 do
-      if not TrackedObjects[I].FreeOnTerminate then
+    while (TrackedObjects.Count > 0) do
+    begin
+      if not TrackedObjects.First.FreeOnTerminate then
       begin
         if NeedHeader then
           DebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
         NeedHeader := False;
 
-        TrackedObjects[I].NotifyUnfreed();
+        TrackedObjects.First.NotifyUnfreed();
       end;
+
+      TrackedObjects.First.Free();
+    end;
   finally
     TrackedObjects.Unlock();
   end;
@@ -104,19 +107,25 @@ end;
 procedure PrintUnfreedThreads;
 var
   NeedHeader: Boolean = True;
-  I: Integer;
 begin
   TrackedThreads.Lock();
   try
-    for I := 0 to TrackedThreads.Count - 1 do
-      if TrackedThreads[I].Finished and (not TrackedThreads[I].FreeOnTerminate) then
+    while (TrackedThreads.Count > 0) do
+    begin
+      if TrackedThreads.First.Finished and (not TrackedThreads.First.FreeOnTerminate) then
       begin
         if NeedHeader then
           DebugLn([EDebugLn.YELLOW], 'The following threads were not freed:');
         NeedHeader := False;
 
-        TrackedThreads[I].NotifyUnfreed();
+        TrackedThreads.First.NotifyUnfreed();
       end;
+
+      if TrackedThreads.First.FreeOnTerminate then
+        TrackedThreads.Delete(TrackedThreads.First)
+      else
+        TrackedThreads.First.Free();
+    end;
   finally
     TrackedThreads.Unlock();
   end;
@@ -179,40 +188,13 @@ begin
     TrackedThreads.Delete(Self);
 end;
 
-procedure FreeObjects;
-var
-  List: TTrackedObjects;
-  Thread: TSimbaBaseThread;
-  I: Integer;
-begin
-  List := TrackedObjects;
-  TrackedObjects := nil;
-  for I := 0 to List.Count - 1 do
-    List[I].Free();
-end;
-
-procedure FreeThreads;
-var
-  List: TTrackedThreads;
-  Thread: TSimbaBaseThread;
-  I: Integer;
-begin
-  List := TrackedThreads;
-  TrackedThreads := nil;
-  for I := 0 to List.Count - 1 do
-    if List[I].FreeOnTerminate then
-      List[I].Terminate()
-    else
-      List[I].Free();
-end;
-
 initialization
   TrackedObjects := TTrackedObjects.Create();
   TrackedThreads := TTrackedThreads.Create();
 
 finalization
-  FreeObjects();
-  FreeThreads();
+  while (TrackedObjects.Count > 0) do
+    TrackedObjects.First.Free();
 
 end.
 

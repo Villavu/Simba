@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.image, simba.image_utils, simba.externalimage,
+  simba.base, simba.image, simba.image_utils, simba.externalcanvas,
   simba.target_eios, simba.target_window, simba.target_image, simba.target_plugin,
   simba.colormath, simba.dtm;
 
@@ -131,7 +131,7 @@ type
     procedure SetImage(Image: TSimbaImage);
     procedure SetEIOS(FileName, Args: String);
     procedure SetPlugin(FileName, Args: String); overload;
-    procedure SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalImage); overload;
+    procedure SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalCanvas); overload;
 
     function AddTargetChangeEvent(Event: TTargetEvent): TTargetEvent;
     function AddTargetInvalidEvent(Event: TTargetEvent): TTargetEvent;
@@ -1035,7 +1035,7 @@ begin
   TargetChanged();
 end;
 
-procedure TSimbaTarget.SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalImage);
+procedure TSimbaTarget.SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalCanvas);
 begin
   ChangeTarget(ESimbaTargetKind.PLUGIN);
 

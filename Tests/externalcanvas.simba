@@ -1,0 +1,30 @@
+{$assertions on}
+
+var Img: TImage;
+var ExternalCanvas: TExternalCanvas;
+
+begin
+  Img := TImage.Create(100,100);
+
+  ExternalCanvas := TExternalCanvas.Create();
+  ExternalCanvas.DefaultPixel := [0,0,0,255];
+  ExternalCanvas.SetMemory(Img.Data, Img.Width, Img.Height);
+
+  ExternalCanvas.BeginUpdate();
+
+  Assert(ExternalCanvas.Width=100);
+  Assert(ExternalCanvas.Height=100);
+
+  ExternalCanvas.DrawColor := Colors.WHITE;
+  ExternalCanvas.DrawBox([10,10,90,90]);
+  ExternalCanvas.DrawAlpha := 127;
+  ExternalCanvas.DrawBox([5,5,95,95]);
+
+  ExternalCanvas.EndUpdate();
+
+  Assert(Img.FindColor($FFFFFF, 0).Bounds() = [10,10,90,90]);
+  Assert(Img.FindColor($7F7F7F, 0).Bounds() = [5,5,95,95]);
+
+  ExternalCanvas.Free();
+  Img.Free();
+end;
