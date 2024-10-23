@@ -1962,6 +1962,9 @@ begin
   for LoopY := 0 to H do
     for LoopX := 0 to W do
     begin
+      if (TheData[LoopY * DataW + LoopX].A = 0) then
+        Continue;
+
       DestX := LoopX + P.X;
       DestY := LoopY + P.Y;
       if (DestX >= 0) and (DestY >= 0) and (DestX < FWidth) and (DestY < FHeight) then
@@ -1986,6 +1989,9 @@ begin
   for LoopY := 0 to H do
     for LoopX := 0 to W do
     begin
+      if (TheData[LoopY * DataW + LoopX].A = 0) then
+        Continue;
+
       DestX := LoopX + P.X;
       DestY := LoopY + P.Y;
       if (DestX >= 0) and (DestY >= 0) and (DestX < FWidth) and (DestY < FHeight) then

@@ -1882,8 +1882,8 @@ begin
     addGlobalFunc('function TImage.InImage(X, Y: Integer): Boolean', @_LapeImage_InImage);
 
     addGlobalFunc('procedure TImage.SetSize(NewWidth, NewHeight: Integer);', @_LapeImage_SetSize);
-    addGlobalFunc('procedure TImage.SetExternaData(Data: PColorBGRA; DataWidth, DataHeight: Integer);', @_LapeImage_SetExternalData);
-    addGlobalFunc('procedure TImage.ResetExternaData(NewWidth, NewHeight: Integer);', @_LapeImage_ResetExternalData);
+    addGlobalFunc('procedure TImage.SetExternalData(Data: PColorBGRA; DataWidth, DataHeight: Integer);', @_LapeImage_SetExternalData);
+    addGlobalFunc('procedure TImage.ResetExternalData(NewWidth, NewHeight: Integer);', @_LapeImage_ResetExternalData);
 
     addGlobalFunc('procedure TImage.Fill(Color: TColor);', @_LapeImage_Fill);
     addGlobalFunc('procedure TImage.FillWithAlpha(Value: Byte);', @_LapeImage_FillWithAlpha);

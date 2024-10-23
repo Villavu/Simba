@@ -9,7 +9,7 @@ begin
   FillMem(testData^, 50*50*SizeOf(TColorBGRA), 255);
 
   img := TImage.Create(100,100);
-  img.SetExternaData(testData, 50, 50);
+  img.SetExternalData(testData, 50, 50);
 
   Assert(img.Pixel[10,10] = Colors.WHITE);
   img.Pixel[10,10] := Colors.RED;
@@ -17,7 +17,7 @@ begin
   Assert(testData[10*50+10]^ = [0,0,255,255]);
 
   // test reseting works
-  img.ResetExternaData(100,100);
+  img.ResetExternalData(100,100);
   img.SetSize(200,200);
   Assert(img.Pixel[10,10] = Colors.BLACK);
 
