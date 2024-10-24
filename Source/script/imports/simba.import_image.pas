@@ -1897,7 +1897,7 @@ begin
     addGlobalFunc('procedure TImage.Pad(Amount: Integer)', @_LapeImage_Pad);
     addGlobalFunc('procedure TImage.Offset(X,Y: Integer)', @_LapeImage_Offset);
 
-    addGlobalFunc('procedure TImage.SplitChannels(var B,G,R: TByteArray); overload', @_LapeImage_SplitChannels);
+    addGlobalFunc('procedure TImage.SplitChannels(var B,G,R: TByteArray)', @_LapeImage_SplitChannels);
     addGlobalFunc('procedure TImage.FromChannels(const B,G,R: TByteArray; W, H: Integer);', @_LapeImage_FromChannels);
 
     addGlobalFunc('function TImage.GetColors: TColorArray; overload', @_LapeImage_GetColors1);

@@ -147,19 +147,21 @@ var
   begin
     Path := CleanAndExpandDirectory(Path);
 
-    if (FindFirst(Path + '*', faAnyFile and faDirectory, SearchRec) = 0) then
-    repeat
-      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
-      begin
-        if (SearchRec.Attr = faDirectory) and Recursive then
-          Get(Path + SearchRec.Name);
+    if (FindFirst(Path + AllFilesMask, faAnyFile and faDirectory, SearchRec) = 0) then
+    try
+      repeat
+        if (SearchRec.Name <> '') and (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+        begin
+          if (SearchRec.Attr and faDirectory <> 0) and Recursive then // is directory
+            Get(Path + SearchRec.Name);
 
-        if (SearchRec.Attr <> faDirectory) then
-          Buffer.Add(Path + SearchRec.Name);
-      end;
-    until (FindNext(SearchRec) <> 0);
-
-    SysUtils.FindClose(SearchRec);
+          if (SearchRec.Attr and faDirectory = 0) then // is file
+            Buffer.Add(Path + SearchRec.Name);
+        end;
+      until (FindNext(SearchRec) <> 0);
+    finally
+      SysUtils.FindClose(SearchRec);
+    end;
   end;
 
 begin
@@ -178,19 +180,21 @@ var
   begin
     Path := CleanAndExpandDirectory(Path);
 
-    if (FindFirst(Path + '*', faDirectory, SearchRec) = 0) then
-    repeat
-      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
-      begin
-        if (SearchRec.Attr = faDirectory) and Recursive then
-          Get(Path + SearchRec.Name);
+    if (FindFirst(Path + AllDirectoryEntriesMask, faDirectory, SearchRec) = 0) then
+    try
+      repeat
+        if (SearchRec.Name <> '') and (SearchRec.Name <> '.') and (SearchRec.Name <> '..') and
+           (SearchRec.Attr and faDirectory <> 0) then // is directory
+        begin
+          if Recursive then
+            Get(Path + SearchRec.Name);
 
-        if (SearchRec.Attr = faDirectory) then
           Buffer.Add(Path + SearchRec.Name);
-      end;
-    until (FindNext(SearchRec) <> 0);
-
-    SysUtils.FindClose(SearchRec);
+        end;
+      until (FindNext(SearchRec) <> 0);
+    finally
+      SysUtils.FindClose(SearchRec);
+    end;
   end;
 
 begin
