@@ -68,6 +68,10 @@ implementation
 uses
   simba.env, simba.fs, simba.script_pluginloader;
 
+// use EIOS mouse butons
+const
+  MouseButtonToInt: array[EMouseButton] of Int32 = (1, 3, 2, 4, 5);
+
 type
   TUpdateDebugImageThread = class(TThread)
   protected
@@ -202,7 +206,7 @@ begin
   begin
     CheckExported('SimbaPluginTarget_MousePressed', MousePressed);
 
-    Result := MousePressed(Target, Integer(Button));
+    Result := MousePressed(Target, MouseButtonToInt[Button]);
   end;
 end;
 
@@ -232,7 +236,7 @@ begin
   begin
     CheckExported('SimbaPluginTarget_MouseUp', MouseUp);
 
-    MouseUp(Target, Integer(Button));
+    MouseUp(Target, MouseButtonToInt[Button]);
   end;
 end;
 
@@ -242,7 +246,7 @@ begin
   begin
     CheckExported('SimbaPluginTarget_MouseDown', MouseDown);
 
-    MouseDown(Target, Integer(Button));
+    MouseDown(Target, MouseButtonToInt[Button]);
   end;
 end;
 
