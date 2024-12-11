@@ -75,7 +75,7 @@ type
     function Difference(Other: TBoxArray): TBoxArray;
     function SymmetricDifference(Other: TBoxArray): TBoxArray;
     function Intersection(Other: TBoxArray): TBoxArray;
-
+    function Unique: TBoxArray;
     function Pack: TBoxArray;
 
     function Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TBoxArray; overload;
@@ -422,6 +422,11 @@ end;
 function TBoxArrayHelper.Intersection(Other: TBoxArray): TBoxArray;
 begin
   Result := specialize TArrayRelationship<TBox>.Intersection(Self, Other);
+end;
+
+function TBoxArrayHelper.Unique: TBoxArray;
+begin
+  Result := specialize TArrayUnique<TBox>.Unique(Self)
 end;
 
 function TBoxArrayHelper.SortFrom(From: TPoint): TBoxArray;

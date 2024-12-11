@@ -274,6 +274,21 @@ begin
   PInteger(Result)^ := PSingleMatrix(Params^[0])^.Height;
 end;
 
+procedure _LapeSingleMatrix_Min(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := PSingleMatrix(Params^[0])^.Min;
+end;
+
+procedure _LapeSingleMatrix_Max(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := PSingleMatrix(Params^[0])^.Max;
+end;
+
+procedure _LapeSingleMatrix_Mean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDouble(Result)^ := PSingleMatrix(Params^[0])^.Mean;
+end;
+
 (*
 TSingleMatrix.SetSize
 ---------------------
@@ -626,6 +641,9 @@ begin
     // single
     addGlobalFunc('function TSingleMatrix.Width: Integer;', @_LapeSingleMatrix_Width);
     addGlobalFunc('function TSingleMatrix.Height: Integer;', @_LapeSingleMatrix_Height);
+    addGlobalFunc('function TSingleMatrix.Min: Single;', @_LapeSingleMatrix_Min);
+    addGlobalFunc('function TSingleMatrix.Max: Single;', @_LapeSingleMatrix_Max);
+    addGlobalFunc('function TSingleMatrix.Mean: Double;', @_LapeSingleMatrix_Mean);
     addGlobalFunc('procedure TSingleMatrix.SetSize(Width, Height: Integer);', @_LapeSingleMatrix_SetSize);
     addGlobalFunc('function TSingleMatrix.Area: Integer;', @_LapeSingleMatrix_Area);
     addGlobalFunc('function TSingleMatrix.GetSize(out Width, Height: Integer): Boolean;', @_LapeSingleMatrix_GetSize);

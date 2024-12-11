@@ -4,14 +4,13 @@
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 
   Very simple containers:
-    - List
+    - Lists
     - Stack
     - ArrayBuffer
     - StringBuilder
 }
 unit simba.containers;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface

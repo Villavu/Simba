@@ -1,7 +1,7 @@
 {$assertions on}
 
 var
-  Map: Map(Int32,String);
+  Map: TMap<Int32, String>;
 begin
   Map.Value[123] := '123';
   Map.Value[456] := '456';

@@ -523,7 +523,7 @@ begin
   Compiler.addGlobalFunc('function _StringMapIndexOf(Arr: Pointer; ElSize: Int32; Hi: Int32; CaseSens: Boolean; Key: String): Int32', @_LapeStringMapIndexOf);
   Compiler.addGlobalFunc('function _StringMapHash(Str: String): UInt64', @_LapeStringMapHash);
 
-  Compiler.InternalMethodMap['StringMap'] := TLapeTree_InternalMethod_StringMap;
+  Compiler.InternalMethodMap['TStringMap'] := TLapeTree_InternalMethod_StringMap;
 end;
 
 end.

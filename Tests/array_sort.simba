@@ -1,5 +1,6 @@
 {$assertions on}
 
+// Test our native overrides
 
 procedure TestInt;
 var
@@ -8,7 +9,17 @@ begin
   a := [-1000, 1000, 0, 0, 1, 2, -1, 3];
   a.Sort();
 
-  Assert(ToStr(a) = '[-1000, -1, 0, 0, 1, 2, 3, 1000]');
+  Assert(a.Equals([-1000, -1, 0, 0, 1, 2, 3, 1000]));
+end;
+
+procedure TestInt64;
+var
+  a: TInt64Array;
+begin
+  a := [Low(Int64), High(Int64), 0, 0, 1, 2, -1, 3];
+  a.Sort();
+
+  Assert(a.Equals([-9223372036854775808, -1, 0, 0, 1, 2, 3, 9223372036854775807]));
 end;
 
 procedure TestSingle;
@@ -45,11 +56,13 @@ var
 begin
   a := ['xyz', 'abc', '1', 'a', 'b', 'c', 'abc1', '0', 'xyz0'];
   a.Sort();
-  Assert(ToStr(a) = '[0, 1, a, abc, abc1, b, c, xyz, xyz0]');
+
+  Assert(a.Equals(['0', '1', 'a', 'abc', 'abc1', 'b', 'c', 'xyz', 'xyz0']));
 end;
 
 begin
   TestInt();
+  TestInt64();
   TestSingle();
   TestDouble();
   TestString();

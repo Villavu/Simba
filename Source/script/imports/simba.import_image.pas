@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.script;
+  simba.base, simba.baseclass, simba.script;
 
 procedure ImportSimbaImage(Script: TSimbaScript);
 
@@ -1664,35 +1664,15 @@ begin
 end;
 
 (*
-TImage.SaveUnfreedImagesInDir
------------------------------
+TImage.LoadFonts
+----------------
 ```
-procedure TImage.SaveUnfreedImagesInDir(Directory: String); static;
-```
-
-On script terminate if any images have not been freed save them to `Directory` for debugging ease.
-
-Example:
-
-```
-  TImage.SaveUnfreedImagesInDir('some/directory/');
-```
-*)
-procedure _LapeImage_SaveUnfreedImagesInDir(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  TSimbaImage.SaveUnfreedImages := PString(Params^[0])^;
-end;
-
-(*
-TImage.LoadFontsInDir
----------------------
-```
-function TImage.LoadFontsInDir(Dir: String): Boolean; static;
+function TImage.LoadFonts(Dir: String): Boolean; static;
 ```
 
 Loads all ".ttf" fonts in the given directory.
 *)
-procedure _LapeImage_LoadFontsInDir(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_LoadFonts(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := TSimbaImage.LoadFontsInDir(PString(Params^[0])^);
 end;
@@ -1712,15 +1692,46 @@ begin
 end;
 
 (*
-TImage.Target
--------------
+TImage.FindColor
+----------------
 ```
-function TImage.Target: TTarget;
+function TImage.FindColor(Color: TColor; Tolerance: Single = 0): TPointArray;
 ```
 
-Returns a target which is targetted to the image.
-Use this to find colors and such on a image.
+Returns all the loaded font names.
 *)
+procedure _LapeImage_FindColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPointArray(Result)^ := PSimbaImage(Params^[0])^.FindColor(PColor(Params^[1])^, PSingle(Params^[2])^);
+end;
+
+(*
+TImage.FindImage
+----------------
+```
+function TImage.FindImage(Image: TImage; Tolerance: Single = 0): TPoint;
+```
+
+Returns all the loaded font names.
+*)
+procedure _LapeImage_FindImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PSimbaImage(Params^[0])^.FindImage(PSimbaImage(Params^[1])^, PSingle(Params^[2])^);
+end;
+
+(*
+TImage.GetLoadedImages
+----------------------
+```
+function GetLoadedImages: TImageArray;
+```
+
+Returns an array of all the loaded images.
+*)
+procedure _LapeImage_GetLoadedImages(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageArray(Result)^ := TSimbaImageArray(GetSimbaObjectsOfClass(TSimbaImage));
+end;
 
 (*
 TImage.CreateFromTarget
@@ -1771,6 +1782,16 @@ procedure TImage.Show(EnsureVisible: Boolean = True);
 ```
 
 Show a image on the debug image.
+*)
+
+(*
+TImage.Target
+-------------
+```
+property TImage.Target: TTarget;
+```
+
+Returns a target which is targetted to the image.
 *)
 
 procedure ImportSimbaImage(Script: TSimbaScript);
@@ -1935,11 +1956,14 @@ begin
     addGlobalFunc('procedure TImage.FromLazBitmap(LazBitmap: TLazBitmap);', @_LapeImage_FromLazBitmap);
 
     addGlobalFunc('function TImage.Fonts: TStringArray; static;', @_LapeImage_Fonts);
-    addGlobalFunc('function TImage.LoadFontsInDir(Dir: String): Boolean; static;', @_LapeImage_LoadFontsInDir);
+    addGlobalFunc('function TImage.LoadFonts(Dir: String): Boolean; static;', @_LapeImage_LoadFonts);
 
-    addGlobalFunc('procedure TImage.SaveUnfreedImagesInDir(Directory: String); static;', @_LapeImage_SaveUnfreedImagesInDir);
+    addGlobalFunc('function TImage.FindColor(Color: TColor; Tolerance: Single = 0): TPointArray;', @_LapeImage_FindColor);
+    addGlobalFunc('function TImage.FindImage(Image: TImage; Tolerance: Single = 0): TPoint;', @_LapeImage_FindImage);
 
     DumpSection := '';
+
+    addGlobalFunc('function GetLoadedImages: TImageArray', @_LapeImage_GetLoadedImages);
   end;
 end;
 

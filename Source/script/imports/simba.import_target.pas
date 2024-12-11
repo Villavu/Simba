@@ -1229,9 +1229,9 @@ begin
       '  Result.SetImage(Self);',
       'end;'
     ]);
-
     DumpSection := '';
   end;
 end;
 
 end.
+

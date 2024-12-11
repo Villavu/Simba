@@ -26,6 +26,7 @@ uses
   simba.script_genericmap,
   simba.script_genericstringmap,
   simba.script_genericheap,
+  simba.script_genericarraybuffer,
 
   // Simba
   simba.import_base, simba.import_colormath,simba.import_matrix, simba.import_windowhandle,
@@ -34,7 +35,7 @@ uses
   simba.import_encoding, simba.import_file, simba.import_process,
   simba.import_target, simba.import_math, simba.import_misc, simba.import_slacktree, simba.import_string,
   simba.import_random, simba.import_debugimage, simba.import_web, simba.import_threading,
-  simba.import_pointbuffer, simba.import_async,
+  simba.import_async,
 
   // Simba classes
   simba.import_image, simba.import_externalcanvas, simba.import_dtm, simba.import_matchtemplate,
@@ -54,6 +55,7 @@ begin
   InitializeMap(Script.Compiler);
   InitializeStringMap(Script.Compiler);
   InitializeHeap(Script.Compiler);
+  InitializeArrayBuffer(Script.Compiler);
 end;
 
 procedure AddSimbaImports(Script: TSimbaScript);
@@ -96,7 +98,6 @@ begin
   ImportMisc(Script);
   ImportThreading(Script);
   ImportASync(Script);
-  ImportPointBuffer(Script);
 
   ImportSimbaImageBox(Script);
   ImportSimbaShapeBox(Script);

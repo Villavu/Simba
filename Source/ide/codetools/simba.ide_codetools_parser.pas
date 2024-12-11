@@ -170,6 +170,17 @@ type
     function GetHeader: String; override;
   end;
 
+  TDeclaration_GenericSpecialize = class(TDeclaration);
+  TDeclaration_GenericParam = class(TDeclaration);
+  TDeclaration_TypeGeneric = class(TDeclaration_Type)
+  protected
+    function GetTyp: TDeclaration;
+    function GetParams: TDeclarationArray;
+  public
+    property Typ: TDeclaration read GetTyp;
+    property Params: TDeclarationArray read GetParams;
+  end;
+
   TDeclaration_TypeRecord = class(TDeclaration_Type)
   protected
     FFields: TDeclarationCache;
@@ -247,7 +258,6 @@ type
     property Method: TDeclaration_Method read GetMethod;
   end;
 
-  TDeclaration_TypeFakeGeneric = class(TDeclaration_Type);
   TDeclaration_TypeNativeMethod = class(TDeclaration_Type);
 
   TDeclaration_TypeRange = class(TDeclaration_Type);
@@ -473,6 +483,11 @@ type
     procedure TypeDeclaration; override;
     procedure TypeName; override;
 
+    // types - generics
+    procedure GenericType; override;
+    procedure GenericSpecialize; override;
+    procedure GenericParam; override;
+
     // types - alias
     procedure TypeAlias; override;
 
@@ -491,8 +506,6 @@ type
 
     // types - native
     procedure NativeType; override;
-
-    procedure FakeGenericType; override;
 
     // types = record
     procedure UnionType; override;
@@ -1008,6 +1021,16 @@ begin
     FHeader := 'type ' + Name + ' = ' + TextNoCommentsSingleLine;
 
   Result := FHeader;
+end;
+
+function TDeclaration_TypeGeneric.GetTyp: TDeclaration;
+begin
+  Result := FItems.GetByClassFirst(TDeclaration_GenericSpecialize);
+end;
+
+function TDeclaration_TypeGeneric.GetParams: TDeclarationArray;
+begin
+  Result := FItems.GetByClass(TDeclaration_GenericParam);
 end;
 
 function TDeclaration_EnumElement.GetName: string;
@@ -1713,6 +1736,27 @@ begin
   inherited;
 end;
 
+procedure TCodeParser.GenericType;
+begin
+  PushStack(TDeclaration_TypeGeneric);
+  inherited;
+  PopStack();
+end;
+
+procedure TCodeParser.GenericSpecialize;
+begin
+  PushStack(TDeclaration_GenericSpecialize);
+  inherited;
+  PopStack();
+end;
+
+procedure TCodeParser.GenericParam;
+begin
+  PushStack(TDeclaration_GenericParam);
+  inherited;
+  PopStack();
+end;
+
 procedure TCodeParser.TypeCopy;
 begin
   PushStack(TDeclaration_TypeCopy);
@@ -1726,7 +1770,7 @@ procedure TCodeParser.PointerType;
 begin
   PushStack(TDeclaration_TypePointer);
   PushStack(TDeclaration_VarType);
-  inherited PointerType();
+  inherited;
   PopStack();
   PopStack();
 end;
@@ -1893,13 +1937,6 @@ end;
 procedure TCodeParser.NativeType;
 begin
   PushStack(TDeclaration_TypeNativeMethod);
-  inherited;
-  PopStack();
-end;
-
-procedure TCodeParser.FakeGenericType;
-begin
-  PushStack(TDeclaration_TypeFakeGeneric);
   inherited;
   PopStack();
 end;

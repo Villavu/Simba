@@ -29,10 +29,10 @@ type
   generic TArrayUnique<_T> = class
   public type
     TArr = array of _T;
-    TCompareFunc = function(const L, R: _T): Boolean is nested;
+    TEqualsFunc = function(const L, R: _T): Boolean is nested;
   public
     class function Unique(Arr: TArr): TArr; static; overload;
-    class function Unique(Arr: TArr; CompareFunc: TCompareFunc): TArr; static; overload;
+    class function Unique(Arr: TArr; EqualsFunc: TEqualsFunc): TArr; static; overload;
   end;
 
   generic TArraySort<_T> = class
@@ -61,46 +61,21 @@ type
   generic TArrayEquals<_T> = class
   public type
     TArr = array of _T;
-  public
-    class function Equals(A, B: TArr): Boolean; static; reintroduce;
-  end;
-
-  generic TArrayEqualsFunc<_T> = class
-  public type
-    TArr = array of _T;
     TEqualFunc = function(const A, B: _T): Boolean is nested;
   public
-    class function Equals(A, B: TArr; EqualFunc: TEqualFunc): Boolean; static; reintroduce;
+    class function Equals(A, B: TArr): Boolean; static; overload;
+    class function Equals(A, B: TArr; EqualFunc: TEqualFunc): Boolean; static; overload;
   end;
 
   generic TArrayIndexOf<_T> = class
   public type
     TArr = array of _T;
-  public
-    class function IndexOf(Item: _T; Arr: TArr): Integer; static;
-  end;
-
-  generic TArrayIndexOfFunc<_T> = class
-  public type
-    TArr = array of _T;
     TEqualFunc = function(const A, B: _T): Boolean is nested;
   public
-    class function IndexOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): Integer; static;
-  end;
-
-  generic TArrayIndicesOf<_T> = class
-  public type
-    TArr = array of _T;
-  public
-    class function IndicesOf(Item: _T; Arr: TArr): TIntegerArray; static;
-  end;
-
-  generic TArrayIndicesOfFunc<_T> = class
-  public type
-    TArr = array of _T;
-    TEqualFunc = function(const A, B: _T): Boolean is nested;
-  public
-    class function IndicesOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): TIntegerArray; static;
+    class function IndexOf(Item: _T; Arr: TArr): Integer; static; overload;
+    class function IndexOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): Integer; static; overload;
+    class function IndicesOf(Item: _T; Arr: TArr): TIntegerArray; static; overload;
+    class function IndicesOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): TIntegerArray; static; overload;
   end;
 
 implementation
@@ -230,7 +205,7 @@ begin
   dict.Free();
 end;
 
-class function TArrayUnique.Unique(Arr: TArr; CompareFunc: TCompareFunc): TArr;
+class function TArrayUnique.Unique(Arr: TArr; EqualsFunc: TEqualsFunc): TArr;
 var
   I, J, NewLen: Integer;
 begin
@@ -242,7 +217,7 @@ begin
     J := 0;
     while (J < NewLen) do
     begin
-      if CompareFunc(Result[I], Result[J]) then
+      if EqualsFunc(Result[I], Result[J]) then
         Break;
       Inc(J);
     end;
@@ -407,33 +382,19 @@ begin
 end;
 
 class function TArrayEquals.Equals(A, B: TArr): Boolean;
-var
-  I: Integer;
 begin
-  if (Length(A) <> Length(B)) then
-    Exit(False);
-  if (Length(A) = 0) and (Length(B) = 0) then
-    Exit(True);
+  if IsManagedType(_T) then
+    SimbaException('Requires EqualsFunc');
 
-  if (not IsManagedType(_T)) then
-    Result := CompareMem(@A[0], @B[0], Length(A) * SizeOf(_T))
-  else
-  begin
-    for I := 0 to High(A) do
-      if (A[I] <> B[I]) then
-        Exit(False);
-    Exit(True);
-  end;
+  Result := (Length(A) = Length(B)) and ((Length(A) = 0) and (Length(B) = 0)) or CompareMem(@A[0], @B[0], Length(A) * SizeOf(_T))
 end;
 
-class function TArrayEqualsFunc.Equals(A, B: TArr; EqualFunc: TEqualFunc): Boolean;
+class function TArrayEquals.Equals(A, B: TArr; EqualFunc: TEqualFunc): Boolean;
 var
   I: Integer;
 begin
   if (Length(A) <> Length(B)) then
     Exit(False);
-  if (Length(A) = 0) and (Length(B) = 0) then
-    Exit(True);
 
   for I := 0 to High(A) do
     if not EqualFunc(A[I], B[I]) then
@@ -446,46 +407,38 @@ class function TArrayIndexOf.IndexOf(Item: _T; Arr: TArr): Integer;
 var
   I: Integer;
 begin
-  Result := -1;
-  if (Length(Arr) = 0) then
-    Exit;
-
-  // can use these for better code
-  if (not IsManagedType(_T)) and ((SizeOf(_T) = 1) or (SizeOf(_T) = 2) or (SizeOf(_T) = 4) or (SizeOf(_T) = 8)) then
-  begin
-    case SizeOf(_T) of
-      1: Result := IndexByte(Arr[0], Length(Arr), PByte(@Item)^);
-      2: Result := IndexWord(Arr[0], Length(Arr), PWord(@Item)^);
-      4: Result := IndexDWord(Arr[0], Length(Arr), PDWord(@Item)^);
-      8: Result := IndexQWord(Arr[0], Length(Arr), PQWord(@Item)^);
-    end;
-    Exit;
-  end;
+  if IsManagedType(_T) then
+    SimbaException('Need EqualsFunc');
 
   for I := 0 to High(Arr) do
-    if (Arr[I] = Item) then
+    if CompareMem(@Arr[I], @Item, SizeOf(_T)) then
       Exit(I);
+
+  Result := -1;
 end;
 
-class function TArrayIndexOfFunc.IndexOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): Integer;
+class function TArrayIndexOf.IndexOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): Integer;
 var
   I: Integer;
 begin
-  Result := -1;
   for I := 0 to High(Arr) do
     if EqualFunc(Arr[I], Item) then
       Exit(I);
+  Result := -1;
 end;
 
-class function TArrayIndicesOf.IndicesOf(Item: _T; Arr: TArr): TIntegerArray;
+class function TArrayIndexOf.IndicesOf(Item: _T; Arr: TArr): TIntegerArray;
 var
   I, Count: Integer;
 begin
+  if IsManagedType(_T) then
+    SimbaException('Requires EqualsFunc');
+
   SetLength(Result, 8);
   Count := 0;
 
   for I := 0 to High(Arr) do
-    if (Arr[I] = Item) then
+    if CompareMem(@Arr[I], @Item, SizeOf(_T)) then
     begin
       if (Count >= Length(Result)) then
         SetLength(Result, Length(Result) * 2);
@@ -496,7 +449,7 @@ begin
   SetLength(Result, Count);
 end;
 
-class function TArrayIndicesOfFunc.IndicesOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): TIntegerArray;
+class function TArrayIndexOf.IndicesOf(Item: _T; Arr: TArr; EqualFunc: TEqualFunc): TIntegerArray;
 var
   I, Count: Integer;
 begin

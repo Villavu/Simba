@@ -1,0 +1,12 @@
+{$assertions on}
+
+// Test our native overrides
+
+var
+  ints: TIntegerArray = [0, -1, 1, 2, 3, Low(Int32),High(Int32)];
+  int64s: TInt64Array = [0, -1, 1, 2, 3, Low(Int64),High(Int64)];
+
+begin
+  Assert(ints.Sum = 4);
+  Assert(int64s.Sum = 4);
+end.

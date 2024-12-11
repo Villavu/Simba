@@ -87,7 +87,7 @@ var
 begin
   Result := '';
   for I := 0 to High(LoadedPlugins) do
-    if (TSimbaPath.PathExtractNameWithoutExt(LoadedPlugins[I].OrginalFileName).EqualsIgnoreCase(TSimbaPath.PathExtractNameWithoutExt(FileName))) then
+    if (TSimbaPath.PathExtractNameWithoutExt(LoadedPlugins[I].OrginalFileName).Equals(TSimbaPath.PathExtractNameWithoutExt(FileName), False)) then
       Exit(LoadedPlugins[I].FileName);
 end;
 

@@ -57,7 +57,6 @@ type
     procedure DrawDataAlpha(TheData: PColorBGRA; DataW, DataH: Integer; P: TPoint; Alpha: Byte);
 
     procedure RaiseOutOfImageException(X, Y: Integer);
-    procedure NotifyUnfreed; override;
 
     function GetPixel(const X, Y: Integer): TColor;
     function GetAlpha(const X, Y: Integer): Byte;
@@ -77,7 +76,6 @@ type
     procedure SetFontBold(Value: Boolean);
     procedure SetFontItalic(Value: Boolean);
   public
-    class var SaveUnfreedImages: ShortString;
     class function LoadFontsInDir(Dir: String): Boolean;
     class function Fonts: TStringArray;
   public
@@ -247,20 +245,21 @@ type
     function Save(FileName: String; OverwriteIfExists: Boolean = False): Boolean;
     function SaveToString: String;
 
-    // Difference
-    function Equals(Other: TObject): Boolean; override;
-    function Equals(Other: TSimbaImage): Boolean; overload;
-
+    // Compare/Difference
+    function Equals(Other: TSimbaImage): Boolean; reintroduce;
     function Compare(Other: TSimbaImage): Single;
-
     function PixelDifference(Other: TSimbaImage): Integer; overload;
     function PixelDifference(Other: TSimbaImage; Tolerance: Single): Integer; overload;
-    function PixelDifferenceTPA(Other: TSimbaImage): TPointArray; overload;                        
+    function PixelDifferenceTPA(Other: TSimbaImage): TPointArray; overload;
     function PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Single): TPointArray; overload;
 
     // Laz bridge
     function ToLazBitmap: TBitmap;
     procedure FromLazBitmap(LazBitmap: TBitmap);
+
+    // Basic finders, use Target.SetTarget(img) for all
+    function FindColor(Color: TColor; Tolerance: Single): TPointArray;
+    function FindImage(Image: TSimbaImage; Tolerance: Single): TPoint;
   end;
 
   PSimbaImage = ^TSimbaImage;
@@ -611,14 +610,6 @@ begin
   Result := SimbaImage_ToString(Self);
 end;
 
-function TSimbaImage.Equals(Other: TObject): Boolean;
-begin
-  if (Other is TSimbaImage) then
-    Result := Equals(TSimbaImage(Other))
-  else
-    Result := inherited Equals(Other);
-end;
-
 // Compare without alpha
 function TSimbaImage.Equals(Other: TSimbaImage): Boolean;
 var
@@ -843,6 +834,22 @@ begin
 
   TempBitmap.FData := nil; // data is now ours
   TempBitmap.Free();
+end;
+
+function TSimbaImage.FindColor(Color: TColor; Tolerance: Single): TPointArray;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+  Result := Target.FindColor(Color, Tolerance, Target.Bounds);
+end;
+
+function TSimbaImage.FindImage(Image: TSimbaImage; Tolerance: Single): TPoint;
+var
+  Target: TSimbaTarget;
+begin
+  Target.SetImage(Self);
+  Result := Target.FindImage(Image, Tolerance, Target.Bounds);
 end;
 
 procedure TSimbaImage.DrawTPA(TPA: TPointArray);
@@ -1885,19 +1892,6 @@ begin
   SimbaException('%d,%d is outside the image bounds (0,0,%d,%d)', [X, Y, FWidth-1, FHeight-1]);
 end;
 
-procedure TSimbaImage.NotifyUnfreed;
-begin
-  inherited NotifyUnfreed();
-
-  if (SaveUnfreedImages <> '') then
-  try
-    Save(IncludeTrailingPathDelimiter(SetDirSeparators(SaveUnfreedImages)) + IntToStr(PtrUInt(Self)) + '.bmp');
-  except
-    on E: Exception do
-      DebugLn(E.ToString);
-  end;
-end;
-
 function TSimbaImage.GetPixel(const X, Y: Integer): TColor;
 begin
   if (X < 0) or (Y < 0) or (X >= FWidth) or (Y >= FHeight) then
@@ -2047,4 +2041,5 @@ begin
 end;
 
 end.
+
 

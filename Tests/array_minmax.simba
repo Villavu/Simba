@@ -1,0 +1,15 @@
+{$assertions on}
+
+// Test our native overrides
+
+var
+  ints: TIntegerArray = [1,2,0,Low(Int32),High(Int32)];
+  int64s: TInt64Array = [1,2,0,Low(Int64),High(Int64)];
+
+begin
+  Assert(ints.Min = Low(Int32));
+  Assert(ints.Max = High(Int32));
+
+  Assert(int64s.Min = Low(Int64));
+  Assert(int64s.Max = High(Int64));
+end.

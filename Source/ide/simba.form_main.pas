@@ -801,8 +801,8 @@ begin
   if SimbaTabsForm.CurrentEditor <> nil then
   begin
     Value := '';
-    if InputQuery('Goto line', 'Goto line:', Value) and Value.IsInteger() then
-      SimbaTabsForm.CurrentEditor.TopLine := StrToInt(Value) - (SimbaTabsForm.CurrentEditor.LinesInWindow div 2);
+    if InputQuery('Goto line', 'Goto line:', Value) and Value.IsNumeric then
+      SimbaTabsForm.CurrentEditor.TopLine := Value.ToInteger - (SimbaTabsForm.CurrentEditor.LinesInWindow div 2);
   end;
 end;
 

@@ -3,7 +3,7 @@
 function MaxValues(Mat: TIntegerMatrix; count: Integer): TPointArray;
 var
   X,Y,I: Integer;
-  Heap: Heap(Single);
+  Heap: THeap<Single>;
   Errored: Boolean;
 begin
   for Y := 0 to Mat.Height - 1 do

@@ -13,11 +13,123 @@ procedure ImportString(Script: TSimbaScript);
 
 implementation
 
+uses
+  lpmessages;
+
 (*
 String
 ======
 String methods
 *)
+
+(*
+String.SetLength
+----------------
+```
+procedure String.SetLength(NewLength: Integer);
+```
+*)
+procedure _LapeString_SetLength(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  SetLength(PString(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+(*
+String.Length
+-------------
+```
+property String.Length: Integer;
+```
+*)
+procedure _LapeString_Length(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := Length(PString(Params^[0])^);
+end;
+
+(*
+String.High
+-----------
+```
+property String.Low: Integer;
+```
+*)
+procedure _LapeString_Low(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := Low(PString(Params^[0])^);
+end;
+
+(*
+String.High
+-----------
+```
+property String.High: Integer;
+```
+*)
+procedure _LapeString_High(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := High(PString(Params^[0])^);
+end;
+
+(*
+String.Pop
+----------
+```
+property String.Pop: Char;
+```
+*)
+procedure _LapeString_Pop(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+
+  function _Pop(var Str: lpString): Char;
+  begin
+    if Length(Str) < 1 then
+      LapeExceptionFmt(lpeIndexOutOfRange, [Length(Str), Low(Str), Length(Str)]);
+    Result := Str[Length(Str)];
+    SetLength(Str, Length(Str) - 1);
+  end;
+
+begin
+  PChar(Result)^ := _Pop(PString(Params^[0])^);
+end;
+
+(*
+String.First
+------------
+```
+property String.First: Char;
+```
+*)
+procedure _LapeString_First(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+
+  function _First(const Str: lpString): Char;
+  begin
+    if Length(Str) < 1 then
+      LapeExceptionFmt(lpeIndexOutOfRange, [Low(Str), Low(Str), Length(Str)]);
+    Result := Str[Low(Str)];
+  end;
+
+begin
+  PChar(Result)^ := _First(PString(Params^[0])^);
+end;
+
+(*
+String.Last
+-----------
+```
+property String.Last: Char;
+```
+*)
+procedure _LapeString_Last(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+
+  function _Last(const Str: lpString): Char;
+  begin
+    if Length(Str) < 1 then
+      LapeExceptionFmt(lpeIndexOutOfRange, [High(Str), Low(Str), Length(Str)]);
+    Result := Str[High(Str)];
+  end;
+
+begin
+  PChar(Result)^ := _Last(PString(Params^[0])^);
+end;
 
 (*
 String.Before
@@ -47,7 +159,7 @@ end;
 String.StartsWith
 -----------------
 ```
-function String.StartsWith(Value: String; CaseSenstive: Boolean = True): Boolean;
+function String.StartsWith(Value: String; CaseSensitive: Boolean = True): Boolean;
 ```
 *)
 procedure _LapeString_StartsWith(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -59,24 +171,12 @@ end;
 String.Equals
 -------------
 ```
-function String.Equals(Other: String): Boolean;
+function String.EqualsIgnoreCase(Other: String; CaseSensitive: Boolean = True): Boolean;
 ```
 *)
 procedure _LapeString_Equals(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PString(Params^[0])^.Equals(PString(Params^[1])^);
-end;
-
-(*
-String.EqualsIgnoreCase
------------------------
-```
-function String.EqualsIgnoreCase(Other: String): Boolean;
-```
-*)
-procedure _LapeString_EqualsIgnoreCase(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PString(Params^[0])^.EqualsIgnoreCase(PString(Params^[1])^);
+  PBoolean(Result)^ := PString(Params^[0])^.Equals(PString(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -119,7 +219,7 @@ end;
 String.EndsWith
 ---------------
 ```
-function String.EndsWith(Value: String; CaseSenstive: Boolean = True): Boolean;
+function String.EndsWith(Value: String; CaseSensitive: Boolean = True): Boolean;
 ```
 *)
 procedure _LapeString_EndsWith(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -131,31 +231,31 @@ end;
 String.IsUpper
 --------------
 ```
-function String.IsUpper(): Boolean;
+property String.IsUpper(): Boolean;
 ```
 *)
 procedure _LapeString_IsUpper(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PString(Params^[0])^.IsUpper();
+  PBoolean(Result)^ := PString(Params^[0])^.IsUpper;
 end;
 
 (*
 String.IsLower
 --------------
 ```
-function String.IsLower(): Boolean;
+property String.IsLower: Boolean;
 ```
 *)
 procedure _LapeString_IsLower(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PString(Params^[0])^.IsLower();
+  PBoolean(Result)^ := PString(Params^[0])^.IsLower;
 end;
 
 (*
 String.ToUpper
 --------------
 ```
-function String.ToUpper(): String;
+function String.ToUpper: String;
 ```
 *)
 procedure _LapeString_ToUpper(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -167,7 +267,7 @@ end;
 String.ToLower
 --------------
 ```
-function String.ToLower(): String;
+function String.ToLower: String;
 ```
 *)
 procedure _LapeString_ToLower(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -185,6 +285,18 @@ function String.Capitalize(): String;
 procedure _LapeString_Capitalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PString(Params^[0])^.Capitalize();
+end;
+
+(*
+String.CapitalizeWords
+----------------------
+```
+function String.CapitalizeWords: String;
+```
+*)
+procedure _LapeString_CapitalizeWords(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PString(Params^[0])^.CapitalizeWords();
 end;
 
 (*
@@ -260,6 +372,18 @@ begin
 end;
 
 (*
+String.PadCenter
+----------------
+```
+function String.PadCenter(Count: Integer; PaddingChar: Char = #32): String;
+```
+*)
+procedure _LapeString_PadCenter(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PString(Params^[0])^.PadCenter(PInteger(Params^[1])^, PChar(Params^[2])^);
+end;
+
+(*
 String.Partition
 ----------------
 ```
@@ -275,26 +399,12 @@ end;
 String.Replace
 --------------
 ```
-function String.Replace(OldValue: String; NewValue: String): String;
+function String.Replace(OldValue: String; NewValue: String; CaseSensitive: Boolean = True): String;
 ```
 *)
 procedure _LapeString_Replace(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := PString(Params^[0])^.Replace(PString(Params^[1])^, PString(Params^[2])^);
-end;
-
-(*
-String.Replace
---------------
-```
-function String.Replace(OldValue: String; NewValue: String; ReplaceFlags: TReplaceFlags): String;
-```
-*)
-procedure _LapeString_ReplaceEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-type
-  PReplaceFlags = ^TReplaceFlags;
-begin
-  PString(Result)^ := PString(Params^[0])^.Replace(PString(Params^[1])^, PString(Params^[2])^, PReplaceFlags(Params^[3])^);
+  PString(Result)^ := PString(Params^[0])^.Replace(PString(Params^[1])^, PString(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 (*
@@ -424,54 +534,6 @@ begin
 end;
 
 (*
-String.CopyRange
-----------------
-```
-function String.CopyRange(StartIndex, EndIndex: Integer): String;
-```
-*)
-procedure _LapeString_CopyRange(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PString(Params^[0])^.CopyRange(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-String.DeleteRange
-------------------
-```
-procedure String.DeleteRange(StartIndex, EndIndex: Integer);
-```
-*)
-procedure _LapeString_DeleteRange(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Params^[0])^.DeleteRange(PInteger(Params^[1])^, PInteger(Params^[2])^);
-end;
-
-(*
-String.Remove
--------------
-```
-function String.Remove(Value: String): Boolean;
-```
-*)
-procedure _LapeString_Remove(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PString(Params^[0])^.Remove(PString(Params^[1])^);
-end;
-
-(*
-String.RemoveAll
-----------------
-```
-function String.RemoveAll(Value: String): Integer;
-```
-*)
-procedure _LapeString_RemoveAll(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PString(Params^[0])^.RemoveAll(PString(Params^[1])^);
-end;
-
-(*
 String.IndexOf
 --------------
 ```
@@ -568,66 +630,6 @@ begin
 end;
 
 (*
-String.NumberChars
-------------------
-```
-function String.NumberChars: String; static;
-```
-*)
-procedure _LapeString_NumberChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := String.NumberChars;
-end;
-
-(*
-String.LowerChars
------------------
-```
-function String.LowerChars: String; static;
-```
-*)
-procedure _LapeString_LowerChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := String.LowerChars;
-end;
-
-(*
-String.UpperChars
------------------
-```
-function String.UpperChars: String; static;
-```
-*)
-procedure _LapeString_UpperChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := String.UpperChars;
-end;
-
-(*
-String.AlphaChars
------------------
-```
-function String.AlphaChars: String; static;
-```
-*)
-procedure _LapeString_AlphaChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := String.AlphaChars;
-end;
-
-(*
-String.AlphaNumChars
---------------------
-```
-function String.AlphaNumChars: String; static;
-```
-*)
-procedure _LapeString_AlphaNumChars(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := String.AlphaNumChars;
-end;
-
-(*
 String.Extract
 --------------
 ```
@@ -666,39 +668,123 @@ begin
 end;
 
 (*
+String.IsAlpha
+--------------
+```
+property String.IsAlpha: Boolean;
+```
+*)
+procedure _LapeString_IsAlpha(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PString(Params^[0])^.IsAlpha;
+end;
+
+(*
 String.IsAlphaNum
 -----------------
 ```
-function String.IsAlphaNum(): Boolean;
+property String.IsAlphaNum: Boolean;
 ```
 *)
 procedure _LapeString_IsAlphaNum(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PString(Params^[0])^.IsAlphaNum();
+  PBoolean(Result)^ := PString(Params^[0])^.IsAlphaNum;
+end;
+
+(*
+String.IsNumeric
+----------------
+```
+property String.IsNumeric: Boolean;
+```
+*)
+procedure _LapeString_IsNumeric(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PString(Params^[0])^.IsNumeric;
 end;
 
 (*
 String.IsInteger
 ----------------
 ```
-function String.IsInteger(): Boolean;
+property String.IsInteger: Boolean;
 ```
 *)
 procedure _LapeString_IsInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PString(Params^[0])^.IsInteger();
+  PBoolean(Result)^ := PString(Params^[0])^.IsInteger;
 end;
 
 (*
 String.IsFloat
 --------------
 ```
-function String.IsFloat(): Boolean;
+property String.IsFloat: Boolean;
 ```
 *)
 procedure _LapeString_IsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PString(Params^[0])^.IsFloat();
+  PBoolean(Result)^ := PString(Params^[0])^.IsFloat;
+end;
+
+(*
+String.Insert
+-------------
+```
+procedure String.Insert(Value: String; Index: Integer);
+```
+*)
+procedure _LapeString_Insert(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Insert(PString(Params^[1])^, PString(Params^[0])^, PInteger(Params^[2])^);
+end;
+
+(*
+String.DeleteIndex
+------------------
+```
+function String.DeleteIndex(Index: Integer): Char;
+```
+*)
+procedure _LapeString_DeleteIndex(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Delete(PString(Params^[0])^, PInteger(Params^[1])^, 1);
+end;
+
+(*
+String.DeleteRange
+------------------
+```
+procedure String.DeleteRange(StartIndex, EndIndex: Integer);
+```
+*)
+procedure _LapeString_DeleteRange(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Delete(PString(Params^[0])^, PInteger(Params^[1])^, (PInteger(Params^[2])^ - PInteger(Params^[1])^) + 1);
+end;
+
+(*
+String.Copy
+-----------
+```
+function String.Copy: String;
+```
+*)
+procedure _LapeString_Copy(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := Copy(PString(Params^[0])^, 1, Length(PString(Params^[0])^));
+end;
+
+(*
+String.CopyRange
+----------------
+```
+function String.CopyRange(StartIndex, EndIndex: Integer): String;
+```
+*)
+procedure _LapeString_CopyRange(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := Copy(PString(Params^[0])^, PInteger(Params^[1])^, (PInteger(Params^[2])^ - PInteger(Params^[1])^) + 1);
 end;
 
 (*
@@ -710,26 +796,14 @@ function String.Count(Value: String): Integer;
 *)
 procedure _LapeString_Count(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PString(Params^[0])^.Count(PString(Params^[1])^);
-end;
-
-(*
-String.CountAll
----------------
-```
-function String.CountAll(Values: TStringArray): TIntegerArray;
-```
-*)
-procedure _LapeString_CountAll(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PIntegerArray(Result)^ := PString(Params^[0])^.CountAll(PStringArray(Params^[1])^);
+  PInteger(Result)^ := PString(Params^[0])^.Count(PString(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
 String.Contains
 ---------------
 ```
-function String.Contains(Value: String; CaseSenstive: Boolean = True): Boolean;
+function String.Contains(Value: String; CaseSensitive: Boolean): Boolean;
 ```
 *)
 procedure _LapeString_Contains(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -741,36 +815,12 @@ end;
 String.ContainsAny
 ------------------
 ```
-function String.ContainsAny(Values: TStringArray; CaseSenstive: Boolean = True): Boolean;
+function String.ContainsAny(Values: TStringArray; CaseSensitive: Boolean = True): Boolean;
 ```
 *)
 procedure _LapeString_ContainsAny(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PString(Params^[0])^.ContainsAny(PStringArray(Params^[1])^, PBoolean(Params^[2])^);
-end;
-
-(*
-String.IndexOfAny
------------------
-```
-function String.IndexOfAny(Values: TStringArray): Integer;
-```
-*)
-procedure _LapeString_IndexOfAny(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PString(Params^[0])^.IndexOfAny(PStringArray(Params^[1])^);
-end;
-
-(*
-String.IndexOfAny
------------------
-```
-function String.IndexOfAny(Values: TStringArray; Offset: Integer): Integer;
-```
-*)
-procedure _LapeString_IndexOfAnyEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PString(Params^[0])^.IndexOfAny(PStringArray(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -969,75 +1019,71 @@ begin
   PBoolean(Result)^ := PString(Params^[0])^ in PStringArray(Params^[1])^;
 end;
 
-
-// --------------------------
-// char methods
+(*
+Char.IsAlpha
+------------
+```
+property Char.IsAlpha: Boolean;
+```
+*)
+procedure _LapeChar_IsAlpha(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PChar(Params^[0])^.IsAlpha;
+end;
 
 (*
 Char.IsAlphaNum
 ---------------
 ```
-function Char.IsAlphaNum(): Boolean;
+property Char.IsAlphaNum: Boolean;
 ```
 *)
 procedure _LapeChar_IsAlphaNum(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PChar(Params^[0])^.IsAlphaNum();
+  PBoolean(Result)^ := PChar(Params^[0])^.IsAlphaNum;
 end;
 
 (*
-Char.IsInteger
+Char.IsNumeric
 --------------
 ```
-function Char.IsInteger(): Boolean;
+property Char.IsNumeric: Boolean;
 ```
 *)
-procedure _LapeChar_IsInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeChar_IsNumeric(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PChar(Params^[0])^.IsInteger();
-end;
-
-(*
-Char.IsFloat
-------------
-```
-function Char.IsFloat(): Boolean;
-```
-*)
-procedure _LapeChar_IsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PChar(Params^[0])^.IsFloat();
+  PBoolean(Result)^ := PChar(Params^[0])^.IsNumeric;
 end;
 
 (*
 Char.IsUpper
 ------------
 ```
-function Char.IsUpper(): Boolean;
+property Char.IsUpper: Boolean;
 ```
 *)
 procedure _LapeChar_IsUpper(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PChar(Params^[0])^.IsUpper();
+  PBoolean(Result)^ := PChar(Params^[0])^.IsUpper;
 end;
 
 (*
 Char.IsLower
 ------------
 ```
-function Char.IsLower(): Boolean;
+property Char.IsLower: Boolean;
 ```
 *)
 procedure _LapeChar_IsLower(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PChar(Params^[0])^.IsLower();
+  PBoolean(Result)^ := PChar(Params^[0])^.IsLower;
 end;
 
 (*
 Char.ToUpper
 ------------
 ```
-function Char.ToUpper(): String;
+function Char.ToUpper: String;
 ```
 *)
 procedure _LapeChar_ToUpper(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1049,24 +1095,12 @@ end;
 Char.ToLower
 ------------
 ```
-function Char.ToLower(): String;
+function Char.ToLower: String;
 ```
 *)
 procedure _LapeChar_ToLower(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PChar(Params^[0])^.ToLower();
-end;
-
-(*
-Char.Capitalize
----------------
-```
-function Char.Capitalize(): String;
-```
-*)
-procedure _LapeChar_Capitalize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := PChar(Params^[0])^.Capitalize();
 end;
 
 (*
@@ -1117,9 +1151,16 @@ begin
   PBoolean(Result)^ := PChar(Params^[0])^ in PStringArray(Params^[1])^;
 end;
 
-procedure _LapeStringArray_ToString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+(*
+TStringArray.Join
+-----------------
+```
+function TStringArray.Join(Glue: String): String;
+```
+*)
+procedure _LapeStringArray_Join(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := PStringArray(Params^[0])^.ToString(PString(Params^[1])^);
+  PString(Result)^ := PStringArray(Params^[0])^.Join(PString(Params^[1])^);
 end;
 
 procedure ImportString(Script: TSimbaScript);
@@ -1149,25 +1190,38 @@ begin
     );
     addGlobalType('array of TRegExprMatch', 'TRegExprMatchArray');
 
-    addGlobalFunc('function String.NumberChars: String; static;', @_LapeString_NumberChars);
-    addGlobalFunc('function String.AlphaChars: String; static;', @_LapeString_AlphaChars);
-    addGlobalFunc('function String.LowerChars: String; static;', @_LapeString_LowerChars);
-    addGlobalFunc('function String.UpperChars: String; static;', @_LapeString_UpperChars);
-    addGlobalFunc('function String.AlphaNumChars: String; static;', @_LapeString_AlphaNumChars);
+    addGlobalFunc('procedure String.SetLength(NewLen: Int32);', @_LapeString_SetLength);
+    addGlobalFunc('property String.Length: Int32;', @_LapeString_Length);
+    addGlobalFunc('property String.Low: Int32;', @_LapeString_Low);
+    addGlobalFunc('property String.High: Int32;', @_LapeString_High);
+    addGlobalFunc('property String.Pop: Char;', @_LapeString_Pop);
+    addGlobalFunc('property String.First: Char;', @_LapeString_First);
+    addGlobalFunc('property String.Last: Char;', @_LapeString_Last);
 
-    addGlobalFunc('function String.Equals(Other: String): Boolean;', @_LapeString_Equals);
-    addGlobalFunc('function String.EqualsIgnoreCase(Other: String): Boolean;', @_LapeString_EqualsIgnoreCase);
+    addGlobalFunc('property String.IsUpper: Boolean;', @_LapeString_IsUpper);
+    addGlobalFunc('property String.IsLower: Boolean;', @_LapeString_IsLower);
+    addGlobalFunc('property String.IsAlpha: Boolean;', @_LapeString_IsAlpha);
+    addGlobalFunc('property String.IsAlphaNum: Boolean;', @_LapeString_IsAlphaNum);
+    addGlobalFunc('property String.IsNumeric: Boolean;', @_LapeString_IsNumeric);
+    addGlobalFunc('property String.IsInteger: Boolean;', @_LapeString_IsInteger);
+    addGlobalFunc('property String.IsFloat: Boolean;', @_LapeString_IsFloat);
+
+    addGlobalFunc('procedure String.Insert(Value: String; Index: Int32);', @_LapeString_Insert);
+    addGlobalFunc('procedure String.DeleteIndex(Index: Integer);', @_LapeString_DeleteIndex);
+    addGlobalFunc('procedure String.DeleteRange(StartIndex, EndIndex: Int32);', @_LapeString_DeleteRange);
+    addGlobalFunc('function String.Copy: String', @_LapeString_Copy);
+    addGlobalFunc('function String.CopyRange(StartIndex, EndIndex: Int32): String', @_LapeString_CopyRange);
+
+    addGlobalFunc('function String.Equals(Other: String; CaseSensitive: Boolean = True): Boolean;', @_LapeString_Equals);
     addGlobalFunc('function String.Compare(Other: String): Integer;', @_LapeString_Compare);
     addGlobalFunc('function String.Similarity(Other: String): Double;', @_LapeString_Similarity);
     addGlobalFunc('function String.Hash(Seed: UInt32 = 0): UInt32;', @_LapeString_Hash);
 
-    addGlobalFunc('function String.IsUpper(): Boolean;', @_LapeString_IsUpper);
-    addGlobalFunc('function String.IsLower(): Boolean;', @_LapeString_IsLower);
-
-    addGlobalFunc('function String.ToUpper(): String;', @_LapeString_ToUpper);
-    addGlobalFunc('function String.ToLower(): String;', @_LapeString_ToLower);
-    addGlobalFunc('function String.Capitalize(): String;', @_LapeString_Capitalize);
-    addGlobalFunc('function String.SwapCase(): String;', @_LapeString_SwapCase);
+    addGlobalFunc('function String.ToUpper: String;', @_LapeString_ToUpper);
+    addGlobalFunc('function String.ToLower: String;', @_LapeString_ToLower);
+    addGlobalFunc('function String.Capitalize: String;', @_LapeString_Capitalize);
+    addGlobalFunc('function String.CapitalizeWords: String;', @_LapeString_CapitalizeWords);
+    addGlobalFunc('function String.SwapCase: String;', @_LapeString_SwapCase);
 
     addGlobalFunc('function String.Before(Value: String): String;', @_LapeString_Before);
     addGlobalFunc('function String.After(Value: String): String;', @_LapeString_After);
@@ -1180,24 +1234,16 @@ begin
     addGlobalFunc('function String.RegExprFind(Pattern: String): TRegExprMatch;', @_LapeString_RegExprFind);
     addGlobalFunc('function String.RegExprExists(Pattern: String): Boolean;', @_LapeString_RegExprExists);
 
-    addGlobalFunc('function String.IndexOfAny(Values: TStringArray): Integer; overload;', @_LapeString_IndexOfAny);
-    addGlobalFunc('function String.IndexOfAny(Values: TStringArray; Offset: Integer): Integer; overload;', @_LapeString_IndexOfAnyEx);
-
     addGlobalFunc('function String.IndexOf(Value: String): Integer; overload;', @_LapeString_IndexOf);
     addGlobalFunc('function String.IndexOf(Value: String; Offset: Integer): Integer; overload;', @_LapeString_IndexOfEx);
     addGlobalFunc('function String.LastIndexOf(Value: String): Integer; overload;', @_LapeString_LastIndexOf);
     addGlobalFunc('function String.LastIndexOf(Value: String; Offset: Integer): Integer; overload;', @_LapeString_LastIndexOfEx);
-
     addGlobalFunc('function String.IndicesOf(Value: String): TIntegerArray; overload;', @_LapeString_IndicesOf);
     addGlobalFunc('function String.IndicesOf(Value: String; Offset: Integer): TIntegerArray; overload;', @_LapeString_IndicesOfEx);
 
     addGlobalFunc('function String.Extract(Chars: array of Char): String;', @_LapeString_Extract);
     addGlobalFunc('function String.ExtractInteger(Default: Int64 = -1): Int64;', @_LapeString_ExtractInteger);
     addGlobalFunc('function String.ExtractFloat(Default: Double = -1): Double;', @_LapeString_ExtractFloat);
-
-    addGlobalFunc('function String.IsAlphaNum(): Boolean;', @_LapeString_IsAlphaNum);
-    addGlobalFunc('function String.IsInteger(): Boolean;', @_LapeString_IsInteger);
-    addGlobalFunc('function String.IsFloat(): Boolean;', @_LapeString_IsFloat);
 
     addGlobalFunc('function String.Trim: String; overload;', @_LapeString_Trim);
     addGlobalFunc('function String.Trim(TrimChars: array of Char): String; overload;', @_LapeString_TrimEx);
@@ -1208,31 +1254,23 @@ begin
     addGlobalFunc('function String.TrimRight: String; overload;', @_LapeString_TrimRight);
     addGlobalFunc('function String.TrimRight(TrimChars: array of Char): String; overload;', @_LapeString_TrimRightEx);
 
-    addGlobalFunc('function String.StartsWith(Value: String; CaseSenstive: Boolean = True): Boolean;', @_LapeString_StartsWith);
-    addGlobalFunc('function String.EndsWith(Value: String; CaseSenstive: Boolean = True): Boolean;', @_LapeString_EndsWith);
+    addGlobalFunc('function String.StartsWith(Value: String; CaseSensitive: Boolean = True): Boolean;', @_LapeString_StartsWith);
+    addGlobalFunc('function String.EndsWith(Value: String; CaseSensitive: Boolean = True): Boolean;', @_LapeString_EndsWith);
 
     addGlobalFunc('function String.Partition(Value: String): TStringArray;', @_LapeString_Partition);
-    addGlobalFunc('function String.Replace(OldValue: String; NewValue: String): String; overload;', @_LapeString_Replace);
-    addGlobalFunc('function String.Replace(OldValue: String; NewValue: String; ReplaceFlags: TReplaceFlags): String; overload;', @_LapeString_ReplaceEx);
+    addGlobalFunc('function String.Replace(OldValue, NewValue: String; CaseSensitive: Boolean = True): String;', @_LapeString_Replace);
 
-    addGlobalFunc('function String.Contains(Value: String; CaseSenstive: Boolean = True): Boolean;', @_LapeString_Contains);
-    addGlobalFunc('function String.ContainsAny(Values: TStringArray; CaseSenstive: Boolean = True): Boolean;', @_LapeString_ContainsAny);
-
-    addGlobalFunc('function String.Count(Value: String): Integer;', @_LapeString_Count);
-    addGlobalFunc('function String.CountAll(Values: TStringArray): TIntegerArray;', @_LapeString_CountAll);
+    addGlobalFunc('function String.Count(Value: String; CaseSensitive: Boolean = True): Integer;', @_LapeString_Count);
+    addGlobalFunc('function String.Contains(Value: String; CaseSensitive: Boolean = True): Boolean; overload', @_LapeString_Contains);
+    addGlobalFunc('function String.ContainsAny(Values: TStringArray; CaseSensitive: Boolean = True): Boolean;', @_LapeString_ContainsAny);
 
     addGlobalFunc('function String.Join(Values: TStringArray): String;', @_LapeString_Join);
     addGlobalFunc('function String.Split(Seperator: String; ExcludeEmpty: Boolean = True): TStringArray;', @_LapeString_Split);
     addGlobalFunc('function String.SplitLines: TStringArray;', @_LapeString_SplitLines);
 
-    addGlobalFunc('function String.CopyRange(StartIndex, EndIndex: Integer): String;', @_LapeString_CopyRange);
-    addGlobalFunc('procedure String.DeleteRange(StartIndex, EndIndex: Integer);', @_LapeString_DeleteRange);
-
-    addGlobalFunc('function String.Remove(Value: String): Boolean;', @_LapeString_Remove);
-    addGlobalFunc('function String.RemoveAll(Value: String): Integer;', @_LapeString_RemoveAll);
-
     addGlobalFunc('function String.PadLeft(Count: Integer; PaddingChar: Char = #32): String', @_LapeString_PadLeft);
     addGlobalFunc('function String.PadRight(Count: Integer; PaddingChar: Char = #32): String', @_LapeString_PadRight);
+    addGlobalFunc('function String.PadCenter(ACount: Integer; PaddingChar: Char = #32): String', @_LapeString_PadCenter);
 
     addGlobalFunc('function String.Format(Args: TVariantArray): String;', @_LapeString_Format);
 
@@ -1249,20 +1287,17 @@ begin
     addGlobalFunc('function String.ToDouble(Default: Double): Double; overload;', @_LapeString_ToDoubleDef);
     addGlobalFunc('function String.ToDateTime(Fmt: String; Def: TDateTime): TDateTime;', @_LapeString_ToDateTime);
 
-    addGlobalFunc('function TStringArray.ToString(Sep: String): String;', @_LapeStringArray_ToString);
+    addGlobalFunc('function TStringArray.Join(Glue: String): String;', @_LapeStringArray_Join);
 
     addGlobalFunc('operator *(Left: String; Right: Integer): String', @_LapeString_MUL_Integer);
     addGlobalFunc('operator in(Left: String; Right: String): Boolean', @_LapeString_IN_String);
     addGlobalFunc('operator in(Left: String; Right: TStringArray): Boolean', @_LapeString_IN_StringArray);
 
-    addGlobalFunc('function Char.IsUpper(): Boolean;',    @_LapeChar_IsUpper);
-    addGlobalFunc('function Char.IsLower(): Boolean;',    @_LapeChar_IsLower);
-    addGlobalFunc('function Char.ToUpper(): String;',     @_LapeChar_ToUpper);
-    addGlobalFunc('function Char.ToLower(): String;',     @_LapeChar_ToLower);
-    addGlobalFunc('function Char.Capitalize(): String;',  @_LapeChar_Capitalize);
-    addGlobalFunc('function Char.IsAlphaNum(): Boolean;', @_LapeChar_IsAlphaNum);
-    addGlobalFunc('function Char.IsInteger(): Boolean;',  @_LapeChar_IsInteger);
-    addGlobalFunc('function Char.IsFloat(): Boolean;',    @_LapeChar_IsFloat);
+    addGlobalFunc('property Char.IsUpper: Boolean;', @_LapeChar_IsUpper);
+    addGlobalFunc('property Char.IsLower: Boolean;', @_LapeChar_IsLower);
+    addGlobalFunc('property Char.IsAlpha: Boolean;', @_LapeChar_IsAlpha);
+    addGlobalFunc('property Char.IsAlphaNum: Boolean;', @_LapeChar_IsAlphaNum);
+    addGlobalFunc('property Char.IsNumeric: Boolean;', @_LapeChar_IsNumeric);
     addGlobalFunc('function Char.Join(Values: TStringArray): String;', @_LapeChar_Join);
 
     addGlobalFunc('operator *(Left: Char; Right: Integer): String', @_LapeChar_MUL_Integer);

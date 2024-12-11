@@ -14,6 +14,7 @@ uses
   simba.base, simba.containers, simba.threading;
 
 type
+
   TSimbaBaseClass = class
   protected
     FName: String;
@@ -32,6 +33,8 @@ type
     property Name: String read GetName write SetName;
     property FreeOnTerminate: Boolean read FFreeOnTerminate write FFreeOnTerminate;
   end;
+  TSimbaBaseClassType = class of TSimbaBaseClass;
+  TSimbaBaseClassArray = array of TSimbaBaseClass;
 
   TSimbaBaseThread = class(TThread)
   protected
@@ -48,6 +51,8 @@ type
   procedure PrintUnfreedObjects;
   procedure PrintUnfinishedThreads;
   procedure PrintUnfreedThreads;
+
+  function GetSimbaObjectsOfClass(ClassType: TSimbaBaseClassType): TSimbaBaseClassArray;
 
 implementation
 
@@ -131,6 +136,22 @@ begin
   end;
 end;
 
+function GetSimbaObjectsOfClass(ClassType: TSimbaBaseClassType): TSimbaBaseClassArray;
+var
+  I: Integer;
+begin
+  Result := [];
+
+  TrackedObjects.Lock();
+  try
+    for I := 0 to TrackedObjects.Count - 1 do
+      if (TrackedObjects[I] is ClassType) then
+        Result := Result + [TrackedObjects[I]];
+  finally
+    TrackedObjects.UnLock();
+  end;
+end;
+
 procedure TSimbaBaseClass.NotifyUnfreed;
 begin
   DebugLn([EDebugLn.YELLOW], '  ' + ClassName + ' (' + HexStr(Self) + ')' + IfThen(Name <> '', ' "' + Name + '"', ''));
@@ -197,4 +218,3 @@ finalization
     TrackedObjects.First.Free();
 
 end.
-

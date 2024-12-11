@@ -1,71 +1,128 @@
 {$assertions on}
-var
-  TestString: String;
 
+procedure TestStringIs;
 begin
-  TestString := 'abcHelloxyz';
-  Assert(ToString(TestString.Partition('Hello')) = '[abc, Hello, xyz]');
+  Assert('123'.IsNumeric);
+  Assert(not 'abc123'.IsNumeric);
 
-  TestString := 'HelloRemoveWorld';
-  Assert(TestString.Remove('Remove') = True);
-  Assert(TestString = 'HelloWorld');
+  Assert('123'.IsInteger);
+  Assert(not 'abc123'.IsNumeric);
 
-  TestString := 'HelloRemoveRemoveWorld';
-  Assert(TestString.RemoveAll('Remove') = 2);
-  Assert(TestString = 'HelloWorld');
+  Assert('123'.IsFloat);
+  Assert('123.456'.IsFloat);
+  Assert(not 'abc123'.IsFloat);
 
-  TestString := '1.23';
-  Assert(TestString.IsInteger = False);
-  Assert(TestString.IsFloat   = True);
-  Assert(ToString(TestString.ExtractFloat) = '1.23');
+  Assert('123'.IsAlphaNum);
+  Assert('abc123'.IsAlphaNum);
+  Assert(not '-123'.IsAlphaNum);
+  Assert(not '#abc'.IsAlphaNum);
 
-  TestString := '-9000';
-  Assert(TestString.IsFloat   = True);
-  Assert(TestString.IsInteger = True);
-  Assert(ToString(TestString.ExtractInteger) = '-9000');
-  Assert(ToString(TestString.ExtractFloat) = '-9000');
+  Assert('abc'.IsAlpha);
+  Assert(not 'abc123'.IsAlpha);
 
-  TestString := 'Hello World 1,2,3';
-  Assert(ToString(TestString.Split(' ')) = '[Hello, World, 1,2,3]');
+  Assert('abc'.IsLower);
+  Assert(not 'Abc'.IsLower);
 
-  TestString := '|1||2|3|';
-  Assert(ToString(TestString.Split('|')) = '[1, 2, 3]');
+  Assert('ABC'.IsUpper);
+  Assert(not 'Abc'.IsUpper);
+end;
 
-  TestString := 'WorldHelloWorldHelloWorldWorld';
-  Assert(ToString(TestString.Split('World')) = '[Hello, Hello]');
+procedure TestStringCopyDeleteInsert;
+var
+  Str: String;
+begin
+  Str := 'HoiHola';
+  Str.Insert('Hello', 4);
+  Assert(Str = 'HoiHelloHola');
 
-  TestString := '@ @@@@@@';
-  Assert(ToString(TestString.Split('@@@@@')) = '[@ , @]');
+  Str := 'xyz';
+  Str.DeleteIndex(2);
+  Assert(Str = 'xz');
 
-  TestString := 'abcdef';
-  Assert(ToString(TestString.Split('nothin')) = '[abcdef]');
+  Str := 'abc123xyz';
+  Str.DeleteRange(4,6);
+  Assert(Str = 'abcxyz');
 
-  TestString := 'abcdef';
-  Assert(ToString(TestString.Split('f')) = '[abcde]');
+  Str := 'abc123xyz';
+  Assert(Str.Copy() = 'abc123xyz');
+  Assert(Str.CopyRange(4,6) = '123');
+end;
 
-  TestString := 'Hello'+#13#10+'World'+#13#10+'1'+#10+'2'+#13#10+#13#10;
-  Assert(ToString(TestString.SplitLines()) = '[Hello, World, 1, 2, ]');
+procedure TestStringExtract;
+var
+  Str: String;
+begin
+  Str := '1.23';
+  Assert(ToString(Str.ExtractInteger()) = '123');
+  Assert(ToString(Str.ExtractFloat()) = '1.23');
+  Str := '123abcxyz';
+  Assert(Str.Extract(['a','b','c']) = 'abc');
+  Str := '123';
+  Assert(Str.Extract(['a','b','c']) = '');
+  Str := 'hello123world.456';
+  Assert(ToString(Str.ExtractFloat) = '123.456');
+  Str := '-hello123world.456';
+  Assert(ToString(Str.ExtractFloat) = '-123.456');
+end;
 
-  TestString := 'abc abc xyz xyz';
-  Assert(TestString.Extract(['x', 'y', 'z']) = 'xyzxyz');
+procedure TestStringToXXX;
+var
+  Str: String;
+begin
+  Str := '123';
+  Assert(Str.ToInteger() = 123);
+  Assert(Str.ToInt64() = 123);
+  Str := '1.23';
+  Assert(Str.ToSingle() = Single(1.23));
+  Assert(Str.ToDouble() = Double(1.23));
 
-  TestString := 'hello123world456';
-  Assert(ToString(TestString.ExtractInteger) = '123456');
-  TestString := '-hello123world456';
-  Assert(ToString(TestString.ExtractInteger) = '-123456');
+  Str := 'True';
+  Assert(Str.ToBoolean = True);
+  Str := 'False';
+  Assert(Str.ToBoolean = False);
+  Str := '1';
+  Assert(Str.ToBoolean = True);
+  Str := '0';
+  Assert(Str.ToBoolean = False);
 
-  TestString := 'hello123world.456';
-  Assert(ToString(TestString.ExtractFloat) = '123.456');
-  TestString := '-hello123world.456';
-  Assert(ToString(TestString.ExtractFloat) = '-123.456');
+  Str := 'abc XYZ';
+  Assert(Str.ToLower = 'abc xyz');
+  Assert(Str.ToUpper = 'ABC XYZ');
+  Assert(Str.SwapCase = 'ABC xyz');
+  Assert(Str.Capitalize = 'Abc xyz');
+  Assert(Str.CapitalizeWords = 'Abc Xyz');
 
-  Assert(String.UpperChars.IsUpper() = True);
-  Assert(String.UpperChars.IsLower() = False);
+  Str := 'abc';
+  Assert(Str.ToBytes.Equals([97,98,99]));
+end;
 
-  Assert(String.LowerChars.IsLower() = True);
-  Assert(String.LowerChars.IsUpper() = False);
+procedure TestStringSplitJoin;
+var
+  Str: String;
+begin
+  Str := 'beforemiddleafter';
+  Assert(Str.Partition('middle').Equals(['before', 'middle', 'after']));
 
-  Assert(String.AlphaChars.IsAlphaNum() = True);
+  Str := 'Hello World 1,2,3';
+  Assert(ToString(Str.Split(' ')) = '[Hello, World, 1,2,3]');
+
+  Str := '|1||2|3|';
+  Assert(ToString(Str.Split('|')) = '[1, 2, 3]');
+
+  Str := 'WorldHelloWorldHelloWorldWorld';
+  Assert(ToString(Str.Split('World')) = '[Hello, Hello]');
+
+  Str := '@ @@@@@@';
+  Assert(ToString(Str.Split('@@@@@')) = '[@ , @]');
+
+  Str := 'abcdef';
+  Assert(ToString(Str.Split('nothin')) = '[abcdef]');
+
+  Str := 'abcdef';
+  Assert(ToString(Str.Split('f')) = '[abcde]');
+
+  Str := 'Hello'+#13#10+'World'+#13#10+'1'+#10+'2'+#13#10+#13#10;
+  Assert(ToString(Str.SplitLines()) = '[Hello, World, 1, 2, ]');
 
   Assert(#32.Join(['a']) = 'a');
   Assert(#32.Join(['a','b']) = 'a b');
@@ -78,4 +135,33 @@ begin
   Assert(String(' ').Join(['aaa', 'bb', 'c']) = 'aaa bb c');
   Assert(String(' ').Join(['aaa', '', 'bb', '', 'c']) = 'aaa  bb  c');
   Assert(String(' ').Join(['aaa', '', 'bb', '', 'c', '']) = 'aaa  bb  c ');
+end;
+
+var
+  Str: String;
+begin
+  Str := 'abc1';
+  Assert(Str.Pop = '1');
+  Assert(Str.First = 'a');
+  Assert(Str.Last = 'c');
+
+  Assert(Str.Low = 1);
+  Assert(Str.High = 3);
+  Assert(Str.Length = 3);
+
+  Str.SetLength(10);
+  Assert(Str.Length = 10);
+  Str.SetLength(0);
+  Assert(Str.Length = 0);
+
+  Assert('abcxyz'.Equals('abcxyz'));
+  Assert(not 'abcxyz'.Equals('Abcxyz'));
+  Assert('abcxyz'.Equals('Abcxyz', False));
+  Assert(not 'abcxyz123'.Equals('abcxyz', False));
+
+  TestStringIs();
+  TestStringCopyDeleteInsert();
+  TestStringExtract();
+  TestStringToXXX();
+  TestStringSplitJoin();
 end;

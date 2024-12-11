@@ -48,6 +48,18 @@ const
     'procedure <HeapName>.Clear; external;'                                                         + LineEnding +
     'function <HeapName>.ToString: String; external;'                                               + LineEnding;
 
+  ARRAYBUFFER_METHODS =
+    'property <ArrayBufferName>.Count: Integer; external;'                                 + LineEnding +
+    'property <ArrayBufferName>.Items: array of <ValueType>; external;'                    + LineEnding +
+    'property <ArrayBufferName>.First: <ValueType>; external;'                             + LineEnding +
+    'property <ArrayBufferName>.Last: <ValueType>; external;'                              + LineEnding +
+    'property <ArrayBufferName>.Pop: <ValueType>; external;'                               + LineEnding +
+    'property <ArrayBufferName>.ToArray: array of <ValueType>; external;'                  + LineEnding +
+    'procedure <ArrayBufferName>.Add(Value: <ValueType>); overload; external;'             + LineEnding +
+    'procedure <ArrayBufferName>.Add(Values: array of <ValueType>); overload; external;'   + LineEnding +
+    'procedure <ArrayBufferName>.Clear; external;'                                         + LineEnding +
+    'function <ArrayBufferName>.ToString: String; external;'                               + LineEnding;
+
 function GetGeneric(Decl: TDeclaration): TDeclarationArray;
 
 implementation
@@ -57,7 +69,7 @@ var
 
 function GetGeneric(Decl: TDeclaration): TDeclarationArray;
 
-  function RunStrMap(Name, Key, Value: String): TCodeParser;
+  function RunStrMap(Name, Value: String): TCodeParser;
   var
     I: Integer;
     Methods, FileName: String;
@@ -68,12 +80,12 @@ function GetGeneric(Decl: TDeclaration): TDeclarationArray;
         Exit(GenericParsers[I]);
 
     Methods := STRINGMAP_METHODS;
-    Methods := Methods.Replace('<MapName>', Name);
-    Methods := Methods.Replace('<KeyType>', Key);
+    Methods := Methods.Replace('<MapName>', IfThen(Name <> '', Name, 'TStringMap'));
+    Methods := Methods.Replace('<KeyType>', 'String');
     Methods := Methods.Replace('<ValueType>', Value);
 
     Result := TCodeParser.Create();
-    Result.SetScript(Methods);
+    Result.SetScript(Methods, FileName);
     Result.Run();
 
     GenericParsers.Add(Result);
@@ -90,12 +102,12 @@ function GetGeneric(Decl: TDeclaration): TDeclarationArray;
         Exit(GenericParsers[I]);
 
     Methods := MAP_METHODS;
-    Methods := Methods.Replace('<MapName>', Name);
+    Methods := Methods.Replace('<MapName>', IfThen(Name <> '', Name, 'TMap'));
     Methods := Methods.Replace('<KeyType>', Key);
     Methods := Methods.Replace('<ValueType>', Value);
 
     Result := TCodeParser.Create();
-    Result.SetScript(Methods);
+    Result.SetScript(Methods, FileName);
     Result.Run();
 
     GenericParsers.Add(Result);
@@ -112,11 +124,32 @@ function GetGeneric(Decl: TDeclaration): TDeclarationArray;
         Exit(GenericParsers[I]);
 
     Methods := HEAP_METHODS;
-    Methods := Methods.Replace('<HeapName>', Name);
+    Methods := Methods.Replace('<HeapName>', IfThen(Name <> '', Name, 'THeap'));
     Methods := Methods.Replace('<ValueType>', Value);
 
     Result := TCodeParser.Create();
-    Result.SetScript(Methods);
+    Result.SetScript(Methods, FileName);
+    Result.Run();
+
+    GenericParsers.Add(Result);
+  end;
+
+  function RunArrayBuffer(Name, Value: String): TCodeParser;
+  var
+    I: Integer;
+    Methods, FileName: String;
+  begin
+    FileName := '!GenericArrayBuffer::' + Name + '::' + Value;
+    for I := 0 to GenericParsers.Count - 1 do
+      if (GenericParsers[I].Lexer.FileName = FileName) then
+        Exit(GenericParsers[I]);
+
+    Methods := ARRAYBUFFER_METHODS;
+    Methods := Methods.Replace('<ArrayBufferName>', IfThen(Name <> '', Name, 'TArrayBuffer'));
+    Methods := Methods.Replace('<ValueType>', Value);
+
+    Result := TCodeParser.Create();
+    Result.SetScript(Methods, FileName);
     Result.Run();
 
     GenericParsers.Add(Result);
@@ -124,39 +157,35 @@ function GetGeneric(Decl: TDeclaration): TDeclarationArray;
 
 var
   Parser: TCodeParser;
+  Typ: TDeclaration;
   Params: TDeclarationArray;
-  Name, Kind: String;
 begin
   Parser := nil;
 
-  if (Decl is TDeclaration_TypeFakeGeneric) then
+  if (Decl is TDeclaration_TypeGeneric) then
   begin
-    Kind := Decl.Items.GetTextOfClass(TDeclaration_Identifier);
-    Name := Decl.Name;
-    if (Name = '') then
-      Name := Kind;
+    Typ := TDeclaration_TypeGeneric(Decl).Typ;
+    Params := TDeclaration_TypeGeneric(Decl).Params;
 
-    case LowerCase(Kind) of
-      'stringmap':
-        begin
-          Params := Decl.Items.GetByClass(TDeclaration_Parameter, True, True);
-          if Length(Params) = 1 then
-            Parser := RunStrMap(Name, 'String', Params[0].Name);
-        end;
+    if (Typ <> nil) and (Length(Params) > 0) then
+    begin
+      case UpperCase(Typ.Text) of
+        'TSTRINGMAP':
+          if (Length(Params) = 1) then
+            Parser := RunStrMap(Decl.Name, Params[0].Text);
 
-      'map':
-        begin
-          Params := Decl.Items.GetByClass(TDeclaration_Parameter, True, True);
-          if Length(Params) = 2 then
-            Parser := RunMap(Name, Params[0].Name, Params[1].Name);
-        end;
+        'TMAP':
+          if (Length(Params) = 2) then
+            Parser := RunMap(Decl.Name, Params[0].Text, Params[1].Text);
 
-      'heap':
-        begin
-          Params := Decl.Items.GetByClass(TDeclaration_Parameter, True, True);
-          if Length(Params) = 1 then
-            Parser := RunHeap(Name, Params[0].Name);
-        end;
+        'THEAP':
+          if (Length(Params) = 1) then
+            Parser := RunHeap(Decl.Name, Params[0].Text);
+
+        'TARRAYBUFFER':
+          if (Length(Params) = 1) then
+           Parser := RunArrayBuffer(Decl.Name, Params[0].Text);
+      end;
     end;
   end;
 

@@ -1,7 +1,7 @@
 {$assertions on}
 
 type
-  TStringIntMap = StringMap(Int32);
+  TStringIntMap = TStringMap<Int32>;
 
 procedure Test_CaseSens;
 var
@@ -65,7 +65,7 @@ end;
 
 procedure Test_Arr;
 var
-  Map: StringMap(TIntegerArray);
+  Map: TStringMap(TIntegerArray);
 begin
   Map.Value['a'] := [1,2,3];
   Map.Value['b'] := [100,101,102];

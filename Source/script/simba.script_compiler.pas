@@ -60,6 +60,7 @@ type
     function addGlobalVar(Value: Pointer; AName: lpString): TLapeGlobalVar; override;
     function addGlobalFunc(Header: lpString; Value: Pointer): TLapeGlobalVar; override;
     function addGlobalType(Str: lpString; AName: lpString): TLapeType; override;
+    function addGlobalType(Typ: TLapeType; AName: lpString = ''; ACopy: Boolean = True): TLapeType; override;
 
     // Compiler addons
     procedure pushCode(Code: String);
@@ -343,7 +344,7 @@ var
 begin
   FDump := TSimbaStringPairList.Create();
 
-  // init the dump with things not imported normally
+  // init the dump with things not imported by normal means
   for BaseType in ELapeBaseType do
     if (FBaseTypes[BaseType] <> nil) then
       DumpCode('Base', 'type %s = %s;'.Format([LapeTypeToString(BaseType), LapeTypeToString(BaseType)]));
@@ -384,9 +385,10 @@ begin
   DumpCode('Base', 'function GetScriptMethodName(Address: Pointer): String; external;');
   DumpCode('Base', 'function DumpCallStack(Start: Integer = 0): String; external;');
 
-  DumpCode('Base', 'function Map(KeyType: T; ValueType: V): Map; external;');
-  DumpCode('Base', 'function StringMap(ValueType: V): StringMap; external;');
-  DumpCode('Base', 'function Heap(ValueType: V): Heap; external;');
+  DumpCode('Base', 'function TMap(KeyType: T; ValueType: V): TMap; external;');
+  DumpCode('Base', 'function TStringMap(ValueType: V): TStringMap; external;');
+  DumpCode('Base', 'function THeap(ValueType: V): THeap; external;');
+  DumpCode('Base', 'function TArrayBuffer(ValueType: V): TArrayBuffer; external;');
 
   inherited Create(TLapeTokenizerString.Create(''));
 end;
@@ -517,6 +519,14 @@ begin
 
   if (FDump <> nil) then
     DumpType(AName, Str);
+end;
+
+function TScriptCompiler.addGlobalType(Typ: TLapeType; AName: lpString; ACopy: Boolean): TLapeType;
+begin
+  if (FDump <> nil) and (Typ <> nil) and (Typ.Name <> '') then
+    DumpType(AName, Typ.Name);
+
+  Result := inherited;
 end;
 
 procedure TScriptCompiler.pushCode(Code: String);

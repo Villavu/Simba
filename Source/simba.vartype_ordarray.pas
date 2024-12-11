@@ -18,7 +18,6 @@ type
     function ToString: String;
     procedure FromString(Value: String);
   end;
-
   TIntegerArrayHelper = type helper for TIntegerArray
     function Equals(Other: TIntegerArray): Boolean;
     function IndexOf(Value: Integer): Integer;
@@ -38,12 +37,14 @@ type
     function Difference(Other: TInt64Array): TInt64Array;
     function SymmetricDifference(Other: TInt64Array): TInt64Array;
     function Intersection(Other: TInt64Array): TInt64Array;
+    function Min: Int64;
+    function Max: Int64;
+    function Sum: Int64;
+    function Unique: TInt64Array;
+    procedure Sort;
   end;
 
   TSingleArrayHelper = type helper for TSingleArray
-    function Equals(Other: TSingleArray): Boolean;
-    function IndexOf(Value: Single): Integer;
-    function IndicesOf(Value: Single): TIntegerArray;
     function Min: Single;
     function Max: Single;
     function Sum: Double;
@@ -52,9 +53,6 @@ type
   end;
 
   TDoubleArrayHelper = type helper for TDoubleArray
-    function Equals(Other: TDoubleArray): Boolean;
-    function IndexOf(Value: Double): Integer;
-    function IndicesOf(Value: Double): TIntegerArray;
     function Min: Double;
     function Max: Double;
     function Sum: Double;
@@ -81,7 +79,6 @@ begin
   if (Length(Self) > 0) then
     Move(Value[1], Self[0], Length(Value));
 end;
-
 function TIntegerArrayHelper.Equals(Other: TIntegerArray): Boolean;
 begin
   Result := specialize TArrayEquals<Integer>.Equals(Self, Other);
@@ -94,7 +91,7 @@ end;
 
 function TIntegerArrayHelper.IndicesOf(Value: Integer): TIntegerArray;
 begin
-  Result := specialize TArrayIndicesOf<Integer>.IndicesOf(Value, Self);
+  Result := specialize TArrayIndexOf<Integer>.IndicesOf(Value, Self);
 end;
 
 function TIntegerArrayHelper.Min: Integer;
@@ -144,7 +141,7 @@ end;
 
 function TInt64ArrayHelper.SymmetricDifference(Other: TInt64Array): TInt64Array;
 begin
-  Result := specialize TArrayRelationship<Int64>.SymmetricDifference(Self, Other);
+   Result := specialize TArrayRelationship<Int64>.SymmetricDifference(Self, Other);
 end;
 
 function TInt64ArrayHelper.Intersection(Other: TInt64Array): TInt64Array;
@@ -152,37 +149,29 @@ begin
   Result := specialize TArrayRelationship<Int64>.Intersection(Self, Other);
 end;
 
-function TSingleArrayHelper.Equals(Other: TSingleArray): Boolean;
-
-  function Same(const L, R: Single): Boolean;
-  begin
-    Result := SameValue(L, R);
-  end;
-
+function TInt64ArrayHelper.Min: Int64;
 begin
-  Result := specialize TArrayEqualsFunc<Single>.Equals(Self, Other, @Same);
+  Result := specialize MinA<Int64>(Self);
 end;
 
-function TSingleArrayHelper.IndexOf(Value: Single): Integer;
-
-  function Same(const L, R: Single): Boolean;
-  begin
-    Result := SameValue(L, R);
-  end;
-
+function TInt64ArrayHelper.Max: Int64;
 begin
-  Result := specialize TArrayIndexOfFunc<Single>.IndexOf(Value, Self, @Same);
+  Result := specialize MaxA<Int64>(Self);
 end;
 
-function TSingleArrayHelper.IndicesOf(Value: Single): TIntegerArray;
-
-  function Same(const L, R: Single): Boolean;
-  begin
-    Result := SameValue(L, R);
-  end;
-
+function TInt64ArrayHelper.Sum: Int64;
 begin
-  Result := specialize TArrayIndicesOfFunc<Single>.IndicesOf(Value, Self, @Same);
+  Result := specialize Sum<Int64, Int64>(Self);
+end;
+
+function TInt64ArrayHelper.Unique: TInt64Array;
+begin
+  Result := specialize TArrayUnique<Int64>.Unique(Self);
+end;
+
+procedure TInt64ArrayHelper.Sort;
+begin
+  specialize TArraySort<Int64>.QuickSort(Self, Low(Self), High(Self));
 end;
 
 function TSingleArrayHelper.Min: Single;
@@ -214,39 +203,6 @@ end;
 procedure TSingleArrayHelper.Sort;
 begin
   specialize TArraySort<Single>.QuickSort(Self, Low(Self), High(Self));
-end;
-
-function TDoubleArrayHelper.Equals(Other: TDoubleArray): Boolean;
-
-  function Same(const L, R: Double): Boolean;
-  begin
-    Result := SameValue(L, R);
-  end;
-
-begin
-  Result := specialize TArrayEqualsFunc<Double>.Equals(Self, Other, @Same);
-end;
-
-function TDoubleArrayHelper.IndexOf(Value: Double): Integer;
-
-  function Same(const L, R: Double): Boolean;
-  begin
-    Result := SameValue(L, R);
-  end;
-
-begin
-  Result := specialize TArrayIndexOfFunc<Double>.IndexOf(Value, Self, @Same);
-end;
-
-function TDoubleArrayHelper.IndicesOf(Value: Double): TIntegerArray;
-
-  function Same(const L, R: Double): Boolean;
-  begin
-    Result := SameValue(L, R);
-  end;
-
-begin
-  Result := specialize TArrayIndicesOfFunc<Double>.IndicesOf(Value, Self, @Same);
 end;
 
 function TDoubleArrayHelper.Min: Double;

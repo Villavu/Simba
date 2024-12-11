@@ -14,22 +14,6 @@ uses
   simba.base, simba.ide_codetools_parser;
 
 const
-  HELPERS_STRING: TStringArray = (
-    'property <ArrayName>.Length: Integer;',
-    'property <ArrayName>.First: <ArrayElementType>;',
-    'property <ArrayName>.Last: <ArrayElementType>;',
-    'property <ArrayName>.Pop: <ArrayElementType>;',
-    'procedure <ArrayName>.SetLength(NewLength: Integer);',
-    'function <ArrayName>.Copy: <ArrayName>;',
-    'function <ArrayName>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <ArrayName>;',
-    'procedure <ArrayName>.Delete(StartIndex: Integer; Count: Integer = High(Integer));',
-    'function <ArrayName>.Remove(Value: <ArrayElementType>): <ArrayElementType>;',
-    'function <ArrayName>.RandomValue: <ArrayElementType>;',
-    'procedure <ArrayName>.Reverse;',
-    'function <ArrayName>.Reversed: <ArrayName>;',
-    'procedure <ArrayName>.Clear;'
-  );
-
   HELPERS_DYNARRAY: TStringArray = (
     'property <ArrayName>.Length: Integer;',
     'property <ArrayName>.Low: Integer;',
@@ -57,19 +41,17 @@ const
     'function <ArrayName>.Sorted(CompareFunc: function(constref L, R: <ArrayElementType>): Integer): <ArrayDef>;',
     'function <ArrayName>.Sorted(Weights: TIntegerArray; LowToHigh: Boolean): <ArrayDef>;',
     'function <ArrayName>.Copy: <ArrayDef>;',
-    'function <ArrayName>.Copy(StartIndex: Integer; Count: Integer = High(Integer)): <ArrayDef>;',
-    'function <ArrayName>.RandomValue: <ArrayElementType>;',
+    'function <ArrayName>.CopyRange(StartIndex, EndIndex: Integer): <ArrayDef>;',
+    'function <ArrayName>.Random: <ArrayElementType>;',
     'function <ArrayName>.Reversed: <ArrayDef>;',
     'function <ArrayName>.Slice(Start, Stop, Step: Integer): <ArrayDef>;',
     'function <ArrayName>.Remove(Value: <ArrayElementType>): <ArrayElementType>;',
-    'procedure <ArrayName>.Delete(Index: Integer; Count: Integer = High(Integer));',
+    'function <ArrayName>.DeleteIndex(Index: Integer; Count: Integer): <ArrayElementType>;',
+    'procedure <ArrayName>.DeleteRange(StartIndex, EndIndex: Integer);',
     'procedure <ArrayName>.Insert(Item: <ArrayElementType>; Index: Integer);',
     'procedure <ArrayName>.SetLength(NewLength: Integer);',
-    'function <ArrayName>.RandomValue: <ArrayElementType>;',
     'procedure <ArrayName>.Reverse;',
     'procedure <ArrayName>.Clear;',
-    'procedure <ArrayName>.Append(Value: <ArrayElementType>);',
-    'procedure <ArrayName>.Extend(Value: <ArrayDef>);',
     'function <ArrayName>.Equals(Other: <ArrayDef>): Boolean;',
     'function <ArrayName>.Intersection(Other: <ArrayDef>): <ArrayDef>;',
     'function <ArrayName>.Difference(Other: <ArrayDef>): <ArrayDef>;',
@@ -143,14 +125,7 @@ begin
     ElementType := Decl.Items.GetTextOfClass(TDeclaration_VarType);
     if (ElementType <> '') then
       Parser := Get(HELPERS_DYNARRAY, IfThen(Decl.Name <> '', Decl.Name, 'array'), ElementType, IfThen(Decl.Name <> '', Decl.Name, 'array of ' + ElementType));
-  end
-  else if (Decl is TDeclaration_TypeAlias) then
-    case UpperCase(Decl.Name) of
-      'STRING':        Parser := Get(HELPERS_STRING, 'String', 'Char', 'String');
-      'ANSISTRING':    Parser := Get(HELPERS_STRING, 'AnsiString', 'Char', 'AnsiString');
-      'WIDESTRING':    Parser := Get(HELPERS_STRING, 'WideString', 'WideChar', 'WideString');
-      'UNICODESTRING': Parser := Get(HELPERS_STRING, 'UnicodeString', 'UnicodeChar', 'UnicodeString');
-    end;
+  end;
 
   if (Parser <> nil) then
     Result := Parser.Items.ToArray

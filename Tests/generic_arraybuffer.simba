@@ -1,0 +1,28 @@
+{$assertions on}
+
+type
+  TPointBuffer = TArrayBuffer<TPoint>;
+
+var
+  Buffer: TPointBuffer;
+  I: Integer;
+begin
+  Buffer.Add([100,100]);
+  Buffer.Add([[200,200],[300,300]]);
+  Assert(Buffer.Count = 3);
+  Assert(Buffer.First = [100,100]);
+  Assert(Buffer.Last = [300,300]);
+
+  Assert(Buffer.Pop = [300,300]);
+  Buffer.Clear;
+  Assert(Buffer.Count = 0);
+
+  // test growth and overallocation
+  for I := 1 to 1000 do
+    Buffer.Add([I,I]);
+
+  Assert(Buffer.Count = 1000);
+  Assert(Buffer.Items.Length > 1500);
+
+  Assert(Length(Buffer.ToArray) = 1000);
+end.

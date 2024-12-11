@@ -153,8 +153,8 @@ procedure TSimbaACAForm.MenuItemLoadHSLCircleExClick(Sender: TObject);
 var
   Value: String;
 begin
-  if InputQuery('ACA', 'HSL Circle Radius (Max 2000)', Value) and Value.IsInteger() then
-    LoadHSLCircle(Min(Value.ToInteger(), 2000));
+  if InputQuery('ACA', 'HSL Circle Radius (Max 2000)', Value) and Value.IsNumeric then
+    LoadHSLCircle(Min(Value.ToInteger, 2000));
 end;
 
 function TSimbaACAForm.IsShortcut(var Message: TLMKey): Boolean;

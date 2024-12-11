@@ -84,6 +84,9 @@ type
     procedure FieldName; virtual;
     procedure ForStatement; virtual;
     procedure ForwardDeclaration; virtual;
+    procedure GenericType; virtual;
+    procedure GenericSpecialize; virtual;
+    procedure GenericParam; virtual;
     procedure Identifier; virtual;
     procedure IdentifierList; virtual;
     procedure IfStatement; virtual;
@@ -96,7 +99,6 @@ type
     procedure OrdinalType; virtual;
     procedure ParseFile; virtual;
     procedure PointerType; virtual;
-    procedure FakeGenericType; virtual;
 
     procedure Method; virtual;
     procedure MethodOfType; virtual;
@@ -181,6 +183,29 @@ procedure TPasParser.ForwardDeclaration;
 begin
   NextToken;
   SemiColon;
+end;
+
+procedure TPasParser.GenericType;
+begin
+  GenericSpecialize();
+  Expected(tokLower);
+  GenericParam();
+  while (Lexer.TokenID = tokComma) do
+  begin
+    NextToken();
+    GenericParam();
+  end;
+  Expected(tokGreater);
+end;
+
+procedure TPasParser.GenericSpecialize;
+begin
+  Expected(tokIdentifier);
+end;
+
+procedure TPasParser.GenericParam;
+begin
+  TypeKind();
 end;
 
 procedure TPasParser.Run;
@@ -1572,12 +1597,6 @@ begin
   TypeIdentifer;
 end;
 
-procedure TPasParser.FakeGenericType;
-begin
-  TypeIdentifer;
-  Parameters;
-end;
-
 procedure TPasParser.Method;
 var
   Typ: ELexerToken;
@@ -1785,15 +1804,6 @@ begin
 end;
 
 procedure TPasParser.TypeKind;
-
-  function isMaybeFakeGeneric: Boolean;
-  var
-    S: String;
-  begin
-    S := UpperCase(fLexer.Token);
-    Result := (S = 'STRINGMAP') or (S = 'MAP') or (S = 'HEAP');
-  end;
-
 begin
   if (fLexer.TokenID = tokIdentifier) and (fLexer.TokenID = tokPrivate) then
     NextToken;
@@ -1813,14 +1823,10 @@ begin
       end;
     tokIdentifier:
       begin
-        if isMaybeFakeGeneric() then
-        begin
-          fLexer.InitAhead;
-          if fLexer.AheadTokenID = tokRoundOpen then
-            FakeGenericType
-          else
-            TypeIdentifer;
-        end else
+        fLexer.InitAhead;
+        if fLexer.AheadTokenID = tokLower then
+          GenericType
+        else
           TypeIdentifer;
       end;
     tokAsciiChar, tokFloat, tokIntegerConst, tokMinus, tokPlus, tokSquareOpen, tokStringConst, tokRoundOpen, tokEnum:

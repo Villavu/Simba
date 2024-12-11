@@ -1,0 +1,16 @@
+var
+  p: TRunningProcessPiped;
+  s: String;
+begin
+  p := StartProcessPiped('python.exe', ['-u', 'docgen.py'], 'DocGen');
+  while p.Running do
+  begin
+    s := p.ReadString;
+    if (s <> '') then
+      WriteLn(s);
+    Sleep(100);
+  end;
+  p.Free();
+
+  WriteLn('Link: "' + PathNormalize('DocGen/build/index.html') + '"');
+end;

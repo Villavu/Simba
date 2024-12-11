@@ -1,5 +1,7 @@
 {$assertions on}
 
+// Test our native overrides
+
 procedure TestIntegerArray;
 
   function Success(a,b: TIntegerArray): Boolean;
@@ -29,21 +31,34 @@ begin
   Assert(Success(a.Intersection(b), [3, 4]));
 end;
 
+
 procedure TestInt64Array;
+
+  function Success(a,b: TInt64Array): Boolean;
+  var i: Int32;
+  begin
+    if (Length(a) <> Length(b)) then
+      Exit(False);
+    for i:=0 to High(a) do
+      if not Contains(a[i], b) then
+        Exit(False);
+    Result := True;
+  end;
+
 var
   a,b: TInt64Array;
 begin
-  //a := [1,2,3];
-  //b := [3,2,1];
-  //Assert(ToString(a.Difference(b)) = '[]');
-  //Assert(ToString(a.SymDifference(b)) = '[]');
-  //Assert(ToString(a.Intersection(b)) = '[3, 2, 1]');
-  //
-  //a := [1,2,3,4];
-  //b := [5,4,3];
-  //Assert(ToString(a.Difference(b)) = '[1, 2]');
-  //Assert(ToString(a.SymDifference(b)) = '[1, 2, 5]');
-  //Assert(ToString(a.Intersection(b)) = '[3, 4]');
+  a := [1,2,3,High(Int64),Low(Int64)];
+  b := [High(Int64),Low(Int64),3,2,1];
+  Assert(Success(a.Difference(b), []));
+  Assert(Success(a.SymDifference(b), []));
+  Assert(Success(a.Intersection(b), [High(Int64),Low(Int64),3,2,1]));
+
+  a := [1,2,3,4];
+  b := [5,4,3];
+  Assert(Success(a.Difference(b), [1, 2]));
+  Assert(Success(a.SymDifference(b), [1, 2, 5]));
+  Assert(Success(a.Intersection(b), [3, 4]));
 end;
 
 procedure TestPointArray;

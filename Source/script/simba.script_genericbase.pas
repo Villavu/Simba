@@ -206,6 +206,7 @@ begin
   inherited Create(ACompiler, ADocPos);
 
   FConstant := bTrue;
+  FSpecialParam := spType;
 end;
 
 // "inherited FoldConstants()" but dont hide exception if raised

@@ -230,7 +230,7 @@ end;
 
 procedure InitializeHeap(Compiler: TLapeCompiler);
 begin
-  Compiler.InternalMethodMap['Heap'] := TLapeTree_InternalMethod_Heap;
+  Compiler.InternalMethodMap['THeap'] := TLapeTree_InternalMethod_Heap;
 end;
 
 end.

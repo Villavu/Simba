@@ -338,7 +338,7 @@ end;
 
 procedure InitializeMap(Compiler: TLapeCompiler);
 begin
-  Compiler.InternalMethodMap['Map'] := TLapeTree_InternalMethod_Map;
+  Compiler.InternalMethodMap['TMap'] := TLapeTree_InternalMethod_Map;
 end;
 
 end.

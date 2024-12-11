@@ -156,7 +156,7 @@ begin
 
   if (Str <> '') then
   begin
-    if Str.IsInteger() then
+    if Str.IsNumeric then
       Time := Str.ToDateTime('unix', 0)
     else
       Time := Str.ToDateTime('iso8601', 0);

@@ -1166,8 +1166,7 @@ end;
 
 class operator TSimbaTarget.Initialize(var Self: TSimbaTarget);
 begin
-  Self := Default(TSimbaTarget);
+  FillByte(Self, SizeOf(TSimbaTarget), 0);
 end;
 
 end.
-
