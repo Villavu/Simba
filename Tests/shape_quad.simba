@@ -5,6 +5,8 @@ var
 begin
   q := TQuad.CreateFromBox([100,100,400,200]);
 
+  Assert(q = [[100,100],[400,100],[400,200],[100,200]]);
+  Assert(q.Expand(1).Expand(-1) = [[400,200],[100,200],[100,100],[400,100]]);
   Assert(q.ShortSideLen = 100);
   Assert(q.LongSideLen = 300);
   Assert(q.Area = 30000);
@@ -16,7 +18,6 @@ begin
   Assert(q.Corners[3] = [100,200]);
 
   q := q.Rotate(120);
-
   Assert(q.ShortSideLen = 100);
   Assert(q.LongSideLen = 300);
   Assert(q.Area = 30000);

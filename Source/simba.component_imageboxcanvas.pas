@@ -12,7 +12,8 @@ interface
 
 uses
   Classes, SysUtils, Graphics, LCLType, FPImage,
-  simba.base, simba.image_lazbridge, simba.component_imageboxdrawers, simba.image_textdrawer;
+  simba.base, simba.image_lazbridge, simba.component_imageboxdrawers, simba.image_textdrawer,
+  simba.vartype_quad;
 
 type
   TSimbaImageBoxCanvas = class;

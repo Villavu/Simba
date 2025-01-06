@@ -13,13 +13,17 @@ procedure ImportPoint(Script: TSimbaScript);
 implementation
 
 uses
-  simba.vartype_point, simba.vartype_pointarray,
+  simba.vartype_point,
+  simba.vartype_pointarray,
+  simba.vartype_polygon,
+  simba.vartype_quad, simba.vartype_circle,
   lptypes;
+
 
 (*
 TPoint
 ======
-The TPoint type is a record which defines a X,Y coordinate.
+The TPoint type is a record which defines a X,Y integer coordinate.
 *)
 
 (*
@@ -47,54 +51,6 @@ begin
 end;
 
 (*
-TPoint.InPolygon
-----------------
-```
-function TPoint.InPolygon(Poly: TPointArray): Boolean;
-```
-*)
-procedure _LapePoint_InPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PPoint(Params^[0])^.InPolygon(PPointArray(Params^[1])^);
-end;
-
-(*
-TPoint.InCircle
----------------
-```
-function TPoint.InCircle(Center: TPoint; Radius: Double): Boolean;
-```
-*)
-procedure _LapePoint_InCircle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PPoint(Params^[0])^.InCircle(PPoint(Params^[1])^, PDouble(Params^[2])^);
-end;
-
-(*
-TPoint.InTriangle
------------------
-```
-function TPoint.InTriangle(A, B, C: TPoint): Boolean;
-```
-*)
-procedure _LapePoint_InTriangle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PPoint(Params^[0])^.InTriangle(PPoint(Params^[1])^, PPoint(Params^[2])^, PPoint(Params^[3])^);
-end;
-
-(*
-TPoint.InBox
-------------
-```
-function TPoint.InBox(Box: TBox): Boolean;
-```
-*)
-procedure _LapePoint_InBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PPoint(Params^[0])^.InBox(PBox(Params^[1])^);
-end;
-
-(*
 TPoint.DistanceTo
 -----------------
 ```
@@ -116,18 +72,6 @@ function TPoint.Rotate(Radians: Double; Center: TPoint): TPoint;
 procedure _LapePoint_Rotate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PPoint(Params^[0])^.Rotate(PDouble(Params^[1])^, PPoint(Params^[2])^);
-end;
-
-(*
-TPoint.RotateFast
------------------
-```
-function TPoint.RotateFast(Degrees: Integer; Center: TPoint): TPoint;
-```
-*)
-procedure _LapePoint_RotateFast(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPoint(Result)^ := PPoint(Params^[0])^.RotateFast(PInteger(Params^[1])^, PPoint(Params^[2])^);
 end;
 
 (*
@@ -289,27 +233,10 @@ begin
 end;
 
 (*
-TPoint in
----------
-```
-operator in(Left: TPoint; Right: TBox): Boolean;
-```
-*)
-procedure _LapePoint_IN_Box(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PPoint(Params^[0])^ in PBox(Params^[1])^;
-end;
-
-(*
 TPointArray
 ===========
 Methods relating to point arrays.
 *)
-
-procedure _Lape_Point_Remove(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PPointArray(Params^[0])^.Remove(PPointArray(Params^[1])^);
-end;
 
 (*
 TPointArray.CreateFromBox
@@ -768,7 +695,7 @@ TPointArray.ExcludePoints
 function TPointArray.ExcludePoints(Points: TPointArray): TPointArray;
 ```
 
-Returns all points from `Self` that are **not** inside the `Points` array.
+Returns all points from `Self` that are **not** in the `Points` array.
 *)
 procedure _LapeTPAExcludePoints(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -779,7 +706,7 @@ end;
 TPointArray.ExcludePolygon
 --------------------------
 ```
-function TPointArray.ExcludePolygon(Polygon: TPointArray): TPointArray;
+function TPointArray.ExcludePolygon(Polygon: TPolygon): TPointArray;
 ```
 
 Returns all points from `Self` that are **not** inside the polygon.
@@ -843,7 +770,7 @@ end;
 TPointArray.ExtractPolygon
 --------------------------
 ```
-function TPointArray.ExtractPolygon(Polygon: TPointArray): TPointArray;
+function TPointArray.ExtractPolygon(Polygon: TPolygon): TPointArray;
 ```
 
 Returns all points from `Self` that are **inside** the polygon.
@@ -935,12 +862,12 @@ end;
 TPointArray.ConvexHull
 ----------------------
 ```
-function TPointArray.ConvexHull: TPointArray;
+function TPointArray.ConvexHull: TPolygon;
 ```
 *)
 procedure _LapeTPAConvexHull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PPointArray(Params^[0])^.ConvexHull();
+  PPolygon(Result)^ := PPointArray(Params^[0])^.ConvexHull();
 end;
 
 (*
@@ -1150,39 +1077,27 @@ begin
 end;
 
 (*
-TPointArray.DouglasPeucker
---------------------------
-```
-function TPointArray.DouglasPeucker(epsilon: Double): TPointArray;
-```
-*)
-procedure _LapeTPADouglasPeucker(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PPointArray(Params^[0])^.DouglasPeucker(PDouble(Params^[1])^);
-end;
-
-(*
 TPointArray.ConcaveHull
 -----------------------
 ```
-function TPointArray.ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPointArray;
+function TPointArray.ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPolygon;
 ```
 *)
 procedure _LapeTPAConcaveHull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PPointArray(Params^[0])^.ConcaveHull(PDouble(Params^[1])^, PInteger(Params^[2])^);
+  PPolygon(Result)^ := PPointArray(Params^[0])^.ConcaveHull(PDouble(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
 TPointArray.ConcaveHullEx
 -------------------------
 ```
-function TPointArray.ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): T2DPointArray;
+function TPointArray.ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): TPolygonArray;
 ```
 *)
 procedure _LapeTPAConcaveHullEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  P2DPointArray(Result)^ := PPointArray(Params^[0])^.ConcaveHullEx(PDouble(Params^[1])^, PDouble(Params^[2])^);
+  PPolygonArray(Result)^ := PPointArray(Params^[0])^.ConcaveHullEx(PDouble(Params^[1])^, PDouble(Params^[2])^);
 end;
 
 (*
@@ -1602,13 +1517,8 @@ begin
     addGlobalFunc('function Point(X, Y: Integer): TPoint', @_LapePoint);
 
     addGlobalFunc('function TPoint.Create(X, Y: Integer): TPoint; static;', @_LapePoint_Create);
-    addGlobalFunc('function TPoint.InTriangle(A, B, C: TPoint): Boolean;', @_LapePoint_InTriangle);
-    addGlobalFunc('function TPoint.InPolygon(Poly: TPointArray): Boolean;', @_LapePoint_InPolygon);
-    addGlobalFunc('function TPoint.InCircle(Center: TPoint; Radius: Double): Boolean;', @_LapePoint_InCircle);
-    addGlobalFunc('function TPoint.InBox(Box: TBox): Boolean;', @_LapePoint_InBox);
     addGlobalFunc('function TPoint.DistanceTo(Other: TPoint): Double;', @_LapePoint_DistanceTo);
     addGlobalFunc('function TPoint.Rotate(Radians: Double; Center: TPoint): TPoint;', @_LapePoint_Rotate);
-    addGlobalFunc('function TPoint.RotateFast(Degrees: Integer; Center: TPoint): TPoint;', @_LapePoint_RotateFast);
     addGlobalFunc('function TPoint.Magnitude: Double;', @_LapePoint_Magnitude);
     addGlobalFunc('function TPoint.AngleBetween(Other: TPoint): Double;', @_LapePoint_AngleBetween);
     addGlobalFunc('function TPoint.Offset(X, Y: Integer): TPoint; overload;', @_LapePoint_Offset1);
@@ -1624,7 +1534,6 @@ begin
     addGlobalFunc('operator -= (var L: TPoint; R: TPoint): TPoint;', @_LapePoint_MinusAssign_Point);
     addGlobalFunc('operator * (L: TPoint; R: Double): TPoint;', @_LapePoint_Multiply_Double);
     addGlobalFunc('operator *= (var L: TPoint; R: Double): TPoint;', @_LapePoint_MultiplyAssign_Double);
-    addGlobalFunc('operator in(Left: TPoint; Right: TBox): Boolean;', @_LapePoint_IN_Box);
 
     DumpSection := 'TPointArray';
 
@@ -1639,12 +1548,12 @@ begin
     addGlobalFunc('function TPointArray.ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;', @_LapeTPAExcludePie);
     addGlobalFunc('function TPointArray.ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray', @_LapeTPAExcludeDist);
     addGlobalFunc('function TPointArray.ExcludePoints(Points: TPointArray): TPointArray', @_LapeTPAExcludePoints);
-    addGlobalFunc('function TPointArray.ExcludePolygon(Polygon: TPointArray): TPointArray', @_LapeTPAExcludePolygon);
+    addGlobalFunc('function TPointArray.ExcludePolygon(Polygon: TPolygon): TPointArray', @_LapeTPAExcludePolygon);
     addGlobalFunc('function TPointArray.ExcludeBox(Box: TBox): TPointArray', @_LapeTPAExcludeBox);
     addGlobalFunc('function TPointArray.ExcludeQuad(Quad: TQuad): TPointArray', @_LapeTPAExcludeQuad);
 
     addGlobalFunc('function TPointArray.ExtractDist(Center: TPoint; MinDist, MaxDist: Single): TPointArray', @_LapeTPAExtractDist);
-    addGlobalFunc('function TPointArray.ExtractPolygon(Polygon: TPointArray): TPointArray', @_LapeTPAExtractPolygon);
+    addGlobalFunc('function TPointArray.ExtractPolygon(Polygon: TPolygon): TPointArray', @_LapeTPAExtractPolygon);
     addGlobalFunc('function TPointArray.ExtractBox(Box: TBox): TPointArray', @_LapeTPAExtractBox);
     addGlobalFunc('function TPointArray.ExtractQuad(Quad: TQuad): TPointArray', @_LapeTPAExtractQuad);
     addGlobalFunc('function TPointArray.ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray', @_LapeTPAExtractPie);
@@ -1652,7 +1561,7 @@ begin
     addGlobalFunc('function TPointArray.Skeleton(FMin: Integer = 2; FMax: Integer = 6): TPointArray;', @_LapeTPASkeleton);
     addGlobalFunc('function TPointArray.Border: TPointArray;', @_LapeTPABorder);
     addGlobalFunc('function TPointArray.Edges: TPointArray;', @_LapeTPAEdges);
-    addGlobalFunc('function TPointArray.ConvexHull: TPointArray;', @_LapeTPAConvexHull);
+    addGlobalFunc('function TPointArray.ConvexHull: TPolygon;', @_LapeTPAConvexHull);
 
     addGlobalFunc('function TPointArray.Erode(Iterations: Integer): TPointArray;', @_LapeTPAErode);
     addGlobalFunc('function TPointArray.Grow(Iterations: Integer): TPointArray;', @_LapeTPAGrow);
@@ -1710,16 +1619,13 @@ begin
     addGlobalFunc('function TPointArray.PartitionEx(BoxWidth, BoxHeight: Integer): T2DPointArray; overload', @_LapeTPAPartitionEx1);
     addGlobalFunc('function TPointArray.PartitionEx(StartPoint: TPoint; BoxWidth, BoxHeight: Integer): T2DPointArray; overload', @_LapeTPAPartitionEx2);
 
-    addGlobalFunc('function TPointArray.Remove(Points: TPointArray): TPointArray; overload', @_Lape_Point_Remove);
-
     addGlobalFunc('function TPointArray.DistanceTransform: TSingleMatrix;', @_LapeTPADistanceTransform);
     addGlobalFunc('function TPointArray.QuickSkeleton(): TPointArray;', @_LapeTPAQuickSkeleton);
 
     addGlobalFunc('function TPointArray.Circularity: Double;', @_LapeTPACircularity);
 
-    addGlobalFunc('function TPointArray.DouglasPeucker(Epsilon: Double): TPointArray;', @_LapeTPADouglasPeucker);
-    addGlobalFunc('function TPointArray.ConcaveHull(Epsilon: Double = 2.5; kCount: Integer = 5): TPointArray;', @_LapeTPAConcaveHull);
-    addGlobalFunc('function TPointArray.ConcaveHullEx(MaxLeap: Double = -1; Epsilon: Double = 2): T2DPointArray;', @_LapeTPAConcaveHullEx);
+    addGlobalFunc('function TPointArray.ConcaveHull(Epsilon: Double = 2.5; kCount: Integer = 5): TPolygon;', @_LapeTPAConcaveHull);
+    addGlobalFunc('function TPointArray.ConcaveHullEx(MaxLeap: Double = -1; Epsilon: Double = 2): TPolygonArray;', @_LapeTPAConcaveHullEx);
 
     addGlobalType('enum(NONE, ALL, MINIMAL)', 'EConvexityDefects');
     addGlobalFunc('function TPointArray.ConvexityDefects(Epsilon: Single = 0; Mode: EConvexityDefects = EConvexityDefects.NONE): TPointArray;', @_LapeTPAConvexityDefects);

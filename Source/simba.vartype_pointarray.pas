@@ -31,14 +31,16 @@
 
 unit simba.vartype_pointarray;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
 
 uses
   Classes, SysUtils,
-  simba.base;
+  simba.base,
+  simba.vartype_polygon,
+  simba.vartype_quad,
+  simba.vartype_circle;
 
 type
   {$PUSH}
@@ -60,6 +62,7 @@ type
     function IndicesOf(P: TPoint): TIntegerArray;
     function Equals(Other: TPointArray): Boolean;
     function Sum: TPoint;
+    function Reversed: TPointArray;
 
     function Offset(P: TPoint): TPointArray; overload;
     function Offset(X, Y: Integer): TPointArray; overload;
@@ -77,7 +80,7 @@ type
     function ShapeFill: TPointArray;
 
     procedure FurthestPoints(out A, B: TPoint);
-    function ConvexHull: TPointArray;
+    function ConvexHull: TPolygon;
 
     function Mean: TPoint;
     function Median: TPoint;
@@ -94,7 +97,7 @@ type
 
     // Return points NOT in ...
     function ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
-    function ExcludePolygon(Polygon: TPointArray): TPointArray;
+    function ExcludePolygon(Polygon: TPolygon): TPointArray;
     function ExcludeBox(Box: TBox): TPointArray;
     function ExcludeQuad(Quad: TQuad): TPointArray;
     function ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
@@ -102,7 +105,7 @@ type
 
     // return points WITHIN ...
     function ExtractDist(Center: TPoint; MinDist, MaxDist: Single): TPointArray;
-    function ExtractPolygon(Polygon: TPointArray): TPointArray;
+    function ExtractPolygon(Polygon: TPolygon): TPointArray;
     function ExtractBox(Box: TBox): TPointArray;
     function ExtractQuad(Quad: TQuad): TPointArray;
     function ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
@@ -148,20 +151,17 @@ type
     function Intersection(Other: TPointArray): TPointArray;
     function SymmetricDifference(Other: TPointArray): TPointArray;
     function Difference(Other: TPointArray): TPointArray;
-    function Remove(Values: TPointArray): TPointArray;
 
     function DistanceTransform: TSingleMatrix;
     function QuickSkeleton(): TPointArray;
 
     function Circularity: Double;
 
-    function DouglasPeucker(epsilon: Double): TPointArray;
-    function ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPointArray;
-    function ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): T2DPointArray;
+    function ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPolygon;
+    function ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): TPolygonArray;
     function ConvexityDefects(Epsilon: Single; Mode: EConvexityDefects = EConvexityDefects.NONE): TPointArray;
 
     procedure ToAxes(out X, Y: TIntegerArray);
-
   end;
 
   T2DPointArrayHelper = type helper for T2DPointArray
@@ -219,7 +219,7 @@ uses
   simba.containers, simba.geometry, simba.math,
   simba.container_slacktree,
   simba.vartype_matrix, simba.vartype_ordarray,
-  simba.vartype_box, simba.vartype_point, simba.vartype_quad, simba.vartype_circle, simba.vartype_triangle,
+  simba.vartype_box, simba.vartype_point, simba.vartype_triangle,
   simba.array_algorithm;
 
 procedure GetAdjacent4(var Adj: TPointArray; const P: TPoint); inline;
@@ -528,6 +528,11 @@ begin
   Result := specialize Sum<TPoint, TPoint>(Self);
 end;
 
+function TPointArrayHelper.Reversed: TPointArray;
+begin
+  Result := specialize Reversed<TPoint>(Self);
+end;
+
 function TPointArrayHelper.Offset(P: TPoint): TPointArray;
 var
   Ptr: PPoint;
@@ -603,9 +608,10 @@ end;
 
 function TPointArrayHelper.Density: Double;
 begin
-  Result := 0;
-  if Length(Self) > 0 then
-    Result := Min(Length(Self) / TSimbaGeometry.PolygonArea(Self.ConvexHull()), 1);
+  if (Length(Self) > 0) then
+    Result := Min(Length(Self) / Self.ConvexHull().Area, 1)
+  else
+    Result := 0;
 end;
 
 function TPointArrayHelper.Edges: TPointArray;
@@ -942,10 +948,10 @@ begin
     Exit;
   end;
 
-  TSimbaGeometry.FurthestPointsPolygon(Self.ConvexHull(), A,B);
+  Self.ConvexHull().FurthestPoints(A, B);
 end;
 
-function TPointArrayHelper.ConvexHull: TPointArray;
+function TPointArrayHelper.ConvexHull: TPolygon;
 var
   pts: TPointArray;
   h,i,k,u: Integer;
@@ -1100,7 +1106,7 @@ end;
 
 function TPointArrayHelper.Area: Double;
 begin
-  Result := TSimbaGeometry.PolygonArea(Self.ConvexHull());
+  Result := Self.ConvexHull().Area;
 end;
 
 function TPointArrayHelper.Erode(Iterations: Integer): TPointArray;
@@ -1347,27 +1353,49 @@ begin
   Result := Buffer.ToArray(False);
 end;
 
-function TPointArrayHelper.ExcludePolygon(Polygon: TPointArray): TPointArray;
+function TPointArrayHelper.ExcludePolygon(Polygon: TPolygon): TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
-  I: Integer;
+  I, Count: Integer;
 begin
-  Buffer.Init();
+  Count := 0;
+  SetLength(Result, Length(Self));
   for I := 0 to High(Self) do
-    if not Self[I].InPolygon(Polygon) then
-      Buffer.Add(Self[I]);
-
-  Result := Buffer.ToArray(False);
+    if not Polygon.Contains(Self[I]) then
+    begin
+      Result[Count] := Self[I];
+      Inc(Count);
+    end;
+  SetLength(Result, Count);
 end;
 
 function TPointArrayHelper.ExcludeBox(Box: TBox): TPointArray;
+var
+  I, Count: Integer;
 begin
-  Result := Box.Exclude(Self);
+  Count := 0;
+  SetLength(Result, Length(Self));
+  for I := 0 to High(Self) do
+    if not Box.Contains(Self[I]) then
+    begin
+      Result[Count] := Self[I];
+      Inc(Count);
+    end;
+  SetLength(Result, Count);
 end;
 
 function TPointArrayHelper.ExcludeQuad(Quad: TQuad): TPointArray;
+var
+  I, Count: Integer;
 begin
-  Result := Quad.Exclude(Self);
+  Count := 0;
+  SetLength(Result, Length(Self));
+  for I := 0 to High(Self) do
+    if not Quad.Contains(Self[I]) then
+    begin
+      Result[Count] := Self[I];
+      Inc(Count);
+    end;
+  SetLength(Result, Count);
 end;
 
 function TPointArrayHelper.ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
@@ -1377,29 +1405,29 @@ end;
 
 function TPointArrayHelper.ExcludePoints(Points: TPointArray): TPointArray;
 var
-  Matrix: TBooleanMatrix;
-  B: TBox;
-  I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Box: TBox;
+  test: TBooleanArray;
+  w,h: Integer;
+  i,c: Integer;
 begin
-  Result := Default(TPointArray);
-  if (Length(Self) = 0) then
-    Exit;
-  if (Length(Points) = 0) then
-    Exit(Copy(Self));
+  Box := Points.Bounds;
+  w := box.Width;
+  h := box.Height;
+  SetLength(test, box.Area);
+  for i:=0 to High(Points) do
+    test[(Points[i].y - box.y1) * w + (Points[i].x - box.x1)] := True;
 
-  B := Self.Bounds().Combine(Points.Bounds());
-
-  Matrix.SetSize(B.Width, B.Height);
-  for I := 0 to High(Points) do
-    Matrix[Points[I].Y - B.Y1, Points[I].X - B.X1] := True;
-
-  Buffer.Init(Length(Self));
-  for I := 0 to High(Self) do
-    if not Matrix[Self[I].Y - B.Y1, Self[I].X - B.X1] then
-      Buffer.Add(Self[I]);
-
-  Result := Buffer.ToArray(False);
+  SetLength(Result, Length(Self));
+  c := 0;
+  for i:=0 to High(Self) do
+  begin
+    if InRange(Self[i].x - box.x1, 0, w-1) and InRange(Self[i].y - box.y1, 0, h-1) and
+      (test[(Self[i].y - box.y1) * w + (Self[i].x - box.x1)]) then
+      Continue;
+    Result[c] := Self[i];
+    Inc(c);
+  end;
+  SetLength(Result, c);
 end;
 
 function TPointArrayHelper.ExtractDist(Center: TPoint; MinDist, MaxDist: Single): TPointArray;
@@ -1422,27 +1450,49 @@ begin
   Result := Buffer.ToArray(False);
 end;
 
-function TPointArrayHelper.ExtractPolygon(Polygon: TPointArray): TPointArray;
+function TPointArrayHelper.ExtractPolygon(Polygon: TPolygon): TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
-  I: Integer;
+  I, Count: Integer;
 begin
-  Buffer.Init(Length(Polygon));
+  Count := 0;
+  SetLength(Result, Length(Self));
   for I := 0 to High(Self) do
-    if Self[I].InPolygon(Polygon) then
-      Buffer.Add(Self[I]);
-
-  Result := Buffer.ToArray(False);
+    if Polygon.Contains(Self[I]) then
+    begin
+      Result[Count] := Self[I];
+      Inc(Count);
+    end;
+  SetLength(Result, Count);
 end;
 
 function TPointArrayHelper.ExtractBox(Box: TBox): TPointArray;
+var
+  I, Count: Integer;
 begin
-  Result := Box.Extract(Self);
+  Count := 0;
+  SetLength(Result, Length(Self));
+  for I := 0 to High(Self) do
+    if Box.Contains(Self[I]) then
+    begin
+      Result[Count] := Self[I];
+      Inc(Count);
+    end;
+  SetLength(Result, Count);
 end;
 
 function TPointArrayHelper.ExtractQuad(Quad: TQuad): TPointArray;
+var
+  I, Count: Integer;
 begin
-  Result := Quad.Extract(Self);
+  Count := 0;
+  SetLength(Result, Length(Self));
+  for I := 0 to High(Self) do
+    if Quad.Contains(Self[I]) then
+    begin
+      Result[Count] := Self[I];
+      Inc(Count);
+    end;
+  SetLength(Result, Count);
 end;
 
 function TPointArrayHelper.ExtractPie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;
@@ -2367,33 +2417,6 @@ begin
   Result := specialize TArrayRelationship<TPoint>.Difference(Self, Other);
 end;
 
-function TPointArrayHelper.Remove(Values: TPointArray): TPointArray;
-var
-  Box: TBox;
-  test: TBooleanArray;
-  w,h: Integer;
-  i,c: Integer;
-begin
-  Box := Values.Bounds;
-  w := box.Width;
-  h := box.Height;
-  SetLength(test, box.Area);
-  for i:=0 to High(Values) do
-    test[(Values[i].y - box.y1) * w + (Values[i].x - box.x1)] := True;
-
-  SetLength(Result, Length(Self));
-  c := 0;
-  for i:=0 to High(Self) do
-  begin
-    if InRange(Self[i].x - box.x1, 0, w-1) and InRange(Self[i].y - box.y1, 0, h-1) and
-      (test[(Self[i].y - box.y1) * w + (Self[i].x - box.x1)]) then
-      Continue;
-    Result[c] := Self[i];
-    Inc(c);
-  end;
-  SetLength(Result, c);
-end;
-
 function TPointArrayHelper.DistanceTransform: TSingleMatrix;
 
   function EucDist(const x1,x2:Int32): Int32; inline;
@@ -2619,15 +2642,15 @@ end;
 *)
 function TPointArrayHelper.MinAreaCircle(): TCircle;
 var
-  poly: TPointArray;
+  poly: TPolygon;
   p1,p2,p3,p,q,t: TPoint;
 begin
   poly := Self.ConvexHull();  // O(n log n)
-  TSimbaGeometry.FurthestPointsPolygon(poly, p1,p2); // O(m^2) call - ugh
+  poly.FurthestPoints(p1, p2); // O(m^2) call - ugh
 
   p.x := (p1.x+p2.x) div 2;
   p.y := (p1.y+p2.y) div 2;
-  t := poly.FurthestPoint(p);
+  t := TPointArray(poly).FurthestPoint(p);
 
   // Two Point Circle
   if (p1 = t) or (p2 = t) then
@@ -2635,7 +2658,7 @@ begin
 
   // Three Point Circle
   p := TTriangle.Create(p1, p2, t).Circumcircle().Center;
-  q := poly.FurthestPoint(p);
+  q := TPointArray(poly).FurthestPoint(p);
 
   if Sign(TSimbaGeometry.CrossProduct(q,  p1, p2)) = Sign(TSimbaGeometry.CrossProduct(t, p1, p2)) then
     p3 := q
@@ -2643,7 +2666,7 @@ begin
     p3 := t;
 
   p := TTriangle.Create(p1,p2,p3).Circumcircle().Center;
-  q := poly.FurthestPoint(p);
+  q := TPointArray(poly).FurthestPoint(p);
   if (p1 <> q) and (p2 <> q) and (p3 <> q) then
   begin
     p.x := (p3.x+q.x) div 2;
@@ -2656,45 +2679,12 @@ begin
       p2 := q;
 
     p := TTriangle.Create(p1,p2,p3).Circumcircle().Center;
-    q := poly.FurthestPoint(p);
+    q := TPointArray(poly).FurthestPoint(p);
     if (p1 <> q) and (p2 <> q) and (p3 <> q) then
       p1 := q;
   end;
 
   Result := TTriangle.Create(p1,p2,p3).Circumcircle();
-end;
-
-function TPointArrayHelper.DouglasPeucker(epsilon: Double): TPointArray;
-var
-  H, i, index: Int32;
-  dmax, d: Double;
-  Slice1,Slice2: TPointArray;
-begin
-  H := High(Self);
-  if (H = -1) then
-    Exit(nil);
-
-  dmax := 0;
-  index := 0;
-  for i:=1 to H do
-  begin
-    d := TSimbaGeometry.DistToLine(Self[i], Self[0], Self[H]);
-    if (d > dmax) then
-    begin
-      index := i;
-      dmax  := d;
-    end;
-  end;
-
-  if (dmax > epsilon) then
-  begin
-    Slice1 := Copy(Self, 0, index).DouglasPeucker(epsilon);
-    Slice2 := Copy(Self, index).DouglasPeucker(epsilon);
-
-    Result := Slice1;
-    Result += Slice2;
-  end else
-    Result := [Self[0], Self[High(Self)]];
 end;
 
 (*
@@ -2709,7 +2699,7 @@ end;
   1. Increase "Epsilon", this will reduce accurate.. But it's faster.
   2. Increase "kCount", this will maintain accuracy.. But it's slower.
 *)
-function TPointArrayHelper.ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPointArray;
+function TPointArrayHelper.ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPolygon;
 var
   TPA, pts: TPointArray;
   Buffer: TSimbaPointBuffer;
@@ -2729,14 +2719,12 @@ begin
     pts := tree.KNearest(tree.data[i].split, kCount, False);
     if Length(pts) <= 1 then
       Continue;
-    pts := pts.ConvexHull().Connect();
+    pts := TPointArray(pts.ConvexHull()).Connect();
 
     Buffer.Add(pts);
   end;
 
-  TPA := Buffer.ToArray(False);
-
-  Result := TPA.Border().DouglasPeucker(Max(2, Epsilon/2));
+  Result := TPolygon(Buffer.ToArray(False)).DouglasPeucker(Max(2, Epsilon/2));
 end;
 
 (*
@@ -2748,14 +2736,13 @@ end;
   Higher maxleap is slower.
   Epsilon describes how accurate you want your output, and have some impact on speed.
 *)
-function TPointArrayHelper.ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): T2DPointArray;
+function TPointArrayHelper.ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): TPolygonArray;
 var
   TPA, pts: TPointArray;
   tree: TSlackTree;
   i: Int32;
   B: TBox;
   Buffer: TSimbaPointBuffer;
-  BufferResult: TSimbaPointArrayBuffer;
 begin
   B := Self.Bounds();
   TPA := Self.PartitionEx(TPoint.Create(B.X1-Round(Epsilon), B.Y1-Round(Epsilon)), Round(Epsilon*2-1), Round(Epsilon*2-1)).Means();
@@ -2764,24 +2751,21 @@ begin
   tree.Init(TPA);
 
   if MaxLeap = -1 then
-    MaxLeap := Ceil(Sqrt(TSimbaGeometry.PolygonArea(TPA.ConvexHull()) / Length(TPA)) * Sqrt(2));
+    MaxLeap := Ceil(Sqrt(TPA.ConvexHull().Area / Length(TPA)) * Sqrt(2));
 
   MaxLeap := Max(MaxLeap, Epsilon*2);
-  Buffer.Init(256);
   for i:=0 to High(tree.data) do
   begin
     pts := tree.RangeQueryEx(tree.data[i].split, MaxLeap,MaxLeap, False);
     if Length(pts) <= 1 then
       Continue;
 
-    Buffer.Add(pts.ConvexHull().Connect());
+    Buffer.Add(TPointArray(pts.ConvexHull()).Connect());
   end;
 
   pts := Buffer.ToArray(False);
   for pts in pts.Cluster(2) do
-    BufferResult.Add(pts.Border().DouglasPeucker(Epsilon));
-
-  Result := BufferResult.ToArray();
+    Result := Result + [TPolygon(pts.Border()).DouglasPeucker(Epsilon)];
 end;
 
 (*

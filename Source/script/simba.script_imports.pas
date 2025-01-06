@@ -38,7 +38,7 @@ uses
   simba.import_async,
   
   // Simba shapes
-  simba.import_quad, simba.import_triangle, simba.import_box, simba.import_point, simba.import_circle, 
+  simba.import_quad, simba.import_triangle, simba.import_box, simba.import_point, simba.import_circle, simba.import_polygon,
   
 
   // Simba classes
@@ -68,7 +68,8 @@ begin
   ImportColorMath(Script);
   ImportMatrix(Script);
   ImportWindowHandle(Script);
-  
+
+  ImportPolygon(Script);
   ImportQuad(Script);
   ImportCircle(Script);
   ImportBox(Script);

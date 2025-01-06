@@ -148,67 +148,15 @@ begin
 end;
 
 (*
-TBox.Extract
-------------
-```
-function TBox.Extract(Points: TPointArray): TPointArray;
-```
-
-Returns all points that *are inside* the box.
-*)
-procedure _LapeBox_Extract(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PBox(Params^[0])^.Extract(PPointArray(Params^[1])^);
-end;
-
-(*
-TBox.Exclude
-------------
-```
-function TBox.Exclude(Points: TPointArray): TPointArray;
-```
-
-Returns all points that are *not inside* the box.
-*)
-procedure _LapeBox_Exclude(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PBox(Params^[0])^.Exclude(PPointArray(Params^[1])^);
-end;
-
-(*
 TBox.Contains
 -------------
 ```
-function TBox.Contains(Other: TBox): Boolean;
+function TBox.Contains(Point: TPoint): Boolean;
 ```
 *)
-procedure _LapeBox_Contains1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PBox(Params^[0])^.Contains(PBox(Params^[1])^);
-end;
-
-(*
-TBox.Contains
--------------
-```
-function TBox.Contains(Other: TPoint): Boolean;
-```
-*)
-procedure _LapeBox_Contains2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeBox_Contains(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PBox(Params^[0])^.Contains(PPoint(Params^[1])^);
-end;
-
-(*
-TBox.Contains
--------------
-```
-function TBox.Contains(Other: TQuad): Boolean;
-```
-*)
-procedure _LapeBox_Contains3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PBox(Params^[0])^.Contains(PQuad(Params^[1])^);
 end;
 
 (*
@@ -353,20 +301,6 @@ function TBox.Corners: TPointArray;
 procedure _LapeBox_Corners(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PBox(Params^[0])^.Corners();
-end;
-
-(*
-TBox.ToQuad
------------
-```
-function TBox.ToQuad: TQuad;
-```
-
-Converts the TBox to a TQuad type.
-*)
-procedure _LapeBox_ToQuad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PQuad(Result)^ := PBox(Params^[0])^.ToQuad();
 end;
 
 (*
@@ -665,16 +599,11 @@ begin
     addGlobalFunc('function TBox.Expand(SizeMod: Integer; MaxBounds: TBox): TBox; overload;', @_LapeBox_Expand3);
     addGlobalFunc('function TBox.Expand(WidMod, HeiMod: Integer): TBox; overload;', @_LapeBox_Expand2);
     addGlobalFunc('function TBox.Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox; overload;', @_LapeBox_Expand4);
-    addGlobalFunc('function TBox.Extract(Points: TPointArray): TPointArray', @_LapeBox_Extract);
-    addGlobalFunc('function TBox.Exclude(Points: TPointArray): TPointArray', @_LapeBox_Exclude);
-    addGlobalFunc('function TBox.Contains(Other: TBox): Boolean; overload;', @_LapeBox_Contains1);
-    addGlobalFunc('function TBox.Contains(Other: TPoint): Boolean; overload;', @_LapeBox_Contains2);
-    addGlobalFunc('function TBox.Contains(Other: TQuad): Boolean; overload;', @_LapeBox_Contains3);
+    addGlobalFunc('function TBox.Contains(Point: TPoint): Boolean;', @_LapeBox_Contains);
     addGlobalFunc('function TBox.Partition(Rows, Cols: Integer): TBoxArray;', @_LapeBox_Partition);
     addGlobalFunc('function TBox.Offset(P: TPoint): TBox; overload;', @_LapeBox_Offset1);
     addGlobalFunc('function TBox.Combine(Other: TBox): TBox;', @_LapeBox_Combine);
     addGlobalFunc('function TBox.Invert(Space: TBox): TBoxArray;', @_LapeBox_Invert);
-    addGlobalFunc('function TBox.ToQuad: TQuad;', @_LapeBox_ToQuad);
 
     addGlobalFunc('function TBox.NearestEdge(P: TPoint): TPoint;', @_LapeBox_NearestEdge);
     addGlobalFunc('function TBox.Intersect(P: TPoint): TPoint;', @_LapeBox_Intersect);

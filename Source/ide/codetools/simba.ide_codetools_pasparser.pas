@@ -11,7 +11,7 @@ interface
 
 uses
   SysUtils, Classes,
-  simba.ide_codetools_base, simba.ide_codetools_paslexer;
+  simba.ide_codetools_paslexer;
 
 type
   TPasParser = class(TObject)

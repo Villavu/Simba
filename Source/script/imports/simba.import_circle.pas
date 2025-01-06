@@ -51,31 +51,6 @@ begin
   PCircle(Result)^ := TCircle.CreateFromPoints(PPointArray(Params^[0])^);
 end;
 
-
-(*
-TCircle.Edge
-------------
-```
-function TCircle.Edge: TPointArray;
-```
-*)
-procedure _LapeCircle_Edge_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PCircle(Params^[0])^.Edge;
-end;
-
-(*
-TCircle.Filled
---------------
-```
-function TCircle.Filled: TPointArray;
-```
-*)
-procedure _LapeCircle_Filled_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PCircle(Params^[0])^.Filled;
-end;
-
 (*
 TCircle.Bounds
 --------------
@@ -223,34 +198,6 @@ begin
 end;
 
 (*
-TCircle.Extract
----------------
-```
-function TCircle.Extract(Points: TPointArray): TPointArray;
-```
-
-Returns the points that **are** in the circle.
-*)
-procedure _LapeCircle_Extract(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PCircle(Params^[0])^.Extract(PPointArray(Params^[1])^);
-end;
-
-(*
-TCircle.Exclude
----------------
-```
-function TCircle.Exclude(Points: TPointArray): TPointArray;
-```
-
-Returns the points that are not inside the circle.
-*)
-procedure _LapeCircle_Exclude(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PCircle(Params^[0])^.Exclude(PPointArray(Params^[1])^);
-end;
-
-(*
 in
 --
 ```
@@ -281,15 +228,11 @@ begin
     addGlobalFunc('function TCircle.Circularity(TPA: TPointArray): Double', @_LapeCircle_Circularity);
     addGlobalFunc('function TCircle.Expand(Amount: Integer): TCircle', @_LapeCircle_Expand);
     addGlobalFunc('function TCircle.Offset(P: TPoint): TCircle', @_LapeCircle_Offset);
-    addGlobalFunc('function TCircle.Extract(Points: TPointArray): TPointArray', @_LapeCircle_Extract);
-    addGlobalFunc('function TCircle.Exclude(Points: TPointArray): TPointArray', @_LapeCircle_Exclude);
 
     addProperty('TCircle', 'Circumference', 'Double', @_LapeCircle_Circumference_Read);
     addProperty('TCircle', 'Area', 'Double', @_LapeCircle_Area_Read);
     addProperty('TCircle', 'Center', 'TPoint', @_LapeCircle_Center_Read);
     addProperty('TCircle', 'Bounds', 'TBox', @_LapeCircle_Bounds_Read);
-    addProperty('TCircle', 'Edge', 'TPointArray', @_LapeCircle_Edge_Read);
-    addProperty('TCircle', 'Filled', 'TPointArray', @_LapeCircle_Filled_Read);
 
     addGlobalFunc('operator in(Left: TPoint; Right: TCircle): Boolean;', @_LapePoint_IN_Cicle);
 

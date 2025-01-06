@@ -18,9 +18,15 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base;
+  simba.base,
+  simba.vartype_circle;
 
 type
+  TTriangle = record
+    A,B,C: TPoint;
+  end;
+  TTriangleArray = array of TTriangle;
+
   TTriangleHelper = type helper for TTriangle
   private
     function GetCorners: TPointArray;
@@ -30,7 +36,7 @@ type
   public const
     EMPTY: TTriangle = (A: (X:0; Y:0); B: (X:0; Y:0); C: (X:0; Y:0));
   public
-    class function Create(A, B, C: TPoint): TTriangle; static; 
+    class function Create(const A, B, C: TPoint): TTriangle; static;
 
     function Centroid(): TPoint;
     function SymmedianPoint(): TPoint;
@@ -39,8 +45,6 @@ type
     function Rotate(Radians: Double): TTriangle;
     function Contains(P: TPoint): Boolean;
     function Offset(P: TPoint): TTriangle;
-    function Extract(Points: TPointArray): TPointArray;
-    function Exclude(Points: TPointArray): TPointArray;
     function Expand(Amount: Int32): TTriangle;
     function NearestEdge(P: TPoint): TPoint;
     function IsObtuse(): Boolean; overload;
@@ -57,17 +61,23 @@ type
     property Bounds: TBox read GetBounds;
   end;
 
+  PTriangle = ^TTriangle;
+  PTriangleArray = ^TTriangleArray;
+
   operator in(const P: TPoint; const Triangle: TTriangle): Boolean;
 
 implementation
 
 uses
   Math,
-  simba.math, simba.vartype_pointarray, simba.random, simba.geometry, simba.containers,
-  simba.vartype_point;
+  simba.math,
+  simba.random,
+  simba.geometry,
+  simba.vartype_point,
+  simba.vartype_polygon;
 
 
-class function TTriangleHelper.Create(A ,B, C: TPoint): TTriangle;
+class function TTriangleHelper.Create(const A ,B, C: TPoint): TTriangle;
 begin
   Result.A := A;
   Result.B := B;
@@ -134,7 +144,6 @@ end;
 function TTriangleHelper.Incenter(): TPoint;
 var
   ar, br, cr: Single;
-  I: TPoint;
 begin
   ar := Distance(B, C);
   br := Distance(A, C);
@@ -146,7 +155,6 @@ end;
 
 function TTriangleHelper.Rotate(Radians: Double): TTriangle;
 begin
-  // we can use RotatePointFast for any A,B,C if dist to X,Y < 100
   with Self.Mean do
   begin
     Result.A := TSimbaGeometry.RotatePoint(Self.A, Radians, X, Y);
@@ -167,56 +175,15 @@ begin
   Result := TTriangle.Create(A.Offset(P), B.Offset(P), C.Offset(P));
 end;
 
-
-function TTriangleHelper.Extract(Points: TPointArray): TPointArray;
-var
-  I: Integer;
-  Buffer: TSimbaPointBuffer;
-begin
-  Buffer.Init(Length(Points));
-  for I := 0 to High(Points) do
-    if Self.Contains(Points[I]) then
-      Buffer.Add(Points[I]);
-  
-  Result := Buffer.ToArray(False);
-end;
-
-
-function TTriangleHelper.Exclude(Points: TPointArray): TPointArray;
-var
-  I: Integer;
-  Buffer: TSimbaPointBuffer;
-begin
-  Buffer.Init(Length(Points));
-  for I := 0 to High(Points) do
-    if not Self.Contains(Points[I]) then
-      Buffer.Add(Points[I]);
-
-  Result := Buffer.ToArray(False);
-end;
-
-
 function TTriangleHelper.Expand(Amount: Int32): TTriangle;
 var
-  poly: TPointArray;
-  tmp: TPoint;
-  o: Int32;
+  poly: TPolygon;
 begin
-  o := TSimbaGeometry.CrossProduct(A,B,C);
-  SetLength(poly, 3);
-  poly[0] := A;
-  poly[1] := B;
-  poly[2] := C;
+  poly := [A,B,C];
+  if (TSimbaGeometry.CrossProduct(Self.A, Self.B, Self.C) < 0) then
+    Swap(poly[0], poly[2]);
 
-  if o < 0 then
-  begin
-    tmp := A;
-    A   := C;
-    C   := tmp;
-  end;
-
-  poly := TSimbaGeometry.ExpandPolygon(poly, Amount);
-
+  poly := poly.Expand(Amount);
   Result.A := poly[0];
   Result.B := poly[1];
   Result.C := poly[2];

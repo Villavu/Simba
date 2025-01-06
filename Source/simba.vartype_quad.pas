@@ -14,6 +14,14 @@ uses
   simba.base;
 
 type
+  TQuad = record
+    Top: TPoint;
+    Right: TPoint;
+    Bottom: TPoint;
+    Left: TPoint;
+  end;
+  TQuadArray = array of TQuad;
+
   TQuadHelper = type helper for TQuad
   private
     function GetCorners: TPointArray;
@@ -35,9 +43,7 @@ type
     function Rotate(Radians: Double): TQuad;
     function Contains(P: TPoint): Boolean;
     function Offset(P: TPoint): TQuad;
-    function Extract(Points: TPointArray): TPointArray;
-    function Exclude(Points: TPointArray): TPointArray;
-    function Expand(Amount: Double): TQuad;
+    function Expand(Amount: Integer): TQuad;
     function NearestEdge(P: TPoint): TPoint;
     function Normalize: TQuad;
 
@@ -49,14 +55,18 @@ type
     property LongSideLen: Integer read GetLongSideLen;
   end;
 
+  PQuad = ^TQuad;
+  PQuadArray = ^TQuadArray;
+
   operator in(const P: TPoint; const Quad: TQuad): Boolean;
 
 implementation
 
 uses
   Math,
-  simba.math, simba.vartype_pointarray, simba.random, simba.geometry, simba.containers,
-  simba.vartype_point;
+  simba.math, simba.vartype_pointarray, simba.random, simba.geometry,
+  simba.vartype_point,
+  simba.vartype_polygon;
 
 class function TQuadHelper.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad;
 begin
@@ -168,7 +178,8 @@ end;
 
 function TQuadHelper.Contains(P: TPoint): Boolean;
 begin
-  Result := TSimbaGeometry.PointInQuad(P, Self.Top, Self.Right, Self.Bottom, Self.Left);
+  Result := TSimbaGeometry.PointInTriangle(P, Self.Top, Self.Bottom, Self.Right) or
+            TSimbaGeometry.PointInTriangle(P, Self.Top, Self.Left, Self.Bottom);
 end;
 
 function TQuadHelper.Offset(P: TPoint): TQuad;
@@ -176,53 +187,17 @@ begin
   Result := TQuad.Create(Top.Offset(P), Right.Offset(P), Bottom.Offset(P), Left.Offset(P));
 end;
 
-function TQuadHelper.Extract(Points: TPointArray): TPointArray;
+function TQuadHelper.Expand(Amount: Integer): TQuad;
 var
-  I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Poly: TPolygon;
 begin
-  Buffer.Init(Length(Points));
-  for I := 0 to High(Points) do
-    if Contains(Points[I]) then
-      Buffer.Add(Points[I]);
+  Poly := TPolygon([Self.Top, Self.Right, Self.Bottom, Self.Left]);
+  Poly := Poly.Expand(Amount);
 
-  Result := Buffer.ToArray(False);
-end;
-
-function TQuadHelper.Exclude(Points: TPointArray): TPointArray;
-var
-  I: Integer;
-  Buffer: TSimbaPointBuffer;
-begin
-  Buffer.Init(Length(Points));
-  for I := 0 to High(Points) do
-    if not Contains(Points[I]) then
-      Buffer.Add(Points[I]);
-
-  Result := Buffer.ToArray(False);
-end;
-
-function TQuadHelper.Expand(Amount: Double): TQuad;
-var
-  InTPA, OutTPA: array[0..3] of TPoint;
-  Theta: Double;
-  I, J: Integer;
-begin
-  InTPA[0] := Self.Top;
-  InTPA[1] := Self.Right;
-  InTPA[2] := Self.Bottom;
-  InTPA[3] := Self.Left;
-
-  Amount *= Sqrt(2);
-  for I := 0 to 3 do
-  begin
-    J := (I+1) mod 4;
-    Theta := ArcTan2(InTPA[I].Y - InTPA[J].Y, InTPA[I].X - InTPA[J].X) + PI/4;
-    OutTPA[I].X := Round(InTPA[I].X + Amount * Cos(Theta));
-    OutTPA[I].Y := Round(InTPA[I].Y + Amount * Sin(Theta));
-  end;
-
-  Result := TQuad.Create(OutTPA[0], OutTPA[1], OutTPA[2], OutTPA[3]);
+  Result.Top    := Poly[0];
+  Result.Right  := Poly[1];
+  Result.Bottom := Poly[2];
+  Result.Left   := Poly[3];
 end;
 
 function TQuadHelper.NearestEdge(P: TPoint): TPoint;

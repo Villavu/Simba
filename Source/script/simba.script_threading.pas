@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, syncobjs,
-  lptypes, lpmessages, lpvartypes, lpinterpreter,
+  lptypes, lpvartypes, lpinterpreter,
   simba.base, simba.baseclass, simba.threading;
 
 type

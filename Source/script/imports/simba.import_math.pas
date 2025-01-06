@@ -214,86 +214,6 @@ begin
   PDouble(Result)^ := TSimbaGeometry.DeltaAngle(PDouble(Params^[0])^, PDouble(Params^[1])^, PDouble(Params^[2])^);
 end;
 
-(*
-ExpandPolygon
--------------
-```
-function ExpandPolygon(const Polygon: TPointArray; Amount: Integer): TPointArray;
-```
-*)
-procedure _LapeExpandPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := TSimbaGeometry.ExpandPolygon(PPointArray(Params^[0])^, PInteger(Params^[1])^);
-end;
-
-(*
-PolygonArea
------------
-```
-function PolygonArea(const Polygon: TPointArray): Double;
-```
-*)
-procedure _LapePolygonArea(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDouble(Result)^ := TSimbaGeometry.PolygonArea(PPointArray(Params^[0])^);
-end;
-
-(*
-IsConvexPolygon
------------
-> function IsConvexPolygon(Polygon: TPointArray): Boolean;
-
-Returns if the polygon is convex, order does not matter. A concave polygon will return False.
-*)
-procedure _LapeIsConvexPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaGeometry.IsConvexPolygon(PPointArray(Params^[0])^);
-end;
-
-(*
-TriangulatePolygon
------------
-> function TriangulatePolygon(Polygon: TPointArray; MinArea: Double=0; MaxDepth: Int32=0): TTriangleArray;
-
-Break the polygon into triangles, the smallest possible polygon. The order of the
-input does matter, if it fails, try to reverse the Poly with Poly.Reversed()
-
-This is a custom algorithm by slacky, based around the concept of trimming "ears",
-if you dont like the output, you may have more luck with rolling the Polygon before calling.
-
-Two default params exists as well, `MinArea` and `MaxDepth`, they work in tandom,
-`MinArea` parameter is for setting a minimum size of triangles added to result, and as this method
-works iteratively, removing triangles in a circle around the shape over and over, `MaxDepth` refers
-to the max number of rounds it has moved around the shape before it ignores `MinArea` paramater.
-*)
-procedure _LapeTriangulatePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PTriangleArray(Result)^ := TSimbaGeometry.TriangulatePolygon(PPointArray(Params^[0])^, PSingle(Params^[1])^, PInt32(Params^[2])^);
-end;
-
-(*
-LineInPolygon
------------
-> function LineInPolygon(p,q: TPoint; const Polygon: TPointArray): Boolean;
-
-Returns True if the line fits within the bounds of the polygon.
-*)
-procedure _LapeLineInPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaGeometry.LineInPolygon(PPoint(Params^[0])^, PPoint(Params^[1])^, PPointArray(Params^[2])^);
-end;
-
-(*
-FurthestPointsPolygon
------------
-> procedure FurthestPointsPolygon(const Polygon: TPointArray; out A,B: TPoint);
-
-Returns the two points that are furthest away from eachother in a polygon.
-*)
-procedure _LapeFurthestPointsPolygon(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  TSimbaGeometry.FurthestPointsPolygon(PPointArray(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^);
-end;
 
 (*
 CrossProduct
@@ -368,88 +288,6 @@ begin
 end;
 
 (*
-PointInTriangle
----------------
-```
-function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean;
-```
-*)
-procedure _LapePointInTriangle1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaGeometry.PointInTriangle(PPoint(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^, PPoint(Params^[3])^);
-end;
-
-(*
-PointInTriangle
----------------
-> function PointInTriangle(const P: TPoint; const Triangle: TTriangle): Boolean;
-*)
-procedure _LapePointInTriangle2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaGeometry.PointInTriangle(PPoint(Params^[0])^, PTriangle(Params^[1])^.A, PTriangle(Params^[1])^.B, PTriangle(Params^[1])^.C);
-end;
-
-(*
-PointInBox
-----------
-```
-function PointInBox(const P: TPoint; const Box: TBox): Boolean;
-```
-*)
-procedure _LapePointInBox(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaGeometry.PointInBox(PPoint(Params^[0])^, PBox(Params^[1])^);
-end;
-
-(*
-PointInQuad
------------
-```
-function PointInQuad(const P: TPoint; const A,B,C,D: TPoint): Boolean;
-```
-*)
-procedure _LapePointInQuad(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaGeometry.PointInQuad(PPoint(Params^[0])^, PPoint(Params^[1])^, PPoint(Params^[2])^, PPoint(Params^[3])^, PPoint(Params^[4])^);
-end;
-
-(*
-PointInPolygon
---------------
-```
-function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean;
-```
-*)
-procedure _LapePointInPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaGeometry.PointInPolygon(PPoint(Params^[0])^, PPointArray(Params^[1])^);
-end;
-
-(*
-PointInCircle
--------------
-```
-function PointInCircle(const P, Center: TPoint; Radius: Double): Boolean; static;
-```
-*)
-procedure _LapePointInCircle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaGeometry.PointInCircle(PPoint(Params^[0])^, PPoint(Params^[1])^, PDouble(Params^[2])^);
-end;
-
-(*
-PointInEllipse
---------------
-```
-function PointInEllipse(const P, Center: TPoint; const YRadius, XRadius: Double): Boolean;
-```
-*)
-procedure _LapePointInEllipse(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := TSimbaGeometry.PointInEllipse(PPoint(Params^[0])^, PPoint(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^);
-end;
-
-(*
 IsNumber
 --------
 ```
@@ -507,15 +345,8 @@ begin
 
     addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);
     addGlobalFunc('function Modulo(const X, Y: Double): Double; overload', @_LapeModuloF);
-    
-    addGlobalFunc('function IsConvexPolygon(const Polygon: TPointArray): Boolean', @_LapeIsConvexPolygon);
-    addGlobalFunc('function TriangulatePolygon(const Polygon: TPointArray; MinArea: Single=0; MaxDepth: Int32=0): TTriangleArray', @_LapeTriangulatePolygon);
-    addGlobalFunc('function LineInPolygon(a1, a2: TPoint; const Polygon: TPointArray): Boolean', @_LapeLineInPolygon);
-    addGlobalFunc('procedure FurthestPointsPolygon(const Polygon: TPointArray; out A,B: TPoint)', @_LapeFurthestPointsPolygon);
 
     addGlobalFunc('function DeltaAngle(const DegreesA, DegreesB: Double; R: Double = 360): Double', @_LapeDeltaAngle);
-    addGlobalFunc('function PolygonArea(const Polygon: TPointArray): Double', @_LapePolygonArea);
-    addGlobalFunc('function ExpandPolygon(const Polygon: TPointArray; Amount: Integer): TPointArray', @_LapeExpandPolygon);
 
     addGlobalFunc('function CrossProduct(const r, p, q: TPoint): Int64; overload', @_LapeCrossProduct1);
     addGlobalFunc('function CrossProduct(const rx,ry, px,py, qx,qy: Double): Double; overload', @_LapeCrossProduct2);
@@ -524,15 +355,6 @@ begin
 
     addGlobalFunc('function DistToLine(const P, P1, P2: TPoint; out Nearest: TPoint): Double; overload', @_LapeDistToLine1);
     addGlobalFunc('function DistToLine(const P, P1, P2: TPoint): Double; overload', @_LapeDistToLine2);
-    
-    addGlobalFunc('function PointInTriangle(const P, P1, P2, P3: TPoint): Boolean; overload', @_LapePointInTriangle1);
-    addGlobalFunc('function PointInTriangle(const P: TPoint; const Triangle: TTriangle): Boolean; overload', @_LapePointInTriangle2);
-    
-    addGlobalFunc('function PointInBox(const P: TPoint; const Box: TBox): Boolean', @_LapePointInBox);
-    addGlobalFunc('function PointInQuad(const P: TPoint; const A,B,C,D: TPoint): Boolean', @_LapePointInQuad);
-    addGlobalFunc('function PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean', @_LapePointInPolygon);
-    addGlobalFunc('function PointInCircle(const P, Center: TPoint; Radius: Double): Boolean; static', @_LapePointInCircle);
-    addGlobalFunc('function PointInEllipse(const P, Center: TPoint; const YRadius, XRadius: Double): Boolean', @_LapePointInEllipse);
 
     DumpSection := '';
   end;

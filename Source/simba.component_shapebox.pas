@@ -295,7 +295,7 @@ implementation
 
 uses
   LCLType, simba.geometry, simba.vartype_pointarray,
-  simba.vartype_box, simba.vartype_string, simba.vartype_point;
+  simba.vartype_box, simba.vartype_string, simba.vartype_point, simba.vartype_polygon;
 
 const
   CLOSE_DISTANCE = 4;
@@ -504,7 +504,7 @@ end;
 
 procedure TSimbaShapeBoxShape_Poly.BuildContainsCache;
 begin
-  FContainsCache := TSimbaGeometry.ExpandPolygon(FPoly.ConvexHull(), CLOSE_DISTANCE);
+  FContainsCache := FPoly.ConvexHull().Expand(CLOSE_DISTANCE);
 end;
 
 procedure TSimbaShapeBoxShape_Poly.SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint);

@@ -14,7 +14,8 @@ implementation
 
 uses
   lptypes,
-  simba.image, simba.image_textdrawer, simba.externalcanvas;
+  simba.image, simba.image_textdrawer, simba.externalcanvas,
+  simba.vartype_quad;
 
 type
   PSimbaExternalCanvas = ^TSimbaExternalCanvas;

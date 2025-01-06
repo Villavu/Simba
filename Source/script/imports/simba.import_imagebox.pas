@@ -17,7 +17,8 @@ uses
   simba.component_imagebox, simba.component_imageboxcanvas,
   simba.image, simba.image_textdrawer,
   simba.dtm, simba.colormath,
-  simba.target;
+  simba.target,
+  simba.vartype_quad;
 
 type
   PSimbaTarget = ^TSimbaTarget;

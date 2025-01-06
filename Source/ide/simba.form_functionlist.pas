@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, Menus, StrUtils,
-  simba.base, simba.ide_codetools_base, simba.ide_codetools_parser, simba.ide_codetools_insight,
+  simba.base, simba.ide_codetools_parser, simba.ide_codetools_insight,
   simba.component_treeview, simba.container_dict;
 
 type

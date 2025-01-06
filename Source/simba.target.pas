@@ -13,7 +13,8 @@ uses
   Classes, SysUtils,
   simba.base, simba.image, simba.image_utils, simba.externalcanvas,
   simba.target_eios, simba.target_window, simba.target_image, simba.target_plugin,
-  simba.colormath, simba.dtm;
+  simba.colormath, simba.dtm,
+  simba.vartype_quad;
 
 const
   DEFAULT_KEY_PRESS_MIN = 20;
@@ -263,7 +264,7 @@ type
 implementation
 
 uses
-  simba.nativeinterface, simba.vartype_box, simba.vartype_quad, simba.target_movemouse, simba.random,
+  simba.nativeinterface, simba.vartype_box, simba.target_movemouse, simba.random,
   simba.finder_color, simba.finder_image, simba.finder_dtm;
 
 function TSimbaTarget.MousePressed(Button: EMouseButton): Boolean;

@@ -16,7 +16,8 @@ uses
   TypInfo,
   lptypes, lpvartypes, ffi,
   simba.colormath, simba.dtm, simba.misc,
-  simba.image, simba.target, simba.externalcanvas, simba.finder_image, simba.finder_color;
+  simba.image, simba.target, simba.externalcanvas, simba.finder_image, simba.finder_color,
+  simba.vartype_quad;
 
 type
   PSimbaTarget = ^TSimbaTarget;

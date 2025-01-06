@@ -1,0 +1,40 @@
+{$assertions on}
+
+var
+  p: TPolygon;
+  tpa: TPointArray;
+  x,y,i: Integer;
+begin
+  // concave
+  p := [[49,8], [87,32], [64,67], [39,34], [14,60], [5,14]];
+
+  Assert(Abs(p.Area - 2665) <= 5);
+  Assert(p.IsConvex = False);
+
+  tpa := [];
+  for y:=0 to 200 do
+    for x := 0 to 200 do
+      if p.Contains([x,y]) then
+        tpa += [x,y];
+
+  Assert(Abs(tpa.Bounds.X1 - TPointArray(p).Bounds.X1) <= 2);
+  Assert(Abs(tpa.Bounds.Y1 - TPointArray(p).Bounds.Y1) <= 2);
+  Assert(Abs(tpa.Bounds.X2 - TPointArray(p).Bounds.X2) <= 2);
+  Assert(Abs(tpa.Bounds.Y2 - TPointArray(p).Bounds.Y2) <= 2);
+
+  // convex
+  p := [[39,7], [69,26], [69,56], [40,76], [9,56], [9,25]];
+  Assert(Abs(p.Area - 2985) <= 5);
+  Assert(p.IsConvex = True);
+
+  tpa := [];
+  for y:=0 to 200 do
+    for x := 0 to 200 do
+      if p.Contains([x,y]) then
+        tpa += [x,y];
+
+  Assert(Abs(tpa.Bounds.X1 - TPointArray(p).Bounds.X1) <= 2);
+  Assert(Abs(tpa.Bounds.Y1 - TPointArray(p).Bounds.Y1) <= 2);
+  Assert(Abs(tpa.Bounds.X2 - TPointArray(p).Bounds.X2) <= 2);
+  Assert(Abs(tpa.Bounds.Y2 - TPointArray(p).Bounds.Y2) <= 2);
+end.

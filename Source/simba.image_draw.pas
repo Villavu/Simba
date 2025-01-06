@@ -5,14 +5,16 @@
 }
 unit simba.image_draw;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
 
 uses
   Classes, SysUtils, Math,
-  simba.base, simba.image;
+  simba.base,
+  simba.image,
+  simba.vartype_polygon,
+  simba.vartype_quad;
 
 procedure SimbaImage_DrawTPA(Image: TSimbaImage; TPA: TPointArray);
 procedure SimbaImage_DrawTPAAlpha(Image: TSimbaImage; TPA: TPointArray);
@@ -37,11 +39,11 @@ procedure SimbaImage_DrawCircleInvertedAlpha(Image: TSimbaImage; ACenter: TPoint
 procedure SimbaImage_DrawCircleEdge(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
 procedure SimbaImage_DrawCircleEdgeAlpha(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
 
-procedure SimbaImage_DrawPolygonFilled(Image: TSimbaImage; Points: TPointArray);
-procedure SimbaImage_DrawPolygonFilledAlpha(Image: TSimbaImage; Points: TPointArray);
+procedure SimbaImage_DrawPolygonFilled(Image: TSimbaImage; Poly: TPolygon);
+procedure SimbaImage_DrawPolygonFilledAlpha(Image: TSimbaImage; Poly: TPolygon);
 
-procedure SimbaImage_DrawPolygonInverted(Image: TSimbaImage; Points: TPointArray);
-procedure SimbaImage_DrawPolygonInvertedAlpha(Image: TSimbaImage; Points: TPointArray);
+procedure SimbaImage_DrawPolygonInverted(Image: TSimbaImage; Poly: TPolygon);
+procedure SimbaImage_DrawPolygonInvertedAlpha(Image: TSimbaImage; Poly: TPolygon);
 
 procedure SimbaImage_DrawQuadInverted(Image: TSimbaImage; Quad: TQuad);
 procedure SimbaImage_DrawQuadInvertedAlpha(Image: TSimbaImage; Quad: TQuad);
@@ -52,8 +54,8 @@ procedure SimbaImage_DrawEllipseAA(Image: TSimbaImage; ACenter: TPoint; XRadius,
 implementation
 
 uses
-  simba.image_utils, simba.array_algorithm, simba.geometry,
-  simba.vartype_point, simba.vartype_box, simba.vartype_quad, simba.vartype_pointarray;
+  simba.image_utils, simba.array_algorithm,
+  simba.vartype_point, simba.vartype_box;
 
 procedure SimbaImage_DrawTPA(Image: TSimbaImage; TPA: TPointArray);
 var
@@ -409,7 +411,7 @@ begin
     _BuildCircle(ACenter.X, ACenter.Y, Radius);
 end;
 
-procedure SimbaImage_DrawPolygonFilled(Image: TSimbaImage; Points: TPointArray);
+procedure SimbaImage_DrawPolygonFilled(Image: TSimbaImage; Poly: TPolygon);
 var
   BGRA: TColorBGRA;
 
@@ -428,10 +430,10 @@ var
 begin
   BGRA := Image.DrawColorAsBGRA;
 
-  _BuildPolygonFilled(Points, TRect.Create(0, 0, Image.Width-1, Image.Height-1), TPoint.ZERO);
+  _BuildPolygonFilled(Poly, TRect.Create(0, 0, Image.Width-1, Image.Height-1), TPoint.ZERO);
 end;
 
-procedure SimbaImage_DrawPolygonFilledAlpha(Image: TSimbaImage; Points: TPointArray);
+procedure SimbaImage_DrawPolygonFilledAlpha(Image: TSimbaImage; Poly: TPolygon);
 var
   BGRA: TColorBGRA;
 
@@ -463,36 +465,36 @@ var
 begin
   BGRA := Image.DrawColorAsBGRA;
 
-  _BuildPolygonFilled(Points, TRect.Create(0, 0, Image.Width-1, Image.Height-1), TPoint.ZERO);
+  _BuildPolygonFilled(Poly, TRect.Create(0, 0, Image.Width-1, Image.Height-1), TPoint.ZERO);
 end;
 
-procedure SimbaImage_DrawPolygonInverted(Image: TSimbaImage; Points: TPointArray);
+procedure SimbaImage_DrawPolygonInverted(Image: TSimbaImage; Poly: TPolygon);
 var
   BGRA: TColorBGRA;
   B: TBox;
   X,Y: Integer;
 begin
   BGRA := Image.DrawColorAsBGRA;
-  B := Points.Bounds().Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
+  B := Poly.Bounds().Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInPolygon(TPoint.Create(X, Y), Points) then
+      if not Poly.Contains(TPoint.Create(X, Y)) then
         Image.Data[Y * Image.Width + X] := BGRA;
 end;
 
-procedure SimbaImage_DrawPolygonInvertedAlpha(Image: TSimbaImage; Points: TPointArray);
+procedure SimbaImage_DrawPolygonInvertedAlpha(Image: TSimbaImage; Poly: TPolygon);
 var
   BGRA: TColorBGRA;
   B: TBox;
   X,Y: Integer;
 begin
   BGRA := Image.DrawColorAsBGRA;
-  B := Points.Bounds().Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
+  B := Poly.Bounds().Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInPolygon(TPoint.Create(X, Y), Points) then
+      if not Poly.Contains(TPoint.Create(X, Y)) then
         BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
 end;
 
@@ -507,7 +509,7 @@ begin
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInQuad(TPoint.Create(X, Y), Quad.Top, Quad.Right, Quad.Bottom, Quad.Left) then
+      if not Quad.Contains(TPoint.Create(X, Y)) then
         Image.Data[Y * Image.Width + X] := BGRA;
 end;
 
@@ -522,7 +524,7 @@ begin
 
   for X := B.X1 to B.X2 do
     for Y := B.Y1 to B.Y2 do
-      if not TSimbaGeometry.PointInQuad(TPoint.Create(X, Y), Quad.Top, Quad.Right, Quad.Bottom, Quad.Left) then
+      if not Quad.Contains(TPoint.Create(X, Y)) then
         BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
 end;
 

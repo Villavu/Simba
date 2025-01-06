@@ -35,22 +35,17 @@ type
     function RandomPoint: TPoint;
     function RandomPointCenter: TPoint;
 
-    function ToQuad: TQuad;
     function EqualDimensions(Other: TBox): Boolean;
     function Expand(SizeMod: Integer): TBox; overload;
     function Expand(SizeMod: Integer; MaxBounds: TBox): TBox; overload;
     function Expand(WidMod, HeiMod: Integer): TBox; overload;
     function Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox; overload;
-    function Contains(Other: TBox): Boolean; overload; inline;
-    function Contains(Other: TPoint): Boolean; overload; inline;
-    function Contains(Other: TQuad): Boolean; overload; inline;
+    function Contains(p: TPoint): Boolean;
 
     function Offset(P: TPoint): TBox;
     function Combine(Other: TBox): TBox;
     function Invert(Space: TBox): TBoxArray;
     function Partition(Rows, Cols: Integer): TBoxArray;
-    function Extract(Points: TPointArray): TPointArray;
-    function Exclude(Points: TPointArray): TPointArray;
 
     function NearestEdge(P: TPoint): TPoint;
     function Intersect(P: TPoint): TPoint;
@@ -104,7 +99,7 @@ implementation
 
 uses
   Math,
-  simba.random, simba.containers, simba.geometry, simba.math, simba.array_algorithm;
+  simba.random, simba.geometry, simba.math, simba.array_algorithm;
 
 function TBoxHelper.GetTopRight: TPoint;
 begin
@@ -168,13 +163,6 @@ begin
   Result.Y := RandomMean(Self.Y1, Self.Y2);
 end;
 
-function TBoxHelper.ToQuad: TQuad;
-begin
-  Result.Top    := TPoint.Create(Self.X1, Self.Y1);
-  Result.Right  := TPoint.Create(Self.X2, Self.Y1);
-  Result.Bottom := TPoint.Create(Self.X2, Self.Y2);
-  Result.Left   := TPoint.Create(Self.X1, Self.Y2);
-end;
 
 function TBoxHelper.EqualDimensions(Other: TBox): Boolean;
 begin
@@ -214,19 +202,9 @@ begin
   Result.Clip(MaxBounds);
 end;
 
-function TBoxHelper.Contains(Other: TBox): Boolean;
+function TBoxHelper.Contains(p: TPoint): Boolean;
 begin
-  Result := (Other.X1 >= Self.X1) and (Other.Y1 >= Self.Y1) and (Other.X2 <= Self.X2) and (Other.Y2 <= Self.Y2);
-end;
-
-function TBoxHelper.Contains(Other: TPoint): Boolean;
-begin
-  Result := (Other.X >= Self.X1) and (Other.Y >= Self.Y1) and (Other.X <= Self.X2) and (Other.Y <= Self.Y2);
-end;
-
-function TBoxHelper.Contains(Other: TQuad): Boolean;
-begin
-  Result := Contains(Other.Left) and Contains(Other.Right) and Contains(Other.Top) and Contains(Other.Bottom);
+  Result := (p.x >= Self.X1) and (p.y >= Self.Y1) and (p.x <= Self.X2) and (p.y <= Self.Y2);
 end;
 
 function TBoxHelper.Offset(P: TPoint): TBox;
@@ -288,32 +266,6 @@ begin
       Result[idx].X2 := Trunc(Self.X1 + (BoxW * x) + BoxW-1);
       Result[idx].Y2 := Trunc(Self.Y1 + (BoxH * y) + BoxH-1);
     end;
-end;
-
-function TBoxHelper.Extract(Points: TPointArray): TPointArray;
-var
-  I: Integer;
-  Buffer: TSimbaPointBuffer;
-begin
-  Buffer.Init(Length(Points));
-  for I := 0 to High(Points) do
-    if Contains(Points[I]) then
-      Buffer.Add(Points[I]);
-
-  Result := Buffer.ToArray(False);
-end;
-
-function TBoxHelper.Exclude(Points: TPointArray): TPointArray;
-var
-  I: Integer;
-  Buffer: TSimbaPointBuffer;
-begin
-  Buffer.Init(Length(Points));
-  for I := 0 to High(Points) do
-    if not Contains(Points[I]) then
-      Buffer.Add(Points[I]);
-
-  Result := Buffer.ToArray(False);
 end;
 
 function TBoxHelper.NearestEdge(P: TPoint): TPoint;

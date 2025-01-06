@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.vartype_point;
 
 {$i simba.inc}
@@ -9,18 +14,13 @@ uses
   simba.base;
 
 type
-  TPointHelper = record Helper for TPoint
+  TPointHelper = record helper for TPoint
   const
     ZERO: TPoint = (X: 0; Y: 0);
   public
     class function Create(const X, Y: Integer): TPoint; static; inline;
 
-    function InTriangle(A, B, C: TPoint): Boolean;
-    function InPolygon(Poly: TPointArray): Boolean; inline;
-    function InCircle(Center: TPoint; Radius: Double): Boolean;
-    function InBox(Box: TBox): Boolean; inline;
     function DistanceTo(Other: TPoint): Double;
-    function RotateFast(Degrees: Integer; Center: TPoint): TPoint;
     function Rotate(Radians: Double; Center: TPoint): TPoint;
     function Magnitude: Double;
     function AngleBetween(Other: TPoint): Double;
@@ -37,7 +37,6 @@ type
   operator - (const Left, Right: TPoint): TPoint;
   operator * (const Left: TPoint; const Right: Double): TPoint;
   operator div (const Left: TPoint; const Right: Integer): TPoint;
-  operator in (const Left: TPoint; const Right: TBox): Boolean;
 
 implementation
 
@@ -50,34 +49,9 @@ begin
   Result.Y := Y;
 end;
 
-function TPointHelper.InTriangle(A, B, C: TPoint): Boolean;
-begin
-  Result := TSimbaGeometry.PointInTriangle(Self, A, B, C);
-end;
-
-function TPointHelper.InPolygon(Poly: TPointArray): Boolean;
-begin
-  Result := TSimbaGeometry.PointInPolygon(Self, Poly);
-end;
-
-function TPointHelper.InCircle(Center: TPoint; Radius: Double): Boolean;
-begin
-  Result := TSimbaGeometry.PointInCircle(Self, Center, Radius);
-end;
-
-function TPointHelper.InBox(Box: TBox): Boolean;
-begin
-  Result := TSimbaGeometry.PointInBox(Self, Box);
-end;
-
 function TPointHelper.DistanceTo(Other: TPoint): Double;
 begin
   Result := Sqrt(Sqr(Double(Other.X) - Double(X)) + Sqr(Double(Other.Y) - Double(Y)));
-end;
-
-function TPointHelper.RotateFast(Degrees: Integer; Center: TPoint): TPoint;
-begin
-  Result := TSimbaGeometry.RotatePointFast(Self, Degrees, Center.X, Center.Y);
 end;
 
 function TPointHelper.Rotate(Radians: Double; Center: TPoint): TPoint;
@@ -155,11 +129,6 @@ operator div(const Left: TPoint; const Right: Integer): TPoint;
 begin
   Result.X := Left.X div Right;
   Result.Y := Left.Y div Right;
-end;
-
-operator in(const Left: TPoint; const Right: TBox): Boolean;
-begin
-  Result := Left.InBox(Right);
 end;
 
 end.

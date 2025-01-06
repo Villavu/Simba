@@ -278,31 +278,6 @@ type
   PBox = ^TBox;
   PBoxArray = ^TBoxArray;
 
-  TTriangle = record
-    A,B,C: TPoint;
-  end;
-  TTriangleArray = array of TTriangle;
-  PTriangle = ^TTriangle;
-  PTriangleArray = ^TTriangleArray;
-
-  TQuad = record
-    Top: TPoint;
-    Right: TPoint;
-    Bottom: TPoint;
-    Left: TPoint;
-  end;
-  TQuadArray = array of TQuad;
-
-  PQuad = ^TQuad;
-  PQuadArray = ^TQuadArray;
-
-  TCircle = record
-    X: Integer;
-    Y: Integer;
-    Radius: Integer;
-  end;
-  PCircle = ^TCircle;
-
 {$PUSH}
 {$SCOPEDENUMS ON}
 type
@@ -340,6 +315,7 @@ procedure Swap(var A, B: Single); inline; overload;
 procedure Swap(var A, B: Double); inline; overload;
 procedure Swap(var A, B: TColorBGRA); inline; overload;
 procedure Swap(var A, B: Pointer); inline; overload;
+procedure Swap(var A, B: TPoint); inline; overload;
 
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: String): String; inline; overload;
 function IfThen(const Val: Boolean; const IfTrue, IfFalse: Int64): Int64; inline; overload;
@@ -600,6 +576,15 @@ end;
 procedure Swap(var A, B: Pointer);
 var
   Temp: Pointer;
+begin
+  Temp := A;
+  A := B;
+  B := Temp;
+end;
+
+procedure Swap(var A, B: TPoint);
+var
+  Temp: TPoint;
 begin
   Temp := A;
   A := B;

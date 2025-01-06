@@ -14,6 +14,12 @@ uses
   simba.base;
 
 type
+  TCircle = record
+    X: Integer;
+    Y: Integer;
+    Radius: Integer;
+  end;
+
   TCircleHelper = type helper for TCircle
   private
     function GetCenter: TPoint;
@@ -46,6 +52,8 @@ type
     function Circularity(TPA: TPointArray): Double;
   end;
 
+  PCircle = ^TCircle;
+
   operator in(const P: TPoint; const Circle: TCircle): Boolean;
 
 implementation
@@ -53,7 +61,7 @@ implementation
 uses
   Math,
   simba.math, simba.vartype_pointarray, simba.random, simba.containers, simba.geometry,
-  simba.vartype_box;
+  simba.vartype_box, simba.vartype_polygon;
 
 function TCircleHelper.GetCenter: TPoint;
 begin
@@ -178,16 +186,16 @@ function TCircleHelper.Circularity(TPA: TPointArray): Double;
 var
   I: Integer;
   Smallest, Test: Double;
-  Hull: TPointArray;
+  Poly: TPolygon;
 begin
-  Hull := TPA.ConvexHull();
-  if Length(Hull) <= 1 then
+  Poly := TPA.ConvexHull();
+  if (Length(Poly) <= 1) then
     Exit(0);
 
   Smallest := $FFFFFF;
-  for I := 0 to High(Hull) do
+  for I := 0 to High(Poly) do
   begin
-    Test := TSimbaGeometry.DistToLine(Self.Center, Hull[I], Hull[(I+1) mod Length(Hull)]);
+    Test := TSimbaGeometry.DistToLine(Self.Center, Poly[I], Poly[(I+1) mod Length(Poly)]);
     if (Test < Smallest) then
       Smallest := Test;
   end;

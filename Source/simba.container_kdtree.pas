@@ -65,9 +65,6 @@ type
 
 implementation
 
-uses
-  Math;
-
 const
   NONE = -1;
 

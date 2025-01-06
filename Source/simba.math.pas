@@ -5,7 +5,6 @@
 }
 unit simba.math;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface

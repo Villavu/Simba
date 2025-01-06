@@ -12,7 +12,8 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.base, simba.baseclass, simba.image_textdrawer, simba.colormath, simba.dtm;
+  simba.base, simba.baseclass, simba.image_textdrawer, simba.colormath,
+  simba.vartype_polygon, simba.vartype_quad;
 
 type
   {$PUSH}
@@ -188,9 +189,9 @@ type
     procedure DrawBoxInverted(B: TBox);
 
     // Poly
-    procedure DrawPolygon(Points: TPointArray);
-    procedure DrawPolygonFilled(Points: TPointArray);
-    procedure DrawPolygonInverted(Points: TPointArray);
+    procedure DrawPolygon(Poly: TPolygon);
+    procedure DrawPolygonFilled(Poly: TPolygon);
+    procedure DrawPolygonInverted(Poly: TPolygon);
 
     // Quad
     procedure DrawQuad(Quad: TQuad);
@@ -210,7 +211,7 @@ type
     // Arrays
     procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean);
     procedure DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);
-    procedure DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);
+    procedure DrawPolygonArray(Polygons: TPolygonArray; Filled: Boolean);
     procedure DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean);
     procedure DrawCrossArray(Points: TPointArray; Radius: Integer);
 
@@ -274,7 +275,6 @@ uses
   simba.vartype_matrix,
   simba.vartype_pointarray,
   simba.vartype_box,
-  simba.vartype_quad,
   simba.image_utils,
   simba.image_lazbridge,
   simba.image_resizerotate,
@@ -284,7 +284,6 @@ uses
   simba.colormath_distance,
   simba.colormath_conversion,
   simba.zip,
-  simba.geometry,
   simba.nativeinterface,
   simba.containers,
   simba.threading,
@@ -863,31 +862,31 @@ begin
     SimbaImage_DrawLineGapAlpha(Self, Start, Stop, GapSize);
 end;
 
-procedure TSimbaImage.DrawPolygon(Points: TPointArray);
+procedure TSimbaImage.DrawPolygon(Poly: TPolygon);
 begin
-  if (Length(Points) >= 3) then
-    Self.DrawTPA(Points.Connect());
+  if (Length(Poly) >= 3) then
+    Self.DrawTPA(TPointArray(Poly).Connect());
 end;
 
-procedure TSimbaImage.DrawPolygonFilled(Points: TPointArray);
+procedure TSimbaImage.DrawPolygonFilled(Poly: TPolygon);
 begin
-  if (Length(Points) >= 3) then
+  if (Length(Poly) >= 3) then
     if (FDrawAlpha = ALPHA_OPAQUE) then
-      SimbaImage_DrawPolygonFilled(Self, Points)
+      SimbaImage_DrawPolygonFilled(Self, Poly)
     else
-      SimbaImage_DrawPolygonFilledAlpha(Self, Points)
+      SimbaImage_DrawPolygonFilledAlpha(Self, Poly)
 end;
 
-procedure TSimbaImage.DrawPolygonInverted(Points: TPointArray);
+procedure TSimbaImage.DrawPolygonInverted(Poly: TPolygon);
 begin
-  if (Length(Points) >= 3) then
+  if (Length(Poly) >= 3) then
   begin
-    Self.DrawBoxInverted(Points.Bounds().Clip(TBox.Create(0, 0, FWidth-1, FHeight-1)));
+    Self.DrawBoxInverted(Poly.Bounds().Clip(TBox.Create(0, 0, FWidth-1, FHeight-1)));
 
     if (FDrawAlpha = ALPHA_OPAQUE) then
-      SimbaImage_DrawPolygonInverted(Self, Points)
+      SimbaImage_DrawPolygonInverted(Self, Poly)
     else
-      SimbaImage_DrawPolygonInvertedAlpha(Self, Points);
+      SimbaImage_DrawPolygonInvertedAlpha(Self, Poly);
   end;
 end;
 
@@ -1016,7 +1015,7 @@ begin
   DrawColor := PrevDrawColor;
 end;
 
-procedure TSimbaImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);
+procedure TSimbaImage.DrawPolygonArray(Polygons: TPolygonArray; Filled: Boolean);
 var
   I: Integer;
   PrevDrawColor: TColor;

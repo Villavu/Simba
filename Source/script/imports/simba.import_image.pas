@@ -15,7 +15,8 @@ implementation
 uses
   Graphics,
   lptypes,
-  simba.image, simba.image_textdrawer, simba.colormath, simba.dtm;
+  simba.image, simba.image_textdrawer, simba.colormath,
+  simba.vartype_polygon, simba.vartype_quad, simba.vartype_circle;
 
 type
   PBitmap = ^TBitmap;
@@ -1038,36 +1039,36 @@ end;
 TImage.DrawPolygon
 ------------------
 ```
-procedure TImage.DrawPolygon(Points: TPointArray);
+procedure TImage.DrawPolygon(Points: TPolygon);
 ```
 *)
 procedure _LapeImage_DrawPolygon(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawPolygon(PPointArray(Params^[1])^);
+  PSimbaImage(Params^[0])^.DrawPolygon(PPolygon(Params^[1])^);
 end;
 
 (*
 TImage.DrawPolygonFilled
 ------------------------
 ```
-procedure TImage.DrawPolygonFilled(Points: TPointArray);
+procedure TImage.DrawPolygonFilled(Points: TPolygon);
 ```
 *)
 procedure _LapeImage_DrawPolygonFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawPolygonFilled(PPointArray(Params^[1])^);
+  PSimbaImage(Params^[0])^.DrawPolygonFilled(PPolygon(Params^[1])^);
 end;
 
 (*
 TImage.DrawPolygonInverted
 --------------------------
 ```
-procedure TImage.DrawPolygonInverted(Points: TPointArray);
+procedure TImage.DrawPolygonInverted(Points: TPolygon);
 ```
 *)
 procedure _LapeImage_DrawPolygonInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawPolygonInverted(PPointArray(Params^[1])^);
+  PSimbaImage(Params^[0])^.DrawPolygonInverted(PPolygon(Params^[1])^);
 end;
 
 (*
@@ -1231,12 +1232,12 @@ end;
 TImage.DrawPolygonArray
 -----------------------
 ```
-procedure TImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);
+procedure TImage.DrawPolygonArray(Polygons: TPolygonArray; Filled: Boolean);
 ```
 *)
 procedure _LapeImage_DrawPolygonArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImage(Params^[0])^.DrawPolygonArray(P2DPointArray(Params^[1])^, PBoolean(Params^[2])^);
+  PSimbaImage(Params^[0])^.DrawPolygonArray(PPolygonArray(Params^[1])^, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -1922,9 +1923,9 @@ begin
     addGlobalFunc('procedure TImage.DrawBoxFilled(B: TBox);', @_LapeImage_DrawBoxFilled);
     addGlobalFunc('procedure TImage.DrawBoxInverted(B: TBox);', @_LapeImage_DrawBoxInverted);
 
-    addGlobalFunc('procedure TImage.DrawPolygon(Points: TPointArray);', @_LapeImage_DrawPolygon);
-    addGlobalFunc('procedure TImage.DrawPolygonFilled(Points: TPointArray);', @_LapeImage_DrawPolygonFilled);
-    addGlobalFunc('procedure TImage.DrawPolygonInverted(Points: TPointArray);', @_LapeImage_DrawPolygonInverted);
+    addGlobalFunc('procedure TImage.DrawPolygon(Points: TPolygon);', @_LapeImage_DrawPolygon);
+    addGlobalFunc('procedure TImage.DrawPolygonFilled(Points: TPolygon);', @_LapeImage_DrawPolygonFilled);
+    addGlobalFunc('procedure TImage.DrawPolygonInverted(Points: TPolygon);', @_LapeImage_DrawPolygonInverted);
 
     addGlobalFunc('procedure TImage.DrawQuad(Quad: TQuad);', @_LapeImage_DrawQuad);
     addGlobalFunc('procedure TImage.DrawQuadFilled(Quad: TQuad);', @_LapeImage_DrawQuadFilled);
@@ -1945,7 +1946,7 @@ begin
     
     addGlobalFunc('procedure TImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean);', @_LapeImage_DrawQuadArray);
     addGlobalFunc('procedure TImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);', @_LapeImage_DrawBoxArray);
-    addGlobalFunc('procedure TImage.DrawPolygonArray(Polygons: T2DPointArray; Filled: Boolean);', @_LapeImage_DrawPolygonArray);
+    addGlobalFunc('procedure TImage.DrawPolygonArray(Polygons: TPolygonArray; Filled: Boolean);', @_LapeImage_DrawPolygonArray);
     addGlobalFunc('procedure TImage.DrawCircleArray(Centers: TPointArray; Radius: Integer; Filled: Boolean);', @_LapeImage_DrawCircleArray1);
     addGlobalFunc('procedure TImage.DrawCrossArray(Points: TPointArray; Radius: Integer);', @_LapeImage_DrawCrossArray);
 

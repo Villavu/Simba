@@ -6,6 +6,7 @@ var
 begin
   TestTPA := TPointArray.CreateFromBox([10,10,40,40],True);
 
+  // Box
   ExcludedTPA := TestTPA.ExcludeBox([20,20,30,30]);
   Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
   Assert(ExcludedTPA.Length = 840);
@@ -29,4 +30,16 @@ begin
   ExcludedTPA := TestTPA.ExcludePolygon([TPoint.Create(15, 15), TPoint.Create(30, 25), TPoint.Create(15, 35)]);
   Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
   Assert(ExcludedTPA.Length = 806);
+
+  // Points
+  ExcludedTPA := TestTPA.ExcludePoints(TPointArray.CreateFromBox([11,11,39,39],True));
+  Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
+  Assert(ExcludedTPA.Length = 120);
+
+  ExcludedTPA := TestTPA.ExcludePoints(TPointArray.CreateFromBox([11,11,100,100],True));
+  Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
+  Assert(ExcludedTPA.Length = 61);
+
+  ExcludedTPA := TestTPA.ExcludePoints(TPointArray.CreateFromBox([1,1,100,100],True));
+  Assert(ExcludedTPA.Length = 0);
 end.

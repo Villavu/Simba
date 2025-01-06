@@ -38,7 +38,7 @@ type
 implementation
 
 uses
-  simba.ide_codetools_base, simba.ide_codetools_parser, simba.settings,
+  simba.ide_codetools_parser, simba.settings,
   simba.dialog;
 
 procedure TSimbaEditorPlugin_DocGenerator.DoEditorAdded(Value: TCustomSynEdit);

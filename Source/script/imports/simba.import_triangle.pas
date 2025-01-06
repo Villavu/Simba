@@ -19,7 +19,8 @@ implementation
 
 uses
   lptypes,
-  simba.vartype_triangle;
+  simba.vartype_triangle,
+  simba.vartype_circle;
 
 (*
 TTriangle
@@ -121,34 +122,6 @@ function TTriangle.Offset(P: TPoint): TTriangle;
 procedure _LapeTriangle_Offset(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   TTriangle(Result^) := TTriangle(Params^[0]^).Offset(TPoint(Params^[1]^));
-end;
-
-(*
-TTriangle.Extract
------------------
-```
-function TTriangle.Extract(Points: TPointArray): TPointArray;
-```
-
-Returns all points that are in the triangle.
-*)
-procedure _LapeTriangle_Extract(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  TPointArray(Result^) := TTriangle(Params^[0]^).Extract(TPointArray(Params^[1]^));
-end;
-
-(*
-TTriangle.Exclude
------------------
-```
-function TTriangle.Exclude(Points: TPointArray): TPointArray;
-```
-
-Returns all points that are **not inside** the triangle.
-*)
-procedure _LapeTriangle_Exclude(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  TPointArray(Result^) := TTriangle(Params^[0]^).Exclude(TPointArray(Params^[1]^));
 end;
 
 (*
@@ -327,8 +300,6 @@ begin
     addGlobalFunc('function TTriangle.Rotate(Angle: Double): TTriangle', @_LapeTriangle_Rotate);
     addGlobalFunc('function TTriangle.Contains(P: TPoint): Boolean', @_LapeTriangle_Contains);
     addGlobalFunc('function TTriangle.Offset(P: TPoint): TTriangle', @_LapeTriangle_Offset);
-    addGlobalFunc('function TTriangle.Extract(Points: TPointArray): TPointArray', @_LapeTriangle_Extract);
-    addGlobalFunc('function TTriangle.Exclude(Points: TPointArray): TPointArray', @_LapeTriangle_Exclude);
     addGlobalFunc('function TTriangle.Expand(Amount: Int32): TTriangle', @_LapeTriangle_Expand);
     addGlobalFunc('function TTriangle.NearestEdge(P: TPoint): TPoint', @_LapeTriangle_NearestEdge);
     addGlobalFunc('function TTriangle.IsObtuse(): Boolean; overload', @_LapeTriangle_IsObtuse);

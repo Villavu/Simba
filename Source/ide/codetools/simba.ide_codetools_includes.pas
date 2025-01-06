@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils,
   simba.base, simba.threading,
-  simba.ide_codetools_base, simba.ide_codetools_paslexer, simba.ide_codetools_parser;
+  simba.ide_codetools_paslexer, simba.ide_codetools_parser;
 
 const
   PurgeThreshold = 35; // If cache miss reaches of a include reaches this, remove the cache
