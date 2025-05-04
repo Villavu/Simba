@@ -52,6 +52,7 @@ type
     FSimbaOptions: ESimbaEditorOptions;
 
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure ShiftWheelHandler(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -291,6 +292,26 @@ begin
   inherited MouseDown(Button, Shift, X, Y);
 end;
 
+procedure TSimbaEditor.ShiftWheelHandler(
+  Sender: TObject;
+  Shift: TShiftState;
+  WheelDelta: Integer;
+  MousePos: TPoint;
+  var Handled: Boolean);
+const
+  SCROLL_AMOUNT = 2;
+begin
+  if ssShift in Shift then
+  begin
+    if WheelDelta > 0 then
+      FScrollbarHorz.Position := FScrollbarHorz.Position - SCROLL_AMOUNT
+    else
+      FScrollbarHorz.Position := FScrollbarHorz.Position + SCROLL_AMOUNT;
+
+    Handled := True;  
+  end;
+end;
+
 procedure TSimbaEditor.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
@@ -470,7 +491,7 @@ begin
 
   Options := Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   Options2 := Options2 + [eoCaretSkipsSelection];
-
+  OnMouseWheel := @ShiftWheelHandler;
   MouseOptions := [emAltSetsColumnMode, emUseMouseActions, emShowCtrlMouseLinks, emCtrlWheelZoom];
   ResetMouseActions();
 
