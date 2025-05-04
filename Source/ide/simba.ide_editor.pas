@@ -52,7 +52,7 @@ type
     FSimbaOptions: ESimbaEditorOptions;
 
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
-    procedure ShiftWheelHandler(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+    procedure MouseWheelInterceptor(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -292,7 +292,7 @@ begin
   inherited MouseDown(Button, Shift, X, Y);
 end;
 
-procedure TSimbaEditor.ShiftWheelHandler(
+procedure TSimbaEditor.MouseWheelInterceptor(
   Sender: TObject;
   Shift: TShiftState;
   WheelDelta: Integer;
@@ -491,7 +491,9 @@ begin
 
   Options := Options + [eoTabIndent, eoKeepCaretX, eoDragDropEditing, eoScrollPastEof] - [eoSmartTabs];
   Options2 := Options2 + [eoCaretSkipsSelection];
-  OnMouseWheel := @ShiftWheelHandler;
+
+  OnMouseWheel := @MouseWheelInterceptor;
+
   MouseOptions := [emAltSetsColumnMode, emUseMouseActions, emShowCtrlMouseLinks, emCtrlWheelZoom];
   ResetMouseActions();
 
