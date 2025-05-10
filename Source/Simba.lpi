@@ -469,7 +469,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="83">
+    <Units Count="84">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -859,6 +859,10 @@
         <Filename Value="script/imports/simba.import_timing.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit82>
+      <Unit83>
+        <Filename Value="ide/simba.form_tabs_history.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit83>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

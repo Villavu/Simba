@@ -14,7 +14,7 @@ uses
   SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses, SynEditKeyCmds, SynEditHighlighter, SynEditMarkupCtrlMouseLink, SynEditMarkupHighAll,
   simba.base, simba.settings,
   simba.ide_editor_completionbox, simba.ide_editor_paramhint, simba.ide_editor_attributes,
-  simba.ide_editor_modifiedlinegutter, simba.component_synedit;
+  simba.ide_editor_modifiedlinegutter, simba.component_synedit, simba.ide_editor_history;
 
 type
   TSimbaEditorFileNameEvent = function(Sender: TObject): String of object;
@@ -527,6 +527,7 @@ begin
   TSimbaEditorPlugin_DocGenerator.Create(Self);
   TSimbaEditorPlugin_CommentBlock.Create(Self);
   TSimbaEditorPlugin_MouseWheelZoom.Create(Self);
+  TSimbaEditorPlugin_History.Create(Self);
   TSimbaCodeComplete.Create(Self);
 
   FAttributes := TSimbaEditor_Attributes.Create(Self);
