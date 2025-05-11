@@ -101,7 +101,7 @@ begin
   { ignore tiny moves in the same file }
   if (FHistory.Count > 0) and (FIndex > 0) then
     with FHistory[FIndex-1] do
-      if (Tab = Pt.Tab) and (Abs(Caret.Y - Pt.Caret.Y) < 2) then
+      if (Tab = Pt.Tab) and (Abs(Caret.Y - Pt.Caret.Y) < 15) then
         Exit;                     // nothing added, nothing deleted
 
   DebugLn('TSimbaScriptTabHistory.PushFromEditor deduped');
