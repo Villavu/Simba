@@ -87,6 +87,8 @@ begin
   else
   if AnAction.Command = EditorCommandBack then
     SimbaScriptTabHistory.GoBack;
+
+  Result := False;
 end;
 
 
