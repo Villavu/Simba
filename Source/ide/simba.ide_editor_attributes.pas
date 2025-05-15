@@ -90,7 +90,7 @@ implementation
 
 uses
   Graphics, IniFiles,
-  SynGutterBase, SynEditMiscClasses, SynEditMarkupHighAll, SynEditMarkupWordGroup, SynEditMarkupFoldColoring, SynEditPointClasses, SynHighlighterPas_Simba,
+  SynGutterBase, SynEditMiscClasses, SynEditMarkupHighAll, SynEditMarkupWordGroup, SynEditMarkupFoldColoring, SynEditPointClasses, SynHighlighterPas,
   simba.ide_editor, simba.ide_theme;
 
 type
@@ -283,6 +283,13 @@ constructor TSimbaEditor_Attributes.Create(Editor: TSynEdit);
 
   procedure Add(AName: String; Attribute: TSynHighlighterAttributes);
   begin
+    // dont add things we have no use for
+    if (Attribute.StoredName = 'PasDoc-Keyword') or
+       (Attribute.StoredName = 'PasDoc-Symbol')  or
+       (Attribute.StoredName = 'PasDoc-Unknown') or
+       (Attribute.StoredName = 'Assembler') then
+      Exit;
+
     if Attribute is TSimbaEditor_Attribute then
       TSimbaEditor_Attribute(Attribute).Editor := Editor;
 
@@ -300,24 +307,23 @@ var
 begin
   inherited Create();
 
-  if (Editor.Highlighter is TSynFreePascalSyn) then
-    with TSynFreePascalSyn(Editor.Highlighter) do
-    begin
-      KeywordAttribute.Foreground := RGBToColor(199, 125, 187);
-      StringAttribute.Foreground := RGBToColor(232, 191, 106);
-      SymbolAttri.Foreground := RGBToColor(190, 20, 20);
-      CommentAttri.Foreground := RGBToColor(95, 130, 107);
-      CommentAttri.Style := [fsBold];
-      IdentifierAttri.Foreground := RGBToColor(242, 242, 242);
-      NumberAttri.Foreground := RGBToColor(87, 170, 247);
-      DirectiveAttri.Foreground := RGBToColor(13, 161, 149);
-      DirectiveAttri.Style := [fsBold];
+  with TSynPasSyn(Editor.Highlighter) do
+  begin
+    KeyAttri.Foreground := RGBToColor(199, 125, 187);
+    StringAttri.Foreground := RGBToColor(232, 191, 106);
+    SymbolAttri.Foreground := RGBToColor(190, 20, 20);
+    CommentAttri.Foreground := RGBToColor(95, 130, 107);
+    CommentAttri.Style := [fsBold];
+    IdentifierAttri.Foreground := RGBToColor(242, 242, 242);
+    NumberAttri.Foreground := RGBToColor(87, 170, 247);
+    DirectiveAttri.Foreground := RGBToColor(13, 161, 149);
+    DirectiveAttri.Style := [fsBold];
 
-      NestedComments := True;
-      TypeHelpers := True;
-      StringKeywordMode := spsmNone;
-      StringMultilineMode := [spmsmDoubleQuote];
-    end;
+    NestedComments := True;
+    TypeHelpers := True;
+    StringKeywordMode := spsmNone;
+    StringMultilineMode := [spmsmDoubleQuote];
+  end;
 
   Editor.BracketMatchColor.FrameColor := RGBToColor(190, 20, 20);
 
@@ -372,6 +378,7 @@ begin
   Add('Gutter.Saved Changes', TSimbaEditor_GutterColorSavedAttribute.Create());
   Add('Gutter.Modified Changes', TSimbaEditor_GutterColorModifiedAttribute.Create());
   Add('Gutter.Code Fold', Editor.Gutter.CodeFoldPart().MarkupInfo);
+  Add('Gutter.Current Code Fold', Editor.Gutter.CodeFoldPart().MarkupInfoCurrentFold);
   Add('Gutter.Line Number', Editor.Gutter.LineNumberPart().MarkupInfo);
 end;
 

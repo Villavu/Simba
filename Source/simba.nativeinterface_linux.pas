@@ -326,14 +326,16 @@ end;
 function TSimbaNativeInterface_Linux.GetWindowImage(Window: TWindowHandle; X, Y, Width, Height: Integer; var ImageData: PColorBGRA): Boolean;
 var
   Image: PXImage;
+  Size: PtrUInt;
 begin
   Image := SimbaXLib.XGetImage(Window, X, Y, Width, Height, AllPlanes, ZPixmap);
 
   Result := Image <> nil;
   if Result then
   begin
-    ReAllocMem(ImageData, Width * Height * SizeOf(TColorBGRA));
-    Move(Image^.Data^, PColorBGRA(ImageData)^, MemSize(ImageData));
+    Size := Width * Height * SizeOf(TColorBGRA);
+    ReAllocMem(ImageData, Size);
+    Move(Image^.Data^, ImageData^, Size);
 
     SimbaXLib.XDestroyImage(Image);
   end;

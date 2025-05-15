@@ -123,11 +123,18 @@ type
 implementation
 
 uses
-  SynEditPointClasses, SynGutter, SynHighlighterPas_Simba, LazSynEditMouseCmdsTypes, Forms,
-  simba.misc, simba.ide_editor_blockcompletion,
-  simba.ide_editor_docgenerator, simba.ide_editor_commentblock,
-  simba.ide_editor_mousewheelzoom, simba.ide_editor_multicaret,
-  simba.ide_theme, simba.vartype_string, simba.ide_editor_codecomplete,
+  LazSynEditMouseCmdsTypes,
+  SynHighlighterPas,
+  SynEditPointClasses,
+  SynGutter,
+  simba.misc,
+  simba.vartype_string,
+  simba.ide_editor_blockcompletion,
+  simba.ide_editor_docgenerator,
+  simba.ide_editor_commentblock,
+  simba.ide_editor_mousewheelzoom,
+  simba.ide_editor_multicaret,
+  simba.ide_editor_codecomplete,
   simba.ide_editor_commands;
 
 function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;

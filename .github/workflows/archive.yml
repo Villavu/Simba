@@ -50,7 +50,7 @@ jobs:
           branch=${{ github.event.workflow_run.head_branch }}
           sha=${{ github.event.workflow_run.head_sha }}
           commit=${sha::10}
-          echo "$date_year/$date_month_day | $branch | [$commit](https://github.com/Villavu/Simba/commit/$commit) | [Win32](/$date_year/$date_month_day%20$branch%20$commit/Win32.zip?raw=true) - [Win64](/$date_year/$date_month_day%20$branch%20$commit/Win64.zip?raw=true) - [Win64&nbsp;Debug](/$date_year/$date_month_day%20$branch%20$commit/Win64%20DebugInfo.zip?raw=true)<br>[Mac](/$date_year/$date_month_day%20$branch%20$commit/Mac.zip?raw=true) - [Mac Arm](/$date_year/$date_month_day%20$branch%20$commit/Mac%20Arm.zip?raw=true)<br>[Linux64](/$date_year/$date_month_day%20$branch%20$commit/Linux64.zip?raw=true) - [Linux64](/$date_year/$date_month_day%20$branch%20$commit/Linux%20Arm.zip?raw=true)" > row.txt
+          echo "$date_year/$date_month_day | $branch | [$commit](https://github.com/Villavu/Simba/commit/$commit) | [Win32](/$date_year/$date_month_day%20$branch%20$commit/Win32.zip?raw=true) - [Win64](/$date_year/$date_month_day%20$branch%20$commit/Win64.zip?raw=true) - [Win64&nbsp;Debug](/$date_year/$date_month_day%20$branch%20$commit/Win64%20DebugInfo.zip?raw=true)<br>[Mac](/$date_year/$date_month_day%20$branch%20$commit/Mac.zip?raw=true) - [Mac Arm](/$date_year/$date_month_day%20$branch%20$commit/Mac%20Arm.zip?raw=true)<br>[Linux64](/$date_year/$date_month_day%20$branch%20$commit/Linux64.zip?raw=true) - [Linux Arm](/$date_year/$date_month_day%20$branch%20$commit/Linux%20Arm.zip?raw=true)" > row.txt
           
           cd Simba-Build-Archive
           mkdir -p "$date_year/$date_month_day $branch $commit"

@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, LCLType,
-  SynEdit, SynEditTypes, SynEditKeyCmds, SynEditHighlighterFoldBase, SynHighlighterPas_Simba;
+  SynEdit, SynEditTypes, SynEditKeyCmds, SynEditHighlighterFoldBase;
 
 type
   TSimbaCodeComplete = class(TLazSynEditPlugin)

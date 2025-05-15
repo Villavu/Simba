@@ -207,6 +207,7 @@ begin
   FTreeView.Align := alClient;
   FTreeView.FilterVisible := False;
   FTreeView.OnDoubleClick := @DoTreeDoubleClick;
+  FTreeView.Images := SimbaMainForm.Images;
   if (SIMBA_COMMIT <> '') then
     {%H-}FTreeView.OnGetNodeColor := @DoGetNodeColor;
 
