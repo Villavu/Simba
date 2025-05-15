@@ -304,6 +304,7 @@ end;
 procedure TSimbaACA.DoListDeleteKey(Sender: TObject; var Key: Word;Shift: TShiftState);
 begin
   FColorList.DeleteSelection();
+  CalcBestColor();
 end;
 
 procedure TSimbaACA.DoColorSpaceChange(Sender: TObject);
@@ -465,6 +466,7 @@ begin
   end;
 
   FColorListPopup.Close();
+  CalcBestColor();
 end;
 
 procedure TSimbaACA.DoColorListPopup(Sender: TObject);
