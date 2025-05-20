@@ -23,7 +23,7 @@ uses
 type
   TMoveMouseEvent = procedure(var X, Y, DestX, DestY: Double; out Stop: Boolean) of object;
 
-procedure MoveMouseOnTarget(constref Target: TSimbaTarget; Dest: TPoint; MouseMoveEvent: TMoveMouseEvent = nil);
+procedure MoveMouseOnTarget(Target: TSimbaTarget; Dest: TPoint; MouseMoveEvent: TMoveMouseEvent = nil);
 
 implementation
 
@@ -31,7 +31,7 @@ uses
   Math,
   simba.math, simba.random, simba.nativeinterface;
 
-procedure MoveMouseOnTarget(constref Target: TSimbaTarget; Dest: TPoint; MouseMoveEvent: TMoveMouseEvent);
+procedure MoveMouseOnTarget(Target: TSimbaTarget; Dest: TPoint; MouseMoveEvent: TMoveMouseEvent);
 
   procedure Move(const X, Y, Idle: Double);
   var
@@ -123,28 +123,21 @@ procedure MoveMouseOnTarget(constref Target: TSimbaTarget; Dest: TPoint; MouseMo
   end;
 
 var
-  Speed, Gravity, Wind: Double;
-  Timeout: Integer;
   Start: TPoint;
   RandSpeed, Expo: Double;
 begin
-  Speed   := IfThen(Target.MouseOptions.Speed   = 0, DEFAULT_MOUSE_SPEED,   Target.MouseOptions.Speed);
-  Gravity := IfThen(Target.MouseOptions.Gravity = 0, DEFAULT_MOUSE_GRAVITY, Target.MouseOptions.Gravity);
-  Wind    := IfThen(Target.MouseOptions.Wind    = 0, DEFAULT_MOUSE_WIND,    Target.MouseOptions.Wind);
-  Timeout := IfThen(Target.MouseOptions.Timeout = 0, DEFAULT_MOUSE_TIMEOUT, Target.MouseOptions.Timeout);
-
   Start := Target.MouseXY;
   Expo := 1 + Power(Hypot(Start.X - Dest.X, Start.Y - Dest.Y), 0.5) / 50; // Further the distance the faster we move
 
-  RandSpeed := RandomLeft(Speed, Speed * 1.5);
+  RandSpeed := RandomLeft(Target.Options.MouseSpeed, Target.Options.MouseSpeed * 1.5);
   RandSpeed *= Expo;
   RandSpeed /= 10;
 
   WindMouse(
     Start.X, Start.Y, Dest.X, Dest.Y,
-    Gravity, Wind,
+    Target.Options.MouseGravity, Target.Options.MouseWind,
     5 / RandSpeed, 10 / RandSpeed, 10 * RandSpeed, 15 * RandSpeed,
-    Timeout
+    Target.Options.MouseTimeout
   );
 end;
 

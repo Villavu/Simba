@@ -12,14 +12,14 @@ unit simba.target_plugin;
 interface
 
 uses
-  Classes, SysUtils, DynLibs,
+  Classes, SysUtils,
   simba.base, simba.externalcanvas;
 
 type
   PSimbaPluginTarget = ^TSimbaPluginTarget;
   TSimbaPluginTarget = record
     Lib: TLibHandle;
-    FileName: ShortString;
+    FileName: String;
     Target: Pointer;
     DebugImageThread: TThread;
 

@@ -180,7 +180,6 @@ uses
   Math,
   simba.ide_theme,
   simba.ide_utils,
-  simba.form_main,
   simba.component_images;
 
 constructor TSimbaTreeView.Create(AOwner: TComponent; NodeClass: TTreeNodeClass);

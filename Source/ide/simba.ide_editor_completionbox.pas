@@ -300,17 +300,51 @@ begin
 end;
 
 procedure TSimbaCompletionBox.DoCodeCompletion(var Value: String; SourceValue: String; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char; Shift: TShiftState);
+
+  function isObjectConstructor(Decl: TDeclaration): Boolean;
+  var
+    Decls: TDeclarationArray;
+  begin
+    if (Decl <> nil) and Decl.IsName('Construct') and (Decl is TDeclaration_MethodOfType) then
+    begin
+      Decls := FCodeinsight.Get(TDeclaration_MethodOfType(Decl).ObjectName);
+      Result := (Length(Decls) > 0) and (FCodeinsight.ResolveVarType(Decls[0]) is TDeclaration_TypeObject);
+    end else
+      Result := False;
+  end;
+
 var
   Decl: TDeclaration;
 begin
   Decl := GetDecl(Position);
-  if (Decl <> nil) then
-    if Decl.IsName(SourceValue) then
-      Value := SourceValue
+
+  // special handling for object constructor insert new statement
+  if isObjectConstructor(Decl) then
+  begin
+    Value := '';
+
+    if Length(Editor.LineText) > 0 then
+    begin
+      // go back until white space
+      while (SourceStart.X-1 > 1) and (SourceStart.X-1 <= Length(Editor.LineText)) and (Editor.LineText[SourceStart.X - 1] <> ' ') do
+        Dec(SourceStart.X);
+
+      // ensure we dont duplicate new keyword
+      if not Copy(Editor.LineText, 1, SourceStart.X-2).EndsWith('new', False) then
+        Value := 'new ';
+    end;
+    Value := Value + TDeclaration_MethodOfType(Decl).ObjectName;
+  end else
+  begin
+    if (Decl <> nil) then
+      if Decl.IsName(SourceValue) then
+        Value := SourceValue
+      else
+        Value := Decl.Name
     else
-      Value := Decl.Name
-  else
-    Value := SourceValue;
+      Value := SourceValue;
+  end;
+
   Value := Value + KeyChar;
   case KeyChar of
     '.':      Application.QueueAsyncCall(@ContinueCompletion, ecCompletionBox);
@@ -361,6 +395,7 @@ var
     begin
       if IgnoreDeclaration(Decls, I) then
         Continue;
+
       DeclName := Decls[I].Name.ToUpper();
       if (DeclName.IndexOf(Filter) > 0) then
       begin

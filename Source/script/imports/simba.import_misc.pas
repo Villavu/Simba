@@ -15,10 +15,12 @@ implementation
 uses
   clipbrd, dialogs,
   lptypes,
+  simba.script_importutil,
   simba.process,
   simba.nativeinterface, simba.settings, simba.compress, simba.env,
-  simba.aca, simba.dtmeditor, simba.dialog, simba.threading, simba.target, simba.colormath,
-  simba.finder_color, simba.finder_image, simba.matchtemplate, simba.datetime;
+  simba.dtmeditor, simba.dialog, simba.threading, simba.target,
+  simba.finder_color, simba.finder_image, simba.matchtemplate,
+  simba.colormath, simba.aca;
 
 type
   PSimbaTarget = ^TSimbaTarget;
@@ -221,29 +223,15 @@ end;
 ShowDTMEditor
 -------------
 ```
-function ShowDTMEditor(Target: TTarget; Title: String): String;
-function ShowDTMEditor(Title: String): String;
+function ShowDTMEditor(Target: TTarget): String;
+function ShowDTMEditor: String;
 ```
 *)
 procedure _LapeShowDTMEditor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
   procedure Execute;
-  var
-    Window: TWindowHandle;
   begin
-    with PSimbaTarget(Params^[0])^ do
-      Window := TargetWindow;
-
-    with TSimbaDTMEditorForm.Create(Window) do
-    try
-      FreeOnClose := False;
-      Caption := PString(Params^[1])^;
-      ShowModal();
-
-      PString(Result)^ := DTMString;
-    finally
-      Free();
-    end;
+    ShowDTMEditor(PSimbaTarget(PLapeObject(Params^[0])^)^, False, PString(Result)^);
   end;
 
 begin
@@ -255,18 +243,14 @@ ShowACA
 -------
 ```
 function ShowACA(Target: TTarget; Title: String): TColorTolerance;
-function ShowACA(Title: String): TColorTolerance;
+function ShowACA: TColorTolerance;
 ```
 *)
 procedure _LapeShowACA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
   procedure Execute;
   begin
-    ShowACA(
-      PSimbaTarget(Params^[0])^.TargetWindow,
-      PString(Params^[1])^,
-      PColorTolerance(Result)^
-    );
+    ShowACA(PSimbaTarget(PLapeObject(Params^[0])^)^, False, PColorTolerance(Result)^);
   end;
 
 begin
@@ -541,7 +525,6 @@ begin
       'end;'
     ], 'SimbaEnv');
 
-
     addGlobalVar(Script.ScriptFileName, 'SCRIPT_FILE').isConstant := True;
     addGlobalVar(SimbaNativeInterface.UnixTime(), 'SCRIPT_START_TIME').isConstant := True;
 
@@ -595,20 +578,20 @@ begin
     addGlobalFunc('function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer', @_LapeInputCombo);
     addGlobalFunc('procedure ShowMessage(Message: String)', @_LapeShowMessage);
     addGlobalFunc('function ShowQuestionDialog(Title, Question: String): Boolean', @_LapeShowQuestionDialog);
-    addGlobalFunc('function ShowDTMEditor(Target: TTarget; Title: String): String; overload', @_LapeShowDTMEditor);
-    addGlobalFunc('function ShowACA(Target: TTarget; Title: String): TColorTolerance; overload', @_LapeShowACA);
+    addGlobalFunc('function ShowDTMEditor(Target: TTarget): String; overload', @_LapeShowDTMEditor);
+    addGlobalFunc('function ShowACA(Target: TTarget): TColorTolerance; overload', @_LapeShowACA);
 
     addGlobalFunc(
-      'function ShowDTMEditor(Title: String): String; overload;', [
+      'function ShowDTMEditor: String; overload;', [
       'begin',
-      '  Result := ShowDTMEditor(Target, Title);',
+      '  Result := ShowDTMEditor(Target);',
       'end;'
     ]);
 
     addGlobalFunc(
-      'function ShowACA(Title: String): TColorTolerance; overload;', [
+      'function ShowACA: TColorTolerance; overload;', [
       'begin',
-      '  Result := ShowACA(Target, Title);',
+      '  Result := ShowACA(Target);',
       'end;'
     ]);
 
@@ -617,42 +600,37 @@ begin
       'var',
       '  FileName: String;',
       '  T: Int64;',
+      '  Image: TImage;',
       'begin',
-      '  with TImage.CreateFromTarget() do',
-      '  try',
-      '    FileName := SimbaEnv.ScreenshotsPath + PathExtractNameWithoutExt(SCRIPT_FILE) + #32 + TDateTime.CreateFromSystem().ToString("dd-mm hh-mm-ss") + ".png";',
-      '    if Save(FileName) then',
+      '  Image := Target.GetImage();',
+      '  FileName := SimbaEnv.ScreenshotsPath + PathExtractNameWithoutExt(SCRIPT_FILE) + #32 + TDateTime.CreateFromSystem().ToString("dd-mm hh-mm-ss") + ".png";',
+      '  if Image.Save(FileName) then',
+      '    Exit(FileName);',
+      '',
+      '  // File not available! Try for a little with milliseconds (zzz)',
+      '  T := Time() + 1000;',
+      '  while (Time() < T) do',
+      '  begin',
+      '    FileName := SimbaEnv.ScreenshotsPath + PathExtractNameWithoutExt(SCRIPT_FILE) + #32 + TDateTime.CreateFromSystem().ToString("dd-mm hh-mm-ss-zzz") + ".png";',
+      '    if Image.Save(FileName) then',
       '      Exit(FileName);',
       '',
-      '    // File not available! Try for a little with milliseconds (zzz)',
-      '    T := Time() + 1000;',
-      '    while (Time() < T) do',
-      '    begin',
-      '      FileName := SimbaEnv.ScreenshotsPath + PathExtractNameWithoutExt(SCRIPT_FILE) + #32 + TDateTime.CreateFromSystem().ToString("dd-mm hh-mm-ss-zzz") + ".png";',
-      '      if Save(FileName) then',
-      '        Exit(FileName);',
-      '',
-      '      Sleep(50);',
-      '    end;',
-      '  finally',
-      '    Free();',
+      '    Sleep(10);',
       '  end;',
       'end;'
     ]);
 
     addGlobalFunc(
       'function SaveScreenshot(FileName: String): String; overload;', [
+      'var',
+      '  Image: TImage;',
       'begin',
       '  if (PathExtractExt(FileName) = "") then',
       '    FileName := FileName + ".png";',
       '',
-      '  with TImage.CreateFromTarget() do',
-      '  try',
-      '    if Save(FileName, True) then',
-      '      Result := FileName;',
-      '  finally',
-      '    Free();',
-      '  end;',
+      '  Image := Target.GetImage();',
+      '  if Image.Save(FileName, True) then',
+      '    Result := FileName;',
       'end;'
     ]);
 
@@ -744,7 +722,8 @@ begin
       'begin',
       '  _ResumeEvents += [,Proc];',
       'end;'
-    ]);
+    ],
+    'Misc');
 
     DumpSection := '';
   end;

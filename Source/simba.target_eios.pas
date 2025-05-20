@@ -44,14 +44,14 @@ unit simba.target_eios;
 interface
 
 uses
-  classes, sysutils,
-  simba.base, dynlibs;
+  Classes, SysUtils,
+  simba.base;
 
 type
   PEIOSTarget = ^TEIOSTarget;
   TEIOSTarget = record
     Lib: TLibHandle;
-    FileName: ShortString;
+    FileName: String;
     ImageBuffer: PColorBGRA;
     Target: Pointer;
 

@@ -4,7 +4,7 @@ var Img: TImage;
 var ExternalCanvas: TExternalCanvas;
 
 begin
-  Img := TImage.Create(100,100);
+  Img := new TImage(100,100);
 
   ExternalCanvas := TExternalCanvas.Create();
   ExternalCanvas.DefaultPixel := [0,0,0,255];
@@ -26,6 +26,5 @@ begin
   Assert(Img.FindColor($7F7F7F, 0).Bounds() = [5,5,95,95]);
 
   ExternalCanvas.Free();
-  Img.Free();
 end;
 

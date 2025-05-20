@@ -159,8 +159,8 @@ type
     destructor Destroy; override;
 
     function FindDTM(DTM: TDTM): TPointArray;
-    function FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
-    function MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
+    function FindColor(ColorTolerance: TColorTolerance): TPointArray;
+    function MatchColor(ColorTolerance: TColorTolerance): TSingleMatrix;
 
     function ScreenToImage(ScreenXY: TPoint): TPoint;
     function ImageToScreen(ImageXY: TPoint): TPoint;
@@ -792,41 +792,38 @@ function TSimbaImageBox.FindDTM(DTM: TDTM): TPointArray;
 var
   Target: TSimbaTarget;
 begin
-  with LazImage_ToSimbaImage(FBackground) do
+  Target := TSimbaTarget.Create();
+  Target.SetImage(LazImage_ToSimbaImage(FBackground));
   try
-    Target.SetImage(GetSelf() as TSimbaImage);
-
     Result := Target.FindDTMEx(DTM, -1, Target.Bounds);
   finally
-    Free();
+    Target.Free();
   end;
 end;
 
-function TSimbaImageBox.FindColor(AColor: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
+function TSimbaImageBox.FindColor(ColorTolerance: TColorTolerance): TPointArray;
 var
   Target: TSimbaTarget;
 begin
-  with LazImage_ToSimbaImage(FBackground) do
+  Target := TSimbaTarget.Create();
+  Target.SetImage(LazImage_ToSimbaImage(FBackground));
   try
-    Target.SetImage(GetSelf() as TSimbaImage);
-
-    Result := Target.FindColor(AColor, Tolerance, ColorSPace, Multipliers, Target.Bounds);
+    Result := Target.FindColor(ColorTolerance, Target.Bounds);
   finally
-    Free();
+    Target.Free();
   end;
 end;
 
-function TSimbaImageBox.MatchColor(AColor: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix;
+function TSimbaImageBox.MatchColor(ColorTolerance: TColorTolerance): TSingleMatrix;
 var
   Target: TSimbaTarget;
 begin
-  with LazImage_ToSimbaImage(FBackground) do
+  Target := TSimbaTarget.Create();
+  Target.SetImage(LazImage_ToSimbaImage(FBackground));
   try
-    Target.SetImage(GetSelf() as TSimbaImage);
-
-    Result := Target.MatchColor(AColor, ColorSpace, Multipliers, Target.Bounds);
+    Result := Target.MatchColor(ColorTolerance.Color, ColorTolerance.ColorSpace, ColorTolerance.Multipliers, Target.Bounds);
   finally
-    Free();
+    Target.Free();
   end;
 end;
 

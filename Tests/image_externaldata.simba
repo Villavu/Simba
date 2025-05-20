@@ -8,7 +8,7 @@ begin
   // white, and alpha=255
   FillMem(testData^, 50*50*SizeOf(TColorBGRA), 255);
 
-  img := TImage.Create(100,100);
+  img := new TImage(100,100);
   img.SetExternalData(testData, 50, 50);
 
   Assert(img.Pixel[10,10] = Colors.WHITE);
@@ -21,6 +21,5 @@ begin
   img.SetSize(200,200);
   Assert(img.Pixel[10,10] = Colors.BLACK);
 
-  img.Free();
   FreeMem(testData);
 end.

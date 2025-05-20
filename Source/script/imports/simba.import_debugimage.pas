@@ -13,7 +13,11 @@ procedure ImportDebugImage(Script: TSimbaScript);
 implementation
 
 uses
-  lptypes;
+  lptypes,
+  simba.script_importutil;
+
+type
+  PSimbaImage = ^TSimbaImage;
 
 (*
 Debug Image
@@ -87,50 +91,50 @@ procedure Show(ATPA: T2DPointArray);
 *)
 
 (*
-ShowOnClient
+ShowOnTarget
 ------------
 ```
-procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False);
+procedure ShowOnTarget(Boxes: TBoxArray; Filled: Boolean = False);
 ```
 *)
 
 (*
-ShowOnClient
+ShowOnTarget
 ------------
 ```
-procedure ShowOnClient(Box: TBox; Filled: Boolean = False);
+procedure ShowOnTarget(Box: TBox; Filled: Boolean = False);
 ```
 *)
 
 (*
-ShowOnClient
+ShowOnTarget
 ------------
 ```
-procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False);
+procedure ShowOnTarget(Quads: TQuadArray; Filled: Boolean = False);
 ```
 *)
 
 (*
-ShowOnClient
+ShowOnTarget
 ------------
 ```
-procedure ShowOnClient(Quad: TQuad; Filled: Boolean = False);
+procedure ShowOnTarget(Quad: TQuad; Filled: Boolean = False);
 ```
 *)
 
 (*
-ShowOnClient
+ShowOnTarget
 ------------
 ```
-procedure ShowOnClient(TPA: TPointArray);
+procedure ShowOnTarget(TPA: TPointArray);
 ```
 *)
 
 (*
-ShowOnClient
+ShowOnTarget
 ------------
 ```
-procedure ShowOnClient(ATPA: T2DPointArray);
+procedure ShowOnTarget(ATPA: T2DPointArray);
 ```
 *)
 
@@ -165,7 +169,7 @@ begin
   begin
     if (SimbaCommunication = nil) then
       SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_Show(PSimbaImage(Params^[1])^, PBoolean(Params^[2])^);
+    SimbaCommunication.DebugImage_Show(PSimbaImage(PLapeObject(Params^[1])^)^, PBoolean(Params^[2])^);
   end;
 end;
 
@@ -182,7 +186,7 @@ begin
   begin
     if (SimbaCommunication = nil) then
       SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_Update(PSimbaImage(Params^[1])^);
+    SimbaCommunication.DebugImage_Update(PSimbaImage(PLapeObject(Params^[1])^)^);
   end;
 end;
 
@@ -263,39 +267,32 @@ begin
 
     addGlobalFunc(
       'procedure Show(Matrix: TIntegerMatrix); overload;', [
+      'var img: TImage;',
       'begin',
-      '  with TImage.CreateFromMatrix(Matrix) do',
-      '  try',
-      '    Show();',
-      '  finally',
-      '    Free();',
-      '  end;',
+      '  img := new TImage();',
+      '  img.FromMatrix(Matrix);',
+      '  img.Show();',
       'end;'
     ]);
 
     addGlobalFunc(
       'procedure Show(Matrix: TSingleMatrix; ColorMapType: Integer = 0); overload;', [
+      'var img: TImage;',
       'begin',
-      '  with TImage.CreateFromMatrix(Matrix, ColorMapType) do',
-      '  try',
-      '    Show();',
-      '  finally',
-      '    Free();',
-      '  end;',
+      '  img := new TImage();',
+      '  img.FromMatrix(Matrix, ColorMapType);',
+      '  img.Show();',
       'end;'
     ]);
 
     addGlobalFunc(
       'procedure Show(Boxes: TBoxArray; Filled: Boolean = False); overload;', [
+      'var img: TImage;',
       'begin',
       '  with Boxes.Merge() do',
-      '    with TImage.Create(X1+Width, Y1+Height) do',
-      '    try',
-      '      DrawBoxArray(Boxes, Filled);',
-      '      Show();',
-      '    finally',
-      '      Free();',
-      '    end;',
+      '    img := new TImage(X1+Width, Y1+Height);',
+      '  img.DrawBoxArray(Boxes, Filled);',
+      '  img.Show();',
       'end;'
     ]);
 
@@ -308,49 +305,34 @@ begin
 
     addGlobalFunc(
       'procedure Show(TPA: TPointArray); overload;', [
+      'var img: TImage;',
       'begin',
       '  with TPA.Bounds() do',
-      '    with TImage.Create(X1+Width, Y1+Height) do',
-      '    try',
-      '      DrawTPA(TPA);',
-      '      Show();',
-      '    finally',
-      '      Free();',
-      '    end;',
+      '    img := new TImage(X1+Width, Y1+Height);',
+      '  img.DrawTPA(TPA);',
+      '  img.Show();',
       'end;'
     ]);
 
     addGlobalFunc(
       'procedure Show(ATPA: T2DPointArray); overload;', [
+      'var img: TImage;',
       'begin',
       '  with ATPA.Bounds() do',
-      '    with TImage.Create(X1+Width, Y1+Height) do',
-      '    try',
-      '      DrawATPA(ATPA);',
-      '      Show();',
-      '    finally',
-      '      Free();',
-      '    end;',
+      '    img := new TImage(X1+Width, Y1+Height);',
+      '  img.DrawATPA(ATPA);',
+      '  img.Show();',
       'end;'
     ]);
 
     addGlobalFunc(
       'procedure Show(Quads: TQuadArray; Filled: Boolean = False); overload;', [
-      'var',
-      '  Boxes: TBoxArray;',
-      '  Quad: TQuad;',
+      'var img: TImage;',
       'begin',
-      '  for Quad in Quads do',
-      '    Boxes += Quad.Bounds;',
-      '',
-      '  with Boxes.Merge() do',
-      '    with TImage.Create(X1+Width, Y1+Height) do',
-      '    try',
-      '      DrawQuadArray(Quads, Filled);',
-      '      Show();',
-      '    finally',
-      '      Free();',
-      '    end;',
+      '  with Quads.Merge().Bounds do',
+      '    img := new TImage(X1+Width, Y1+Height);',
+      '  img.DrawQuadArray(Quads, Filled);',
+      '  img.Show();',
       'end;'
     ]);
 
@@ -362,68 +344,56 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure ShowOnClient(Quads: TQuadArray; Filled: Boolean = False); overload;', [
+      'procedure ShowOnTarget(Boxes: TBoxArray; Filled: Boolean = False); overload;', [
+      'var img: TImage;',
       'begin',
-      '  with TImage.CreateFromTarget() do',
-      '  try',
-      '    DrawQuadArray(Quads, Filled);',
-      '    Show();',
-      '  finally',
-      '    Free();',
-      '  end;',
+      '  img := Target.GetImage();',
+      '  img.DrawBoxArray(Boxes, Filled);',
+      '  img.Show();',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure ShowOnClient(Quad: TQuad; Filled: Boolean = False); overload;', [
+      'procedure ShowOnTarget(Box: TBox; Filled: Boolean = False); overload;', [
       'begin',
-      '  ShowOnClient(TQuadArray([Quad]), Filled);',
+      '  ShowOnTarget(TBoxArray([Box]), Filled);',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure ShowOnClient(Boxes: TBoxArray; Filled: Boolean = False); overload;', [
+      'procedure ShowOnTarget(TPA: TPointArray); overload;', [
+      'var img: TImage;',
       'begin',
-      '  with TImage.CreateFromTarget() do',
-      '  try',
-      '    DrawBoxArray(Boxes, Filled);',
-      '    Show();',
-      '  finally',
-      '    Free();',
-      '  end;',
+      '  img := Target.GetImage();',
+      '  img.DrawTPA(TPA);',
+      '  img.Show();',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure ShowOnClient(Box: TBox; Filled: Boolean = False); overload;', [
+      'procedure ShowOnTarget(ATPA: T2DPointArray); overload;', [
+      'var img: TImage;',
       'begin',
-      '  ShowOnClient(TBoxArray([Box]), Filled);',
+      '  img := Target.GetImage();',
+      '  img.DrawATPA(ATPA);',
+      '  img.Show();',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure ShowOnClient(TPA: TPointArray); overload;', [
+      'procedure ShowOnTarget(Quads: TQuadArray; Filled: Boolean = False); overload;', [
+      'var img: TImage;',
       'begin',
-      '  with TImage.CreateFromTarget() do',
-      '  try',
-      '    DrawTPA(TPA);',
-      '    Show();',
-      '  finally',
-      '    Free();',
-      '  end;',
+      '  img := Target.GetImage();',
+      '  img.DrawQuadArray(Quads, Filled);',
+      '  img.Show();',
       'end;'
     ]);
 
     addGlobalFunc(
-      'procedure ShowOnClient(ATPA: T2DPointArray); overload;', [
+      'procedure ShowOnTarget(Quad: TQuad; Filled: Boolean = False); overload;', [
       'begin',
-      '  with TImage.CreateFromTarget() do',
-      '  try',
-      '    DrawATPA(ATPA);',
-      '    Show();',
-      '  finally',
-      '    Free();',
-      '  end;',
+      '  ShowOnTarget(TQuadArray([Quad]), Filled);',
       'end;'
     ]);
 

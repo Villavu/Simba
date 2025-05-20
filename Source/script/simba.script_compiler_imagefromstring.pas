@@ -19,7 +19,7 @@ implementation
 
 uses
   lptypes, lptree, lpvartypes, lpmessages,
-  simba.image;
+  simba.image, simba.script_importutil;
 
 type
   TLapeTree_InternalMethod_ImageFromString = class(TLapeTree_InternalMethod)
@@ -44,6 +44,7 @@ end;
 function TLapeTree_InternalMethod_ImageFromString.Evaluate: TLapeGlobalVar;
 var
   Param: TLapeGlobalVar;
+  Image: TSimbaImage;
 begin
   if (FParams.Count <> 1) then
     LapeExceptionFmt(lpeWrongNumberParams, [1], DocPos);
@@ -54,8 +55,11 @@ begin
   try
     Result := resType().NewGlobalVarP();
 
-    PSimbaImage(Result.Ptr)^ := TSimbaImage.CreateFromString(PAnsiString(Param.Ptr)^);
-    PSimbaImage(Result.Ptr)^.FreeOnTerminate := True;
+    Image := TSimbaImage.CreateFromString(PAnsiString(Param.Ptr)^);
+    Image.FreeOnTerminate := True;
+
+    PLapeObject(Result.Ptr)^ := Image;
+    SetManaging(Result.Ptr, False);
   except
     on E: Exception do
       LapeException(E.Message, DocPos);

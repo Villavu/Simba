@@ -283,7 +283,8 @@ uses
   simba.ide_tab,
   simba.aca, simba.dtmeditor, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
   simba.ide_simpleformatter, simba.ide_theme,
-  simba.threading, simba.ide_editor, simba.vartype_string, simba.misc;
+  simba.threading, simba.ide_editor, simba.vartype_string, simba.misc,
+  simba.target;
 
 procedure TSimbaMainForm.HandleException(Sender: TObject; E: Exception);
 
@@ -728,8 +729,14 @@ begin
 end;
 
 procedure TSimbaMainForm.MenuItemACAClick(Sender: TObject);
+var
+  Target: TSimbaTarget;
 begin
-  ShowACA(SimbaMainToolBar.WindowSelection);
+  Target := TSimbaTarget.Create();
+  if (SimbaMainToolBar.WindowSelection <> 0) then
+    Target.SetWindow(SimbaMainToolBar.WindowSelection);
+
+  ShowACA(Target, True);
 end;
 
 procedure TSimbaMainForm.DoMenuItemRunClick(Sender: TObject);
@@ -921,8 +928,14 @@ begin
 end;
 
 procedure TSimbaMainForm.MenuItemDTMEditorClick(Sender: TObject);
+var
+  Target: TSimbaTarget;
 begin
-  TSimbaDTMEditorForm.Create(SimbaMainToolBar.WindowSelection).ShowOnTop();
+  Target := TSimbaTarget.Create();
+  if (SimbaMainToolBar.WindowSelection <> 0) then
+    Target.SetWindow(SimbaMainToolBar.WindowSelection);
+
+  ShowDTMEditor(Target, True);
 end;
 
 procedure TSimbaMainForm.MenuFindClick(Sender: TObject);

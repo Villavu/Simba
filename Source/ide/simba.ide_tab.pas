@@ -578,7 +578,10 @@ begin
       Save(FScriptFileName);
 
     FScriptRunner := TSimbaScriptTabRunner.Create(Self);
-    FScriptRunner.Run(['--target=' + IntToStr(Target)]);
+    if (Target > 0) then
+      FScriptRunner.Run(['--target=' + IntToStr(Target)])
+    else
+      FScriptRunner.Run([]);
   end;
 end;
 

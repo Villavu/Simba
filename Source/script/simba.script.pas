@@ -22,8 +22,7 @@ type
   TSimbaScript = class(TObject)
   protected
     FUserTerminated: Boolean;
-    FTargetWindow: TWindowHandle;
-    FTarget: TSimbaTarget;
+    FTargetWindow: String;
     FHints: Boolean;
 
     FScript: String;
@@ -44,11 +43,8 @@ type
     function DoCompilerHandleDirective(Sender: TLapeCompiler; Directive, Argument: lpString; InPeek, InIgnore: Boolean): Boolean;
     function GetState: ESimbaScriptState;
 
-    procedure SetTargetWindow(Value: String);
     procedure SetState(Value: ESimbaScriptState);
   public
-    property Target: TSimbaTarget read FTarget;
-
     property CompileTime: Double read FCompileTime;
     property RunningTime: Double read FRunningTime;
 
@@ -56,7 +52,7 @@ type
 
     property SimbaCommunication: TSimbaScriptCommunication read FSimbaCommunication;
 
-    property TargetWindow: String write SetTargetWindow;
+    property TargetWindow: String read FTargetWindow write FTargetWindow;
     property Hints: Boolean write FHints;
 
     function Compile: Boolean;
@@ -76,12 +72,12 @@ type
 implementation
 
 uses
-  simba.env, simba.fs, simba.datetime, simba.vartype_windowhandle,
+  simba.env, simba.fs, simba.datetime,
   simba.vartype_string,
   simba.script_pluginloader,
   simba.script_imports;
 
-function TSimbaScript.DoCompilerPreprocessorFunc(Sender: TLapeCompiler; Name, Argument: lpString; out Value: lpString): Boolean;
+function TSimbaScript.{%H-}DoCompilerPreprocessorFunc(Sender: TLapeCompiler; Name, Argument: lpString; out Value: lpString): Boolean;
 begin
   Value := '';
 
@@ -175,12 +171,6 @@ begin
       Result := ESimbaScriptState.STATE_PAUSED;
 end;
 
-procedure TSimbaScript.SetTargetWindow(Value: String);
-begin
-  if (Value.IsInteger) then
-    FTargetWindow := Value.ToInt;
-end;
-
 function TSimbaScript.Compile: Boolean;
 begin
   FCompiler := TScriptCompiler.Create(FScript, FScriptFileName);
@@ -219,10 +209,6 @@ function TSimbaScript.Run: Boolean;
 var
   I: Integer;
 begin
-  if (FTargetWindow = 0) or (not FTargetWindow.IsValid()) then
-    FTargetWindow := GetDesktopWindow();
-  FTarget.SetWindow(FTargetWindow);
-
   FRunningTime := HighResolutionTime();
   try
     FCodeRunner := TLapeCodeRunner.Create(FCompiler.Emitter);
@@ -266,6 +252,7 @@ constructor TSimbaScript.Create;
 begin
   inherited Create();
 
+  //FTarget := TSimbaTarget.Create();
   FPlugins := TSimbaScriptPluginList.Create(True);
 end;
 
@@ -291,9 +278,12 @@ destructor TSimbaScript.Destroy;
 begin
   if (FCompiler <> nil) then
     FreeAndNil(FCompiler);
-  FreeAndNil(FPlugins);
-  FreeAndNil(FSimbaCommunication);
-  FreeAndNil(FCodeRunner);
+  if (FPlugins <> nil) then
+    FreeAndNil(FPlugins);
+  if (FSimbaCommunication <> nil) then
+    FreeAndNil(FSimbaCommunication);
+  if (FCodeRunner <> nil) then
+    FreeAndNil(FCodeRunner);
 
   inherited Destroy();
 end;

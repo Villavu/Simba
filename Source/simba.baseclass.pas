@@ -34,7 +34,6 @@ type
   end;
   TSimbaBaseClassType = class of TSimbaBaseClass;
   TSimbaBaseClassArray = array of TSimbaBaseClass;
-  TSimbaBaseClassCreate = procedure(Obj: TSimbaBaseClass) of object;
 
   TSimbaBaseThread = class(TThread)
   protected
@@ -54,21 +53,15 @@ type
 
   function GetSimbaObjectsOfClass(ClassType: TSimbaBaseClassType): TSimbaBaseClassArray;
 
-  procedure AddHandlerOnSimbaObjectCreate(Proc: TSimbaBaseClassCreate);
-  procedure RemoveHandlerOnSimbaObjectCreate(Proc: TSimbaBaseClassCreate);
-
 implementation
 
 type
   TTrackedObjects = specialize TSimbaThreadsafeObjectList<TSimbaBaseClass>;
   TTrackedThreads = specialize TSimbaThreadsafeObjectList<TSimbaBaseThread>;
-  TCreateObjectEvents = specialize TSimbaThreadsafeList<TSimbaBaseClassCreate>;
 
 var
   TrackedObjects: TTrackedObjects;
   TrackedThreads: TTrackedThreads;
-
-  CreateEvents: TCreateObjectEvents;
 
 procedure PrintUnfreedObjects;
 var
@@ -154,26 +147,7 @@ begin
       if (TrackedObjects[I] is ClassType) then
         Result := Result + [TrackedObjects[I]];
   finally
-    TrackedObjects.UnLock();
-  end;
-end;
-
-procedure AddHandlerOnSimbaObjectCreate(Proc: TSimbaBaseClassCreate);
-begin
-  CreateEvents.Add(Proc);
-end;
-
-procedure RemoveHandlerOnSimbaObjectCreate(Proc: TSimbaBaseClassCreate);
-var
-  i: Integer;
-begin
-  CreateEvents.Lock();
-  try
-    for i := CreateEvents.Count - 1 downto 0 do
-      if (CreateEvents[i] = Proc) then
-        CreateEvents.Delete(i);
-  finally
-    CreateEvents.UnLock();
+    TrackedObjects.Unlock();
   end;
 end;
 
@@ -198,14 +172,6 @@ begin
 
   if (TrackedObjects <> nil) then
     TrackedObjects.Add(Self);
-
-  CreateEvents.Lock();
-  try
-    if (CreateEvents.Count > 0) then
-      CreateEvents[CreateEvents.Count - 1](Self);
-  finally
-    CreateEvents.UnLock();
-  end;
 end;
 
 destructor TSimbaBaseClass.Destroy;
@@ -246,8 +212,6 @@ initialization
   TrackedObjects := TTrackedObjects.Create();
   TrackedThreads := TTrackedThreads.Create();
 
-  CreateEvents := TCreateObjectEvents.Create();
-
 finalization
   if (TrackedObjects <> nil) then
   begin
@@ -262,8 +226,5 @@ finalization
       TrackedThreads.First.Free();
     FreeAndNil(TrackedThreads);
   end;
-
-  if (CreateEvents <> nil) then
-    FreeAndNil(CreateEvents);
 
 end.

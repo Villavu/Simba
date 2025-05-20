@@ -22,6 +22,9 @@ uses
 
 type
   TSimbaParamHintForm = class(THintWindow)
+  protected type
+    EDrawFlag = (dontDrawNames);
+    EDrawFlags = set of EDrawFlag;
   protected const
     BORDER_SIZE = 4;
   protected
@@ -32,6 +35,7 @@ type
     FMeasuring: Boolean;
     FLineHeight: Integer;
     FIndexing: Boolean;
+    FDrawFlags: EDrawFlags;
 
     procedure DoHide; override;
     procedure Paint; override;
@@ -43,6 +47,7 @@ type
 
     procedure SetBoldIndex(AValue: Integer);
   public
+    procedure EraseBackground(DC: HDC); override;
     procedure Show(ScreenPoint: TPoint; Decls: TDeclarationArray; IsIndexing: Boolean);
 
     property BoldIndex: Integer read FBoldIndex write SetBoldIndex;
@@ -76,6 +81,8 @@ type
 implementation
 
 uses
+  ATCanvasPrimitives,
+
   simba.ide_codetools_setup,
   simba.ide_codetools_paslexer,
   simba.ide_editor,
@@ -112,6 +119,11 @@ begin
   end;
 end;
 
+procedure TSimbaParamHintForm.EraseBackground(DC: HDC);
+begin
+  { nothing }
+end;
+
 procedure TSimbaParamHintForm.Paint;
 var
   I, Y: Integer;
@@ -119,8 +131,7 @@ begin
   if (not FMeasuring) then
   begin
     Canvas.Brush.Color := SimbaTheme.ColorScrollBarActive;
-    Canvas.Pen.Color := SimbaTheme.ColorLine;
-    Canvas.Rectangle(ClientRect);
+    Canvas.FillRect(ClientRect);
   end;
 
   Y := BORDER_SIZE div 2;
@@ -131,6 +142,14 @@ begin
     False:
       for I := 0 to High(FMethods) do
         FNeededWidth := Max(FNeededWidth, DrawMethod(Y, FMethods[I]));
+  end;
+
+  if (not FMeasuring) then
+  begin
+    Canvas.Pen.Color := SimbaTheme.ColorLine;
+    Canvas.Frame(ClientRect);
+    Canvas.Pen.Color := ColorBlendHalf(SimbaTheme.ColorScrollBarActive, SimbaTheme.ColorLine);
+    Canvas.Frame(TRect.Create(1,1,ClientWidth-1,ClientHeight-1));
   end;
 
   FNeededWidth := FNeededWidth + BORDER_SIZE;
@@ -202,7 +221,8 @@ begin
 
   if (Method is TDeclaration_Method) then
   begin
-    NameString := TDeclaration_Method(Method).Name;
+    if not (dontDrawNames in FDrawFlags) then
+      NameString := TDeclaration_Method(Method).Name;
     ResultString := TDeclaration_Method(Method).ResultString;
   end;
 
@@ -448,6 +468,9 @@ begin
       if ((P.X = -1) and (P.Y = -1)) or (IsShowing and IsIndexing) then
         Exit;
 
+      // Reset draw flags
+      FHintForm.FDrawFlags := [];
+
       FParenthesesPoint := P;
       FDisplayPoint := P;
 
@@ -479,12 +502,23 @@ begin
           // method of type
           if (Decl is TDeclaration_MethodOfType) then
           begin
+            Dec(FDisplayPoint.X, Length(Decl.Name));
+
             Decls := Members.GetByClassAndName(Decl.Name, TDeclaration_MethodOfType, True);
           end else
           // regular methods
           if (Decl is TDeclaration_Method) then
           begin
+            Dec(FDisplayPoint.X, Length(Decl.Name));
+
             Decls := FCodeinsight.SymbolTable.Get(Decl.Name).GetByClassAndName(Decl.Name, TDeclaration_Method, True);
+          end else
+          // object constructors
+          if (Decl is TDeclaration_TypeObject) then
+          begin
+            Include(FHintForm.FDrawFlags, dontDrawNames);
+
+            Decls := FCodeinsight.SymbolTable.Get(Decl.Name).GetByClassAndName('Construct', TDeclaration_MethodOfType);
           end;
         end;
 
@@ -499,13 +533,11 @@ begin
 
       if (Length(Decls) > 0) then
       begin
-        if (Decls[0] is TDeclaration_Method) and (Length(Decls[0].Name) > 0) then
-          FDisplayPoint.X := FDisplayPoint.X - Length(Decls[0].Name);
-
         FHintForm.Font := Font;
         FHintForm.Font.Color := Editor.Highlighter.IdentifierAttribute.Foreground;
         FHintForm.BoldIndex := GetParameterIndexAtCaret();
-        FHintForm.Show(ClientToScreen(RowColumnToPixels(LogicalToPhysicalPos(FDisplayPoint))), Decls, IsIndexing);
+
+        FHintForm.Show(ClientToScreen(RowColumnToPixels(FDisplayPoint)), Decls, IsIndexing);
       end else
         FHintForm.Hide();
     end;

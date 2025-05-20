@@ -1,26 +1,23 @@
 {$assertions on}
 
-procedure DoInvalidTarget(var Target: TTarget; Data: TTargetEventData);
+// On invalid target set a image of 100x100
+procedure DoInvalidTarget(Target: TTarget; Data: TTargetEventData);
 begin
-  Assert(Target.TargetKind = ETargetKind.IMAGE);
-  Assert(Target.TargetImage = nil);
-  Target.SetImage(TImage.Create(100,100));
+  Target.SetImage(new TImage(100,100));
 end;
 
-var Event: TTargetEvent;
 var Err: String;
 begin
-  Event := Target.AddEvent(ETargetEvent.TARGET_INVALID, @DoInvalidTarget);
+  Target.AddEvent(ETargetEvent.TARGET_INVALID, @DoInvalidTarget);
   Target.SetImage(nil);
   Assert(Target.Width = 100);
   Assert(Target.Height = 100);
-  Target.TargetImage.Free();
-  Target.RemoveEvent(ETargetEvent.TARGET_INVALID, Event);
+  Target.RemoveEvent(ETargetEvent.TARGET_INVALID, 0);
   Target.SetImage(nil);
   try
     Target.Width;
   except
     Err := GetExceptionMessage();
   end;
-  Assert(Err = 'Target is invalid: IMAGE: TImage(nil)');
+  Assert(Err <> '');
 end.

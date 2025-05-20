@@ -1,9 +1,10 @@
 {$assertions on}
 var
-  img: TImage := TImage.Create(50, 50);
+  img: TImage;
 begin
+  img := new TImage(50,50);
   // test entire client
-  img.FreeOnTerminate := True;
+  //img.FreeOnTerminate := True;
   img.Fill(Colors.RED);
 
   Target.SetImage(img);

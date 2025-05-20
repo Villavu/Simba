@@ -29,7 +29,7 @@ var
   Bitmap: TImage;
   I: Integer;
 begin
-  Bitmap := TImage.Create(500, 500);
+  Bitmap := new TImage(500, 500);
   Bitmap.DrawHSLCircle(Bitmap.Center, 200); // roughly  628300 pixels, so 0.1% error is 628
 
   Target.SetImage(Bitmap);
@@ -39,6 +39,4 @@ begin
     WriteLn(Target.CountColor(TESTS[I]), ' vs ', TEST_RESULTS[i]);
     Assert(Abs(Target.CountColor(TESTS[I]) - TEST_RESULTS[I]) <= 6283);
   end;
-
-  Bitmap.Free();
 end.

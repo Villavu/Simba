@@ -11,12 +11,12 @@ interface
 
 uses
   Classes, SysUtils, Controls, ComCtrls, ExtCtrls, Forms, Graphics, Menus,
-  simba.base, simba.colormath;
+  simba.base, simba.colormath, simba.target;
 
   // ShowOnTop
-  procedure ShowACA(Window: TWindowHandle); overload;
+  procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean); overload;
   // ShowModal
-  procedure ShowACA(Window: TWindowHandle; Title: String; out Color: TColorTolerance); overload;
+  procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean; out Color: TColorTolerance); overload;
 
 implementation
 
@@ -36,7 +36,6 @@ uses
   simba.ide_theme,
   simba.vartype_string,
   simba.vartype_matrix,
-  simba.vartype_windowhandle,
   simba.threading;
 
 type
@@ -51,7 +50,8 @@ type
     FColorListPopup: TPopupMenu;
     FDrawColorMenu: TMenuItem;
     FDrawColor: TColor;
-    FWindow: TWindowHandle;
+    FTarget: TSimbaTarget;
+    FManageTarget: Boolean;
 
     FEditColor: TSimbaLabeledEdit;
     FEditTol: TSimbaLabeledEdit;
@@ -106,7 +106,7 @@ type
     procedure Add(Color: TColor);
     function GetBest: TColorTolerance;
   public
-    constructor Create(Window: TWindowHandle = 0);
+    constructor Create(Target: TSimbaTarget; ManageTarget: Boolean = True); reintroduce;
     destructor Destroy; override;
 
     property BestColor: TColorTolerance read GetBest;
@@ -314,14 +314,11 @@ end;
 
 procedure TSimbaACA.DoFindColorClick(Sender: TObject);
 begin
-  with BestColor do
-  begin
-    FDebugMat := [];
-    FDebugTPA := FImageBox.FindColor(Color, Tolerance, ColorSpace, Multipliers);
+  FDebugMat := [];
+  FDebugTPA := FImageBox.FindColor(BestColor);
 
-    FImageBox.Status := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
-    FImageBox.RePaint();
-  end;
+  FImageBox.Status := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
+  FImageBox.RePaint();
 end;
 
 procedure TSimbaACA.DoClearImageClick(Sender: TObject);
@@ -336,18 +333,14 @@ end;
 
 procedure TSimbaACA.DoMatchColorClick(Sender: TObject);
 begin
-  with BestColor do
-  begin
-    FDebugTPA := [];
-    FDebugMat := FImageBox.MatchColor(Color, ColorSpace, Multipliers).NormMinMax(0, 1);
-
-    FImageBox.Repaint();
-  end;
+  FDebugTPA := [];
+  FDebugMat := FImageBox.MatchColor(BestColor).NormMinMax(0, 1);
+  FImageBox.Repaint();
 end;
 
 procedure TSimbaACA.DoUpdateImgClick(Sender: TObject);
 begin
-  FImageBox.SetImage(TSimbaImage.CreateFromWindow(FWindow));
+  FImageBox.SetImage(FTarget.GetImage());
   if (Length(FDebugTPA) > 0) then
     FButtonFindColor.Click()
   else if (Length(FDebugMat) > 0) then
@@ -509,7 +502,7 @@ begin
   );
 end;
 
-constructor TSimbaACA.Create(Window: TWindowHandle);
+constructor TSimbaACA.Create(Target: TSimbaTarget; ManageTarget: Boolean);
 
   function CreateColorMenu: TPopupMenu;
   begin
@@ -561,9 +554,8 @@ var
 begin
   inherited Create();
 
-  FWindow := Window;
-  if (FWindow = 0) then
-    FWindow := GetDesktopWindow();
+  FTarget := Target;
+  FManageTarget := ManageTarget;
   FDrawColor := clRed;
 
   FForm := TForm.Create(nil);
@@ -593,7 +585,7 @@ begin
   FImageBox := TSimbaImageBox.Create(FForm);
   FImageBox.Parent := FForm;
   FImageBox.Align := alClient;
-  FImageBox.SetImage(TSimbaImage.CreateFromWindow(FWindow));
+  FImageBox.SetImage(FTarget.GetImage());
   FImageBox.OnImgMouseMove := @DoImgMouseMove;
   FImageBox.OnImgMouseDown := @DoImgMouseDown;
   FImageBox.OnImgPaint := @DoImgPaintArea;
@@ -743,6 +735,8 @@ destructor TSimbaACA.Destroy;
 begin
   if (FForm <> nil) then
     FreeAndNil(FForm);
+  if (FTarget <> nil) and FManageTarget then
+    FreeAndNil(FTarget);
 
   inherited Destroy();
 end;
@@ -769,17 +763,16 @@ begin
   Result.Multipliers[2] := String(FEditMulti3.Edit.Text).ToFloat(0);
 end;
 
-procedure ShowACA(Window: TWindowHandle);
+procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean);
 begin
-  with TSimbaACA.Create(Window) do
+  with TSimbaACA.Create(Target, ManageTarget) do
     Form.ShowOnTop();
 end;
 
-procedure ShowACA(Window: TWindowHandle; Title: String; out Color: TColorTolerance);
+procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean; out Color: TColorTolerance);
 begin
-  with TSimbaACA.Create(Window) do
+  with TSimbaACA.Create(Target, ManageTarget) do
   try
-    Form.Caption := Title;
     Form.ShowModal();
 
     Color := BestColor;

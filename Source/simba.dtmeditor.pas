@@ -2,6 +2,8 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+
+  TODO: make like aca, themed and not using form designer
 }
 unit simba.dtmeditor;
 
@@ -10,9 +12,41 @@ unit simba.dtmeditor;
 interface
 
 uses
-  classes, sysutils, fileutil, dividerbevel, forms, controls,
-  graphics, dialogs, extctrls, comctrls, stdctrls, menus, lcltype,
-  simba.base, simba.dtm, simba.component_imagebox, simba.component_imageboxcanvas, simba.component_imageboxzoom;
+  Classes,
+  SysUtils,
+  simba.base,
+  simba.target;
+
+  // ShowOnTop
+  procedure ShowDTMEditor(Target: TSimbaTarget; ManageTarget: Boolean); overload;
+  // ShowModal
+  procedure ShowDTMEditor(Target: TSimbaTarget; ManageTarget: Boolean; out DTM: String); overload;
+
+implementation
+
+{$R *.lfm}
+
+uses
+  Forms,
+  Controls,
+  Graphics,
+  StdCtrls,
+  ExtCtrls,
+  Menus,
+  Dialogs,
+  DividerBevel,
+  LCLType,
+
+  simba.image,
+  simba.dtm,
+  simba.dialog,
+  simba.vartype_box,
+  simba.vartype_string,
+  simba.component_imagebox,
+  simba.component_imageboxcanvas,
+  simba.component_imageboxzoom,
+  simba.colormath,
+  simba.threading;
 
 type
   TSimbaDTMEditorForm = class(TForm)
@@ -78,7 +112,6 @@ type
     procedure ClientImageClear(Sender: TObject);
     procedure ButtonUpdateImageClick(Sender: TObject);
   protected
-    FFreeOnClose: Boolean;
     FImageBox: TSimbaImageBox;
     FZoomPanel: TSimbaImageBoxZoomPanel;
 
@@ -87,8 +120,10 @@ type
     FDebugColor: TPointArray;
 
     FDrawColor: TColor;
-    FWindow: TWindowHandle;
     FDTMString: String;
+
+    FTarget: TSimbaTarget;
+    FManageTarget: Boolean;
 
     procedure DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
     procedure DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -107,19 +142,11 @@ type
 
     procedure DrawDTM;
   public
-    constructor Create(Window: TWindowHandle); reintroduce;
+    constructor Create(Target: TSimbaTarget; ManageTarget: Boolean = True); reintroduce;
+    destructor Destroy; override;
 
-    property FreeOnClose: Boolean read FFreeOnClose write FFreeOnClose;
     property DTMString: String read FDTMString;
   end;
-
-implementation
-
-{$R *.lfm}
-
-uses
-  simba.vartype_windowhandle, simba.vartype_string, simba.colormath, simba.dialog, simba.vartype_box,
-  simba.image;
 
 procedure TSimbaDTMEditorForm.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 var
@@ -142,23 +169,20 @@ end;
 
 procedure TSimbaDTMEditorForm.DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  case Button of
-    mbLeft:
+  if (Button <> mbLeft) then
+    Exit;
+
+  FDragging := GetPointAt(X, Y);
+  case FImageBox.Cursor of
+    crDefault:
       begin
-        FDragging := GetPointAt(X, Y);
+        AddPoint(X, Y, FImageBox.Background.Canvas.Pixels[X, Y]);
 
-        case FImageBox.Cursor of
-          crDefault:
-            begin
-              AddPoint(X, Y, FImageBox.Background.Canvas.Pixels[X, Y]);
-
-              FImageBox.Cursor := crHandPoint;
-            end;
-
-          crHandPoint:
-            ListBox.ItemIndex := GetPointAt(X, Y);
-        end;
+        FImageBox.Cursor := crHandPoint;
       end;
+
+    crHandPoint:
+      ListBox.ItemIndex := GetPointAt(X, Y);
   end;
 end;
 
@@ -192,7 +216,7 @@ begin
   FDebugColor := [];
   FDebugDTM   := [];
 
-  FImageBox.RePaint();
+  FImageBox.Repaint();
 end;
 
 function TSimbaDTMEditorForm.GetPointAt(X, Y: Integer): Integer;
@@ -217,9 +241,7 @@ end;
 
 procedure TSimbaDTMEditorForm.ButtonUpdateImageClick(Sender: TObject);
 begin
-  if (not FWindow.IsValid()) then
-    FWindow := GetDesktopWindow();
-  FImageBox.SetImage(TSimbaImage.CreateFromWindow(FWindow));
+  FImageBox.SetImage(FTarget.GetImage());
 
   DrawDTM();
 end;
@@ -363,7 +385,7 @@ begin
   FDebugColor := [];
   FDebugDTM   := FImageBox.FindDTM(GetDTM());
 
-  FImageBox.RePaint();
+  FImageBox.Repaint();
 end;
 
 procedure TSimbaDTMEditorForm.ButtonPrintDTMClick(Sender: TObject);
@@ -402,14 +424,21 @@ begin
 end;
 
 procedure TSimbaDTMEditorForm.ButtonDebugColorClick(Sender: TObject);
+var
+  Col: TColorTolerance;
 begin
   if ListBox.ItemIndex > -1 then
     with GetPoint(ListBox.ItemIndex) do
     begin
-      FDebugDTM   := [];
-      FDebugColor := FImageBox.FindColor(Color, Tolerance, EColorSpace.RGB, DefaultMultipliers);
+      Col.Color := Color;
+      Col.Tolerance := Tolerance;
+      Col.ColorSpace := EColorSpace.RGB;
+      Col.Multipliers := DefaultMultipliers;
 
-      FImageBox.RePaint();
+      FDebugDTM   := [];
+      FDebugColor := FImageBox.FindColor(Col);
+
+      FImageBox.Repaint();
     end;
 end;
 
@@ -431,8 +460,8 @@ end;
 
 procedure TSimbaDTMEditorForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  if FFreeOnClose then
-    CloseAction := caFree;
+  if (not (fsModal in FormState)) then // non modal, free
+    QueueOnMainThread(@Self.Free);
 end;
 
 procedure TSimbaDTMEditorForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -514,15 +543,12 @@ begin
   DrawDTM();
 end;
 
-constructor TSimbaDTMEditorForm.Create(Window: TWindowHandle);
+constructor TSimbaDTMEditorForm.Create(Target: TSimbaTarget; ManageTarget: Boolean);
 begin
   inherited Create(Application.MainForm);
 
-  FWindow := Window;
-  if (FWindow = 0) or (not FWindow.IsValid()) then
-    FWindow := GetDesktopWindow();
-
-  FFreeOnClose := True;
+  FTarget := Target;
+  FManageTarget := ManageTarget;
 
   FDrawColor := clRed;
   FDragging := -1;
@@ -534,11 +560,37 @@ begin
   FImageBox.OnImgMouseDown := @DoImgMouseDown;
   FImageBox.OnImgMouseMove := @DoImgMouseMove;
   FImageBox.OnImgMouseUp := @DoImgMouseUp;
-  FImageBox.SetImage(TSimbaImage.CreateFromWindow(FWindow));
+  FImageBox.SetImage(FTarget.GetImage());
 
   FZoomPanel := TSimbaImageBoxZoomPanel.Create(Self);
   FZoomPanel.Parent := PanelRight;
   FZoomPanel.Align := alTop;
+end;
+
+destructor TSimbaDTMEditorForm.Destroy;
+begin
+  if FManageTarget and (FTarget <> nil) then
+    FreeAndNil(FTarget);
+
+  inherited Destroy();
+end;
+
+procedure ShowDTMEditor(Target: TSimbaTarget; ManageTarget: Boolean);
+begin
+  with TSimbaDTMEditorForm.Create(Target, ManageTarget) do
+    ShowOnTop();
+end;
+
+procedure ShowDTMEditor(Target: TSimbaTarget; ManageTarget: Boolean; out DTM: String);
+begin
+  with TSimbaDTMEditorForm.Create(Target, ManageTarget) do
+  try
+    ShowModal();
+
+    DTM := DTMString;
+  finally
+    Free();
+  end;
 end;
 
 end.

@@ -19,7 +19,10 @@ implementation
 
 uses
   lptypes,
-  simba.image, simba.matchtemplate;
+  simba.image, simba.matchtemplate, simba.script_importutil;
+
+type
+  PSimbaImage = ^TSimbaImage;
 
 (*
 Match Template
@@ -50,7 +53,7 @@ function TMatchTemplateCache.Create(Image, Template: TImage; Formula: ETMFormula
 *)
 procedure _LapeMatchTemplateCache_Create2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PMatchTemplateCacheBase(Result)^ := MatchTemplateCache(PSimbaImage(Params^[0])^, PSimbaImage(Params^[1])^, PTMFormula(Params^[2])^);
+  PMatchTemplateCacheBase(Result)^ := MatchTemplateCache(PSimbaImage(PLapeObject(Params^[0])^)^, PSimbaImage(PLapeObject(Params^[1])^)^, PTMFormula(Params^[2])^);
 end;
 
 (*
@@ -110,7 +113,7 @@ function MatchTemplateMask(Cache: TMatchTemplateCache; Template: TImage; Formula
 *)
 procedure _LapeMatchTemplateMaskCache2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleMatrix(Result)^ := MatchTemplateMask(PMatchTemplateCacheBase(Params^[0])^, PSimbaImage(Params^[1])^, PTMFormula(Params^[2])^);
+  PSingleMatrix(Result)^ := MatchTemplateMask(PMatchTemplateCacheBase(Params^[0])^, PSimbaImage(PLapeObject(Params^[1])^)^, PTMFormula(Params^[2])^);
 end;
 
 (*
@@ -122,7 +125,7 @@ function MatchTemplate(Image, Template: TImage; Formula: ETMFormula): TSingleMat
 *)
 procedure _LapeMatchTemplate2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleMatrix(Result)^ := MatchTemplate(PSimbaImage(Params^[0])^, PSimbaImage(Params^[1])^, PTMFormula(Params^[2])^);
+  PSingleMatrix(Result)^ := MatchTemplate(PSimbaImage(PLapeObject(Params^[0])^)^, PSimbaImage(PLapeObject(Params^[1])^)^, PTMFormula(Params^[2])^);
 end;
 
 (*
@@ -134,7 +137,7 @@ function MatchTemplateMask(Image, Template: TImage; Formula: ETMFormula): TSingl
 *)
 procedure _LapeMatchTemplateMask2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleMatrix(Result)^ := MatchTemplateMask(PSimbaImage(Params^[0])^, PSimbaImage(Params^[1])^, PTMFormula(Params^[2])^);
+  PSingleMatrix(Result)^ := MatchTemplateMask(PSimbaImage(PLapeObject(Params^[0])^)^, PSimbaImage(PLapeObject(Params^[1])^)^, PTMFormula(Params^[2])^);
 end;
 
 procedure ImportMatchTemplate(Script: TSimbaScript);

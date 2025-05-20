@@ -84,12 +84,9 @@ type
     constructor Create; overload;
     constructor Create(AWidth, AHeight: Integer); overload;
     constructor Create(FileName: String); overload;
-    constructor CreateFromZip(ZipFileName, ZipEntry: String);
     constructor CreateFromString(Str: String);
     constructor CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     constructor CreateFromWindow(Window: TWindowHandle);
-    constructor CreateFromMatrix(Mat: TIntegerMatrix); overload;
-    constructor CreateFromMatrix(Mat: TSingleMatrix; ColorMapType: Integer = 0); overload;
     destructor Destroy; override;
 
     property DataOwner: Boolean read FDataOwner;
@@ -243,6 +240,7 @@ type
     function ToMatrix(Box: TBox): TIntegerMatrix; overload;
 
     // Load & Save
+    procedure FromZip(ZipFile, ZipEntry: String);
     procedure FromStream(Stream: TStream; FileName: String);
     procedure FromString(Str: String);
     procedure FromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
@@ -254,8 +252,7 @@ type
     // Compare/Difference
     function Equals(Other: TSimbaImage): Boolean; reintroduce;
     function Compare(Other: TSimbaImage): Single;
-    function PixelDifference(Other: TSimbaImage; Tolerance: Single = 0): Integer;
-    function PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Single = 0): TPointArray;
+    function PixelDifference(Other: TSimbaImage; Tolerance: Single = 0): TPointArray;
 
     // Laz bridge
     function ToLazBitmap: TBitmap;
@@ -266,9 +263,6 @@ type
     function FindImage(Image: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;
     function FindAlpha(Value: Byte): TPointArray;
   end;
-
-  PSimbaImage = ^TSimbaImage;
-  PSimbaImageArray = ^TSimbaImageArray;
 
 implementation
 
@@ -369,6 +363,18 @@ begin
   for Y := Box.Y1 to Box.Y2 do
     for X := Box.X1 to Box.X2 do
       Result[Y-Box.Y1, X-Box.X1] := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
+end;
+
+procedure TSimbaImage.FromZip(ZipFile, ZipEntry: String);
+var
+  Stream: TMemoryStream;
+begin
+  Stream := ZipExtractEntry(ZipFile, ZipEntry);
+  try
+    FromStream(Stream, ZipEntry);
+  finally
+    Stream.Free();
+  end;
 end;
 
 procedure TSimbaImage.FromMatrix(Matrix: TIntegerMatrix);
@@ -722,47 +728,29 @@ begin
   Result := Result / Sqrt(isum * tsum);
 end;
 
-function TSimbaImage.PixelDifference(Other: TSimbaImage; Tolerance: Single): Integer;
-var
-  Ptr, Upper, OtherPtr: PColorBGRA;
-begin
-  Result := 0;
-  if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
-    SimbaException('TSimbaImage.PixelDifference: Both images must be equal dimensions');
-
-  if DataRange(Ptr, Upper) then
-  begin
-    OtherPtr := Other.Data;
-    while (Ptr <= Upper) do
-    begin
-      if (not SimilarRGB(Ptr^, OtherPtr^, Tolerance)) then
-        Inc(Result);
-
-      Inc(Ptr);
-      Inc(OtherPtr);
-    end;
-  end;
-end;
-
-function TSimbaImage.PixelDifferenceTPA(Other: TSimbaImage; Tolerance: Single): TPointArray;
+function TSimbaImage.PixelDifference(Other: TSimbaImage; Tolerance: Single): TPointArray;
 var
   P1, P2: PColorBGRA;
-  I: Integer;
+  X, Y, W, H: Integer;
   Buffer: TSimbaPointBuffer;
 begin
   if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
-    SimbaException('TSimbaImage.PixelDifferenceTPA: Both images must be equal dimensions');
+    SimbaException('TSimbaImage.PixelDifference: Both images must be equal dimensions');
+
+  W := FWidth-1;
+  H := FHeight-1;
 
   P1 := Data;
   P2 := Other.Data;
-  for I := 0 to (FWidth * FHeight) - 1 do
-  begin
-    if (not SimilarRGB(P1^, P2^, Tolerance)) then
-      Buffer.Add(I mod FWidth, I div FWidth);
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      if not SimilarRGB(P1^, P2^, Tolerance) then
+        Buffer.Add(X, Y);
 
-    Inc(P1);
-    Inc(P2);
-  end;
+      Inc(P1);
+      Inc(P2);
+    end;
 
   Result := Buffer.ToArray(False);
 end;
@@ -2049,20 +2037,6 @@ begin
   Load(FileName);
 end;
 
-constructor TSimbaImage.CreateFromZip(ZipFileName, ZipEntry: String);
-var
-  Stream: TMemoryStream;
-begin
-  Create();
-
-  Stream := ZipExtractEntry(ZipFileName, ZipEntry);
-  try
-    FromStream(Stream, ZipEntry);
-  finally
-    Stream.Free();
-  end;
-end;
-
 constructor TSimbaImage.CreateFromString(Str: String);
 begin
   Create();
@@ -2091,20 +2065,6 @@ begin
   finally
     FreeMem(ImageData);
   end;
-end;
-
-constructor TSimbaImage.CreateFromMatrix(Mat: TIntegerMatrix);
-begin
-  Create();
-
-  FromMatrix(Mat);
-end;
-
-constructor TSimbaImage.CreateFromMatrix(Mat: TSingleMatrix; ColorMapType: Integer);
-begin
-  Create();
-
-  FromMatrix(Mat, ColorMapType);
 end;
 
 destructor TSimbaImage.Destroy;

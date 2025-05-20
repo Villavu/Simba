@@ -18,13 +18,14 @@ uses
   simba.image, simba.image_textdrawer,
   simba.dtm, simba.colormath,
   simba.target,
-  simba.vartype_quad;
+  simba.vartype_quad, simba.script_importutil;
 
 type
   PComponent = ^TComponent;
   PBitmap = ^TBitmap;
   PSimbaImageBox = ^TSimbaImageBox;
   PQuad = ^TQuad;
+  PSimbaImage = ^TSimbaImage;
 
 procedure _LapeSimbaImageBox_FindDTM(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -33,12 +34,12 @@ end;
 
 procedure _LapeSimbaImageBox_FindColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindColor(PColor(Params^[1])^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^);
+  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindColor(PColorTolerance(Params^[1])^);
 end;
 
 procedure _LapeSimbaImageBox_MatchColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleMatrix(Result)^ := PSimbaImageBox(Params^[0])^.MatchColor(PColor(Params^[1])^, PColorSpace(Params^[2])^, PChannelMultipliers(Params^[3])^);
+  PSingleMatrix(Result)^ := PSimbaImageBox(Params^[0])^.MatchColor(PColorTolerance(Params^[1])^);
 end;
 
 procedure _LapeSimbaImageBox_MoveTo(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -68,7 +69,7 @@ end;
 
 procedure _LapeSimbaImageBox_SetImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBox(Params^[0])^.SetImage(PSimbaImage(Params^[1])^, PBoolean(Params^[2])^);
+  PSimbaImageBox(Params^[0])^.SetImage(PSimbaImage(PLapeObject(Params^[1])^)^, PBoolean(Params^[2])^);
 end;
 
 procedure _LapeSimbaImageBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -435,14 +436,14 @@ begin
     addProperty('TImageBox', 'Background', 'TLazBitmap', @_LapeSimbaImageBox_Background_Read);
 
     addGlobalFunc('function TImageBox.FindDTM(DTM: TDTM): TPointArray', @_LapeSimbaImageBox_FindDTM);
-    addGlobalFunc('function TImageBox.FindColor(Col: TColor; Tol: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray', @_LapeSimbaImageBox_FindColor);
-    addGlobalFunc('function TImageBox.MatchColor(Col: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TSingleMatrix', @_LapeSimbaImageBox_MatchColor);
+    addGlobalFunc('function TImageBox.FindColor(ColorTolerance: TColorTolerance): TPointArray', @_LapeSimbaImageBox_FindColor);
+    addGlobalFunc('function TImageBox.MatchColor(ColorTolerance: TColorTolerance): TSingleMatrix', @_LapeSimbaImageBox_MatchColor);
 
     addGlobalFunc('procedure TImageBox.MoveTo(ImageXY: TPoint);', @_LapeSimbaImageBox_MoveTo);
     addGlobalFunc('function TImageBox.IsPointVisible(ImageXY: TPoint): Boolean;', @_LapeSimbaImageBox_IsPointVisible);
-    addGlobalFunc('function TImageBox.MouseX: Integer;', @_LapeSimbaImageBox_MouseX);
-    addGlobalFunc('function TImageBox.MouseY: Integer;', @_LapeSimbaImageBox_MouseY);
-    addGlobalFunc('function TImageBox.MousePoint: TPoint;', @_LapeSimbaImageBox_MousePoint);
+    addProperty('TImageBox', 'MouseX', 'Integer', @_LapeSimbaImageBox_MouseX);
+    addProperty('TImageBox', 'MouseY', 'Integer', @_LapeSimbaImageBox_MouseY);
+    addProperty('TImageBox', 'MousePoint', 'TPoint', @_LapeSimbaImageBox_MousePoint);
 
     addGlobalFunc('procedure TImageBox.SetImage(Image: TImage; DoFree: Boolean = True)', @_LapeSimbaImageBox_SetImage);
 

@@ -11,22 +11,10 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.image, simba.image_utils, simba.externalcanvas,
+  simba.base, simba.baseclass, simba.image, simba.image_utils, simba.externalcanvas,
   simba.target_eios, simba.target_window, simba.target_image, simba.target_plugin,
   simba.colormath, simba.dtm,
-  simba.vartype_quad;
-
-const
-  DEFAULT_KEY_PRESS_MIN = 20;
-  DEFAULT_KEY_PRESS_MAX = 125;
-
-  DEFAULT_CLICK_MIN = 40;
-  DEFAULT_CLICK_MAX = 220;
-
-  DEFAULT_MOUSE_TIMEOUT = 15000;
-  DEFAULT_MOUSE_SPEED   = 10;
-  DEFAULT_MOUSE_GRAVITY = 9;
-  DEFAULT_MOUSE_WIND    = 4;
+  simba.vartype_quad, simba.containers;
 
 type
   {$PUSH}
@@ -38,14 +26,7 @@ const
   TargetName: array[ESimbaTargetKind] of String = ('NONE', 'IMAGE', 'WINDOW', 'EIOS', 'PLUGIN');
 
 type
-  TSimbaTargetInfo = record
-    Kind: ESimbaTargetKind;
-    Target: Pointer;
-    Image: TSimbaImage;
-    Window: TWindowHandle;
-    EIOS: TEIOSTarget;
-    Plugin: TSimbaPluginTarget;
-
+  TSimbaTargetMethods = record
     GetDimensions: procedure(Target: Pointer; out W, H: Integer);
     GetImageData: function(Target: Pointer; X, Y, Width, Height: Integer; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
 
@@ -97,34 +78,74 @@ type
     end;
   end;
 
-  TSimbaTarget = record
+  TSimbaTarget = class;
+  TSimbaTargetEvent = procedure(Target: TSimbaTarget; Data: TTargetEventData; UserData: Pointer) of object;
+
+  TSimbaTargetEventManager = class
+  protected
+    FEvents: array[ETargetEvent] of array of record
+      Method: TSimbaTargetEvent;
+      UserData: Pointer;
+    end;
   public
-  type
-    TEvent = procedure(var Target: TSimbaTarget; Data: TTargetEventData) of object;
+    destructor Destroy; override;
+
+    function Add(Event: ETargetEvent; Method: TSimbaTargetEvent; UserData: Pointer; UserDataSize: Integer): Integer;
+    procedure Remove(Event: ETargetEvent; Index: Integer);
+    function Has(Event: ETargetEvent): Boolean;
+
+    procedure Call(Target: TSimbaTarget; var Data: TTargetEventData);
+    procedure CallTeleportEvent(Target: TSimbaTarget; X, Y: Integer);
+    procedure CallMouseButtonEvent(Target: TSimbaTarget; Button: EMouseButton; Down: Boolean);
+    procedure CallResizeEvent(Target: TSimbaTarget; Width, Height: Integer);
+    procedure CallTargetChange(Target: TSimbaTarget);
+    procedure CallTargetInvalid(Target: TSimbaTarget);
+  end;
+
+  TSimbaTargetOptions = class
+  public
+    ForceFocus: Boolean;
+
+    MousePressMin: Integer;
+    MousePressMax: Integer;
+    MouseSpeed: Double;
+    MouseGravity: Double;
+    MouseWind: Double;
+    MouseTimeout: Integer;
+
+    KeyPressMin: Integer;
+    KeyPressMax: Integer;
+
+    constructor Create;
+  end;
+
+  TSimbaTarget = class(TSimbaBaseClass)
   private
-    FTarget: TSimbaTargetInfo;
-    FFrozen: record
+    FTargetKind: ESimbaTargetKind;
+    FTargetImage: TSimbaImage;
+    FTargetWindow: TWindowHandle;
+    FTargetEIOS: TEIOSTarget;
+    FTargetPlugin: TSimbaPluginTarget;
+    FTarget: Pointer;
+    FTargetMethods: TSimbaTargetMethods;
+    FOptions: TSimbaTargetOptions;
+
+    FFrozenImage: record
       Bounds: TBox;
       DataWidth: Integer;
       Data: array of TColorBGRA;
     end;
-    FEvents: array of record
-      Event: ETargetEvent;
-      Method: TEvent;
-    end;
-    FCustomClientArea: TBox;
-    FAutoFocus: Boolean;
-    FLastSize: TSize;
 
-    function HasEvent(Event: ETargetEvent): Boolean;
-    procedure CallEvent(var Data: TTargetEventData);
+    FEventManager: TSimbaTargetEventManager;
+    FCustomClientArea: TBox;
+    FLastSize: TSize;
 
     function ValidateBounds(var ABounds: TBox): Boolean;
 
     procedure ChangeTarget(Kind: ESimbaTargetKind);
     procedure TargetChanged;
 
-    procedure CheckMethod(Method: Pointer; Name: String);
+    procedure CheckMethod(Method: Pointer; AName: String);
     procedure CheckResize(NewSize: TSize);
     procedure CheckInvalidTarget;
     procedure CheckAutoFocus;
@@ -141,23 +162,8 @@ type
     procedure SetMouseY(Value: Integer);
     procedure SetMouseXY(Value: TPoint);
   public
-    MouseOptions: record
-      MinClickTime: Integer;
-      MaxClickTime: Integer;
-
-      Speed: Double;
-      Gravity: Double;
-      Wind: Double;
-      Timeout: Integer;
-    end;
-
-    KeyOptions: record
-      MinPressTime: Integer;
-      MaxPressTime: Integer;
-    end;
-
-    function AddEvent(Event: ETargetEvent; Method: TEvent): TEvent;
-    procedure RemoveEvent(Event: ETargetEvent; Method: TEvent);
+    function AddEvent(Event: ETargetEvent; Method: TSimbaTargetEvent; UserData: Pointer; UserDataSize: Integer): Integer;
+    procedure RemoveEvent(Event: ETargetEvent; Index: Integer);
 
     // target
     procedure SetDesktop;
@@ -175,25 +181,23 @@ type
     procedure FreezeImage(ABounds: TBox);
     procedure UnFreezeImage;
 
-    function GetImage(ABounds: TBox): TSimbaImage;
+    function GetImage(ABounds: TBox): TSimbaImage; overload;
+    function GetImage: TSimbaImage; overload;
 
     function IsValid: Boolean;
     function IsFocused: Boolean;
     function Focus: Boolean;
 
-    function ToString: String;
+    function ToString: String; override;
 
-    property TargetKind: ESimbaTargetKind read FTarget.Kind;
-    property TargetWindow: TWindowHandle read FTarget.Window;
-    property TargetImage: TSimbaImage read FTarget.Image;
-
+    property TargetKind: ESimbaTargetKind read FTargetKind;
     property Bounds: TBox read GetBounds;
     property Width: Integer read GetWidth;
     property Height: Integer read GetHeight;
     property Size: TSize read GetSize;
+    property Options: TSimbaTargetOptions read FOptions write FOptions;
 
     property CustomClientArea: TBox read FCustomClientArea write FCustomClientArea;
-    property AutoFocus: Boolean read FAutoFocus write FAutoFocus;
 
     procedure MouseMove(Dest: TPoint); overload;
     procedure MouseMove(Box: TBox; ForcedMove: Boolean = False); overload;
@@ -221,14 +225,11 @@ type
     function MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TSingleMatrix;
 
     function FindColor(Color: TColor; Tolerance: Single; ABounds: TBox): TPointArray; overload;
-    function FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPointArray; overload;
     function FindColor(Color: TColorTolerance; ABounds: TBox): TPointArray; overload;
 
     function CountColor(Color: TColor; Tolerance: Single; ABounds: TBox): Integer; overload;
-    function CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): Integer; overload;
     function CountColor(Color: TColorTolerance; ABounds: TBox): Integer; overload;
 
-    function HasColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer; ABounds: TBox): Boolean; overload;
     function HasColor(Color: TColor; Tolerance: Single; MinCount: Integer; ABounds: TBox): Boolean; overload;
     function HasColor(Color: TColorTolerance; MinCount: Integer; ABounds: TBox): Boolean; overload;
 
@@ -255,15 +256,14 @@ type
     function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPointArray; overload;
     function FindEdges(MinDiff: Single; ABounds: TBox): TPointArray; overload;
 
-    function GetPixelDifference(WaitTime: Integer; ABounds: TBox): Integer; overload;
-    function GetPixelDifference(WaitTime: Integer; Tolerance: Single; ABounds: TBox): Integer; overload;
-    function GetPixelDifferenceTPA(WaitTime: Integer; ABounds: TBox): TPointArray; overload;
-    function GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Single; ABounds: TBox): TPointArray; overload;
+    function GetPixelDifference(WaitTime: Integer; ABounds: TBox): TPointArray; overload;
+    function GetPixelDifference(WaitTime: Integer; Tolerance: Single; ABounds: TBox): TPointArray; overload;
 
     function AverageBrightness(ABounds: TBox): Integer;
     function PeakBrightness(ABounds: TBox): Integer;
 
-    class operator Initialize(var Self: TSimbaTarget);
+    constructor Create;
+    destructor Destroy; override;
   end;
 
 implementation
@@ -272,11 +272,171 @@ uses
   simba.nativeinterface, simba.vartype_box, simba.target_movemouse, simba.random,
   simba.finder_color, simba.finder_image, simba.finder_dtm;
 
+function TSimbaTargetEventManager.Add(Event: ETargetEvent; Method: TSimbaTargetEvent; UserData: Pointer; UserDataSize: Integer): Integer;
+
+  procedure DoAdd(Index: Integer);
+  begin
+    FEvents[Event][Index].Method := Method;
+    FEvents[Event][Index].UserData := nil;
+
+    if (UserDataSize > 0) then
+    begin
+      FEvents[Event][Index].UserData := GetMem(UserDataSize);
+      Move(UserData^, FEvents[Event][Index].UserData^, UserDataSize);
+    end;
+  end;
+
+begin
+  // find a free space
+  for Result := 0 to High(FEvents[Event]) do
+    if (FEvents[Event][Result].Method = nil) then
+    begin
+      DoAdd(Result);
+      Exit;
+    end;
+
+  // append
+  Result := Length(FEvents[Event]);
+  SetLength(FEvents[Event], Result + 1);
+  DoAdd(Result);
+end;
+
+procedure TSimbaTargetEventManager.Remove(Event: ETargetEvent; Index: Integer);
+begin
+  if (Index < 0) or (Index > High(FEvents[Event])) then
+    Exit;
+
+  FEvents[Event][Index].Method := nil;
+  if (FEvents[Event][Index].UserData <> nil) then
+    FreeMemAndNil(FEvents[Event][Index].UserData);
+end;
+
+function TSimbaTargetEventManager.Has(Event: ETargetEvent): Boolean;
+var
+  I: Integer;
+begin
+  for I := 0 to High(FEvents[Event]) do
+    if Assigned(FEvents[Event][I].Method) then
+      Exit(True);
+  Result := False;
+end;
+
+procedure TSimbaTargetEventManager.Call(Target: TSimbaTarget; var Data: TTargetEventData);
+var
+  I: Integer;
+begin
+  for I := 0 to High(FEvents[Data.Event]) do
+    with FEvents[Data.Event][I] do
+      if Assigned(Method) then
+        Method(Target, Data, UserData);
+end;
+
+procedure TSimbaTargetEventManager.CallTeleportEvent(Target: TSimbaTarget; X, Y: Integer);
+var
+  Data: TTargetEventData;
+begin
+  if Has(ETargetEvent.MOUSE_TELEPORT) then
+  begin
+    Data := Default(TTargetEventData);
+    Data.Event := ETargetEvent.MOUSE_TELEPORT;
+    Data.MouseTeleport.X := X;
+    Data.MouseTeleport.Y := Y;
+
+    Call(Target, Data);
+  end;
+end;
+
+procedure TSimbaTargetEventManager.CallMouseButtonEvent(Target: TSimbaTarget; Button: EMouseButton; Down: Boolean);
+var
+  Data: TTargetEventData;
+begin
+  if Has(ETargetEvent.MOUSE_BUTTON) then
+  begin
+    Data := Default(TTargetEventData);
+    Data.Event := ETargetEvent.MOUSE_BUTTON;
+    Data.MouseButton.Button := Button;
+    Data.MouseButton.Down   := Down;
+
+    Call(Target, Data);
+  end;
+end;
+
+procedure TSimbaTargetEventManager.CallResizeEvent(Target: TSimbaTarget; Width, Height: Integer);
+var
+  Data: TTargetEventData;
+begin
+  if Has(ETargetEvent.TARGET_RESIZE) then
+  begin
+    Data := Default(TTargetEventData);
+    Data.Event := ETargetEvent.TARGET_RESIZE;
+    Data.TargetResize.Width := Width;
+    Data.TargetResize.Height := Height;
+
+    Call(Target, Data);
+  end;
+end;
+
+procedure TSimbaTargetEventManager.CallTargetChange(Target: TSimbaTarget);
+var
+  Data: TTargetEventData;
+begin
+  if Has(ETargetEvent.TARGET_CHANGE) then
+  begin
+    Data := Default(TTargetEventData);
+    Data.Event := ETargetEvent.TARGET_CHANGE;
+
+    Call(Target, Data);
+  end;
+end;
+
+procedure TSimbaTargetEventManager.CallTargetInvalid(Target: TSimbaTarget);
+var
+  Data: TTargetEventData;
+begin
+  if Has(ETargetEvent.TARGET_INVALID) then
+  begin
+    Data := Default(TTargetEventData);
+    Data.Event := ETargetEvent.TARGET_INVALID;
+
+    Call(Target, Data);
+  end;
+end;
+
+destructor TSimbaTargetEventManager.Destroy;
+var
+  Event: ETargetEvent;
+  I: Integer;
+begin
+  for Event in ETargetEvent do
+    for I := 0 to High(FEvents[Event]) do
+      if (FEvents[Event][I].UserData <> nil) then
+        FreeMemAndNil(FEvents[Event][I].UserData);
+
+  inherited Destroy();
+end;
+
+constructor TSimbaTargetOptions.Create;
+begin
+  inherited Create();
+
+  Self.ForceFocus := False;
+
+  Self.MousePressMin := 40;
+  Self.MousePressMax := 220;
+  Self.MouseSpeed    := 10;
+  Self.MouseGravity  := 9;
+  Self.MouseWind     := 4;
+  Self.MouseTimeout  := 15000;
+
+  Self.KeyPressMin := 20;
+  Self.KeyPressMax := 125;
+end;
+
 function TSimbaTarget.MousePressed(Button: EMouseButton): Boolean;
 begin
-  CheckMethod(FTarget.MousePressed, 'MousePressed');
+  CheckMethod(FTargetMethods.MousePressed, 'MousePressed');
 
-  Result := FTarget.MousePressed(FTarget.Target, Button);
+  Result := FTargetMethods.MousePressed(FTarget, Button);
 end;
 
 procedure TSimbaTarget.MouseMove(Dest: TPoint);
@@ -300,10 +460,7 @@ procedure TSimbaTarget.MouseClick(Button: EMouseButton);
 var
   Time: Integer;
 begin
-  if (MouseOptions.MinClickTime = 0) and (MouseOptions.MaxClickTime = 0) then
-    Time := RandomLeft(DEFAULT_CLICK_MIN, DEFAULT_CLICK_MAX)
-  else
-    Time := RandomLeft(MouseOptions.MinClickTime, MouseOptions.MaxClickTime);
+  Time := RandomLeft(FOptions.MousePressMin, FOptions.MousePressMax);
 
   MouseDown(Button);
   SimbaNativeInterface.PreciseSleep(Time);
@@ -311,60 +468,37 @@ begin
 end;
 
 procedure TSimbaTarget.MouseTeleport(P: TPoint);
-var
-  EventData: TTargetEventData;
 begin
-  CheckMethod(FTarget.MouseTeleport, 'MouseTeleport');
+  CheckMethod(FTargetMethods.MouseTeleport, 'MouseTeleport');
 
-  EventData := Default(TTargetEventData);
-  EventData.Event := ETargetEvent.MOUSE_TELEPORT;
-  EventData.MouseTeleport.X := P.X;
-  EventData.MouseTeleport.Y := P.Y;
-  CallEvent(EventData);
-
-  FTarget.MouseTeleport(FTarget.Target, P);
+  FEventManager.CallTeleportEvent(Self, P.X, P.Y);
+  FTargetMethods.MouseTeleport(FTarget, P);
 end;
 
 procedure TSimbaTarget.MouseDown(Button: EMouseButton);
-var
-  EventData: TTargetEventData;
 begin
-  CheckMethod(FTarget.MouseDown, 'MouseDown');
+  CheckMethod(FTargetMethods.MouseDown, 'MouseDown');
   CheckAutoFocus();
 
-  EventData := Default(TTargetEventData);
-  EventData.Event := ETargetEvent.MOUSE_BUTTON;
-  EventData.MouseButton.Button := Button;
-  EventData.MouseButton.Down := True;
-
-  CallEvent(EventData);
-
-  FTarget.MouseDown(FTarget.Target, Button);
+  FEventManager.CallMouseButtonEvent(Self, Button, True);
+  FTargetMethods.MouseDown(FTarget, Button);
 end;
 
 procedure TSimbaTarget.MouseUp(Button: EMouseButton);
-var
-  EventData: TTargetEventData;
 begin
-  CheckMethod(FTarget.MouseUp, 'MouseUp');
+  CheckMethod(FTargetMethods.MouseUp, 'MouseUp');
   CheckAutoFocus();
 
-  EventData := Default(TTargetEventData);
-  EventData.Event := ETargetEvent.MOUSE_BUTTON;
-  EventData.MouseButton.Button := Button;
-  EventData.MouseButton.Down := False;
-
-  CallEvent(EventData);
-
-  FTarget.MouseUp(FTarget.Target, Button);
+  FEventManager.CallMouseButtonEvent(Self, Button, False);
+  FTargetMethods.MouseUp(FTarget, Button);
 end;
 
 procedure TSimbaTarget.MouseScroll(Scrolls: Integer);
 begin
-  CheckMethod(FTarget.MouseScroll, 'MouseScroll');
+  CheckMethod(FTargetMethods.MouseScroll, 'MouseScroll');
   CheckAutoFocus();
 
-  FTarget.MouseScroll(FTarget.Target, Scrolls);
+  FTargetMethods.MouseScroll(FTarget, Scrolls);
 end;
 
 procedure TSimbaTarget.KeySend(Text: String);
@@ -372,21 +506,16 @@ var
   I: Integer;
   SleepTimes: TIntegerArray;
 begin
-  CheckMethod(FTarget.KeySend, 'KeySend');
+  CheckMethod(FTargetMethods.KeySend, 'KeySend');
   CheckAutoFocus();
 
   if (Length(Text) > 0) then
   begin
     SetLength(SleepTimes, Length(Text) * 4);
+    for I := 0 to High(SleepTimes) do
+      SleepTimes[I] := RandomLeft(FOptions.KeyPressMin, FOptions.KeyPressMax);
 
-    if (KeyOptions.MinPressTime = 0) and (KeyOptions.MaxPressTime = 0) then
-      for I := 0 to High(SleepTimes) do
-        SleepTimes[I] := RandomLeft(DEFAULT_KEY_PRESS_MIN, DEFAULT_KEY_PRESS_MAX)
-    else
-      for I := 0 to High(SleepTimes) do
-        SleepTimes[I] := RandomLeft(KeyOptions.MinPressTime, KeyOptions.MaxPressTime);
-
-    FTarget.KeySend(FTarget.Target, PChar(Text), Length(Text), @SleepTimes[0]);
+    FTargetMethods.KeySend(FTarget, PChar(Text), Length(Text), @SleepTimes[0]);
   end;
 end;
 
@@ -394,10 +523,7 @@ procedure TSimbaTarget.KeyPress(Key: EKeyCode);
 var
   Time: Integer;
 begin
-  if (KeyOptions.MinPressTime = 0) and (KeyOptions.MaxPressTime = 0) then
-    Time := RandomLeft(DEFAULT_KEY_PRESS_MIN, DEFAULT_KEY_PRESS_MAX)
-  else
-    Time := RandomLeft(KeyOptions.MinPressTime, KeyOptions.MaxPressTime);
+  Time := RandomLeft(FOptions.KeyPressMin, FOptions.KeyPressMax);
 
   KeyDown(Key);
   SimbaNativeInterface.PreciseSleep(Time);
@@ -406,25 +532,25 @@ end;
 
 procedure TSimbaTarget.KeyDown(Key: EKeyCode);
 begin
-  CheckMethod(FTarget.KeyDown, 'KeyDown');
+  CheckMethod(FTargetMethods.KeyDown, 'KeyDown');
   CheckAutoFocus();
 
-  FTarget.KeyDown(FTarget.Target, Key);
+  FTargetMethods.KeyDown(FTarget, Key);
 end;
 
 procedure TSimbaTarget.KeyUp(Key: EKeyCode);
 begin
-  CheckMethod(FTarget.KeyUp, 'KeyUp');
+  CheckMethod(FTargetMethods.KeyUp, 'KeyUp');
   CheckAutoFocus();
 
-  FTarget.KeyUp(FTarget.Target, Key);
+  FTargetMethods.KeyUp(FTarget, Key);
 end;
 
 function TSimbaTarget.KeyPressed(Key: EKeyCode): Boolean;
 begin
-  CheckMethod(FTarget.KeyPressed, 'KeyPressed');
+  CheckMethod(FTargetMethods.KeyPressed, 'KeyPressed');
 
-  Result := FTarget.KeyPressed(FTarget.Target, Key);
+  Result := FTargetMethods.KeyPressed(FTarget, Key);
 end;
 
 function TSimbaTarget.KeyCodeFromChar(C: Char): EKeyCode;
@@ -470,11 +596,6 @@ begin
   Result := FindColorsOnTarget(Self, ABounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers);
 end;
 
-function TSimbaTarget.FindColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPointArray;
-begin
-  Result := FindColorsOnTarget(Self, ABounds, ColorSpace, Color, Tolerance, Multipliers);
-end;
-
 function TSimbaTarget.FindColor(Color: TColorTolerance; ABounds: TBox): TPointArray;
 begin
   Result := FindColorsOnTarget(Self, ABounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
@@ -485,19 +606,9 @@ begin
   Result := CountColorsOnTarget(Self, ABounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers);
 end;
 
-function TSimbaTarget.CountColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): Integer;
-begin
-  Result := CountColorsOnTarget(Self, ABounds, ColorSpace, Color, Tolerance, Multipliers);
-end;
-
 function TSimbaTarget.CountColor(Color: TColorTolerance; ABounds: TBox): Integer;
 begin
   Result := CountColorsOnTarget(Self, ABounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
-end;
-
-function TSimbaTarget.HasColor(Color: TColor; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MinCount: Integer; ABounds: TBox): Boolean;
-begin
-  Result := CountColorsOnTarget(Self, ABounds, ColorSpace, Color, Tolerance, Multipliers, MinCount) >= MinCount;
 end;
 
 function TSimbaTarget.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer; ABounds: TBox): Boolean;
@@ -594,11 +705,11 @@ begin
     Result := TPoint.Create(-1, -1);
 end;
 
-function TSimbaTarget.GetPixelDifference(WaitTime: Integer; ABounds: TBox): Integer;
+function TSimbaTarget.GetPixelDifference(WaitTime: Integer; ABounds: TBox): TPointArray;
 var
   ImgBefore, ImgAfter: TSimbaImage;
 begin
-  Result := 0;
+  Result := [];
 
   ImgBefore := nil;
   ImgAfter := nil;
@@ -615,11 +726,11 @@ begin
   end;
 end;
 
-function TSimbaTarget.GetPixelDifference(WaitTime: Integer; Tolerance: Single; ABounds: TBox): Integer;
+function TSimbaTarget.GetPixelDifference(WaitTime: Integer; Tolerance: Single; ABounds: TBox): TPointArray;
 var
   ImgBefore, ImgAfter: TSimbaImage;
 begin
-  Result := 0;
+  Result := [];
 
   ImgBefore := nil;
   ImgAfter := nil;
@@ -628,48 +739,6 @@ begin
     Sleep(WaitTime);
     if GetImageDataAsImage(ABounds, ImgAfter) and (ImgBefore.Width = ImgAfter.Width) and (ImgBefore.Height = ImgAfter.Height) then
       Result := ImgBefore.PixelDifference(ImgAfter, Tolerance);
-  finally
-    if (ImgBefore <> nil) then
-      ImgBefore.Free();
-    if (ImgAfter <> nil) then
-      ImgAfter.Free();
-  end;
-end;
-
-function TSimbaTarget.GetPixelDifferenceTPA(WaitTime: Integer; ABounds: TBox): TPointArray;
-var
-  ImgBefore, ImgAfter: TSimbaImage;
-begin
-  Result := nil;
-
-  ImgBefore := nil;
-  ImgAfter := nil;
-  if GetImageDataAsImage(ABounds, ImgBefore) then
-  try
-    Sleep(WaitTime);
-    if GetImageDataAsImage(ABounds, ImgAfter) and (ImgBefore.Width = ImgAfter.Width) and (ImgBefore.Height = ImgAfter.Height) then
-      Result := ImgBefore.PixelDifferenceTPA(ImgAfter);
-  finally
-    if (ImgBefore <> nil) then
-      ImgBefore.Free();
-    if (ImgAfter <> nil) then
-      ImgAfter.Free();
-  end;
-end;
-
-function TSimbaTarget.GetPixelDifferenceTPA(WaitTime: Integer; Tolerance: Single; ABounds: TBox): TPointArray;
-var
-  ImgBefore, ImgAfter: TSimbaImage;
-begin
-  Result := nil;
-
-  ImgBefore := nil;
-  ImgAfter := nil;
-  if GetImageDataAsImage(ABounds, ImgBefore) then
-  try
-    Sleep(WaitTime);
-    if GetImageDataAsImage(ABounds, ImgAfter) and (ImgBefore.Width = ImgAfter.Width) and (ImgBefore.Height = ImgAfter.Height) then
-      Result := ImgBefore.PixelDifferenceTPA(ImgAfter, Tolerance);
   finally
     if (ImgBefore <> nil) then
       ImgBefore.Free();
@@ -688,6 +757,27 @@ begin
   Result := PeakBrightnessOnTarget(Self, Bounds);
 end;
 
+constructor TSimbaTarget.Create;
+begin
+  inherited Create();
+
+  FEventManager := TSimbaTargetEventManager.Create();
+  FOptions := TSimbaTargetOptions.Create();
+
+  SetDesktop();
+end;
+
+destructor TSimbaTarget.Destroy;
+begin
+  ChangeTarget(ESimbaTargetKind.NONE);
+  if (FEventManager <> nil) then
+    FreeAndNil(FEventManager);
+  if (FOptions <> nil) then
+    FreeAndNil(FOptions);
+
+  inherited Destroy();
+end;
+
 function TSimbaTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPointArray;
 begin
   Result := FindEdgesOnTarget(Self, ABounds, MinDiff, ColorSpace, Multipliers);
@@ -698,25 +788,19 @@ begin
   Result := FindEdgesOnTarget(Self, ABounds, MinDiff, DefaultColorSpace, DefaultMultipliers);
 end;
 
-procedure TSimbaTarget.CheckMethod(Method: Pointer; Name: String);
+procedure TSimbaTarget.CheckMethod(Method: Pointer; AName: String);
 begin
   if (Method = nil) then
-    SimbaException('Target "%s" cannot %s', [TargetName[FTarget.Kind], Name]);
+    SimbaException('Target "%s" cannot %s', [TargetName[FTargetKind], AName]);
 end;
 
 procedure TSimbaTarget.CheckResize(NewSize: TSize);
-var
-  EventData: TTargetEventData;
 begin
-  if (FLastSize = NewSize) or (not HasEvent(ETargetEvent.TARGET_RESIZE)) then
+  if (FLastSize = NewSize) then
     Exit;
   FLastSize := NewSize;
 
-  EventData := Default(TTargetEventData);
-  EventData.Event := ETargetEvent.TARGET_RESIZE;
-  EventData.TargetResize.Width := NewSize.Width;
-  EventData.TargetResize.Height := NewSize.Height;
-  CallEvent(EventData);
+  FEventManager.CallResizeEvent(Self, NewSize.Width, NewSize.Height);
 end;
 
 function TSimbaTarget.GetMouseX: Integer;
@@ -726,9 +810,9 @@ end;
 
 function TSimbaTarget.GetMouseXY: TPoint;
 begin
-  CheckMethod(FTarget.MousePosition, 'MousePosition');
+  CheckMethod(FTargetMethods.MousePosition, 'MousePosition');
 
-  Result := FTarget.MousePosition(FTarget.Target);
+  Result := FTargetMethods.MousePosition(FTarget);
 end;
 
 function TSimbaTarget.GetMouseY: Integer;
@@ -751,77 +835,44 @@ begin
   MouseTeleport(Value);
 end;
 
-function TSimbaTarget.HasEvent(Event: ETargetEvent): Boolean;
-var
-  I: Integer;
+function TSimbaTarget.AddEvent(Event: ETargetEvent; Method: TSimbaTargetEvent; UserData: Pointer; UserDataSize: Integer): Integer;
 begin
-  for I := 0 to High(FEvents) do
-    if (FEvents[I].Event = Event) then
-      Exit(True);
-  Result := False;
+  Result := FEventManager.Add(Event, Method, UserData, UserDataSize);
 end;
 
-procedure TSimbaTarget.CallEvent(var Data: TTargetEventData);
-var
-  I: Integer;
+procedure TSimbaTarget.RemoveEvent(Event: ETargetEvent; Index: Integer);
 begin
-  for I := 0 to High(FEvents) do
-    if (FEvents[I].Event = Data.Event) then
-      FEvents[I].Method(Self, Data);
-end;
-
-function TSimbaTarget.AddEvent(Event: ETargetEvent; Method: TEvent): TEvent;
-begin
-  SetLength(FEvents, Length(FEvents) + 1);
-  FEvents[High(FEvents)].Event := Event;
-  FEvents[High(FEvents)].Method := Method;
-
-  Result := Method;
-end;
-
-procedure TSimbaTarget.RemoveEvent(Event: ETargetEvent; Method: TEvent);
-var
-  I: Integer;
-begin
-  for I := High(FEvents) downto 0 do
-    if (FEvents[I].Event = Event) and (FEvents[I].Method = Method) then
-      Delete(FEvents, I, 1);
+  FEventManager.Remove(Event, Index);
 end;
 
 procedure TSimbaTarget.ChangeTarget(Kind: ESimbaTargetKind);
 begin
-  FTarget := Default(TSimbaTargetInfo);
-  FTarget.Kind := Kind;
+  if (FTargetKind = ESimbaTargetKind.IMAGE) and (FTargetImage <> nil) then
+    FreeAndNil(FTargetImage);
+
+  FTargetMethods := Default(TSimbaTargetMethods);
+  FTargetKind := Kind;
 end;
 
 procedure TSimbaTarget.TargetChanged;
-var
-  EventData: TTargetEventData;
 begin
-  EventData := Default(TTargetEventData);
-  EventData.Event := ETargetEvent.TARGET_CHANGE;
-
-  CallEvent(EventData);
+  FEventManager.CallTargetChange(Self);
 end;
 
 procedure TSimbaTarget.CheckInvalidTarget;
 var
-  Attempt, I: Integer;
-  EventData: TTargetEventData;
+  Attempt: Integer;
 begin
   if IsValid() then
     Exit;
 
-  if HasEvent(ETargetEvent.TARGET_INVALID) then
+  if FEventManager.Has(ETargetEvent.TARGET_INVALID) then
   begin
-    EventData := Default(TTargetEventData);
-    EventData.Event := ETargetEvent.TARGET_INVALID;
-
     for Attempt := 1 to 5 do
     begin
       Sleep(100);
 
-      CallEvent(EventData);
+      FEventManager.CallTargetInvalid(Self);
       if IsValid() then
         Exit;
     end;
@@ -832,29 +883,29 @@ end;
 
 procedure TSimbaTarget.CheckAutoFocus;
 begin
-  if FAutoFocus and (not IsFocused()) then
+  if FOptions.ForceFocus and (not IsFocused()) then
     Focus();
 end;
 
 function TSimbaTarget.IsValid: Boolean;
 begin
-  CheckMethod(FTarget.IsValid, 'IsValid');
+  CheckMethod(FTargetMethods.IsValid, 'IsValid');
 
-  Result := FTarget.IsValid(FTarget.Target);
+  Result := FTargetMethods.IsValid(FTarget);
 end;
 
 function TSimbaTarget.IsFocused: Boolean;
 begin
-  CheckMethod(FTarget.IsFocused, 'IsFocused');
+  CheckMethod(FTargetMethods.IsFocused, 'IsFocused');
 
-  Result := FTarget.IsFocused(FTarget.Target);
+  Result := FTargetMethods.IsFocused(FTarget);
 end;
 
 function TSimbaTarget.Focus: Boolean;
 begin
-  CheckMethod(FTarget.Focus, 'Focus');
+  CheckMethod(FTargetMethods.Focus, 'Focus');
 
-  Result := FTarget.Focus(FTarget.Target);
+  Result := FTargetMethods.Focus(FTarget);
 end;
 
 function TSimbaTarget.GetBounds: TBox;
@@ -870,10 +921,10 @@ end;
 
 function TSimbaTarget.GetSize: TSize;
 begin
-  CheckMethod(FTarget.GetDimensions, 'GetDimensions');
+  CheckMethod(FTargetMethods.GetDimensions, 'GetDimensions');
   CheckInvalidTarget();
 
-  FTarget.GetDimensions(FTarget.Target, Result.cx, Result.cy);
+  FTargetMethods.GetDimensions(FTarget, Result.cx, Result.cy);
   CheckResize(Result);
 end;
 
@@ -903,6 +954,11 @@ begin
     Result := TSimbaImage.Create();
 end;
 
+function TSimbaTarget.GetImage: TSimbaImage;
+begin
+  Result := GetImage(TBox.Create(-1,-1,-1,-1));
+end;
+
 procedure TSimbaTarget.SetDesktop;
 begin
   SetWindow(SimbaNativeInterface.GetDesktopWindow());
@@ -912,27 +968,27 @@ procedure TSimbaTarget.SetWindow(Window: TWindowHandle);
 begin
   ChangeTarget(ESimbaTargetKind.WINDOW);
 
-  FTarget.Window := Window;
-  FTarget.Target := @FTarget.Window;
+  FTargetWindow := Window;
+  FTarget := @FTargetWindow;
 
-  FTarget.Focus := @WindowTarget_Focus;
-  FTarget.IsFocused := @WindowTarget_IsFocused;
-  FTarget.IsValid := @WindowTarget_IsValid;
+  FTargetMethods.Focus := @WindowTarget_Focus;
+  FTargetMethods.IsFocused := @WindowTarget_IsFocused;
+  FTargetMethods.IsValid := @WindowTarget_IsValid;
 
-  FTarget.KeyDown := @WindowTarget_KeyDown;
-  FTarget.KeyUp := @WindowTarget_KeyUp;
-  FTarget.KeySend := @WindowTarget_KeySend;
-  FTarget.KeyPressed := @WindowTarget_KeyPressed;
+  FTargetMethods.KeyDown := @WindowTarget_KeyDown;
+  FTargetMethods.KeyUp := @WindowTarget_KeyUp;
+  FTargetMethods.KeySend := @WindowTarget_KeySend;
+  FTargetMethods.KeyPressed := @WindowTarget_KeyPressed;
 
-  FTarget.MouseTeleport := @WindowTarget_MouseTeleport;
-  FTarget.MousePosition := @WindowTarget_MousePosition;
-  FTarget.MousePressed := @WindowTarget_MousePressed;
-  FTarget.MouseDown := @WindowTarget_MouseDown;
-  FTarget.MouseUp := @WindowTarget_MouseUp;
-  FTarget.MouseScroll := @WindowTarget_MouseScroll;
+  FTargetMethods.MouseTeleport := @WindowTarget_MouseTeleport;
+  FTargetMethods.MousePosition := @WindowTarget_MousePosition;
+  FTargetMethods.MousePressed := @WindowTarget_MousePressed;
+  FTargetMethods.MouseDown := @WindowTarget_MouseDown;
+  FTargetMethods.MouseUp := @WindowTarget_MouseUp;
+  FTargetMethods.MouseScroll := @WindowTarget_MouseScroll;
 
-  FTarget.GetDimensions := @WindowTarget_GetDimensions;
-  FTarget.GetImageData := @WindowTarget_GetImageData;
+  FTargetMethods.GetDimensions := @WindowTarget_GetDimensions;
+  FTargetMethods.GetImageData := @WindowTarget_GetImageData;
 
   TargetChanged();
 end;
@@ -941,12 +997,12 @@ procedure TSimbaTarget.SetImage(Image: TSimbaImage);
 begin
   ChangeTarget(ESimbaTargetKind.IMAGE);
 
-  FTarget.Image := Image;
-  FTarget.Target := FTarget.Image;
+  FTargetImage := Image;
+  FTarget := FTargetImage;
 
-  FTarget.GetDimensions := @ImageTarget_GetDimensions;
-  FTarget.GetImageData := @ImageTarget_GetImageData;
-  FTarget.IsValid := @ImageTarget_IsValid;
+  FTargetMethods.GetDimensions := @ImageTarget_GetDimensions;
+  FTargetMethods.GetImageData := @ImageTarget_GetImageData;
+  FTargetMethods.IsValid := @ImageTarget_IsValid;
 
   TargetChanged();
 end;
@@ -955,25 +1011,25 @@ procedure TSimbaTarget.SetEIOS(FileName, Args: String);
 begin
   ChangeTarget(ESimbaTargetKind.EIOS);
 
-  FTarget.EIOS := LoadEIOS(FileName, Args);
-  FTarget.Target := @FTarget.EIOS;
+  FTargetEIOS := LoadEIOS(FileName, Args);
+  FTarget := @FTargetEIOS;
 
-  FTarget.KeyDown := @EIOSTarget_KeyDown;
-  FTarget.KeyUp := @EIOSTarget_KeyUp;
-  FTarget.KeySend := @EIOSTarget_KeySend;
-  FTarget.KeyPressed := @EIOSTarget_KeyPressed;
+  FTargetMethods.KeyDown := @EIOSTarget_KeyDown;
+  FTargetMethods.KeyUp := @EIOSTarget_KeyUp;
+  FTargetMethods.KeySend := @EIOSTarget_KeySend;
+  FTargetMethods.KeyPressed := @EIOSTarget_KeyPressed;
 
-  FTarget.MouseTeleport := @EIOSTarget_MouseTeleport;
-  FTarget.MousePosition := @EIOSTarget_MousePosition;
-  FTarget.MousePressed := @EIOSTarget_MousePressed;
-  FTarget.MouseDown := @EIOSTarget_MouseDown;
-  FTarget.MouseUp := @EIOSTarget_MouseUp;
-  FTarget.MouseScroll := @EIOSTarget_MouseScroll;
+  FTargetMethods.MouseTeleport := @EIOSTarget_MouseTeleport;
+  FTargetMethods.MousePosition := @EIOSTarget_MousePosition;
+  FTargetMethods.MousePressed := @EIOSTarget_MousePressed;
+  FTargetMethods.MouseDown := @EIOSTarget_MouseDown;
+  FTargetMethods.MouseUp := @EIOSTarget_MouseUp;
+  FTargetMethods.MouseScroll := @EIOSTarget_MouseScroll;
 
-  FTarget.GetDimensions := @EIOSTarget_GetDimensions;
-  FTarget.GetImageData := @EIOSTarget_GetImageData;
+  FTargetMethods.GetDimensions := @EIOSTarget_GetDimensions;
+  FTargetMethods.GetImageData := @EIOSTarget_GetImageData;
 
-  FTarget.IsValid := @EIOSTarget_IsValid;
+  FTargetMethods.IsValid := @EIOSTarget_IsValid;
 
   TargetChanged();
 end;
@@ -982,25 +1038,25 @@ procedure TSimbaTarget.SetPlugin(FileName, Args: String);
 begin
   ChangeTarget(ESimbaTargetKind.PLUGIN);
 
-  FTarget.Plugin := LoadPluginTarget(FileName, Args);
-  FTarget.Target := @FTarget.Plugin;
+  FTargetPlugin := LoadPluginTarget(FileName, Args);
+  FTarget := @FTargetPlugin;
 
-  FTarget.KeyDown := @PluginTarget_KeyDown;
-  FTarget.KeyUp := @PluginTarget_KeyUp;
-  FTarget.KeySend := @PluginTarget_KeySend;
-  FTarget.KeyPressed := @PluginTarget_KeyPressed;
+  FTargetMethods.KeyDown := @PluginTarget_KeyDown;
+  FTargetMethods.KeyUp := @PluginTarget_KeyUp;
+  FTargetMethods.KeySend := @PluginTarget_KeySend;
+  FTargetMethods.KeyPressed := @PluginTarget_KeyPressed;
 
-  FTarget.MouseTeleport := @PluginTarget_MouseTeleport;
-  FTarget.MousePosition := @PluginTarget_MousePosition;
-  FTarget.MousePressed := @PluginTarget_MousePressed;
-  FTarget.MouseDown := @PluginTarget_MouseDown;
-  FTarget.MouseUp := @PluginTarget_MouseUp;
-  FTarget.MouseScroll := @PluginTarget_MouseScroll;
+  FTargetMethods.MouseTeleport := @PluginTarget_MouseTeleport;
+  FTargetMethods.MousePosition := @PluginTarget_MousePosition;
+  FTargetMethods.MousePressed := @PluginTarget_MousePressed;
+  FTargetMethods.MouseDown := @PluginTarget_MouseDown;
+  FTargetMethods.MouseUp := @PluginTarget_MouseUp;
+  FTargetMethods.MouseScroll := @PluginTarget_MouseScroll;
 
-  FTarget.GetDimensions := @PluginTarget_GetDimensions;
-  FTarget.GetImageData := @PluginTarget_GetImageData;
+  FTargetMethods.GetDimensions := @PluginTarget_GetDimensions;
+  FTargetMethods.GetImageData := @PluginTarget_GetImageData;
 
-  FTarget.IsValid := @PluginTarget_IsValid;
+  FTargetMethods.IsValid := @PluginTarget_IsValid;
 
   TargetChanged();
 end;
@@ -1009,25 +1065,25 @@ procedure TSimbaTarget.SetPlugin(FileName, Args: String; out DebugImage: TSimbaE
 begin
   ChangeTarget(ESimbaTargetKind.PLUGIN);
 
-  FTarget.Plugin := LoadPluginTarget(FileName, Args, DebugImage);
-  FTarget.Target := @FTarget.Plugin;
+  FTargetPlugin := LoadPluginTarget(FileName, Args, DebugImage);
+  FTarget := @FTargetPlugin;
 
-  FTarget.KeyDown := @PluginTarget_KeyDown;
-  FTarget.KeyUp := @PluginTarget_KeyUp;
-  FTarget.KeySend := @PluginTarget_KeySend;
-  FTarget.KeyPressed := @PluginTarget_KeyPressed;
+  FTargetMethods.KeyDown := @PluginTarget_KeyDown;
+  FTargetMethods.KeyUp := @PluginTarget_KeyUp;
+  FTargetMethods.KeySend := @PluginTarget_KeySend;
+  FTargetMethods.KeyPressed := @PluginTarget_KeyPressed;
 
-  FTarget.MouseTeleport := @PluginTarget_MouseTeleport;
-  FTarget.MousePosition := @PluginTarget_MousePosition;
-  FTarget.MousePressed := @PluginTarget_MousePressed;
-  FTarget.MouseDown := @PluginTarget_MouseDown;
-  FTarget.MouseUp := @PluginTarget_MouseUp;
-  FTarget.MouseScroll := @PluginTarget_MouseScroll;
+  FTargetMethods.MouseTeleport := @PluginTarget_MouseTeleport;
+  FTargetMethods.MousePosition := @PluginTarget_MousePosition;
+  FTargetMethods.MousePressed := @PluginTarget_MousePressed;
+  FTargetMethods.MouseDown := @PluginTarget_MouseDown;
+  FTargetMethods.MouseUp := @PluginTarget_MouseUp;
+  FTargetMethods.MouseScroll := @PluginTarget_MouseScroll;
 
-  FTarget.GetDimensions := @PluginTarget_GetDimensions;
-  FTarget.GetImageData := @PluginTarget_GetImageData;
+  FTargetMethods.GetDimensions := @PluginTarget_GetDimensions;
+  FTargetMethods.GetImageData := @PluginTarget_GetImageData;
 
-  FTarget.IsValid := @PluginTarget_IsValid;
+  FTargetMethods.IsValid := @PluginTarget_IsValid;
 
   TargetChanged();
 end;
@@ -1101,15 +1157,15 @@ function TSimbaTarget.GetImageData(var ABounds: TBox; out Data: PColorBGRA; out 
   begin
     // constrain to our frozen bounds
      if (ABounds.X1 = -1) and (ABounds.Y1 = -1) and (ABounds.X2 = -1) and (ABounds.Y2 = -1) then
-       ABounds := FFrozen.Bounds
+       ABounds := FFrozenImage.Bounds
      else
-       ABounds := ABounds.Clip(FFrozen.Bounds);
+       ABounds := ABounds.Clip(FFrozenImage.Bounds);
 
     Result := (ABounds.Width > 0) and (ABounds.Height > 0);
     if Result then
     begin
-      Data := @FFrozen.Data[(ABounds.Y1 - FFrozen.Bounds.Y1) * FFrozen.DataWidth + (ABounds.X1 - FFrozen.Bounds.X1)];
-      DataWidth := FFrozen.DataWidth;
+      Data := @FFrozenImage.Data[(ABounds.Y1 - FFrozenImage.Bounds.Y1) * FFrozenImage.DataWidth + (ABounds.X1 - FFrozenImage.Bounds.X1)];
+      DataWidth := FFrozenImage.DataWidth;
     end;
   end;
 
@@ -1117,26 +1173,26 @@ begin
   Data := nil;
   DataWidth := 0;
 
-  CheckMethod(FTarget.GetImageData, 'GetImageData');
+  CheckMethod(FTargetMethods.GetImageData, 'GetImageData');
   if IsImageFrozen() then
     Result := GetFrozenData()
   else
-    Result := ValidateBounds(ABounds) and FTarget.GetImageData(FTarget.Target, ABounds.X1, ABounds.Y1, ABounds.Width, ABounds.Height, Data, DataWidth);
+    Result := ValidateBounds(ABounds) and FTargetMethods.GetImageData(FTarget, ABounds.X1, ABounds.Y1, ABounds.Width, ABounds.Height, Data, DataWidth);
 end;
 
 procedure TSimbaTarget.FreeImageData(var Data: PColorBGRA);
 begin
   // never free frozen data
-  if IsImageFrozen() and (Data = @FFrozen.Data[0]) then
+  if IsImageFrozen() and (Data = @FFrozenImage.Data[0]) then
     Exit;
   // Only free window since rest of targets are references to buffers or image data.
-  if (FTarget.Kind in [ESimbaTargetKind.WINDOW]) then
+  if (FTargetKind in [ESimbaTargetKind.WINDOW]) then
     FreeMem(Data);
 end;
 
 function TSimbaTarget.IsImageFrozen: Boolean;
 begin
-  Result := Length(FFrozen.Data) > 0;
+  Result := Length(FFrozenImage.Data) > 0;
 end;
 
 procedure TSimbaTarget.FreezeImage(ABounds: TBox);
@@ -1146,11 +1202,11 @@ var
 begin
   if GetImageData(ABounds, Data, DataWidth) then
   try
-    FFrozen.Bounds := ABounds;
-    FFrozen.DataWidth := DataWidth;
+    FFrozenImage.Bounds := ABounds;
+    FFrozenImage.DataWidth := DataWidth;
 
-    SetLength(FFrozen.Data, DataWidth * ABounds.Height);
-    Move(Data^, FFrozen.Data[0], Length(FFrozen.Data) * SizeOf(TColorBGRA));
+    SetLength(FFrozenImage.Data, DataWidth * ABounds.Height);
+    Move(Data^, FFrozenImage.Data[0], Length(FFrozenImage.Data) * SizeOf(TColorBGRA));
   finally
     FreeImageData(Data);
   end;
@@ -1158,34 +1214,28 @@ end;
 
 procedure TSimbaTarget.UnFreezeImage;
 begin
-  FFrozen.Data := [];
+  FFrozenImage.Data := [];
 end;
 
 function TSimbaTarget.ToString: String;
 begin
-  Result := 'ESimbaTargetKind.' + TargetName[FTarget.Kind];
+  Result := Format('%P - ', [Pointer(Self)]);
 
-  case FTarget.Kind of
+  case FTargetKind of
     ESimbaTargetKind.IMAGE:
-      if (FTarget.Image = nil) then
-        Result := 'IMAGE: TImage(nil)'
+      if (FTargetImage = nil) then
+        Result += 'IMAGE: TImage(nil)'
       else
-        Result := 'IMAGE: TImage(%P), Size=%dx%d'.Format([Pointer(FTarget.Image), FTarget.Image.Width, FTarget.Image.Height]);
-
+        Result += 'IMAGE: TImage(%P), Size=%dx%d'.Format([Pointer(FTargetImage), FTargetImage.Width, FTargetImage.Height]);
     ESimbaTargetKind.WINDOW:
-      Result := 'WINDOW: Handle=%d, Valid: %s'.Format([FTarget.Window, BoolToStr(IsValid(), True)]);
-
+      Result += 'WINDOW: Handle=%d, Valid: %s'.Format([FTargetWindow, IsValid().ToString]);
     ESimbaTargetKind.EIOS:
-      Result := 'EIOS: File="%s" Target=%P'.Format([FTarget.EIOS.FileName, FTarget.EIOS.Target]);
-
+      Result += 'EIOS: File="%s" Target=%P'.Format([FTargetEIOS.FileName, FTargetEIOS.Target]);
     ESimbaTargetKind.PLUGIN:
-      Result := 'PLUGIN: File="%s" Target=%P'.Format([FTarget.Plugin.FileName, FTarget.Plugin.Target]);
+      Result += 'PLUGIN: File="%s" Target=%P'.Format([FTargetPlugin.FileName, FTargetPlugin.Target]);
+    else
+      Result += TargetName[FTargetKind];
   end;
-end;
-
-class operator TSimbaTarget.Initialize(var Self: TSimbaTarget);
-begin
-  FillByte(Self, SizeOf(TSimbaTarget), 0);
 end;
 
 end.

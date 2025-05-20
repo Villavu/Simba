@@ -58,7 +58,7 @@ type
     procedure Add(Item: _T);
     procedure Delete(Index: Integer);
     procedure Lock;
-    procedure UnLock;
+    procedure Unlock;
 
     property Count: Integer read GetCount;
     property Items[Index: Integer]: _T read GetItem; default;
@@ -98,7 +98,7 @@ type
     procedure Delete(Item: _T);
 
     procedure Lock;
-    procedure UnLock;
+    procedure Unlock;
 
     property Count: Integer read GetCount;
     property Items[Index: Integer]: _T read GetItem; default;
@@ -429,7 +429,7 @@ begin
   FLock.Enter();
 end;
 
-procedure TSimbaThreadsafeObjectList.UnLock;
+procedure TSimbaThreadsafeObjectList.Unlock;
 begin
   FLock.Leave();
 end;
