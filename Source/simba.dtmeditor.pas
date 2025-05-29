@@ -565,6 +565,7 @@ begin
   FZoomPanel := TSimbaImageBoxZoomPanel.Create(Self);
   FZoomPanel.Parent := PanelRight;
   FZoomPanel.Align := alTop;
+  FZoomPanel.BorderSpacing.Around := 5;
 end;
 
 destructor TSimbaDTMEditorForm.Destroy;

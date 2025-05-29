@@ -231,7 +231,7 @@ begin
   FZoom := TSimbaImageBoxZoom.Create(Self);
   FZoom.Parent := Self;
   FZoom.SetZoom(4, 5);
-  FZoom.BorderSpacing.Around := 5;
+  FZoom.BorderSpacing.Right := 5;
   FZoom.Align := alLeft;
 
   FLabel := TLabel.Create(Self);

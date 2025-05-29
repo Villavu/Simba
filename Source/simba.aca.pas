@@ -29,6 +29,7 @@ uses
   simba.component_button,
   simba.component_edit,
   simba.component_menubar,
+  simba.component_splitter,
   simba.env,
   simba.image,
   simba.component_divider,
@@ -236,7 +237,8 @@ end;
 
 procedure TSimbaACA.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 begin
-  FImageBoxZoom.Move(FImageBox.Background.Canvas, X ,Y);
+  if FImageBox.MouseInClient then
+    FImageBoxZoom.Move(FImageBox.Background.Canvas, X ,Y);
 end;
 
 procedure TSimbaACA.DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -576,10 +578,24 @@ begin
   FPanel := TPanel.Create(FForm);
   FPanel.Parent := FForm;
   FPanel.Align := alRight;
-  FPanel.AutoSize := True;
   FPanel.BevelOuter := bvNone;
   FPanel.BevelInner := bvNone;
   FPanel.Color := SimbaTheme.ColorFrame;
+  FPanel.Constraints.MinWidth := 150;
+
+  with TBitmap.Create() do
+  try
+    Canvas.Font := FForm.Font;
+    FPanel.Width := Canvas.TextWidth('Best R Multipliers') * 3;
+  finally
+    Free();
+  end;
+
+  with TSimbaSplitter.Create(FForm) do
+  begin
+    Parent := FForm;
+    Align := alRight;
+  end;
 
   FImageBox := TSimbaImageBox.Create(FForm);
   FImageBox.Parent := FForm;
@@ -592,6 +608,8 @@ begin
   FImageBoxZoom := TSimbaImageBoxZoomPanel.Create(FPanel);
   FImageBoxZoom.Parent := FPanel;
   FImageBoxZoom.Align := alTop;
+  FImageBoxZoom.BorderSpacing.Top := 5;
+  FImageBoxZoom.BorderSpacing.Bottom := 5;
   FImageBoxZoom.Font.Color := SimbaTheme.ColorFont;
   FImageBoxZoom.FrameColor := SimbaTheme.ColorScrollBarActive;
 
@@ -605,7 +623,6 @@ begin
   FColorList.OnSelectionChange := @DoListSelectionChange;
   FColorList.AddKeyEvent(VK_DELETE, [], @DoListDeleteKey);
   FColorList.FilterVisible := False;
-  FColorList.BorderSpacing.Left := 5;
   FColorList.BorderSpacing.Right := 5;
   FColorList.BorderSpacing.Bottom := 2;
   FColorList.PopupMenu := FColorListPopup;
@@ -616,7 +633,7 @@ begin
   BottomPanel.Align := alBottom;
   BottomPanel.AutoSize := True;
   BottomPanel.BevelOuter := bvNone;
-  BottomPanel.BorderSpacing.Around := 5;
+  BottomPanel.BorderSpacing.Right := 5;
 
   ButtonPanel := TPanel.Create(BottomPanel);
   ButtonPanel.Parent := BottomPanel;
@@ -637,48 +654,56 @@ begin
   FButtonFindColor := TSimbaButton.Create(FPanel);
   FButtonFindColor.Parent := ButtonPanel;
   FButtonFindColor.Caption := 'Find Color';
-  FButtonFindColor.BorderSpacing.Around := 5;
+  FButtonFindColor.BorderSpacing.Top := 5;
+  FButtonFindColor.BorderSpacing.Bottom := 5;
+  FButtonFindColor.BorderSpacing.Right := 5;
   FButtonFindColor.OnClick := @DoFindColorClick;
 
   FButtonClearImg := TSimbaButton.Create(FPanel);
   FButtonClearImg.Parent := ButtonPanel;
   FButtonClearImg.Caption := 'Clear Image';
-  FButtonClearImg.BorderSpacing.Around := 5;
+  FButtonClearImg.BorderSpacing.Top := 5;
+  FButtonClearImg.BorderSpacing.Bottom := 5;
+  FButtonClearImg.BorderSpacing.Right := 5;
   FButtonClearImg.OnClick := @DoClearImageClick;
 
   FButtonMatchColor := TSimbaButton.Create(FPanel);
   FButtonMatchColor.Parent := ButtonPanel;
   FButtonMatchColor.Caption := 'Match Color';
-  FButtonMatchColor.BorderSpacing.Around := 5;
+  FButtonMatchColor.BorderSpacing.Top := 5;
+  FButtonMatchColor.BorderSpacing.Bottom := 5;
+  FButtonMatchColor.BorderSpacing.Left := 5;
   FButtonMatchColor.OnClick := @DoMatchColorClick;
 
   FButtonUpdateImg := TSimbaButton.Create(FPanel);
   FButtonUpdateImg.Parent := ButtonPanel;
   FButtonUpdateImg.Caption := 'Update Image';
-  FButtonUpdateImg.BorderSpacing.Around := 5;
+  FButtonUpdateImg.BorderSpacing.Top := 5;
+  FButtonUpdateImg.BorderSpacing.Bottom := 5;
+  FButtonUpdateImg.BorderSpacing.Left := 5;
   FButtonUpdateImg.OnClick := @DoUpdateImgClick;
 
   FEditMulti3 := TSimbaLabeledEdit.Create(FPanel);
   FEditMulti3.Parent := BottomPanel;
   FEditMulti3.Align := alTop;
-  FEditMulti3.Caption := 'Best B Multiplier';
-  FEditMulti3.LabelMeasure := 'Best R Multipliers';
+  FEditMulti3.Caption := 'Best Multiplier[2]';
+  FEditMulti3.LabelMeasure := 'Best Multiplier[2]';
   FEditMulti3.BorderSpacing.Top := 4;
   FEditMulti3.Color := SimbaTheme.ColorFrame;
 
   FEditMulti2 := TSimbaLabeledEdit.Create(FPanel);
   FEditMulti2.Parent := BottomPanel;
   FEditMulti2.Align := alTop;
-  FEditMulti2.Caption := 'Best G Multiplier';
-  FEditMulti2.LabelMeasure := 'Best R Multipliers';
+  FEditMulti2.Caption := 'Best Multiplier[1]';
+  FEditMulti2.LabelMeasure := 'Best Multiplier[1]';
   FEditMulti2.BorderSpacing.Top := 4;
   FEditMulti2.Color := SimbaTheme.ColorFrame;
 
   FEditMulti1 := TSimbaLabeledEdit.Create(FPanel);
   FEditMulti1.Parent := BottomPanel;
   FEditMulti1.Align := alTop;
-  FEditMulti1.Caption := 'Best R Multiplier';
-  FEditMulti1.LabelMeasure := 'Best R Multipliers';
+  FEditMulti1.Caption := 'Best Multiplier[0]';
+  FEditMulti1.LabelMeasure := 'Best Multiplier[0]';
   FEditMulti1.BorderSpacing.Top := 4;
   FEditMulti1.Color := SimbaTheme.ColorFrame;
 
