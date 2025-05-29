@@ -32,8 +32,33 @@ TImage is a data type that holds an image.
 
 This is used manipulate and process an image such as resizing, rotating, bluring and much more.
 Or simply get/set a pixel color at a given (x,y) coord.
+
+```{note}
+Images are now objects so there is no need to free them - it is done automatically once they go out of scope.
+```
 *)
 
+(*
+TImage.Construct
+----------------
+```
+function TImage.Construct: TImage; static;
+function TImage.Construct(Width, Height: Integer): TImage; static;
+function TImage.Construct(FileName: String): TImage; static;
+```
+
+Constructors for TImage. Use the `new` keyword for these.
+
+```
+var
+  img: TImage;
+begin
+  img := new TImage(100, 200);
+  WriteLn(img.Width);
+  WriteLn(img.Height);
+end;
+```
+*)
 procedure _LapeImage_Construct1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLapeObject(Result)^ := TSimbaImage.Create();
@@ -54,7 +79,6 @@ begin
   if IsManaging(PLapeObject(Params^[0])) and Assigned(PSimbaImage(PLapeObject(Params^[0])^)^) then
     FreeAndNil(PSimbaImage(PLapeObject(Params^[0])^)^);
 end;
-
 
 (*
 TImage.Data
@@ -171,10 +195,11 @@ begin
 end;
 
 (*
-TImage.GetFontName
-------------------
+TImage.FontName
+---------------
 ```
-function TImage.GetFontName: String;
+property TImage.FontName: String;
+property TImage.FontName(Value: String);
 ```
 *)
 procedure _LapeImage_FontName_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -182,23 +207,17 @@ begin
   PString(Result)^ := PSimbaImage(PLapeObject(Params^[0])^)^.FontName;
 end;
 
-(*
-TImage.SetFontName
-------------------
-```
-procedure TImage.SetFontName(Value: String);
-```
-*)
 procedure _LapeImage_FontName_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(PLapeObject(Params^[0])^)^.FontName := PString(Params^[1])^;
 end;
 
 (*
-TImage.GetFontSize
-------------------
+TImage.FontSize
+---------------
 ```
-function TImage.GetFontSize: Single;
+property TImage.FontSize: Single;
+property TImage.FontSize(Value: Single);
 ```
 *)
 procedure _LapeImage_FontSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -206,23 +225,17 @@ begin
   PSingle(Result)^ := PSimbaImage(PLapeObject(Params^[0])^)^.FontSize;
 end;
 
-(*
-TImage.SetFontSize
-------------------
-```
-procedure TImage.SetFontSize(Value: Single);
-```
-*)
 procedure _LapeImage_FontSize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(PLapeObject(Params^[0])^)^.FontSize := PSingle(Params^[1])^;
 end;
 
 (*
-TImage.GetFontAntialiasing
---------------------------
+TImage.FontAntialiasing
+-----------------------
 ```
-function TImage.GetFontAntialiasing: Boolean;
+property TImage.FontAntialiasing: Boolean;
+property TImage.FontAntialiasing(Value: Boolean);
 ```
 *)
 procedure _LapeImage_FontAntialiasing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -230,23 +243,17 @@ begin
   PBoolean(Result)^ := PSimbaImage(PLapeObject(Params^[0])^)^.FontAntialiasing;
 end;
 
-(*
-TImage.SetFontAntialiasing
---------------------------
-```
-procedure TImage.SetFontAntialiasing(Value: Boolean);
-```
-*)
 procedure _LapeImage_FontAntialiasing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(PLapeObject(Params^[0])^)^.FontAntialiasing := PBoolean(Params^[1])^;
 end;
 
 (*
-TImage.GetFontBold
-------------------
+TImage.FontBold
+---------------
 ```
-function TImage.GetFontBold: Boolean;
+property TImage.FontBold: Boolean;
+property TImage.FontBold(Value: Boolean);
 ```
 *)
 procedure _LapeImage_FontBold_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -254,23 +261,17 @@ begin
   PBoolean(Result)^ := PSimbaImage(PLapeObject(Params^[0])^)^.FontBold;
 end;
 
-(*
-TImage.SetFontBold
-------------------
-```
-procedure TImage.SetFontBold(Value: Boolean);
-```
-*)
 procedure _LapeImage_FontBold_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(PLapeObject(Params^[0])^)^.FontBold := PBoolean(Params^[1])^;
 end;
 
 (*
-TImage.GetFontItalic
---------------------
+TImage.FontItalic
+-----------------
 ```
-function TImage.GetFontItalic: Boolean;
+property TImage.FontItalic: Boolean;
+property TImage.FontItalic(Value: Boolean);
 ```
 *)
 procedure _LapeImage_FontItalic_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -278,23 +279,17 @@ begin
   PBoolean(Result)^ := PSimbaImage(PLapeObject(Params^[0])^)^.FontItalic;
 end;
 
-(*
-TImage.SetFontItalic
---------------------
-```
-procedure TImage.SetFontItalic(Value: Boolean);
-```
-*)
 procedure _LapeImage_FontItalic_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(PLapeObject(Params^[0])^)^.FontItalic := PBoolean(Params^[1])^;
 end;
 
 (*
-TImage.GetAlpha
----------------
+TImage.Alpha
+------------
 ```
-function TImage.GetAlpha(X, Y: Integer): Byte;
+property TImage.Alpha(X, Y: Integer): Byte;
+property TImage.Alpha(X, Y: Integer; Alpha: Byte);
 ```
 *)
 procedure _LapeImage_GetAlpha(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -302,13 +297,6 @@ begin
   PByte(Result)^ := PSimbaImage(PLapeObject(Params^[0])^)^.Alpha[PInteger(Params^[1])^, PInteger(Params^[2])^];
 end;
 
-(*
-TImage.SetAlpha
----------------
-```
-procedure TImage.SetAlpha(X, Y: Integer; Alpha: Byte);
-```
-*)
 procedure _LapeImage_SetAlpha(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(PLapeObject(Params^[0])^)^.Alpha[PInteger(Params^[1])^, PInteger(Params^[2])^] := PByte(Params^[3])^;
@@ -318,7 +306,8 @@ end;
 TImage.GetPixel
 ---------------
 ```
-function TImage.GetPixel(X, Y: Integer): TColor;
+property TImage.Pixel(X, Y: Integer): TColor;
+property TImage.Pixel(X, Y: Integer; Alpha: TColor);
 ```
 *)
 procedure _LapeImage_GetPixel(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -326,13 +315,6 @@ begin
   PColor(Result)^ := PSimbaImage(PLapeObject(Params^[0])^)^.Pixel[PInteger(Params^[1])^, PInteger(Params^[2])^];
 end;
 
-(*
-TImage.SetPixel
----------------
-```
-procedure TImage.SetPixel(X, Y: Integer; Color: TColor);
-```
-*)
 procedure _LapeImage_SetPixel(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImage(PLapeObject(Params^[0])^)^.Pixel[PInteger(Params^[1])^, PInteger(Params^[2])^] := PColor(Params^[3])^;
@@ -1676,47 +1658,6 @@ begin
 end;
 
 (*
-TImage.CreateFromTarget
------------------------
-```
-function TImage.CreateFromTarget(Target: TSimbaTarget; Bounds: TBox = [-1,-1,-1,-1]): TImage; static;
-```
-
-Creates an image from the given target and bounds.
-
-- The `Bounds` parameter defaults to the entire target.
-*)
-
-(*
-TImage.CreateFromTarget
------------------------
-```
-function TImage.CreateFromTarget(Bounds: TBox = [-1,-1,-1,-1]): TImage; static;
-```
-
-Creates an image from the bounds of the current target.
-
-- Current target is the global **Target** variable
-- The `Bounds` parameter defaults to the entire target.
-*)
-
-(*
-TImage.DrawTarget
------------------
-```
-procedure TImage.DrawTarget(Target: TSimbaTarget; P: TPoint; Bounds: TBox = [-1,-1,-1,-1]);
-```
-*)
-
-(*
-TImage.DrawTarget
------------------
-```
-procedure TImage.DrawTarget(P: TPoint; Bounds: TBox = [-1,-1,-1,-1]); overload;
-```
-*)
-
-(*
 TImage.Show
 -----------
 ```
@@ -1724,16 +1665,6 @@ procedure TImage.Show(EnsureVisible: Boolean = True);
 ```
 
 Show a image on the debug image.
-*)
-
-(*
-TImage.Target
--------------
-```
-property TImage.Target: TTarget;
-```
-
-Returns a target which is targetted to the image.
 *)
 
 procedure ImportSimbaImage(Script: TSimbaScript);

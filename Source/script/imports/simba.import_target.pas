@@ -33,6 +33,14 @@ Target
 Target related methods.
 *)
 
+(*
+TTarget.FocusFocus
+------------------
+```
+property TTarget.FocusFocus: Boolean;
+property TTarget.FocusFocus(Value: Boolean);
+```
+*)
 procedure _LapeTargetOptions_ForceFocus_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaTargetOptions(Params^[0])^.ForceFocus;
@@ -43,6 +51,14 @@ begin
   PSimbaTargetOptions(Params^[0])^.ForceFocus := PBoolean(Params^[1])^;
 end;
 
+(*
+TTarget.MousePressMin
+---------------------
+```
+property TTarget.MousePressMin: Integer;
+property TTarget.MousePressMin(Value: Integer);
+```
+*)
 procedure _LapeTargetOptions_MousePressMin_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaTargetOptions(Params^[0])^.MousePressMin;
@@ -53,6 +69,14 @@ begin
   PSimbaTargetOptions(Params^[0])^.MousePressMin := PInteger(Params^[1])^;
 end;
 
+(*
+TTarget.MousePressMax
+---------------------
+```
+property TTarget.MousePressMax: Integer;
+property TTarget.MousePressMax(Value: Integer);
+```
+*)
 procedure _LapeTargetOptions_MousePressMax_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaTargetOptions(Params^[0])^.MousePressMax;
@@ -63,6 +87,14 @@ begin
   PSimbaTargetOptions(Params^[0])^.MousePressMax := PInteger(Params^[1])^;
 end;
 
+(*
+TTarget.MouseSpeed
+------------------
+```
+property TTarget.MouseSpeed: Double;
+property TTarget.MouseSpeed(Value: Double);
+```
+*)
 procedure _LapeTargetOptions_MouseSpeed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PSimbaTargetOptions(Params^[0])^.MouseSpeed;
@@ -73,6 +105,14 @@ begin
   PSimbaTargetOptions(Params^[0])^.MouseSpeed := PDouble(Params^[1])^;
 end;
 
+(*
+TTarget.MouseGravity
+--------------------
+```
+property TTarget.MouseGravity: Double;
+property TTarget.MouseGravity(Value: Double);
+```
+*)
 procedure _LapeTargetOptions_MouseGravity_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PSimbaTargetOptions(Params^[0])^.MouseGravity;
@@ -80,9 +120,17 @@ end;
 
 procedure _LapeTargetOptions_MouseGravity_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaTargetOptions(Params^[0])^.MouseGravity :=PDouble(Params^[1])^;
+  PSimbaTargetOptions(Params^[0])^.MouseGravity := PDouble(Params^[1])^;
 end;
 
+(*
+TTarget.MouseWind
+-----------------
+```
+property TTarget.MouseWind: Double;
+property TTarget.MouseWind(Value: Double);
+```
+*)
 procedure _LapeTargetOptions_MouseWind_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDouble(Result)^ := PSimbaTargetOptions(Params^[0])^.MouseWind;
@@ -93,6 +141,14 @@ begin
   PSimbaTargetOptions(Params^[0])^.MouseWind := PDouble(Params^[1])^;
 end;
 
+(*
+TTarget.MouseTimeout
+--------------------
+```
+property TTarget.MouseTimeout: Integer;
+property TTarget.MouseTimeout(Value: Integer);
+```
+*)
 procedure _LapeTargetOptions_MouseTimeout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaTargetOptions(Params^[0])^.MouseTimeout;
@@ -103,6 +159,14 @@ begin
   PSimbaTargetOptions(Params^[0])^.MouseTimeout := PInteger(Params^[1])^;
 end;
 
+(*
+TTarget.KeyPressMin
+-------------------
+```
+property TTarget.KeyPressMin: Integer;
+property TTarget.KeyPressMin(Value: Integer);
+```
+*)
 procedure _LapeTargetOptions_KeyPressMin_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaTargetOptions(Params^[0])^.KeyPressMin;
@@ -113,6 +177,14 @@ begin
   PSimbaTargetOptions(Params^[0])^.KeyPressMin := PInteger(Params^[1])^;
 end;
 
+(*
+TTarget.KeyPressMax
+-------------------
+```
+property TTarget.KeyPressMax: Integer;
+property TTarget.KeyPressMax(Value: Integer);
+```
+*)
 procedure _LapeTargetOptions_KeyPressMax_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaTargetOptions(Params^[0])^.KeyPressMax;
@@ -123,6 +195,18 @@ begin
   PSimbaTargetOptions(Params^[0])^.KeyPressMax := PInteger(Params^[1])^;
 end;
 
+(*
+TTarget.Construct
+-----------------
+```
+function TTarget.Construct: TTarget; static;
+```
+
+TTarget constructor. Use the `new` keyword to call this method like so:
+```
+myTarget := new TTarget();
+```
+*)
 procedure _LapeTarget_Construct(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLapeObject(Result)^ := TSimbaTarget.Create();
@@ -142,6 +226,10 @@ procedure TTarget.SetDesktop;
 ```
 
 Sets the desktop as the target.
+
+```{note}
+This is the default target for any TTarget created
+```
 *)
 procedure _LapeTarget_SetDesktop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -158,7 +246,7 @@ procedure TTarget.SetImage(TImage: TImage);
 Sets the TSimbaImage as a target.
 
 ```{note}
-Ownership of the TSimbaImage is **not** taken. Make sure you do not free the image while using this target.
+Ownership of the image is taken. It will be freed when the target is changed or target is freed
 ```
 *)
 procedure _LapeTarget_SetImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -1098,13 +1186,12 @@ begin
     addGlobalFunc('function TTarget.Focus: Boolean', @_LapeTarget_Focus);
     addGlobalFunc('function TTarget.ToString: String;', @_LapeTarget_ToString);
 
+    addProperty('TTarget', 'Options', 'TTargetOptions', @_LapeTarget_Options_Read);
     addProperty('TTarget', 'CustomClientArea', 'Boolean', @_LapeTarget_SetCustomClientArea, @_LapeTarget_GetCustomClientArea);
     addProperty('TTarget', 'Bounds', 'TBox', @_LapeTarget_Bounds);
     addProperty('TTarget', 'Width', 'Integer', @_LapeTarget_Width);
     addProperty('TTarget', 'Height', 'Integer', @_LapeTarget_Height);
     addProperty('TTarget', 'Size', 'TSize', @_LapeTarget_Size);
-
-    addProperty('TTarget', 'Options', 'TTargetOptions', @_LapeTarget_Options_Read);
 
     // MOUSE
     addGlobalFunc('procedure TTarget.MouseTeleport(P: TPoint)', @_LapeTarget_MouseTeleport);

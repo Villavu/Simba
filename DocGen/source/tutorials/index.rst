@@ -12,5 +12,6 @@ Tutorials
    Variant Data Type.rst
    Properties.rst
    Preprocessor.rst
+   Objects.rst
 
    plugins/index.rst
