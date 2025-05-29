@@ -34,11 +34,11 @@ Target related methods.
 *)
 
 (*
-TTarget.FocusFocus
-------------------
+TTargetOptions.FocusFocus
+-------------------------
 ```
-property TTarget.FocusFocus: Boolean;
-property TTarget.FocusFocus(Value: Boolean);
+property TTargetOptions.FocusFocus: Boolean;
+property TTargetOptions.FocusFocus(Value: Boolean);
 ```
 *)
 procedure _LapeTargetOptions_ForceFocus_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -52,11 +52,11 @@ begin
 end;
 
 (*
-TTarget.MousePressMin
----------------------
+TTargetOptions.MousePressMin
+----------------------------
 ```
-property TTarget.MousePressMin: Integer;
-property TTarget.MousePressMin(Value: Integer);
+property TTargetOptions.MousePressMin: Integer;
+property TTargetOptions.MousePressMin(Value: Integer);
 ```
 *)
 procedure _LapeTargetOptions_MousePressMin_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -70,11 +70,11 @@ begin
 end;
 
 (*
-TTarget.MousePressMax
----------------------
+TTargetOptions.MousePressMax
+----------------------------
 ```
-property TTarget.MousePressMax: Integer;
-property TTarget.MousePressMax(Value: Integer);
+property TTargetOptions.MousePressMax: Integer;
+property TTargetOptions.MousePressMax(Value: Integer);
 ```
 *)
 procedure _LapeTargetOptions_MousePressMax_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -88,11 +88,11 @@ begin
 end;
 
 (*
-TTarget.MouseSpeed
-------------------
+TTargetOptions.MouseSpeed
+-------------------------
 ```
-property TTarget.MouseSpeed: Double;
-property TTarget.MouseSpeed(Value: Double);
+property TTargetOptions.MouseSpeed: Double;
+property TTargetOptions.MouseSpeed(Value: Double);
 ```
 *)
 procedure _LapeTargetOptions_MouseSpeed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -106,11 +106,11 @@ begin
 end;
 
 (*
-TTarget.MouseGravity
---------------------
+TTargetOptions.MouseGravity
+---------------------------
 ```
-property TTarget.MouseGravity: Double;
-property TTarget.MouseGravity(Value: Double);
+property TTargetOptions.MouseGravity: Double;
+property TTargetOptions.MouseGravity(Value: Double);
 ```
 *)
 procedure _LapeTargetOptions_MouseGravity_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -124,11 +124,11 @@ begin
 end;
 
 (*
-TTarget.MouseWind
------------------
+TTargetOptions.MouseWind
+------------------------
 ```
-property TTarget.MouseWind: Double;
-property TTarget.MouseWind(Value: Double);
+property TTargetOptions.MouseWind: Double;
+property TTargetOptions.MouseWind(Value: Double);
 ```
 *)
 procedure _LapeTargetOptions_MouseWind_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -142,11 +142,11 @@ begin
 end;
 
 (*
-TTarget.MouseTimeout
---------------------
+TTargetOptions.MouseTimeout
+---------------------------
 ```
-property TTarget.MouseTimeout: Integer;
-property TTarget.MouseTimeout(Value: Integer);
+property TTargetOptions.MouseTimeout: Integer;
+property TTargetOptions.MouseTimeout(Value: Integer);
 ```
 *)
 procedure _LapeTargetOptions_MouseTimeout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -160,11 +160,11 @@ begin
 end;
 
 (*
-TTarget.KeyPressMin
--------------------
+TTargetOptions.KeyPressMin
+--------------------------
 ```
-property TTarget.KeyPressMin: Integer;
-property TTarget.KeyPressMin(Value: Integer);
+property TTargetOptions.KeyPressMin: Integer;
+property TTargetOptions.KeyPressMin(Value: Integer);
 ```
 *)
 procedure _LapeTargetOptions_KeyPressMin_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -178,11 +178,11 @@ begin
 end;
 
 (*
-TTarget.KeyPressMax
--------------------
+TTargetOptions.KeyPressMax
+--------------------------
 ```
-property TTarget.KeyPressMax: Integer;
-property TTarget.KeyPressMax(Value: Integer);
+property TTargetOptions.KeyPressMax: Integer;
+property TTargetOptions.KeyPressMax(Value: Integer);
 ```
 *)
 procedure _LapeTargetOptions_KeyPressMax_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -488,6 +488,20 @@ begin
   PSize(Result)^ := PSimbaTarget(PLapeObject(Params^[0])^)^.Size;
 end;
 
+(*
+TTarget.Options
+---------------
+```
+property TTarget.Options: TTargetOptions;
+```
+Returns options for the target.
+Mostly contains input options controlling speed of mouse/keyboard.
+
+Example for changing the mouse speed:
+```
+Target.Options.MouseSpeed := 15;
+```
+*)
 procedure _LapeTarget_Options_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaTargetOptions(Result)^ := PSimbaTarget(PLapeObject(Params^[0])^)^.Options;
@@ -506,7 +520,7 @@ Add an event. Valid events are:
   - `ETargetEvent.MOUSE_TELEPORT`
   - `ETargetEvent.MOUSE_BUTTON`
 
-Returns the index of the event, use this in RemoveEvent
+Returns the index of the added event, use for RemoveEvent.
 *)
 
 // Since lape objects are TByteArray and not directly TSimbaTarget need to convert the param.
@@ -1098,7 +1112,7 @@ begin
   begin
     DumpSection := 'Target';
 
-    addGlobalType('object {%codetools off} Instance: Pointer; DontManage: Boolean; {%codetools on} end', 'TTarget');
+    addGlobalType('object {%CODETOOLS OFF} Instance: Pointer; DontManage: Boolean; {%CODETOOLS ON} end', 'TTarget');
     with addGlobalVar('TTarget', '[]', 'Target') do
       Used := duTrue;
 

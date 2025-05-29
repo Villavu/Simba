@@ -1673,7 +1673,7 @@ begin
   begin
     DumpSection := 'Image';
 
-    addGlobalType('object Instance: Pointer; DontManage: Boolean; end;', 'TImage');
+    addGlobalType('object {%CODETOOLS OFF} Instance: Pointer; DontManage: Boolean; {%CODETOOLS ON} end;', 'TImage');
     addGlobalType('array of TImage', 'TImageArray');
     addGlobalType('enum(WIDTH, HEIGHT, LINE)', 'EImageMirrorStyle');
     addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR)', 'EImageResizeAlgo');
