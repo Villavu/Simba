@@ -179,8 +179,7 @@ var
   FormatSettingsDot: TFormatSettings;
 begin
   Colors := GetColors();
-
-  if (Length(GetColors) > 0) then
+  if (Length(Colors) > 0) then
   begin
     Best := GetBestColor(GetColorSpace(), Colors);
 
@@ -617,6 +616,7 @@ begin
   BottomPanel.Align := alBottom;
   BottomPanel.AutoSize := True;
   BottomPanel.BevelOuter := bvNone;
+  BottomPanel.BorderSpacing.Around := 5;
 
   ButtonPanel := TPanel.Create(BottomPanel);
   ButtonPanel.Parent := BottomPanel;
@@ -631,8 +631,6 @@ begin
   begin
     Parent := BottomPanel;
     BorderSpacing.Top := 5;
-    BorderSpacing.Left := 5;
-    BorderSpacing.Right := 5;
     Align := alTop;
   end;
 
@@ -705,8 +703,6 @@ begin
     Parent := BottomPanel;
     Align := alTop;
     BorderSpacing.Top := 2;
-    BorderSpacing.Left := 5;
-    BorderSpacing.Right := 5;
     BorderSpacing.Bottom := 5;
   end;
 
@@ -750,7 +746,10 @@ begin
     if (TColorNode(FColorList.TopLevelItem[I]).Color = Color)then
       Exit;
 
+  // Wrap with begin/endupdate so modify event doesnt fire before .Color is assigned
+  FColorList.BeginUpdate();
   TColorNode(FColorList.AddNode(ColorToStr(Color))).Color := Color;
+  FColorList.EndUpdate();
 end;
 
 function TSimbaACA.GetBest: TColorTolerance;
