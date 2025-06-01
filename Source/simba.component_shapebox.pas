@@ -1338,8 +1338,8 @@ begin
   try
     for I := 0 to FShapes.Count - 1 do
     begin
-      Add('[' + FShapes[I].FShapeType + ']');
-      Add('Name=' + FShapes[I].FName);
+      Add('[' + FShapes[I].FName + ']');
+      Add('Shape=' + FShapes[I].FShapeType);
       Add('Value=' + FShapes[I].ToStr());
       Add('');
     end;
@@ -1371,14 +1371,14 @@ begin
       begin
         ShapeClass := nil;
 
-        if (Strings[I] = '[Box]')   then ShapeClass := TSimbaShapeBoxShape_Box   else
-        if (Strings[I] = '[Point]') then ShapeClass := TSimbaShapeBoxShape_Point else
-        if (Strings[I] = '[Path]')  then ShapeClass := TSimbaShapeBoxShape_Path  else
-        if (Strings[I] = '[Poly]')  then ShapeClass := TSimbaShapeBoxShape_Poly;
+        if (Strings[I+1] = 'Shape=Box')   then ShapeClass := TSimbaShapeBoxShape_Box   else
+        if (Strings[I+1] = 'Shape=Point]') then ShapeClass := TSimbaShapeBoxShape_Point else
+        if (Strings[I+1] = 'Shape=Path')  then ShapeClass := TSimbaShapeBoxShape_Path  else
+        if (Strings[I+1] = 'Shape=Poly')  then ShapeClass := TSimbaShapeBoxShape_Poly;
 
         if (ShapeClass <> nil) then
         begin
-          ShapeName := Strings[I+1].After('Name=');
+          ShapeName := Strings[I].Between('[', ']');
           ShapeValue := Strings[I+2].After('Value=');
 
           NewShape := ShapeClass.Create(Self);
