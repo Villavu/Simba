@@ -1140,8 +1140,8 @@ begin
 
   if (FSelecting = nil) then
   begin
-    ShapeAtMouse := Self.GetShapeAt(MousePoint);
-    if (ShapeAtMouse <> nil) and ShapeAtMouse.BeginDrag(MousePoint) then
+    ShapeAtMouse := Self.GetShapeAt(MouseXY);
+    if (ShapeAtMouse <> nil) and ShapeAtMouse.BeginDrag(MouseXY) then
     begin
       InternalStartDragging(ShapeAtMouse);
       Exit;
@@ -1149,7 +1149,7 @@ begin
   end;
 
   if (FSelecting <> nil) then
-    FSelecting.SelectingMouseDown(Self, Button, Shift, MousePoint);
+    FSelecting.SelectingMouseDown(Self, Button, Shift, MouseXY);
 end;
 
 procedure TSimbaShapeBox.ImgMouseUp(Button: TMouseButton; Shift: TShiftState;
@@ -1171,15 +1171,15 @@ begin
   begin
     if (FDragging = nil) then
     begin
-      ShapeAtMouse := Self.GetShapeAt(MousePoint);
-      if (ShapeAtMouse <> nil) and ShapeAtMouse.CanDrag(MousePoint, NewCursor) then
+      ShapeAtMouse := Self.GetShapeAt(MouseXY);
+      if (ShapeAtMouse <> nil) and ShapeAtMouse.CanDrag(MouseXY, NewCursor) then
       begin
         Cursor := NewCursor;
         Exit;
       end;
     end else
     begin
-      FDragging.Drag(MousePoint);
+      FDragging.Drag(MouseXY);
       Paint();
       Exit;
     end;
@@ -1195,7 +1195,7 @@ begin
 
   if (FSelecting <> nil) then
   begin
-    FSelecting.SelectingKeyDown(Self, Key, Shift, MousePoint);
+    FSelecting.SelectingKeyDown(Self, Key, Shift, MouseXY);
 
     Key := 0;
   end
@@ -1237,7 +1237,7 @@ begin
       if (FShapes[I] = _SelectingShape) then Flags := Flags + [EPaintShapeFlag.SELECTING];
       if (FShapes[I] = _SelectedShape)  then Flags := Flags + [EPaintShapeFlag.SELECTED];
 
-      FShapes[I].Paint(Self, ACanvas, Flags, MousePoint);
+      FShapes[I].Paint(Self, ACanvas, Flags, MouseXY);
     end;
 
   inherited;

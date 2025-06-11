@@ -62,9 +62,9 @@ begin
   PInteger(Result)^ := PSimbaImageBox(Params^[0])^.MouseY;
 end;
 
-procedure _LapeSimbaImageBox_MousePoint(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSimbaImageBox_MouseXY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPoint(Result)^ := PSimbaImageBox(Params^[0])^.MousePoint;
+  PPoint(Result)^ := PSimbaImageBox(Params^[0])^.MouseXY;
 end;
 
 procedure _LapeSimbaImageBox_SetImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -220,6 +220,16 @@ end;
 procedure _LapeSimbaImageBox_ShowStatusBar_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBox(Params^[0])^.ShowStatusBar := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeSimbaImageBox_AllowMoving_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaImageBox(Params^[0])^.AllowMoving;
+end;
+
+procedure _LapeSimbaImageBox_AllowMoving_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBox(Params^[0])^.AllowMoving := PBoolean(Params^[1])^;
 end;
 
 procedure _LapeSimbaImageBox_OnImgKeyUp_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -451,6 +461,8 @@ begin
 
     addProperty('TImageBox', 'ShowScrollBars', 'Boolean', @_LapeSimbaImageBox_ShowScrollBars_Read, @_LapeSimbaImageBox_ShowScrollBars_Write);
     addProperty('TImageBox', 'ShowStatusBar', 'Boolean', @_LapeSimbaImageBox_ShowStatusBar_Read, @_LapeSimbaImageBox_ShowStatusBar_Write);
+    addProperty('TImageBox', 'AllowMoving', 'Boolean', @_LapeSimbaImageBox_AllowMoving_Read, @_LapeSimbaImageBox_AllowMoving_Write);
+
 
     addProperty('TImageBox', 'Status', 'String', @_LapeSimbaImageBox_Status_Read, @_LapeSimbaImageBox_Status_Write);
     addProperty('TImageBox', 'Background', 'TLazBitmap', @_LapeSimbaImageBox_Background_Read);
@@ -466,7 +478,7 @@ begin
     addGlobalFunc('function TImageBox.IsPointVisible(ImageXY: TPoint): Boolean;', @_LapeSimbaImageBox_IsPointVisible);
     addProperty('TImageBox', 'MouseX', 'Integer', @_LapeSimbaImageBox_MouseX);
     addProperty('TImageBox', 'MouseY', 'Integer', @_LapeSimbaImageBox_MouseY);
-    addProperty('TImageBox', 'MousePoint', 'TPoint', @_LapeSimbaImageBox_MousePoint);
+    addProperty('TImageBox', 'MouseXY', 'TPoint', @_LapeSimbaImageBox_MouseXY);
 
     addClassConstructor('TImageBox', '(Owner: TLazComponent)', @_LapeSimbaImageBox_Create);
   end;
