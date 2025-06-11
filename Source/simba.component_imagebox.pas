@@ -736,6 +736,7 @@ begin
   FZoomLevel := 100;
   FZoomPixels := 1;
   FAllowZoom := True;
+  FDragging.Enabled := True;
 
   FVertScroll := TSimbaScrollBar.Create(Self);
   FVertScroll.Parent := Self;
