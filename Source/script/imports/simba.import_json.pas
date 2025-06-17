@@ -16,31 +16,42 @@ uses
   lptypes,
   simba.json;
 
-(*
-JSON
-====
-JSON parser.
-*)
-
 type
   PJSONItemType = ^EJSONItemType;
   PJSONFormatOptions = ^EJSONFormatOptions;
 
-procedure _LapeJSONParser_Parse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectJSON(Params^[0])^^.Parse(PString(Params^[1])^);
-end;
+(*
+JSON
+====
+JSON parsing.
+*)
 
-procedure _LapeJSONParser_Load(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectJSON(Params^[0])^^.Load(PString(Params^[1])^);
-end;
+(*
+TJSONParser.Construct
+---------------------
+```
+function TJSONArray.Construct: TJSONArray; static;
+function TJSONObject.Construct: TJSONObject; static;
+function TJSONParser.Construct: TJSONParser; static;
+```
+Constructors for JSON. Use the `new` keyword for these.
 
-procedure _LapeJSONParser_Save(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+```
+var
+  parser: TJSONParser;
 begin
-  PLapeObjectJSON(Params^[0])^^.Save(PString(Params^[1])^, PJSONFormatOptions(Params^[2])^, PInteger(Params^[3])^);
-end;
+  parser := new TJSONParser();
+  parser.Parse('{"someNumber": 123, someString: "hello"}');
 
+  WriteLn parser.Typ;
+  WriteLn parser.Count;
+  WriteLn parser.Item[0].Typ;
+  WriteLn parser.Item[0].AsInt;
+  WriteLn parser.Item['someString'].Typ;
+  WriteLn parser.Item['someString'].AsString;
+end;
+```
+*)
 procedure _LapeJSONArray_Construct(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLapeObjectJSON(Result)^^ := NewJSONArray();
@@ -62,6 +73,63 @@ begin
     PLapeObjectJSON(Params^[0])^^.Free();
 end;
 
+(*
+TJSONParser.Parse
+-----------------
+```
+procedure TJSONParser.Parse(Str: String);
+```
+Parse a json string.
+*)
+procedure _LapeJSONParser_Parse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectJSON(Params^[0])^^.Parse(PString(Params^[1])^);
+end;
+
+(*
+TJSONParser.Load
+----------------
+```
+procedure TJSONParser.Load(FileName: String);
+```
+Parse json from a file.
+*)
+procedure _LapeJSONParser_Load(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectJSON(Params^[0])^^.Load(PString(Params^[1])^);
+end;
+
+(*
+TJSONParser.Save
+----------------
+```
+procedure TJSONParser.Save(FileName: String; Options: EJSONFormatOptions = []; Indent: Integer = 2);
+```
+Formats the json parser to a string and saves to file.
+*)
+procedure _LapeJSONParser_Save(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectJSON(Params^[0])^^.Save(PString(Params^[1])^, PJSONFormatOptions(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+(*
+TJSONItem.Typ
+-------------
+```
+property TJSONItem.Typ: EJSONType
+```
+Returns json type of the item.
+
+This can be any of:
+ - `EJSONType.UNKNOWN`
+ - `EJSONType.INT`
+ - `EJSONType.FLOAT`
+ - `EJSONType.STR`
+ - `EJSONType.BOOL`
+ - `EJSONType.NULL`
+ - `EJSONType.ARR`
+ - `EJSONType.OBJ`
+*)
 procedure _LapeJSONItem_ItemType_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PJSONItemType(Result)^ := PLapeObjectJSON(Params^[0])^^.Typ;
@@ -265,6 +333,21 @@ begin
   PLapeObjectJSON(Params^[0])^^.Clear();
 end;
 
+(*
+TJSONItem.Format
+----------------
+```
+function TJSONItem.Format(Options: EJSONFormatOptions = []; Indent: Integer = 2): String;
+```
+Formats the json item into a JSON string.
+
+Options can be a set of:
+  - `EJSONFormatOption.SINGLE_LINE_ARR`: Array without CR/LF : all on one line
+  - `EJSONFormatOption.SINGLE_LINE_OBJ`: Object without CR/LF : all on one line
+  - `EJSONFormatOption.NO_QUOTE_MEMBERS`: Do not quote object member names.
+  - `EJSONFormatOption.USE_TABS`: Use tab characters instead of spaces.
+  - `EJSONFormatOption.NO_WHITESPACE`: Do not use whitespace at all
+*)
 procedure _LapeJSONItem_Format(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PLapeObjectJSON(Params^[0])^^.Format(PJSONFormatOptions(Params^[1])^, PInteger(Params^[2])^);
@@ -284,14 +367,14 @@ begin
     addGlobalType('enum(SINGLE_LINE_ARR, SINGLE_LINE_OBJ, NO_QUOTE_MEMBERS, USE_TABS, NO_WHITESPACE)', 'EJSONFormatOption');
     addGlobalType('enum(UNKNOWN, INT, FLOAT, STR, BOOL, NULL, ARR, OBJ)', 'EJSONType');
     addGlobalType('set of EJSONFormatOption', 'EJSONFormatOptions');
-    addGlobalFunc('procedure TJSONParser.Load(FileName: String);', @_LapeJSONParser_Load);
-    addGlobalFunc('procedure TJSONParser.Parse(Str: String);', @_LapeJSONParser_Parse);
-    addGlobalFunc('procedure TJSONParser.Save(FileName: String; Options: EJSONFormatOptions = []; Indent: Integer = 2);', @_LapeJSONParser_Save);
-
     addGlobalFunc('function TJSONArray.Construct: TJSONArray; static;', @_LapeJSONArray_Construct);
     addGlobalFunc('function TJSONObject.Construct: TJSONObject; static;', @_LapeJSONObject_Construct);
     addGlobalFunc('function TJSONParser.Construct: TJSONParser; static;', @_LapeJSONParser_Construct);
     addGlobalFunc('procedure TJSONItem.Destroy;', @_LapeJSONItem_Destroy);
+
+    addGlobalFunc('procedure TJSONParser.Load(FileName: String);', @_LapeJSONParser_Load);
+    addGlobalFunc('procedure TJSONParser.Parse(Str: String);', @_LapeJSONParser_Parse);
+    addGlobalFunc('procedure TJSONParser.Save(FileName: String; Options: EJSONFormatOptions = []; Indent: Integer = 2);', @_LapeJSONParser_Save);
 
     addProperty('TJSONItem', 'Typ', 'EJSONType', @_LapeJSONItem_ItemType_Read);
     addProperty('TJSONItem', 'AsInt', 'Int64', @_LapeJSONItem_AsInt_Read, @_LapeJSONItem_AsInt_Write);

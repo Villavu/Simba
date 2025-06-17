@@ -490,7 +490,7 @@ begin
     addProperty('TRunningProcess', 'PID', 'TProcessID', @_LapeRunningProcess_PID_Read);
     addProperty('TRunningProcess', 'ExitCode', 'TProcessExitCode', @_LapeRunningProcess_ExitCode_Read);
 
-    addGlobalType('type TBaseClass', 'TRunningProcessPiped');
+    addGlobalType('type TRunningProcess', 'TRunningProcessPiped');
     addGlobalFunc('function TRunningProcess.Read(Buf: Pointer; Count: Integer): Integer;', @_LapeRunningProcessPiped_Read);
     addGlobalFunc('function TRunningProcess.ReadString: String;', @_LapeRunningProcessPiped_ReadString);
     addGlobalFunc('function TRunningProcess.ReadStringUntil(Seq: String; Timeout: Integer): String;', @_LapeRunningProcessPiped_ReadStringUntil);
