@@ -46,7 +46,7 @@ type
     procedure WaitMoving;
     procedure Stop;
 
-    procedure Move(constref Target: TSimbaTarget; Dest: TPoint; Accuracy: Single = 0.5);
+    procedure Move(Target: TSimbaTarget; Dest: TPoint; Accuracy: Single = 0.5);
   end;
 
 var
@@ -142,7 +142,7 @@ begin
     Sleep(15);
 end;
 
-procedure TSimbaASyncMouse.Move(constref Target: TSimbaTarget; Dest: TPoint; Accuracy: Single);
+procedure TSimbaASyncMouse.Move(Target: TSimbaTarget; Dest: TPoint; Accuracy: Single);
 begin
   FTarget := Target;
   FStop := False;

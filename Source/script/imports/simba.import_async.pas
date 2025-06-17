@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.script;
+  simba.base, simba.script, simba.script_objectutil;
 
 procedure ImportASync(Script: TSimbaScript);
 
@@ -16,13 +16,10 @@ uses
   lptypes, ffi,
   simba.target, simba.http_async, simba.input_async, simba.fs_async;
 
-type
-  PSimbaTarget = ^TSimbaTarget;
-
 (*
 ASync
 =====
-Simple functions that run in the background.
+High level functions that run a task such as an HTTP request which run in the background on another thread.
 
 ```
 procedure ThisIsCalledWhenFinished(constref Result: TASyncHTTPResult);
@@ -106,7 +103,7 @@ Moves the mouse on another thread, so the script can do other things such as upd
 *)
 procedure _LapeASyncMouse_Move(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncMouse.Move(PSimbaTarget(Params^[0])^, PPoint(Params^[1])^, PSingle(Params^[2])^);
+  ASyncMouse.Move(PLapeObjectTarget(Params^[0])^^, PPoint(Params^[1])^, PSingle(Params^[2])^);
 end;
 
 (*
@@ -214,7 +211,7 @@ begin
     // namespace
     addGlobalType('record end;', 'ASync');
 
-    addGlobalFunc('procedure ASync.MouseMove(constref Target: TTarget; Dest: TPoint; Accuracy: Single = 0.5); static; overload;', @_LapeASyncMouse_Move);
+    addGlobalFunc('procedure ASync.MouseMove(Target: TTarget; Dest: TPoint; Accuracy: Single = 0.5); static; overload;', @_LapeASyncMouse_Move);
     addGlobalFunc('procedure ASync.MouseMove(Dest: TPoint; Accuracy: Single = 0.5); static; overload;', [
                   'begin',
                   '  ASync.MouseMove(System.Target, Dest, Accuracy);',
