@@ -320,7 +320,7 @@ begin
   begin
     DumpSection := 'Encoding';
 
-    addGlobalType('enum(SHA1, SHA256, SHA384, SHA512, MD5)', 'EHashAlgo');
+    addGlobalType('enum(CRC32, CRC64, MD4, MD5, SHA1, SHA256, SHA512)', 'EHashAlgo');
     addGlobalType('enum(b64URL, b64, b32, b32Hex, b16)', 'EBaseEncoding');
 
     addGlobalFunc('function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer', @_LapeHOTPCalculateToken);

@@ -15,7 +15,11 @@ uses
 
 type
   {$SCOPEDENUMS ON}
-  EHashAlgo = (SHA1, SHA256, SHA384, SHA512, MD5);
+  EHashAlgo = (
+    CRC32, CRC64,
+    MD4, MD5,
+    SHA1, SHA256, SHA512
+  );
   {$SCOPEDENUMS OFF}
 
   function HashBuffer(Algo: EHashAlgo; Buf: PByte; Len: Integer): String;
@@ -34,22 +38,41 @@ type
 implementation
 
 uses
-  crc,
-  simba.hash_sha1, simba.hash_sha256, simba.hash_sha384, simba.hash_sha512,
-  simba.hash_md5,
+  crc, md5, fpsha256, fpsha512, sha1,
   simba.hash_murmur;
 
 function HashBuffer(Algo: EHashAlgo; Buf: PByte; Len: Integer): String;
+var
+  SHA256: TSHA256;
+  SHA512: TSHA512;
 begin
   Result := '';
 
   if (Len > 0) then
     case Algo of
-      EHashAlgo.SHA1:   Result := Hash_SHA1(Buf, Len);
-      EHashAlgo.SHA256: Result := Hash_SHA256(Buf, Len);
-      EHashAlgo.SHA384: Result := Hash_SHA384(Buf, Len);
-      EHashAlgo.SHA512: Result := Hash_SHA512(Buf, Len);
-      EHashAlgo.MD5:    Result := Hash_MD5(Buf, Len);
+      EHashAlgo.CRC32: Result := IntToHex(CRC32(Buf, Len), 8);
+      EHashAlgo.CRC64: Result := IntToHex(CRC64(Buf, Len), 16);
+
+      EHashAlgo.MD4:   Result := MD4Print(MD4Buffer(Buf^, Len));
+      EHashAlgo.MD5:   Result := MD5Print(MD5Buffer(Buf^, Len));
+
+      EHashAlgo.SHA1:  Result := SHA1Print(SHA1Buffer(Buf^, Len));
+      EHashAlgo.SHA256:
+        begin
+          SHA256.Init;
+          SHA256.Update(Buf, Len);
+          SHA256.Final;
+          SHA256.OutputHexa(Result);
+          Result := LowerCase(Result);
+        end;
+      EHashAlgo.SHA512:
+        begin
+          SHA512.Init;
+          SHA512.Update(Buf, Len);
+          SHA512.Final;
+          SHA512.OutputHexa(Result);
+          Result := LowerCase(Result);
+        end;
     end;
 end;
 
