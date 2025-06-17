@@ -21,7 +21,8 @@ uses
   simba.form_backups, simba.form_findinfiles, simba.form_downloadsimba, simba.form_package,
   simba.form_colorpickhistory,
   simba.plugin_dump, simba.script_runner,
-  simba.ide_initialization, simba.ide_analytics, simba.script;
+  simba.ide_initialization, simba.ide_analytics, simba.script,
+  simba.openssl;
 
 begin
   {$IF DECLARED(SetHeapTraceOutput)}
@@ -76,6 +77,13 @@ begin
   begin
     with DumpPlugin(Application.GetOptionValue('dumpplugin')) do
       SaveToFile(Application.Params[Application.ParamCount]);
+
+    Halt();
+  end;
+
+  if Application.HasOption('extractopenssl') then
+  begin
+    ExtractOpenSSL();
 
     Halt();
   end;
