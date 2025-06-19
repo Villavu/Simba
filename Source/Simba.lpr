@@ -81,12 +81,8 @@ begin
     Halt();
   end;
 
-  if Application.HasOption('extractopenssl') then
-  begin
+  if Application.HasOption('extractopenssl') then // is called on ide launch but make it a option for running a script
     ExtractOpenSSL();
-
-    Halt();
-  end;
 
   if (not Application.HasOption('open')) and (Application.HasOption('run') or Application.HasOption('compile')) then
   begin

@@ -59,12 +59,14 @@ type
   TNodeColorEvent = procedure(Node: TTreeNode; var Color: TColor) of object;
   TNodeHintEvent = function(Node: TTreeNode): String of object;
   TNodeForEachEvent = procedure(Node: TTreeNode) is nested;
+  TNodeCustomFilterEvent = procedure(Filter: String; Node: TTreeNode) of object;
 
   TSimbaTreeView = class(TCustomControl)
   protected
     FFilterPanel: TCustomControl;
     FFilterEdit: TSimbaEdit;
     FFilterClearButton: TSimbaButton;
+
     FHint: TSimbaTreeViewHint;
     FTree: TSimbaInternalTreeView;
     FScrollbarVert: TSimbaScrollBar;
@@ -73,6 +75,8 @@ type
     FOnGetNodeColor: TNodeColorEvent;
     FOnPaintNode: TNodePaintEvent;
     FOnAfterFilter: TNotifyEvent;
+    FCustomFilterEvent: TNodeCustomFilterEvent;
+    FFilterUseCustom: Boolean;
     FOnClear: TNotifyEvent;
     FOnModify: TNotifyEvent;
     FNodeClass: TTreeNodeClass;
@@ -88,7 +92,6 @@ type
 
     procedure FontChanged(Sender: TObject); override;
 
-    procedure UpdateFilter;
 
     function GetImages: TCustomImageList;
     function GetLoading: Boolean;
@@ -128,13 +131,11 @@ type
   public
     constructor Create(AOwner: TComponent; NodeClass: TTreeNodeClass = nil); reintroduce;
 
+    procedure UpdateFilter;
     procedure HideRoot;
-
     procedure FullCollapse;
     procedure FullExpand;
-
     procedure ForEachTopLevel(Func: TNodeForEachEvent);
-
     procedure BeginUpdate;
     procedure EndUpdate;
     procedure Clear;
@@ -149,6 +150,7 @@ type
     property OnDoubleClick: TNotifyEvent read GetOnDoubleClick write SetOnDoubleClick;
     property OnSelectionChange: TNotifyEvent read GetOnSelectionChange write SetOnSelectionChange;
     property OnAfterFilter: TNotifyEvent read FOnAfterFilter write FOnAfterFilter;
+    property OnCustomFilter: TNodeCustomFilterEvent read FCustomFilterEvent write FCustomFilterEvent;
     property OnClear: TNotifyEvent read FOnClear write FOnClear;
     property OnModify: TNotifyEvent read FOnModify write FOnModify;
     property Images: TCustomImageList read GetImages write SetImages;
@@ -163,6 +165,7 @@ type
     property FilterVisible: Boolean read GetFilterVisible write SetFilterVisible;
     property FilterOnlyTopLevel: Boolean read FFilterOnlyTopLevel write FFilterOnlyTopLevel;
     property FilterCollapseOnClear: Boolean read FFilterCollapseOnClear write FFilterCollapseOnClear;
+    property FilterUseCustom: Boolean read FFilterUseCustom write FFilterUseCustom;
 
     property ScrollbarHorz: TSimbaScrollBar read FScrollbarHorz;
     property ScrollbarVert: TSimbaScrollBar read FScrollbarVert;
@@ -177,7 +180,7 @@ type
 implementation
 
 uses
-  Math,
+  Math, Masks,
   simba.ide_theme,
   simba.ide_utils,
   simba.component_images;
@@ -466,7 +469,10 @@ begin
         Continue;
       end;
 
-      Node.Visible := ((FilterText = '') or (Pos(FilterText, LowerCase(Node.Text)) > 0));
+      if FFilterUseCustom and Assigned(FCustomFilterEvent) then
+        FCustomFilterEvent(FilterText, Node)
+      else
+        Node.Visible := ((FilterText = '') or (Pos(FilterText, LowerCase(Node.Text)) > 0));
 
       if Node.Visible then
       begin

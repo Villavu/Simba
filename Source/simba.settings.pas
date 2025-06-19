@@ -108,6 +108,8 @@ type
       FindInFilesSubDirs: TSimbaSetting;
       FindInFilesWholeWords: TSimbaSetting;
       FindInFilesCaseSens: TSimbaSetting;
+
+      FileBrowserMasks: TSimbaSetting;
     end;
 
     Editor: record
@@ -486,6 +488,8 @@ begin
   General.FindInFilesSubDirs    := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesSubDirs', False);
   General.FindInFilesWholeWords := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesWholeWords', False);
   General.FindInFilesCaseSens   := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesCaseSens', False);
+
+  General.FileBrowserMasks := TSimbaSetting_Boolean.Create(Self, 'General', 'FileBrowserMasks', False);
 
   // Editor
   Editor.DefaultScriptType               := TSimbaSetting_Integer.Create(Self, 'Editor', 'DefaultScriptType', 1);

@@ -10,8 +10,8 @@ unit simba.form_filebrowser;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Menus,
-  simba.base, simba.component_treeview;
+  Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Menus, Masks,
+  simba.base, simba.component_treeview, simba.settings;
 
 type
   TSimbaFileBrowserNode = class(TTreeNode)
@@ -22,6 +22,7 @@ type
 
   TSimbaFileBrowserForm = class(TForm)
   published
+    PopupMenu_UseFileMaskFiltering: TMenuItem;
     PopupMenu_CopyRelativePath: TMenuItem;
     PopupMenu_CopyFullPath: TMenuItem;
     PopupMenu_Seperator1: TMenuItem;
@@ -34,6 +35,7 @@ type
     procedure DoUpdate(Sender: TObject);
     procedure DoPopupClick(Sender: TObject);
     procedure PopupMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
+    procedure PopupMenu_UseFileMaskFilteringClick(Sender: TObject);
     procedure PopupPopup(Sender: TObject);
   protected
   type
@@ -54,13 +56,18 @@ type
     FFiles: TDirectoryInfo;
     FUpdating: Boolean;
 
+    FMaskList: TMaskList;
+
     procedure DoFindFiles;
     procedure DoPopluateTreeView(Sender: TObject);
     function DoGetNodeHint(Node: TTreeNode): String;
     procedure DoDoubleClick(Sender: TObject);
     procedure DoAfterFilter(Sender: TObject);
+    procedure DoCustomFilter(Filter: String; Node: TTreeNode);
+    procedure DoSimbaSettingChanged(Setting: TSimbaSetting);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     procedure Fill;
   end;
@@ -204,6 +211,11 @@ begin
   MenuItemHeight(Sender as TMenuItem, ACanvas, AHeight);
 end;
 
+procedure TSimbaFileBrowserForm.PopupMenu_UseFileMaskFilteringClick(Sender: TObject);
+begin
+  SimbaSettings.General.FileBrowserMasks.Value := TMenuItem(Sender).Checked;
+end;
+
 procedure TSimbaFileBrowserForm.PopupPopup(Sender: TObject);
 var
   Node: TSimbaFileBrowserNode;
@@ -259,10 +271,27 @@ begin
   end;
 end;
 
+procedure TSimbaFileBrowserForm.DoCustomFilter(Filter: String; Node: TTreeNode);
+begin
+  if (FMaskList.Mask <> Filter) then
+    FMaskList.Mask := Filter;
+
+  Node.Visible := FMaskList.Matches(TSimbaFileBrowserNode(Node).Path);
+end;
+
+procedure TSimbaFileBrowserForm.DoSimbaSettingChanged(Setting: TSimbaSetting);
+begin
+  PopupMenu_UseFileMaskFiltering.Checked := SimbaSettings.General.FileBrowserMasks.Value;
+  FTreeView.FilterUseCustom              := SimbaSettings.General.FileBrowserMasks.Value;
+  if (FTreeView.Filter <> '') then
+    FTreeView.UpdateFilter();
+end;
+
 constructor TSimbaFileBrowserForm.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
+  FMaskList := TMaskList.Create('');
   FTreeView := TSimbaTreeView.Create(Self, TSimbaFileBrowserNode);
   FTreeView.Parent := Self;
   FTreeView.Align := alClient;
@@ -271,8 +300,19 @@ begin
   FTreeView.OnDoubleClick := @DoDoubleClick;
   FTreeView.OnAfterFilter := @DoAfterFilter;
   FTreeView.PopupMenu := Popup;
+  FTreeView.OnCustomFilter := @DoCustomFilter;
+
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.FileBrowserMasks, @DoSimbaSettingChanged, True);
 
   Fill();
+end;
+
+destructor TSimbaFileBrowserForm.Destroy;
+begin
+  if (FMaskList <> nil) then
+    FreeAndNil(FMaskList);
+
+  inherited Destroy();
 end;
 
 end.

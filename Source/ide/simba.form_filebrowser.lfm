@@ -1,18 +1,17 @@
 object SimbaFileBrowserForm: TSimbaFileBrowserForm
   Left = 535
-  Height = 309
+  Height = 247
   Top = 758
-  Width = 1389
+  Width = 1111
   Caption = 'File Browser'
-  DesignTimePPI = 120
   ShowInTaskBar = stAlways
-  LCLVersion = '3.4.0.0'
+  LCLVersion = '4.0.0.4'
   object Popup: TPopupMenu
     Images = SimbaMainForm.Images
     OnMeasureItem = PopupMeasureItem
     OnPopup = PopupPopup
-    Left = 110
-    Top = 46
+    Left = 88
+    Top = 37
     object PopupMenu_Open: TMenuItem
       Caption = 'Open'
       ImageIndex = 40
@@ -39,6 +38,11 @@ object SimbaFileBrowserForm: TSimbaFileBrowserForm
     object PopupMenu_Refresh: TMenuItem
       Caption = 'Refresh'
       OnClick = DoUpdate
+    end
+    object PopupMenu_UseFileMaskFiltering: TMenuItem
+      AutoCheck = True
+      Caption = 'Use File Mask For Filtering'
+      OnClick = PopupMenu_UseFileMaskFilteringClick
     end
   end
 end
