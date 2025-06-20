@@ -30,14 +30,18 @@ type
     procedure SetSimbaTitle(S: String);
 
     procedure DebugImage_SetMaxSize(Width, Height: Integer);
-    procedure DebugImage_Show(Bitmap: TSimbaImage; EnsureVisible: Boolean);
-    procedure DebugImage_Update(Bitmap: TSimbaImage);
+    procedure DebugImage_Update(Image: TSimbaImage; Resize, EnsureVisible: Boolean);
     procedure DebugImage_Hide;
     procedure DebugImage_Display(Width, Height: Integer); overload;
     procedure DebugImage_Display(X, Y, Width, Height: Integer); overload;
+
+    procedure DebugMatrix_Update(Mat: TSingleMatrix; ColorMapType: Integer; Resize, EnsureVisible: Boolean);
   end;
 
 implementation
+
+uses
+  simba.vartype_matrix;
 
 function TSimbaScriptCommunication.GetScript(out Name: String): String;
 begin
@@ -163,41 +167,11 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.DebugImage_Show(Bitmap: TSimbaImage; EnsureVisible: Boolean);
+procedure TSimbaScriptCommunication.DebugImage_Update(Image: TSimbaImage; Resize, EnsureVisible: Boolean);
 var
   Header: TSimbaIPCHeader;
 begin
-  if (Bitmap = nil) or (Bitmap.Width = 0) or (Bitmap.Height = 0) then
-    Exit;
-
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_SHOW));
-  try
-    Header.Size      := 0;
-    Header.MessageID := FMessageID;
-
-    FOutputStream.Write(Header, SizeOf(TSimbaIPCHeader));
-    FOutputStream.Write(EnsureVisible, SizeOf(Boolean));
-    FOutputStream.Write(Bitmap.Width, SizeOf(Integer));
-    FOutputStream.Write(Bitmap.Height, SizeOf(Integer));
-    FOutputStream.Write(Bitmap.Data^, (Bitmap.Width * Bitmap.Height) * SizeOf(TColorBGRA));
-
-    // Read result
-    FInputStream.Read(Header, SizeOf(TSimbaIPCHeader));
-    if (Header.Size > 0) then
-    begin
-      FResult.CopyFrom(FInputStream, Header.Size);
-      FResult.Position := 0;
-    end;
-  finally
-    EndInvoke();
-  end;
-end;
-
-procedure TSimbaScriptCommunication.DebugImage_Update(Bitmap: TSimbaImage);
-var
-  Header: TSimbaIPCHeader;
-begin
-  if (Bitmap = nil) or (Bitmap.Width = 0) or (Bitmap.Height = 0) then
+  if (Image = nil) or (Image.Width = 0) or (Image.Height = 0) then
     Exit;
 
   BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE));
@@ -206,9 +180,11 @@ begin
     Header.MessageID := FMessageID;
 
     FOutputStream.Write(Header, SizeOf(TSimbaIPCHeader));
-    FOutputStream.Write(Bitmap.Width, SizeOf(Integer));
-    FOutputStream.Write(Bitmap.Height, SizeOf(Integer));
-    FOutputStream.Write(Bitmap.Data^, (Bitmap.Width * Bitmap.Height) * SizeOf(TColorBGRA));
+    FOutputStream.Write(Image.Width, SizeOf(Integer));
+    FOutputStream.Write(Image.Height, SizeOf(Integer));
+    FOutputStream.Write(Resize, SizeOf(Boolean));
+    FOutputStream.Write(EnsureVisible, SizeOf(Boolean));
+    FOutputStream.Write(Image.Data^, (Image.Width * Image.Height) * SizeOf(TColorBGRA));
 
     // Read result
     FInputStream.Read(Header, SizeOf(TSimbaIPCHeader));
@@ -258,6 +234,40 @@ begin
     FParams.Write(Height, SizeOf(Integer));
 
     Invoke();
+  finally
+    EndInvoke();
+  end;
+end;
+
+procedure TSimbaScriptCommunication.DebugMatrix_Update(Mat: TSingleMatrix; ColorMapType: Integer; Resize, EnsureVisible: Boolean);
+var
+  Header: TSimbaIPCHeader;
+  Width, Height, Y: Integer;
+begin
+  if not Mat.GetSize(Width, Height) then
+    Exit;
+
+  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGMATRIX_UPDATE));
+  try
+    Header.Size      := 0;
+    Header.MessageID := FMessageID;
+
+    FOutputStream.Write(Header, SizeOf(TSimbaIPCHeader));
+    FOutputStream.Write(Width, SizeOf(Integer));
+    FOutputStream.Write(Height, SizeOf(Integer));
+    FOutputStream.Write(Resize, SizeOf(Boolean));
+    FOutputStream.Write(EnsureVisible, SizeOf(Boolean));
+    FOutputStream.Write(ColorMapType, SizeOf(Integer));
+    for Y := 0 to Height - 1 do
+      FOutputStream.Write(Mat[Y, 0], Width * SizeOf(Single));
+
+    // Read result
+    FInputStream.Read(Header, SizeOf(TSimbaIPCHeader));
+    if (Header.Size > 0) then
+    begin
+      FResult.CopyFrom(FInputStream, Header.Size);
+      FResult.Position := 0;
+    end;
   finally
     EndInvoke();
   end;

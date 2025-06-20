@@ -342,16 +342,16 @@ generic procedure DoDrawHeatmap<_T>(Mat: TSingleMatrix; DrawInfo: TDrawInfo);
 type
   PType = ^_T;
 
-  procedure _Pixel(const X, Y: Integer; const Color: TColor); inline;
+  procedure _Pixel(const X, Y: Integer; const Color: TColorBGR); inline;
   begin
     Assert((X >= 0) and (Y >= 0));
     Assert((X < DrawInfo.Width) and (Y < DrawInfo.Height));
 
     with PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ do
     begin
-      R := Color shr R_BIT and $FF;
-      G := Color shr G_BIT and $FF;
-      B := Color shr B_BIT and $FF;
+      R := Color.R;
+      G := Color.G;
+      B := Color.B;
     end;
   end;
 

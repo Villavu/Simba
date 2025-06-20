@@ -699,7 +699,7 @@ begin
   with ImageToScreen(ImageXY) do
     Result := (X >= 0) and
               (Y >= 0) and
-              (X < ClientWidth - IfThen(FVertScroll.Visible, FVertScroll.Width, 0)) and
+              (X < ClientWidth  - IfThen(FVertScroll.Visible, FVertScroll.Width, 0)) and
               (Y < ClientHeight - IfThen(FHorzScroll.Visible, FHorzScroll.Height, 0));
 end;
 

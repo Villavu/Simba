@@ -3,20 +3,22 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.form_debugimage;
+unit simba.component_debugimg;
 
 {$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls,
-  simba.component_imagebox, simba.image_lazbridge, simba.threading;
+  Classes, SysUtils, Controls, Forms, Graphics,
+  simba.base,
+  simba.threading,
+  simba.component_imagebox;
 
 type
   TSimbaDebugImageForm = class(TForm)
-    procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
+  protected type
+    ESwapBufferFlags = set of (sbfResize, sbfEnsureVisible);
   protected
     FImageBox: TSimbaImageBox;
     FBackBuffer: TBitmap;
@@ -26,32 +28,37 @@ type
     FNeedRepaint: Boolean;
 
     FMaxWidth, FMaxHeight: Integer;
+    FSwapBufferFlags: ESwapBufferFlags;
 
-    procedure DoApplicationIsIdle(Sender: TObject; var Done: Boolean);
-    procedure DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
+    procedure SwapBuffers(DoResize, DoEnsureVisible: Boolean);
+
+    procedure DoApplicationIsIdle(Sender: TObject; var Done: Boolean); virtual;
   public
-    // Can (and probs should) be called off main thread.
-    // Stream must be BGRA and have AWidth*AHeight*SizeOf(TColorBGRA) readable
-    procedure UpdateFromStream(AWidth, AHeight: Integer; Stream: TStream; AResize, AEnsureVisible: Boolean); overload;
-    procedure UpdateFromStream(AWidth, AHeight: Integer; Stream: TStream); overload;
+    constructor Create(TheOwner: TComponent); override;
+    destructor Destroy; override;
 
-    procedure Close;
+    // Designed to be called off main thread to prevent lock ups.
+    // Stream have the following format:
+    //  - Width (Integer)
+    //  - Height (Integer)
+    //  - Resize (Boolean)
+    //  - EnsureVisible (Boolean)
+    //  - TColorBGRA image data equaling Width*Height*SizeOf(TColorBGRA)
+    procedure UpdateFromStream(Stream: TStream); virtual;
 
-    procedure SetMaxSize(AWidth, AHeight: Integer);
-    procedure SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean = True);
+    procedure Close; virtual;
+
+    procedure SetMaxSize(AWidth, AHeight: Integer); virtual;
+    procedure SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean = True); virtual;
 
     property ImageBox: TSimbaImageBox read FImageBox;
   end;
 
-var
-  SimbaDebugImageForm: TSimbaDebugImageForm;
-
 implementation
 
-{$R *.lfm}
-
 uses
-  simba.base, simba.ide_dockinghelpers,
+  simba.ide_dockinghelpers,
+  simba.image_lazbridge,
   simba.colormath, simba.datetime;
 
 procedure TSimbaDebugImageForm.Close;
@@ -65,28 +72,30 @@ begin
   Form.Close();
 end;
 
-procedure TSimbaDebugImageForm.FormCreate(Sender: TObject);
+procedure TSimbaDebugImageForm.SwapBuffers(DoResize, DoEnsureVisible: Boolean);
+
+  procedure DoSwapBuffers;
+  var
+    Temp: TBitmap;
+  begin
+    Temp := FImageBox.Background;
+    FImageBox.Background := FBackBuffer;
+    FBackBuffer := Temp;
+
+    if (sbfResize in FSwapBufferFlags) then
+      SetSize(FImageBox.Background.Width, FImageBox.Background.Height, sbfEnsureVisible in FSwapBufferFlags)
+    else if (sbfEnsureVisible in FSwapBufferFlags) then
+      SetSize(-1, -1, True);
+
+    FNeedRepaint := True;
+  end;
+
 begin
-  FMaxWidth := 1500;
-  FMaxHeight := 1000;
+  FSwapBufferFlags := [];
+  if DoResize        then Include(FSwapBufferFlags, sbfResize);
+  if DoEnsureVisible then Include(FSwapBufferFlags, sbfEnsureVisible);
 
-  FImageBox := TSimbaImageBox.Create(Self);
-  FImageBox.Parent := Self;
-  FImageBox.Align := alClient;
-  FImageBox.OnImgDoubleClick := @DoImgDoubleClick;
-  FImageBox.BackgroundOwner := False;
-
-  Application.AddOnIdleHandler(@DoApplicationIsIdle);
-end;
-
-procedure TSimbaDebugImageForm.FormDestroy(Sender: TObject);
-begin
-  Application.RemoveOnIdleHandler(@DoApplicationIsIdle);
-
-  if (FBackBuffer <> nil) then
-    FreeAndNil(FBackBuffer);
-  if (FImageBox.Background <> nil) then
-    FImageBox.Background.Free();
+  RunInMainThread(@DoSwapBuffers);
 end;
 
 procedure TSimbaDebugImageForm.DoApplicationIsIdle(Sender: TObject; var Done: Boolean);
@@ -100,13 +109,43 @@ begin
   end;
 end;
 
-procedure TSimbaDebugImageForm.DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
+constructor TSimbaDebugImageForm.Create(TheOwner: TComponent);
 begin
-  DebugLn([EDebugLn.FOCUS], 'Debug Image Click: (%d, %d)', [X, Y]);
+  inherited Create(TheOwner);
+
+  FMaxWidth := 1500;
+  FMaxHeight := 1000;
+
+  FImageBox := TSimbaImageBox.Create(Self);
+  FImageBox.Parent := Self;
+  FImageBox.Align := alClient;
+  FImageBox.BackgroundOwner := False;
+
+  Application.AddOnIdleHandler(@DoApplicationIsIdle);
 end;
 
-procedure TSimbaDebugImageForm.UpdateFromStream(AWidth, AHeight: Integer; Stream: TStream; AResize, AEnsureVisible: Boolean);
+destructor TSimbaDebugImageForm.Destroy;
+begin
+  Application.RemoveOnIdleHandler(@DoApplicationIsIdle);
+
+  if (FBackBuffer <> nil) then
+    FreeAndNil(FBackBuffer);
+  if (FImageBox.Background <> nil) then
+    FImageBox.Background.Free();
+
+  inherited Destroy();
+end;
+
+procedure TSimbaDebugImageForm.UpdateFromStream(Stream: TStream);
+type
+  TParams = packed record
+    Width, Height: Integer;
+    Resize: Boolean;
+    EnsureVisible: Boolean;
+  end;
 var
+  Params: TParams;
+
   Source, Dest: PByte;
   SourceUpper: PtrUInt;
   DestBytesPerLine, SourceBytesPerLine: Integer;
@@ -115,7 +154,7 @@ var
   var
     Y: Integer;
   begin
-    for Y := 0 to AHeight - 1 do
+    for Y := 0 to Params.Height - 1 do
     begin
       Stream.Read(Source^, SourceBytesPerLine);
       LazImage_CopyRow_BGR(PColorBGRA(Source), SourceUpper, PColorBGR(Dest));
@@ -127,7 +166,7 @@ var
   var
     Y: Integer;
   begin
-    for Y := 0 to AHeight - 1 do
+    for Y := 0 to Params.Height - 1 do
     begin
       Stream.Read(Source^, SourceBytesPerLine);
       LazImage_CopyRow_BGRA(PColorBGRA(Source), SourceUpper, PColorBGRA(Dest));
@@ -139,28 +178,12 @@ var
   var
     Y: Integer;
   begin
-    for Y := 0 to AHeight - 1 do
+    for Y := 0 to Params.Height - 1 do
     begin
       Stream.Read(Source^, SourceBytesPerLine);
       LazImage_CopyRow_ARGB(PColorBGRA(Source), SourceUpper, PColorARGB(Dest));
       Inc(Dest, DestBytesPerLine);
     end;
-  end;
-
-  procedure SwapBuffers;
-  var
-    Temp: TBitmap;
-  begin
-    Temp := FImageBox.Background;
-    FImageBox.Background := FBackBuffer;
-    FBackBuffer := Temp;
-
-    if AResize then
-      SimbaDebugImageForm.SetSize(FImageBox.Background.Width, FImageBox.Background.Height, AEnsureVisible)
-    else if AEnsureVisible then
-      SimbaDebugImageForm.SetSize(-1, -1, True);
-
-    FNeedRepaint := True;
   end;
 
 begin
@@ -172,12 +195,14 @@ begin
       FBackBuffer := TBitmap.Create();
     FBackBuffer.BeginUpdate();
     try
-      FBackBuffer.SetSize(AWidth, AHeight);
+      Stream.Read(Params, SizeOf(TParams));
+
+      FBackBuffer.SetSize(Params.Width, Params.Height);
 
       DestBytesPerLine := FBackBuffer.RawImage.Description.BytesPerLine;
       Dest             := FBackBuffer.RawImage.Data;
 
-      SourceBytesPerLine := AWidth * SizeOf(TColorBGRA);
+      SourceBytesPerLine := Params.Width * SizeOf(TColorBGRA);
       Source             := GetMem(SourceBytesPerLine);
       SourceUpper        := PtrUInt(Source + SourceBytesPerLine);
 
@@ -194,15 +219,10 @@ begin
         FreeMem(Source);
     end;
 
-    RunInMainThread(@SwapBuffers);
+    SwapBuffers(Params.Resize, Params.EnsureVisible);
   finally
     FUpdating.Leave();
   end;
-end;
-
-procedure TSimbaDebugImageForm.UpdateFromStream(AWidth, AHeight: Integer; Stream: TStream);
-begin
-  UpdateFromStream(AWidth, AHeight, Stream, False, False);
 end;
 
 procedure TSimbaDebugImageForm.SetSize(AWidth, AHeight: Integer; AEnsureVisible: Boolean);

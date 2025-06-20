@@ -166,7 +166,7 @@ begin
   begin
     if (SimbaCommunication = nil) then
       SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_Show(PLapeObjectImage(Params^[1])^^, PBoolean(Params^[2])^);
+    SimbaCommunication.DebugImage_Update(PLapeObjectImage(Params^[1])^^, True, PBoolean(Params^[2])^);
   end;
 end;
 
@@ -174,7 +174,7 @@ end;
 DebugImageUpdate
 ----------------
 ```
-procedure DebugImageUpdate(Bitmap: TSimbaImage);
+procedure DebugImageUpdate(Image: TImage);
 ```
 *)
 procedure _LapeDebugImage_Update(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -183,7 +183,41 @@ begin
   begin
     if (SimbaCommunication = nil) then
       SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_Update(PLapeObjectImage(Params^[1])^^);
+    SimbaCommunication.DebugImage_Update(PLapeObjectImage(Params^[1])^^, False, False);
+  end;
+end;
+
+(*
+DebugMatrixUpdate
+-----------------
+```
+procedure DebugMatrixUpdate(Mat: TSingleMatrix; ColorMapID: Integer = 0);
+```
+*)
+procedure _LapeDebugMatrix_Update(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  with TSimbaScript(Params^[0]) do
+  begin
+    if (SimbaCommunication = nil) then
+      SimbaException('DebugImage requires Simba communication');
+    SimbaCommunication.DebugMatrix_Update(TSingleMatrix(Params^[1]^), PInteger(Params^[2])^, False, False);
+  end;
+end;
+
+(*
+DebugMatrixShow
+---------------
+```
+procedure DebugMatrixShow(Mat: TSingleMatrix; ColorMapID: Integer = 0; EnsureVisible: Boolean = True);
+```
+*)
+procedure _LapeDebugMatrix_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  with TSimbaScript(Params^[0]) do
+  begin
+    if (SimbaCommunication = nil) then
+      SimbaException('DebugImage requires Simba communication');
+    SimbaCommunication.DebugMatrix_Update(TSingleMatrix(Params^[1]^), PInteger(Params^[2])^, True, PBoolean(Params^[3])^);
   end;
 end;
 
@@ -251,6 +285,9 @@ begin
     addGlobalMethod('procedure DebugImageUpdate(Image: TImage)', @_LapeDebugImage_Update, Script);
     addGlobalMethod('procedure DebugImageShow(Image: TImage; EnsureVisible: Boolean = True)', @_LapeDebugImage_Show, Script);
 
+    addGlobalMethod('procedure DebugMatrixUpdate(Matrix: TSingleMatrix; ColorMapType: Integer = 0)', @_LapeDebugMatrix_Update, Script);
+    addGlobalMethod('procedure DebugMatrixShow(Matrix: TSingleMatrix; ColorMapType: Integer = 0; EnsureVisible: Boolean = True)', @_LapeDebugMatrix_Show, Script);
+
     DumpSection := 'Image';
 
     addGlobalFunc(
@@ -273,12 +310,9 @@ begin
     ]);
 
     addGlobalFunc(
-      'procedure Show(Matrix: TSingleMatrix; ColorMapType: Integer = 0); overload;', [
-      'var img: TImage;',
+      'procedure Show(Matrix: TSingleMatrix; ColorMapType: Integer = 0; EnsureVisible: Boolean = True); overload;', [
       'begin',
-      '  img := new TImage();',
-      '  img.FromMatrix(Matrix, ColorMapType);',
-      '  img.Show();',
+      '  DebugMatrixShow(Matrix, ColorMapType, EnsureVisible);',
       'end;'
     ]);
 

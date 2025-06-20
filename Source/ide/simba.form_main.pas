@@ -70,6 +70,7 @@ type
   TSimbaMainForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
+    MenuItemDebugMatrix: TMenuItem;
     MenuItemFindInFiles: TMenuItem;
     MenuItemBackup: TMenuItem;
     MenuItemRunLast: TMenuItem;
@@ -275,9 +276,10 @@ uses
   simba.ide_initialization, simba.ide_events, simba.ide_utils,
   simba.ide_mainstatusbar, simba.ide_mainmenubar, simba.ide_maintoolbar,
   simba.ide_scriptbackup, simba.ide_associate,
+  simba.ide_debugimage,
 
   simba.form_shapebox, simba.form_openexample, simba.form_colorpickhistory,
-  simba.form_debugimage, simba.form_imagestring, simba.form_about,
+  simba.form_imagestring, simba.form_about,
   simba.form_findinfiles, simba.form_output, simba.form_filebrowser,
   simba.form_notes, simba.form_settings, simba.form_tabs,
   simba.form_functionlist, simba.form_downloadsimba, simba.form_backups,
@@ -619,6 +621,7 @@ begin
     DockMaster.MakeDockable(SimbaFunctionListForm, MenuItemFunctionList);
     DockMaster.MakeDockable(SimbaNotesForm, MenuItemNotes);
     DockMaster.MakeDockable(SimbaDebugImageForm, MenuItemDebugImage);
+    DockMaster.MakeDockable(SimbaDebugMatrixForm, MenuItemDebugMatrix);
     DockMaster.MakeDockable(SimbaColorPickHistoryForm, MenuItemColourHistory);
     DockMaster.MakeDockable(SimbaBackupsForm, MenuItemBackup);
     DockMaster.MakeDockable(SimbaFindInFilesForm, MenuItemFindInFiles);

@@ -36,11 +36,12 @@ type
     procedure ScriptError;
 
     procedure DebugImage_SetMaxSize;
-    procedure DebugImage_Show;
     procedure DebugImage_Update;
     procedure DebugImage_Hide;
     procedure DebugImage_Display;
     procedure DebugImage_DisplayXY;
+
+    procedure DebugMatrix_Update;
   public
     constructor Create(Runner: TSimbaScriptTabRunner); reintroduce;
   end;
@@ -48,7 +49,7 @@ type
 implementation
 
 uses
-  simba.form_main, simba.form_debugimage,
+  simba.form_main, simba.ide_debugimage,
   simba.threading, simba.ide_maintoolbar, simba.process;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
@@ -169,26 +170,9 @@ begin
   RunInMainThread(@Execute);
 end;
 
-procedure TSimbaScriptInstanceCommunication.DebugImage_Show;
-var
-  EnsureVisible: Boolean;
-  Width, Height: Integer;
-begin
-  FInputStream.Read(EnsureVisible, SizeOf(Boolean));
-  FInputStream.Read(Width, SizeOf(Integer));
-  FInputStream.Read(Height, SizeOf(Integer));
-
-  SimbaDebugImageForm.UpdateFromStream(Width, Height, FInputStream, True, EnsureVisible);
-end;
-
 procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
-var
-  Width, Height: Integer;
 begin
-  FInputStream.Read(Width, SizeOf(Integer));
-  FInputStream.Read(Height, SizeOf(Integer));
-
-  SimbaDebugImageForm.UpdateFromStream(Width, Height, FInputStream);
+  SimbaDebugImageForm.UpdateFromStream(FInputStream);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Hide;
@@ -238,6 +222,11 @@ begin
   RunInMainThread(@Execute);
 end;
 
+procedure TSimbaScriptInstanceCommunication.DebugMatrix_Update;
+begin
+  SimbaDebugMatrixForm.UpdateFromStream(FInputStream);
+end;
+
 constructor TSimbaScriptInstanceCommunication.Create(Runner: TSimbaScriptTabRunner);
 begin
   inherited Create(Runner);
@@ -253,11 +242,12 @@ begin
   FMethods[ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE]   := @ScriptStateChanged;
   FMethods[ESimbaCommunicationMessage.TRAY_NOTIFICATION]     := @ShowTrayNotification;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE]    := @DebugImage_SetMaxSize;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_SHOW]       := @DebugImage_Show;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE]     := @DebugImage_Update;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_HIDE]       := @DebugImage_Hide;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY]    := @DebugImage_Display;
   FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY_XY] := @DebugImage_DisplayXY;
+
+  FMethods[ESimbaCommunicationMessage.DEBUGMATRIX_UPDATE]    := @DebugMatrix_Update;
 end;
 
 end.
