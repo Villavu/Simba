@@ -5,16 +5,22 @@ unit simba.import_encoding;
 interface
 
 uses
-  Classes, SysUtils, SynLZ,
-  simba.base, simba.script;
+  Classes, SysUtils,
+  simba.base,
+  simba.script,
+  simba.script_objectutil;
 
 procedure ImportEncoding(Script: TSimbaScript);
 
 implementation
 
 uses
-  lptypes, ffi,
-  simba.encoding, simba.hash, simba.compress, simba.image, simba.image_fastcompress;
+  SynLZ,
+  lptypes,
+  simba.encoding,
+  simba.hash,
+  simba.compress,
+  simba.resource;
 
 (*
 Encoding
@@ -290,28 +296,134 @@ begin
   PInteger(Result)^ := SynLZdecompressdestlen(PPointer(Params^[0])^);
 end;
 
-(*
-FastCompressImage
------------------
-```
-procedure FastCompressImages(Images: TSimbaImageArray; var Data: Pointer; out DataSize: SizeUInt);
-```
-*)
-procedure _LapeFastCompressImages(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeResourceWriter_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaImage_FastCompress(TSimbaImageArray(Params^[0]^), PPointer(Params^[1])^, PSizeUInt(Params^[2])^);
+  PLapeObjectResourceWriter(Result)^^ := TSimbaResourceWriter.Create();
 end;
 
-(*
-FastDecompressImages
---------------------
-```
-function FastDecompressImages(Data: Pointer; DataLen: SizeUInt): TSimbaImageArray;
-```
-*)
-procedure _LapeFastDecompressImages(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeResourceWriter_Destroy(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  TSimbaImageArray(Result^) := SimbaImage_FastDecompress(PPointer(Params^[0])^, PSizeUInt(Params^[1])^);
+  LapeObjectDestroy(PLapeObject(Params^[0]));
+end;
+
+procedure _LapeResourceWriter_Add(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectResourceWriter(Params^[0])^^.Add(PString(Params^[1])^, PPByte(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure _LapeResourceWriter_AddString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectResourceWriter(Params^[0])^^.AddString(PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure _LapeResourceWriter_AddImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectResourceWriter(Params^[0])^^.AddImage(PString(Params^[1])^, PLapeObjectImage(Params^[2])^^);
+end;
+
+procedure _LapeResourceWriter_AddImages(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectResourceWriter(Params^[0])^^.AddImages(PString(Params^[1])^, PString(Params^[2])^, PBoolean(Params^[3])^);
+end;
+
+procedure _LapeResourceWriter_AddFiles(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectResourceWriter(Params^[0])^^.AddFiles(PString(Params^[1])^, PString(Params^[2])^, PBoolean(Params^[3])^);
+end;
+
+procedure _LapeResourceWriter_Save(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectResourceWriter(Params^[0])^^.Save(PString(Params^[1])^);
+end;
+
+procedure _LapeResourceReader_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectResourceReader(Result)^^ := TSimbaResourceReader.Create(PString(Params^[0])^);
+end;
+
+procedure _LapeResourceReader_Destroy(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  LapeObjectDestroy(PLapeObject(Params^[0]));
+end;
+
+procedure _LapeResourceReader_UnloadData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectResourceReader(Params^[0])^^.UnloadData();
+end;
+
+procedure _LapeResourceReader_Names_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PStringArray(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Names;
+end;
+
+procedure _LapeResourceReader_Count_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Count;
+end;
+
+procedure _LapeResourceReader_Name_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Name[PInteger(Params^[1])^];
+end;
+
+procedure _LapeResourceReader_Hash_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt32(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Hash[PInteger(Params^[1])^];
+end;
+
+procedure _LapeResourceReader_UncompressedSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt32(Result)^ := PLapeObjectResourceReader(Params^[0])^^.UncompressedSize[PInteger(Params^[1])^];
+end;
+
+procedure _LapeResourceReader_CompressedSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt32(Result)^ := PLapeObjectResourceReader(Params^[0])^^.CompressedSize[PInteger(Params^[1])^];
+end;
+
+procedure _LapeResourceReader_Find(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Find(PString(Params^[1])^);
+end;
+
+procedure _LapeResourceReader_Load(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Load(PInteger(Params^[1])^, PPointer(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+procedure _LapeResourceReader_LoadPartial(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PLapeObjectResourceReader(Params^[0])^^.LoadPartial(PInteger(Params^[1])^, PInteger(Params^[2])^, PPByte(Params^[3])^);
+end;
+
+procedure _LapeResourceReader_LoadString1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PLapeObjectResourceReader(Params^[0])^^.LoadString(PInteger(Params^[1])^);
+end;
+
+procedure _LapeResourceReader_LoadString2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PLapeObjectResourceReader(Params^[0])^^.LoadString(PString(Params^[1])^);
+end;
+
+procedure _LapeResourceReader_LoadImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectImage(Result)^^ := PLapeObjectResourceReader(Params^[0])^^.LoadImage(PInteger(Params^[1])^);
+end;
+
+procedure _LapeResourceReader_LoadImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectImage(Result)^^ := PLapeObjectResourceReader(Params^[0])^^.LoadImage(PString(Params^[1])^);
+end;
+
+procedure _LapeResourceReader_Save1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Save(PInteger(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure _LapeResourceReader_Save2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Save(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 procedure ImportEncoding(Script: TSimbaScript);
@@ -349,8 +461,36 @@ begin
     addGlobalFunc('function FastCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeFastCompress);
     addGlobalFunc('function FastDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeFastDecompress);
 
-    addGlobalFunc('procedure FastCompressImages(Images: TImageArray; var Data: Pointer; out DataSize: SizeUInt);', @_LapeFastCompressImages);
-    addGlobalFunc('function FastDecompressImages(Data: Pointer; out DataLen: SizeUInt): TImageArray', @_LapeFastDecompressImages);
+    LapeObjectImport(Script.Compiler, 'TResourceWriter');
+    LapeObjectImport(Script.Compiler, 'TResourceReader');
+
+    addGlobalFunc('function TResourceWriter.Construct: TResourceWriter; static;', @_LapeResourceWriter_Create);
+    addGlobalFunc('procedure TResourceWriter.Destroy;', @_LapeResourceWriter_Destroy);
+    addGlobalFunc('procedure TResourceWriter.Add(Name: String; Data: Pointer; DataSize: Integer);', @_LapeResourceWriter_Add);
+    addGlobalFunc('procedure TResourceWriter.AddString(Name: String; Str: String);', @_LapeResourceWriter_AddString);
+    addGlobalFunc('procedure TResourceWriter.AddImage(Name: String; Image: TImage);', @_LapeResourceWriter_AddImage);
+    addGlobalFunc('procedure TResourceWriter.AddImages(Directory: String; Mask: String; Recursive: Boolean = False);', @_LapeResourceWriter_AddImages);
+    addGlobalFunc('procedure TResourceWriter.AddFiles(Directory: String; Mask: String; Recursive: Boolean = False);', @_LapeResourceWriter_AddFiles);
+    addGlobalFunc('procedure TResourceWriter.Save(FileName: String);', @_LapeResourceWriter_Save);
+
+    addGlobalFunc('function TResourceReader.Construct(FileName: String): TResourceReader; static;', @_LapeResourceReader_Create);
+    addGlobalFunc('procedure TResourceReader.Destroy;', @_LapeResourceReader_Destroy);
+    addGlobalFunc('procedure TResourceReader.UnloadData;', @_LapeResourceReader_UnloadData);
+    addGlobalFunc('property TResourceReader.Names: TStringArray;', @_LapeResourceReader_Names_Read);
+    addGlobalFunc('property TResourceReader.Count: Integer;', @_LapeResourceReader_Count_Read);
+    addGlobalFunc('property TResourceReader.Name(Index: Integer): String;', @_LapeResourceReader_Name_Read);
+    addGlobalFunc('property TResourceReader.Hash(Index: Integer): UInt32;', @_LapeResourceReader_Hash_Read);
+    addGlobalFunc('property TResourceReader.CompressedSize(Index: Integer): UInt32;', @_LapeResourceReader_CompressedSize_Read);
+    addGlobalFunc('property TResourceReader.UncompressedSize(Index: Integer): UInt32;', @_LapeResourceReader_UnCompressedSize_Read);
+    addGlobalFunc('function TResourceReader.Find(Name: String): Integer;', @_LapeResourceReader_Find);
+    addGlobalFunc('function TResourceReader.Load(Index: Integer; out Data: Pointer; out DataSize: Integer): Boolean;', @_LapeResourceReader_Load);
+    addGlobalFunc('function TResourceReader.LoadPartial(Index: Integer; Size: Integer; out Data: Pointer): Boolean;', @_LapeResourceReader_LoadPartial);
+    addGlobalFunc('function TResourceReader.LoadString(Index: Integer): String; overload', @_LapeResourceReader_LoadString1);
+    addGlobalFunc('function TResourceReader.LoadString(Name: String): String; overload', @_LapeResourceReader_LoadString2);
+    addGlobalFunc('function TResourceReader.LoadImage(Index: Integer): TImage; overload', @_LapeResourceReader_LoadImage1);
+    addGlobalFunc('function TResourceReader.LoadImage(Name: String): TImage; overload', @_LapeResourceReader_LoadImage2);
+    addGlobalFunc('function TResourceReader.Save(Index: Integer; FileName: String): Boolean; overload;', @_LapeResourceReader_Save1);
+    addGlobalFunc('function TResourceReader.Save(Name: String; FileName: String): Boolean; overload;', @_LapeResourceReader_Save2);
 
     DumpSection := '';
   end;

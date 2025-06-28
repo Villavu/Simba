@@ -17,7 +17,8 @@ uses
   simba.target,
   simba.image,
   simba.httpclient,
-  simba.json;
+  simba.json,
+  simba.resource;
 
 {
  Lape objects internally are just dynarray of byte.
@@ -41,6 +42,8 @@ type
   PLapeObjectImage = ^PSimbaImage;
   PLapeObjectTarget = ^PSimbaTarget;
   PLapeObjectJSON = ^PSimbaJSONItem;
+  PLapeObjectResourceWriter = ^PSimbaResourceWriter;
+  PLapeObjectResourceReader = ^PSimbaResourceReader;
 
 function IsLapeObjectManage(const Obj: PLapeObject): Boolean;
 procedure SetLapeObjectManage(const Obj: PLapeObject; const Value: Boolean);
