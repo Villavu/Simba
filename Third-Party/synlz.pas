@@ -116,21 +116,21 @@
 }
 unit SynLZ;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 
 interface
 
-/// get maximum possible (worse) compressed size for out_p
+// get maximum possible (worse) compressed size for out_p
 function SynLZcompressdestlen(in_len: integer): integer;
 
-/// get uncompressed size from lz-compressed buffer (to reserve memory, e.g.)
+// get uncompressed size from lz-compressed buffer (to reserve memory, e.g.)
 function SynLZdecompressdestlen(in_p: PByte): integer;
 
-/// 1st compression algorithm uses hashing with a 32bits control word
 function SynLZcompress(src: PByte; size: integer; dst: PByte): integer;
-
-/// 1st compression algorithm uses hashing with a 32bits control word
 function SynLZdecompress(src: PByte; size: integer; dst: PByte): integer;
+
+// this function is slower, but will allow to uncompress only the start of the content (e.g. to read some metadata header)
+function SynLZdecompress1partial(src: PByte; size: integer; dst: PByte; maxDst: integer): integer;
 
 implementation
 
@@ -172,107 +172,338 @@ begin // get uncompressed size from lz-compressed buffer (to reserve memory, e.g
     result := (result and $7fff) or (integer(PWord(in_p+2)^) shl 15);
 end;
 
-procedure SynLZdecompress1passub(src, src_end, dst: PByte; var offset: TOffsets);
-var
-  last_hashed: PByte; // initial src and dst value
-  {$ifdef CPU64}
-  o: PByte;
-  {$endif CPU64}
-  CW, CWbit: cardinal;
-  v, t, h: PtrUInt;
-label
-  nextCW;
-begin
-  last_hashed := dst - 1;
-nextCW:
-  CW := PCardinal(src)^;
-  inc(src, 4);
-  CWbit := 1;
-  if src < src_end then
-    repeat
-      if CW and CWbit = 0 then
-      begin
-        dst^ := src^;
-        inc(src);
-        inc(dst);
-        if src >= src_end then
-          break;
-        if last_hashed < dst - 3 then
-        begin
-          inc(last_hashed);
-          v := PCardinal(last_hashed)^;
-          offset[((v shr 12) xor v) and 4095] := last_hashed;
-        end;
-        CWbit := CWbit shl 1;
-        if CWbit <> 0 then
-          continue
-        else
-          goto nextCW;
-      end
-      else
-      begin
-        h := PWord(src)^;
-        inc(src, 2);
-        t := (h and 15) + 2;
-        if t = 2 then
-        begin
-          t := ord(src^) + (16 + 2);
-          inc(src);
-        end;
-        h := h shr 4;
-        {$ifdef CPU64}
-        o := offset[h];
-        if PtrUInt(dst - o) < t then // overlap -> move byte-by-byte
-          MoveByOne(o, dst, t)
-        else if t <= 8 then
-          PInt64(dst)^ := PInt64(o)^ // much faster in practice
-        else
-          Move(o^, dst^, t);     // safe since src_endmatch := src_end-(6+5)
-        {$else}
-        if PtrUInt(dst - offset[h]) < t then
-          MoveByOne(offset[h], dst, t)
-        else if t > 8 then
-          Move(offset[h]^, dst^, t)
-        else
-          PInt64(dst)^ := PInt64(offset[h])^;
-        {$endif CPU64}
-        if src >= src_end then
-          break;
-        if last_hashed < dst then
-          repeat // decompressed bytes should update the hash table
-            inc(last_hashed);
-            v := PCardinal(last_hashed)^;
-            offset[((v shr 12) xor v) and 4095] := last_hashed;
-          until last_hashed >= dst;
-        inc(dst, t);
-        last_hashed := dst - 1;
-        CWbit := CWbit shl 1;
-        if CWbit <> 0 then
-          continue
-        else
-          goto nextCW;
-      end;
-    until false;
+{$IFDEF CPUX86}
+{$ASMMODE INTEL}
+{$DEFINE HasSynLZdecompress}
+function SynLZdecompress(src: PByte; size: integer; dst: PByte): integer; nostackframe; assembler;
+asm
+        push    ebp
+        push    ebx
+        push    esi
+        push    edi
+        push    eax
+        add     esp, -4092
+        push    eax
+        add     esp, -4092
+        push    eax
+        add     esp, -4092
+        push    eax
+        add     esp, -4092
+        push    eax
+        add     esp, -24
+        mov     esi, ecx
+        mov     ebx, eax
+        add     edx, eax
+        mov     [esp+8H], esi
+        mov     [esp+10H], edx
+        movzx   eax, word ptr [ebx]
+        mov     [esp], eax
+        or      eax,eax
+        je      @@0917
+        add     ebx, 2
+        mov     eax, [esp]
+        test    ah, 80H
+        jz      @@0907
+        and     eax, 7FFFH
+        movzx   edx, word ptr [ebx]
+        shl     edx, 15
+        or      eax, edx
+        mov     [esp], eax
+        add     ebx, 2
+@@0907: lea     ebp, [esi - 1]
+@@0908: mov     ecx, [ebx]
+        add     ebx, 4
+        mov     [esp+14H], ecx
+        mov     edi, 1             // edi=CWbit
+        cmp     ebx, [esp+10H]
+        jnc     @@0917
+@@0909: mov     ecx, [esp+14H]
+@@090A: test    ecx, edi
+        jnz     @@0911
+        mov     al, [ebx]
+        inc     ebx
+        mov     [esi], al
+        inc     esi
+        cmp     ebx, [esp+10H]
+        lea     eax, [esi-3]
+        jnc     @@0917
+        cmp     eax, ebp
+        jbe     @@0910
+        inc     ebp
+        mov     eax, [ebp]
+        mov     edx, eax
+        shr     eax, 12
+        xor     eax, edx
+        and     eax, 0FFFH
+        mov     [esp+1CH + eax * 4], ebp
+@@0910: add     edi, edi
+        jnz     @@090A
+        jmp     @@0908
+@@0911: movzx   edx, word ptr [ebx]
+        add     ebx, 2
+        mov     eax, edx
+        and     edx, 0FH
+        add     edx, 2
+        shr     eax, 4
+        cmp     edx,2
+        jnz     @@0912
+        movzx   edx, byte ptr [ebx]
+        inc     ebx
+        add     edx, 18
+@@0912: mov     eax, [esp+1CH + eax * 4]
+        mov     ecx, esi
+        mov     [esp+18H], edx
+        sub     ecx, eax
+        // inlined optimized move()
+        cmp     ecx, edx
+        jl      @@ovlap   // overlapping content requires per-byte copy
+        cmp     edx, 32
+        ja      @large
+        sub     edx, 8
+        jg      @9_32
+{$ifdef HASNOSSE2}
+        // slowest x87 FPU code on very old CPU with no SSE2 support
+        mov     ecx, [eax]
+        mov     eax, [eax + 4]     // always copy 8 bytes for 0..8
+        mov     [esi], ecx         // safe since src_endmatch := src_end-(6+5)
+        mov     [esi + 4], eax
+        jmp     @movend
+@9_32:  fild    qword ptr [eax + edx]
+        fild    qword ptr [eax]
+        cmp     edx, 8
+        jle     @16
+        fild    qword ptr [eax + 8]
+        cmp     edx, 16
+        jle     @24
+        fild    qword ptr [eax + 16]
+        fistp   qword ptr [esi + 16]
+@24:    fistp   qword ptr [esi + 8]
+@16:    fistp   qword ptr [esi]
+        fistp   qword ptr [esi + edx]
+        jmp     @movend
+        nop
+@large: push    esi
+        fild    qword ptr [eax]
+        lea     eax, [eax + edx - 8]
+        lea     edx, [esi + edx - 8]
+        fild    qword ptr [eax]
+        push    edx
+        neg     edx
+        and     esi, -8
+        lea     edx, [edx + esi + 8]
+        pop     esi
+@lrgnxt:fild    qword ptr [eax + edx]
+        fistp   qword ptr [esi + edx]
+        add     edx, 8
+        jl      @lrgnxt
+        fistp   qword ptr [esi]
+        pop     esi
+        fistp   qword ptr [esi]
+{$else} // inlined SSE2 move
+        movq    xmm0, qword ptr [eax]
+        movq    qword ptr [esi], xmm0
+        jmp     @movend
+@9_32:  movq    xmm0, qword ptr [eax + edx]
+        movq    xmm1, qword ptr [eax]
+        cmp     edx, 8
+        jle     @16
+        movq    xmm2, qword ptr [eax + 8]
+        cmp     edx, 16
+        jle     @24
+        movq    xmm3, qword ptr [eax + 16]
+        movq    qword ptr [esi + 16], xmm3
+@24:    movq    qword ptr [esi + 8], xmm2
+@16:    movq    qword ptr [esi], xmm1
+        movq    qword ptr [esi + edx], xmm0
+        jmp     @movend
+@large: push    esi
+        movups  xmm2, dqword ptr [eax]
+        lea     eax, [eax + edx - 16]
+        lea     edx, [esi + edx - 16]
+        movups  xmm1, dqword ptr [eax]
+        push    edx
+        neg     edx
+        and     esi, -16
+        lea     edx, [edx + esi + 16]
+        pop     esi
+@lrgnxt:movups  xmm0, dqword ptr [eax + edx]
+        movaps  dqword ptr [esi + edx], xmm0
+        add     edx, 16
+        jl      @lrgnxt
+        movups  dqword ptr [esi], xmm1
+        pop     esi
+        movups  dqword ptr [esi], xmm2
+{$endif HASNOSSE2}
+@movend:cmp     esi, ebp
+        jbe     @@0916
+@@0915: inc     ebp
+        mov     edx, [ebp]
+        mov     eax, edx
+        shr     edx, 12
+        xor     eax, edx
+        and     eax, 0FFFH
+        mov     [esp+1CH + eax * 4], ebp
+        cmp     esi, ebp
+        ja      @@0915
+@@0916: add     esi, [esp+18H]
+        cmp     ebx, [esp+10H]
+        jnc     @@0917
+        add     edi, edi
+        lea     ebp, [esi - 1]
+        jz      @@0908
+        jmp     @@0909
+@@ovlap:push    ebx
+        push    esi
+        lea     ebx, [eax + edx]
+        add     esi, edx
+        neg     edx
+@s:     mov     al, [ebx + edx]
+        mov     [esi + edx], al
+        inc     edx
+        jnz     @s
+        pop     esi
+        pop     ebx
+        jmp     @movend
+@@0917: mov     eax, [esp]
+        add     esp, 16412
+        pop     edi
+        pop     esi
+        pop     ebx
+        pop     ebp
 end;
+{$ENDIF}
 
+{$IFDEF CPUX86_64}
+{$ASMMODE INTEL}
+{$DEFINE HasSynLZdecompress}
 function SynLZdecompress(src: PByte; size: integer; dst: PByte): integer;
-var offset: TOffsets;
-    src_end: PByte;
-begin
-  src_end := src+size;
-  result := PWord(src)^;
-  if result=0 then exit;
-  inc(src,2);
-  if result and $8000<>0 then begin
-    result := (result and $7fff) or (integer(PWord(src)^) shl 15);
-    inc(src,2);
-  end;
-  SynLZdecompress1passub(src, src_end, dst, offset{%H-});
+var
+  off: TOffsets; // pointers are faster and use only 32KB on stack
+asm     // rcx=src, edx=size, r8=dest
+        {$ifdef WIN64} // additional registers to preserve
+        push    rsi
+        push    rdi
+        {$else} // Linux 64-bit ABI
+        mov     r8, rdx
+        mov     rdx, rsi
+        mov     rcx, rdi
+        {$endif WIN64}
+        push    rbx
+        push    r12
+        push    r13
+        movzx   eax, word ptr [rcx]    // rcx=src   eax=result
+        lea     r9, [rcx + rdx]        // r9=src_end
+        test    eax, eax
+        je      @36
+        add     rcx, 2
+        mov     r10d, eax
+        and     r10d, $8000
+        jz      @21                   // dest size < 32768
+        movzx   ebx, word ptr [rcx]
+        shl     ebx, 15
+        and     eax, $7fff
+        or      eax, ebx
+        add     rcx, 2
+@21:    push    rax                    // save result for function exit
+        lea     rax, [r8 - 1]          // rax=last_hashed  r8=dest
+@22:    mov     edi, dword ptr [rcx]   // edi=CW
+        add     rcx, 4
+        mov     r10d, 1                // r10d=CWBit
+        cmp     rcx, r9
+        jnc     @35
+        {$ifdef FPC} align 16 {$else} .align 16 {$endif}
+@23:    test    r10d, edi
+        jnz     @25
+        mov     bl, byte ptr [rcx]    // CWBit was not set: copy byte and hash
+        mov     byte ptr [r8], bl
+        add     rcx, 1
+        lea     rbx, [r8 - 2]
+        add     r8, 1
+        cmp     rcx, r9
+        jnc     @35
+        cmp     rbx, rax
+        jbe     @24
+        add     rax, 1
+        mov     esi, dword ptr [rax]
+        mov     ebx, esi
+        shr     esi, 12
+        xor     ebx, esi
+        and     ebx, 4095
+        mov     qword ptr [off + rbx * 8], rax
+@24:    shl     r10d, 1
+        jnz     @23
+        jmp     @22
+@25:    movzx   rbx, word ptr [rcx] // CWBit was set: copy bytes from offset
+        add     rcx, 2
+        mov     r11, rbx
+        shr     ebx, 4                 // ebx=h
+        and     r11, 0FH               // r11=t
+        lea     r11, [r11 + 2]
+        jnz     @26
+        movzx   r11, byte ptr [rcx]
+        add     rcx, 1
+        lea     r11, [r11 + (16 + 2)]
+@26:    mov     r13, qword ptr [off + rbx * 8] // r13=o
+        mov     rbx, r8
+        xor     rsi, rsi
+        sub     rbx, r13
+        mov     r12, r11
+        cmp     rbx, r11
+        jc      @29       // PtrUInt(dst - o) < t overlap -> MoveByOne
+        mov     rbx, qword ptr [r13]
+        mov     qword ptr [r8], rbx
+        sub     r12, 8
+        jbe     @31       // 1..8 bytes
+        mov     rbx, qword ptr [r13 + r12] // last 8 bytes (may overlap)
+        mov     qword ptr [r8 + r12], rbx
+        cmp     r12, 8
+        jbe     @31      // 9..16 bytes
+        shr     r12, 3
+@27:    add     rsi, 8
+        mov     rbx, qword ptr [r13 + rsi] // inlined move by 8 bytes
+        mov     qword ptr [r8 + rsi], rbx
+        sub     r12, 1
+        jnz     @27
+@31:    cmp     rcx, r9
+        jz      @35
+        cmp     rax, r8
+        jnc     @34
+        {$ifdef FPC} align 16 {$else} .align 16 {$endif}
+@32:    add     rax, 1               // hash decompressed bytes
+        mov     ebx, dword ptr [rax]
+        mov     esi, ebx
+        shr     ebx, 12
+        xor     esi, ebx
+        and     esi, 4095
+        mov     qword ptr [off + rsi * 8], rax
+        cmp     rax, r8
+        jc      @32
+@34:    add     r8, r11
+        lea     rax, [r8 - 1]
+        shl     r10d, 1
+        jnz     @23
+        jmp     @22
+        {$ifdef FPC} align 16 {$else} .align 16 {$endif}
+@29:    mov     bl, byte ptr [r13 + rsi] // overlaping move
+        mov     byte ptr [r8 + rsi], bl
+        add     rsi, 1
+        sub     r12, 1
+        jnz     @29
+        jmp     @31
+@35:    pop     rax     // returns stored dest length
+@36:    pop     r13
+        pop     r12
+        pop     rbx
+        {$ifdef WIN64} // additional registers to preserve
+        pop     rdi
+        pop     rsi
+        {$endif WIN64}
 end;
+{$ENDIF}
 
 {$IFDEF CPUX86}
-{$DEFINE HasSynLZCompress}
 {$ASMMODE INTEL}
+{$DEFINE HasSynLZCompress}
 function SynLZcompress(src: PByte; size: integer; dst: PByte): integer; nostackframe; assembler;
 asm
         push    ebp
@@ -322,26 +553,12 @@ asm
         sub     eax, 11
         mov     [esp+4], eax
         xor     eax, eax
-        lea     ebx, [esp+24H] // reset offsets lookup table
-        {$ifdef HASNOSSE2}
-        mov     ecx, 1024
-@@089I: mov     [ebx], eax
-        mov     [ebx + 4], eax
-        mov     [ebx + 8], eax
-        mov     [ebx + 12], eax
-        add     ebx, 16
-        {$else}
-        pxor    xmm0, xmm0
-        mov     ecx, 256
-@@089I: movups  dqword ptr [ebx], xmm0
-        movups  dqword ptr [ebx + 16], xmm0
-        movups  dqword ptr [ebx + 32], xmm0
-        movups  dqword ptr [ebx + 48], xmm0
-        add     ebx, 64
-        {$endif HASNOSSE2}
-        dec     ecx
-        jnz     @@089I
         mov     [edi], eax
+        lea     edi, [esp+24H] // reset 16KB offsets lookup table using ERMS
+        mov     ecx, 4096
+        cld
+        rep stosd
+        mov     edi, [esp+18H]
         add     edi, 4
         mov     ebx, 1 // ebx=1 shl CWbit
         // main loop:
@@ -455,14 +672,13 @@ end;
 {$ENDIF}
 
 {$IFDEF CPUX86_64}
-{$DEFINE HasSynLZCompress}
 {$ASMMODE INTEL}
+{$DEFINE HasSynLZCompress}
 function SynLZcompress(src: PByte; size: integer; dst: PByte): integer;
 var
-  off: TOffsets;
-  cache: array[0..4095] of cardinal; // uses 32KB+16KB=48KB on stack
-begin
-  asm // rcx=src, edx=size, r8=dest
+  off: TOffsets;                     // 32KB hash table
+  cache: array[0..4095] of cardinal; // 16KB = total 48KB on stack
+asm // rcx=src, edx=size, r8=dest
         {$ifdef WIN64} // additional registers to preserve
         push    rdi
         push    rsi
@@ -470,71 +686,66 @@ begin
         mov     r8, rdx
         mov     rdx, rsi
         mov     rcx, rdi
-        {$endif WIN64}
+        {$endif}
         push    rbx
         push    r12
         push    r13
-        push    r14
-        push    r15
-        mov     r15, r8            // r8=dest r15=dst_beg
+        push    r8                 // save r8=dest to compute result
         mov     rbx, rcx           // rbx=src
-        cmp     edx, 32768
+        cmp     edx, 32768         // edx=size
         jc      @03
         mov     eax, edx
+        mov     ecx, edx
         and     eax, 7FFFH
+        shr     ecx, 15
         or      eax, 8000H
-        mov     word ptr [r8], ax
-        mov     eax, edx
-        shr     eax, 15
-        mov     word ptr [r8 + 2], ax
+        shl     ecx, 16
+        or      eax, ecx
+        mov     dword ptr [r8], eax
         add     r8, 4
         jmp     @05
-@03:    mov     word ptr [r8], dx
+@03:    mov     dword ptr [r8], edx
+        add     r8, 2
         test    edx, edx
-        jnz     @04
-        mov     r15d, 2
-        jmp     @19
-        nop
-@04:    add     r8, 2
-@05:    lea     r9, [rdx + rbx]    // r9=src_end
+        jz      @18
+@05:    xor     eax, eax
+        lea     rdi, [off]
+        mov     rcx, 4096
+        cld
+        rep stosq                  // reset 32KB offsets lookup table using ERMS
+        lea     r9,  [rdx + rbx]   // r9=src_end
         lea     r10, [r9 - 11]     // r10=src_endmatch
-        mov     ecx, 1             // ecx=CWBits
         mov     r11, r8            // r11=CWpoint
-        mov     dword ptr [r8], 0
+        mov     ecx, 1             // ecx=CWBits
+        mov     dword ptr [r8], eax
         add     r8, 4
-        pxor    xmm0, xmm0
-        mov     eax, 32768 - 64
-@06:    movaps  dqword ptr [off + rax - 48], xmm0 // stack is 16 bytes aligned
-        movaps  dqword ptr [off + rax - 32], xmm0
-        movaps  dqword ptr [off + rax - 16], xmm0
-        movaps  dqword ptr [off + rax], xmm0
-        sub     eax, 64
-        jae     @06
         cmp     rbx, r10
         ja      @15
+        {$ifdef FPC} align 16 {$else} .align 16 {$endif}
 @07:    mov     edx, dword ptr [rbx]
-        mov     rax, rdx
+        mov     eax, edx
+        shr     eax, 12
+        xor     eax, edx
+        and     eax, 4095              // rax=h
         mov     r12, rdx
-        shr     rax, 12
-        xor     rax, rdx
-        and     rax, 0FFFH                     // rax=h
-        mov     r14, qword ptr [off + rax * 8] // r14=o
+        //lea [off + rax * 8] pre-compute is not faster: 2 AGUs since Nehalem
+        mov     r13, qword ptr [off + rax * 8]    // r13=o
         mov     edx, dword ptr [cache + rax * 4]
         mov     qword ptr [off + rax * 8], rbx
         mov     dword ptr [cache + rax * 4], r12d
         xor     rdx, r12
-        test    r14, r14
-        lea     rdi, [r9-1]
+        test    r13, r13
+        lea     rdi, [r9 - 1]
         je      @12
-        and     rdx, 0FFFFFFH
+        and     rdx, $00ffffff
         jne     @12
         mov     rdx, rbx
-        sub     rdx, r14
+        sub     rdx, r13
         cmp     rdx, 2
         jbe     @12
         or      dword ptr [r11], ecx
         add     rbx, 2
-        add     r14, 2
+        add     r13, 2
         mov     esi, 1
         sub     rdi, rbx
         cmp     rdi, 271
@@ -542,7 +753,7 @@ begin
         mov     edi, 271
         jmp     @09
 @08:    add     rsi, 1
-@09:    mov     edx, dword ptr [r14 + rsi]
+@09:    mov     edx, dword ptr [r13 + rsi]
         cmp     dl, byte ptr [rbx + rsi]
         jnz     @10
         cmp     rsi, rdi
@@ -596,16 +807,14 @@ begin
         add     r8, 1
         add     ecx, ecx
         jnz     @17
-        mov     [r8], ecx
+        mov     dword ptr [r8], ecx
         add     r8, 4
         add     ecx, 1
 @17:    cmp     rbx, r9
         jc      @16
-@18:    sub     r8, r15
-        mov     r15, r8
-@19:    mov     rax, r15
-        pop     r15
-        pop     r14
+@18:    pop     rax
+        sub     r8, rax // result := dst - dstbeg
+        mov     rax, r8
         pop     r13
         pop     r12
         pop     rbx
@@ -613,12 +822,11 @@ begin
         pop     rsi
         pop     rdi
         {$endif WIN64}
-  end;
 end;
 {$ENDIF}
 
+// pure pascal fallback for compress
 {$IFNDEF HasSynLZCompress}
-// no asm versions so pure pascal
 function SynLZcompress(src: PByte; size: integer; dst: PByte): integer;
 var
   dst_beg,          // initial dst value
@@ -753,5 +961,217 @@ begin
   result := dst - dst_beg;
 end;
 {$ENDIF}
+
+// pure pascal fallback for decompress
+{$IFNDEF HasSynLZdecompress}
+function SynLZdecompress(src: PByte; size: integer; dst: PByte): integer;
+
+  procedure SynLZdecompress1passub(src, src_end, dst: PByte; var offset: TOffsets);
+  var
+    last_hashed: PByte; // initial src and dst value
+    {$ifdef CPU64}
+    o: PByte;
+    {$endif CPU64}
+    CW, CWbit: cardinal;
+    v, t, h: PtrUInt;
+  label
+    nextCW;
+  begin
+    last_hashed := dst - 1;
+  nextCW:
+    CW := PCardinal(src)^;
+    inc(src, 4);
+    CWbit := 1;
+    if src < src_end then
+      repeat
+        if CW and CWbit = 0 then
+        begin
+          dst^ := src^;
+          inc(src);
+          inc(dst);
+          if src >= src_end then
+            break;
+          if last_hashed < dst - 3 then
+          begin
+            inc(last_hashed);
+            v := PCardinal(last_hashed)^;
+            offset[((v shr 12) xor v) and 4095] := last_hashed;
+          end;
+          CWbit := CWbit shl 1;
+          if CWbit <> 0 then
+            continue
+          else
+            goto nextCW;
+        end
+        else
+        begin
+          h := PWord(src)^;
+          inc(src, 2);
+          t := (h and 15) + 2;
+          if t = 2 then
+          begin
+            t := ord(src^) + (16 + 2);
+            inc(src);
+          end;
+          h := h shr 4;
+          {$ifdef CPU64}
+          o := offset[h];
+          if PtrUInt(dst - o) < t then // overlap -> move byte-by-byte
+            MoveByOne(o, dst, t)
+          else if t <= 8 then
+            PInt64(dst)^ := PInt64(o)^ // much faster in practice
+          else
+            Move(o^, dst^, t);     // safe since src_endmatch := src_end-(6+5)
+          {$else}
+          if PtrUInt(dst - offset[h]) < t then
+            MoveByOne(offset[h], dst, t)
+          else if t > 8 then
+            Move(offset[h]^, dst^, t)
+          else
+            PInt64(dst)^ := PInt64(offset[h])^;
+          {$endif CPU64}
+          if src >= src_end then
+            break;
+          if last_hashed < dst then
+            repeat // decompressed bytes should update the hash table
+              inc(last_hashed);
+              v := PCardinal(last_hashed)^;
+              offset[((v shr 12) xor v) and 4095] := last_hashed;
+            until last_hashed >= dst;
+          inc(dst, t);
+          last_hashed := dst - 1;
+          CWbit := CWbit shl 1;
+          if CWbit <> 0 then
+            continue
+          else
+            goto nextCW;
+        end;
+      until false;
+  end;
+
+var offset: TOffsets;
+    src_end: PByte;
+begin
+  src_end := src+size;
+  result := PWord(src)^;
+  if result=0 then exit;
+  inc(src,2);
+  if result and $8000<>0 then begin
+    result := (result and $7fff) or (integer(PWord(src)^) shl 15);
+    inc(src,2);
+  end;
+  SynLZdecompress1passub(src, src_end, dst, offset{%H-});
+end;
+{$ENDIF}
+
+function SynLZdecompress1partial(src: PByte; size: integer; dst: PByte; maxDst: integer): integer;
+
+  procedure SynLZdecompresspartialsub(src, dst, src_end, dst_end: PByte; var offset: TOffsets);
+  var
+    lasthashed: PByte; // initial src and dst value
+    cwbit, cw: integer;
+    v, t, h: PtrUInt;
+    {$ifdef CPU64}
+    o: PByte;
+    {$endif CPU64}
+  label
+    nextCW;
+  begin
+    lasthashed := dst - 1;
+  nextCW:
+    cw := PCardinal(src)^;
+    inc(src, 4);
+    cwbit := 1;
+    if src < src_end then
+      repeat
+        if cw and cwbit = 0 then
+        begin
+          dst^ := src^;
+          inc(src);
+          inc(dst);
+          if (src >= src_end) or
+             (dst >= dst_end) then
+            break;
+          if lasthashed < dst - 3 then
+          begin
+            inc(lasthashed);
+            v := PCardinal(lasthashed)^;
+            offset[((v shr 12) xor v) and 4095] := lasthashed;
+          end;
+          cwbit := cwbit shl 1;
+          if cwbit <> 0 then
+            continue
+          else
+            goto nextCW;
+        end
+        else
+        begin
+          h := PWord(src)^;
+          inc(src, 2);
+          t := (h and 15) + 2;
+          h := h shr 4;
+          if t = 2 then
+          begin
+            t := ord(src^) + (16 + 2);
+            inc(src);
+          end;
+          if dst + t >= dst_end then
+          begin
+            // avoid buffer overflow by all means
+            MoveByOne(offset[h], dst, dst_end - dst);
+            break;
+          end;
+          {$ifdef CPU64}
+          o := offset[h];
+          if (t <= 8) or
+             (PtrUInt(dst - o) < t) then
+            MoveByOne(o, dst, t)
+          else
+            Move(o^, dst^, t);
+          {$else}
+          if (t <= 8) or
+             (PtrUInt(dst - offset[h]) < t) then
+            MoveByOne(offset[h], dst, t)
+          else
+            Move(offset[h]^, dst^, t);
+          {$endif CPU64}
+          if src >= src_end then
+            break;
+          if lasthashed < dst then
+            repeat
+              inc(lasthashed);
+              v := PCardinal(lasthashed)^;
+              offset[((v shr 12) xor v) and 4095] := lasthashed;
+            until lasthashed >= dst;
+          inc(dst, t);
+          lasthashed := dst - 1;
+          cwbit := cwbit shl 1;
+          if cwbit <> 0 then
+            continue
+          else
+            goto nextCW;
+        end;
+      until false;
+  end;
+
+var
+  offset: TOffsets;
+  srcend: PByte;
+begin
+  srcend := src + size;
+  result := PWord(src)^;
+  if result = 0 then
+    exit;
+  inc(src, 2);
+  if result and $8000 <> 0 then
+  begin
+    result := (result and $7fff) or (integer(PWord(src)^) shl 15);
+    inc(src, 2);
+  end;
+  if maxDst < result then
+    result := maxDst;
+  if result > 0 then
+    SynLZdecompresspartialsub(src, dst, srcend, dst + result, offset);
+end;
 
 end.
