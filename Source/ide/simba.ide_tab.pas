@@ -640,6 +640,8 @@ begin
   LoadDefaultScript();
 
   FSavedText := FEditor.Text;
+
+  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_ADD, Self);
 end;
 
 destructor TSimbaScriptTab.Destroy;

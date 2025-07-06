@@ -27,6 +27,7 @@ type
     TAB_SEARCH,
     TAB_BEFORECHANGE,
     TAB_CHANGE,
+    TAB_ADD,
     TAB_CLOSED,
     // Event called on a form dock/undock
     FORM_DOCK,

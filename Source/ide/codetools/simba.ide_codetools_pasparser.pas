@@ -26,6 +26,8 @@ type
     fInRound: Boolean;
 
     function getLexer: TPasLexer;
+    function getLexersCount: Integer;
+    function getLexerByIndex(Index: Integer): TPasLexer;
 
     procedure PushLexer(ALexer: TPasLexer); virtual;
     procedure PopLexer; virtual;
@@ -174,6 +176,8 @@ type
     procedure Reset; virtual;
     procedure Run; virtual;
 
+    property LexersCount: Integer read getLexersCount;
+    property Lexers[Index: Integer]: TPasLexer read getLexerByIndex;
     property Lexer: TPasLexer read getLexer;
     property LastNoJunkPos: Integer read fLastNoJunkPos;
   end;
@@ -2117,6 +2121,16 @@ end;
 procedure TPasParser.AncestorId;
 begin
   QualifiedIdentifier;
+end;
+
+function TPasParser.getLexersCount: Integer;
+begin
+  Result := fLexers.Count;
+end;
+
+function TPasParser.getLexerByIndex(Index: Integer): TPasLexer;
+begin
+  Result := fLexers[Index];
 end;
 
 function TPasParser.getLexer: TPasLexer;

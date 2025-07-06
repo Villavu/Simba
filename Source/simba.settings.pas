@@ -161,6 +161,7 @@ type
     FunctionList: record
       ShowMouseoverHint: TSimbaSetting;
       HiddenSimbaSections: TSimbaSetting;
+      CustomOrder: TSimbaSetting;
     end;
 
     Compiler: record
@@ -534,6 +535,7 @@ begin
   // Function List
   FunctionList.ShowMouseoverHint := TSimbaSetting_Boolean.Create(Self, 'FunctionList', 'ShowMouseoverHint', True);
   FunctionList.HiddenSimbaSections := TSimbaSetting_BinaryString.Create(Self, 'FunctionList', 'HiddenSimbaSections', '');
+  FunctionList.CustomOrder := TSimbaSetting_BinaryString.Create(Self, 'FunctionList', 'CustomOrder', '');
 
   // Compiler
   Compiler.ShowHints := TSimbaSetting_Boolean.Create(Self, 'Compiler', 'ShowHints', False);

@@ -28,6 +28,7 @@ type
       procedure EndUpdate; override;
     end;
   protected
+    FWasDragging: Boolean; // dont do what we do in MouseUp if we're dragging
     FLoading: Boolean;
     FScrollbarVert: TSimbaScrollBar;
     FScrollbarHorz: TSimbaScrollBar;
@@ -66,7 +67,6 @@ type
     FFilterPanel: TCustomControl;
     FFilterEdit: TSimbaEdit;
     FFilterClearButton: TSimbaButton;
-
     FHint: TSimbaTreeViewHint;
     FTree: TSimbaInternalTreeView;
     FScrollbarVert: TSimbaScrollBar;
@@ -91,7 +91,6 @@ type
     FModified: Boolean;
 
     procedure FontChanged(Sender: TObject); override;
-
 
     function GetImages: TCustomImageList;
     function GetLoading: Boolean;
@@ -128,6 +127,8 @@ type
     procedure DoEndUpdate(Sender: TObject);
     procedure DoTreeAddOrDelete(Sender: TObject; Node: TTreeNode);
     procedure DoDrawArrow(Sender: TCustomTreeView; const ARect: TRect; ACollapsed: Boolean);
+    procedure DoDragDrop(Sender, Source: TObject; X, Y: Integer);
+    procedure DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
   public
     constructor Create(AOwner: TComponent; NodeClass: TTreeNodeClass = nil); reintroduce;
 
@@ -143,6 +144,9 @@ type
     procedure DeleteSelection;
 
     procedure Invalidate; override;
+
+    property OnDragOver;
+    property OnDragDrop;
 
     property OnPaintNode: TNodePaintEvent read FOnPaintNode write FOnPaintNode;
     property OnGetNodeColor: TNodeColorEvent read FOnGetNodeColor write FOnGetNodeColor;
@@ -180,9 +184,8 @@ type
 implementation
 
 uses
-  Math, Masks,
+  Math,
   simba.ide_theme,
-  simba.ide_utils,
   simba.component_images;
 
 constructor TSimbaTreeView.Create(AOwner: TComponent; NodeClass: TTreeNodeClass);
@@ -237,9 +240,11 @@ begin
   FTree.OnEndUpdate := @DoEndUpdate;
   FTree.OnAddition := @DoTreeAddOrDelete;
   FTree.OnDeletion := @DoTreeAddOrDelete;
+  FTree.OnDragDrop := @DoDragDrop;
+  FTree.OnDragOver := @DoDragOver;
   FTree.AddHandlerOnKeyDown(@DoKeyDown);
-  FTree.ExpandSignSize := ImageWidthForDPI(Font.PixelsPerInch) - 2;
-  FTree.Indent := ImageWidthForDPI(Font.PixelsPerInch) - 2;
+  FTree.Indent := 12;
+  FTree.ExpandSignSize := 12;
 
   FHint := TSimbaTreeViewHint.Create(FTree);
 
@@ -269,7 +274,7 @@ begin
   FScrollbarVert.ForwardScrollControl := FTree;
 
   with SimbaSettings do
-    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize);
+    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize, True);
 end;
 
 procedure TSimbaTreeView.HideRoot;
@@ -442,8 +447,6 @@ begin
 
   FTree.Font := Self.Font;
   FTree.Font.Color := SimbaTheme.ColorFont;
-  FTree.ExpandSignSize := ImageWidthForDPI(Font.PixelsPerInch) - 2;
-  FTree.Indent := ImageWidthForDPI(Font.PixelsPerInch) - 2;
 
   FFilterEdit.Font := Self.Font;
   FFilterEdit.Font.Color := SimbaTheme.ColorFont;
@@ -621,8 +624,8 @@ end;
 
 procedure TSimbaTreeView.DoSettingChanged_ImageSize(Setting: TSimbaSetting);
 begin
-  FTree.ExpandSignSize := ImageWidthForDPI(Font.PixelsPerInch) - 2;
-  FTree.Indent := ImageWidthForDPI(Font.PixelsPerInch) - 2;
+  FTree.Indent := IfThen(Setting.IsDefault, 16, Setting.Value) - 4;
+  FTree.ExpandSignSize := IfThen(Setting.IsDefault, 16, Setting.Value) - 4;
 
   Invalidate();
 end;
@@ -673,6 +676,19 @@ begin
   );
 end;
 
+procedure TSimbaTreeView.DoDragDrop(Sender, Source: TObject; X, Y: Integer);
+begin
+  FTree.FWasDragging := True;
+  if Assigned(OnDragDrop) then
+    OnDragDrop(Sender, Source, X, Y);
+end;
+
+procedure TSimbaTreeView.DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+begin
+  if Assigned(OnDragOver) then
+    OnDragOver(Sender, Source, X, Y, State, Accept);
+end;
+
 procedure TSimbaTreeView.DoScrollHorzChange(Sender: TObject);
 begin
   FTree.ScrolledLeft := FScrollbarHorz.Position;
@@ -721,6 +737,12 @@ var
   n: TTreeNode;
 begin
   inherited MouseUp(Button, Shift, X, Y);
+
+  if FWasDragging then
+  begin
+    FWasDragging := False;
+    Exit;
+  end;
 
   if (Button = mbLeft) and (not (ssDouble in Shift)) then
   begin
