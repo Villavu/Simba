@@ -410,7 +410,7 @@ begin
 
   FEntryLookup := specialize TDictionary<String, Integer>.Create();
 
-  FStream := TFileStream.Create(FileName, fmOpenRead);
+  FStream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
   FStream.Read(ResourceHeader, SizeOf(TResourceHeader));
 
   if (ResourceHeader.Signature <> ResourceSignature) then

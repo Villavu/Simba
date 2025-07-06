@@ -381,7 +381,7 @@ begin
   Bytes := [];
   Stream := nil;
   try
-    Stream := TFileStream.Create(FileName, fmOpenRead);
+    Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
     if (Len = -1) then
       Len := $FFFFFF;
     SetLength(Bytes, Min(Len, Stream.Size - Offset));
@@ -409,7 +409,7 @@ begin
   Stream := nil;
   try
     if FileExists(FileName) then
-      Stream := TFileStream.Create(FileName, fmOpenReadWrite)
+      Stream := TFileStream.Create(FileName, fmOpenReadWrite or fmShareDenyNone)
     else
       Stream := TFileStream.Create(FileName, fmCreate);
     Stream.Seek(Offset, Seek);
