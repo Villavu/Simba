@@ -10,7 +10,7 @@ unit simba.ide_editor;
 interface
 
 uses
-  Classes, SysUtils, Graphics, Controls, ComCtrls, LCLType,
+  Classes, SysUtils, Graphics, Controls, ComCtrls, LCLType, StdCtrls, ExtCtrls,
   SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses, SynEditKeyCmds, SynEditHighlighter, SynEditMarkupCtrlMouseLink, SynEditMarkupHighAll,
   simba.base, simba.settings,
   simba.ide_editor_completionbox, simba.ide_editor_paramhint, simba.ide_editor_attributes,
@@ -51,6 +51,8 @@ type
 
     FSimbaOptions: ESimbaEditorOptions;
 
+    FReadOnlyNotice: TPanel;
+
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
 
@@ -64,6 +66,8 @@ type
     procedure DoSettingChanged_AntiAliased(Setting: TSimbaSetting);
     procedure DoSettingChanged_FontSize(Setting: TSimbaSetting);
     procedure DoSettingChanged_FontName(Setting: TSimbaSetting);
+
+    procedure DoHideReadOnlyNotice(Sender: TObject);
 
     // Temp line coloring
     procedure DoSpecialLineColor(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
@@ -107,6 +111,8 @@ type
     function GetExpressionEx(X, Y: Integer): String;
     // Execute a command that needs no extra data
     procedure ExecuteSimpleCommand(Command: TSynEditorCommand);
+    procedure ExecuteCommand(Command: TSynEditorCommand; const AChar: TUTF8Char; Data: pointer); override;
+
     // Repaint some extra things when saved
     procedure InvalidateGutter; override;
 
@@ -123,6 +129,7 @@ type
 implementation
 
 uses
+  ATCanvasPrimitives,
   LazSynEditMouseCmdsTypes,
   SynHighlighterPas,
   SynEditPointClasses,
@@ -370,6 +377,65 @@ procedure TSimbaEditor.DoSettingChanged_FontName(Setting: TSimbaSetting);
 begin
   if IsFontFixed(Setting.Value) then
     Font.Name := Setting.Value;
+end;
+
+procedure TSimbaEditor.DoHideReadOnlyNotice(Sender: TObject);
+begin
+  FReadOnlyNotice.Visible := False;
+
+  TTimer(Sender).Free();
+end;
+
+procedure TSimbaEditor.ExecuteCommand(Command: TSynEditorCommand; const AChar: TUTF8Char; Data: pointer);
+
+  function IsTryingToModify(Command: TSynEditorCommand): Boolean;
+  begin
+    Result := ((Command >= ecDeleteLastChar) and (Command <= ecDeleteCharNoCrLf))  or
+              ((Command >= ecBlockIndent)    and (Command <= ecShiftTab))           or
+              ((Command >= ecUndo)           and (Command <= ecPaste))              or
+              ((Command >= ecMoveLineUp)     and (Command <= ecDuplicateSelection)) or
+              ((Command = ecImeStr));
+  end;
+
+begin
+  inherited ExecuteCommand(Command, AChar, Data);
+
+  if ReadOnly and IsTryingToModify(Command) then
+  begin
+    if (FReadOnlyNotice = nil) then
+    begin
+      FReadOnlyNotice := TPanel.Create(Self);
+      FReadOnlyNotice.Parent := Self;
+      FReadOnlyNotice.Color := ColorBlendHalf(clMaroon, Color);
+      FReadOnlyNotice.BevelOuter := bvNone;
+      FReadOnlyNotice.AnchorVerticalCenterTo(Self);
+      FReadOnlyNotice.AnchorHorizontalCenterTo(Self);
+      FReadOnlyNotice.AutoSize := True;
+      FReadOnlyNotice.Visible := False;
+
+      with TLabel.Create(FReadOnlyNotice) do
+      begin
+        Parent := FReadOnlyNotice;
+        Align := alClient;
+        Caption := 'This file is read only!';
+        BorderSpacing.Around := 10;
+      end;
+    end;
+
+    FReadOnlyNotice.Font := Self.Font;
+    FReadOnlyNotice.Font.Bold := True;
+
+    if (not FReadOnlyNotice.Visible) then
+    begin
+      with TTimer.Create(Self) do
+      begin
+        Interval := 3500;
+        Enabled  := True;
+        OnTimer  := @DoHideReadOnlyNotice;
+      end;
+      FReadOnlyNotice.Visible := True;
+    end;
+  end;
 end;
 
 procedure TSimbaEditor.DragDrop(Source: TObject; X, Y: Integer);

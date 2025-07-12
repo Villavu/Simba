@@ -483,7 +483,7 @@ end;
 
 procedure TSimbaTabsForm.Replace;
 begin
-  if (CurrentEditor <> nil) then
+  if (CurrentEditor <> nil) and (not CurrentEditor.ReadOnly) then
     FEditorReplace.Execute(CurrentEditor);
 end;
 

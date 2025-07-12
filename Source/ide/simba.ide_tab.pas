@@ -440,6 +440,7 @@ begin
 
   try
     FEditor.Lines.SaveToFile(FileName);
+    FEditor.ReadOnly := False;
 
     Result := True;
   except
@@ -478,6 +479,8 @@ begin
       Exit;
     end;
   end;
+
+  FEditor.ReadOnly := FileIsReadOnly(FileName);
 
   FSavedText := FEditor.Text;
 
@@ -574,7 +577,7 @@ begin
     FScriptRunner.Resume()
   else
   begin
-    if (FScriptFileName <> '') then
+    if (not FEditor.ReadOnly) and (FScriptFileName <> '') then
       Save(FScriptFileName);
 
     FScriptRunner := TSimbaScriptTabRunner.Create(Self);
@@ -591,7 +594,7 @@ begin
 
   if (FScriptRunner = nil) then
   begin
-    if (FScriptFileName <> '') then
+    if (not FEditor.ReadOnly) and (FScriptFileName <> '') then
       Save(FScriptFileName);
 
     FScriptRunner := TSimbaScriptTabRunner.Create(Self);

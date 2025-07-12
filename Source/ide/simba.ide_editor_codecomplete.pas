@@ -51,6 +51,9 @@ var
 begin
   if (Command = ecCodeComplete) then
   begin
+    if Editor.ReadOnly then
+      Exit;
+
     ci := TCodeinsight.Create();
     try
       ci.SetScript(Editor.Text, TSimbaEditor(Editor).FileName);

@@ -94,16 +94,25 @@ end;
 
 procedure TSimbaTabPopupMenu.DoUndo(Sender: TObject);
 begin
+  if ScriptTab.Editor.ReadOnly then
+    Exit;
+
   ScriptTab.Editor.Undo();
 end;
 
 procedure TSimbaTabPopupMenu.DoRedo(Sender: TObject);
 begin
+  if ScriptTab.Editor.ReadOnly then
+    Exit;
+
   ScriptTab.Editor.Redo();
 end;
 
 procedure TSimbaTabPopupMenu.DoCut(Sender: TObject);
 begin
+  if ScriptTab.Editor.ReadOnly then
+   Exit;
+
   ScriptTab.Editor.CutToClipboard();
 end;
 
@@ -114,11 +123,17 @@ end;
 
 procedure TSimbaTabPopupMenu.DoPaste(Sender: TObject);
 begin
+  if ScriptTab.Editor.ReadOnly then
+    Exit;
+
   ScriptTab.Editor.PasteFromClipboard();
 end;
 
 procedure TSimbaTabPopupMenu.DoDelete(Sender: TObject);
 begin
+  if ScriptTab.Editor.ReadOnly then
+    Exit;
+
   ScriptTab.Editor.ClearSelection();
 end;
 
@@ -134,11 +149,17 @@ end;
 
 procedure TSimbaTabPopupMenu.DoReplace(Sender: TObject);
 begin
+  if ScriptTab.Editor.ReadOnly then
+    Exit;
+
   SimbaTabsForm.Replace();
 end;
 
 procedure TSimbaTabPopupMenu.DoDocComment(Sender: TObject);
 begin
+  if ScriptTab.Editor.ReadOnly then
+    Exit;
+
   ScriptTab.Editor.ExecuteSimpleCommand(ecDocumentation);
 end;
 

@@ -316,6 +316,9 @@ procedure TSimbaCompletionBox.DoCodeCompletion(var Value: String; SourceValue: S
 var
   Decl: TDeclaration;
 begin
+  if Editor.ReadOnly then
+    Exit;
+
   Decl := GetDecl(Position);
 
   // special handling for object constructor insert new statement

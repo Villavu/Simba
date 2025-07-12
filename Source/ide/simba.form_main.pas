@@ -471,6 +471,8 @@ procedure TSimbaMainForm.MenuItemFormatScriptClick(Sender: TObject);
 var
   Script: String;
 begin
+  if (SimbaTabsForm.CurrentEditor = nil) or SimbaTabsForm.CurrentEditor.ReadOnly then
+    Exit;
   try
     SimbaTabsForm.CurrentEditor.BeginUndoBlock();
 
@@ -798,7 +800,7 @@ end;
 
 procedure TSimbaMainForm.MenuCutClick(Sender: TObject);
 begin
-  if (SimbaTabsForm.CurrentEditor <> nil) then
+  if (SimbaTabsForm.CurrentEditor <> nil) and (not SimbaTabsForm.CurrentEditor.ReadOnly) then
     SimbaTabsForm.CurrentEditor.CutToClipboard();
 end;
 
@@ -851,7 +853,7 @@ end;
 
 procedure TSimbaMainForm.MenuItemLowercaseClick(Sender: TObject);
 begin
-  if Assigned(SimbaTabsForm.CurrentEditor) then
+  if Assigned(SimbaTabsForm.CurrentEditor) and (not SimbaTabsForm.CurrentEditor.ReadOnly) then
     if SimbaTabsForm.CurrentEditor.SelAvail then
       SimbaTabsForm.CurrentEditor.SelText := LowerCase(SimbaTabsForm.CurrentEditor.SelText);
 end;
@@ -966,13 +968,13 @@ end;
 
 procedure TSimbaMainForm.MenuPasteClick(Sender: TObject);
 begin
-  if (SimbaTabsForm.CurrentEditor <> nil) then
+  if (SimbaTabsForm.CurrentEditor <> nil) and (not SimbaTabsForm.CurrentEditor.ReadOnly) then
     SimbaTabsForm.CurrentEditor.PasteFromClipboard();
 end;
 
 procedure TSimbaMainForm.MenuRedoClick(Sender: TObject);
 begin
-  if (SimbaTabsForm.CurrentEditor <> nil) then
+  if (SimbaTabsForm.CurrentEditor <> nil) and (not SimbaTabsForm.CurrentEditor.ReadOnly) then
     SimbaTabsForm.CurrentEditor.Redo();
 end;
 
@@ -984,7 +986,7 @@ end;
 
 procedure TSimbaMainForm.MenuUndoClick(Sender: TObject);
 begin
-  if (SimbaTabsForm.CurrentEditor <> nil) then
+  if (SimbaTabsForm.CurrentEditor <> nil) and (not SimbaTabsForm.CurrentEditor.ReadOnly) then
     SimbaTabsForm.CurrentEditor.Undo();
 end;
 
@@ -1005,7 +1007,7 @@ end;
 
 procedure TSimbaMainForm.MenuItemUppercaseClick(Sender: TObject);
 begin
-  if Assigned(SimbaTabsForm.CurrentEditor) then
+  if Assigned(SimbaTabsForm.CurrentEditor) and (not SimbaTabsForm.CurrentEditor.ReadOnly) then
     if SimbaTabsForm.CurrentEditor.SelAvail then
       SimbaTabsForm.CurrentEditor.SelText := UpperCase(SimbaTabsForm.CurrentEditor.SelText);
 end;

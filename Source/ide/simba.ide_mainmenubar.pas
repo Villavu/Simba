@@ -38,7 +38,8 @@ implementation
 
 uses
   Forms, LCLType,
-  simba.ide_initialization, simba.ide_events, simba.ide_maintoolbar, simba.form_main;
+  simba.ide_initialization, simba.ide_events, simba.ide_maintoolbar, simba.form_main,
+  simba.ide_tab;
 
 procedure TSimbaMainMenuBar.DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
@@ -113,6 +114,9 @@ end;
 procedure TSimbaMainMenuBar.DoTabModified(Sender: TObject);
 begin
   SimbaMainForm.MenuItemSave.Enabled := SimbaMainToolBar.ButtonSave.Enabled;
+  SimbaMainForm.MenuItemCut.Enabled := TSimbaScriptTab(Sender).Editor.SelAvail;
+  SimbaMainForm.MenuItemCopy.Enabled := TSimbaScriptTab(Sender).Editor.SelAvail;
+  SimbaMainForm.MenuItemPaste.Enabled := TSimbaScriptTab(Sender).Editor.CanPaste;
 end;
 
 procedure TSimbaMainMenuBar.DoTabChanged(Sender: TObject);
@@ -124,6 +128,10 @@ begin
   SimbaMainForm.MenuItemPause.Enabled := SimbaMainToolBar.ButtonPause.Enabled;
   SimbaMainForm.MenuItemCompile.Enabled := SimbaMainToolBar.ButtonCompile.Enabled;
   SimbaMainForm.MenuItemStop.Enabled := SimbaMainToolBar.ButtonStop.Enabled;
+
+  SimbaMainForm.MenuItemCut.Enabled := TSimbaScriptTab(Sender).Editor.SelAvail;
+  SimbaMainForm.MenuItemCopy.Enabled := TSimbaScriptTab(Sender).Editor.SelAvail;
+  SimbaMainForm.MenuItemPaste.Enabled := TSimbaScriptTab(Sender).Editor.CanPaste;
 end;
 
 procedure TSimbaMainMenuBar.DoTabScriptStateChange(Sender: TObject);
