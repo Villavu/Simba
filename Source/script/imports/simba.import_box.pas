@@ -17,8 +17,8 @@ uses
   simba.vartype_box;
 
 (*
-TBox
-====
+Box
+===
 The `TBox` type is a record which defines a box from top left and bottom right coords.
 
 - `X1` is the **top left** `X` coord

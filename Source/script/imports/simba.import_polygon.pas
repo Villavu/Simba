@@ -206,7 +206,7 @@ procedure ImportPolygon(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
-    DumpSection := 'TPolygon';
+    DumpSection := 'Polygon';
 
     addGlobalType('array of TPoint', 'TPolygon');
     addGlobalType('array of TPolygon', 'TPolygonArray');

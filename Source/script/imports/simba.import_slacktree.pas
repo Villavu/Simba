@@ -18,8 +18,8 @@ uses
 
 
 (*
-TSlackTree
-==========
+SlackTree
+=========
 A 2D version of a KDTree for TPoint datatype
 
 Note:

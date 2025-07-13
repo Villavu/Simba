@@ -24,8 +24,8 @@ type
   PQuad = ^TQuad;
 
 (*
-TPoint
-======
+Point
+=====
 The TPoint type is a record which defines a X,Y integer coordinate.
 *)
 
@@ -234,12 +234,6 @@ begin
   PPoint(Params^[0])^ -= PPoint(Params^[1])^;
   PPoint(Result)^ := PPoint(Params^[0])^;
 end;
-
-(*
-TPointArray
-===========
-Methods relating to point arrays.
-*)
 
 (*
 TPointArray.CreateFromBox
@@ -1132,12 +1126,6 @@ begin
 end;
 
 (*
-T2DPointArray
-=============
-Arrays of TPointArrays.
-*)
-
-(*
 T2DPointArray.Offset
 --------------------
 ```
@@ -1520,7 +1508,7 @@ procedure ImportPoint(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
-    DumpSection := 'TPoint';
+    DumpSection := 'Point';
 
     addGlobalFunc('function Point(X, Y: Integer): TPoint', @_LapePoint);
 
@@ -1542,8 +1530,6 @@ begin
     addGlobalFunc('operator -= (var L: TPoint; R: TPoint): TPoint;', @_LapePoint_MinusAssign_Point);
     addGlobalFunc('operator * (L: TPoint; R: Double): TPoint;', @_LapePoint_Multiply_Double);
     addGlobalFunc('operator *= (var L: TPoint; R: Double): TPoint;', @_LapePoint_MultiplyAssign_Double);
-
-    DumpSection := 'TPointArray';
 
     addGlobalFunc('function TPointArray.CreateFromBox(Box: TBox; Filled: Boolean): TPointArray; static;', @_LapeTPACreateFromBox);
     addGlobalFunc('function TPointArray.CreateFromEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Filled: Boolean): TPointArray; static;', @_LapeTPACreateFromEllipse);
@@ -1639,8 +1625,6 @@ begin
     addGlobalFunc('function TPointArray.ConvexityDefects(Epsilon: Single = 0; Mode: EConvexityDefects = EConvexityDefects.NONE): TPointArray;', @_LapeTPAConvexityDefects);
 
     addGlobalFunc('procedure TPointArray.ToAxes(out X, Y: TIntegerArray);', @_LapeTPAToAxes);
-
-    DumpSection := 'T2DPointArray';
 
     addGlobalFunc('function T2DPointArray.Offset(P: TPoint): T2DPointArray', @_LapeATPA_Offset1);
 

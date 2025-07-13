@@ -22,8 +22,8 @@ uses
   simba.vartype_circle;
 
 (*
-TCircle
-=======
+Circle
+======
 Record that contains center point and radius.
 *)
 
@@ -213,7 +213,7 @@ procedure ImportCircle(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
-    DumpSection := 'TCircle';
+    DumpSection := 'Circle';
 
     addGlobalType('record X, Y, Radius: Integer; end;', 'TCircle');
     addGlobalType('array of TCircle;', 'TCircleArray');

@@ -60,7 +60,7 @@ THTTPClient.Create
 ------------------
 ```
 function THTTPClient.Construct: THTTPClient; static;
-function THTTPClient.Construct(Proxy: String; Auth: String = ""): THTTPClient; static;
+function THTTPClient.Construct(Proxy: String; Auth: String = ''): THTTPClient; static;
 ```
 
 THTTPClient constructor. Use the `new` keyword to call this method like so:

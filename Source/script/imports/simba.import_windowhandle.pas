@@ -17,8 +17,8 @@ uses
   simba.vartype_windowhandle;
 
 (*
-Window Handle
-=============
+Window
+======
 TWindowHandle stores a handle to a native window with methods for simple window manipulation.
 
 Example:
@@ -328,7 +328,7 @@ procedure ImportWindowHandle(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
-    DumpSection := 'TWindowHandle';
+    DumpSection := 'Window';
 
     addGlobalType('type UInt64', 'TWindowHandle');
     addGlobalType('array of TWindowHandle', 'TWindowHandleArray');

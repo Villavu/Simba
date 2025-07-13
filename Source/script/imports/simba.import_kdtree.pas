@@ -17,8 +17,8 @@ uses
   simba.container_kdtree;
 
 (*
-TKDTree
-=======
+KDTree
+======
 A version of a KDTree for n dimensional vectors (each a float).
 
 An Item is described as
@@ -227,11 +227,12 @@ begin
   T2DKDItems(Result^) := TKDTree(Params^[0]^).Clusters(TSingleArray(Params^[1]^));
 end;
 
-
 procedure ImportKDTree(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
+    DumpSection := 'KDTree';
+
     addGlobalType('record Ref: Int32; Vector: TSingleArray; end;', 'TKDItem');
     addGlobalType('array of TKDItem;',  'TKDItems');
     addGlobalType('array of TKDItems;', 'T2DKDItems');

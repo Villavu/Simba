@@ -497,7 +497,7 @@ Returns milliseconds since the script was started.
 GetTimeStamp
 ------------
 ```
-function GetTimeStamp(Format: String = "[hh:mm:ss:uu]"): String;
+function GetTimeStamp(Format: String = '[hh:mm:ss:uu]'): String;
 ```
 Formats GetTimeRunning using `FormatMilliseconds`
 *)

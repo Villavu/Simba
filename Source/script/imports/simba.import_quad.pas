@@ -26,8 +26,8 @@ type
   PQuadArray = ^TQuadArray;
 
 (*
-TQuad
-=====
+Quad
+====
 The TQuad type is a record which stores four TPoints (Top, Right, Bottom, Left)
 
 See: <https://en.wikipedia.org/wiki/Quadrilateral>
@@ -370,7 +370,7 @@ procedure ImportQuad(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
-    DumpSection := 'TQuad';
+    DumpSection := 'Quad';
 
     addGlobalFunc('function TQuad.Create(ATop, ARight, ABottom, ALeft: TPoint): TQuad; static; overload', @_LapeQuad_Create);
     addGlobalFunc('function TQuad.CreateFromBox(Box: TBox): TQuad; static; overload', @_LapeQuad_CreateFromBox);

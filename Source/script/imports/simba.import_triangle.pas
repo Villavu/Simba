@@ -23,8 +23,8 @@ uses
   simba.vartype_circle;
 
 (*
-TTriangle
-=========
+Triangle
+========
 The TTriangle type is a record which stores three TPoints (A, B, C)
 
 See: <https://en.wikipedia.org/wiki/Triangle>
@@ -289,7 +289,7 @@ procedure ImportTriangle(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
-    DumpSection := 'TTriangle';
+    DumpSection := 'Triangle';
 
     addGlobalFunc('function TTriangle.Create(A, B, C: TPoint): TTriangle; static', @_LapeTriangle_Create);
 

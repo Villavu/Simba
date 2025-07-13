@@ -5,7 +5,6 @@
 [==============================================================================}
 unit simba.container_slacktree;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
