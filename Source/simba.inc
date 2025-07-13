@@ -44,7 +44,7 @@
 // use mORMot memory manager. This should be better than default FPC for our uses.
 // This will only be used on x86_64 Windows & Linux.
 // nevermind - is causing issues
-{.$DEFINE SIMBA_CUSTOM_MM}
+{$DEFINE SIMBA_CUSTOM_MM}
 
 {$IFDEF Lape_CDECL}
   {$DEFINE LAPE_WRAPPER_CALLING_CONV := cdecl;}
