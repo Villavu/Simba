@@ -23,7 +23,7 @@ type
   *)
   
   TKDItem = record
-    Ref: Int32;
+    Ref: Integer;
     Vector: TSingleArray;
   end;
 
@@ -33,7 +33,7 @@ type
   PKDNode = ^TKDNode;
   TKDNode = record
     Split: TKDItem;
-    L, R: Int32;
+    L, R: Integer;
     Hidden: Boolean;
   end;
 
@@ -41,26 +41,25 @@ type
   TKDNodeRefArray = array of PKDNode;
 
   TKDTree = record
-    Dimensions: Int32;
+    Dimensions: Integer;
     Data: TKDNodeArray;
-    Size: Int32;
+    Size: Integer;
 
-    procedure Init(const AData: TKDItems);
-    constructor Create(const AData: TKDItems);
-    constructor Create(const FileName: string);
+    class function Create(const AData: TKDItems): TKDTree; static; overload;
+    class function Create(const FileName: string): TKDTree; static; overload;
     function SaveToFile(FileName: string): Boolean;
 
     function RefArray(): TKDNodeRefArray;
-    function GetItem(i:Int32): PKDNode;
-    function InitBranch(): Int32; inline;
+    function GetItem(i:Integer): PKDNode;
+    function InitBranch(): Integer; inline;
     function Copy(): TKDTree;
     function SqDistance(A, B: TSingleArray; Limit: Single = High(UInt32)): Single; inline;
-    function IndexOf(const Value: TSingleArray): Int32;
-    function KNearest(Vector: TSingleArray; K: Int32; NotEqual: Boolean = False): TKDItems;
+    function IndexOf(const Value: TSingleArray): Integer;
+    function KNearest(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TKDItems;
     function RangeQuery(Low, High: TSingleArray): TKDItems;
     function RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Hide: Boolean): TKDItems;
-    function KNearestClassify(Vector: TSingleArray; K: Int32): Int32;
-    function WeightedKNearestClassify(Vector: TSingleArray; K: Int32): Int32;
+    function KNearestClassify(Vector: TSingleArray; K: Integer): Integer;
+    function WeightedKNearestClassify(Vector: TSingleArray; K: Integer): Integer;
     function Clusters(Radii: TSingleArray): T2DKDItems;
   end;
 
@@ -79,9 +78,9 @@ const
 (*
   Quick select for the KDTree build process
 *)
-function QuickSelectOnAxis(var Arr:TKDItems; k, Start, Stop: Int32; Axis: Int32): TKDItem;
+function QuickSelectOnAxis(var Arr:TKDItems; k, Start, Stop: Integer; Axis: Integer): TKDItem;
 var
-  l, r: Int32;
+  l, r: Integer;
   tmp: TKDItem;
   pivot: Single;
 begin
@@ -116,20 +115,20 @@ end;
 
 function TKDTree.RefArray(): TKDNodeRefArray;
 var
-  i:Int32;
+  i:Integer;
 begin
   SetLength(Result, Length(self.data));
   for i:=0 to High(self.data) do Result[i] := @self.data[i];
 end;
 
 
-function TKDTree.GetItem(i:Int32): PKDNode;
+function TKDTree.GetItem(i:Integer): PKDNode;
 begin
   Result := @self.data[i];
 end;
 
 
-function TKDTree.InitBranch: Int32;
+function TKDTree.InitBranch: Integer;
 begin
   Result := self.size;
   with self.data[result] do
@@ -151,7 +150,7 @@ end;
 
 
 function TKDTree.SqDistance(A, B: TSingleArray; Limit: Single = High(UInt32)): Single;
-var i: Int32;
+var i: Integer;
 begin
   Result := 0;
   for i:=0 to High(a) do
@@ -161,73 +160,71 @@ begin
   end;
 end;
 
-
-procedure TKDTree.Init(const AData: TKDItems);
+class function TKDTree.Create(const AData: TKDItems): TKDTree;
 var
   Sortable: TKDItems;
 
-  procedure BuildTree(var Node: TKDNode; Left, Right:Int32; Depth:Int32=0);
+  procedure BuildTree(var Node: TKDNode; Left, Right:Integer; Depth:Integer=0);
   var
-    Mid: Int32;
+    Mid: Integer;
   begin
     if (Right-Left < 0) then Exit();     // just nil back up..
 
     Mid := (Right + left) shr 1;
-    Node.Split := QuickSelectOnAxis(Sortable, Mid, Left, Right, depth mod Self.Dimensions);
+    Node.Split := QuickSelectOnAxis(Sortable, Mid, Left, Right, depth mod Result.Dimensions);
 
     if Mid-left > 0 then begin           //lower half
-      Node.L := self.InitBranch();
-      BuildTree(self.Data[Node.L], left,mid-1, depth+1);
+      Node.L := Result.InitBranch();
+      BuildTree(Result.Data[Node.L], left,mid-1, depth+1);
     end;
 
     if Right-Mid > 0 then begin          //upper half
-      Node.R := self.InitBranch();
-      BuildTree(self.Data[Node.R], mid+1,right, depth+1);
+      Node.R := Result.InitBranch();
+      BuildTree(Result.Data[Node.R], mid+1,right, depth+1);
     end;
   end;
 begin
-  if Length(AData) = 0 then Exit;
+  Result := Default(TKDTree);
+  if Length(AData) = 0 then
+    Exit;
 
   Sortable := System.Copy(AData);
 
-  Self.Dimensions := Length(AData[0].Vector);
-  Self.Size := 0;
+  Result.Dimensions := Length(AData[0].Vector);
+  Result.Size := 0;
 
-  SetLength(self.Data, Length(Sortable));
-  BuildTree(self.Data[self.InitBranch()], 0, High(Sortable));
+  SetLength(Result.Data, Length(Sortable));
+  BuildTree(Result.Data[Result.InitBranch()], 0, High(Sortable));
 end;
 
-constructor TKDTree.Create(const AData: TKDItems);
-begin
-  Self.Init(AData);
-end;
-
-constructor TKDTree.Create(const FileName: string);
+class function TKDTree.Create(const FileName: string): TKDTree;
 var
   bytes: TByteArray;
-  i,j,c: Int32;
+  i,j,c: Integer;
 begin
+  Result := Default(TKDTree);
+
   bytes := TSimbaFile.FileReadBytes(FileName);
-  Move(bytes[0], Self.Dimensions, 4);
-  Move(bytes[4], Self.Size,       4);
+  Move(bytes[0], Result.Dimensions, 4);
+  Move(bytes[4], Result.Size,       4);
   c := 8;
 
-  SetLength(Self.Data, Self.Size);
-  for i:=0 to Self.Size-1 do
+  SetLength(Result.Data, Result.Size);
+  for i:=0 to Result.Size-1 do
   begin
-    Self.Data[i].Hidden := Boolean(bytes[c]);
+    Result.Data[i].Hidden := Boolean(bytes[c]);
     Inc(c);
-    Move(bytes[c], Self.Data[i].L, 4);
+    Move(bytes[c], Result.Data[i].L, 4);
     Inc(c, 4);
-    Move(bytes[c], Self.Data[i].R, 4);
+    Move(bytes[c], Result.Data[i].R, 4);
     Inc(c, 4);
-    Move(bytes[c], Self.Data[i].Split.Ref, 4);
+    Move(bytes[c], Result.Data[i].Split.Ref, 4);
     Inc(c, 4);
 
-    SetLength(Self.Data[i].Split.Vector, Self.Dimensions);
-    for j:=0 to Self.Dimensions-1 do
+    SetLength(Result.Data[i].Split.Vector, Result.Dimensions);
+    for j:=0 to Result.Dimensions-1 do
     begin
-      Move(bytes[c], Self.Data[i].Split.Vector[j], 4);
+      Move(bytes[c], Result.Data[i].Split.Vector[j], 4);
       Inc(c, 4);
     end;
   end;
@@ -238,7 +235,7 @@ end;
 function TKDTree.SaveToFile(FileName: string): Boolean;
 var
   bytes: TByteArray;
-  i,j,c: Int32;
+  i,j,c: Integer;
 begin
   SetLength(bytes,
     4 +
@@ -283,9 +280,9 @@ end;
   Note:
     The time complexity is typically closer to O(log n) when K is significantly smaller than n.
 *)
-function TKDTree.IndexOf(const Value: TSingleArray): Int32;
+function TKDTree.IndexOf(const Value: TSingleArray): Integer;
 var
-  Node: Int32;
+  Node: Integer;
   Depth: UInt8;
   Axis: Integer;
   i: Integer;
@@ -333,7 +330,7 @@ end;
   XXX:
     Can maybe use simba's heap strucutre, I elected not to as this was designed within Simba/Lape.
 *)
-function TKDTree.KNearest(Vector: TSingleArray; K: Int32; NotEqual: Boolean = False): TKDItems;
+function TKDTree.KNearest(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TKDItems;
 type
   TNearestItem = record
     Node: PKDNode;
@@ -369,14 +366,14 @@ var
     end;
   end;
 
-  procedure FindKNearest(Node: Int32; Depth: UInt8);
+  procedure FindKNearest(Node: Integer; Depth: UInt8);
   var
     Delta, DistSq: Single;
-    Test: Int32;
+    Test: Integer;
     This: PKDNode;
     Axis: Integer;
     Temp: TNearestItem;
-    I: Int32;
+    I: Integer;
   begin
     if Node = NONE then Exit;
 
@@ -460,7 +457,7 @@ function TKDTree.RangeQuery(Low, High: TSingleArray): TKDItems;
 var
   ResultSize: Integer;
 
-  procedure Query(Node: Int32; Depth: UInt8);
+  procedure Query(Node: Integer; Depth: UInt8);
   var
     This: PKDNode;
     Axis: Integer;
@@ -527,10 +524,10 @@ end;
 *)
 function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Hide: Boolean): TKDItems;
 var
-  i, ResultSize: Int32;
+  i, ResultSize: Integer;
   SumSqRadii: Single;
 
-  procedure Query(Node: Int32; Depth: UInt8);
+  procedure Query(Node: Integer; Depth: UInt8);
   var
     This: PKDNode;
     Axis: Integer;
@@ -611,14 +608,14 @@ end;
   Note:
     The time complexity is typically closer to O(log n) when K is significantly smaller than n.
 *)
-function TKDTree.KNearestClassify(Vector: TSingleArray; K: Int32): Int32;
+function TKDTree.KNearestClassify(Vector: TSingleArray; K: Integer): Integer;
 var
   NearestNeighbors: TKDItems;
   CategoryCounts: TIntegerArray;
   i: Integer;
-  MostCommonCategory: Int32;
+  MostCommonCategory: Integer;
   MaxCount: Integer;
-  Category: Int32;
+  Category: Integer;
   LowCategory: Integer;
 begin
   NearestNeighbors := Self.KNearest(Vector, K, False);
@@ -657,21 +654,21 @@ end;
   Same as KNearestClassify except we weight the output towards our Vector so
   that closer vectors in the tree is slightly higher valued.
 *)
-function TKDTree.WeightedKNearestClassify(Vector: TSingleArray; K: Int32): Int32;
+function TKDTree.WeightedKNearestClassify(Vector: TSingleArray; K: Integer): Integer;
 var
   NearestNeighbors: TKDItems;
   CategoryCounts: TSingleArray; // Dynamic array for weighted counts
   i: Integer;
-  MostCommonCategory: Int32;
+  MostCommonCategory: Integer;
   MaxWeight: Single;
   Weight: Single;
   Dist: Single;
-  LowCategory: Int32;
+  LowCategory: Integer;
 begin
   NearestNeighbors := Self.KNearest(Vector, K, False);
 
   SetLength(CategoryCounts, 0);
-  LowCategory := High(Int32);
+  LowCategory := High(Integer);
 
   for i := 0 to High(NearestNeighbors) do
   begin
@@ -718,7 +715,7 @@ end;
 *)
 function TKDTree.Clusters(Radii: TSingleArray): T2DKDItems;
 var
-  resCount, qCount: Int32;
+  resCount, qCount: Integer;
   sqRadii: TSingleArray;
   sqrProduct: Double;
   queue: array of PKDNode;
@@ -726,7 +723,7 @@ var
   function Fits(const p,c: TKDItem): Boolean; {inline; produces worse machinecode}
   var
     dsqr: Single;
-    i: Int32;
+    i: Integer;
   begin
     if p.ref <> c.ref then Exit(False); //mismatch category
     dsqr := 0;
@@ -739,11 +736,11 @@ var
     Result := dsqr <= sqrProduct;
   end;
 
-  procedure Cluster(const test: TKDItem; var result: TKDItems; this: PKDNode; depth:Int32=0);
+  procedure Cluster(const test: TKDItem; var result: TKDItems; this: PKDNode; depth:Integer=0);
   var
     goright:Boolean = False;
     goleft: Boolean = False;
-    splitDim: Int32;
+    splitDim: Integer;
   begin
     // Early exit if this node and its subtree are fully explored
     if Byte(this^.hidden) = 2 then Exit;
@@ -779,7 +776,7 @@ var
   end;
 
 var
-  i,j:Int32;
+  i,j:Integer;
 begin
   if Length(Radii) <> self.Dimensions then
     raise Exception.Create('TKDTree.Clusters: Input dimensions does not match the tree');

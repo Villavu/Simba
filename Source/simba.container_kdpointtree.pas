@@ -3,7 +3,7 @@
   Project: SlackTree
   License: GNU Lesser GPL (http://www.gnu.org/licenses/lgpl.html)
 [==============================================================================}
-unit simba.container_slacktree;
+unit simba.container_kdpointtree;
 
 {$i simba.inc}
 
@@ -23,40 +23,38 @@ type
   PNode = ^TNode;
   TNode = record
     Split: TPoint;
-    L,R: Int32;
+    L,R: Integer;
     Hidden: Boolean;
   end;
 
   TNodeArray = array of TNode;
   TNodeRefArray = array of PNode;
 
-  TSlackTree = record
+  TKDPointTree = record
   public
     data: TNodeArray;
-    size: Int32;
+    size: Integer;
   private
-    function GetItem(i:Int32): PNode; inline;
+    function GetItem(i:Integer): PNode; inline;
   public
-    property items[i:Int32]: PNode read GetItem; default;
+    class function Create(TPA: TPointArray): TKDPointTree; static;
 
-    function InitBranch: Int32; inline;
-    function Copy: TSlackTree;
+    property items[i:Integer]: PNode read GetItem; default;
 
-    procedure Init(TPA:TPointArray);
-    constructor Create(TPA:TPointArray);
-    
+    function InitBranch: Integer; inline;
+    function Copy: TKDPointTree;
 
-    function IndexOf(p:TPoint): Int32;
+    function IndexOf(p:TPoint): Integer;
     function Find(p:TPoint): PNode;
 
-    procedure HideNode(idx:Int32);
+    procedure HideNode(idx:Integer);
     function HideNode(pt:TPoint): Boolean; overload;
 
     function RawNearest(pt:TPoint; notEqual:Boolean=False): PNode;
     function Nearest(pt:TPoint; notEqual:Boolean=False): TPoint;
 
-    function RawKNearest(pt:TPoint; k:Int32; notEqual:Boolean=False): TNodeRefArray;
-    function KNearest(pt:TPoint; k:Int32; notEqual:Boolean=False): TPointArray;
+    function RawKNearest(pt:TPoint; k:Integer; notEqual:Boolean=False): TNodeRefArray;
+    function KNearest(pt:TPoint; k:Integer; notEqual:Boolean=False): TPointArray;
 
     function RawRangeQuery(B:TBox): TNodeRefArray;
     function RangeQuery(B:TBox; hide:Boolean=False): TPointArray;
@@ -64,12 +62,7 @@ type
     function RangeQueryEx(query:TPoint; xmin,ymin,xmax,ymax:Double; hide:Boolean=False): TPointArray; overload;
 
     function Clusters(RadX, RadY: Single): T2DPointArray;
-
-    function RefArray: TNodeRefArray;
   end;
-
-  PSlackTree = ^TSlackTree;
-
 
 implementation
 
@@ -81,7 +74,7 @@ const
 
 // used to allow us indexing rather than x and y TPoint.
 type
-  IntInt = array [0..1] of Int32; //[0..1] represents a TPoint
+  IntInt = array [0..1] of Integer; //[0..1] represents a TPoint
   TIntIntArray = array of IntInt;
 
 
@@ -90,9 +83,9 @@ TODO:
    There might be some optimizations in TKDTree that's not used here
 *)
 
-function SelectNth_Axis(var arr: TIntIntArray; k, start, stop: Int32; axis: Int32): TPoint;
+function SelectNth_Axis(var arr: TIntIntArray; k, start, stop: Integer; axis: Integer): TPoint;
 var
-  l, r: Int32;
+  l, r: Integer;
   tmp: IntInt;
   pivot: Single;
 begin
@@ -126,22 +119,47 @@ begin
 end;
 
 
-function TSlackTree.RefArray: TNodeRefArray;
-var
-  i:Int32;
-begin
-  SetLength(Result, Length(self.data));
-  for i:=0 to High(self.data) do Result[i] := @self.data[i];
-end;
-
-
-function TSlackTree.GetItem(i:Int32): PNode;
+function TKDPointTree.GetItem(i:Integer): PNode;
 begin
   Result := @self.data[i];
 end;
 
+class function TKDPointTree.Create(TPA: TPointArray): TKDPointTree;
 
-function TSlackTree.InitBranch: Int32;
+  procedure BuildTree(var node:TNode; left, right:Integer; depth:Integer=0);
+  var
+    mid: Integer;
+  begin
+    if (right - left < 0) then
+      Exit; // just nil back up..
+
+    mid := (right + left) shr 1;
+    node.split := SelectNth_Axis(TIntIntArray(TPA), mid, left, right, depth and 1);
+
+    if (mid - left > 0) then // lower half
+    begin
+      node.L := Result.InitBranch();
+      BuildTree(Result.data[node.L], left, mid - 1, depth + 1);
+    end;
+
+    if (right - mid > 0) then // upper half
+    begin
+      node.R := Result.InitBranch();
+      BuildTree(Result.data[node.R], mid + 1,right, depth +1 );
+    end;
+  end;
+
+begin
+  Result := Default(TKDPointTree);
+
+  if (Length(TPA) > 0) then
+  begin
+    SetLength(Result.Data, Length(TPA));
+    BuildTree(Result.Data[Result.InitBranch()], 0, High(TPA));
+  end;
+end;
+
+function TKDPointTree.InitBranch: Integer;
 begin
   Result := self.size;
   with self.data[result] do
@@ -153,49 +171,16 @@ begin
   Inc(self.size);
 end;
 
-function TSlackTree.Copy: TSlackTree;
+function TKDPointTree.Copy: TKDPointTree;
 begin
   Result.Data := System.Copy(Data);
   Result.Size := Size;
 end;
 
-procedure TSlackTree.Init(TPA: TPointArray);
-  procedure __build(var node:TNode; left, right:Int32; depth:Int32=0);
-  var mid: Int32;
-  begin
-    if (right-left < 0) then Exit(); // just nil back up..
-
-    mid := (right+left) shr 1;
-    node.split := SelectNth_Axis(TIntIntArray(TPA), mid, left, right, depth and 1);
-
-    if mid-left > 0 then begin           //lower half
-      node.L := self.InitBranch();
-      __build(self.data[node.L], left,mid-1, depth+1);
-    end;
-
-    if right-mid > 0 then begin          //upper half
-      node.R := self.InitBranch();
-      __build(self.data[node.R], mid+1,right, depth+1);
-    end;
-  end;
-begin
-  if Length(TPA) = 0 then Exit;
-
-  Self.Size := 0;
-  SetLength(self.data, Length(TPA));
-  __build(self.data[InitBranch()], 0, High(TPA));
-end;
-
-constructor TSlackTree.Create(TPA: TPointArray);
-begin
-  Self.Init(TPA);
-end;
-
-
-function TSlackTree.IndexOf(p:TPoint): Int32;
-  function __find(idx:Int32; depth:Int32=0): Int32;
+function TKDPointTree.IndexOf(p:TPoint): Integer;
+  function __find(idx:Integer; depth:Integer=0): Integer;
   var
-    s:Int32;
+    s:Integer;
     this:PNode;
   begin
     this := Self[idx];
@@ -222,21 +207,21 @@ begin
   Result := __find(0,0);
 end;
 
-function TSlackTree.Find(p:TPoint): PNode;
-var i:Int32;
+function TKDPointTree.Find(p:TPoint): PNode;
+var i:Integer;
 begin
   Result := nil;
   i := Self.IndexOf(p);
   if i <> NONE then Result := @self.data[i];
 end;
 
-procedure TSlackTree.HideNode(idx:Int32);
+procedure TKDPointTree.HideNode(idx:Integer);
 begin
   Self[idx]^.hidden := True;
 end;
 
-function TSlackTree.HideNode(pt:TPoint): Boolean; overload;
-var idx:Int32;
+function TKDPointTree.HideNode(pt:TPoint): Boolean; overload;
+var idx:Integer;
 begin
   idx := self.IndexOf(pt);
   Result := idx <> NONE;
@@ -244,13 +229,13 @@ begin
     self.data[idx].hidden := True;
 end;
 
-function TSlackTree.RawNearest(pt:TPoint; notEqual:Boolean=False): PNode;
+function TKDPointTree.RawNearest(pt:TPoint; notEqual:Boolean=False): PNode;
 var
-  resDist:Int32;
+  resDist:Integer;
   resNode:PNode;
-  procedure __nearest(node:Int32; depth:UInt8=0);
+  procedure __nearest(node:Integer; depth:UInt8=0);
   var
-    test,dist,delta:Int32;
+    test,dist,delta:Integer;
     this:PNode;
   begin
     this := @self.data[node];
@@ -283,14 +268,14 @@ var
   end;
 
 begin
-  resDist := High(Int32);
+  resDist := High(Integer);
   resNode := nil;
   __nearest(0);
   Result := resNode;
 end;
 
 
-function TSlackTree.Nearest(pt:TPoint; notEqual:Boolean=False): TPoint;
+function TKDPointTree.Nearest(pt:TPoint; notEqual:Boolean=False): TPoint;
 var tmp:PNode;
 begin
   tmp := self.RawNearest(pt, notEqual);
@@ -301,8 +286,8 @@ begin
 end;
 
 
-function TSlackTree.RawKNearest(pt:TPoint; k:Int32; notEqual:Boolean=False): TNodeRefArray;
-var i,c:Int32;
+function TKDPointTree.RawKNearest(pt:TPoint; k:Integer; notEqual:Boolean=False): TNodeRefArray;
+var i,c:Integer;
 begin
   SetLength(Result, k);
   c := 0;
@@ -319,10 +304,10 @@ begin
 end;
 
 
-function TSlackTree.KNearest(pt:TPoint; k:Int32; notEqual:Boolean=False): TPointArray;
+function TKDPointTree.KNearest(pt:TPoint; k:Integer; notEqual:Boolean=False): TPointArray;
 var
   arr:TNodeRefArray;
-  i:Int32;
+  i:Integer;
 begin
   arr := RawKNearest(pt,k,notEqual);
   SetLength(result, Length(arr));
@@ -330,10 +315,10 @@ begin
 end;
 
 
-function TSlackTree.RawRangeQuery(B:TBox): TNodeRefArray;
+function TKDPointTree.RawRangeQuery(B:TBox): TNodeRefArray;
 var
-  res_len, res_count: Int32;
-  procedure __query(node:Int32; var res:TNodeRefArray; depth:Int32=0);
+  res_len, res_count: Integer;
+  procedure __query(node:Integer; var res:TNodeRefArray; depth:Integer=0);
   var
     goright, goleft:Boolean;
     this: PNode;
@@ -378,10 +363,10 @@ begin
 end;
 
 
-function TSlackTree.RangeQuery(B:TBox; hide:Boolean=False): TPointArray;
+function TKDPointTree.RangeQuery(B:TBox; hide:Boolean=False): TPointArray;
 var
   nodes:TNodeRefArray;
-  i:Int32;
+  i:Integer;
 begin
   nodes := self.RawRangeQuery(B);
   SetLength(Result, length(nodes));
@@ -394,9 +379,9 @@ begin
 end;
 
 
-function TSlackTree.RangeQueryEx(query: TPoint; xRad, yRad: Double; hide: Boolean): TPointArray;
+function TKDPointTree.RangeQueryEx(query: TPoint; xRad, yRad: Double; hide: Boolean): TPointArray;
 var
-  i,c:Int32;
+  i,c:Integer;
   nodes:TNodeRefArray;
   sqx,sqy,xxyy:Single;
   pt:TPoint;
@@ -436,9 +421,9 @@ begin
 end;
 
 
-function TSlackTree.RangeQueryEx(query:TPoint; xmin,ymin,xmax,ymax:Double; hide:Boolean=False): TPointArray; overload;
+function TKDPointTree.RangeQueryEx(query:TPoint; xmin,ymin,xmax,ymax:Double; hide:Boolean=False): TPointArray; overload;
 var
-  i,c:Int32;
+  i,c:Integer;
   nodes:TNodeRefArray;
   hisqx,hisqy,hixxyy,losqx,losqy,loxxyy:Single;
   pt:TPoint;
@@ -473,9 +458,9 @@ begin
 end;
 
 
-function TSlackTree.Clusters(RadX, RadY: Single): T2DPointArray;
+function TKDPointTree.Clusters(RadX, RadY: Single): T2DPointArray;
 var
-  ResCount, qCount: Int32;
+  ResCount, qCount: Integer;
   Radii: array[0..1] of Single;
   Queue: array of PNode;
   sqrx,sqry,sqrxy: Single;
@@ -492,7 +477,7 @@ var
     Result := (Sqr(p.x-c.x)*sqry)+(Sqr(p.y-c.y)*sqrx) <= sqrxy;
   end;
 
-  procedure Cluster(const Test: TPoint; var Result: TPointArray; const This: PNode; const Depth:Int32=0);
+  procedure Cluster(const Test: TPoint; var Result: TPointArray; const This: PNode; const Depth:Integer=0);
   var
     goright:Boolean = False;
     goleft: Boolean = False;
@@ -532,7 +517,7 @@ var
   end;
 
 var
-  i,j:Int32;
+  i,j:Integer;
 begin
   sqrx := Sqr(RadX);
   sqry := Sqr(RadY);

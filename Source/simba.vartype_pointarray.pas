@@ -217,7 +217,7 @@ implementation
 uses
   Math,
   simba.containers, simba.geometry, simba.math,
-  simba.container_slacktree,
+  simba.container_kdpointtree,
   simba.vartype_matrix, simba.vartype_ordarray,
   simba.vartype_box, simba.vartype_point, simba.vartype_triangle,
   simba.array_algorithm;
@@ -1300,7 +1300,7 @@ end;
 
 function TPointArrayHelper.ReduceByDistance(Dist: Integer): TPointArray;
 var
-  Tree: TSlackTree;
+  Tree: TKDPointTree;
   Nodes: TNodeRefArray;
   I, J, DistSqr: Integer;
   Query: TPoint;
@@ -1310,7 +1310,7 @@ begin
 
   if (Length(Self) > 1) then
   begin
-    Tree.Init(Self.Unique());
+    Tree := TKDPointTree.Create(Self.Unique());
 
     DistSqr := Sqr(Dist);
     for I := 0 to High(Tree.Data) do
@@ -1625,7 +1625,7 @@ end;
 
 function TPointArrayHelper.PointsNearby(Other: TPointArray; MinDist, MaxDist: Double): TPointArray;
 var
-  Tree: TSlackTree;
+  Tree: TKDPointTree;
   I: Integer;
   Buffer: TSimbaPointBuffer;
 begin
@@ -1633,7 +1633,7 @@ begin
 
   if (Length(Self) > 0) and (Length(Other) > 0) then
   begin
-    Tree.Init(Copy(Self));
+    Tree := TKDPointTree.Create(Copy(Self));
     for I := 0 to High(Other) do
       Buffer.Add(Tree.RangeQueryEx(Other[I], MinDist, MinDist, MaxDist, MaxDist, True));
   end;
@@ -1643,7 +1643,7 @@ end;
 
 function TPointArrayHelper.PointsNearby(Other: TPointArray; MinDistX, MinDistY, MaxDistX, MaxDistY: Double): TPointArray;
 var
-  Tree: TSlackTree;
+  Tree: TKDPointTree;
   I: Integer;
   Buffer: TSimbaPointBuffer;
 begin
@@ -1651,7 +1651,7 @@ begin
 
   if (Length(Self) > 0) and (Length(Other) > 0) then
   begin
-    Tree.Init(Copy(Self));
+    Tree := TKDPointTree.Create(Copy(Self));
     for I := 0 to High(Other) do
       Buffer.Add(Tree.RangeQueryEx(Other[I], MinDistX, MinDistY, MaxDistX, MaxDistY, True));
   end;
@@ -2621,7 +2621,7 @@ function TPointArrayHelper.ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPol
 var
   TPA, pts: TPointArray;
   Buffer: TSimbaPointBuffer;
-  tree: TSlackTree;
+  tree: TKDPointTree;
   i: Int32;
   B: TBox;
 begin
@@ -2630,7 +2630,7 @@ begin
   if Length(TPA) <= 2 then
     Exit(TPA);
 
-  tree.Init(TPA);
+  Tree := TKDPointTree.Create(TPA);
   Buffer.Init(256);
   for i:=0 to High(tree.data) do
   begin
@@ -2657,7 +2657,7 @@ end;
 function TPointArrayHelper.ConcaveHullEx(MaxLeap: Double=-1; Epsilon:Double=2): TPolygonArray;
 var
   TPA, pts: TPointArray;
-  tree: TSlackTree;
+  tree: TKDPointTree;
   i: Int32;
   B: TBox;
   Buffer: TSimbaPointBuffer;
@@ -2666,7 +2666,7 @@ begin
   TPA := Self.PartitionEx(TPoint.Create(B.X1-Round(Epsilon), B.Y1-Round(Epsilon)), Round(Epsilon*2-1), Round(Epsilon*2-1)).Means();
   if Length(TPA) <= 2 then
     Exit([TPA]);
-  tree.Init(TPA);
+  Tree := TKDPointTree.Create(TPA);
 
   if MaxLeap = -1 then
     MaxLeap := Ceil(Sqrt(TPA.ConvexHull().Area / Length(TPA)) * Sqrt(2));
