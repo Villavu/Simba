@@ -99,6 +99,8 @@ type
     procedure DoTabChange(Sender: TObject);
     procedure DoTabClosed(Sender: TObject);
     procedure DoTabAdd(Sender: TObject);
+
+    procedure DoDoubleClickSplitter(Sender: TObject);
   public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
@@ -112,6 +114,7 @@ implementation
 {.$DEFINE DEBUG}
 
 uses
+  AnchorDocking,
   simba.ide_events,
   simba.ide_utils,
   simba.ide_showdeclaration,
@@ -778,6 +781,7 @@ begin
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE,       @DoTabChange);
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CLOSED,       @DoTabClosed);
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_ADD,          @DoTabAdd);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.SPLITTER_DOUBLE_CLICK,  @DoDoubleClickSplitter);
 
   with TIdleTimer.Create(Self) do
   begin
@@ -807,6 +811,16 @@ begin
   FreeAndNil(FUpdateThread);
 
   inherited Destroy();
+end;
+
+procedure TSimbaFunctionListForm.DoDoubleClickSplitter(Sender: TObject);
+var
+  Splitter: TAnchorDockSplitter;
+begin
+  if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = Sender)) then
+    Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + TSimbaFunctionListPage(FNotebook.ActivePage).FTreeView.MaxRight)
+  else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = Sender)) then
+    Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - TSimbaFunctionListPage(FNotebook.ActivePage).FTreeView.MaxRight);
 end;
 
 {$R *.lfm}

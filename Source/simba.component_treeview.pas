@@ -51,6 +51,8 @@ type
     procedure Paint; override;
     procedure SetLoading(Value: Boolean);
   public
+    function GetMaxLvl: integer; reintroduce;
+
     property Loading: Boolean read FLoading write SetLoading;
     property OnBeginUpdate: TNotifyEvent read FOnBeginUpdate write FOnBeginUpdate;
     property OnEndUpdate: TNotifyEvent read FOnEndUpdate write FOnEndUpdate;
@@ -179,6 +181,8 @@ type
 
     procedure AddKeyEvent(Key: Integer; Shift: TShiftState; Callback: TKeyEvent);
     procedure RemoveKeyEvent(Key: Integer; Shift: TShiftState; Callback: TKeyEvent);
+
+    function MaxRight: Integer;
   end;
 
 implementation
@@ -382,6 +386,11 @@ begin
       Delete(FKeyEvents, I, 1);
       Break;
     end;
+end;
+
+function TSimbaTreeView.MaxRight: Integer;
+begin
+  Result := FTree.GetMaxLvl;
 end;
 
 function TSimbaTreeView.GetFilter: String;
@@ -775,6 +784,11 @@ begin
   FLoading := Value;
 
   Invalidate();
+end;
+
+function TSimbaInternalTreeView.GetMaxLvl: integer;
+begin
+  Result := inherited + FScrollbarVert.Width;
 end;
 
 procedure TSimbaInternalTreeView.DoSelectionChanged;

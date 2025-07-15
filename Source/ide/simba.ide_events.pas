@@ -32,6 +32,7 @@ type
     // Event called on a form dock/undock
     FORM_DOCK,
     FORM_UNDOCK,
+    SPLITTER_DOUBLE_CLICK,
     // Event called when a tabs script state changes. Sender=TSimbaScriptTab
     TAB_SCRIPTSTATE_CHANGE,
     // Event called on mouselogger change. Sender=TSimbaMouseLogger

@@ -57,6 +57,10 @@ type
   TSimbaAnchorDockSplitter = class(TAnchorDockSplitter)
   protected
     procedure Paint; override;
+    procedure DblClick; override;
+
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   public
     constructor Create(TheOwner: TComponent); override;
   end;
@@ -86,7 +90,7 @@ implementation
 
 uses
   XMLPropStorage, LazConfigStorage,
-  simba.ide_theme, simba.misc, simba.ide_events;
+  simba.ide_theme, simba.misc, simba.ide_events, simba.form_functionlist, simba.threading, simba.form_tabs;
 
 procedure TSimbaAnchorDockHeader.ParentFontChanged;
 begin
@@ -250,6 +254,29 @@ begin
     Canvas.Brush.Color := SimbaTheme.ColorActive;
     Canvas.FillRect(3, 3, Width-3, Height-3);
   end;
+end;
+
+procedure TSimbaAnchorDockSplitter.DblClick;
+begin
+  inherited DblClick();
+
+  SimbaIDEEvents.Notify(SimbaIDEEvent.SPLITTER_DOUBLE_CLICK, Self);
+end;
+
+procedure TSimbaAnchorDockSplitter.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if (ssDouble in Shift) then
+    Exit;
+
+  inherited MouseDown(Button, Shift, X, Y);
+end;
+
+procedure TSimbaAnchorDockSplitter.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if (ssDouble in Shift) then
+    Exit;
+
+  inherited MouseUp(Button, Shift, X, Y);
 end;
 
 constructor TSimbaAnchorDockSplitter.Create(TheOwner: TComponent);
