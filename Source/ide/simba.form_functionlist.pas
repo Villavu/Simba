@@ -59,9 +59,9 @@ type
     procedure DoMouseOverTooltipClick(Sender: TObject);
     procedure DoShowAllClick(Sender: TObject);
     procedure DoHideAllClick(Sender: TObject);
-
     procedure DoDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+    procedure DoAfterFilter(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -524,6 +524,22 @@ begin
   Accept := (Node is TSimbaFunctionListNode) and (TSimbaFunctionListNode(Node).NodeType = ntSimbaFile);
 end;
 
+procedure TSimbaFunctionListPage.DoAfterFilter(Sender: TObject);
+begin
+  if (FTreeView.Filter = '') then
+  begin
+    FTreeView.BeginUpdate();
+    FTreeView.FullCollapse();
+
+    FScriptNode.Expanded := True;
+    FIncludesNode.Expanded := True;
+    FPluginsNode.Expanded := True;
+    FSimbaNode.Expanded := True;
+
+    FTreeView.EndUpdate();
+  end;
+end;
+
 constructor TSimbaFunctionListPage.Create(AOwner: TComponent);
 var
   ContextMenu: TPopupMenu;
@@ -567,6 +583,7 @@ begin
   FTreeView.OnSelectionChange := @DoSelectionChanged;
   FTreeView.OnDragDrop := @DoDragDrop;
   FTreeView.OnDragOver := @DoDragOver;
+  FTreeView.OnAfterFilter := @DoAfterFilter;
   FTreeView.PopupMenu := ContextMenu;
 
   Add('Open Simba Documentation', @DoOpenSimbaDocClick, False, False, IMG_SIMBA);
