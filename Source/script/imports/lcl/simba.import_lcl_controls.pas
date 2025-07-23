@@ -40,6 +40,7 @@ type
   PAnchorSideReference = ^TAnchorSideReference;
   PAnchorKind = ^TAnchorKind;
   PAnchors = ^TAnchors;
+  PSizeConstraints = ^TSizeConstraints;
 
 procedure _LapeAnchorSide_Side_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -129,6 +130,16 @@ end;
 procedure _LapeControl_SetBounds(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PControl(Params^[0])^.SetBounds(Pinteger(Params^[1])^, Pinteger(Params^[2])^, Pinteger(Params^[3])^, Pinteger(Params^[4])^);
+end;
+
+procedure _LapeControl_Constraints_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSizeConstraints(Result)^ := PControl(Params^[0])^.Constraints;
+end;
+
+procedure _LapeControl_Constraints_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PControl(Params^[0])^.Constraints := PSizeConstraints(Params^[1])^;
 end;
 
 procedure _LapeControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -465,6 +476,61 @@ end;
 procedure _LapeControl_Cursor_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PControl(Params^[0])^.Cursor := ELazCurorToTCursor[ELazCursor(Params^[1]^)];
+end;
+
+procedure _LapeSizeConstraints_Control_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PControl(Result)^ := PSizeConstraints(Params^[0])^.Control;
+end;
+
+procedure _LapeSizeConstraints_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PSizeConstraints(Params^[0])^.OnChange;
+end;
+
+procedure _LapeSizeConstraints_OnChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSizeConstraints(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapeSizeConstraints_MaxHeight_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MaxHeight;
+end;
+
+procedure _LapeSizeConstraints_MaxHeight_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSizeConstraints(Params^[0])^.MaxHeight := PInteger(Params^[1])^;
+end;
+
+procedure _LapeSizeConstraints_MaxWidth_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MaxWidth;
+end;
+
+procedure _LapeSizeConstraints_MaxWidth_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSizeConstraints(Params^[0])^.MaxWidth := PInteger(Params^[1])^;
+end;
+
+procedure _LapeSizeConstraints_MinHeight_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MinHeight;
+end;
+
+procedure _LapeSizeConstraints_MinHeight_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSizeConstraints(Params^[0])^.MinHeight := PInteger(Params^[1])^;
+end;
+
+procedure _LapeSizeConstraints_MinWidth_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MinWidth;
+end;
+
+procedure _LapeSizeConstraints_MinWidth_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSizeConstraints(Params^[0])^.MinWidth := PInteger(Params^[1])^;
 end;
 
 procedure _LapeWinControl_Brush_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -846,19 +912,21 @@ begin
     addClass('TLazControl', 'TLazComponent', TControl);
     addClass('TLazWinControl', 'TLazControl', TWinControl);
 
+    addClass('TLazSizeConstraints', 'TLazObject', TSizeConstraints);
+    addProperty('TLazSizeConstraints', 'Control', 'TLazControl', @_LapeSizeConstraints_Control_Read);
+    addProperty('TLazSizeConstraints', 'OnChange', 'TLazNotifyEvent', @_LapeSizeConstraints_OnChange_Read, @_LapeSizeConstraints_OnChange_Write);
+    addProperty('TLazSizeConstraints', 'MaxHeight', 'Integer', @_LapeSizeConstraints_MaxHeight_Read, @_LapeSizeConstraints_MaxHeight_Write);
+    addProperty('TLazSizeConstraints', 'MaxWidth', 'Integer', @_LapeSizeConstraints_MaxWidth_Read, @_LapeSizeConstraints_MaxWidth_Write);
+    addProperty('TLazSizeConstraints', 'MinHeight', 'Integer', @_LapeSizeConstraints_MinHeight_Read, @_LapeSizeConstraints_MinHeight_Write);
+    addProperty('TLazSizeConstraints', 'MinWidth', 'Integer', @_LapeSizeConstraints_MinWidth_Read, @_LapeSizeConstraints_MinWidth_Write);
+
     addClass('TLazAnchorSide', 'TLazObject', TAnchorSide);
     addProperty('TLazAnchorSide', 'Side', 'ELazAnchorSideReference', @_LapeAnchorSide_Side_Read, @_LapeAnchorSide_Side_Write);
     addProperty('TLazAnchorSide', 'Kind', 'ELazAnchorKind', @_LapeAnchorSide_Kind_Read);
     addProperty('TLazAnchorSide', 'Control', 'TLazControl', @_LapeAnchorSide_Control_Read, @_LapeAnchorSide_Control_Write);
 
-    addProperty('TLazControl', 'Anchors', 'ELazAnchors',  @_LapeControl_Anchors_Read, @_LapeControl_Anchors_Write);
-    addProperty('TLazControl', 'AnchorSideLeft', 'TLazAnchorSide',  @_LapeControl_AnchorSideLeft_Read);
-    addProperty('TLazControl', 'AnchorSideTop', 'TLazAnchorSide',  @_LapeControl_AnchorSideTop_Read);
-    addProperty('TLazControl', 'AnchorSideRight', 'TLazAnchorSide',  @_LapeControl_AnchorSideRight_Read);
-    addProperty('TLazControl', 'AnchorSideBottom', 'TLazAnchorSide',  @_LapeControl_AnchorSideBottom_Read);
-
-    addGlobalFunc('procedure TLazControl.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);', @_LapeControl_SetBounds);
     addClassConstructor('TLazControl', '(AOwner: TLazComponent)', @_LapeControl_Create);
+    addGlobalFunc('procedure TLazControl.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);', @_LapeControl_SetBounds);
     addGlobalFunc('procedure TLazControl.BringToFront;', @_LapeControl_BringToFront);
     addGlobalFunc('procedure TLazControl.Hide;', @_LapeControl_Hide);
     addGlobalFunc('procedure TLazControl.Refresh;', @_LapeControl_Refresh);
@@ -872,6 +940,12 @@ begin
     addGlobalFunc('procedure TLazControl.Show;', @_LapeControl_Show);
     addGlobalFunc('procedure TLazControl.Update;', @_LapeControl_Update);
 
+    addProperty('TLazControl', 'Constraints', 'TLazSizeConstraints', @_LapeControl_Constraints_Read, @_LapeControl_Constraints_Write);
+    addProperty('TLazControl', 'Anchors', 'ELazAnchors', @_LapeControl_Anchors_Read, @_LapeControl_Anchors_Write);
+    addProperty('TLazControl', 'AnchorSideLeft', 'TLazAnchorSide', @_LapeControl_AnchorSideLeft_Read);
+    addProperty('TLazControl', 'AnchorSideTop', 'TLazAnchorSide', @_LapeControl_AnchorSideTop_Read);
+    addProperty('TLazControl', 'AnchorSideRight', 'TLazAnchorSide', @_LapeControl_AnchorSideRight_Read);
+    addProperty('TLazControl', 'AnchorSideBottom', 'TLazAnchorSide', @_LapeControl_AnchorSideBottom_Read);
     addProperty('TLazControl', 'Cursor', 'ELazCursor', @_LapeControl_Cursor_Read, @_LapeControl_Cursor_Write);
     addProperty('TLazControl', 'Align', 'ELazAlign', @_LapeControl_Align_Read, @_LapeControl_Align_Write);
     addProperty('TLazControl', 'AutoSize', 'Boolean', @_LapeControl_AutoSize_Read, @_LapeControl_AutoSize_Write);

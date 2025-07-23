@@ -18,6 +18,9 @@ begin
   Panel.Color := Colors.DARK_RED;
   Panel.Left := 222;
   Panel.Top := 333;
+  Panel.Width := 450;
+  Panel.Height := 80;
+  Panel.Caption := 'You can move and drag me!';
 
   Form.ShowModal();
 

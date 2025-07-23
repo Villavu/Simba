@@ -13,7 +13,7 @@ procedure ImportLCLExtCtrls(Script: TSimbaScript);
 implementation
 
 uses
-  controls, extctrls, graphics, customtimer, lptypes, ffi;
+  controls, extctrls, graphics, customtimer, lptypes, ffi, math;
 
 type
   PAlignment = ^TAlignment;
@@ -338,54 +338,171 @@ end;
 type
   PDragablePanel = ^TDragablePanel;
   TDragablePanel = class(TPanel)
+  protected type
+    {$scopedenums on}
+    EDragEdge = (
+      NONE,
+      LEFT, RIGHT, TOP, BOTTOM,
+      TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
+    );
+    {$scopedenums off}
   protected
-    FDragging: Boolean;
-    FDragStart: TPoint;
+    FDownEdge: EDragEdge;
+    FDownX: Integer;
+    FDownY: Integer;
+    FDown: Boolean;
+
+    FMouseEdgeSize: Integer;
+    FAllowMoving: Boolean;
+    FAllowResizing: Boolean;
+
+    function GetDragEdge(X, Y: Integer): EDragEdge;
 
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
-
+  public
     constructor Create(TheOwner: TComponent); override;
+
+    property MouseEdgeSize: Integer read FMouseEdgeSize write FMouseEdgeSize;
+    property AllowMoving: Boolean read FAllowMoving write FAllowMoving;
+    property AllowResizing: Boolean read FAllowResizing write FAllowResizing;
   end;
 
+function TDragablePanel.GetDragEdge(X, Y: Integer): EDragEdge;
+
+  function DistToCorner(CornerX, CornerY: Integer): Integer;
+  begin
+    Result := Round(Hypot(CornerX - X, CornerY - Y));
+  end;
+
+begin
+  Result := EDragEdge.NONE;
+
+  with ClientRect do
+  begin
+    if (DistToCorner(Left,  Top) < FMouseEdgeSize+2)    then Exit(EDragEdge.TOP_LEFT);
+    if (DistToCorner(Right, Top) < FMouseEdgeSize+2)    then Exit(EDragEdge.TOP_RIGHT);
+    if (DistToCorner(Left,  Bottom) < FMouseEdgeSize+2) then Exit(EDragEdge.BOTTOM_LEFT);
+    if (DistToCorner(Right, Bottom) < FMouseEdgeSize+2) then Exit(EDragEdge.BOTTOM_RIGHT);
+
+    if (X < FMouseEdgeSize)          then Exit(EDragEdge.LEFT);
+    if (Y < FMouseEdgeSize)          then Exit(EDragEdge.TOP);
+    if (X > Width - FMouseEdgeSize)  then Exit(EDragEdge.RIGHT);
+    if (Y > Height - FMouseEdgeSize) then Exit(EDragEdge.BOTTOM);
+  end;
+end;
+
 procedure TDragablePanel.MouseMove(Shift: TShiftState; X, Y: Integer);
+var
+  MouseXY: TPoint;
+  NewRect: TRect;
 begin
   inherited MouseMove(Shift, X, Y);
 
-  if FDragging then
+  if (not FDown) then
   begin
-    Left := Left + (X - FDragStart.X);
-    Top := Top + (Y - FDragStart.Y);
+    case GetDragEdge(X, Y) of
+      EDragEdge.LEFT:   Cursor := crSizeE;
+      EDragEdge.TOP:    Cursor := crSizeN;
+      EDragEdge.RIGHT:  Cursor := crSizeW;
+      EDragEdge.BOTTOM: Cursor := crSizeS;
+
+      EDragEdge.TOP_LEFT:     Cursor := crSizeNW;
+      EDragEdge.TOP_RIGHT:    Cursor := crSizeNE;
+      EDragEdge.BOTTOM_LEFT:  Cursor := crSizeSW;
+      EDragEdge.BOTTOM_RIGHT: Cursor := crSizeSE;
+      else
+        Cursor := crSize;
+    end;
+    Exit;
   end;
+
+  if (FDownEdge = EDragEdge.NONE) and (not AllowMoving)    then Exit;
+  if (FDownEdge <> EDragEdge.NONE) and (not AllowResizing) then Exit;
+
+  MouseXY := Parent.ScreenToClient(Mouse.CursorPos);
+
+  NewRect := BoundsRect;
+  case FDownEdge of
+    EDragEdge.LEFT:   NewRect.Left   := MouseXY.X;
+    EDragEdge.RIGHT:  NewRect.Right  := MouseXY.X;
+    EDragEdge.TOP:    NewRect.Top    := MouseXY.Y;
+    EDragEdge.BOTTOM: NewRect.Bottom := MouseXY.Y;
+
+    EDragEdge.TOP_LEFT:     begin NewRect.Left  := MouseXY.X; NewRect.Top := MouseXY.Y;    end;
+    EDragEdge.TOP_RIGHT:    begin NewRect.Right := MouseXY.X; NewRect.Top := MouseXY.Y;    end;
+    EDragEdge.BOTTOM_LEFT:  begin NewRect.Left  := MouseXY.X; NewRect.Bottom := MouseXY.Y; end;
+    EDragEdge.BOTTOM_RIGHT: begin NewRect.Right := MouseXY.X; NewRect.Bottom := MouseXY.Y; end;
+    else
+      NewRect.SetLocation(MouseXY.X - FDownX, MouseXY.Y - FDownY);
+  end;
+  BoundsRect := NewRect;
 end;
 
 procedure TDragablePanel.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   inherited MouseDown(Button, Shift, X, Y);
 
-  FDragging := True;
-  FDragStart.X := X;
-  FDragStart.Y := Y;
+  FDownEdge := GetDragEdge(X, Y);
+  FDownX := X;
+  FDownY := Y;
+  FDown := True;
 end;
 
 procedure TDragablePanel.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   inherited MouseUp(Button, Shift, X, Y);
 
-  FDragging := False;
+  FDown := False;
 end;
 
 constructor TDragablePanel.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
+  FMouseEdgeSize := 5;
+  FAllowMoving := True;
+  FAllowResizing := True;
+
   BevelOuter := bvNone;
+  Constraints.MinWidth := 10;
+  Constraints.MinHeight := 10;
 end;
 
 procedure _LapeDragablePanel_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDragablePanel(Result)^ := TDragablePanel.Create(PComponent(Params^[0])^);
+end;
+
+procedure _LapeDragablePanel_MouseEdgeSize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDragablePanel(Params^[0])^.MouseEdgeSize := PInteger(Params^[1])^;
+end;
+
+procedure _LapeDragablePanel_MouseEdgeSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PDragablePanel(Params^[0])^.MouseEdgeSize;
+end;
+
+procedure _LapeDragablePanel_AllowMoving_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDragablePanel(Params^[0])^.AllowMoving := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeDragablePanel_AllowMoving_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PDragablePanel(Params^[0])^.AllowMoving;
+end;
+
+procedure _LapeDragablePanel_AllowResizing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDragablePanel(Params^[0])^.AllowResizing := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeDragablePanel_AllowResizing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PDragablePanel(Params^[0])^.AllowResizing;
 end;
 
 procedure ImportLCLExtCtrls(Script: TSimbaScript);
@@ -438,6 +555,9 @@ begin
 
     addClass('TLazDragablePanel', 'TLazPanel', TDragablePanel);
     addClassConstructor('TLazDragablePanel', '(Owner: TLazComponent)', @_LapeDragablePanel_Create);
+    addProperty('TLazDragablePanel', 'MouseEdgeSize', 'Integer', @_LapeDragablePanel_MouseEdgeSize_Read, @_LapeDragablePanel_MouseEdgeSize_Write);
+    addProperty('TLazDragablePanel', 'AllowMoving', 'Boolean', @_LapeDragablePanel_AllowMoving_Read, @_LapeDragablePanel_AllowMoving_Write);
+    addProperty('TLazDragablePanel', 'AllowResizing', 'Boolean', @_LapeDragablePanel_AllowResizing_Read, @_LapeDragablePanel_AllowResizing_Write);
   end;
 end;
 

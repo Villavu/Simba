@@ -29,7 +29,6 @@ type
   PPosition = ^TPosition;
   PScrollBox = ^TScrollBox;
   PShowInTaskBar = ^TShowInTaskBar;
-  PSizeConstraints = ^TSizeConstraints;
   PControl = ^TControl;
   PNotifyEvent = ^TNotifyEvent;
   PDropFilesEvent = ^TDropFilesEvent;
@@ -46,61 +45,6 @@ type
   POpenDialog = ^TOpenDialog;
   POpenOption = ^TOpenOption;
   POpenOptions = ^TOpenOptions;
-
-procedure _LapeSizeConstraints_Control_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PControl(Result)^ := PSizeConstraints(Params^[0])^.Control;
-end;
-
-procedure _LapeSizeConstraints_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PNotifyEvent(Result)^ := PSizeConstraints(Params^[0])^.OnChange;
-end;
-
-procedure _LapeSizeConstraints_OnChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSizeConstraints(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
-end;
-
-procedure _LapeSizeConstraints_MaxHeight_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PConstraintSize(Result)^ := PSizeConstraints(Params^[0])^.MaxHeight;
-end;
-
-procedure _LapeSizeConstraints_MaxHeight_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSizeConstraints(Params^[0])^.MaxHeight := PConstraintSize(Params^[1])^;
-end;
-
-procedure _LapeSizeConstraints_MaxWidth_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MaxWidth;
-end;
-
-procedure _LapeSizeConstraints_MaxWidth_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSizeConstraints(Params^[0])^.MaxWidth := PInteger(Params^[1])^;
-end;
-
-procedure _LapeSizeConstraints_MinHeight_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MinHeight;
-end;
-
-procedure _LapeSizeConstraints_MinHeight_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSizeConstraints(Params^[0])^.MinHeight := PInteger(Params^[1])^;
-end;
-
-procedure _LapeSizeConstraints_MinWidth_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PSizeConstraints(Params^[0])^.MinWidth;
-end;
-
-procedure _LapeSizeConstraints_MinWidth_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSizeConstraints(Params^[0])^.MinWidth := PConstraintSize(Params^[1])^;
-end;
 
 procedure _LapeCustomForm_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -335,16 +279,6 @@ end;
 procedure _LapeCustomForm_Read_BorderIcons(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBorderIcons(Result)^ := PCustomForm(Params^[0])^.BorderIcons;
-end;
-
-procedure _LapeCustomForm_Constraints_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSizeConstraints(Result)^ := PCustomForm(Params^[0])^.Constraints;
-end;
-
-procedure _LapeCustomForm_Constraints_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PCustomForm(Params^[0])^.Constraints := PSizeConstraints(Params^[1])^;
 end;
 
 procedure _LapeCustomForm_ShowInTaskBar_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -940,14 +874,6 @@ begin
     addGlobalType('procedure(Sender: TLazObject; var CloseAction: ELazFormCloseAction) of object', 'TLazCloseEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TLazObject; var CanClose: Boolean) of object', 'TLazCloseQueryEvent', FFI_DEFAULT_ABI);
 
-    addClass('TLazSizeConstraints', 'TLazObject', TSizeConstraints);
-    addProperty('TLazSizeConstraints', 'Control', 'TLazControl', @_LapeSizeConstraints_Control_Read);
-    addProperty('TLazSizeConstraints', 'OnChange', 'TLazNotifyEvent', @_LapeSizeConstraints_OnChange_Read, @_LapeSizeConstraints_OnChange_Write);
-    addProperty('TLazSizeConstraints', 'MaxHeight', 'Integer', @_LapeSizeConstraints_MaxHeight_Read, @_LapeSizeConstraints_MaxHeight_Write);
-    addProperty('TLazSizeConstraints', 'MaxWidth', 'Integer', @_LapeSizeConstraints_MaxWidth_Read, @_LapeSizeConstraints_MaxWidth_Write);
-    addProperty('TLazSizeConstraints', 'MinHeight', 'Integer', @_LapeSizeConstraints_MinHeight_Read, @_LapeSizeConstraints_MinHeight_Write);
-    addProperty('TLazSizeConstraints', 'MinWidth', 'Integer', @_LapeSizeConstraints_MinWidth_Read, @_LapeSizeConstraints_MinWidth_Write);
-
     addClass('TLazCustomForm', 'TLazScrollingWinControl', TCustomForm);
     addClassConstructor('TLazCustomForm', '(AOwner: TLazCustomForm)', @_LapeCustomForm_Create);
     addGlobalFunc('procedure TLazCustomForm.Close;', @_LapeCustomForm_Close);
@@ -972,7 +898,6 @@ begin
     addProperty('TLazCustomForm', 'RestoredTop', 'Integer', @_LapeCustomForm_RestoredTop_Read);
     addProperty('TLazCustomForm', 'RestoredWidth', 'Integer', @_LapeCustomForm_RestoredWidth_Read);
     addProperty('TLazCustomForm', 'RestoredHeight', 'Integer', @_LapeCustomForm_RestoredHeight_Read);
-    addProperty('TLazCustomForm', 'Constraints', 'TLazSizeConstraints', @_LapeCustomForm_Constraints_Read, @_LapeCustomForm_Constraints_Write);
     addProperty('TLazCustomForm', 'ShowInTaskBar', 'ELazFormShowInTaskbar', @_LapeCustomForm_ShowInTaskBar_Read, @_LapeCustomForm_ShowInTaskBar_Write);
     addProperty('TLazCustomForm', 'Position', 'ELazFormPosition', @_LapeCustomForm_Position_Read, @_LapeCustomForm_Position_Write);
     addProperty('TLazCustomForm', 'AutoScroll', 'Boolean', @_LapeCustomForm_AutoScroll_Read, @_LapeCustomForm_AutoScroll_Write);
