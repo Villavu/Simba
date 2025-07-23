@@ -637,6 +637,14 @@ begin
   PWinControl(Params^[0])^.SetShape(PBitmap(Params^[1])^);
 end;
 
+procedure _LapeWinControl_ControlAtPos(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  if PBoolean(Params^[2])^ then
+    PControl(Result)^ := PWinControl(Params^[0])^.ControlAtPos(PPoint(Params^[1])^, [capfOnlyClientAreas, capfAllowWinControls, capfAllowDisabled, capfRecursive])
+  else
+    PControl(Result)^ := PWinControl(Params^[0])^.ControlAtPos(PPoint(Params^[1])^, [capfOnlyClientAreas, capfAllowWinControls, capfAllowDisabled]);
+end;
+
 procedure _LapeCustomControl_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomControl(Result)^ := TCustomControl.Create(PComponent(Params^[0])^);
@@ -910,6 +918,7 @@ begin
     addGlobalFunc('procedure TLazWinControl.HandleNeeded;', @_LapeWinControl_HandleNeeded);
     addGlobalFunc('procedure TLazWinControl.PaintTo(ACanvas: TLazCanvas; X, Y: Integer);', @_LapeWinControl_PaintTo);
     addGlobalFunc('procedure TLazWinControl.SetShape(AShape: TLazBitmap);', @_LapeWinControl_SetShape);
+    addGlobalFunc('function TLazWinControl.ControlAtPos(Pos: TPoint; Recursive: Boolean = True): TLazControl;', @_LapeWinControl_ControlAtPos);
 
     addClass('TLazCustomControl', 'TLazWinControl', TCustomControl);
     addClassConstructor('TLazCustomControl', '(AOwner: TLazComponent)', @_LapeCustomControl_Create);

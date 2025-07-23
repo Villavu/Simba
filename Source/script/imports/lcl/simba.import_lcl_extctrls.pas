@@ -155,9 +155,19 @@ begin
   PImage(Params^[0])^.OnPictureChanged := PNotifyEvent(Params^[1])^;
 end;
 
+procedure _LapeImage_OnMouseDown_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseEvent(Result)^ := PImage(Params^[0])^.OnMouseDown;
+end;
+
 procedure _LapeImage_OnMouseDown_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PImage(Params^[0])^.OnMouseDown := PMouseEvent(Params^[1])^;
+end;
+
+procedure _LapeImage_OnMouseUp_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseEvent(Result)^ := PImage(Params^[0])^.OnMouseUp;
 end;
 
 procedure _LapeImage_OnMouseUp_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -193,6 +203,16 @@ end;
 procedure _LapeImage_OnMouseMove_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PImage(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
+end;
+
+procedure _LapeImage_OnDblClick_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PImage(Params^[0])^.OnDblClick;
+end;
+
+procedure _LapeImage_OnDblClick_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PImage(Params^[0])^.OnDblClick := PNotifyEvent(Params^[1])^;
 end;
 
 procedure _LapeCustomPanel_Alignment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -245,6 +265,76 @@ begin
   PPanel(Result)^ := TPanel.Create(PComponent(Params^[0])^);
 end;
 
+procedure _LapePanel_WordWrap_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanel(Params^[0])^.WordWrap := PBoolean(Params^[1])^;
+end;
+
+procedure _LapePanel_WordWrap_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PPanel(Params^[0])^.WordWrap;
+end;
+
+procedure _LapePanel_OnMouseDown_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseEvent(Result)^ := PPanel(Params^[0])^.OnMouseDown;
+end;
+
+procedure _LapePanel_OnMouseDown_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanel(Params^[0])^.OnMouseDown := PMouseEvent(Params^[1])^;
+end;
+
+procedure _LapePanel_OnMouseUp_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseEvent(Result)^ := PPanel(Params^[0])^.OnMouseUp;
+end;
+
+procedure _LapePanel_OnMouseUp_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanel(Params^[0])^.OnMouseUp := PMouseEvent(Params^[1])^;
+end;
+
+procedure _LapePanel_OnMouseEnter_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PPanel(Params^[0])^.OnMouseEnter;
+end;
+
+procedure _LapePanel_OnMouseEnter_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanel(Params^[0])^.OnMouseEnter := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapePanel_OnMouseLeave_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PPanel(Params^[0])^.OnMouseLeave;
+end;
+
+procedure _LapePanel_OnMouseLeave_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanel(Params^[0])^.OnMouseLeave := PNotifyEvent(Params^[1])^;
+end;
+
+procedure _LapePanel_OnMouseMove_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PMouseMoveEvent(Result)^ := PPanel(Params^[0])^.OnMouseMove;
+end;
+
+procedure _LapePanel_OnMouseMove_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanel(Params^[0])^.OnMouseMove := PMouseMoveEvent(Params^[1])^;
+end;
+
+procedure _LapePanel_OnDblClick_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PPanel(Params^[0])^.OnDblClick;
+end;
+
+procedure _LapePanel_OnDblClick_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanel(Params^[0])^.OnDblClick := PNotifyEvent(Params^[1])^;
+end;
+
 procedure ImportLCLExtCtrls(Script: TSimbaScript);
 begin
   with Script.Compiler do
@@ -268,11 +358,12 @@ begin
     addProperty('TLazImage', 'Transparent', 'Boolean', @_LapeImage_Transparent_Read, @_LapeImage_Transparent_Write);
     addProperty('TLazImage', 'Proportional', 'Boolean', @_LapeImage_Proportional_Read, @_LapeImage_Proportional_Write);
     addProperty('TLazImage', 'OnPictureChanged', 'TLazNotifyEvent', @_LapeImage_OnPictureChanged_Read, @_LapeImage_OnPictureChanged_Write);
-    addProperty('TLazImage', 'OnMouseDown', 'TLazMouseEvent', nil, @_LapeImage_OnMouseDown_Write);
-    addProperty('TLazImage', 'OnMouseUp', 'TLazMouseEvent', nil, @_LapeImage_OnMouseUp_Write);
+    addProperty('TLazImage', 'OnMouseDown', 'TLazMouseEvent', @_LapeImage_OnMouseDown_Read, @_LapeImage_OnMouseDown_Write);
+    addProperty('TLazImage', 'OnMouseUp', 'TLazMouseEvent', @_LapeImage_OnMouseUp_Read, @_LapeImage_OnMouseUp_Write);
     addProperty('TLazImage', 'OnMouseEnter', 'TLazNotifyEvent', @_LapeImage_OnMouseEnter_Read, @_LapeImage_OnMouseEnter_Write);
     addProperty('TLazImage', 'OnMouseLeave', 'TLazNotifyEvent', @_LapeImage_OnMouseLeave_Read, @_LapeImage_OnMouseLeave_Write);
     addProperty('TLazImage', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapeImage_OnMouseMove_Read, @_LapeImage_OnMouseMove_Write);
+    addProperty('TLazImage', 'OnDblClick', 'TLazNotifyEvent', @_LapeImage_OnDblClick_Read, @_LapeImage_OnDblClick_Write);
 
     addClass('TLazCustomPanel', 'TLazCustomControl', TCustomPanel);
     addProperty('TLazCustomPanel', 'Alignment', 'ELazAlignment', @_LapeCustomPanel_Alignment_Read, @_LapeCustomPanel_Alignment_Write);
@@ -283,6 +374,14 @@ begin
 
     addClass('TLazPanel', 'TLazCustomPanel', TPanel);
     addClassConstructor('TLazPanel', '(TheOwner: TLazComponent)', @_LapePanel_Create);
+
+    addProperty('TLazPanel', 'WordWrap', 'Boolean', @_LapePanel_WordWrap_Read, @_LapePanel_WordWrap_Write);
+    addProperty('TLazPanel', 'OnMouseDown', 'TLazMouseEvent', @_LapePanel_OnMouseDown_Read, @_LapePanel_OnMouseDown_Write);
+    addProperty('TLazPanel', 'OnMouseUp', 'TLazMouseEvent', @_LapePanel_OnMouseUp_Read, @_LapePanel_OnMouseUp_Write);
+    addProperty('TLazPanel', 'OnMouseEnter', 'TLazNotifyEvent', @_LapePanel_OnMouseEnter_Read, @_LapePanel_OnMouseEnter_Write);
+    addProperty('TLazPanel', 'OnMouseLeave', 'TLazNotifyEvent', @_LapePanel_OnMouseLeave_Read, @_LapePanel_OnMouseLeave_Write);
+    addProperty('TLazPanel', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapePanel_OnMouseMove_Read, @_LapePanel_OnMouseMove_Write);
+    addProperty('TLazPanel', 'OnDblClick', 'TLazNotifyEvent', @_LapePanel_OnDblClick_Read, @_LapePanel_OnDblClick_Write);
   end;
 end;
 
