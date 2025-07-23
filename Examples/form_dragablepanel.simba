@@ -1,0 +1,29 @@
+var
+  Form: TLazForm;
+
+procedure ShowMyForm;
+var
+  Form: TLazForm;
+  Panel: TLazDragablePanel;
+begin
+  Form := TLazForm.Create();
+  Form.Caption := 'Example dragable panel';
+  Form.Width := 1000;
+  Form.Height := 800;
+  Form.Position := ELazFormPosition.ScreenCenter;
+  Form.Color := Colors.DARK_GREY;
+
+  Panel := TLazDragablePanel.Create(Form);
+  Panel.Parent := Form;
+  Panel.Color := Colors.DARK_RED;
+  Panel.Left := 222;
+  Panel.Top := 333;
+
+  Form.ShowModal();
+
+  WriteLn('Form has been closed.');
+end;
+
+begin
+  ShowMyForm();
+end.

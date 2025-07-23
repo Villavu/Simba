@@ -335,6 +335,59 @@ begin
   PPanel(Params^[0])^.OnDblClick := PNotifyEvent(Params^[1])^;
 end;
 
+type
+  PDragablePanel = ^TDragablePanel;
+  TDragablePanel = class(TPanel)
+  protected
+    FDragging: Boolean;
+    FDragStart: TPoint;
+
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+
+    constructor Create(TheOwner: TComponent); override;
+  end;
+
+procedure TDragablePanel.MouseMove(Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseMove(Shift, X, Y);
+
+  if FDragging then
+  begin
+    Left := Left + (X - FDragStart.X);
+    Top := Top + (Y - FDragStart.Y);
+  end;
+end;
+
+procedure TDragablePanel.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseDown(Button, Shift, X, Y);
+
+  FDragging := True;
+  FDragStart.X := X;
+  FDragStart.Y := Y;
+end;
+
+procedure TDragablePanel.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+
+  FDragging := False;
+end;
+
+constructor TDragablePanel.Create(TheOwner: TComponent);
+begin
+  inherited Create(TheOwner);
+
+  BevelOuter := bvNone;
+end;
+
+procedure _LapeDragablePanel_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDragablePanel(Result)^ := TDragablePanel.Create(PComponent(Params^[0])^);
+end;
+
 procedure ImportLCLExtCtrls(Script: TSimbaScript);
 begin
   with Script.Compiler do
@@ -342,7 +395,7 @@ begin
     addGlobalType('enum(None, Lowered, Raised, Space)', 'ELazPanelBevel');
 
     addClass('TLazTimer', 'TLazComponent', TTimer);
-    addClassConstructor('TLazTimer', '(AOwner: TLazComponent)', @_LapeTimer_Create);
+    addClassConstructor('TLazTimer', '(Owner: TLazComponent)', @_LapeTimer_Create);
     addProperty('TLazTimer', 'Enabled', 'Boolean', @_LapeTimer_Enabled_Read, @_LapeTimer_Enabled_Write);
     addProperty('TLazTimer', 'Interval', 'UInt32', @_LapeTimer_Interval_Read, @_LapeTimer_Interval_Write);
     addProperty('TLazTimer', 'OnTimer', 'TLazNotifyEvent', @_LapeTimer_OnTimer_Read, @_LapeTimer_OnTimer_Write);
@@ -350,7 +403,7 @@ begin
     addProperty('TLazTimer', 'OnStopTimer', 'TLazNotifyEvent', @_LapeTimer_OnStopTimer_Read, @_LapeTimer_OnStopTimer_Write);
 
     addClass('TLazImage', 'TLazGraphicControl', TImage);
-    addClassConstructor('TLazImage', '(AOwner: TLazComponent)', @_LapeImage_Create);
+    addClassConstructor('TLazImage', '(Owner: TLazComponent)', @_LapeImage_Create);
     addGlobalFunc('function TLazImage.DestRect: TLazRect;', @_LapeImage_DestRect);
     addProperty('TLazImage', 'Center', 'Boolean', @_LapeImage_Center_Read, @_LapeImage_Center_Write);
     addProperty('TLazImage', 'Picture', 'TLazPicture', @_LapeImage_Picture_Read, @_LapeImage_Picture_Write);
@@ -370,10 +423,10 @@ begin
     addProperty('TLazCustomPanel', 'BevelInner', 'ELazPanelBevel', @_LapeCustomPanel_BevelInner_Read, @_LapeCustomPanel_BevelInner_Write);
     addProperty('TLazCustomPanel', 'BevelOuter', 'ELazPanelBevel', @_LapeCustomPanel_BevelOuter_Read, @_LapeCustomPanel_BevelOuter_Write);
     addProperty('TLazCustomPanel', 'BevelWidth', 'Integer', @_LapeCustomPanel_BevelWidth_Read, @_LapeCustomPanel_BevelWidth_Write);
-    addClassConstructor('TLazCustomPanel', '(TheOwner: TLazComponent)', @_LapeCustomPanel_Create);
+    addClassConstructor('TLazCustomPanel', '(Owner: TLazComponent)', @_LapeCustomPanel_Create);
 
     addClass('TLazPanel', 'TLazCustomPanel', TPanel);
-    addClassConstructor('TLazPanel', '(TheOwner: TLazComponent)', @_LapePanel_Create);
+    addClassConstructor('TLazPanel', '(Owner: TLazComponent)', @_LapePanel_Create);
 
     addProperty('TLazPanel', 'WordWrap', 'Boolean', @_LapePanel_WordWrap_Read, @_LapePanel_WordWrap_Write);
     addProperty('TLazPanel', 'OnMouseDown', 'TLazMouseEvent', @_LapePanel_OnMouseDown_Read, @_LapePanel_OnMouseDown_Write);
@@ -382,8 +435,12 @@ begin
     addProperty('TLazPanel', 'OnMouseLeave', 'TLazNotifyEvent', @_LapePanel_OnMouseLeave_Read, @_LapePanel_OnMouseLeave_Write);
     addProperty('TLazPanel', 'OnMouseMove', 'TLazMouseMoveEvent', @_LapePanel_OnMouseMove_Read, @_LapePanel_OnMouseMove_Write);
     addProperty('TLazPanel', 'OnDblClick', 'TLazNotifyEvent', @_LapePanel_OnDblClick_Read, @_LapePanel_OnDblClick_Write);
+
+    addClass('TLazDragablePanel', 'TLazPanel', TDragablePanel);
+    addClassConstructor('TLazDragablePanel', '(Owner: TLazComponent)', @_LapeDragablePanel_Create);
   end;
 end;
+
 
 end.
 
