@@ -105,11 +105,6 @@ begin
   EditorGeneralFrame.CompleteParenthesesCheckbox.Checked := SimbaSettings.Editor.AutomaticallyCompleteParentheses.Value;
   EditorGeneralFrame.CompleteIndexCheckbox.Checked := SimbaSettings.Editor.AutomaticallyCompleteIndex.Value;
 
-  SimbaGeneralFrame.ToolbarSizeTrackBar.Position := SimbaSettings.General.ToolbarSize.Value;
-  SimbaGeneralFrame.ToolbarSizeTrackBar.OnChange(nil);
-  SimbaGeneralFrame.FontSizeTrackBar.Position := SimbaSettings.General.CustomFontSize.Value;
-  SimbaGeneralFrame.FontSizeTrackBar.OnChange(nil);
-
   SimbaGeneralFrame.Load();
   SimbaCodetoolsFrame.Load();
   EditorGeneralFrame.Load();

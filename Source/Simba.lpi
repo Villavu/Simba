@@ -17,7 +17,7 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="26">
+      <Resources Count="27">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
         <Resource_2 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
@@ -44,6 +44,7 @@
         <Resource_23 FileName="..\Images\arrow_right.png" Type="RCDATA" ResourceName="ARROW_RIGHT"/>
         <Resource_24 FileName="..\Images\arrow_right_150.png" Type="RCDATA" ResourceName="ARROW_RIGHT_150"/>
         <Resource_25 FileName="..\Images\arrow_right_200.png" Type="RCDATA" ResourceName="ARROW_RIGHT_200"/>
+        <Resource_26 FileName="..\Examples\form_dragablepanel.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_DRAGABLEPANEL"/>
       </Resources>
     </General>
     <VersionInfo>

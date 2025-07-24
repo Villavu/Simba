@@ -61,14 +61,13 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.env, simba.misc, simba.dialog,
+  simba.env, simba.dialog,
   simba.ide_package_endpointgithub, simba.ide_utils, simba.threading;
 
 constructor TSimbaPackageInstallForm.Create(AOwner: TComponent; APackage: TSimbaPackage);
 begin
   inherited Create(AOwner);
 
-  Output.Font.Size := GetDefaultFontSize();
   {$IFDEF WINDOWS}
   Output.Font.Name := 'Consolas';
   {$ENDIF}

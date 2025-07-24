@@ -52,15 +52,16 @@ type
 implementation
 
 uses
-  simba.settings;
+  simba.settings,
+  simba.misc;
 
 {$R *.lfm}
 
 procedure TSimbaGeneralFrame.FontSizeTrackBarChange(Sender: TObject);
 begin
-  SimbaSettings.General.CustomFontSize.Value := FontSizeTrackBar.Position;
-
   FontSizeLabel.Caption := 'Font Size: ' + IntToStr(FontSizeTrackBar.Position);
+
+  SimbaSettings.General.CustomFontSize.Value := FontSizeTrackBar.Position;
 end;
 
 procedure TSimbaGeneralFrame.ToolbarPositionComboBoxChange(Sender: TObject);
@@ -150,7 +151,12 @@ begin
   ToolbarSizeTrackBar.Position := SimbaSettings.General.ToolbarSize.Value;
   ToolbarSpacingSpinEdit.Value := SimbaSettings.General.ToolBarSpacing.Value;
 
-  FontSizeTrackBar.Position := SimbaSettings.General.CustomFontSize.Value;
+  FontSizeTrackBar.Position := IfThen(
+    SimbaSettings.General.CustomFontSize.IsDefault,
+    GetDefaultFontSize(),
+    SimbaSettings.General.CustomFontSize.Value
+  );
+
   ScrollBarSizeTrackBar.Position := SimbaSettings.General.ScrollBarSize.Value;
   ScrollBarArrowSizeTrackBar.Position := SimbaSettings.General.ScrollBarArrowSize.Value;
   ImageSizeTrackBar.Position := SimbaSettings.General.CustomImageSize.Value;

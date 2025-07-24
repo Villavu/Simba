@@ -71,7 +71,7 @@ implementation
 uses
   simba.form_packageinstall, simba.ide_package_installer, simba.ide_package_autoupdater,
   simba.dialog, simba.ide_utils, simba.vartype_string,
-  simba.httpclient, simba.fs, simba.env, simba.misc;
+  simba.httpclient, simba.fs, simba.env;
 
 procedure TSimbaPackageForm.FormShow(Sender: TObject);
 begin
@@ -342,7 +342,6 @@ begin
 
   ListPanel.Height := Scale96ToScreen(260);
 
-  OutputSynEdit.Font.Size := GetDefaultFontSize();
   {$IFDEF WINDOWS}
   OutputSynEdit.Font.Name := 'Consolas';
   {$ENDIF}

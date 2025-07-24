@@ -72,7 +72,7 @@ begin
   begin
     ImgWidth := ImageWidthForDPI(Canvas.Font.PixelsPerInch);
     if (ImgWidth > 16) then
-      Height := Round(ImgWidth * 1.3);
+      Height := Round(ImgWidth * 1.5);
   end;
 end;
 

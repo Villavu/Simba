@@ -1,11 +1,11 @@
 object SimbaGeneralFrame: TSimbaGeneralFrame
   Left = 0
-  Height = 653
+  Height = 784
   Top = 0
-  Width = 934
-  ClientHeight = 653
-  ClientWidth = 934
-  DesignTimePPI = 120
+  Width = 1121
+  ClientHeight = 784
+  ClientWidth = 1121
+  DesignTimePPI = 144
   ParentFont = False
   TabOrder = 0
   DesignLeft = 3939
@@ -18,19 +18,21 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Side = asrBottom
-    Left = 201
+    Left = 234
     Height = 31
-    Top = 118
-    Width = 718
+    Top = 129
+    Width = 869
     Max = 32
     Min = 12
-    OnChange = ToolbarSizeTrackBarChange
     PageSize = 1
     Position = 12
+    OnChange = ToolbarSizeTrackBarChange
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
-    BorderSpacing.Right = 15
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 18
+    Color = 3487029
+    ParentColor = False
     TabOrder = 0
   end
   object FontSizeTrackBar: TTrackBar
@@ -41,17 +43,19 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = FontSizeLabel
     AnchorSideBottom.Side = asrBottom
-    Left = 201
+    Left = 234
     Height = 31
     Top = 0
-    Width = 718
+    Width = 869
     Max = 24
     Min = 8
-    OnChange = FontSizeTrackBarChange
     Position = 8
+    OnChange = FontSizeTrackBarChange
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Right = 15
+    BorderSpacing.Right = 18
+    Color = 3487029
+    ParentColor = False
     TabOrder = 1
   end
   object FontSizeLabel: TLabel
@@ -62,7 +66,7 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     Left = 0
     Height = 31
     Top = 0
-    Width = 91
+    Width = 107
     Align = alCustom
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Font Size'
@@ -76,8 +80,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 31
-    Top = 118
-    Width = 40
+    Top = 129
+    Width = 47
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Size'
     Layout = tlCenter
@@ -90,17 +94,19 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 201
-    Height = 31
-    Top = 298
-    Width = 708
+    Left = 234
+    Height = 37
+    Top = 335
+    Width = 857
     Max = 38
     Min = 8
-    OnChange = DoScrollBarTrackBarChange
     Position = 10
+    OnChange = ToolbarSizeTrackBarChange
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
-    BorderSpacing.Right = 25
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 30
+    Color = 3487029
+    ParentColor = False
     TabOrder = 2
   end
   object ScrollBarArrowSizeTrackBar: TTrackBar
@@ -110,16 +116,18 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 201
-    Height = 31
-    Top = 339
-    Width = 708
+    Left = 234
+    Height = 37
+    Top = 384
+    Width = 857
     Min = 1
-    OnChange = DoScrollBarArrowTrackBarChange
     Position = 10
+    OnChange = DoScrollBarArrowTrackBarChange
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
-    BorderSpacing.Right = 25
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 30
+    Color = 3487029
+    ParentColor = False
     TabOrder = 3
   end
   object ScrollBarSizeLabel: TLabel
@@ -128,9 +136,9 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = ScrollBarSizeTrackBar
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 31
-    Top = 298
-    Width = 40
+    Height = 37
+    Top = 335
+    Width = 47
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Size'
     Layout = tlCenter
@@ -142,9 +150,9 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = ScrollBarArrowSizeTrackBar
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 31
-    Top = 339
-    Width = 107
+    Height = 37
+    Top = 384
+    Width = 125
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Arrow Size'
     Layout = tlCenter
@@ -157,21 +165,21 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 31
-    Top = 257
-    Width = 934
+    Height = 37
+    Top = 286
+    Width = 1121
     Caption = 'Scroll Bar'
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
+    BorderSpacing.Top = 12
     Style = gsHorLines
   end
   object PlaceholderLabel: TLabel
     AnchorSideLeft.Control = Owner
     Left = 0
-    Height = 31
-    Top = 600
-    Width = 195
-    BorderSpacing.Right = 6
+    Height = 37
+    Top = 720
+    Width = 227
+    BorderSpacing.Right = 7
     Caption = 'Image Size: Default'
     ParentColor = False
   end
@@ -182,24 +190,24 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 0
-    Height = 31
-    Top = 77
-    Width = 934
+    Height = 37
+    Top = 80
+    Width = 1121
     Caption = 'Tool Bar'
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 5
+    BorderSpacing.Top = 6
     Style = gsHorLines
   end
   object ToolbarPositionComboBox: TComboBox
     AnchorSideLeft.Control = ToolbarSizeTrackBar
     AnchorSideTop.Control = ToolbarSizeTrackBar
     AnchorSideTop.Side = asrBottom
-    Left = 201
-    Height = 39
-    Top = 159
-    Width = 252
-    BorderSpacing.Top = 10
-    ItemHeight = 31
+    Left = 234
+    Height = 45
+    Top = 172
+    Width = 302
+    BorderSpacing.Top = 12
+    ItemHeight = 37
     ItemIndex = 0
     Items.Strings = (
       'Top (Default)'
@@ -216,9 +224,9 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = ToolbarPositionComboBox
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 39
-    Top = 159
-    Width = 81
+    Height = 45
+    Top = 172
+    Width = 95
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Position'
     Layout = tlCenter
@@ -230,15 +238,15 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = ToolbarPositionComboBox
     AnchorSideRight.Side = asrBottom
-    Left = 201
-    Height = 39
-    Top = 208
-    Width = 252
+    Left = 234
+    Height = 45
+    Top = 229
+    Width = 302
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
+    BorderSpacing.Top = 12
     MaxValue = 40
-    OnChange = ToolbarSpacingSpinEditChange
     TabOrder = 5
+    OnChange = ToolbarSpacingSpinEditChange
   end
   object Label1: TLabel
     AnchorSideLeft.Control = Owner
@@ -246,9 +254,9 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Control = ToolbarSpacingSpinEdit
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 39
-    Top = 208
-    Width = 82
+    Height = 45
+    Top = 229
+    Width = 94
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Spacing'
     Layout = tlCenter
@@ -261,8 +269,8 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideBottom.Side = asrBottom
     Left = 0
     Height = 31
-    Top = 41
-    Width = 110
+    Top = 43
+    Width = 128
     Align = alCustom
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Image Size'
@@ -278,18 +286,20 @@ object SimbaGeneralFrame: TSimbaGeneralFrame
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ImageSizeLabel
     AnchorSideBottom.Side = asrBottom
-    Left = 201
+    Left = 234
     Height = 31
-    Top = 41
-    Width = 718
+    Top = 43
+    Width = 869
     Max = 32
     Min = 15
-    OnChange = ImageSizeTrackBarChange
     Position = 15
+    OnChange = ImageSizeTrackBarChange
     Align = alCustom
     Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 10
-    BorderSpacing.Right = 15
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 18
+    Color = 3487029
+    ParentColor = False
     TabOrder = 6
   end
 end

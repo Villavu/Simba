@@ -90,7 +90,7 @@ implementation
 
 uses
   XMLPropStorage, LazConfigStorage,
-  simba.ide_theme, simba.misc, simba.ide_events, simba.form_functionlist, simba.threading, simba.form_tabs;
+  simba.ide_theme, simba.misc, simba.ide_events, simba.threading;
 
 procedure TSimbaAnchorDockHeader.ParentFontChanged;
 begin
