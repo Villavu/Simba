@@ -259,12 +259,21 @@ begin
 end;
 
 procedure TSimbaTabsForm.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  Tab: TSimbaScriptTab;
 begin
+  if (Button = mbMiddle) then
+  begin
+    Tab := TSimbaScriptTab(FTabControl.GetTabAt(X, Y));
+    if Assigned(Tab) then
+      CloseTab(Tab, True);
+  end;
+
   FMouseDown := False;
 
   if (HostDockSite is TSimbaAnchorDockHostSite) then
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseUp(Button, Shift, X, Y);
-end;
+end;  
 
 procedure TSimbaTabsForm.TabPopupMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
 begin
