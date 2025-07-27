@@ -17,7 +17,7 @@ uses
   lptypes,
   simba.script_objectutil,
   simba.process,
-  simba.nativeinterface, simba.settings, simba.compress, simba.env,
+  simba.nativeinterface, simba.settings, simba.env,
   simba.dtmeditor, simba.dialog, simba.threading, simba.target,
   simba.finder_color, simba.finder_image, simba.matchtemplate,
   simba.colormath, simba.aca;
@@ -116,18 +116,6 @@ procedure StopSound;
 procedure _LapeStopSound(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   SimbaNativeInterface.StopSound();
-end;
-
-(*
-Simba
------
-```
-procedure Simba;
-```
-*)
-procedure _LapeSimba(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  DebugLn(DecompressString('eJzdlEsOgCAMRPcm3sGEZQP3P54h2hb6AzRunGVnnqUleBys1Grf7LpwDY98x8NEaAPJD0Igl7r9UiQxOBZiVcTkSxHInICIjclWWaDTZJZiEgefJBGEngtAHBAk4jPVbEaECRSI7PejWY0a+6HtPoTdu3lFW92NT9g0xfvyQmdR4+fv9VM1K6hTw5/D73IfBBeSKZ0cut7f'));
 end;
 
 (*
@@ -568,7 +556,6 @@ begin
     addGlobalFunc('procedure GetSimbaSetting(Name, Value: String);', @_LapeSetSimpleSetting);
     addGlobalFunc('procedure PlaySound(Sound: String)', @_LapePlaySound);
     addGlobalFunc('procedure StopSound', @_LapeStopSound);
-    addGlobalFunc('procedure Simba', @_LapeSimba);
     addGlobalFunc('procedure SetClipBoard(Data: string)', @_LapeSetClipBoard);
     addGlobalFunc('function GetClipBoard: String', @_LapeGetClipBoard);
 

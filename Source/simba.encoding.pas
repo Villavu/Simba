@@ -31,7 +31,7 @@ implementation
 
 uses
   SHA1, HMAC, DateUtils,
-  basenenc_simba;
+  fpbasenenc;
 
 function BaseEncode(Encoding: EBaseEncoding; const Data: String): String;
 begin

@@ -10,7 +10,7 @@ program Simba;
 
 uses
   {$IFDEF SIMBA_CUSTOM_MM} // note: comment out if needing heaptrc
-  mormot_mm,
+  mormot2_mm,
   {$ENDIF}
   simba.init,
   Classes, SysUtils, Interfaces, Forms,
