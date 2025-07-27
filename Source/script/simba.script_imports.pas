@@ -29,7 +29,7 @@ uses
   simba.script_genericarraybuffer,
 
   // Simba
-  simba.import_base, simba.import_colormath,simba.import_matrix, simba.import_windowhandle,
+  simba.import_base, simba.import_variant, simba.import_colormath,simba.import_matrix, simba.import_windowhandle,
 
   simba.import_timing, simba.import_datetime,
   simba.import_encoding, simba.import_file, simba.import_process,
@@ -64,6 +64,7 @@ end;
 procedure AddSimbaImports(Script: TSimbaScript);
 begin
   ImportBase(Script);
+  ImportVariant(Script);
   ImportColorMath(Script);
   ImportMatrix(Script);
   ImportWindowHandle(Script);

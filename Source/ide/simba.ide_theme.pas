@@ -63,7 +63,7 @@ end;
 
 function TSimbaTheme.GetScrollBarSize: Integer;
 begin
-  Result := MulDiv(ATScrollbarTheme.InitialSize + 4, Screen.PixelsPerInch, 96);
+  Result := MulDiv(ATScrollbarTheme.InitialSize, Screen.PixelsPerInch, 96);
 end;
 
 procedure TSimbaTheme.SetScrollBarArrowSize(Value: Integer);

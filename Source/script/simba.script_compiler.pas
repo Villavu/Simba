@@ -33,7 +33,6 @@ type
 
     procedure InitBaseFile; override;
     procedure InitBaseVariant; override;
-    procedure InitBaseDefinitions; override;
     procedure InitBaseMath; override;
     procedure InitBaseString; override;
     procedure InitBaseDateTime; override;
@@ -77,7 +76,6 @@ type
     procedure addMagic(Name: String; Params: array of lpString; ParamTypes: array of ELapeParameterType; Res: String; Func: Pointer);
     function Compile: Boolean; override;
     procedure CallProc(ProcName: String);
-
 
     property DumpSection: String read GetDumpSection write FDumpSection;
     property Dump: TSimbaStringPairList read FDump;
@@ -163,15 +161,6 @@ end;
 procedure TScriptCompiler.InitBaseVariant;
 begin
   { nothing, we import our own variant later }
-end;
-
-procedure TScriptCompiler.InitBaseDefinitions;
-begin
-  DumpSection := 'Base';
-
-  inherited InitBaseDefinitions();
-
-  DumpSection := '';
 end;
 
 // lpeval_import_math.inc but moved Random functions under Random section
@@ -346,7 +335,6 @@ begin
 
   DumpSection := 'Timing';
 
-  //addGlobalFunc('function GetTickCount: UInt64;', @_LapeGetTickCount);
   addGlobalFunc('procedure Sleep(MilliSeconds: UInt32);', @_LapeSleep);
 
   DumpSection := '';
@@ -358,58 +346,99 @@ begin
 end;
 
 constructor TScriptCompiler.CreateDump;
-var
-  BaseType: ELapeBaseType;
+
+  procedure AddBaseTypes;
+  const
+    Types: TStringArray = (
+      'UInt8', 'Int8', 'UInt16', 'Int16', 'UInt32', 'Int32', 'UInt64', 'Int64',
+      'Currency', 'Single', 'Double',
+      'Boolean', 'ByteBool', 'WordBool', 'LongBool',
+      'AnsiChar', 'WideChar',
+      'ShortString', 'AnsiString', 'WideString', 'UnicodeString',
+      'Variant',
+      'Pointer',
+      'String', 'Char',
+      'SizeInt', 'SizeUInt',
+      'NativeInt', 'NativeUInt',
+      'PtrInt', 'PtrUInt'
+    );
+  var
+    Typ: String;
+  begin
+    for Typ in Types do
+      DumpCode('Base', 'type ' + Typ + ' = ' + Typ + ';');
+  end;
+
+  procedure AddBaseMethods;
+  begin
+    DumpCode('Base', 'function GetMem(i: SizeInt): Pointer; external;');
+    DumpCode('Base', 'function AllocMem(i: SizeInt): Pointer; external;');
+    DumpCode('Base', 'procedure FreeMem(p: Pointer); external;');
+    DumpCode('Base', 'procedure ReallocMem(var p: Pointer; s: SizeInt); external;');
+    DumpCode('Base', 'procedure FillMem(var p; s: SizeInt; b: UInt8 = 0); external;');
+    DumpCode('Base', 'procedure Move(constref Src; var Dst; s: SizeInt); external;');
+    DumpCode('Base', 'function CompareMem(constref p1, p2; Length: SizeInt): EvalBool; external;');
+    DumpCode('Base', 'function Assigned(constref p): EvalBool; external;');
+    DumpCode('Base', 'function BitCount(constref Value; Size: UInt8): UInt32; external;');
+    DumpCode('Base', 'procedure RaiseException(Message: string); overload; external;');
+    DumpCode('Base', 'procedure RaiseException(Message: String; DocPos: Pointer); overload; external;');
+    DumpCode('Base', 'procedure UniqueString(var Str: AnsiString); overload; external;');
+    DumpCode('Base', 'procedure UniqueString(var Str: WideString); overload; external;');
+    DumpCode('Base', 'procedure UniqueString(var Str: UnicodeString); overload; external;');
+  end;
+
+  procedure AddInternalMethods;
+  begin
+    DumpCode('Base', 'procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;');
+    DumpCode('Base', 'procedure Insert(Item: Anything; A: array; Index: Int32); external;');
+    DumpCode('Base', 'procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A)); external;');
+    DumpCode('Base', 'procedure SetLength(A: array; Length: Int32); external;');
+    DumpCode('Base', 'function Low(A: array): Int32; external;');
+    DumpCode('Base', 'function High(A: array): Int32; external;');
+    DumpCode('Base', 'function Length(A: array): Int32; external;');
+    DumpCode('Base', 'procedure WriteLn(Args: Anything); external;');
+    DumpCode('Base', 'procedure Write(Args: Anything); external;');
+    DumpCode('Base', 'procedure Swap(var A, B: Anything); external;');
+    DumpCode('Base', 'function SizeOf(A: Anything): Int32; external;');
+    DumpCode('Base', 'function ToString(A: Anything): String; external;');
+    DumpCode('Base', 'function ToStr(A: Anything): String; external;');
+    DumpCode('Base', 'function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal; external;');
+    DumpCode('Base', 'function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal; external;');
+    DumpCode('Base', 'function Ord(X: Ordinal): Int32; external;');
+    DumpCode('Base', 'function SleepUntil(Condition: BoolExpr; Interval, Timeout: Int32): Boolean; external;');
+    DumpCode('Base', 'function Default(T: AnyType): AnyType; external;');
+    DumpCode('Base', 'procedure Sort(var A: array); overload; external;');
+    DumpCode('Base', 'procedure Sort(var A: array; Weights: array of Ordinal; LowToHigh: Boolean); overload; external;');
+    DumpCode('Base', 'procedure Sort(var A: array; CompareFunc: function(L, R: Anything): Int32); overload; external;');
+    DumpCode('Base', 'function Sorted(const A: array): array; overload; external;');
+    DumpCode('Base', 'function Sorted(const A: array; CompareFunc: function(L, R: Anything): Int32): array; overload; external;');
+    DumpCode('Base', 'function Sorted(const A: array; Weights: array of Ordinal; LowToHigh: Boolean): array; overload; external;');
+    DumpCode('Base', 'function Unique(const A: array): array; external;');
+    DumpCode('Base', 'procedure Reverse(var A: array); external;');
+    DumpCode('Base', 'function Reversed(const A: array): array; external;');
+    DumpCode('Base', 'function IndexOf(const Item: T; const A: array): Integer; external;');
+    DumpCode('Base', 'function IndicesOf(const Item: T; const A: array): TIntegerArray; external;');
+    DumpCode('Base', 'function Contains(const Item: T; const A: array): Boolean; external;');
+    DumpCode('Base', 'function RTTIFields(constref RecordTypeOrVar): TRTTIFields; external;');
+    DumpCode('Base', 'function GetExceptionLocationStr: String; external;');
+    DumpCode('Base', 'function GetExceptionMessage: String; external;');
+    DumpCode('Base', 'function GetScriptMethodName(Address: Pointer): String; external;');
+    DumpCode('Base', 'function DumpCallStack(Start: Integer = 0): String; external;');
+
+    DumpCode('Base', 'function TMap(KeyType: T; ValueType: V): TMap; external;');
+    DumpCode('Base', 'function TStringMap(ValueType: V): TStringMap; external;');
+    DumpCode('Base', 'function THeap(ValueType: V): THeap; external;');
+    DumpCode('Base', 'function TArrayBuffer(ValueType: V): TArrayBuffer; external;');
+  end;
+
 begin
   FDump := TSimbaStringPairList.Create();
 
-  // init the dump with things not imported by normal means
-  for BaseType in ELapeBaseType do
-    if (FBaseTypes[BaseType] <> nil) then
-      DumpCode('Base', 'type %s = %s;'.Format([LapeTypeToString(BaseType), LapeTypeToString(BaseType)]));
-
-  DumpCode('Base', 'procedure Delete(A: array; Index: Int32; Count: Int32 = Length(A)); external;');
-  DumpCode('Base', 'procedure Insert(Item: Anything; A: array; Index: Int32); external;');
-  DumpCode('Base', 'procedure Copy(A: array; Index: Int32 = 0; Count: Int32 = Length(A)); external;');
-  DumpCode('Base', 'procedure SetLength(A: array; Length: Int32); external;');
-  DumpCode('Base', 'function Low(A: array): Int32; external;');
-  DumpCode('Base', 'function High(A: array): Int32; external;');
-  DumpCode('Base', 'function Length(A: array): Int32; external;');
-  DumpCode('Base', 'procedure WriteLn(Args: Anything); external;');
-  DumpCode('Base', 'procedure Write(Args: Anything); external;');
-  DumpCode('Base', 'procedure Swap(var A, B: Anything); external;');
-  DumpCode('Base', 'function SizeOf(A: Anything): Int32; external;');
-  DumpCode('Base', 'function ToString(A: Anything): String; external;');
-  DumpCode('Base', 'function ToStr(A: Anything): String; external;');
-  DumpCode('Base', 'function Inc(var X: Ordinal; Amount: SizeInt = 1): Ordinal; external;');
-  DumpCode('Base', 'function Dec(var X: Ordinal; Amount: SizeInt = 1): Ordinal; external;');
-  DumpCode('Base', 'function Ord(X: Ordinal): Int32; external;');
-  DumpCode('Base', 'function SleepUntil(Condition: BoolExpr; Interval, Timeout: Int32): Boolean; external;');
-  DumpCode('Base', 'function Default(T: AnyType): AnyType; external;');
-  DumpCode('Base', 'procedure Sort(var A: array); overload; external;');
-  DumpCode('Base', 'procedure Sort(var A: array; Weights: array of Ordinal; LowToHigh: Boolean); overload; external;');
-  DumpCode('Base', 'procedure Sort(var A: array; CompareFunc: function(L, R: Anything): Int32); overload; external;');
-  DumpCode('Base', 'function Sorted(const A: array): array; overload; external;');
-  DumpCode('Base', 'function Sorted(const A: array; CompareFunc: function(L, R: Anything): Int32): array; overload; external;');
-  DumpCode('Base', 'function Sorted(const A: array; Weights: array of Ordinal; LowToHigh: Boolean): array; overload; external;');
-  DumpCode('Base', 'function Unique(const A: array): array; external;');
-  DumpCode('Base', 'procedure Reverse(var A: array); external;');
-  DumpCode('Base', 'function Reversed(const A: array): array; external;');
-  DumpCode('Base', 'function IndexOf(const Item: T; const A: array): Integer; external;');
-  DumpCode('Base', 'function IndicesOf(const Item: T; const A: array): TIntegerArray; external;');
-  DumpCode('Base', 'function Contains(const Item: T; const A: array): Boolean; external;');
-  DumpCode('Base', 'function RTTIFields(constref RecordTypeOrVar): TRTTIFields; external;');
-  DumpCode('Base', 'function GetExceptionLocationStr: String; external;');
-  DumpCode('Base', 'function GetExceptionMessage: String; external;');
-  DumpCode('Base', 'function GetScriptMethodName(Address: Pointer): String; external;');
-  DumpCode('Base', 'function DumpCallStack(Start: Integer = 0): String; external;');
-
-  DumpCode('Base', 'function TMap(KeyType: T; ValueType: V): TMap; external;');
-  DumpCode('Base', 'function TStringMap(ValueType: V): TStringMap; external;');
-  DumpCode('Base', 'function THeap(ValueType: V): THeap; external;');
-  DumpCode('Base', 'function TArrayBuffer(ValueType: V): TArrayBuffer; external;');
-
   inherited Create(TLapeTokenizerString.Create(''));
+
+  AddBaseTypes();
+  AddBaseMethods();
+  AddInternalMethods();
 end;
 
 destructor TScriptCompiler.Destroy;
@@ -606,7 +635,7 @@ var
   Header: TLapeType_Method;
 begin
   if (Globals[Name] = nil) or (not (Globals[Name].VarType is TLapeType_OverloadedMethod)) then
-    SimbaException('addNativeMagic "%s" is incorrect', [Name]);
+    SimbaException('addMagic "%s" is incorrect', [Name]);
 
   SetLength(ParamVarTypes, Length(Params));
   SetLength(ParamDefaults, Length(Params));
@@ -728,4 +757,5 @@ begin
 end;
 
 end.
+
 

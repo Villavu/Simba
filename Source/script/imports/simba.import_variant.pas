@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.script_compiler;
+  simba.base, simba.script;
 
 procedure ImportVariant(Script: TSimbaScript);
 
@@ -65,14 +65,18 @@ Note:: If curious to how the Variant datatype works, internally it's a record:
 (*
 Variant.VarType
 ---------------
-> function Variant.VarType: EVariantVarType;
+```
+function Variant.VarType: EVariantVarType;
+```
 
 Returns the variants var type.
 
-Example::
+Example:
 
+```
   if (v.VarType = EVariantVarType.Int32) then
     WriteLn('Variant contains a Int32');
+```
 *)
 procedure _LapeVariantVarType(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -82,9 +86,11 @@ end;
 (*
 Variant.IsNumeric
 -----------------
-> function Variant.IsNumeric: Boolean;
+```
+function Variant.IsNumeric: Boolean;
+```
 
-Is integer or float?
+Is Integer or Float?
 *)
 procedure _LapeVariantIsNumeric(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -94,7 +100,9 @@ end;
 (*
 Variant.IsString
 ----------------
-> function Variant.IsString: Boolean;
+```
+function Variant.IsString: Boolean;
+```
 *)
 procedure _LapeVariantIsString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -104,7 +112,9 @@ end;
 (*
 Variant.IsInteger
 -----------------
-> function Variant.IsInteger: Boolean;
+```
+function Variant.IsInteger: Boolean;
+```
 *)
 procedure _LapeVariantIsInteger(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -114,7 +124,9 @@ end;
 (*
 Variant.IsFloat
 ---------------
-> function Variant.IsFloat: Boolean;
+```
+function Variant.IsFloat: Boolean;
+```
 *)
 procedure _LapeVariantIsFloat(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -124,7 +136,9 @@ end;
 (*
 Variant.IsBoolean
 -----------------
-> function Variant.IsBoolean: Boolean;
+```
+function Variant.IsBoolean: Boolean;
+```
 *)
 procedure _LapeVariantIsBoolean(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -134,7 +148,9 @@ end;
 (*
 Variant.IsVariant
 -----------------
-> function Variant.IsVariant: Boolean;
+```
+function Variant.IsVariant: Boolean;
+```
 
 The variant holds another variant!
 *)
@@ -146,7 +162,9 @@ end;
 (*
 Variant.IsAssigned
 ------------------
-> function Variant.IsAssigned: Boolean;
+```
+function Variant.IsAssigned: Boolean;
+```
 
 Example:
 
@@ -165,7 +183,9 @@ end;
 (*
 Variant.IsNull
 --------------
-> function Variant.IsNull: Boolean;
+```
+function Variant.IsNull: Boolean;
+```
 *)
 procedure _LapeVariantIsNull(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -175,14 +195,17 @@ end;
 (*
 Variant.NULL
 ------------
-> function Variant.NULL: Variant; static;
+```
+function Variant.NULL: Variant; static;
+```
 
 Static method that returns a null variant variable.
 
 Example:
 
 ```
-  v := Variant.NULL;
+v := Variant.NULL;
+WriteLn(v.IsNull());
 ```
 *)
 procedure _LapeVariantNULL(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -196,10 +219,9 @@ begin
   begin
     DumpSection := 'Variant';
 
+    addGlobalType('array of Variant', 'TVariantArray');
     addGlobalType('enum(Unknown, Unassigned, Null, Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Single, Double, DateTime, Currency, Boolean, Variant, AString, UString, WString)', 'EVariantVarType');
-
     addGlobalFunc('function Variant.VarType: EVariantVarType;', @_LapeVariantVarType);
-
     addGlobalFunc('function Variant.IsNumeric: Boolean;', @_LapeVariantIsNumeric);
     addGlobalFunc('function Variant.IsInteger: Boolean;', @_LapeVariantIsInteger);
     addGlobalFunc('function Variant.IsFloat: Boolean;', @_LapeVariantIsFloat);
@@ -208,7 +230,6 @@ begin
     addGlobalFunc('function Variant.IsVariant: Boolean;', @_LapeVariantIsVariant);
     addGlobalFunc('function Variant.IsAssigned: Boolean;', @_LapeVariantIsAssigned);
     addGlobalFunc('function Variant.IsNull: Boolean;', @_LapeVariantIsNull);
-
     addGlobalFunc('function Variant.NULL: Variant; static;', @_LapeVariantNULL);
 
     DumpSection := '';
