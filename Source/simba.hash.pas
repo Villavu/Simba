@@ -5,7 +5,7 @@
 }
 unit simba.hash;
 
-{$i simba.inc}
+{$i simba.Inc}
 
 interface
 
@@ -29,17 +29,18 @@ type
   function Hash32(Data: PByte; Len: Int32; Seed: UInt32 = 0): UInt32; overload;
   function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload;
 
-  function Hash64(Data: PByte; Len: Int32; Seed: UInt64 = 0): UInt64; overload;
-  function Hash64(S: String; Seed: UInt64 = 0): UInt64; overload;
-
   function CRC32(Data: PByte; Len: Int32): UInt32;
   function CRC64(Data: PByte; Len: Int32): UInt64;
 
 implementation
 
 uses
-  crc, md5, fpsha256, fpsha512, sha1,
-  simba.hash_murmur;
+  mormor2_xxhash32,
+  crc, md5, fpsha256, fpsha512, sha1;
+
+var
+  InitialCrc32: UInt32;
+  InitialCrc64: UInt64;
 
 function HashBuffer(Algo: EHashAlgo; Buf: PByte; Len: Integer): String;
 var
@@ -101,39 +102,30 @@ end;
 
 function Hash32(Data: PByte; Len: Int32; Seed: UInt32): UInt32;
 begin
-  Result := TMurmur2aLE.HashBuf(Data, Len, Seed);
+  Result := xxHash32(Seed, Data, Len);
 end;
 
 function Hash32(S: String; Seed: UInt32): UInt32;
 begin
   if (Length(S) > 0) then
-    Result := Hash32(@S[1], Length(S), Seed)
-  else
-    Result := Seed;
-end;
-
-function Hash64(Data: PByte; Len: Int32; Seed: UInt64): UInt64;
-begin
-  Result := TMurmur64aLE.HashBuf(Data, Len, Seed);
-end;
-
-function Hash64(S: String; Seed: UInt64): UInt64;
-begin
-  if (Length(S) > 0) then
-    Result := Hash64(@S[1], Length(S), Seed)
+    Result := xxHash32(Seed, @S[1], Length(S))
   else
     Result := Seed;
 end;
 
 function CRC32(Data: PByte; Len: Int32): UInt32;
 begin
-  Result := crc.crc32(crc.crc32(0, nil, 0), Data, Len);
+  Result := crc.crc32(InitialCrc32, Data, Len);
 end;
 
 function CRC64(Data: PByte; Len: Int32): UInt64;
 begin
-  Result := crc.crc64(crc.crc64(0, nil, 0), Data, Len);
+  Result := crc.crc64(InitialCrc64, Data, Len);
 end;
+
+initialization
+  InitialCrc32 := crc.crc32(0, nil, 0);
+  InitialCrc64 := crc.crc64(0, nil, 0);
 
 end.
 

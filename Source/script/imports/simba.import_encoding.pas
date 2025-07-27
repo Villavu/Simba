@@ -29,7 +29,7 @@ Encoding & Hashing
 
 (*
 EHashAlgo
---------
+---------
 ```
 type EHashAlgo = enum(SHA1, SHA256, SHA384, SHA512, MD5);
 ```
@@ -41,7 +41,7 @@ This enum is scoped, so must be used like `EHashAlgo.SHA512`
 
 (*
 EBaseEncoding
-------------
+-------------
 ```
 type EBaseEncoding = enum(b64URL, b64, b32, b32Hex, b16);
 ```
@@ -93,6 +93,8 @@ Hash32
 ```
 function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32;
 ```
+Computes a UInt32 hash of data using xxhash32 algorithm.
+https://xxhash.com/
 *)
 procedure _LapeHash32(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -105,34 +107,12 @@ Hash32
 ```
 function Hash32(S: String; Seed: UInt32 = 0): UInt32;
 ```
+Computes a UInt32 hash of string using xxhash32 algorithm.
+https://xxhash.com/
 *)
 procedure _LapeHash32String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PUInt32(Result)^ := Hash32(PString(Params^[0])^, PUInt32(Params^[1])^);
-end;
-
-(*
-Hash64
-------
-```
-function Hash64(Data: PByte; Len: Int32; Seed: UInt64 = 0): UInt64;
-```
-*)
-procedure _LapeHash64(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PUInt64(Result)^ := Hash64(PPointer(Params^[0])^, PInteger(Params^[1])^, PUInt64(Params^[2])^);
-end;
-
-(*
-Hash64
-------
-```
-function Hash64(S: String; Seed: UInt64 = 0): UInt64;
-```
-*)
-procedure _LapeHash64String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PUInt64(Result)^ := Hash64(PString(Params^[0])^, PUInt64(Params^[1])^);
 end;
 
 (*
@@ -157,6 +137,91 @@ function BaseDecode(Encoding: EBaseEncoding; const Data: String): String;
 procedure _LapeBaseDecode(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := BaseDecode(EBaseEncoding(Params^[0]^), PString(Params^[1])^);
+end;
+
+
+(*
+ECompressAlgo
+-------------
+```
+type ECompressAlgo = enum(ZLIB, SYNLZ);
+```
+
+```{note}
+This enum is scoped, so must be used like `ECompressAlgo.ZLIB`
+```
+*)
+
+(*
+CompressData
+------------
+```
+procedure CompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64);
+```
+*)
+procedure _LapeCompressData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  CompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^);
+end;
+
+(*
+DecompressData
+--------------
+```
+procedure DecompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64);
+```
+*)
+procedure _LapeDecompressData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  DecompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^);
+end;
+
+(*
+CompressBytes
+-------------
+```
+function CompressBytes(Algo: ECompressAlgo; Bytes: TByteArray): TByteArray;
+```
+*)
+procedure _LapeCompressBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByteArray(Result)^ := CompressBytes(ESimbaCompressAlgo(Params^[0]^), PByteArray(Params^[1])^);
+end;
+
+(*
+DecompressBytes
+---------------
+```
+function DecompressBytes(Algo: ECompressAlgo; Bytes: TByteArray): TByteArray;
+```
+*)
+procedure _LapeDecompressBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByteArray(Result)^ := DecompressBytes(ESimbaCompressAlgo(Params^[0]^), PByteArray(Params^[1])^);
+end;
+
+(*
+CompressString
+--------------
+```
+function CompressString(Algo: ECompressAlgo; Encoding: EBaseEncoding; Str: String): String;
+```
+*)
+procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := CompressString(ESimbaCompressAlgo(Params^[0]^), EBaseEncoding(Params^[1]^), PString(Params^[2])^);
+end;
+
+(*
+DecompressString
+----------------
+```
+function DecompressString(Algo: ESimbaCompressAlgo; Encoding: EBaseEncoding; Str: String): String;
+```
+*)
+procedure _LapeDecompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := DecompressString(ESimbaCompressAlgo(Params^[0]^), EBaseEncoding(Params^[1]^), PString(Params^[2])^);
 end;
 
 (*
@@ -313,36 +378,6 @@ begin
   PBoolean(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Save(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
-procedure _LapeCompressData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  CompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^);
-end;
-
-procedure _LapeDecompressData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  DecompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^);
-end;
-
-procedure _LapeCompressBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteArray(Result)^ := CompressBytes(ESimbaCompressAlgo(Params^[0]^), PByteArray(Params^[1])^);
-end;
-
-procedure _LapeDecompressBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PByteArray(Result)^ := DecompressBytes(ESimbaCompressAlgo(Params^[0]^), PByteArray(Params^[1])^);
-end;
-
-procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := CompressString(ESimbaCompressAlgo(Params^[0]^), EBaseEncoding(Params^[1]^), PString(Params^[2])^);
-end;
-
-procedure _LapeDecompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := DecompressString(ESimbaCompressAlgo(Params^[0]^), EBaseEncoding(Params^[1]^), PString(Params^[2])^);
-end;
-
 procedure ImportEncoding(Script: TSimbaScript);
 begin
   with Script.Compiler do
@@ -364,8 +399,6 @@ begin
 
     addGlobalFunc('function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32);
     addGlobalFunc('function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32String);
-    addGlobalFunc('function Hash64(Data: Pointer; Len: Int32; Seed: UInt64 = 0): UInt64; overload', @_LapeHash64);
-    addGlobalFunc('function Hash64(S: String; Seed: UInt64 = 0): UInt64; overload', @_LapeHash64String);
 
     addGlobalType('enum(ZLIB, SYNLZ)', 'ECompressAlgo');
 
