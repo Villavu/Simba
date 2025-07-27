@@ -148,7 +148,7 @@ implementation
 
 uses
   TypInfo,
-  simba.math, simba.hash_murmur;
+  simba.math, simba.hash;
 
 {$overflowchecks off}
 {$rangechecks off}
@@ -316,7 +316,7 @@ end;
 function TDictionary<K,V>.Hash(constref key: K): UInt32;
 begin
   if FHashData then
-    Result := UInt32(TMurmur2aLE.HashBuf(@key, SizeOf(K)) and FSize)
+    Result := UInt32(Hash32(@key, SizeOf(K)) and FSize)
   else
     Result := UInt32(FHashFunc(key) and FSize);
 end;
