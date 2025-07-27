@@ -114,7 +114,7 @@
        SynLZ uncompress in 61.27ms, 1.5 GB/s
 
 }
-unit SynLZ;
+unit mormot2_synlz;
 
 {$mode delphi}
 

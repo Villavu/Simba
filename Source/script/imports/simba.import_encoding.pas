@@ -15,7 +15,6 @@ procedure ImportEncoding(Script: TSimbaScript);
 implementation
 
 uses
-  SynLZ,
   lptypes,
   simba.encoding,
   simba.hash,
@@ -184,118 +183,6 @@ begin
   PInteger(Result)^ := TOTPCalculateToken(PString(Params^[0])^);
 end;
 
-(*
-CompressBytes
--------------
-```
-function CompressBytes(Bytes: TByteArray): TByteArray;
-```
-
-```{note}
-Zlib compression is used.
-```
-*)
-procedure _LapeCompressBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  TByteArray(Result^) := CompressBytes(TByteArray(Params^[0]^));
-end;
-
-(*
-DecompressBytes
----------------
-```
-function DecompressBytes(Bytes: TByteArray): TByteArray;
-```
-
-```{note}
-Zlib compression is used.
-```
-*)
-procedure _LapeDeCompressBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  TByteArray(Result^) := DeCompressBytes(TByteArray(Params^[0]^));
-end;
-
-(*
-CompressString
---------------
-```
-function CompressString(Data: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
-```
-
-```{note}
-Zlib compression is used.
-```
-*)
-procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := CompressString(PString(Params^[0])^, EBaseEncoding(Params^[1]^));
-end;
-
-(*
-DecompressBytes
----------------
-```
-function DeCompressString(Data: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
-```
-
-```{note}
-Zlib compression is used.
-```
-*)
-procedure _LapeDeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PString(Result)^ := DeCompressString(PString(Params^[0])^, EBaseEncoding(Params^[1]^));
-end;
-
-(*
-FastCompress
-------------
-```
-function FastCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
-```
-*)
-procedure _LapeFastCompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := SynLZcompress(PPointer(Params^[0])^, PInteger(Params^[1])^, PPointer(Params^[2])^);
-end;
-
-(*
-FastDecompress
---------------
-```
-function FastDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer;
-```
-*)
-procedure _LapeFastDecompress(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := SynLZdecompress(PPointer(Params^[0])^, PInteger(Params^[1])^, PPointer(Params^[2])^);
-end;
-
-(*
-FastCompressDestLen
--------------------
-```
-function FastCompressDestLen(Len: Integer): Integer;
-```
-*)
-procedure _LapeFastCompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := SynLZcompressdestlen(PInteger(Params^[0])^);
-end;
-
-(*
-FastDecompressDestLen
----------------------
-```
-function FastDecompressDestLen(Src: Pointer): Integer;
-```
-*)
-procedure _LapeFastDecompressDestLen(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := SynLZdecompressdestlen(PPointer(Params^[0])^);
-end;
-
 procedure _LapeResourceWriter_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLapeObjectResourceWriter(Result)^^ := TSimbaResourceWriter.Create();
@@ -426,6 +313,36 @@ begin
   PBoolean(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Save(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
+procedure _LapeCompressData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  CompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^);
+end;
+
+procedure _LapeDecompressData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  DecompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^);
+end;
+
+procedure _LapeCompressBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByteArray(Result)^ := CompressBytes(ESimbaCompressAlgo(Params^[0]^), PByteArray(Params^[1])^);
+end;
+
+procedure _LapeDecompressBytes(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByteArray(Result)^ := DecompressBytes(ESimbaCompressAlgo(Params^[0]^), PByteArray(Params^[1])^);
+end;
+
+procedure _LapeCompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := CompressString(ESimbaCompressAlgo(Params^[0]^), EBaseEncoding(Params^[1]^), PString(Params^[2])^);
+end;
+
+procedure _LapeDecompressString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := DecompressString(ESimbaCompressAlgo(Params^[0]^), EBaseEncoding(Params^[1]^), PString(Params^[2])^);
+end;
+
 procedure ImportEncoding(Script: TSimbaScript);
 begin
   with Script.Compiler do
@@ -435,8 +352,8 @@ begin
     addGlobalType('enum(CRC32, CRC64, MD4, MD5, SHA1, SHA256, SHA512)', 'EHashAlgo');
     addGlobalType('enum(b64URL, b64, b32, b32Hex, b16)', 'EBaseEncoding');
 
-    addGlobalFunc('function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer', @_LapeHOTPCalculateToken);
-    addGlobalFunc('function TOTPCalculateToken(const Secret: String): Integer', @_LapeTOTPCalculateToken);
+    addGlobalFunc('function HOTPCalculateToken(Secret: String; Counter: Integer): Integer', @_LapeHOTPCalculateToken);
+    addGlobalFunc('function TOTPCalculateToken(Secret: String): Integer', @_LapeTOTPCalculateToken);
 
     addGlobalFunc('function BaseEncode(Encoding: EBaseEncoding; const S: String): String', @_LapeBaseEncode);
     addGlobalFunc('function BaseDecode(Encoding: EBaseEncoding; const S: String): String', @_LapeBaseDecode);
@@ -450,16 +367,17 @@ begin
     addGlobalFunc('function Hash64(Data: Pointer; Len: Int32; Seed: UInt64 = 0): UInt64; overload', @_LapeHash64);
     addGlobalFunc('function Hash64(S: String; Seed: UInt64 = 0): UInt64; overload', @_LapeHash64String);
 
-    addGlobalFunc('function CompressBytes(Bytes: TByteArray): TByteArray', @_LapeCompressBytes);
-    addGlobalFunc('function DecompressBytes(Bytes: TByteArray): TByteArray', @_LapeDecompressBytes);
+    addGlobalType('enum(ZLIB, SYNLZ)', 'ECompressAlgo');
 
-    addGlobalFunc('function CompressString(S: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String', @_LapeCompressString);
-    addGlobalFunc('function DecompressString(S: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String', @_LapeDeCompressString);
+    addGlobalFunc('procedure CompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64);', @_LapeCompressData);
+    addGlobalFunc('function CompressBytes(Algo: ECompressAlgo; Bytes: TByteArray): TByteArray', @_LapeCompressBytes);
+    addGlobalFunc('function CompressString(Algo: ECompressAlgo; Encoding: EBaseEncoding; Str: String): String', @_LapeCompressString);
 
-    addGlobalFunc('function FastCompressDestLen(Len: Integer): Integer', @_LapeFastCompressDestLen);
-    addGlobalFunc('function FastDecompressDestLen(Src: Pointer): Integer', @_LapeFastDecompressDestLen);
-    addGlobalFunc('function FastCompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeFastCompress);
-    addGlobalFunc('function FastDecompress(Src: Pointer; Size: Integer; Dest: Pointer): Integer', @_LapeFastDecompress);
+    addGlobalFunc('procedure DecompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64);', @_LapeDecompressData);
+    addGlobalFunc('function DecompressBytes(Algo: ECompressAlgo; Bytes: TByteArray): TByteArray', @_LapeDecompressBytes);
+    addGlobalFunc('function DecompressString(Algo: ECompressAlgo; Encoding: EBaseEncoding; Str: String): String', @_LapeDecompressString);
+
+    DumpSection := '';
 
     LapeObjectImport(Script.Compiler, 'TResourceWriter');
     LapeObjectImport(Script.Compiler, 'TResourceReader');
@@ -491,8 +409,6 @@ begin
     addGlobalFunc('function TResourceReader.LoadImage(Name: String): TImage; overload', @_LapeResourceReader_LoadImage2);
     addGlobalFunc('function TResourceReader.Save(Index: Integer; FileName: String): Boolean; overload;', @_LapeResourceReader_Save1);
     addGlobalFunc('function TResourceReader.Save(Name: String; FileName: String): Boolean; overload;', @_LapeResourceReader_Save2);
-
-    DumpSection := '';
   end;
 end;
 

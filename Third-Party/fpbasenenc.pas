@@ -13,7 +13,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
  **********************************************************************}
-unit basenenc_simba;
+unit fpbasenenc;
 
 {$mode ObjFPC}{$H+}
 

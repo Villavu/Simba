@@ -137,7 +137,7 @@ type
 implementation
 
 uses
-  SynLZ, crc,
+  mormot2_synlz, crc,
   simba.fs;
 
 procedure TSimbaResourceWriter.Build;

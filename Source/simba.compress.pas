@@ -1,8 +1,3 @@
-{
-  Author: Raymond van Venetië and Merlijn Wajer
-  Project: Simba (https://github.com/MerlijnWajer/Simba)
-  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-}
 unit simba.compress;
 
 {$i simba.inc}
@@ -13,79 +8,205 @@ uses
   Classes, SysUtils,
   simba.base, simba.encoding;
 
-// TByteArray
-function CompressBytes(const Data: TByteArray): TByteArray;
-function DecompressBytes(const Data: TByteArray): TByteArray;
+{$PUSH}
+{$SCOPEDENUMS ON}
+type
+  ESimbaCompressAlgo = (
+    ZLIB,
+    SYNLZ
+  );
+{$POP}
 
-// String
-function CompressString(S: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
-function DecompressString(S: String; Encoding: EBaseEncoding = EBaseEncoding.b64): String;
+procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; out OutData: PByte; out OutSize: Int64);
+procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; out OutData: PByte; out OutSize: Int64);
+
+function CompressBytes(Algo: ESimbaCompressAlgo; Bytes: TByteArray): TByteArray;
+function DecompressBytes(Algo: ESimbaCompressAlgo; Bytes: TByteArray): TByteArray;
+
+function CompressString(Algo: ESimbaCompressAlgo; Encoding: EBaseEncoding; Str: String): String;
+function DecompressString(Algo: ESimbaCompressAlgo; Encoding: EBaseEncoding; Str: String): String;
 
 implementation
 
 uses
-  basenenc_simba, ZStream;
+  ZStream,
+  mormot2_synlz,
+  mormot2_rle;
 
-function CompressBytes(const Data: TByteArray): TByteArray;
-var
-  InStream: TCompressionstream;
-  OutStream: TMemoryStream;
+procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; out OutData: PByte; out OutSize: Int64);
+
+  procedure CompressWithZLib;
+  var
+    InStream: TCompressionstream;
+    OutStream: TMemoryStream;
+  begin
+    OutStream := TMemoryStream.Create();
+    InStream := TCompressionStream.Create(clDefault, OutStream);
+    try
+      InStream.Write(InData^, InSize);
+      InStream.Flush();
+
+      OutSize := OutStream.Position;
+      OutData := GetMem(OutSize);
+
+      Move(OutStream.Memory^, OutData^, OutSize);
+    finally
+      InStream.Free();
+      OutStream.Free();
+    end;
+  end;
+
+  procedure CompressWithSynLZ;
+  var
+    RleSize: Int64;
+    RleData: PByte;
+  begin
+    // first byte stores if RLE or not
+    // see if RLE is even worth it
+    RleData := GetMem(InSize - InSize shr 3);
+    RleSize := RleCompress(InData, RleData, InSize, InSize - InSize shr 3);
+
+    if (RleSize < 0) then
+    begin
+      OutData := GetMem(SynLZcompressdestlen(InSize) + SizeOf(Int64));
+      OutSize := SynLZcompress(InData, InSize, OutData + SizeOf(Int64)) + SizeOf(Int64);
+      PInt64(OutData)^ := 0;
+    end
+    else
+    begin
+      OutData := GetMem(SynLZcompressdestlen(RleSize) + SizeOf(Int64));
+      OutSize := SynLZcompress(RleData, RleSize, OutData + SizeOf(Int64)) + SizeOf(Int64);
+      PInt64(OutData)^ := InSize;
+    end;
+
+    FreeMem(RleData);
+
+    OutData := ReAllocMem(OutData, OutSize);
+  end;
+
 begin
-  Result := [];
+  OutSize := 0;
+  OutData := nil;
 
-  OutStream := TMemoryStream.Create();
-  InStream := TCompressionStream.Create(clDefault, OutStream);
-  try
-    InStream.Write(Data[0], Length(Data));
-    InStream.Flush();
-
-    SetLength(Result, OutStream.Position);
-    if (Length(Result) > 0) then
-      Move(OutStream.Memory^, Result[0], Length(Result));
-  finally
-    InStream.Free();
-    OutStream.Free();
+  case Algo of
+    ESimbaCompressAlgo.ZLIB:  CompressWithZLib();
+    ESimbaCompressAlgo.SYNLZ: CompressWithSynLZ();
   end;
 end;
 
-function DecompressBytes(const Data: TByteArray): TByteArray;
-var
-  InStream: TBytesStream;
-  OutStream: Tdecompressionstream;
-  ReadCount, TotalCount: Integer;
-  Chunk: array[0..2048-1] of Byte;
-begin
-  TotalCount := 0;
+procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; out OutData: PByte; out OutSize: Int64);
 
-  InStream := TBytesStream.Create(Data);
-  OutStream := TDeCompressionStream.Create(InStream);
-  try
-    repeat
-      ReadCount := OutStream.Read(Chunk[0], Length(Chunk));
-      if (ReadCount > 0) then
-      begin
-        if (TotalCount + ReadCount > High(Result)) then
-          SetLength(Result, 4 + (High(Result) * 2) + ReadCount);
-        Move(Chunk[0], Result[TotalCount], ReadCount);
-        Inc(TotalCount, ReadCount);
-      end;
-    until (ReadCount = 0);
-  finally
-    InStream.Free();
-    OutStream.Free();
+  procedure DecompressWithZLib;
+  var
+    InStream, OutStream: TMemoryStream;
+    DecompressStream: Tdecompressionstream;
+    Count: Integer;
+    Chunk: array[0..4095] of Byte;
+  begin
+    InStream := TMemoryStream.Create();
+    InStream.Write(InData^, InSize);
+    InStream.Position := 0;
+    OutStream := TMemoryStream.Create();
+    DecompressStream := TDeCompressionStream.Create(InStream);
+    try
+      repeat
+        Count := DecompressStream.Read(Chunk[0], Length(Chunk));
+        if (Count > 0) then
+          OutStream.Write(Chunk[0], Count);
+      until (Count = 0);
+      OutSize := OutStream.Position;
+      OutData := GetMem(OutSize);
+
+      Move(OutStream.Memory^, OutData^, OutSize);
+    finally
+      InStream.Free();
+      OutStream.Free();
+      DecompressStream.Free();
+    end;
   end;
 
-  SetLength(Result, TotalCount);
+  procedure DecompressWithSynLZ;
+  var
+    RleData: PByte;
+    RleSize: Int64;
+  begin
+    if (PInt64(InData)^ > 0) then // data has been rle compressed
+    begin
+      RleSize := SynLZdecompressdestlen(InData + SizeOf(Int64));
+      RleData := GetMem(RleSize);
+      if (SynLZdecompress(InData + SizeOf(Int64), InSize - SizeOf(Int64), RleData) <> RleSize) then
+        SimbaException('Error SynLZDecompress');
+
+      OutSize := PInt64(InData)^;
+      OutData := GetMem(OutSize);
+
+      if (RleUnCompress(RleData, OutData, RleSize) <> OutSize) then
+        SimbaException('Error RleUnCompress');
+
+      FreeMem(RleData);
+    end else
+    begin
+      OutData := GetMem(SynLZdecompressdestlen(InData + SizeOf(Int64)));
+      OutSize := SynLZdecompress(InData + SizeOf(Int64), InSize - SizeOf(Int64), OutData);
+    end;
+  end;
+
+begin
+  OutData := nil;
+  OutSize := 0;
+
+  case Algo of
+    ESimbaCompressAlgo.ZLIB:  DecompressWithZLib();
+    ESimbaCompressAlgo.SYNLZ: DecompressWithSynLZ();
+  end;
 end;
 
-function CompressString(S: String; Encoding: EBaseEncoding): String;
+function CompressBytes(Algo: ESimbaCompressAlgo; Bytes: TByteArray): TByteArray;
+var
+  OutData: PByte;
+  OutSize: Int64;
 begin
-  Result := BaseEncodeBytes(Encoding, CompressBytes(GetRawStringBytes(S)));
+  CompressData(Algo, @Bytes[0], Length(Bytes), OutData, OutSize);
+  SetLength(Result, OutSize);
+  Move(OutData^, Result[0], OutSize);
+  FreeMem(OutData);
 end;
 
-function DecompressString(S: String; Encoding: EBaseEncoding): String;
+function DecompressBytes(Algo: ESimbaCompressAlgo; Bytes: TByteArray): TByteArray;
+var
+  OutData: PByte;
+  OutSize: Int64;
 begin
-  Result := GetRawStringFromBytes(DeCompressBytes(BaseDecodeBytes(Encoding, S)));
+  DecompressData(Algo, @Bytes[0], Length(Bytes), OutData, OutSize);
+  SetLength(Result, OutSize);
+  Move(OutData^, Result[0], OutSize);
+  FreeMem(OutData);
+end;
+
+function CompressString(Algo: ESimbaCompressAlgo; Encoding: EBaseEncoding; Str: String): String;
+var
+  OutData: PByte;
+  OutSize: Int64;
+begin
+  CompressData(Algo, @Str[1], Length(Str), OutData, OutSize);
+  SetLength(Str, OutSize);
+  Move(OutData^, Str[1], OutSize);
+  FreeMem(OutData);
+
+  Result := BaseEncode(Encoding, Str);
+end;
+
+function DecompressString(Algo: ESimbaCompressAlgo; Encoding: EBaseEncoding; Str: String): String;
+var
+  OutData: PByte;
+  OutSize: Int64;
+begin
+  Str := BaseDecode(Encoding, Str);
+  DecompressData(Algo, @Str[1], Length(Str), OutData, OutSize);
+
+  SetLength(Result, OutSize);
+  Move(OutData^, Result[1], OutSize);
+  FreeMem(OutData);
 end;
 
 end.

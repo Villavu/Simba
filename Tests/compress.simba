@@ -1,34 +1,78 @@
 {$assertions on}
 
-function BytesOf(s: String): TByteArray;
+procedure testD(algo: ECompressAlgo; inData: Pointer; inLen: Int64);
+var
+  compressedData, decompressedData: Pointer;
+  compressedSize, decompressedSize: Int64;
 begin
-  SetLength(Result, Length(s));
-  Move(s[1], Result[0], Length(s));
+  CompressData(algo, inData, inLen, compressedData, compressedSize);
+  DecompressData(algo, compressedData, compressedSize, decompressedData, decompressedSize);
+
+  Assert(compressedSize < inLen);
+  Assert(inLen = decompressedSize);
+  Assert(CompareMem(inData^, decompressedData^, inLen));
+
+  FreeMem(compressedData);
+  FreeMem(decompressedData);
 end;
 
-function StringOf(Bytes: TByteArray): String;
+procedure testB(Algo: ECompressAlgo);
+var
+  Bytes: TByteArray;
+  Compressed, Decompressed: TByteArray;
+  I: Integer;
 begin
-  SetLength(Result, Length(Bytes));
-  Move(Bytes[0], Result[1], Length(Bytes));
+  SetLength(Bytes, 12345);
+  for I := 0 to High(Bytes) do
+    Bytes[I] := Byte(I);
+
+  Compressed := CompressBytes(Algo, Bytes);
+  Decompressed := DecompressBytes(Algo, Compressed);
+
+  Assert(Bytes.Equals(Decompressed));
+end;
+
+procedure TestS(Algo: ECompressAlgo; Encoding: EBaseEncoding);
+var
+  I: Integer;
+  Str: String;
+  Compressed, Decompressed: String;
+begin
+  for I := 1 to 1234 do
+    Str += IntToStr(I);
+  Compressed := CompressString(Algo, Encoding, Str);
+  Decompressed := DecompressString(Algo, Encoding, Compressed);
+
+  Assert(Str.Equals(Decompressed));
 end;
 
 var
-  s: String;
-  compressed,decompressed: TByteArray;
+  testData: String;
 begin
-  s := StringOfChar(' ', 1234);
-  s[2] := 'z';
-  s[4] := 'z';
-  s[6] := '0';
-  s[Length(s) div 2] := '0';
-  s += 'Foo Woo ';
+  // test with some binary data, where rle might be used
+  testData := '0000000000000000011111111111111111111111111' * 1234;
 
-  compressed := CompressBytes(BytesOf(s));
-  decompressed := DecompressBytes(compressed);
-  Assert(StringOf(decompressed) = s);
+  testD(ECompressAlgo.ZLIB, @testData[1], Length(testData));
+  testD(ECompressAlgo.SYNLZ, @testData[1], Length(testData));
 
-  // test a just a single byte input
-  compressed := CompressBytes(TByteArray([123]));
-  decompressed := DecompressBytes(compressed);
-  Assert((Length(decompressed) = 1) and (decompressed[0] = 123));
+  // non binary data
+  testData := 'ABCDEF111222333000' * 1234;
+
+  testD(ECompressAlgo.ZLIB, @testData[1], Length(testData));
+  testD(ECompressAlgo.SYNLZ, @testData[1], Length(testData));
+
+  testB(ECompressAlgo.ZLIB);
+  testB(ECompressAlgo.SYNLZ);
+
+  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b16);
+  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b32);
+  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b32Hex);
+  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b64);
+  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b64URL);
+
+  testS(ECompressAlgo.ZLIB, EBaseEncoding.b16);
+  testS(ECompressAlgo.ZLIB, EBaseEncoding.b32);
+  testS(ECompressAlgo.ZLIB, EBaseEncoding.b32Hex);
+  testS(ECompressAlgo.ZLIB, EBaseEncoding.b64);
+  testS(ECompressAlgo.ZLIB, EBaseEncoding.b64URL);
 end.

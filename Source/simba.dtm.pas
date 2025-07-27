@@ -47,7 +47,7 @@ type
 implementation
 
 uses
-  simba.compress, simba.vartype_string;
+  simba.compress, simba.vartype_string, simba.encoding;
 
 procedure TDTM.FromString(Str: String);
 var
@@ -57,7 +57,7 @@ begin
   if not Str.StartsWith('DTM:', True) then
     raise Exception.Create('TDTM.FromString: Invalid string "' + Str + '"');
 
-  Stream := TStringStream.Create(DeCompressString(Str.After('DTM:')));
+  Stream := TStringStream.Create(DecompressString(ESimbaCompressAlgo.ZLIB, EBaseEncoding.b64, Str.After('DTM:')));
 
   SetLength(Points, Stream.ReadDWord());
   for I := 0 to High(Points) do
@@ -103,7 +103,7 @@ begin
   for I := 0 to High(Points) do
     Stream.WriteDWord(Points[I].AreaSize);
 
-  Result := 'DTM:' + CompressString(Stream.DataString);
+  Result := 'DTM:' + CompressString(ESimbaCompressAlgo.ZLIB, EBaseEncoding.b64, Stream.DataString);
 
   Stream.Free();
 end;
