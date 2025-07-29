@@ -144,7 +144,7 @@ end;
 ECompressAlgo
 -------------
 ```
-type ECompressAlgo = enum(ZLIB, SYNLZ);
+type ECompressAlgo = enum(ZLIB, SYNLZ, GZ);
 ```
 
 ```{note}
@@ -229,20 +229,16 @@ HOTPCalculateToken
 ------------------
 ```
 function HOTPCalculateToken(const Secret: String; const Counter: Integer): Integer;
+function TOTPCalculateToken(const Secret: String): Integer;
 ```
+
+HOTP and TOTP One-time password algorithms. Compatible with Google Authenticator.
 *)
 procedure _LapeHOTPCalculateToken(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := HOTPCalculateToken(PString(Params^[0])^, PInteger(Params^[1])^);
 end;
 
-(*
-TOTPCalculateToken
-------------------
-```
-function TOTPCalculateToken(const Secret: String): Integer;
-```
-*)
 procedure _LapeTOTPCalculateToken(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := TOTPCalculateToken(PString(Params^[0])^);
@@ -400,7 +396,7 @@ begin
     addGlobalFunc('function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32);
     addGlobalFunc('function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32String);
 
-    addGlobalType('enum(ZLIB, SYNLZ)', 'ECompressAlgo');
+    addGlobalType('enum(ZLIB, SYNLZ, GZ)', 'ECompressAlgo');
 
     addGlobalFunc('procedure CompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64);', @_LapeCompressData);
     addGlobalFunc('function CompressBytes(Algo: ECompressAlgo; Bytes: TByteArray): TByteArray', @_LapeCompressBytes);

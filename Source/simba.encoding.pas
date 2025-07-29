@@ -13,10 +13,11 @@ uses
   Classes, SysUtils,
   simba.base;
 
-{$scopedenums on}
+{$PUSH}
+{$SCOPEDENUMS ON}
 type
   EBaseEncoding = (b64URL, b64, b32, b32Hex, b16);
-{$scopedenums off}
+{$POP}
 
 function BaseEncode(Encoding: EBaseEncoding; const Data: String): String;
 function BaseDecode(Encoding: EBaseEncoding; const Data: String): String;

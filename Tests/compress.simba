@@ -48,31 +48,28 @@ end;
 
 var
   testData: String;
+  algo: ECompressAlgo;
+  encoding: EBaseEncoding;
 begin
   // test with some binary data, where rle might be used
   testData := '0000000000000000011111111111111111111111111' * 1234;
 
   testD(ECompressAlgo.ZLIB, @testData[1], Length(testData));
   testD(ECompressAlgo.SYNLZ, @testData[1], Length(testData));
+  testD(ECompressAlgo.GZ, @testData[1], Length(testData));
 
   // non binary data
   testData := 'ABCDEF111222333000' * 1234;
 
   testD(ECompressAlgo.ZLIB, @testData[1], Length(testData));
   testD(ECompressAlgo.SYNLZ, @testData[1], Length(testData));
+  testD(ECompressAlgo.GZ, @testData[1], Length(testData));
 
   testB(ECompressAlgo.ZLIB);
   testB(ECompressAlgo.SYNLZ);
+  testB(ECompressAlgo.GZ);
 
-  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b16);
-  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b32);
-  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b32Hex);
-  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b64);
-  testS(ECompressAlgo.SYNLZ, EBaseEncoding.b64URL);
-
-  testS(ECompressAlgo.ZLIB, EBaseEncoding.b16);
-  testS(ECompressAlgo.ZLIB, EBaseEncoding.b32);
-  testS(ECompressAlgo.ZLIB, EBaseEncoding.b32Hex);
-  testS(ECompressAlgo.ZLIB, EBaseEncoding.b64);
-  testS(ECompressAlgo.ZLIB, EBaseEncoding.b64URL);
+  for algo in ECompressAlgo do
+    for encoding in EBaseEncoding do
+      testS(algo, encoding);
 end.

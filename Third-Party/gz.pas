@@ -1087,7 +1087,7 @@ begin
   inherited Destroy();
 end;
 
-function TGZFileStream.Read(Var Buffer; Count : longint): longint;
+function TGZFileStream.Read(var Buffer; Count: LongInt): LongInt;
 begin
   If FWriteMode then
     Raise ezliberror.create(SWriteOnlyStream);
@@ -1096,7 +1096,7 @@ begin
     raise EZlibError.Create('Gzip decompression error: ' + gzerror(FFile));
 end;
 
-function TGZFileStream.Write(const Buffer; Count: Longint): Longint;
+function TGZFileStream.Write(const Buffer; Count: LongInt): Longint;
 begin
   If not FWriteMode then
     Raise EzlibError.Create(SReadonlyStream);

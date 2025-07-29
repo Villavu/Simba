@@ -18,7 +18,8 @@ uses
 type
   ESimbaCompressAlgo = (
     ZLIB,
-    SYNLZ
+    SYNLZ,
+    GZ
   );
 {$POP}
 
@@ -35,6 +36,7 @@ implementation
 
 uses
   ZStream,
+  gz,
   mormot2_synlz,
   mormot2_rle;
 
@@ -47,6 +49,7 @@ procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; o
   begin
     OutStream := TMemoryStream.Create();
     InStream := TCompressionStream.Create(clDefault, OutStream);
+    InStream.SourceOwner := False;
     try
       InStream.Write(InData^, InSize);
       InStream.Flush();
@@ -89,6 +92,30 @@ procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; o
     OutData := ReAllocMem(OutData, OutSize);
   end;
 
+  procedure CompressWithGz;
+  var
+    InStream: TGZFileStream;
+    OutStream: TMemoryStream;
+  begin
+    OutStream := TMemoryStream.Create();
+    try
+      InStream := TGZFileStream.Create(OutStream, True);
+      InStream.SourceOwner := False;
+      try
+        InStream.Write(InData^, InSize);
+      finally
+        InStream.Free(); // flushes on free
+      end;
+
+      OutSize := OutStream.Position;
+      OutData := GetMem(OutSize);
+
+      Move(OutStream.Memory^, OutData^, OutSize);
+    finally
+      OutStream.Free();
+    end;
+  end;
+
 begin
   OutSize := 0;
   OutData := nil;
@@ -96,6 +123,7 @@ begin
   case Algo of
     ESimbaCompressAlgo.ZLIB:  CompressWithZLib();
     ESimbaCompressAlgo.SYNLZ: CompressWithSynLZ();
+    ESimbaCompressAlgo.GZ:    CompressWithGZ();
   end;
 end;
 
@@ -113,6 +141,7 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
     InStream.Position := 0;
     OutStream := TMemoryStream.Create();
     DecompressStream := TDeCompressionStream.Create(InStream);
+    DecompressStream.SourceOwner := False;
     try
       repeat
         Count := DecompressStream.Read(Chunk[0], Length(Chunk));
@@ -156,6 +185,36 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
     end;
   end;
 
+  procedure DecompressWithGZ;
+  var
+    InStream, OutStream: TMemoryStream;
+    GzStream: TGZFileStream;
+    Count: Integer;
+    Chunk: array[0..4095] of Byte;
+  begin
+    InStream := TMemoryStream.Create();
+    InStream.Write(InData^, InSize);
+    InStream.Position := 0;
+    OutStream := TMemoryStream.Create();
+    GzStream := TGZFileStream.Create(InStream, False);
+    GzStream.SourceOwner := False;
+    try
+      repeat
+        Count := GzStream.Read(Chunk[0], Length(Chunk));
+        if (Count > 0) then
+          OutStream.Write(Chunk[0], Count);
+      until (Count = 0);
+      OutSize := OutStream.Position;
+      OutData := GetMem(OutSize);
+
+      Move(OutStream.Memory^, OutData^, OutSize);
+    finally
+      InStream.Free();
+      OutStream.Free();
+      GzStream.Free();
+    end;
+  end;
+
 begin
   OutData := nil;
   OutSize := 0;
@@ -163,6 +222,7 @@ begin
   case Algo of
     ESimbaCompressAlgo.ZLIB:  DecompressWithZLib();
     ESimbaCompressAlgo.SYNLZ: DecompressWithSynLZ();
+    ESimbaCompressAlgo.GZ:    DecompressWithGZ();
   end;
 end;
 
