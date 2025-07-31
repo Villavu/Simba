@@ -24,12 +24,16 @@ type
     FItems: TList;
 
     procedure NotifyUnfreed; override;
+
+    function GetCount: Integer;
   public
+    constructor Create; reintroduce;
+    destructor Destroy; override;
+
     procedure Add(Item: TJSONData);
     procedure Del(Item: TJSONData);
 
-    constructor Create; reintroduce;
-    destructor Destroy; override;
+    property Count: Integer read GetCount;
   end;
 
   TSimbaJSONParser = class(TBaseJSONReader)
@@ -60,6 +64,7 @@ type
     procedure EndObject; override;
   public
     constructor Create(Stream: TStream; FreeStream: Boolean); reintroduce;
+    destructor Destroy; override;
 
     function Parse: TJSONData;
 
@@ -322,6 +327,14 @@ begin
   inherited Destroy;
 end;
 
+function TGarbageList.GetCount: Integer;
+begin
+  if (FItems <> nil) then
+    Result := FItems.Count
+  else
+    Result := 0;
+end;
+
 procedure TGarbageList.NotifyUnfreed;
 
   function Dump(Item: TJSONData): String;
@@ -370,7 +383,8 @@ end;
 
 destructor TGarbageList.Destroy;
 begin
-  FItems.Free();
+  if (FItems <> nil) then
+    FreeAndNil(FItems);
   inherited Destroy();
 end;
 
@@ -519,9 +533,18 @@ end;
 constructor TSimbaJSONParser.Create(Stream: TStream; FreeStream: Boolean);
 begin
   inherited Create(Stream, DefaultOptions);
+
   FGarbage := TGarbageList.Create();
   if FreeStream then
     Stream.Free();
+end;
+
+destructor TSimbaJSONParser.Destroy;
+begin
+  if (FGarbage.Count = 0) then
+    FreeAndNil(FGarbage);
+
+  inherited Destroy();
 end;
 
 end.
