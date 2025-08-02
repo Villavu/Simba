@@ -189,17 +189,48 @@ begin
 end;
 
 (*
-ShowMessage
+EDialogIcon
 -----------
 ```
-procedure ShowMessage(Message: String);
+enum(NONE, ERROR, WARNING, INFO)
+```
+The icon a dialog can have.
+
+```{note}
+This enum is scoped so use like `EDialogIcon.ERROR`
 ```
 *)
-procedure _LapeShowMessage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+
+(*
+EDialogButton
+-------------
+```
+enum(YES, NO, OK, CANCEL, ABORT, RETRY, IGNORE, ALL, NO_TO_ALL, YES_TO_ALL, CLOSE)
+```
+The buttons a dialog can have.
+
+```{note}
+This enum is scoped so use like `EDialogButton.YES`
+```
+*)
+
+(*
+ShowDialog
+----------
+```
+function ShowDialog(Icon: EDialogIcon; Buttons: EDialogButtons; Title, Msg: String): EDialogButton;
+```
+Show a dialog waiting until a button is used. Once closed will return which button was clicked.
+
+```{note}
+If the dialog was closed without a button EDialogButton.CLOSE will be returned.
+```
+*)
+procedure _LapeShowDialog(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 
   procedure Execute;
   begin
-    ShowMessage(PString(Params^[0])^);
+    ESimbaDialogButton(Result^) := ShowDialog(ESimbaDialogIcon(Params^[0]^), ESimbaDialogButtons(Params^[1]^), PString(Params^[2])^, PString(Params^[3])^);
   end;
 
 begin
@@ -256,24 +287,6 @@ procedure _LapeSelectDirectory(const Params: PParamArray; const Result: Pointer)
   procedure Execute;
   begin
     PBoolean(Result)^ := SelectDirectory(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
-  end;
-
-begin
-  RunInMainThread(@Execute);
-end;
-
-(*
-ShowQuestionDialog
-------------------
-```
-function ShowQuestionDialog(Title, Question: String): Boolean;
-```
-*)
-procedure _LapeShowQuestionDialog(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-
-  procedure Execute;
-  begin
-    PBoolean(Result)^ := SimbaQuestionDlg(PString(Params^[0])^, PString(Params^[1])^, []) = ESimbaDialogResult.YES;
   end;
 
 begin
@@ -559,11 +572,14 @@ begin
     addGlobalFunc('procedure SetClipBoard(Data: string)', @_LapeSetClipBoard);
     addGlobalFunc('function GetClipBoard: String', @_LapeGetClipBoard);
 
+    addGlobalType('enum(NONE, ERROR, WARNING, INFO)', 'EDialogIcon');
+    addGlobalType('enum(YES, NO, OK, CANCEL, ABORT, RETRY, IGNORE, ALL, NO_TO_ALL, YES_TO_ALL, CLOSE)', 'EDialogButton');
+    addGlobalType('set of EDialogButton', 'EDialogButtons');
+
+    addGlobalFunc('function ShowDialog(Icon: EDialogIcon; Buttons: EDialogButtons; Title, Message: String): EDialogButton;', @_LapeShowDialog);
     addGlobalFunc('function ShowDirectoryDialog(Title, InitialDirectory: String; out Directory: String): Boolean;', @_LapeSelectDirectory);
     addGlobalFunc('function ShowQueryDialog(Caption, Prompt: String; var Value: String): Boolean', @_LapeInputQuery);
     addGlobalFunc('function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer', @_LapeInputCombo);
-    addGlobalFunc('procedure ShowMessage(Message: String)', @_LapeShowMessage);
-    addGlobalFunc('function ShowQuestionDialog(Title, Question: String): Boolean', @_LapeShowQuestionDialog);
     addGlobalFunc('function ShowDTMEditor(Target: TTarget): String; overload', @_LapeShowDTMEditor);
     addGlobalFunc('function ShowACA(Target: TTarget): TColorTolerance; overload', @_LapeShowACA);
 

@@ -97,7 +97,7 @@ unit mormot2_mm;
 // won't check the IsMultiThread global, but assume it is true
 // - multi-threaded apps (e.g. a Server Daemon instance) will be faster with it
 // - mono-threaded (console/LCL) apps are faster without this conditional
-{.$define FPCMM_ASSUMEMULTITHREAD}
+{$define FPCMM_ASSUMEMULTITHREAD}
 
 // won't use mremap but a regular getmem/move/freemem pattern for large blocks
 // - depending on the actual system (e.g. on a VM), mremap may be slower
@@ -112,7 +112,7 @@ unit mormot2_mm;
 // - would use a little more memory, but medium pool is less likely to sleep
 // - not defined for FPCMM_SERVER because no performance difference was found
 // - defined for FPCMM_BOOST
-{.$define FPCMM_SMALLNOTWITHMEDIUM}
+{$define FPCMM_SMALLNOTWITHMEDIUM}
 
 // force several tiny/small blocks arenas, not with medium blocks
 // - would use a little more memory, but more medium pools could help
