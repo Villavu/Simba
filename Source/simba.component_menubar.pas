@@ -10,8 +10,7 @@ unit simba.component_menubar;
 interface
 
 uses
-  Classes, SysUtils, Controls, Forms, Menus, Graphics, ExtCtrls,
-  simba.settings;
+  Classes, SysUtils, Controls, Forms, Menus, Graphics, ExtCtrls;
 
 type
   TPopupMenuArray = array of TPopupMenu;
@@ -67,7 +66,7 @@ implementation
 
 uses
   LCLType, LCLIntf, LMessages, ATCanvasPrimitives,
-  simba.ide_theme, simba.misc;
+  simba.component_theme, simba.misc;
 
 function TSimbaMenuBar.GetMenus: TPopupMenuArray;
 var
@@ -193,8 +192,8 @@ begin
   Style.Alignment := taCenter;
   Style.Layout := tlCenter;
 
-  Canvas.Font.Color := SimbaTheme.ColorFont;
-  Canvas.Brush.Color := SimbaTheme.ColorFrame;
+  Canvas.Font.Color := SimbaComponentTheme.ColorFont;
+  Canvas.Brush.Color := SimbaComponentTheme.ColorFrame;
   Canvas.FillRect(ClientRect);
 
   for I := 0 to High(FItems) do
@@ -205,14 +204,14 @@ begin
 
     if (I = FHotIndex) then
     begin
-      Canvas.Brush.Color := SimbaTheme.ColorActive;
+      Canvas.Brush.Color := SimbaComponentTheme.ColorActive;
       Canvas.FillRect(R.Left, R.Top + 2, R.Right, R.Height - 2);
     end;
 
     Canvas.TextRect(R, R.Left, R.Top, FItems[I].Text, Style);
   end;
 
-  Canvas.Pen.Color := ColorBlendHalf(SimbaTheme.ColorFrame, SimbaTheme.ColorLine);
+  Canvas.Pen.Color := ColorBlendHalf(SimbaComponentTheme.ColorFrame, SimbaComponentTheme.ColorLine);
   Canvas.Line(0, Height - 1, Width, Height - 1);
 end;
 

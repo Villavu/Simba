@@ -38,7 +38,7 @@ type
     procedure Lock;
     procedure Unlock;
     procedure WaitLocked; overload;
-    function WaitLocked(Timeout: Integer): Boolean; overload; // Returns True if unlocked!
+    function WaitLocked(Timeout: Integer): Boolean; overload; // returns True if unlocked!
 
     function IsLocked: Boolean;
 
@@ -105,6 +105,21 @@ type
     function RunParallel(MaxThreads: Integer; Lo, Hi: Integer; Method: TThreadPoolMethod): Integer;
   end;
 
+  // Thread is idle until Wake() is called which then invokes FMethod
+  // and then returns to idleness.
+  TIdleThread = class(TThread)
+  protected
+    FLock: TWaitableLock;
+    FMethod: TThreadMethod;
+
+    procedure Execute; override;
+    function GetIsIdle: Boolean;
+  public
+    constructor Create(Method: TThreadMethod); reintroduce;
+    procedure Wake;
+    property IsIdle: Boolean read GetIsIdle;
+  end;
+
 var
   SimbaThreadPool: TSimbaThreadPool = nil;
 
@@ -117,7 +132,8 @@ var
 implementation
 
 uses
-  NumCPULib;
+  NumCPULib,
+  simba.initializations;
 
 procedure TLimit.Inc;
 begin
@@ -495,15 +511,56 @@ begin
   inherited Destroy();
 end;
 
-initialization
+procedure TIdleThread.Execute;
+begin
+  while (not Terminated) do
+  begin
+    if FLock.WaitLocked(1000) then
+    try
+      FMethod();
+    finally
+      FLock.Lock();
+    end;
+  end;
+end;
+
+function TIdleThread.GetIsIdle: Boolean;
+begin
+  Result := FLock.IsLocked;
+end;
+
+constructor TIdleThread.Create(Method: TThreadMethod);
+begin
+  inherited Create(True, 512*512);
+
+  FMethod := Method;
+  FLock.Lock(); // default to idle
+end;
+
+procedure TIdleThread.Wake;
+begin
+  if Suspended then
+    Start();
+  FLock.Unlock();
+end;
+
+procedure DoCreate;
+begin
   SimbaCPUInfo.ThreadCount    := TNumCPULib.GetLogicalCPUCount();
   SimbaCPUInfo.CoreCount      := TNumCPULib.GetPhysicalCPUCount();
   SimbaCPUInfo.PhysicalMemory := TNumCPULib.GetTotalPhysicalMemory();
 
   SimbaThreadPool := TSimbaThreadPool.Create(SimbaCPUInfo.CoreCount);
+end;
 
-finalization
+procedure DoDestroy;
+begin
   FreeAndNil(SimbaThreadPool);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'SimbaThreadPool');
+  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'SimbaThreadPool');
 
 end.
 

@@ -37,6 +37,7 @@ type
     FNeedRestore: Boolean;
 
     procedure DoShow; override;
+    procedure DoHide; override;
 
     procedure DoMenuItemDestroyed(Sender: TObject);
     procedure DoMenuItemClicked(Sender: TObject);
@@ -49,8 +50,11 @@ type
   public
     constructor CreateNew(AOwner: TComponent; Num: Integer = 0); override;
 
-    property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
+    procedure MakeVisible;
+
+    property NeedRestore: Boolean read FNeedRestore write FNeedRestore;
     property NeedDefaultPosition: Boolean read FNeedDefaultPosition write FNeedDefaultPosition;
+    property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
     property Header: TSimbaAnchorDockHeader read GetHeader;
   end;
 
@@ -78,19 +82,11 @@ type
     function LoadLayout(Layout: String): Boolean;
   end;
 
-type
-  TSimbaDockMaster = class(TObject)
-    procedure MakeVisible(Form: TCustomForm);
-  end;
-
-var
-  SimbaDockMaster: TSimbaDockMaster;
-
 implementation
 
 uses
   XMLPropStorage, LazConfigStorage,
-  simba.ide_theme, simba.misc, simba.ide_events, simba.threading;
+  simba.component_theme, simba.misc, simba.ide_events, simba.threading;
 
 procedure TSimbaAnchorDockHeader.ParentFontChanged;
 begin
@@ -99,7 +95,7 @@ begin
   if Assigned(Parent) and Assigned(Parent.Font) then
   begin
     Font.Size := GetFontSize(Parent, 1);
-    Font.Color := SimbaTheme.ColorFont;
+    Font.Color := SimbaComponentTheme.ColorFont;
   end;
 end;
 
@@ -162,7 +158,7 @@ begin
   //MinimizeButton.Parent := nil;
 
   ParentFont := True;
-  Color := SimbaTheme.ColorFrame;
+  Color := SimbaComponentTheme.ColorFrame;
 end;
 
 function TSimbaAnchorDockHostSite.GetHeader: TSimbaAnchorDockHeader;
@@ -237,21 +233,40 @@ begin
   FNeedDefaultPosition := True;
 end;
 
+procedure TSimbaAnchorDockHostSite.MakeVisible;
+begin
+  if FNeedDefaultPosition then
+  begin
+    FNeedDefaultPosition := False;
+    with Application.MainForm.Monitor.WorkareaRect.CenterPoint do
+      BoundsRect := TRect.Create(X - (Width div 2), Y - (Height div 2), X + (Width div 2), Y + (Height div 2));
+  end;
+
+  EnsureVisible();
+end;
+
 procedure TSimbaAnchorDockHostSite.DoShow;
 begin
   inherited DoShow();
 
-  SimbaTheme.AddNativeWindowColoring(Self);
+  VisibleChanged();
+end;
+
+procedure TSimbaAnchorDockHostSite.DoHide;
+begin
+  inherited DoHide();
+
+  VisibleChanged();
 end;
 
 procedure TSimbaAnchorDockSplitter.Paint;
 begin
-  Canvas.Brush.Color := SimbaTheme.ColorFrame;
+  Canvas.Brush.Color := SimbaComponentTheme.ColorFrame;
   Canvas.FillRect(ClientRect);
 
   if MouseInClient then
   begin
-    Canvas.Brush.Color := SimbaTheme.ColorActive;
+    Canvas.Brush.Color := SimbaComponentTheme.ColorActive;
     Canvas.FillRect(3, 3, Width-3, Height-3);
   end;
 end;
@@ -308,7 +323,7 @@ begin
     Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
     if Screen.CustomForms[I].Showing and (Site is TSimbaAnchorDockHostSite) and Site.Floating and Site.FMenuItem.Checked then
     begin
-      Site.FNeedRestore := True;
+      Site.NeedRestore := True;
       Site.CloseSite();
     end;
   end;
@@ -322,10 +337,10 @@ begin
   for I := 0 to Screen.CustomFormCount - 1 do
   begin
     Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
-    if (Site is TSimbaAnchorDockHostSite) and Site.FNeedRestore then
+    if (Site is TSimbaAnchorDockHostSite) and Site.NeedRestore then
     begin
       MakeVisible(Screen.CustomForms[I], False);
-      Site.FNeedRestore := False;
+      Site.NeedRestore := False;
     end;
   end;
 end;
@@ -434,28 +449,5 @@ begin
     Stream.Free();
   end;
 end;
-
-procedure TSimbaDockMaster.MakeVisible(Form: TCustomForm);
-begin
-  if (Form <> nil) and (Form.HostDockSite is TSimbaAnchorDockHostSite) then
-    with TSimbaAnchorDockHostSite(Form.HostDockSite) do
-    begin
-      if FNeedDefaultPosition then
-      begin
-        with Application.MainForm.Monitor.WorkareaRect.CenterPoint do
-          BoundsRect := TRect.Create(X - (Width div 2), Y - (Height div 2), X + (Width div 2), Y + (Height div 2));
-
-        FNeedDefaultPosition := False;
-      end;
-
-      EnsureVisible();
-    end;
-end;
-
-initialization
-  SimbaDockMaster := TSimbaDockMaster.Create();
-
-finalization
-  FreeAndNil(SimbaDockMaster);
 
 end.

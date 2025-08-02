@@ -241,6 +241,7 @@ begin
 
   FBuffer.SetSize(ARect.Width, ARect.Height);
   FBuffer.Canvas.Font := Self.Font;
+  FBuffer.Canvas.Font.Size := GetFontSize(Self);
 
   if (odSelected in State) then
     FBuffer.Canvas.Brush.Color := RGBToColor(159, 180, 208)

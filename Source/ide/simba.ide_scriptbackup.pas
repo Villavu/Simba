@@ -37,7 +37,7 @@ type
 implementation
 
 uses
-  simba.zip, simba.fs, simba.env, simba.ide_initialization, simba.form_tabs, simba.threading, simba.hash;
+  simba.zip, simba.fs, simba.env, simba.initializations, simba.form_tabs, simba.threading, simba.hash;
 
 procedure TSimbaScriptBackup.DoFileCollecting(Sender: TObject);
 var
@@ -103,15 +103,13 @@ begin
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.ScriptBackup.Interval, @DoSettingChanged_BackupInterval, True);
 end;
 
-procedure SetupScriptBackup;
+procedure DoCreate;
 begin
-  CheckMainThread('SetupScriptBackup');
-
   TSimbaScriptBackup.Create(SimbaTabsForm);
 end;
 
 initialization
-  SimbaIDEInitialization_AddBeforeShow(@SetupScriptBackup, 'Create Script Backup');
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'ScriptBackup');
 
 end.
 

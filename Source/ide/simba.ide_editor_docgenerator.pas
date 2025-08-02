@@ -98,7 +98,7 @@ begin
     end;
   except
     on E: Exception do
-      SimbaErrorDlg('Simba', 'Insert documentation error: %s', [E.Message]);
+      ShowErrorDialog('Simba', 'Insert documentation error: %s', [E.Message]);
   end;
   if (Parser <> nil) then
     Parser.Free();

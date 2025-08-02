@@ -34,7 +34,7 @@ uses
   simba.image,
   simba.component_divider,
   simba.colormath_aca,
-  simba.ide_theme,
+  simba.component_theme,
   simba.vartype_string,
   simba.vartype_matrix,
   simba.threading;
@@ -271,12 +271,12 @@ begin
 
   if Node.Selected then
   begin
-    ACanvas.Brush.Color := SimbaTheme.ColorActive;
+    ACanvas.Brush.Color := SimbaComponentTheme.ColorActive;
     ACanvas.FillRect(BaseRect);
   end;
 
   ACanvas.Brush.Color := TColorNode(Node).Color;
-  ACanvas.Pen.Color := SimbaTheme.ColorFont;
+  ACanvas.Pen.Color := SimbaComponentTheme.ColorFont;
   ACanvas.Pen.Width := 1;
   ACanvas.Rectangle(ColorRect);
 
@@ -564,7 +564,7 @@ begin
   FForm.Position := poScreenCenter;
   FForm.Width := FForm.Scale96ToScreen(1200);
   FForm.Height := FForm.Scale96ToScreen(800);
-  FForm.Font.Color := SimbaTheme.ColorFont;
+  FForm.Font.Color := SimbaComponentTheme.ColorFont;
   FForm.KeyPreview := True;
   FForm.OnKeyDown := @DoFormKeyDown;
   FForm.OnClose := @DoFormClose;
@@ -581,7 +581,7 @@ begin
   FPanel.Align := alRight;
   FPanel.BevelOuter := bvNone;
   FPanel.BevelInner := bvNone;
-  FPanel.Color := SimbaTheme.ColorFrame;
+  FPanel.Color := SimbaComponentTheme.ColorFrame;
   FPanel.Constraints.MinWidth := 150;
 
   with TBitmap.Create() do
@@ -611,8 +611,8 @@ begin
   FImageBoxZoom.Align := alTop;
   FImageBoxZoom.BorderSpacing.Top := 5;
   FImageBoxZoom.BorderSpacing.Bottom := 5;
-  FImageBoxZoom.Font.Color := SimbaTheme.ColorFont;
-  FImageBoxZoom.FrameColor := SimbaTheme.ColorScrollBarActive;
+  FImageBoxZoom.Font.Color := SimbaComponentTheme.ColorFont;
+  FImageBoxZoom.FrameColor := SimbaComponentTheme.ColorScrollBarActive;
 
   FColorListPopup := CreateListPopupMenu();
 
@@ -690,7 +690,7 @@ begin
   FEditMulti3.Caption := 'Best Multiplier[2]';
   FEditMulti3.LabelMeasure := 'Best Multiplier[2]';
   FEditMulti3.BorderSpacing.Top := 4;
-  FEditMulti3.Color := SimbaTheme.ColorFrame;
+  FEditMulti3.Color := SimbaComponentTheme.ColorFrame;
 
   FEditMulti2 := TSimbaLabeledEdit.Create(FPanel);
   FEditMulti2.Parent := BottomPanel;
@@ -698,7 +698,7 @@ begin
   FEditMulti2.Caption := 'Best Multiplier[1]';
   FEditMulti2.LabelMeasure := 'Best Multiplier[1]';
   FEditMulti2.BorderSpacing.Top := 4;
-  FEditMulti2.Color := SimbaTheme.ColorFrame;
+  FEditMulti2.Color := SimbaComponentTheme.ColorFrame;
 
   FEditMulti1 := TSimbaLabeledEdit.Create(FPanel);
   FEditMulti1.Parent := BottomPanel;
@@ -706,7 +706,7 @@ begin
   FEditMulti1.Caption := 'Best Multiplier[0]';
   FEditMulti1.LabelMeasure := 'Best Multiplier[0]';
   FEditMulti1.BorderSpacing.Top := 4;
-  FEditMulti1.Color := SimbaTheme.ColorFrame;
+  FEditMulti1.Color := SimbaComponentTheme.ColorFrame;
 
   FEditTol := TSimbaLabeledEdit.Create(FPanel);
   FEditTol.Parent := BottomPanel;
@@ -714,7 +714,7 @@ begin
   FEditTol.Caption := 'Best Tolerance';
   FEditTol.LabelMeasure := 'Best R Multipliers';
   FEditTol.BorderSpacing.Top := 4;
-  FEditTol.Color := SimbaTheme.ColorFrame;
+  FEditTol.Color := SimbaComponentTheme.ColorFrame;
 
   FEditColor := TSimbaLabeledEdit.Create(FPanel);
   FEditColor.Parent := BottomPanel;
@@ -722,7 +722,7 @@ begin
   FEditColor.Caption := 'Best Color';
   FEditColor.LabelMeasure := 'Best R Multipliers';
   FEditColor.BorderSpacing.Top := 4;
-  FEditColor.Color := SimbaTheme.ColorFrame;
+  FEditColor.Color := SimbaComponentTheme.ColorFrame;
 
   with TSimbaDivider.Create(FPanel) do
   begin
@@ -737,7 +737,7 @@ begin
   begin
     Parent := BottomPanel;
     Align := alTop;
-    Color := SimbaTheme.ColorFrame;
+    Color := SimbaComponentTheme.ColorFrame;
 
     ToggleButtons.Add('RGB').MeasureText := 'DeltaE';
     ToggleButtons.Add('HSL').MeasureText := 'DeltaE';

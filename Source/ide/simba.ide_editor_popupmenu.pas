@@ -60,7 +60,7 @@ implementation
 
 uses
   LCLType,
-  simba.base, simba.form_main, simba.ide_editor, simba.ide_editor_docgenerator, simba.nativeinterface,
+  simba.base, simba.form_main, simba.ide_editor, simba.nativeinterface,
   simba.ide_tab, simba.form_tabs, simba.ide_utils, simba.ide_codetools_debug,
   simba.ide_editor_commands;
 

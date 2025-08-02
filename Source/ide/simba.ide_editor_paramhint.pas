@@ -87,7 +87,7 @@ uses
   simba.ide_codetools_paslexer,
   simba.ide_editor,
   simba.ide_editor_commands,
-  simba.ide_theme,
+  simba.component_theme,
   simba.misc;
 
 procedure TSimbaParamHintForm.SetBoldIndex(AValue: Integer);
@@ -130,7 +130,7 @@ var
 begin
   if (not FMeasuring) then
   begin
-    Canvas.Brush.Color := SimbaTheme.ColorScrollBarActive;
+    Canvas.Brush.Color := SimbaComponentTheme.ColorScrollBarActive;
     Canvas.FillRect(ClientRect);
   end;
 
@@ -146,9 +146,9 @@ begin
 
   if (not FMeasuring) then
   begin
-    Canvas.Pen.Color := SimbaTheme.ColorLine;
+    Canvas.Pen.Color := SimbaComponentTheme.ColorLine;
     Canvas.Frame(ClientRect);
-    Canvas.Pen.Color := ColorBlendHalf(SimbaTheme.ColorScrollBarActive, SimbaTheme.ColorLine);
+    Canvas.Pen.Color := ColorBlendHalf(SimbaComponentTheme.ColorScrollBarActive, SimbaComponentTheme.ColorLine);
     Canvas.Frame(TRect.Create(1,1,ClientWidth-1,ClientHeight-1));
   end;
 

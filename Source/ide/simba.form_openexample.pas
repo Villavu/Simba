@@ -51,7 +51,7 @@ implementation
 
 uses
   LCLType, AnchorDocking, simba.vartype_string,
-  simba.form_main, simba.form_tabs, simba.fs, simba.ide_theme;
+  simba.form_main, simba.form_tabs, simba.fs, simba.component_theme;
 
 function ReadResourceString(ResourceName: String): String;
 begin
@@ -135,12 +135,12 @@ procedure TSimbaOpenExampleForm.SplitterPaint(Sender: TObject);
 begin
   with TSplitter(Sender) do
   begin
-    Canvas.Brush.Color := SimbaTheme.ColorFrame;
+    Canvas.Brush.Color := SimbaComponentTheme.ColorFrame;
     Canvas.FillRect(ClientRect);
 
     if MouseInClient then
     begin
-      Canvas.Brush.Color := SimbaTheme.ColorActive;
+      Canvas.Brush.Color := SimbaComponentTheme.ColorActive;
       Canvas.FillRect(3, 3, Width-3, Height-3);
     end;
   end;
@@ -181,8 +181,8 @@ begin
   Splitter.OnEnter := @DoSplitterEnterExit;
   Splitter.OnExit := @DoSplitterEnterExit;
 
-  RightPanel.Color := SimbaTheme.ColorBackground;
-  RightPanel.Font.Color := SimbaTheme.ColorFont;
+  RightPanel.Color := SimbaComponentTheme.ColorBackground;
+  RightPanel.Font.Color := SimbaComponentTheme.ColorFont;
 
   ButtonPanel := TSimbaButtonPanel.Create(Self);
   ButtonPanel.Parent := Self;

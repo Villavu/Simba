@@ -16,7 +16,6 @@ interface
 uses
   Classes, SysUtils, Forms, ComCtrls, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls, Zipper, syncobjs,
   simba.base,
-  simba.settings,
   simba.httpclient,
   simba.component_treeview,
   simba.component_buttonpanel,
@@ -99,7 +98,7 @@ implementation
 
 uses
   ATCanvasPrimitives,
-  simba.ide_theme,
+  simba.component_theme,
   simba.form_main,
   simba.vartype_string,
   simba.fs,
@@ -202,8 +201,8 @@ var
   ButtonPanel: TSimbaButtonPanel;
   Control: TControl;
 begin
-  Color := SimbaTheme.ColorFrame;
-  Font.Color := SimbaTheme.ColorFont;
+  Color := SimbaComponentTheme.ColorFrame;
+  Font.Color := SimbaComponentTheme.ColorFont;
   Width := Scale96ToScreen(750);
   Height := Scale96ToScreen(450);
 
@@ -235,13 +234,13 @@ begin
   FStatusLabel.Layout := tlCenter;
   FStatusLabel.AutoSize := True;
   FStatusLabel.BorderSpacing.Left := 5;
-  FStatusLabel.Font.Color := SimbaTheme.ColorFont;
+  FStatusLabel.Font.Color := SimbaComponentTheme.ColorFont;
   FStatusLabel.Caption := 'Double click on an item to download it!';
 
-  MainPage.Color := SimbaTheme.ColorBackground;
-  ErrorPage.Color := SimbaTheme.ColorBackground;
+  MainPage.Color := SimbaComponentTheme.ColorBackground;
+  ErrorPage.Color := SimbaComponentTheme.ColorBackground;
   for Control in ErrorPage.GetEnumeratorControls() do
-    Control.Font.Color := SimbaTheme.ColorFont;
+    Control.Font.Color := SimbaComponentTheme.ColorFont;
   Label5.Font.Color := $FFE385;
   Label6.Font.Color := $FFE385;
 

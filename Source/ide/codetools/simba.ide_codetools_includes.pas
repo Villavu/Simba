@@ -80,7 +80,8 @@ var
 implementation
 
 uses
-  simba.env, simba.fs, simba.plugin_dump;
+  simba.env, simba.fs, simba.plugin_dump,
+  simba.initializations;
 
 procedure TCodetoolsInclude.OnIncludeDirect(Sender: TPasLexer);
 var
@@ -374,12 +375,19 @@ begin
   end;
 end;
 
-initialization
+procedure DoCreate;
+begin
   CodetoolsIncludes := TCodetoolsIncludes.Create();
+end;
 
-finalization
-  if Assigned(CodetoolsIncludes) then
-    FreeAndNil(CodetoolsIncludes);
+procedure DoDestroy;
+begin
+  FreeAndNil(CodetoolsIncludes);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'CodetoolsIncludes', 5);
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'CodetoolsIncludes', -5);
 
 end.
 

@@ -223,7 +223,7 @@ begin
   Opts.Flat := FlatCheckbox.Checked;
   Opts.IgnoreList := IgnoreListMemo.Lines.ToStringArray();
 
-  if SimbaQuestionDlg('Install Package', 'Install "%s" to "%s" ?', [FPackage.DisplayName, ExtractRelativePath(SimbaEnv.SimbaPath, Opts.Path)]) = ESimbaDialogResult.YES then
+  if ShowQuestionDialog('Install Package', 'Install "%s" to "%s" ?', [FPackage.DisplayName, ExtractRelativePath(SimbaEnv.SimbaPath, Opts.Path)]) = ESimbaDialogButton.YES then
     FInstaller.Install(Opts);
 end;
 

@@ -45,6 +45,8 @@ type
     procedure Add(APoint: TPoint; AColor: TColor; ExpandAndScroll: Boolean = False);
     procedure LoadColors;
     procedure SaveColors;
+
+    procedure MakeVisible;
   end;
 
 var
@@ -55,7 +57,8 @@ implementation
 uses
   Clipbrd, LCLType,
   simba.ide_maintoolbar, simba.dialog,
-  simba.colormath, simba.ide_theme, simba.settings, simba.vartype_string;
+  simba.colormath, simba.component_theme, simba.settings, simba.vartype_string,
+  simba.ide_dockinghelpers;
 
 type
   TColorHistoryValue = packed record
@@ -134,7 +137,7 @@ end;
 
 procedure TSimbaColorPickHistoryForm.ContextMenuClearClick(Sender: TObject);
 begin
-  if SimbaQuestionDlg('Simba', 'Clear the entire list?', []) = ESimbaDialogResult.YES then
+  if ShowQuestionDialog('Simba', 'Clear the entire list?', []) = ESimbaDialogButton.YES then
     FColorList.Clear();
 end;
 
@@ -213,12 +216,12 @@ begin
 
   if Node.Selected then
   begin
-    ACanvas.Brush.Color := SimbaTheme.ColorActive;
+    ACanvas.Brush.Color := SimbaComponentTheme.ColorActive;
     ACanvas.FillRect(BaseRect);
   end;
 
   ACanvas.Brush.Color := TColorNode(Node).Color;
-  ACanvas.Pen.Color := SimbaTheme.ColorFont;
+  ACanvas.Pen.Color := SimbaComponentTheme.ColorFont;
   ACanvas.Pen.Width := 1;
   ACanvas.Rectangle(ColorRect);
 
@@ -286,6 +289,12 @@ begin
   SimbaSettings.General.ColorPickerHistory.Value := Stream.DataString;
 
   Stream.Free();
+end;
+
+procedure TSimbaColorPickHistoryForm.MakeVisible;
+begin
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    TSimbaAnchorDockHostSite(HostDockSite).MakeVisible();
 end;
 
 {$R *.lfm}

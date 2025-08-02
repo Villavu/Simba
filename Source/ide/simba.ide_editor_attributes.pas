@@ -91,7 +91,7 @@ implementation
 uses
   Graphics, IniFiles,
   SynGutterBase, SynEditMiscClasses, SynEditMarkupHighAll, SynEditMarkupWordGroup, SynEditMarkupFoldColoring, SynEditPointClasses, SynHighlighterPas,
-  simba.ide_editor, simba.ide_theme;
+  simba.ide_editor, simba.component_theme;
 
 type
   TSynAttributeProtectedAccess = class(TSynHighlighterAttributes);
@@ -176,7 +176,7 @@ procedure TSimbaEditor_GutterColorAttribute.Init;
 begin
   inherited;
 
-  Foreground := SimbaTheme.ColorBackground;
+  Foreground := SimbaComponentTheme.ColorBackground;
 end;
 
 procedure TSimbaEditor_IndentColorAttribute.DoChange;
@@ -229,7 +229,7 @@ procedure TSimbaEditor_BackgroundColorAttribute.Init;
 begin
   inherited;
 
-  Foreground := SimbaTheme.ColorBackground;
+  Foreground := SimbaComponentTheme.ColorBackground;
 end;
 
 procedure TSimbaEditor_CaretColorAttribute.DoChange;
@@ -250,7 +250,7 @@ procedure TSimbaEditor_CaretColorAttribute.Init;
 begin
   inherited;
 
-  Foreground := SimbaTheme.ColorBackground;
+  Foreground := SimbaComponentTheme.ColorBackground;
 end;
 
 procedure TSimbaEditor_DividerAttribute.DoChange;
@@ -327,7 +327,7 @@ begin
 
   Editor.BracketMatchColor.FrameColor := RGBToColor(190, 20, 20);
 
-  Editor.SelectedColor.Background := SimbaTheme.ColorActive;
+  Editor.SelectedColor.Background := SimbaComponentTheme.ColorActive;
   Editor.SelectedColor.BackAlpha := 220;
 
   Editor.LineHighlightColor.Background := $FFFFFF;

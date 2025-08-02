@@ -37,23 +37,12 @@ implementation
 uses
   Forms,
   Graphics,
-  simba.ide_initialization,
+  simba.initializations,
   simba.vartype_matrix,
   simba.image_lazbridge,
   simba.image_drawmatrix,
   simba.colormath,
   simba.threading;
-
-procedure CreateDebugImg;
-begin
-  SimbaDebugImageForm := TSimbaDebugImageForm.Create(Application);
-  SimbaDebugImageForm.Name := 'SimbaDebugImageForm';
-  SimbaDebugImageForm.Caption := 'Debug Image';
-
-  SimbaDebugMatrixForm := TSimbaDebugMatrixForm.Create(Application);
-  SimbaDebugMatrixForm.Name := 'SimbaDebugMatrixForm';
-  SimbaDebugMatrixForm.Caption := 'Debug Matrix';
-end;
 
 procedure TSimbaDebugMatrixForm.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 begin
@@ -137,8 +126,19 @@ begin
   FImageBox.OnImgDoubleClick := @DoImgDoubleClick;
 end;
 
+procedure DoCreate;
+begin
+  SimbaDebugImageForm := TSimbaDebugImageForm.Create(Application);
+  SimbaDebugImageForm.Name := 'SimbaDebugImageForm';
+  SimbaDebugImageForm.Caption := 'Debug Image';
+
+  SimbaDebugMatrixForm := TSimbaDebugMatrixForm.Create(Application);
+  SimbaDebugMatrixForm.Name := 'SimbaDebugMatrixForm';
+  SimbaDebugMatrixForm.Caption := 'Debug Matrix';
+end;
+
 initialization
-  SimbaIDEInitialization_AddBeforeCreate(@CreateDebugImg, 'Create Debug Image');
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'DebugImage');
 
 end.
 

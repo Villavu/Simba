@@ -150,7 +150,9 @@ implementation
 
 uses
   Math, Clipbrd,
-  simba.ide_theme, simba.misc;
+  simba.component_theme,
+  simba.misc,
+  simba.initializations;
 
 type
   TCaretFlasher = class
@@ -168,7 +170,7 @@ type
   end;
 
 var
-  CaretFlasher: TCaretFlasher;
+  EditCaretFlasher: TCaretFlasher;
 
 procedure TCaretFlasher.DoTimer(Sender: TObject);
 var
@@ -263,14 +265,14 @@ procedure TSimbaEdit.WMSetFocus(var Message: TLMSetFocus);
 begin
   inherited;
 
-  CaretFlasher.Add(Self);
+  EditCaretFlasher.Add(Self);
 end;
 
 procedure TSimbaEdit.WMKillFocus(var Message: TLMKillFocus);
 begin
   inherited;
 
-  CaretFlasher.Remove(Self);
+  EditCaretFlasher.Remove(Self);
   ClearSelection();
   Invalidate();
 end;
@@ -519,7 +521,7 @@ begin
   begin
     Font.BeginUpdate();
     Font := Parent.Font;
-    Font.Color := SimbaTheme.ColorFont;
+    Font.Color := SimbaComponentTheme.ColorFont;
     Font.EndUpdate();
   end;
 end;
@@ -787,12 +789,12 @@ begin
   TabStop := True;
   BorderWidth := 2;
 
-  Font.Color := SimbaTheme.ColorFont;
+  Font.Color := SimbaComponentTheme.ColorFont;
 
-  Color := SimbaTheme.ColorBackground;
-  ColorBorder := SimbaTheme.ColorBackground;
-  ColorBorderActive := SimbaTheme.ColorActive;
-  ColorSelection := SimbaTheme.ColorActive;
+  Color := SimbaComponentTheme.ColorBackground;
+  ColorBorder := SimbaComponentTheme.ColorBackground;
+  ColorBorderActive := SimbaComponentTheme.ColorActive;
+  ColorSelection := SimbaComponentTheme.ColorActive;
 
   HintTextStyle := [fsItalic];
   HintTextColor := clLtGray;
@@ -802,7 +804,7 @@ end;
 
 destructor TSimbaEdit.Destroy;
 begin
-  CaretFlasher.Remove(Self);
+  EditCaretFlasher.Remove(Self);
 
   inherited Destroy();
 end;
@@ -895,7 +897,7 @@ begin
   inherited Create(AOwner);
 
   ControlStyle := ControlStyle + [csOpaque];
-  Color := SimbaTheme.ColorBackground;
+  Color := SimbaComponentTheme.ColorBackground;
   AutoSize := True;
 
   FEdit := TSimbaEdit.Create(Self);
@@ -925,12 +927,19 @@ begin
   FEdit.BorderSpacing.Left := 5;
 end;
 
-initialization
-  CaretFlasher := TCaretFlasher.Create();
+procedure DoCreate;
+begin
+  EditCaretFlasher := TCaretFlasher.Create();
+end;
 
-finalization
-  if (CaretFlasher <> nil) then
-    FreeAndNil(CaretFlasher);
+procedure DoDestroy;
+begin
+  FreeAndNil(EditCaretFlasher);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'EditCaretFlasher');
+  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'EditCaretFlasher');
 
 end.
 

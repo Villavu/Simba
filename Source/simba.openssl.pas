@@ -25,7 +25,7 @@ implementation
 
 uses
   LCLType, Forms, openssl, gz,
-  simba.base, simba.settings, simba.env, simba.fs, simba.ide_initialization
+  simba.base, simba.settings, simba.env, simba.fs, simba.initializations
   {$IF defined(WINDOWS)},
   windows
   {$ELSEIF defined(LINUX)},
@@ -149,7 +149,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization_AddBeforeShow(@ExtractOpenSSL, 'Extract OpenSSL', True);
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW_BACKGROUND, @ExtractOpenSSL, 'Extract OpenSSL', 0);
 
 end.
 

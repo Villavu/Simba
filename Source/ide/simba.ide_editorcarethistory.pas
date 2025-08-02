@@ -59,7 +59,7 @@ implementation
 uses
   simba.form_tabs,
   simba.ide_events,
-  simba.ide_initialization,
+  simba.initializations,
   simba.ide_editor_mousecommands,
   simba.threading;
 
@@ -290,17 +290,19 @@ begin
       QueueOnMainThread(@SimbaEditorCaretHistory.GoBack);
 end;
 
-procedure CreateEditorCaretHistory;
+procedure DoCreate;
 begin
   SimbaEditorCaretHistory := TSimbaEditorCaretHistory.Create();
 end;
 
-initialization
-  SimbaIDEInitialization_AddBeforeCreate(@CreateEditorCaretHistory, 'Create EditorCaretHistory');
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaEditorCaretHistory);
+end;
 
-finalization
-  if (SimbaEditorCaretHistory <> nil) then
-    FreeAndNil(SimbaEditorCaretHistory);
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaEditorCaretHistory');
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaEditorCaretHistory');
 
 end.
 

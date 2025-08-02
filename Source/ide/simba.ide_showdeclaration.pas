@@ -29,7 +29,7 @@ implementation
 uses
   Forms, Controls, Graphics, ATListbox,
   simba.env,
-  simba.ide_theme,
+  simba.component_theme,
   simba.component_buttonpanel,
   simba.form_main,
   simba.form_tabs;
@@ -149,13 +149,13 @@ begin
   FListBox.VirtualMode := False;
   FListBox.HeaderText := '|Header|Line|File';
   FListBox.OnDrawItem := @DoDrawItem;
-  FListBox.ColorBgListbox := SimbaTheme.ColorBackground;
-  FListBox.ColorBgListboxHeader := SimbaTheme.ColorFrame;
-  FListBox.ColorBgListboxSel := SimbaTheme.ColorActive;
-  FListBox.ColorFontListbox := SimbaTheme.ColorFont;
-  FListBox.ColorFontListboxHeader := SimbaTheme.ColorFont;
-  FListBox.ColorFontListboxSel := SimbaTheme.ColorFont;
-  FListBox.ColorSeparators := SimbaTheme.ColorLine;
+  FListBox.ColorBgListbox := SimbaComponentTheme.ColorBackground;
+  FListBox.ColorBgListboxHeader := SimbaComponentTheme.ColorFrame;
+  FListBox.ColorBgListboxSel := SimbaComponentTheme.ColorActive;
+  FListBox.ColorFontListbox := SimbaComponentTheme.ColorFont;
+  FListBox.ColorFontListboxHeader := SimbaComponentTheme.ColorFont;
+  FListBox.ColorFontListboxSel := SimbaComponentTheme.ColorFont;
+  FListBox.ColorSeparators := SimbaComponentTheme.ColorLine;
 
   for I := 0 to High(Items) do
     with Items[I] do

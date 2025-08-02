@@ -28,7 +28,7 @@ implementation
 
 uses
   lptypes,
-  simba.random, simba.image, simba.script_objectutil;
+  simba.random, simba.script_objectutil;
 
 (*
 Random

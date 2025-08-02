@@ -2,9 +2,11 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+  Images for our components.
+  Must be here so the components work in a script processes since SimbaMainForm.Images isn't available
 
-  Images for components.
-  Must be here so the components work in a script process since SimbaMainForm.Images wont be created
+  Images are stored in Project options > Resources
 }
 unit simba.component_images;
 
@@ -29,7 +31,7 @@ var
 implementation
 
 uses
-  simba.ide_initialization, simba.ide_utils;
+  simba.initializations, simba.ide_utils;
 
 type
   TImageListHelper = class helper for TImageList

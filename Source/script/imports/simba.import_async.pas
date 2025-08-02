@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.script, simba.script_objectutil;
+  simba.base, simba.baseclass, simba.script;
 
 procedure ImportASync(Script: TSimbaScript);
 
@@ -14,7 +14,11 @@ implementation
 
 uses
   lptypes, ffi,
-  simba.target, simba.http_async, simba.input_async, simba.fs_async;
+  simba.script_objectutil,
+  simba.target,
+  simba.target_asyncmovemouse,
+  simba.http_async,
+  simba.fs_async;
 
 (*
 ASync
@@ -93,65 +97,91 @@ begin
 end;
 
 (*
-ASync.MouseMove
----------------
+TASyncMouse.Construct
+---------------------
 ```
-procedure ASync.MouseMove(Target: TTarget; Dest: TPoint; Accuracy: Single = 1);
-procedure ASync.MouseMove(Dest: TPoint; Accuracy: Single = 1);
+function TASyncMouse.Construct(Target: TTarget): TASyncMouse; static;
 ```
-Moves the mouse on another thread, so the script can do other things such as updating the destination.
+Construct a ASyncMouse for a target.
+The `new` keyword is used like so:
+```
+m := new TASyncMouse(Target);
+```
+*)
+procedure _LapeASyncMouse_Construct(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectASyncMouse(Result)^^ := TASyncMouse.Create(PLapeObjectTarget(Params^[0])^^);
+end;
+
+procedure _LapeASyncMouse_Destroy(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  LapeObjectDestroy(PLapeObject(Params^[0]));
+end;
+
+(*
+TASyncMouse.Move
+----------------
+```
+procedure TASyncMouse.Move(Dest: TPoint; Accuracy: Single = 1);
+```
 *)
 procedure _LapeASyncMouse_Move(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncMouse.Move(PLapeObjectTarget(Params^[0])^^, PPoint(Params^[1])^, PSingle(Params^[2])^);
+  PLapeObjectASyncMouse(Params^[0])^^.Move(PPoint(Params^[1])^, PSingle(Params^[2])^);
 end;
 
 (*
-ASync.MouseChangeDest
----------------------
+TASyncMouse.MouseChangeDest
+---------------------------
 ```
-procedure ASync.MouseChangeDest(Dest: TPoint);
+property TASyncMouse.Destination(Value: TPoint);
+property TASyncMouse.Destination: TPoint;
 ```
 *)
-procedure _LapeASyncMouse_MouseChangeDest(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeASyncMouse_Destination_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncMouse.ChangeDest(PPoint(Params^[0])^);
+  PLapeObjectASyncMouse(Params^[0])^^.Destination := PPoint(Params^[1])^;
+end;
+
+procedure _LapeASyncMouse_Destination_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPoint(Result)^ := PLapeObjectASyncMouse(Params^[0])^^.Destination;
 end;
 
 (*
-ASync.MouseMoving
------------------
+TASyncMouse.IsMoving
+--------------------
 ```
-property ASync.MouseMoving: Boolean;
+property TASyncMouse.IsMoving: Boolean;
 ```
 *)
-procedure _LapeASyncMouse_IsMoving(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeASyncMouse_IsMoving_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := ASyncMouse.IsMoving();
+  PBoolean(Result)^ := PLapeObjectASyncMouse(Params^[0])^^.IsMoving;
 end;
 
 (*
-ASync.MouseWaitMoving
----------------------
+TASyncMouse.Wait
+----------------
 ```
-procedure ASync.MouseWaitMoving;
+function TASyncMouse.Wait(Timeout: Integer = -1): Boolean
 ```
 *)
-procedure _LapeASyncMouse_WaitMoving(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeASyncMouse_Wait(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncMouse.WaitMoving();
+  PBoolean(Result)^ := PLapeObjectASyncMouse(Params^[0])^^.Wait(PInteger(Params^[1])^);
 end;
 
 (*
-ASync.MouseStop
----------------
+TASyncMouse.Stop
+----------------
 ```
-procedure ASync.MouseStop;
+procedure TASyncMouse.Stop;
 ```
 *)
 procedure _LapeASyncMouse_Stop(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  ASyncMouse.Stop();
+  PLapeObjectASyncMouse(Params^[0])^^.Stop();
 end;
 
 (*
@@ -208,19 +238,18 @@ begin
   begin
     DumpSection := 'ASync';
 
+    LapeObjectImport(Script.Compiler, 'TASyncMouse');
+    addGlobalFunc('function TASyncMouse.Construct(Target: TTarget): TASyncMouse; static;', @_LapeASyncMouse_Construct);
+    addGlobalFunc('procedure TASyncMouse.Destroy;', @_LapeASyncMouse_Destroy);
+    addGlobalFunc('property TASyncMouse.Destination: TPoint;', @_LapeASyncMouse_Destination_Read);
+    addGlobalFunc('property TASyncMouse.Destination(Value: TPoint);', @_LapeASyncMouse_Destination_Write);
+    addGlobalFunc('property TASyncMouse.IsMoving: Boolean', @_LapeASyncMouse_IsMoving_Read);
+    addGlobalFunc('function TASyncMouse.Wait(Timeout: Integer = -1): Boolean;', @_LapeASyncMouse_Wait);
+    addGlobalFunc('procedure TASyncMouse.Stop;', @_LapeASyncMouse_Stop);
+    addGlobalFunc('procedure TASyncMouse.Move(Dest: TPoint; Accuracy: Single = 0.5); overload;', @_LapeASyncMouse_Move);
+
     // namespace
     addGlobalType('record end;', 'ASync');
-
-    addGlobalFunc('procedure ASync.MouseMove(Target: TTarget; Dest: TPoint; Accuracy: Single = 0.5); static; overload;', @_LapeASyncMouse_Move);
-    addGlobalFunc('procedure ASync.MouseMove(Dest: TPoint; Accuracy: Single = 0.5); static; overload;', [
-                  'begin',
-                  '  ASync.MouseMove(System.Target, Dest, Accuracy);',
-                  'end;'
-                 ]);
-    addGlobalFunc('procedure ASync.MouseChangeDest(Dest: TPoint); static;', @_LapeASyncMouse_MouseChangeDest);
-    addGlobalFunc('property ASync.MouseMoving: Boolean; static;', @_LapeASyncMouse_IsMoving);
-    addGlobalFunc('procedure ASync.MouseWaitMoving; static;', @_LapeASyncMouse_WaitMoving);
-    addGlobalFunc('procedure ASync.MouseStop; static;', @_LapeASyncMouse_Stop);
 
     addGlobalType([
       'record',

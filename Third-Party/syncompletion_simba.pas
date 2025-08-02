@@ -68,7 +68,7 @@ type
   private
     FCompletion: TSynBaseCompletion;
     FIndex: Integer;
-
+  protected
     procedure Paint; override;
   public
     constructor Create(AOwner: TComponent); override;

@@ -71,7 +71,7 @@ implementation
 uses
   AnchorDocking,
   simba.component_button,
-  simba.env, simba.fs, simba.ide_theme, simba.ide_events, simba.form_main, simba.form_tabs;
+  simba.env, simba.fs, simba.component_theme, simba.ide_events, simba.form_main, simba.form_tabs;
 
 type
   TBackupNode = class(TTreeNode)
@@ -88,12 +88,12 @@ procedure TSimbaBackupsForm.SplitterPaint(Sender: TObject);
 begin
   with TSplitter(Sender) do
   begin
-    Canvas.Brush.Color := SimbaTheme.ColorFrame;
+    Canvas.Brush.Color := SimbaComponentTheme.ColorFrame;
     Canvas.FillRect(ClientRect);
 
     if MouseInClient then
     begin
-      Canvas.Brush.Color := SimbaTheme.ColorActive;
+      Canvas.Brush.Color := SimbaComponentTheme.ColorActive;
       Canvas.FillRect(3, 3, Width-3, Height-3);
     end;
   end;
@@ -238,8 +238,8 @@ begin
   TreeView.FilterCollapseOnClear := True;
   TreeView.Images := SimbaMainForm.Images;
 
-  RightPanel.Color := SimbaTheme.ColorBackground;
-  RightPanel.Font.Color := SimbaTheme.ColorFont;
+  RightPanel.Color := SimbaComponentTheme.ColorBackground;
+  RightPanel.Font.Color := SimbaComponentTheme.ColorFont;
 
   ButtonPanel := TSimbaButtonPanel.Create(Self);
   ButtonPanel.Parent := Self;

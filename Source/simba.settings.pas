@@ -198,7 +198,7 @@ implementation
 uses
   Forms, SynEdit, LCLType,
   simba.base, simba.encoding, simba.env, simba.ide_editor_docgenerator,
-  simba.ide_initialization, simba.ide_theme, simba.misc;
+  simba.initializations, simba.component_theme, simba.misc;
 
 var
   SimbaSettingsInstance: TSimbaSettings = nil;
@@ -479,8 +479,8 @@ begin
   General.OpenSSLHash        := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLHash', '');
 
   General.CustomImageSize    := TSimbaSetting_Integer.Create(Self, 'General', 'CustomImageSize', 0);
-  General.ScrollBarSize      := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarSize', SimbaTheme.ScrollBarSize);
-  General.ScrollBarArrowSize := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarArrowSize', SimbaTheme.ScrollBarArrowSize);
+  General.ScrollBarSize      := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarSize', SimbaComponentTheme.ScrollBarSize);
+  General.ScrollBarArrowSize := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarArrowSize', SimbaComponentTheme.ScrollBarArrowSize);
 
   General.FindInFilesWidth      := TSimbaSetting_Integer.Create(Self, 'General', 'FindInFilesWidth', 700);
   General.FindInFilesHeight     := TSimbaSetting_Integer.Create(Self, 'General', 'FindInFilesHeight', 400);
@@ -549,13 +549,20 @@ begin
   inherited Destroy();
 end;
 
-initialization
+procedure DoCreate;
+begin
   SimbaSettingsInstance := TSimbaSettings.Create();
   SimbaSettingsInstance.Load();
+end;
 
-finalization
-  if (SimbaSettingsInstance <> nil) then
-    FreeAndNil(SimbaSettingsInstance);
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaSettingsInstance);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'SimbaSettings', 10); // Priority 10 = init first
+  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'SimbaSettings', -10); // Priority -10 = finalize last
 
 end.
 

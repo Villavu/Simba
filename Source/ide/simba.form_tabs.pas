@@ -119,7 +119,7 @@ uses
   simba.base, simba.env,
   simba.form_main, simba.form_output,
   simba.ide_dockinghelpers, simba.nativeinterface,
-  simba.ide_events, simba.ide_utils, simba.ide_theme, simba.settings;
+  simba.ide_events, simba.ide_utils, simba.component_theme, simba.settings;
 
 function GetSimbaActiveTab: TSimbaScriptTab;
 begin
@@ -391,7 +391,7 @@ begin
   FEditorReplace := TSimbaEditorReplace.Create(Self);
   FEditorFind := TSimbaEditorFind.Create(Self);
 
-  FindPanel.Color := SimbaTheme.ColorFrame;
+  FindPanel.Color := SimbaComponentTheme.ColorFrame;
   FindPanel.Visible := SimbaSettings.Editor.FindPanelVisible.Value;
   FindPanel.AddHandlerOnVisibleChanged(@DoFindPanelVisibleChanged);
 

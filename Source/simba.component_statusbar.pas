@@ -57,7 +57,7 @@ implementation
 
 uses
   LCLIntf, ATCanvasPrimitives,
-  simba.ide_theme;
+  simba.component_theme;
 
 procedure TSimbaStatusBar.CheckIndex(Index: Integer);
 begin
@@ -162,8 +162,8 @@ var
 begin
   if (FPanelCount = 0) then
   begin
-    Canvas.Pen.Color := ColorBlendHalf(SimbaTheme.ColorFrame, SimbaTheme.ColorLine);
-    Canvas.Brush.Color := SimbaTheme.ColorFrame;
+    Canvas.Pen.Color := ColorBlendHalf(SimbaComponentTheme.ColorFrame, SimbaComponentTheme.ColorLine);
+    Canvas.Brush.Color := SimbaComponentTheme.ColorFrame;
     Canvas.Line(0, 0, Width, 0);
     Canvas.FillRect(0, 1, Width, Height);
   end else
@@ -189,9 +189,9 @@ begin
   Style := Canvas.TextStyle;
   Style.Layout := tlCenter;
 
-  Canvas.Font.Color := SimbaTheme.ColorFont;
-  Canvas.Pen.Color := ColorBlendHalf(SimbaTheme.ColorFrame, SimbaTheme.ColorLine);
-  Canvas.Brush.Color := SimbaTheme.ColorFrame;
+  Canvas.Font.Color := SimbaComponentTheme.ColorFont;
+  Canvas.Pen.Color := ColorBlendHalf(SimbaComponentTheme.ColorFrame, SimbaComponentTheme.ColorLine);
+  Canvas.Brush.Color := SimbaComponentTheme.ColorFrame;
 
   R := PanelRect(Index);
 

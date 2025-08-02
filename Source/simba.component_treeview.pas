@@ -189,7 +189,7 @@ implementation
 
 uses
   Math,
-  simba.ide_theme,
+  simba.component_theme,
   simba.component_images;
 
 constructor TSimbaTreeView.Create(AOwner: TComponent; NodeClass: TTreeNodeClass);
@@ -237,9 +237,9 @@ begin
   FTree.OnMouseMove := @DoMouseMove;
   FTree.DragMode := dmAutomatic;
   FTree.TabStop := False;
-  FTree.BackgroundColor := SimbaTheme.ColorBackground;
-  FTree.SelectionColor := SimbaTheme.ColorActive;
-  FTree.Font.Color := SimbaTheme.ColorFont;
+  FTree.BackgroundColor := SimbaComponentTheme.ColorBackground;
+  FTree.SelectionColor := SimbaComponentTheme.ColorActive;
+  FTree.Font.Color := SimbaComponentTheme.ColorFont;
   FTree.OnAdvancedCustomDrawItem := @DoDrawItem;
   FTree.OnEndUpdate := @DoEndUpdate;
   FTree.OnAddition := @DoTreeAddOrDelete;
@@ -256,7 +256,7 @@ begin
   FFilterPanel.Parent := Self;
   FFilterPanel.Align := alBottom;
   FFilterPanel.AutoSize := True;
-  FFilterPanel.Color := SimbaTheme.ColorFrame;
+  FFilterPanel.Color := SimbaComponentTheme.ColorFrame;
 
   FFilterEdit := TSimbaEdit.Create(Self);
   FFilterEdit.Parent := FFilterPanel;
@@ -455,10 +455,10 @@ begin
   inherited FontChanged(Sender);
 
   FTree.Font := Self.Font;
-  FTree.Font.Color := SimbaTheme.ColorFont;
+  FTree.Font.Color := SimbaComponentTheme.ColorFont;
 
   FFilterEdit.Font := Self.Font;
-  FFilterEdit.Font.Color := SimbaTheme.ColorFont;
+  FFilterEdit.Font.Color := SimbaComponentTheme.ColorFont;
 end;
 
 procedure TSimbaTreeView.UpdateFilter;

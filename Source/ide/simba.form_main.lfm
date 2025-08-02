@@ -1,11 +1,12 @@
 object SimbaMainForm: TSimbaMainForm
   Left = -1136
-  Height = 431
+  Height = 646
   Top = 461
-  Width = 812
+  Width = 1218
   Caption = 'Simba'
-  ClientHeight = 431
-  ClientWidth = 812
+  ClientHeight = 646
+  ClientWidth = 1218
+  DesignTimePPI = 144
   Position = poScreenCenter
   LCLVersion = '4.0.0.4'
   OnClose = FormClose
@@ -118,13 +119,13 @@ object SimbaMainForm: TSimbaMainForm
     }
     Visible = True
     OnClick = TrayIconClick
-    Left = 152
-    Top = 40
+    Left = 228
+    Top = 60
   end
   object TrayPopup: TPopupMenu
     Images = Images
-    Left = 152
-    Top = 104
+    Left = 228
+    Top = 156
     object TrayPopupExit: TMenuItem
       Caption = 'Close Simba'
       ImageIndex = 4
@@ -135,8 +136,8 @@ object SimbaMainForm: TSimbaMainForm
     Images = Images
     OnMeasureItem = MainMenuMeasureItem
     OnPopup = MenuFileClick
-    Left = 304
-    Top = 104
+    Left = 456
+    Top = 156
     object MenuItemNew: TMenuItem
       Caption = '&New'
       ImageIndex = 5
@@ -219,8 +220,8 @@ object SimbaMainForm: TSimbaMainForm
     Images = Images
     OnMeasureItem = MainMenuMeasureItem
     OnPopup = MenuEditClick
-    Left = 512
-    Top = 104
+    Left = 768
+    Top = 156
     object MenuItemUndo: TMenuItem
       Caption = 'Undo'
       ImageIndex = 32
@@ -292,8 +293,8 @@ object SimbaMainForm: TSimbaMainForm
   object MainMenuScript: TPopupMenu
     Images = Images
     OnMeasureItem = MainMenuMeasureItem
-    Left = 408
-    Top = 104
+    Left = 612
+    Top = 156
     object MenuItemCompile: TMenuItem
       Caption = 'Compile'
       Hint = 'Compile Script'
@@ -336,8 +337,8 @@ object SimbaMainForm: TSimbaMainForm
   object MainMenuTools: TPopupMenu
     Images = Images
     OnMeasureItem = MainMenuMeasureItem
-    Left = 512
-    Top = 40
+    Left = 768
+    Top = 60
     object MenuItemSettings: TMenuItem
       Caption = 'Settings'
       ImageIndex = 34
@@ -395,8 +396,8 @@ object SimbaMainForm: TSimbaMainForm
   object MainMenuView: TPopupMenu
     Images = Images
     OnMeasureItem = MainMenuMeasureItem
-    Left = 304
-    Top = 40
+    Left = 456
+    Top = 60
     object MenuItemTrayIcon: TMenuItem
       AutoCheck = True
       Caption = 'Tray Icon'
@@ -462,8 +463,8 @@ object SimbaMainForm: TSimbaMainForm
   object MainMenuHelp: TPopupMenu
     Images = Images
     OnMeasureItem = MainMenuMeasureItem
-    Left = 408
-    Top = 40
+    Left = 612
+    Top = 60
     object MenuItemAbout: TMenuItem
       Caption = 'About'
       ImageIndex = 40
@@ -487,14 +488,14 @@ object SimbaMainForm: TSimbaMainForm
   object RecentFilesPopup: TPopupMenu
     OnMeasureItem = MainMenuMeasureItem
     OnPopup = RecentFilesPopupPopup
-    Left = 152
-    Top = 176
+    Left = 228
+    Top = 264
   end
   object Images: TImageList
     ShareImages = True
     OnGetWidthForPPI = ImagesGetWidthForPPI
-    Left = 48
-    Top = 40
+    Left = 72
+    Top = 60
     Bitmap = {
       4C7A420000001000000010000000ED3900000000000078DAED9D075814D7D7C6
       C71A1335B16B2CD81B9A184B8C2DB144638D511135F6164B346AD468D4A888D8
@@ -2888,8 +2889,8 @@ object SimbaMainForm: TSimbaMainForm
   end
   object MainMenuSearch: TPopupMenu
     Images = Images
-    Left = 304
-    Top = 176
+    Left = 456
+    Top = 264
     object MenuItemFind: TMenuItem
       Caption = 'Find'
       ImageIndex = 28

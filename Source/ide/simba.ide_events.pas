@@ -67,7 +67,7 @@ var
 implementation
 
 uses
-  simba.ide_initialization;
+  simba.initializations;
 
 type
   TManagedEvent = class(TComponent)
@@ -140,17 +140,19 @@ begin
   inherited Destroy();
 end;
 
-procedure CreateSimbaIDEEvents;
+procedure DoCreate;
 begin
   SimbaIDEEvents := TSimbaIDEEvents.Create();
 end;
 
-initialization
-  SimbaIDEInitialization_AddBeforeCreate(@CreateSimbaIDEEvents, 'Create SimbaIDEEvents');
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaIDEEvents);
+end;
 
-finalization
-  if Assigned(SimbaIDEEvents) then
-    FreeAndNil(SimbaIDEEvents);
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'SimbaIDEEvents', 10); // Priority 10  = create first
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaIDEEvents', -10);     // Priority -10 = finalize last
 
 end.
 

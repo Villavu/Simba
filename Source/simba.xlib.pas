@@ -272,7 +272,8 @@ implementation
 
 uses
   dl,
-  simba.base;
+  simba.base,
+  simba.initializations;
 
 function dlmopen(ID: SizeInt; Path: PChar; Flags: Integer): Pointer; cdecl; external;
 
@@ -512,10 +513,18 @@ begin
     dlclose(XTestHandle);
 end;
 
-initialization
+procedure DoCreate;
+begin
   SimbaXLib := TSimbaXLib.Create();
+end;
 
-finalization
-  SimbaXLib.Free();
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaXLib);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'SimbaXLib', 50);
+  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'SimbaXLib', -50);
 
 end.

@@ -87,6 +87,9 @@ const
 
 implementation
 
+uses
+  simba.initializations;
+
 var
   ArrayHelperParsers: TCodeParserList;
 
@@ -163,11 +166,19 @@ begin
     Result := [];
 end;
 
-initialization
+procedure DoCreate;
+begin
   ArrayHelperParsers := TCodeParserList.Create(True);
+end;
 
-finalization
+procedure DoDestroy;
+begin
   FreeAndNil(ArrayHelperParsers);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'ArrayHelperParsers', 5);
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'ArrayHelperParsers', -5);
 
 end.
 

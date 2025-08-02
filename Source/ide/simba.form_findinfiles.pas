@@ -94,7 +94,7 @@ implementation
 
 uses
   simba.threading,
-  simba.ide_theme,
+  simba.component_theme,
   simba.fs,
   simba.settings,
   simba.form_tabs;
@@ -371,8 +371,8 @@ begin
   FEditLocation.Align := alTop;
   FEditLocation.Caption := 'Location:';
   FEditLocation.LabelMeasure := 'Location:';
-  FEditLocation.Color := SimbaTheme.ColorFrame;
-  FEditLocation.Edit.ColorBorder := SimbaTheme.ColorScrollBarActive;
+  FEditLocation.Color := SimbaComponentTheme.ColorFrame;
+  FEditLocation.Edit.ColorBorder := SimbaComponentTheme.ColorScrollBarActive;
   FEditLocation.BorderSpacing.Top := 5;
   FEditLocation.Button := FButtonSelectDir;
   FEditLocation.TabOrder := 1;
@@ -382,8 +382,8 @@ begin
   FEditSearch.Align := alTop;
   FEditSearch.Caption := 'Search:';
   FEditSearch.LabelMeasure := 'Location:';
-  FEditSearch.Color := SimbaTheme.ColorFrame;
-  FEditSearch.Edit.ColorBorder := SimbaTheme.ColorScrollBarActive;
+  FEditSearch.Color := SimbaComponentTheme.ColorFrame;
+  FEditSearch.Edit.ColorBorder := SimbaComponentTheme.ColorScrollBarActive;
   FEditSearch.TabOrder := 0;
 
   MemoContainer := TCustomControl.Create(Self);
@@ -415,8 +415,8 @@ end;
 
 procedure TSimbaFindInFilesForm.FormCreate(Sender: TObject);
 begin
-  Color := SimbaTheme.ColorFrame;
-  Font.Color := SimbaTheme.ColorFont;
+  Color := SimbaComponentTheme.ColorFrame;
+  Font.Color := SimbaComponentTheme.ColorFont;
 
   ButtonPanel := TSimbaButtonPanel.Create(Self);
   ButtonPanel.Parent := Self;

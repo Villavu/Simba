@@ -1,0 +1,14 @@
+// non-blocking mouse movement so your script can do
+// other tasks whilst the mouse is moving.
+
+var mouse: TASyncMouse;
+begin
+  mouse := new TASyncMouse(Target);
+  mouse.Move([400,400]);
+  Sleep(500); // but after 500ms we will change the destination!
+  mouse.Destination := [400,800];
+
+  // now wait for movement to complete
+  mouse.Wait();
+end;
+

@@ -98,7 +98,7 @@ begin
   DestY := FDest.Y;
   if (Hypot(X - DestX, Y - DestY) <= FAccuracy) then
     FStop := True;
-  Stop  := FStop;
+  Stop := FStop;
 end;
 
 procedure TSimbaASyncMouse.Execute;

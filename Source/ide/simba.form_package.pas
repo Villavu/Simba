@@ -178,7 +178,7 @@ begin
         FListBox.ItemIndex := FListBox.Add(Package);
       end else
       begin
-        SimbaErrorDlg('Package error', ['Package not found: %s', 'Error: %s'], [URL, IfThen(ExceptionMsg <> '', ExceptionMsg, Package.EndPoint.LastHTTPStatus.AsString)]);
+        ShowErrorDialog('Package error', ['Package not found: %s', 'Error: %s'], [URL, IfThen(ExceptionMsg <> '', ExceptionMsg, Package.EndPoint.LastHTTPStatus.AsString)]);
 
         Package.Free();
       end;
@@ -232,7 +232,7 @@ begin
       begin
         OutputSynEdit.Clear();
 
-        if SimbaQuestionDlg('Install Package', 'Install package "%s" to "%s" ?', [Package.DisplayName, TSimbaPath.PathExtractRelative(SimbaEnv.SimbaPath, Installer.RemoteInstallOpts.Path)]) = ESimbaDialogResult.YES then
+        if ShowQuestionDialog('Install Package', 'Install package "%s" to "%s" ?', [Package.DisplayName, TSimbaPath.PathExtractRelative(SimbaEnv.SimbaPath, Installer.RemoteInstallOpts.Path)]) = ESimbaDialogButton.YES then
         begin
           InstallingButton.Caption := 'Installing...';
           InstallingButton.Enabled := False;
@@ -285,10 +285,10 @@ begin
 
   case Package.IsInstalled() of
     True:
-      if SimbaQuestionDlg('Uninstall Package', ['Do you want to uninstall "%s"'], [Package.DisplayName, Package.InstalledPath]) = ESimbaDialogResult.YES then
+      if ShowQuestionDialog('Uninstall Package', ['Do you want to uninstall "%s"'], [Package.DisplayName, Package.InstalledPath]) = ESimbaDialogButton.YES then
       begin
-        RemoveFiles := SimbaQuestionDlg('Uninstall Package', ['Permanently delete all files in "%s"?'], [Package.InstalledPath]) = ESimbaDialogResult.YES;
-        RemoveFromList := SimbaQuestionDlg('Uninstall Package', 'Also remove the package from the list?', []) = ESimbaDialogResult.YES;
+        RemoveFiles := ShowQuestionDialog('Uninstall Package', ['Permanently delete all files in "%s"?'], [Package.InstalledPath]) = ESimbaDialogButton.YES;
+        RemoveFromList := ShowQuestionDialog('Uninstall Package', 'Also remove the package from the list?', []) = ESimbaDialogButton.YES;
 
         Package.UnInstall(RemoveFiles, RemoveFromList);
         if RemoveFromList then

@@ -87,7 +87,7 @@ implementation
 
 uses
   Dialogs,
-  simba.ide_initialization, simba.ide_events, simba.form_main, simba.form_tabs, simba.form_output,
+  simba.initializations, simba.ide_events, simba.form_main, simba.form_tabs, simba.form_output,
   simba.ide_tab, simba.form_package,
   simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector,
   simba.vartype_windowhandle, simba.vartype_box;
@@ -317,17 +317,19 @@ begin
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.ToolBarSpacing, @DoSettingChanged_Spacing, True);
 end;
 
-procedure CreateMainToolBar;
+procedure DoCreate;
 begin
   SimbaMainToolBar := TSimbaMainToolBar.Create();
 end;
 
-initialization
-  SimbaIDEInitialization_AddBeforeShow(@CreateMainToolBar, 'Create Main ToolBar');
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaMainToolBar);
+end;
 
-finalization
-  if Assigned(SimbaMainToolBar) then
-    FreeAndNil(SimbaMainToolBar);
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaMainToolBar');
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaMainToolBar');
 
 end.
 

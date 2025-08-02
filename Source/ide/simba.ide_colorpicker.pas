@@ -55,7 +55,6 @@ uses
   simba.image,
   simba.vartype_windowhandle,
   simba.form_colorpickhistory,
-  simba.ide_dockinghelpers,
   simba.colormath;
 
 function ShowColorPicker(Window: TWindowHandle; out X, Y: Integer; out Color: TColor): Boolean;
@@ -66,8 +65,7 @@ begin
     if Result then
     begin
       SimbaColorPickHistoryForm.Add(TPoint.Create(X, Y), Color, True);
-
-      SimbaDockMaster.MakeVisible(SimbaColorPickHistoryForm);
+      SimbaColorPickHistoryForm.MakeVisible();
     end;
   finally
     Free();

@@ -47,7 +47,7 @@ type
 implementation
 
 uses
-  simba.form_main, simba.ide_theme,
+  simba.form_main, simba.component_theme,
   ATCanvasPrimitives;
 
 type
@@ -103,7 +103,7 @@ procedure TSimbaDropToolButton.Paint;
 begin
   inherited Paint();
 
-  CanvasPaintTriangleDown(Canvas, SimbaTheme.ColorFont, ClientRect.CenterPoint, IfThen(FToolbar.FButtonSize >= 20, 2, 1));
+  CanvasPaintTriangleDown(Canvas, SimbaComponentTheme.ColorFont, ClientRect.CenterPoint, IfThen(FToolbar.FButtonSize >= 20, 2, 1));
 end;
 
 procedure TSimbaDropToolButton.Click;
@@ -152,7 +152,7 @@ end;
 
 procedure TSimbaToolButtonDivider.Paint;
 begin
-  Canvas.Brush.Color := ColorBlendHalf(SimbaTheme.ColorFrame, SimbaTheme.ColorLine);
+  Canvas.Brush.Color := ColorBlendHalf(SimbaComponentTheme.ColorFrame, SimbaComponentTheme.ColorLine);
   Canvas.FillRect(ClientRect);
 end;
 
@@ -255,7 +255,7 @@ begin
   ControlStyle := ControlStyle + [csOpaque];
   AutoSize := True;
   Spacing := 3;
-  Color := SimbaTheme.ColorFrame;
+  Color := SimbaComponentTheme.ColorFrame;
 end;
 
 function TSimbaToolbar.AddGroup: TSimbaToolbarButtonGroup;

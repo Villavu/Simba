@@ -262,6 +262,8 @@ type
     procedure UpdateTitle;
   public
     procedure Setup;
+
+    destructor Destroy; override;
   end;
 
 var
@@ -274,7 +276,7 @@ implementation
 uses
   LazFileUtils, AnchorDocking, LCLType,
 
-  simba.ide_initialization, simba.ide_events, simba.ide_utils,
+  simba.initializations, simba.ide_events, simba.ide_utils,
   simba.ide_mainstatusbar, simba.ide_mainmenubar, simba.ide_maintoolbar,
   simba.ide_scriptbackup, simba.ide_associate,
   simba.ide_debugimage,
@@ -287,7 +289,7 @@ uses
 
   simba.ide_tab,
   simba.aca, simba.dtmeditor, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
-  simba.ide_simpleformatter, simba.ide_theme,
+  simba.ide_simpleformatter, simba.component_theme,
   simba.threading, simba.ide_editor, simba.vartype_string, simba.misc,
   simba.target;
 
@@ -659,6 +661,13 @@ begin
 
   QueueOnMainThread(@DoApplicationParameters); // open/compile/run parameters
   QueueOnMainThread(@DoFocusEditor); // finally focus the tab
+end;
+
+destructor TSimbaMainForm.Destroy;
+begin
+  inherited Destroy();
+
+  SimbaInitialization_Call(ESimbaInit.IDE_DESTROY);
 end;
 
 procedure TSimbaMainForm.FormDestroy(Sender: TObject);
@@ -1107,6 +1116,6 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization_AddBeforeShow(@SetupSimbaForm, 'Setup SimbaForm');
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @SetupSimbaForm, 'SimbaForm');
 
 end.

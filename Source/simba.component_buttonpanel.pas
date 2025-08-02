@@ -41,7 +41,7 @@ type
 implementation
 
 uses
-  simba.ide_theme;
+  simba.component_theme;
 
 type
   TButtonPanelButton = class(TSimbaButton)
@@ -133,7 +133,7 @@ begin
   FButtonClose.Caption := 'Close';
   FButtonClose.Visible := False;
 
-  Color := SimbaTheme.ColorFrame;
+  Color := SimbaComponentTheme.ColorFrame;
   AutoSize := True;
 end;
 

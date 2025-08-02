@@ -326,6 +326,9 @@ const
 
 implementation
 
+uses
+  simba.initializations;
+
 var
   KeywordDict: specialize TKeywordDictionary<ELexerToken>;
 
@@ -1392,7 +1395,7 @@ begin
   Result := Copy(GetEnumName(TypeInfo(ELexerToken), Ord(Value)), 4);
 end;
 
-procedure InitKeywordDictionary;
+procedure DoCreate;
 var
   Tok: ELexerToken;
 begin
@@ -1404,12 +1407,14 @@ begin
     KeywordDict.Add(TokenName(Tok), Tok);
 end;
 
-initialization
-  InitKeywordDictionary();
+procedure DoDestroy;
+begin
+  FreeAndNil(KeywordDict);
+end;
 
-finalization
-  if (KeywordDict <> nil) then
-    FreeAndNil(KeywordDict);
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'KeywordDict', 5);
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'KeywordDict', -5);
 
 end.
 

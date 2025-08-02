@@ -119,7 +119,7 @@ type
 implementation
 
 uses
-  simba.form_main, simba.base, simba.ide_theme, simba.ide_utils;
+  simba.form_main, simba.base, simba.component_theme, simba.ide_utils;
 
 function TSimbaTab.GetImageIndex: TImageIndex;
 begin
@@ -325,7 +325,7 @@ end;
 
 procedure TSimbaTabControl.Paint;
 begin
-  Canvas.Brush.Color := SimbaTheme.ColorActive;
+  Canvas.Brush.Color := SimbaComponentTheme.ColorActive;
   Canvas.FillRect(0, FTabs.Height, Width, FTabs.Height + FTabs.BorderSpacing.Bottom);
 end;
 
@@ -438,7 +438,7 @@ begin
   FTabs.OnTabClose := @DoTabClose;
   FTabs.OnTabChangeQuery := @DoTabChangeQuery;
   FTabs.OnContextPopup := @DoTabRightClick;
-  FTabs.ColorFont := SimbaTheme.ColorFont;
+  FTabs.ColorFont := SimbaComponentTheme.ColorFont;
   FTabs.Images := SimbaMainForm.Images;
   FTabs.BorderSpacing.Bottom := 5;
 
@@ -454,14 +454,14 @@ begin
   FTabs.OptTabHeight := FTabs.Height;
   FTabs.OptShowFlat := True;
 
-  FTabs.ColorArrow := SimbaTheme.ColorLine;
-  FTabs.ColorCloseX := SimbaTheme.ColorLine;
-  FTabs.ColorBg := SimbaTheme.ColorFrame;
-  FTabs.ColorTabPassive := SimbaTheme.ColorActive;
-  FTabs.ColorTabOver := SimbaTheme.ColorActive;
-  FTabs.ColorSeparator := SimbaTheme.ColorFont;
-  FTabs.ColorTabActive := SimbaTheme.ColorActive;
-  FTabs.ColorActiveMark := SimbaTheme.ColorActive;
+  FTabs.ColorArrow := SimbaComponentTheme.ColorLine;
+  FTabs.ColorCloseX := SimbaComponentTheme.ColorLine;
+  FTabs.ColorBg := SimbaComponentTheme.ColorFrame;
+  FTabs.ColorTabPassive := SimbaComponentTheme.ColorActive;
+  FTabs.ColorTabOver := SimbaComponentTheme.ColorActive;
+  FTabs.ColorSeparator := SimbaComponentTheme.ColorFont;
+  FTabs.ColorTabActive := SimbaComponentTheme.ColorActive;
+  FTabs.ColorActiveMark := SimbaComponentTheme.ColorActive;
   FTabs.ColorCloseBgOver := clNone;
 
   with SimbaSettings do

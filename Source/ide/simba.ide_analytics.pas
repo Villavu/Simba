@@ -15,7 +15,7 @@ uses
 implementation
 
 uses
-  simba.ide_initialization, simba.httpclient;
+  simba.initializations, simba.httpclient;
 
 procedure SendAnalytics;
 begin
@@ -38,7 +38,7 @@ begin
 end;
 
 initialization
-  SimbaIDEInitialization_AddBeforeShow(@SendAnalytics, 'Analytics', True);
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW_BACKGROUND, @SendAnalytics, 'Analytics');
 
 end.
 

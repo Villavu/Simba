@@ -37,7 +37,7 @@ implementation
 
 uses
   LCLType,
-  simba.ide_theme;
+  simba.component_theme;
 
 type
   TCustomHintWindow = class(THintWindow)
@@ -61,8 +61,8 @@ begin
 
   Canvas.Font := TSimbaTreeViewHint(Owner).FTreeView.Font;
   Canvas.Font.Color := clWhite;
-  Canvas.Pen.Color := SimbaTheme.ColorActive;
-  Canvas.Brush.Color := SimbaTheme.ColorBackground;
+  Canvas.Pen.Color := SimbaComponentTheme.ColorActive;
+  Canvas.Brush.Color := SimbaComponentTheme.ColorBackground;
   Canvas.Rectangle(ClientRect);
   Canvas.TextRect(ClientRect, 4, 0, Caption, TextStyle);
 end;

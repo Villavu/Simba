@@ -38,7 +38,7 @@ var
 implementation
 
 uses
-  simba.ide_package, simba.ide_package_installer, simba.ide_maintoolbar, simba.ide_initialization, simba.ide_mainmenubar,
+  simba.ide_package, simba.ide_package_installer, simba.ide_maintoolbar, simba.initializations, simba.ide_mainmenubar,
   simba.form_main, simba.form_package, simba.form_output, simba.form_tabs, simba.form_openexample,
   simba.vartype_string, simba.fs;
 
@@ -297,17 +297,19 @@ begin
   inherited Destroy();
 end;
 
-procedure SetupPackageAutoUpdater;
+procedure DoCreate;
 begin
   PackageAutoUpdater := TPackageAutoUpdater.Create();
 end;
 
-initialization
-  SimbaIDEInitialization_AddBeforeShow(@SetupPackageAutoUpdater, 'Setup Package AutoUpdater');
+procedure DoDestroy;
+begin
+  FreeAndNil(PackageAutoUpdater);
+end;
 
-finalization
-  if Assigned(PackageAutoUpdater) then
-    FreeAndNil(PackageAutoUpdater);
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'PackageAutoUpdater');
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'PackageAutoUpdater');
 
 end.
 

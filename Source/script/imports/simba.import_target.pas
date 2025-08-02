@@ -15,7 +15,7 @@ implementation
 uses
   lptypes, lpvartypes,  ffi,
   simba.colormath, simba.dtm, simba.misc,
-  simba.image, simba.target, simba.externalcanvas, simba.finder_image, simba.finder_color,
+  simba.target, simba.externalcanvas, simba.finder_image, simba.finder_color,
   simba.vartype_quad, simba.vartype_string;
 
 type
@@ -23,8 +23,6 @@ type
   PKeyCode = ^EKeyCode;
   PTargetEvent = ^ETargetEvent;
   PQuad = ^TQuad;
-  PSimbaImage = ^TSimbaImage;
-  PSimbaTarget = ^TSimbaTarget;
   PSimbaTargetOptions = ^TSimbaTargetOptions;
 
 (*
@@ -1118,7 +1116,7 @@ begin
   begin
     DumpSection := 'Target';
 
-    addGlobalType('object {%CODETOOLS OFF} Instance: Pointer; DontManage: Boolean; {%CODETOOLS ON} end', 'TTarget');
+    LapeObjectImport(Script.Compiler, 'TTarget');
     with addGlobalVar('TTarget', '[]', 'Target') do
       Used := duTrue;
 

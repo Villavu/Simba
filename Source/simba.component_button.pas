@@ -53,7 +53,7 @@ type
 
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: integer; WithThemeSpace: Boolean); override;
 
-    // Use parent font size, but use SimbaTheme.FontStyle and font styles if changed
+    // Use parent font size, but use SimbaComponentTheme.FontStyle and font styles if changed
     procedure CMParentFontChanged(var Message: TLMessage); message CM_PARENTFONTCHANGED;
 
     procedure SetDown(AValue: Boolean);
@@ -167,7 +167,7 @@ type
 implementation
 
 uses
-  simba.ide_theme, simba.component_images, simba.form_main, simba.misc, LCLType,
+  simba.component_theme, simba.component_images, simba.form_main, simba.misc, LCLType,
   ATCanvasPrimitives;
 
 procedure TSimbaTransparentButton.Paint;
@@ -191,8 +191,8 @@ begin
   inherited Create(AOwner);
 
   ControlStyle := ControlStyle + [csOpaque];
-  Color := SimbaTheme.ColorFrame;
-  Font.Color := SimbaTheme.ColorFont;
+  Color := SimbaComponentTheme.ColorFrame;
+  Font.Color := SimbaComponentTheme.ColorFont;
   AutoSize := True;
   ParentFont := True;
 
@@ -286,7 +286,7 @@ begin
   inherited Create(AOwner);
 
   AutoSize := True;
-  Color := SimbaTheme.ColorBackground;
+  Color := SimbaComponentTheme.ColorBackground;
   BevelOuter := bvNone;
 end;
 
@@ -324,8 +324,8 @@ begin
   inherited Create(AOwner);
 
   ControlStyle := ControlStyle + [csOpaque];
-  Color := SimbaTheme.ColorFrame;
-  Font.Color := SimbaTheme.ColorFont;
+  Color := SimbaComponentTheme.ColorFrame;
+  Font.Color := SimbaComponentTheme.ColorFont;
   AutoSize := True;
   ParentFont := True;
 
@@ -365,7 +365,7 @@ begin
     Font.BeginUpdate();
     Font := Parent.Font;
     Font.Style := OldStyle;
-    Font.Color := SimbaTheme.ColorFont;
+    Font.Color := SimbaComponentTheme.ColorFont;
     Font.EndUpdate();
   end;
 end;
@@ -495,12 +495,12 @@ var
   ImgPoint: TPoint;
 begin
   if MouseInClient or FDown then
-    Canvas.Brush.Color := SimbaTheme.ColorActive
+    Canvas.Brush.Color := SimbaComponentTheme.ColorActive
   else
     Canvas.Brush.Color := Color;
 
   Canvas.FillRect(ClientRect);
-  CanvasPaintRoundedCorners(Canvas, ClientRect, [acckLeftTop, acckRightTop, acckLeftBottom, acckRightBottom], SimbaTheme.ColorFrame, Canvas.Brush.Color, Canvas.Brush.Color);
+  CanvasPaintRoundedCorners(Canvas, ClientRect, [acckLeftTop, acckRightTop, acckLeftBottom, acckRightBottom], SimbaComponentTheme.ColorFrame, Canvas.Brush.Color, Canvas.Brush.Color);
 
   R := ClientRect;
   R.Left += XPadding;
@@ -529,7 +529,7 @@ begin
 
   if (Caption <> '') then
   begin
-    Canvas.Font.Color := SimbaTheme.ColorFont;
+    Canvas.Font.Color := SimbaComponentTheme.ColorFont;
 
     R := ClientRect;
     if HasImage then
@@ -550,7 +550,7 @@ constructor TSimbaButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  Color := SimbaTheme.ColorScrollBarActive;
+  Color := SimbaComponentTheme.ColorScrollBarActive;
   AutoSize := True;
 
   FImageList := LCLGlyphs;
@@ -619,7 +619,7 @@ begin
   inherited Create(AOwner);
 
   ControlStyle := ControlStyle + [csOpaque];
-  Color := SimbaTheme.ColorBackground;
+  Color := SimbaComponentTheme.ColorBackground;
   AutoSize := True;
 
   FButton := TSimbaButton.Create(Self);

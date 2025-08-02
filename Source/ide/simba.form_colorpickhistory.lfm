@@ -1,17 +1,17 @@
 object SimbaColorPickHistoryForm: TSimbaColorPickHistoryForm
   Left = -466
-  Height = 240
+  Height = 360
   Top = 796
-  Width = 320
+  Width = 480
   Caption = 'Color Picker History'
-  FormStyle = fsStayOnTop
+  DesignTimePPI = 144
+  LCLVersion = '4.0.0.4'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '3.8.0.0'
   object ContextMenu: TPopupMenu
     OnPopup = ContextMenuPopup
-    Left = 48
-    Top = 16
+    Left = 72
+    Top = 24
     object MenuItemCopy: TMenuItem
       Caption = 'Copy'
       OnClick = ContextMenuCopyClick

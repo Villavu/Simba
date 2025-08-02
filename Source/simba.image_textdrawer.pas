@@ -112,7 +112,7 @@ implementation
 
 uses
   Forms, FileUtil, LazFileUtils, LazFreeTypeFontCollection,
-  simba.image, simba.image_utils, simba.vartype_box;
+  simba.image, simba.image_utils, simba.vartype_box, simba.initializations;
 
 function TSimbaFreeTypeFontLoader.GetFontNames: TStringArray;
 begin
@@ -480,12 +480,19 @@ begin
   FSimbaImage := SimbaImage;
 end;
 
-initialization
+procedure DoCreate;
+begin
   SimbaFreeTypeFontLoader := TSimbaFreeTypeFontLoader.Create();
+end;
 
-finalization
-  if Assigned(SimbaFreeTypeFontLoader) then
-    FreeAndNil(SimbaFreeTypeFontLoader);
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaFreeTypeFontLoader);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'SimbaFreeTypeFontLoader');
+  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'SimbaFreeTypeFontLoader');
 
 end.
 

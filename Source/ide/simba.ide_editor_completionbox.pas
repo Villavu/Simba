@@ -84,8 +84,8 @@ implementation
 
 uses
   ATCanvasPrimitives,
-  simba.array_algorithm, simba.ide_editor, simba.ide_theme, simba.misc,
-  simba.ide_codetools_setup, simba.ide_codetools_keywords, simba.vartype_string,
+  simba.array_algorithm, simba.ide_editor, simba.component_theme, simba.misc,
+  simba.ide_codetools_setup, simba.vartype_string,
   simba.ide_editor_commands;
 
 {$IFDEF WINDOWS}
@@ -453,8 +453,8 @@ begin
   begin
     Form.TextColor := Editor.Highlighter.IdentifierAttribute.Foreground;
     Form.TextSelectedColor := Editor.Highlighter.IdentifierAttribute.Foreground;
-    Form.DrawBorderColor := SimbaTheme.ColorScrollBarInActive;
-    Form.BackgroundColor := SimbaTheme.ColorScrollBarInActive;
+    Form.DrawBorderColor := SimbaComponentTheme.ColorScrollBarInActive;
+    Form.BackgroundColor := SimbaComponentTheme.ColorScrollBarInActive;
     Form.SelectedColor := Editor.SelectedColor.Background;
     Form.Font := Editor.Font;
     Form.ScrollBar.Position := 0;
@@ -585,7 +585,7 @@ begin
         Filter := Expression;
 
         if SimbaSettings.CodeTools.CompletionAddKeywords.Value then
-          FDecls := FCodeinsight.GetGlobals() + GetKeywords()
+          FDecls := FCodeinsight.GetGlobals() + CodetoolsKeywords
         else
           FDecls := FCodeinsight.GetGlobals();
 
@@ -744,8 +744,8 @@ var
 begin
   with TSynBaseCompletionFormSizeDrag(Sender) do
   begin
-    Canvas.Brush.Color := SimbaTheme.ColorScrollBarInActive;
-    Canvas.Pen.Color := SimbaTheme.ColorLine;
+    Canvas.Brush.Color := SimbaComponentTheme.ColorScrollBarInActive;
+    Canvas.Pen.Color := SimbaComponentTheme.ColorLine;
 
     Canvas.FillRect(ClientRect);
 

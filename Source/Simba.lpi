@@ -17,22 +17,23 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="27">
+      <Resources Count="28">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
         <Resource_2 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
         <Resource_3 FileName="..\Examples\stopwatch.simba" Type="RCDATA" ResourceName="EXAMPLE_STOPWATCH"/>
         <Resource_4 FileName="..\Examples\image.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE"/>
+        <Resource_10 FileName="..\Examples\image_drawtext.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE_DRAW_TEXT"/>
         <Resource_5 FileName="..\Examples\cluster_points.simba" Type="RCDATA" ResourceName="EXAMPLE_CLUSTER_POINTS"/>
         <Resource_6 FileName="..\Examples\mouse_teleport_event.simba" Type="RCDATA" ResourceName="EXAMPLE_MOUSE_TELEPORT_EVENT"/>
         <Resource_7 FileName="..\Examples\static_method.simba" Type="RCDATA" ResourceName="EXAMPLE_STATIC_METHOD"/>
         <Resource_8 FileName="..\Examples\form.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM"/>
+        <Resource_11 FileName="..\Examples\form_imagebox.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_IMAGEBOX"/>
+        <Resource_26 FileName="..\Examples\form_dragablepanel.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_DRAGABLE_PANEL"/>        
         <Resource_9 FileName="..\Examples\irc.simba" Type="RCDATA" ResourceName="EXAMPLE_IRC"/>
-        <Resource_10 FileName="..\Examples\image_drawtext.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE-DRAW-TEXT"/>
-        <Resource_11 FileName="..\Examples\form_imagebox.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM-IMAGEBOX"/>
-        <Resource_12 FileName="..\Examples\randomleft.simba" Type="RCDATA" ResourceName="EXAMPLE_RANDOM-LEFT"/>
-        <Resource_13 FileName="..\Examples\method-property.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD-PROPERTY"/>
-        <Resource_14 FileName="..\Examples\method-property-index.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD-PROPERTY-INDEX"/>
+        <Resource_12 FileName="..\Examples\randomleft.simba" Type="RCDATA" ResourceName="EXAMPLE_RANDOM_LEFT"/>
+        <Resource_13 FileName="..\Examples\method-property.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD_PROPERTY"/>
+        <Resource_14 FileName="..\Examples\method-property-index.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD_PROPERTY_INDEX"/>
         <Resource_15 FileName="..\Examples\json_read.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON_READ"/>
         <Resource_16 FileName="..\Examples\json_write.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON_WRITE"/>
         <Resource_17 FileName="..\Images\tick.png" Type="RCDATA" ResourceName="TICK"/>
@@ -44,7 +45,7 @@
         <Resource_23 FileName="..\Images\arrow_right.png" Type="RCDATA" ResourceName="ARROW_RIGHT"/>
         <Resource_24 FileName="..\Images\arrow_right_150.png" Type="RCDATA" ResourceName="ARROW_RIGHT_150"/>
         <Resource_25 FileName="..\Images\arrow_right_200.png" Type="RCDATA" ResourceName="ARROW_RIGHT_200"/>
-        <Resource_26 FileName="..\Examples\form_dragablepanel.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_DRAGABLEPANEL"/>
+        <Resource_27 FileName="..\Examples\asyncmouse.simba" Type="RCDATA" ResourceName="EXAMPLE_ASYNCMOUSE"/>
       </Resources>
     </General>
     <VersionInfo>
@@ -476,7 +477,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="89">
+    <Units Count="88">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -671,222 +672,215 @@
         <IsPartOfProject Value="True"/>
       </Unit36>
       <Unit37>
-        <Filename Value="simba.dialog.lfm"/>
+        <Filename Value="simba.finder_dtm.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit37>
       <Unit38>
-        <Filename Value="simba.dialog.pas"/>
+        <Filename Value="simba.array_algorithm.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaDialogForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit38>
       <Unit39>
-        <Filename Value="simba.finder_dtm.pas"/>
+        <Filename Value="ide/simba.ide_package_autoupdater.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit39>
       <Unit40>
-        <Filename Value="simba.array_algorithm.pas"/>
+        <Filename Value="ide/simba.ide_package_installer.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit40>
       <Unit41>
-        <Filename Value="ide/simba.ide_package_autoupdater.pas"/>
+        <Filename Value="ide/simba.ide_package.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit41>
       <Unit42>
-        <Filename Value="ide/simba.ide_package_installer.pas"/>
+        <Filename Value="ide/simba.ide_package_components.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit42>
       <Unit43>
-        <Filename Value="ide/simba.ide_package.pas"/>
+        <Filename Value="ide/simba.ide_package_endpointcustom.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit43>
       <Unit44>
-        <Filename Value="ide/simba.ide_package_components.pas"/>
+        <Filename Value="ide/simba.ide_package_endpointgithub.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit44>
       <Unit45>
-        <Filename Value="ide/simba.ide_package_endpointcustom.pas"/>
+        <Filename Value="simba.image_lazbridge.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit45>
       <Unit46>
-        <Filename Value="ide/simba.ide_package_endpointgithub.pas"/>
+        <Filename Value="simba.image.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit46>
       <Unit47>
-        <Filename Value="simba.image_lazbridge.pas"/>
+        <Filename Value="simba.image_stringconv.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit47>
       <Unit48>
-        <Filename Value="simba.image.pas"/>
+        <Filename Value="simba.image_textdrawer.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit48>
       <Unit49>
-        <Filename Value="simba.image_fastcompress.pas"/>
+        <Filename Value="simba.image_utils.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit49>
       <Unit50>
-        <Filename Value="simba.image_stringconv.pas"/>
+        <Filename Value="simba.image_resizerotate.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit50>
       <Unit51>
-        <Filename Value="simba.image_textdrawer.pas"/>
+        <Filename Value="simba.image_draw.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit51>
       <Unit52>
-        <Filename Value="simba.image_utils.pas"/>
+        <Filename Value="simba.random.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit52>
       <Unit53>
-        <Filename Value="simba.image_resizerotate.pas"/>
+        <Filename Value="simba.image_filters.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit53>
       <Unit54>
-        <Filename Value="simba.image_draw.pas"/>
+        <Filename Value="simba.target_movemouse.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit54>
       <Unit55>
-        <Filename Value="simba.random.pas"/>
+        <Filename Value="simba.fs_async.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit55>
       <Unit56>
-        <Filename Value="simba.image_filters.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_insight.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit56>
       <Unit57>
-        <Filename Value="simba.target_movemouse.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_pasparser.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit57>
       <Unit58>
-        <Filename Value="simba.fs_async.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_paslexer.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit58>
       <Unit59>
-        <Filename Value="ide/codetools/simba.ide_codetools_insight.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_exprparser.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit59>
       <Unit60>
-        <Filename Value="ide/codetools/simba.ide_codetools_pasparser.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_parser.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit60>
       <Unit61>
-        <Filename Value="ide/codetools/simba.ide_codetools_paslexer.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_setup.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit61>
       <Unit62>
-        <Filename Value="ide/codetools/simba.ide_codetools_exprparser.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_base.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit62>
       <Unit63>
-        <Filename Value="ide/codetools/simba.ide_codetools_parser.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_includes.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit63>
       <Unit64>
-        <Filename Value="ide/codetools/simba.ide_codetools_setup.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_debug.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit64>
       <Unit65>
-        <Filename Value="ide/codetools/simba.ide_codetools_base.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_arrayhelpers.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit65>
       <Unit66>
-        <Filename Value="ide/codetools/simba.ide_codetools_includes.pas"/>
+        <Filename Value="ide/codetools/simba.ide_codetools_keywords.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit66>
       <Unit67>
-        <Filename Value="ide/codetools/simba.ide_codetools_debug.pas"/>
+        <Filename Value="script/simba.script_threading.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit67>
       <Unit68>
-        <Filename Value="ide/codetools/simba.ide_codetools_arrayhelpers.pas"/>
+        <Filename Value="simba.vartype_matrix.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit68>
       <Unit69>
-        <Filename Value="ide/codetools/simba.ide_codetools_keywords.pas"/>
+        <Filename Value="simba.component_splitter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit69>
       <Unit70>
-        <Filename Value="script/simba.script_threading.pas"/>
+        <Filename Value="simba.pixelocr.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit70>
       <Unit71>
-        <Filename Value="simba.vartype_matrix.pas"/>
+        <Filename Value="script/imports/simba.import_pixelocr.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit71>
       <Unit72>
-        <Filename Value="simba.component_splitter.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit72>
-      <Unit73>
-        <Filename Value="simba.pixelocr.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit73>
-      <Unit74>
-        <Filename Value="script/imports/simba.import_pixelocr.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit74>
-      <Unit75>
         <Filename Value="ide/simba.form_colorpickhistory.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaColorPickHistoryForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit75>
-      <Unit76>
+      </Unit72>
+      <Unit73>
         <Filename Value="ide/simba.frame_settings_editorkeystrokes.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SimbaEditorHotkeyFrame"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Frame"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="ide/simba.ide_editor_commands.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="ide/simba.ide_editor.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="simba.component_divider.pas"/>
+        <IsPartOfProject Value="True"/>
       </Unit76>
       <Unit77>
-        <Filename Value="ide/simba.ide_editor_commands.pas"/>
+        <Filename Value="script/imports/simba.import_timing.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit77>
       <Unit78>
-        <Filename Value="ide/simba.ide_editor.pas"/>
+        <Filename Value="ide/simba.ide_editorcarethistory.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit78>
       <Unit79>
-        <Filename Value="simba.aca_new.pas"/>
+        <Filename Value="simba.component_images.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit79>
       <Unit80>
-        <Filename Value="simba.component_divider.pas"/>
+        <Filename Value="../Third-Party/fpsha256.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit80>
       <Unit81>
-        <Filename Value="script/imports/simba.import_timing.pas"/>
+        <Filename Value="../Third-Party/fphashutils.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit81>
       <Unit82>
-        <Filename Value="ide/simba.ide_editorcarethistory.pas"/>
+        <Filename Value="../Third-Party/fpsha512.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit82>
       <Unit83>
-        <Filename Value="simba.component_images.pas"/>
+        <Filename Value="simba.component_debugimg.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit83>
       <Unit84>
-        <Filename Value="../Third-Party/fpsha256.pas"/>
+        <Filename Value="ide/simba.ide_debugimage.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit84>
       <Unit85>
-        <Filename Value="../Third-Party/fphashutils.pas"/>
+        <Filename Value="simba.dialog.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit85>
       <Unit86>
-        <Filename Value="../Third-Party/fpsha512.pas"/>
+        <Filename Value="simba.initializations.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit86>
       <Unit87>
-        <Filename Value="simba.component_debugimg.pas"/>
+        <Filename Value="simba.target_asyncmovemouse.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit87>
-      <Unit88>
-        <Filename Value="ide/simba.ide_debugimage.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit88>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

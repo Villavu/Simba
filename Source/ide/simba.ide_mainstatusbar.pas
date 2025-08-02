@@ -37,7 +37,7 @@ var
 implementation
 
 uses
-  simba.ide_initialization, simba.ide_events, simba.ide_mouselogger, simba.ide_tab,
+  simba.initializations, simba.ide_events, simba.ide_mouselogger, simba.ide_tab,
   simba.ide_editor_findreplace, simba.form_tabs, simba.form_functionlist;
 
 procedure TSimbaMainStatusBar.DoUpdateScriptStatus(Sender: TObject);
@@ -124,17 +124,19 @@ begin
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.FUNCTIONLIST_SELECTION,  @DoFunctionListSelection);
 end;
 
-procedure CreateMainStatusBar;
+procedure DoCreate;
 begin
   SimbaMainStatusBar := TSimbaMainStatusBar.Create();
 end;
 
-initialization
-  SimbaIDEInitialization_AddBeforeShow(@CreateMainStatusBar, 'Create Main StatusBar');
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaMainStatusBar);
+end;
 
-finalization
-  if Assigned(SimbaMainStatusBar) then
-    FreeAndNil(SimbaMainStatusBar);
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaMainStatusBar');
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaMainStatusBar');
 
 end.
 

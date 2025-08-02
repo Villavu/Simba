@@ -88,6 +88,7 @@ implementation
 
 uses
   LCLType, LCLIntf,
+  simba.initializations,
   {$IF DEFINED(WINDOWS)}
   simba.nativeinterface_windows;
   {$ELSEIF DEFINED(LINUX)}
@@ -165,7 +166,8 @@ begin
   end;
 end;
 
-initialization
+procedure DoCreate;
+begin
   SimbaNativeInterface := {$IF DEFINED(WINDOWS)}
                           TSimbaNativeInterface_Windows.Create();
                           {$ELSEIF DEFINED(LINUX)}
@@ -173,10 +175,16 @@ initialization
                           {$ELSEIF DEFINED(DARWIN)}
                           TSimbaNativeInterface_Darwin.Create();
                           {$ENDIF}
+end;
 
-finalization
-  if (SimbaNativeInterface <> nil) then
-    FreeAndNil(SimbaNativeInterface)
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaNativeInterface)
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'SimbaNativeInterface', 40);
+  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'SimbaNativeInterface', -40);
 
 end.
 

@@ -13,7 +13,7 @@ uses
   Classes, SysUtils, Controls, Forms, StdCtrls, Graphics,
   SynEdit, SynEditTypes, SynEditFoldedView, SynEditTextBuffer, SynEditMarkupSelection, {%H-}SynEditWrappedView,
   LazSynEditText,
-  simba.ide_theme, simba.component_scrollbar;
+  simba.component_theme, simba.component_scrollbar;
 
 type
   TSimbaSynEdit = class(TSynEdit)
@@ -142,11 +142,11 @@ begin
   ScrollBars := ssNone;
   BorderStyle := bsNone;
 
-  TSynEditMarkupSelection(MarkupByClass[TSynEditMarkupSelection]).MarkupInfoSeletion.Background := SimbaTheme.ColorActive;
+  TSynEditMarkupSelection(MarkupByClass[TSynEditMarkupSelection]).MarkupInfoSeletion.Background := SimbaComponentTheme.ColorActive;
 
-  Color := SimbaTheme.ColorBackground;
+  Color := SimbaComponentTheme.ColorBackground;
 
-  Font.Color := SimbaTheme.ColorFont;
+  Font.Color := SimbaComponentTheme.ColorFont;
   Font.Size := SynDefaultFontSize;
   Font.Name := SynDefaultFontName;
 

@@ -38,7 +38,7 @@ implementation
 
 uses
   Forms, LCLType,
-  simba.ide_initialization, simba.ide_events, simba.ide_maintoolbar, simba.form_main,
+  simba.initializations, simba.ide_events, simba.ide_maintoolbar, simba.form_main,
   simba.ide_tab;
 
 procedure TSimbaMainMenuBar.DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -175,17 +175,19 @@ begin
   inherited Destroy();
 end;
 
-procedure CreateMainMenuBar;
+procedure DoCreate;
 begin
   SimbaMainMenuBar := TSimbaMainMenuBar.Create();
 end;
 
-initialization
-  SimbaIDEInitialization_AddBeforeShow(@CreateMainMenuBar, 'Create Main MenuBar');
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaMainMenuBar);
+end;
 
-finalization
-  if Assigned(SimbaMainMenuBar) then
-    FreeAndNil(SimbaMainMenuBar);
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaMainMenuBar');
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaMainMenuBar');
 
 end.
 

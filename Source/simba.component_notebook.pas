@@ -13,7 +13,7 @@ unit simba.component_notebook;
 interface
 
 uses
-  Classes, SysUtils, Controls, StdCtrls, ExtCtrls,
+  Classes, SysUtils, Controls, ExtCtrls,
   simba.containers;
 
 type

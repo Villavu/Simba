@@ -133,7 +133,7 @@ begin
   FMainPanel := TPanel.Create(Self);
   FMainPanel.Parent := Self;
   FMainPanel.Align := alClient;
-  FMainPanel.Color := SimbaTheme.ColorBackground;
+  FMainPanel.Color := SimbaComponentTheme.ColorBackground;
   FMainPanel.AutoSize := True;
   FMainPanel.BevelOuter := bvNone;
 
@@ -150,7 +150,7 @@ begin
   FMessageLabel.AnchorSide[akRight].Control := FMainPanel;
   FMessageLabel.AnchorSide[akTop].Side := asrCenter;
   FMessageLabel.AnchorSide[akTop].Control := FMainPanel;
-  FMessageLabel.Font.Color := SimbaTheme.ColorFont;
+  FMessageLabel.Font.Color := SimbaComponentTheme.ColorFont;
   FMessageLabel.WordWrap := True;
   FMessageLabel.BorderSpacing.Around := 15;
   FMessageLabel.Caption := AMessage;
@@ -165,7 +165,7 @@ begin
   FButtonPanel := TPanel.Create(Self);
   FButtonPanel.Parent := Self;
   FButtonPanel.Align := alBottom;
-  FButtonPanel.Color := SimbaTheme.ColorFrame;
+  FButtonPanel.Color := SimbaComponentTheme.ColorFrame;
   FButtonPanel.AutoSize := True;
   FButtonPanel.BevelOuter := bvNone;
 

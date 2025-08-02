@@ -906,7 +906,7 @@ end;
 
 procedure TSimbaShapeBox.DoShapeDeleteAllClick(Sender: TObject);
 begin
-  if SimbaQuestionDlg('Simba', 'Delete all shapes?', []) = ESimbaDialogResult.YES then
+  if ShowQuestionDialog('Simba', 'Delete all shapes?', []) = ESimbaDialogButton.YES then
   begin
     FShapes.Clear();
     FListBox.Clear();

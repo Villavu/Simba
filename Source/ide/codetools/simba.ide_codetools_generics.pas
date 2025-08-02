@@ -64,6 +64,9 @@ function GetGeneric(Decl: TDeclaration): TDeclarationArray;
 
 implementation
 
+uses
+  simba.initializations;
+
 var
   GenericParsers: TCodeParserList;
 
@@ -195,11 +198,19 @@ begin
     Result := [];
 end;
 
-initialization
+procedure DoCreate;
+begin
   GenericParsers := TCodeParserList.Create(True);
+end;
 
-finalization
+procedure DoDestroy;
+begin
   FreeAndNil(GenericParsers);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'GenericParsers', 5);
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'GenericParsers', -5);
 
 end.
 

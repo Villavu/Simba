@@ -15,6 +15,7 @@ uses
   Classes, SysUtils,
   lpcompiler, lptypes,
   simba.target,
+  simba.target_asyncmovemouse,
   simba.image,
   simba.httpclient,
   simba.json,
@@ -44,6 +45,7 @@ type
   PLapeObjectJSON = ^PSimbaJSONItem;
   PLapeObjectResourceWriter = ^PSimbaResourceWriter;
   PLapeObjectResourceReader = ^PSimbaResourceReader;
+  PLapeObjectASyncMouse = ^PASyncMouse;
 
 function IsLapeObjectManage(const Obj: PLapeObject): Boolean;
 procedure SetLapeObjectManage(const Obj: PLapeObject; const Value: Boolean);

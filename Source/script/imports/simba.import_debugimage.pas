@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.script, simba.image;
+  simba.base, simba.script;
 
 procedure ImportDebugImage(Script: TSimbaScript);
 

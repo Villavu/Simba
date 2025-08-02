@@ -19,14 +19,14 @@ implementation
 
 uses
   ATCanvasPrimitives,
-  simba.ide_theme;
+  simba.component_theme;
 
 procedure TSimbaDivider.Paint;
 begin
-  //Canvas.Brush.Color := SimbaTheme.ColorScrollBarActive;
+  //Canvas.Brush.Color := SimbaComponentTheme.ColorScrollBarActive;
   //Canvas.FillRect(ClientRect);
 
-  CanvasPaintRoundedCorners(Canvas, ClientRect, [acckLeftTop, acckRightTop, acckLeftBottom, acckRightBottom], SimbaTheme.ColorFrame, Canvas.Brush.Color, Canvas.Brush.Color);
+  CanvasPaintRoundedCorners(Canvas, ClientRect, [acckLeftTop, acckRightTop, acckLeftBottom, acckRightBottom], SimbaComponentTheme.ColorFrame, Canvas.Brush.Color, Canvas.Brush.Color);
 end;
 
 constructor TSimbaDivider.Create(AOwner: TComponent);
@@ -37,7 +37,7 @@ begin
 
   Height := 4;
   //BorderSpacing.Around := 5;
-  Color := SimbaTheme.ColorScrollBarActive;
+  Color := SimbaComponentTheme.ColorScrollBarActive;
 end;
 
 end.

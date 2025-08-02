@@ -328,6 +328,7 @@ generic function Sum<_T, _R>(var AValues: specialize TArray<_T>): _R;
 generic procedure Reverse<_T>(var Arr: specialize TArray<_T>);
 generic function Reversed<_T>(const Arr: specialize TArray<_T>): specialize TArray<_T>;
 generic function Contains<_A, _T>(const Arr: _A; const Value: _T): Boolean;
+generic function EnumToString<_T>(Param: _T): String;
 
 type
   TBooleanHelper = type helper for Boolean
@@ -366,6 +367,11 @@ implementation
 
 uses
   Math, TypInfo, Variants;
+
+generic function EnumToString<_T>(Param: _T): String;
+begin
+  Result := GetEnumName(TypeInfo(_T), UInt32(Param));
+end;
 
 procedure Debug(const Msg: String);
 begin

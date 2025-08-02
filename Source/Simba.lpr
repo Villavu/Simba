@@ -6,7 +6,7 @@
 program Simba;
 
 {$I simba.inc}
-{$R Simba.res}
+{$R simba.res}
 
 uses
   {$IFDEF SIMBA_CUSTOM_MM} // note: comment out if needing heaptrc
@@ -21,7 +21,7 @@ uses
   simba.form_backups, simba.form_findinfiles, simba.form_downloadsimba, simba.form_package,
   simba.form_colorpickhistory,
   simba.plugin_dump, simba.script_runner,
-  simba.ide_initialization, simba.ide_analytics, simba.script,
+  simba.initializations, simba.ide_analytics, simba.script,
   simba.openssl;
 
 begin
@@ -33,6 +33,8 @@ begin
   FormatSettings.ThousandSeparator := ',';
   FormatSettings.DateSeparator := '-';
   FormatSettings.TimeSeparator := ':';
+
+  SimbaInitialization_Call(ESimbaInit.CREATE);
 
   Application.CaptureExceptions := False;
   Application.Initialize();
@@ -121,7 +123,7 @@ begin
   begin
     SimbaProcessType := ESimbaProcessType.IDE;
 
-    SimbaIDEInitialization_CallBeforeCreate();
+    SimbaInitialization_Call(ESimbaInit.IDE_BEFORE_CREATE);
 
     Application.ShowMainForm := False;
     Application.CreateForm(TSimbaMainForm, SimbaMainForm);
@@ -141,7 +143,9 @@ begin
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
     Application.CreateForm(TSimbaColorPickHistoryForm, SimbaColorPickHistoryForm);
 
-    SimbaIDEInitialization_CallBeforeShow();
+    SimbaInitialization_Call(ESimbaInit.IDE_BEFORE_SHOW_BACKGROUND);
+    SimbaInitialization_Call(ESimbaInit.IDE_BEFORE_SHOW);
   end;
+
   Application.Run();
 end.
