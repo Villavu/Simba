@@ -13,7 +13,7 @@ procedure ImportLCLMisc(Script: TSimbaScript);
 implementation
 
 uses
-  Controls, Spin, Menus, Graphics, ListFilterEdit, StdCtrls, Buttons, ButtonPanel,
+  Controls, EditBtn, Spin, Menus, Graphics, ListFilterEdit, StdCtrls, Buttons, ButtonPanel,
   lptypes, ffi;
 
 type
@@ -25,6 +25,9 @@ type
   PCustomSpinEdit = ^TCustomSpinEdit;
   PFloatSpinEdit = ^TFloatSpinEdit;
   PSpinEdit = ^TSpinEdit;
+
+  PDateEdit = ^TDateEdit;
+  PTimeEdit = ^TTimeEdit;
 
   PMenu = ^TMenu;
   PPopupMenu = ^TPopupMenu;
@@ -156,6 +159,134 @@ procedure _LapeSpinEdit_Create(const Params: PParamArray; const Result: Pointer)
 begin
   PSpinEdit(Result)^ := TSpinEdit.Create(PComponent(Params^[0])^);
 end;
+
+
+//DATE
+procedure _LapeDateEdit_Date_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateTime(Result)^ := PDateEdit(Params^[0])^.Date;
+end;
+
+procedure _LapeDateEdit_Date_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.Date := PDouble(Params^[1])^;
+end;
+
+procedure _LapeDateEdit_MinDate_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateTime(Result)^ := PDateEdit(Params^[0])^.MinDate;
+end;
+
+procedure _LapeDateEdit_MinDate_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.MinDate := PDouble(Params^[1])^;
+end;
+
+procedure _LapeDateEdit_MaxDate_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateTime(Result)^ := PDateEdit(Params^[0])^.MaxDate;
+end;
+
+procedure _LapeDateEdit_MaxDate_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.MaxDate := PDateTime(Params^[1])^;
+end;
+
+procedure _LapeDateEdit_DateFormat_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PDateEdit(Params^[0])^.DateFormat;
+end;
+
+procedure _LapeDateEdit_DateFormat_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.DateFormat := PString(Params^[1])^;
+end;
+
+procedure _LapeDateEdit_DefaultToday_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PDateEdit(Params^[0])^.DefaultToday;
+end;
+
+procedure _LapeDateEdit_DefaultToday_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.DefaultToday := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeDateEdit_ReadOnly_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PDateEdit(Params^[0])^.ReadOnly;
+end;
+
+procedure _LapeDateEdit_ReadOnly_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.ReadOnly := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeDateEdit_DirectInput_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PDateEdit(Params^[0])^.DirectInput;
+end;
+
+procedure _LapeDateEdit_DirectInput_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.DirectInput := PBoolean(Params^[1])^;
+end;
+
+
+
+procedure _LapeDateEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Result)^ := TDateEdit.Create(PComponent(Params^[0])^);
+end;
+
+//TIME
+procedure _LapeTimeEdit_Time_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateTime(Result)^ := PTimeEdit(Params^[0])^.Time;
+end;
+
+procedure _LapeTimeEdit_Time_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Params^[0])^.Time := PDateTime(Params^[1])^;
+end;
+
+procedure _LapeTimeEdit_DefaultNow_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PTimeEdit(Params^[0])^.DefaultNow;
+end;
+
+procedure _LapeTimeEdit_DefaultNow_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Params^[0])^.DefaultNow := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeTimeEdit_ReadOnly_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PTimeEdit(Params^[0])^.ReadOnly;
+end;
+
+procedure _LapeTimeEdit_ReadOnly_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Params^[0])^.ReadOnly := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeTimeEdit_DirectInput_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PTimeEdit(Params^[0])^.DirectInput;
+end;
+
+procedure _LapeTimeEdit_DirectInput_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Params^[0])^.DirectInput := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeTimeEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Result)^ := TTimeEdit.Create(PComponent(Params^[0])^);
+end;
+
+
+
 
 procedure _LapeMenuItem_Find(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -623,6 +754,25 @@ begin
 
     addClass('TLazSpinEdit', 'TLazCustomSpinEdit', TSpinEdit);
     addClassConstructor('TLazSpinEdit', '(TheOwner: TLazComponent)', @_LapeSpinEdit_Create);
+
+
+    addClass('TLazDateEdit', 'TLazCustomControl', TDateEdit);
+    addProperty('TLazDateEdit', 'Date', 'TDateTime', @_LapeDateEdit_Date_Read, @_LapeDateEdit_Date_Write);
+    addProperty('TLazDateEdit', 'MinDate', 'TDateTime', @_LapeDateEdit_MinDate_Read, @_LapeDateEdit_MinDate_Write);
+    addProperty('TLazDateEdit', 'MaxDate', 'TDateTime', @_LapeDateEdit_MaxDate_Read, @_LapeDateEdit_MaxDate_Write);
+    addProperty('TLazDateEdit', 'DateFormat', 'String', @_LapeDateEdit_DateFormat_Read, @_LapeDateEdit_DateFormat_Write);
+    addProperty('TLazDateEdit', 'DefaultToday', 'Boolean', @_LapeDateEdit_DefaultToday_Read, @_LapeDateEdit_DefaultToday_Write);
+    addProperty('TLazDateEdit', 'ReadOnly', 'Boolean', @_LapeDateEdit_ReadOnly_Read, @_LapeDateEdit_ReadOnly_Write);
+    addProperty('TLazDateEdit', 'DirectInput', 'Boolean', @_LapeDateEdit_DirectInput_Read, @_LapeDateEdit_DirectInput_Write);
+    addClassConstructor('TLazDateEdit', '(TheOwner: TLazComponent)', @_LapeDateEdit_Create);
+
+    addClass('TLazTimeEdit', 'TLazCustomControl', TTimeEdit);
+    addProperty('TLazTimeEdit', 'Time', 'TDateTime', @_LapeTimeEdit_Time_Read, @_LapeTimeEdit_Time_Write);
+    addProperty('TLazTimeEdit', 'DefaultNow', 'Boolean', @_LapeTimeEdit_DefaultNow_Read, @_LapeTimeEdit_DefaultNow_Write);
+    addProperty('TLazTimeEdit', 'ReadOnly', 'Boolean', @_LapeTimeEdit_ReadOnly_Read, @_LapeTimeEdit_ReadOnly_Write);
+    addProperty('TLazTimeEdit', 'DirectInput', 'Boolean', @_LapeTimeEdit_DirectInput_Read, @_LapeTimeEdit_DirectInput_Write);
+    addClassConstructor('TLazTimeEdit', '(TheOwner: TLazComponent)', @_LapeTimeEdit_Create);
+
 
     addClass('TLazMenu', 'TLazComponent', TMenu);
     addClass('TLazMenuItem', 'TLazComponent', TMenuItem);
