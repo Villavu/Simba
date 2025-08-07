@@ -12,34 +12,20 @@ interface
 uses
   Classes, SysUtils;
 
-function xxHash32(Seed: UInt32; P: PByte; Len: UInt32): UInt32;
+function xxHash32(P: PByte; const Len: UInt32; const Seed: UInt32 = 0): UInt32;
 
 implementation
 
 {$R-}
 {$Q-}
 
-(*
-{$IFDEF CPUX86}
-{$ASMMODE INTEL}
-{$DEFINE xxHash32}
-{$ENDIF}
-
-{$IFDEF CPUX86_64}
-{$ASMMODE INTEL}
-{$DEFINE xxHash32}
-{$ENDIF}
-*)
-
-// pure pascal fallback
-{$IFNDEF xxHash32}
-function xxHash32(Seed: UInt32; P: PByte; Len: UInt32): UInt32;
+function xxHash32(P: PByte; const Len: UInt32; const Seed: UInt32): UInt32;
 const
-  PRIME32_1 = 2654435761;
-  PRIME32_2 = 2246822519;
-  PRIME32_3 = 3266489917;
-  PRIME32_4 = 668265263;
-  PRIME32_5 = 374761393;
+  PRIME32_1 = UInt32(2654435761);
+  PRIME32_2 = UInt32(2246822519);
+  PRIME32_3 = UInt32(3266489917);
+  PRIME32_4 = UInt32(668265263);
+  PRIME32_5 = UInt32(374761393);
 
   function Rol13(const Value: UInt32): UInt32; inline;
   begin
@@ -88,7 +74,6 @@ begin
   Result := Result * PRIME32_3;
   Result := Result xor (Result shr 16);
 end;
-{$ENDIF}
 
 end.
 

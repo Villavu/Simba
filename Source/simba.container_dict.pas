@@ -178,17 +178,9 @@ begin
   Result := (UInt32(k) * 31) xor UInt32(k shr 32);
 end;
 
-// FNV
 class function TDictionary<K, V>.HashString(constref k: String): UInt32;
-var
-  I: Int32;
 begin
-  Result := 2166136261;
-  for I := 1 to Length(k) do
-  begin
-    Result := Result xor Byte(k[I]);
-    Result := Result * 16777619;
-  end;
+  Result := Hash32(@k[1], Length(k));
 end;
 
 class function TDictionary<K, V>.CompareBool(constref A, B: Boolean): Boolean;

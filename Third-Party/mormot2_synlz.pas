@@ -120,6 +120,9 @@ unit mormot2_synlz;
 
 interface
 
+type
+  TSynLZByteArray = array of Byte;
+
 // get maximum possible (worse) compressed size for out_p
 function SynLZcompressdestlen(in_len: integer): integer;
 
@@ -130,7 +133,11 @@ function SynLZcompress(src: PByte; size: integer; dst: PByte): integer;
 function SynLZdecompress(src: PByte; size: integer; dst: PByte): integer;
 
 // this function is slower, but will allow to uncompress only the start of the content (e.g. to read some metadata header)
-function SynLZdecompress1partial(src: PByte; size: integer; dst: PByte; maxDst: integer): integer;
+function SynLZdecompressPartial(src: PByte; size: integer; dst: PByte; maxDst: integer): integer;
+
+function SynLZcompressSimple(src: PByte; size: integer): TSynLZByteArray;
+function SynLZdecompressSimple(src: PByte; size: integer): TSynLZByteArray;
+function SynLZdecompressPartialSimple(src: PByte; srcSize: integer; size: Integer): TSynLZByteArray;
 
 implementation
 
@@ -1064,7 +1071,7 @@ begin
 end;
 {$ENDIF}
 
-function SynLZdecompress1partial(src: PByte; size: integer; dst: PByte; maxDst: integer): integer;
+function SynLZdecompressPartial(src: PByte; size: integer; dst: PByte; maxDst: integer): integer;
 
   procedure SynLZdecompresspartialsub(src, dst, src_end, dst_end: PByte; var offset: TOffsets);
   var
@@ -1172,6 +1179,24 @@ begin
     result := maxDst;
   if result > 0 then
     SynLZdecompresspartialsub(src, dst, srcend, dst + result, offset);
+end;
+
+function SynLZcompressSimple(src: PByte; size: integer): TSynLZByteArray;
+begin
+  SetLength(Result, SynLZcompressdestlen(size));
+  SetLength(Result, SynLZcompress(src, size, @Result[0]));
+end;
+
+function SynLZdecompressSimple(src: PByte; size: integer): TSynLZByteArray;
+begin
+  SetLength(Result, SynLZdecompressdestlen(src));
+  SetLength(Result, SynLZdecompress(src, size, @Result[0]));
+end;
+
+function SynLZdecompressPartialSimple(src: PByte; srcSize: integer; size: Integer): TSynLZByteArray;
+begin
+  SetLength(Result, size);
+  SetLength(Result, SynLZdecompressPartial(src, srcSize, @Result[0], size));
 end;
 
 end.
