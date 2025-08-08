@@ -57,6 +57,7 @@ begin
   testD(ECompressAlgo.ZLIB, @testData[1], Length(testData));
   testD(ECompressAlgo.SYNLZ, @testData[1], Length(testData));
   testD(ECompressAlgo.GZ, @testData[1], Length(testData));
+  testD(ECompressAlgo.RLE, @testData[1], Length(testData));
 
   // non binary data
   testData := 'ABCDEF111222333000' * 1234;
@@ -64,10 +65,13 @@ begin
   testD(ECompressAlgo.ZLIB, @testData[1], Length(testData));
   testD(ECompressAlgo.SYNLZ, @testData[1], Length(testData));
   testD(ECompressAlgo.GZ, @testData[1], Length(testData));
+  // will fail as data isn't for RLE
+  //testD(ECompressAlgo.RLE, @testData[1], Length(testData));
 
   testB(ECompressAlgo.ZLIB);
   testB(ECompressAlgo.SYNLZ);
   testB(ECompressAlgo.GZ);
+  testB(ECompressAlgo.RLE);
 
   for algo in ECompressAlgo do
     for encoding in EBaseEncoding do

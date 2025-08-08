@@ -3,8 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
   --------------------------------------------------------------------------
-
-  Think a zip file, but (massively) optimized for reading speed rather than compression
+  Like a zip file but (massively) optimized for reading speed rather than compression.
 }
 unit simba.resource;
 
@@ -14,35 +13,39 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.baseclass,
-  simba.image, simba.container_dict;
+  simba.base,
+  simba.baseclass,
+  simba.image,
+  simba.container_dict;
 
 const
   ResourceSignature = UInt32($53455253); // "SRES"
   EntrySignature    = UInt32($4E455253); // "SREN"
 
-  CompressMethod_None  = UInt8(0);
-  CompressMethod_SynLZ = UInt8(1);
+  CompressMethod_None     = UInt8(0);
+  CompressMethod_SynLZ    = UInt8(1);
+  CompressMethod_RleSynLZ = UInt8(2);
 
 type
   PResourceHeader = ^TResourceHeader;
   TResourceHeader = packed record
-    Signature: UInt32;            // signature
-    Version: UInt32;              // version for any future changes
-    Count: UInt32;                // entry count
-    HeadersDataSize: UInt32;      // entry headers data size
-    HeadersCompressed: Boolean;   // if headers are compressed
-    CompressedDataOffset: UInt32; // offset to the start of the compressed data
+    Signature: UInt32;             // signature
+    Version: UInt32;               // version for any future changes
+    Count: UInt32;                 // entry count
+    HeadersDataSize: UInt32;       // entry headers data size
+    CompressedDataOffset: UInt32;  // offset to the start of the compressed data
   end;
 
   PEntryHeader = ^TEntryHeader;
   TEntryHeader = packed record
     Signature: UInt32;        // signature
-    CompressMethod: Byte;     // 0 = no compression, 1 = SynLZ
+    CompressMethod: UInt8;    // 0 = no compression, 1 = SynLZ, 2 = RleSynLZ
     UncompressedSize: UInt32; // uncompressed data size
     CompressedSize: UInt32;   // compressed data size
     DataHash: UInt32;         // crc32 of uncompressed data
     DataOffset: UInt32;       // offset to data compressed data
+    MetaOffset: UInt32;       // todo
+    MetaSize: UInt32;         // todo
     NameSize: UInt32;         // name size in chars, the characters follow this
     // char[NameSize]
   end;
@@ -51,22 +54,14 @@ type
   PSimbaResourceWriter = ^TSimbaResourceWriter;
   TSimbaResourceWriter = class(TSimbaBaseClass)
   protected
-    FCompressHeaders: Boolean;
     FCount: Integer;
-    FEntryHeaders: Pointer;
-    FEntryHeadersSize: Integer;
+    FHeaders: TMemoryStream;
+    FData: TMemoryStream;
 
-    FCompressed: Pointer;
-    FCompressedSize: Integer;
-
-    FBuiltSize: Integer;
-
-    procedure Build;
+    procedure Build(Dest: TStream);
   public
     constructor Create;
     destructor Destroy; override;
-
-    property CompressHeaders: Boolean read FCompressHeaders write FCompressHeaders;
 
     procedure Add(AName: String; Data: PByte; DataSize: Integer);
     procedure AddString(AName: String; Str: String);
@@ -84,27 +79,23 @@ type
     TLoadedEntry = record
       Header: TEntryHeader;
       Name: String;
-      Data: Pointer;
-      DataSize: UInt32;
-      PartialData: Pointer; // partial being data that can be uncompresed at the start without needing full uncompression (e.g. to read some metadata Header)
-      PartialDataSize: UInt32;
+      Data: TByteArray;
     end;
+    TEntryLookupMap = specialize TDictionary<String, Integer>;
   protected
     FStream: TFileStream;
     FCount: Integer;
     FCompressedDataOffset: Integer;
-    FEntryLookup: specialize TDictionary<String, Integer>; // use a dict for fast lookup of string to index
-
+    FEntryLookup: TEntryLookupMap; // use a dict for fast lookup of string to index
     FEntries: array of TLoadedEntry;
 
-    function DoLoadEntry(Index: Integer; Partial: Integer = 0): Boolean;
-
-    function LoadEntryPartial(Index: Integer; Size: Integer): Boolean;
+    procedure CheckIndex(Index: Integer);
     function LoadEntry(Index: Integer): Boolean;
 
     function GetNames: TStringArray;
     function GetName(Index: Integer): String;
     function GetHash(Index: Integer): UInt32;
+    function GetCompressAlgo(Index: Integer): UInt8;
     function GetCompressedSize(Index: Integer): UInt32;
     function GetUncompressedSize(Index: Integer): UInt32;
   public
@@ -116,13 +107,14 @@ type
 
     property Name[Index: Integer]: String read GetName;
     property Hash[Index: Integer]: UInt32 read GetHash;
+    property CompressAlgo[Index: Integer]: UInt8 read GetCompressAlgo;
     property CompressedSize[Index: Integer]: UInt32 read GetCompressedSize;
     property UncompressedSize[Index: Integer]: UInt32 read GetUncompressedSize;
 
     function Find(AName: String): Integer;
 
-    function Load(Index: Integer; out Data: PByte; out DataSize: Integer): Boolean;
-    function LoadPartial(Index: Integer; Size: Integer; out Data: PByte): Boolean;
+    function Load(Index: Integer): TByteArray; overload;
+    function Load(AName: String): TByteArray; overload;
     function LoadString(Index: Integer): String; overload;
     function LoadString(AName: String): String; overload;
     function LoadImage(Index: Integer): TSimbaImage; overload;
@@ -131,103 +123,110 @@ type
     function Save(Index: Integer; FileName: String): Boolean; overload;
     function Save(AName: String; FileName: String): Boolean; overload;
 
-    procedure UnloadData;
+    procedure Unload;
   end;
 
 implementation
 
 uses
-  mormot2_synlz, crc,
-  simba.fs;
+  mormot2_synlz,
+  mormot2_rle,
+  simba.fs,
+  simba.hash,
+  simba.vartype_ordarray;
 
-procedure TSimbaResourceWriter.Build;
+procedure TSimbaResourceWriter.Build(Dest: TStream);
 var
-  CompressedHeaders: PByte;
+  CompressedHeaders: TByteArray;
+  MainHeader: TResourceHeader;
 begin
-  if FCompressHeaders then
-  begin
-    CompressedHeaders := GetMem(SynLZcompressdestlen(FEntryHeadersSize));
-    FEntryHeadersSize := SynLZcompress(FEntryHeaders, FEntryHeadersSize, CompressedHeaders);
-    FreeMem(FEntryHeaders);
-    FEntryHeaders := CompressedHeaders;
-  end;
+  Dest.Position := 0;
 
-  FBuiltSize := FCompressedSize + FEntryHeadersSize + SizeOf(TResourceHeader);
+  CompressedHeaders := SynLZcompressSimple(FHeaders.Memory, FHeaders.Position);
 
-  // Get enough space for everything
-  ReAllocMem(FCompressed, FBuiltSize);
-  // move compressed data down to make space for ResourceHeader + EntryHeaders
-  Move(FCompressed^, PByte(FCompressed)[FEntryHeadersSize + SizeOf(TResourceHeader)], FCompressedSize);
-  // move headers in
-  Move(FEntryHeaders^, PByte(FCompressed)[SizeOf(TResourceHeader)], FEntryHeadersSize);
+  // set main Header
+  MainHeader := Default(TResourceHeader);
+  MainHeader.Signature := ResourceSignature;
+  MainHeader.Version := 1;
+  MainHeader.Count := FCount;
+  MainHeader.HeadersDataSize := Length(CompressedHeaders);
+  MainHeader.CompressedDataOffset := Length(CompressedHeaders) + SizeOf(TResourceHeader);
 
-  // set resource Header
-  PResourceHeader(FCompressed)^.Signature := ResourceSignature;
-  PResourceHeader(FCompressed)^.Version := 1;
-  PResourceHeader(FCompressed)^.Count := FCount;
-  PResourceHeader(FCompressed)^.HeadersDataSize := FEntryHeadersSize;
-  PResourceHeader(FCompressed)^.HeadersCompressed := FCompressHeaders;
-  PResourceHeader(FCompressed)^.CompressedDataOffset := FEntryHeadersSize + SizeOf(TResourceHeader);
+  Dest.Write(MainHeader, SizeOf(MainHeader));
+  Dest.Write(CompressedHeaders[0], Length(CompressedHeaders));
+  Dest.Write(FData.Memory^, FData.Position);
 end;
 
 constructor TSimbaResourceWriter.Create;
 begin
   inherited Create();
 
-  FEntryHeaders    := GetMem(256 * 256);
-  FCompressed      := GetMem(4 * (1024 * 1024));
-  FCompressHeaders := True;
+  FHeaders := TMemoryStream.Create();
+  FData := TMemoryStream.Create();
 end;
 
 destructor TSimbaResourceWriter.Destroy;
 begin
-  FreeMem(FEntryHeaders);
-  FreeMem(FCompressed);
+  FreeAndNil(FHeaders);
+  FreeAndNil(FData);
 
   inherited Destroy();
 end;
 
 procedure TSimbaResourceWriter.Add(AName: String; Data: PByte; DataSize: Integer);
 
-  procedure addHeader(size: Integer; crc: UInt32);
+  procedure addHeader(ACompressedData: PByte; ACompressedDataSize: Integer; ACompressMethod: Integer);
   var
-    Header: PEntryHeader;
-    Needed: Integer;
+    Header: TEntryHeader;
   begin
-    Needed := FEntryHeadersSize + SizeOf(TEntryHeader) + Length(AName);
-    if (Needed >= MemSize(FEntryHeaders)) then
-      ReAllocMem(FEntryHeaders, Needed * 2);
+    Header := Default(TEntryHeader);
+    Header.Signature := EntrySignature;
+    Header.CompressMethod := ACompressMethod;
+    Header.UncompressedSize := DataSize;
+    Header.DataOffset := FData.Position;
+    Header.CompressedSize := ACompressedDataSize;
+    Header.DataHash := CRC32(Data, DataSize);
+    Header.NameSize := Length(AName);
 
-    Header := PEntryHeader(FEntryHeaders + FEntryHeadersSize);
-    Header^.Signature := EntrySignature;
-    Header^.CompressMethod := CompressMethod_SynLZ;
-    Header^.UncompressedSize := DataSize;
-    Header^.DataOffset := FCompressedSize;
-    Header^.CompressedSize := size;
-    Header^.DataHash := crc;
-    Header^.NameSize := Length(AName);
-    if Header^.NameSize > 0 then
-      Move(AName[1], PByte(Pointer(Header) + SizeOf(TEntryHeader))^, Length(AName));
-
-    Inc(FEntryHeadersSize, SizeOf(TEntryHeader) + Header^.NameSize);
+    FHeaders.Write(Header, SizeOf(TEntryHeader));
+    if (Length(AName) > 0) then
+      FHeaders.Write(AName[1], Length(AName));
+    FData.Write(ACompressedData^, ACompressedDataSize);
   end;
 
 var
-  tmp: Pointer;
-  tmpSize: Integer;
+  CompressedData: TByteArray;
+  CompressedDataSize: Integer;
+  RleData: Pointer;
+  RleSize: Integer;
 begin
   Inc(FCount);
 
-  tmp := GetMem(SynLZcompressdestlen(DataSize));
-  tmpSize := SynLZcompress(Data, DataSize, tmp);
-  addHeader(tmpSize, crc32(crc.crc32(0, nil, 0), tmp, tmpSize));
+  // try to reduce at least by 1/8
+  RleData := GetMem(DataSize - DataSize shr 3);
+  RleSize := RleCompress(Data, RleData, DataSize, DataSize - DataSize shr 3);
 
-  if (FCompressedSize + tmpSize > MemSize(FCompressed)) then
-    ReAllocMem(FCompressed, (FCompressedSize + tmpSize) * 2);
-  Move(tmp^, PByte(FCompressed)[FCompressedSize], tmpSize);
-  Inc(FCompressedSize, tmpSize);
+  // RLE was not worth it (no 1/8 reduction) -> apply only SynLZ
+  if (RleSize < 0) then
+  begin
+    CompressedData := SynLZcompressSimple(Data, DataSize);
+    CompressedDataSize := Length(CompressedData);
 
-  FreeMem(tmp);
+    // If compresion didnt do much, dont bother.
+    if (CompressedDataSize >= Round(DataSize * 0.95)) then
+      addHeader(Data, DataSize, CompressMethod_None)
+    else
+      addHeader(@CompressedData[0], CompressedDataSize, CompressMethod_SynLZ);
+  end else
+  // RLE did reduce the size enough -> compress the RLE data
+  begin
+    CompressedData := SynLZcompressSimple(RleData, RleSize);
+    CompressedDataSize := Length(CompressedData);
+
+    addHeader(@CompressedData[0], CompressedDataSize, CompressMethod_RleSynLZ);
+  end;
+
+  FreeMem(RleData);
 end;
 
 procedure TSimbaResourceWriter.AddString(AName: String; Str: String);
@@ -241,6 +240,7 @@ var
   Data: PByte;
 begin
   // width,height,pixels
+  // todo eventually implement metadata stuff and store width/height there
   Size := SizeOf(Integer)*2 + ((Image.Width * Image.Height) * SizeOf(TColorBGRA));
   Data := GetMem(Size);
 
@@ -249,6 +249,7 @@ begin
   Move(Image.Data^,  Data[SizeOf(Integer)*2], (Image.Width * Image.Height) * SizeOf(TColorBGRA));
 
   Add(AName, Data, Size);
+  FreeMem(Data);
 end;
 
 procedure TSimbaResourceWriter.AddImages(Dir: String; Mask: String;  Recursive: Boolean);
@@ -287,79 +288,105 @@ begin
 end;
 
 procedure TSimbaResourceWriter.Save(FileName: String);
+var
+  Stream: TFileStream;
 begin
-  Build();
-
-  with TFileStream.Create(FileName, fmCreate) do
-  try
-    Write(FCompressed^, FBuiltSize);
-  finally
-    Free();
-  end;
+  Stream := TFileStream.Create(FileName, fmCreate);
+  Build(Stream);
+  Stream.Free();
 end;
 
-function TSimbaResourceReader.DoLoadEntry(Index: Integer; Partial: Integer): Boolean;
+constructor TSimbaResourceReader.Create(FileName: String);
+var
+  I: Integer;
+  ResourceHeader: TResourceHeader;
+  Headers: TByteArray;
+  Ptr: PByte;
+begin
+  inherited Create();
+
+  FEntryLookup := TEntryLookupMap.Create();
+
+  FStream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
+  FStream.Read(ResourceHeader, SizeOf(TResourceHeader));
+  if (ResourceHeader.Signature <> ResourceSignature) then
+    SimbaException('Invalid resource file (invalid signature)');
+
+  FCount := ResourceHeader.Count;
+  FCompressedDataOffset := ResourceHeader.CompressedDataOffset;
+  SetLength(FEntries, FCount);
+
+  Headers := SynLZdecompressSimple(FStream, ResourceHeader.HeadersDataSize);
+
+  Ptr := @Headers[0];
+  for I := 0 to FCount - 1 do
+  begin
+    FEntries[I].Header := PEntryHeader(Ptr)^;
+    if (FEntries[I].Header.Signature <> EntrySignature) then
+      SimbaException('Invalid entry signature for index: %d', [I]);
+
+    Inc(Ptr, SizeOf(TEntryHeader));
+    if (FEntries[I].Header.NameSize > 0) then
+    begin
+      SetLength(FEntries[I].Name, FEntries[I].Header.NameSize);
+      Move(Ptr^, FEntries[I].Name[1], FEntries[I].Header.NameSize);
+      Inc(Ptr, FEntries[I].Header.NameSize);
+    end;
+  end;
+
+  for I := 0 to FCount - 1 do
+    FEntryLookup.AddFast(FEntries[I].Name, I);
+end;
+
+destructor TSimbaResourceReader.Destroy;
+begin
+  inherited Destroy();
+
+  if (FStream <> nil) then
+    FreeAndNil(FStream);
+  if (FEntryLookup <> nil) then
+    FreeAndNil(FEntryLookup);
+end;
+
+procedure TSimbaResourceReader.CheckIndex(Index: Integer);
+begin
+  if (Index < 0) or (Index >= FCount) then
+    SimbaException('Entry %d out of range %d..%d', [Index, 0, FCount-1]);
+end;
+
+function TSimbaResourceReader.LoadEntry(Index: Integer): Boolean;
 
   procedure NoCompression(var Entry: TLoadedEntry);
   begin
-    if (Partial > 0) then
-    begin
-      Entry.PartialData := GetMem(Partial);
-      Entry.PartialDataSize := Partial;
-
-      FStream.Seek(FCompressedDataOffset + Entry.Header.DataOffset, soFromBeginning);
-      FStream.Read(Entry.PartialData^, Partial);
-    end else
-    begin
-      Entry.Data := GetMem(Entry.Header.CompressedSize);
-      Entry.DataSize := Entry.Header.UncompressedSize;
-
-      FStream.Seek(FCompressedDataOffset + Entry.Header.DataOffset, soFromBeginning);
-      FStream.Read(Entry.Data^, Entry.Header.CompressedSize);
-    end;
+    SetLength(Entry.Data, Entry.Header.CompressedSize);
+    FStream.Seek(FCompressedDataOffset + Entry.Header.DataOffset, soFromBeginning);
+    FStream.Read(Entry.Data[0], Entry.Header.CompressedSize);
   end;
 
   procedure SynLZCompression(var Entry: TLoadedEntry);
-  var
-    Buffer: PByte;
   begin
-    Buffer := GetMem(Entry.Header.CompressedSize);
     FStream.Seek(FCompressedDataOffset + Entry.Header.DataOffset, soFromBeginning);
-    FStream.Read(Buffer^, Entry.Header.CompressedSize);
+    Entry.Data := SynLZdecompressSimple(FStream, Entry.Header.CompressedSize);
+  end;
 
-    if (Partial > 0) then
-    begin
-      Entry.PartialData := GetMem(Partial);
-      Entry.PartialDataSize := SynLZdecompress1partial(Buffer, Entry.Header.CompressedSize, Entry.PartialData, Partial);
-    end else
-    begin
-      Entry.Data := GetMem(SynLZdecompressdestlen(Buffer));
-      Entry.DataSize := SynLZdecompress(Buffer, Entry.Header.CompressedSize, Entry.Data);
-    end;
-
-    FreeMem(Buffer);
+  procedure RleSynLZCompression(var Entry: TLoadedEntry);
+  begin
+    FStream.Seek(FCompressedDataOffset + Entry.Header.DataOffset, soFromBeginning);
+    Entry.Data := SynLZdecompressSimple(FStream, Entry.Header.CompressedSize);
+    Entry.Data := RleUnCompressSimple(Entry.Data, Entry.Header.UncompressedSize);
   end;
 
 begin
   Result := (Index >= 0) and (Index < FCount);
 
-  if Result and ((Partial = 0) and (FEntries[Index].Data = nil)) or ((Partial > 0) and (FEntries[Index].PartialData = nil)) then
+  if Result and (FEntries[Index].Data = nil) then
     case FEntries[Index].Header.CompressMethod of
-      CompressMethod_None:  NoCompression(FEntries[Index]);
-      CompressMethod_SynLZ: SynLZCompression(FEntries[Index]);
+      CompressMethod_None:     NoCompression(FEntries[Index]);
+      CompressMethod_SynLZ:    SynLZCompression(FEntries[Index]);
+      CompressMethod_RleSynLZ: RleSynLZCompression(FEntries[Index]);
       else
         SimbaException('Invalid compresion mode: %d. Corrupt resource?', [FEntries[Index].Header.CompressMethod]);
     end;
-end;
-
-function TSimbaResourceReader.LoadEntryPartial(Index: Integer; Size: Integer): Boolean;
-begin
-  Result := DoLoadEntry(Index, Size);
-end;
-
-function TSimbaResourceReader.LoadEntry(Index: Integer): Boolean;
-begin
-  Result := DoLoadEntry(Index);
 end;
 
 function TSimbaResourceReader.GetNames: TStringArray;
@@ -373,113 +400,62 @@ end;
 
 function TSimbaResourceReader.GetName(Index: Integer): String;
 begin
-  if (Index < 0) or (Index >= FCount) then
-    SimbaException('Entry %d is out of range %d..%d', [Index, 0, FCount]);
+  CheckIndex(Index);
   Result := FEntries[Index].Name;
 end;
 
 function TSimbaResourceReader.GetHash(Index: Integer): UInt32;
 begin
-  if (Index < 0) or (Index >= FCount) then
-    SimbaException('Entry %d is out of range %d..%d', [Index, 0, FCount]);
+  CheckIndex(Index);
   Result := FEntries[Index].Header.DataHash;
+end;
+
+function TSimbaResourceReader.GetCompressAlgo(Index: Integer): UInt8;
+begin
+  CheckIndex(Index);
+  Result := FEntries[Index].Header.CompressMethod;
 end;
 
 function TSimbaResourceReader.GetCompressedSize(Index: Integer): UInt32;
 begin
-  if (Index < 0) or (Index >= FCount) then
-    SimbaException('Entry %d is out of range %d..%d', [Index, 0, FCount]);
-  Result := FEntries[Index].header.CompressedSize;
+  CheckIndex(Index);
+  Result := FEntries[Index].Header.CompressedSize;
 end;
 
 function TSimbaResourceReader.GetUncompressedSize(Index: Integer): UInt32;
 begin
-  if (Index < 0) or (Index >= FCount) then
-    SimbaException('Entry %d is out of range %d..%d', [Index, 0, FCount]);
+  CheckIndex(Index);
   Result := FEntries[Index].Header.UncompressedSize;
-end;
-
-constructor TSimbaResourceReader.Create(FileName: String);
-var
-  I: Integer;
-  ResourceHeader: TResourceHeader;
-  EntryHeadersCompressed, EntryHeadersDecompressed: PByte;
-  Ptr: PByte;
-begin
-  inherited Create();
-
-  FEntryLookup := specialize TDictionary<String, Integer>.Create();
-
-  FStream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
-  FStream.Read(ResourceHeader, SizeOf(TResourceHeader));
-
-  if (ResourceHeader.Signature <> ResourceSignature) then
-    SimbaException('Invalid resource file (missing signature)');
-
-  FCount := ResourceHeader.Count;
-  FCompressedDataOffset := ResourceHeader.CompressedDataOffset;
-  SetLength(FEntries, FCount);
-
-  if ResourceHeader.HeadersCompressed then
-  begin
-    EntryHeadersCompressed := GetMem(ResourceHeader.HeadersDataSize);
-    FStream.Read(EntryHeadersCompressed^, ResourceHeader.HeadersDataSize);
-    EntryHeadersDecompressed := GetMem(SynLZdecompressdestlen(EntryHeadersCompressed));
-    ResourceHeader.HeadersDataSize := SynLZdecompress(EntryHeadersCompressed, ResourceHeader.HeadersDataSize, EntryHeadersDecompressed);
-
-    Ptr := EntryHeadersDecompressed;
-    for I := 0 to FCount - 1 do
-    begin
-      FEntries[I].Header := PEntryHeader(Ptr)^;
-      if (FEntries[I].Header.Signature <> EntrySignature) then
-        SimbaException('Invalid entry signature for index: %d', [I]);
-
-      Inc(Ptr, SizeOf(TEntryHeader));
-      if (FEntries[I].Header.NameSize > 0) then
-      begin
-        SetLength(FEntries[I].Name, FEntries[I].Header.NameSize);
-        Move(Ptr^, FEntries[I].Name[1], FEntries[I].Header.NameSize);
-        Inc(Ptr, FEntries[I].Header.NameSize);
-      end;
-    end;
-
-    FreeMem(EntryHeadersCompressed);
-    FreeMem(EntryHeadersDecompressed);
-  end else
-  begin
-    for I := 0 to FCount - 1 do
-    begin
-      FStream.Read(FEntries[I].Header, SizeOf(TEntryHeader));
-      if (FEntries[I].Header.Signature <> EntrySignature) then
-        SimbaException('Invalid entry signature for index: %d', [I]);
-
-      if (FEntries[I].Header.NameSize > 0) then
-      begin
-        SetLength(FEntries[I].Name, FEntries[I].Header.NameSize);
-        FStream.Read(FEntries[I].Name[1], FEntries[I].Header.NameSize);
-      end;
-    end;
-  end;
-
-  for I := 0 to FCount - 1 do
-    FEntryLookup.AddFast(FEntries[I].Name, I);
-end;
-
-destructor TSimbaResourceReader.Destroy;
-begin
-  inherited Destroy();
-
-  UnloadData();
-
-  if (FStream <> nil) then
-    FreeAndNil(FStream);
-  if (FEntryLookup <> nil) then
-    FreeAndNil(FEntryLookup);
 end;
 
 function TSimbaResourceReader.Find(AName: String): Integer;
 begin
   Result := FEntryLookup.GetDef(AName, -1);
+end;
+
+function TSimbaResourceReader.Load(Index: Integer): TByteArray;
+begin
+  if LoadEntry(Index) then
+    Result := FEntries[Index].Data
+  else
+    Result := [];
+end;
+
+function TSimbaResourceReader.Load(AName: String): TByteArray;
+begin
+  Result := Load(Find(AName));
+end;
+
+function TSimbaResourceReader.LoadString(Index: Integer): String;
+begin
+  Result := '';
+  if LoadEntry(Index) then
+    Result := FEntries[Index].Data.ToString();
+end;
+
+function TSimbaResourceReader.LoadString(AName: String): String;
+begin
+  Result := LoadString(Find(AName));
 end;
 
 function TSimbaResourceReader.LoadImage(Index: Integer): TSimbaImage;
@@ -489,8 +465,8 @@ begin
   if LoadEntry(Index) then
     Result := TSimbaImage.CreateFromData(
       PInteger(FEntries[Index].Data)^,
-      PInteger(FEntries[Index].Data + SizeOf(Integer))^,
-      PColorBGRA(FEntries[Index].Data + (SizeOf(Integer) * 2)),
+      PInteger(@FEntries[Index].Data[SizeOf(Integer)])^,
+      PColorBGRA(@FEntries[Index].Data[SizeOf(Integer)*2]),
       PInteger(FEntries[Index].Data)^
     );
 end;
@@ -498,13 +474,6 @@ end;
 function TSimbaResourceReader.LoadImage(AName: String): TSimbaImage;
 begin
   Result := LoadImage(Find(AName));
-end;
-
-function TSimbaResourceReader.LoadPartial(Index: Integer; Size: Integer; out Data: PByte): Boolean;
-begin
-  Result := LoadEntryPartial(Index, Size);
-  if Result then
-    Data := FEntries[Index].PartialData;
 end;
 
 function TSimbaResourceReader.Save(Index: Integer; FileName: String): Boolean;
@@ -515,7 +484,7 @@ begin
   if Result then
   begin
     Stream := TFileStream.Create(FileName, fmCreate);
-    Stream.Write(FEntries[Index].Data^, FEntries[Index].DataSize);
+    Stream.Write(FEntries[Index].Data[0], Length(FEntries[Index].Data));
   end;
 end;
 
@@ -524,44 +493,12 @@ begin
   Result := Save(Find(AName), FileName);
 end;
 
-function TSimbaResourceReader.Load(Index: Integer; out Data: PByte; out DataSize: Integer): Boolean;
-begin
-  Result := LoadEntry(Index);
-
-  if Result then
-  begin
-    Data := FEntries[Index].Data;
-    DataSize := FEntries[Index].DataSize;
-  end;
-end;
-
-function TSimbaResourceReader.LoadString(Index: Integer): String;
-begin
-  Result := '';
-
-  if LoadEntry(Index) then
-  begin
-    SetLength(Result, FEntries[Index].DataSize);
-    Move(FEntries[Index].Data^, Result[1], Length(Result));
-  end;
-end;
-
-function TSimbaResourceReader.LoadString(AName: String): String;
-begin
-  Result := LoadString(Find(AName));
-end;
-
-procedure TSimbaResourceReader.UnloadData;
+procedure TSimbaResourceReader.Unload;
 var
   I: Integer;
 begin
-  for I := 0 to FCount - 1 do
-  begin
-    if (FEntries[I].PartialData <> nil) then
-      FreeMemAndNil(FEntries[I].PartialData);
-    if (FEntries[I].Data <> nil) then
-      FreeMemAndNil(FEntries[I].Data);
-  end;
+  for I := 0 to High(FEntries) do
+    FEntries[I].Data := nil;;
 end;
 
 end.

@@ -16,15 +16,11 @@ begin
     Result[i] := i;
 end;
 
-function arrFromMem(p: Pointer; size: Integer): TIntegerArray;
+function arrFromBytes(bytes: TByteArray): TIntegerArray;
 var i: Integer;
 begin
-  SetLength(Result, size div SizeOf(Integer));
-  for i:=0 to High(Result) do
-  begin
-    Result[i] := Int32(p^);
-    inc(p, SizeOf(Integer));
-  end;
+  SetLength(Result, Length(bytes) div SizeOf(Integer));
+  Move(bytes[0], Result[0], Length(Bytes));
 end;
 
 var writer: TResourceWriter;
@@ -32,8 +28,7 @@ var reader: TResourceReader;
 var img1, img2: TImage;
 var string1, string2: String;
 var ints1, ints2: TIntegerArray;
-var tmp: Pointer;
-var tmpSize: Integer;
+var i: Integer;
 begin
   img1 := genImage(111,25,$FF);
   img2 := genImage(222,222,$FFFFFF);
@@ -59,10 +54,10 @@ begin
   Assert(reader.Count = 6);
   Assert(reader.Names.Equals(['img1', 'img2', 'string1', 'string2', 'ints1', 'ints2']));
 
-  Assert(reader.Hash[0] = 1491406162);
+  Assert(reader.Hash[0] = 2540280038);
   Assert(reader.Name[0] = 'img1');
-  Assert(reader.UncompressedSize[0]= 11108);
-  Assert(reader.CompressedSize[0]= 205);
+  Assert(reader.UncompressedSize[0] = 11108);
+  Assert(reader.CompressedSize[0] = 205);
 
   Assert(reader.LoadImage(reader.Find('img1')).Equals(img1));
   Assert(reader.LoadImage(reader.Find('img2')).Equals(img2));
@@ -70,8 +65,6 @@ begin
   Assert(reader.LoadString(reader.Find('string1')) = string1);
   Assert(reader.LoadString(reader.Find('string2')) = string2);
 
-  Assert(reader.Load(reader.Find('ints1'), tmp, tmpSize));
-  Assert(arrFromMem(tmp, tmpSize).Equals(ints1));
-  Assert(reader.Load(reader.Find('ints2'), tmp, tmpSize));
-  Assert(arrFromMem(tmp, tmpSize).Equals(ints2));
+  Assert(arrFromBytes(reader.Load(reader.Find('ints1'))).Equals(ints1));
+  Assert(arrFromBytes(reader.Load(reader.Find('ints2'))).Equals(ints2));
 end.

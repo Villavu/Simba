@@ -102,13 +102,13 @@ end;
 
 function Hash32(Data: PByte; Len: Int32; Seed: UInt32): UInt32;
 begin
-  Result := xxHash32(Seed, Data, Len);
+  Result := xxHash32(Data, Len, Seed);
 end;
 
 function Hash32(S: String; Seed: UInt32): UInt32;
 begin
   if (Length(S) > 0) then
-    Result := xxHash32(Seed, @S[1], Length(S))
+    Result := xxHash32(@S[1], Length(S), Seed)
   else
     Result := Seed;
 end;

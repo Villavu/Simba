@@ -13,12 +13,16 @@ interface
 uses
   Classes, SysUtils;
 
+type
+  TRleByteArray = array of Byte;
+
 /// simple Run-Length-Encoding compression of a memory buffer
 // - SynLZ is not good with input of a lot of redundant bytes, e.g. chunks of
 // zeros: you could pre-process RleCompress/RleUnCompress such data before SynLZ
 // - see AlgoRleLZ as such a RLE + SynLZ algorithm
 // - returns the number of bytes written to dst, or -1 on dstsize overflow
 function RleCompress(src, dst: PByte; srcsize, dstsize: PtrUInt): PtrInt;
+function RleCompressDestLen(PlainLen: integer): integer;
 
 /// simple Run-Length-Encoding uncompression of a memory buffer
 // - SynLZ is not good with input of a lot of redundant bytes, e.g. chunks of
@@ -29,8 +33,8 @@ function RleUnCompress(src, dst: PByte; size: PtrUInt): PtrUInt;
 /// partial Run-Length-Encoding uncompression of a memory buffer
 function RleUnCompressPartial(src, dst: PByte; size, max: PtrUInt): PtrUInt;
 
-function RleCompressDestLen(PlainLen: integer): integer;
-
+function RleCompressSimple(src: PByte; size: integer): TRleByteArray;
+function RleUnCompressSimple(src: TRleByteArray; uncompressedSize: Integer): TRleByteArray;
 
 implementation
 
@@ -167,6 +171,18 @@ begin
     end;
   end;
   result := PAnsiChar(dst) - dststart;
+end;
+
+function RleCompressSimple(src: PByte; size: integer): TRleByteArray;
+begin
+  SetLength(Result, RleCompressDestLen(size));
+  SetLength(Result, RleCompress(src, @Result[0], size, Length(Result)));
+end;
+
+function RleUnCompressSimple(src: TRleByteArray; uncompressedSize: Integer): TRleByteArray;
+begin
+  SetLength(Result, uncompressedSize);
+  RleUnCompress(@src[0], @Result[0], Length(src));
 end;
 
 function RleCompressDestLen(PlainLen: integer): integer;

@@ -120,6 +120,9 @@ unit mormot2_synlz;
 
 interface
 
+uses
+  Classes, SysUtils;
+
 type
   TSynLZByteArray = array of Byte;
 
@@ -135,9 +138,12 @@ function SynLZdecompress(src: PByte; size: integer; dst: PByte): integer;
 // this function is slower, but will allow to uncompress only the start of the content (e.g. to read some metadata header)
 function SynLZdecompressPartial(src: PByte; size: integer; dst: PByte; maxDst: integer): integer;
 
-function SynLZcompressSimple(src: PByte; size: integer): TSynLZByteArray;
-function SynLZdecompressSimple(src: PByte; size: integer): TSynLZByteArray;
-function SynLZdecompressPartialSimple(src: PByte; srcSize: integer; size: Integer): TSynLZByteArray;
+// simple versions that return a byte array
+function SynLZcompressSimple(src: PByte; size: integer): TSynLZByteArray; overload;
+function SynLZdecompressSimple(src: PByte; size: integer): TSynLZByteArray; overload;
+
+function SynLZcompressSimple(Stream: TStream; size: Integer): TSynLZByteArray; overload;
+function SynLZdecompressSimple(Stream: TStream; size: Integer): TSynLZByteArray; overload;
 
 implementation
 
@@ -1181,6 +1187,26 @@ begin
     SynLZdecompresspartialsub(src, dst, srcend, dst + result, offset);
 end;
 
+function SynLZcompressSimple(Stream: TStream; size: Integer): TSynLZByteArray;
+var
+  buffer: PByte;
+begin
+  buffer := GetMem(size);
+  if (Stream.Read(buffer^, size) <> size) then
+    Exit(nil);
+  Result := SynLZcompressSimple(buffer, size);
+end;
+
+function SynLZdecompressSimple(Stream: TStream; size: Integer): TSynLZByteArray;
+var
+  buffer: PByte;
+begin
+  buffer := GetMem(size);
+  if (Stream.Read(buffer^, size) <> size) then
+    Exit(nil);
+  Result := SynLZdecompressSimple(buffer, size);
+end;
+
 function SynLZcompressSimple(src: PByte; size: integer): TSynLZByteArray;
 begin
   SetLength(Result, SynLZcompressdestlen(size));
@@ -1191,12 +1217,6 @@ function SynLZdecompressSimple(src: PByte; size: integer): TSynLZByteArray;
 begin
   SetLength(Result, SynLZdecompressdestlen(src));
   SetLength(Result, SynLZdecompress(src, size, @Result[0]));
-end;
-
-function SynLZdecompressPartialSimple(src: PByte; srcSize: integer; size: Integer): TSynLZByteArray;
-begin
-  SetLength(Result, size);
-  SetLength(Result, SynLZdecompressPartial(src, srcSize, @Result[0], size));
 end;
 
 end.

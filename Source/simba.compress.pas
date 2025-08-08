@@ -19,12 +19,16 @@ type
   ESimbaCompressAlgo = (
     ZLIB,
     SYNLZ,
-    GZ
+    GZ,
+    RLE
   );
 {$POP}
 
-procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; out OutData: PByte; out OutSize: Int64);
-procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; out OutData: PByte; out OutSize: Int64);
+procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; var OutData: PByte; out OutSize: Int64; Truncate: Boolean = True);
+procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; var OutData: PByte; out OutSize: Int64; Truncate: Boolean = True);
+
+function CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64): TByteArray; overload;
+function DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64): TByteArray; overload;
 
 function CompressBytes(Algo: ESimbaCompressAlgo; Bytes: TByteArray): TByteArray;
 function DecompressBytes(Algo: ESimbaCompressAlgo; Bytes: TByteArray): TByteArray;
@@ -36,18 +40,77 @@ implementation
 
 uses
   ZStream,
-  gz,
+  castle_gz,
   mormot2_synlz,
   mormot2_rle;
 
-procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; out OutData: PByte; out OutSize: Int64);
+type
+  TOutStream = class(TStream)
+  protected
+    FData: Pointer;
+    FDataSize: UInt32;
+    FPosition: Int32;
+    FSize: Int32;
+  public
+    constructor Create(Data: Pointer); reintroduce;
+
+    function Seek(const Offset: Int64; Origin: TSeekOrigin): Int64; override;
+    function Write(const Buffer; Count: Longint): Longint; override;
+
+    property Data: Pointer read FData;
+  end;
+
+constructor TOutStream.Create(Data: Pointer);
+begin
+  inherited Create();
+
+  FData := Data;
+  if (FData <> nil) then
+    FDataSize := MemSize(FData);
+end;
+
+function TOutStream.Seek(const Offset: Int64; Origin: TSeekOrigin): Int64;
+begin
+  case Word(Origin) of
+    soFromBeginning: FPosition := Offset;
+    soFromEnd      : FPosition := FSize + Offset;
+    soFromCurrent  : FPosition := FPosition + Offset;
+  end;
+  Result := FPosition;
+end;
+
+function TOutStream.Write(const Buffer; Count: Longint): Longint;
+begin
+  if (FPosition + Count > FSize) then
+    FSize := FPosition + Count;
+
+  if (FPosition + Count > FDataSize) then
+  begin
+    FDataSize := Max(4096, (FDataSize + Count) * 2);
+    ReAllocMem(FData, (FDataSize + Count) * 2);
+  end;
+
+  Move(Buffer, (FData + FPosition)^, Count);
+  Inc(FPosition, Count);
+  Inc(FSize, Count);
+
+  Result := Count;
+end;
+
+procedure AllocOrGrowMemory(var P: Pointer; Needed: PtrUInt);
+begin
+  if (P = nil) or (MemSize(P) < Needed) then
+    ReAllocMem(P, Needed);
+end;
+
+procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; var OutData: PByte; out OutSize: Int64; Truncate: Boolean);
 
   procedure CompressWithZLib;
   var
     InStream: TCompressionstream;
-    OutStream: TMemoryStream;
+    OutStream: TOutStream;
   begin
-    OutStream := TMemoryStream.Create();
+    OutStream := TOutStream.Create(OutData);
     InStream := TCompressionStream.Create(clDefault, OutStream);
     InStream.SourceOwner := False;
     try
@@ -55,9 +118,7 @@ procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; o
       InStream.Flush();
 
       OutSize := OutStream.Position;
-      OutData := GetMem(OutSize);
-
-      Move(OutStream.Memory^, OutData^, OutSize);
+      OutData := OutStream.Data;
     finally
       InStream.Free();
       OutStream.Free();
@@ -65,39 +126,17 @@ procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; o
   end;
 
   procedure CompressWithSynLZ;
-  var
-    RleSize: Int64;
-    RleData: PByte;
   begin
-    // first byte stores if RLE or not
-    // see if RLE is even worth it
-    RleData := GetMem(InSize - InSize shr 3);
-    RleSize := RleCompress(InData, RleData, InSize, InSize - InSize shr 3);
-
-    if (RleSize < 0) then
-    begin
-      OutData := GetMem(SynLZcompressdestlen(InSize) + SizeOf(Int64));
-      OutSize := SynLZcompress(InData, InSize, OutData + SizeOf(Int64)) + SizeOf(Int64);
-      PInt64(OutData)^ := 0;
-    end
-    else
-    begin
-      OutData := GetMem(SynLZcompressdestlen(RleSize) + SizeOf(Int64));
-      OutSize := SynLZcompress(RleData, RleSize, OutData + SizeOf(Int64)) + SizeOf(Int64);
-      PInt64(OutData)^ := InSize;
-    end;
-
-    FreeMem(RleData);
-
-    OutData := ReAllocMem(OutData, OutSize);
+    AllocOrGrowMemory(OutData, SynLZcompressdestlen(InSize));
+    OutSize := SynLZcompress(InData, InSize, OutData);
   end;
 
   procedure CompressWithGz;
   var
     InStream: TGZFileStream;
-    OutStream: TMemoryStream;
+    OutStream: TOutStream;
   begin
-    OutStream := TMemoryStream.Create();
+    OutStream := TOutStream.Create(OutData);
     try
       InStream := TGZFileStream.Create(OutStream, True);
       InStream.SourceOwner := False;
@@ -108,30 +147,47 @@ procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; o
       end;
 
       OutSize := OutStream.Position;
-      OutData := GetMem(OutSize);
-
-      Move(OutStream.Memory^, OutData^, OutSize);
+      OutData := OutStream.Data;
     finally
       OutStream.Free();
     end;
   end;
 
+  procedure CompressWithRle();
+  begin
+    OutSize := InSize + SizeOf(Int32);
+    AllocOrGrowMemory(OutData, OutSize);
+    OutSize := RleCompress(InData, @OutData[SizeOf(Int32)], InSize, OutSize - SizeOf(Int32));
+    if (OutSize = -1) then
+    begin
+      OutSize := InSize + SizeOf(Int32);
+      Move(InData^, OutData[SizeOf(Int32)], InSize);
+      PInt32(OutData)^ := 0;
+    end else
+    begin
+      OutSize := OutSize + SizeOf(Int32);
+      PInt32(OutData)^ := InSize;
+    end;
+  end;
+
 begin
   OutSize := 0;
-  OutData := nil;
-
   case Algo of
     ESimbaCompressAlgo.ZLIB:  CompressWithZLib();
     ESimbaCompressAlgo.SYNLZ: CompressWithSynLZ();
     ESimbaCompressAlgo.GZ:    CompressWithGZ();
+    ESimbaCompressAlgo.RLE:   CompressWithRle();
   end;
+  if Truncate then
+    ReAllocMem(OutData, OutSize);
 end;
 
-procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; out OutData: PByte; out OutSize: Int64);
+procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; var OutData: PByte; out OutSize: Int64; Truncate: Boolean);
 
   procedure DecompressWithZLib;
   var
-    InStream, OutStream: TMemoryStream;
+    InStream: TMemoryStream;
+    OutStream: TOutStream;
     DecompressStream: Tdecompressionstream;
     Count: Integer;
     Chunk: array[0..4095] of Byte;
@@ -139,7 +195,7 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
     InStream := TMemoryStream.Create();
     InStream.Write(InData^, InSize);
     InStream.Position := 0;
-    OutStream := TMemoryStream.Create();
+    OutStream := TOutStream.Create(OutData);
     DecompressStream := TDeCompressionStream.Create(InStream);
     DecompressStream.SourceOwner := False;
     try
@@ -149,9 +205,7 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
           OutStream.Write(Chunk[0], Count);
       until (Count = 0);
       OutSize := OutStream.Position;
-      OutData := GetMem(OutSize);
-
-      Move(OutStream.Memory^, OutData^, OutSize);
+      OutData := OutStream.Data;
     finally
       InStream.Free();
       OutStream.Free();
@@ -160,34 +214,15 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
   end;
 
   procedure DecompressWithSynLZ;
-  var
-    RleData: PByte;
-    RleSize: Int64;
   begin
-    if (PInt64(InData)^ > 0) then // data has been rle compressed
-    begin
-      RleSize := SynLZdecompressdestlen(InData + SizeOf(Int64));
-      RleData := GetMem(RleSize);
-      if (SynLZdecompress(InData + SizeOf(Int64), InSize - SizeOf(Int64), RleData) <> RleSize) then
-        SimbaException('Error SynLZDecompress');
-
-      OutSize := PInt64(InData)^;
-      OutData := GetMem(OutSize);
-
-      if (RleUnCompress(RleData, OutData, RleSize) <> OutSize) then
-        SimbaException('Error RleUnCompress');
-
-      FreeMem(RleData);
-    end else
-    begin
-      OutData := GetMem(SynLZdecompressdestlen(InData + SizeOf(Int64)));
-      OutSize := SynLZdecompress(InData + SizeOf(Int64), InSize - SizeOf(Int64), OutData);
-    end;
+    AllocOrGrowMemory(OutData, SynLZdecompressdestlen(InData));
+    OutSize := SynLZdecompress(InData, InSize, OutData);
   end;
 
   procedure DecompressWithGZ;
   var
-    InStream, OutStream: TMemoryStream;
+    InStream: TMemoryStream;
+    OutStream: TOutStream;
     GzStream: TGZFileStream;
     Count: Integer;
     Chunk: array[0..4095] of Byte;
@@ -195,7 +230,7 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
     InStream := TMemoryStream.Create();
     InStream.Write(InData^, InSize);
     InStream.Position := 0;
-    OutStream := TMemoryStream.Create();
+    OutStream := TOutStream.Create(OutData);
     GzStream := TGZFileStream.Create(InStream, False);
     GzStream.SourceOwner := False;
     try
@@ -205,9 +240,7 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
           OutStream.Write(Chunk[0], Count);
       until (Count = 0);
       OutSize := OutStream.Position;
-      OutData := GetMem(OutSize);
-
-      Move(OutStream.Memory^, OutData^, OutSize);
+      OutData := OutStream.Data;
     finally
       InStream.Free();
       OutStream.Free();
@@ -215,15 +248,57 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
     end;
   end;
 
-begin
-  OutData := nil;
-  OutSize := 0;
+  procedure DecompressWithRLE;
+  begin
+    OutSize := PInt32(InData)^;
 
+    // no rle
+    if (OutSize = 0) then
+    begin
+      OutSize := InSize - SizeOf(Int32);
+      AllocOrGrowMemory(OutData, OutSize);
+      Move(InData[SizeOf(Int32)], OutData^, OutSize);
+    end else
+    begin
+      AllocOrGrowMemory(OutData, OutSize);
+      OutSize := RleUnCompress(@InData[SizeOf(Int32)], OutData, InSize - SizeOf(Int32));
+    end;
+  end;
+
+begin
+  OutSize := 0;
   case Algo of
     ESimbaCompressAlgo.ZLIB:  DecompressWithZLib();
     ESimbaCompressAlgo.SYNLZ: DecompressWithSynLZ();
     ESimbaCompressAlgo.GZ:    DecompressWithGZ();
+    ESimbaCompressAlgo.RLE:   DecompressWithRLE();
   end;
+  if Truncate then
+    ReAllocMem(OutData, OutSize);
+end;
+
+function CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64): TByteArray;
+var
+  OutData: Pointer;
+  OutSize: Int64;
+begin
+  OutData := nil;
+  CompressData(Algo, InData, InSize, OutData, OutSize);
+  SetLength(Result, OutSize);
+  Move(OutData^, Result[0], Length(Result));
+  FreeMem(OutData);
+end;
+
+function DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64): TByteArray;
+var
+  OutData: Pointer;
+  OutSize: Int64;
+begin
+  OutData := nil;
+  DecompressData(Algo, InData, InSize, OutData, OutSize);
+  SetLength(Result, OutSize);
+  Move(OutData^, Result[0], Length(Result));
+  FreeMem(OutData);
 end;
 
 function CompressBytes(Algo: ESimbaCompressAlgo; Bytes: TByteArray): TByteArray;
@@ -231,6 +306,7 @@ var
   OutData: PByte;
   OutSize: Int64;
 begin
+  OutData := nil;
   CompressData(Algo, @Bytes[0], Length(Bytes), OutData, OutSize);
   SetLength(Result, OutSize);
   Move(OutData^, Result[0], OutSize);
@@ -242,6 +318,7 @@ var
   OutData: PByte;
   OutSize: Int64;
 begin
+  OutData := nil;
   DecompressData(Algo, @Bytes[0], Length(Bytes), OutData, OutSize);
   SetLength(Result, OutSize);
   Move(OutData^, Result[0], OutSize);
@@ -253,6 +330,7 @@ var
   OutData: PByte;
   OutSize: Int64;
 begin
+  OutData := nil;
   CompressData(Algo, @Str[1], Length(Str), OutData, OutSize);
   SetLength(Str, OutSize);
   Move(OutData^, Str[1], OutSize);
@@ -266,6 +344,7 @@ var
   OutData: PByte;
   OutSize: Int64;
 begin
+  OutData := nil;
   Str := BaseDecode(Encoding, Str);
   DecompressData(Algo, @Str[1], Length(Str), OutData, OutSize);
 

@@ -156,24 +156,24 @@ This enum is scoped, so must be used like `ECompressAlgo.ZLIB`
 CompressData
 ------------
 ```
-procedure CompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64);
+procedure CompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64; Truncate: Boolean = True);
 ```
 *)
 procedure _LapeCompressData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  CompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^);
+  CompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^, PBoolean(Params^[5])^);
 end;
 
 (*
 DecompressData
 --------------
 ```
-procedure DecompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64);
+procedure DecompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64; Truncate: Boolean = True);
 ```
 *)
 procedure _LapeDecompressData(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  DecompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^);
+  DecompressData(ESimbaCompressAlgo(Params^[0]^), PPByte(Params^[1])^, PInt64(Params^[2])^, PPByte(Params^[3])^, PInt64(Params^[4])^, PBoolean(Params^[5])^);
 end;
 
 (*
@@ -294,11 +294,6 @@ begin
   LapeObjectDestroy(PLapeObject(Params^[0]));
 end;
 
-procedure _LapeResourceReader_UnloadData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectResourceReader(Params^[0])^^.UnloadData();
-end;
-
 procedure _LapeResourceReader_Names_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStringArray(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Names;
@@ -324,6 +319,11 @@ begin
   PUInt32(Result)^ := PLapeObjectResourceReader(Params^[0])^^.UncompressedSize[PInteger(Params^[1])^];
 end;
 
+procedure _LapeResourceReader_CompressAlgo_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt8(Result)^ := PLapeObjectResourceReader(Params^[0])^^.CompressAlgo[PInteger(Params^[1])^];
+end;
+
 procedure _LapeResourceReader_CompressedSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PUInt32(Result)^ := PLapeObjectResourceReader(Params^[0])^^.CompressedSize[PInteger(Params^[1])^];
@@ -334,14 +334,14 @@ begin
   PInteger(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Find(PString(Params^[1])^);
 end;
 
-procedure _LapeResourceReader_Load(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeResourceReader_Load1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Load(PInteger(Params^[1])^, PPointer(Params^[2])^, PInteger(Params^[3])^);
+  PByteArray(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Load(PInteger(Params^[1])^);
 end;
 
-procedure _LapeResourceReader_LoadPartial(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeResourceReader_Load2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PLapeObjectResourceReader(Params^[0])^^.LoadPartial(PInteger(Params^[1])^, PInteger(Params^[2])^, PPByte(Params^[3])^);
+  PByteArray(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Load(PString(Params^[1])^);
 end;
 
 procedure _LapeResourceReader_LoadString1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -374,6 +374,11 @@ begin
   PBoolean(Result)^ := PLapeObjectResourceReader(Params^[0])^^.Save(PString(Params^[1])^, PString(Params^[2])^);
 end;
 
+procedure _LapeResourceReader_Unload(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectResourceReader(Params^[0])^^.Unload();
+end;
+
 procedure ImportEncoding(Script: TSimbaScript);
 begin
   with Script.Compiler do
@@ -396,13 +401,13 @@ begin
     addGlobalFunc('function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32);
     addGlobalFunc('function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32String);
 
-    addGlobalType('enum(ZLIB, SYNLZ, GZ)', 'ECompressAlgo');
+    addGlobalType('enum(ZLIB, SYNLZ, GZ, RLE)', 'ECompressAlgo');
 
-    addGlobalFunc('procedure CompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64);', @_LapeCompressData);
+    addGlobalFunc('procedure CompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; var OutData: Pointer; out OutSize: Int64; Truncate: Boolean = True);', @_LapeCompressData);
     addGlobalFunc('function CompressBytes(Algo: ECompressAlgo; Bytes: TByteArray): TByteArray', @_LapeCompressBytes);
     addGlobalFunc('function CompressString(Algo: ECompressAlgo; Encoding: EBaseEncoding; Str: String): String', @_LapeCompressString);
 
-    addGlobalFunc('procedure DecompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; out OutData: Pointer; out OutSize: Int64);', @_LapeDecompressData);
+    addGlobalFunc('procedure DecompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; var OutData: Pointer; out OutSize: Int64; Truncate: Boolean = True);', @_LapeDecompressData);
     addGlobalFunc('function DecompressBytes(Algo: ECompressAlgo; Bytes: TByteArray): TByteArray', @_LapeDecompressBytes);
     addGlobalFunc('function DecompressString(Algo: ECompressAlgo; Encoding: EBaseEncoding; Str: String): String', @_LapeDecompressString);
 
@@ -422,22 +427,23 @@ begin
 
     addGlobalFunc('function TResourceReader.Construct(FileName: String): TResourceReader; static;', @_LapeResourceReader_Create);
     addGlobalFunc('procedure TResourceReader.Destroy;', @_LapeResourceReader_Destroy);
-    addGlobalFunc('procedure TResourceReader.UnloadData;', @_LapeResourceReader_UnloadData);
     addGlobalFunc('property TResourceReader.Names: TStringArray;', @_LapeResourceReader_Names_Read);
     addGlobalFunc('property TResourceReader.Count: Integer;', @_LapeResourceReader_Count_Read);
     addGlobalFunc('property TResourceReader.Name(Index: Integer): String;', @_LapeResourceReader_Name_Read);
     addGlobalFunc('property TResourceReader.Hash(Index: Integer): UInt32;', @_LapeResourceReader_Hash_Read);
+    addGlobalFunc('property TResourceReader.CompressAlgo(Index: Integer): UInt8;', @_LapeResourceReader_CompressAlgo_Read);
     addGlobalFunc('property TResourceReader.CompressedSize(Index: Integer): UInt32;', @_LapeResourceReader_CompressedSize_Read);
     addGlobalFunc('property TResourceReader.UncompressedSize(Index: Integer): UInt32;', @_LapeResourceReader_UnCompressedSize_Read);
     addGlobalFunc('function TResourceReader.Find(Name: String): Integer;', @_LapeResourceReader_Find);
-    addGlobalFunc('function TResourceReader.Load(Index: Integer; out Data: Pointer; out DataSize: Integer): Boolean;', @_LapeResourceReader_Load);
-    addGlobalFunc('function TResourceReader.LoadPartial(Index: Integer; Size: Integer; out Data: Pointer): Boolean;', @_LapeResourceReader_LoadPartial);
+    addGlobalFunc('function TResourceReader.Load(Index: Integer): TByteArray; overload', @_LapeResourceReader_Load1);
+    addGlobalFunc('function TResourceReader.Load(Name: String): TByteArray; overload', @_LapeResourceReader_Load2);
     addGlobalFunc('function TResourceReader.LoadString(Index: Integer): String; overload', @_LapeResourceReader_LoadString1);
     addGlobalFunc('function TResourceReader.LoadString(Name: String): String; overload', @_LapeResourceReader_LoadString2);
     addGlobalFunc('function TResourceReader.LoadImage(Index: Integer): TImage; overload', @_LapeResourceReader_LoadImage1);
     addGlobalFunc('function TResourceReader.LoadImage(Name: String): TImage; overload', @_LapeResourceReader_LoadImage2);
     addGlobalFunc('function TResourceReader.Save(Index: Integer; FileName: String): Boolean; overload;', @_LapeResourceReader_Save1);
     addGlobalFunc('function TResourceReader.Save(Name: String; FileName: String): Boolean; overload;', @_LapeResourceReader_Save2);
+    addGlobalFunc('procedure TResourceReader.Unload;', @_LapeResourceReader_Unload);
   end;
 end;
 
