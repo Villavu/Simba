@@ -16,7 +16,6 @@ uses
   lptypes, ffi,
   simba.component_imagebox,
   simba.component_imageboxcanvas,
-  simba.image,
   simba.image_textdrawer,
   simba.dtm,
   simba.colormath,

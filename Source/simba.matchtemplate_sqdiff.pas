@@ -22,7 +22,6 @@
 
 unit simba.matchtemplate_sqdiff;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 {$MODESWITCH ARRAYOPERATORS OFF}
@@ -42,7 +41,9 @@ function MatchTemplateMask_SQDIFF_Cache(ACache: TMatchTemplateCacheBase; Templat
 implementation
 
 uses
-  simba.threading, simba.vartype_matrix;
+  simba.vartype_matrix,
+  simba.threading,
+  simba.multiprocessing;
 
 // MatchTemplate_SQDIFF
 function __MatchTemplate_SQDIFF(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -282,7 +283,12 @@ begin
   );
   RowSize := Result.Width * SizeOf(Single);
 
-  SimbaThreadPool.RunParallel(CalculateSlices(Cache.Width, Cache.Height), 0, Cache.Height - Template.Height, @Execute);
+  SimbaMultiprocessing.Run(
+    SimbaMultiprocessingStrategy.SlicesForTemplateFinder(Cache.Width, Cache.Height),
+    0,
+    Cache.Height - Template.Height,
+    @Execute
+  );
 end;
 
 function MatchTemplateMask_SQDIFF_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;

@@ -14,7 +14,6 @@ unit simba.matchtemplate;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 {$MODESWITCH ARRAYOPERATORS OFF}
@@ -55,41 +54,20 @@ function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TSimbaImage
 function MatchTemplateMask(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix; overload;
 function MatchTemplate(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix; overload;
 
-function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
-
 type
   TMatchTemplate = function(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 
 function Multithread(Image, Templ: TIntegerMatrix; MatchTemplate: TMatchTemplate; Normed: Boolean): TSingleMatrix;
 
-var
-  MatchTemplateMultithreadOpts: record
-    Enabled: Boolean;
-    SliceWidth, SliceHeight: Integer;
-  end;
-
 implementation
 
 uses
-  simba.matchtemplate_ccorr, simba.matchtemplate_sqdiff, simba.matchtemplate_ccoeff,
-  simba.vartype_matrix, simba.threading;
-
-// How much to "Slice" (vertically) the image up for multithreading.
-function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
-var
-  I: Integer;
-begin
-  Result := 1;
-
-  if MatchTemplateMultithreadOpts.Enabled and (SearchWidth >= MatchTemplateMultithreadOpts.SliceWidth) and (SearchHeight >= (MatchTemplateMultithreadOpts.SliceHeight * 2)) then // not worth
-  begin
-    for I := SimbaThreadPool.ThreadCount - 1 downto 2 do
-      if (SearchHeight div I) > MatchTemplateMultithreadOpts.SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
-        Exit(I);
-  end;
-
-  // not possible to slice into at least `MatchTemplateMT_SliceHeight` pixels
-end;
+  simba.matchtemplate_ccorr,
+  simba.matchtemplate_sqdiff,
+  simba.matchtemplate_ccoeff,
+  simba.vartype_matrix,
+  simba.threading,
+  simba.multiprocessing;
 
 function Multithread(Image, Templ: TIntegerMatrix; MatchTemplate: TMatchTemplate; Normed: Boolean): TSingleMatrix;
 var
@@ -112,7 +90,12 @@ begin
   );
   RowSize := Result.Width * SizeOf(Single);
 
-  SimbaThreadPool.RunParallel(CalculateSlices(Image.Width, Image.Height), 0, Image.Height - Templ.Height, @Execute);
+  SimbaMultiprocessing.Run(
+    SimbaMultiprocessingStrategy.SlicesForTemplateFinder(Image.Width, Image.Height),
+    0,
+    Image.Height - Templ.Height,
+    @Execute
+  );
 end;
 
 procedure Validate(ImageWidth, ImageHeight, TemplateWidth, TemplateHeight: Integer);
@@ -200,10 +183,5 @@ function MatchTemplate(Image, Template: TSimbaImage; Formula: ETMFormula): TSing
 begin
   Result := MatchTemplate(Image.ToMatrix(), Template.ToMatrix(), Formula);
 end;
-
-initialization
-  MatchTemplateMultithreadOpts.Enabled     := True;
-  MatchTemplateMultithreadOpts.SliceWidth  := 125;
-  MatchTemplateMultithreadOpts.SliceHeight := 250;
 
 end.

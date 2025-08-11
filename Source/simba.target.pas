@@ -288,7 +288,7 @@ function TSimbaTargetEventManager.Add(Event: ETargetEvent; Method: TSimbaTargetE
   end;
 
 begin
-  // find a free space
+  // find a free space?
   for Result := 0 to High(FEvents[Event]) do
     if (FEvents[Event][Result].Method = nil) then
     begin
@@ -425,7 +425,7 @@ begin
   Self.MousePressMin := 40;
   Self.MousePressMax := 220;
   Self.MouseSpeed    := 10;
-  Self.MouseGravity  := 9;
+  Self.MouseGravity  := 12;
   Self.MouseWind     := 4;
   Self.MouseTimeout  := 15000;
 

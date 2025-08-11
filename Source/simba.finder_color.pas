@@ -2,7 +2,7 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-
+  --------------------------------------------------------------------------
   The colorfinder.
   Lots of code from: https://github.com/slackydev/colorlib
 }
@@ -16,78 +16,44 @@ interface
 
 uses
   Classes, SysUtils, Math, Graphics,
-  simba.base, simba.colormath, simba.colormath_distance, simba.target, simba.threading;
+  simba.base,
+  simba.colormath,
+  simba.target;
 
 function FindColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
-
-function FindColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
-                            Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer): TPointArray;
 
 function CountColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
                              Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
                              MaxToFind: Integer = -1): Integer;
 
-function CountColorsOnBuffer(var Limit: TLimit;
-                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
-                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
-
 function MatchColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
                              Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers): TSingleMatrix;
 
-function MatchColorsOnBuffer(Formula: EColorSpace; Color: TColor; Multipliers: TChannelMultipliers;
-                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TSingleMatrix;
-
 function GetColorOnTarget(Target: TSimbaTarget; P: TPoint): TColor;
-
-function GetColorsOnBuffer(Points: TPointArray; Offset: TPoint; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TColorArray;
 
 function GetColorsOnTarget(Target: TSimbaTarget; Points: TPointArray): TColorArray;
 
-function GetColorsMatrixOnBuffer(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TIntegerMatrix;
-
 function GetColorsMatrixOnTarget(Target: TSimbaTarget; Bounds: TBox): TIntegerMatrix;
-
-function FindEdgesOnBuffer(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer;
-                           MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
 
 function FindEdgesOnTarget(Target: TSimbaTarget; Bounds: TBox;
                            MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
 
-function PeakBrightnessOnBuffer(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
 function PeakBrightnessOnTarget(Target: TSimbaTarget; Bounds: TBox): Integer;
-
-function AverageBrightnessOnBuffer(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
 function AverageBrightnessOnTarget(Target: TSimbaTarget; Bounds: TBox): Integer;
-
-var
-  ColorFinderMultithreadOpts: record
-    Enabled: Boolean;
-    SliceWidth, SliceHeight: Integer;
-  end;
 
 implementation
 
 uses
-  simba.containers, simba.colormath_conversion, simba.colormath_distance_unrolled,
-  simba.vartype_pointarray, simba.vartype_matrix, simba.vartype_box;
-
-// How much to "Slice" (vertically) the image up for multithreading.
-function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
-var
-  I: Integer;
-begin
-  Result := 1;
-
-  if ColorFinderMultithreadOpts.Enabled and (SearchWidth >= ColorFinderMultithreadOpts.SliceWidth) and (SearchHeight >= (ColorFinderMultithreadOpts.SliceHeight * 2)) then // not worth
-  begin
-    for I := SimbaThreadPool.ThreadCount - 1 downto 2 do
-      if (SearchHeight div I) > ColorFinderMultithreadOpts.SliceHeight then // Each slice is at least ColorFinderMultithreadOpts.SliceHeight pixels
-        Exit(I);
-  end;
-
-  // not possible to slice into at least `ColorFinderMT_SliceHeight` pixels
-end;
+  simba.colormath_conversion,
+  simba.colormath_distance,
+  simba.colormath_distance_unrolled,
+  simba.vartype_pointarray,
+  simba.vartype_matrix,
+  simba.vartype_box,
+  simba.containers,
+  simba.threading,
+  simba.multiprocessing;
 
 {$DEFINE MACRO_FINDCOLORS :=
 var
@@ -255,9 +221,11 @@ var
     );
   end;
 
+{$IFDEF SIMBA_BENCHMARKS}
 var
   ThreadsUsed: Integer;
   T: Double;
+{$ENDIF}
 begin
   Result := [];
 
@@ -267,8 +235,8 @@ begin
     T := HighResolutionTime();
     {$ENDIF}
 
-    SetLength(SliceResults, CalculateSlices(Bounds.Width, Bounds.Height)); // Cannot exceed this
-    ThreadsUsed := SimbaThreadPool.RunParallel(Length(SliceResults), 0, Bounds.Height - 1, @Execute);
+    SetLength(SliceResults, SimbaMultiprocessingStrategy.SlicesForColorFinder(Bounds.Width, Bounds.Height)); // Cannot exceed this
+    {$IFDEF SIMBA_BENCHMARKS}ThreadsUsed := {$ENDIF}SimbaMultiprocessing.Run(Length(SliceResults), 0, Bounds.Height - 1, @Execute);
     Result := SliceResults.Merge();
 
     {$IFDEF SIMBA_BENCHMARKS}
@@ -295,21 +263,28 @@ var
     );
   end;
 
+{$IFDEF SIMBA_BENCHMARKS}
 var
   ThreadsUsed: Integer;
   T: Double;
-  I: Integer;
+{$ENDIF}
 begin
   Result := 0;
 
   if Target.GetImageData(Bounds, Buffer, BufferWidth) then
   try
+    Limit := TLimit.Create(MaxToFind);
     {$IFDEF SIMBA_BENCHMARKS}
     T := HighResolutionTime();
+    ThreadsUsed :=
     {$ENDIF}
+    SimbaMultiprocessing.Run(
+      SimbaMultiprocessingStrategy.SlicesForColorFinder(Bounds.Width, Bounds.Height),
+      0,
+      Bounds.Height - 1,
+      @Execute
+    );
 
-    Limit := TLimit.Create(MaxToFind);
-    ThreadsUsed := SimbaThreadPool.RunParallel(CalculateSlices(Bounds.Width, Bounds.Height), 0, Bounds.Height - 1, @Execute);
     Result := Limit.Count;
 
     {$IFDEF SIMBA_BENCHMARKS}
@@ -354,20 +329,22 @@ var
   end;
 
 var
+  I: Integer;
+{$IFDEF SIMBA_BENCHMARKS}
   ThreadsUsed: Integer;
   T: Double;
-  I: Integer;
+{$ENDIF}
 begin
   Result := [];
 
   if Target.GetImageData(Bounds, Buffer, BufferWidth) then
   try
+    SetLength(SliceResults, SimbaMultiprocessingStrategy.SlicesForColorFinder(Bounds.Width, Bounds.Height)); // Cannot exceed this
     {$IFDEF SIMBA_BENCHMARKS}
     T := HighResolutionTime();
+    ThreadsUsed :=
     {$ENDIF}
-
-    SetLength(SliceResults, CalculateSlices(Bounds.Width, Bounds.Height)); // Cannot exceed this
-    ThreadsUsed := SimbaThreadPool.RunParallel(Length(SliceResults), 0, Bounds.Height - 1, @Execute);
+    SimbaMultiprocessing.Run(Length(SliceResults), 0, Bounds.Height - 1, @Execute);
     for I := 0 to High(SliceResults) do
       Result += SliceResults[I];
 
@@ -414,10 +391,11 @@ var
     );
   end;
 
+{$IFDEF SIMBA_BENCHMARKS}
 var
   ThreadsUsed: Integer;
   T: Double;
-  I: Integer;
+{$ENDIF}
 begin
   Limit := TLimit.Create(Max(MinCount, 1));
 
@@ -425,9 +403,15 @@ begin
   try
     {$IFDEF SIMBA_BENCHMARKS}
     T := HighResolutionTime();
+    ThreadsUsed :=
     {$ENDIF}
 
-    ThreadsUsed := SimbaThreadPool.RunParallel(CalculateSlices(Bounds.Width, Bounds.Height), 0, Bounds.Height - 1, @Execute);
+    SimbaMultiprocessing.Run(
+      SimbaMultiprocessingStrategy.SlicesForColorFinder(Bounds.Width, Bounds.Height),
+      0,
+      Bounds.Height - 1,
+      @Execute
+    );
 
     {$IFDEF SIMBA_BENCHMARKS}
     DebugLn('HasColors: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
@@ -557,7 +541,7 @@ begin
 end;
 
 function FindEdgesOnTarget(Target: TSimbaTarget; Bounds: TBox;
-                          MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
+                           MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
 var
   Buffer: PColorBGRA;
   BufferWidth: Integer;
@@ -627,10 +611,5 @@ begin
     Target.FreeImageData(Buffer);
   end;
 end;
-
-initialization
-  ColorFinderMultithreadOpts.Enabled     := True;
-  ColorFinderMultithreadOpts.SliceWidth  := 250;
-  ColorFinderMultithreadOpts.SliceHeight := 250;
 
 end.

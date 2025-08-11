@@ -308,7 +308,7 @@ begin
   FEntryLookup := TEntryLookupMap.Create();
 
   FStream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
-  FStream.Read(ResourceHeader, SizeOf(TResourceHeader));
+  FStream.Read(ResourceHeader{%H-}, SizeOf(TResourceHeader));
   if (ResourceHeader.Signature <> ResourceSignature) then
     SimbaException('Invalid resource file (invalid signature)');
 

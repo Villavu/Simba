@@ -2,12 +2,11 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-
+  --------------------------------------------------------------------------
   The simple Image finder.
 }
 unit simba.finder_image;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 {.$DEFINE SIMBA_BENCHMARKS}
@@ -15,48 +14,29 @@ unit simba.finder_image;
 interface
 
 uses
-  Classes, SysUtils, Graphics,
-  simba.base, simba.colormath, simba.colormath_distance, simba.target,
-  simba.image, simba.colormath_distance_unrolled, simba.threading, simba.vartype_matrix;
+  Classes, SysUtils,
+  simba.base,
+  simba.colormath,
+  simba.target,
+  simba.image;
 
-function FindImageOnTarget(constref Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;
+function FindImageOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;
                            Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray;
 
-function FindImageOnBuffer(var Limit: TLimit;
-                           Image: TSimbaImage;
-                           ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers;
-                           Buffer: PColorBGRA; BufferWidth: Integer;
-                           SearchWidth, SearchHeight: Integer): TPointArray;
-
-function FindTemplateOnTarget(constref Target: TSimbaTarget; Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
-
-var
-  ImageFinderMultithreadOpts: record
-    Enabled: Boolean;
-    SliceWidth, SliceHeight: Integer;
-  end;
+function FindTemplateOnTarget(Target: TSimbaTarget; Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
 
 implementation
 
 uses
-  simba.containers,simba.vartype_pointarray, simba.vartype_box, simba.matchtemplate;
-
-// How much to "Slice" (vertically) the image up for multithreading.
-function CalculateSlices(SearchWidth, SearchHeight: Integer): Integer;
-var
-  I: Integer;
-begin
-  Result := 1;
-
-  if ImageFinderMultithreadOpts.Enabled and (SearchWidth >= ImageFinderMultithreadOpts.SliceWidth) and (SearchHeight >= (ImageFinderMultithreadOpts.SliceHeight * 2)) then // not worth
-  begin
-    for I := SimbaThreadPool.ThreadCount - 1 downto 2 do
-      if (SearchHeight div I) > ImageFinderMultithreadOpts.SliceHeight then // Each slice is at least `MatchTemplateMT_SliceHeight` pixels
-        Exit(I);
-  end;
-
-  // not possible to slice into at least `SliceHeight` pixels
-end;
+  simba.containers,
+  simba.matchtemplate,
+  simba.threading,
+  simba.multiprocessing,
+  simba.colormath_distance,
+  simba.colormath_distance_unrolled,
+  simba.vartype_pointarray,
+  simba.vartype_box,
+  simba.vartype_matrix;
 
 const
   BitmapColorSize = SizeOf(TColorHSL) + SizeOf(Boolean);
@@ -95,58 +75,6 @@ begin
 
     Inc(Source);
     Inc(Dest, BitmapColorSize);
-  end;
-end;
-
-function FindImageOnTarget(constref Target: TSimbaTarget; Image: TSimbaImage;
-  Bounds: TBox; Formula: EColorSpace; Tolerance: Single;
-  Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
-var
-  Buffer: PColorBGRA;
-  BufferWidth: Integer;
-
-  SliceResults: T2DPointArray;
-
-  Limit: TLimit;
-
-  procedure Execute(const Index, Lo, Hi: Integer);
-  var
-    TPA: TPointArray;
-  begin
-    TPA := FindImageOnBuffer(
-      Limit,
-      Image, Formula, Tolerance, Multipliers,
-      @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + Image.Height
-    );
-
-    SliceResults[Index] := TPA.Offset(Bounds.X1, Bounds.Y1 + Lo);
-  end;
-
-var
-  T: Double;
-  ThreadsUsed: Integer;
-begin
-  Result := [];
-
-  Limit := TLimit.Create(MaxToFind);
-
-  if Target.GetImageData(Bounds, Buffer, BufferWidth) then
-  try
-    {$IFDEF SIMBA_BENCHMARKS}
-    T := HighResolutionTime();
-    {$ENDIF}
-
-    SetLength(SliceResults, CalculateSlices(Bounds.Width, Bounds.Height)); // Cannot exceed this
-    ThreadsUsed := SimbaThreadPool.RunParallel(Length(SliceResults), 0, Bounds.Height - Image.Height, @Execute);
-    Result := SliceResults.Merge();
-    if (MaxToFind > -1) and (Length(Result) > MaxToFind) then
-      SetLength(Result, MaxToFind);
-
-    {$IFDEF SIMBA_BENCHMARKS}
-    DebugLn('FindImage: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
-    {$ENDIF}
-  finally
-    Target.FreeImageData(Buffer);
   end;
 end;
 
@@ -275,7 +203,62 @@ begin
   end;
 end;
 
-function FindTemplateOnTarget(constref Target: TSimbaTarget; Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
+function FindImageOnTarget(Target: TSimbaTarget; Image: TSimbaImage;
+  Bounds: TBox; Formula: EColorSpace; Tolerance: Single;
+  Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
+var
+  Buffer: PColorBGRA;
+  BufferWidth: Integer;
+
+  SliceResults: T2DPointArray;
+
+  Limit: TLimit;
+
+  procedure Execute(const Index, Lo, Hi: Integer);
+  var
+    TPA: TPointArray;
+  begin
+    TPA := FindImageOnBuffer(
+      Limit,
+      Image, Formula, Tolerance, Multipliers,
+      @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + Image.Height
+    );
+
+    SliceResults[Index] := TPA.Offset(Bounds.X1, Bounds.Y1 + Lo);
+  end;
+
+{$IFDEF SIMBA_BENCHMARKS}
+var
+  T: Double;
+  ThreadsUsed: Integer;
+{$ENDIF}
+begin
+  Result := [];
+
+  Limit := TLimit.Create(MaxToFind);
+
+  if Target.GetImageData(Bounds, Buffer, BufferWidth) then
+  try
+    SetLength(SliceResults, SimbaMultiprocessingStrategy.SlicesForImageFinder(Bounds.Width, Bounds.Height)); // Cannot exceed this
+    {$IFDEF SIMBA_BENCHMARKS}
+    T := HighResolutionTime();
+    ThreadsUsed :=
+    {$ENDIF}
+    SimbaMultiprocessing.Run(Length(SliceResults), 0, Bounds.Height - Image.Height, @Execute);
+
+    Result := SliceResults.Merge();
+    if (MaxToFind > -1) and (Length(Result) > MaxToFind) then
+      SetLength(Result, MaxToFind);
+
+    {$IFDEF SIMBA_BENCHMARKS}
+    DebugLn('FindImage: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
+    {$ENDIF}
+  finally
+    Target.FreeImageData(Buffer);
+  end;
+end;
+
+function FindTemplateOnTarget(Target: TSimbaTarget; Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
 var
   Image: TSimbaImage;
   Mat: TSingleMatrix;
@@ -294,11 +277,6 @@ begin
     Image.Free();
   end;
 end;
-
-initialization
-  ImageFinderMultithreadOpts.Enabled     := True;
-  ImageFinderMultithreadOpts.SliceHeight := 250;
-  ImageFinderMultithreadOpts.SliceWidth  := 250;
 
 end.
 

@@ -22,7 +22,6 @@
 
 unit simba.matchtemplate_ccoeff;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 {$MODESWITCH ARRAYOPERATORS OFF}
@@ -42,7 +41,9 @@ function MatchTemplateMask_CCOEFF_Cache(ACache: TMatchTemplateCacheBase; Templat
 implementation
 
 uses
-  simba.threading, simba.vartype_matrix;
+  simba.vartype_matrix,
+  simba.threading,
+  simba.multiprocessing;
 
 // MatchTemplate_CCOEFF
 function __MatchTemplate_CCOEFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -314,7 +315,12 @@ begin
   );
   RowSize := Result.Width * SizeOf(Single);
 
-  SimbaThreadPool.RunParallel(CalculateSlices(Cache.Width, Cache.Height), 0, Cache.Height - Template.Height, @Execute);
+  SimbaMultiprocessing.Run(
+    SimbaMultiprocessingStrategy.SlicesForTemplateFinder(Cache.Width, Cache.Height),
+    0,
+    Cache.Height - Template.Height,
+    @Execute
+  );
 end;
 
 end.

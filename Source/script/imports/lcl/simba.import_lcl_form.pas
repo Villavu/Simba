@@ -21,7 +21,6 @@ type
   PBorderIcons = ^TBorderIcons;
   PCloseEvent = ^TCloseEvent;
   PCloseQueryEvent = ^TCloseQueryEvent;
-  PConstraintSize = ^TConstraintSize;
   PCustomForm = ^TCustomForm;
   PForm = ^TForm;
   PMouseEvent = ^TMouseEvent;

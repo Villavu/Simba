@@ -19,8 +19,7 @@ uses
   simba.process,
   simba.nativeinterface, simba.settings, simba.env,
   simba.dtmeditor, simba.dialog, simba.threading, simba.target,
-  simba.finder_color, simba.finder_image, simba.matchtemplate,
-  simba.colormath, simba.aca;
+  simba.colormath, simba.aca, simba.multiprocessing;
 
 type
   PProcessID = ^TProcessID;
@@ -509,10 +508,6 @@ begin
   begin
     DumpSection := 'Misc';
 
-    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @ColorFinderMultithreadOpts, 'ColorFinderMultithreadOpts');
-    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @ImageFinderMultithreadOpts, 'ImageFinderMultithreadOpts');
-    addGlobalVar('record Enabled: Boolean; SliceWidth, SliceHeight: Integer; end;', @MatchTemplateMultithreadOpts, 'MatchTemplateMultithreadOpts');
-
     addGlobalType([
       'record',
       '  const SimbaPath       = "' + SimbaEnv.SimbaPath       + '";',
@@ -527,6 +522,27 @@ begin
 
     addGlobalVar(Script.ScriptFileName, 'SCRIPT_FILE').isConstant := True;
     addGlobalVar(SimbaNativeInterface.UnixTime(), 'SCRIPT_START_TIME').isConstant := True;
+
+    addGlobalVar(
+      'record'                    + LineEnding +
+      '  TemplateFinder: record'  + LineEnding +
+      '    Enabled: Boolean;'     + LineEnding +
+      '    SliceWidth: Integer;'  + LineEnding +
+      '    SliceHeight: Integer;' + LineEnding +
+      '  end;'                    + LineEnding +
+      '  ColorFinder: record'     + LineEnding +
+      '    Enabled: Boolean;'     + LineEnding +
+      '    SliceWidth: Integer;'  + LineEnding +
+      '    SliceHeight: Integer;' + LineEnding +
+      '  end;'                    + LineEnding +
+      '  ImageFinder: record'     + LineEnding +
+      '    Enabled: Boolean;'     + LineEnding +
+      '    SliceWidth: Integer;'  + LineEnding +
+      '    SliceHeight: Integer;' + LineEnding +
+      '  end;'                    + LineEnding +
+      'end;',
+      @SimbaMultiprocessingStrategy,
+      'MultiprocessingStrategy');
 
     addGlobalFunc(
       'function GetTimeRunning: UInt64;', [

@@ -22,7 +22,6 @@ type
   PBitmap = ^TBitmap;
   PQuad = ^TQuad;
   PQuadArray = ^TQuadArray;
-  PSimbaImage = ^TSimbaImage;
 
 (*
 Image

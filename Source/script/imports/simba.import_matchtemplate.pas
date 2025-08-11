@@ -19,7 +19,7 @@ implementation
 
 uses
   lptypes,
-  simba.image, simba.matchtemplate, simba.script_objectutil;
+  simba.matchtemplate, simba.script_objectutil;
 
 (*
 Match Template

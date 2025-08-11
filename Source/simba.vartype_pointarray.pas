@@ -203,7 +203,6 @@ type
 
     function Mean: TPoint;
     function Means: TPointArray;
-
     function Merge: TPointArray;
 
     function Smallest: TPointArray;

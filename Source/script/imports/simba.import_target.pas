@@ -15,7 +15,7 @@ implementation
 uses
   lptypes, lpvartypes,  ffi,
   simba.colormath, simba.dtm, simba.misc,
-  simba.target, simba.externalcanvas, simba.finder_image, simba.finder_color,
+  simba.target, simba.externalcanvas,
   simba.vartype_quad, simba.vartype_string;
 
 type

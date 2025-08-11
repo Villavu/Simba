@@ -15,7 +15,7 @@ implementation
 uses
   lptypes, lpvartypes,
   simba.pixelocr,
-  simba.image, simba.script_objectutil;
+  simba.script_objectutil;
 
 type
   PPixelFont = ^TPixelFont;

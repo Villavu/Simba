@@ -22,7 +22,6 @@
 
 unit simba.matchtemplate_ccorr;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 {$MODESWITCH ARRAYOPERATORS OFF}
@@ -31,7 +30,10 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
+  simba.base,
+  simba.matchtemplate,
+  simba.matchtemplate_matrix,
+  simba.matchtemplate_helpers;
 
 function MatchTemplate_CCORR(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 function MatchTemplateMask_CCORR(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -42,7 +44,9 @@ function MatchTemplateMask_CCORR_Cache(ACache: TMatchTemplateCacheBase; Template
 implementation
 
 uses
-  simba.threading, simba.vartype_matrix;
+  simba.vartype_matrix,
+  simba.threading,
+  simba.multiprocessing;
 
 // MatchTemplate_CCORR
 function __MatchTemplate_CCORR(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
@@ -279,7 +283,12 @@ begin
   );
   RowSize := Result.Width * SizeOf(Single);
 
-  SimbaThreadPool.RunParallel(CalculateSlices(Cache.Width, Cache.Height), 0, Cache.Height - Template.Height, @Execute);
+  SimbaMultiprocessing.Run(
+    SimbaMultiprocessingStrategy.SlicesForTemplateFinder(Cache.Width, Cache.Height),
+    0,
+    Cache.Height - Template.Height,
+    @Execute
+  );
 end;
 
 end.
