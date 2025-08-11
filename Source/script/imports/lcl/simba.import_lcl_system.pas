@@ -608,7 +608,7 @@ begin
     addGlobalType('type UInt32', 'TLazHandle');
     {$ENDIF}
 
-    addGlobalType('enum(soBeginning, soCurrent, soEnd)', 'ELazSeekOrigin');
+    addGlobalType('enum(Beginning, Current, Ending)', 'ELazSeekOrigin');
     addGlobalType('procedure(Sender: TLazObject) of object', 'TLazNotifyEvent', FFI_DEFAULT_ABI);
 
     addClass('TLazComponent', 'TLazObject', TComponent);

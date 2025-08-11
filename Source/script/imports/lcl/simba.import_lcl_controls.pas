@@ -893,7 +893,7 @@ begin
     addGlobalType('enum(Top, Left, Right, Bottom)', 'ELazAnchorKind');
     addGlobalType('set of ELazAnchorKind', 'ELazAnchors');
 
-    addGlobalType('enum(asrTop, asrBottom, asrCenter)', 'ELazAnchorSideReference');
+    addGlobalType('enum(Top, Bottom, Center)', 'ELazAnchorSideReference');
     addGlobalType('procedure(Sender: TLazObject; var Key: Int16; Shift: ELazShiftStates) of object', 'TLazKeyEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TLazObject; var Key: Char) of object', 'TLazKeyPressEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TLazObject; Button: ELazMouseButton; Shift: ELazShiftStates; X, Y: Integer) of object', 'TLazMouseEvent', FFI_DEFAULT_ABI);

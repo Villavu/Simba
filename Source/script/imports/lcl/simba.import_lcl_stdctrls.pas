@@ -1141,13 +1141,13 @@ procedure ImportLCLStdCtrls(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
-    addGlobalType('enum(ssNone, ssHorizontal, ssVertical, ssBoth, ssAutoHorizontal, ssAutoVertical, ssAutoBoth)', 'ELazScrollStyle');
-    addGlobalType('set of enum(odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit, odBackgroundPainted)', 'ELazOwnerDrawStates');
-    addGlobalType('enum(csDropDown, csSimple, csDropDownList, csOwnerDrawFixed, csOwnerDrawVariable, csOwnerDrawEditableFixed, csOwnerDrawEditableVariable)', 'ELazComboBoxStyle');
-    addGlobalType('enum(lbStandard, lbOwnerDrawFixed, lbOwnerDrawVariable, lbVirtual)', 'ELazListBoxStyle');
-    addGlobalType('enum(taLeftJustify, taRightJustify, taCenter)', 'ELazAlignment');
-    addGlobalType('enum(cbUnchecked, cbChecked, cbGrayed)', 'ELazCheckBoxState');
-    addGlobalType('enum(blGlyphLeft, blGlyphRight, blGlyphTop, blGlyphBottom)', 'ELazButtonLayout');
+    addGlobalType('enum(None, Horizontal, Vertical, Both, AutoHorizontal, AutoVertical, AutoBoth)', 'ELazScrollStyle');
+    addGlobalType('set of enum(Selected, Grayed, Disabled, Checked, Focused, Default, HotLight, Inactive, NoAccel, NoFocusRect, Reserved1, Reserved2, ComboBoxEdit, BackgroundPainted)', 'ELazOwnerDrawStates');
+    addGlobalType('enum(DropDown, Simple, DropDownList, OwnerDrawFixed, OwnerDrawVariable, OwnerDrawEditableFixed, OwnerDrawEditableVariable)', 'ELazComboBoxStyle');
+    addGlobalType('enum(Standard, OwnerDrawFixed, OwnerDrawVariable, Virtual)', 'ELazListBoxStyle');
+    addGlobalType('enum(LeftJustify, RightJustify, Center)', 'ELazAlignment');
+    addGlobalType('enum(Unchecked, Checked, Grayed)', 'ELazCheckBoxState');
+    addGlobalType('enum(GlyphLeft, GlyphRight, GlyphTop, GlyphBottom)', 'ELazButtonLayout');
 
     addGlobalType('procedure(Control: TLazWinControl; Index: Integer; ARect: TLazRect; State: ELazOwnerDrawStates) of object', 'TLazDrawItemEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Control: TLazWinControl; Index: Integer; var AHeight: Integer) of object', 'TLazMeasureItemEvent', FFI_DEFAULT_ABI);

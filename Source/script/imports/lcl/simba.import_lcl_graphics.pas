@@ -762,16 +762,16 @@ procedure ImportLCLGraphics(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
-    addGlobalType('record Left, Top ,Right, Bottom: Integer; end', 'TLazRect');
-    addGlobalType('enum(fqDefault, fqDraft, fqProof, fqNonAntialiased, fqAntialiased, fqCleartype, fqCleartypeNatural)', 'ELazFontQuality');
-    addGlobalType('set of enum(fsBold, fsItalic, fsStrikeOut, fsUnderline)', 'ELazFontStyles');
-    addGlobalType('enum(fpDefault, fpVariable, fpFixed)', 'ELazFontPitch');
-    addGlobalType('enum(psSolid, psDash, psDot, psDashDot, psDashDotDot, psInsideFrame, psPattern, psClear)', 'ELazPenStyle');
-    addGlobalType('enum(pmBlack, pmWhite, pmNop, pmNot, pmCopy, pmNotCopy, pmMergePenNot, pmMaskPenNot, pmMergeNotPen, pmMaskNotPen, pmMerge, pmNotMerge, pmMask, pmNotMask, pmXor, pmNotXor)', 'ELazPenMode');
-    addGlobalType('enum(bsSolid, bsClear, bsHorizontal, bsVertical, bsFDiagonal, bsBDiagonal, bsCross, bsDiagCross, bsImage, bsPattern)', 'ELazBrushStyle');
-    addGlobalType('enum(tmAuto, tmFixed)', 'ELazTransparentMode');
-    addGlobalType('enum(amDontCare, amOn, amOff)', 'ELazAntialiasingMode');
-    addGlobalType('enum(tlTop, tlCenter, tlBottom)', 'ELazTextLayout');
+    addGlobalType('record Left, Top, Right, Bottom: Integer; end', 'TLazRect');
+    addGlobalType('enum(Default, Draft, Proof, NonAntialiased, Antialiased, Cleartype, CleartypeNatural)', 'ELazFontQuality');
+    addGlobalType('set of enum(Bold, Italic, StrikeOut, Underline)', 'ELazFontStyles');
+    addGlobalType('enum(Default, Variable, Fixed)', 'ELazFontPitch');
+    addGlobalType('enum(Solid, Dash, Dot, DashDot, DashDotDot, InsideFrame, Pattern, Clear)', 'ELazPenStyle');
+    addGlobalType('enum(Black, White, Nop, Nott, Copy, NotCopy, MergePenNot, MaskPenNot, MergeNotPen, MaskNotPen, Merge, NotMerge, Mask, NotMask, Xorr, NotXor)', 'ELazPenMode');
+    addGlobalType('enum(Solid, Clear, Horizontal, Vertical, FDiagonal, BDiagonal, Cross, DiagCross, Image, Pattern)', 'ELazBrushStyle');
+    addGlobalType('enum(Auto, Fixed)', 'ELazTransparentMode');
+    addGlobalType('enum(DontCare, On, Off)', 'ELazAntialiasingMode');
+    addGlobalType('enum(Top, Center, Bottom)', 'ELazTextLayout');
 
     addClass('TLazGraphicsObject', 'TLazObject', TGraphicsObject);
     addProperty('TLazGraphicsObject', 'OnChanging', 'TLazNotifyEvent', @_LapeGraphicsObject_OnChanging_Read, @_LapeGraphicsObject_OnChanging_Write);
