@@ -1,0 +1,26 @@
+var
+  Paths: T2DPointArray; // stores the teleport events so we can view at the end
+
+procedure MouseTeleportEvent(Target: TTarget; Data: TTargetEventData);
+begin
+  Paths[High(Paths)] += [Data.MouseTeleport.X, Data.MouseTeleport.Y];
+end;
+
+var img: TImage;
+begin
+  // uncomment the following for a consistent result every run!
+  //RandSeed := 123;
+
+  Target.AddEvent(ETargetEvent.MOUSE_TELEPORT, @MouseTeleportEvent);
+
+  for 1 to 5 do
+  begin
+    SetLength(Paths, Length(Paths) + 1);
+    Target.MouseTeleport([200,200]);
+    Target.MouseMove([1400,800]);
+  end;
+
+  img := new TImage(1800, 1200);
+  img.DrawATPA(Paths);
+  img.Show();
+end;

@@ -11,12 +11,12 @@ begin
   Target.SetImage(img);
 
   // entire target
-  Assert(Target.GetBrightness(ETargetBrightnessAlgo.MEAN) = 14);
-  Assert(Target.GetBrightness(ETargetBrightnessAlgo.MIN) = 13);
-  Assert(Target.GetBrightness(ETargetBrightnessAlgo.MAX) = 147);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MEAN) = 14);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MIN) = 13);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MAX) = 147);
 
   // just the green
-  Assert(Target.GetBrightness(ETargetBrightnessAlgo.MEAN, [10,10,15,15]) = 147);
-  Assert(Target.GetBrightness(ETargetBrightnessAlgo.MIN, [10,10,15,15]) = 147);
-  Assert(Target.GetBrightness(ETargetBrightnessAlgo.MAX, [10,10,15,15]) = 147);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MEAN, [10,10,15,15]) = 147);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MIN, [10,10,15,15]) = 147);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MAX, [10,10,15,15]) = 147);
 end.

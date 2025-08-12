@@ -8,12 +8,13 @@ const
     '}';
 
 var
-  json: TJSONItem;
+  json: TJSONParser;
   I: Integer;
   street: String;
   postal: Int64;
 begin
-  json := ParseJSON(SOME_JSON);
+  json := new TJSONParser();
+  json.Parse(SOME_JSON);
 
   // if you the structure ...
   if json.GetString('streetAddress', street) then
@@ -38,6 +39,4 @@ begin
       EJSONType.STR:   WriteLn('  Value = ', json.Item[i].AsString);
     end;
   end;
-
-  json.Free();
 end;

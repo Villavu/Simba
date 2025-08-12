@@ -2,7 +2,7 @@
 
 procedure ImgBoxPaint(Sender: TImageBox; Canvas: TImageBoxCanvas; R: TLazRect);
 begin
-  Canvas.DrawCircleFilled(Sender.MousePoint, 5, Colors.YELLOW);
+  Canvas.DrawCircleFilled(Sender.MouseXY, 5, Colors.YELLOW);
 
   // if 300,300 is visible in the paint rect
   if (300 >= R.Left) and (300 >= R.Top) and (300 <= R.Right) and (300 <= R.Bottom) then

@@ -1,25 +1,23 @@
 var
   json, jsonArr, jsonObj: TJSONItem;
 begin
-  json := NewJSONObject();
+  json := new TJSONObject();
   json.AddString('str', 'str');
   json.AddInt('int', 12345);
   json.AddFloat('float', 1.23);
   json.AddBool('bool', True);
 
-  jsonArr := NewJSONArray();
+  jsonArr := new TJSONArray();
   jsonArr.AddInt('', 1);
   jsonArr.AddInt('', 2);
   jsonArr.AddBool('', True);
   jsonArr.AddFloat('', 1.23);
 
-  jsonObj := NewJSONObject();
+  jsonObj := new TJSONObject();
   jsonObj.AddString('key', 'value');
 
   json.AddArray('array', jsonArr);
   json.AddObject('obj', jsonObj);
 
-  WriteLn json.ToJSON;
-
-  json.Free();
+  WriteLn json.Format();
 end;

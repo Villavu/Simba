@@ -20,32 +20,32 @@
       <Resources Count="28">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
-        <Resource_2 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
-        <Resource_3 FileName="..\Examples\stopwatch.simba" Type="RCDATA" ResourceName="EXAMPLE_STOPWATCH"/>
-        <Resource_4 FileName="..\Examples\image.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE"/>
-        <Resource_10 FileName="..\Examples\image_drawtext.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE_DRAW_TEXT"/>
-        <Resource_5 FileName="..\Examples\cluster_points.simba" Type="RCDATA" ResourceName="EXAMPLE_CLUSTER_POINTS"/>
-        <Resource_6 FileName="..\Examples\mouse_teleport_event.simba" Type="RCDATA" ResourceName="EXAMPLE_MOUSE_TELEPORT_EVENT"/>
-        <Resource_7 FileName="..\Examples\static_method.simba" Type="RCDATA" ResourceName="EXAMPLE_STATIC_METHOD"/>
+        <Resource_2 FileName="..\Examples\static_method.simba" Type="RCDATA" ResourceName="EXAMPLE_STATIC_METHOD"/>
+        <Resource_3 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
+        <Resource_4 FileName="..\Examples\stopwatch.simba" Type="RCDATA" ResourceName="EXAMPLE_STOPWATCH"/>
+        <Resource_5 FileName="..\Examples\image.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE"/>
+        <Resource_6 FileName="..\Examples\image_drawtext.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE_DRAW_TEXT"/>
+        <Resource_7 FileName="..\Examples\cluster_points.simba" Type="RCDATA" ResourceName="EXAMPLE_CLUSTER_POINTS"/>
         <Resource_8 FileName="..\Examples\form.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM"/>
-        <Resource_11 FileName="..\Examples\form_imagebox.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_IMAGEBOX"/>
-        <Resource_26 FileName="..\Examples\form_dragablepanel.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_DRAGABLE_PANEL"/>        
-        <Resource_9 FileName="..\Examples\irc.simba" Type="RCDATA" ResourceName="EXAMPLE_IRC"/>
-        <Resource_12 FileName="..\Examples\randomleft.simba" Type="RCDATA" ResourceName="EXAMPLE_RANDOM_LEFT"/>
-        <Resource_13 FileName="..\Examples\method-property.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD_PROPERTY"/>
-        <Resource_14 FileName="..\Examples\method-property-index.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD_PROPERTY_INDEX"/>
-        <Resource_15 FileName="..\Examples\json_read.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON_READ"/>
-        <Resource_16 FileName="..\Examples\json_write.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON_WRITE"/>
-        <Resource_17 FileName="..\Images\tick.png" Type="RCDATA" ResourceName="TICK"/>
-        <Resource_18 FileName="..\Images\tick_150.png" Type="RCDATA" ResourceName="TICK_150"/>
-        <Resource_19 FileName="..\Images\tick_200.png" Type="RCDATA" ResourceName="TICK_200"/>
-        <Resource_20 FileName="..\Images\arrow_down.png" Type="RCDATA" ResourceName="ARROW_DOWN"/>
-        <Resource_21 FileName="..\Images\arrow_down_150.png" Type="RCDATA" ResourceName="ARROW_DOWN_150"/>
-        <Resource_22 FileName="..\Images\arrow_down_200.png" Type="RCDATA" ResourceName="ARROW_DOWN_200"/>
-        <Resource_23 FileName="..\Images\arrow_right.png" Type="RCDATA" ResourceName="ARROW_RIGHT"/>
-        <Resource_24 FileName="..\Images\arrow_right_150.png" Type="RCDATA" ResourceName="ARROW_RIGHT_150"/>
-        <Resource_25 FileName="..\Images\arrow_right_200.png" Type="RCDATA" ResourceName="ARROW_RIGHT_200"/>
-        <Resource_27 FileName="..\Examples\asyncmouse.simba" Type="RCDATA" ResourceName="EXAMPLE_ASYNCMOUSE"/>
+        <Resource_9 FileName="..\Examples\form_dragablepanel.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_DRAGABLE_PANEL"/>  
+        <Resource_10 FileName="..\Examples\form_imagebox.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_IMAGEBOX"/>     
+        <Resource_11 FileName="..\Examples\irc.simba" Type="RCDATA" ResourceName="EXAMPLE_IRC"/>
+        <Resource_12 FileName="..\Examples\asyncmouse.simba" Type="RCDATA" ResourceName="EXAMPLE_ASYNCMOUSE"/>
+        <Resource_13 FileName="..\Examples\mouse_path.simba" Type="RCDATA" ResourceName="MOUSE_PATH"/>           
+        <Resource_14 FileName="..\Examples\randomleft.simba" Type="RCDATA" ResourceName="EXAMPLE_RANDOM_LEFT"/>
+        <Resource_15 FileName="..\Examples\method-property.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD_PROPERTY"/>
+        <Resource_16 FileName="..\Examples\method-property-index.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD_PROPERTY_INDEX"/>
+        <Resource_17 FileName="..\Examples\json_read.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON_READ"/>
+        <Resource_18 FileName="..\Examples\json_write.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON_WRITE"/>
+        <Resource_19 FileName="..\Images\tick.png" Type="RCDATA" ResourceName="TICK"/>
+        <Resource_20 FileName="..\Images\tick_150.png" Type="RCDATA" ResourceName="TICK_150"/>
+        <Resource_21 FileName="..\Images\tick_200.png" Type="RCDATA" ResourceName="TICK_200"/>
+        <Resource_22 FileName="..\Images\arrow_down.png" Type="RCDATA" ResourceName="ARROW_DOWN"/>
+        <Resource_23 FileName="..\Images\arrow_down_150.png" Type="RCDATA" ResourceName="ARROW_DOWN_150"/>
+        <Resource_24 FileName="..\Images\arrow_down_200.png" Type="RCDATA" ResourceName="ARROW_DOWN_200"/>
+        <Resource_25 FileName="..\Images\arrow_right.png" Type="RCDATA" ResourceName="ARROW_RIGHT"/>
+        <Resource_26 FileName="..\Images\arrow_right_150.png" Type="RCDATA" ResourceName="ARROW_RIGHT_150"/>
+        <Resource_27 FileName="..\Images\arrow_right_200.png" Type="RCDATA" ResourceName="ARROW_RIGHT_200"/>
       </Resources>
     </General>
     <VersionInfo>
@@ -477,7 +477,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="88">
+    <Units Count="89">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -881,6 +881,10 @@
         <Filename Value="simba.target_asyncmovemouse.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit87>
+      <Unit88>
+        <Filename Value="simba.multiprocessing.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit88>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
