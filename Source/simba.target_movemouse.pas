@@ -136,7 +136,7 @@ begin
   WindMouse(
     Start.X, Start.Y, Dest.X, Dest.Y,
     Target.Options.MouseGravity, Target.Options.MouseWind,
-    5 / RandSpeed, 10 / RandSpeed, RandomLeft(10.0, 12.5) * RandSpeed, RandomLeft(10.0, 20.0) * RandSpeed,
+    5 / RandSpeed, 10 / RandSpeed, RandomLeft(10.0, 12.5) * RandSpeed, RandomLeft(8.5, 20.0) * RandSpeed,
     Target.Options.MouseTimeout
   );
 end;

@@ -1087,27 +1087,21 @@ begin
 end;
 
 (*
-TTarget.AverageBrightness
--------------------------
+TTarget.GetBrightness
+---------------------
 ```
-function TTarget.AverageBrightness(Bounds: TBox = [-1,-1,-1,-1]): Integer;
+function TTarget.GetBrightness(Algo: EBrightnessAlgo; Bounds: TBox = [-1,-1,-1,-1]): Integer;
 ```
-*)
-procedure _LapeFinder_AverageBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PLapeObjectTarget(Params^[0])^^.AverageBrightness(PBox(Params^[1])^);
-end;
+Return the brightness of the area within the target.
 
-(*
-TTarget.PeakBrightness
-----------------------
-```
-function TTarget.PeakBrightness(Bounds: TBox = [-1,-1,-1,-1]): Integer;
-```
+`Algo` can be either of:
+ - `EBrightnessAlgo.MIN`
+ - `EBrightnessAlgo.MAX`
+ - `EBrightnessAlgo.MODE`
 *)
-procedure _LapeFinder_PeakBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFinder_GetBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PLapeObjectTarget(Params^[0])^^.PeakBrightness(PBox(Params^[1])^);
+  PInteger(Result)^ := PLapeObjectTarget(Params^[0])^^.GetBrightness(ESimbaTargetBrightnessAlgo(Params^[1]^), PBox(Params^[2])^);
 end;
 
 procedure ImportTarget(Script: TSimbaScript);
@@ -1123,6 +1117,7 @@ begin
     addGlobalType(specialize GetEnumDecl<ETargetEvent>(True, False), 'ETargetEvent');
     addGlobalType(specialize GetEnumDecl<EMouseButton>(True, False), 'EMouseButton');
     addGlobalType(specialize GetEnumDecl<EKeyCode>(True, True), 'EKeyCode');
+    addGlobalType(specialize GetEnumDecl<ESimbaTargetBrightnessAlgo>(True, True), 'EBrightnessAlgo');
 
     addGlobalType('type Pointer', 'TTargetOptions');
     addProperty('TTargetOptions', 'ForceFocus', 'Boolean', @_LapeTargetOptions_ForceFocus_Read, @_LapeTargetOptions_ForceFocus_Write);
@@ -1267,8 +1262,8 @@ begin
     addGlobalFunc('function TTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeFinder_FindEdges1);
     addGlobalFunc('function TTarget.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeFinder_FindEdges2);
 
-    addGlobalFunc('function TTarget.AverageBrightness(Bounds: TBox = [-1,-1,-1,-1]): Integer;', @_LapeFinder_AverageBrightness);
-    addGlobalFunc('function TTarget.PeakBrightness(Bounds: TBox = [-1,-1,-1,-1]): Integer;', @_LapeFinder_PeakBrightness);
+    addGlobalFunc('function TTarget.GetBrightness(Algo: EBrightnessAlgo; Bounds: TBox = [-1,-1,-1,-1]): Integer;', @_LapeFinder_GetBrightness);
+
 
     addDelayedCode([
       'function ToString(constref Target: TTarget): String; override;',

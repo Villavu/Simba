@@ -20,6 +20,7 @@ type
   {$PUSH}
   {$SCOPEDENUMS ON}
   ESimbaTargetKind = (NONE, IMAGE, WINDOW, EIOS, PLUGIN);
+  ESimbaTargetBrightnessAlgo = (MEAN, MIN, MAX);
   {$POP}
 
 const
@@ -260,8 +261,7 @@ type
     function GetPixelDifference(WaitTime: Integer; Tolerance: Single; ABounds: TBox): TPointArray; overload;
     function GetPixelDifference(WaitTime: Integer; ABounds: TBox): TPointArray; overload;
 
-    function AverageBrightness(ABounds: TBox): Integer;
-    function PeakBrightness(ABounds: TBox): Integer;
+    function GetBrightness(Algo: ESimbaTargetBrightnessAlgo; ABounds: TBox): Integer;
 
     constructor Create;
     destructor Destroy; override;
@@ -737,14 +737,9 @@ begin
   Result := GetPixelDifference(WaitTime, 0, ABounds);
 end;
 
-function TSimbaTarget.AverageBrightness(ABounds: TBox): Integer;
+function TSimbaTarget.GetBrightness(Algo: ESimbaTargetBrightnessAlgo; ABounds: TBox): Integer;
 begin
-  Result := AverageBrightnessOnTarget(Self, ABounds);
-end;
-
-function TSimbaTarget.PeakBrightness(ABounds: TBox): Integer;
-begin
-  Result := PeakBrightnessOnTarget(Self, ABounds);
+  Result := GetBrightnessOnTarget(Self, EBrightnessAlgo(Algo), ABounds);
 end;
 
 constructor TSimbaTarget.Create;

@@ -20,6 +20,12 @@ uses
   simba.colormath,
   simba.target;
 
+{$PUSH}
+{$SCOPEDENUMS ON}
+type
+  EBrightnessAlgo = (MEAN, MIN, MAX);
+{$POP}
+
 function FindColorsOnTarget(Target: TSimbaTarget; Bounds: TBox;
                             Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers): TPointArray;
 
@@ -39,8 +45,7 @@ function GetColorsMatrixOnTarget(Target: TSimbaTarget; Bounds: TBox): TIntegerMa
 function FindEdgesOnTarget(Target: TSimbaTarget; Bounds: TBox;
                            MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
 
-function PeakBrightnessOnTarget(Target: TSimbaTarget; Bounds: TBox): Integer;
-function AverageBrightnessOnTarget(Target: TSimbaTarget; Bounds: TBox): Integer;
+function GetBrightnessOnTarget(Target: TSimbaTarget; Algo: EBrightnessAlgo; Bounds: TBox): Integer;
 
 implementation
 
@@ -554,59 +559,41 @@ begin
   end;
 end;
 
-function PeakBrightnessOnBuffer(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
+function GetBrightnessOnBuffer(Algo: EBrightnessAlgo; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
 var
   X, Y, Grey: Integer;
+  Min,Max: Integer;
+  Sum: UInt64;
 begin
-  Result := 0;
+  Min := 255;
+  Max := 0;
+  Sum := 0;
 
   for Y := 0 to SearchHeight - 1 do
     for X := 0 to SearchWidth - 1 do
       with Buffer[Y * BufferWidth + X] do
       begin
         Grey := Round(R * 0.299 + G * 0.587 + B * 0.114);
-        if (Grey > Result) then
-          Result := Grey;
+        if (Grey < Min) then Min := Grey;
+        if (Grey > Max) then Max := Grey;
+        Sum += Grey;
       end;
-end;
 
-function PeakBrightnessOnTarget(Target: TSimbaTarget; Bounds: TBox): Integer;
-var
-  Buffer: PColorBGRA;
-  BufferWidth: Integer;
-begin
-  if Target.GetImageData(Bounds, Buffer, BufferWidth) then
-  try
-    Result := PeakBrightnessOnBuffer(Buffer, BufferWidth, Bounds.Width, Bounds.Height);
-  finally
-    Target.FreeImageData(Buffer);
+  case Algo of
+    EBrightnessAlgo.MIN:  Result := Min;
+    EBrightnessAlgo.MAX:  Result := Max;
+    EBrightnessAlgo.MEAN: Result := Sum div (SearchWidth * SearchHeight);
   end;
 end;
 
-function AverageBrightnessOnBuffer(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): Integer;
-var
-  X, Y: Integer;
-  Sum: UInt64;
-begin
-  Result := 0;
-  Sum := 0;
-
-  for Y := 0 to SearchHeight - 1 do
-    for X := 0 to SearchWidth - 1 do
-      with Buffer[Y * BufferWidth + X] do
-        Sum += Round(R * 0.299 + G * 0.587 + B * 0.114);
-
-  Result := Sum div (SearchWidth * SearchHeight);
-end;
-
-function AverageBrightnessOnTarget(Target: TSimbaTarget; Bounds: TBox): Integer;
+function GetBrightnessOnTarget(Target: TSimbaTarget; Algo: EBrightnessAlgo; Bounds: TBox): Integer;
 var
   Buffer: PColorBGRA;
   BufferWidth: Integer;
 begin
   if Target.GetImageData(Bounds, Buffer, BufferWidth) then
   try
-    Result := AverageBrightnessOnBuffer(Buffer, BufferWidth, Bounds.Width, Bounds.Height);
+    Result := GetBrightnessOnBuffer(Algo, Buffer, BufferWidth, Bounds.Width, Bounds.Height);
   finally
     Target.FreeImageData(Buffer);
   end;
