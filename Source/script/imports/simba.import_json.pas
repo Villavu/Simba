@@ -319,12 +319,12 @@ end;
 
 procedure _LapeJSONItem_Delete(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLapeObjectJSON(Params^[0])^^.Delete(PSimbaJSONItem(Params^[1])^);
+  PLapeObjectJSON(Params^[0])^^.Delete(PLapeObjectJSON(Params^[1])^^);
 end;
 
 procedure _LapeJSONItem_Extract(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLapeObjectJSON(Result)^^ := PLapeObjectJSON(Params^[0])^^.Extract(PSimbaJSONItem(Params^[1])^);
+  PLapeObjectJSON(Result)^^ := PLapeObjectJSON(Params^[0])^^.Extract(PLapeObjectJSON(Params^[1])^^);
   SetLapeObjectManage(Result, True);
 end;
 
