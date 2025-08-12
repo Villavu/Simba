@@ -57,6 +57,7 @@ type
     procedure DoOpenContextMenu(Sender: TObject);
     procedure DoUpdateHiddenSections(Sender: TObject);
     procedure DoMouseOverTooltipClick(Sender: TObject);
+    procedure DoCollapseAllClick(Sender: TObject);
     procedure DoShowAllClick(Sender: TObject);
     procedure DoHideAllClick(Sender: TObject);
     procedure DoDragDrop(Sender, Source: TObject; X, Y: Integer);
@@ -173,7 +174,7 @@ var
 begin
   if (Decl.Name = '') then
     Exit;
-  if (ANodeType = ntSimbaDecl) and ((Decl is TDeclaration_Method) and ((Decl.Name[1] = '_') or TDeclaration_Method(Decl).isOverride)) then
+  if (ANodeType = ntSimbaDecl) and ((Decl is TDeclaration_Method) and ((Decl.Name[1] = '_') or TDeclaration_Method(Decl).isOverride or TDeclaration_Method(Decl).isOperator)) then
     Exit;
 
   Node := FTreeView.AddNode(ParentNode, Decl.Name);
@@ -222,7 +223,7 @@ begin
       AddDecl(ParentNode, Decl, ntSimbaDecl);
   end;
 
-  FSimbaNode.AlphaSort();
+  //FSimbaNode.AlphaSort();
   FSimbaNode.Expanded := True;
 
   DoHiddenSimbaSectionsChange(SimbaSettings.FunctionList.HiddenSimbaSections);
@@ -359,16 +360,9 @@ var
   I: Integer;
 begin
   Order := String(Setting.Value).Split(',');
-
-  // will need to be re done when anything changes, just easier
-  if (Length(Order) <> FSimbaNode.Count) then
-    Exit;
   for I := 0 to High(Order) do
-    if (FSimbaNode.FindNode(Order[I]) = nil) then
-      Exit;
-
-  for I := 0 to High(Order) do
-    FSimbaNode.FindNode(Order[I]).Index := I;
+    if (FSimbaNode.FindNode(Order[I]) <> nil) and (I < FSimbaNode.Count) then
+      FSimbaNode.FindNode(Order[I]).Index := I;
 end;
 
 procedure TSimbaFunctionListPage.DoEditorModified(Sender: TObject);
@@ -469,6 +463,16 @@ end;
 procedure TSimbaFunctionListPage.DoMouseOverTooltipClick(Sender: TObject);
 begin
   SimbaSettings.FunctionList.ShowMouseoverHint.Value := TMenuItem(Sender).Checked;
+end;
+
+procedure TSimbaFunctionListPage.DoCollapseAllClick(Sender: TObject);
+begin
+  FTreeView.FullCollapse();
+
+  FScriptNode.Expanded := True;
+  FIncludesNode.Expanded := True;
+  FPluginsNode.Expanded := True;
+  FSimbaNode.Expanded := True;
 end;
 
 procedure TSimbaFunctionListPage.DoShowAllClick(Sender: TObject);
@@ -592,6 +596,7 @@ begin
   Add('Open Simba Documentation', @DoOpenSimbaDocClick, False, False, IMG_SIMBA);
   Add('Show Mouse-over tooltip', @DoMouseOverTooltipClick, True, SimbaSettings.FunctionList.ShowMouseoverHint.Value);
   AddLine();
+  Add('Collapse all', @DoCollapseAllClick);
   Add('Show all', @DoShowAllClick);
   Add('Hide all', @DoHideAllClick);
 
@@ -826,4 +831,3 @@ end;
 {$R *.lfm}
 
 end.
-

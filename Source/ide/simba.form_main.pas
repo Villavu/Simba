@@ -609,7 +609,7 @@ begin
   BeginFormUpdate();
   try
     DockMaster.BeginUpdate();
-    DockMaster.SplitterWidth := Scale96ToScreen(8);
+    DockMaster.SplitterWidth := Scale96ToScreen(6);
     DockMaster.HeaderClass := TSimbaAnchorDockHeader;
     DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
     DockMaster.SiteClass := TSimbaAnchorDockHostSite;

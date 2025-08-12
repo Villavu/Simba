@@ -59,9 +59,16 @@ uses
 
 procedure TSimbaGeneralFrame.FontSizeTrackBarChange(Sender: TObject);
 begin
-  FontSizeLabel.Caption := 'Font Size: ' + IntToStr(FontSizeTrackBar.Position);
-
-  SimbaSettings.General.CustomFontSize.Value := FontSizeTrackBar.Position;
+  if (FontSizeTrackBar.Position = FontSizeTrackBar.Min) then
+  begin
+    FontSizeLabel.Caption := 'Font Size: Default';
+    SimbaSettings.General.CustomFontSize.SetDefault();
+  end
+  else
+  begin
+    FontSizeLabel.Caption := 'Font Size: ' + IntToStr(FontSizeTrackBar.Position);
+    SimbaSettings.General.CustomFontSize.Value := FontSizeTrackBar.Position;
+  end;
 end;
 
 procedure TSimbaGeneralFrame.ToolbarPositionComboBoxChange(Sender: TObject);
@@ -153,7 +160,7 @@ begin
 
   FontSizeTrackBar.Position := IfThen(
     SimbaSettings.General.CustomFontSize.IsDefault,
-    GetDefaultFontSize(),
+    FontSizeTrackBar.Min,
     SimbaSettings.General.CustomFontSize.Value
   );
 

@@ -628,6 +628,16 @@ begin
   PScrollBox(Result)^ := TScrollBox.Create(PComponent(Params^[0])^);
 end;
 
+procedure _LapeScrollBox_AutoScroll_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PScrollBox(Params^[0])^.AutoScroll := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeScrollBox_AutoScroll_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PScrollBox(Params^[0])^.AutoScroll;
+end;
+
 procedure _LapeCommonDialog_Execute(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   Pboolean(Result)^ := PCommonDialog(Params^[0])^.Execute();
@@ -937,6 +947,7 @@ begin
 
     addClass('TLazScrollBox', 'TLazScrollingWinControl', TScrollBox);
     addClassConstructor('TLazScrollBox', '(AOwner: TLazComponent)', @_LapeScrollBox_Create);
+    addProperty('TLazScrollBox', 'AutoScroll', 'Boolean', @_LapeScrollBox_AutoScroll_Read, @_LapeScrollBox_AutoScroll_Write);
 
     addClass('TLazCommonDialog', 'TLazComponent', TCommonDialog);
     addGlobalFunc('function TLazCommonDialog.Execute: Boolean;', @_LapeCommonDialog_Execute);
