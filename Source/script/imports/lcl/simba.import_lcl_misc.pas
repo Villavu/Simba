@@ -20,6 +20,7 @@ type
   PBitmap = ^TBitmap;
   PNotifyEvent = ^TNotifyEvent;
   PComponent = ^TComponent;
+  PCaption = ^TCaption;
 
   PCustomFloatSpinEdit = ^TCustomFloatSpinEdit;
   PCustomSpinEdit = ^TCustomSpinEdit;
