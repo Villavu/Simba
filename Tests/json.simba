@@ -51,7 +51,7 @@ begin
     '{'                                     + LINE_SEP +
     '  "str" : "abc",'                      + LINE_SEP +
     '  "int" : 123,'                        + LINE_SEP +
-    '  "float" : 1.2300000000000000E+000,'  + LINE_SEP +
+    '  "float" : 1.23,'                     + LINE_SEP +
     '  "bool" : true,'                      + LINE_SEP +
     '  "arr" : ['                           + LINE_SEP +
     '  ],'                                  + LINE_SEP +
@@ -106,7 +106,7 @@ begin
     '['                           + LINE_SEP +
     '  "abc",'                    + LINE_SEP +
     '  123,'                      + LINE_SEP +
-    '  1.2300000000000000E+000,'  + LINE_SEP +
+    '  1.23,'                     + LINE_SEP +
     '  true,'                     + LINE_SEP +
     '  ['                         + LINE_SEP +
     '  ],'                        + LINE_SEP +
@@ -183,7 +183,7 @@ begin
     '{'                                    + LINE_SEP +
     '  "str" : "abc",'                     + LINE_SEP +
     '  "int" : 123,'                       + LINE_SEP +
-    '  "float" : 1.2300000000000000E+000,' + LINE_SEP +
+    '  "float" : 1.23,'                    + LINE_SEP +
     '  "bool" : true,'                     + LINE_SEP +
     '  "arr" : ['                          + LINE_SEP +
     '  ],'                                 + LINE_SEP +
@@ -238,11 +238,12 @@ begin
   json.Save(SimbaEnv.TempPath + 'test.json');
   json.Clear();
   json.Load(SimbaEnv.TempPath + 'test.json');
+
   Assert(json.Format() =
     '{'                                     + LINE_SEP +
     '  "str" : "abc",'                      + LINE_SEP +
     '  "int" : 123,'                        + LINE_SEP +
-    '  "float" : 1.2300000000000000E+000,'  + LINE_SEP +
+    '  "float" : 1.23,'                     + LINE_SEP +
     '  "bool" : true,'                      + LINE_SEP +
     '  "arr" : ['                           + LINE_SEP +
     '  ],'                                  + LINE_SEP +

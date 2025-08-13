@@ -454,18 +454,9 @@ begin
 end;
 
 procedure TSimbaJSONItemHelper.Load(FileName: String);
-var
-  Stream: TFileStream;
 begin
   Free();
-
-  Stream := TFileStream.Create(FileName, fmOpenRead);
-  with TSimbaJSONParser.Create(Stream, True) do
-  try
-    Self := Parse();
-  finally
-    Free();
-  end;
+  Self := LoadJSON(FileName);
 end;
 
 procedure TSimbaJSONItemHelper.Save(FileName: String; Options: EJSONFormatOptions; Indent: Integer);
@@ -508,22 +499,17 @@ end;
 
 function NewJSONObject: TSimbaJSONItem;
 begin
-  Result := TSimbaJSONParser.NewObject();
+  Result := TJSONObjectClass(GetJSONInstanceType(jitObject)).Create();
 end;
 
 function NewJSONArray: TSimbaJSONItem;
 begin
-  Result := TSimbaJSONParser.NewArray();
+  Result := TJSONArrayClass(GetJSONInstanceType(jitArray)).Create();
 end;
 
 function ParseJSON(Str: String): TSimbaJSONItem;
 begin
-  with TSimbaJSONParser.Create(TStringStream.Create(Str), True) do
-  try
-    Result := Parse();
-  finally
-    Free();
-  end;
+  Result := GetJSON(Str);
 end;
 
 function LoadJSON(FileName: String): TSimbaJSONItem;
@@ -531,11 +517,10 @@ var
   Stream: TFileStream;
 begin
   Stream := TFileStream.Create(FileName, fmOpenRead);
-  with TSimbaJSONParser.Create(Stream, True) do
   try
-    Result := Parse();
+    Result := GetJSON(Stream);
   finally
-    Free();
+    Stream.Free();
   end;
 end;
 
