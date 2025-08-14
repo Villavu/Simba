@@ -11,10 +11,23 @@ interface
 
 uses
   Classes, SysUtils, Graphics, Controls, ComCtrls, LCLType, StdCtrls, ExtCtrls,
-  SynEdit, SynEditTypes, SynGutterLineOverview, SynEditMouseCmds, SynEditMiscClasses, SynEditKeyCmds, SynEditHighlighter, SynEditMarkupCtrlMouseLink, SynEditMarkupHighAll,
-  simba.base, simba.settings,
-  simba.ide_editor_completionbox, simba.ide_editor_paramhint, simba.ide_editor_attributes,
-  simba.ide_editor_modifiedlinegutter, simba.component_synedit;
+  SynEdit,
+  SynEditTypes,
+  SynEditMouseCmds,
+  SynEditMiscClasses,
+  SynEditKeyCmds,
+  SynEditHighlighter,
+  SynEditMarkupCtrlMouseLink,
+  SynEditMarkupHighAll,
+  SynGutterLineOverview,
+  SynHighlighterPas,
+  simba.base,
+  simba.settings,
+  simba.ide_editor_completionbox,
+  simba.ide_editor_paramhint,
+  simba.ide_editor_attributes,
+  simba.ide_editor_modifiedlinegutter,
+  simba.component_synedit;
 
 type
   TSimbaEditorFileNameEvent = function(Sender: TObject): String of object;
@@ -131,7 +144,6 @@ implementation
 uses
   ATCanvasPrimitives,
   LazSynEditMouseCmdsTypes,
-  SynHighlighterPas,
   SynEditPointClasses,
   SynGutter,
   simba.misc,
@@ -143,7 +155,8 @@ uses
   simba.ide_editor_multicaret,
   simba.ide_editor_codecomplete,
   simba.ide_editor_commands,
-  simba.ide_editorcarethistory;
+  simba.ide_editorcarethistory,
+  simba.editor_highlighter;
 
 function TSimbaEditor.IsHighlighterAttribute(Values: TStringArray): Boolean;
 var
@@ -562,7 +575,7 @@ begin
 
   MouseActions.AddCommand(emcOverViewGutterScrollTo, False, LazSynEditMouseCmdsTypes.mbLeft, ccSingle, cdDown, [], []);
 
-  Highlighter := TSynFreePascalSyn.Create(Self);
+  Highlighter := TSimbaEditorHighlighter.Create(Self);
 
   FScreenCaretPainterClass {%H-}:= TSynEditScreenCaretPainterInternal;
   if (FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal) then

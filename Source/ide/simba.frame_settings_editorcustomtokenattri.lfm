@@ -1,0 +1,116 @@
+object EditorCustomTokenAttriFrame: TEditorCustomTokenAttriFrame
+  Left = 0
+  Height = 480
+  Top = 0
+  Width = 640
+  ClientHeight = 480
+  ClientWidth = 640
+  DesignTimePPI = 192
+  ParentBackground = False
+  ParentFont = False
+  TabOrder = 0
+  DesignLeft = 731
+  DesignTop = 10
+  object ListBox: TListBox
+    AnchorSideTop.Control = ButtonRemove
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 8
+    Height = 250
+    Top = 60
+    Width = 627
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Around = 5
+    ItemHeight = 0
+    TabOrder = 0
+    OnSelectionChange = ListBoxSelectionChange
+  end
+  object ButtonRemove: TButton
+    AnchorSideLeft.Control = ButtonAdd
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    Left = 160
+    Height = 50
+    Top = 5
+    Width = 150
+    BorderSpacing.Around = 5
+    Caption = 'Remove'
+    TabOrder = 1
+    OnClick = ButtonRemoveClick
+  end
+  object ButtonAdd: TButton
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 5
+    Height = 50
+    Top = 5
+    Width = 150
+    BorderSpacing.Around = 5
+    Caption = 'Add'
+    TabOrder = 2
+    OnClick = ButtonAddClick
+  end
+  object LabelToken: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = EditToken
+    AnchorSideBottom.Control = EditToken
+    AnchorSideBottom.Side = asrBottom
+    Left = 5
+    Height = 40
+    Top = 315
+    Width = 64
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 5
+    Caption = 'Token'
+    Layout = tlCenter
+  end
+  object EditToken: TEdit
+    AnchorSideLeft.Control = LabelAttribute
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = ListBox
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 104
+    Height = 40
+    Top = 315
+    Width = 531
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Around = 5
+    TabOrder = 3
+    OnChange = EditTokenChange
+  end
+  object LabelAttribute: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = ComboAttributes
+    AnchorSideBottom.Control = ComboAttributes
+    AnchorSideBottom.Side = asrBottom
+    Left = 5
+    Height = 30
+    Top = 365
+    Width = 94
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Around = 5
+    Caption = 'Attribute'
+    Layout = tlCenter
+  end
+  object ComboAttributes: TComboBox
+    AnchorSideLeft.Control = LabelAttribute
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = EditToken
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 104
+    Height = 40
+    Top = 360
+    Width = 531
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Around = 5
+    ItemHeight = 32
+    ReadOnly = True
+    TabOrder = 4
+    OnChange = ComboAttributesChange
+  end
+end

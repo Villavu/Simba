@@ -1,48 +1,47 @@
 object SimbaSettingsForm: TSimbaSettingsForm
   Left = -1107
-  Height = 625
+  Height = 1000
   Top = 465
-  Width = 750
+  Width = 1200
   Caption = 'Settings'
-  ClientHeight = 0
-  ClientWidth = 0
-  DesignTimePPI = 120
-  OnShow = FormShow
+  ClientHeight = 1000
+  ClientWidth = 1200
+  DesignTimePPI = 192
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.3'
+  OnShow = FormShow
   object TreeView: TTreeView
     Left = 0
-    Height = 566
+    Height = 920
     Top = 0
-    Width = 200
+    Width = 320
     Align = alLeft
     AutoExpand = True
-    BorderSpacing.Right = 1
+    BorderSpacing.Right = 2
     ReadOnly = True
     ScrollBars = ssAutoBoth
     ShowRoot = False
     TabOrder = 0
-    OnSelectionChanged = TreeViewSelectionChanged
     Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoToolTips, tvoThemedDraw]
+    OnSelectionChanged = TreeViewSelectionChanged
   end
   object Notebook: TNotebook
-    Left = 212
-    Height = 556
-    Top = 10
-    Width = 533
+    Left = 340
+    Height = 904
+    Top = 16
+    Width = 852
     Align = alClient
-    BorderSpacing.Left = 5
-    BorderSpacing.Top = 10
-    BorderSpacing.Right = 5
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 16
+    BorderSpacing.Right = 8
     TabOrder = 1
   end
   object ButtonPanel: TButtonPanel
-    Left = 8
-    Height = 43
-    Top = 574
-    Width = 734
-    BorderSpacing.Around = 8
+    Left = 13
+    Height = 54
+    Top = 933
+    Width = 1174
+    BorderSpacing.Around = 13
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
     OKButton.OnClick = OKButtonClick
@@ -56,9 +55,9 @@ object SimbaSettingsForm: TSimbaSettingsForm
     ShowButtons = [pbOK, pbCancel]
   end
   object Splitter: TSplitter
-    Left = 201
-    Height = 566
+    Left = 322
+    Height = 920
     Top = 0
-    Width = 6
+    Width = 10
   end
 end

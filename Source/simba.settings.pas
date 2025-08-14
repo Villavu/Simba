@@ -117,6 +117,7 @@ type
       DefaultScript: TSimbaSetting;
       DefaultScriptFile: TSimbaSetting;
       CustomColors: TSimbaSetting;
+      CustomTokenAttris: TSimbaSetting;
       Keystrokes: TSimbaSetting;
       FontSize: TSimbaSetting;
       FontName: TSimbaSetting;
@@ -497,6 +498,7 @@ begin
   Editor.DefaultScript                   := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
   Editor.DefaultScriptFile               := TSimbaSetting_String.Create(Self, 'Editor', 'DefaultScriptFile', '');
   Editor.CustomColors                    := TSimbaSetting_String.Create(Self, 'Editor', 'CustomColors', '');
+  Editor.CustomTokenAttris               := TSimbaSetting_String.Create(Self, 'Editor', 'CustomTokenAttris', '');
   Editor.Keystrokes                      := TSimbaSetting_String.Create(Self, 'Editor', 'Keystrokes', '');
   Editor.FontSize                        := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize);
   Editor.FontName                        := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', SynDefaultFontName);

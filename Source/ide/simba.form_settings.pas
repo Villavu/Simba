@@ -13,6 +13,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls, ButtonPanel, Spin,
   simba.frame_settings_editor,
   simba.frame_settings_editorcolors,
+  simba.frame_settings_editorcustomtokenattri,
   simba.frame_settings_editordefault,
   simba.frame_settings_editorfont,
   simba.frame_settings_editorkeystrokes,
@@ -43,6 +44,7 @@ type
     EditorColorsFrame: TEditorColorsFrame;
     EditorDefaultFrame: TEditorDefaultFrame;
     EditorKeybindingFrame: TSimbaEditorHotkeyFrame;
+    EditorCustomTokenAttriFrame: TEditorCustomTokenAttriFrame;
 
     procedure ShowPage(Title: String);
     procedure Open(Page: String);
@@ -108,6 +110,7 @@ begin
   SimbaGeneralFrame.Load();
   SimbaCodetoolsFrame.Load();
   EditorGeneralFrame.Load();
+  EditorCustomTokenAttriFrame.Load();
   EditorColorsFrame.Load();
   EditorDefaultFrame.Load();
   EditorKeybindingFrame.Load();
@@ -135,6 +138,7 @@ begin
   SimbaCodetoolsFrame.Save();
   EditorGeneralFrame.Save();
   EditorColorsFrame.Save();
+  EditorCustomTokenAttriFrame.Save();
   EditorDefaultFrame.Save();
   EditorKeybindingFrame.Save();
   SimbaOutputBoxFrame.Save();
@@ -162,8 +166,8 @@ var
 begin
   inherited Create(AOwner);
 
-  Width  := Scale96ToScreen(800);
-  Height := Scale96ToScreen(600);
+  Width  := Scale96ToScreen(700);
+  Height := Scale96ToScreen(500);
 
   Constraints.MinWidth  := Round(Width * 0.75);
   Constraints.MinHeight := Round(Height * 0.75);
@@ -206,6 +210,11 @@ begin
   EditorColorsFrame.Parent := AddPage('Colors', Node);
   EditorColorsFrame.Align := alClient;
   EditorColorsFrame.ParentFont := True;
+
+  EditorCustomTokenAttriFrame := TEditorCustomTokenAttriFrame.Create(Self);
+  EditorCustomTokenAttriFrame.Parent := AddPage('Token Colors', Node);
+  EditorCustomTokenAttriFrame.Align := alClient;
+  EditorCustomTokenAttriFrame.ParentFont := True;
 
   EditorDefaultFrame := TEditorDefaultFrame.Create(Self);
   EditorDefaultFrame.Parent := AddPage('Default Script', Node);
