@@ -20,6 +20,7 @@ type
   PBitmap = ^TBitmap;
   PNotifyEvent = ^TNotifyEvent;
   PComponent = ^TComponent;
+  PCaption = ^TCaption;
 
   PCustomFloatSpinEdit = ^TCustomFloatSpinEdit;
   PCustomSpinEdit = ^TCustomSpinEdit;
@@ -232,12 +233,41 @@ begin
   PDateEdit(Params^[0])^.DirectInput := PBoolean(Params^[1])^;
 end;
 
+procedure _LapeDateEdit_NumbersOnly_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PDateEdit(Params^[0])^.NumbersOnly;
+end;
 
+procedure _LapeDateEdit_NumbersOnly_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.NumbersOnly := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeDateEdit_Text_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PDateEdit(Params^[0])^.Text;
+end;
+
+procedure _LapeDateEdit_Text_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.Text := PCaption(Params^[1])^;
+end;
+
+procedure _LapeDateEdit_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PDateEdit(Params^[0])^.OnChange;
+end;
+
+procedure _LapeDateEdit_OnChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PDateEdit(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
+end;
 
 procedure _LapeDateEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDateEdit(Result)^ := TDateEdit.Create(PComponent(Params^[0])^);
 end;
+
 
 //TIME
 procedure _LapeTimeEdit_Time_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -278,6 +308,46 @@ end;
 procedure _LapeTimeEdit_DirectInput_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PTimeEdit(Params^[0])^.DirectInput := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeTimeEdit_NumbersOnly_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PTimeEdit(Params^[0])^.NumbersOnly;
+end;
+
+procedure _LapeTimeEdit_NumbersOnly_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Params^[0])^.NumbersOnly := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeTimeEdit_SimpleLayout_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PTimeEdit(Params^[0])^.SimpleLayout;
+end;
+
+procedure _LapeTimeEdit_SimpleLayout_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Params^[0])^.SimpleLayout := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeTimeEdit_Text_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PTimeEdit(Params^[0])^.Text;
+end;
+
+procedure _LapeTimeEdit_Text_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Params^[0])^.Text := PCaption(Params^[1])^;
+end;
+
+procedure _LapeTimeEdit_OnChange_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PNotifyEvent(Result)^ := PTimeEdit(Params^[0])^.OnChange;
+end;
+
+procedure _LapeTimeEdit_OnChange_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Params^[0])^.OnChange := PNotifyEvent(Params^[1])^;
 end;
 
 procedure _LapeTimeEdit_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -764,6 +834,9 @@ begin
     addProperty('TLazDateEdit', 'DefaultToday', 'Boolean', @_LapeDateEdit_DefaultToday_Read, @_LapeDateEdit_DefaultToday_Write);
     addProperty('TLazDateEdit', 'ReadOnly', 'Boolean', @_LapeDateEdit_ReadOnly_Read, @_LapeDateEdit_ReadOnly_Write);
     addProperty('TLazDateEdit', 'DirectInput', 'Boolean', @_LapeDateEdit_DirectInput_Read, @_LapeDateEdit_DirectInput_Write);
+    addProperty('TLazDateEdit', 'NumbersOnly', 'Boolean', @_LapeDateEdit_NumbersOnly_Read, @_LapeDateEdit_NumbersOnly_Write);
+    addProperty('TLazDateEdit', 'Text', 'String', @_LapeDateEdit_Text_Read, @_LapeDateEdit_Text_Write);
+    addProperty('TLazDateEdit', 'OnChange', 'TLazNotifyEvent', @_LapeDateEdit_OnChange_Read, @_LapeDateEdit_OnChange_Write);
     addClassConstructor('TLazDateEdit', '(TheOwner: TLazComponent)', @_LapeDateEdit_Create);
 
     addClass('TLazTimeEdit', 'TLazCustomControl', TTimeEdit);
@@ -771,6 +844,10 @@ begin
     addProperty('TLazTimeEdit', 'DefaultNow', 'Boolean', @_LapeTimeEdit_DefaultNow_Read, @_LapeTimeEdit_DefaultNow_Write);
     addProperty('TLazTimeEdit', 'ReadOnly', 'Boolean', @_LapeTimeEdit_ReadOnly_Read, @_LapeTimeEdit_ReadOnly_Write);
     addProperty('TLazTimeEdit', 'DirectInput', 'Boolean', @_LapeTimeEdit_DirectInput_Read, @_LapeTimeEdit_DirectInput_Write);
+    addProperty('TLazTimeEdit', 'NumbersOnly', 'Boolean', @_LapeTimeEdit_NumbersOnly_Read, @_LapeTimeEdit_NumbersOnly_Write);
+    addProperty('TLazTimeEdit', 'SimpleLayout', 'Boolean', @_LapeTimeEdit_SimpleLayout_Read, @_LapeTimeEdit_SimpleLayout_Write);
+    addProperty('TLazTimeEdit', 'Text', 'String', @_LapeTimeEdit_Text_Read, @_LapeTimeEdit_Text_Write);
+    addProperty('TLazTimeEdit', 'OnChange', 'TLazNotifyEvent', @_LapeTimeEdit_OnChange_Read, @_LapeTimeEdit_OnChange_Write);
     addClassConstructor('TLazTimeEdit', '(TheOwner: TLazComponent)', @_LapeTimeEdit_Create);
 
 
