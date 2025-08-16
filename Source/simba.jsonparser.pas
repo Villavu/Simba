@@ -161,9 +161,16 @@ begin
   inherited Destroy;
 end;
 
+// can be improved later to use a more mathematical approach
 function TSimbaJSONFloat.GetAsString: TJSONStringType;
+var
+  Len: Integer;
 begin
-  Result := FloatToStrF(AsFloat, ffGeneral, 8, 3, FormatSettingsDot);
+  Result := FormatFloat('0.00000000', AsFloat);
+  Len := Length(Result);
+  while (Len > 3) and (Result[Len] = '0') and (Result[Len - 1] <> '.') do
+    Dec(Len);
+  SetLength(Result, Len);
 end;
 
 class function TSimbaJSONFloat.NewInstance: TObject;

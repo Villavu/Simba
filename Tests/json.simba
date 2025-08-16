@@ -252,6 +252,61 @@ begin
   );
 end;
 
+procedure TestFloat;
+var
+  json: TJSONObject;
+begin
+  json := new TJSONObject();
+  json.AddFloat('f0', 0);
+  json.AddFloat('f1', 0.1);
+  json.AddFloat('f2', 0.01);
+  json.AddFloat('f3', 9999999.010);
+  json.AddFloat('f4', -0);
+  json.AddFloat('f5', -0.1);
+  json.AddFloat('f6', -0.01);
+  json.AddFloat('f7', -9999999.010);
+
+  json.AddFloat('f8', 1);
+  json.AddFloat('f9', 1.23);
+  json.AddFloat('f10', 1.23456789);
+  json.AddFloat('f11', 1.23000);
+  json.AddFloat('f12', 1.23450000);
+  json.AddFloat('f13', 123.0);
+  json.AddFloat('f14', 123.456);
+  json.AddFloat('f15', 9999);
+  json.AddFloat('f16', 9999.0);
+  json.AddFloat('f17', 9999.10);
+  json.AddFloat('f18', -9999);
+  json.AddFloat('f19', -9999.0);
+  json.AddFloat('f20', -9999.10);
+
+  Assert(json.Format() =
+    '{'                        + LINE_SEP +
+    '  "f0" : 0.0,'            + LINE_SEP +
+    '  "f1" : 0.1,'            + LINE_SEP +
+    '  "f2" : 0.01,'           + LINE_SEP +
+    '  "f3" : 9999999.01,'     + LINE_SEP +
+    '  "f4" : 0.0,'            + LINE_SEP +
+    '  "f5" : -0.1,'           + LINE_SEP +
+    '  "f6" : -0.01,'          + LINE_SEP +
+    '  "f7" : -9999999.01,'    + LINE_SEP +
+    '  "f8" : 1.0,'            + LINE_SEP +
+    '  "f9" : 1.23,'           + LINE_SEP +
+    '  "f10" : 1.23456789,'    + LINE_SEP +
+    '  "f11" : 1.23,'          + LINE_SEP +
+    '  "f12" : 1.2345,'        + LINE_SEP +
+    '  "f13" : 123.0,'         + LINE_SEP +
+    '  "f14" : 123.456,'       + LINE_SEP +
+    '  "f15" : 9999.0,'        + LINE_SEP +
+    '  "f16" : 9999.0,'        + LINE_SEP +
+    '  "f17" : 9999.1,'        + LINE_SEP +
+    '  "f18" : -9999.0,'       + LINE_SEP +
+    '  "f19" : -9999.0,'       + LINE_SEP +
+    '  "f20" : -9999.1'        + LINE_SEP +
+    '}'
+  );
+end;
+
 begin
   TestParseObject();
   TestBuildObject();
@@ -268,4 +323,5 @@ begin
   TestIndexingArray();
 
   TestSaveLoad();
+  TestFloat();
 end;

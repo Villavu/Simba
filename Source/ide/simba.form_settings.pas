@@ -166,8 +166,8 @@ var
 begin
   inherited Create(AOwner);
 
-  Width  := Scale96ToScreen(700);
-  Height := Scale96ToScreen(500);
+  Width  := Scale96ToScreen(800);
+  Height := Scale96ToScreen(600);
 
   Constraints.MinWidth  := Round(Width * 0.75);
   Constraints.MinHeight := Round(Height * 0.75);

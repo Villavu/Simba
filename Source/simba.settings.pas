@@ -494,21 +494,21 @@ begin
   General.FileBrowserMasks := TSimbaSetting_Boolean.Create(Self, 'General', 'FileBrowserMasks', False);
 
   // Editor
-  Editor.DefaultScriptType               := TSimbaSetting_Integer.Create(Self, 'Editor', 'DefaultScriptType', 1);
-  Editor.DefaultScript                   := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'program new;' + LineEnding + 'begin' + LineEnding + 'end.');
-  Editor.DefaultScriptFile               := TSimbaSetting_String.Create(Self, 'Editor', 'DefaultScriptFile', '');
-  Editor.CustomColors                    := TSimbaSetting_String.Create(Self, 'Editor', 'CustomColors', '');
-  Editor.CustomTokenAttris               := TSimbaSetting_String.Create(Self, 'Editor', 'CustomTokenAttris', '');
-  Editor.Keystrokes                      := TSimbaSetting_String.Create(Self, 'Editor', 'Keystrokes', '');
-  Editor.FontSize                        := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize);
-  Editor.FontName                        := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', SynDefaultFontName);
-  Editor.AntiAliased                     := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AntiAliased', True);
-  Editor.AllowCaretPastEOL               := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AllowCaretPastEOL', True);
+  Editor.DefaultScriptType := TSimbaSetting_Integer.Create(Self, 'Editor', 'DefaultScriptType', 1);
+  Editor.DefaultScript     := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DefaultScript', 'begin' + LineEnding + '  WriteLn('+#39+'Hello World'+#39+');' + LineEnding + 'end.');
+  Editor.DefaultScriptFile := TSimbaSetting_String.Create(Self, 'Editor', 'DefaultScriptFile', '');
+  Editor.CustomColors      := TSimbaSetting_String.Create(Self, 'Editor', 'CustomColors', '');
+  Editor.CustomTokenAttris := TSimbaSetting_String.Create(Self, 'Editor', 'CustomTokenAttris', '');
+  Editor.Keystrokes        := TSimbaSetting_String.Create(Self, 'Editor', 'Keystrokes', '');
+  Editor.FontSize          := TSimbaSetting_Integer.Create(Self, 'Editor', 'FontSize', SynDefaultFontSize);
+  Editor.FontName          := TSimbaSetting_String.Create(Self, 'Editor', 'FontName', SynDefaultFontName);
+  Editor.AntiAliased       := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AntiAliased', True);
+  Editor.AllowCaretPastEOL := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AllowCaretPastEOL', True);
 
-  Editor.RightMargin                     := TSimbaSetting_Integer.Create(Self, 'Editor', 'RightMargin', 80);
-  Editor.RightMarginVisible              := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
-  Editor.DocumentationComment            := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DocumentationComment', DEFAULT_DOCUMENTATION_COMMENT);
-  Editor.FindPanelVisible                := TSimbaSetting_Boolean.Create(Self, 'Editor', 'FindPanelVisible', False);
+  Editor.RightMargin          := TSimbaSetting_Integer.Create(Self, 'Editor', 'RightMargin', 80);
+  Editor.RightMarginVisible   := TSimbaSetting_Boolean.Create(Self, 'Editor', 'RightMarginVisible', False);
+  Editor.DocumentationComment := TSimbaSetting_BinaryString.Create(Self, 'Editor', 'DocumentationComment', DEFAULT_DOCUMENTATION_COMMENT);
+  Editor.FindPanelVisible     := TSimbaSetting_Boolean.Create(Self, 'Editor', 'FindPanelVisible', False);
 
   Editor.AutomaticallyCompleteBegin       := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteBegin', True);
   Editor.AutomaticallyCompleteParentheses := TSimbaSetting_Boolean.Create(Self, 'Editor', 'AutomaticallyCompleteParentheses', False);
