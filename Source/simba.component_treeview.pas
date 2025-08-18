@@ -337,7 +337,11 @@ end;
 procedure TSimbaTreeView.DeleteSelection;
 begin
   if (FTree.Selected <> nil) then
+  begin
+    FTree.Items.BeginUpdate(); // wrap in update so OnModify is called once the node is actually removed
     FTree.Items.Delete(FTree.Selected);
+    FTree.Items.EndUpdate();
+  end;
 end;
 
 procedure TSimbaTreeView.Invalidate;
