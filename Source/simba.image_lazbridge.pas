@@ -145,7 +145,7 @@ function LazImage_ToSimbaImage(LazImage: TBitmap): TSimbaImage;
       Ptr := SourcePtr;
       while (PtrUInt(DestPtr) < RowUpper) do
       begin
-        PColorRGB(DestPtr)^ := PColorRGB(Ptr)^; // can just use first three bytes
+        PColorBGR(DestPtr)^ := PColorBGR(Ptr)^; // can just use first three bytes
 
         Inc(Ptr, SizeOf(TColorRGB));
         Inc(DestPtr, SizeOf(TColorBGRA));
@@ -177,7 +177,7 @@ function LazImage_ToSimbaImage(LazImage: TBitmap): TSimbaImage;
       begin
         PUInt32(DestPtr)^ := SwapEndian(PUInt32(Ptr)^); // reverse the bytes
 
-        Inc(Ptr, SizeOf(TColorRGB));
+        Inc(Ptr, SizeOf(TColorARGB));
         Inc(DestPtr, SizeOf(TColorBGRA));
       end;
       Inc(SourcePtr, SourceRowSize);
@@ -199,7 +199,7 @@ begin
   SourceRowSize := LazImage.RawImage.Description.BytesPerLine;
 
   case LazImage_PixelFormat(LazImage) of
-    ELazPixelFormat.BGR: BGR(Source, Dest, DestUpper, SourceRowSize, DestRowSize);
+    ELazPixelFormat.BGR:  BGR(Source, Dest, DestUpper, SourceRowSize, DestRowSize);
     ELazPixelFormat.BGRA: BGRA(Source, Dest, DestUpper, SourceRowSize, DestRowSize);
     ELazPixelFormat.ARGB: ARGB(Source, Dest, DestUpper, SourceRowSize, DestRowSize);
     else
