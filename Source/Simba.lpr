@@ -37,6 +37,7 @@ begin
   SimbaInitialization_Call(ESimbaInit.CREATE);
 
   Application.CaptureExceptions := False;
+  Application.UpdateFormatSettings := False;
   Application.Initialize();
 
   if Application.HasOption('help') then
