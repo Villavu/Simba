@@ -13,7 +13,11 @@ uses
   Classes, SysUtils, Controls, ComCtrls, ExtCtrls, Forms, Graphics, Menus,
   simba.base, simba.colormath, simba.target;
 
+type
+  TGetWindow = function(): TWindowHandle of object;
+
   // ShowOnTop
+  procedure ShowACA(GetWindow: TGetWindow); overload;
   procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean); overload;
   // ShowModal
   procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean; out Color: TColorTolerance); overload;
@@ -51,6 +55,7 @@ type
     FColorListPopup: TPopupMenu;
     FDrawColorMenu: TMenuItem;
     FDrawColor: TColor;
+    FGetWindow: TGetWindow;
     FTarget: TSimbaTarget;
     FManageTarget: Boolean;
 
@@ -107,7 +112,8 @@ type
     procedure Add(Color: TColor);
     function GetBest: TColorTolerance;
   public
-    constructor Create(Target: TSimbaTarget; ManageTarget: Boolean = True); reintroduce;
+    constructor Create(Target: TSimbaTarget; ManageTarget: Boolean = True); reintroduce; overload;
+    constructor Create(GetWindow: TGetWindow); reintroduce; overload;
     destructor Destroy; override;
 
     property BestColor: TColorTolerance read GetBest;
@@ -341,6 +347,11 @@ end;
 
 procedure TSimbaACA.DoUpdateImgClick(Sender: TObject);
 begin
+  if Assigned(@FGetWindow) then
+  begin
+    FTarget.SetWindow(FGetWindow());
+  end;
+
   FImageBox.SetImage(FTarget.GetImage());
   if (Length(FDebugTPA) > 0) then
     FButtonFindColor.Click()
@@ -753,6 +764,18 @@ begin
   end;
 end;
 
+constructor TSimbaACA.Create(GetWindow: TGetWindow);
+var
+  Target: TSimbaTarget;
+begin
+  Target := TSimbaTarget.Create();
+  Target.SetWindow(GetWindow());
+
+  Create(Target);
+
+  FGetWindow := GetWindow;
+end;
+
 destructor TSimbaACA.Destroy;
 begin
   if (FForm <> nil) then
@@ -786,6 +809,12 @@ begin
   Result.Multipliers[0] := String(FEditMulti1.Edit.Text).ToFloat(0);
   Result.Multipliers[1] := String(FEditMulti2.Edit.Text).ToFloat(0);
   Result.Multipliers[2] := String(FEditMulti3.Edit.Text).ToFloat(0);
+end;
+
+procedure ShowACA(GetWindow: TGetWindow);
+begin
+  with TSimbaACA.Create(GetWindow) do
+    Form.ShowOnTop();
 end;
 
 procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean);

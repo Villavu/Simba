@@ -951,6 +951,10 @@ end;
 
 procedure TSimbaTarget.SetWindow(Window: TWindowHandle);
 begin
+  // unchanged
+  if (FTargetKind = ESimbaTargetKind.WINDOW) and (FTargetWindow = Window) then
+    Exit;
+
   ChangeTarget(ESimbaTargetKind.WINDOW);
 
   FTargetWindow := Window;
@@ -980,6 +984,10 @@ end;
 
 procedure TSimbaTarget.SetImage(Image: TSimbaImage);
 begin
+  // unchanged
+  if (FTargetKind = ESimbaTargetKind.IMAGE) and (FTargetImage = Image) then
+    Exit;
+
   ChangeTarget(ESimbaTargetKind.IMAGE);
 
   FTargetImage := Image;

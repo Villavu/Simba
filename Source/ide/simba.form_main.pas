@@ -250,8 +250,8 @@ type
 
     // Handle main menu shortcuts if editor is focused
     procedure DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-
     procedure DoTabLoaded(Sender: TObject);
+    function DoGetWindowForACA: TWindowHandle;
 
     procedure SetCustomFontSize(Value: Integer);
     procedure SetLayoutLocked(Value: Boolean);
@@ -291,7 +291,8 @@ uses
   simba.aca, simba.dtmeditor, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
   simba.ide_simpleformatter, simba.component_theme,
   simba.threading, simba.ide_editor, simba.vartype_string, simba.misc,
-  simba.target;
+  simba.target,
+  simba.vartype_windowhandle;
 
 procedure TSimbaMainForm.HandleException(Sender: TObject; E: Exception);
 
@@ -746,14 +747,8 @@ begin
 end;
 
 procedure TSimbaMainForm.MenuItemACAClick(Sender: TObject);
-var
-  Target: TSimbaTarget;
 begin
-  Target := TSimbaTarget.Create();
-  if (SimbaMainToolBar.WindowSelection <> 0) then
-    Target.SetWindow(SimbaMainToolBar.WindowSelection);
-
-  ShowACA(Target, True);
+  ShowACA(@DoGetWindowForACA);
 end;
 
 procedure TSimbaMainForm.DoMenuItemRunClick(Sender: TObject);
@@ -1050,6 +1045,14 @@ procedure TSimbaMainForm.DoTabLoaded(Sender: TObject);
 begin
   if (Sender is TSimbaScriptTab) then
     AddRecentFile(TSimbaScriptTab(Sender).ScriptFileName);
+end;
+
+function TSimbaMainForm.DoGetWindowForACA: TWindowHandle;
+begin
+  if (SimbaMainToolBar.WindowSelection = 0) or (not SimbaMainToolBar.WindowSelection.IsValid) then
+    Result := GetDesktopWindow
+  else
+    Result := SimbaMainToolBar.WindowSelection;
 end;
 
 procedure TSimbaMainForm.MenuEditClick(Sender: TObject);

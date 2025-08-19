@@ -29,16 +29,16 @@ begin
   SetHeapTraceOutput(Application.Location + '/' + IntToStr(GetProcessID()) + '.trc');
   {$ENDIF}
 
+  Application.CaptureExceptions := False;
+  Application.UpdateFormatSettings := False;
+  Application.Initialize();
+
   FormatSettings.DecimalSeparator := '.';
   FormatSettings.ThousandSeparator := ',';
   FormatSettings.DateSeparator := '-';
   FormatSettings.TimeSeparator := ':';
 
   SimbaInitialization_Call(ESimbaInit.CREATE);
-
-  Application.CaptureExceptions := False;
-  Application.UpdateFormatSettings := False;
-  Application.Initialize();
 
   if Application.HasOption('help') then
   begin
