@@ -41,54 +41,54 @@ type
   PPanelButtons = ^TPanelButtons;
   PControl = ^TControl;
 
-procedure _LapeCustomFloatSpinEdit_DecimalPlaces_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_DecimalPlaces_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PCustomFloatSpinEdit(Params^[0])^.DecimalPlaces;
+  PInteger(Result)^ := PFloatSpinEdit(Params^[0])^.DecimalPlaces;
 end;
 
-procedure _LapeCustomFloatSpinEdit_DecimalPlaces_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_DecimalPlaces_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomFloatSpinEdit(Params^[0])^.DecimalPlaces := PInteger(Params^[1])^;
+  PFloatSpinEdit(Params^[0])^.DecimalPlaces := PInteger(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Increment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_Increment_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.Increment;
+  PDouble(Result)^ := PFloatSpinEdit(Params^[0])^.Increment;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Increment_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_Increment_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomFloatSpinEdit(Params^[0])^.Increment := PDouble(Params^[1])^;
+  PFloatSpinEdit(Params^[0])^.Increment := PDouble(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_MinValue_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_MinValue_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.MinValue;
+  PDouble(Result)^ := PFloatSpinEdit(Params^[0])^.MinValue;
 end;
 
-procedure _LapeCustomFloatSpinEdit_MinValue_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_MinValue_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomFloatSpinEdit(Params^[0])^.MinValue := PDouble(Params^[1])^;
+  PFloatSpinEdit(Params^[0])^.MinValue := PDouble(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_MaxValue_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_MaxValue_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.MaxValue;
+  PDouble(Result)^ := PFloatSpinEdit(Params^[0])^.MaxValue;
 end;
 
-procedure _LapeCustomFloatSpinEdit_MaxValue_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_MaxValue_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomFloatSpinEdit(Params^[0])^.MaxValue := PDouble(Params^[1])^;
+  PFloatSpinEdit(Params^[0])^.MaxValue := PDouble(Params^[1])^;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Value_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_Value_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := PCustomFloatSpinEdit(Params^[0])^.Value;
+  PDouble(Result)^ := PFloatSpinEdit(Params^[0])^.Value;
 end;
 
-procedure _LapeCustomFloatSpinEdit_Value_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeFloatSpinEdit_Value_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PCustomFloatSpinEdit(Params^[0])^.Value := PDouble(Params^[1])^;
+  PFloatSpinEdit(Params^[0])^.Value := PDouble(Params^[1])^;
 end;
 
 procedure _LapeCustomFloatSpinEdit_ValueEmpty_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -804,15 +804,15 @@ begin
   with Script.Compiler do
   begin
     addClass('TLazCustomFloatSpinEdit', 'TLazCustomEdit', TCustomFloatSpinEdit);
-    addProperty('TLazCustomFloatSpinEdit', 'DecimalPlaces', 'Integer', @_LapeCustomFloatSpinEdit_DecimalPlaces_Read, @_LapeCustomFloatSpinEdit_DecimalPlaces_Write);
-    addProperty('TLazCustomFloatSpinEdit', 'Increment', 'Double', @_LapeCustomFloatSpinEdit_Increment_Read, @_LapeCustomFloatSpinEdit_Increment_Write);
-    addProperty('TLazCustomFloatSpinEdit', 'MinValue', 'Double', @_LapeCustomFloatSpinEdit_MinValue_Read, @_LapeCustomFloatSpinEdit_MinValue_Write);
-    addProperty('TLazCustomFloatSpinEdit', 'MaxValue', 'Double', @_LapeCustomFloatSpinEdit_MaxValue_Read, @_LapeCustomFloatSpinEdit_MaxValue_Write);
-    addProperty('TLazCustomFloatSpinEdit', 'Value', 'Double', @_LapeCustomFloatSpinEdit_Value_Read, @_LapeCustomFloatSpinEdit_Value_Write);
     addProperty('TLazCustomFloatSpinEdit', 'ValueEmpty', 'Boolean', @_LapeCustomFloatSpinEdit_ValueEmpty_Read, @_LapeCustomFloatSpinEdit_ValueEmpty_Write);
     addClassConstructor('TLazCustomFloatSpinEdit', '(TheOwner: TLazComponent)', @_LapeCustomFloatSpinEdit_Create);
 
     addClass('TLazFloatSpinEdit', 'TLazCustomFloatSpinEdit', TFloatSpinEdit);
+    addProperty('TLazFloatSpinEdit', 'DecimalPlaces', 'Integer', @_LapeFloatSpinEdit_DecimalPlaces_Read, @_LapeFloatSpinEdit_DecimalPlaces_Write);
+    addProperty('TLazFloatSpinEdit', 'Increment', 'Double', @_LapeFloatSpinEdit_Increment_Read, @_LapeFloatSpinEdit_Increment_Write);
+    addProperty('TLazFloatSpinEdit', 'MinValue', 'Double', @_LapeFloatSpinEdit_MinValue_Read, @_LapeFloatSpinEdit_MinValue_Write);
+    addProperty('TLazFloatSpinEdit', 'MaxValue', 'Double', @_LapeFloatSpinEdit_MaxValue_Read, @_LapeFloatSpinEdit_MaxValue_Write);
+    addProperty('TLazFloatSpinEdit', 'Value', 'Double', @_LapeFloatSpinEdit_Value_Read, @_LapeFloatSpinEdit_Value_Write);
     addClassConstructor('TLazFloatSpinEdit', '(TheOwner: TLazComponent)', @_LapeFloatSpinEdit_Create);
 
     addClass('TLazCustomSpinEdit', 'TLazCustomFloatSpinEdit', TCustomSpinEdit);
@@ -824,7 +824,6 @@ begin
 
     addClass('TLazSpinEdit', 'TLazCustomSpinEdit', TSpinEdit);
     addClassConstructor('TLazSpinEdit', '(TheOwner: TLazComponent)', @_LapeSpinEdit_Create);
-
 
     addClass('TLazDateEdit', 'TLazCustomControl', TDateEdit);
     addProperty('TLazDateEdit', 'Date', 'TDateTime', @_LapeDateEdit_Date_Read, @_LapeDateEdit_Date_Write);
