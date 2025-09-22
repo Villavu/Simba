@@ -473,7 +473,7 @@ begin
     addGlobalFunc(
       'procedure RunInThread(Method: procedure of object; OnTerminateMethod: procedure(Thread: TThread) of object); overload;', [
       'begin',
-      '  _CreateThreadAnon(Method, nil);',
+      '  _CreateThreadAnon(Method, OnTerminateMethod);',
       'end;'
     ]);
 
