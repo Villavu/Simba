@@ -1,0 +1,31 @@
+{$assertions on}
+var
+  img, imgBlended: TImage;
+  tpa: TPointArray;
+  x,y: Integer;
+  c: TColor;
+begin
+  img := new TImage();
+  img.FromString('IMG:AQAAADsAAABAAAAAAAAAAOwAAAABAAAAsOM/AQAAAADQZ8MGAAAAANBnwwYAAAAA0GfDBgAAAADAtH0AAQAAAAEAAAA7AAAAQAAAACAAAAAAAAAAAAAAAAAAAAADAAAAIAgQCAgIAAgYAQAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCAswMAiVBORw0KGgoAAAANSUhEUgAAADsAAABACAIAAAAropjmAAAFDklEQVR4nM3aS28bVRQHcHdZUUEbQohIpKAiCqVpiMSjck1IEY9i4lqxWlWhISVNQUE0KbHjOFGNAqGVkNjykBCLVqh8ACQ2rNiwZAcSCxaonyT8L2d85szcxzw844z11+g6dTM/XZ175nompY3dRU77zkVOa2/emI3dujHr3Rqn2a1NvXX8VG3k5UtjlSvjCAatnbmN1nnOdmeG075ZoXx0+bQj+/+/SnmIwSUxjizG2C12c31xhvPKkWJC09E4r0hzTSVSTMlFfHOrSnl78vDCiSF3JZA4Jjd3Mbjvl8f7qd3CiZNylXjnzsUnnx1+7vXHkKdefBTFh4Lr7M23d+vGNIM4DloBx7bCqF4pax+WU3CVGFyCUs5dGn9naQJLu7jik6+o2S2/qVKpjl1oTECMac5bnI6rxFQPL71w9NWpY6+Vh9+oPwExclDiUumQDH6yflXF/8DIIw+fmBxGzj19BGjMNKYZ7u3dOmerW+PYlJtbVY6ti6ESKA7rb8EX/TAgxspD4J4aOwp09dQQgpWXn9jGZeW9e3e/uH270+lINz7z13efPLi76YmR00OH3z3zOJoRuPmJ3dzry8sfr93oBF+MDovPjj4Ebq5iR+3KCUZAZzHeBsS39uaNsYll+EqBtLdn/GxWOM1VL3G4/Prmg9m9xUma70a9Lqd5QGJXt9LE4N5qHF+tjMzOzmCyIeZp/rm7NAhxRH8NipnL5TFocfQVQYiJu3jmGHFpLfKYOkYpqTLRaot1DeuJiVs9eYSJLJY9LkdxzKsurg6EDs2u7B7MzVEcn8tibm1668hdHN+KfLb+KWLscTo3lnhqYRRbuZ1ujbK1M8dptc5zEouveLl24T2If/jqe8e+IlD3brH6arkwWr42gWQlbq5MI7B+Ozd3v9FgMY4Y63u38Ep1iPV7Dn2KyUppPPM8iXEElNw88RRzb7GJbfcc0olp18bcjcpZhMQ8CHH7Est7DlIsldstP4F5vV7xIyYYULpjwvrm0jSiu0OJXnl0z8G48gDd772SivfFC2+Jm42YvsGnE7dvVIxiRIqZW2gx+oB3H610KJkY/yXRFUSKA1cQTQyuEq+KCDGhFXdlWooj9UpMyVaM/nr/6x9JTGNdTC1CF//9+5///vFPtJiSiRjNlZQ4yrFym/qxcve4XzY/JzEdo8WMTi2mfQL5QmNGG/sxuL/+9AtCVh6EOrRXxLrbJrbtfuQEE44mmMesF/1YncjvxytqggmKsN6b/pVpwxUkjju+mPYJcoyIfuyfBW9pOlmMI8aIX99GMdWD2x0pJjRZsfJ4HKpj+ftl7RIU4tByjL5K29xxxNTXEFsd9/qx+rUY6LWrdzpf7O5oujuR2FbHsh+bazfYBwM7ocgerKPZHV8cqmMZQ+1qn0kmpo5mdEeKZR2HrtIhtFe7pn8N7zYTXedcbovYtq+In7A48ZVC7X4M7sDTLrmXKIKY4nBnK5ZotV5Ti6kSjOjMxTL9iim6e1DiOErL3WwsMqN7bbnMKZyYoruLLqZdvNFdaDHFUCf9i213/uQdbKvS1oNXXeg+3QMQe1+Zs3IPSEwrLxP3QMV0yj7dJfnUOyul7MHeXR/txKnRByZO7T5gcQp3IcSJ3IHvEfLJof73aF6krPf3EiqW/UN8cUx34cT0zdnhLqjYiCZ3ccV0H0hHl2yygMYSOof7WRiJ4zzh0x/18VPKzMRxTp9C7KOv+uH5/g9EerU1CuLzMAAAAABJRU5ErkJggg==');
+
+  tpa := img.FindColor($FFFFFF, 0); // white
+  tpa += img.FindColor($FFFF, 0);   // yellow
+  tpa += img.FindColor($010000, 0); // black
+
+  // add some points off the image to check clipping
+  tpa += [-1,-1];
+  tpa += [100000,100000];
+  tpa += [999999,-999999];
+
+  imgBlended := img.Blend(tpa, 10);
+  for x:=0 to imgBlended.Width-1 do
+    for y:=0 to imgBlended.Height-1 do
+    begin
+      c := imgBlended.Pixel[x,y];
+
+      // shouldn't contain any of these pixels anymore
+      Assert(ColorDistance(c, $FFFFFF) > 15);
+      Assert(ColorDistance(c, $FFFF) > 15);
+      Assert(ColorDistance(c, $010000) > 5);
+    end;
+end;

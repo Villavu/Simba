@@ -1463,47 +1463,50 @@ begin
   Result := Copy();
   SetLength(Skip, FWidth*FHeight);
   for P in IgnorePoints do
-    Skip[P.Y * FWidth + P.X] := True;
+    if (P.X >= 0) and (P.Y >= 0) and (P.X < FWidth) and (P.Y < FHeight) then
+      Skip[P.Y * FWidth + P.X] := True;
   for P in Points do
-    Skip[P.Y * FWidth + P.X] := True;
+    if (P.X >= 0) and (P.Y >= 0) and (P.X < FWidth) and (P.Y < FHeight) then
+      Skip[P.Y * FWidth + P.X] := True;
 
   for P in Points do
-  begin
-    Area.X1 := Max(P.X - Radius, 0);
-    Area.Y1 := Max(P.Y - Radius, 0);
-    Area.X2 := Min(P.X + Radius, FWidth - 1);
-    Area.Y2 := Min(P.Y + Radius, FHeight - 1);
-
-    Count := 0;
-    SumR := 0; SumG := 0; SumB := 0;
-
-    for X := Area.X1 to Area.X2 do
-      for Y := Area.Y1 to Area.Y2 do
-      begin
-        if Skip[Y * FWidth + X] then
-          Continue;
-
-        with FData[Y * FWidth + X] do
-        begin
-          Inc(SumR, R);
-          Inc(SumG, G);
-          Inc(SumB, B);
-        end;
-        Inc(Count);
-      end;
-
-    if (Count > 1) then
+    if (P.X >= 0) and (P.Y >= 0) and (P.X < FWidth) and (P.Y < FHeight) then
     begin
-      with Result.Data[P.Y * FWidth + P.X] do
+      Area.X1 := Max(P.X - Radius, 0);
+      Area.Y1 := Max(P.Y - Radius, 0);
+      Area.X2 := Min(P.X + Radius, FWidth - 1);
+      Area.Y2 := Min(P.Y + Radius, FHeight - 1);
+
+      Count := 0;
+      SumR := 0; SumG := 0; SumB := 0;
+
+      for X := Area.X1 to Area.X2 do
+        for Y := Area.Y1 to Area.Y2 do
+        begin
+          if Skip[Y * FWidth + X] then
+            Continue;
+
+          with FData[Y * FWidth + X] do
+          begin
+            Inc(SumR, R);
+            Inc(SumG, G);
+            Inc(SumB, B);
+          end;
+          Inc(Count);
+        end;
+
+      if (Count > 1) then
       begin
-        R := SumR div Count;
-        G := SumG div Count;
-        B := SumB div Count;
-        A := ALPHA_OPAQUE;
-      end;
-    end else
-      Result.Data[P.Y * FWidth + P.X] := FData[P.Y * FWidth + P.X];
-  end;
+        with Result.Data[P.Y * FWidth + P.X] do
+        begin
+          R := SumR div Count;
+          G := SumG div Count;
+          B := SumB div Count;
+          A := ALPHA_OPAQUE;
+        end;
+      end else
+        Result.Data[P.Y * FWidth + P.X] := FData[P.Y * FWidth + P.X];
+    end;
 end;
 
 function TSimbaImage.Downsample(Scale: Integer): TSimbaImage;
