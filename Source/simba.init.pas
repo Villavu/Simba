@@ -19,7 +19,7 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  Classes;
+  Classes, Math;
 
 implementation
 
@@ -87,6 +87,12 @@ end;
 {$ENDIF}
 
 initialization
+  // default masks seem to be inconstient on different platforms
+  // use IsNumber for NaN checks etc if doing "dangerous" stuff
+  // Also:
+  //   From RAD Studio Athens (R120), all of the floating-point-related exception masks will be turned ON. The applications will no longer raise Floating Point exceptions on all platforms as default.
+  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
+
   {$IFDEF DARWIN}
   DarwinInitialization();
   {$ENDIF}
