@@ -1663,7 +1663,7 @@ var
   I: Integer;
 begin
   for I := 0 to High(Self) do
-    if InRange(Distance(Self[I], Other), MinDist, MaxDist) then
+    if InRange(DistEuclidean(Self[I], Other), MinDist, MaxDist) then
       Exit(True);
 
   Result := False;

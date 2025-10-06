@@ -145,9 +145,9 @@ function TTriangleHelper.Incenter(): TPoint;
 var
   ar, br, cr: Single;
 begin
-  ar := Distance(B, C);
-  br := Distance(A, C);
-  cr := Distance(A, B);
+  ar := DistEuclidean(B, C);
+  br := DistEuclidean(A, C);
+  cr := DistEuclidean(A, B);
 
   Result.x := Round((ar * A.x + br * B.x + cr * C.x) / (ar + br + cr));
   Result.y := Round((ar * A.y + br * B.y + cr * C.y) / (ar + br + cr));

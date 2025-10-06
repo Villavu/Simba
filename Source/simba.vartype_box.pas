@@ -395,7 +395,7 @@ var
 begin
   SetLength(Weights, Length(Self));
   for I := 0 to High(Weights) do
-    Weights[I] := Distance(From, Self[I].Center);
+    Weights[I] := DistEuclidean(From, Self[I].Center);
 
   Result := Self.Sort(Weights);
 end;

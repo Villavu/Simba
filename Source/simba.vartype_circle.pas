@@ -108,7 +108,7 @@ end;
 
 function TCircleHelper.Contains(const P: TPoint): Boolean;
 begin
-  Result := Distance(X, Y, P.X, P.Y) <= Radius;
+  Result := DistEuclidean(X, Y, P.X, P.Y) <= Radius;
 end;
 
 function TCircleHelper.PointAtDegrees(Degrees: Double): TPoint;

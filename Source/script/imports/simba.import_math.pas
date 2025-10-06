@@ -26,24 +26,38 @@ Math functions
 Distance
 --------
 ```
-function Distance(const X1, Y1, X2, Y2: Double): Double;
+function Distance(X1, Y1, X2, Y2: Double; Algo: EDistanceAlgo = EDistanceAlgo.Euclidean): Double;
 ```
+Calculates the distance between X1,Y1 and X2,Y2.
+If not provided the `Algo` parameter defaults to Euclidean.
+But can be any of these:
+ - `EDistanceAlgo.Euclidean`
+ - `EDistanceAlgo.EuclideanSq`
+ - `EDistanceAlgo.Manhattan`
+ - `EDistanceAlgo.Chebyshev`
 *)
-procedure _LapeDistance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeDistance1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := Distance(PDouble(Params^[0])^, PDouble(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^);
+  PDouble(Result)^ := Distance(PDouble(Params^[0])^, PDouble(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^, EDistanceAlgo(Params^[4]^));
 end;
 
 (*
 Distance
 --------
 ```
-function Distance(const P1, P2: TPoint): Double;
+function Distance(P1, P2: TPoint; Algo: EDistanceAlgo = EDistanceAlgo.Euclidean): Double;
 ```
+Calculates the distance between two points.
+If not provided the `Algo` parameter defaults to Euclidean.
+But can be any of these:
+ - `EDistanceAlgo.Euclidean`
+ - `EDistanceAlgo.EuclideanSq`
+ - `EDistanceAlgo.Manhattan`
+ - `EDistanceAlgo.Chebyshev`
 *)
-procedure _LapeDistanceEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeDistance2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDouble(Result)^ := Distance(PPoint(Params^[0])^, PPoint(Params^[1])^);
+  PDouble(Result)^ := Distance(PPoint(Params^[0])^, PPoint(Params^[1])^, EDistanceAlgo(Params^[2]^));
 end;
 
 (*
@@ -170,7 +184,7 @@ end;
 NextPower2
 ----------
 ```
-function NextPower2(const n: Integer): Integer;
+function NextPower2(n: Integer): Integer;
 ```
 *)
 procedure _LapeNextPower2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -182,7 +196,7 @@ end;
 Modulo
 ------
 ```
-function Modulo(const X, Y: Integer): Integer;
+function Modulo(X, Y: Integer): Integer;
 ```
 *)
 procedure _LapeModulo(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -194,7 +208,7 @@ end;
 Modulo
 ------
 ```
-function Modulo(const X, Y: Double): Double;
+function Modulo(X, Y: Double): Double;
 ```
 *)
 procedure _LapeModuloF(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -206,7 +220,7 @@ end;
 DeltaAngle
 ----------
 ```
-function DeltaAngle(const DegreesA, DegreesB: Double; R: Double = 360): Double;
+function DeltaAngle(DegreesA, DegreesB: Double; R: Double = 360): Double;
 ```
 *)
 procedure _LapeDeltaAngle(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -219,7 +233,7 @@ end;
 CrossProduct
 ------------
 ```
-function CrossProduct(const r, p, q: TPoint): Int64;
+function CrossProduct(r, p, q: TPoint): Int64;
 ```
 *)
 procedure _LapeCrossProduct1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -231,7 +245,7 @@ end;
 CrossProduct
 ------------
 ```
-function CrossProduct(const rx,ry, px,py, qx,qy: Double): Double;
+function CrossProduct(rx,ry, px,py, qx,qy: Double): Double;
 ```
 *)
 procedure _LapeCrossProduct2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -243,7 +257,7 @@ end;
 LinesIntersect
 --------------
 ```
-function LinesIntersect(const P1, P2, Q1, Q2: TPoint): Boolean;
+function LinesIntersect(P1, P2, Q1, Q2: TPoint): Boolean;
 ```
 *)
 procedure _LapeLinesIntersect1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -255,7 +269,7 @@ end;
 LinesIntersect
 --------------
 ```
-function LinesIntersect(const P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean;
+function LinesIntersect(P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean;
 ```
 *)
 procedure _LapeLinesIntersect2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -267,7 +281,7 @@ end;
 DistToLine
 ----------
 ```
-function DistToLine(const P, P1, P2: TPoint; out Nearest: TPoint): Double;
+function DistToLine(P, P1, P2: TPoint; out Nearest: TPoint): Double;
 ```
 *)
 procedure _LapeDistToLine1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -279,7 +293,7 @@ end;
 DistToLine
 ----------
 ```
-function DistToLine(const P, P1, P2: TPoint): Double;
+function DistToLine(P, P1, P2: TPoint): Double;
 ```
 *)
 procedure _LapeDistToLine2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -291,7 +305,7 @@ end;
 IsNumber
 --------
 ```
-function IsNumber(const Value: Single): Boolean;
+function IsNumber(Value: Single): Boolean;
 ```
 *)
 procedure _LapeIsNumberS(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -322,11 +336,13 @@ begin
     addGlobalVar(SQRT_3, 'SQRT_3').isConstant := True;
     addGlobalVar(SQRT_5, 'SQRT_5').isConstant := True;
 
-    addGlobalFunc('function IsNumber(const Value: Single): Boolean; overload', @_LapeIsNumberS);
-    addGlobalFunc('function IsNumber(const Value: Double): Boolean; overload', @_LapeIsNumberD);
+    addGlobalType('enum(Euclidean, EuclideanSq, Manhattan, Chebyshev)', 'EDistanceAlgo');
 
-    addGlobalFunc('function Distance(const X1, Y1, X2, Y2: Double): Double; overload', @_LapeDistance);
-    addGlobalFunc('function Distance(const P1, P2: TPoint): Double; overload', @_LapeDistanceEx);
+    addGlobalFunc('function IsNumber(Value: Single): Boolean; overload', @_LapeIsNumberS);
+    addGlobalFunc('function IsNumber(Value: Double): Boolean; overload', @_LapeIsNumberD);
+
+    addGlobalFunc('function Distance(X1, Y1, X2, Y2: Double; Algo: EDistanceAlgo = EDistanceAlgo.Euclidean): Double; overload', @_LapeDistance1);
+    addGlobalFunc('function Distance(P1, P2: TPoint; Algo: EDistanceAlgo = EDistanceAlgo.Euclidean): Double; overload', @_LapeDistance2);
 
     addGlobalFunc('function Sar(x: Integer; Shift: Byte): Integer', @_LapeSar);
     addGlobalFunc('function Ror(x: UInt32; Shift: Byte): UInt32', @_LapeRor);
@@ -346,15 +362,15 @@ begin
     addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);
     addGlobalFunc('function Modulo(const X, Y: Double): Double; overload', @_LapeModuloF);
 
-    addGlobalFunc('function DeltaAngle(const DegreesA, DegreesB: Double; R: Double = 360): Double', @_LapeDeltaAngle);
+    addGlobalFunc('function DeltaAngle(DegreesA, DegreesB: Double; R: Double = 360): Double', @_LapeDeltaAngle);
 
-    addGlobalFunc('function CrossProduct(const r, p, q: TPoint): Int64; overload', @_LapeCrossProduct1);
-    addGlobalFunc('function CrossProduct(const rx,ry, px,py, qx,qy: Double): Double; overload', @_LapeCrossProduct2);
-    addGlobalFunc('function LinesIntersect(const P1, P2, Q1, Q2: TPoint): Boolean; overload', @_LapeLinesIntersect1);
-    addGlobalFunc('function LinesIntersect(const P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean; overload', @_LapeLinesIntersect2);
+    addGlobalFunc('function CrossProduct(r, p, q: TPoint): Int64; overload', @_LapeCrossProduct1);
+    addGlobalFunc('function CrossProduct(rx,ry, px,py, qx,qy: Double): Double; overload', @_LapeCrossProduct2);
+    addGlobalFunc('function LinesIntersect(P1, P2, Q1, Q2: TPoint): Boolean; overload', @_LapeLinesIntersect1);
+    addGlobalFunc('function LinesIntersect(P1, P2, Q1, Q2: TPoint; out Where: TPoint): Boolean; overload', @_LapeLinesIntersect2);
 
-    addGlobalFunc('function DistToLine(const P, P1, P2: TPoint; out Nearest: TPoint): Double; overload', @_LapeDistToLine1);
-    addGlobalFunc('function DistToLine(const P, P1, P2: TPoint): Double; overload', @_LapeDistToLine2);
+    addGlobalFunc('function DistToLine(P, P1, P2: TPoint; out Nearest: TPoint): Double; overload', @_LapeDistToLine1);
+    addGlobalFunc('function DistToLine(P, P1, P2: TPoint): Double; overload', @_LapeDistToLine2);
 
     DumpSection := '';
   end;

@@ -173,7 +173,7 @@ end;
 
 function TQuadHelper.GetArea: Integer;
 begin
-  Result := Round(Distance(Self.Bottom, Self.Right)) * Round(Distance(Self.Bottom, Self.Left));
+  Result := Round(DistEuclidean(Self.Bottom, Self.Right)) * Round(DistEuclidean(Self.Bottom, Self.Left));
 end;
 
 function TQuadHelper.Rotate(Radians: Double): TQuad;
@@ -333,7 +333,7 @@ var
 begin
   SetLength(Weights, Length(Self));
   for I := 0 to High(Weights) do
-    Weights[I] := Distance(From, Self[I].Mean);
+    Weights[I] := DistEuclidean(From, Self[I].Mean);
 
   Result := Self.Sort(Weights);
 end;
