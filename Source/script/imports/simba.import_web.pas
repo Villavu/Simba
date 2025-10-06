@@ -265,7 +265,7 @@ function THTTPClient.GetJson(URL: String): TJsonItem;
 *)
 procedure _LapeHTTPClient_GetJson(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointer(Result)^ := PLapeObjectHTTPClient(Params^[0])^^.GetJson(PString(Params^[1])^);
+  PLapeObjectJSON(Result)^^ := PLapeObjectHTTPClient(Params^[0])^^.GetJson(PString(Params^[1])^);
 end;
 
 (*
