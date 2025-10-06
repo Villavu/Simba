@@ -172,8 +172,9 @@ type
     property FirstLaunch: Boolean read FFirstLaunch;
 
     class function GetINIFile: TINIFile;
-    class procedure SetSimpleSetting(AName, Value: String);
-    class function GetSimpleSetting(AName: String; DefValue: String = ''): String;
+    class procedure RemoveSimpleSetting(Section, Name: String);
+    class procedure SetSimpleSetting(Section: String; Name, Value: String);
+    class function GetSimpleSetting(Section: String; Name: String; DefValue: String = ''): String;
 
     procedure Load;
     procedure Save;
@@ -425,12 +426,15 @@ begin
   Result.SetBoolStringValues(False, ['False']);
 end;
 
-class procedure TSimbaSettings.SetSimpleSetting(AName, Value: String);
+class procedure TSimbaSettings.RemoveSimpleSetting(Section, Name: String);
 begin
   try
     with GetINIFile() do
     try
-      WriteString('Other', AName, Value);
+      if (Name = '') then
+        EraseSection(Section)
+      else
+        DeleteKey(Section, Name);
     finally
       Free();
     end;
@@ -438,14 +442,27 @@ begin
   end;
 end;
 
-class function TSimbaSettings.GetSimpleSetting(AName: String; DefValue: String): String;
+class procedure TSimbaSettings.SetSimpleSetting(Section: String; Name, Value: String);
+begin
+  try
+    with GetINIFile() do
+    try
+      WriteString(Section, Name, Value);
+    finally
+      Free();
+    end;
+  except
+  end;
+end;
+
+class function TSimbaSettings.GetSimpleSetting(Section: String; Name: String; DefValue: String): String;
 begin
   Result := '';
 
   try
     with GetINIFile() do
     try
-      Result := ReadString('Other', AName, DefValue);
+      Result := ReadString(Section, Name, DefValue);
     finally
       Free();
     end;

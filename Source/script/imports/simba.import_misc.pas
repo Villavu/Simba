@@ -70,27 +70,44 @@ begin
 end;
 
 (*
-SetSimbaSetting
----------------
+GetSetting
+----------
 ```
-function SetSimbaSetting(Name: String; DefValue: String = ''): String;
+function GetSetting(Section, Name: String; DefValue: String = ''): String;
 ```
+Read a string setting from Simba's settings.ini.
+Returns `DefValue` if the setting does not exist.
 *)
-procedure _LapeGetSimpleSetting(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeGetSetting(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := SimbaSettings.GetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
+  PString(Result) ^:= SimbaSettings.GetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 (*
-GetSimbaSetting
----------------
+SetSetting
+----------
 ```
-procedure GetSimbaSetting(Name, Value: String);
+procedure SetSetting(Section, Name: String; Value: String);
 ```
+Write a string setting in Simba's settings.ini.
 *)
-procedure _LapeSetSimpleSetting(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSetSetting(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaSettings.SetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
+  SimbaSettings.SetSimpleSetting(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+(*
+RemoveSetting
+-------------
+```
+procedure RemoveSetting(Section, Name: String);
+```
+Remove a setting from Simba's setting.ini.
+If `Name` is empty, will remove the entire section.
+*)
+procedure _LapeRemoveSetting(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  SimbaSettings.RemoveSimpleSetting(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
 (*
@@ -581,8 +598,10 @@ begin
     ]);
 
     addGlobalFunc('procedure ClearSimbaOutput', @ClearSimbaOutput);
-    addGlobalFunc('function SetSimbaSetting(Name: String; DefValue: String = ""): String', @_LapeGetSimpleSetting);
-    addGlobalFunc('procedure GetSimbaSetting(Name, Value: String);', @_LapeSetSimpleSetting);
+
+    addGlobalFunc('function GetSetting(Section, Name: String; DefValue: String = ""): String;', @_LapeGetSetting);
+    addGlobalFunc('procedure SetSetting(Section, Name, Value: String);', @_LapeSetSetting);
+    addGlobalFunc('procedure RemoveSetting(Section, Name: String);', @_LapeRemoveSetting);
     addGlobalFunc('procedure PlaySound(Sound: String)', @_LapePlaySound);
     addGlobalFunc('procedure StopSound', @_LapeStopSound);
     addGlobalFunc('procedure SetClipBoard(Data: string)', @_LapeSetClipBoard);
