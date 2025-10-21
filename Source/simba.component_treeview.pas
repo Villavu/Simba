@@ -91,6 +91,7 @@ type
       Callback: TKeyEvent;
     end;
     FModified: Boolean;
+    FPendingFilter: Boolean; // filter changed while in beginupdate/endupdate
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -470,6 +471,13 @@ var
   Node, NodeParent: TTreeNode;
   FilterText: String;
 begin
+  // delay the filter until EndUpdate
+  if Items.IsUpdating then
+  begin
+    FPendingFilter := True;
+    Exit;
+  end;
+
   FilterText := LowerCase(FFilterEdit.Text);
 
   Items.BeginUpdate();
@@ -662,6 +670,13 @@ begin
   if FModified and Assigned(FOnModify) then
     FOnModify(Self);
   FModified := False;
+
+  if FPendingFilter then
+  begin
+    FPendingFilter := False;
+
+    UpdateFilter();
+  end;
 end;
 
 procedure TSimbaTreeView.DoTreeAddOrDelete(Sender: TObject; Node: TTreeNode);
