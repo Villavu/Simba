@@ -10,8 +10,9 @@ unit simba.form_functionlist;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, Menus, ImgList, syncobjs,
+  Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls, Menus, ImgList,
   simba.base,
+  simba.containers,
   simba.ide_codetools_parser,
   simba.ide_codetools_insight,
   simba.ide_tab,
@@ -85,11 +86,13 @@ type
     Images: TImageList;
 
     procedure ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
+  protected type
+    TFunctionListPageList = specialize TSimbaList<TSimbaFunctionListPage>;
   protected
-    FUpdateLock: TCriticalSection;
     FUpdateThread: TThread;
     FIsIdle: Boolean;
     FNotebook: TSimbaNotebook;
+    FPendingRemoves: TFunctionListPageList;
 
     function PageForTab(Tab: TSimbaScriptTab): TSimbaPage;
 
@@ -120,10 +123,10 @@ uses
   simba.ide_utils,
   simba.ide_showdeclaration,
   simba.vartype_string,
-  simba.threading,
   simba.form_tabs,
   simba.nativeinterface,
-  simba.fs;
+  simba.fs,
+  simba.threading;
 
 const
   IMG_FOLDER = 0;
@@ -605,9 +608,9 @@ begin
   FIncludesNode := FTreeView.AddNode('Includes', IMG_FOLDER);
   FPluginsNode  := FTreeView.AddNode('Plugins', IMG_FOLDER);
 
-  FScriptNodeState := TTreeNodeExpandedState.Create(TTreeNode(nil));
+  FScriptNodeState   := TTreeNodeExpandedState.Create(TTreeNode(nil));
   FIncludesNodeState := TTreeNodeExpandedState.Create(TTreeNode(nil));
-  FPluginsNodeState := TTreeNodeExpandedState.Create(TTreeNode(nil));
+  FPluginsNodeState  := TTreeNodeExpandedState.Create(TTreeNode(nil));
 
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_MODIFIED, @DoEditorModified);
   SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE, @DoEditorModified); // force a update on change
@@ -678,7 +681,7 @@ var
   end;
 
 begin
-  if not FNeedUpdate then
+  if (not FNeedUpdate) then
     Exit;
 
   RunInMainThread(@BeginUpdate);
@@ -716,12 +719,13 @@ begin
   try
     while not TThread.CurrentThread.CheckTerminated do
     begin
-      if FIsIdle and FUpdateLock.TryEnter() then
-      try
+      if FIsIdle then
+      begin
         if (FNotebook.ActivePage <> nil) then
           TSimbaFunctionListPage(FNotebook.ActivePage).Fill();
-      finally
-        FUpdateLock.Leave();
+
+        while (FPendingRemoves.Count > 0) do
+          RunInMainThread(@FPendingRemoves.Pop.Free);
       end;
 
       Sleep(350);
@@ -748,7 +752,7 @@ var
 begin
   Page := PageForTab(TSimbaScriptTab(Sender));
   if (Page <> nil) then
-    Page.Free();
+    FPendingRemoves.Add(TSimbaFunctionListPage(Page));
 
   {$IFDEF DEBUG}
   WriteLn('DoTabClosed: PageCount=',FNotebook.PageCount);
@@ -782,11 +786,11 @@ constructor TSimbaFunctionListForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.CODETOOLS_SETUP,  @DoCodetoolsSetup);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE,       @DoTabChange);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CLOSED,       @DoTabClosed);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_ADD,          @DoTabAdd);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.SPLITTER_DOUBLE_CLICK,  @DoDoubleClickSplitter);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.CODETOOLS_SETUP,       @DoCodetoolsSetup);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE,            @DoTabChange);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CLOSED,            @DoTabClosed);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_ADD,               @DoTabAdd);
+  SimbaIDEEvents.Register(Self, SimbaIDEEvent.SPLITTER_DOUBLE_CLICK, @DoDoubleClickSplitter);
 
   with TIdleTimer.Create(Self) do
   begin
@@ -802,18 +806,16 @@ begin
   FNotebook.Parent := Self;
   FNotebook.Align := alClient;
 
-  FUpdateLock := TCriticalSection.Create();
+  FPendingRemoves := TFunctionListPageList.Create();
 end;
 
 destructor TSimbaFunctionListForm.Destroy;
 begin
-  FUpdateLock.Enter();
   FUpdateThread.Terminate();
   FUpdateThread.WaitFor();
-  FUpdateLock.Leave();
 
-  FreeAndNil(FUpdateLock);
   FreeAndNil(FUpdateThread);
+  FreeAndNil(FPendingRemoves);
 
   inherited Destroy();
 end;

@@ -21,15 +21,15 @@ uses
 
 type
   generic TSimbaList<_T> = class(TObject)
-  private
-    function GetFirst: _T;
-    function GetLast: _T;
   public type
     TArr = array of _T;
   protected
     FArr: TArr;
     FCount: Integer;
 
+    function GetPop: _T; virtual;
+    function GetFirst: _T; virtual;
+    function GetLast: _T; virtual;
     function GetItem(Index: Integer): _T; virtual;
     procedure SetItem(Index: Integer; AValue: _T); virtual;
   public
@@ -41,6 +41,7 @@ type
     property Count: Integer read FCount;
     property Items[Index: Integer]: _T read GetItem write SetItem; default;
 
+    property Pop: _T read GetPop;
     property First: _T read GetFirst;
     property Last: _T read GetLast;
   end;
@@ -221,6 +222,14 @@ begin
   if (FCount = 0) then
     SimbaException('%s.GetItem: Index %d out of bounds', [ClassName, 0]);
   Result := FArr[FCount - 1];
+end;
+
+function TSimbaList.GetPop: _T;
+begin
+  if (FCount = 0) then
+    SimbaException('%s.Pop: Index %d out of bounds', [ClassName, FCount - 1]);
+  Result := FArr[FCount - 1];
+  Dec(FCount);
 end;
 
 function TSimbaList.GetItem(Index: Integer): _T;
