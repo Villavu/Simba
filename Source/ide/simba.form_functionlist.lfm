@@ -1,16 +1,16 @@
 object SimbaFunctionListForm: TSimbaFunctionListForm
   Left = -838
-  Height = 810
+  Height = 926
   Top = 278
-  Width = 749
+  Width = 856
   Caption = 'Function List'
-  DesignTimePPI = 168
+  DesignTimePPI = 192
   ShowInTaskBar = stAlways
   LCLVersion = '4.0.0.4'
   object Images: TImageList
     OnGetWidthForPPI = ImagesGetWidthForPPI
-    Left = 301
-    Top = 425
+    Left = 344
+    Top = 486
     Bitmap = {
       4C7A090000001000000010000000FE0900000000000078DAED98075454571A80
       D9933DD9B886C4355911980288D83642C482C678442C31C9311AC41A8393444D

@@ -352,6 +352,9 @@ var
   Hidden: String;
   I: Integer;
 begin
+  if (FSimbaNode = nil) then
+    Exit;
+
   Hidden := Setting.Value;
   for I := 0 to FSimbaNode.Count - 1 do
     FSimbaNode[I].Visible := Pos('[' + FSimbaNode[I].Text + ']', Hidden) <= 0;
@@ -362,6 +365,9 @@ var
   Order: TStringArray;
   I: Integer;
 begin
+  if (FSimbaNode = nil) then
+    Exit;
+
   Order := String(Setting.Value).Split(',');
   for I := 0 to High(Order) do
     if (FSimbaNode.FindNode(Order[I]) <> nil) and (I < FSimbaNode.Count) then
@@ -475,7 +481,8 @@ begin
   FScriptNode.Expanded := True;
   FIncludesNode.Expanded := True;
   FPluginsNode.Expanded := True;
-  FSimbaNode.Expanded := True;
+  if (FSimbaNode <> nil) then
+    FSimbaNode.Expanded := True;
 end;
 
 procedure TSimbaFunctionListPage.DoShowAllClick(Sender: TObject);
@@ -488,6 +495,9 @@ var
   Hidden: String;
   I: Integer;
 begin
+  if (FSimbaNode = nil) then
+    Exit;
+
   Hidden := '';
   for I := 0 to FSimbaNode.Count - 1 do
     Hidden := Hidden + '[' + FSimbaNode.Items[I].Text + ']';
@@ -513,6 +523,9 @@ var
   Node: TSimbaFunctionListNode;
   I: Integer;
 begin
+  if (FSimbaNode = nil) then
+    Exit;
+
   Node := TSimbaFunctionListNode(FTreeView.Selected);
   if (Node is TSimbaFunctionListNode) and (TSimbaFunctionListNode(Node).NodeType = ntSimbaFile) then
   begin
@@ -544,7 +557,8 @@ begin
     FScriptNode.Expanded := True;
     FIncludesNode.Expanded := True;
     FPluginsNode.Expanded := True;
-    FSimbaNode.Expanded := True;
+    if (FSimbaNode <> nil) then
+      FSimbaNode.Expanded := True;
 
     FTreeView.EndUpdate();
   end;
