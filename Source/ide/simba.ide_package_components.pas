@@ -65,6 +65,7 @@ type
       Age: String;
     end;
     TVersionInfo = class
+      Expanded: Boolean;
       Notes: String;
       Wrapped: TStringArray;
     end;
@@ -74,6 +75,9 @@ type
     FFixedCharWidth: Integer;
     FFixedCharHeight: Integer;
 
+    // forward scroll events
+    function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X,Y: Integer); override;
     procedure FontChanged(Sender: TObject); override;
 
     procedure DoOnResize; override;
@@ -572,6 +576,38 @@ begin
   Cells[1, 3] := LatestVer;
 end;
 
+function TPackageVersionGrid.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
+begin
+  Result := inherited DoMouseWheel(Shift, WheelDelta, MousePos);
+  if (Parent is TScrollBox) then
+    TScrollBox(Parent).VertScrollBar.Position := TScrollBox(Parent).VertScrollBar.Position - WheelDelta;
+end;
+
+procedure TPackageVersionGrid.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  ColIndex, RowIndex: Integer;
+  Data: TObject;
+begin
+  inherited MouseUp(Button, Shift, X, Y);
+
+  MouseToCell(X, Y, ColIndex, RowIndex);
+  Data := Objects[ColIndex, RowIndex];
+  if (Data is TVersionInfo) then
+  begin
+    BeginUpdate();
+    try
+      if TVersionInfo(Data).Expanded then
+        RowHeights[RowIndex] := FFixedCharHeight + varCellpadding
+      else
+        RowHeights[RowIndex] := (Length(TVersionInfo(Data).Wrapped) * FFixedCharHeight) + varCellPadding;
+      TVersionInfo(Data).Expanded := not TVersionInfo(Data).Expanded;
+      Height := GridHeight;
+    finally
+      EndUpdate();
+    end;
+  end;
+end;
+
 procedure TPackageVersionGrid.FontChanged(Sender: TObject);
 begin
   inherited FontChanged(Sender);
@@ -627,11 +663,19 @@ begin
     Inc(ARect.Top, varCellPadding div 2);
     Inc(ARect.Left, varCellPadding);
 
-    for Line in Info.Wrapped do
+    if Info.Expanded then
     begin
-      Canvas.TextOut(ARect.Left, ARect.Top, Line.TrimRight());
+      for Line in Info.Wrapped do
+      begin
+        Canvas.TextOut(ARect.Left, ARect.Top, Line.TrimRight());
 
-      Inc(ARect.Top, FFixedCharHeight);
+        Inc(ARect.Top, FFixedCharHeight);
+      end;
+    end
+    else begin
+      Canvas.Font.Underline := True;
+      Canvas.TextOut(ARect.Left, ARect.Top, 'View notes');
+      Canvas.Font.Underline := False;
     end;
 
     Exit;
@@ -680,7 +724,7 @@ begin
   GridLineWidth := 0;
   AutoFillColumns := True;
   ScrollBars := ssNone;
-  Enabled := False;
+  Enabled := True;
 
   FixedCols := 0;
   FixedRows := 1;
@@ -790,18 +834,23 @@ begin
     begin
       Data := Objects[0, I];
 
-      if Data is TVersionInfo then
+      if (Data is TVersionInfo) then
       begin
         Info.Wrapped := UTF8WrapText(Info.Notes, MaxCol).Split(LineEnding);
 
-        RowHeights[I] := (Length(Info.Wrapped) * FFixedCharHeight) + varCellPadding;
+        // Have the first one always expanded
+        if (I = FixedRows+1) then
+        begin
+          RowHeights[I] := (Length(TVersionInfo(Data).Wrapped) * FFixedCharHeight) + varCellpadding;
+          TVersionInfo(Data).Expanded := True;
+        end else
+          RowHeights[I] := FFixedCharHeight + varCellpadding;
       end;
     end;
+    Height := GridHeight;
   finally
     EndUpdate();
   end;
-
-  Height := GridHeight;
 end;
 
 procedure TPackageVersionGrid.DoFontCalculate;
