@@ -407,7 +407,7 @@ var
 begin
   Result := [];
   if IsArray(Decl) then
-    Result.Add(GetArrayHelpers(Decl as TDeclaration_TypeArray, IsMultiDim(Decl)));
+    Result.Add(GetArrayHelpers(Self, Decl));
   if IsGeneric(Decl) then
     Result.Add(GetGeneric(Decl));
 
