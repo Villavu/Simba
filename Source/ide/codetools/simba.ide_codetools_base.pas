@@ -10,15 +10,15 @@ unit simba.ide_codetools_base;
 interface
 
 uses
-  Classes, SysUtils,
-  simba.base;
+  Classes, SysUtils;
 
 type
   // "Perfect Hashing"
   // A hashtable with no collisions.
   generic TKeywordDictionary<_T> = class(TObject)
-  type
-    TBucketArray = array of record Key: String; Value: _T; end;
+  public type
+    TBucket = record Key: String; Value: _T; end;
+    TBucketArray = array of TBucket;
   protected
     FBuckets: TBucketArray;
     FSeed: UInt32;

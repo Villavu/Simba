@@ -10,10 +10,6 @@ unit simba.fftpack4_core;
 [==============================================================================}
 {$i simba.inc}
 
-{$IFOPT D-}
-  {$OPTIMIZATION LEVEL4}
-{$ENDIF}
-
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
