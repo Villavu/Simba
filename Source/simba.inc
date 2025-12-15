@@ -9,6 +9,11 @@
   {$DEFINE SIMBA_HAS_DEBUGINFO}
 {$ENDIF}
 
+// https://gitlab.com/freepascal.org/fpc/source/-/issues/41550
+{$IF DEFINED(DARWIN) AND DEFINED(CPUAARCH64)}
+  {$Optimization noDFA}
+{$ENDIF}
+
 // Set in project options > custom options "-CfSSE"
 //{$IF Defined(CPU386)}
 //  {$FPUTYPE SSE3}
