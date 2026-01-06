@@ -77,6 +77,9 @@ type
 
 const
   ALPHA_NUM_SYMBOLS = ['a'..'z', 'A'..'Z', '0'..'9', '%', '&', '#', '$', '[', ']', '{', '}', '@', '!', '?'];
+var
+  AlphaNumSymbolTableInitialized: Boolean = False;
+  AlphaNumSymbolTable: array [Char] of Boolean;
 
 implementation
 
@@ -112,13 +115,21 @@ begin
   Result := nil;
 end;
 
-function ContainsAlphaNumSym(const Text: string): Boolean; inline;
+function IsAlphaNumSym(const text: string): Boolean; inline;
 var
-  I: Integer;
+  i, count, needed: Integer;
 begin
-  for I := 1 to Length(Text) do
-    if Text[I] in ALPHA_NUM_SYMBOLS then
-      Exit(True);
+  count := 0;
+  needed := (Length(text) * 50 + 99) div 100;
+
+  for i := 1 to Length(text) do
+    if AlphaNumSymbolTable[text[i]] then
+    begin
+      Inc(count);
+      //if 50% of the text is ALPHA_NUM_SYMBOLS we are good.
+      if count >= needed then
+        Exit(True);
+    end;
 
   Result := False;
 end;
@@ -251,6 +262,7 @@ begin
   Result.Bounds.Y1 := $FFFFFF;
   Space := 0;
 
+  BestGlyph := @Font^.Glyphs[0];
   Lo := @Font^.Glyphs[0];
   Hi := @Font^.Glyphs[High(Font^.Glyphs)];
 
@@ -578,31 +590,18 @@ begin
 end;
 
 function TPixelOCR.RecognizeLines(Image: TSimbaImage; constref Font: TPixelFont; Bounds: TBox): TStringArray;
-
+  var Temp: TPixelOCR;
   function MaybeRecognize(const X, Y: Integer; const isBinary: Boolean; out Match: TPixelOCRMatch): Boolean;
-  var
-    Temp: TPixelOCR;
   begin
     Result := False;
-
-    // use a copy here since we change these properties
-    Temp := Self;
-    Temp.Whitelist := ALPHA_NUM_SYMBOLS;
-    Temp.MaxLen := 1;
-    Temp.MaxWalk := 0;
-
     // Find something on a row that isn't a small character
     Match := Temp._RecognizeX(Image, @Font, X, Y, isBinary);
     if (Match.Hits > 0) then
     begin
       // OCR the row and some extra rows
-      Temp.Whitelist := Self.Whitelist;
-      Temp.MaxWalk := 0;
-      Temp.MaxLen := 0;
-
       Match := Temp._RecognizeXY(Image, @Font, X, Y, Font.MaxGlyphHeight div 2, isBinary);
       // Ensure that actual Text was extracted, not just a symbol mess of short or small character symbols.
-      if ContainsAlphaNumSym(Match.Text) then
+      if IsAlphaNumSym(Match.Text) then
         Result := True;
     end;
   end;
@@ -610,9 +609,26 @@ function TPixelOCR.RecognizeLines(Image: TSimbaImage; constref Font: TPixelFont;
 var
   isBinary: Boolean;
   Match: TPixelOCRMatch;
+  c: Char;
 begin
   if (Length(Font.Glyphs) = 0) then
     SimbaException('Font is empty');
+
+  if not AlphaNumSymbolTableInitialized then
+  begin
+    FillChar(AlphaNumSymbolTable, SizeOf(AlphaNumSymbolTable), False);
+    for c in ALPHA_NUM_SYMBOLS do
+      AlphaNumSymbolTable[c] := True;
+    AlphaNumSymbolTableInitialized := True;
+  end;
+
+  Temp := Self;
+  Temp.Whitelist := ALPHA_NUM_SYMBOLS;
+  Temp.MaxLen := 1;
+  Temp.MaxWalk := 0;
+  Temp.Whitelist := Self.Whitelist;
+  Temp.MaxWalk := 0;
+  Temp.MaxLen := 0;
 
   Result := [];
   Matches := [];
@@ -634,6 +650,7 @@ begin
       // Now we can confidently skip this search line by a jump, but we dont skip fully in case of close/overlapping Text
       // So we divide the texts max glyph Height by 2 and subtract that from the lower end of the found bounds.
       Bounds.Y1 := Max(Bounds.Y1, Match.Bounds.Y2 - (Font.MaxGlyphHeight div 2));
+      Continue;
     end;
 
     Bounds.Y1 += 1;
