@@ -268,8 +268,17 @@ begin
   PDateEdit(Result)^ := TDateEdit.Create(PComponent(Params^[0])^);
 end;
 
-
 //TIME
+procedure _LapeTimeEdit_TimeFormat_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PTimeEdit(Params^[0])^.TimeFormat;
+end;
+
+procedure _LapeTimeEdit_TimeFormat_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PTimeEdit(Params^[0])^.TimeFormat := PString(Params^[1])^;
+end;
+
 procedure _LapeTimeEdit_Time_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PDateTime(Result)^ := PTimeEdit(Params^[0])^.Time;
@@ -840,6 +849,7 @@ begin
 
     addClass('TLazTimeEdit', 'TLazCustomControl', TTimeEdit);
     addProperty('TLazTimeEdit', 'Time', 'TDateTime', @_LapeTimeEdit_Time_Read, @_LapeTimeEdit_Time_Write);
+    addProperty('TLazTimeEdit', 'TimeFormat', 'String', @_LapeTimeEdit_TimeFormat_Read, @_LapeTimeEdit_TimeFormat_Write);
     addProperty('TLazTimeEdit', 'DefaultNow', 'Boolean', @_LapeTimeEdit_DefaultNow_Read, @_LapeTimeEdit_DefaultNow_Write);
     addProperty('TLazTimeEdit', 'ReadOnly', 'Boolean', @_LapeTimeEdit_ReadOnly_Read, @_LapeTimeEdit_ReadOnly_Write);
     addProperty('TLazTimeEdit', 'DirectInput', 'Boolean', @_LapeTimeEdit_DirectInput_Read, @_LapeTimeEdit_DirectInput_Write);
