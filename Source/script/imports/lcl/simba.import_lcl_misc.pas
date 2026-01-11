@@ -274,7 +274,7 @@ begin
   PString(Result)^ := PTimeEdit(Params^[0])^.TimeFormat;
 end;
 
-procedure _LapeTimeEdit_TimeFormat_Write(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTimeEdit_TimeFormat_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PTimeEdit(Params^[0])^.TimeFormat := PString(Params^[1])^;
 end;

@@ -78,6 +78,18 @@ type
 const
   ALPHA_NUM_SYMBOLS = ['a'..'z', 'A'..'Z', '0'..'9', '%', '&', '#', '$', '[', ']', '{', '}', '@', '!', '?'];
 
+  // lookup table for above
+  ALPHA_NUM_MAP: array[Char] of UInt8 = (
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  );
+
 implementation
 
 uses
@@ -112,15 +124,29 @@ begin
   Result := nil;
 end;
 
-function ContainsAlphaNumSym(const Text: string): Boolean; inline;
+// text contains >= 50% alphanum
+function IsAlphaNumSym(const Text: String): Boolean; inline;
 var
-  I: Integer;
+  Len, Count, Threshold: Integer;
+  Ptr: PChar;
+  Upper: PtrUInt;
 begin
-  for I := 1 to Length(Text) do
-    if Text[I] in ALPHA_NUM_SYMBOLS then
-      Exit(True);
+  Len := Length(Text);
+  if (Len > 1) then
+  begin
+    Count := 0;
+    Threshold := Len div 2;
 
-  Result := False;
+    Ptr := @Text[1];
+    Upper := PtrUInt(@Text[Len]);
+    while (PtrUInt(Ptr) <= Upper) and (Count < Threshold) do
+    begin
+      Inc(Count, ALPHA_NUM_MAP[Ptr^]);
+      Inc(Ptr);
+    end;
+    Result := Count >= Threshold;
+  end else
+    Result := False;
 end;
 
 function TPixelOCR._RecognizeX(const Image: TSimbaImage; const Font: PPixelFont; X, Y: Integer; const isBinary: Boolean): TPixelOCRMatch;
@@ -578,33 +604,15 @@ begin
 end;
 
 function TPixelOCR.RecognizeLines(Image: TSimbaImage; constref Font: TPixelFont; Bounds: TBox): TStringArray;
+var
+  Temp: TPixelOCR;
 
   function MaybeRecognize(const X, Y: Integer; const isBinary: Boolean; out Match: TPixelOCRMatch): Boolean;
-  var
-    Temp: TPixelOCR;
   begin
-    Result := False;
-
-    // use a copy here since we change these properties
-    Temp := Self;
-    Temp.Whitelist := ALPHA_NUM_SYMBOLS;
-    Temp.MaxLen := 1;
-    Temp.MaxWalk := 0;
-
-    // Find something on a row that isn't a small character
-    Match := Temp._RecognizeX(Image, @Font, X, Y, isBinary);
-    if (Match.Hits > 0) then
-    begin
-      // OCR the row and some extra rows
-      Temp.Whitelist := Self.Whitelist;
-      Temp.MaxWalk := 0;
-      Temp.MaxLen := 0;
-
-      Match := Temp._RecognizeXY(Image, @Font, X, Y, Font.MaxGlyphHeight div 2, isBinary);
-      // Ensure that actual Text was extracted, not just a symbol mess of short or small character symbols.
-      if ContainsAlphaNumSym(Match.Text) then
-        Result := True;
-    end;
+    // OCR the row and some extra rows that being `Font.MaxGlyphHeight div 2`
+    Match := Temp._RecognizeXY(Image, @Font, X, Y, Font.MaxGlyphHeight div 2, isBinary);
+    // Ensure that actual text was extracted, not just a symbol mess of short or small character symbols.
+    Result := IsAlphaNumSym(Match.Text);
   end;
 
 var
@@ -613,6 +621,11 @@ var
 begin
   if (Length(Font.Glyphs) = 0) then
     SimbaException('Font is empty');
+
+  Temp := Self;
+  Temp.Whitelist := Self.Whitelist;
+  Temp.MaxWalk := 0;
+  Temp.MaxLen := 0;
 
   Result := [];
   Matches := [];
@@ -633,10 +646,9 @@ begin
 
       // Now we can confidently skip this search line by a jump, but we dont skip fully in case of close/overlapping Text
       // So we divide the texts max glyph Height by 2 and subtract that from the lower end of the found bounds.
-      Bounds.Y1 := Max(Bounds.Y1, Match.Bounds.Y2 - (Font.MaxGlyphHeight div 2));
-    end;
-
-    Bounds.Y1 += 1;
+      Bounds.Y1 := Max(Bounds.Y1+1, Match.Bounds.Y2 - (Font.MaxGlyphHeight div 2));
+    end else
+      Bounds.Y1 += 1;
   end;
 end;
 
