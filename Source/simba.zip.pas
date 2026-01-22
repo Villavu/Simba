@@ -48,13 +48,14 @@ type
     destructor Destroy; override;
   end;
 
-function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean;
+function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean; overload;
+function ZipFiles(ZipFileName: String; Files: TStringArray; ArchiveFileNames: TStringArray): Boolean; overload;
+function ZipDirectory(ZipFileName: String; Dir: String): Boolean;
 function ZipReadEntries(FileName: String): TStringArray;
 function ZipAppend(FileName: String; Entry, FileContents: String): Boolean;
 
 function ZipExtractEntries(FileName, OutputDir: String; Entries: TStringArray): Integer;
-function ZipExtractEntry(FileName, Entry, OutputDir: String): Boolean; overload;
-function ZipExtractEntry(FileName: String; Entry: String): TMemoryStream; overload;
+function ZipExtractEntryToStream(FileName: String; Entry: String): TMemoryStream;
 function ZipExtract(ZipFileName, OutputDir: String): Boolean;
 
 function ZipHasEntryCrc(ZipFileName: String; Crc32: UInt32): Boolean;
@@ -63,7 +64,7 @@ implementation
 
 uses
   fileutil, lazfileutils,
-  simba.vartype_string;
+  simba.vartype_string, simba.fs;
 
 // Zip Extractor
 procedure TSimbaZipExtractor.DoProgress(Sender: TObject; const ATotPos, ATotSize: Int64);
@@ -178,6 +179,60 @@ begin
       for I := 0 to High(Files) do
         Zipper.Entries.AddFileEntry(Files[I], ExtractFileName(Files[I]));
 
+      Zipper.ZipAllFiles();
+
+      Result := True;
+    except
+    end;
+
+    Zipper.Free();
+  end;
+end;
+
+function ZipFiles(ZipFileName: String; Files: TStringArray; ArchiveFileNames: TStringArray): Boolean;
+var
+  Zipper: TZipper;
+  I: Integer;
+begin
+  Result := False;
+
+  if (Length(Files) > 0) then
+  begin
+    Zipper := TZipper.Create();
+
+    try
+      Zipper.FileName := ZipFileName;
+      for I := 0 to High(Files) do
+        Zipper.Entries.AddFileEntry(Files[I], ArchiveFileNames[I]);
+
+      Zipper.ZipAllFiles();
+
+      Result := True;
+    except
+    end;
+
+    Zipper.Free();
+  end;
+end;
+
+function ZipDirectory(ZipFileName: String; Dir: String): Boolean;
+var
+  Zipper: TZipper;
+  FileName: String;
+  Offset: Integer;
+begin
+  Result := False;
+
+  Dir := TSimbaPath.PathIncludeTrailingSep(Dir);
+  if DirectoryExists(Dir) then
+  begin
+    Offset := Length(Dir) + 2; // trim dir from filenames
+
+    Zipper := TZipper.Create();
+    try
+      Zipper.FileName := ZipFileName;
+      for FileName in TSimbaDir.DirListFiles(Dir, True) do
+        Zipper.Entries.AddFileEntry(FileName, Copy(FileName, Offset));
       Zipper.ZipAllFiles();
 
       Result := True;
@@ -371,11 +426,6 @@ begin
   end;
 end;
 
-function ZipExtractEntry(FileName, Entry, OutputDir: String): Boolean;
-begin
-  Result := ZipExtractEntries(FileName, OutputDir, [Entry]) = 1;
-end;
-
 // ZipExtractEntry
 type
   TSimpleZipExtractStream = class(TUnZipper)
@@ -409,7 +459,7 @@ begin
   OnDoneStream := @DoDoneStream;
 end;
 
-function ZipExtractEntry(FileName: String; Entry: String): TMemoryStream;
+function ZipExtractEntryToStream(FileName: String; Entry: String): TMemoryStream;
 var
   UnZipper: TSimpleZipExtractStream;
 begin

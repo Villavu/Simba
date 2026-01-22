@@ -682,55 +682,86 @@ end;
 ZipExtract
 ----------
 ```
-function ZipExtract(ZipFileName, OutputDir: String): Boolean;
+function ZipExtract(ZipFile, DestDir: String): Boolean;
+```
+Extract an entire zip to the destination directory.
+
+Example:
+```
+ZipExtract('myzip.zip', './path/to/unzipped');
 ```
 *)
-procedure _LapeZipExtract(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeZipExtract1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := ZipExtract(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
 (*
-ZipExtractEntries
------------------
+ZipExtract
+----------
 ```
-function ZipExtractEntries(FileName, OutputDir: String; Entries: TStringArray): Integer;
+function ZipExtract(ZipFile, DestDir: String; Entries: TStringArray): Integer;
+```
+Extract entries (select files) from a zipfile.
+
+Example:
+```
+ZipExtract('myzip.zip', './path/to/unzipped', ['somethinginzip', 'somethingelse/in/zip']);
 ```
 *)
-procedure _LapeZipExtractEntries(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeZipExtract2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := ZipExtractEntries(PString(Params^[0])^, PString(Params^[1])^, PStringArray(Params^[2])^);
-end;
-
-(*
-ZipExtractEntry
----------------
-```
-function ZipExtractEntry(ZipFileName, FileName, OutputDir: String): Boolean;
-```
-*)
-procedure _LapeZipExtractEntry(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := ZipExtractEntry(PString(Params^[0])^, PString(Params^[1])^, PString(Params^[2])^);
 end;
 
 (*
 ZipFiles
 --------
 ```
-function ZipFiles(ZipFileName: String; Files: TStringArray): Boolean;
+function ZipFiles(ZipFile: String; Files: TStringArray): Boolean;
 ```
+Creates a ZIP archive from the provided list of files.
+
+The archive structure is "flattened": only the filenames are stored,
+removing any hierarchy, they will all appear in the root of the resulting ZIP file.
 *)
-procedure _LapeZipFiles(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeZipFiles1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := ZipFiles(PString(Params^[0])^, PStringArray(Params^[1])^);
+end;
+
+(*
+ZipFiles
+--------
+```
+function ZipFiles(ZipFile: String; Files, Names: TStringArray): Boolean;
+```
+ZipFiles but allows you control the filenames within the resulting ZIP file.
+*)
+procedure _LapeZipFiles2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := ZipFiles(PString(Params^[0])^, PStringArray(Params^[1])^, PStringArray(Params^[2])^);
+end;
+
+(*
+ZipDirectory
+------------
+```
+function ZipDirectory(ZipFileName: String; Dir: String): Boolean;
+```
+Creates a ZIP archive from all the files in the provided directory.
+All files inside the archive are stored relative to the `Dir` parameter.
+*)
+procedure _LapeZipDirectory(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := ZipDirectory(PString(Params^[0])^, PString(Params^[1])^);
 end;
 
 (*
 ZipReadEntries
 --------------
 ```
-function ZipReadEntries(FileName: String): TStringArray;
+function ZipReadEntries(ZipFile: String): TStringArray;
 ```
 *)
 procedure _LapeZipReadEntries(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -842,11 +873,12 @@ begin
     addGlobalFunc('function INIFileKeys(FileName: String; Section: String): TStringArray', @_LapeINIFileKeys);
     addGlobalFunc('function INIFileSections(FileName: String): TStringArray', @_LapeINIFileSections);
 
-    addGlobalFunc('function ZipExtract(FileName, OutputDir: String): Boolean', @_LapeZipExtract);
-    addGlobalFunc('function ZipExtractEntries(FileName, OutputDir: String; Entries: TStringArray): Integer', @_LapeZipExtractEntries);
-    addGlobalFunc('function ZipExtractEntry(FileName, Entry, OutputDir: String): Boolean', @_LapeZipExtractEntry);
-    addGlobalFunc('function ZipFiles(FileName: String; Files: TStringArray): Boolean', @_LapeZipFiles);
-    addGlobalFunc('function ZipReadEntries(FileName: String): TStringArray', @_LapeZipReadEntries);
+    addGlobalFunc('function ZipExtract(ZipFile, DestDir: String): Boolean; overload', @_LapeZipExtract1);
+    addGlobalFunc('function ZipExtract(ZipFile, DestDir: String; Entries: TStringArray): Boolean; overload', @_LapeZipExtract2);
+    addGlobalFunc('function ZipFiles(ZipFile: String; Files: TStringArray): Boolean; overload', @_LapeZipFiles1);
+    addGlobalFunc('function ZipFiles(ZipFile: String; Files, Names: TStringArray): Boolean; overload', @_LapeZipFiles2);
+    addGlobalFunc('function ZipDirectory(ZipFile, Dir: String): Boolean', @_LapeZipDirectory);
+    addGlobalFunc('function ZipReadEntries(ZipFile: String): TStringArray', @_LapeZipReadEntries);
 
     addGlobalFunc('function GetUserDir: String', @_LapeGetUserDir);
     addGlobalFunc('function GetTempDir: String', @_LapeGetTempDir);

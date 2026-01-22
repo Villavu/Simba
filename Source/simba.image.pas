@@ -373,7 +373,7 @@ procedure TSimbaImage.FromZip(ZipFile, ZipEntry: String);
 var
   Stream: TMemoryStream;
 begin
-  Stream := ZipExtractEntry(ZipFile, ZipEntry);
+  Stream := ZipExtractEntryToStream(ZipFile, ZipEntry);
   try
     FromStream(Stream, ZipEntry);
   finally
