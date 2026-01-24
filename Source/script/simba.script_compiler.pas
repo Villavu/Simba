@@ -95,7 +95,7 @@ type
 
 function TClassPointer.EvalRes(Op: EOperator; Right: TLapeType; Flags: ELapeEvalFlags): TLapeType;
 begin
-  if (Right is TClassPointer) and (TClassPointer(Right).ClassTyp <> nil) and TClassPointer(Right).ClassTyp.InheritsFrom(ClassTyp) then
+  if (Op = op_Assign) and (Right <> Self) and (Right is TClassPointer) and (TClassPointer(Right).ClassTyp <> nil) and TClassPointer(Right).ClassTyp.InheritsFrom(ClassTyp) then
     Result := Self
   else
     Result := inherited EvalRes(Op, Right, Flags);
