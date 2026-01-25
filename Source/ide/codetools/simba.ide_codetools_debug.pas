@@ -121,6 +121,7 @@ begin
     TreeView.AddNode(n, 'Max Stack Depth: ' + IntToStr(Parser.Stack.Max), IMG_INFO);
     TreeView.AddNode(n, 'Ref Count: ' + IntToStr(TCodetoolsInclude(Parser).RefCount), IMG_INFO);
     TreeView.AddNode(n, 'Last Used: ' + IntToStr(TCodetoolsInclude(Parser).LastUsed), IMG_INFO);
+    TreeView.AddNode(n, 'InDefines: ' + TCodetoolsInclude(Parser).InDefines.ToString);
 
     DebugClassTypes(Parser, TreeView, n);
   end;

@@ -64,10 +64,8 @@ type
     tokIdentifier,
     tokIf,
     tokIfDirect,
-    tokElseIfDirect,
     tokIfDefDirect,
     tokIfNDefDirect,
-    tokIfOptDirect,
     tokIDEDirective,
     tokIn,
     tokIncludeDirect,
@@ -147,19 +145,12 @@ type
   TPasLexer = class;
   TDirectiveEvent = procedure(Sender: TPasLexer) of object;
 
-  PDefineRec = ^TDefineRec;
-  TDefineRec = record
-    Defined: Boolean;
-    StartCount: Integer;
-    Next: PDefineRec;
-  end;
-  TDefineRecArray = array of TDefineRec;
-
-  PSaveDefinesRec = ^TSaveDefinesRec;
   TSaveDefinesRec = record
-    RecArray: TDefineRecArray;
-    Stack: Integer;
-    Defines: string;
+    Stack: TBooleanArray;
+    DefinesText: string;
+
+    function ToString: string;
+    function IsEqual(const Other: TSaveDefinesRec): Boolean;
   end;
 
   TPasLexer = class(TObject)
@@ -183,17 +174,12 @@ type
     fOnIncludeDirect: TDirectiveEvent;
     fOnLibraryDirect: TDirectiveEvent;
     fOnDefineDirect: TDirectiveEvent;
-    fOnIfOptDirect: TDirectiveEvent;
     fOnIfDirect: TDirectiveEvent;
-    fOnElseIfDirect: TDirectiveEvent;
 	  fOnUnDefDirect: TDirectiveEvent;
 
-    FDirectiveParamOrigin: PAnsiChar;
-
     FDefines: TStringList;
-    FDefineStack: Integer;
-    FTopDefineRec: PDefineRec;
-    FUseDefines: Boolean;
+    FDefineStack: TBooleanArray;
+    FDefineStackCount: Integer;
 
     FIdentBuffer: PChar;
     FIdentBufferUpper: PtrUInt;
@@ -243,6 +229,7 @@ type
     function GetDirectiveParamOriginal: string;
     function GetDirectiveParamAsFileName: string;
     function GetIsJunk: Boolean;
+    function InIgnore: Boolean;
 
     procedure EnterDefineBlock(ADefined: Boolean);
     procedure ExitDefineBlock;
@@ -268,7 +255,7 @@ type
     procedure ClearDefines;
     procedure CloneDefinesFrom(ALexer: TPasLexer);
     function SaveDefines: TSaveDefinesRec;
-    procedure LoadDefines(From: TSaveDefinesRec);
+    procedure LoadDefines(const From: TSaveDefinesRec);
     function IsDefined(const ADefine: string): Boolean;
 
     property FileName: String read fFileName;
@@ -295,16 +282,11 @@ type
     property OnEndIfDirect: TDirectiveEvent read fOnEndIfDirect write fOnEndIfDirect;
     property OnIfDefDirect: TDirectiveEvent read fOnIfDefDirect write fOnIfDefDirect;
     property OnIfNDefDirect: TDirectiveEvent read fOnIfNDefDirect write fOnIfNDefDirect;
-    property OnIfOptDirect: TDirectiveEvent read fOnIfOptDirect write fOnIfOptDirect;
     property OnIncludeDirect: TDirectiveEvent read fOnIncludeDirect write fOnIncludeDirect;
     property OnLibraryDirect: TDirectiveEvent read fOnLibraryDirect write fOnLibraryDirect;
     property OnIfDirect: TDirectiveEvent read fOnIfDirect write fOnIfDirect;
-    property OnElseIfDirect: TDirectiveEvent read fOnElseIfDirect write fOnElseIfDirect;
 	  property OnUnDefDirect: TDirectiveEvent read fOnUnDefDirect write fOnUnDefDirect;
 
-    property DirectiveParamOrigin: PAnsiChar read FDirectiveParamOrigin;
-
-    property UseDefines: Boolean read FUseDefines write FUseDefines;
     property Defines: TStringList read FDefines;
   end;
 
@@ -319,7 +301,7 @@ const
   JunkTokens = [
     tokAnsiComment, tokBorComment, tokSlashesComment,
     tokWhiteSpace,
-    tokIfDirect, tokElseIfDirect, tokIfDefDirect, tokIfNDefDirect, tokEndIfDirect, tokIfOptDirect, tokUndefDirect
+    tokIfDirect, tokIfDefDirect, tokIfNDefDirect, tokEndIfDirect, tokUndefDirect
   ];
 
   function TokenName(const Value: ELexerToken): String;
@@ -332,91 +314,100 @@ uses
 var
   KeywordDict: specialize TKeywordDictionary<ELexerToken>;
 
-procedure TPasLexer.ClearDefines;
-var
-  Frame: PDefineRec;
-begin
-  while FTopDefineRec <> nil do
+function TSaveDefinesRec.ToString: string;
+
+  function StackToString: String;
+  const
+    BoolToChar: array[Boolean] of Char = ('F', 'T');
+  var
+    I: Integer;
   begin
-    Frame := FTopDefineRec;
-    FTopDefineRec := Frame^.Next;
-    Dispose(Frame);
+    SetLength(Result, Length(Stack));
+    for I := 0 to High(Stack) do
+      Result[I+1] := BoolToChar[Stack[I]];
   end;
-  FDefines.Clear;
-  FDefineStack := 0;
-  FTopDefineRec := nil;
+
+begin
+  Result := DefinesText + '|' + StackToString();
+end;
+
+function TSaveDefinesRec.IsEqual(const Other: TSaveDefinesRec): Boolean;
+begin
+  Result := ToString() = Other.ToString();
+end;
+
+procedure TPasLexer.AddDefine(const ADefine: string);
+begin
+  FDefines.Add(ADefine);
+end;
+
+procedure TPasLexer.RemoveDefine(const ADefine: string);
+var
+  I: Integer;
+begin
+  I := FDefines.IndexOf(ADefine);
+  if (I > -1) then
+    FDefines.Delete(I);
+end;
+
+procedure TPasLexer.ClearDefines;
+begin
+  FDefineStackCount := 0;
+  if Assigned(FDefines) then
+    FDefines.Clear();
 end;
 
 procedure TPasLexer.CloneDefinesFrom(ALexer: TPasLexer);
-var
-  Frame, LastFrame, SourceFrame: PDefineRec;
 begin
   ClearDefines;
-  FDefines.Assign(ALexer.FDefines);
-  FDefineStack := ALexer.FDefineStack;
+  if Assigned(ALexer.FDefines) then
+    FDefines.Assign(ALexer.FDefines);
 
-  Frame := nil;
-  LastFrame := nil;
-  SourceFrame := ALexer.FTopDefineRec;
-  while SourceFrame <> nil do
+  FDefineStackCount := ALexer.FDefineStackCount;
+  if (FDefineStackCount > 0) then
   begin
-    New(Frame);
-    if FTopDefineRec = nil then
-      FTopDefineRec := Frame
-    else
-      LastFrame^.Next := Frame;
-    Frame^.Defined := SourceFrame^.Defined;
-    Frame^.StartCount := SourceFrame^.StartCount;
-    LastFrame := Frame;
-
-    SourceFrame := SourceFrame^.Next;
+    if Length(FDefineStack) < FDefineStackCount then
+      SetLength(FDefineStack, FDefineStackCount * 2);
+    Move(ALexer.FDefineStack[0], FDefineStack[0], FDefineStackCount * SizeOf(Boolean));
   end;
-  if Frame <> nil then
-    Frame^.Next := nil;
 end;
 
 function TPasLexer.SaveDefines: TSaveDefinesRec;
-var
-  Frame: PDefineRec;
 begin
-  Result.Defines := FDefines.CommaText;
-  Result.Stack := FDefineStack;
+  Result.DefinesText := FDefines.CommaText;
+  Result.Stack := Copy(FDefineStack, 0, FDefineStackCount);
+end;
 
-  Frame := FTopDefineRec;
-  while (Frame <> nil) do
+procedure TPasLexer.LoadDefines(const From: TSaveDefinesRec);
+begin
+  FDefines.CommaText := From.DefinesText;
+
+  FDefineStackCount := Length(From.Stack);
+  if (FDefineStackCount > 0) then
   begin
-    SetLength(Result.RecArray, Length(Result.RecArray) + 1);
-    Result.RecArray[High(Result.RecArray)] := Frame^;
-    Result.RecArray[High(Result.RecArray)].Next := nil;
-    Frame := Frame^.Next;
+    if (Length(FDefineStack) < FDefineStackCount) then
+      SetLength(FDefineStack, FDefineStackCount * 2);
+    Move(From.Stack[0], FDefineStack[0], FDefineStackCount * SizeOf(Boolean));
   end;
 end;
 
-procedure TPasLexer.LoadDefines(From: TSaveDefinesRec);
-var
-  Frame, LastFrame: PDefineRec;
-  i: Integer;
+procedure TPasLexer.EnterDefineBlock(ADefined: Boolean);
 begin
-  ClearDefines;
-  FDefines.CommaText := From.Defines;
-  FDefineStack := From.Stack;
+  // if parent is already false, child must be False.
+  if (FDefineStackCount > 0) and (not FDefineStack[FDefineStackCount - 1]) then
+    ADefined := False;
 
-  Frame := nil;
-  LastFrame := nil;
-  for i := 0 to High(From.RecArray) do
-  begin
-    New(Frame);
-    if (i = 0) then
-      FTopDefineRec := Frame
-    else
-      LastFrame^.Next := Frame;
+  Inc(FDefineStackCount);
+  if (FDefineStackCount > Length(FDefineStack)) then
+    SetLength(FDefineStack, FDefineStackCount * 2);
 
-    Frame^ := From.RecArray[i];
-    LastFrame := Frame;
-  end;
+  FDefineStack[FDefineStackCount - 1] := ADefined;
+end;
 
-  if (Frame <> nil) then
-    Frame^.Next := nil;
+procedure TPasLexer.ExitDefineBlock;
+begin
+  if (FDefineStackCount > 0) then
+    Dec(FDefineStackCount);
 end;
 
 function TPasLexer.getChar(const Pos: Integer): Char;
@@ -448,10 +439,12 @@ begin
   FIdentBuffer := GetMem(KeywordDict.MaxKeyLength + 1);
   FIdentBufferUpper := PtrUInt(@FIdentBuffer[KeywordDict.MaxKeyLength]);
 
-  FUseDefines := True;
   FDefines := TStringList.Create();
   FDefines.UseLocale := False;
   FDefines.Duplicates := dupIgnore;
+
+  // should realisticly never need to grow
+  SetLength(FDefineStack, 256);
 end;
 
 constructor TPasLexer.CreateFromFile(AFileName: String);
@@ -489,11 +482,6 @@ procedure TPasLexer.SetRunPos(Value: Integer);
 begin
   fRun := Value;
   Next;
-end;
-
-procedure TPasLexer.AddDefine(const ADefine: string);
-begin
-  FDefines.Add(ADefine);
 end;
 
 procedure TPasLexer.AddressOpProc;
@@ -559,8 +547,7 @@ begin
       begin
         if (Value = 'OFF') then
           EnterDefineBlock(IsDefined('!CODETOOLS')) // ifdef !CODETOOLS
-        else
-        if (Value = 'ON') then
+        else if (Value = 'ON') then
           ExitDefineBlock();                        // endif !CODETOOLS
       end;
   end;
@@ -568,7 +555,7 @@ end;
 
 procedure TPasLexer.BraceOpenProc;
 var
-  Param, Def: string;
+  Param: string;
 begin
   case getChar(fRun + 1) of
     '$', '%':
@@ -583,126 +570,84 @@ begin
   if (fCommentState = csNo) then
   begin
     case fTokenID of
-      tokIDEDirective:
+       tokIDEDirective:
         begin
           MaybeHandleIDEDirective(CompilerDirective, DirectiveParam);
-
           if Assigned(fOnIDEDirective) then
             fOnIDEDirective(Self);
         end;
 
       tokCompilerDirective:
         begin
-          if FUseDefines and (FDefineStack = 0) then
+          if not InIgnore then
             MaybeHandleCompilerDirective(CompilerDirective, DirectiveParam);
-
-          if Assigned(fOnCompilerDirective) and (FDefineStack = 0) then
+          if Assigned(fOnCompilerDirective) and not InIgnore then
             fOnCompilerDirective(Self);
         end;
 
       tokDefineDirect:
         begin
-          if FUseDefines and (FDefineStack = 0) then
+          if not InIgnore then
             AddDefine(DirectiveParam);
-          if Assigned(fOnDefineDirect) then
-            fOnDefineDirect(Self);
+          if Assigned(fOnDefineDirect) then fOnDefineDirect(Self);
         end;
+
+      tokUndefDirect:
+        begin
+          if not InIgnore then
+            RemoveDefine(DirectiveParam);
+          if Assigned(fOnUndefDirect) then fOnUndefDirect(Self);
+        end;
+
+      tokIfDefDirect:
+        begin
+          EnterDefineBlock(IsDefined(DirectiveParam));
+          if Assigned(fOnIfDefDirect) then fOnIfDefDirect(Self);
+        end;
+
+      tokIfNDefDirect:
+        begin
+          EnterDefineBlock(not IsDefined(DirectiveParam));
+          if Assigned(fOnIfNDefDirect) then fOnIfNDefDirect(Self);
+        end;
+
+      tokIfDirect:
+        begin
+          Param := DirectiveParam;
+          if Pos('DEFINED', Param) = 1 then
+            EnterDefineBlock(IsDefined(Copy(Param, 9, Length(Param) - 9)));
+          if Assigned(fOnIfDirect) then fOnIfDirect(Self);
+        end;
+
       tokElseDirect:
         begin
-          if FUseDefines then
+          if (FDefineStackCount > 0) then
           begin
-            if FTopDefineRec <> nil then
-            begin
-              if FTopDefineRec^.Defined then
-                Inc(FDefineStack)
-              else
-                if FDefineStack > 0 then
-                  Dec(FDefineStack);
-            end;
+            if (FDefineStackCount > 1) then
+              FDefineStack[FDefineStackCount - 1] := FDefineStack[FDefineStackCount - 2] and not FDefineStack[FDefineStackCount - 1]
+            else
+              FDefineStack[FDefineStackCount - 1] := not FDefineStack[FDefineStackCount - 1];
           end;
+
           if Assigned(fOnElseDirect) then
             fOnElseDirect(Self);
         end;
+
       tokEndIfDirect:
         begin
-          if FUseDefines then
-            ExitDefineBlock;
-          if Assigned(fOnEndIfDirect) then
-            fOnEndIfDirect(Self);
+          ExitDefineBlock;
+          if Assigned(fOnEndIfDirect) then fOnEndIfDirect(Self);
         end;
-      tokIfDefDirect:
+
+      tokIncludeDirect, tokIncludeOnceDirect, tokLibraryDirect:
         begin
-          if FUseDefines then
-            EnterDefineBlock(IsDefined(DirectiveParam));
-          if Assigned(fOnIfDefDirect) then
-            fOnIfDefDirect(Self);
-        end;
-      tokIfNDefDirect:
-        begin
-          if FUseDefines then
-            EnterDefineBlock(not IsDefined(DirectiveParam));
-    		  if Assigned(fOnIfNDefDirect) then
-            fOnIfNDefDirect(Self);
-        end;
-      tokIfOptDirect:
-        begin
-          if Assigned(fOnIfOptDirect) then
-            fOnIfOptDirect(Self);
-        end;
-      tokIfDirect:
-        begin
-          if FUseDefines then
+          if (not IsJunk) then
           begin
-            Param := DirectiveParam;
-            if Pos('DEFINED', Param) = 1 then
-            begin
-              Def := Copy(Param, 9, Length(Param) - 9);
-              EnterDefineBlock(IsDefined(Def));
-            end;
+            if (fTokenID = tokLibraryDirect) and Assigned(fOnLibraryDirect) then
+              fOnLibraryDirect(Self)
+            else if Assigned(fOnIncludeDirect) then
+              fOnIncludeDirect(Self);
           end;
-          if Assigned(fOnIfDirect) then
-            fOnIfDirect(Self);
-        end;
-      tokElseIfDirect:
-        begin
-          if FUseDefines then
-          begin
-            if FTopDefineRec <> nil then
-            begin
-              if FTopDefineRec^.Defined then
-                Inc(FDefineStack)
-              else
-              begin
-                if FDefineStack > 0 then
-                  Dec(FDefineStack);
-                Param := DirectiveParam;
-                if Pos('DEFINED', Param) = 1 then
-                begin
-                  Def := Copy(Param, 9, Length(Param) - 9);
-                  EnterDefineBlock(IsDefined(Def));
-                end;
-              end;
-            end;
-          end;
-          if Assigned(fOnElseIfDirect) then
-            fOnElseIfDirect(Self);
-        end;
-      tokIncludeDirect, tokIncludeOnceDirect:
-        begin
-          if Assigned(fOnIncludeDirect) and (FDefineStack = 0) and (not IsJunk) then
-            fOnIncludeDirect(Self);
-        end;
-      tokLibraryDirect:
-        begin
-          if Assigned(fOnLibraryDirect) and (FDefineStack = 0) and (not IsJunk) then
-            fOnLibraryDirect(Self);
-        end;
-      tokUndefDirect:
-        begin
-          if FUseDefines and (FDefineStack = 0) then
-            RemoveDefine(DirectiveParam);
-          if Assigned(fOnUndefDirect) then
-            fOnUndefDirect(Self);
         end;
     end;
   end;
@@ -729,36 +674,10 @@ begin
   fTokenID := tokComma;
 end;
 
-procedure TPasLexer.EnterDefineBlock(ADefined: Boolean);
-var
-  StackFrame: PDefineRec;
-begin
-  New(StackFrame);
-  StackFrame^.Next := FTopDefineRec;
-  StackFrame^.Defined := ADefined;
-  StackFrame^.StartCount := FDefineStack;
-  FTopDefineRec := StackFrame;
-  if not ADefined then
-    Inc(FDefineStack);
-end;
-
 procedure TPasLexer.EqualProc;
 begin
   Inc(fRun);
   fTokenID := tokEqual;
-end;
-
-procedure TPasLexer.ExitDefineBlock;
-var
-  StackFrame: PDefineRec;
-begin
-  StackFrame := FTopDefineRec;
-  if StackFrame <> nil then
-  begin
-    FDefineStack := StackFrame^.StartCount;
-    FTopDefineRec := StackFrame^.Next;
-    Dispose(StackFrame);
-  end;
 end;
 
 procedure TPasLexer.GreaterProc;
@@ -905,15 +824,6 @@ begin
       fTokenID := tokPoint;
     end;
   end;
-end;
-
-procedure TPasLexer.RemoveDefine(const ADefine: string);
-var
-  I: Integer;
-begin
-  I := FDefines.IndexOf(ADefine);
-  if (I > -1) then
-    FDefines.Delete(I);
 end;
 
 procedure TPasLexer.RoundCloseProc;
@@ -1212,7 +1122,12 @@ end;
 
 function TPasLexer.GetIsJunk: Boolean;
 begin
-  result := (fTokenID in JunkTokens) or (FUseDefines and (FDefineStack > 0) and (TokenID <> tokNull));
+  Result := (fTokenID in JunkTokens) or (InIgnore() and (fTokenID <> tokNull));
+end;
+
+function TPasLexer.InIgnore: Boolean;
+begin
+  Result := (FDefineStackCount > 0) and (not FDefineStack[FDefineStackCount - 1]);
 end;
 
 function TPasLexer.GetToken: string;
@@ -1318,8 +1233,6 @@ begin
       if (Directive = 'IFNDEF')       then Result := tokIfNDefDirect      else
       if (Directive = 'UNDEF')        then Result := tokUndefDirect       else
       if (Directive = 'LOADLIB')      then Result := tokLibraryDirect     else
-      if (Directive = 'ELSEIF')       then Result := tokElseIfDirect      else
-      if (Directive = 'IFOPT')        then Result := tokIfOptDirect       else
       if (Directive = 'INCLUDE')      then Result := tokIncludeDirect     else
       if (Directive = 'INCLUDE_ONCE') then Result := tokIncludeOnceDirect;
     end;

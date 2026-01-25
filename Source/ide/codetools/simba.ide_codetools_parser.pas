@@ -1552,8 +1552,7 @@ var
 begin
   if FHash.IsNull then
   begin
-    with Lexer.SaveDefines() do
-      Builder.Append(Defines + IntToStr(Stack));
+    Builder.Append(Lexer.SaveDefines().ToString());
     for I := 0 to fLexers.Count - 1 do
       Builder.Append(fLexers[i].FileName + IntToStr(fLexers[i].FileAge));
 

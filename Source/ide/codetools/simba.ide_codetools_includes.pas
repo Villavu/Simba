@@ -63,6 +63,7 @@ type
     property Plugins: TStringArray read GetPlugins;
     property RefCount: Integer read FRefCount;
     property LastUsed: Integer read FLastUsed;
+    property InDefines: TSaveDefinesRec read FInDefines;
 
     function IsOutdated: Boolean;
     function IncRef: TCodetoolsInclude;
@@ -122,7 +123,7 @@ end;
 function TCodetoolsInclude.GetHash: String;
 begin
   if FHash.IsNull then
-    FHash := inherited + FInDefines.Defines + IntToStr(FInDefines.Stack) + FPlugins.Text;
+    FHash := inherited + FInDefines.ToString + FPlugins.Text;
 
   Result := FHash;
 end;
@@ -306,7 +307,7 @@ begin
       if (FParsers[I].Lexer.FileName = FileName) then
         with TCodetoolsInclude(FParsers[I]) do
         begin
-          if (FInDefines.Stack <> Defines.Stack) or (FInDefines.Defines <> Defines.Defines) then
+          if not FInDefines.IsEqual(Defines) then
           begin
             {$IFDEF PARSER_CACHE_DEBUG}
             DebugLn('[Codetools]: Cache hit "%s" but not used (defines mismatch) %d, %d', [Lexer.FileName, FRefCount, FLastUsed + 1]);
