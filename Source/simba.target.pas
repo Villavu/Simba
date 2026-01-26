@@ -10,7 +10,7 @@ unit simba.target;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, syncobjs,
   simba.base, simba.baseclass, simba.image, simba.image_utils, simba.externalcanvas,
   simba.target_eios, simba.target_window, simba.target_image, simba.target_plugin,
   simba.colormath, simba.dtm,
@@ -141,6 +141,8 @@ type
     FEventManager: TSimbaTargetEventManager;
     FCustomClientArea: TBox;
     FLastSize: TSize;
+
+    FInputLock: TCriticalSection;
 
     function ValidateBounds(var ABounds: TBox): Boolean;
 
@@ -433,16 +435,14 @@ begin
   Self.KeyPressMax := 125;
 end;
 
-function TSimbaTarget.MousePressed(Button: EMouseButton): Boolean;
-begin
-  CheckMethod(FTargetMethods.MousePressed, 'MousePressed');
-
-  Result := FTargetMethods.MousePressed(FTarget, Button);
-end;
-
 procedure TSimbaTarget.MouseMove(Dest: TPoint);
 begin
-  MoveMouseOnTarget(Self, Dest);
+  FInputLock.Enter();
+  try
+    MoveMouseOnTarget(Self, Dest);
+  finally
+    FInputLock.Leave();
+  end;
 end;
 
 procedure TSimbaTarget.MouseMove(Box: TBox; ForcedMove: Boolean);
@@ -463,17 +463,27 @@ var
 begin
   Time := RandomLeft(FOptions.MousePressMin, FOptions.MousePressMax);
 
-  MouseDown(Button);
-  SimbaNativeInterface.PreciseSleep(Time);
-  MouseUp(Button);
+  FInputLock.Enter();
+  try
+    MouseDown(Button);
+    SimbaNativeInterface.PreciseSleep(Time);
+    MouseUp(Button);
+  finally
+    FInputLock.Leave();
+  end;
 end;
 
 procedure TSimbaTarget.MouseTeleport(P: TPoint);
 begin
   CheckMethod(FTargetMethods.MouseTeleport, 'MouseTeleport');
 
-  FEventManager.CallTeleportEvent(Self, P.X, P.Y);
-  FTargetMethods.MouseTeleport(FTarget, P);
+  FInputLock.Enter();
+  try
+    FEventManager.CallTeleportEvent(Self, P.X, P.Y);
+    FTargetMethods.MouseTeleport(FTarget, P);
+  finally
+    FInputLock.Leave();
+  end;
 end;
 
 procedure TSimbaTarget.MouseDown(Button: EMouseButton);
@@ -481,8 +491,13 @@ begin
   CheckMethod(FTargetMethods.MouseDown, 'MouseDown');
   CheckAutoFocus();
 
-  FEventManager.CallMouseButtonEvent(Self, Button, True);
-  FTargetMethods.MouseDown(FTarget, Button);
+  FInputLock.Enter();
+  try
+    FEventManager.CallMouseButtonEvent(Self, Button, True);
+    FTargetMethods.MouseDown(FTarget, Button);
+  finally
+    FInputLock.Leave();
+  end;
 end;
 
 procedure TSimbaTarget.MouseUp(Button: EMouseButton);
@@ -490,8 +505,13 @@ begin
   CheckMethod(FTargetMethods.MouseUp, 'MouseUp');
   CheckAutoFocus();
 
-  FEventManager.CallMouseButtonEvent(Self, Button, False);
-  FTargetMethods.MouseUp(FTarget, Button);
+  FInputLock.Enter();
+  try
+    FEventManager.CallMouseButtonEvent(Self, Button, False);
+    FTargetMethods.MouseUp(FTarget, Button);
+  finally
+    FInputLock.Leave();
+  end;
 end;
 
 procedure TSimbaTarget.MouseScroll(Scrolls: Integer);
@@ -499,7 +519,61 @@ begin
   CheckMethod(FTargetMethods.MouseScroll, 'MouseScroll');
   CheckAutoFocus();
 
-  FTargetMethods.MouseScroll(FTarget, Scrolls);
+  FInputLock.Enter();
+  try
+    FTargetMethods.MouseScroll(FTarget, Scrolls);
+  finally
+    FInputLock.Leave();
+  end;
+end;
+
+function TSimbaTarget.MousePressed(Button: EMouseButton): Boolean;
+begin
+  CheckMethod(FTargetMethods.MousePressed, 'MousePressed');
+
+  FInputLock.Enter();
+  try
+    Result := FTargetMethods.MousePressed(FTarget, Button);
+  finally
+    FInputLock.Leave();
+  end;
+end;
+
+function TSimbaTarget.GetMouseX: Integer;
+begin
+  Result := MouseXY.X;
+end;
+
+function TSimbaTarget.GetMouseXY: TPoint;
+begin
+  CheckMethod(FTargetMethods.MousePosition, 'MousePosition');
+
+  FInputLock.Enter();
+  try
+    Result := FTargetMethods.MousePosition(FTarget);
+  finally
+    FInputLock.Leave();
+  end;
+end;
+
+function TSimbaTarget.GetMouseY: Integer;
+begin
+  Result := MouseXY.Y;
+end;
+
+procedure TSimbaTarget.SetMouseX(Value: Integer);
+begin
+  MouseTeleport(TPoint.Create(Value, MouseY));
+end;
+
+procedure TSimbaTarget.SetMouseY(Value: Integer);
+begin
+  MouseTeleport(TPoint.Create(MouseX, Value));
+end;
+
+procedure TSimbaTarget.SetMouseXY(Value: TPoint);
+begin
+  MouseTeleport(Value);
 end;
 
 procedure TSimbaTarget.KeySend(Text: String);
@@ -509,14 +583,17 @@ var
 begin
   CheckMethod(FTargetMethods.KeySend, 'KeySend');
   CheckAutoFocus();
+  if (Length(Text) = 0) then
+    Exit;
+  SetLength(SleepTimes, Length(Text) * 4);
+  for I := 0 to High(SleepTimes) do
+    SleepTimes[I] := RandomLeft(FOptions.KeyPressMin, FOptions.KeyPressMax);
 
-  if (Length(Text) > 0) then
-  begin
-    SetLength(SleepTimes, Length(Text) * 4);
-    for I := 0 to High(SleepTimes) do
-      SleepTimes[I] := RandomLeft(FOptions.KeyPressMin, FOptions.KeyPressMax);
-
+  FInputLock.Enter();
+  try
     FTargetMethods.KeySend(FTarget, PChar(Text), Length(Text), @SleepTimes[0]);
+  finally
+    FInputLock.Leave();
   end;
 end;
 
@@ -526,9 +603,14 @@ var
 begin
   Time := RandomLeft(FOptions.KeyPressMin, FOptions.KeyPressMax);
 
-  KeyDown(Key);
-  SimbaNativeInterface.PreciseSleep(Time);
-  KeyUp(Key);
+  FInputLock.Enter();
+  try
+    KeyDown(Key);
+    SimbaNativeInterface.PreciseSleep(Time);
+    KeyUp(Key);
+  finally
+    FInputLock.Leave();
+  end;
 end;
 
 procedure TSimbaTarget.KeyDown(Key: EKeyCode);
@@ -536,7 +618,12 @@ begin
   CheckMethod(FTargetMethods.KeyDown, 'KeyDown');
   CheckAutoFocus();
 
-  FTargetMethods.KeyDown(FTarget, Key);
+  FInputLock.Enter();
+  try
+    FTargetMethods.KeyDown(FTarget, Key);
+  finally
+    FInputLock.Leave();
+  end;
 end;
 
 procedure TSimbaTarget.KeyUp(Key: EKeyCode);
@@ -544,14 +631,24 @@ begin
   CheckMethod(FTargetMethods.KeyUp, 'KeyUp');
   CheckAutoFocus();
 
-  FTargetMethods.KeyUp(FTarget, Key);
+  FInputLock.Enter();
+  try
+    FTargetMethods.KeyUp(FTarget, Key);
+  finally
+    FInputLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.KeyPressed(Key: EKeyCode): Boolean;
 begin
   CheckMethod(FTargetMethods.KeyPressed, 'KeyPressed');
 
-  Result := FTargetMethods.KeyPressed(FTarget, Key);
+  FInputLock.Enter();
+  try
+    Result := FTargetMethods.KeyPressed(FTarget, Key);
+  finally
+    FInputLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.KeyCodeFromChar(C: Char): EKeyCode;
@@ -748,6 +845,7 @@ begin
 
   FEventManager := TSimbaTargetEventManager.Create();
   FOptions := TSimbaTargetOptions.Create();
+  FInputLock := TCriticalSection.Create();
 
   SetDesktop();
 end;
@@ -759,6 +857,8 @@ begin
     FreeAndNil(FEventManager);
   if (FOptions <> nil) then
     FreeAndNil(FOptions);
+  if (FInputLock <> nil) then
+    FreeAndNil(FInputLock);
 
   inherited Destroy();
 end;
@@ -786,38 +886,6 @@ begin
   FLastSize := NewSize;
 
   FEventManager.CallResizeEvent(Self, NewSize.Width, NewSize.Height);
-end;
-
-function TSimbaTarget.GetMouseX: Integer;
-begin
-  Result := MouseXY.X;
-end;
-
-function TSimbaTarget.GetMouseXY: TPoint;
-begin
-  CheckMethod(FTargetMethods.MousePosition, 'MousePosition');
-
-  Result := FTargetMethods.MousePosition(FTarget);
-end;
-
-function TSimbaTarget.GetMouseY: Integer;
-begin
-  Result := MouseXY.Y;
-end;
-
-procedure TSimbaTarget.SetMouseX(Value: Integer);
-begin
-  MouseTeleport(TPoint.Create(Value, MouseY));
-end;
-
-procedure TSimbaTarget.SetMouseY(Value: Integer);
-begin
-  MouseTeleport(TPoint.Create(MouseX, Value));
-end;
-
-procedure TSimbaTarget.SetMouseXY(Value: TPoint);
-begin
-  MouseTeleport(Value);
 end;
 
 function TSimbaTarget.AddEvent(Event: ETargetEvent; Method: TSimbaTargetEvent; UserData: Pointer; UserDataSize: Integer): Integer;
