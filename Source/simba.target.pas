@@ -143,6 +143,7 @@ type
     FLastSize: TSize;
 
     FInputLock: TCriticalSection;
+    FFinderLock: TCriticalSection;
 
     function ValidateBounds(var ABounds: TBox): Boolean;
 
@@ -166,6 +167,9 @@ type
     procedure SetMouseY(Value: Integer);
     procedure SetMouseXY(Value: TPoint);
   public
+    constructor Create;
+    destructor Destroy; override;
+
     function AddEvent(Event: ETargetEvent; Method: TSimbaTargetEvent; UserData: Pointer; UserDataSize: Integer): Integer;
     procedure RemoveEvent(Event: ETargetEvent; Index: Integer);
 
@@ -264,9 +268,6 @@ type
     function GetPixelDifference(WaitTime: Integer; ABounds: TBox): TPointArray; overload;
 
     function GetBrightness(Algo: ESimbaTargetBrightnessAlgo; ABounds: TBox): Integer;
-
-    constructor Create;
-    destructor Destroy; override;
   end;
 
 implementation
@@ -686,121 +687,216 @@ end;
 
 function TSimbaTarget.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TSingleMatrix;
 begin
-  Result := MatchColorsOnTarget(Self, ABounds, ColorSpace, Color, Multipliers);
+  FFinderLock.Enter();
+  try
+    Result := MatchColorsOnTarget(Self, ABounds, ColorSpace, Color, Multipliers);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindColor(Color: TColor; Tolerance: Single; ABounds: TBox): TPointArray;
 begin
-  Result := FindColorsOnTarget(Self, ABounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers);
+  FFinderLock.Enter();
+  try
+    Result := FindColorsOnTarget(Self, ABounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindColor(Color: TColorTolerance; ABounds: TBox): TPointArray;
 begin
-  Result := FindColorsOnTarget(Self, ABounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+  FFinderLock.Enter();
+  try
+    Result := FindColorsOnTarget(Self, ABounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.CountColor(Color: TColor; Tolerance: Single; ABounds: TBox): Integer;
 begin
-  Result := CountColorsOnTarget(Self, ABounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers);
+  FFinderLock.Enter();
+  try
+    Result := CountColorsOnTarget(Self, ABounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.CountColor(Color: TColorTolerance; ABounds: TBox): Integer;
 begin
-  Result := CountColorsOnTarget(Self, ABounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+  FFinderLock.Enter();
+  try
+    Result := CountColorsOnTarget(Self, ABounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer; ABounds: TBox): Boolean;
 begin
-  Result := CountColorsOnTarget(Self, ABounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers, MinCount) >= MinCount;
+  FFinderLock.Enter();
+  try
+    Result := CountColorsOnTarget(Self, ABounds, DefaultColorSpace, Color, Tolerance, DefaultMultipliers, MinCount) >= MinCount;
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.HasColor(Color: TColorTolerance; MinCount: Integer; ABounds: TBox): Boolean;
 begin
-  Result := CountColorsOnTarget(Self, ABounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers, MinCount) >= MinCount;
+  FFinderLock.Enter();
+  try
+    Result := CountColorsOnTarget(Self, ABounds, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers, MinCount) >= MinCount;
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.GetColor(P: TPoint): TColor;
 begin
-  Result := GetColorOnTarget(Self, P);
+  FFinderLock.Enter();
+  try
+    Result := GetColorOnTarget(Self, P);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.GetColors(Points: TPointArray): TColorArray;
 begin
-  Result := GetColorsOnTarget(Self, Points);
+  FFinderLock.Enter();
+  try
+    Result := GetColorsOnTarget(Self, Points);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.GetColorsMatrix(ABounds: TBox): TIntegerMatrix;
 begin
-  Result := GetColorsMatrixOnTarget(Self, ABounds);
+  FFinderLock.Enter();
+  try
+    Result := GetColorsMatrixOnTarget(Self, ABounds);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindImageEx(Image: TSimbaImage; Tolerance: Single; MaxToFind: Integer; ABounds: TBox): TPointArray;
 begin
-  Result := FindImageOnTarget(Self, Image, ABounds, DefaultColorSpace, Tolerance, DefaultMultipliers, MaxToFind);
+  FFinderLock.Enter();
+  try
+    Result := FindImageOnTarget(Self, Image, ABounds, DefaultColorSpace, Tolerance, DefaultMultipliers, MaxToFind);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindImageEx(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; ABounds: TBox): TPointArray;
 begin
-  Result := FindImageOnTarget(Self, Image, ABounds, ColorSpace, Tolerance, Multipliers, MaxToFind);
+  FFinderLock.Enter();
+  try
+    Result := FindImageOnTarget(Self, Image, ABounds, ColorSpace, Tolerance, Multipliers, MaxToFind);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindImage(Image: TSimbaImage; Tolerance: Single; ABounds: TBox): TPoint;
 var
   TPA: TPointArray;
 begin
-  TPA := FindImageOnTarget(Self, Image, ABounds, DefaultColorSpace, Tolerance, DefaultMultipliers, 1);
-  if (Length(TPA) > 0) then
-    Result := TPA[0]
-  else
-    Result := TPoint.Create(-1, -1);
+  FFinderLock.Enter();
+  try
+    TPA := FindImageOnTarget(Self, Image, ABounds, DefaultColorSpace, Tolerance, DefaultMultipliers, 1);
+    if (Length(TPA) > 0) then
+      Result := TPA[0]
+    else
+      Result := TPoint.Create(-1, -1);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPoint;
 var
   TPA: TPointArray;
 begin
-  TPA := FindImageOnTarget(Self, Image, ABounds, ColorSpace, Tolerance, Multipliers, 1);
-  if (Length(TPA) > 0) then
-    Result := TPA[0]
-  else
-    Result := TPoint.Create(-1, -1);
+  FFinderLock.Enter();
+  try
+    TPA := FindImageOnTarget(Self, Image, ABounds, ColorSpace, Tolerance, Multipliers, 1);
+    if (Length(TPA) > 0) then
+      Result := TPA[0]
+    else
+      Result := TPoint.Create(-1, -1);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindTemplate(Templ: TSimbaImage; out Match: Single; ABounds: TBox): TPoint;
 begin
-  Result := FindTemplateOnTarget(Self, Templ, Match, ABounds);
+  FFinderLock.Enter();
+  try
+    Result := FindTemplateOnTarget(Self, Templ, Match, ABounds);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindDTMEx(DTM: TDTM; MaxToFind: Integer; ABounds: TBox): TPointArray;
 begin
-  Result := FindDTMOnTarget(Self, DTM, ABounds, MaxToFind);
+  FFinderLock.Enter();
+  try
+    Result := FindDTMOnTarget(Self, DTM, ABounds, MaxToFind);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; ABounds: TBox): TPointArray;
 begin
-  Result := FindDTMRotatedOnTarget(Self, DTM, StartDegrees, EndDegrees, Step, FoundDegrees, ABounds, MaxToFind);
+  FFinderLock.Enter();
+  try
+    Result := FindDTMRotatedOnTarget(Self, DTM, StartDegrees, EndDegrees, Step, FoundDegrees, ABounds, MaxToFind);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindDTM(DTM: TDTM; ABounds: TBox): TPoint;
 var
   TPA: TPointArray;
 begin
-  TPA := FindDTMOnTarget(Self, DTM, ABounds, 1);
-  if (Length(TPA) > 0) then
-    Result := TPA[0]
-  else
-    Result := TPoint.Create(-1, -1);
+  FFinderLock.Enter();
+  try
+    TPA := FindDTMOnTarget(Self, DTM, ABounds, 1);
+    if (Length(TPA) > 0) then
+      Result := TPA[0]
+    else
+      Result := TPoint.Create(-1, -1);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; ABounds: TBox): TPoint;
 var
   TPA: TPointArray;
 begin
-  TPA := FindDTMRotatedOnTarget(Self, DTM, StartDegrees, EndDegrees, Step, FoundDegrees, ABounds, 1);
-  if (Length(TPA) > 0) then
-    Result := TPA[0]
-  else
-    Result := TPoint.Create(-1, -1);
+  FFinderLock.Enter();
+  try
+    TPA := FindDTMRotatedOnTarget(Self, DTM, StartDegrees, EndDegrees, Step, FoundDegrees, ABounds, 1);
+    if (Length(TPA) > 0) then
+      Result := TPA[0]
+    else
+      Result := TPoint.Create(-1, -1);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.GetPixelDifference(WaitTime: Integer; Tolerance: Single; ABounds: TBox): TPointArray;
@@ -810,22 +906,27 @@ var
 begin
   Result := [];
 
-  ImgBefore := nil;
-  ImgAfter := nil;
-
-  B := ABounds;
-  if GetImageDataAsImage(B, ImgBefore) then
+  FFinderLock.Enter();
   try
-    Sleep(WaitTime);
+    ImgBefore := nil;
+    ImgAfter := nil;
 
     B := ABounds;
-    if GetImageDataAsImage(B, ImgAfter) and (ImgBefore.Width = ImgAfter.Width) and (ImgBefore.Height = ImgAfter.Height) then
-      Result := ImgBefore.PixelDifference(ImgAfter, Tolerance, B.TopLeft);
+    if GetImageDataAsImage(B, ImgBefore) then
+    try
+      Sleep(WaitTime);
+
+      B := ABounds;
+      if GetImageDataAsImage(B, ImgAfter) and (ImgBefore.Width = ImgAfter.Width) and (ImgBefore.Height = ImgAfter.Height) then
+        Result := ImgBefore.PixelDifference(ImgAfter, Tolerance, B.TopLeft);
+    finally
+      if (ImgBefore <> nil) then
+        ImgBefore.Free();
+      if (ImgAfter <> nil) then
+        ImgAfter.Free();
+    end;
   finally
-    if (ImgBefore <> nil) then
-      ImgBefore.Free();
-    if (ImgAfter <> nil) then
-      ImgAfter.Free();
+    FFinderLock.Leave();
   end;
 end;
 
@@ -836,7 +937,12 @@ end;
 
 function TSimbaTarget.GetBrightness(Algo: ESimbaTargetBrightnessAlgo; ABounds: TBox): Integer;
 begin
-  Result := GetBrightnessOnTarget(Self, EBrightnessAlgo(Algo), ABounds);
+  FFinderLock.Enter();
+  try
+    Result := GetBrightnessOnTarget(Self, EBrightnessAlgo(Algo), ABounds);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 constructor TSimbaTarget.Create;
@@ -846,6 +952,7 @@ begin
   FEventManager := TSimbaTargetEventManager.Create();
   FOptions := TSimbaTargetOptions.Create();
   FInputLock := TCriticalSection.Create();
+  FFinderLock := TCriticalSection.Create();
 
   SetDesktop();
 end;
@@ -859,18 +966,30 @@ begin
     FreeAndNil(FOptions);
   if (FInputLock <> nil) then
     FreeAndNil(FInputLock);
+  if (FFinderLock <> nil) then
+    FreeAndNil(FFinderLock);
 
   inherited Destroy();
 end;
 
 function TSimbaTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPointArray;
 begin
-  Result := FindEdgesOnTarget(Self, ABounds, MinDiff, ColorSpace, Multipliers);
+  FFinderLock.Enter();
+  try
+    Result := FindEdgesOnTarget(Self, ABounds, MinDiff, ColorSpace, Multipliers);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.FindEdges(MinDiff: Single; ABounds: TBox): TPointArray;
 begin
-  Result := FindEdgesOnTarget(Self, ABounds, MinDiff, DefaultColorSpace, DefaultMultipliers);
+  FFinderLock.Enter();
+  try
+    Result := FindEdgesOnTarget(Self, ABounds, MinDiff, DefaultColorSpace, DefaultMultipliers);
+  finally
+    FFinderLock.Leave();
+  end;
 end;
 
 procedure TSimbaTarget.CheckMethod(Method: Pointer; AName: String);
@@ -996,15 +1115,20 @@ var
   Data: PColorBGRA;
   DataWidth: Integer;
 begin
-  if GetImageData(ABounds, Data, DataWidth) then
+  FFinderLock.Enter();
   try
-    Result := TSimbaImage.CreateFromData(ABounds.Width, ABounds.Height, Data, DataWidth);
-    Result.FillWithAlpha(ALPHA_OPAQUE);
+    if GetImageData(ABounds, Data, DataWidth) then
+    try
+      Result := TSimbaImage.CreateFromData(ABounds.Width, ABounds.Height, Data, DataWidth);
+      Result.FillWithAlpha(ALPHA_OPAQUE);
+    finally
+      FreeImageData(Data);
+    end
+    else
+      Result := TSimbaImage.Create();
   finally
-    FreeImageData(Data);
-  end
-  else
-    Result := TSimbaImage.Create();
+    FFinderLock.Leave();
+  end;
 end;
 
 function TSimbaTarget.GetImage: TSimbaImage;
