@@ -1161,9 +1161,6 @@ begin
           for I:=0 to 7 do
           begin
             pt := face[I];
-            if (pt.x < 0) or (pt.y < 0) or (pt.x >= B.X2) or (pt.y >= B.Y2) then
-              Continue;
-
             if Matrix[pt.y][pt.x] and (not Queued[pt.y][pt.x]) then
             begin
               Queued[pt.y][pt.x] := True;
@@ -1180,9 +1177,6 @@ begin
           for I:=0 to 7 do
           begin
             pt := face[I];
-            if (pt.x < 0) or (pt.y < 0) or (pt.x >= B.X2) or (pt.y >= B.Y2) then
-              Continue;
-
             if Matrix[pt.y][pt.x] and (not Queued[pt.y][pt.x]) then
             begin
               Queued[pt.y][pt.x] := True;
@@ -1239,9 +1233,6 @@ begin
         for I:=0 to 7 do
         begin
           pt := face[I];
-          if (pt.x < 0) or (pt.y < 0) or (pt.x >= B.x2) or (pt.y >= B.y2) then
-            Continue;
-
           if not(Matrix[pt.y][pt.x]) then
           begin
             Matrix[pt.y][pt.x] := True;
@@ -1258,9 +1249,6 @@ begin
         for I:=0 to 7 do
         begin
           pt := face[I];
-          if (pt.x < 0) or (pt.y < 0) or (pt.x >= B.x2) or (pt.y >= B.y2) then
-            Continue;
-
           if not(Matrix[pt.y][pt.x]) then
           begin
             Matrix[pt.y][pt.x] := True;
