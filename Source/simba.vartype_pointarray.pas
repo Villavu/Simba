@@ -1228,8 +1228,7 @@ begin
     True:
       while (QueueA.Count > 0) do
       begin
-        pt := QueueA.Pop();
-        GetAdjacent8(face, pt);
+        GetAdjacent8(face, QueueA.Pop());
         for I:=0 to 7 do
         begin
           pt := face[I];
@@ -1244,8 +1243,7 @@ begin
     False:
       while (QueueB.Count > 0) do
       begin
-        pt := QueueB.Pop();
-        GetAdjacent8(face, pt);
+        GetAdjacent8(face, QueueB.Pop());
         for I:=0 to 7 do
         begin
           pt := face[I];
