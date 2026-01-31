@@ -1132,8 +1132,6 @@ begin
   for I:=0 to High(Self) do
     Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := 1;
 
-  SetLength(face, 8);
-
   Edges := Self.Edges().Offset(-B.X1, -B.Y1);
   QueueA.Init();
   for I:=0 to High(Edges) do
@@ -1146,6 +1144,7 @@ begin
     end;
   end;
 
+  SetLength(face, 8);
   QueueB.Init();
   J := 0;
   repeat
