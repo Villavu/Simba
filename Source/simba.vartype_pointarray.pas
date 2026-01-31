@@ -1133,14 +1133,14 @@ begin
   for I:=0 to High(Self) do
     Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := True;
 
-  SetLength(face, 4);
+  SetLength(face, 8);
 
   Edges := Self.Edges().Offset(-B.X1, -B.Y1);
   QueueA.Init();
   for I:=0 to High(Edges) do
   begin
     pt := Edges[I];
-    if Matrix[pt.y][pt.x] and not Enqueued[pt.y][pt.x] then
+    if Matrix[pt.y][pt.x] and (not Enqueued[pt.y][pt.x]) then
     begin
       Enqueued[pt.y][pt.x] := True;
       QueueA.Add(pt);
@@ -1156,11 +1156,11 @@ begin
         begin
           pt := QueueA.Pop;
           Matrix[pt.y][pt.x] := False;
-          GetAdjacent4(face, pt);
-          for I:=0 to 3 do
+          GetAdjacent8(face, pt);
+          for I:=0 to 7 do
           begin
             pt := face[I];
-            if Matrix[pt.y][pt.x] and not Enqueued[pt.y][pt.x] then
+            if Matrix[pt.y][pt.x] and (not Enqueued[pt.y][pt.x]) then
             begin
               Enqueued[pt.y][pt.x] := True;
               QueueB.Add(pt);
@@ -1172,8 +1172,8 @@ begin
         begin
           pt := QueueB.Pop;
           Matrix[pt.y][pt.x] := False;
-          GetAdjacent4(face, pt);
-          for I:=0 to 3 do
+          GetAdjacent8(face, pt);
+          for I:=0 to 7 do
           begin
             pt := face[I];
             if Matrix[pt.y][pt.x] and (not Enqueued[pt.y][pt.x]) then
@@ -1218,7 +1218,7 @@ begin
   for I:=0 to High(Self) do
     Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := True;
 
-  SetLength(face,4);
+  SetLength(face,8);
   QueueA.InitWith(Self.Edges().Offset(-B.X1,-B.Y1));
   QueueB.Init();
   J := 0;
@@ -1227,8 +1227,8 @@ begin
     True:
       while (QueueA.Count > 0) do
       begin
-        GetAdjacent4(face, QueueA.Pop());
-        for I:=0 to 3 do
+        GetAdjacent8(face, QueueA.Pop());
+        for I:=0 to 7 do
         begin
           pt := face[I];
           if not(Matrix[pt.y][pt.x]) then
@@ -1242,8 +1242,8 @@ begin
     False:
       while (QueueB.Count > 0) do
       begin
-        GetAdjacent4(face, QueueB.Pop());
-        for I:=0 to 3 do
+        GetAdjacent8(face, QueueB.Pop());
+        for I:=0 to 7 do
         begin
           pt := face[I];
           if not(Matrix[pt.y][pt.x]) then
