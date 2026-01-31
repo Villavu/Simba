@@ -1111,11 +1111,12 @@ end;
 function TPointArrayHelper.Erode(Iterations: Integer): TPointArray;
 var
   I, J, X, Y: Integer;
-  Matrix: TBooleanMatrix;
+  Matrix, Queued: TBooleanMatrix;
   QueueA, QueueB: TSimbaPointBuffer;
   face: TPointArray;
   pt: TPoint;
   B: TBox;
+  Edges: TPointArray;
 begin
   Result := Default(TPointArray);
   if (Length(Self) = 0) or (Iterations = 0) then
@@ -1128,11 +1129,25 @@ begin
   B.Y2 := (B.Y2 - B.Y1) + Iterations + 1;
 
   Matrix.SetSize(B.X2, B.Y2);
+  SetLength(Queued, B.Y2, B.X2);
+
   for I:=0 to High(Self) do
     Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := True;
 
-  SetLength(face, 4);
-  QueueA.InitWith(Self.Edges().Offset(-B.X1, -B.Y1));
+  SetLength(face, 8);
+
+  Edges := Self.Edges().Offset(-B.X1, -B.Y1);
+  QueueA.Init();
+  for i := 0 to High(Edges) do
+  begin
+    pt := Edges[i];
+    if Matrix[pt.y][pt.x] and (not Queued[pt.y][pt.x]) then
+    begin
+      Queued[pt.y][pt.x] := True;
+      QueueA.Add(pt);
+    end;
+  end;
+
   QueueB.Init();
   J := 0;
   repeat
@@ -1142,30 +1157,35 @@ begin
         begin
           pt := QueueA.Pop;
           Matrix[pt.y][pt.x] := False;
-          GetAdjacent4(face, pt);
-          for I:=0 to 3 do
+          GetAdjacent8(face, pt);
+          for I:=0 to 7 do
           begin
             pt := face[I];
-            if Matrix[pt.y][pt.x] then
+            if (pt.x < 0) or (pt.y < 0) or (pt.x >= B.X2) or (pt.y >= B.Y2) then
+              Continue;
+
+            if Matrix[pt.y][pt.x] and (not Queued[pt.y][pt.x]) then
             begin
-              Matrix[pt.y][pt.x] := False;
+              Queued[pt.y][pt.x] := True;
               QueueB.Add(pt);
             end;
           end;
         end;
-
       False:
         while (QueueB.Count > 0) do
         begin
           pt := QueueB.Pop;
           Matrix[pt.y][pt.x] := False;
-          GetAdjacent4(face, pt);
-          for I:=0 to 3 do
+          GetAdjacent8(face, pt);
+          for I:=0 to 7 do
           begin
             pt := face[I];
-            if Matrix[pt.y][pt.x] then
+            if (pt.x < 0) or (pt.y < 0) or (pt.x >= B.X2) or (pt.y >= B.Y2) then
+              Continue;
+
+            if Matrix[pt.y][pt.x] and (not Queued[pt.y][pt.x]) then
             begin
-              Matrix[pt.y][pt.x] := False;
+              Queued[pt.y][pt.x] := True;
               QueueA.Add(pt);
             end;
           end;
@@ -1205,7 +1225,7 @@ begin
   for I:=0 to High(Self) do
     Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := True;
 
-  SetLength(face,4);
+  SetLength(face,8);
   QueueA.InitWith(Self.Edges().Offset(-B.X1,-B.Y1));
   QueueB.Init();
   J := 0;
@@ -1214,10 +1234,14 @@ begin
     True:
       while (QueueA.Count > 0) do
       begin
-        GetAdjacent4(face, QueueA.Pop());
-        for I:=0 to 3 do
+        pt := QueueA.Pop();
+        GetAdjacent8(face, pt);
+        for I:=0 to 7 do
         begin
           pt := face[I];
+          if (pt.x < 0) or (pt.y < 0) or (pt.x >= B.x2) or (pt.y >= B.y2) then
+            Continue;
+
           if not(Matrix[pt.y][pt.x]) then
           begin
             Matrix[pt.y][pt.x] := True;
@@ -1229,10 +1253,14 @@ begin
     False:
       while (QueueB.Count > 0) do
       begin
-        GetAdjacent4(face, QueueB.Pop());
-        for I:=0 to 3 do
+        pt := QueueB.Pop();
+        GetAdjacent8(face, pt);
+        for I:=0 to 7 do
         begin
           pt := face[I];
+          if (pt.x < 0) or (pt.y < 0) or (pt.x >= B.x2) or (pt.y >= B.y2) then
+            Continue;
+
           if not(Matrix[pt.y][pt.x]) then
           begin
             Matrix[pt.y][pt.x] := True;
