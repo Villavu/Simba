@@ -1111,7 +1111,7 @@ end;
 function TPointArrayHelper.Erode(Iterations: Integer): TPointArray;
 var
   I, J, X, Y: Integer;
-  Matrix, Enqueued: TBooleanMatrix;
+  Matrix: TByteMatrix; // 0 = removed, 1 = filled, 2 = enqueued
   QueueA, QueueB: TSimbaPointBuffer;
   face: TPointArray;
   pt: TPoint;
@@ -1129,9 +1129,8 @@ begin
   B.Y2 := (B.Y2 - B.Y1) + Iterations + 1;
 
   Matrix.SetSize(B.X2, B.Y2);
-  Enqueued.SetSize(B.X2, B.Y2);
   for I:=0 to High(Self) do
-    Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := True;
+    Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := 1;
 
   SetLength(face, 8);
 
@@ -1140,9 +1139,9 @@ begin
   for I:=0 to High(Edges) do
   begin
     pt := Edges[I];
-    if Matrix[pt.y][pt.x] and (not Enqueued[pt.y][pt.x]) then
+    if Matrix[pt.y][pt.x] = 1 then
     begin
-      Enqueued[pt.y][pt.x] := True;
+      Matrix[pt.y][pt.x] := 2;
       QueueA.Add(pt);
     end;
   end;
@@ -1155,14 +1154,15 @@ begin
         while (QueueA.Count > 0) do
         begin
           pt := QueueA.Pop;
-          Matrix[pt.y][pt.x] := False;
+          Matrix[pt.y][pt.x] := 0;
+
           GetAdjacent8(face, pt);
           for I:=0 to 7 do
           begin
             pt := face[I];
-            if Matrix[pt.y][pt.x] and (not Enqueued[pt.y][pt.x]) then
+            if Matrix[pt.y][pt.x] = 1 then
             begin
-              Enqueued[pt.y][pt.x] := True;
+              Matrix[pt.y][pt.x] := 2;
               QueueB.Add(pt);
             end;
           end;
@@ -1171,14 +1171,14 @@ begin
         while (QueueB.Count > 0) do
         begin
           pt := QueueB.Pop;
-          Matrix[pt.y][pt.x] := False;
+          Matrix[pt.y][pt.x] := 0;
           GetAdjacent8(face, pt);
           for I:=0 to 7 do
           begin
             pt := face[I];
-            if Matrix[pt.y][pt.x] and (not Enqueued[pt.y][pt.x]) then
+            if Matrix[pt.y][pt.x] = 1 then
             begin
-              Enqueued[pt.y][pt.x] := True;
+              Matrix[pt.y][pt.x] := 2;
               QueueA.Add(pt);
             end;
           end;
@@ -1190,7 +1190,7 @@ begin
   QueueA.Clear();
   for Y := 0 to B.Y2-1 do
     for X := 0 to B.X2-1 do
-      if Matrix[Y, X] then
+      if Matrix[Y, X] = 1 then
         QueueA.Add(X + B.X1, Y + B.Y1);
   Result := QueueA.ToArray(False);
 end;
