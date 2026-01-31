@@ -1111,7 +1111,7 @@ end;
 function TPointArrayHelper.Erode(Iterations: Integer): TPointArray;
 var
   I, J, X, Y: Integer;
-  Matrix, Queued: TBooleanMatrix;
+  Matrix, Enqueued: TBooleanMatrix;
   QueueA, QueueB: TSimbaPointBuffer;
   face: TPointArray;
   pt: TPoint;
@@ -1129,7 +1129,7 @@ begin
   B.Y2 := (B.Y2 - B.Y1) + Iterations + 1;
 
   Matrix.SetSize(B.X2, B.Y2);
-  SetLength(Queued, B.Y2, B.X2);
+  SetLength(Enqueued, B.Y2, B.X2);
 
   for I:=0 to High(Self) do
     Matrix[Self[I].Y - B.Y1][Self[I].X - B.X1] := True;
@@ -1141,9 +1141,9 @@ begin
   for i := 0 to High(Edges) do
   begin
     pt := Edges[i];
-    if Matrix[pt.y][pt.x] and (not Queued[pt.y][pt.x]) then
+    if Matrix[pt.y][pt.x] and (not Enqueued[pt.y][pt.x]) then
     begin
-      Queued[pt.y][pt.x] := True;
+      Enqueued[pt.y][pt.x] := True;
       QueueA.Add(pt);
     end;
   end;
@@ -1161,9 +1161,9 @@ begin
           for I:=0 to 7 do
           begin
             pt := face[I];
-            if Matrix[pt.y][pt.x] and (not Queued[pt.y][pt.x]) then
+            if Matrix[pt.y][pt.x] and (not Enqueued[pt.y][pt.x]) then
             begin
-              Queued[pt.y][pt.x] := True;
+              Enqueued[pt.y][pt.x] := True;
               QueueB.Add(pt);
             end;
           end;
@@ -1177,9 +1177,9 @@ begin
           for I:=0 to 7 do
           begin
             pt := face[I];
-            if Matrix[pt.y][pt.x] and (not Queued[pt.y][pt.x]) then
+            if Matrix[pt.y][pt.x] and (not Enqueued[pt.y][pt.x]) then
             begin
-              Queued[pt.y][pt.x] := True;
+              Enqueued[pt.y][pt.x] := True;
               QueueA.Add(pt);
             end;
           end;
