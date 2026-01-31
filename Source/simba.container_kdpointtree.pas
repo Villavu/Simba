@@ -231,11 +231,12 @@ end;
 
 function TKDPointTree.RawNearest(pt:TPoint; notEqual:Boolean=False): PNode;
 var
-  resDist:Integer;
+  resDist:Int64;
   resNode:PNode;
   procedure __nearest(node:Integer; depth:UInt8=0);
   var
-    test,dist,delta:Integer;
+    dist: Int64;
+    test,delta:Integer;
     this:PNode;
   begin
     this := @self.data[node];
