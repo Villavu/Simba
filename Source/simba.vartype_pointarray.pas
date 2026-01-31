@@ -1190,7 +1190,7 @@ begin
   QueueA.Clear();
   for Y := 0 to B.Y2-1 do
     for X := 0 to B.X2-1 do
-      if Matrix[Y, X] = 1 then
+      if Matrix[Y, X] > 0 then
         QueueA.Add(X + B.X1, Y + B.Y1);
   Result := QueueA.ToArray(False);
 end;
