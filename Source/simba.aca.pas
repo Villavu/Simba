@@ -10,22 +10,10 @@ unit simba.aca;
 interface
 
 uses
-  Classes, SysUtils, Controls, ComCtrls, ExtCtrls, Forms, Graphics, Menus,
-  simba.base, simba.colormath, simba.target;
-
-type
-  TGetWindow = function(): TWindowHandle of object;
-
-  // ShowOnTop
-  procedure ShowACA(GetWindow: TGetWindow); overload;
-  procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean); overload;
-  // ShowModal
-  procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean; out Color: TColorTolerance); overload;
-
-implementation
-
-uses
-  IniFiles, Dialogs, Clipbrd, LCLType, TypInfo,
+  Classes, SysUtils, Controls, ComCtrls, ExtCtrls, Forms, Menus, Graphics,
+  simba.base,
+  simba.image,
+  simba.colormath,
   simba.component_imagebox,
   simba.component_imageboxcanvas,
   simba.component_imageboxzoom,
@@ -33,20 +21,18 @@ uses
   simba.component_button,
   simba.component_edit,
   simba.component_menubar,
-  simba.component_splitter,
-  simba.env,
-  simba.image,
-  simba.component_divider,
-  simba.colormath_aca,
-  simba.component_theme,
-  simba.vartype_string,
-  simba.vartype_matrix,
-  simba.threading;
+  simba.component_splitter;
 
 type
-  TSimbaACA = class
+  TACAImageSupplier = function(): TSimbaImage of object;
+  TACAImageSupplierLape = function(): TByteArray of object;
+
+  TSimbaACA = class(TForm)
+  private
+  private const
+    DEF_WIDTH = 1100;
+    DEF_HEIGHT = 700;
   protected
-    FForm: TForm;
     FMenuBar: TSimbaMenuBar;
     FPanel: TPanel;
     FImageBox: TSimbaImageBox;
@@ -55,9 +41,8 @@ type
     FColorListPopup: TPopupMenu;
     FDrawColorMenu: TMenuItem;
     FDrawColor: TColor;
-    FGetWindow: TGetWindow;
-    FTarget: TSimbaTarget;
-    FManageTarget: Boolean;
+    FImageSupplier: TACAImageSupplier;
+    FImageSupplierLape: TACAImageSupplierLape;
 
     FEditColor: TSimbaLabeledEdit;
     FEditTol: TSimbaLabeledEdit;
@@ -74,14 +59,15 @@ type
     FDebugTPA: TPointArray;
     FDebugMat: TSingleMatrix;
 
+    procedure DoClose(var CloseAction: TCloseAction); override;
+    procedure DoFirstShow; override;
+
     procedure FillLoadDeleteColorMenus(LoadItem, DeleteItem: TMenuItem);
 
-    function GetColors: TColorArray;
     function GetColorSpace: EColorSpace;
     procedure CalcBestColor;
 
     procedure DoFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure DoFormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
     procedure DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
     procedure DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -109,17 +95,45 @@ type
     procedure DoCopyBestColorClick(Sender: TObject);
     procedure DoColorMenuPopup(Sender: TObject);
 
-    procedure Add(Color: TColor);
+    procedure AddColor(NewColor: TColor);
     function GetBest: TColorTolerance;
+    function GetUserPanel: TPanel;
+    function GetColors: TColorArray;
+    procedure SetColors(Colors: TColorArray);
+    procedure SetImage(Image: TSimbaImage);
   public
-    constructor Create(Target: TSimbaTarget; ManageTarget: Boolean = True); reintroduce; overload;
-    constructor Create(GetWindow: TGetWindow); reintroduce; overload;
-    destructor Destroy; override;
+    FreeOnClose: Boolean;
 
+    constructor Create(ImageSupplier: TACAImageSupplier); reintroduce;
+    constructor CreateLape(ImageSupplier: TACAImageSupplierLape); reintroduce;
+
+    property UserPanel: TPanel read GetUserPanel;
+    property Image: TSimbaImage write SetImage;
+    property ImageBox: TSimbaImageBox read FImageBox;
+    property DrawColor: TColor read FDrawColor write FDrawColor;
+    property Colors: TColorArray read GetColors write SetColors;
     property BestColor: TColorTolerance read GetBest;
-    property Form: TForm read FForm;
+
+    property ButtonFindColor: TSimbaButton read FButtonFindColor;
+    property ButtonMatchColor: TSimbaButton read FButtonMatchColor;
+    property ButtonClearImg: TSimbaButton read FButtonClearImg;
+    property ButtonUpdateImg: TSimbaButton read FButtonUpdateImg;
   end;
 
+implementation
+
+uses
+  IniFiles, Dialogs, Clipbrd, LCLType, TypInfo, LCLIntf,
+  simba.env,
+  simba.component_divider,
+  simba.colormath_aca,
+  simba.component_theme,
+  simba.vartype_string,
+  simba.vartype_matrix,
+  simba.threading,
+  simba.array_algorithm;
+
+type
   TColorNode = class(TTreeNode)
   public
     Color: TColor;
@@ -128,6 +142,26 @@ type
 function GetColorsINI: TINIFile;
 begin
   Result := TINIFile.Create(SimbaEnv.DataPath + 'aca.ini');
+end;
+
+function TSimbaACA.GetUserPanel: TPanel;
+begin
+  Result := FImageBox.UserPanel;
+end;
+
+procedure TSimbaACA.DoClose(var CloseAction: TCloseAction);
+begin
+  inherited DoClose(CloseAction);
+
+  if FreeOnClose then
+    CloseAction := caFree;
+end;
+
+procedure TSimbaACA.DoFirstShow;
+begin
+  inherited DoFirstShow();
+
+  DoUpdateImgClick(Self);
 end;
 
 procedure TSimbaACA.FillLoadDeleteColorMenus(LoadItem, DeleteItem: TMenuItem);
@@ -164,6 +198,22 @@ begin
     Result[I] := TColorNode(FColorList.TopLevelItem[I]).Color;
 end;
 
+procedure TSimbaACA.SetColors(Colors: TColorArray);
+var
+  Col: TColor;
+begin
+  FColorList.BeginUpdate();
+  FColorList.Clear();
+  for Col in specialize TArrayUnique<TColor>.Unique(Colors) do
+    TColorNode(FColorList.AddNode(ColorToStr(Col))).Color := Col;
+  FColorList.EndUpdate();
+end;
+
+procedure TSimbaACA.SetImage(Image: TSimbaImage);
+begin
+  FImageBox.SetImage(Image);
+end;
+
 function TSimbaACA.GetColorSpace: EColorSpace;
 begin
   case FColorSpaces.ToggleButtons.SelectedText of
@@ -181,14 +231,12 @@ end;
 
 procedure TSimbaACA.CalcBestColor;
 var
-  Colors: TColorArray;
   Best: TBestColor;
   FormatSettingsDot: TFormatSettings;
 begin
-  Colors := GetColors();
-  if (Length(Colors) > 0) then
+  if (FColorList.Items.Count > 0) then
   begin
-    Best := GetBestColor(GetColorSpace(), Colors);
+    Best := GetBestColor(GetColorSpace(), GetColors());
 
     FormatSettingsDot := FormatSettings;
     FormatSettingsDot.DecimalSeparator := '.';
@@ -215,7 +263,7 @@ begin
     Key := 0;
     DoAddFromClipboardClick(nil);
   end
-  else if (Key = VK_C) and (Shift = [ssCtrl]) and (not (FForm.ActiveControl is TSimbaEdit)) then
+  else if (Key = VK_C) and (Shift = [ssCtrl]) and (not (ActiveControl is TSimbaEdit)) then
   begin
     Key := 0;
     DoCopyBestColorClick(nil);
@@ -225,12 +273,6 @@ begin
     Key := 0;
     DoUpdateImgClick(nil);
   end;
-end;
-
-procedure TSimbaACA.DoFormClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-  if (not (fsModal in FForm.FormState)) then // non modal, free
-    QueueOnMainThread(@Self.Free);
 end;
 
 procedure TSimbaACA.DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
@@ -250,7 +292,7 @@ end;
 procedure TSimbaACA.DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (Button = mbLeft) then
-    Add(FImageBox.Background.Canvas.Pixels[X, Y]);
+    AddColor(FImageBox.Background.Canvas.Pixels[X, Y]);
 end;
 
 // stolen from colorpickerhistory
@@ -346,13 +388,30 @@ begin
 end;
 
 procedure TSimbaACA.DoUpdateImgClick(Sender: TObject);
-begin
-  if Assigned(@FGetWindow) then
+
+  procedure SetImageNormal;
   begin
-    FTarget.SetWindow(FGetWindow());
+    FImageBox.SetImage(FImageSupplier());
   end;
 
-  FImageBox.SetImage(FTarget.GetImage());
+  procedure SetImageFromLape;
+  var
+    LapeObject: TByteArray;
+  begin
+    LapeObject := FImageSupplierLape();
+
+    FImageBox.SetImage(
+      PSimbaImage(LapeObject)^,
+      PSizeInt(LapeObject)[-2] <= 1 // If has no image references, we need to free it
+    );
+  end;
+
+begin
+  if Assigned(FImageSupplierLape) then
+    SetImageFromLape()
+  else if Assigned(FImageSupplier) then
+    SetImageNormal();
+
   if (Length(FDebugTPA) > 0) then
     FButtonFindColor.Click()
   else if (Length(FDebugMat) > 0) then
@@ -407,7 +466,7 @@ begin
     try
       for Str in Numbers do
         if Str.IsInteger and (Str.ToInt >= 0) and (Str.ToInt <= $FFFFFFFF) then
-          Add(StrToColor(Str));
+          AddColor(StrToColor(Str));
     finally
       FColorList.Items.EndUpdate();
     end;
@@ -422,16 +481,16 @@ end;
 
 procedure TSimbaACA.DoSaveColorsClick(Sender: TObject);
 var
-  col: TColor;
-  Name,s: String;
+  Col: TColor;
+  ColorName, ColorsString: String;
 begin
-  if InputQuery('Auto Color Aid', 'Save under what name?', Name) then
+  if InputQuery('Auto Color Aid', 'Save under what name?', ColorName) then
     with GetColorsINI() do
     try
-      s := '';
-      for col in GetColors() do
-        s += ColorToStr(col) + ',';
-      WriteString(Name, 'Colors', s);
+      ColorsString := '';
+      for Col in GetColors() do
+        ColorsString := ColorsString + ColorToStr(Col) + ',';
+      WriteString(ColorName, 'Colors', ColorsString);
     finally
       Free();
     end;
@@ -448,7 +507,7 @@ begin
   try
     for Str in ReadString(TMenuItem(Sender).Caption, 'Colors', '').ExtractNumbers() do
       if Str.IsInteger and (Str.ToInt >= 0) and (Str.ToInt <= $FFFFFFFF) then
-        Add(StrToColor(Str));
+        AddColor(StrToColor(Str));
   finally
     Free();
   end;
@@ -514,11 +573,11 @@ begin
   );
 end;
 
-constructor TSimbaACA.Create(Target: TSimbaTarget; ManageTarget: Boolean);
+constructor TSimbaACA.Create(ImageSupplier: TACAImageSupplier);
 
   function CreateColorMenu: TPopupMenu;
   begin
-    Result := TPopupMenu.Create(FForm);
+    Result := TPopupMenu.Create(Self);
     Result.OnPopup := @DoColorMenuPopup;
     Result.Items.Add(NewItem('Clear Color List', scNone, False, True, @DoClearColorsClick, 0, ''));
     Result.Items.Add(NewItem('Add Colors From Clipboard', ShortCut(VK_V, [ssCtrl]), False, True, @DoAddFromClipboardClick, 0, ''));
@@ -539,7 +598,7 @@ constructor TSimbaACA.Create(Target: TSimbaTarget; ManageTarget: Boolean);
     FDrawColorMenu.Add(NewItem('Yellow', scNone, False, True, @DoDrawColorChange, 0, ''));
     FDrawColorMenu.Add(NewItem('Aqua', scNone, False, True, @DoDrawColorChange, 0, ''));
 
-    Result := TPopupMenu.Create(FForm);
+    Result := TPopupMenu.Create(Self);
     Result.Items.Add(NewItem('Load HSL Circle', scNone, False, True, @DoLoadHSLCircleClick, 0, ''));
     Result.Items.Add(NewItem('Load Image', scNone, False, True, @DoLoadImageClick, 0, ''));
     Result.Items.Add(NewItem('Update Image', ShortCut(VK_F5, []), False, True, nil, 0, ''));
@@ -549,7 +608,7 @@ constructor TSimbaACA.Create(Target: TSimbaTarget; ManageTarget: Boolean);
 
   function CreateListPopupMenu: TPopupMenu;
   begin
-    Result := TPopupMenu.Create(FForm);
+    Result := TPopupMenu.Create(Self);
     Result.OnPopup := @DoColorListPopup;
     Result.Items.Add(NewItem('Delete Selected', scNone, False, True, @DoDeleteSelectedClick, 0, ''));
     Result.Items.Add(NewLine);
@@ -564,31 +623,29 @@ constructor TSimbaACA.Create(Target: TSimbaTarget; ManageTarget: Boolean);
 var
   BottomPanel, ButtonPanel: TPanel;
 begin
-  inherited Create();
+  inherited CreateNew(nil);
 
-  FTarget := Target;
-  FManageTarget := ManageTarget;
+  FImageSupplier := ImageSupplier;
   FDrawColor := clRed;
 
-  FForm := TForm.Create(nil);
-  FForm.Caption := 'Auto Color Aid';
-  FForm.Position := poScreenCenter;
-  FForm.Width := FForm.Scale96ToScreen(1200);
-  FForm.Height := FForm.Scale96ToScreen(800);
-  FForm.Font.Color := SimbaComponentTheme.ColorFont;
-  FForm.KeyPreview := True;
-  FForm.OnKeyDown := @DoFormKeyDown;
-  FForm.OnClose := @DoFormClose;
-  FForm.ShowInTaskBar := stAlways;
+  Caption := 'Auto Color Aid';
+  Width := Min(Scale96ToScreen(DEF_WIDTH), Monitor.WorkareaRect.Width - 200);
+  Height := Min(Scale96ToScreen(DEF_HEIGHT), Monitor.WorkareaRect.Height - 100);
+  Position := poScreenCenter;
 
-  FMenuBar := TSimbaMenuBar.Create(FForm);
-  FMenuBar.Parent := FForm;
+  Font.Color := SimbaComponentTheme.ColorFont;
+  KeyPreview := True;
+  OnKeyDown := @DoFormKeyDown;
+  ShowInTaskBar := stAlways;
+
+  FMenuBar := TSimbaMenuBar.Create(Self);
+  FMenuBar.Parent := Self;
   FMenuBar.Align := alTop;
   FMenuBar.AddMenu('Colors', CreateColorMenu());
   FMenuBar.AddMenu('Image', CreateImageMenu());
 
-  FPanel := TPanel.Create(FForm);
-  FPanel.Parent := FForm;
+  FPanel := TPanel.Create(Self);
+  FPanel.Parent := Self;
   FPanel.Align := alRight;
   FPanel.BevelOuter := bvNone;
   FPanel.BevelInner := bvNone;
@@ -597,22 +654,21 @@ begin
 
   with TBitmap.Create() do
   try
-    Canvas.Font := FForm.Font;
+    Canvas.Font := Self.Font;
     FPanel.Width := Canvas.TextWidth('Best R Multipliers') * 3;
   finally
     Free();
   end;
 
-  with TSimbaSplitter.Create(FForm) do
+  with TSimbaSplitter.Create(Self) do
   begin
-    Parent := FForm;
+    Parent := Self;
     Align := alRight;
   end;
 
-  FImageBox := TSimbaImageBox.Create(FForm);
-  FImageBox.Parent := FForm;
+  FImageBox := TSimbaImageBox.Create(Self);
+  FImageBox.Parent := Self;
   FImageBox.Align := alClient;
-  FImageBox.SetImage(FTarget.GetImage());
   FImageBox.OnImgMouseMove := @DoImgMouseMove;
   FImageBox.OnImgMouseDown := @DoImgMouseDown;
   FImageBox.OnImgPaint := @DoImgPaintArea;
@@ -627,7 +683,7 @@ begin
 
   FColorListPopup := CreateListPopupMenu();
 
-  FColorList := TSimbaTreeView.Create(FForm, TColorNode);
+  FColorList := TSimbaTreeView.Create(Self, TColorNode);
   FColorList.Parent := FPanel;
   FColorList.Align := alClient;
   FColorList.OnModify := @DoListModify;
@@ -723,7 +779,7 @@ begin
   FEditTol.Parent := BottomPanel;
   FEditTol.Align := alTop;
   FEditTol.Caption := 'Best Tolerance';
-  FEditTol.LabelMeasure := 'Best R Multipliers';
+  FEditTol.LabelMeasure := 'Best Multiplier[0]';
   FEditTol.BorderSpacing.Top := 4;
   FEditTol.Color := SimbaComponentTheme.ColorFrame;
 
@@ -731,7 +787,7 @@ begin
   FEditColor.Parent := BottomPanel;
   FEditColor.Align := alTop;
   FEditColor.Caption := 'Best Color';
-  FEditColor.LabelMeasure := 'Best R Multipliers';
+  FEditColor.LabelMeasure := 'Best Multiplier[0]';
   FEditColor.BorderSpacing.Top := 4;
   FEditColor.Color := SimbaComponentTheme.ColorFrame;
 
@@ -764,40 +820,25 @@ begin
   end;
 end;
 
-constructor TSimbaACA.Create(GetWindow: TGetWindow);
-var
-  Target: TSimbaTarget;
+constructor TSimbaACA.CreateLape(ImageSupplier: TACAImageSupplierLape);
 begin
-  Target := TSimbaTarget.Create();
-  Target.SetWindow(GetWindow());
+  Create(nil);
 
-  Create(Target);
-
-  FGetWindow := GetWindow;
+  FImageSupplierLape := ImageSupplier;
 end;
 
-destructor TSimbaACA.Destroy;
-begin
-  if (FForm <> nil) then
-    FreeAndNil(FForm);
-  if (FTarget <> nil) and FManageTarget then
-    FreeAndNil(FTarget);
-
-  inherited Destroy();
-end;
-
-procedure TSimbaACA.Add(Color: TColor);
+procedure TSimbaACA.AddColor(NewColor: TColor);
 var
   I: Integer;
 begin
   // check duplicate
   for I := 0 to FColorList.TopLevelCount - 1 do
-    if (TColorNode(FColorList.TopLevelItem[I]).Color = Color)then
+    if (TColorNode(FColorList.TopLevelItem[I]).Color = NewColor)then
       Exit;
 
   // Wrap with begin/endupdate so modify event doesnt fire before .Color is assigned
   FColorList.BeginUpdate();
-  TColorNode(FColorList.AddNode(ColorToStr(Color))).Color := Color;
+  TColorNode(FColorList.AddNode(ColorToStr(NewColor))).Color := NewColor;
   FColorList.EndUpdate();
 end;
 
@@ -809,30 +850,6 @@ begin
   Result.Multipliers[0] := String(FEditMulti1.Edit.Text).ToFloat(0);
   Result.Multipliers[1] := String(FEditMulti2.Edit.Text).ToFloat(0);
   Result.Multipliers[2] := String(FEditMulti3.Edit.Text).ToFloat(0);
-end;
-
-procedure ShowACA(GetWindow: TGetWindow);
-begin
-  with TSimbaACA.Create(GetWindow) do
-    Form.ShowOnTop();
-end;
-
-procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean);
-begin
-  with TSimbaACA.Create(Target, ManageTarget) do
-    Form.ShowOnTop();
-end;
-
-procedure ShowACA(Target: TSimbaTarget; ManageTarget: Boolean; out Color: TColorTolerance);
-begin
-  with TSimbaACA.Create(Target, ManageTarget) do
-  try
-    Form.ShowModal();
-
-    Color := BestColor;
-  finally
-    Free();
-  end;
 end;
 
 end.

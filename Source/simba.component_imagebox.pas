@@ -110,6 +110,8 @@ type
   protected
     FImageScrollBox: TSimbaImageScrollBox;
     FStatusBar: TSimbaStatusBar;
+    FStatusBarPanel: TPanel;
+    FUserPanel: TPanel;
     FBackground: TBitmap;
     FBackgroundOwner: Boolean;
     FPixelFormat: ELazPixelFormat;
@@ -144,6 +146,7 @@ type
     procedure ImgMouseLeave; virtual;
 
     function GetLastPaintTime: Double;
+    function GetUserPanel: TPanel;
     function GetMousePoint: TPoint;
     function GetCursor: TCursor; override;
     function GetStatus: String;
@@ -181,6 +184,7 @@ type
     property AllowMoving: Boolean read GetAllowMoving write SetAllowMoving;
 
     property LastPaintTime: Double read GetLastPaintTime;
+    property UserPanel: TPanel read GetUserPanel;
     property StatusBar: TSimbaStatusBar read FStatusBar;
     property Status: String read GetStatus write SetStatus;
     property PixelFormat: ELazPixelFormat read FPixelFormat;
@@ -207,7 +211,7 @@ type
 implementation
 
 uses
-  simba.datetime,
+  simba.datetime, simba.component_theme,
   LCLIntf;
 
 generic procedure ZoomOut<_T>(Ratio, SrcX, SrcY, LoopEndX, LoopEndY: Integer; SrcImg, DestImg: TRawImage);
@@ -773,8 +777,23 @@ begin
   FImageScrollBox.Parent := Self;
   FImageScrollBox.Align := alClient;
 
+  FStatusBarPanel := TPanel.Create(Self);
+  FStatusBarPanel.Parent := Self;
+  FStatusBarPanel.BevelOuter := bvNone;
+  FStatusBarPanel.Align := alBottom;
+  FStatusBarPanel.Height := 100;
+  FStatusBarPanel.AutoSize := True;
+  FStatusBarPanel.Color := SimbaComponentTheme.ColorFrame;
+
+  FUserPanel := TPanel.Create(Self);
+  FUserPanel.BevelOuter := bvNone;
+  FUserPanel.Parent := FStatusBarPanel;
+  FUserPanel.Color := SimbaComponentTheme.ColorFrame;
+  FUserPanel.AutoSize := True;
+  FUserPanel.Align := alClient;
+
   FStatusBar := TSimbaStatusBar.Create(Self);
-  FStatusBar.Parent := Self;
+  FStatusBar.Parent := FStatusBarPanel;
   FStatusBar.Align := alBottom;
   FStatusBar.PanelCount := 4;
   FStatusBar.PanelTextMeasure[0] := '(1235, 1234)';
@@ -1014,6 +1033,11 @@ begin
     Result := FImageScrollBox.FPaintTime
   else
     Result := -1;
+end;
+
+function TSimbaImageBox.GetUserPanel: TPanel;
+begin
+  Result := FUserPanel;
 end;
 
 procedure TSimbaImageBox.SetCursor(Value: TCursor);

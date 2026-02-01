@@ -41,6 +41,8 @@ type
 
     FAreaSelection: TBox;
 
+    function GetWindowSelectionOrDesktop: TWindowHandle;
+
     procedure SetStates(ScriptState: ESimbaScriptState);
 
     procedure DoTabScriptStateChange(Sender: TObject);
@@ -74,6 +76,7 @@ type
     property ButtonPackage: TSimbaButton read FButtonPackage;
 
     property WindowSelection: TWindowHandle read FWindowSelection;
+    property WindowSelectionOrDesktop: TWindowHandle read GetWindowSelectionOrDesktop;
     property ProcessSelection: TProcessID read FProcessSelection;
     property AreaSelection: TBox read FAreaSelection;
 
@@ -91,6 +94,13 @@ uses
   simba.ide_tab, simba.form_package,
   simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector,
   simba.vartype_windowhandle, simba.vartype_box;
+
+function TSimbaMainToolBar.GetWindowSelectionOrDesktop: TWindowHandle;
+begin
+  Result := WindowSelection;
+  if (Result = 0) or (not Result.IsValid()) then
+    Result := GetDesktopWindow()
+end;
 
 procedure TSimbaMainToolBar.SetStates(ScriptState: ESimbaScriptState);
 
