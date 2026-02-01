@@ -5,7 +5,7 @@ unit simba.import_imagebox;
 interface
 
 uses
-  Classes, SysUtils, Controls, Graphics,
+  Classes, SysUtils, Controls, ExtCtrls, Graphics,
   simba.base, simba.script, simba.script_objectutil;
 
 procedure ImportSimbaImageBox(Script: TSimbaScript);
@@ -24,6 +24,7 @@ uses
 
 type
   PComponent = ^TComponent;
+  PPanel = ^TPanel;
   PBitmap = ^TBitmap;
   PSimbaImageBox = ^TSimbaImageBox;
   PSimbaImageBoxCanvas = ^TSimbaImageBoxCanvas;
@@ -237,6 +238,11 @@ end;
 procedure _LapeImageBox_OnImgKeyUp_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   TImageBoxKeyEvent(Result^) := PSimbaImageBox(Params^[0])^.OnImgKeyUp;
+end;
+
+procedure _LapeImageBox_UserPanel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanel(Result)^ := PSimbaImageBox(Params^[0])^.UserPanel;
 end;
 
 procedure _LapeImageBox_OnImgKeyUp_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -459,6 +465,7 @@ begin
     addProperty('TImageBox', 'OnImgKeyDown', 'TImageBoxKeyEvent', @_LapeImageBox_OnImgKeyDown_Read, @_LapeImageBox_OnImgKeyDown_Write);
     addProperty('TImageBox', 'OnImgKeyUp', 'TImageBoxKeyEvent', @_LapeImageBox_OnImgKeyUp_Read, @_LapeImageBox_OnImgKeyUp_Write);
 
+    addProperty('TImageBox', 'UserPanel', 'TLazPanel', @_LapeImageBox_UserPanel_Read);
     addProperty('TImageBox', 'ShowScrollBars', 'Boolean', @_LapeImageBox_ShowScrollBars_Read, @_LapeImageBox_ShowScrollBars_Write);
     addProperty('TImageBox', 'ShowStatusBar', 'Boolean', @_LapeImageBox_ShowStatusBar_Read, @_LapeImageBox_ShowStatusBar_Write);
     addProperty('TImageBox', 'AllowMoving', 'Boolean', @_LapeImageBox_AllowMoving_Read, @_LapeImageBox_AllowMoving_Write);

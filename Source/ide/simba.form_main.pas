@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
   Menus, ImgList, AnchorDockPanel, LMessages,
-  simba.base, simba.settings, simba.ide_mouselogger;
+  simba.base, simba.settings, simba.ide_mouselogger, simba.image;
 
 const
   IMG_NONE = -1;
@@ -251,7 +251,7 @@ type
     // Handle main menu shortcuts if editor is focused
     procedure DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoTabLoaded(Sender: TObject);
-    function DoGetWindowForACA: TWindowHandle;
+    function DoGetWindowForACA: TSimbaImage;
 
     procedure SetCustomFontSize(Value: Integer);
     procedure SetLayoutLocked(Value: Boolean);
@@ -291,8 +291,7 @@ uses
   simba.aca, simba.dtmeditor, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
   simba.ide_simpleformatter, simba.component_theme,
   simba.threading, simba.ide_editor, simba.vartype_string, simba.misc,
-  simba.target,
-  simba.vartype_windowhandle;
+  simba.target;
 
 procedure TSimbaMainForm.HandleException(Sender: TObject; E: Exception);
 
@@ -748,7 +747,11 @@ end;
 
 procedure TSimbaMainForm.MenuItemACAClick(Sender: TObject);
 begin
-  ShowACA(@DoGetWindowForACA);
+  with TSimbaACA.Create(@DoGetWindowForACA) do
+  begin
+    FreeOnClose := True;
+    Show();
+  end;
 end;
 
 procedure TSimbaMainForm.DoMenuItemRunClick(Sender: TObject);
@@ -1047,12 +1050,9 @@ begin
     AddRecentFile(TSimbaScriptTab(Sender).ScriptFileName);
 end;
 
-function TSimbaMainForm.DoGetWindowForACA: TWindowHandle;
+function TSimbaMainForm.DoGetWindowForACA: TSimbaImage;
 begin
-  if (SimbaMainToolBar.WindowSelection = 0) or (not SimbaMainToolBar.WindowSelection.IsValid) then
-    Result := GetDesktopWindow
-  else
-    Result := SimbaMainToolBar.WindowSelection;
+  Result := TSimbaImage.CreateFromWindow(SimbaMainToolBar.WindowSelectionOrDesktop);
 end;
 
 procedure TSimbaMainForm.MenuEditClick(Sender: TObject);

@@ -5,7 +5,7 @@ unit simba.import_misc;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, Forms, ExtCtrls,
   simba.base, simba.script;
 
 procedure ImportMisc(Script: TSimbaScript);
@@ -14,15 +14,17 @@ implementation
 
 uses
   clipbrd, dialogs,
-  lptypes,
+  lptypes, ffi,
   simba.script_objectutil,
   simba.process,
   simba.nativeinterface, simba.settings, simba.env,
   simba.dtmeditor, simba.dialog, simba.threading, simba.target,
-  simba.colormath, simba.aca, simba.multiprocessing;
+  simba.colormath, simba.aca, simba.multiprocessing,
+  simba.component_imagebox;
 
 type
   PProcessID = ^TProcessID;
+  PSimbaImageBox = ^TSimbaImageBox;
 
 (*
 Misc
@@ -273,25 +275,6 @@ begin
 end;
 
 (*
-ShowACA
--------
-```
-function ShowACA(Target: TTarget; Title: String): TColorTolerance;
-function ShowACA: TColorTolerance;
-```
-*)
-procedure _LapeShowACA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-
-  procedure Execute;
-  begin
-    ShowACA(PLapeObjectTarget(Params^[0])^^, False, PColorTolerance(Result)^);
-  end;
-
-begin
-  RunInMainThread(@Execute);
-end;
-
-(*
 ShowDirectoryDialog
 -------------------
 ```
@@ -519,6 +502,75 @@ function GetTimeStamp(Format: String = '[hh:mm:ss:uu]'): String;
 Formats GetTimeRunning using `FormatMilliseconds`
 *)
 
+type
+  PACAForm = ^TSimbaACA;
+  PPanel = ^TPanel;
+
+procedure _LapeACAForm_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PACAForm(Result)^ := TSimbaACA.CreateLape(TACAImageSupplierLape(Params^[0]^));
+end;
+
+procedure _LapeACAForm_UserPanel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPanel(Result)^ := PACAForm(Params^[0])^.UserPanel;
+end;
+
+procedure _LapeACAForm_ImageBox_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBox(Result)^ := PACAForm(Params^[0])^.ImageBox;
+end;
+
+procedure _LapeACAForm_Image_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PACAForm(Params^[0])^.Image := PLapeObjectImage(Params^[1])^^;
+end;
+
+procedure _LapeACAForm_BestColor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorTolerance(Result)^ := PACAForm(Params^[0])^.BestColor;
+end;
+
+procedure _LapeACAForm_Colors_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorArray(Result)^ := PACAForm(Params^[0])^.Colors;
+end;
+
+procedure _LapeACAForm_Colors_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PACAForm(Params^[0])^.Colors := PColorArray(Params^[1])^;
+end;
+
+procedure _LapeACAForm_DrawColor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColor(Result)^ := PACAForm(Params^[0])^.DrawColor;
+end;
+
+procedure _LapeACAForm_DrawColor_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PACAForm(Params^[0])^.DrawColor := PColor(Params^[1])^;
+end;
+
+procedure _LapeACAForm_FindColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PACAForm(Params^[0])^.ButtonFindColor.Click();
+end;
+
+procedure _LapeACAForm_MatchColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PACAForm(Params^[0])^.ButtonMatchColor.Click();
+end;
+
+procedure _LapeACAForm_ClearImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PACAForm(Params^[0])^.ButtonClearImg.Click();
+end;
+
+procedure _LapeACAForm_UpdateImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PACAForm(Params^[0])^.ButtonUpdateImg.Click();
+end;
+
 procedure ImportMisc(Script: TSimbaScript);
 begin
   with Script.Compiler do
@@ -597,6 +649,20 @@ begin
       'end;'
     ]);
 
+    addClass('TACAForm', 'TLazForm', TForm);
+    addGlobalType('function(): TImage of object', 'TAcaImageSupplier', FFI_DEFAULT_ABI);
+    addClassConstructor('TACAForm', '(ImageSupplier: TAcaImageSupplier)', @_LapeACAForm_Create);
+    addProperty('TACAForm', 'UserPanel', 'TLazPanel', @_LapeACAForm_UserPanel_Read);
+    addProperty('TACAForm', 'Colors', 'TColorArray', @_LapeACAForm_Colors_Read, @_LapeACAForm_Colors_Write);
+    addProperty('TACAForm', 'BestColor', 'TColorTolerance', @_LapeACAForm_BestColor_Read);
+    addProperty('TACAForm', 'ImageBox', 'TImageBox', @_LapeACAForm_ImageBox_Read);
+    addProperty('TACAForm', 'Image', 'TImage', nil, @_LapeACAForm_Image_Write);
+    addProperty('TACAForm', 'DrawColor', 'TColor', @_LapeACAForm_DrawColor_Read, @_LapeACAForm_DrawColor_Write);
+    addGlobalFunc('procedure TACAForm.FindColor;', @_LapeACAForm_FindColor);
+    addGlobalFunc('procedure TACAForm.MatchColor;', @_LapeACAForm_MatchColor);
+    addGlobalFunc('procedure TACAForm.ClearImage;', @_LapeACAForm_ClearImage);
+    addGlobalFunc('procedure TACAForm.UpdateImage;', @_LapeACAForm_UpdateImage);
+
     addGlobalFunc('procedure ClearSimbaOutput', @ClearSimbaOutput);
 
     addGlobalFunc('function GetSetting(Section, Name: String; DefValue: String = ""): String;', @_LapeGetSetting);
@@ -616,19 +682,11 @@ begin
     addGlobalFunc('function ShowQueryDialog(Caption, Prompt: String; var Value: String): Boolean', @_LapeInputQuery);
     addGlobalFunc('function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer', @_LapeInputCombo);
     addGlobalFunc('function ShowDTMEditor(Target: TTarget): String; overload', @_LapeShowDTMEditor);
-    addGlobalFunc('function ShowACA(Target: TTarget): TColorTolerance; overload', @_LapeShowACA);
 
     addGlobalFunc(
       'function ShowDTMEditor: String; overload;', [
       'begin',
       '  Result := ShowDTMEditor(Target);',
-      'end;'
-    ]);
-
-    addGlobalFunc(
-      'function ShowACA: TColorTolerance; overload;', [
-      'begin',
-      '  Result := ShowACA(Target);',
       'end;'
     ]);
 

@@ -308,11 +308,10 @@ begin
     EColorSpace.LCH:    MaxDist := DistanceLCH_Max(Mods);
     EColorSpace.DeltaE: MaxDist := DistanceDeltaE_Max(Mods);
   end;
-  if (maxDist = 0) then
-    Exit;
 
-  for i := 0 to High(Colors) do
-    Result := Max(Result, GetDistance(Color, Colors[i]) / MaxDist * 100);
+  if (MaxDist > 0) then
+    for i := 0 to High(Colors) do
+      Result := Max(Result, GetDistance(Color, Colors[i]) / MaxDist * 100);
 end;
 
 function GetBestColor(Formula: EColorSpace; Colors: TColorArray): TBestColor;

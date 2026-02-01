@@ -1,0 +1,59 @@
+var
+  AcaForm: TACAForm;
+
+function GetImageForACA: TImage;
+begin
+  Result := Target.GetImage();
+end;
+
+// On button click, set a custom image.
+// Clicking Update Image will still use GetImageForACA though
+procedure OnSomeButtonClick(Sender: TLazObject);
+var
+  img: TImage;
+begin
+  img := new TImage(100,100);
+  img.Fill(Random($FFFFFF));
+  for 1 to 100 do
+    img.Pixel[Random(100), Random(100)] := Random($FFFFFF);
+
+  AcaForm.Image := img;
+  // can also maniplate the imagebox with some zooming
+  AcaForm.ImageBox.Zoom := 800;
+end;
+
+begin
+  AcaForm := TACAForm.Create(@GetImageForACA);
+  AcaForm.Width := 1600;
+  AcaForm.Height := 800;
+
+  // Add custom things to user panel
+  // sorry no custom (themed) components for the time being
+  with TLazButton.Create(AcaForm) do
+  begin
+    Parent := AcaForm.UserPanel;
+    Caption := 'SomeButton';
+    AutoSize := True;
+    Align := ELazAlign.LEFT;
+    BorderSpacing.Around := 5;
+    OnClick := @OnSomeButtonClick;
+  end;
+
+  with TLazEdit.Create(AcaForm) do
+  begin
+    Parent := AcaForm.UserPanel;
+    Caption := 'SomeInput';
+    Align := ELazAlign.LEFT;
+    Width := 200;
+    Font.Color := $000000;
+    BorderSpacing.Around := 5;
+  end;
+
+  // can populate the colors too
+  AcaForm.Colors := [Colors.RED, Colors.GREEN];
+  AcaForm.ShowModal();
+
+  WriteLn('The best color was: ', AcaForm.BestColor);
+
+  AcaForm.Free();
+end;

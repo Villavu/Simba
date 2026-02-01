@@ -92,6 +92,9 @@ begin
   ImportJSON(Script);
   ImportPixelOCR(Script);
 
+  ImportSimbaImageBox(Script);
+  ImportSimbaShapeBox(Script);
+
   ImportDateTime(Script);
   ImportTiming(Script);
   ImportEncoding(Script);
@@ -109,9 +112,6 @@ begin
   ImportThreading(Script);
   ImportASync(Script);
   ImportVector(Script);
-
-  ImportSimbaImageBox(Script);
-  ImportSimbaShapeBox(Script);
 end;
 
 end.
