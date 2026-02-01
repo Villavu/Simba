@@ -893,6 +893,7 @@ begin
     addGlobalFunc('procedure TLazCustomForm.SetRestoredBounds(ALeft, ATop, AWidth, AHeight: Integer);', @_LapeCustomForm_SetRestoredBounds);
     addGlobalFunc('function TLazCustomForm.ShowModal: Integer;', @_LapeCustomForm_ShowModal);
     addGlobalFunc('procedure TLazCustomForm.ShowOnTop;', @_LapeCustomForm_ShowOnTop);
+    addGlobalFunc('procedure TLazCustomForm.Show;', @_LapeCustomForm_Show);
     addProperty('TLazCustomForm', 'BorderStyle', 'ELazFormBorderStyle', @_LapeCustomForm_Read_BorderStyle, @_LapeCustomForm_Write_BorderStyle);
     addProperty('TLazCustomForm', 'BorderIcons', 'ELazFormBorderIcons', @_LapeCustomForm_Read_BorderIcons, @_LapeCustomForm_Write_BorderIcons);
     addProperty('TLazCustomForm', 'Active', 'Boolean', @_LapeCustomForm_Active_Read);
