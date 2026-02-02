@@ -301,7 +301,7 @@ class function TSimbaPath.PathExtractNameWithoutExt(Path: String): String;
 begin
   Result := ExtractFileName(Path);
   if '.' in Result then
-    Result := Result.Before('.');
+    Result := Result.Before(ExtractFileExt(Path));
 end;
 
 class function TSimbaPath.PathExtractExt(Path: String): String;
