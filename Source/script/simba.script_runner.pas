@@ -20,7 +20,7 @@ type
     FScript: TSimbaScript;
     FCompileOnly: Boolean;
 
-    procedure DoDebugLn(Flags: EDebugLnFlags; Text: String);
+    procedure DoDebugLn(Flags: EDebugLnFlags; bgColor: TColor; Text: String);
     procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 
     procedure DoApplicationTerminate(Sender: TObject);
@@ -41,14 +41,21 @@ uses
   simba.env, simba.fs, simba.datetime, simba.script_communication, simba.vartype_string,
   simba.baseclass;
 
-procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; Text: String);
+procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; bgColor: TColor; Text: String);
 begin
   if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then // Only add flags if we have communication with simba to use them
     DebugLn(Flags, Text)
   else
   begin
-    if Application.HasOption('silent') and (Flags * [EDebugLn.BACKGROUND_COLOR] <> []) then
+    if Application.HasOption('silent') then
+    begin
+      if (Flags * [EDebugLn.BACKGROUND_COLOR] <> []) then
+      begin
+        if bgColor = GetLineColor(EDebugLnColor.RED) then
+           DebugLn(Text);
+      end;
       Exit;
+    end;
 
     DebugLn(Text);
   end;
