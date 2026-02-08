@@ -439,9 +439,14 @@ begin
 end;
 
 procedure TSimbaOutputBox.AddLine(Flags: EDebugLnFlags; const S: String);
+var
+  lineData: PLineFlagsData;
 begin
   FLock.Enter();
-  FBuffer.AddObject(S, TObject(PtrUInt(Integer(Flags))));
+  New(lineData);
+  lineData^.Flags := Flags;
+  lineData^.Color := $0;
+  FBuffer.AddObject(S, TObject(lineData));
   FLock.Leave();
 end;
 

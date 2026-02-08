@@ -456,13 +456,13 @@ end;
 
 const
   DebugLnFlagsHeader       = String(#0#0);
-  DebugLnFlagsHeaderLength = Length(DebugLnFlagsHeader) + 6;
+  DebugLnFlagsHeaderLength = Length(DebugLnFlagsHeader) + 7;
 
 function FlagsToByte(const flags: EDebugLnFlags): Byte; inline;
 begin
   Result := 0;
-  if EDebugLn.CLEAR           in flags then Result := Result or 1;
-  if EDebugLn.FOCUS           in flags then Result := Result or 2;
+  if EDebugLn.CLEAR            in flags then Result := Result or 1;
+  if EDebugLn.FOCUS            in flags then Result := Result or 2;
   if EDebugLn.BACKGROUND_COLOR in flags then Result := Result or 4;
 end;
 
@@ -477,9 +477,17 @@ begin
 end;
 
 function FlagsFromString(var str: String; out bgColor: TColor): EDebugLnFlags;
+  function _HexToColor(const hex: String): TColor;
+  begin
+    if Length(hex) = 6 then
+      Result := (StrToInt('$' + Copy(hex,1,2)) shl 16) or
+                (StrToInt('$' + Copy(hex,3,2)) shl 8)  or
+                 StrToInt('$' + Copy(hex,5,2))
+    else
+      Result := 0;
+  end;
 var
   flagsByte: Byte;
-  idx: Integer;
 begin
   Result := [];
   if (Length(Str) >= DebugLnFlagsHeaderLength) and (Str[1] = DebugLnFlagsHeader[1]) and (Str[2] = DebugLnFlagsHeader[2]) then
@@ -491,11 +499,9 @@ begin
     //if (flagsByte and 8 <> 0) then Include(Result, EDebugLn.TEXT_COLOR);
     //maybe in the future... would like multi color support per line
 
-    idx := 4;
     if EDebugLn.BACKGROUND_COLOR in Result then
     begin
-      bgColor := (Ord(Str[idx]) shl 16) or (Ord(str[idx+1]) shl 8) or Ord(str[idx+2]);
-      Inc(idx, 3);
+      bgColor := _HexToColor(Copy(str, 4, 6));
     end
     else
       bgColor := $0;
