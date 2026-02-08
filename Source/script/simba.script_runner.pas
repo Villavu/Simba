@@ -10,7 +10,7 @@ unit simba.script_runner;
 interface
 
 uses
-  Classes, SysUtils, Graphics,
+  Classes, SysUtils,
   lptypes, lpvartypes, lpmessages,
   simba.script, simba.base;
 
@@ -20,7 +20,7 @@ type
     FScript: TSimbaScript;
     FCompileOnly: Boolean;
 
-    procedure DoDebugLn(Flags: EDebugLnFlags; bgColor: TColor; Text: String);
+    procedure DoDebugLn(Flags: EDebugLnFlags; color: EDebugLnColor; Text: String);
     procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 
     procedure DoApplicationTerminate(Sender: TObject);
@@ -41,7 +41,7 @@ uses
   simba.env, simba.fs, simba.datetime, simba.script_communication, simba.vartype_string,
   simba.baseclass;
 
-procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; bgColor: TColor; Text: String);
+procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; color: EDebugLnColor; Text: String);
 begin
   if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then // Only add flags if we have communication with simba to use them
     DebugLn(Flags, Text)
@@ -50,10 +50,8 @@ begin
     if Application.HasOption('silent') then
     begin
       if (Flags * [EDebugLn.BACKGROUND_COLOR] <> []) then
-      begin
-        if bgColor = GetLineColor(EDebugLnColor.RED) then
-           DebugLn(Text);
-      end;
+        if color = EDebugLnColor.RED then
+          DebugLn(Text);
       Exit;
     end;
 
@@ -90,15 +88,15 @@ var
 begin
   ExitCode := 1;
 
-  DoDebugLn([EDebugLn.BACKGROUND_COLOR, EDebugLn.FOCUS], GetLineColor(EDebugLnColor.RED), E.Message);
+  DoDebugLn([EDebugLn.BACKGROUND_COLOR, EDebugLn.FOCUS], EDebugLnColor.RED, E.Message);
 
   if (E is lpException) then
     with lpException(E) do
     begin
       for Line in StackTrace.Split(LineEnding) do
-        DoDebugLn([EDebugLn.BACKGROUND_COLOR, EDebugLn.FOCUS], GetLineColor(EDebugLnColor.RED), Line);
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR, EDebugLn.FOCUS], EDebugLnColor.RED, Line);
       for Line in Hint.Split(LineEnding) do
-        DoDebugLn([EDebugLn.BACKGROUND_COLOR, EDebugLn.FOCUS], GetLineColor(EDebugLnColor.YELLOW), Line);
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR, EDebugLn.FOCUS], EDebugLnColor.YELLOW, Line);
 
       if (FScript.SimbaCommunication <> nil) then
         FScript.SimbaCommunication.ScriptError(Message, DocPos.Line, DocPos.Col, DocPos.FileName);
@@ -112,7 +110,7 @@ begin
 
     try
       if FScript.Compile() then
-        DoDebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.GREEN), 'Succesfully compiled in %.2f milliseconds.'.Format([FScript.CompileTime]));
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR], EDebugLnColor.GREEN, 'Succesfully compiled in %.2f milliseconds.'.Format([FScript.CompileTime]));
     except
       on E: Exception do
       begin
@@ -126,9 +124,9 @@ begin
       FScript.Run();
 
       if (FScript.RunningTime < 10000) then
-        DoDebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.GREEN), 'Succesfully executed in %.2f milliseconds.'.Format([FScript.RunningTime]))
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR], EDebugLnColor.GREEN, 'Succesfully executed in %.2f milliseconds.'.Format([FScript.RunningTime]))
       else
-        DoDebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.GREEN), 'Succesfully executed in %s.'.Format([FormatMilliseconds(Round(FScript.RunningTime), '\[hh:mm:ss\]')]));
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR], EDebugLnColor.GREEN, 'Succesfully executed in %s.'.Format([FormatMilliseconds(Round(FScript.RunningTime), '\[hh:mm:ss\]')]));
     except
       on E: Exception do
         DoError(E);
