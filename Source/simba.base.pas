@@ -468,24 +468,37 @@ end;
 
 function FlagsToString(const flags: EDebugLnFlags; const bgColor: TColor): String; inline;
 begin
-  Result := DebugLnFlagsHeader;
-  Result := Result + Chr(FlagsToByte(flags));
+  Result := DebugLnFlagsHeader + Chr(FlagsToByte(flags));
   if (EDebugLn.BACKGROUND_COLOR in flags) then
-    Result := Result + Chr((bgColor shr 16) and $FF) +
-                       Chr((bgColor shr 8) and $FF) +
-                       Chr(bgColor and $FF);
+    Result += Format('%.6X', [bgColor])
+  else
+    Result += '000000';
 end;
 
 function FlagsFromString(var str: String; out bgColor: TColor): EDebugLnFlags;
-  function _HexToColor(const hex: String): TColor;
+  function HexToColor(P: PChar): TColor; inline;
+  var
+    N, I: Integer;
+    Val: Char;
   begin
-    if Length(hex) = 6 then
-      Result := (StrToInt('$' + Copy(hex,1,2)) shl 16) or
-                (StrToInt('$' + Copy(hex,3,2)) shl 8)  or
-                 StrToInt('$' + Copy(hex,5,2))
-    else
-      Result := 0;
+    Result := 0;
+
+    for I := 1 to 6 do
+    begin
+      Val := P^;
+      case Val of
+        '0'..'9': N := Ord(Val) - (Ord('0'));
+        'a'..'f': N := Ord(Val) - (Ord('a') - 10);
+        'A'..'F': N := Ord(Val) - (Ord('A') - 10);
+        else
+          Exit(0);
+      end;
+      Inc(P);
+
+      Result := Result*16+N;
+    end;
   end;
+
 var
   flagsByte: Byte;
 begin
@@ -500,15 +513,14 @@ begin
     //maybe in the future... would like multi color support per line
 
     if EDebugLn.BACKGROUND_COLOR in Result then
-    begin
-      bgColor := _HexToColor(Copy(str, 4, 6));
-    end
+      bgColor := HexToColor(@Str[4])
     else
       bgColor := $0;
 
     Delete(str, 1, DebugLnFlagsHeaderLength);
   end;
 end;
+
 
 function InRange(const AValue, AMin, AMax: Integer): Boolean;
 begin

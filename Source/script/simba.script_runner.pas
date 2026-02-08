@@ -44,7 +44,7 @@ uses
 procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; color: EDebugLnColor; Text: String);
 begin
   if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then // Only add flags if we have communication with simba to use them
-    DebugLn(Flags, Text)
+    DebugLn(Flags, GetLineColor(color), Text)
   else
   begin
     if Application.HasOption('silent') then

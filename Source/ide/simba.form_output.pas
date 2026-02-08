@@ -251,11 +251,12 @@ var
 begin
   lineData := PLineFlagsData(Lines.Objects[Line - 1]);
 
-  if lineData = nil then
-  begin
-    Special := False;
-    Exit;
-  end;
+  //99.99% sure there's no need to check, should never be nil
+  //if lineData = nil then
+  //begin
+  //  Special := False;
+  //  Exit;
+  //end;
 
   if EDebugLn.BACKGROUND_COLOR in lineData^.Flags then
   begin
