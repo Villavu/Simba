@@ -56,7 +56,7 @@ end;
 
 procedure TSimbaScriptRunner.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  DoDebugLn([EDebugLn.YELLOW], Hint);
+  DebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.YELLOW), Hint);
 end;
 
 procedure TSimbaScriptRunner.DoApplicationTerminate(Sender: TObject);
@@ -83,15 +83,15 @@ var
 begin
   ExitCode := 1;
 
-  DoDebugLn([EDebugLn.RED, EDebugLn.FOCUS], E.Message);
+  DoDebugLn([EDebugLn.BACKGROUND_COLOR, EDebugLn.FOCUS], GetLineColor(EDebugLnColor.RED), E.Message);
 
   if (E is lpException) then
     with lpException(E) do
     begin
       for Line in StackTrace.Split(LineEnding) do
-        DoDebugLn([EDebugLn.RED, EDebugLn.FOCUS], Line);
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR, EDebugLn.FOCUS], GetLineColor(EDebugLnColor.RED), Line);
       for Line in Hint.Split(LineEnding) do
-        DoDebugLn([EDebugLn.YELLOW, EDebugLn.FOCUS], Line);
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR, EDebugLn.FOCUS], GetLineColor(EDebugLnColor.YELLOW), Line);
 
       if (FScript.SimbaCommunication <> nil) then
         FScript.SimbaCommunication.ScriptError(Message, DocPos.Line, DocPos.Col, DocPos.FileName);

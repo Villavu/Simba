@@ -279,7 +279,8 @@ type
 {$PUSH}
 {$SCOPEDENUMS ON}
 type
-  EDebugLn = (CLEAR, YELLOW, RED, GREEN, FOCUS);
+  EDebugLn = (CLEAR, FOCUS, BACKGROUND_COLOR);
+  EDebugLnColor = (YELLOW, RED, GREEN);
   EDebugLnFlags = set of EDebugLn;
 {$POP}
 
@@ -291,10 +292,14 @@ procedure Debug(const Msg: String; Args: array of const); overload;
 procedure DebugLn(const Msg: String); overload;
 procedure DebugLn(const Msg: String; Args: array of const); overload;
 procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String); overload;
+procedure DebugLn(const Flags: EDebugLnFlags; bgColor: TColor; const Msg: String); overload; 
 procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String; Args: array of const); overload;
+procedure DebugLn(const Flags: EDebugLnFlags; bgColor: TColor; const Msg: String; Args: array of const); overload;
 
-function FlagsToString(const Flags: EDebugLnFlags): String;
-function FlagsFromString(var Str: String): EDebugLnFlags;
+function GetLineColor(const color: EDebugLnColor): TColor;
+
+function FlagsToString(const flags: EDebugLnFlags; const bgColor: TColor): String;
+function FlagsFromString(var Str: String; out bgColor: Int32): EDebugLnFlags;
 
 function InRange(const AValue, AMin, AMax: Integer): Boolean; inline; overload;
 function InRange(const AValue, AMin, AMax: Int64): Boolean; inline; overload;
@@ -412,12 +417,22 @@ end;
 
 procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String);
 begin
-  DebugLn(FlagsToString(Flags) + Msg);
+  DebugLn(FlagsToString(Flags, $0) + Msg);
+end;
+
+procedure DebugLn(const Flags: EDebugLnFlags; bgColor: TColor; const Msg: String);
+begin
+  DebugLn(FlagsToString(Flags, bgColor) + Msg);
 end;
 
 procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String; Args: array of const);
 begin
-  DebugLn(FlagsToString(Flags) + Format(Msg, Args));
+  DebugLn(FlagsToString(Flags, $0) + Format(Msg, Args));
+end;
+
+procedure DebugLn(const Flags: EDebugLnFlags; bgColor: TColor; const Msg: String; Args: array of const);
+begin
+  DebugLn(FlagsToString(Flags, bgColor) + Format(Msg, Args));
 end;
 
 procedure SimbaException(Message: String; Args: array of const);
@@ -430,48 +445,58 @@ begin
   raise ESimbaException.Create(Message);
 end;
 
+
+function GetLineColor(const color: EDebugLnColor): TColor; inline;
+const
+  DEBUG_LINE_COLORS: array [EDebugLnColor] of TColor = [
+    $00BFFF, $0000A5, $228B22
+  ];
+begin
+  Result := DEBUG_LINE_COLORS[color];
+end;
+
 const
   DebugLnFlagsHeader       = String(#0#0);
   DebugLnFlagsHeaderLength = Length(DebugLnFlagsHeader) + 6;
 
-function FlagsToString(const Flags: EDebugLnFlags): String; inline;
+function FlagsToString(const flags: EDebugLnFlags; const bgColor: TColor): String; inline;
 begin
-  Result := DebugLnFlagsHeader + IntToHex(Integer(Flags), 6);
+  Result := DebugLnFlagsHeader;
+  Result := Result + Chr(Byte(flags));
+  if (EDebugLn.BACKGROUND_COLOR in flags) then
+  begin
+    Result := Result + Chr((bgColor shr 16) and $FF) +
+                       Chr((bgColor shr 8) and $FF) +
+                       Chr(bgColor and $FF);
+  end;
 end;
 
-function FlagsFromString(var Str: String): EDebugLnFlags;
-
-  function HexToInt(P: PChar): Integer; inline;
-  var
-    N, I: Integer;
-    Val: Char;
-  begin
-    Result := 0;
-
-    for I := 1 to 6 do
-    begin
-      Val := P^;
-      case Val of
-        '0'..'9': N := Ord(Val) - (Ord('0'));
-        'a'..'f': N := Ord(Val) - (Ord('a') - 10);
-        'A'..'F': N := Ord(Val) - (Ord('A') - 10);
-        else
-          Exit(0);
-      end;
-      Inc(P);
-
-      Result := Result*16+N;
-    end;
-  end;
-
+function FlagsFromString(var str: String; out bgColor: Int32): EDebugLnFlags;
+var
+  flagsByte: Byte;
+  idx: Integer;
 begin
+  Result := [];
   if (Length(Str) >= DebugLnFlagsHeaderLength) and (Str[1] = DebugLnFlagsHeader[1]) and (Str[2] = DebugLnFlagsHeader[2]) then
   begin
-    Result := EDebugLnFlags(HexToInt(@Str[3]));
+    flagsByte := Ord(str[3]);
+    if (flagsByte and 1 <> 0) then Include(Result, EDebugLn.CLEAR);
+    if (flagsByte and 2 <> 0) then Include(Result, EDebugLn.FOCUS);
+    if (flagsByte and 4 <> 0) then Include(Result, EDebugLn.BACKGROUND_COLOR);
+    //if (flagsByte and 8 <> 0) then Include(Result, EDebugLn.TEXT_COLOR);
+    //maybe in the future... would like multi color support per line
 
-    Delete(Str, 1, DebugLnFlagsHeaderLength);
-  end else
-    Result := [];
+    idx := 4;
+    if EDebugLn.BACKGROUND_COLOR in Result then
+    begin
+      bgColor := (Ord(Str[idx]) shl 16) or (Ord(str[idx+1]) shl 8) or Ord(str[idx+2]);
+      Inc(idx, 3);
+    end
+    else
+      bgColor := $0;
+
+    Delete(str, 1, DebugLnFlagsHeaderLength);
+  end;
 end;
 
 function InRange(const AValue, AMin, AMax: Integer): Boolean;

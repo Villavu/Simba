@@ -125,7 +125,7 @@ end;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  DebugLn([EDebugLn.YELLOW], Hint);
+  DebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.YELLOW), Hint);
 end;
 
 procedure TSimbaScript.DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString);

@@ -74,7 +74,7 @@ begin
       if not TrackedObjects.First.FreeOnTerminate then
       begin
         if NeedHeader then
-          DebugLn([EDebugLn.YELLOW], 'The following objects were not freed:');
+          DebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.YELLOW), 'The following objects were not freed:');
         NeedHeader := False;
 
         TrackedObjects.First.NotifyUnfreed();
@@ -98,7 +98,7 @@ begin
       if not TrackedThreads[I].Finished then
       begin
         if NeedHeader then
-          DebugLn([EDebugLn.YELLOW], 'The following threads were still running:');
+          DebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.YELLOW), 'The following threads were still running:');
         NeedHeader := False;
 
         TrackedThreads[I].NotifyUnfreed();
@@ -119,7 +119,7 @@ begin
       if TrackedThreads.First.Finished and (not TrackedThreads.First.FreeOnTerminate) then
       begin
         if NeedHeader then
-          DebugLn([EDebugLn.YELLOW], 'The following threads were not freed:');
+          DebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.YELLOW), 'The following threads were not freed:');
         NeedHeader := False;
 
         TrackedThreads.First.NotifyUnfreed();
@@ -153,7 +153,7 @@ end;
 
 procedure TSimbaBaseClass.NotifyUnfreed;
 begin
-  DebugLn([EDebugLn.YELLOW], '  ' + ClassName + ' (' + HexStr(Self) + ')' + IfThen(Name <> '', ' "' + Name + '"', ''));
+  DebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.YELLOW), '  ' + ClassName + ' (' + HexStr(Self) + ')' + IfThen(Name <> '', ' "' + Name + '"', ''));
 end;
 
 function TSimbaBaseClass.GetName: String;
@@ -189,7 +189,7 @@ end;
 
 procedure TSimbaBaseThread.NotifyUnfreed;
 begin
-  DebugLn([EDebugLn.YELLOW], '  ' + ClassName + ' (' + HexStr(Self) + ')' + IfThen(FName <> '', ' "' + FName + '"', ''));
+  DebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.YELLOW), '  ' + ClassName + ' (' + HexStr(Self) + ')' + IfThen(FName <> '', ' "' + FName + '"', ''));
 end;
 
 constructor TSimbaBaseThread.Create;

@@ -135,6 +135,13 @@ type
     property OutputBox: TSimbaOutputBox read FOutputBox;
   end;
 
+type
+  PLineFlagsData = ^TLineFlagsData;
+  TLineFlagsData = record
+    Flags: EDebugLnFlags;
+    Color: TColor;
+  end;
+
 procedure TSimbaOutputTab.DoTabScriptStateChange(Sender: TObject);
 begin
   if (Sender is TSimbaScriptTab) and (TSimbaScriptTab(Sender).OutputBox = FOutputBox) then
@@ -240,19 +247,21 @@ end;
 
 procedure TSimbaOutputBox.DoSpecialLineMarkup(Sender: TObject; Line: Integer; var Special: Boolean; AMarkup: TSynSelectedColor);
 var
-  Flags: EDebugLnFlags;
+  lineData: PLineFlagsData;
 begin
-  Flags := EDebugLnFlags(Integer(PtrUInt(Lines.Objects[Line - 1])));
+  lineData := PLineFlagsData(Lines.Objects[Line - 1]);
 
-  if (([EDebugLn.YELLOW, EDebugLn.RED, EDebugLn.GREEN] * Flags) <> []) then
+  if lineData = nil then
   begin
-    if (EDebugLn.YELLOW in Flags) then AMarkup.Background := $00BFFF else
-    if (EDebugLn.RED    in Flags) then AMarkup.Background := $0000A5 else
-    if (EDebugLn.GREEN  in Flags) then AMarkup.Background := $228B22;
+    Special := False;
+    Exit;
+  end;
 
+  if EDebugLn.BACKGROUND_COLOR in lineData.Flags then
+  begin
+    AMarkup.Background := lineData.Color;
     AMarkup.BackAlpha  := 115;
     AMarkup.Foreground := clNone;
-
     Special := True;
   end else
     Special := False;
@@ -304,16 +313,22 @@ begin
 end;
 
 destructor TSimbaOutputBox.Destroy;
+var
+  i: Integer;
 begin
+  if (FBuffer <> nil) then
+  begin
+    for i := 0 to FBuffer.Count - 1 do
+      Dispose(PLineFlagsData(FBuffer.Objects[i]))
+    FreeAndNil(FBuffer);
+  end;
   if (FLock <> nil) then
     FreeAndNil(FLock);
-  if (FBuffer <> nil) then
-    FreeAndNil(FBuffer);
 
   inherited Destroy();
 end;
 
-procedure TSimbaOutputBox.GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: integer);
+procedure TSimbaOutputBox.GetWordBoundsAtRowCol(const XY: TPoint; out StartX, EndX: Integer);
 
   // Line 3 in function "cpuuu" in file "Untitled"
   function FindStackTrace(Line: String; var StartPos, EndPos: Integer): Boolean;
@@ -386,7 +401,7 @@ var
   Arr: TStringArray;
   I: Integer;
   Line: String;
-  Flags: EDebugLnFlags;
+  lineData: PLineData;
 begin
   Arr := S.Split(LineEnding, False);
   if (Length(Arr) = 0) then
@@ -402,9 +417,9 @@ begin
       for I := 0 to High(Arr) do
       begin
         Line  := Arr[I];
-        Flags := FlagsFromString(Line);
-
-        FBuffer.AddObject(Line, TObject(PtrUInt(Integer(Flags))));
+        New(lineData);
+        lineData^.Flags := FlagsFromString(Line, lineData^.Color);
+        FBuffer.AddObject(Line, TObject(data));
       end;
     end else
     begin
@@ -413,9 +428,9 @@ begin
       for I := 0 to High(Arr) - 1 do
       begin
         Line  := Arr[I];
-        Flags := FlagsFromString(Line);
-
-        FBuffer.AddObject(Line, TObject(PtrUInt(Integer(Flags))));
+        New(lineData);
+        lineData^.Flags := FlagsFromString(Line, lineData^.Color);
+        FBuffer.AddObject(Line, TObject(data));
       end;
     end;
 
@@ -439,7 +454,7 @@ procedure TSimbaOutputBox.Flush;
 var
   I, StartIndex: Integer;
   NeedFocus, NeedScroll: Boolean;
-  Flags: EDebugLnFlags;
+  lineData: PLineFlagsData;
 begin
   FLock.Enter();
 
@@ -451,10 +466,10 @@ begin
       StartIndex := 0;
       for I := 0 to FBuffer.Count - 1 do
       begin
-        Flags := EDebugLnFlags(Integer(PtrUInt(FBuffer.Objects[I])));
-        if (EDebugLn.CLEAR in Flags) then
+        lineData := PLineFlagsData(FBuffer.Objects[I]);
+        if (EDebugLn.CLEAR in lineData^.Flags) then
           StartIndex := I+1;
-        if (EDebugLn.FOCUS in Flags) then
+        if (EDebugLn.FOCUS in lineData^.Flags) then
           NeedFocus := True;
       end;
 
@@ -465,7 +480,10 @@ begin
       // auto scroll if already scrolled to bottom.
       NeedScroll := (Lines.Count < LinesInWindow) or ((Lines.Count + 1) = (TopLine + LinesInWindow));
       for I := StartIndex to FBuffer.Count - 1 do
-        Lines.AddObject(FBuffer[I], FBuffer.Objects[I]);
+      begin
+        lineData := PLineFlagsData(FBuffer.Objects[I]);
+        Lines.AddObject(FBuffer[I], TObject(lineData));
+      end;
 
       if NeedFocus or NeedScroll then
       begin
@@ -477,6 +495,8 @@ begin
       EndUpdate();
       Invalidate();
 
+      for I := 0 to FBuffer.Count - 1 do
+        Dispose(PLineFlagsData(FBuffer.Objects[I]));
       FBuffer.Clear();
     end;
   finally

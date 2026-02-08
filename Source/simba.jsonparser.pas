@@ -243,7 +243,7 @@ procedure TJsonItemTracked.NotifyUnfreed;
   end;
 
 begin
-  DebugLn([EDebugLn.YELLOW], '  ' + Dump());
+  DebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.YELLOW), '  ' + Dump());
 end;
 
 constructor TJsonItemTracked.Create(AItem: TJSONData);
