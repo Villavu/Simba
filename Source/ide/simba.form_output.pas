@@ -257,9 +257,9 @@ begin
     Exit;
   end;
 
-  if EDebugLn.BACKGROUND_COLOR in lineData.Flags then
+  if EDebugLn.BACKGROUND_COLOR in lineData^.Flags then
   begin
-    AMarkup.Background := lineData.Color;
+    AMarkup.Background := lineData^.Color;
     AMarkup.BackAlpha  := 115;
     AMarkup.Foreground := clNone;
     Special := True;
@@ -319,7 +319,7 @@ begin
   if (FBuffer <> nil) then
   begin
     for i := 0 to FBuffer.Count - 1 do
-      Dispose(PLineFlagsData(FBuffer.Objects[i]))
+      Dispose(PLineFlagsData(FBuffer.Objects[i]));
     FreeAndNil(FBuffer);
   end;
   if (FLock <> nil) then
@@ -401,7 +401,7 @@ var
   Arr: TStringArray;
   I: Integer;
   Line: String;
-  lineData: PLineData;
+  lineData: PLineFlagsData;
 begin
   Arr := S.Split(LineEnding, False);
   if (Length(Arr) = 0) then
@@ -419,7 +419,7 @@ begin
         Line  := Arr[I];
         New(lineData);
         lineData^.Flags := FlagsFromString(Line, lineData^.Color);
-        FBuffer.AddObject(Line, TObject(data));
+        FBuffer.AddObject(Line, TObject(lineData));
       end;
     end else
     begin
@@ -430,7 +430,7 @@ begin
         Line  := Arr[I];
         New(lineData);
         lineData^.Flags := FlagsFromString(Line, lineData^.Color);
-        FBuffer.AddObject(Line, TObject(data));
+        FBuffer.AddObject(Line, TObject(lineData));
       end;
     end;
 
@@ -447,7 +447,7 @@ end;
 
 procedure TSimbaOutputBox.Empty;
 begin
-  Add(FlagsToString([EDebugLn.CLEAR]) + LineEnding);
+  Add(FlagsToString([EDebugLn.CLEAR], $0) + LineEnding);
 end;
 
 procedure TSimbaOutputBox.Flush;

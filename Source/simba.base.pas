@@ -298,8 +298,9 @@ procedure DebugLn(const Flags: EDebugLnFlags; bgColor: TColor; const Msg: String
 
 function GetLineColor(const color: EDebugLnColor): TColor;
 
+function FlagsToByte(const flags: EDebugLnFlags): Byte;
 function FlagsToString(const flags: EDebugLnFlags; const bgColor: TColor): String;
-function FlagsFromString(var Str: String; out bgColor: Int32): EDebugLnFlags;
+function FlagsFromString(var Str: String; out bgColor: TColor): EDebugLnFlags;
 
 function InRange(const AValue, AMin, AMax: Integer): Boolean; inline; overload;
 function InRange(const AValue, AMin, AMax: Int64): Boolean; inline; overload;
@@ -448,30 +449,34 @@ end;
 
 function GetLineColor(const color: EDebugLnColor): TColor; inline;
 const
-  DEBUG_LINE_COLORS: array [EDebugLnColor] of TColor = [
-    $00BFFF, $0000A5, $228B22
-  ];
+  DEBUG_LINE_COLORS: TColorArray = ($00BFFF, $0000A5, $228B22);
 begin
-  Result := DEBUG_LINE_COLORS[color];
+  Result := DEBUG_LINE_COLORS[Ord(color)];
 end;
 
 const
   DebugLnFlagsHeader       = String(#0#0);
   DebugLnFlagsHeaderLength = Length(DebugLnFlagsHeader) + 6;
 
+function FlagsToByte(const flags: EDebugLnFlags): Byte; inline;
+begin
+  Result := 0;
+  if EDebugLn.CLEAR           in flags then Result := Result or 1;
+  if EDebugLn.FOCUS           in flags then Result := Result or 2;
+  if EDebugLn.BACKGROUND_COLOR in flags then Result := Result or 4;
+end;
+
 function FlagsToString(const flags: EDebugLnFlags; const bgColor: TColor): String; inline;
 begin
   Result := DebugLnFlagsHeader;
-  Result := Result + Chr(Byte(flags));
+  Result := Result + Chr(FlagsToByte(flags));
   if (EDebugLn.BACKGROUND_COLOR in flags) then
-  begin
     Result := Result + Chr((bgColor shr 16) and $FF) +
                        Chr((bgColor shr 8) and $FF) +
                        Chr(bgColor and $FF);
-  end;
 end;
 
-function FlagsFromString(var str: String; out bgColor: Int32): EDebugLnFlags;
+function FlagsFromString(var str: String; out bgColor: TColor): EDebugLnFlags;
 var
   flagsByte: Byte;
   idx: Integer;

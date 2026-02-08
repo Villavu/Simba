@@ -228,7 +228,7 @@ begin
 
     if Package.HasUpdate() and Package.AutoUpdateEnabled then
     begin
-      DebugLn([EDebugLn.FOCUS, EDebugLn.YELLOW], 'Automatically updating %s', [Package.Name]);
+      DebugLn([EDebugLn.FOCUS, EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.YELLOW), 'Automatically updating %s', [Package.Name]);
       Sleep(750); // whatever, let above flush... TSimbaPackageInstaller directly writes to the synedit.
 
       try
@@ -247,16 +247,16 @@ begin
 
           if Install(InstallOpts) then
           begin
-            DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Succesfully updated "%s"', [Package.Name]);
-            DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Now at version: %s', [Package.InstalledVersion]);
+            DebugLn([EDebugLn.FOCUS, EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.GREEN), 'Succesfully updated "%s"', [Package.Name]);
+            DebugLn([EDebugLn.FOCUS, EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.GREEN), 'Now at version: %s', [Package.InstalledVersion]);
           end else
-            DebugLn([EDebugLn.FOCUS, EDebugLn.RED], 'Failed to update: %s', [Package.Name]);
+            DebugLn([EDebugLn.FOCUS, EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.RED), 'Failed to update: %s', [Package.Name]);
         finally
           Free();
         end;
       except
         on E: Exception do
-          DebugLn([EDebugLn.FOCUS, EDebugLn.RED], 'Failed to update: %s (%s)', [Package.Name, E.Message]);
+          DebugLn([EDebugLn.FOCUS, EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.RED), 'Failed to update: %s (%s)', [Package.Name, E.Message]);
       end;
     end;
   end;
