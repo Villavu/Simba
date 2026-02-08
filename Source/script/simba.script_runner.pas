@@ -47,7 +47,7 @@ begin
     DebugLn(Flags, Text)
   else
   begin
-    if Application.HasOption('silent') and (Flags * [EDebugLn.YELLOW, EDebugLn.GREEN] <> []) then
+    if Application.HasOption('silent') and (Flags * [EDebugLn.BACKGROUND_COLOR] <> []) then
       Exit;
 
     DebugLn(Text);
@@ -105,7 +105,7 @@ begin
 
     try
       if FScript.Compile() then
-        DoDebugLn([EDebugLn.GREEN], 'Succesfully compiled in %.2f milliseconds.'.Format([FScript.CompileTime]));
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.GREEN), 'Succesfully compiled in %.2f milliseconds.'.Format([FScript.CompileTime]));
     except
       on E: Exception do
       begin
@@ -119,9 +119,9 @@ begin
       FScript.Run();
 
       if (FScript.RunningTime < 10000) then
-        DoDebugLn([EDebugLn.GREEN], 'Succesfully executed in %.2f milliseconds.'.Format([FScript.RunningTime]))
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.GREEN), 'Succesfully executed in %.2f milliseconds.'.Format([FScript.RunningTime]))
       else
-        DoDebugLn([EDebugLn.GREEN], 'Succesfully executed in %s.'.Format([FormatMilliseconds(Round(FScript.RunningTime), '\[hh:mm:ss\]')]));
+        DoDebugLn([EDebugLn.BACKGROUND_COLOR], GetLineColor(EDebugLnColor.GREEN), 'Succesfully executed in %s.'.Format([FormatMilliseconds(Round(FScript.RunningTime), '\[hh:mm:ss\]')]));
     except
       on E: Exception do
         DoError(E);
