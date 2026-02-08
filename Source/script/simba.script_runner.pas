@@ -10,7 +10,7 @@ unit simba.script_runner;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, Graphics,
   lptypes, lpvartypes, lpmessages,
   simba.script, simba.base;
 
