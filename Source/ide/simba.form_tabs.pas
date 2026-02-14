@@ -89,6 +89,7 @@ type
     procedure Find;
     procedure FindNext;
     procedure FindPrevious;
+    function CheckForFileChanges: Boolean;
 
     function AddTab: TSimbaScriptTab;
     function FindTab(ID: Integer): TSimbaScriptTab;
@@ -521,6 +522,28 @@ procedure TSimbaTabsForm.FindPrevious;
 begin
   if (CurrentEditor <> nil) then
     FEditorFind.FindPrev(CurrentEditor);
+end;
+
+function TSimbaTabsForm.CheckForFileChanges: Boolean;
+var
+  Tab: TSimbaScriptTab;
+begin
+  Result := False;
+  Tab := CurrentTab;
+  if (Tab = nil) or (Tab.ScriptFileName = '') or (not FileExists(Tab.ScriptFileName)) then
+    Exit;
+
+  if (FileDateToDateTime(FileAge(Tab.ScriptFileName)) > Tab.DiskAge) then
+  begin
+    if MessageDlg('File "' + Tab.ScriptFileName + '" has changed on disk.' + sLineBreak + 'Do you want to reload it?',
+                  mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    begin
+      Tab.Load(Tab.ScriptFileName);
+      Result := True;
+    end
+    else
+      Tab.UpdateDiskAge();
+  end;
 end;
 
 function TSimbaTabsForm.AddTab: TSimbaScriptTab;
