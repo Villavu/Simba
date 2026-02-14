@@ -42,6 +42,8 @@ type
     procedure DoAllowMouseLink(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
     procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
+    function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
+
     function GetTabTitle: String;
     function GetTabImageIndex: Integer;
     procedure SetTabTitle(Value: String);
@@ -272,6 +274,22 @@ end;
 procedure TSimbaOutputBox.DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   Application.QueueAsyncCall(@DoOpenLink, 0);
+end;
+
+function TSimbaOutputBox.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
+const
+  SCROLL_AMOUNT = 5;
+begin
+  if (ssShift in Shift) then
+  begin
+    if (WheelDelta > 0) then
+      FScrollbarHorz.Position := FScrollbarHorz.Position - SCROLL_AMOUNT
+    else
+      FScrollbarHorz.Position := FScrollbarHorz.Position + SCROLL_AMOUNT;
+
+    Result := True;
+  end else
+    Result := inherited DoMouseWheel(Shift, WheelDelta, MousePos);
 end;
 
 constructor TSimbaOutputBox.Create(AOwner: TComponent);
