@@ -90,7 +90,6 @@ type
 
     FOutputBox: TSimbaOutputBox;
 
-    procedure UpdateDiskAge;
     procedure LoadDefaultScript;
     procedure FindDeclarationAtCaretASync(Data: PtrInt);
 
