@@ -56,6 +56,7 @@ function TKDTree.Copy(): TKDTree;
 procedure TKDTree.Init(const AData: TKDItems);
 function TKDTree.IndexOf(const Value: TSingleArray): Integer;
 function TKDTree.KNearest(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TKDItems;
+function TKDTree.KNearestIndex(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TIntegerArray;
 function TKDTree.RangeQuery(Low, High: TSingleArray): TKDItems;
 function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Hide: Boolean): TKDItems;
 function TKDTree.KNearestClassify(Vector: TSingleArray; K: Integer): Integer;
@@ -130,6 +131,20 @@ end;
 procedure _LapeKDTreeKNearest(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   TKDItems(Result^) := TKDTree(Params^[0]^).KNearest(TSingleArray(Params^[1]^), Integer(Params^[2]^), Boolean(Params^[3]^));
+end;
+
+(*
+TKDTree.KNearestIndex
+---------------------
+```
+function TKDTree.KNearestIndex(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TIntegerArray;
+```
+
+Returns an array that with indices that can be used to access the kdtree data directly if needed. As an alterantive to getting the vector itself.
+*)
+procedure _LapeKDTreeKNearestIndex(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TIntegerArray(Result^) := TKDTree(Params^[0]^).KNearestIndex(TSingleArray(Params^[1]^), Integer(Params^[2]^), Boolean(Params^[3]^));
 end;
 
 procedure _LapeKDTreeRangeQuery(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -223,6 +238,7 @@ begin
     addGlobalFunc('function TKDTree.Copy(): TKDTree;', @_LapeKDTreeCopy);
     addGlobalFunc('function TKDTree.IndexOf(const Value: TSingleArray): Integer;', @_LapeKDTreeIndexOf);
     addGlobalFunc('function TKDTree.KNearest(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TKDItems;', @_LapeKDTreeKNearest);
+    addGlobalFunc('function TKDTree.KNearestIndex(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TIntegerArray;', @_LapeKDTreeKNearestIndex);
     addGlobalFunc('function TKDTree.RangeQuery(Low, High: TSingleArray): TKDItems;', @_LapeKDTreeRangeQuery);
     addGlobalFunc('function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Hide: Boolean): TKDItems;', @_LapeKDTreeRangeQueryEx);
     addGlobalFunc('function TKDTree.KNearestClassify(Vector: TSingleArray; K: Integer): Integer;', @_LapeKDTreeKNearestClassify);

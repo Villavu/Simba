@@ -56,6 +56,7 @@ type
     function SqDistance(A, B: TSingleArray; Limit: Single = High(UInt32)): Single; inline;
     function IndexOf(const Value: TSingleArray): Integer;
     function KNearest(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TKDItems;
+    function KNearestIndex(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TIntegerArray;
     function RangeQuery(Low, High: TSingleArray): TKDItems;
     function RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Hide: Boolean): TKDItems;
     function KNearestClassify(Vector: TSingleArray; K: Integer): Integer;
@@ -73,6 +74,13 @@ uses
 
 const
   NONE = -1;
+
+function FloatEqual(const A, B: Single): Boolean;
+const
+  EPS = 1e-6;
+begin
+  Result := Abs(A - B) <= EPS * Max(1.0, Max(Abs(A), Abs(B)));
+end;
 
 
 (*
@@ -275,46 +283,56 @@ end;
 (*
   Returns an Index that can be used to access TKDTree.Data directly.
 
-  Average Time Complexity: O(log n)
-
-  Note:
-    The time complexity is typically closer to O(log n) when K is significantly smaller than n.
+  Average Time Complexity: O(log n), worst case O(n)
 *)
 function TKDTree.IndexOf(const Value: TSingleArray): Integer;
-var
-  Node: Integer;
-  Depth: UInt8;
-  Axis: Integer;
-  i: Integer;
-  Found: Boolean;
-begin
-  Node := 0;
-  Depth := 0;
-  Result := NONE;
 
-  while Node <> NONE do
+const
+  EPS = 0.000001;
+
+  function FloatEqual(const A, B: Single): Boolean;
   begin
-    Found := True;
+    Result := Abs(A - B) <= EPS;
+  end;
+
+  function FindNode(Node: Integer; Depth: Integer): Integer;
+  var
+    Axis, i: Integer;
+    SplitVal, Val: Single;
+    Equal: Boolean;
+  begin
+    if Node = NONE then
+      Exit(NONE);
+
+    Equal := True;
     for i := 0 to Self.Dimensions - 1 do
-    begin
-      if Self.Data[Node].Split.Vector[i] <> Value[i] then
+      if not FloatEqual(Self.Data[Node].Split.Vector[i], Value[i]) then
       begin
-        Found := False;
+        Equal := False;
         Break;
       end;
-    end;
 
-    if Found then
+    if Equal then
       Exit(Node);
 
     Axis := Depth mod Self.Dimensions;
-    if Value[Axis] < Self.Data[Node].Split.Vector[Axis] then
-      Node := Self.Data[Node].L
-    else
-      Node := Self.Data[Node].R;
+    SplitVal := Self.Data[Node].Split.Vector[Axis];
+    Val := Value[Axis];
 
-    Inc(Depth);
+    if FloatEqual(Val, SplitVal) then
+    begin
+      Result := FindNode(Self.Data[Node].L, Depth + 1);
+      if Result = NONE then
+        Result := FindNode(Self.Data[Node].R, Depth + 1);
+    end
+    else if Val < SplitVal then
+      Result := FindNode(Self.Data[Node].L, Depth + 1)
+    else
+      Result := FindNode(Self.Data[Node].R, Depth + 1);
   end;
+
+begin
+  Result := FindNode(0, 0);
 end;
 
 
@@ -440,6 +458,121 @@ begin
   for i := High(Heap) downto 0 do
   begin
     Result[j] := Heap[i].Node^.Split;
+    Inc(j);
+  end;
+end;
+
+// same as the above, but returns an array of indices.
+function TKDTree.KNearestIndex(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TIntegerArray;
+type
+  TNearestItem = record
+    Node: Integer;
+    DistSq: Single;
+  end;
+  TNearestHeap = array of TNearestItem;
+
+var
+  Heap: TNearestHeap;
+
+  procedure Heapify(Index: Integer);
+  var
+    Largest: Integer;
+    Left, Right: Integer;
+    Temp: TNearestItem;
+  begin
+    Largest := Index;
+    Left    := 2 * Index + 1;
+    Right   := 2 * Index + 2;
+
+    if (Left < Length(Heap)) and (Heap[Left].DistSq > Heap[Largest].DistSq) then
+      Largest := Left;
+
+    if (Right < Length(Heap)) and (Heap[Right].DistSq > Heap[Largest].DistSq) then
+      Largest := Right;
+
+    if Largest <> Index then
+    begin
+      Temp := Heap[Index];
+      Heap[Index] := Heap[Largest];
+      Heap[Largest] := Temp;
+      Heapify(Largest);
+    end;
+  end;
+
+  procedure FindKNearest(Node: Integer; Depth: UInt8);
+  var
+    Delta, DistSq: Single;
+    Test: Integer;
+    This: PKDNode;
+    Axis: Integer;
+    Temp: TNearestItem;
+    I: Integer;
+  begin
+    if Node = NONE then Exit;
+
+    This := @Self.Data[Node];
+    Axis := Depth mod Self.Dimensions;
+
+    Delta := This^.Split.Vector[Axis] - Vector[Axis];
+
+    if Length(Heap) < K then
+      DistSq := Self.SqDistance(This^.Split.Vector, Vector, High(UInt32)) // No limit if heap is not full
+    else
+      DistSq := Self.SqDistance(This^.Split.Vector, Vector, Heap[0].DistSq); // Limit is the furthest distance in the heap
+
+    if not((DistSq = 0) and NotEqual) then
+    begin
+      if Length(Heap) < K then
+      begin
+        // heap not full, add current node
+        SetLength(Heap, Length(Heap) + 1);
+        Heap[High(Heap)].Node := Node;
+        Heap[High(Heap)].DistSq := DistSq;
+
+        // heapify upwards
+        i := High(Heap);
+        while (i > 0) and (Heap[(i - 1) div 2].DistSq < Heap[i].DistSq) do
+        begin
+          Temp := Heap[i];
+          Heap[i] := Heap[(i - 1) div 2];
+          Heap[(i - 1) div 2] := Temp;
+          i := (i - 1) div 2;
+        end;
+      end
+      else
+      begin
+        if DistSq < Heap[0].DistSq then
+        begin
+          // replace the furthest node with the current node
+          Heap[0].Node := Node;
+          Heap[0].DistSq := DistSq;
+          // heapify downwards
+          Heapify(0);
+        end;
+      end;
+    end;
+
+    if Delta > 0 then Test := This^.L else Test := This^.R;
+    FindKNearest(Test, Depth + 1);
+
+    if (Length(Heap) < K) or (Sqr(Delta) < Heap[0].DistSq) then
+    begin
+      if Delta > 0 then Test := This^.R else Test := This^.L;
+      FindKNearest(Test, Depth + 1);
+    end;
+  end;
+
+var
+  i,j: Integer;
+begin
+  SetLength(Heap, 0);
+  FindKNearest(0, 0);
+
+  SetLength(Result, Length(Heap));
+  j := 0;
+  for i := High(Heap) downto 0 do
+  begin
+    Result[j] := Heap[i].Node;
     Inc(j);
   end;
 end;
