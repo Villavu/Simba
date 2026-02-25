@@ -496,6 +496,8 @@ var
     This: PKDNode;
     Axis: Integer;
     i: Integer;
+  label
+    NextNode;
   begin
     if Node = NONE then Exit;
 
@@ -509,11 +511,11 @@ var
 
       if i = Self.Dimensions - 1 then // completed = within range
       begin
-        if (tsIgnoreHidden in Setting) and This^.Hidden then
-          Exit;
+        if (not(tsIgnoreHidden in Setting)) and This^.Hidden then
+          goto NextNode;
 
         if (tsRefSensitive in Setting) and (This^.Split.Ref <> WorkingRef) then
-          Exit;
+          goto NextNode;
 
         if ResultSize = Length(Result) then
           SetLength(Result, Length(Result) * 2);
@@ -525,6 +527,8 @@ var
           This^.Hidden := True;
       end;
     end;
+
+  NextNode:
 
     if (Low[Axis] <= This^.Split.Vector[Axis]) then
     begin
@@ -590,6 +594,8 @@ var
   var
     This: PKDNode;
     Axis: Integer;
+  label
+    NextNode;
   begin
     if Node = NONE then Exit;
 
@@ -598,11 +604,11 @@ var
 
     if Fits(This^.Split.Vector, Center) then
     begin
-      if (tsIgnoreHidden in Setting) and This^.Hidden then
-        Exit;
+      if (not(tsIgnoreHidden in Setting)) and This^.Hidden then
+        goto NextNode;
 
       if (tsRefSensitive in Setting) and (This^.Split.Ref <> WorkingRef) then
-        Exit;
+        goto NextNode;
 
       if ResultSize = Length(Result) then
         SetLength(Result, Length(Result) * 2);
@@ -614,6 +620,7 @@ var
         This^.Hidden := True;
     end;
 
+  NextNode:
     if (Center[Axis] - Radii[Axis] <= This^.Split.Vector[Axis]) then
         Query(This^.L, Depth + 1);
 
