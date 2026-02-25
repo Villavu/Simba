@@ -289,17 +289,15 @@ const
   function FindNode(Node: Integer; Depth: Integer): Integer;
   var
     Axis, i: Integer;
+    SplitVal, Val: Single;
     Equal: Boolean;
-    This: PKDNode;
   begin
     if Node = NONE then
       Exit(NONE);
 
-    This := @Self.Data[Node];
-
     Equal := True;
     for i := 0 to Self.Dimensions - 1 do
-      if not FloatEqual(This^.Split.Vector[i], Value[i]) then
+      if not FloatEqual(Self.Data[Node].Split.Vector[i], Value[i]) then
       begin
         Equal := False;
         Break;
@@ -309,13 +307,20 @@ const
       Exit(Node);
 
     Axis := Depth mod Self.Dimensions;
+    SplitVal := Self.Data[Node].Split.Vector[Axis];
+    Val := Value[Axis];
 
-    if Value[Axis] < This^.Split.Vector[Axis] then
-      Result := FindNode(This^.L, Depth + 1)
+    if FloatEqual(Val, SplitVal) then
+    begin
+      Result := FindNode(Self.Data[Node].L, Depth + 1);
+      if Result = NONE then
+        Result := FindNode(Self.Data[Node].R, Depth + 1);
+    end
+    else if Val < SplitVal then
+      Result := FindNode(Self.Data[Node].L, Depth + 1)
     else
-      Result := FindNode(This^.R, Depth + 1);
+      Result := FindNode(Self.Data[Node].R, Depth + 1);
   end;
-
 begin
   Result := FindNode(0, 0);
 end;
@@ -563,32 +568,35 @@ end;
 function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Setting: TTreeSettings = []; WorkingRef: Integer = NONE): TKDItems;
 var
   i, ResultSize: Integer;
-  SumSqRadii: Single;
+  sqrProduct: Single;
+  sqRadii: array of single;
+
+  function Fits(const p,c: TSingleArray): Boolean; {inline; produces worse machinecode}
+  var
+    dsqr: Single;
+    i: Integer;
+  begin
+    dsqr := 0;
+    for i := 0 to High(p) do
+    begin
+      dsqr += (Sqr(p[i] - c[i]) * sqRadii[i]);
+      if dsqr > sqrProduct then Exit(False);
+    end;
+
+    Result := dsqr <= sqrProduct;
+  end;
 
   procedure Query(Node: Integer; Depth: UInt8);
   var
     This: PKDNode;
     Axis: Integer;
-    i: Integer;
-    DistSq: Single;
-    WithinRange: Boolean;
   begin
     if Node = NONE then Exit;
 
     This := @Self.Data[Node];
     Axis := Depth mod Self.Dimensions;
 
-    DistSq := 0;
-    for i := 0 to Self.Dimensions - 1 do
-    begin
-      DistSq += Sqr(This^.Split.Vector[i] - Center[i]);
-      if DistSq > SumSqRadii then
-        break;
-    end;
-
-    WithinRange := DistSq <= SumSqRadii;
-
-    if WithinRange then
+    if Fits(This^.Split.Vector, Center) then
     begin
       if (tsIgnoreHidden in Setting) and This^.Hidden then
         Exit;
@@ -614,9 +622,13 @@ var
   end;
 
 begin
-  SumSqRadii := 0;
-  for i := 0 to Self.Dimensions - 1 do
-    SumSqRadii := SumSqRadii + Sqr(Radii[i]);
+  SetLength(sqRadii, Self.Dimensions);
+  for i:=0 to High(radii) do
+    sqRadii[i] := Sqr(Radii[i]);
+
+  sqrProduct := 1.0;
+  for i:=0 to High(radii) do
+    sqrProduct *= sqradii[i];
 
   SetLength(Result, 1024);
   ResultSize := 0;
