@@ -663,7 +663,14 @@ end;
 
 function TSimbaNativeInterface_Linux.GetWindowAtCursor(Exclude: TWindowHandleArray): TWindowHandle;
 
-  function ShouldReturnWindow(Window: TWindow): Boolean;
+  function NormalizeWindow(Window: TWindow): TWindow;
+  begin
+    Result := GetRootWindow(Window);
+    if (Result = 0) then
+      Result := Window;
+  end;
+
+  function IsUsableWindow(Window: TWindow): Boolean;
   var
     B: TBox;
   begin
@@ -675,31 +682,78 @@ function TSimbaNativeInterface_Linux.GetWindowAtCursor(Exclude: TWindowHandleArr
   end;
 
 var
-  Root, Child: TWindow;
+  Root, Child, Current: TWindow;
   x_root, y_root, x, y: Integer;
   mask: UInt32;
   I: Integer;
   Windows: array[UInt8] of TWindow;
   WindowCount: Integer;
+  RawCandidate, NormalizedCandidate: TWindow;
 begin
   Result := 0;
   WindowCount := 0;
 
-  SimbaXLib.XQueryPointer(GetDesktopWindow(), @Root, @Child, @x_root, @y_root, @x, @y, @mask);
-  while SimbaXLib.XQueryPointer(Child, @Root, @Child, @x_root, @y_root, @x, @y, @mask) do
+  if not SimbaXLib.XQueryPointer(GetDesktopWindow(), @Root, @Child, @x_root, @y_root, @x, @y, @mask) then
+  begin
+    DebugLn([EDebugLn.FOCUS], 'GetWindowAtCursor: initial XQueryPointer failed');
+    Exit(0);
+  end;
+
+  DebugLn([EDebugLn.FOCUS], 'GetWindowAtCursor: root=%d child=%d', [Root, Child]);
+
+  if (Child = 0) then
+  begin
+    DebugLn([EDebugLn.FOCUS], 'GetWindowAtCursor: child is 0');
+    Exit(0);
+  end;
+
+  Current := Child;
+
+  // IMPORTANT: include the first child returned from the root query
+  Windows[WindowCount] := Current;
+  Inc(WindowCount);
+
+  while SimbaXLib.XQueryPointer(Current, @Root, @Child, @x_root, @y_root, @x, @y, @mask) do
   begin
     if (Child = 0) then
       Break;
-    Windows[WindowCount] := Child;
+
+    DebugLn([EDebugLn.FOCUS], '  descended child=%d', [Child]);
+
+    Current := Child;
+    Windows[WindowCount] := Current;
     Inc(WindowCount);
+
     if (WindowCount > High(Windows)) then
-      Exit;
+      Break;
   end;
 
-  // now go back until we find something worthwhile
+  DebugLn([EDebugLn.FOCUS], 'GetWindowAtCursor: candidate count=%d', [WindowCount]);
+
   for I := WindowCount - 1 downto 0 do
-    if ShouldReturnWindow(Windows[I]) then
-      Exit(Windows[I])
+  begin
+    RawCandidate := Windows[I];
+    DebugLn([EDebugLn.FOCUS], '  trying raw=%d title="%s" class="%s"',
+      [RawCandidate, GetWindowTitle(RawCandidate), GetWindowClass(RawCandidate)]);
+
+    if IsUsableWindow(RawCandidate) then
+    begin
+      DebugLn([EDebugLn.FOCUS], '  returning raw=%d', [RawCandidate]);
+      Exit(RawCandidate);
+    end;
+
+    NormalizedCandidate := NormalizeWindow(RawCandidate);
+    DebugLn([EDebugLn.FOCUS], '  trying normalized=%d title="%s" class="%s"',
+      [NormalizedCandidate, GetWindowTitle(NormalizedCandidate), GetWindowClass(NormalizedCandidate)]);
+
+    if IsUsableWindow(NormalizedCandidate) then
+    begin
+      DebugLn([EDebugLn.FOCUS], '  returning normalized=%d', [NormalizedCandidate]);
+      Exit(NormalizedCandidate);
+    end;
+  end;
+
+  DebugLn([EDebugLn.FOCUS], 'GetWindowAtCursor: returning 0');
 end;
 
 function TSimbaNativeInterface_Linux.GetDesktopWindow: TWindowHandle;
@@ -725,8 +779,14 @@ begin
 end;
 
 function TSimbaNativeInterface_Linux.IsWindowVisible(Window: TWindowHandle): Boolean;
+var
+  Attr: TXWindowAttributes;
 begin
-  Result := HasWindowProperty(GetRootWindow(Window), SimbaXLib.WM_STATE);
+  if (Window = 0) then
+    Exit;
+
+  if SimbaXLib.XGetWindowAttributes(Window, @Attr) then
+    Result := Attr.map_state = IsViewable;
 end;
 
 function TSimbaNativeInterface_Linux.GetWindowPID(Window: TWindowHandle): Integer;
