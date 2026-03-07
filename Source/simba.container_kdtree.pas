@@ -14,14 +14,17 @@ uses
   Classes, SysUtils,
   simba.base;
 
+const
+  NONE = -1;
+
 type
   (*
     KDTree is a static tree for quick "spatial lookups" that also contains `ref` per item added 
     which means it can be used for simple classifcation for example.
-
-    ToDo: Load data from CSV for storing of training data to avoid rebuilding? - building can be slow
   *)
-  
+  ETreeSetting = (tsNotEqual, tsHideResult, tsRefSensitive, tsIgnoreHidden);
+  TTreeSettings = set of ETreeSetting;
+
   TKDItem = record
     Ref: Integer;
     Vector: TSingleArray;
@@ -55,9 +58,10 @@ type
     function Copy(): TKDTree;
     function SqDistance(A, B: TSingleArray; Limit: Single = High(UInt32)): Single; inline;
     function IndexOf(const Value: TSingleArray): Integer;
-    function KNearest(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TKDItems;
-    function RangeQuery(Low, High: TSingleArray): TKDItems;
-    function RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Hide: Boolean): TKDItems;
+    function KNearest(Vector: TSingleArray; K: Integer; Setting: TTreeSettings=[]; WorkingRef:Int32=NONE): TKDItems;
+    function KNearestIndex(Vector: TSingleArray; K: Integer; Setting: TTreeSettings=[]; WorkingRef:Int32=NONE): TIntegerArray;
+    function RangeQuery(Low, High: TSingleArray; Setting: TTreeSettings = []; WorkingRef: Integer = NONE): TKDItems;
+    function RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Setting: TTreeSettings = []; WorkingRef: Integer = NONE): TKDItems;
     function KNearestClassify(Vector: TSingleArray; K: Integer): Integer;
     function WeightedKNearestClassify(Vector: TSingleArray; K: Integer): Integer;
     function Clusters(Radii: TSingleArray): T2DKDItems;
@@ -70,10 +74,6 @@ implementation
 
 uses
   simba.fs;
-
-const
-  NONE = -1;
-
 
 (*
   Quick select for the KDTree build process
@@ -275,65 +275,62 @@ end;
 (*
   Returns an Index that can be used to access TKDTree.Data directly.
 
-  Average Time Complexity: O(log n)
-
-  Note:
-    The time complexity is typically closer to O(log n) when K is significantly smaller than n.
+  Average Time Complexity: O(log n), worst case O(n)
 *)
 function TKDTree.IndexOf(const Value: TSingleArray): Integer;
-var
-  Node: Integer;
-  Depth: UInt8;
-  Axis: Integer;
-  i: Integer;
-  Found: Boolean;
-begin
-  Node := 0;
-  Depth := 0;
-  Result := NONE;
+const
+  EPS = 0.000001;
 
-  while Node <> NONE do
+  function FloatEqual(const A, B: Single): Boolean;
   begin
-    Found := True;
+    Result := Abs(A - B) <= EPS;
+  end;
+
+  function FindNode(Node: Integer; Depth: Integer): Integer;
+  var
+    Axis, i: Integer;
+    SplitVal, Val: Single;
+    Equal: Boolean;
+  begin
+    if Node = NONE then
+      Exit(NONE);
+
+    Equal := True;
     for i := 0 to Self.Dimensions - 1 do
-    begin
-      if Self.Data[Node].Split.Vector[i] <> Value[i] then
+      if not FloatEqual(Self.Data[Node].Split.Vector[i], Value[i]) then
       begin
-        Found := False;
+        Equal := False;
         Break;
       end;
-    end;
 
-    if Found then
+    if Equal then
       Exit(Node);
 
     Axis := Depth mod Self.Dimensions;
-    if Value[Axis] < Self.Data[Node].Split.Vector[Axis] then
-      Node := Self.Data[Node].L
-    else
-      Node := Self.Data[Node].R;
+    SplitVal := Self.Data[Node].Split.Vector[Axis];
+    Val := Value[Axis];
 
-    Inc(Depth);
+    if FloatEqual(Val, SplitVal) then
+    begin
+      Result := FindNode(Self.Data[Node].L, Depth + 1);
+      if Result = NONE then
+        Result := FindNode(Self.Data[Node].R, Depth + 1);
+    end
+    else if Val < SplitVal then
+      Result := FindNode(Self.Data[Node].L, Depth + 1)
+    else
+      Result := FindNode(Self.Data[Node].R, Depth + 1);
   end;
+begin
+  Result := FindNode(0, 0);
 end;
 
 
-(*
-  Returns the K nearest vectors to the input vector
-
-  Average Time Complexity:    O(log n * log k)
-  Worst Case Time Complexity: O(n)
-
-  Note:
-    The time complexity is typically closer to O(log n) when K is significantly smaller than n.
-    
-  XXX:
-    Can maybe use simba's heap strucutre, I elected not to as this was designed within Simba/Lape.
-*)
-function TKDTree.KNearest(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TKDItems;
+// same as kNearest, but returns an array of indices.
+function TKDTree.KNearestIndex(Vector: TSingleArray; K: Integer; Setting: TTreeSettings=[]; WorkingRef:Integer=NONE): TIntegerArray;
 type
   TNearestItem = record
-    Node: PKDNode;
+    Node: Integer;
     DistSq: Single;
   end;
   TNearestHeap = array of TNearestItem;
@@ -374,6 +371,8 @@ var
     Axis: Integer;
     Temp: TNearestItem;
     I: Integer;
+  label
+      NextNode;
   begin
     if Node = NONE then Exit;
 
@@ -387,13 +386,19 @@ var
     else
       DistSq := Self.SqDistance(This^.Split.Vector, Vector, Heap[0].DistSq); // Limit is the furthest distance in the heap
 
-    if not((DistSq = 0) and NotEqual) then
+    if (tsRefSensitive in Setting) and (This^.Split.Ref <> WorkingRef) then
+      goto NextNode;
+
+    if (tsIgnoreHidden in Setting) and This^.Hidden then
+      goto NextNode;
+
+    if not((DistSq = 0) and (tsNotEqual in Setting)) then
     begin
       if Length(Heap) < K then
       begin
         // heap not full, add current node
         SetLength(Heap, Length(Heap) + 1);
-        Heap[High(Heap)].Node := This;
+        Heap[High(Heap)].Node := Node;
         Heap[High(Heap)].DistSq := DistSq;
 
         // heapify upwards
@@ -411,13 +416,15 @@ var
         if DistSq < Heap[0].DistSq then
         begin
           // replace the furthest node with the current node
-          Heap[0].Node := This;
+          Heap[0].Node := Node;
           Heap[0].DistSq := DistSq;
           // heapify downwards
           Heapify(0);
         end;
       end;
     end;
+
+  NextNode:
 
     if Delta > 0 then Test := This^.L else Test := This^.R;
     FindKNearest(Test, Depth + 1);
@@ -439,8 +446,35 @@ begin
   j := 0;
   for i := High(Heap) downto 0 do
   begin
-    Result[j] := Heap[i].Node^.Split;
+    Result[j] := Heap[i].Node;
+
+    if (tsHideResult in Setting) then
+      Self.Data[Heap[i].Node].Hidden := True;
+
     Inc(j);
+  end;
+end;
+
+(*
+  Returns the K nearest vectors to the input vector
+
+  Average Time Complexity:    O(log n * log k)
+  Worst Case Time Complexity: O(n)
+
+  Note:
+    The time complexity is typically closer to O(log n) when K is significantly smaller than n.
+*)
+function TKDTree.KNearest(Vector: TSingleArray; K: Integer; Setting: TTreeSettings; WorkingRef:Integer=NONE): TKDItems;
+var
+  arr: TIntegerArray;
+  i: Int32;
+begin
+  arr := Self.KNearestIndex(Vector, k, setting, workingref);
+
+  SetLength(Result, Length(arr));
+  for i:=0 to High(arr) do
+  begin
+    Result[i] := Self.Data[arr[i]].Split;
   end;
 end;
 
@@ -453,7 +487,7 @@ end;
 
   Where k is the number of output points (not known ahead of time)
 *)
-function TKDTree.RangeQuery(Low, High: TSingleArray): TKDItems;
+function TKDTree.RangeQuery(Low, High: TSingleArray; Setting: TTreeSettings = []; WorkingRef: Integer = NONE): TKDItems;
 var
   ResultSize: Integer;
 
@@ -462,6 +496,8 @@ var
     This: PKDNode;
     Axis: Integer;
     i: Integer;
+  label
+    NextNode;
   begin
     if Node = NONE then Exit;
 
@@ -475,13 +511,24 @@ var
 
       if i = Self.Dimensions - 1 then // completed = within range
       begin
+        if (not(tsIgnoreHidden in Setting)) and This^.Hidden then
+          goto NextNode;
+
+        if (tsRefSensitive in Setting) and (This^.Split.Ref <> WorkingRef) then
+          goto NextNode;
+
         if ResultSize = Length(Result) then
           SetLength(Result, Length(Result) * 2);
 
         Result[ResultSize] := This^.Split;
         Inc(ResultSize);
+
+        if tsHideResult in Setting then
+          This^.Hidden := True;
       end;
     end;
+
+  NextNode:
 
     if (Low[Axis] <= This^.Split.Vector[Axis]) then
     begin
@@ -515,53 +562,65 @@ end;
 
 
 (*
-  Returns the vectors that within the query center and radii bounds defining the hypersphere.
+  Returns the vectors thats within the query center and radii bounds defining the hypersphere.
 
   Average Time Complexity:    O(log n + k)
   Worst Case Time Complexity: O(n^((d-1)/d) + k)
 
   Where k is the number of output points (not known ahead of time)
 *)
-function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Hide: Boolean): TKDItems;
+function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Setting: TTreeSettings = []; WorkingRef: Integer = NONE): TKDItems;
 var
   i, ResultSize: Integer;
-  SumSqRadii: Single;
+  sqrProduct: Single;
+  sqRadii: array of single;
+
+  function Fits(const p,c: TSingleArray): Boolean; {inline; produces worse machinecode}
+  var
+    dsqr: Single;
+    i: Integer;
+  begin
+    dsqr := 0;
+    for i := 0 to High(p) do
+    begin
+      dsqr += (Sqr(p[i] - c[i]) * sqRadii[i]);
+      if dsqr > sqrProduct then Exit(False);
+    end;
+
+    Result := dsqr <= sqrProduct;
+  end;
 
   procedure Query(Node: Integer; Depth: UInt8);
   var
     This: PKDNode;
     Axis: Integer;
-    i: Integer;
-    DistSq: Single;
-    WithinRange: Boolean;
+  label
+    NextNode;
   begin
     if Node = NONE then Exit;
 
     This := @Self.Data[Node];
     Axis := Depth mod Self.Dimensions;
 
-    DistSq := 0;
-    for i := 0 to Self.Dimensions - 1 do
+    if Fits(This^.Split.Vector, Center) then
     begin
-      DistSq += Sqr(This^.Split.Vector[i] - Center[i]);
-      if DistSq > SumSqRadii then
-        break;
-    end;
+      if (not(tsIgnoreHidden in Setting)) and This^.Hidden then
+        goto NextNode;
 
-    WithinRange := DistSq <= SumSqRadii;
+      if (tsRefSensitive in Setting) and (This^.Split.Ref <> WorkingRef) then
+        goto NextNode;
 
-    if WithinRange then
-    begin
       if ResultSize = Length(Result) then
         SetLength(Result, Length(Result) * 2);
 
       Result[ResultSize] := This^.Split;
       Inc(ResultSize);
 
-      if Hide then
+      if tsHideResult in Setting then
         This^.Hidden := True;
     end;
 
+  NextNode:
     if (Center[Axis] - Radii[Axis] <= This^.Split.Vector[Axis]) then
         Query(This^.L, Depth + 1);
 
@@ -570,9 +629,13 @@ var
   end;
 
 begin
-  SumSqRadii := 0;
-  for i := 0 to Self.Dimensions - 1 do
-    SumSqRadii := SumSqRadii + Sqr(Radii[i]);
+  SetLength(sqRadii, Self.Dimensions);
+  for i:=0 to High(radii) do
+    sqRadii[i] := Sqr(Radii[i]);
+
+  sqrProduct := 1.0;
+  for i:=0 to High(radii) do
+    sqrProduct *= sqradii[i];
 
   SetLength(Result, 1024);
   ResultSize := 0;
@@ -618,7 +681,7 @@ var
   Category: Integer;
   LowCategory: Integer;
 begin
-  NearestNeighbors := Self.KNearest(Vector, K, False);
+  NearestNeighbors := Self.KNearest(Vector, K);
 
   SetLength(CategoryCounts, NearestNeighbors[0].Ref + 1);
   LowCategory := High(Integer);
@@ -665,7 +728,7 @@ var
   Dist: Single;
   LowCategory: Integer;
 begin
-  NearestNeighbors := Self.KNearest(Vector, K, False);
+  NearestNeighbors := Self.KNearest(Vector, K);
 
   SetLength(CategoryCounts, 0);
   LowCategory := High(Integer);
@@ -700,7 +763,7 @@ begin
 end;
 
 (*
-  Implements an efficient n-dimensional spatial clustering algorithm using a KD-Tree.
+  Implements n-dimensional spatial clustering algorithm using a KD-Tree.
   It supports label-based filtering to cluster points within specific categories.
 
   Best case:                  O(n)
@@ -712,6 +775,8 @@ end;
 
   TODO: Add a version that returns T2DIntegerArray where each version represents
         an index in KDTree.Data.
+
+  TODO2: Use a visited set to not mutate the tree's hidden states.
 *)
 function TKDTree.Clusters(Radii: TSingleArray): T2DKDItems;
 var

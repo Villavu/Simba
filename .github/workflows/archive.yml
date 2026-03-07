@@ -39,7 +39,7 @@ jobs:
           git config --global http.postBuffer 500M
           git config --global user.email "villavu-bot"
           git config --global user.name "villavu-bot"
-          git clone https://github.com/Villavu/Simba-Build-Archive
+          git clone --depth 1 https://github.com/Villavu/Simba-Build-Archive
 
           echo "Current repo (uncompressed) size:"
           du -sh "Simba-Build-Archive" | awk '{print $1}'

@@ -55,13 +55,27 @@ function TKDTree.InitBranch(): Integer;
 function TKDTree.Copy(): TKDTree;
 procedure TKDTree.Init(const AData: TKDItems);
 function TKDTree.IndexOf(const Value: TSingleArray): Integer;
-function TKDTree.KNearest(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TKDItems;
-function TKDTree.RangeQuery(Low, High: TSingleArray): TKDItems;
-function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Hide: Boolean): TKDItems;
+function TKDTree.KNearest(Vector: TSingleArray; K: Integer; Setting: TTreeSettings=[]; WorkingRef:Int32=NONE): TKDItems;
+function TKDTree.KNearestIndex(Vector: TSingleArray; K: Integer; Setting: TTreeSettings=[]; WorkingRef:Int32=NONE): TIntegerArray;
+function TKDTree.RangeQuery(Low, High: TSingleArray; Setting: TTreeSettings = []; WorkingRef: Integer = NONE): TKDItems;
+function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Setting: TTreeSettings = []; WorkingRef: Integer = NONE): TKDItems;
 function TKDTree.KNearestClassify(Vector: TSingleArray; K: Integer): Integer;
 function TKDTree.WeightedKNearestClassify(Vector: TSingleArray; K: Integer): Integer;
 function TKDTree.Clusters(Radii: TSingleArray): T2DKDItems;
 ```
+
+The flags you can set:
+```
+ETreeSetting = (
+  tsNotEqual,     // if this exact vector is matched it should be ignored and not returned
+  tsHideResult,   // hides all the resulting nodes if this flag is set
+  tsRefSensitive, // you may pass a reference group and only scan within it's ID
+  tsIgnoreHidden  // ignores that the node is hidden
+);
+
+TTreeSettings = set of ETreeSetting;
+```
+
 *)
 
 (*
@@ -127,19 +141,42 @@ begin
   PInteger(Result)^ := TKDTree(Params^[0]^).IndexOf(TSingleArray(Params^[1]^));
 end;
 
+(*
+TKDTree.KNearest
+---------------------
+```
+function TKDTree.KNearest(Vector: TSingleArray; K: Integer; Setting: TTreeSettings=[]; WorkingRef:Int32=NONE): TIntegerArray;
+```
+
+Returns an array that with the k elements (vectors) that are nearby the given vector.
+*)
 procedure _LapeKDTreeKNearest(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  TKDItems(Result^) := TKDTree(Params^[0]^).KNearest(TSingleArray(Params^[1]^), Integer(Params^[2]^), Boolean(Params^[3]^));
+  TKDItems(Result^) := TKDTree(Params^[0]^).KNearest(TSingleArray(Params^[1]^), Integer(Params^[2]^), TTreeSettings(Params^[3]^), Integer(Params^[4]^));
+end;
+
+(*
+TKDTree.KNearestIndex
+---------------------
+```
+function TKDTree.KNearestIndex(Vector: TSingleArray; K: Integer; Setting: TTreeSettings=[]; WorkingRef:Int32=NONE): TIntegerArray;
+```
+
+Returns an array that with indices that can be used to access the kdtree data directly if needed. As an alterantive to getting the vector itself.
+*)
+procedure _LapeKDTreeKNearestIndex(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  TIntegerArray(Result^) := TKDTree(Params^[0]^).KNearestIndex(TSingleArray(Params^[1]^), Integer(Params^[2]^), TTreeSettings(Params^[3]^), Integer(Params^[4]^));
 end;
 
 procedure _LapeKDTreeRangeQuery(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  TKDItems(Result^) := TKDTree(Params^[0]^).RangeQuery(TSingleArray(Params^[1]^), TSingleArray(Params^[2]^));
+  TKDItems(Result^) := TKDTree(Params^[0]^).RangeQuery(TSingleArray(Params^[1]^), TSingleArray(Params^[2]^), TTreeSettings(Params^[3]^), Integer(Params^[4]^));
 end;
 
 procedure _LapeKDTreeRangeQueryEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  TKDItems(Result^) := TKDTree(Params^[0]^).RangeQueryEx(TSingleArray(Params^[1]^), TSingleArray(Params^[2]^), Boolean(Params^[3]^));
+  TKDItems(Result^) := TKDTree(Params^[0]^).RangeQueryEx(TSingleArray(Params^[1]^), TSingleArray(Params^[2]^), TTreeSettings(Params^[3]^), Integer(Params^[4]^));
 end;
 
 (*
@@ -209,6 +246,8 @@ begin
   with Script.Compiler do
   begin
     //DumpSection := 'KDTree';
+    addGlobalType('(NotEqual, HideResult, RefSensitive, IgnoreHidden);', 'ETreeSetting');
+    addGlobalType('set of ETreeSetting;', 'TTreeSettings');
 
     addGlobalType('record Ref: Integer; Vector: TSingleArray; end;', 'TKDItem');
     addGlobalType('record Split: TKDItem; L, R: Integer; Hidden: Boolean; end;', 'TKDNode');
@@ -222,9 +261,10 @@ begin
 
     addGlobalFunc('function TKDTree.Copy(): TKDTree;', @_LapeKDTreeCopy);
     addGlobalFunc('function TKDTree.IndexOf(const Value: TSingleArray): Integer;', @_LapeKDTreeIndexOf);
-    addGlobalFunc('function TKDTree.KNearest(Vector: TSingleArray; K: Integer; NotEqual: Boolean = False): TKDItems;', @_LapeKDTreeKNearest);
-    addGlobalFunc('function TKDTree.RangeQuery(Low, High: TSingleArray): TKDItems;', @_LapeKDTreeRangeQuery);
-    addGlobalFunc('function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Hide: Boolean): TKDItems;', @_LapeKDTreeRangeQueryEx);
+    addGlobalFunc('function TKDTree.KNearest(Vector: TSingleArray; K: Integer; Setting: TTreeSettings = []; WorkingRef: Integer = -1): TKDItems;', @_LapeKDTreeKNearest);
+    addGlobalFunc('function TKDTree.KNearestIndex(Vector: TSingleArray; K: Integer; Setting: TTreeSettings = []; WorkingRef: Integer = -1): TIntegerArray;', @_LapeKDTreeKNearestIndex);
+    addGlobalFunc('function TKDTree.RangeQuery(Low, High: TSingleArray; Setting: TTreeSettings = []; WorkingRef: Integer = -1): TKDItems;', @_LapeKDTreeRangeQuery);
+    addGlobalFunc('function TKDTree.RangeQueryEx(Center: TSingleArray; Radii: TSingleArray; Setting: TTreeSettings = []; WorkingRef: Integer = -1): TKDItems;', @_LapeKDTreeRangeQueryEx);
     addGlobalFunc('function TKDTree.KNearestClassify(Vector: TSingleArray; K: Integer): Integer;', @_LapeKDTreeKNearestClassify);
     addGlobalFunc('function TKDTree.WeightedKNearestClassify(Vector: TSingleArray; K: Integer): Integer;', @_LapeKDTreeWeightedKNearestClassify);
     addGlobalFunc('function TKDTree.Clusters(Radii: TSingleArray): T2DKDItems;', @_LapeKDTreeClusters);
