@@ -524,18 +524,29 @@ var
   Tol: Single;
   Point: TDTMPoint;
 begin
-  if (ListBox.ItemIndex > -1) and (TEdit(Sender).Text <> '') then
-  begin
-    Point := GetPoint(ListBox.ItemIndex);
+  if (ListBox.ItemIndex = -1) or (TEdit(Sender).Text = '') then
+    Exit;
 
-    X := StrToIntDef(EditPointX.Text, Point.X);
-    Y := StrToIntDef(EditPointY.Text, Point.Y);
-    Col := StrToIntDef(EditPointColor.Text, Point.Color);
-    Tol := StrToFloatDef(EditPointTolerance.Text, Point.Tolerance);
+  Point := GetPoint(ListBox.ItemIndex);
+
+  X := Point.X;
+  Y := Point.Y;
+  Col := Point.Color;
+  Tol := Point.Tolerance;
+  Size := Point.AreaSize;
+
+  if Sender = EditPointX then
+    X := StrToIntDef(EditPointX.Text, Point.X)
+  else if Sender = EditPointY then
+    Y := StrToIntDef(EditPointY.Text, Point.Y)
+  else if Sender = EditPointColor then
+    Col := StrToColor(EditPointColor.Text)
+  else if Sender = EditPointTolerance then
+    Tol := StrToFloatDef(EditPointTolerance.Text, Point.Tolerance)
+  else if Sender = EditPointSize then
     Size := StrToIntDef(EditPointSize.Text, Point.AreaSize);
 
-    EditPoint(ListBox.ItemIndex, X, Y, Col, Tol, Size);
-  end;
+  EditPoint(ListBox.ItemIndex, X, Y, Col, Tol, Size);
 end;
 
 procedure TSimbaDTMEditorForm.ClientImageClear(Sender: TObject);

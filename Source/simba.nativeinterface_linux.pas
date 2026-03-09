@@ -690,13 +690,22 @@ var
   WindowCount: Integer;
   RawCandidate, NormalizedCandidate: TWindow;
 begin
+  Result := 0;
+  WindowCount := 0;
+
   if not SimbaXLib.XQueryPointer(GetDesktopWindow(), @Root, @Child, @x_root, @y_root, @x, @y, @mask) then
-    Exit;
+  begin
+    Exit(0);
+  end;
 
   if (Child = 0) then
-    Exit;
+  begin
+    Exit(0);
+  end;
 
   Current := Child;
+
+  // IMPORTANT: include the first child returned from the root query
   Windows[WindowCount] := Current;
   Inc(WindowCount);
 
@@ -718,11 +727,15 @@ begin
     RawCandidate := Windows[I];
 
     if IsUsableWindow(RawCandidate) then
+    begin
       Exit(RawCandidate);
+    end;
 
     NormalizedCandidate := NormalizeWindow(RawCandidate);
     if IsUsableWindow(NormalizedCandidate) then
+    begin
       Exit(NormalizedCandidate);
+    end;
   end;
 end;
 
