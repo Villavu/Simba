@@ -25,6 +25,8 @@ type
   TPixelFontGlyph = record
     Value: Char;
 
+    Hash: UInt32;
+
     Width: Int16;  // image width
     Height: Int16; // image height
     ForegroundBounds: TBox;  // foreground meaning points and shadow
@@ -44,6 +46,11 @@ type
     SpaceWidth: Integer;
     MaxGlyphWidth: Integer;
     MaxGlyphHeight: Integer;
+  public
+    function GetGlyph(const c: Char): PPixelFontGlyph; inline;
+    function SameGlyph(const a, b: Char): Boolean; inline;
+    function SameText(const s1, s2: String): Boolean; inline;
+    procedure ReplaceSameGlyphs(var s1: String; const s2: String); inline;
   end;
   PPixelFont = ^TPixelFont;
 
@@ -112,17 +119,57 @@ begin
     Result := (R <= Tol) and (G <= Tol) and (B <= Tol + 5); // allow a little more in the blue channel only
 end;
 
-function GetGlyph(const Font: PPixelFont; const c: Char): PPixelFontGlyph; inline;
+//slacky hashing algorithm
+function HashPoints(const points: TPointArray): UInt32; inline;
+var
+  pt: TPoint;
+begin
+  {$PUSH}
+  {$Q-}{$R-}
+  Result := $811C9DC5;
+  for pt in points do
+    Result := (Result xor (UInt32(pt.X) shl 16 or UInt32(pt.Y))) * $01000193;
+  {$POP}
+end;
+
+function TPixelFont.GetGlyph(const c: Char): PPixelFontGlyph; inline;
 var
   I: Integer;
 begin
-  for I := 0 to High(Font^.Glyphs) do
-    if (Font^.Glyphs[I].Value = c) then
-      Exit(@Font^.Glyphs[I]);
+  for I := 0 to High(Self.Glyphs) do
+    if (Self.Glyphs[I].Value = c) then
+      Exit(@Self.Glyphs[I]);
 
   SimbaException('Character %s does exist in the Font', [c]);
   Result := nil;
 end;
+
+function TPixelFont.SameGlyph(const a, b: Char): Boolean; inline;
+begin
+  Result := Self.GetGlyph(a)^.Hash = Self.GetGlyph(b)^.Hash;
+end;
+
+function TPixelFont.SameText(const s1, s2: String): Boolean; inline;
+var
+  i: Integer;
+begin
+  if Length(s1) <> Length(s2) then
+     Exit(False);
+  for i := 1 to Length(s1) do
+     if not Self.SameGlyph(s1[i], s2[i]) then
+        Exit(False);
+  Result := True;
+end;
+
+procedure TPixelFont.ReplaceSameGlyphs(var s1: String; const s2: String); inline;
+var
+  i: Integer;
+begin
+  for i := 1 to Min(Length(s1), Length(s2)) do
+    if Self.SameGlyph(s1[i], s2[i]) then
+      s1[i] := s2[i];
+end;
+
 
 // text contains >= 50% alphanum
 function IsAlphaNumSym(const Text: String): Boolean; inline;
@@ -364,6 +411,7 @@ var
   Character: String;
   Glyph: TPixelFontGlyph;
   B: TBox;
+  Pt: TPoint;
 begin
   Result := Default(TPixelFont);
   Result.SpaceWidth := SpaceWidth;
@@ -410,6 +458,8 @@ begin
           Glyph.BackgroundBounds := B;
           Glyph.PointsShadowWidth := B.Width;
 
+          Glyph.Hash := HashPoints(TPointArray(Glyph.Points + Glyph.Shadow));
+
           if (Length(Glyph.Shadow) > 0) then
             Glyph.BestMatch := Length(Glyph.Points) + Length(Glyph.Shadow)
           else
@@ -442,7 +492,7 @@ begin
   X := 0;
   Count := 0;
   for I := 1 to Length(Text) do
-    with GetGlyph(@Font, Text[I])^ do
+    with Font.GetGlyph(Text[I])^ do
     begin
       if (Points <> nil) then
       begin
@@ -460,7 +510,7 @@ begin
 
   Count := 0;
   for I := 1 to Length(Text) do
-    with GetGlyph(@Font, Text[I])^ do
+    with Font.GetGlyph(Text[I])^ do
     begin
       for J := 0 to High(Points) do
       begin
@@ -651,5 +701,6 @@ begin
       Bounds.Y1 += 1;
   end;
 end;
+
 
 end.

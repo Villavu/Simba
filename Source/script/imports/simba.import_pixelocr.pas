@@ -21,6 +21,22 @@ type
   PPixelFont = ^TPixelFont;
   PPixelOCR = ^TPixelOCR;
 
+procedure _LapePixelFont_SameChar(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PPixelFont(Params^[0])^.SameGlyph(PChar(Params^[1])^, PChar(Params^[2])^);
+end;
+
+procedure _LapePixelFont_SameText(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PPixelFont(Params^[0])^.SameText(PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+procedure _LapePixelFont_ReplaceSameGlyphs(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPixelFont(Params^[0])^.ReplaceSameGlyphs(PString(Params^[1])^, PString(Params^[2])^);
+end;
+
+
 procedure _LapePixelOCR_LoadFont(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPixelFont(Result)^ := TPixelOCR.LoadFont(PString(Params^[0])^, PInteger(Params^[1])^);
@@ -58,6 +74,8 @@ begin
     addGlobalType([
       'record',
       '  Value: Char;',
+      '',
+      '  Hash: UInt32;',
       '',
       '  Width: Int16;',
       '  Height: Int16;',
@@ -114,6 +132,9 @@ begin
     if (getGlobalType('TPixelOCR').Size <> SizeOf(TPixelOCR)) then
       SimbaException('TPixelOCR import is wrong');
 
+    addGlobalFunc('function TPixelFont.SameGlyph(const a, b: Char): Boolean;', @_LapePixelFont_SameChar);
+    addGlobalFunc('function TPixelFont.SameText(const s1, s2: String): Boolean;', @_LapePixelFont_SameText);
+    addGlobalFunc('procedure TPixelFont.ReplaceSameGlyphs(var s1: String; const s2: String);', @_LapePixelFont_ReplaceSameGlyphs);
     addGlobalFunc('function TPixelOCR.LoadFont(Path: String; SpaceWidth: Integer): TPixelFont; static;', @_LapePixelOCR_LoadFont);
     addGlobalFunc('function TPixelOCR.TextToTPA(constref Font: TPixelFont; Text: String): TPointArray; static;', @_LapePixelOCR_TextToTPA);
     addGlobalFunc('function TPixelOCR.Locate(Image: TImage; constref Font: TPixelFont; Text: String): Single;', @_LapePixelOCR_Locate);
