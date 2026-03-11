@@ -15,7 +15,7 @@ implementation
 uses
   lptypes,
   simba.image_textdrawer, simba.externalcanvas,
-  simba.vartype_quad, simba.script_objectutil;
+  simba.vartype_quad, simba.vartype_circle, simba.script_objectutil;
 
 type
   PSimbaExternalCanvas = ^TSimbaExternalCanvas;
@@ -292,19 +292,34 @@ begin
   PSimbaExternalCanvas(Params^[0])^.DrawQuadInverted(PQuad(Params^[1])^);
 end;
 
-procedure _LapeExternalCanvas_DrawCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeExternalCanvas_DrawCircle1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaExternalCanvas(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeExternalCanvas_DrawCircleFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeExternalCanvas_DrawCircleFilled1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaExternalCanvas(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
-procedure _LapeExternalCanvas_DrawCircleInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeExternalCanvas_DrawCircleInverted1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaExternalCanvas(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+procedure _LapeExternalCanvas_DrawCircle2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalCanvas(Params^[0])^.DrawCircle(Point(TCircle(Params^[1]^).X, TCircle(Params^[1]^).Y), TCircle(Params^[1]^).Radius);
+end;
+
+procedure _LapeExternalCanvas_DrawCircleFilled2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalCanvas(Params^[0])^.DrawCircleFilled(Point(TCircle(Params^[1]^).X, TCircle(Params^[1]^).Y), TCircle(Params^[1]^).Radius);
+end;
+
+procedure _LapeExternalCanvas_DrawCircleInverted2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalCanvas(Params^[0])^.DrawCircleInverted(Point(TCircle(Params^[1]^).X, TCircle(Params^[1]^).Y), TCircle(Params^[1]^).Radius);
 end;
 
 procedure _LapeExternalCanvas_DrawCrosshairs(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -441,9 +456,13 @@ begin
     addGlobalFunc('procedure TExternalCanvas.DrawQuadFilled(Quad: TQuad);', @_LapeExternalCanvas_DrawQuadFilled);
     addGlobalFunc('procedure TExternalCanvas.DrawQuadInverted(Quad: TQuad);', @_LapeExternalCanvas_DrawQuadInverted);
 
-    addGlobalFunc('procedure TExternalCanvas.DrawCircle(Center: TPoint; Radius: Integer)', @_LapeExternalCanvas_DrawCircle);
-    addGlobalFunc('procedure TExternalCanvas.DrawCircleFilled(Center: TPoint; Radius: Integer)', @_LapeExternalCanvas_DrawCircleFilled);
-    addGlobalFunc('procedure TExternalCanvas.DrawCircleInverted(Center: TPoint; Radius: Integer)', @_LapeExternalCanvas_DrawCircleInverted);
+    addGlobalFunc('procedure TExternalCanvas.DrawCircle(Center: TPoint; Radius: Integer)', @_LapeExternalCanvas_DrawCircle1);
+    addGlobalFunc('procedure TExternalCanvas.DrawCircleFilled(Center: TPoint; Radius: Integer)', @_LapeExternalCanvas_DrawCircleFilled1);
+    addGlobalFunc('procedure TExternalCanvas.DrawCircleInverted(Center: TPoint; Radius: Integer)', @_LapeExternalCanvas_DrawCircleInverted1);
+
+    addGlobalFunc('procedure TExternalCanvas.DrawCircle(Circle: TCircle); overload', @_LapeExternalCanvas_DrawCircle2);
+    addGlobalFunc('procedure TExternalCanvas.DrawCircleFilled(Circle: TCircle); overload', @_LapeExternalCanvas_DrawCircleFilled2);
+    addGlobalFunc('procedure TExternalCanvas.DrawCircleInverted(Circle: TCircle); overload', @_LapeExternalCanvas_DrawCircleInverted2);
 
     addGlobalFunc('procedure TExternalCanvas.DrawCrosshairs(ACenter: TPoint; Size: Integer);', @_LapeExternalCanvas_DrawCrosshairs);
     addGlobalFunc('procedure TExternalCanvas.DrawCross(ACenter: TPoint; Radius: Integer);', @_LapeExternalCanvas_DrawCross);
