@@ -35,24 +35,29 @@ type
     property FrameColor: TColor read FFrameColor write FFrameColor;
   end;
 
+  // Zoom but with text on the right
   TSimbaImageBoxZoomPanel = class(TCustomControl)
-  private
-    function GetFrameColor: TColor;
-    procedure SetFrameColor(AValue: TColor);
+  public type
+    TTextEvent = function(Sender: TObject; Col: TColor; X, Y: Integer): String of object;
+    TTextMeasureEvent = function(Sender: TObject): String of object;
   protected
     FZoom: TSimbaImageBoxZoom;
     FLabel: TLabel;
-
     FImageCanvas: TCanvas;
     FImageX, FImageY: Integer;
+    FOnGetText: TTextEvent;
+    FOnGetTextMeasure: TTextMeasureEvent;
 
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
-
     procedure DoUpdate(Data: PtrInt);
     procedure DoFill(Data: PtrInt);
+    function GetFrameColor: TColor;
+    procedure SetFrameColor(AValue: TColor);
   public
     constructor Create(AOwner: TComponent); override;
 
+    property OnGetText: TTextEvent read FOnGetText write FOnGetText;
+    property OnGetTextMeasure: TTextMeasureEvent read FOnGetTextMeasure write FOnGetTextMeasure;
     property FrameColor: TColor read GetFrameColor write SetFrameColor;
 
     procedure Move(ImgCanvas: TCanvas; ImgX, ImgY: Integer);
@@ -63,7 +68,9 @@ implementation
 
 uses
   Forms,
-  simba.nativeinterface, simba.colormath, simba.misc;
+  simba.nativeinterface,
+  simba.colormath,
+  simba.misc;
 
 constructor TSimbaImageBoxZoom.Create(AOwner: TComponent);
 begin
@@ -183,43 +190,70 @@ end;
 
 procedure TSimbaImageBoxZoomPanel.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
 var
-  bmp: TBitmap;
+  MeasureText: String;
 begin
   inherited CalculatePreferredSize(PreferredWidth, PreferredHeight, WithThemeSpace);
 
-  bmp := TBitmap.Create();
-  bmp.Canvas.Font := Self.Font;
-  bmp.Canvas.Font.Size := GetFontSize(Self, 2);
-  PreferredWidth := (FZoom.BorderSpacing.Around * 2) + FZoom.Width + bmp.Canvas.TextWidth('HSL: 360.00, 100.00, 100.00') + FLabel.BorderSpacing.Right;
+  if Assigned(FOnGetTextMeasure) then
+    MeasureText := FOnGetTextMeasure(Self)
+  else
+    MeasureText := 'HSL: 360.00, 100.00, 100.00';
 
-  bmp.Free();
+  with TBitmap.Create() do
+  try
+    Canvas.Font := Self.Font;
+    Canvas.Font.Size := GetFontSize(Self, 2); // measure on slightly larger text for padding
+
+    PreferredWidth := (FZoom.BorderSpacing.Around * 2) + FZoom.Width + Canvas.TextWidth(MeasureText) + FLabel.BorderSpacing.Right;
+  finally
+    Free();
+  end;
 end;
 
 procedure TSimbaImageBoxZoomPanel.DoUpdate(Data: PtrInt);
 var
   Col: TColor;
+  HintText: String;
 begin
   if (FImageCanvas <> nil) then
   begin
     Col := FImageCanvas.Pixels[FImageX, FImageY];
 
+    if Assigned(FOnGetText) then
+      HintText := FOnGetText(Self, Col, FImageX, FImageY)
+    else
+    begin
+      with Col.ToRGB(), Col.ToHSL() do
+        HintText := Format(
+          'Color: %s' + LineEnding + 'RGB: %d, %d, %d' + LineEnding + 'HSL: %.2f, %.2f, %.2f',
+          [ColorToStr(Col), R, G, B, H, S, L]
+        );
+    end;
+
     FZoom.Move(FImageCanvas, FImageX, FImageY);
-    with Col.ToRGB(), Col.ToHSL() do
-      FLabel.Caption := Format('Color: %s', [ColorToStr(Col)])     + LineEnding +
-                        Format('RGB: %d, %d, %d', [R, G, B])       + LineEnding +
-                        Format('HSL: %.2f, %.2f, %.2f', [H, S, L]);
+    FLabel.Caption := HintText;
   end;
 end;
 
 procedure TSimbaImageBoxZoomPanel.DoFill(Data: PtrInt);
 var
   Col: TColor absolute Data;
+  HintText: String;
 begin
   FZoom.SetTempColor(Col);
-  with Col.ToRGB(), Col.ToHSL() do
-    FLabel.Caption := Format('Color: %s', [ColorToStr(Col)])     + LineEnding +
-                      Format('RGB: %d, %d, %d', [R, G, B])       + LineEnding +
-                      Format('HSL: %.2f, %.2f, %.2f', [H, S, L]);
+
+  if Assigned(FOnGetText) then
+    HintText := FOnGetText(Self, Col, -1, -1)
+  else
+  begin
+    with Col.ToRGB(), Col.ToHSL() do
+      HintText := Format(
+        'Color: %s' + LineEnding + 'RGB: %d, %d, %d' + LineEnding + 'HSL: %.2f, %.2f, %.2f',
+        [ColorToStr(Col), R, G, B, H, S, L]
+      );
+  end;
+
+  FLabel.Caption := HintText;
 end;
 
 constructor TSimbaImageBoxZoomPanel.Create(AOwner: TComponent);
@@ -227,6 +261,7 @@ begin
   inherited Create(AOwner);
 
   AutoSize := True;
+  BorderSpacing.Around := 5;
 
   FZoom := TSimbaImageBoxZoom.Create(Self);
   FZoom.Parent := Self;
@@ -236,10 +271,8 @@ begin
 
   FLabel := TLabel.Create(Self);
   FLabel.Parent := Self;
-  FLabel.BorderSpacing.Top := 5;
-  FLabel.BorderSpacing.Bottom := 5;
-  FLabel.BorderSpacing.Right := 5;
-  FLabel.Align := alClient;
+  FLabel.AnchorToNeighbour(akLeft, 10, FZoom);
+  FLabel.AnchorVerticalCenterTo(FZoom);
 end;
 
 procedure TSimbaImageBoxZoomPanel.Move(ImgCanvas: TCanvas; ImgX, ImgY: Integer);
