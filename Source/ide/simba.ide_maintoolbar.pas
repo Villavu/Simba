@@ -196,16 +196,7 @@ end;
 
 procedure TSimbaMainToolBar.DoClickAreaSelector(Sender: TObject);
 begin
-  try
-    FAreaSelection := ShowAreaSelector(FWindowSelection);
-    with FAreaSelection do
-      DebugLn([EDebugLn.FOCUS], 'Area picked: [%d, %d, %d, %d]', [X1, Y1, X2, Y2]);
-
-    SimbaIDEEvents.Notify(SimbaIDEEvent.AREA_SELECTED, Self);
-  except
-    on E: Exception do
-      ShowMessage('Exception while selecting area: ' + E.Message);
-  end;
+  SimbaAreaSelector.Pick();
 end;
 
 procedure TSimbaMainToolBar.DoClickWindowSelector(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

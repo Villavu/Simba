@@ -10,8 +10,9 @@ unit simba.ide_areaselector;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, extctrls,
-  simba.base;
+  Classes, SysUtils, Controls, Forms,
+  simba.base,
+  simba.ide_events;
 
 type
   TSimbaAreaSelector = class(TObject)
@@ -41,26 +42,20 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Pick(TargetWindow: TWindowHandle): TBox;
+    procedure Pick;
   end;
 
-  function ShowAreaSelector(Window: TWindowHandle): TBox;
+var
+  SimbaAreaSelector: TSimbaAreaSelector;
 
 implementation
 
 uses
-  Math, LCLType,
-  simba.vartype_windowhandle;
-
-function ShowAreaSelector(Window: TWindowHandle): TBox;
-begin
-  with TSimbaAreaSelector.Create() do
-  try
-    Result := Pick(Window);
-  finally
-    Free();
-  end;
-end;
+  Math, LCLType, Graphics,
+  simba.dialog,
+  simba.vartype_windowhandle,
+  simba.initializations,
+  simba.ide_maintoolbar;
 
 function TSimbaAreaSelector.GetDragEdge(X, Y: Integer): EDragEdge;
 
@@ -158,22 +153,6 @@ end;
 constructor TSimbaAreaSelector.Create;
 begin
   inherited Create();
-
-  FForm := TForm.CreateNew(nil);
-  FForm.Scaled := False;
-  FForm.BorderStyle := bsNone;
-  FForm.Color := clGreen;
-  FForm.FormStyle := fsSystemStayOnTop;
-  FForm.ShowInTaskBar := stNever;
-  FForm.AlphaBlend := True;
-  FForm.AlphaBlendValue := 80;
-  FForm.OnMouseDown := @DoMouseDown;
-  FForm.OnMouseUp   := @DoMouseUp;
-  FForm.OnMouseMove := @DoMouseMove;
-  FForm.OnKeyDown   := @DoKeyDown;
-  FForm.OnDblClick  := @DoDblClick;
-  with Screen.WorkAreaRect do
-    FForm.BoundsRect := TRect.Create(CenterPoint - TPoint.Create(200, 200), 400, 400);
 end;
 
 destructor TSimbaAreaSelector.Destroy;
@@ -184,24 +163,58 @@ begin
   inherited Destroy();
 end;
 
-function TSimbaAreaSelector.Pick(TargetWindow: TWindowHandle): TBox;
+procedure TSimbaAreaSelector.Pick;
 var
-  WindowBounds: TBox;
+  TargetBounds: TBox;
 begin
-  FForm.ShowModal();
+  try
+    TargetBounds := SimbaMainToolBar.WindowSelection.EnsureValid().GetBounds();
 
-  WindowBounds := Default(TBox);
-  if TargetWindow.IsValid() then
-    WindowBounds := TargetWindow.GetBounds();
+    if (FForm = nil) then // only create the form once actually needed
+    begin
+      FForm := TForm.CreateNew(nil);
+      FForm.Scaled := False;
+      FForm.BorderStyle := bsNone;
+      FForm.Color := clGreen;
+      FForm.FormStyle := fsSystemStayOnTop;
+      FForm.ShowInTaskBar := stNever;
+      FForm.AlphaBlend := True;
+      FForm.AlphaBlendValue := 80;
+      FForm.OnMouseDown := @DoMouseDown;
+      FForm.OnMouseUp   := @DoMouseUp;
+      FForm.OnMouseMove := @DoMouseMove;
+      FForm.OnKeyDown   := @DoKeyDown;
+      FForm.OnDblClick  := @DoDblClick;
+      with Screen.WorkAreaRect do
+        FForm.BoundsRect := TRect.Create(CenterPoint - TPoint.Create(200, 200), 400, 400);
+    end;
 
-  with FForm.BoundsRect do
-  begin
-    Result.X1 := Left - WindowBounds.X1;
-    Result.Y1 := Top - WindowBounds.Y1;
-    Result.X2 := Right - WindowBounds.X1;
-    Result.Y2 := Bottom - WindowBounds.Y1;
+    FForm.ShowModal();
+    with FForm.BoundsRect do
+      DebugLn([EDebugLn.FOCUS], 'Area picked: [%d, %d, %d, %d]', [Left - TargetBounds.X1,Top - TargetBounds.Y1, Right - TargetBounds.X1, Bottom - TargetBounds.Y1]);
+  except
+    on E: Exception do
+    begin
+      ShowErrorDialog('Area Selector', 'Exception while selecting %s', [E.Message]);
+      if (FForm <> nil) then
+        FForm.Close();
+    end;
   end;
 end;
+
+procedure DoCreate;
+begin
+  SimbaAreaSelector := TSimbaAreaSelector.Create();
+end;
+
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaAreaSelector);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaAreaSelector');
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaAreaSelector');
 
 end.
 

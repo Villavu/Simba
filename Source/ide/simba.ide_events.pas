@@ -42,9 +42,7 @@ type
     // Window selection changed
     WINDOW_SELECTED,
     // A color was picked
-    COLOR_PICKED,
-    // A area was selected
-    AREA_SELECTED
+    COLOR_PICKED
   );
   {$POP}
 
