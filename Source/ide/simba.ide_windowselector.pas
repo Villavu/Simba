@@ -13,10 +13,21 @@ unit simba.ide_windowselector;
 interface
 
 uses
-  classes, sysutils, controls, forms, graphics,
-  simba.base;
+  Classes, SysUtils, Controls, Forms, Graphics,
+  simba.base,
+  simba.ide_events;
 
-function ShowWindowSelector: TWindowHandle;
+type
+  TSimbaWindowSelector = class(TObject)
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    procedure Pick;
+  end;
+
+var
+  SimbaWindowSelector: TSimbaWindowSelector;
 
 implementation
 
@@ -27,81 +38,40 @@ uses
   {$IFDEF DARWIN}
   CocoaAll, CocoaWSForms, CocoaUtils,
   {$ENDIF}
-  simba.baseclass, simba.vartype_windowhandle, simba.nativeinterface;
+  simba.ide_maintoolbar,
+  simba.vartype_windowhandle,
+  simba.vartype_box,
+  simba.process,
+  simba.dialog,
+  simba.nativeinterface,
+  simba.initializations;
 
 type
-  TSimbaWindowSelectorBase = class(TSimbaBaseClass)
-  protected
-    FExcludeWindows: TWindowHandleArray;
-
-    procedure HighlightWindow(Window: TWindowHandle); virtual; abstract;
-  public
-    function Select: TWindowHandle;
-  end;
-
-  // 4 forms to create a box around the window
-  TSimbaWindowSelectorSimple = class(TSimbaWindowSelectorBase)
-  protected
-  const
-    BORDER_SIZE = 4;
-  protected
-    FLeftForm, FRightForm, FTopForm, FBottomForm: TForm;
-
-    procedure HighlightWindow(Window: TWindowHandle); override;
-  public
-    constructor Create;
-    destructor Destroy; override;
-  end;
-
-  // overlay a transparent form
-  TSimbaWindowSelectorFancy = class(TSimbaWindowSelectorBase)
+  TWindowHighlighter = class
+  protected const
+    BORDER_SIZE = 3;
   protected
     FForm: TForm;
-
-    procedure HighlightWindow(Window: TWindowHandle); override;
+    FLeftForm, FRightForm, FTopForm, FBottomForm: TForm;
+    FExcludeWindows: TWindowHandleArray;
   public
     constructor Create;
     destructor Destroy; override;
+
+    function GetWindowAtCursor: TWindowHandle;
+    procedure Highlight(Window: TWindowHandle);
   end;
 
-function ShowWindowSelector: TWindowHandle;
-begin
-  // Linux (xlib) does support transparent windows but display managers may or may not perform.
-  {$IF DEFINED(WINDOWS) or DEFINED(DARWIN)}
-  with TSimbaWindowSelectorFancy.Create() do
-  {$ELSE}
-  with TSimbaWindowSelectorSimple.Create() do
-  {$ENDIF}
-  try
-    Result := Select();
-  finally
-    Free();
-  end;
-end;
+constructor TWindowHighlighter.Create;
 
-function TSimbaWindowSelectorBase.Select: TWindowHandle;
-var
-  Window: TWindowHandle;
-begin
-  Result := 0;
-
-  while SimbaNativeInterface.MousePressed(EMouseButton.LEFT) do
+  function FormToWindowHandle(Form: TForm): TWindowHandle;
   begin
-    Window := GetWindowAtCursor(FExcludeWindows);
-    if (Window <> 0) and (Window <> Result) then
-    begin
-      HighlightWindow(Window);
-
-      Result := Window;
-    end;
-
-    Application.ProcessMessages();
-
-    Sleep(25);
+    {$IFDEF DARWIN}
+    Result := TCocoaWSCustomForm.GetWindowContentFromHandle(Form).window.windowNumber;
+    {$ELSE}
+    Result := Form.Handle;
+    {$ENDIF}
   end;
-end;
-
-constructor TSimbaWindowSelectorSimple.Create;
 
   function CreateEdgeForm: TForm;
   begin
@@ -114,20 +84,49 @@ constructor TSimbaWindowSelectorSimple.Create;
     Result.SetBounds(0, 0, 0, 0);
     Result.Show();
 
-    FExcludeWindows := FExcludeWindows + [Result.Handle];
+    FExcludeWindows := FExcludeWindows + [FormToWindowHandle(Result)];
+  end;
+
+  function CreateTransparentForm: TForm;
+  begin
+    Result := TForm.CreateNew(nil);
+    Result.FormStyle := fsSystemStayOnTop;
+    Result.BorderStyle := bsNone;
+    Result.Scaled := False;
+    Result.SetBounds(0, 0, 0, 0);
+    Result.Color := clGreen;
+    Result.AlphaBlend := True;
+    Result.AlphaBlendValue := 100;
+    Result.Show();
+
+    {$IFDEF DARWIN}
+    with TCocoaWSCustomForm.GetWindowContentFromHandle(Result) do
+      window.setBackgroundColor(ColorToNSColor(Result.Color));
+    {$ENDIF}
+
+    {$IFDEF WINDOWS}
+    SetWindowLong(Result.Handle, GWL_EXSTYLE, GetWindowLong(Result.Handle, GWL_EXSTYLE) or WS_EX_LAYERED or WS_EX_TRANSPARENT);
+    {$ENDIF}
+
+    FExcludeWindows := FExcludeWindows + [FormToWindowHandle(Result)];
   end;
 
 begin
   inherited Create();
 
+  {$IF DEFINED(WINDOWS) or DEFINED(DARWIN)}
+  FForm := CreateTransparentForm();
+  {$ELSE}
   FLeftForm   := CreateEdgeForm();
   FRightForm  := CreateEdgeForm();
   FTopForm    := CreateEdgeForm();
   FBottomForm := CreateEdgeForm();
+  {$ENDIF}
 end;
 
-destructor TSimbaWindowSelectorSimple.Destroy;
+destructor TWindowHighlighter.Destroy;
 begin
+  FreeAndNil(FForm);
   FreeAndNil(FLeftForm);
   FreeAndNil(FRightForm);
   FreeAndNil(FTopForm);
@@ -136,57 +135,98 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaWindowSelectorSimple.HighlightWindow(Window: TWindowHandle);
+function TWindowHighlighter.GetWindowAtCursor: TWindowHandle;
+begin
+  Result := SimbaNativeInterface.GetWindowAtCursor(FExcludeWindows);
+end;
+
+procedure TWindowHighlighter.Highlight(Window: TWindowHandle);
 begin
   with Window.GetBounds() do
   begin
-    FLeftForm.SetBounds(X1 - BORDER_SIZE, Y1 - BORDER_SIZE, BORDER_SIZE, Y2 - Y1 + (BORDER_SIZE * 2));
-    FRightForm.SetBounds(X2, Y1 - BORDER_SIZE, BORDER_SIZE, Y2 - Y1 + (BORDER_SIZE * 2));
-    FTopForm.SetBounds(X1, Y1 - BORDER_SIZE, X2 - X1, BORDER_SIZE);
-    FBottomForm.SetBounds(X1, Y2, X2 - X1, BORDER_SIZE);
+    if (FForm <> nil)       then FForm.SetBounds(X1, Y1, X2 - X1, Y2 - Y1);
+    if (FLeftForm <> nil)   then FLeftForm.SetBounds(X1 - BORDER_SIZE, Y1 - BORDER_SIZE, BORDER_SIZE, Y2 - Y1 + (BORDER_SIZE * 2));
+    if (FRightForm <> nil)  then FRightForm.SetBounds(X2, Y1 - BORDER_SIZE, BORDER_SIZE, Y2 - Y1 + (BORDER_SIZE * 2));
+    if (FTopForm <> nil)    then FTopForm.SetBounds(X1, Y1 - BORDER_SIZE, X2 - X1, BORDER_SIZE);
+    if (FBottomForm <> nil) then FBottomForm.SetBounds(X1, Y2, X2 - X1, BORDER_SIZE);
   end;
 end;
 
-procedure TSimbaWindowSelectorFancy.HighlightWindow(Window: TWindowHandle);
+constructor TSimbaWindowSelector.Create;
 begin
-  with Window.GetBounds() do
-    FForm.SetBounds(X1, Y1, X2-X1, Y2-Y1);
+  inherited Create();
 end;
 
-constructor TSimbaWindowSelectorFancy.Create;
+destructor TSimbaWindowSelector.Destroy;
 begin
-  FForm := TForm.CreateNew(nil);
-  FForm.FormStyle := fsSystemStayOnTop;
-  FForm.BorderStyle := bsNone;
-  FForm.Scaled := False;
-  FForm.SetBounds(0, 0, 0, 0);
-  FForm.Color := clGreen;
-  FForm.AlphaBlend := True;
-  FForm.AlphaBlendValue := 100;
-  FForm.Show();
-
-  {$IFDEF DARWIN}
-  with TCocoaWSCustomForm.GetWindowContentFromHandle(FForm) do
-  begin
-    window.setBackgroundColor(ColorToNSColor(FForm.Color));
-
-    FExcludeWindows := [window.windowNumber];
-  end;
-  {$ENDIF}
-
-  {$IFDEF WINDOWS}
-  SetWindowLong(FForm.Handle, GWL_EXSTYLE, GetWindowLong(FForm.Handle, GWL_EXSTYLE) or WS_EX_LAYERED or WS_EX_TRANSPARENT);
-
-  FExcludeWindows := [FForm.Handle];
-  {$ENDIF}
-end;
-
-destructor TSimbaWindowSelectorFancy.Destroy;
-begin
-  FreeAndNil(FForm);
-
   inherited Destroy();
 end;
 
+procedure TSimbaWindowSelector.Pick;
+var
+  Selected, WinAtCursor: TWindowHandle;
+  Highlighter: TWindowHighlighter;
+  Pid: TProcessID;
+  Bounds: TBox;
+begin
+  Selected := 0;
+  Highlighter := nil;
+  try
+    Highlighter := TWindowHighlighter.Create();
+
+    while SimbaNativeInterface.MousePressed(EMouseButton.LEFT) do
+    begin
+      WinAtCursor := Highlighter.GetWindowAtCursor();
+      if (WinAtCursor <> 0) and (WinAtCursor <> Selected) then
+      begin
+        Highlighter.Highlight(WinAtCursor);
+        Selected := WinAtCursor;
+      end;
+
+      Application.ProcessMessages();
+      Sleep(25);
+    end;
+
+    if (Selected <> 0) and Selected.IsValid() then
+    begin
+      Pid := Selected.GetPID();
+      Bounds := Selected.GetBounds();
+
+      DebugLn([EDebugLn.FOCUS], 'Window Selected: %d',  [Selected]);
+      DebugLn([EDebugLn.FOCUS], ' - Dimensions: %dx%d', [Bounds.Width - 1, Bounds.Height - 1]);
+      DebugLn([EDebugLn.FOCUS], ' - PID: %d (%s)',      [PID, IfThen(IsProcess64Bit(PID), '64 bit', '32 bit')]);
+      DebugLn([EDebugLn.FOCUS], ' - Title: "%s"',       [Selected.GetTitle()]);
+      DebugLn([EDebugLn.FOCUS], ' - ClassName: "%s"',   [Selected.GetClassName()]);
+      DebugLn([EDebugLn.FOCUS], ' - Executable: "%s"',  [GetProcessPath(PID)]);
+
+      SimbaMainToolBar.WindowSelection := Selected;
+      SimbaMainToolBar.ProcessSelection := Pid;
+
+      SimbaIDEEvents.Notify(SimbaIDEEvent.WINDOW_SELECTED, nil);
+    end;
+  except
+    on E: Exception do
+      ShowErrorDialog('Target Selector', 'Exception occurred while selecting target %s', [E.Message]);
+  end;
+
+  if (Highlighter <> nil) then
+    Highlighter.Free();
+end;
+
+procedure DoCreate;
+begin
+  SimbaWindowSelector := TSimbaWindowSelector.Create();
+end;
+
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaWindowSelector);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaWindowSelector');
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaWindowSelector');
+
 end.
+
 
