@@ -190,21 +190,8 @@ begin
 end;
 
 procedure TSimbaMainToolBar.DoClickColorPicker(Sender: TObject);
-var
-  X, Y: Integer;
-  Color: TColor;
 begin
-  try
-    if ShowColorPicker(FWindowSelection, X, Y, Color) then
-    begin
-      DebugLn([EDebugLn.FOCUS], 'Color picked: %d at (%d, %d)', [Color, X, Y]);
-
-      SimbaIDEEvents.Notify(SimbaIDEEvent.COLOR_PICKED, Self);
-    end;
-  except
-    on E: Exception do
-      ShowMessage('Exception while picking color: ' + E.Message);
-  end;
+  SimbaColorPicker.Pick();
 end;
 
 procedure TSimbaMainToolBar.DoClickAreaSelector(Sender: TObject);

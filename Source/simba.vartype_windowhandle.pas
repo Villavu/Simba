@@ -10,7 +10,7 @@ unit simba.vartype_windowhandle;
 interface
 
 uses
-  classes, sysutils,
+  Classes, SysUtils,
   simba.base;
 
 type
@@ -31,6 +31,7 @@ type
     procedure SetBounds(Bounds: TBox);
     function Activate: Boolean;
     procedure Kill;
+    function EnsureValid: TWindowHandle;
   end;
 
   function GetVisibleWindows: TWindowHandleArray;
@@ -54,7 +55,7 @@ uses
 
 function TWindowHandleHelper.IsValid: Boolean;
 begin
-  Result := SimbaNativeInterface.IsWindowValid(Self);
+  Result := (Self > 0) and SimbaNativeInterface.IsWindowValid(Self);
 end;
 
 function TWindowHandleHelper.IsActive: Boolean;
@@ -120,6 +121,13 @@ end;
 procedure TWindowHandleHelper.Kill;
 begin
   SimbaNativeInterface.TerminateProcess(Self.GetPID());
+end;
+
+function TWindowHandleHelper.EnsureValid: TWindowHandle;
+begin
+  Result := Self;
+  if not Result.IsValid() then
+    Result := GetDesktopWindow();
 end;
 
 function TWindowHandleHelper.GetRelativeCursorPos: TPoint;

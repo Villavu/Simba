@@ -10,110 +10,119 @@ unit simba.ide_colorpicker;
 interface
 
 uses
-  classes, sysutils, forms, controls, graphics, dialogs, extctrls, stdctrls,
-  simba.component_imageboxzoom, simba.base, simba.vartype_box;
+  Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls,
+  simba.base,
+  simba.ide_events,
+  simba.component_imageboxzoom;
 
 type
-  TSimbaColorPickerHint = class(THintWindow)
-  protected
-    procedure Paint; override;
-  public
-    Zoom: TSimbaImageBoxZoom;
-    Info: TLabel;
-
-    constructor Create(AOwner: TComponent); override;
-  end;
-
   TSimbaColorPicker = class(TObject)
-  protected
+  private
     FForm: TForm;
-    FColor: TColor;
-    FPoint: TPoint;
-    FHint: TSimbaColorPickerHint;
+    FHint: THintWindow;
     FImage: TImage;
     FPicked: Boolean;
     FImageX, FImageY: Integer;
-    FWindow: TWindowHandle;
+    FPoint: TPoint;
+    FColor: TColor;
+    FWindowSelection: TWindowHandle;
 
-    procedure FormClosed(Sender: TObject; var CloseAction: TCloseAction);
-    procedure HintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-
-    procedure ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure DoFormClosed(Sender: TObject; var CloseAction: TCloseAction);
+    procedure DoHintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure DoImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure DoImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
-    function Pick(out X, Y: Integer; out Color: TColor): Boolean;
+    constructor Create;
+    destructor Destroy; override;
 
-    constructor Create(Window: TWindowHandle); reintroduce;
+    procedure Pick;
   end;
 
-  function ShowColorPicker(Window: TWindowHandle; out X, Y: Integer; out Color: TColor): Boolean;
+var
+  SimbaColorPicker: TSimbaColorPicker;
 
 implementation
 
 uses
+  ATCanvasPrimitives,
   LCLType,
+  simba.initializations,
+  simba.dialog,
   simba.image,
+  simba.colormath,
+  simba.ide_maintoolbar,
   simba.vartype_windowhandle,
-  simba.form_colorpickhistory,
-  simba.colormath;
+  simba.vartype_box,
+  simba.component_theme,
+  simba.form_colorpickhistory;
 
-function ShowColorPicker(Window: TWindowHandle; out X, Y: Integer; out Color: TColor): Boolean;
-begin
-  with TSimbaColorPicker.Create(Window) do
-  try
-    Result := Pick(X, Y, Color);
-    if Result then
-    begin
-      SimbaColorPickHistoryForm.Add(TPoint.Create(X, Y), Color, True);
-      SimbaColorPickHistoryForm.MakeVisible();
-    end;
-  finally
-    Free();
+type
+  TSimbaColorPickerHint = class(THintWindow)
+  protected
+    function DoHintTextMeasure(Sender: TObject): String;
+    function DoHintText(Sender: TObject; AColor: TColor; X, Y: Integer): String;
+
+    procedure Paint; override;
+  public
+    Zoom: TSimbaImageBoxZoomPanel;
+
+    constructor Create(AOwner: TComponent); override;
   end;
+
+function TSimbaColorPickerHint.DoHintTextMeasure(Sender: TObject): String;
+begin
+  Result := 'Position: 12345, 12345';
+end;
+
+function TSimbaColorPickerHint.DoHintText(Sender: TObject; AColor: TColor; X, Y: Integer): String;
+begin
+  Result := 'Color: ' + ColorToStr(AColor) + LineEnding + 'Position: ' + IntToStr(X) + ', ' + IntToStr(Y);
 end;
 
 procedure TSimbaColorPickerHint.Paint;
 begin
-  Canvas.Pen.Color := clBlack;
-  Canvas.Brush.Color := clForm;
-  Canvas.Rectangle(ClientRect);
+  inherited Paint;
 
-  inherited Paint();
+  Canvas.Pen.Color := ColorBlendHalf(SimbaComponentTheme.ColorFrame, SimbaComponentTheme.ColorLine);
+  Canvas.Frame(ClientRect);
 end;
 
 constructor TSimbaColorPickerHint.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
+  Color := SimbaComponentTheme.ColorFrame;
+  Font.Color := SimbaComponentTheme.ColorFont;
+
   BorderStyle := bsNone;
   AutoSize := True;
 
-  Zoom := TSimbaImageBoxZoom.Create(Self);
+  Zoom := TSimbaImageBoxZoomPanel.Create(Self);
   Zoom.Parent := Self;
-  Zoom.Align := alLeft;
-  Zoom.SetZoom(4, 5);
+  Zoom.Align := alClient;
+  Zoom.OnGetTextMeasure := @DoHintTextMeasure;
+  Zoom.OnGetText := @DoHintText;
   Zoom.BorderSpacing.Around := 10;
-
-  Info := TLabel.Create(Self);
-  Info.Parent := Self;
-  Info.Font.Color := clBlack;
-  Info.BorderSpacing.Right := 10;
-  Info.AnchorToNeighbour(akLeft, 10, Zoom);
-  Info.AnchorVerticalCenterTo(Zoom);
+  Zoom.FrameColor := ColorBlendHalf(SimbaComponentTheme.ColorFrame, SimbaComponentTheme.ColorLine);
 end;
 
-procedure TSimbaColorPicker.FormClosed(Sender: TObject; var CloseAction: TCloseAction);
+procedure TSimbaColorPicker.DoFormClosed(Sender: TObject; var CloseAction: TCloseAction);
 begin
   if FPicked then
   begin
-    FPoint := FWindow.GetRelativeCursorPos();
-    FColor := FImage.Picture.Bitmap.Canvas.Pixels[FImageX, FImageY];
+    DebugLn([EDebugLn.FOCUS], 'Color picked: %s at (%d, %d)', [ColorToStr(FColor), FPoint.X, FPoint.Y]);
+
+    SimbaColorPickHistoryForm.Add(FPoint, FColor, True);
+    SimbaColorPickHistoryForm.MakeVisible();
   end;
 
-  CloseAction := caFree;
+  FHint.Close();
+  FImage.Picture.Clear(); // Free up mem
+
+  CloseAction := caHide;
 end;
 
-procedure TSimbaColorPicker.HintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TSimbaColorPicker.DoHintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
     VK_UP:     Mouse.CursorPos := Mouse.CursorPos + TPoint.Create(0, -1);
@@ -132,101 +141,116 @@ begin
   Key := VK_UNKNOWN;
 end;
 
-procedure TSimbaColorPicker.ImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaColorPicker.DoImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
   FImageX := X;
   FImageY := Y;
 
-  FPoint := FWindow.GetRelativeCursorPos();
-
+  FPoint := FWindowSelection.GetRelativeCursorPos();
+  FColor := FImage.Picture.Bitmap.Canvas.Pixels[X, Y];
   with FImage.ClientToScreen(TPoint.Create(X + 25, Y - (FHint.Height div 2))) do
   begin
     FHint.Left := X;
     FHint.Top := Y;
   end;
 
-  FHint.Zoom.Move(TImage(Sender).Canvas, X, Y);
-  FHint.Info.Caption := 'Color: ' + ColorToStr(FImage.Picture.Bitmap.Canvas.Pixels[X, Y]) + LineEnding +
-                        'Position: ' + IntToStr(FPoint.X) + ', ' + IntToStr(FPoint.Y);
+  TSimbaColorPickerHint(FHint).Zoom.Move(TImage(Sender).Canvas, X, Y);
 end;
 
-procedure TSimbaColorPicker.ImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaColorPicker.DoImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   FPicked := True;
 
   FForm.Close();
 end;
 
-function TSimbaColorPicker.Pick(out X, Y: Integer; out Color: TColor): Boolean;
-begin
-  FForm.ShowOnTop();
-
-  FHint.Show();
-  FHint.BringToFront();
-
-  while FForm.Showing do
-  begin
-    Application.ProcessMessages();
-
-    Sleep(25);
-  end;
-
-  Result := FPicked;
-  if FPicked then
-  begin
-    X := FPoint.X;
-    Y := FPoint.Y;
-    Color := FColor;
-  end;
-end;
-
-constructor TSimbaColorPicker.Create(Window: TWindowHandle);
+procedure TSimbaColorPicker.Pick;
 var
   DesktopWindow: TWindowHandle;
   DesktopBounds: TBox;
-  Temp: TSimbaImage;
+  DesktopImage: TSimbaImage;
 begin
-  inherited Create();
+  DesktopImage := nil;
 
-  DesktopWindow := GetDesktopWindow();
-  DesktopBounds := DesktopWindow.GetBounds();
+  try
+    if (FForm = nil) then // only create form when actually needed
+    begin
+      FForm := TForm.CreateNew(nil);
+      FForm.BorderStyle := bsNone;
+      FForm.OnClose := @DoFormClosed;
 
-  FWindow := Window;
-  if (FWindow = 0) or (not FWindow.IsValid()) then
-    FWindow := GetDesktopWindow();
+      FImage := TImage.Create(FForm);
+      FImage.Parent := FForm;
+      FImage.Align := alClient;
+      FImage.Cursor := crCross;
+      FImage.OnMouseUp := @DoImageMouseUp;
+      FImage.OnMouseMove := @DoImageMouseMove;
 
-  FForm := TForm.CreateNew(nil);
-  with FForm do
-  begin
-    Left := DesktopBounds.X1;
-    Top := DesktopBounds.Y1;
-    Width := DesktopBounds.Width;
-    Height := DesktopBounds.Height;
+      FHint := TSimbaColorPickerHint.Create(FForm);
+      FHint.OnKeyDown := @DoHintKeyDown;
+    end;
 
-    BorderStyle := bsNone;
+    DesktopWindow := GetDesktopWindow();
+    DesktopBounds := DesktopWindow.GetBounds();
+    DesktopImage := TSimbaImage.CreateFromWindow(DesktopWindow);
 
-    OnClose := @FormClosed;
+    FWindowSelection := SimbaMainToolBar.WindowSelection.EnsureValid();
+
+    FForm.Left := DesktopBounds.X1;
+    FForm.Top := DesktopBounds.Y1;
+    FForm.Width := DesktopBounds.Width;
+    FForm.Height := DesktopBounds.Height;
+
+    FImage.Picture.Bitmap := DesktopImage.ToLazBitmap();
+
+    FForm.ShowOnTop();
+    FHint.Show();
+    FHint.BringToFront();
+
+    while FForm.Showing do
+    begin
+      Application.ProcessMessages();
+
+      Sleep(25);
+    end;
+  except
+    on E: Exception do
+    begin
+      ShowErrorDialog('Color Picker', 'Exception occurred while picking color %s', [E.Message]);
+      if (FForm <> nil) then
+        FForm.Close();
+    end;
   end;
 
-  FImage := TImage.Create(FForm);
-  with FImage do
-  begin
-    Parent := FForm;
-    Align := alClient;
-    Cursor := crCross;
-
-    OnMouseUp := @ImageMouseUp;
-    OnMouseMove := @ImageMouseMove;
-
-    Temp := TSimbaImage.CreateFromWindow(DesktopWindow);
-    Picture.Bitmap := Temp.ToLazBitmap;
-    Temp.Free();
-  end;
-
-  FHint := TSimbaColorPickerHint.Create(FForm);
-  FHint.OnKeyDown := @HintKeyDown;
-  FHint.Show();
+  if (DesktopImage <> nil) then
+    FreeAndNil(DesktopImage);
 end;
 
-end.
+constructor TSimbaColorPicker.Create;
+begin
+  inherited Create();
+end;
 
+destructor TSimbaColorPicker.Destroy;
+begin
+  if (FForm <> nil) then
+    FreeAndNil(FForm);
+
+  inherited Destroy();
+end;
+
+procedure DoCreate;
+begin
+  SimbaColorPicker := TSimbaColorPicker.Create();
+end;
+
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaColorPicker);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaColorPicker');
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaColorPicker');
+
+end.
