@@ -223,7 +223,7 @@ procedure TSimbaNativeInterface_Windows.SetWindowBounds(Window: TWindowHandle; B
 begin
   ApplyDWMOffset();
 
-  SetWindowPos(Window, 0, Bounds.X1, Bounds.Y1, Bounds.Width, Bounds.Height, SWP_NOACTIVATE or SWP_NOZORDER);
+  SetWindowPos(Window, 0, Bounds.X1, Bounds.Y1, Bounds.X2 - Bounds.X1, Bounds.Y2 - Bounds.Y1, SWP_NOACTIVATE or SWP_NOZORDER);
 end;
 
 function GetDesktopOffset(Handle: HMONITOR; DC: HDC; Rect: PRect; Data: LPARAM): LongBool; stdcall;
