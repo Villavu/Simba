@@ -28,7 +28,6 @@ type
   TACAImageSupplierLape = function(): TByteArray of object;
 
   TSimbaACA = class(TForm)
-  private
   private const
     DEF_WIDTH = 1100;
     DEF_HEIGHT = 700;

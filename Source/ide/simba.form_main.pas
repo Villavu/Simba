@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
   Menus, ImgList, AnchorDockPanel, LMessages,
-  simba.base, simba.settings, simba.ide_mouselogger, simba.image;
+  simba.base, simba.settings, simba.ide_mouselogger, simba.image, simba.ide_dtmeditor;
 
 const
   IMG_NONE = -1;
@@ -288,7 +288,7 @@ uses
   simba.form_functionlist, simba.form_downloadsimba, simba.form_backups,
 
   simba.ide_tab,
-  simba.aca, simba.dtmeditor, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
+  simba.aca, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
   simba.ide_simpleformatter, simba.component_theme,
   simba.threading, simba.ide_editor, simba.vartype_string, simba.misc,
   simba.target;
@@ -943,14 +943,12 @@ begin
 end;
 
 procedure TSimbaMainForm.MenuItemDTMEditorClick(Sender: TObject);
-var
-  Target: TSimbaTarget;
 begin
-  Target := TSimbaTarget.Create();
-  if (SimbaMainToolBar.WindowSelection <> 0) then
-    Target.SetWindow(SimbaMainToolBar.WindowSelection);
-
-  ShowDTMEditor(Target, True);
+  with TSimbaDTMEditorNew.Create(@DoGetWindowForACA) do
+  begin
+    FreeOnClose := True;
+    Show();
+  end;
 end;
 
 procedure TSimbaMainForm.MenuFindClick(Sender: TObject);

@@ -18,7 +18,7 @@ uses
   simba.script_objectutil,
   simba.process,
   simba.nativeinterface, simba.settings, simba.env,
-  simba.dtmeditor, simba.dialog, simba.threading, simba.target,
+  simba.dialog, simba.threading, simba.target,
   simba.colormath, simba.aca, simba.multiprocessing,
   simba.component_imagebox;
 
@@ -249,25 +249,6 @@ procedure _LapeShowDialog(const Params: PParamArray; const Result: Pointer); LAP
   procedure Execute;
   begin
     ESimbaDialogButton(Result^) := ShowDialog(ESimbaDialogIcon(Params^[0]^), ESimbaDialogButtons(Params^[1]^), PString(Params^[2])^, PString(Params^[3])^);
-  end;
-
-begin
-  RunInMainThread(@Execute);
-end;
-
-(*
-ShowDTMEditor
--------------
-```
-function ShowDTMEditor(Target: TTarget): String;
-function ShowDTMEditor: String;
-```
-*)
-procedure _LapeShowDTMEditor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-
-  procedure Execute;
-  begin
-    ShowDTMEditor(PLapeObjectTarget(Params^[0])^^, False, PString(Result)^);
   end;
 
 begin
@@ -681,14 +662,6 @@ begin
     addGlobalFunc('function ShowDirectoryDialog(Title, InitialDirectory: String; out Directory: String): Boolean;', @_LapeSelectDirectory);
     addGlobalFunc('function ShowQueryDialog(Caption, Prompt: String; var Value: String): Boolean', @_LapeInputQuery);
     addGlobalFunc('function ShowComboDialog(Caption, Prompt: string; List: TStringArray): Integer', @_LapeInputCombo);
-    addGlobalFunc('function ShowDTMEditor(Target: TTarget): String; overload', @_LapeShowDTMEditor);
-
-    addGlobalFunc(
-      'function ShowDTMEditor: String; overload;', [
-      'begin',
-      '  Result := ShowDTMEditor(Target);',
-      'end;'
-    ]);
 
     addGlobalFunc(
       'function SaveScreenshot: String; overload;', [

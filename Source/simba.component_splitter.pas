@@ -41,7 +41,7 @@ constructor TSimbaSplitter.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
-  Width := Scale96ToScreen(10);
+  Width := Scale96ToScreen(7);
 end;
 
 end.

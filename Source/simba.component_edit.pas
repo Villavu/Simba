@@ -49,6 +49,7 @@ type
     FColorSelection: TColor;
 
     FOnChange: TNotifyEvent;
+    FOnUserChange: TNotifyEvent;
 
     procedure WMSetFocus(var Message: TLMSetFocus); message LM_SETFOCUS;
     procedure WMKillFocus(var Message: TLMKillFocus); message LM_KILLFOCUS;
@@ -105,6 +106,7 @@ type
     procedure Clear;
 
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnUserChange: TNotifyEvent read FOnUserChange write FOnUserChange;
 
     property ColorBorderActive: TColor read FColorBorderActive write SetColorBorderActive;
     property ColorBorder: TColor read FColorBorder write SetColorBorder;
@@ -408,6 +410,9 @@ begin
   NewText := Text;
   Insert(C, NewText, FCaretX);
   Text := NewText;
+
+  if Assigned(FOnUserChange) then
+    FOnUserChange(Self);
 end;
 
 procedure TSimbaEdit.AddStringAtCursor(Str: String; ADeleteSelection: Boolean);
@@ -423,6 +428,9 @@ begin
   Inc(FCaretX, Length(Str));
 
   Text := NewText;
+
+  if Assigned(FOnUserChange) then
+    FOnUserChange(Self);
 end;
 
 procedure TSimbaEdit.DeleteCharAtCursor;
@@ -437,6 +445,9 @@ begin
     Dec(FCaretX);
 
     Text := NewText;
+
+    if Assigned(FOnUserChange) then
+      FOnUserChange(Self);
   end;
 end;
 
@@ -457,6 +468,9 @@ begin
       SetCaretPos(FCaretX - GetSelectionLen());
     Text := NewText;
     ClearSelection();
+
+    if Assigned(FOnUserChange) then
+      FOnUserChange(Self);
   end;
 end;
 
@@ -557,8 +571,8 @@ procedure TSimbaEdit.TextChanged;
 begin
   inherited TextChanged();
 
-  if Assigned(OnChange) then
-    OnChange(Self);
+  if Assigned(FOnChange) then
+    FOnChange(Self);
 
   Invalidate();
 end;
@@ -897,7 +911,6 @@ begin
   inherited Create(AOwner);
 
   ControlStyle := ControlStyle + [csOpaque];
-  Color := SimbaComponentTheme.ColorBackground;
   AutoSize := True;
 
   FEdit := TSimbaEdit.Create(Self);

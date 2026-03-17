@@ -30,7 +30,7 @@ begin
   {$ENDIF}
 
   Application.CaptureExceptions := False;
-  Application.UpdateFormatSettings := False;
+  Application.{%H-}UpdateFormatSettings := False;
   Application.Initialize();
 
   FormatSettings.DecimalSeparator := '.';
