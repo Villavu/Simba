@@ -55,7 +55,7 @@ uses
   simba.dialog,
   simba.vartype_windowhandle,
   simba.initializations,
-  simba.ide_maintoolbar;
+  simba.ide_vars;
 
 function TSimbaAreaSelector.GetDragEdge(X, Y: Integer): EDragEdge;
 
@@ -168,7 +168,7 @@ var
   TargetBounds: TBox;
 begin
   try
-    TargetBounds := SimbaMainToolBar.WindowSelection.EnsureValid().GetBounds();
+    TargetBounds := SimbaIDEVars.WindowSelection.EnsureValid().GetBounds();
 
     if (FForm = nil) then // only create the form once actually needed
     begin

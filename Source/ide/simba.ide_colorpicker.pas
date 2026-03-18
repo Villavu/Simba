@@ -50,7 +50,7 @@ uses
   simba.dialog,
   simba.image,
   simba.colormath,
-  simba.ide_maintoolbar,
+  simba.ide_vars,
   simba.vartype_windowhandle,
   simba.vartype_box,
   simba.component_theme,
@@ -194,7 +194,7 @@ begin
     DesktopBounds := DesktopWindow.GetBounds();
     DesktopImage := TSimbaImage.CreateFromWindow(DesktopWindow);
 
-    FWindowSelection := SimbaMainToolBar.WindowSelection.EnsureValid();
+    FWindowSelection := SimbaIDEVars.WindowSelection.EnsureValid();
 
     FForm.Left := DesktopBounds.X1;
     FForm.Top := DesktopBounds.Y1;

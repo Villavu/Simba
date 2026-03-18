@@ -8,7 +8,6 @@ object SimbaMainForm: TSimbaMainForm
   ClientWidth = 1624
   DesignTimePPI = 192
   Position = poScreenCenter
-  LCLVersion = '4.0.0.4'
   OnClose = FormClose
   OnDestroy = FormDestroy
   OnWindowStateChange = FormWindowStateChange
@@ -17,9 +16,9 @@ object SimbaMainForm: TSimbaMainForm
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Side = asrBottom
     Left = 0
-    Height = 431
+    Height = 861
     Top = 0
-    Width = 812
+    Width = 1624
     Align = alClient
     BevelOuter = bvNone
     ParentFont = False
@@ -29,7 +28,7 @@ object SimbaMainForm: TSimbaMainForm
     Left = 0
     Height = 0
     Top = 0
-    Width = 812
+    Width = 1624
     Align = alTop
     AutoSize = True
     BevelOuter = bvNone

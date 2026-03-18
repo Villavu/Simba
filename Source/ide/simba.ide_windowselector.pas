@@ -38,7 +38,7 @@ uses
   {$IFDEF DARWIN}
   CocoaAll, CocoaWSForms, CocoaUtils,
   {$ENDIF}
-  simba.ide_maintoolbar,
+  simba.ide_vars,
   simba.vartype_windowhandle,
   simba.vartype_box,
   simba.process,
@@ -199,8 +199,8 @@ begin
       DebugLn([EDebugLn.FOCUS], ' - ClassName: "%s"',   [Selected.GetClassName()]);
       DebugLn([EDebugLn.FOCUS], ' - Executable: "%s"',  [GetProcessPath(PID)]);
 
-      SimbaMainToolBar.WindowSelection := Selected;
-      SimbaMainToolBar.ProcessSelection := Pid;
+      SimbaIDEVars.WindowSelection := Selected;
+      SimbaIDEVars.ProcessSelection := Pid;
 
       SimbaIDEEvents.Notify(SimbaIDEEvent.WINDOW_SELECTED, nil);
     end;

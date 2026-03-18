@@ -49,8 +49,11 @@ type
 implementation
 
 uses
-  simba.form_main, simba.ide_debugimage,
-  simba.threading, simba.ide_maintoolbar, simba.process;
+  simba.form_main,
+  simba.ide_debugimage,
+  simba.ide_vars,
+  simba.threading,
+  simba.process;
 
 procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
 var
@@ -110,13 +113,13 @@ end;
 // Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetWindow;
 begin
-  FResult.Write(SimbaMainToolBar.WindowSelection, SizeOf(TWindowHandle));
+  FResult.Write(SimbaIDEVars.WindowSelection, SizeOf(TWindowHandle));
 end;
 
 // Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetPID;
 begin
-  FResult.Write(SimbaMainToolBar.ProcessSelection, SizeOf(TProcessID));
+  FResult.Write(SimbaIDEVars.ProcessSelection, SizeOf(TProcessID));
 end;
 
 procedure TSimbaScriptInstanceCommunication.ScriptStateChanged;

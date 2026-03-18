@@ -40,11 +40,13 @@ implementation
 
 uses
   Forms,
-  simba.ide_events, simba.ide_maintoolbar, simba.nativeinterface;
+  simba.ide_events,
+  simba.ide_vars,
+  simba.nativeinterface;
 
 procedure TSimbaMouseLogger.DoWindowSelected(Sender: TObject);
 begin
-  FWindowHandle := SimbaMainToolBar.WindowSelection;
+  FWindowHandle := SimbaIDEVars.WindowSelection;
   FWindowHandleChanged := True;
 end;
 

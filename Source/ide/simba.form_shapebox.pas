@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Menus,
-  simba.base, simba.component_shapebox, simba.env, simba.image, simba.ide_maintoolbar;
+  simba.base, simba.component_shapebox, simba.env, simba.image;
 
 type
   TSimbaShapeBoxForm = class(TForm)
@@ -41,6 +41,7 @@ var
 implementation
 
 uses
+  simba.ide_vars,
   simba.vartype_windowhandle;
 
 procedure TSimbaShapeBoxForm.FormCreate(Sender: TObject);
@@ -81,8 +82,8 @@ end;
 
 procedure TSimbaShapeBoxForm.MenuItemLoadTargetImageClick(Sender: TObject);
 begin
-  if SimbaMainToolBar.WindowSelection.IsValid then
-    ShapeBox.SetImage(TSimbaImage.CreateFromWindow(SimbaMainToolBar.WindowSelection))
+  if SimbaIDEVars.WindowSelection.IsValid() then
+    ShapeBox.SetImage(TSimbaImage.CreateFromWindow(SimbaIDEVars.WindowSelection))
   else
     ShapeBox.SetImage(TSimbaImage.CreateFromWindow(GetDesktopWindow()));
 end;

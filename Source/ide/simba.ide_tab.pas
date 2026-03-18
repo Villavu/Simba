@@ -136,7 +136,7 @@ type
     function ScriptStateStr: String;
     function ScriptState: ESimbaScriptState;
 
-    procedure Run(Target: TWindowHandle);
+    procedure Run;
     procedure Compile;
     procedure Pause;
     procedure Stop;
@@ -151,7 +151,10 @@ uses
   Forms,
   simba.fs, simba.settings, simba.ide_events,
   simba.form_main, simba.form_tabs, simba.env, simba.ide_showdeclaration, simba.threading,
-  simba.ide_scriptcommunication, simba.datetime, simba.ide_editor_popupmenu, simba.vartype_string;
+  simba.ide_scriptcommunication, simba.datetime, simba.ide_editor_popupmenu,
+  simba.vartype_windowhandle,
+  simba.vartype_string,
+  simba.ide_vars;
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var
@@ -582,7 +585,7 @@ begin
     Result := FScriptRunner.State;
 end;
 
-procedure TSimbaScriptTab.Run(Target: TWindowHandle);
+procedure TSimbaScriptTab.Run;
 begin
   //DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
 
@@ -597,8 +600,8 @@ begin
       Save(FScriptFileName);
 
     FScriptRunner := TSimbaScriptTabRunner.Create(Self);
-    if (Target > 0) then
-      FScriptRunner.Run(['--target=' + IntToStr(Target)])
+    if (SimbaIDEVars.WindowSelection.IsValid()) then
+      FScriptRunner.Run(['--target=' + IntToStr(SimbaIDEVars.WindowSelection)])
     else
       FScriptRunner.Run([]);
   end;

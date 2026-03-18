@@ -11,8 +11,11 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
-  Menus, ImgList, AnchorDockPanel, LMessages,
-  simba.base, simba.settings, simba.ide_mouselogger, simba.image, simba.ide_dtmeditor;
+  Menus, ImgList, AnchorDockPanel,
+  simba.base,
+  simba.settings,
+  simba.ide_mouselogger,
+  simba.image;
 
 const
   IMG_NONE = -1;
@@ -251,7 +254,7 @@ type
     // Handle main menu shortcuts if editor is focused
     procedure DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoTabLoaded(Sender: TObject);
-    function DoGetWindowForACA: TSimbaImage;
+    function DoGetTargetImage: TSimbaImage;
 
     procedure SetCustomFontSize(Value: Integer);
     procedure SetLayoutLocked(Value: Boolean);
@@ -274,24 +277,47 @@ implementation
 {$R *.lfm}
 
 uses
-  LazFileUtils, AnchorDocking, LCLType,
+  LazFileUtils, AnchorDocking, LCLType, LMessages,
 
-  simba.initializations, simba.ide_events, simba.ide_utils,
-  simba.ide_mainstatusbar, simba.ide_mainmenubar, simba.ide_maintoolbar,
-  simba.ide_scriptbackup, simba.ide_associate,
+  simba.initializations,
+
+  simba.vartype_string,
+  simba.vartype_windowhandle,
+
+  simba.ide_events,
+  simba.ide_utils,
+  simba.ide_vars,
+  simba.ide_mainstatusbar,
+  simba.ide_mainmenubar,
+  simba.ide_maintoolbar,
+  simba.ide_scriptbackup,
+  simba.ide_associate,
   simba.ide_debugimage,
-
-  simba.form_shapebox, simba.form_openexample, simba.form_colorpickhistory,
-  simba.form_imagestring, simba.form_about,
-  simba.form_findinfiles, simba.form_output, simba.form_filebrowser,
-  simba.form_notes, simba.form_settings, simba.form_tabs,
-  simba.form_functionlist, simba.form_downloadsimba, simba.form_backups,
-
+  simba.ide_editor,
   simba.ide_tab,
-  simba.aca, simba.env, simba.ide_dockinghelpers, simba.nativeinterface,
-  simba.ide_simpleformatter, simba.component_theme,
-  simba.threading, simba.ide_editor, simba.vartype_string, simba.misc,
-  simba.target;
+  simba.ide_simpleformatter,
+  simba.ide_dockinghelpers,
+  simba.ide_dtmeditor,
+
+  simba.form_shapebox,
+  simba.form_openexample,
+  simba.form_colorpickhistory,
+  simba.form_imagestring,
+  simba.form_about,
+  simba.form_findinfiles,
+  simba.form_output,
+  simba.form_filebrowser,
+  simba.form_notes,
+  simba.form_settings,
+  simba.form_tabs,
+  simba.form_functionlist,
+  simba.form_downloadsimba,
+  simba.form_backups,
+
+  simba.aca,
+  simba.env,
+  simba.nativeinterface,
+  simba.threading;
 
 procedure TSimbaMainForm.HandleException(Sender: TObject; E: Exception);
 
@@ -747,7 +773,7 @@ end;
 
 procedure TSimbaMainForm.MenuItemACAClick(Sender: TObject);
 begin
-  with TSimbaACA.Create(@DoGetWindowForACA) do
+  with TSimbaACA.Create(@DoGetTargetImage) do
   begin
     FreeOnClose := True;
     Show();
@@ -843,7 +869,7 @@ end;
 procedure TSimbaMainForm.MenuItemRunLastClick(Sender: TObject);
 begin
   if Assigned(SimbaTabsForm.PreviousTab) then
-    SimbaTabsForm.PreviousTab.Run(SimbaMainToolBar.WindowSelection);
+    SimbaTabsForm.PreviousTab.Run();
 end;
 
 procedure TSimbaMainForm.MenuItemSelectLineClick(Sender: TObject);
@@ -944,7 +970,7 @@ end;
 
 procedure TSimbaMainForm.MenuItemDTMEditorClick(Sender: TObject);
 begin
-  with TSimbaDTMEditorNew.Create(@DoGetWindowForACA) do
+  with TSimbaDTMEditorNew.Create(@DoGetTargetImage) do
   begin
     FreeOnClose := True;
     Show();
@@ -1048,9 +1074,12 @@ begin
     AddRecentFile(TSimbaScriptTab(Sender).ScriptFileName);
 end;
 
-function TSimbaMainForm.DoGetWindowForACA: TSimbaImage;
+function TSimbaMainForm.DoGetTargetImage: TSimbaImage;
 begin
-  Result := TSimbaImage.CreateFromWindow(SimbaMainToolBar.WindowSelectionOrDesktop);
+  if SimbaIDEVars.WindowSelection.IsValid() then
+    Result := TSimbaImage.CreateFromWindow(SimbaIDEVars.WindowSelection)
+  else
+    Result := TSimbaImage.CreateFromWindow(GetDesktopWindow());
 end;
 
 procedure TSimbaMainForm.MenuEditClick(Sender: TObject);
