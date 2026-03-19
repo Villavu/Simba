@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Menus,
-  simba.base, simba.component_treeview, simba.component_buttonpanel;
+  simba.base, simba.component_treeview, simba.component_buttonpanel, simba.ide_events;
 
 type
   TSimbaColorPickHistoryForm = class(TForm)
@@ -37,6 +37,7 @@ type
     FColorList: TSimbaTreeView;
     FButtonPanel: TSimbaButtonPanel;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoKeyDelete(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoKeyCopy(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoPickColorClick(Sender: TObject);
@@ -104,11 +105,23 @@ begin
   end;
 
   LoadColors();
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 procedure TSimbaColorPickHistoryForm.FormDestroy(Sender: TObject);
 begin
   SaveColors();
+end;
+
+procedure TSimbaColorPickHistoryForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  if (Event = ESimbaEvent.COLOR_PICKED) then
+  begin
+    with TSimbaEventData_ColorPicked(Data^) do
+      Add(Point, Color, True);
+    MakeVisible();
+  end;
 end;
 
 procedure TSimbaColorPickHistoryForm.DoKeyDelete(Sender: TObject; var Key: Word; Shift: TShiftState);

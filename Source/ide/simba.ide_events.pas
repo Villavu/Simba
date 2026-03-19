@@ -41,8 +41,8 @@ type
     // Function list selection changed. Data=TSimbaFunctionListNode
     FUNCTIONLIST_SELECTION,
 
-    COLOR_PICKED,
-    TARGET_PICKED
+    // Color selector used. Data=TSimbaEventData_ColorPicked
+    COLOR_PICKED
   );
   {$POP}
 

@@ -53,8 +53,7 @@ uses
   simba.ide_vars,
   simba.vartype_windowhandle,
   simba.vartype_box,
-  simba.component_theme,
-  simba.form_colorpickhistory;
+  simba.component_theme;
 
 type
   TSimbaColorPickerHint = class(THintWindow)
@@ -107,13 +106,17 @@ begin
 end;
 
 procedure TSimbaColorPicker.DoFormClosed(Sender: TObject; var CloseAction: TCloseAction);
+var
+  EventData: TSimbaEventData_ColorPicked;
 begin
   if FPicked then
   begin
     DebugLn([EDebugLn.FOCUS], 'Color picked: %s at (%d, %d)', [ColorToStr(FColor), FPoint.X, FPoint.Y]);
 
-    SimbaColorPickHistoryForm.Add(FPoint, FColor, True);
-    SimbaColorPickHistoryForm.MakeVisible();
+    EventData.Color := FColor;
+    EventData.Point := FPoint;
+
+    SimbaEvents.Post(ESimbaEvent.COLOR_PICKED, @EventData);
   end;
 
   FHint.Close();
