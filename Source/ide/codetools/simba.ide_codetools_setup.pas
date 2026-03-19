@@ -81,7 +81,7 @@ begin
 
   CodetoolsSetup := True;
 
-  SimbaIDEEvents.Notify(SimbaIDEEvent.CODETOOLS_SETUP, nil);
+  SimbaEvents.Post(ESimbaEvent.CODETOOLS_SETUP, nil);
 end;
 
 procedure DoDestroy;

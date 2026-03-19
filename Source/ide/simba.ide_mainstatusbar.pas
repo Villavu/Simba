@@ -11,22 +11,17 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, ExtCtrls,
-  simba.base, simba.component_statusbar;
+  simba.base,
+  simba.component_statusbar,
+  simba.ide_events;
 
 type
   TSimbaMainStatusBar = class(TComponent)
   protected
     FStatusBar: TSimbaStatusBar;
 
-    procedure DoUpdateScriptStatus(Sender: TObject);
-
-    procedure DoMouseLoggerChange(Sender: TObject);
-    procedure DoTabCaretMoved(Sender: TObject);
-    procedure DoTabLoaded(Sender: TObject);
-    procedure DoTabSearch(Sender: TObject);
-    procedure DoTabChange(Sender: TObject);
-    procedure DoTabScriptStateChange(Sender: TObject);
-    procedure DoFunctionListSelection(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+    procedure DoTimerExecute(Sender: TObject);
   public
     constructor Create; reintroduce;
   end;
@@ -37,61 +32,60 @@ var
 implementation
 
 uses
-  simba.initializations, simba.ide_events, simba.ide_mouselogger, simba.ide_tab,
+  simba.initializations, simba.ide_mouselogger, simba.ide_tab,
   simba.ide_editor_findreplace, simba.form_tabs, simba.form_functionlist;
 
-procedure TSimbaMainStatusBar.DoUpdateScriptStatus(Sender: TObject);
+procedure TSimbaMainStatusBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.MOUSELOGGER_CHANGE:
+      begin
+        with TSimbaMouseLogger(Data) do
+        begin
+          FStatusBar.PanelText[0] := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
+          if HotkeyPressed then
+            DebugLn([EDebugLn.FOCUS], FStatusBar.PanelText[0]);
+        end;
+      end;
+
+    ESimbaEvent.TAB_CARETMOVED:
+      begin
+        with TSimbaScriptTab(Data) do
+          FStatusBar.PanelText[2] := 'Line ' + IntToStr(Editor.CaretY) + ', Col ' + IntToStr(Editor.CaretX);
+      end;
+
+    ESimbaEvent.TAB_LOADED:
+      begin
+        FStatusBar.PanelText[3] := TSimbaScriptTab(Data).ScriptFileName;
+      end;
+
+    ESimbaEvent.TAB_SEARCH:
+      begin
+        FStatusBar.PanelText[3] := 'Find matches: ' + IntToStr(TSimbaEditorFind(Data).Matches);
+      end;
+
+    ESimbaEvent.TAB_CHANGE:
+      begin
+        FStatusBar.PanelText[1] := TSimbaScriptTab(Data).ScriptStateStr;
+      end;
+
+    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:
+      begin
+        if TSimbaScriptTab(Data).IsActiveTab() then
+          FStatusBar.PanelText[1] := TSimbaScriptTab(Data).ScriptStateStr;
+      end;
+
+    ESimbaEvent.FUNCTIONLIST_SELECTION:
+      begin
+        FStatusBar.PanelText[3] := TSimbaFunctionListNode(Data).Hint;
+      end;
+  end;
+end;
+
+procedure TSimbaMainStatusBar.DoTimerExecute(Sender: TObject);
 begin
   if Assigned(SimbaTabsForm) and Assigned(SimbaTabsForm.CurrentTab) then
     FStatusBar.PanelText[1] := SimbaTabsForm.CurrentTab.ScriptStateStr;
-end;
-
-procedure TSimbaMainStatusBar.DoMouseLoggerChange(Sender: TObject);
-begin
-  if (Sender is TSimbaMouseLogger) then
-    with TSimbaMouseLogger(Sender) do
-    begin
-      FStatusBar.PanelText[0] := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
-      if HotkeyPressed then
-        DebugLn([EDebugLn.FOCUS], FStatusBar.PanelText[0]);
-    end;
-end;
-
-procedure TSimbaMainStatusBar.DoTabCaretMoved(Sender: TObject);
-begin
-  if (Sender is TSimbaScriptTab) then
-    with TSimbaScriptTab(Sender) do
-      FStatusBar.PanelText[2] := 'Line ' + IntToStr(Editor.CaretY) + ', Col ' + IntToStr(Editor.CaretX);
-end;
-
-procedure TSimbaMainStatusBar.DoTabLoaded(Sender: TObject);
-begin
-  if (Sender is TSimbaScriptTab) then
-    FStatusBar.PanelText[3] := TSimbaScriptTab(Sender).ScriptFileName;
-end;
-
-procedure TSimbaMainStatusBar.DoTabSearch(Sender: TObject);
-begin
-  if (Sender is TSimbaEditorFind) then
-    FStatusBar.PanelText[3] := 'Find matches: ' + IntToStr(TSimbaEditorFind(Sender).Matches);
-end;
-
-procedure TSimbaMainStatusBar.DoTabChange(Sender: TObject);
-begin
-  if (Sender is TSimbaScriptTab) then
-    FStatusBar.PanelText[1] := TSimbaScriptTab(Sender).ScriptStateStr;
-end;
-
-procedure TSimbaMainStatusBar.DoTabScriptStateChange(Sender: TObject);
-begin
-  if (Sender is TSimbaScriptTab) and TSimbaScriptTab(Sender).IsActiveTab() then
-    FStatusBar.PanelText[1] := TSimbaScriptTab(Sender).ScriptStateStr;
-end;
-
-procedure TSimbaMainStatusBar.DoFunctionListSelection(Sender: TObject);
-begin
-  if (Sender is TSimbaFunctionListNode) then
-    FStatusBar.PanelText[3] := TSimbaFunctionListNode(Sender).Hint;
 end;
 
 constructor TSimbaMainStatusBar.Create;
@@ -104,7 +98,7 @@ begin
     AutoStartEvent := itaOnIdle;
     AutoEndEvent := itaOnUserInput;
     Interval := 750;
-    OnTimer := @DoUpdateScriptStatus;
+    OnTimer := @DoTimerExecute;
   end;
 
   FStatusBar := TSimbaStatusBar.Create(Application.MainForm);
@@ -115,13 +109,7 @@ begin
   FStatusBar.PanelTextMeasure[1] := '[000:000:000]';
   FStatusBar.PanelTextMeasure[2] := 'Line 1000, Col 1000';
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.MOUSELOGGER_CHANGE,      @DoMouseLoggerChange);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CARETMOVED,          @DoTabCaretMoved);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_LOADED,              @DoTabLoaded);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_SEARCH,              @DoTabSearch);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE,              @DoTabChange);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_SCRIPTSTATE_CHANGE,  @DoTabScriptStateChange);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.FUNCTIONLIST_SELECTION,  @DoFunctionListSelection);
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 procedure DoCreate;

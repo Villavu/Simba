@@ -15,6 +15,7 @@ uses
   simba.base,
   simba.settings,
   simba.ide_mouselogger,
+  simba.ide_events,
   simba.image;
 
 const
@@ -242,6 +243,7 @@ type
 
     procedure SetupCompleted;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoSettingChanged_CustomFontSize(Setting: TSimbaSetting);
     procedure DoSettingChanged_LockLayout(Setting: TSimbaSetting);
     procedure DoSettingChanged_TrayIconVisible(Setting: TSimbaSetting);
@@ -253,7 +255,6 @@ type
 
     // Handle main menu shortcuts if editor is focused
     procedure DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure DoTabLoaded(Sender: TObject);
     function DoGetTargetImage: TSimbaImage;
 
     procedure SetCustomFontSize(Value: Integer);
@@ -284,7 +285,6 @@ uses
   simba.vartype_string,
   simba.vartype_windowhandle,
 
-  simba.ide_events,
   simba.ide_utils,
   simba.ide_vars,
   simba.ide_mainstatusbar,
@@ -615,7 +615,7 @@ begin
 
   Screen.AddHandlerFormAdded(@Self.HandleFormCreated, True);
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_LOADED, @DoTabLoaded);
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 
   with SimbaSettings do
   begin
@@ -1068,10 +1068,12 @@ begin
   end;
 end;
 
-procedure TSimbaMainForm.DoTabLoaded(Sender: TObject);
+procedure TSimbaMainForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
-  if (Sender is TSimbaScriptTab) then
-    AddRecentFile(TSimbaScriptTab(Sender).ScriptFileName);
+  case Event of
+    ESimbaEvent.TAB_LOADED:
+      AddRecentFile(TSimbaScriptTab(Data).ScriptFileName);
+  end;
 end;
 
 function TSimbaMainForm.DoGetTargetImage: TSimbaImage;

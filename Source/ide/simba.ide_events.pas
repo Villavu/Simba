@@ -11,16 +11,17 @@ unit simba.ide_events;
 interface
 
 uses
-  Classes, SysUtils, LazMethodList,
-  simba.base;
+  Classes, SysUtils,
+  simba.base, simba.colormath, simba.containers;
 
 type
   {$PUSH}
   {$SCOPEDENUMS ON}
-  SimbaIDEEvent = (
-    // Event called when codetools is setup. Sender=nil
+  ESimbaEvent = (
+    // Event called when codetools is setup. Data=nil
     CODETOOLS_SETUP,
-    // Event called on editor caret moved. Sender=TSimbaScriptTab
+
+    // Event called on editor caret moved. Data=TSimbaScriptTab
     TAB_CARETMOVED,
     TAB_MODIFIED,
     TAB_LOADED,
@@ -33,34 +34,42 @@ type
     FORM_DOCK,
     FORM_UNDOCK,
     SPLITTER_DOUBLE_CLICK,
-    // Event called when a tabs script state changes. Sender=TSimbaScriptTab
+    // Event called when a tabs script state changes. Data=TSimbaScriptTab
     TAB_SCRIPTSTATE_CHANGE,
-    // Event called on mouselogger change. Sender=TSimbaMouseLogger
+    // Event called on mouselogger change. Data=TSimbaMouseLogger
     MOUSELOGGER_CHANGE,
-    // Function list selection changed. Sender=TSimbaFunctionListNode
+    // Function list selection changed. Data=TSimbaFunctionListNode
     FUNCTIONLIST_SELECTION,
-    // Window selection changed
-    WINDOW_SELECTED,
-    // A color was picked
-    COLOR_PICKED
+
+    COLOR_PICKED,
+    TARGET_PICKED
   );
   {$POP}
 
-  TSimbaIDEEvents = class(TObject)
+  TSimbaEventData_ColorPicked = record
+    Color: TColor;
+    Point: TPoint;
+  end;
+
+  TSimbaEventCallback = procedure(Event: ESimbaEvent; Data: Pointer) of object;
+
+  TSimbaEvents = class(TObject)
+  private type
+    TCallbackList = specialize TSimbaList<TSimbaEventCallback>;
   private
-    FEvents: array[SimbaIDEEvent] of TMethodList;
+    FCallbacks: TCallbackList;
   public
-    procedure Notify(EventType: SimbaIDEEvent; Sender: TObject);
-    procedure Register(Owner: TComponent; EventType: SimbaIDEEvent; Method: TNotifyEvent; AsFirst: Boolean = False); overload;
-    procedure Register(EventType: SimbaIDEEvent; Method: TNotifyEvent; AsFirst: Boolean = False); overload;
-    procedure UnRegister(EventType: SimbaIDEEvent; Proc: TNotifyEvent);
+    procedure Post(Event: ESimbaEvent; Data: Pointer);
+    procedure Register(Owner: TComponent; Callback: TSimbaEventCallback); overload;
+    procedure Register(Callback: TSimbaEventCallback); overload;
+    procedure UnRegister(Callback: TSimbaEventCallback);
 
     constructor Create;
     destructor Destroy; override;
   end;
 
 var
-  SimbaIDEEvents: TSimbaIDEEvents;
+  SimbaEvents: TSimbaEvents;
 
 implementation
 
@@ -70,88 +79,86 @@ uses
 type
   TManagedEvent = class(TComponent)
   protected
-    FMethod: TMethod;
-    FList: TMethodList;
+    FCallback: TSimbaEventCallback;
   public
-    constructor Create(AOwner: TComponent; AMethod: TMethod; AsFirst: Boolean; AList: TMethodList); reintroduce;
+    constructor Create(AOwner: TComponent; Callback: TSimbaEventCallback); reintroduce;
     destructor Destroy; override;
   end;
 
-constructor TManagedEvent.Create(AOwner: TComponent; AMethod: TMethod; AsFirst: Boolean; AList: TMethodList);
+constructor TManagedEvent.Create(AOwner: TComponent; Callback: TSimbaEventCallback);
 begin
   inherited Create(AOwner);
 
-  FMethod := AMethod;
-
-  FList := AList;
-  FList.Add(FMethod, not AsFirst);
+  FCallback := Callback;
 end;
 
 destructor TManagedEvent.Destroy;
 begin
-  FList.Remove(FMethod);
+  SimbaEvents.UnRegister(FCallback);
 
   inherited Destroy();
 end;
 
-procedure TSimbaIDEEvents.Notify(EventType: SimbaIDEEvent; Sender: TObject);
+procedure TSimbaEvents.Post(Event: ESimbaEvent; Data: Pointer);
+var
+  I: Integer;
 begin
   {$IFDEF SIMBA_PRINT_IDE_EVENTS}
   WriteLn(EventType);
   {$ENDIF}
-  FEvents[EventType].CallNotifyEvents(Sender);
+
+  for I := 0 to FCallbacks.Count - 1 do
+    FCallbacks[I](Event, Data);
 end;
 
-procedure TSimbaIDEEvents.Register(Owner: TComponent; EventType: SimbaIDEEvent; Method: TNotifyEvent; AsFirst: Boolean);
+procedure TSimbaEvents.Register(Owner: TComponent; Callback: TSimbaEventCallback);
 begin
-  TManagedEvent.Create(Owner, TMethod(Method), AsFirst, FEvents[EventType]);
+  FCallbacks.Add(Callback);
+  if (Owner <> nil) then
+    TManagedEvent.Create(Owner, Callback);
 end;
 
-procedure TSimbaIDEEvents.Register(EventType: SimbaIDEEvent; Method: TNotifyEvent; AsFirst: Boolean);
+procedure TSimbaEvents.Register(Callback: TSimbaEventCallback);
 begin
-  FEvents[EventType].Add(TMethod(Method), not AsFirst);
+  Register(nil, Callback);
 end;
 
-procedure TSimbaIDEEvents.UnRegister(EventType: SimbaIDEEvent; Proc: TNotifyEvent);
-begin
-  FEvents[EventType].Remove(TMethod(Proc));
-end;
-
-constructor TSimbaIDEEvents.Create;
+procedure TSimbaEvents.UnRegister(Callback: TSimbaEventCallback);
 var
-  EventType: SimbaIDEEvent;
+  I: Integer;
+begin
+  for I := 0 to FCallbacks.Count - 1 do
+    if (FCallbacks[I] = Callback) then
+    begin
+      FCallbacks.Delete(I);
+      Exit;
+    end;
+end;
+
+constructor TSimbaEvents.Create;
 begin
   inherited Create();
-
-  for EventType in SimbaIDEEvent do
-    FEvents[EventType] := TMethodList.Create();
+  FCallbacks := TCallbackList.Create();
 end;
 
-destructor TSimbaIDEEvents.Destroy;
-var
-  EventType: SimbaIDEEvent;
+destructor TSimbaEvents.Destroy;
 begin
-  for EventType in SimbaIDEEvent do
-    if (FEvents[EventType] <> nil) then
-      FreeAndNil(FEvents[EventType]);
-
+  FreeAndNil(FCallbacks);
   inherited Destroy();
 end;
 
 procedure DoCreate;
 begin
-  SimbaIDEEvents := TSimbaIDEEvents.Create();
+  SimbaEvents := TSimbaEvents.Create();
 end;
 
 procedure DoDestroy;
 begin
-  FreeAndNil(SimbaIDEEvents);
+  FreeAndNil(SimbaEvents);
 end;
 
 initialization
-  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'SimbaIDEEvents', 10); // Priority 10  = create first
-  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaIDEEvents', -10);     // Priority -10 = finalize last
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'SimbaEvents', 10); // Priority 10  = create first
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaEvents', -10);     // Priority -10 = finalize last
 
 end.
-
-

@@ -11,7 +11,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Menus, Masks,
-  simba.base, simba.component_treeview, simba.settings;
+  simba.base, simba.component_treeview, simba.settings,
+  simba.ide_events;
 
 type
   TSimbaFileBrowserNode = class(TTreeNode)
@@ -58,7 +59,7 @@ type
 
     FMaskList: TMaskList;
 
-    procedure DoDoubleClickSplitter(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoFindFiles;
     procedure DoPopluateTreeView(Sender: TObject);
     function DoGetNodeHint(Node: TTreeNode): String;
@@ -82,7 +83,6 @@ implementation
 
 uses
   Clipbrd, AnchorDocking,
-  simba.ide_events,
   simba.form_main, simba.form_tabs, simba.nativeinterface, simba.ide_utils, simba.fs;
 
 procedure TSimbaFileBrowserForm.DoFindFiles;
@@ -243,14 +243,19 @@ begin
   end;
 end;
 
-procedure TSimbaFileBrowserForm.DoDoubleClickSplitter(Sender: TObject);
+procedure TSimbaFileBrowserForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 var
   Splitter: TAnchorDockSplitter;
 begin
-  if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = Sender)) then
-    Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + FTreeView.MaxRight)
-  else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = Sender)) then
-    Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - FTreeView.MaxRight);
+  case Event of
+    ESimbaEvent.SPLITTER_DOUBLE_CLICK:
+      begin
+        if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = TObject(Data))) then
+          Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + FTreeView.MaxRight)
+        else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = TObject(Data))) then
+          Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - FTreeView.MaxRight);
+      end;
+  end;
 end;
 
 procedure TSimbaFileBrowserForm.DoUpdate(Sender: TObject);
@@ -314,7 +319,7 @@ begin
   FTreeView.PopupMenu := Popup;
   FTreeView.OnCustomFilter := @DoCustomFilter;
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.SPLITTER_DOUBLE_CLICK,  @DoDoubleClickSplitter);
+  SimbaEvents.Register(Self, @DoSimbaEvent);
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.FileBrowserMasks, @DoSimbaSettingChanged, True);
 
   Fill();

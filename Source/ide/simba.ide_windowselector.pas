@@ -201,8 +201,6 @@ begin
 
       SimbaIDEVars.WindowSelection := Selected;
       SimbaIDEVars.ProcessSelection := Pid;
-
-      SimbaIDEEvents.Notify(SimbaIDEEvent.WINDOW_SELECTED, nil);
     end;
   except
     on E: Exception do

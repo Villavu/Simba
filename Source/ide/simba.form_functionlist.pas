@@ -16,6 +16,7 @@ uses
   simba.ide_codetools_parser,
   simba.ide_codetools_insight,
   simba.ide_tab,
+  simba.ide_events,
   simba.component_treeview,
   simba.component_notebook,
   simba.settings;
@@ -47,9 +48,10 @@ type
     // returns true if some changes were made
     function AddIncludes(Parsers: TCodeParserList; ParentNode: TTreeNode; DeclType, FileType: ENodeType): Boolean;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
     procedure DoHiddenSimbaSectionsChange(Setting: TSimbaSetting);
     procedure DoCustomOrderChange(Setting: TSimbaSetting);
-    procedure DoEditorModified(Sender: TObject);
     procedure DoSelectionChanged(Sender: TObject);
     procedure DoNodeDoubleClick(Sender: TObject);
     function DoGetNodeHint(Node: TTreeNode): String;
@@ -99,12 +101,8 @@ type
     procedure DoUpdateThread;
     procedure DoIdleBegin(Sender: TObject);
     procedure DoIdleEnd(Sender: TObject);
-    procedure DoCodetoolsSetup(Sender: TObject);
-    procedure DoTabChange(Sender: TObject);
-    procedure DoTabClosed(Sender: TObject);
-    procedure DoTabAdd(Sender: TObject);
 
-    procedure DoDoubleClickSplitter(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
@@ -119,7 +117,6 @@ implementation
 
 uses
   AnchorDocking,
-  simba.ide_events,
   simba.ide_utils,
   simba.ide_showdeclaration,
   simba.vartype_string,
@@ -347,6 +344,15 @@ begin
     end;
 end;
 
+procedure TSimbaFunctionListPage.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.TAB_MODIFIED, ESimbaEvent.TAB_CHANGE:
+      if (TSimbaScriptTab(Data).UID = FTabID) then
+        FNeedUpdate := True;
+  end;
+end;
+
 procedure TSimbaFunctionListPage.DoHiddenSimbaSectionsChange(Setting: TSimbaSetting);
 var
   Hidden: String;
@@ -374,15 +380,9 @@ begin
       FSimbaNode.FindNode(Order[I]).Index := I;
 end;
 
-procedure TSimbaFunctionListPage.DoEditorModified(Sender: TObject);
-begin
-  if (TSimbaScriptTab(Sender).UID = FTabID) then
-    FNeedUpdate := True;
-end;
-
 procedure TSimbaFunctionListPage.DoSelectionChanged(Sender: TObject);
 begin
-  SimbaIDEEvents.Notify(SimbaIDEEvent.FUNCTIONLIST_SELECTION, FTreeView.Selected);
+  SimbaEvents.Post(ESimbaEvent.FUNCTIONLIST_SELECTION, FTreeView.Selected);
 end;
 
 procedure TSimbaFunctionListPage.DoNodeDoubleClick(Sender: TObject);
@@ -626,8 +626,7 @@ begin
   FIncludesNodeState := TTreeNodeExpandedState.Create(TTreeNode(nil));
   FPluginsNodeState  := TTreeNodeExpandedState.Create(TTreeNode(nil));
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_MODIFIED, @DoEditorModified);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE, @DoEditorModified); // force a update on change
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.FunctionList.HiddenSimbaSections, @DoHiddenSimbaSectionsChange);
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.FunctionList.CustomOrder, @DoCustomOrderChange);
@@ -750,42 +749,6 @@ begin
   end;
 end;
 
-procedure TSimbaFunctionListForm.DoCodetoolsSetup(Sender: TObject);
-begin
-  FUpdateThread := RunInThread(@DoUpdateThread);
-end;
-
-procedure TSimbaFunctionListForm.DoTabChange(Sender: TObject);
-begin
-  FNotebook.ActivePage := PageForTab(TSimbaScriptTab(Sender));
-end;
-
-procedure TSimbaFunctionListForm.DoTabClosed(Sender: TObject);
-var
-  Page: TSimbaPage;
-begin
-  Page := PageForTab(TSimbaScriptTab(Sender));
-  if (Page <> nil) then
-    FPendingRemoves.Add(TSimbaFunctionListPage(Page));
-
-  {$IFDEF DEBUG}
-  WriteLn('DoTabClosed: PageCount=',FNotebook.PageCount);
-  {$ENDIF}
-end;
-
-procedure TSimbaFunctionListForm.DoTabAdd(Sender: TObject);
-begin
-  with TSimbaFunctionListPage(FNotebook.AddPage()) do
-  begin
-    FTabID := TSimbaScriptTab(Sender).UID;
-    FNeedUpdate := True;
-  end;
-
-  {$IFDEF DEBUG}
-  WriteLn('DoTabAdd: PageCount=', FNotebook.PageCount);
-  {$ENDIF}
-end;
-
 procedure TSimbaFunctionListForm.DoIdleBegin(Sender: TObject);
 begin
   FIsIdle := True;
@@ -800,11 +763,7 @@ constructor TSimbaFunctionListForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.CODETOOLS_SETUP,       @DoCodetoolsSetup);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE,            @DoTabChange);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CLOSED,            @DoTabClosed);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_ADD,               @DoTabAdd);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.SPLITTER_DOUBLE_CLICK, @DoDoubleClickSplitter);
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 
   with TIdleTimer.Create(Self) do
   begin
@@ -834,14 +793,44 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaFunctionListForm.DoDoubleClickSplitter(Sender: TObject);
+procedure TSimbaFunctionListForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 var
   Splitter: TAnchorDockSplitter;
 begin
-  if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = Sender)) then
-    Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + TSimbaFunctionListPage(FNotebook.ActivePage).FTreeView.MaxRight)
-  else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = Sender)) then
-    Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - TSimbaFunctionListPage(FNotebook.ActivePage).FTreeView.MaxRight);
+  case Event of
+    ESimbaEvent.CODETOOLS_SETUP:
+      begin
+        FUpdateThread := RunInThread(@DoUpdateThread);
+      end;
+
+    ESimbaEvent.TAB_CHANGE:
+      begin
+        FNotebook.ActivePage := PageForTab(TSimbaScriptTab(Data));
+      end;
+
+    ESimbaEvent.TAB_CLOSED:
+      begin
+        if (PageForTab(TSimbaScriptTab(Data)) <> nil) then
+          FPendingRemoves.Add(TSimbaFunctionListPage(PageForTab(TSimbaScriptTab(Data))));
+      end;
+
+    ESimbaEvent.TAB_ADD:
+      begin
+        with TSimbaFunctionListPage(FNotebook.AddPage()) do
+        begin
+          FTabID := TSimbaScriptTab(Data).UID;
+          FNeedUpdate := True;
+        end;
+      end;
+
+    ESimbaEvent.SPLITTER_DOUBLE_CLICK:
+      begin
+        if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = TObject(Data))) then
+          Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + TSimbaFunctionListPage(FNotebook.ActivePage).FTreeView.MaxRight)
+        else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = TObject(Data))) then
+          Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - TSimbaFunctionListPage(FNotebook.ActivePage).FTreeView.MaxRight);
+      end;
+  end;
 end;
 
 {$R *.lfm}

@@ -13,7 +13,7 @@ uses
   classes, sysutils, forms, controls, comctrls, graphics, menus, extctrls, syncobjs,
   synedit, syneditmiscclasses, syneditmousecmds,
   simba.settings, simba.base, simba.component_tabcontrol, simba.component_synedit,
-  simba.vartype_string;
+  simba.vartype_string, simba.ide_events;
 
 type
   TSimbaOutputBox = class(TSimbaMemo)
@@ -92,7 +92,7 @@ type
 
     function CanAnchorDocking(X, Y: Integer): Boolean;
 
-    procedure DoScriptTabChange(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
     procedure DebugLn(const S: String);
 
@@ -123,30 +123,34 @@ uses
   simba.ide_dockinghelpers, simba.misc,
   simba.form_main, simba.form_tabs,  simba.form_settings,
   simba.nativeinterface,
-  simba.ide_tab, simba.ide_events, simba.ide_utils, simba.ide_codetools_base;
+  simba.ide_tab, simba.ide_utils, simba.ide_codetools_base;
 
 type
   TSimbaOutputTab = class(TSimbaTab)
   protected
     FOutputBox: TSimbaOutputBox;
 
-    procedure DoTabScriptStateChange(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   public
     constructor Create(AOwner: TComponent); override;
 
     property OutputBox: TSimbaOutputBox read FOutputBox;
   end;
 
-procedure TSimbaOutputTab.DoTabScriptStateChange(Sender: TObject);
+procedure TSimbaOutputTab.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
-  if (Sender is TSimbaScriptTab) and (TSimbaScriptTab(Sender).OutputBox = FOutputBox) then
-  begin
-    case TSimbaScriptTab(Sender).ScriptState of
-      ESimbaScriptState.STATE_RUNNING: ImageIndex := IMG_PLAY;
-      ESimbaScriptState.STATE_PAUSED:  ImageIndex := IMG_PAUSE;
-      else
-        ImageIndex := IMG_STOP;
-    end;
+  case Event of
+    // Update tab icon depending on the state
+    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:
+      if (TSimbaScriptTab(Data).OutputBox = FOutputBox) then
+      begin
+        case TSimbaScriptTab(Data).ScriptState of
+          ESimbaScriptState.STATE_RUNNING: ImageIndex := IMG_PLAY;
+          ESimbaScriptState.STATE_PAUSED:  ImageIndex := IMG_PAUSE;
+          else
+            ImageIndex := IMG_STOP;
+        end;
+      end;
   end;
 end;
 
@@ -158,7 +162,7 @@ begin
   FOutputBox.Parent := Self;
   FOutputBox.Align := alClient;
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_SCRIPTSTATE_CHANGE, @DoTabScriptStateChange);
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 function TSimbaOutputBox.GetTabTitle: String;
@@ -605,10 +609,13 @@ begin
   Result := FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging);
 end;
 
-procedure TSimbaOutputForm.DoScriptTabChange(Sender: TObject);
+procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
-  if (Sender is TSimbaScriptTab) then
-    TSimbaScriptTab(Sender).OutputBox.MakeVisible();
+  case Event of
+    // open output tab on tab switch
+    ESimbaEvent.TAB_CHANGE:
+      TSimbaScriptTab(Data).OutputBox.MakeVisible();
+  end;
 end;
 
 procedure TSimbaOutputForm.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -654,7 +661,7 @@ begin
   SetCodetoolsMessageHandler(@DebugLn);
   OnDebugLn := @DebugLn;
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE, @DoScriptTabChange);
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 destructor TSimbaOutputForm.Destroy;

@@ -220,7 +220,7 @@ procedure TSimbaScriptTabRunner.SetState(Value: ESimbaScriptState);
 begin
   FState := Value;
 
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_SCRIPTSTATE_CHANGE, FTab);
+  SimbaEvents.Post(ESimbaEvent.TAB_SCRIPTSTATE_CHANGE, FTab);
 end;
 
 procedure TSimbaScriptTabRunner.Start(Args: TStringArray);
@@ -404,7 +404,7 @@ begin
   else
     Caption := FScriptTitle;
 
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_MODIFIED, Self);
+  SimbaEvents.Post(ESimbaEvent.TAB_MODIFIED, Self);
 end;
 
 procedure TSimbaScriptTab.DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -414,7 +414,7 @@ end;
 
 procedure TSimbaScriptTab.DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
 begin
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_CARETMOVED, Self);
+  SimbaEvents.Post(ESimbaEvent.TAB_CARETMOVED, Self);
 end;
 
 function TSimbaScriptTab.SaveAsDialog: String;
@@ -507,7 +507,7 @@ begin
   Caption := FScriptTitle;
   UpdateDiskAge();
   if Result then
-    SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_LOADED, Self);
+    SimbaEvents.Post(ESimbaEvent.TAB_LOADED, Self);
 end;
 
 procedure TSimbaScriptTab.Undo;
@@ -666,13 +666,13 @@ begin
 
   FSavedText := FEditor.Text;
 
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_ADD, Self);
+  SimbaEvents.Post(ESimbaEvent.TAB_ADD, Self);
 end;
 
 destructor TSimbaScriptTab.Destroy;
 begin
   Application.RemoveAsyncCalls(Self);
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_CLOSED, Self);
+  SimbaEvents.Post(ESimbaEvent.TAB_CLOSED, Self);
   if Assigned(SimbaOutputForm) then
     SimbaOutputForm.RemoveTab(FOutputBox);
 

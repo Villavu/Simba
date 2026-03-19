@@ -11,8 +11,11 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, ExtCtrls, Graphics,
-  simba.base, simba.settings, simba.process,
-  simba.component_toolbar, simba.component_button;
+  simba.base,
+  simba.settings,
+  simba.ide_events,
+  simba.component_toolbar,
+  simba.component_button;
 
 type
   TSimbaMainToolBar = class(TComponent)
@@ -38,9 +41,8 @@ type
 
     procedure SetStates(ScriptState: ESimbaScriptState);
 
-    procedure DoTabScriptStateChange(Sender: TObject);
-    procedure DoTabChange(Sender: TObject);
-    procedure DoTabModified(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
 
     procedure DoClickFileButton(Sender: TObject);
     procedure DoClickScriptButton(Sender: TObject);
@@ -78,7 +80,7 @@ implementation
 
 uses
   Dialogs,
-  simba.initializations, simba.ide_events, simba.form_main, simba.form_tabs, simba.form_output,
+  simba.initializations,simba.form_main, simba.form_tabs, simba.form_output,
   simba.ide_tab, simba.form_package,
   simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector,
   simba.vartype_windowhandle, simba.vartype_box;
@@ -104,28 +106,29 @@ begin
   end;
 end;
 
-procedure TSimbaMainToolBar.DoTabScriptStateChange(Sender: TObject);
+procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
-  if (Sender is TSimbaScriptTab) and TSimbaScriptTab(Sender).IsActiveTab() then
-    SetStates(TSimbaScriptTab(Sender).ScriptState);
-end;
+  case Event of
+    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:
+      begin
+        if TSimbaScriptTab(Data).IsActiveTab() then
+          SetStates(TSimbaScriptTab(Data).ScriptState);
+      end;
 
-procedure TSimbaMainToolBar.DoTabChange(Sender: TObject);
-begin
-  if (Sender is TSimbaScriptTab) then
-  begin
-    FButtonSave.Enabled := TSimbaScriptTab(Sender).ScriptChanged;
+    ESimbaEvent.TAB_CHANGE:
+      begin
+        FButtonSave.Enabled := TSimbaScriptTab(Data).ScriptChanged;
+        FButtonSaveAll.Enabled := SimbaTabsForm.TabCount > 1;
 
-    SetStates(TSimbaScriptTab(Sender).ScriptState);
+        SetStates(TSimbaScriptTab(Data).ScriptState);
+      end;
+
+    ESimbaEvent.TAB_MODIFIED:
+      begin
+        if TSimbaScriptTab(Data).IsActiveTab() then
+          FButtonSave.Enabled := TSimbaScriptTab(Data).ScriptChanged;
+      end;
   end;
-
-  FButtonSaveAll.Enabled := SimbaTabsForm.TabCount > 1;
-end;
-
-procedure TSimbaMainToolBar.DoTabModified(Sender: TObject);
-begin
-  if (Sender is TSimbaScriptTab) and TSimbaScriptTab(Sender).IsActiveTab() then
-    FButtonSave.Enabled := TSimbaScriptTab(Sender).ScriptChanged;
 end;
 
 procedure TSimbaMainToolBar.DoClickFileButton(Sender: TObject);
@@ -257,9 +260,7 @@ begin
   FToolBar.AddDivider();
   FButtonPackage := FToolBar.AddButton(IMG_PACKAGE, 'Open Packages', @DoClickPackageButton);
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_SCRIPTSTATE_CHANGE, @DoTabScriptStateChange);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CHANGE, @DoTabChange);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_MODIFIED, @DoTabModified);
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.ToolbarSize, @DoSettingChanged_Size, True);
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.ToolbarPosition, @DoSettingChanged_Position, True);

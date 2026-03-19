@@ -18,11 +18,8 @@ uses
 type
   TSimbaMouseLogger = class(TThread)
   protected
-    FWindowHandle: TWindowHandle;
-    FWindowHandleChanged: Boolean;
     FIdle: TWaitableLock;
 
-    procedure DoWindowSelected(Sender: TObject);
     procedure DoApplicationMinimized(Sender: TObject);
     procedure DoApplicationRestored(Sender: TObject);
     procedure DoChange(Data: PtrInt);
@@ -44,12 +41,6 @@ uses
   simba.ide_vars,
   simba.nativeinterface;
 
-procedure TSimbaMouseLogger.DoWindowSelected(Sender: TObject);
-begin
-  FWindowHandle := SimbaIDEVars.WindowSelection;
-  FWindowHandleChanged := True;
-end;
-
 procedure TSimbaMouseLogger.DoApplicationMinimized(Sender: TObject);
 begin
   FIdle.Lock();
@@ -68,19 +59,17 @@ begin
   Y := Point.Y;
   HotkeyPressed := SimbaNativeInterface.KeyPressed(EKeyCode.F1);
 
-  SimbaIDEEvents.Notify(SimbaIDEEvent.MOUSELOGGER_CHANGE, Self);
+  SimbaEvents.Post(ESimbaEvent.MOUSELOGGER_CHANGE, Self);
 end;
 
 procedure TSimbaMouseLogger.Execute;
 var
-  Window: TWindowHandle;
   PrevPoint, Point: TSmallPoint;
   Data: PtrInt absolute Point;
+  Win: TWindowHandle;
 begin
   PrevPoint.X := -1;
   PrevPoint.Y := -1;
-
-  Window := GetDesktopWindow();
 
   while not Terminated do
   begin
@@ -91,17 +80,9 @@ begin
         Break;
     end;
 
-    if FWindowHandleChanged then
-    begin
-      FWindowHandleChanged := False;
-
-      Window := FWindowHandle;
-    end;
-    if not Window.IsValid() then
-      Window := GetDesktopWindow();
-
-    if Window.IsVisible() then
-      with Window.GetRelativeCursorPos() do
+    Win := SimbaIDEVars.WindowSelection.EnsureValid();
+    if Win.IsVisible() then
+      with Win.GetRelativeCursorPos() do
       begin
         Point.X := Int16(X); // cast to prevent overflows when debugging
         Point.Y := Int16(Y);
@@ -120,7 +101,7 @@ begin
       Application.QueueAsyncCall(@DoChange, Data);
     end;
 
-    Sleep(300);
+    Sleep(1000);
   end;
 end;
 
@@ -137,16 +118,12 @@ begin
 
   Application.AddOnMinimizeHandler(@DoApplicationMinimized);
   Application.AddOnRestoreHandler(@DoApplicationRestored);
-
-  SimbaIDEEvents.Register(SimbaIDEEvent.WINDOW_SELECTED, @DoWindowSelected);
 end;
 
 destructor TSimbaMouseLogger.Destroy;
 begin
   Application.RemoveAsyncCalls(Self);
   Application.RemoveAllHandlersOfObject(Self);
-
-  SimbaIDEEvents.UnRegister(SimbaIDEEvent.WINDOW_SELECTED, @DoWindowSelected);
 
   inherited Destroy();
 end;

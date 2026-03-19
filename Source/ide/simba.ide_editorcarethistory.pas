@@ -10,8 +10,11 @@ unit simba.ide_editorcarethistory;
 interface
 
 uses
-  Classes, SysUtils, Math, SynEdit, SynEditMouseCmds, LazSynEditMouseCmdsTypes,
-  simba.base, simba.ide_tab, simba.containers;
+  Classes, SysUtils, SynEdit, SynEditMouseCmds, LazSynEditMouseCmdsTypes,
+  simba.base,
+  simba.containers,
+  simba.ide_tab,
+  simba.ide_events;
 
 type
   TSimbaEditorCaretHistory = class(TComponent)
@@ -31,8 +34,7 @@ type
     procedure PruneIfNeeded;
     procedure DumpState(const msg: String);
 
-    procedure DoTabClose(Sender: TObject);
-    procedure DoTabCaretMoved(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   public
     property MaxDepth: Integer read FMaxDepth write FMaxDepth;
 
@@ -57,8 +59,8 @@ var
 implementation
 
 uses
+  Math,
   simba.form_tabs,
-  simba.ide_events,
   simba.initializations,
   simba.ide_editor_mousecommands,
   simba.threading;
@@ -82,14 +84,14 @@ begin
   end;
 end;
 
-procedure TSimbaEditorCaretHistory.DoTabClose(Sender: TObject);
+procedure TSimbaEditorCaretHistory.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
-  Clear(Sender as TSimbaScriptTab);
-end;
-
-procedure TSimbaEditorCaretHistory.DoTabCaretMoved(Sender: TObject);
-begin
-  PushFromEditor(Sender as TSimbaScriptTab);
+  case Event of
+    // remove the tab from history
+    ESimbaEvent.TAB_CLOSED: Clear(TSimbaScriptTab(Data));
+    // add to history
+    ESimbaEvent.TAB_CARETMOVED: PushFromEditor(TSimbaScriptTab(Data));
+  end;
 end;
 
 procedure TSimbaEditorCaretHistory.PruneIfNeeded;
@@ -255,8 +257,7 @@ begin
   FMaxDepth := 128;
   FMoving   := False;
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CLOSED, @DoTabClose);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CARETMOVED, @DoTabCaretMoved);
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 destructor TSimbaEditorCaretHistory.Destroy;

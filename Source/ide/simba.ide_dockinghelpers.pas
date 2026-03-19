@@ -212,11 +212,11 @@ end;
 
 procedure TSimbaAnchorDockHostSite.SetParent(Value: TWinControl);
 begin
-  if (SimbaIDEEvents <> nil) then
+  if (SimbaEvents <> nil) then
     if (Value = nil) then
-      SimbaIDEEvents.Notify(SimbaIDEEvent.FORM_UNDOCK, Self)
+      SimbaEvents.Post(ESimbaEvent.FORM_UNDOCK, Self)
     else
-      SimbaIDEEvents.Notify(SimbaIDEEvent.FORM_DOCK, Self);
+      SimbaEvents.Post(ESimbaEvent.FORM_DOCK, Self);
 
   if (Value <> nil) then
     ShowInTaskBar := stNever
@@ -275,7 +275,7 @@ procedure TSimbaAnchorDockSplitter.DblClick;
 begin
   inherited DblClick();
 
-  SimbaIDEEvents.Notify(SimbaIDEEvent.SPLITTER_DOUBLE_CLICK, Self);
+  SimbaEvents.Post(ESimbaEvent.SPLITTER_DOUBLE_CLICK, Self);
 end;
 
 procedure TSimbaAnchorDockSplitter.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

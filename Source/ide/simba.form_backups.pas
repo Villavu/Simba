@@ -11,7 +11,10 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Zipper,
-  simba.ide_editor, simba.component_treeview, simba.component_buttonpanel;
+  simba.ide_editor,
+  simba.ide_events,
+  simba.component_treeview,
+  simba.component_buttonpanel;
 
 type
   TBackups = record
@@ -51,8 +54,7 @@ type
     procedure DoBackupsLoaded(Sender: TObject);
     procedure DoLoadBackups;
 
-    procedure DoFormDocked(Sender: TObject);
-    procedure DoFormUndocked(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
     procedure Activate; override;
     procedure Fill;
@@ -71,7 +73,7 @@ implementation
 uses
   AnchorDocking,
   simba.component_button,
-  simba.env, simba.fs, simba.component_theme, simba.ide_events, simba.form_main, simba.form_tabs;
+  simba.env, simba.fs, simba.component_theme, simba.form_main, simba.form_tabs;
 
 type
   TBackupNode = class(TTreeNode)
@@ -183,21 +185,15 @@ begin
   UnZipper.Free();
 end;
 
-procedure TSimbaBackupsForm.DoFormDocked(Sender: TObject);
+procedure TSimbaBackupsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
-  if (Sender = HostDockSite) then
-  begin
-    ButtonPanel.ButtonCancel.Visible := False;
-    Fill();
-  end;
-end;
-
-procedure TSimbaBackupsForm.DoFormUndocked(Sender: TObject);
-begin
-  if (Sender = HostDockSite) then
-  begin
-    ButtonPanel.ButtonCancel.Visible := True;
-    Fill();
+  case Event of
+    ESimbaEvent.FORM_DOCK, ESimbaEvent.FORM_UNDOCK:
+      if (TObject(Data) = HostDockSite) then
+      begin
+        ButtonPanel.ButtonCancel.Visible := Event = ESimbaEvent.FORM_UNDOCK;
+        Fill();
+      end;
   end;
 end;
 
@@ -252,8 +248,7 @@ begin
   Splitter.OnEnter := @DoSplitterEnterExit;
   Splitter.OnExit := @DoSplitterEnterExit;
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.FORM_DOCK, @DoFormDocked);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.FORM_UNDOCK, @DoFormUndocked);
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 procedure TSimbaBackupsForm.FormShow(Sender: TObject);

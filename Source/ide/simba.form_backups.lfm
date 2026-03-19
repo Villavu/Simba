@@ -1,22 +1,22 @@
 object SimbaBackupsForm: TSimbaBackupsForm
   Left = 1333
-  Height = 450
+  Height = 720
   Top = 543
-  Width = 739
+  Width = 1182
   Caption = 'Backups'
-  ClientHeight = 450
-  ClientWidth = 739
-  DesignTimePPI = 120
-  OnCreate = FormCreate
-  OnShow = FormShow
+  ClientHeight = 720
+  ClientWidth = 1182
+  DesignTimePPI = 192
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
-  LCLVersion = '3.4.0.0'
+  LCLVersion = '4.0.0.4'
+  OnCreate = FormCreate
+  OnShow = FormShow
   object LeftPanel: TPanel
     Left = 0
     Height = 450
     Top = 0
-    Width = 213
+    Width = 341
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
@@ -25,7 +25,7 @@ object SimbaBackupsForm: TSimbaBackupsForm
     Left = 213
     Height = 450
     Top = 0
-    Width = 6
+    Width = 10
     OnPaint = SplitterPaint
   end
   object RightPanel: TPanel
