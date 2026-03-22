@@ -1,21 +1,21 @@
 object SimbaTabsForm: TSimbaTabsForm
   Left = 2706
-  Height = 206
+  Height = 330
   Top = 265
-  Width = 816
+  Width = 1306
   AllowDropFiles = True
   Caption = 'Editor'
-  ClientHeight = 206
-  ClientWidth = 816
-  DesignTimePPI = 120
+  ClientHeight = 330
+  ClientWidth = 1306
+  DesignTimePPI = 192
+  ShowInTaskBar = stAlways
+  LCLVersion = '4.0.0.4'
   OnDestroy = FormDestroy
   OnDropFiles = DoOnDropFiles
   OnMouseDown = FormMouseDown
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove
   OnMouseUp = FormMouseUp
-  ShowInTaskBar = stAlways
-  LCLVersion = '3.6.0.0'
   object FindPanel: TPanel
     Left = 0
     Height = 0
@@ -63,8 +63,8 @@ object SimbaTabsForm: TSimbaTabsForm
   object TabPopupMenu: TPopupMenu
     Images = SimbaMainForm.Images
     OnMeasureItem = TabPopupMenuMeasureItem
-    Left = 320
-    Top = 20
+    Left = 512
+    Top = 32
     object MenuItemNewTab: TMenuItem
       Caption = 'New Tab'
       ImageIndex = 5
@@ -87,7 +87,7 @@ object SimbaTabsForm: TSimbaTabsForm
   object OpenDialog: TOpenDialog
     Filter = 'Simba Files|*.simba;*.pas;*.inc|All Files|*.*'
     Options = [ofAllowMultiSelect, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 110
-    Top = 20
+    Left = 176
+    Top = 32
   end
 end

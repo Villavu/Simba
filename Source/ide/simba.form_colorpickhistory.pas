@@ -57,7 +57,7 @@ implementation
 
 uses
   Clipbrd, LCLType,
-  simba.ide_maintoolbar, simba.dialog,
+  simba.dialog,
   simba.colormath, simba.component_theme, simba.settings, simba.vartype_string,
   simba.ide_dockinghelpers;
 
@@ -203,7 +203,7 @@ end;
 
 procedure TSimbaColorPickHistoryForm.DoPickColorClick(Sender: TObject);
 begin
-  SimbaMainToolBar.ButtonColorPicker.Click();
+  SimbaEvents.Post(ESimbaEvent.TOOLBAR_PICKCOLOR, nil);
 end;
 
 procedure TSimbaColorPickHistoryForm.DoPaintNode(ACanvas: TCanvas; Node: TTreeNode);

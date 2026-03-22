@@ -16,7 +16,7 @@ uses
   simba.component_imageboxzoom;
 
 type
-  TSimbaColorPicker = class(TObject)
+  TSimbaColorPicker = class(TComponent)
   private
     FForm: TForm;
     FHint: THintWindow;
@@ -27,15 +27,16 @@ type
     FColor: TColor;
     FWindowSelection: TWindowHandle;
 
+    procedure Pick;
+
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoFormClosed(Sender: TObject; var CloseAction: TCloseAction);
     procedure DoHintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
-    constructor Create;
+    constructor Create; reintroduce;
     destructor Destroy; override;
-
-    procedure Pick;
   end;
 
 var
@@ -103,6 +104,14 @@ begin
   Zoom.OnGetText := @DoHintText;
   Zoom.BorderSpacing.Around := 10;
   Zoom.FrameColor := ColorBlendHalf(SimbaComponentTheme.ColorFrame, SimbaComponentTheme.ColorLine);
+end;
+
+procedure TSimbaColorPicker.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.TOOLBAR_PICKCOLOR:
+      Pick();
+  end;
 end;
 
 procedure TSimbaColorPicker.DoFormClosed(Sender: TObject; var CloseAction: TCloseAction);
@@ -229,9 +238,11 @@ begin
     FreeAndNil(DesktopImage);
 end;
 
-constructor TSimbaColorPicker.Create;
+constructor TSimbaColorPicker.Create();
 begin
-  inherited Create();
+  inherited Create(nil);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 destructor TSimbaColorPicker.Destroy;

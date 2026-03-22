@@ -11,8 +11,13 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Menus, Buttons,
-  simba.ide_tab, simba.ide_editor, simba.ide_editor_findreplace,
-  simba.component_tabcontrol, simba.component_button, simba.component_edit;
+  simba.ide_events,
+  simba.ide_tab,
+  simba.ide_editor,
+  simba.ide_editor_findreplace,
+  simba.component_tabcontrol,
+  simba.component_button,
+  simba.component_edit;
 
 type
   TSimbaTabsForm = class(TForm)
@@ -61,6 +66,7 @@ type
 
     function CanAnchorDocking(X, Y: Integer): Boolean;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     // Menu shortcuts without modifier key don't seem to work
     procedure DoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoFindPanelVisibleChanged(Sender: TObject);
@@ -101,9 +107,6 @@ type
 
     function Open(FileName: String; CheckOtherTabs: Boolean = True): Boolean; overload;
     procedure Open; overload;
-
-    procedure Save;
-    procedure SaveAll;
   end;
 
 var
@@ -120,7 +123,7 @@ uses
   simba.base, simba.env,
   simba.form_main, simba.form_output,
   simba.ide_dockinghelpers, simba.nativeinterface,
-  simba.ide_events, simba.ide_utils, simba.component_theme, simba.settings;
+  simba.ide_utils, simba.component_theme, simba.settings;
 
 function GetSimbaActiveTab: TSimbaScriptTab;
 begin
@@ -466,6 +469,8 @@ begin
   end;
 
   CalculateFindButtonSizes();
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 function TSimbaTabsForm.GetTabCount: Integer;
@@ -661,23 +666,66 @@ begin
   end;
 end;
 
-procedure TSimbaTabsForm.Save;
-begin
-  CurrentTab.Save(CurrentTab.ScriptFileName);
-end;
-
-procedure TSimbaTabsForm.SaveAll;
+procedure TSimbaTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 var
+  ActiveTab: TSimbaScriptTab;
   I: Integer;
 begin
-  for I := TabCount - 1 downto 0 do
-    if Tabs[I].ScriptChanged then
-    begin
-      if (Tabs[I].ScriptFileName = '') then
-        Tabs[I].Show();
+  ActiveTab := GetCurrentTab();
+  if (ActiveTab = nil) then
+    Exit;
 
-      Tabs[I].Save(Tabs[I].ScriptFileName);
-    end;
+  case Event of
+    ESimbaEvent.TOOLBAR_RUN,
+    ESimbaEvent.TOOLBAR_COMPILE,
+    ESimbaEvent.TOOLBAR_PAUSE,
+    ESimbaEvent.TOOLBAR_STOP:
+      begin
+        if (Event in [ESimbaEvent.TOOLBAR_RUN, ESimbaEvent.TOOLBAR_COMPILE]) then
+        begin
+          ActiveTab.OutputBox.MakeVisible();
+          if SimbaSettings.OutputBox.ClearOnCompile.Value then
+            ActiveTab.OutputBox.Empty();
+        end;
+
+        case Event of
+          ESimbaEvent.TOOLBAR_RUN:     ActiveTab.Run();
+          ESimbaEvent.TOOLBAR_COMPILE: ActiveTab.Compile();
+          ESimbaEvent.TOOLBAR_PAUSE:   ActiveTab.Pause();
+          ESimbaEvent.TOOLBAR_STOP:    ActiveTab.Stop();
+        end;
+
+        if ActiveTab.Editor.CanSetFocus() then
+          ActiveTab.Editor.SetFocus();
+      end;
+
+    ESimbaEvent.TOOLBAR_SAVE:
+      begin
+        ActiveTab.Save(ActiveTab.ScriptFileName);
+      end;
+
+    ESimbaEvent.TOOLBAR_SAVEALL:
+      begin
+        for I := TabCount - 1 downto 0 do
+          if Tabs[I].ScriptChanged then
+          begin
+            if (Tabs[I].ScriptFileName = '') then
+              Tabs[I].Show();
+            Tabs[I].Save(Tabs[I].ScriptFileName);
+          end;
+      end;
+
+    ESimbaEvent.TOOLBAR_NEW:
+      begin
+        AddTab();
+      end;
+
+    ESimbaEvent.TOOLBAR_OPEN:
+      begin
+        Open();
+      end;
+  end;
 end;
+
 
 end.

@@ -6,7 +6,7 @@
 unit simba.ide_events;
 
 {$i simba.inc}
-{.$DEFINE SIMBA_PRINT_IDE_EVENTS}
+{$DEFINE SIMBA_PRINT_IDE_EVENTS}
 
 interface
 
@@ -18,6 +18,21 @@ type
   {$PUSH}
   {$SCOPEDENUMS ON}
   ESimbaEvent = (
+    // Raw toolbar button click events, data=nil
+    TOOLBAR_NEW,
+    TOOLBAR_OPEN,
+    TOOLBAR_SAVE,
+    TOOLBAR_SAVEALL,
+    TOOLBAR_COMPILE,
+    TOOLBAR_RUN,
+    TOOLBAR_PAUSE,
+    TOOLBAR_STOP,
+    TOOLBAR_PICKCOLOR,
+    TOOLBAR_PICKTARGET,
+    TOOLBAR_PICKAREA,
+    TOOLBAR_CLEAROUTPUT,
+    TOOLBAR_PACKAGE,
+
     // Event called when codetools is setup. Data=nil
     CODETOOLS_SETUP,
 
@@ -104,7 +119,7 @@ var
   I: Integer;
 begin
   {$IFDEF SIMBA_PRINT_IDE_EVENTS}
-  WriteLn(EventType);
+  WriteLn(Event);
   {$ENDIF}
 
   for I := 0 to FCallbacks.Count - 1 do

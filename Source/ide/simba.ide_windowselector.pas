@@ -18,12 +18,13 @@ uses
   simba.ide_events;
 
 type
-  TSimbaWindowSelector = class(TObject)
-  public
-    constructor Create;
-    destructor Destroy; override;
-
+  TSimbaWindowSelector = class(TComponent)
+  protected
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure Pick;
+  public
+    constructor Create; reintroduce;
+    destructor Destroy; override;
   end;
 
 var
@@ -154,12 +155,22 @@ end;
 
 constructor TSimbaWindowSelector.Create;
 begin
-  inherited Create();
+  inherited Create(nil);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 destructor TSimbaWindowSelector.Destroy;
 begin
   inherited Destroy();
+end;
+
+procedure TSimbaWindowSelector.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.TOOLBAR_PICKTARGET:
+      Pick();
+  end;
 end;
 
 procedure TSimbaWindowSelector.Pick;

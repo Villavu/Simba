@@ -615,6 +615,9 @@ begin
     // open output tab on tab switch
     ESimbaEvent.TAB_CHANGE:
       TSimbaScriptTab(Data).OutputBox.MakeVisible();
+    // clear active
+    ESimbaEvent.TOOLBAR_CLEAROUTPUT:
+      ActiveOutputBox.Empty();
   end;
 end;
 

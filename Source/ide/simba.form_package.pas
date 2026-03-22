@@ -11,7 +11,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, ExtCtrls, ComCtrls, SynEdit, Dialogs,
-  simba.base, simba.ide_package, simba.ide_package_components;
+  simba.base, simba.ide_package, simba.ide_package_components,
+  simba.ide_events;
 
 type
   TSimbaPackageForm = class(TForm)
@@ -49,6 +50,7 @@ type
     procedure BeginLoading;
     procedure EndLoading;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoAutoUpdateClicked(Sender: TObject);
     procedure DoRefresh(Data: PtrInt);
     procedure DoPackageSelectionChanged(Sender: TObject; User: Boolean);
@@ -88,6 +90,14 @@ procedure TSimbaPackageForm.EndLoading;
 begin
   Notebook1.ShowControl(MainPage);
   Application.ProcessMessages();
+end;
+
+procedure TSimbaPackageForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.TOOLBAR_PACKAGE:
+      SimbaPackageForm.ShowModal();
+  end;
 end;
 
 procedure TSimbaPackageForm.DoAutoUpdateClicked(Sender: TObject);
@@ -345,6 +355,8 @@ begin
   {$IFDEF WINDOWS}
   OutputSynEdit.Font.Name := 'Consolas';
   {$ENDIF}
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 end.
