@@ -374,8 +374,7 @@ procedure TSimbaScriptTab.TextChanged;
 begin
   inherited TextChanged();
 
-  if Assigned(FOutputBox) then
-    FOutputBox.TabTitle := Caption;
+  SimbaEvents.Post(ESimbaEvent.TAB_CAPTION, Self);
 end;
 
 procedure TSimbaScriptTab.Notification(AComponent: TComponent; Operation: TOperation);
@@ -664,7 +663,6 @@ begin
   FEditor.PopupMenu := TSimbaTabPopupMenu.Create(Self);
 
   FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
-  FOutputBox.TabImageIndex := IMG_STOP;
 
   LoadDefaultScript();
 
@@ -677,8 +675,6 @@ destructor TSimbaScriptTab.Destroy;
 begin
   Application.RemoveAsyncCalls(Self);
   SimbaEvents.Post(ESimbaEvent.TAB_CLOSED, Self);
-  if Assigned(SimbaOutputForm) then
-    SimbaOutputForm.RemoveTab(FOutputBox);
 
   inherited Destroy();
 end;

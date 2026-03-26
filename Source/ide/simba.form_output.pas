@@ -43,11 +43,6 @@ type
     procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
     function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
-
-    function GetTabTitle: String;
-    function GetTabImageIndex: Integer;
-    procedure SetTabTitle(Value: String);
-    procedure SetTabImageIndex(Value: Integer);
   public
     constructor Create(AOwner: TComponent); reintroduce;
     destructor Destroy; override;
@@ -60,9 +55,6 @@ type
     procedure Flush;
 
     procedure MakeVisible;
-
-    property TabTitle: String read GetTabTitle write SetTabTitle;
-    property TabImageIndex: Integer read GetTabImageIndex write SetTabImageIndex;
   end;
 
   TSimbaOutputForm = class(TForm)
@@ -129,30 +121,11 @@ type
   TSimbaOutputTab = class(TSimbaTab)
   protected
     FOutputBox: TSimbaOutputBox;
-
-    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   public
     constructor Create(AOwner: TComponent); override;
 
     property OutputBox: TSimbaOutputBox read FOutputBox;
   end;
-
-procedure TSimbaOutputTab.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-begin
-  case Event of
-    // Update tab icon depending on the state
-    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:
-      if (TSimbaScriptTab(Data).OutputBox = FOutputBox) then
-      begin
-        case TSimbaScriptTab(Data).ScriptState of
-          ESimbaScriptState.STATE_RUNNING: ImageIndex := IMG_PLAY;
-          ESimbaScriptState.STATE_PAUSED:  ImageIndex := IMG_PAUSE;
-          else
-            ImageIndex := IMG_STOP;
-        end;
-      end;
-  end;
-end;
 
 constructor TSimbaOutputTab.Create(AOwner: TComponent);
 begin
@@ -161,36 +134,6 @@ begin
   FOutputBox := TSimbaOutputBox.Create(Self);
   FOutputBox.Parent := Self;
   FOutputBox.Align := alClient;
-
-  SimbaEvents.Register(Self, @DoSimbaEvent);
-end;
-
-function TSimbaOutputBox.GetTabTitle: String;
-begin
-  if (Parent is TSimbaOutputTab) then
-    Result := TSimbaOutputTab(Parent).Caption
-  else
-    Result := '';
-end;
-
-procedure TSimbaOutputBox.SetTabTitle(Value: String);
-begin
-  if (Parent is TSimbaOutputTab) then
-    TSimbaOutputTab(Parent).Caption := Value;
-end;
-
-function TSimbaOutputBox.GetTabImageIndex: Integer;
-begin
-  if (Parent is TSimbaOutputTab) then
-    Result := TSimbaOutputTab(Parent).ImageIndex
-  else
-    Result := -1;
-end;
-
-procedure TSimbaOutputBox.SetTabImageIndex(Value: Integer);
-begin
-  if (Parent is TSimbaOutputTab) then
-    TSimbaOutputTab(Parent).ImageIndex := Value;
 end;
 
 procedure TSimbaOutputBox.DoSettingChange_FontName(Setting: TSimbaSetting);
@@ -556,6 +499,7 @@ var
   Tab: TSimbaOutputTab;
 begin
   Tab := FTabControl.AddTab(TabTitle) as TSimbaOutputTab;
+  Tab.ImageIndex := IMG_STOP;
 
   Result := Tab.OutputBox;
   Result.PopupMenu := ContextMenu;
@@ -610,14 +554,49 @@ begin
 end;
 
 procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+var
+  I: Integer;
 begin
   case Event of
     // open output tab on tab switch
     ESimbaEvent.TAB_CHANGE:
       TSimbaScriptTab(Data).OutputBox.MakeVisible();
+
+    // remove the tab
+    ESimbaEvent.TAB_CLOSED:
+      for I := 0 to FTabControl.TabCount - 1 do
+        if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = TSimbaScriptTab(Data).OutputBox) then
+        begin
+          FTabControl.DeleteTab(FTabControl.Tabs[I]);
+          Break;
+        end;
+
     // clear active
     ESimbaEvent.TOOLBAR_CLEAROUTPUT:
       ActiveOutputBox.Empty();
+
+    // update tab icon
+    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:
+      for I := 0 to FTabControl.TabCount - 1 do
+        if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = TSimbaScriptTab(Data).OutputBox) then
+        begin
+          case TSimbaScriptTab(Data).ScriptState of
+            ESimbaScriptState.STATE_RUNNING: TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PLAY;
+            ESimbaScriptState.STATE_PAUSED:  TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PAUSE;
+            else
+              TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_STOP;
+          end;
+          Break;
+        end;
+
+    // Update tab caption
+    ESimbaEvent.TAB_CAPTION:
+      for I := 0 to FTabControl.TabCount - 1 do
+        if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = TSimbaScriptTab(Data).OutputBox) then
+        begin
+          FTabControl.Tabs[I].Caption := TSimbaScriptTab(Data).Caption;
+          Break;
+        end;
   end;
 end;
 

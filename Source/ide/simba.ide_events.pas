@@ -36,7 +36,7 @@ type
     // Event called when codetools is setup. Data=nil
     CODETOOLS_SETUP,
 
-    // Event called on editor caret moved. Data=TSimbaScriptTab
+    // Data=TSimbaScriptTab
     TAB_CARETMOVED,
     TAB_MODIFIED,
     TAB_LOADED,
@@ -45,6 +45,8 @@ type
     TAB_CHANGE,
     TAB_ADD,
     TAB_CLOSED,
+    TAB_CAPTION,
+
     // Event called on a form dock/undock
     FORM_DOCK,
     FORM_UNDOCK,
