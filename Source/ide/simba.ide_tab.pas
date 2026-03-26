@@ -10,7 +10,7 @@ unit simba.ide_tab;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, Controls, Dialogs, Process, SynEdit, SynEditTypes,
+  Classes, SysUtils, Controls, Dialogs, Process, SynEdit, SynEditTypes,
   simba.base,
   simba.ide_editor,
   simba.ide_events,
@@ -83,7 +83,6 @@ type
 
   TSimbaScriptTab = class(TSimbaTab)
   protected
-    FUID: Integer;
     FEditor: TSimbaEditor;
     FSavedText: String;
     FScriptFileName: String;
@@ -110,7 +109,6 @@ type
     function GetScript: String;
     function GetScriptChanged: Boolean;
   public
-    property UID: Integer read FUID;
     property OutputBox: TSimbaOutputBox read FOutputBox;
 
     property ScriptTitle: String read FScriptTitle;
@@ -134,7 +132,6 @@ type
 
     procedure FindDeclarationAtCaret;
 
-    function IsActiveTab: Boolean;
     function CanClose: Boolean;
 
     function ScriptStateStr: String;
@@ -154,7 +151,7 @@ implementation
 uses
   Forms,
   simba.fs, simba.settings,
-  simba.form_main, simba.form_tabs, simba.env, simba.ide_showdeclaration, simba.threading,
+  simba.form_tabs, simba.env, simba.ide_showdeclaration, simba.threading,
   simba.ide_scriptcommunication, simba.datetime, simba.ide_editor_popupmenu,
   simba.vartype_windowhandle,
   simba.vartype_string,
@@ -338,9 +335,6 @@ begin
 
   inherited Destroy();
 end;
-
-var
-  __UID: Integer = 0;
 
 function TSimbaScriptTab.GetScript: String;
 begin
@@ -530,11 +524,6 @@ begin
   Editor.TopLine := (Line + 1) - (Editor.LinesInWindow div 2);
 end;
 
-function TSimbaScriptTab.IsActiveTab: Boolean;
-begin
-  Result := TabControl.ActiveTab = Self;
-end;
-
 function TSimbaScriptTab.CanClose: Boolean;
 begin
   Result := True;
@@ -647,9 +636,6 @@ constructor TSimbaScriptTab.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  Inc(__UID);
-
-  FUID := __UID;
   FScriptTitle := 'Untitled';
   FScriptFileName := '';
 

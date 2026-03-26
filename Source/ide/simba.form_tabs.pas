@@ -97,8 +97,8 @@ type
     procedure FindPrevious;
     function CheckForFileChanges: Boolean;
 
+    function FindTab(ID: Int64): TSimbaScriptTab;
     function AddTab: TSimbaScriptTab;
-    function FindTab(ID: Integer): TSimbaScriptTab;
 
     function CloseTab(Tab: TSimbaScriptTab; KeepOne: Boolean): Boolean;
     function CloseOtherTabs(Tab: TSimbaScriptTab): Boolean;
@@ -551,21 +551,16 @@ begin
   end;
 end;
 
+function TSimbaTabsForm.FindTab(ID: Int64): TSimbaScriptTab;
+begin
+  Result := TSimbaScriptTab(FTabControl.FindTab(ID));
+end;
+
 function TSimbaTabsForm.AddTab: TSimbaScriptTab;
 begin
   Result := FTabControl.AddTab() as TSimbaScriptTab;
   // apparently shortcuts
   Result.Editor.RegisterBeforeKeyDownHandler(@DoKeyDown);
-end;
-
-function TSimbaTabsForm.FindTab(ID: Integer): TSimbaScriptTab;
-var
-  I: Integer;
-begin
-  for I := 0 to TabCount - 1 do
-    if (Tabs[I].UID = ID) then
-      Exit(Tabs[I]);
-  Exit(nil);
 end;
 
 function TSimbaTabsForm.CloseTab(Tab: TSimbaScriptTab; KeepOne: Boolean): Boolean;

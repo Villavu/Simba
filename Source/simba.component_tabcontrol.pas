@@ -18,8 +18,11 @@ type
   TSimbaTabControl = class;
   TSimbaTab = class(TCustomControl)
   protected
+    FUID: Int64;
+
     procedure TextChanged; override;
 
+    function GetIsActiveTab: Boolean;
     function GetImageIndex: TImageIndex;
     function GetTabControl: TSimbaTabControl;
     function GetTabData: TATTabData;
@@ -27,8 +30,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
 
+    property UID: Int64 read FUID;
     property TabControl: TSimbaTabControl read GetTabControl;
     property ImageIndex: TImageIndex read GetImageIndex write SetImageIndex;
+    property IsActiveTab: Boolean read GetIsActiveTab;
   end;
   TSimbaTabClass = class of TSimbaTab;
 
@@ -40,6 +45,7 @@ type
     TTabCloseEvent     = procedure(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean) of object;
     TTabChangeEvent    = procedure(Sender: TSimbaTabControl; NewTab: TSimbaTab) of object;
   protected
+    FUID: Int64;
     FTabs: TATTabs;
     FTabClass: TSimbaTabClass;
     FTabMovedEvent: TTabMovedEvent;
@@ -48,6 +54,7 @@ type
     FTabChangeEvent: TTabChangeEvent;
     FDefaultTitle: String;
 
+    function GetTabUID: Int64;
     function GetTabHeight: Integer;
 
     procedure ShowControl(AControl: TControl); override;
@@ -88,6 +95,7 @@ type
     constructor Create(AOwner: TComponent; TabClass: TSimbaTabClass; ADefaultTitle: String = ''); reintroduce;
     destructor Destroy; override;
 
+    function FindTab(ID: Int64): TSimbaTab;
     function AddTab(Title: String = ''): TSimbaTab;
     function DeleteTab(Tab: TSimbaTab): Boolean;
     procedure MoveTab(AFrom, ATo: Integer);
@@ -139,7 +147,7 @@ end;
 constructor TSimbaTab.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-
+  FUID := TabControl.GetTabUID();
   ControlStyle := ControlStyle + [csOpaque];
 end;
 
@@ -155,6 +163,11 @@ begin
     if (I > -1) then
       Result := GetTabData(I);
   end;
+end;
+
+function TSimbaTab.GetIsActiveTab: Boolean;
+begin
+  Result := TabControl.ActiveTab = Self;
 end;
 
 procedure TSimbaTab.TextChanged;
@@ -271,6 +284,12 @@ end;
 procedure TSimbaTabControl.SetOnMouseMove(Value: TMouseMoveEvent);
 begin
   FTabs.OnMouseMove := Value;
+end;
+
+function TSimbaTabControl.GetTabUID: Int64;
+begin
+  Inc(FUID);
+  Result := FUID;
 end;
 
 function TSimbaTabControl.GetTabHeight: Integer;
@@ -473,6 +492,16 @@ begin
   Application.RemoveAsyncCalls(Self);
 
   inherited Destroy();
+end;
+
+function TSimbaTabControl.FindTab(ID: Int64): TSimbaTab;
+var
+  I: Integer;
+begin
+  for I := 0 to TabCount - 1 do
+    if (Tabs[I].UID = ID) then
+      Exit(Tabs[I]);
+  Result := nil;
 end;
 
 function TSimbaTabControl.AddTab(Title: String): TSimbaTab;

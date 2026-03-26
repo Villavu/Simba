@@ -119,7 +119,7 @@ begin
 
     ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:
       begin
-        if TSimbaScriptTab(Data).IsActiveTab() then
+        if TSimbaScriptTab(Data).IsActiveTab then
           SetStates(TSimbaScriptTab(Data).ScriptState);
       end;
 
@@ -132,7 +132,7 @@ begin
 
     ESimbaEvent.TAB_MODIFIED:
       begin
-        if TSimbaScriptTab(Data).IsActiveTab() then
+        if TSimbaScriptTab(Data).IsActiveTab then
           FButtonSave.Enabled := TSimbaScriptTab(Data).ScriptChanged;
       end;
   end;

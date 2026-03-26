@@ -71,7 +71,7 @@ begin
 
     ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:
       begin
-        if TSimbaScriptTab(Data).IsActiveTab() then
+        if TSimbaScriptTab(Data).IsActiveTab then
           FStatusBar.PanelText[1] := TSimbaScriptTab(Data).ScriptStateStr;
       end;
 
