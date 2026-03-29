@@ -13,8 +13,10 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, Graphics, StdCtrls, ComCtrls, LMessages, LCLType, ImgList, Types,
-  simba.component_edit, simba.component_treeviewhint, simba.component_scrollbar, simba.component_button,
-  simba.settings;
+  simba.component_edit,
+  simba.component_treeviewhint,
+  simba.component_scrollbar,
+  simba.component_button;
 
 type
   TSimbaInternalTreeView = class(TTreeView)
@@ -123,7 +125,6 @@ type
     procedure DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
     procedure DoDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; Stage: TCustomDrawStage; var PaintImages, DefaultDraw: Boolean);
-    procedure DoSettingChanged_ImageSize(Setting: TSimbaSetting);
     procedure DoScrollHorzChange(Sender: TObject);
     procedure DoScrollVertChange(Sender: TObject);
     procedure DoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -277,9 +278,6 @@ begin
   FFilterClearButton.XPadding := 3;
 
   FScrollbarVert.ForwardScrollControl := FTree;
-
-  with SimbaSettings do
-    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize, True);
 end;
 
 procedure TSimbaTreeView.HideRoot;
@@ -641,14 +639,6 @@ begin
     begin
       FOnPaintNode(Sender.Canvas, Node);
     end;
-end;
-
-procedure TSimbaTreeView.DoSettingChanged_ImageSize(Setting: TSimbaSetting);
-begin
-  FTree.Indent := IfThen(Setting.IsDefault, 16, Setting.Value) - 4;
-  FTree.ExpandSignSize := IfThen(Setting.IsDefault, 16, Setting.Value) - 4;
-
-  Invalidate();
 end;
 
 procedure TSimbaTreeView.DoScrollVertChange(Sender: TObject);

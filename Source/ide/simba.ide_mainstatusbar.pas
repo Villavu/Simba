@@ -33,7 +33,8 @@ implementation
 
 uses
   simba.initializations, simba.ide_mouselogger, simba.ide_tab,
-  simba.ide_editor_findreplace, simba.form_tabs, simba.form_functionlist;
+  simba.ide_editor_findreplace, simba.form_tabs,
+  simba.functionlist_page;
 
 procedure TSimbaMainStatusBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
@@ -75,7 +76,7 @@ begin
           FStatusBar.PanelText[1] := TSimbaScriptTab(Data).ScriptStateStr;
       end;
 
-    ESimbaEvent.FUNCTIONLIST_SELECTION:
+    ESimbaEvent.FUNCTIONLIST_SELECTION_CHANGE:
       begin
         FStatusBar.PanelText[3] := TSimbaFunctionListNode(Data).Hint;
       end;

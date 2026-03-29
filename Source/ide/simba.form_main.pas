@@ -244,14 +244,12 @@ type
     procedure SetupCompleted;
 
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-    procedure DoSettingChanged_CustomFontSize(Setting: TSimbaSetting);
     procedure DoSettingChanged_LockLayout(Setting: TSimbaSetting);
     procedure DoSettingChanged_TrayIconVisible(Setting: TSimbaSetting);
     procedure DoSettingChanged_ShowCompilerHints(Setting: TSimbaSetting);
 
     procedure HandleRecentFileClick(Sender: TObject);
     procedure HandleException(Sender: TObject; E: Exception);
-    procedure HandleFormCreated(Sender: TObject; Form: TCustomForm);
 
     // Handle main menu shortcuts if editor is focused
     procedure DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -439,12 +437,6 @@ begin
   Caption := Format('Simba %.1f', [SIMBA_VERSION / 1000]);
 end;
 
-procedure TSimbaMainForm.HandleFormCreated(Sender: TObject; Form: TCustomForm);
-begin
-  if (SimbaSettings.General.CustomFontSize.Value > 0) then
-    Form.Font.Size := SimbaSettings.General.CustomFontSize.Value;
-end;
-
 procedure TSimbaMainForm.HandleRecentFileClick(Sender: TObject);
 begin
   SimbaTabsForm.Open(TMenuItem(Sender).Hint, True);
@@ -613,13 +605,10 @@ begin
   Application.OnException := @Self.HandleException;
   Application.AddOnKeyDownBeforeHandler(@DoApplicationKeyDown);
 
-  Screen.AddHandlerFormAdded(@Self.HandleFormCreated, True);
-
   SimbaEvents.Register(Self, @DoSimbaEvent);
 
   with SimbaSettings do
   begin
-    RegisterChangeHandler(Self, General.CustomFontSize, @DoSettingChanged_CustomFontSize, True);
     RegisterChangeHandler(Self, General.LockLayout, @DoSettingChanged_LockLayout, True);
     RegisterChangeHandler(Self, General.TrayIconVisible, @DoSettingChanged_TrayIconVisible, True);
     RegisterChangeHandler(Self, Compiler.ShowHints, @DoSettingChanged_ShowCompilerHints, True);
@@ -798,11 +787,6 @@ end;
 procedure TSimbaMainForm.DoMenuItemCompileClick(Sender: TObject);
 begin
   SimbaMainToolBar.ButtonCompile.Click();
-end;
-
-procedure TSimbaMainForm.DoSettingChanged_CustomFontSize(Setting: TSimbaSetting);
-begin
-  SetCustomFontSize(Setting.Value);
 end;
 
 procedure TSimbaMainForm.DoSettingChanged_LockLayout(Setting: TSimbaSetting);

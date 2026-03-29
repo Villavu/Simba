@@ -61,6 +61,7 @@ procedure DoCreate;
           Continue;
 
         Parser := TCodeParser.Create();
+        Parser.SourceType := EParserSourceType.SIMBA;
         Parser.SetScript(List.ValueFromIndex[I], List.Names[I]);
         Parser.Run();
 

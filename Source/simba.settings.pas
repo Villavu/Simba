@@ -88,7 +88,6 @@ type
       LockLayout: TSimbaSetting;
       Notes: TSimbaSetting;
       RecentFiles: TSimbaSetting;
-      CustomFontSize: TSimbaSetting;
       ToolbarSize: TSimbaSetting;
       ToolbarPosition: TSimbaSetting;
       ToolBarSpacing: TSimbaSetting;
@@ -97,7 +96,6 @@ type
       OpenSSLCryptoHash: TSimbaSetting;
       OpenSSLHash: TSimbaSetting;
 
-      CustomImageSize: TSimbaSetting;
       ScrollBarSize: TSimbaSetting; // in 96 DPI
       ScrollBarArrowSize: TSimbaSetting;
 
@@ -487,7 +485,6 @@ begin
   General.Layout             := TSimbaSetting_BinaryString.Create(Self, 'General', 'Layout', '');
   General.Notes              := TSimbaSetting_BinaryString.Create(Self, 'General', 'Notes', '');
   General.RecentFiles        := TSimbaSetting_BinaryString.Create(Self, 'General', 'RecentFiles', '');
-  General.CustomFontSize     := TSimbaSetting_Integer.Create(Self, 'General', 'CustomFontSize', 0);
   General.ToolbarSize        := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSize', 24);
   General.ToolbarPosition    := TSimbaSetting_String.Create(Self, 'General', 'ToolbarPosition', 'Top');
   General.ToolbarSpacing     := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSpacing', 2);
@@ -496,7 +493,6 @@ begin
   General.OpenSSLCryptoHash  := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLCryptoHash', '');
   General.OpenSSLHash        := TSimbaSetting_String.Create(Self, 'General', 'OpenSSLHash', '');
 
-  General.CustomImageSize    := TSimbaSetting_Integer.Create(Self, 'General', 'CustomImageSize', 0);
   General.ScrollBarSize      := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarSize', SimbaComponentTheme.ScrollBarSize);
   General.ScrollBarArrowSize := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarArrowSize', SimbaComponentTheme.ScrollBarArrowSize);
 

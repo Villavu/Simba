@@ -394,7 +394,7 @@ type
 
   {$PUSH}
   {$SCOPEDENUMS ON}
-  EParserSourceType = (SCRIPT, INCLUDE, PLUGIN);
+  EParserSourceType = (SIMBA, SCRIPT, INCLUDE, PLUGIN);
   {$POP}
 
   TSymbolTable = record

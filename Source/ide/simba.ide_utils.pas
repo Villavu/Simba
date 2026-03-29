@@ -42,16 +42,10 @@ type
 implementation
 
 uses
-  simba.settings, simba.process, simba.fs, simba.env;
+  simba.process, simba.fs, simba.env;
 
 function ImageWidthForDPI(DPI: Integer): Integer;
 begin
-  if not SimbaSettings.General.CustomImageSize.IsDefault() then
-  begin
-    Result := SimbaSettings.General.CustomImageSize.Value;
-    Exit;
-  end;
-
   if (DPI <= 96) then
     Result := 16  // 100%, no scaling
   else

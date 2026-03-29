@@ -294,7 +294,6 @@ procedure _LapeForm_Create(const Params: PParamArray; const Result: Pointer); LA
 begin
   PForm(Result)^ := TForm.CreateNew(PComponent(Params^[0])^);
   PForm(Result)^.ShowInTaskBar := stAlways;
-  PForm(Result)^.Font.Size := SimbaSettings.General.CustomFontSize.Value;
 end;
 
 procedure _LapeFormThread_Run(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV

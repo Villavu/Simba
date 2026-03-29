@@ -11,8 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, ImgList, Menus,
-  attabs,
-  simba.settings;
+  attabs;
 
 type
   TSimbaTabControl = class;
@@ -63,7 +62,6 @@ type
 
     procedure CallTabChanged(Data: PtrInt);
 
-    procedure DoSettingChanged_ImageSize(Setting: TSimbaSetting);
     procedure DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
     procedure DoTabChanged(Sender: TObject);
     procedure DoTabPlusClick(Sender: TObject);
@@ -294,7 +292,7 @@ end;
 
 function TSimbaTabControl.GetTabHeight: Integer;
 var
-  FontHeight, ImageHeight: Integer;
+  FontHeight: Integer;
 begin
   with TBitmap.Create() do
   try
@@ -306,12 +304,7 @@ begin
     Free();
   end;
 
-  if SimbaSettings.General.CustomImageSize.IsDefault() then
-    ImageHeight := ImageWidthForDPI(Canvas.Font.PixelsPerInch)
-  else
-    ImageHeight := SimbaSettings.General.CustomImageSize.Value;
-
-  Result := Max(FontHeight, ImageHeight) + Scale96ToScreen(8);
+  Result := Max(FontHeight, ImageWidthForDPI(Canvas.Font.PixelsPerInch)) + Scale96ToScreen(8);
 end;
 
 procedure TSimbaTabControl.ShowControl(AControl: TControl);
@@ -352,14 +345,6 @@ procedure TSimbaTabControl.CallTabChanged(Data: PtrInt);
 begin
   if Assigned(FTabs) then
     DoTabChanged(FTabs);
-end;
-
-procedure TSimbaTabControl.DoSettingChanged_ImageSize(Setting: TSimbaSetting);
-begin
-  FTabs.Height := GetTabHeight();
-  FTabs.OptTabHeight := FTabs.Height;
-
-  Invalidate();
 end;
 
 procedure TSimbaTabControl.DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
@@ -482,9 +467,6 @@ begin
   FTabs.ColorTabActive := SimbaComponentTheme.ColorActive;
   FTabs.ColorActiveMark := SimbaComponentTheme.ColorActive;
   FTabs.ColorCloseBgOver := clNone;
-
-  with SimbaSettings do
-    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize);
 end;
 
 destructor TSimbaTabControl.Destroy;

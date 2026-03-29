@@ -6,19 +6,21 @@
 unit simba.ide_events;
 
 {$i simba.inc}
-{$DEFINE SIMBA_PRINT_IDE_EVENTS}
+{.$DEFINE SIMBA_PRINT_IDE_EVENTS}
 
 interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.colormath, simba.containers;
+  simba.base,
+  simba.colormath,
+  simba.containers;
 
 type
   {$PUSH}
   {$SCOPEDENUMS ON}
   ESimbaEvent = (
-    // Raw toolbar button click events, data=nil
+    // Raw toolbar button click events, Data=nil
     TOOLBAR_NEW,
     TOOLBAR_OPEN,
     TOOLBAR_SAVE,
@@ -50,13 +52,16 @@ type
     // Event called on a form dock/undock
     FORM_DOCK,
     FORM_UNDOCK,
+    // Event called when a splitter is double clicked
     SPLITTER_DOUBLE_CLICK,
+
     // Event called when a tabs script state changes. Data=TSimbaScriptTab
     TAB_SCRIPTSTATE_CHANGE,
     // Event called on mouselogger change. Data=TSimbaMouseLogger
     MOUSELOGGER_CHANGE,
-    // Function list selection changed. Data=TSimbaFunctionListNode
-    FUNCTIONLIST_SELECTION,
+
+    //Data=TSimbaFunctionListNode
+    FUNCTIONLIST_SELECTION_CHANGE,
 
     // Color selector used. Data=TSimbaEventData_ColorPicked
     COLOR_PICKED
