@@ -119,12 +119,15 @@ end;
 
 destructor TSimbaFunctionListForm.Destroy;
 begin
-  FUpdateThread.Terminate();
-  FUpdateThread.WaitFor();
+  if (FUpdateThread <> nil) then
+  begin
+    FUpdateThread.Terminate();
+    FUpdateThread.WaitFor();
+    FreeAndNil(FUpdateThread);
+  end;
+
   while (FPendingRemoves.Count > 0) do
     FPendingRemoves.Pop.Free();
-
-  FreeAndNil(FUpdateThread);
   FreeAndNil(FPendingRemoves);
 
   inherited Destroy();

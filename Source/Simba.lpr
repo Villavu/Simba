@@ -26,7 +26,7 @@ uses
   simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector;
 
 begin
-  {$IF DECLARED(SetHeapTraceOutput)}
+  {$IF DECLARED(HEAPTRC)}
   SetHeapTraceOutput(Application.Location + '/' + IntToStr(GetProcessID()) + '.trc');
   {$ENDIF}
 
