@@ -12,14 +12,23 @@ interface
 uses
   Classes, SysUtils,
   simba.base,
+  simba.ide_events,
   simba.component_debugimg,
   simba.component_imagebox;
 
 type
-  TSimbaDebugMatrixForm = class(TSimbaDebugImageForm)
+  TSimbaDebugImage = class(TSimbaDebugImageForm)
+  protected
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+  public
+    constructor Create(TheOwner: TComponent); override;
+  end;
+
+  TSimbaDebugMatrix = class(TSimbaDebugImageForm)
   protected
     FMatrix: TSingleMatrix;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
     procedure DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
   public
@@ -29,14 +38,17 @@ type
   end;
 
 var
-  SimbaDebugImageForm: TSimbaDebugImageForm;
-  SimbaDebugMatrixForm: TSimbaDebugMatrixForm;
+  SimbaDebugImageForm: TSimbaDebugImage;
+  SimbaDebugMatrixForm: TSimbaDebugMatrix;
 
 implementation
 
 uses
   Forms,
+  Menus,
+  AnchorDocking,
   Graphics,
+  simba.ide_dockinghelpers,
   simba.initializations,
   simba.vartype_matrix,
   simba.image_lazbridge,
@@ -44,13 +56,46 @@ uses
   simba.colormath,
   simba.threading;
 
-procedure TSimbaDebugMatrixForm.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaDebugImage.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoViewDebugImage(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.ACTION_VIEW_DEBUGIMAGE: DoViewDebugImage(TMenuItem(Data));
+  end;
+end;
+
+constructor TSimbaDebugImage.Create(TheOwner: TComponent);
+begin
+  inherited Create(TheOwner);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
+end;
+
+procedure TSimbaDebugMatrix.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoViewDebugMatrix(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.ACTION_VIEW_DEBUGMATRIX: DoViewDebugMatrix(TMenuItem(Data));
+  end;
+end;
+
+procedure TSimbaDebugMatrix.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 begin
   if (X >= 0) and (X < FMatrix.Width) and (Y >= 0) and (Y < FMatrix.Height) then
     ImageBox.Status := Format('Matrix[%d,%d] := %.5f', [Y, X, FMatrix[Y,X]]);
 end;
 
-procedure TSimbaDebugMatrixForm.DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
+procedure TSimbaDebugMatrix.DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
 begin
   if (X >= 0) and (X < FMatrix.Width) and (Y >= 0) and (Y < FMatrix.Height) then
     DebugLn([EDebugLn.FOCUS], 'Matrix[%d,%d] := %.5f', [Y, X, FMatrix[Y,X]]);
@@ -75,7 +120,7 @@ begin
   end;
 end;
 
-procedure TSimbaDebugMatrixForm.UpdateFromStream(Stream: TStream);
+procedure TSimbaDebugMatrix.UpdateFromStream(Stream: TStream);
 type
   TParams = packed record
     Width, Height: Integer;
@@ -118,27 +163,35 @@ begin
   end;
 end;
 
-constructor TSimbaDebugMatrixForm.Create(TheOwner: TComponent);
+constructor TSimbaDebugMatrix.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
   FImageBox.OnImgMouseMove := @DoImgMouseMove;
   FImageBox.OnImgDoubleClick := @DoImgDoubleClick;
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 procedure DoCreate;
 begin
-  SimbaDebugImageForm := TSimbaDebugImageForm.Create(Application);
-  SimbaDebugImageForm.Name := 'SimbaDebugImageForm';
+  SimbaDebugImageForm := TSimbaDebugImage.Create(Application);
+  SimbaDebugImageForm.Name := 'SimbaDebugImage';
   SimbaDebugImageForm.Caption := 'Debug Image';
 
-  SimbaDebugMatrixForm := TSimbaDebugMatrixForm.Create(Application);
-  SimbaDebugMatrixForm.Name := 'SimbaDebugMatrixForm';
+  SimbaDebugMatrixForm := TSimbaDebugMatrix.Create(Application);
+  SimbaDebugMatrixForm.Name := 'SimbaDebugMatrix';
   SimbaDebugMatrixForm.Caption := 'Debug Matrix';
+end;
+
+procedure DoDestroy;
+begin
+  SimbaDebugImageForm.Free();
+  SimbaDebugMatrixForm.Free();
 end;
 
 initialization
   SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'DebugImage');
-
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'DebugImage');
 end.
 

@@ -6,4 +6,5 @@ object SimbaFunctionListForm: TSimbaFunctionListForm
   Caption = 'Function List'
   DesignTimePPI = 192
   ShowInTaskBar = stAlways
+  LCLVersion = '4.0.0.4'
 end

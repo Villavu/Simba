@@ -15,6 +15,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
   SynEditMiscClasses, SynEditSearch, SynEditMouseCmds,
   simba.base,
+  simba.ide_events,
   simba.component_synedit,
   simba.component_button,
   simba.component_edit,
@@ -83,6 +84,8 @@ type
   private
     Tab: TFindInFilesTab;
     ButtonPanel: TSimbaButtonPanel;
+
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   end;
 
 var
@@ -93,6 +96,9 @@ implementation
 {$R *.lfm}
 
 uses
+  Menus,
+  AnchorDocking,
+  simba.ide_dockinghelpers,
   simba.threading,
   simba.component_theme,
   simba.fs,
@@ -437,6 +443,8 @@ begin
   Tab.FCheckboxOptions.Checked[0] := SimbaSettings.General.FindInFilesSubDirs.Value;
   Tab.FCheckboxOptions.Checked[1] := SimbaSettings.General.FindInFilesCaseSens.Value;
   Tab.FCheckboxOptions.Checked[2] := SimbaSettings.General.FindInFilesWholeWords.Value;
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 procedure TSimbaFindInFilesForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -451,6 +459,19 @@ begin
     SimbaSettings.General.FindInFilesSubDirs.Value    := FCheckboxOptions.Checked[0];
     SimbaSettings.General.FindInFilesCaseSens.Value   := FCheckboxOptions.Checked[1];
     SimbaSettings.General.FindInFilesWholeWords.Value := FCheckboxOptions.Checked[2];
+  end;
+end;
+
+procedure TSimbaFindInFilesForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoFindInFiles(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.ACTION_FIND_IN_FILES: DoFindInFiles(TMenuItem(Data));
   end;
 end;
 

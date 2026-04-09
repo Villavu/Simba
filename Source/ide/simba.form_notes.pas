@@ -11,13 +11,18 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls,
-  simba.component_synedit, simba.settings;
+  simba.base,
+  simba.ide_events,
+  simba.component_synedit,
+  simba.settings;
 
 type
   TSimbaNotesForm = class(TForm)
   published
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   public
     SynEdit: TSimbaSynEdit;
 
@@ -29,11 +34,26 @@ var
 
 implementation
 
-{$R *.lfm}
+uses
+  AnchorDocking, Menus,
+  simba.ide_dockinghelpers;
 
 procedure TSimbaNotesForm.FormDestroy(Sender: TObject);
 begin
   SimbaSettings.General.Notes.Value := SynEdit.Text;
+end;
+
+procedure TSimbaNotesForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoViewNotes(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.ACTION_VIEW_NOTES: DoViewNotes(TMenuItem(Data));
+  end;
 end;
 
 procedure TSimbaNotesForm.FormCreate(Sender: TObject);
@@ -48,7 +68,11 @@ begin
   SynEdit := TSimbaMemo.Create(Self, True);
   SynEdit.Parent := Self;
   SynEdit.Align := alClient;
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
+
+{$R *.lfm}
 
 end.
 

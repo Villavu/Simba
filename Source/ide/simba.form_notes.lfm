@@ -1,14 +1,14 @@
 object SimbaNotesForm: TSimbaNotesForm
   Left = 4478
-  Height = 218
+  Height = 349
   Top = 58
-  Width = 646
+  Width = 1034
   Caption = 'Notes'
   Color = clWindow
-  DesignTimePPI = 120
+  DesignTimePPI = 192
   Font.CharSet = ANSI_CHARSET
+  ShowInTaskBar = stAlways
+  LCLVersion = '4.0.0.4'
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.3'
 end

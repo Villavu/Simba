@@ -83,6 +83,7 @@ implementation
 
 uses
   Clipbrd, AnchorDocking,
+  simba.ide_dockinghelpers,
   simba.form_main, simba.form_tabs, simba.nativeinterface, simba.ide_utils, simba.fs;
 
 procedure TSimbaFileBrowserForm.DoFindFiles;
@@ -244,17 +245,28 @@ begin
 end;
 
 procedure TSimbaFileBrowserForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoViewFileBrowser(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+  procedure DoSplitterDoubleClick;
+  var
+    Splitter: TAnchorDockSplitter;
+  begin
+    if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = TObject(Data))) then
+      Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + FTreeView.MaxRight)
+    else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = TObject(Data))) then
+      Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - FTreeView.MaxRight);
+  end;
+
 var
   Splitter: TAnchorDockSplitter;
 begin
   case Event of
-    ESimbaEvent.SPLITTER_DOUBLE_CLICK:
-      begin
-        if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = TObject(Data))) then
-          Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + FTreeView.MaxRight)
-        else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = TObject(Data))) then
-          Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - FTreeView.MaxRight);
-      end;
+    ESimbaEvent.ACTION_VIEW_FILEBROWSER: DoViewFileBrowser(TMenuItem(Data));
+    ESimbaEvent.SPLITTER_DOUBLE_CLICK:   DoSplitterDoubleClick();
   end;
 end;
 

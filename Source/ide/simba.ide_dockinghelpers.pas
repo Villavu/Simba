@@ -32,19 +32,14 @@ type
 
   TSimbaAnchorDockHostSite = class(TAnchorDockHostSite)
   protected
-    FMenuItem: TMenuItem;
     FNeedDefaultPosition: Boolean;
     FNeedRestore: Boolean;
 
     procedure DoShow; override;
     procedure DoHide; override;
 
-    procedure DoMenuItemDestroyed(Sender: TObject);
-    procedure DoMenuItemClicked(Sender: TObject);
-
     function GetHeader: TSimbaAnchorDockHeader;
 
-    procedure SetMenuItem(Value: TMenuItem);
     procedure SetVisible(Value: Boolean); override;
     procedure SetParent(Value: TWinControl); override;
   public
@@ -54,7 +49,6 @@ type
 
     property NeedRestore: Boolean read FNeedRestore write FNeedRestore;
     property NeedDefaultPosition: Boolean read FNeedDefaultPosition write FNeedDefaultPosition;
-    property MenuItem: TMenuItem read FMenuItem write SetMenuItem;
     property Header: TSimbaAnchorDockHeader read GetHeader;
   end;
 
@@ -72,14 +66,18 @@ type
   TAnchorDockMasterHelper = class helper for TAnchorDockMaster
   private
     procedure OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure SetVisible(Form: TCustomForm; Visible: Boolean);
   public
-    procedure MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
+    procedure MakeDockable(Form: TCustomForm);
 
     procedure Minimized;
     procedure Restored;
 
     function SaveLayout: String;
     function LoadLayout(Layout: String): Boolean;
+
+
+    procedure Show(Form: TCustomForm);
   end;
 
 implementation
@@ -166,43 +164,9 @@ begin
   Result := inherited Header as TSimbaAnchorDockHeader;
 end;
 
-procedure TSimbaAnchorDockHostSite.DoMenuItemDestroyed(Sender: TObject);
-begin
-  FMenuItem := nil;
-end;
-
-procedure TSimbaAnchorDockHostSite.DoMenuItemClicked(Sender: TObject);
-begin
-  if not TMenuItem(Sender).Checked then
-    CloseSite()
-  else
-  begin
-    if FNeedDefaultPosition then
-    begin
-      with Application.MainForm.Monitor.WorkareaRect.CenterPoint do
-        BoundsRect := TRect.Create(X - (Width div 2), Y - (Height div 2), X + (Width div 2), Y + (Height div 2));
-
-      FNeedDefaultPosition := False;
-    end;
-
-    EnsureVisible();
-  end;
-end;
-
-procedure TSimbaAnchorDockHostSite.SetMenuItem(Value: TMenuItem);
-begin
-  FMenuItem := Value;
-  FMenuItem.Checked := False;
-  FMenuItem.AddHandlerOnDestroy(@DoMenuItemDestroyed);
-  FMenuItem.OnClick := @DoMenuItemClicked;
-end;
-
 procedure TSimbaAnchorDockHostSite.SetVisible(Value: Boolean);
 begin
   inherited SetVisible(Value);
-
-  if (MenuItem <> nil) then
-    MenuItem.Checked := Value;
 
   if (Parent <> nil) then
     ShowInTaskBar := stNever
@@ -301,16 +265,12 @@ begin
   PopupMenu := nil;
 end;
 
-procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm; MenuItem: TMenuItem);
+procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm);
 begin
   inherited MakeDockable(Form, False, False, True);
 
   if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
-  begin
     Form.AddHandlerClose(@OnFormClose, True);
-
-    TSimbaAnchorDockHostSite(Form.HostDockSite).MenuItem := MenuItem;
-  end;
 end;
 
 procedure TAnchorDockMasterHelper.Minimized;
@@ -321,7 +281,7 @@ begin
   for I := 0 to Screen.CustomFormCount - 1 do
   begin
     Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
-    if Screen.CustomForms[I].Showing and (Site is TSimbaAnchorDockHostSite) and Site.Floating and Site.FMenuItem.Checked then
+    if Screen.CustomForms[I].Showing and (Site is TSimbaAnchorDockHostSite) and Site.Floating then
     begin
       Site.NeedRestore := True;
       Site.CloseSite();
@@ -339,7 +299,7 @@ begin
     Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
     if (Site is TSimbaAnchorDockHostSite) and Site.NeedRestore then
     begin
-      MakeVisible(Screen.CustomForms[I], False);
+      inherited MakeVisible(Screen.CustomForms[I], False);
       Site.NeedRestore := False;
     end;
   end;
@@ -448,6 +408,37 @@ begin
     Config.Free();
     Stream.Free();
   end;
+end;
+
+procedure TAnchorDockMasterHelper.SetVisible(Form: TCustomForm; Visible: Boolean);
+var
+  Site: TSimbaAnchorDockHostSite;
+  Center: TPoint;
+begin
+  if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
+  begin
+    Site := TSimbaAnchorDockHostSite(Form.HostDockSite);
+
+    if Visible then
+    begin
+      if Site.NeedDefaultPosition then
+      begin
+        Center := Application.MainForm.Monitor.WorkareaRect.CenterPoint;
+        Site.BoundsRect := Rect(
+            Center.X - (Site.Width div 2), Center.Y - (Site.Height div 2),
+            Center.X + (Site.Width div 2), Center.Y + (Site.Height div 2)
+          );
+        Site.NeedDefaultPosition := False;
+      end;
+      Site.EnsureVisible();
+    end else
+      Site.CloseSite();
+  end;
+end;
+
+procedure TAnchorDockMasterHelper.Show(Form: TCustomForm);
+begin
+  SetVisible(Form, True);
 end;
 
 end.

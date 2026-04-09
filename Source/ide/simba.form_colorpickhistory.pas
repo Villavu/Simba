@@ -56,7 +56,7 @@ var
 implementation
 
 uses
-  Clipbrd, LCLType,
+  Clipbrd, LCLType, AnchorDocking,
   simba.dialog,
   simba.colormath, simba.component_theme, simba.settings, simba.vartype_string,
   simba.ide_dockinghelpers;
@@ -115,12 +115,22 @@ begin
 end;
 
 procedure TSimbaColorPickHistoryForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-begin
-  if (Event = ESimbaEvent.COLOR_PICKED) then
+
+  procedure DoColorPicked(Picked: TSimbaEventData_ColorPicked);
   begin
-    with TSimbaEventData_ColorPicked(Data^) do
-      Add(Point, Color, True);
-    MakeVisible();
+    Add(Picked.Point, Picked.Color, True);
+    DockMaster.Show(Self);
+  end;
+
+  procedure DoViewColorHistory(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.COLOR_PICKED:             DoColorPicked(TSimbaEventData_ColorPicked(Data^));
+    ESimbaEvent.ACTION_VIEW_COLORHISTORY: DoViewColorHistory(TMenuItem(Data));
   end;
 end;
 
@@ -203,7 +213,7 @@ end;
 
 procedure TSimbaColorPickHistoryForm.DoPickColorClick(Sender: TObject);
 begin
-  SimbaEvents.Post(ESimbaEvent.TOOLBAR_PICKCOLOR, nil);
+  SimbaEvents.Post(ESimbaEvent.ACTION_PICKCOLOR, nil);
 end;
 
 procedure TSimbaColorPickHistoryForm.DoPaintNode(ACanvas: TCanvas; Node: TTreeNode);
@@ -216,7 +226,7 @@ begin
 
   BaseRect := Node.DisplayRect(True);
 
-  ColorRect := baseRect;
+  ColorRect := BaseRect;
   ColorRect.Top += 5;
   ColorRect.Bottom -= 5;
   ColorRect.Left += 5;

@@ -165,15 +165,15 @@ end;
 
 function TSimbaScript.GetState: ESimbaScriptState;
 begin
-  Result := ESimbaScriptState.STATE_NONE;
+  Result := ESimbaScriptState.NONE;
 
   if (FCodeRunner <> nil) then
     if FCodeRunner.isRunning then
-      Result := ESimbaScriptState.STATE_RUNNING
+      Result := ESimbaScriptState.RUNNING
     else if FCodeRunner.isStopped then
-      Result := ESimbaScriptState.STATE_STOP
+      Result := ESimbaScriptState.STOP
     else if FCodeRunner.isPaused then
-      Result := ESimbaScriptState.STATE_PAUSED;
+      Result := ESimbaScriptState.PAUSED;
 end;
 
 function TSimbaScript.Compile: Boolean;
@@ -301,7 +301,7 @@ begin
     Exit;
 
   case Value of
-    ESimbaScriptState.STATE_RUNNING:
+    ESimbaScriptState.RUNNING:
       begin
         for I := 0 to FPlugins.Count - 1 do
           FPlugins[I].CallOnResume();
@@ -309,7 +309,7 @@ begin
         FCodeRunner.Resume();
       end;
 
-    ESimbaScriptState.STATE_PAUSED:
+    ESimbaScriptState.PAUSED:
       begin
         FCodeRunner.Pause();
         for I := 0 to FPlugins.Count - 1 do
@@ -317,7 +317,7 @@ begin
         FCompiler.CallProc('_CallOnPause');
       end;
 
-    ESimbaScriptState.STATE_STOP:
+    ESimbaScriptState.STOP:
       begin
         FUserTerminated := True;
         FCodeRunner.Stop();

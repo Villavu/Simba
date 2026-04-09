@@ -168,7 +168,7 @@ end;
 procedure TSimbaWindowSelector.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
   case Event of
-    ESimbaEvent.TOOLBAR_PICKTARGET:
+    ESimbaEvent.ACTION_PICKTARGET:
       Pick();
   end;
 end;

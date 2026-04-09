@@ -71,7 +71,8 @@ implementation
 {$R *.lfm}
 
 uses
-  AnchorDocking,
+  AnchorDocking, Menus,
+  simba.ide_dockinghelpers,
   simba.component_button,
   simba.env, simba.fs, simba.component_theme, simba.form_main, simba.form_tabs;
 
@@ -186,14 +187,26 @@ begin
 end;
 
 procedure TSimbaBackupsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoDockOrUnDock;
+  begin
+    if (TObject(Data) <> HostDockSite) then
+      Exit;
+
+    ButtonPanel.ButtonCancel.Visible := (Event = ESimbaEvent.FORM_UNDOCK);
+    Fill();
+  end;
+
+  procedure DoViewBackups(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
 begin
   case Event of
-    ESimbaEvent.FORM_DOCK, ESimbaEvent.FORM_UNDOCK:
-      if (TObject(Data) = HostDockSite) then
-      begin
-        ButtonPanel.ButtonCancel.Visible := Event = ESimbaEvent.FORM_UNDOCK;
-        Fill();
-      end;
+    ESimbaEvent.FORM_DOCK,
+    ESimbaEvent.FORM_UNDOCK:        DoDockOrUnDock();
+    ESimbaEvent.ACTION_VIEW_BACKUP: DoViewBackups(TMenuItem(Data));
   end;
 end;
 

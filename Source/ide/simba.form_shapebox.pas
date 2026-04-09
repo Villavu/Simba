@@ -11,7 +11,9 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Menus,
-  simba.base, simba.component_shapebox, simba.env, simba.image;
+  simba.base,
+  simba.ide_events,
+  simba.component_shapebox;
 
 type
   TSimbaShapeBoxForm = class(TForm)
@@ -31,6 +33,8 @@ type
     procedure MenuItem4Click(Sender: TObject);
     procedure MenuItemLoadTargetImageClick(Sender: TObject);
     procedure MenuItemLoadImageClick(Sender: TObject);
+
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   public
     ShapeBox: TSimbaShapeBox;
   end;
@@ -41,8 +45,10 @@ var
 implementation
 
 uses
+  simba.env,
   simba.ide_vars,
-  simba.vartype_windowhandle;
+  simba.vartype_windowhandle,
+  simba.image;
 
 procedure TSimbaShapeBoxForm.FormCreate(Sender: TObject);
 begin
@@ -52,6 +58,8 @@ begin
 
   Width  := Scale96ToScreen(800);
   Height := Scale96ToScreen(600);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 procedure TSimbaShapeBoxForm.FormHide(Sender: TObject);
@@ -92,6 +100,14 @@ procedure TSimbaShapeBoxForm.MenuItemLoadImageClick(Sender: TObject);
 begin
   if OpenDialog.Execute() then
     ShapeBox.SetImage(TSimbaImage.Create(OpenDialog.FileName));
+end;
+
+procedure TSimbaShapeBoxForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.ACTION_SHAPE_BOX:
+      ShowOnTop();
+  end;
 end;
 
 {$R *.lfm}

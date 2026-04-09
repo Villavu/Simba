@@ -109,7 +109,7 @@ end;
 procedure TSimbaColorPicker.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
   case Event of
-    ESimbaEvent.TOOLBAR_PICKCOLOR:
+    ESimbaEvent.ACTION_PICKCOLOR:
       Pick();
   end;
 end;

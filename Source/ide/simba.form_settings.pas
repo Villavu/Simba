@@ -11,6 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls, ButtonPanel, Spin,
+  simba.ide_events,
   simba.frame_settings_editor,
   simba.frame_settings_editorcolors,
   simba.frame_settings_editorcustomtokenattri,
@@ -33,6 +34,8 @@ type
     procedure OKButtonClick(Sender: TObject);
     procedure TreeViewSelectionChanged(Sender: TObject);
     procedure DoOpenPage(Data: PtrInt);
+
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   public
     SimbaGeneralFrame: TSimbaGeneralFrame;
     SimbaCodetoolsFrame: TSimbaCodetoolsFrame;
@@ -71,6 +74,14 @@ end;
 procedure TSimbaSettingsForm.DoOpenPage(Data: PtrInt);
 begin
   TreeView.Selected := TTreeNode(Pointer(PtrUInt(Data)));
+end;
+
+procedure TSimbaSettingsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.ACTION_SETTINGS:
+      ShowModal();
+  end;
 end;
 
 procedure TSimbaSettingsForm.ShowPage(Title: String);
@@ -225,6 +236,8 @@ begin
   EditorKeybindingFrame.Parent := AddPage('Keybindings', Node);
   EditorKeybindingFrame.Align := alClient;
   EditorKeybindingFrame.ParentFont := True;
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 end.

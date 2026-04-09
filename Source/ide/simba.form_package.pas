@@ -95,7 +95,7 @@ end;
 procedure TSimbaPackageForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
   case Event of
-    ESimbaEvent.TOOLBAR_PACKAGE:
+    ESimbaEvent.ACTION_PACKAGES:
       SimbaPackageForm.ShowModal();
   end;
 end;

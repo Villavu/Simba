@@ -76,7 +76,7 @@ object SimbaPackageForm: TSimbaPackageForm
             ParentFont = False
             TabOrder = 0
             Gutter.Visible = False
-            Gutter.Width = 103
+            Gutter.Width = 107
             Gutter.MouseActions = <>
             RightGutter.Width = 0
             RightGutter.MouseActions = <>
@@ -271,7 +271,7 @@ object SimbaPackageForm: TSimbaPackageForm
         end
         object ToolButton1: TToolButton
           Left = 93
-          Height = 9
+          Height = 8
           Top = 0
           Caption = 'ToolButton1'
           Style = tbsSeparator

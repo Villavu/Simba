@@ -85,7 +85,7 @@ end;
 procedure TSimbaAreaSelector.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
   case Event of
-    ESimbaEvent.TOOLBAR_PICKAREA:
+    ESimbaEvent.ACTION_PICKAREA:
       Pick();
   end;
 end;

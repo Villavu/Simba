@@ -125,9 +125,6 @@ type
     function Save(FileName: String): Boolean;
     function Load(FileName: String): Boolean;
 
-    procedure Undo;
-    procedure Redo;
-
     procedure GotoLine(Line: Integer);
 
     procedure FindDeclarationAtCaret;
@@ -244,7 +241,7 @@ begin
   FOutputThread := RunInThread(@DoOutputThread);
   FOutputThread.OnTerminate := @DoOutputThreadTerminated;
 
-  State := ESimbaScriptState.STATE_RUNNING;
+  State := ESimbaScriptState.RUNNING;
 end;
 
 procedure TSimbaScriptTabRunner.ShowError;
@@ -279,23 +276,23 @@ end;
 
 procedure TSimbaScriptTabRunner.Resume;
 begin
-  FState := ESimbaScriptState.STATE_RUNNING;
+  FState := ESimbaScriptState.RUNNING;
   FProcess.Input.Write(FState, SizeOf(Int32));
 end;
 
 procedure TSimbaScriptTabRunner.Pause;
 begin
-  FState := ESimbaScriptState.STATE_PAUSED;
+  FState := ESimbaScriptState.PAUSED;
   FProcess.Input.Write(FState, SizeOf(Int32));
 end;
 
 procedure TSimbaScriptTabRunner.Stop;
 begin
-  if (FState = ESimbaScriptState.STATE_STOP) then
+  if (FState = ESimbaScriptState.STOP) then
     FProcess.Terminate(1001)
   else
   begin
-    FState := ESimbaScriptState.STATE_STOP;
+    FState := ESimbaScriptState.STOP;
     FProcess.Input.Write(FState, SizeOf(Int32));
   end;
 end;
@@ -305,7 +302,7 @@ begin
   inherited Create(ATab);
 
   FTab := ATab;
-  FState := ESimbaScriptState.STATE_RUNNING;
+  FState := ESimbaScriptState.RUNNING;
 
   FProcess := TProcess.Create(Self);
   FProcess.PipeBufferSize := 16 * 1024;
@@ -331,7 +328,7 @@ end;
 
 destructor TSimbaScriptTabRunner.Destroy;
 begin
-  State := ESimbaScriptState.STATE_NONE;
+  State := ESimbaScriptState.NONE;
 
   inherited Destroy();
 end;
@@ -507,16 +504,6 @@ begin
     SimbaEvents.Post(ESimbaEvent.TAB_LOADED, Self);
 end;
 
-procedure TSimbaScriptTab.Undo;
-begin
-  FEditor.Undo();
-end;
-
-procedure TSimbaScriptTab.Redo;
-begin
-  FEditor.Redo();
-end;
-
 procedure TSimbaScriptTab.GotoLine(Line: Integer);
 begin
   Editor.CaretX := 1;
@@ -565,14 +552,14 @@ begin
 
   if (FScriptRunner <> nil) then
     case FScriptRunner.State of
-      ESimbaScriptState.STATE_RUNNING: Result := FormatMilliseconds(FScriptRunner.TimeRunning, 'hh:mm:ss');
-      ESimbaScriptState.STATE_PAUSED:  Result := 'Paused';
+      ESimbaScriptState.RUNNING: Result := FormatMilliseconds(FScriptRunner.TimeRunning, 'hh:mm:ss');
+      ESimbaScriptState.PAUSED:  Result := 'Paused';
     end;
 end;
 
 function TSimbaScriptTab.ScriptState: ESimbaScriptState;
 begin
-  Result := ESimbaScriptState.STATE_NONE;
+  Result := ESimbaScriptState.NONE;
   if (FScriptRunner <> nil) then
     Result := FScriptRunner.State;
 end;

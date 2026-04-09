@@ -1,9 +1,10 @@
 object SimbaFindInFilesForm: TSimbaFindInFilesForm
   Left = -969
-  Height = 266
+  Height = 532
   Top = 623
-  Width = 600
+  Width = 1200
   Caption = 'Find in Files'
+  DesignTimePPI = 192
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
   LCLVersion = '4.0.0.4'

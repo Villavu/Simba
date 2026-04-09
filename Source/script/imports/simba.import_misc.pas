@@ -462,7 +462,7 @@ Programmatically pauses the script. The only way for the script to resumed is by
 *)
 procedure _LapePauseScript(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  TSimbaScript(Params^[0]).State := ESimbaScriptState.STATE_PAUSED;
+  TSimbaScript(Params^[0]).State := ESimbaScriptState.PAUSED;
 end;
 
 (*

@@ -16,6 +16,7 @@ interface
 uses
   Classes, SysUtils, Forms, ComCtrls, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls, Zipper, syncobjs,
   simba.base,
+  simba.ide_events,
   simba.httpclient,
   simba.component_treeview,
   simba.component_buttonpanel,
@@ -83,6 +84,7 @@ type
     FTreeView: TSimbaTreeView;
     FStatusLabel: TLabel;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoGetNodeColor(Node: TTreeNode; var TheColor: TColor);
     procedure DoTreeDoubleClick(Sender: TObject);
     procedure DoCheckClick(Sender: TObject);
@@ -245,6 +247,8 @@ begin
   Label6.Font.Color := $FFE385;
 
   Notebook1.PageIndex := 0;
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 procedure TSimbaDownloadSimbaForm.DoGetNodeColor(Node: TTreeNode; var TheColor: TColor);
@@ -271,6 +275,19 @@ end;
 procedure TSimbaDownloadSimbaForm.Label6MouseLeave(Sender: TObject);
 begin
   TLabel(Sender).Font.Underline := False;
+end;
+
+procedure TSimbaDownloadSimbaForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoViewDownloadSimba;
+  begin
+    ShowOnTop();
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.ACTION_DOWNLOAD_SIMBA: DoViewDownloadSimba();
+  end;
 end;
 
 procedure TSimbaDownloadSimbaForm.DoTreeDoubleClick(Sender: TObject);

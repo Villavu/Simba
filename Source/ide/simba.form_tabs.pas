@@ -90,6 +90,7 @@ type
     property PreviousTab: TSimbaScriptTab read FPreviousTab;
     property CurrentTab: TSimbaScriptTab read GetCurrentTab write SetCurrentTab;
     property CurrentEditor: TSimbaEditor read GetCurrentEditor;
+    property ActiveTab: TSimbaScriptTab read GetCurrentTab;
 
     procedure Replace;
     procedure Find;
@@ -119,8 +120,8 @@ implementation
 {$R *.lfm}
 
 uses
-  LCLType,
-  simba.base, simba.env,
+  LCLType, AnchorDocking,
+  simba.base, simba.env, simba.vartype_string,
   simba.form_main, simba.form_output,
   simba.ide_dockinghelpers, simba.nativeinterface,
   simba.ide_utils, simba.component_theme, simba.settings;
@@ -630,6 +631,7 @@ begin
       if SameFileName(Tabs[I].ScriptFileName, FileName) then
       begin
         CurrentTab := Tabs[I];
+        SimbaEvents.Post(ESimbaEvent.TAB_LOADED, CurrentTab);
         Result := True;
         Exit;
       end;
@@ -662,65 +664,193 @@ begin
 end;
 
 procedure TSimbaTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-var
-  ActiveTab: TSimbaScriptTab;
-  I: Integer;
+
+  procedure DoViewEditor(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+  procedure DoRunCompileStopPause(Tab: TSimbaScriptTab);
+  begin
+    if (Event in [ESimbaEvent.ACTION_RUN, ESimbaEvent.ACTION_COMPILE]) then
+    begin
+      Tab.OutputBox.MakeVisible();
+      if SimbaSettings.OutputBox.ClearOnCompile.Value then
+        Tab.OutputBox.Empty();
+    end;
+
+         if (Event = ESimbaEvent.ACTION_RUN)     then Tab.Run()
+    else if (Event = ESimbaEvent.ACTION_COMPILE) then Tab.Compile()
+    else if (Event = ESimbaEvent.ACTION_PAUSE)   then Tab.Pause()
+    else if (Event = ESimbaEvent.ACTION_STOP)    then Tab.Stop();
+
+    if Tab.Editor.CanSetFocus() then
+      Tab.Editor.SetFocus();
+  end;
+
+  procedure DoSave(Tab: TSimbaScriptTab);
+  begin
+    Tab.Save(Tab.ScriptFileName);
+  end;
+
+  procedure DoSaveAll;
+  var
+    I: Integer;
+  begin
+    for I := TabCount - 1 downto 0 do
+      if Tabs[I].ScriptChanged then
+      begin
+        if (Tabs[I].ScriptFileName = '') then
+          Tabs[I].Show();
+        Tabs[I].Save(Tabs[I].ScriptFileName);
+      end;
+  end;
+
+  procedure DoSaveAsDefault(Tab: TSimbaScriptTab);
+  begin
+    if MessageDlg('Are you sure you want to overwrite the default script?', mtConfirmation, [mbYes, mbCancel], 0) = mrYes then
+    begin
+      SimbaSettings.Editor.DefaultScript.Value := Tab.Script;
+      SimbaSettings.Editor.DefaultScriptType.Value := 1;
+    end;
+  end;
+
+  procedure DoNew;
+  begin
+    AddTab();
+  end;
+
+  procedure DoOpen;
+  begin
+    Open();
+  end;
+
+  procedure DoOpenFile(FileName: String);
+  begin
+    Open(FileName);
+  end;
+
+  procedure DoUndo(Tab: TSimbaScriptTab);
+  begin
+    if not Tab.Editor.ReadOnly then
+      Tab.Editor.Undo();
+  end;
+
+  procedure DoRedo(Tab: TSimbaScriptTab);
+  begin
+    if not Tab.Editor.ReadOnly then
+      Tab.Editor.Redo();
+  end;
+
+  procedure DoCut(Tab: TSimbaScriptTab);
+  begin
+    if not Tab.Editor.ReadOnly then
+      Tab.Editor.CutToClipboard();
+  end;
+
+  procedure DoCopy(Tab: TSimbaScriptTab);
+  begin
+    Tab.Editor.CopyToClipboard();
+  end;
+
+  procedure DoPaste(Tab: TSimbaScriptTab);
+  begin
+    if not Tab.Editor.ReadOnly then
+      Tab.Editor.PasteFromClipboard();
+  end;
+
+  procedure DoSelectAll(Tab: TSimbaScriptTab);
+  begin
+    Tab.Editor.SelectAll();
+  end;
+
+  procedure DoSelectLine(Tab: TSimbaScriptTab);
+  begin
+    Tab.Editor.SelectLine();
+  end;
+
+  procedure DoSelectWord(Tab: TSimbaScriptTab);
+  begin
+    Tab.Editor.SelectWord();
+  end;
+
+  procedure DoLowerSelection(Tab: TSimbaScriptTab);
+  begin
+    if not Tab.Editor.ReadOnly and Tab.Editor.SelAvail then
+      Tab.Editor.SelText := LowerCase(Tab.Editor.SelText);
+  end;
+
+  procedure DoUpperSelection(Tab: TSimbaScriptTab);
+  begin
+    if not Tab.Editor.ReadOnly and Tab.Editor.SelAvail then
+      Tab.Editor.SelText := UpperCase(Tab.Editor.SelText);
+  end;
+
+  procedure DoFind;
+  begin
+    Find();
+  end;
+
+  procedure DoFindNext;
+  begin
+    FindNext();
+  end;
+
+  procedure DoFindPrev;
+  begin
+    FindPrevious();
+  end;
+
+  procedure DoReplace;
+  begin
+    Replace();
+  end;
+
+  procedure DoGotoLine;
+  var
+    Value: String;
+  begin
+    Value := '';
+    if InputQuery('Goto line', 'Goto line:', Value) and Value.IsNumeric then
+      ActiveTab.Editor.TopLine := Value.ToInt - (ActiveTab.Editor.LinesInWindow div 2);
+  end;
+
 begin
-  ActiveTab := GetCurrentTab();
-  if (ActiveTab = nil) then
+  // for safety
+  if (FTabControl.TabCount = 0) then
     Exit;
 
   case Event of
-    ESimbaEvent.TOOLBAR_RUN,
-    ESimbaEvent.TOOLBAR_COMPILE,
-    ESimbaEvent.TOOLBAR_PAUSE,
-    ESimbaEvent.TOOLBAR_STOP:
-      begin
-        if (Event in [ESimbaEvent.TOOLBAR_RUN, ESimbaEvent.TOOLBAR_COMPILE]) then
-        begin
-          ActiveTab.OutputBox.MakeVisible();
-          if SimbaSettings.OutputBox.ClearOnCompile.Value then
-            ActiveTab.OutputBox.Empty();
-        end;
+    ESimbaEvent.ACTION_VIEW_EDITOR: DoViewEditor(TMenuItem(Data));
 
-        case Event of
-          ESimbaEvent.TOOLBAR_RUN:     ActiveTab.Run();
-          ESimbaEvent.TOOLBAR_COMPILE: ActiveTab.Compile();
-          ESimbaEvent.TOOLBAR_PAUSE:   ActiveTab.Pause();
-          ESimbaEvent.TOOLBAR_STOP:    ActiveTab.Stop();
-        end;
+    ESimbaEvent.ACTION_RUN,
+    ESimbaEvent.ACTION_COMPILE,
+    ESimbaEvent.ACTION_PAUSE,
+    ESimbaEvent.ACTION_STOP: DoRunCompileStopPause(ActiveTab);
 
-        if ActiveTab.Editor.CanSetFocus() then
-          ActiveTab.Editor.SetFocus();
-      end;
+    ESimbaEvent.ACTION_SAVE:            DoSave(ActiveTab);
+    ESimbaEvent.ACTION_SAVE_ALL:        DoSaveAll();
+    ESimbaEvent.ACTION_SAVE_AS_DEFAULT: DoSaveAsDefault(ActiveTab);
+    ESimbaEvent.ACTION_NEW:             DoNew();
+    ESimbaEvent.ACTION_OPEN:            DoOpen();
+    ESimbaEvent.ACTION_OPEN_FILE:       DoOpenFile(PString(Data)^);
+    ESimbaEvent.ACTION_UNDO:            DoUndo(ActiveTab);
+    ESimbaEvent.ACTION_REDO:            DoRedo(ActiveTab);
+    ESimbaEvent.ACTION_CUT:             DoCut(ActiveTab);
+    ESimbaEvent.ACTION_COPY:            DoCopy(ActiveTab);
+    ESimbaEvent.ACTION_PASTE:           DoPaste(ActiveTab);
+    ESimbaEvent.ACTION_SELECT_ALL:      DoSelectAll(ActiveTab);
+    ESimbaEvent.ACTION_SELECT_LINE:     DoSelectLine(ActiveTab);
+    ESimbaEvent.ACTION_SELECT_WORD:     DoSelectWord(ActiveTab);
+    ESimbaEvent.ACTION_LOWER_SELECTION: DoLowerSelection(ActiveTab);
+    ESimbaEvent.ACTION_UPPER_SELECTION: DoUpperSelection(ActiveTab);
 
-    ESimbaEvent.TOOLBAR_SAVE:
-      begin
-        ActiveTab.Save(ActiveTab.ScriptFileName);
-      end;
-
-    ESimbaEvent.TOOLBAR_SAVEALL:
-      begin
-        for I := TabCount - 1 downto 0 do
-          if Tabs[I].ScriptChanged then
-          begin
-            if (Tabs[I].ScriptFileName = '') then
-              Tabs[I].Show();
-            Tabs[I].Save(Tabs[I].ScriptFileName);
-          end;
-      end;
-
-    ESimbaEvent.TOOLBAR_NEW:
-      begin
-        AddTab();
-      end;
-
-    ESimbaEvent.TOOLBAR_OPEN:
-      begin
-        Open();
-      end;
+    ESimbaEvent.ACTION_FIND:      DoFind();
+    ESimbaEvent.ACTION_FIND_NEXT: DoFindNext();
+    ESimbaEvent.ACTION_FIND_PREV: DoFindPrev();
+    ESimbaEvent.ACTION_REPLACE:   DoReplace();
+    ESimbaEvent.ACTION_GOTO_LINE: DoGotoLine();
   end;
 end;
-
 
 end.

@@ -111,6 +111,7 @@ implementation
 {$R *.lfm}
 
 uses
+  AnchorDocking,
   SynEditMarkupBracket, SynEditMarkupWordGroup,
   simba.ide_dockinghelpers, simba.misc,
   simba.form_main, simba.form_tabs,  simba.form_settings,
@@ -554,49 +555,76 @@ begin
 end;
 
 procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-var
-  I: Integer;
+
+  // show/hide ourselfs
+  procedure DoViewOutput(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+  // clear active
+  procedure DoClearOutput;
+  begin
+    ActiveOutputBox.Empty();
+  end;
+
+  // open output tab on tab switch
+  procedure DoTabChange(Tab: TSimbaScriptTab);
+  begin
+    Tab.OutputBox.MakeVisible();
+  end;
+
+  // remove the tab
+  procedure DoTabClosed(Tab: TSimbaScriptTab);
+  var
+    I: Integer;
+  begin
+    for I := 0 to FTabControl.TabCount - 1 do
+      if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = Tab.OutputBox) then
+      begin
+        FTabControl.DeleteTab(FTabControl.Tabs[I]);
+        Exit;
+      end;
+  end;
+
+  // update tab icon
+  procedure DoScriptStateChange(Tab: TSimbaScriptTab);
+  var
+    I: Integer;
+  begin
+    for I := 0 to FTabControl.TabCount - 1 do
+      if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = Tab.OutputBox) then
+      begin
+        case Tab.ScriptState of
+          ESimbaScriptState.RUNNING: TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PLAY;
+          ESimbaScriptState.PAUSED:  TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PAUSE;
+          else
+            TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_STOP;
+        end;
+        Exit;
+      end;
+  end;
+
+  // Update tab caption
+  procedure DoTabCaption(Tab: TSimbaScriptTab);
+  var
+    I: Integer;
+  begin
+    for I := 0 to FTabControl.TabCount - 1 do
+      if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = Tab.OutputBox) then
+      begin
+        FTabControl.Tabs[I].Caption := Tab.Caption;
+        Exit;
+      end;
+  end;
+
 begin
   case Event of
-    // open output tab on tab switch
-    ESimbaEvent.TAB_CHANGE:
-      TSimbaScriptTab(Data).OutputBox.MakeVisible();
-
-    // remove the tab
-    ESimbaEvent.TAB_CLOSED:
-      for I := 0 to FTabControl.TabCount - 1 do
-        if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = TSimbaScriptTab(Data).OutputBox) then
-        begin
-          FTabControl.DeleteTab(FTabControl.Tabs[I]);
-          Break;
-        end;
-
-    // clear active
-    ESimbaEvent.TOOLBAR_CLEAROUTPUT:
-      ActiveOutputBox.Empty();
-
-    // update tab icon
-    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:
-      for I := 0 to FTabControl.TabCount - 1 do
-        if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = TSimbaScriptTab(Data).OutputBox) then
-        begin
-          case TSimbaScriptTab(Data).ScriptState of
-            ESimbaScriptState.STATE_RUNNING: TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PLAY;
-            ESimbaScriptState.STATE_PAUSED:  TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PAUSE;
-            else
-              TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_STOP;
-          end;
-          Break;
-        end;
-
-    // Update tab caption
-    ESimbaEvent.TAB_CAPTION:
-      for I := 0 to FTabControl.TabCount - 1 do
-        if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = TSimbaScriptTab(Data).OutputBox) then
-        begin
-          FTabControl.Tabs[I].Caption := TSimbaScriptTab(Data).Caption;
-          Break;
-        end;
+    ESimbaEvent.ACTION_VIEW_OUTPUT: DoViewOutput(TMenuItem(Data));
+    ESimbaEvent.ACTION_CLEAROUTPUT: DoClearOutput();
+    ESimbaEvent.TAB_CHANGE:         DoTabChange(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_CLOSED:         DoTabClosed(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_CAPTION:        DoTabCaption(TSimbaScriptTab(Data));
   end;
 end;
 

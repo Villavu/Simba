@@ -58,8 +58,8 @@ type
 
 procedure TPackageMenuItem.Click;
 begin
-  if SimbaTabsForm.Open(FileName, True) and (Caption = 'Run') then
-    SimbaMainForm.MenuItemRun.Click();
+  //if SimbaTabsForm.Open(FileName, True) and (Caption = 'Run') then
+  //  SimbaMainForm.MenuItemRun.Click();
 end;
 
 type

@@ -48,7 +48,8 @@ implementation
 {.$DEFINE DEBUG}
 
 uses
-  AnchorDocking,
+  AnchorDocking, Menus,
+  simba.ide_dockinghelpers,
   simba.threading;
 
 function TSimbaFunctionListForm.PageForTab(Tab: TSimbaScriptTab): TSimbaFunctionListPage;
@@ -134,52 +135,73 @@ begin
 end;
 
 procedure TSimbaFunctionListForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-var
-  Page: TSimbaFunctionListPage;
-  Splitter: TAnchorDockSplitter;
+
+  procedure DoViewFunctionList(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+  procedure DoCodetoolsSetup;
+  begin
+    FUpdateThread := RunInThread(@DoUpdateThread);
+  end;
+
+  procedure DoTabChange(Tab: TSimbaScriptTab);
+  var
+    Page: TSimbaFunctionListPage;
+  begin
+    Page := PageForTab(Tab);
+    if (Page <> nil) then
+      Page.NeedUpdate := True;
+    FNotebook.ActivePage := Page;
+  end;
+
+  procedure DoTabClosed(Tab: TSimbaScriptTab);
+  var
+    Page: TSimbaFunctionListPage;
+  begin
+    Page := PageForTab(Tab);
+    if (Page <> nil) then
+      FPendingRemoves.Add(Page);
+  end;
+
+  procedure DoTabAdd(Tab: TSimbaScriptTab);
+  var
+    Page: TSimbaFunctionListPage;
+  begin
+    Page := TSimbaFunctionListPage(FNotebook.AddPage());
+    Page.TabID := Tab.UID;
+    Page.NeedUpdate := True;
+  end;
+
+  procedure DoTabModified(Tab: TSimbaScriptTab);
+  var
+    Page: TSimbaFunctionListPage;
+  begin
+    Page := PageForTab(Tab);
+    if (Page <> nil) then
+      Page.NeedUpdate := True;
+  end;
+
+  procedure DoSplitterDoubleClick;
+  var
+    Splitter: TAnchorDockSplitter;
+  begin
+    if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = TObject(Data))) then
+      Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + TSimbaFunctionListPage(FNotebook.ActivePage).TreeView.MaxRight)
+    else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = TObject(Data))) then
+      Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - TSimbaFunctionListPage(FNotebook.ActivePage).TreeView.MaxRight);
+  end;
+
 begin
   case Event of
-    ESimbaEvent.CODETOOLS_SETUP:
-      begin
-        FUpdateThread := RunInThread(@DoUpdateThread);
-      end;
-
-    ESimbaEvent.TAB_CHANGE:
-      begin
-        Page := PageForTab(TSimbaScriptTab(Data));
-        if (Page <> nil) then
-          Page.NeedUpdate := True;
-        FNotebook.ActivePage := Page;
-      end;
-
-    ESimbaEvent.TAB_CLOSED:
-      begin
-        Page := PageForTab(TSimbaScriptTab(Data));
-        if (Page <> nil) then
-          FPendingRemoves.Add(Page);
-      end;
-
-    ESimbaEvent.TAB_ADD:
-      begin
-        Page := TSimbaFunctionListPage(FNotebook.AddPage());
-        Page.TabID := TSimbaScriptTab(Data).UID;
-        Page.NeedUpdate := True;
-      end;
-
-    ESimbaEvent.TAB_MODIFIED:
-      begin
-        Page := PageForTab(TSimbaScriptTab(Data));
-        if (Page <> nil) then
-          Page.NeedUpdate := True;
-      end;
-
-    ESimbaEvent.SPLITTER_DOUBLE_CLICK:
-      begin
-        if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = TObject(Data))) then
-          Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + TSimbaFunctionListPage(FNotebook.ActivePage).TreeView.MaxRight)
-        else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = TObject(Data))) then
-          Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - TSimbaFunctionListPage(FNotebook.ActivePage).TreeView.MaxRight);
-      end;
+    ESimbaEvent.ACTION_VIEW_FUNCTIONLIST: DoViewFunctionList(TMenuItem(Data));
+    ESimbaEvent.CODETOOLS_SETUP:          DoCodetoolsSetup();
+    ESimbaEvent.TAB_CHANGE:               DoTabChange(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_CLOSED:               DoTabClosed(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_ADD:                  DoTabAdd(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_MODIFIED:             DoTabModified(TSimbaScriptTab(Data));
+    ESimbaEvent.SPLITTER_DOUBLE_CLICK:    DoSplitterDoubleClick();
   end;
 end;
 
