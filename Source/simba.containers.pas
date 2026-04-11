@@ -193,6 +193,7 @@ type
     procedure AppendBuf(const Buffer; Count: Integer);
     procedure Append(const Str: String);
     procedure AppendLine(const Str: String = '');
+    function EndsWith(const Str: String): Boolean;
 
     property Str: String read GetString;
     property Count: Integer read FCount;
@@ -658,6 +659,11 @@ end;
 procedure TSimbaStringBuilder.AppendLine(const Str: String);
 begin
   Append(Str + LineEnding);
+end;
+
+function TSimbaStringBuilder.EndsWith(const Str: String): Boolean;
+begin
+  Result := Copy(FData, (FCount - Length(Str)) + 1, Length(Str)) = Str;
 end;
 
 end.

@@ -124,7 +124,8 @@ uses
   simba.base, simba.env, simba.vartype_string,
   simba.form_main, simba.form_output,
   simba.ide_dockinghelpers, simba.nativeinterface,
-  simba.ide_utils, simba.component_theme, simba.settings;
+  simba.ide_utils, simba.component_theme, simba.settings,
+  simba.ide_simpleformatter;
 
 function GetSimbaActiveTab: TSimbaScriptTab;
 begin
@@ -815,6 +816,26 @@ procedure TSimbaTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
       ActiveTab.Editor.TopLine := Value.ToInt - (ActiveTab.Editor.LinesInWindow div 2);
   end;
 
+  procedure DoFormatScript(Tab: TSimbaScriptTab);
+  var
+    Script: String;
+  begin
+    Tab.Editor.BeginUndoBlock();
+    try
+      if Tab.Editor.SelAvail then
+        Tab.Editor.SelText := FormatScript(Tab.Editor.SelText)
+      else
+      begin
+        Script := FormatScript(Tab.Editor.Text);
+
+        Tab.Editor.ClearAll();
+        Tab.Editor.InsertTextAtCaret(Script);
+      end;
+    finally
+      Tab.Editor.EndUndoBlock();
+    end;
+  end;
+
 begin
   // for safety
   if (FTabControl.TabCount = 0) then
@@ -850,6 +871,8 @@ begin
     ESimbaEvent.ACTION_FIND_PREV: DoFindPrev();
     ESimbaEvent.ACTION_REPLACE:   DoReplace();
     ESimbaEvent.ACTION_GOTO_LINE: DoGotoLine();
+
+    ESimbaEvent.ACTION_FORMAT_SCRIPT: DoFormatScript(ActiveTab);
   end;
 end;
 

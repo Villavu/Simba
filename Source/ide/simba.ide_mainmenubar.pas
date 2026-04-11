@@ -391,8 +391,8 @@ constructor TSimbaMainMenuBar.Create;
     addItem(FToolsMenu, IMG_NONE, 'DTM Editor', scNone, ESimbaEvent.ACTION_DTM_EDITOR); // todo event
     addItem(FToolsMenu, IMG_SHAPE, 'Shape Box', scNone, ESimbaEvent.ACTION_SHAPE_BOX); // todo: remove usage of form designer
     addLine(FToolsMenu);
-    //addItem(FToolsMenu, IMG_NONE, 'Format Script', scNone, ESimbaEvent.ACTION_SETTINGS); // todo: use JEDI
-    //addLine(FToolsMenu);
+    addItem(FToolsMenu, IMG_NONE, 'Format Script', scNone, ESimbaEvent.ACTION_FORMAT_SCRIPT);
+    addLine(FToolsMenu);
     addItem(FToolsMenu, IMG_NONE, 'Download Simba ...', scNone, ESimbaEvent.ACTION_DOWNLOAD_SIMBA); // todo: remove usage of form designer
   end;
 
