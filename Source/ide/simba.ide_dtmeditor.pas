@@ -22,7 +22,7 @@ uses
   simba.component_button;
 
 type
-  TSimbaDTMEditorNew = class(TSimbaToolForm)
+  TSimbaDTMEditor = class(TSimbaToolForm)
   protected type
     TDTMPointNode = class(TTreeNode)
     public
@@ -78,12 +78,12 @@ uses
   simba.vartype_box,
   simba.component_theme;
 
-procedure TSimbaDTMEditorNew.TDTMPointNode.PointChanged;
+procedure TSimbaDTMEditor.TDTMPointNode.PointChanged;
 begin
   Text := Format('%d, %d, %s, %.1f, %d', [Point.X, Point.Y, ColorToStr(Point.Color), Point.Tolerance, Point.AreaSize]);
 end;
 
-function TSimbaDTMEditorNew.MakeDTM: TDTM;
+function TSimbaDTMEditor.MakeDTM: TDTM;
 var
   i: Integer;
 begin
@@ -93,12 +93,12 @@ begin
     Result.Points[i] := TDTMPointNode(FPointTree.TopLevelItem[i]).Point;
 end;
 
-function TSimbaDTMEditorNew.GetSelectedPoint: TDTMPointNode;
+function TSimbaDTMEditor.GetSelectedPoint: TDTMPointNode;
 begin
   Result := TDTMPointNode(FPointTree.Selected);
 end;
 
-function TSimbaDTMEditorNew.GetPointAt(X, Y: Integer): TDTMPointNode;
+function TSimbaDTMEditor.GetPointAt(X, Y: Integer): TDTMPointNode;
 var
   i: Integer;
 begin
@@ -111,7 +111,7 @@ begin
   Result := nil;
 end;
 
-procedure TSimbaDTMEditorNew.AddPoint(X, Y: Integer; AColor: TColor);
+procedure TSimbaDTMEditor.AddPoint(X, Y: Integer; AColor: TColor);
 var
   Node: TDTMPointNode;
 begin
@@ -126,7 +126,7 @@ begin
   RepaintImg([], []);
 end;
 
-procedure TSimbaDTMEditorNew.RepaintImg(DebugDTM, DebugColor: TPointArray);
+procedure TSimbaDTMEditor.RepaintImg(DebugDTM, DebugColor: TPointArray);
 begin
   FDebugDTM   := DebugDTM;
   FDebugColor := DebugColor;
@@ -134,7 +134,7 @@ begin
   FImageBox.Repaint();
 end;
 
-procedure TSimbaDTMEditorNew.DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaDTMEditor.DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   inherited DoImgMouseDown(Sender, Button, Shift, X, Y);
 
@@ -155,7 +155,7 @@ begin
   end;
 end;
 
-procedure TSimbaDTMEditorNew.DoImgMouseUp(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaDTMEditor.DoImgMouseUp(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   inherited DoImgMouseUp(Sender, Button, Shift, X, Y);
 
@@ -167,7 +167,7 @@ begin
   end;
 end;
 
-procedure TSimbaDTMEditorNew.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaDTMEditor.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 begin
   inherited DoImgMouseMove(Sender, Shift, X, Y);
 
@@ -187,7 +187,7 @@ begin
     FImageBox.Cursor := crDefault;
 end;
 
-procedure TSimbaDTMEditorNew.DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
+procedure TSimbaDTMEditor.DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
 var
   MainPoint: TDTMPoint;
   CurPoint: TDTMPoint;
@@ -230,17 +230,17 @@ begin
   end;
 end;
 
-procedure TSimbaDTMEditorNew.DoFindDTMClick(Sender: TObject);
+procedure TSimbaDTMEditor.DoFindDTMClick(Sender: TObject);
 begin
   RepaintImg(FImageBox.FindDTM(MakeDTM()), []);
 end;
 
-procedure TSimbaDTMEditorNew.DoPrintDTMClick(Sender: TObject);
+procedure TSimbaDTMEditor.DoPrintDTMClick(Sender: TObject);
 begin
   DebugLn([EDebugLn.FOCUS], 'DTM := TDTM.CreateFromString(' + #39 + MakeDTM().ToString() + #39 + ');');
 end;
 
-procedure TSimbaDTMEditorNew.DoDebugColorClick(Sender: TObject);
+procedure TSimbaDTMEditor.DoDebugColorClick(Sender: TObject);
 var
   Selected: TDTMPointNode;
   Col: TColorTolerance;
@@ -257,12 +257,12 @@ begin
   RepaintImg([], FImageBox.FindColor(Col));
 end;
 
-procedure TSimbaDTMEditorNew.DoUpdateImageClick(Sender: TObject);
+procedure TSimbaDTMEditor.DoUpdateImageClick(Sender: TObject);
 begin
   UpdateImage();
 end;
 
-procedure TSimbaDTMEditorNew.DoClearImageClick(Sender: TObject);
+procedure TSimbaDTMEditor.DoClearImageClick(Sender: TObject);
 begin
   FDebugDTM := [];
   FDebugColor := [];
@@ -270,7 +270,7 @@ begin
   FImageBox.Repaint();
 end;
 
-procedure TSimbaDTMEditorNew.DoPointSelectionChange(Sender: TObject);
+procedure TSimbaDTMEditor.DoPointSelectionChange(Sender: TObject);
 var
   Node: TDTMPointNode;
 begin
@@ -286,7 +286,7 @@ begin
   RepaintImg([], []);
 end;
 
-procedure TSimbaDTMEditorNew.DoPaintNode(ACanvas: TCanvas; Node: TTreeNode);
+procedure TSimbaDTMEditor.DoPaintNode(ACanvas: TCanvas; Node: TTreeNode);
 var
   BaseRect, ColorRect: TRect;
   S: TTextStyle;
@@ -326,7 +326,7 @@ begin
   ACanvas.TextRect(BaseRect, BaseRect.Left, BaseRect.Top, Node.Text, S);
 end;
 
-procedure TSimbaDTMEditorNew.DoUserChange(Sender: TObject);
+procedure TSimbaDTMEditor.DoUserChange(Sender: TObject);
 var
   Node: TDTMPointNode;
 begin
@@ -353,13 +353,13 @@ begin
   end;
 end;
 
-procedure TSimbaDTMEditorNew.DoClearClick(Sender: TObject);
+procedure TSimbaDTMEditor.DoClearClick(Sender: TObject);
 begin
   FPointTree.Clear();
   RepaintImg([], []);
 end;
 
-procedure TSimbaDTMEditorNew.DoDeleteSelectedClick(Sender: TObject);
+procedure TSimbaDTMEditor.DoDeleteSelectedClick(Sender: TObject);
 begin
   if (FPointTree.Selected <> nil) then
   begin
@@ -369,7 +369,7 @@ begin
   end;
 end;
 
-procedure TSimbaDTMEditorNew.DoLoadFromString(Sender: TObject);
+procedure TSimbaDTMEditor.DoLoadFromString(Sender: TObject);
 var
   Value: String;
   DTM: TDTM;
@@ -412,7 +412,7 @@ begin
   end;
 end;
 
-procedure TSimbaDTMEditorNew.DoOffsetDTM(Sender: TObject);
+procedure TSimbaDTMEditor.DoOffsetDTM(Sender: TObject);
 var
   Values: array[0..1] of String;
   X, Y, I: Integer;
@@ -435,7 +435,7 @@ begin
   end;
 end;
 
-constructor TSimbaDTMEditorNew.Create(ImageSupplier: TACAImageSupplier);
+constructor TSimbaDTMEditor.Create(ImageSupplier: TACAImageSupplier);
 
   function CreateListPopupMenu: TPopupMenu;
   begin

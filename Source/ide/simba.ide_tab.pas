@@ -254,7 +254,7 @@ begin
   end else
   // else, open the file and display.
   if SimbaTabsForm.Open(FError.FileName) then
-    SimbaTabsForm.CurrentEditor.FocusLine(FError.Line, FError.Col, $0000A5);
+    SimbaTabsForm.ActiveTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
 
   FTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
 end;

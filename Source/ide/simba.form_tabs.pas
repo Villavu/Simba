@@ -77,20 +77,15 @@ type
 
     function GetTabCount: Integer;
     function GetTab(Index: Integer): TSimbaScriptTab;
-    function GetCurrentTab: TSimbaScriptTab;
-    function GetCurrentEditor: TSimbaEditor;
-
-    procedure SetCurrentTab(Value: TSimbaScriptTab);
+    function GetActiveTab: TSimbaScriptTab;
+    procedure SetActiveTab(Value: TSimbaScriptTab);
   public
     constructor Create(AOwner: TComponent); override;
 
     property TabCount: Integer read GetTabCount;
     property Tabs[Index: Integer]: TSimbaScriptTab read GetTab;
 
-    property PreviousTab: TSimbaScriptTab read FPreviousTab;
-    property CurrentTab: TSimbaScriptTab read GetCurrentTab write SetCurrentTab;
-    property CurrentEditor: TSimbaEditor read GetCurrentEditor;
-    property ActiveTab: TSimbaScriptTab read GetCurrentTab;
+    property ActiveTab: TSimbaScriptTab read GetActiveTab write SetActiveTab;
 
     procedure Replace;
     procedure Find;
@@ -113,8 +108,6 @@ type
 var
   SimbaTabsForm: TSimbaTabsForm;
 
-function GetSimbaActiveTab: TSimbaScriptTab;
-
 implementation
 
 {$R *.lfm}
@@ -126,14 +119,6 @@ uses
   simba.ide_dockinghelpers, simba.nativeinterface,
   simba.ide_utils, simba.component_theme, simba.settings,
   simba.ide_simpleformatter;
-
-function GetSimbaActiveTab: TSimbaScriptTab;
-begin
-  if Assigned(SimbaTabsForm) then
-    Result := SimbaTabsForm.CurrentTab
-  else
-    Result := nil;
-end;
 
 procedure TSimbaTabsForm.DoOnDropFiles(Sender: TObject; const FileNames: array of String);
 var
@@ -225,8 +210,7 @@ end;
 
 procedure TSimbaTabsForm.FindEditChange(Sender: TObject);
 begin
-  if (CurrentEditor <> nil) then
-    FEditorFind.ExecuteNoDialog(CurrentEditor, FFindEdit.Text, FFindButtonCaseSens.Down, FFindButtonWholeWord.Down);
+  FEditorFind.ExecuteNoDialog(ActiveTab.Editor, FFindEdit.Text, FFindButtonCaseSens.Down, FFindButtonWholeWord.Down);
 end;
 
 procedure TSimbaTabsForm.FindPanelResize(Sender: TObject);
@@ -332,8 +316,8 @@ end;
 
 procedure TSimbaTabsForm.DoFindPanelVisibleChanged(Sender: TObject);
 begin
-  if (not FindPanel.Visible) and (CurrentEditor <> nil) and CurrentEditor.CanSetFocus() then
-    CurrentEditor.SetFocus();
+  if (not FindPanel.Visible) and ActiveTab.Editor.CanSetFocus() then
+    ActiveTab.Editor.SetFocus();
 
   SimbaSettings.Editor.FindPanelVisible.Value := FindPanel.Visible;
 end;
@@ -350,7 +334,6 @@ end;
 procedure TSimbaTabsForm.DoTabChange(Sender: TSimbaTabControl; NewTab: TSimbaTab);
 begin
   SimbaEvents.Post(ESimbaEvent.TAB_CHANGE, NewTab);
-
   if (NewTab is TSimbaScriptTab) and TSimbaScriptTab(NewTab).Editor.CanSetFocus() then
     TSimbaScriptTab(NewTab).Editor.SetFocus();
 end;
@@ -368,11 +351,6 @@ end;
 procedure TSimbaTabsForm.DoTabMoved(Sender: TSimbaTabControl; AFrom, ATo: Integer);
 begin
   SimbaOutputForm.MoveTab(AFrom, ATo);
-end;
-
-procedure TSimbaTabsForm.SetCurrentTab(Value: TSimbaScriptTab);
-begin
-  FTabControl.ActiveTab := Value;
 end;
 
 constructor TSimbaTabsForm.Create(AOwner: TComponent);
@@ -485,23 +463,19 @@ begin
   Result := FTabControl.Tabs[Index] as TSimbaScriptTab;
 end;
 
-function TSimbaTabsForm.GetCurrentTab: TSimbaScriptTab;
+function TSimbaTabsForm.GetActiveTab: TSimbaScriptTab;
 begin
   Result := TSimbaScriptTab(FTabControl.ActiveTab);
 end;
 
-function TSimbaTabsForm.GetCurrentEditor: TSimbaEditor;
+procedure TSimbaTabsForm.SetActiveTab(Value: TSimbaScriptTab);
 begin
-  if (CurrentTab <> nil) then
-    Result := CurrentTab.Editor
-  else
-    Result := nil;
+  FTabControl.ActiveTab := Value;
 end;
 
 procedure TSimbaTabsForm.Replace;
 begin
-  if (CurrentEditor <> nil) and (not CurrentEditor.ReadOnly) then
-    FEditorReplace.Execute(CurrentEditor);
+  FEditorReplace.Execute(ActiveTab.Editor);
 end;
 
 procedure TSimbaTabsForm.Find;
@@ -521,14 +495,12 @@ end;
 
 procedure TSimbaTabsForm.FindNext;
 begin
-  if (CurrentEditor <> nil) then
-    FEditorFind.FindNext(CurrentEditor);
+  FEditorFind.FindNext(ActiveTab.Editor);
 end;
 
 procedure TSimbaTabsForm.FindPrevious;
 begin
-  if (CurrentEditor <> nil) then
-    FEditorFind.FindPrev(CurrentEditor);
+  FEditorFind.FindPrev(ActiveTab.Editor);
 end;
 
 function TSimbaTabsForm.CheckForFileChanges: Boolean;
@@ -536,7 +508,7 @@ var
   Tab: TSimbaScriptTab;
 begin
   Result := False;
-  Tab := CurrentTab;
+  Tab := ActiveTab;
   if (Tab = nil) or (Tab.ScriptFileName = '') or (not FileExists(Tab.ScriptFileName)) then
     Exit;
 
@@ -623,26 +595,23 @@ function TSimbaTabsForm.Open(FileName: String; CheckOtherTabs: Boolean): Boolean
 var
   I: Integer;
 begin
-  Result := False;
-
   FileName := ExpandFileName(FileName);
 
   if CheckOtherTabs then
     for I := 0 to TabCount - 1 do
       if SameFileName(Tabs[I].ScriptFileName, FileName) then
       begin
-        CurrentTab := Tabs[I];
-        SimbaEvents.Post(ESimbaEvent.TAB_LOADED, CurrentTab);
-        Result := True;
-        Exit;
+        ActiveTab := Tabs[I];
+        SimbaEvents.Post(ESimbaEvent.TAB_LOADED, ActiveTab);
+        Exit(True);
       end;
 
   if FileExists(FileName) then
   begin
-    if (CurrentTab.ScriptFileName <> '') or CurrentTab.ScriptChanged then // Use current tab if default
-      CurrentTab := AddTab();
+    if (ActiveTab.ScriptFileName <> '') or ActiveTab.ScriptChanged then // Use current tab if default
+      ActiveTab := AddTab();
 
-    Result := CurrentTab.Load(FileName);
+    Result := ActiveTab.Load(FileName);
   end;
 end;
 
@@ -651,7 +620,7 @@ var
   I: Integer;
 begin
   try
-    OpenDialog.InitialDir := ExtractFileDir(CurrentTab.ScriptFileName);
+    OpenDialog.InitialDir := ExtractFileDir(ActiveTab.ScriptFileName);
     if (OpenDialog.InitialDir = '') then
       OpenDialog.InitialDir := SimbaEnv.ScriptsPath;
 

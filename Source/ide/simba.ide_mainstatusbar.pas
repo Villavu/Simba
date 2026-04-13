@@ -85,8 +85,8 @@ end;
 
 procedure TSimbaMainStatusBar.DoTimerExecute(Sender: TObject);
 begin
-  if Assigned(SimbaTabsForm) and Assigned(SimbaTabsForm.CurrentTab) then
-    FStatusBar.PanelText[1] := SimbaTabsForm.CurrentTab.ScriptStateStr;
+  if Assigned(SimbaTabsForm) and Assigned(SimbaTabsForm.ActiveTab) then
+    FStatusBar.PanelText[1] := SimbaTabsForm.ActiveTab.ScriptStateStr;
 end;
 
 constructor TSimbaMainStatusBar.Create;

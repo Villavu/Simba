@@ -151,7 +151,7 @@ begin
   Line := PixelsToRowColumn(TPoint.Create(X, Y)).Y;
 
   if Assigned(LineInfo[Line - 1]) and SimbaTabsForm.Open(LineInfo[Line - 1].FileName) then
-    SimbaTabsForm.CurrentTab.GotoLine(LineInfo[Line - 1].Line);
+    SimbaTabsForm.ActiveTab.GotoLine(LineInfo[Line - 1].Line);
 end;
 
 function TResultsMemo.GetLineInfo(Line: Integer): TLineInfo;

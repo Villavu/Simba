@@ -31,7 +31,8 @@ type
     fsLastAsSpace,
     fsLastWasKeyword,
     fsLastWasComment,
-    fsLastWasTypeGuard
+    fsLastWasTypeGuard,
+    fsInDoubleQuotes
   );
   TFormatState = set of EFormatFlag;
 var
@@ -176,11 +177,35 @@ var
           end;
         else
         begin
-          if not ((fsFirstInLine in State) or (fsLastAsSpace in State)) then
-            Builder.Append(' ');
-          Builder.Append(TokenStr);
+          if (TokenStr = '"') then
+          begin
+            if not (fsInDoubleQuotes in State) then
+            begin
+              if not ((fsFirstInLine in State) or (fsLastAsSpace in State)) then
+                Builder.Append(' ');
+              Builder.Append(TokenStr);
+              Include(State, fsLastAsSpace);
+              Include(State, fsInDoubleQuotes);
+            end else
+            begin
+              Builder.Append(TokenStr);
+              Exclude(State, fsInDoubleQuotes);
+              Exclude(State, fsLastAsSpace);
+            end;
+          end else
+          begin
+            if not ((fsFirstInLine in State) or (fsLastAsSpace in State)) then
+            begin
+              if not (fsInDoubleQuotes in State) then
+                Builder.Append(' ');
+            end;
+            Builder.Append(TokenStr);
 
-          Exclude(State, fsLastAsSpace);
+            if (fsInDoubleQuotes in State) then
+              Include(State, fsLastAsSpace)
+            else
+              Exclude(State, fsLastAsSpace);
+          end;
         end;
       end;
     end;
@@ -278,7 +303,7 @@ begin
             Continue;
           end;
 
-        tkProcedure, tkFunction, tkOperator:
+        tkProcedure, tkFunction, tkOperator, tkProperty:
           begin
             if (fsLastWasTypeGuard in State) then
               Add()
@@ -357,7 +382,7 @@ begin
               if (fsFirstInLine in State) then
                 AddLine()
               else
-                Exclude(State, fsLastAsSpace); // <--- FIXED: Forces a space for inline code
+                Exclude(State, fsLastAsSpace);
             end;
             Continue;
           end;
@@ -375,7 +400,7 @@ begin
             if (Lexer.TokenID = tkIf) then
             begin
               Exclude(State, fsFirstInLine);
-              Exclude(State, fsLastAsSpace); // <--- FIXED: Forces a space for 'else if'
+              Exclude(State, fsLastAsSpace);
             end else if (Lexer.TokenID in [tkBegin, tkTry, tkRepeat]) then
             begin
               AddLine();
@@ -385,7 +410,7 @@ begin
               if (fsFirstInLine in State) then
                 AddLine()
               else
-                Exclude(State, fsLastAsSpace); // <--- FIXED: Forces a space for inline else
+                Exclude(State, fsLastAsSpace);
             end;
             Continue;
           end;
@@ -483,7 +508,10 @@ begin
             begin
               NextToken();
               if (Lexer.TokenID <> tkSemiColon) and (Lexer.TokenID <> tkDot) then
-                AddLine();
+              begin
+                if not ((Lexer.TokenID in [tkAnsiComment, tkBorComment, tkSlashesComment]) and not (fsFirstInLine in State)) then
+                  AddLine();
+              end;
 
               Continue;
             end;
@@ -532,7 +560,8 @@ begin
             end else
             begin
               ElseIndent := 0;
-              AddLine();
+              if not ((Lexer.TokenID in [tkAnsiComment, tkBorComment, tkSlashesComment]) and not (fsFirstInLine in State)) then
+                AddLine();
             end;
 
             Continue;

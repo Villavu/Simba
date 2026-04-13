@@ -161,7 +161,7 @@ begin
       SimbaTabsForm.Open(FMouseLink.DocPos.FileName);
 
     with FMouseLink.DocPos do
-      SimbaTabsForm.CurrentEditor.FocusLine(Line, Col, $0000A5);
+      SimbaTabsForm.ActiveTab.Editor.FocusLine(Line, Col, $0000A5);
 
     Exit;
   end;

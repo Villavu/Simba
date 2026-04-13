@@ -387,8 +387,8 @@ constructor TSimbaMainMenuBar.Create;
     addItem(FToolsMenu, IMG_SIMBA, 'Associate Scripts', scNone, ESimbaEvent.ACTION_ASSOCIATE); // todo event
     addLine(FToolsMenu);
     addItem(FToolsMenu, IMG_NONE, 'Image To String', scNone, ESimbaEvent.ACTION_IMG_TO_STRING); // todo: remove usage of form designer
-    addItem(FToolsMenu, IMG_COLORS, 'ACA', scNone, ESimbaEvent.ACTION_ACA); // todo event
-    addItem(FToolsMenu, IMG_NONE, 'DTM Editor', scNone, ESimbaEvent.ACTION_DTM_EDITOR); // todo event
+    addItem(FToolsMenu, IMG_COLORS, 'ACA', scNone, ESimbaEvent.ACTION_ACA);
+    addItem(FToolsMenu, IMG_NONE, 'DTM Editor', scNone, ESimbaEvent.ACTION_DTM_EDITOR);
     addItem(FToolsMenu, IMG_SHAPE, 'Shape Box', scNone, ESimbaEvent.ACTION_SHAPE_BOX); // todo: remove usage of form designer
     addLine(FToolsMenu);
     addItem(FToolsMenu, IMG_NONE, 'Format Script', scNone, ESimbaEvent.ACTION_FORMAT_SCRIPT);
@@ -398,7 +398,6 @@ constructor TSimbaMainMenuBar.Create;
 
   procedure addViewMenu();
   begin
-    // todo all of this
     FViewMenu := addMenu('View');
 
     addCheckItem(FViewMenu, 'Tray Icon', scNone, ESimbaEvent.ACTION_VIEW_TRAYICON);

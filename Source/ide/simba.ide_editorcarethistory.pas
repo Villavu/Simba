@@ -211,9 +211,9 @@ begin
 
     with FHistory[FIndex-1] do
     begin
-      SimbaTabsForm.CurrentTab := Tab;
-      SimbaTabsForm.CurrentTab.Editor.CaretXY := Caret;
-      SimbaTabsForm.CurrentTab.Editor.TopLine := Caret.Y - (Tab.Editor.LinesInWindow div 2);
+      SimbaTabsForm.ActiveTab := Tab;
+      SimbaTabsForm.ActiveTab.Editor.CaretXY := Caret;
+      SimbaTabsForm.ActiveTab.Editor.TopLine := Caret.Y - (Tab.Editor.LinesInWindow div 2);
     end;
   finally
     FMoving := False;
@@ -241,9 +241,9 @@ begin
 
   with FHistory[FIndex-1] do
   begin
-    SimbaTabsForm.CurrentTab := Tab;
-    SimbaTabsForm.CurrentTab.Editor.CaretXY := Caret;
-    SimbaTabsForm.CurrentTab.Editor.TopLine := Caret.Y - (Tab.Editor.LinesInWindow div 2);
+    SimbaTabsForm.ActiveTab := Tab;
+    SimbaTabsForm.ActiveTab.Editor.CaretXY := Caret;
+    SimbaTabsForm.ActiveTab.Editor.TopLine := Caret.Y - (Tab.Editor.LinesInWindow div 2);
   end;
 end;
 

@@ -83,7 +83,6 @@ uses
   LazFileUtils,
   simba.initializations,
   simba.ide_tab,
-  simba.form_tabs,
   simba.form_main;
 
 function TSimbaMainToolBar.AddButton(Image: Integer; Text: String; Event: ESimbaEvent; EventProducer: EEventProducer): TSimbaButton;
@@ -133,14 +132,12 @@ procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   procedure DoTabChange(Tab: TSimbaScriptTab);
   begin
     FButtonSave.Enabled := Tab.ScriptChanged;
-    //FButtonSaveAll.Enabled := SimbaTabsForm.TabCount > 1;
     SetStates(Tab.ScriptState);
   end;
 
   procedure DoTabModified(Tab: TSimbaScriptTab);
   begin
-    if Tab.IsActiveTab then
-      FButtonSave.Enabled := Tab.ScriptChanged;
+    FButtonSave.Enabled := Tab.ScriptChanged;
   end;
 
   procedure DoTabLoaded(Tab: TSimbaScriptTab);

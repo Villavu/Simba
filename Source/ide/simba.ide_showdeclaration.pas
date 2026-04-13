@@ -221,7 +221,7 @@ begin
   if FileExists(FileName) then
     SimbaTabsForm.Open(FileName);
 
-  with SimbaTabsForm.CurrentEditor do
+  with SimbaTabsForm.ActiveTab.Editor do
   begin
     SelStart := StartPos;
     SelEnd := EndPos;
@@ -246,7 +246,7 @@ begin
     if FileExists(Declaration.DocPos.FileName) then
       SimbaTabsForm.Open(Declaration.DocPos.FileName);
 
-    with SimbaTabsForm.CurrentEditor do
+    with SimbaTabsForm.ActiveTab.Editor do
     begin
       SelStart := Declaration.StartPos;
       SelEnd := Declaration.EndPos;

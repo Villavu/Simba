@@ -242,24 +242,10 @@ end;
 
 procedure TSimbaMainForm.DoFocusEditor;
 begin
-  if Assigned(SimbaTabsForm.CurrentEditor) then
-    if SimbaTabsForm.CurrentEditor.CanSetFocus() then
-      SimbaTabsForm.CurrentEditor.SetFocus();
+  if Assigned(SimbaTabsForm.ActiveTab) then
+    if SimbaTabsForm.ActiveTab.Editor.CanSetFocus() then
+      SimbaTabsForm.ActiveTab.Editor.SetFocus();
 end;
-
-{
-procedure TSimbaMainForm.MenuItemAssociateScriptsClick(Sender: TObject);
-const
-  Message = 'Would you like to associate Simba files with this Simba?'                                   + LineEnding +
-            'This means when opening a .simba file the file will be opened using this Simba executable.' + LineEnding +
-            'It also adds right click actions to run the script.';
-begin
-  {$IFDEF WINDOWS}
-  if (MessageDlg(Message, mtConfirmation, mbYesNo, 0) = mrYes) then
-    Associate();
-  {$ENDIF}
-end;
-}
 
 procedure TSimbaMainForm.TrayPopupExitClick(Sender: TObject);
 begin
@@ -489,12 +475,32 @@ procedure TSimbaMainForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoDTMEditor;
   begin
-
+    with TSimbaDTMEditor.Create(@DoGetTargetImage) do
+    begin
+      FreeOnClose := True;
+      ShowOnTop();
+    end;
   end;
 
   procedure DoACA;
   begin
+    with TSimbaACA.Create(@DoGetTargetImage) do
+    begin
+      FreeOnClose := True;
+      ShowOnTop();
+    end;
+  end;
 
+  procedure DoAssociate;
+  const
+    Message = 'Would you like to associate Simba files with this Simba?'                                   + LineEnding +
+              'This means when opening a .simba file the file will be opened using this Simba executable.' + LineEnding +
+              'It also adds right click actions to run the script.';
+  begin
+    {$IFDEF WINDOWS}
+    if (MessageDlg(Message, mtConfirmation, mbYesNo, 0) = mrYes) then
+      Associate();
+    {$ENDIF}
   end;
 
 begin
@@ -505,6 +511,9 @@ begin
     ESimbaEvent.ACTION_REPORTBUG:     DoReportBug();
     ESimbaEvent.ACTION_SIMBAGITHUB:   DoSimbaGithub();
     ESimbaEvent.ACTION_ONLINEDOCS:    DoOnlineDocs();
+    ESimbaEvent.ACTION_ASSOCIATE:     DoAssociate();
+    ESimbaEvent.ACTION_ACA:           DoACA();
+    ESimbaEvent.ACTION_DTM_EDITOR:    DoDTMEditor();
   end;
 end;
 
