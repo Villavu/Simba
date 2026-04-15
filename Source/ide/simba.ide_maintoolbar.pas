@@ -131,6 +131,8 @@ procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoTabChange(Tab: TSimbaScriptTab);
   begin
+    Writeln(HexStr(Tab));
+    WRiteLn(Tab.ScriptState);
     FButtonSave.Enabled := Tab.ScriptChanged;
     SetStates(Tab.ScriptState);
   end;

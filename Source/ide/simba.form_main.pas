@@ -103,11 +103,9 @@ type
 
     procedure DoResetDocking;
     procedure DoDefaultDocking;
-
-    procedure SetupCompleted;
-
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoException(Sender: TObject; E: Exception);
+    procedure DoAssociateIfFirstLaunch;
     procedure DoApplicationParameters;
     procedure DoFocusEditor;
     function DoGetTargetImage: TSimbaImage;
@@ -125,7 +123,7 @@ implementation
 {$R *.lfm}
 
 uses
-  LazFileUtils, AnchorDocking, LCLType,
+  AnchorDocking,
 
   simba.initializations,
 
@@ -133,9 +131,6 @@ uses
 
   simba.ide_utils,
   simba.ide_vars,
-  simba.ide_mainstatusbar,
-  simba.ide_mainmenubar,
-  simba.ide_maintoolbar,
   simba.ide_scriptbackup,
   simba.ide_associate,
   simba.ide_debugimage,
@@ -222,20 +217,31 @@ begin
   end;
 end;
 
+procedure TSimbaMainForm.DoAssociateIfFirstLaunch;
+begin
+  if SimbaSettings.FirstLaunch then
+    SimbaEvents.Post(ESimbaEvent.ACTION_ASSOCIATE, nil);
+end;
+
 procedure TSimbaMainForm.DoApplicationParameters;
+var
+  FileName: String;
 begin
   if (Application.ParamCount > 0) then
   begin
     if (Application.ParamCount = 1) and FileExists(Application.Params[1]) then
       SimbaTabsForm.Open(Application.Params[1])
-    else if Application.HasOption('open') and FileExists(Application.Params[Application.ParamCount]) then
+    else if Application.HasOption('open') then
     begin
-      SimbaTabsForm.Open(Application.Params[Application.ParamCount]);
-
-      if Application.HasOption('compile') then
-        SimbaMainToolBar.ButtonCompile.Click();
-      if Application.HasOption('run') then
-        SimbaMainToolBar.ButtonRun.Click();
+      FileName := Application.Params[Application.ParamCount];
+      if FileExists(FileName) then
+      begin
+        SimbaEvents.Post(ESimbaEvent.ACTION_OPEN_FILE, @FileName);
+        if Application.HasOption('compile') then
+          SimbaEvents.Post(ESimbaEvent.ACTION_COMPILE, nil)
+        else if Application.HasOption('run') then
+          SimbaEvents.Post(ESimbaEvent.ACTION_RUN, nil);
+      end;
     end;
   end;
 end;
@@ -370,6 +376,7 @@ begin
   // Add a tab
   SimbaTabsForm.AddTab();
 
+  QueueOnMainThread(@DoAssociateIfFirstLaunch);
   QueueOnMainThread(@DoApplicationParameters); // open/compile/run parameters
   QueueOnMainThread(@DoFocusEditor); // finally focus the tab
 end;
@@ -405,26 +412,6 @@ procedure TSimbaMainForm.ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWi
 begin
   AResultWidth := ImageWidthForDPI(APPI);
 end;
-
-{
-procedure TSimbaMainForm.MenuItemACAClick(Sender: TObject);
-begin
-  with TSimbaACA.Create(@DoGetTargetImage) do
-  begin
-    FreeOnClose := True;
-    Show();
-  end;
-end;
-
-procedure TSimbaMainForm.MenuItemDTMEditorClick(Sender: TObject);
-begin
-  with TSimbaDTMEditorNew.Create(@DoGetTargetImage) do
-  begin
-    FreeOnClose := True;
-    Show();
-  end;
-end;
-}
 
 procedure TSimbaMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
@@ -530,28 +517,6 @@ begin
   ShowOnTop();
   if CanSetFocus() then
     SetFocus();
-end;
-
-procedure TSimbaMainForm.SetupCompleted;
-begin
-  //if SimbaSettings.FirstLaunch then
-  //  MenuItemAssociateScripts.Click();
-
-  if (Application.ParamCount > 0) then
-  begin
-    if (Application.ParamCount = 1) and FileExists(Application.Params[1]) then
-      SimbaTabsForm.Open(Application.Params[1])
-    else
-    if Application.HasOption('open') and FileExists(Application.Params[Application.ParamCount]) then
-    begin
-      SimbaTabsForm.Open(Application.Params[Application.ParamCount]);
-
-      if Application.HasOption('compile') then
-        SimbaMainToolBar.ButtonCompile.Click();
-      if Application.HasOption('run') then
-        SimbaMainToolBar.ButtonRun.Click();
-    end;
-  end;
 end;
 
 procedure SetupSimbaForm;

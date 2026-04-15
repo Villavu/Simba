@@ -337,8 +337,8 @@ constructor TSimbaMainMenuBar.Create;
     FUndo := addItem(FEditMenu, IMG_UNDO, 'Undo', ShortCut(VK_Z, [ssCtrl]), ESimbaEvent.ACTION_UNDO);
     FRedo := addItem(FEditMenu, IMG_REDO, 'Redo', ShortCut(VK_Z, [ssShift, ssCtrl]), ESimbaEvent.ACTION_REDO);
     addLine(FEditMenu);
-    FCut := addItem(FEditMenu, IMG_CUT, 'Cut', ShortCut(VK_X, [ssCtrl]), ESimbaEvent.ACTION_CUT);
-    FCopy := addItem(FEditMenu, IMG_COPY, 'Copy', ShortCut(VK_C, [ssCtrl]), ESimbaEvent.ACTION_COPY);
+    FCut   := addItem(FEditMenu, IMG_CUT, 'Cut', ShortCut(VK_X, [ssCtrl]), ESimbaEvent.ACTION_CUT);
+    FCopy  := addItem(FEditMenu, IMG_COPY, 'Copy', ShortCut(VK_C, [ssCtrl]), ESimbaEvent.ACTION_COPY);
     FPaste := addItem(FEditMenu, IMG_PASTE, 'Paste', ShortCut(VK_V, [ssCtrl]), ESimbaEvent.ACTION_PASTE);
     addLine(FEditMenu);
     addItem(FEditMenu, IMG_SELECT_ALL, 'Select All', ShortCut(VK_A, [ssCtrl]), ESimbaEvent.ACTION_SELECT_ALL);
@@ -384,7 +384,7 @@ constructor TSimbaMainMenuBar.Create;
     addItem(FToolsMenu, IMG_OPTIONS, 'Settings', scNone, ESimbaEvent.ACTION_SETTINGS);
     addItem(FToolsMenu, IMG_PACKAGE, 'Packages', scNone, ESimbaEvent.ACTION_PACKAGES);
     addLine(FToolsMenu);
-    addItem(FToolsMenu, IMG_SIMBA, 'Associate Scripts', scNone, ESimbaEvent.ACTION_ASSOCIATE); // todo event
+    addItem(FToolsMenu, IMG_SIMBA, 'Associate Scripts', scNone, ESimbaEvent.ACTION_ASSOCIATE);
     addLine(FToolsMenu);
     addItem(FToolsMenu, IMG_NONE, 'Image To String', scNone, ESimbaEvent.ACTION_IMG_TO_STRING); // todo: remove usage of form designer
     addItem(FToolsMenu, IMG_COLORS, 'ACA', scNone, ESimbaEvent.ACTION_ACA);
