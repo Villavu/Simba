@@ -74,7 +74,7 @@ type
     function FindTab(ID: Int64): TSimbaScriptTab;
     function AddTab: TSimbaScriptTab;
     function CloseTab(Tab: TSimbaScriptTab; KeepOne: Boolean = True): Boolean;
-    function CloseAllTabs: Boolean;
+    function CloseAllTabs(KeepOne: Boolean = True): Boolean;
     function CheckForFileChanges: Boolean;
 
     procedure Find;
@@ -149,6 +149,16 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
     if Tab.Editor.CanSetFocus() then
       Tab.Editor.SetFocus();
+  end;
+
+  procedure DoCloseTab(Tab: TSimbaScriptTab);
+  begin
+    CloseTab(Tab);
+  end;
+
+  procedure DoCloseAllTabs();
+  begin
+    CloseAllTabs(True);
   end;
 
   procedure DoSave(Tab: TSimbaScriptTab);
@@ -299,8 +309,7 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   end;
 
 begin
-  // for safety
-  if (FTabControl.TabCount = 0) then
+  if (FTabControl.TabCount = 0) then // for safety
     Exit;
 
   case Event of
@@ -311,6 +320,8 @@ begin
     ESimbaEvent.ACTION_PAUSE,
     ESimbaEvent.ACTION_STOP: DoRunCompileStopPause(ActiveTab);
 
+    ESimbaEvent.ACTION_CLOSE_TAB:       DoCloseTab(ActiveTab);
+    ESimbaEvent.ACTION_CLOSE_ALL_TABS:  DoCloseAllTabs();
     ESimbaEvent.ACTION_SAVE:            DoSave(ActiveTab);
     ESimbaEvent.ACTION_SAVE_ALL:        DoSaveAll();
     ESimbaEvent.ACTION_SAVE_AS_DEFAULT: DoSaveAsDefault(ActiveTab);
@@ -668,14 +679,14 @@ begin
     AddTab();
 end;
 
-function TSimbaScriptTabsForm.CloseAllTabs: Boolean;
+function TSimbaScriptTabsForm.CloseAllTabs(KeepOne: Boolean): Boolean;
 var
   I: Integer;
 begin
   Result := True;
 
   for I := TabCount - 1 downto 0 do
-    if not CloseTab(Tabs[I], False) then
+    if not CloseTab(Tabs[I], KeepOne) then
     begin
       Result := False;
       Exit;

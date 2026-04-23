@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.ide_controller;
 
 {$i simba.inc}
@@ -19,6 +24,7 @@ type
     class procedure OpenInTab(FileName: String); overload; static;
     class procedure OpenInTab(FileName: String; CaretX, CaretY: Integer); overload; static;
     class procedure OpenInExplorer(FileName: String); static;
+    class function CloseAllTabs: Boolean;
   end;
 
 implementation
@@ -105,6 +111,13 @@ begin
     SimbaNativeInterface.OpenDirectory(FileName)
   else if FileExists(FileName) then
     SimbaNativeInterface.OpenFile(FileName);
+end;
+
+class function SimbaController.CloseAllTabs: Boolean;
+begin
+  ASSERT_MAIN_THREAD
+
+  Result := SimbaScriptTabsForm.CloseAllTabs(False);
 end;
 
 end.

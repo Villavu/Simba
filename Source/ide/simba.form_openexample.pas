@@ -13,8 +13,11 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ComCtrls, ExtCtrls,
-  simba.base, simba.ide_editor,
-  simba.component_treeview, simba.component_buttonpanel;
+  simba.base,
+  simba.ide_editor,
+  simba.ide_events,
+  simba.component_treeview,
+  simba.component_buttonpanel;
 
 type
   TSimbaOpenExampleForm = class(TForm)
@@ -30,6 +33,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure SplitterPaint(Sender: TObject);
   protected
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoButtonOkClick(Sender: TObject);
     procedure DoSplitterEnterExit(Sender: TObject);
     procedure DoTreeViewSelectionChanged(Sender: TObject);
@@ -51,7 +55,10 @@ implementation
 
 uses
   LCLType, AnchorDocking, simba.vartype_string,
-  simba.form_main, simba.fs, simba.component_theme, simba.ide_controller;
+  simba.form_main,
+  simba.fs,
+  simba.component_theme,
+  simba.ide_controller;
 
 function ReadResourceString(ResourceName: String): String;
 begin
@@ -146,6 +153,14 @@ begin
   end;
 end;
 
+procedure TSimbaOpenExampleForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.ACTION_OPEN_EXAMPLE:
+      ShowOnTop();
+  end;
+end;
+
 procedure TSimbaOpenExampleForm.DoButtonOkClick(Sender: TObject);
 begin
   if Editor.Visible then
@@ -192,6 +207,8 @@ begin
 
   AddSimbaExamples();
   UpdateTreeSize();
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);

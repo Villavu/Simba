@@ -134,12 +134,10 @@ uses
   simba.ide_scriptbackup,
   simba.ide_associate,
   simba.ide_debugimage,
-  simba.ide_simpleformatter,
   simba.ide_dockinghelpers,
   simba.ide_dtmeditor,
   simba.ide_controller,
 
-  simba.form_shapebox,
   simba.form_colorpickhistory,
   simba.form_findinfiles,
   simba.form_output,
@@ -484,6 +482,11 @@ procedure TSimbaMainForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     {$ENDIF}
   end;
 
+  procedure DoQuit;
+  begin
+    Close();
+  end;
+
 begin
   case Event of
     ESimbaEvent.ACTION_RESET_LAYOUT:  DoResetLayout();
@@ -495,6 +498,7 @@ begin
     ESimbaEvent.ACTION_ASSOCIATE:     DoAssociate();
     ESimbaEvent.ACTION_ACA:           DoACA();
     ESimbaEvent.ACTION_DTM_EDITOR:    DoDTMEditor();
+    ESimbaEvent.ACTION_QUIT:          DoQuit();
   end;
 end;
 

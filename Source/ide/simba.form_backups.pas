@@ -201,7 +201,7 @@ procedure TSimbaBackupsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     Fill();
   end;
 
-  procedure DoViewBackups(Item: TMenuItem);
+  procedure DoViewBackups();
   begin
     DockMaster.Show(Self);
   end;
@@ -210,7 +210,9 @@ begin
   case Event of
     ESimbaEvent.FORM_DOCK,
     ESimbaEvent.FORM_UNDOCK:        DoDockOrUnDock();
-    ESimbaEvent.ACTION_VIEW_BACKUP: DoViewBackups(TMenuItem(Data));
+
+    ESimbaEvent.ACTION_OPEN_BACKUP,
+    ESimbaEvent.ACTION_VIEW_BACKUP: DoViewBackups();
   end;
 end;
 
