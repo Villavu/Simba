@@ -73,8 +73,12 @@ implementation
 uses
   AnchorDocking, Menus,
   simba.ide_dockinghelpers,
+  simba.ide_controller,
   simba.component_button,
-  simba.env, simba.fs, simba.component_theme, simba.form_main, simba.form_tabs;
+  simba.env,
+  simba.fs,
+  simba.component_theme,
+  simba.form_main;
 
 type
   TBackupNode = class(TTreeNode)
@@ -123,7 +127,7 @@ end;
 procedure TSimbaBackupsForm.DoButtonOkClick(Sender: TObject);
 begin
   if Editor.Visible then
-    SimbaTabsForm.AddTab().Editor.Text := Editor.Text;
+    SimbaController.NewTab(Editor.Text);
 end;
 
 procedure TSimbaBackupsForm.DoCreateStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);

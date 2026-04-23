@@ -82,6 +82,8 @@ type
   end;
 
   TSimbaScriptTab = class(TSimbaTab)
+  private
+    procedure SetScript(AValue: String);
   protected
     FEditor: TSimbaEditor;
     FSavedText: String;
@@ -115,7 +117,7 @@ type
     property ScriptFileName: String read FScriptFileName;
 
     property ScriptChanged: Boolean read GetScriptChanged;
-    property Script: String read GetScript;
+    property Script: String read GetScript write SetScript;
     property Editor: TSimbaEditor read FEditor;
     property DiskAge: TDateTime read FDiskAge;
 
@@ -148,7 +150,7 @@ implementation
 uses
   Forms,
   simba.fs, simba.settings,
-  simba.form_tabs, simba.env, simba.ide_showdeclaration, simba.threading,
+  simba.form_scripttabs, simba.env, simba.ide_showdeclaration, simba.threading,
   simba.ide_scriptcommunication, simba.datetime, simba.ide_editor_popupmenu,
   simba.vartype_windowhandle,
   simba.vartype_string,
@@ -253,8 +255,8 @@ begin
     FTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
   end else
   // else, open the file and display.
-  if SimbaTabsForm.Open(FError.FileName) then
-    SimbaTabsForm.ActiveTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
+  if SimbaScriptTabsForm.Open(FError.FileName) then
+    SimbaScriptTabsForm.ActiveTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
 
   FTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
 end;
@@ -349,6 +351,14 @@ begin
     FDiskAge := FileDateToDateTime(FileAge(FScriptFileName))
   else
     FDiskAge := 0;
+end;
+
+procedure TSimbaScriptTab.SetScript(AValue: String);
+begin
+  FEditor.BeginUndoBlock();
+  FEditor.ClearAll();
+  FEditor.InsertTextAtCaret(Script);
+  FEditor.EndUndoBlock();
 end;
 
 procedure TSimbaScriptTab.LoadDefaultScript;
@@ -568,7 +578,7 @@ procedure TSimbaScriptTab.Run;
 begin
   //DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
 
-  if SimbaTabsForm.CheckForFileChanges() then
+  if SimbaScriptTabsForm.CheckForFileChanges() then
     Exit;
 
   if (FScriptRunner <> nil) then
@@ -590,7 +600,7 @@ procedure TSimbaScriptTab.Compile;
 begin
   //DebugLn('TSimbaScriptTab.Compile :: ' + ScriptTitle + ' ' + ScriptFileName);
 
-  if SimbaTabsForm.CheckForFileChanges() then
+  if SimbaScriptTabsForm.CheckForFileChanges() then
     Exit;
 
   if (FScriptRunner = nil) then

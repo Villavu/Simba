@@ -45,8 +45,6 @@ var
 
 implementation
 
-{.$DEFINE DEBUG}
-
 uses
   AnchorDocking, Menus,
   simba.ide_dockinghelpers,

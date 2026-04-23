@@ -81,7 +81,10 @@ implementation
 uses
   Forms, LCLType, LMessages, LazFileUtils,
   simba.initializations, simba.ide_maintoolbar, simba.form_main,
-  simba.ide_tab, simba.ide_editor, simba.settings;
+  simba.ide_tab,
+  simba.ide_editor,
+  simba.ide_controller,
+  simba.settings;
 
 function TSimbaMainMenuBar.addMenu(Text: String): TPopupMenu;
 begin
@@ -211,7 +214,7 @@ procedure TSimbaMainMenuBar.DoApplicationKeyDown(Sender: TObject; var Key: Word;
     FMenuBar.HotIndex := -1;
 
     // quick exit: cant be anything we want.
-    if (Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssAltGr] = []) then
+    if (Key <> VK_F3) and (Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssAltGr] = []) then
       Exit;
 
     // Only check these if editor is focused and doesnt have such a keystroke
@@ -302,7 +305,7 @@ end;
 
 procedure TSimbaMainMenuBar.DoOpenRecentFileClick(Sender: TObject);
 begin
-  SimbaEvents.Post(ESimbaEvent.ACTION_OPEN_FILE, @TMenuItem(Sender).Hint);
+  SimbaController.OpenInTab(TMenuItem(Sender).Hint);
 end;
 
 constructor TSimbaMainMenuBar.Create;
@@ -469,8 +472,8 @@ begin
 end;
 
 initialization
-  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaMainMenuBar');
-  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaMainMenuBar');
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaMainMenuBar', 5); // seems some priority (before script tabs)
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaMainMenuBar', 5);
 
 end.
 

@@ -84,7 +84,10 @@ implementation
 uses
   Clipbrd, AnchorDocking,
   simba.ide_dockinghelpers,
-  simba.form_main, simba.form_tabs, simba.nativeinterface, simba.ide_utils, simba.fs;
+  simba.form_main,
+  simba.ide_utils,
+  simba.ide_controller,
+  simba.fs;
 
 procedure TSimbaFileBrowserForm.DoFindFiles;
 
@@ -199,13 +202,10 @@ begin
       Clipboard.AsText := TSimbaPath.PathExtractRelative(Application.Location, Node.Path)
     else
     if (Sender = PopupMenu_Open) then
-      SimbaTabsForm.Open(Node.Path)
-    else
-    if (Sender = PopupMenu_OpenExternally) and Node.IsDirectory then
-      SimbaNativeInterface.OpenDirectory(Node.Path)
+      SimbaController.OpenInTab(Node.Path)
     else
     if (Sender = PopupMenu_OpenExternally) then
-      SimbaNativeInterface.OpenFile(Node.Path);
+      SimbaController.OpenInExplorer(Node.Path);
   end;
 end;
 
@@ -284,9 +284,9 @@ begin
   if (Node is TSimbaFileBrowserNode) then
   begin
     if Node.IsDirectory then
-      SimbaNativeInterface.OpenDirectory(Node.Path)
+      SimbaController.OpenInExplorer(Node.Path)
     else if TSimbaFile.FileIsText(Node.Path) then
-      SimbaTabsForm.Open(Node.Path);
+      SimbaController.OpenInTab(Node.Path);
   end;
 end;
 

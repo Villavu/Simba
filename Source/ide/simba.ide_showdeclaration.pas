@@ -32,7 +32,7 @@ uses
   simba.component_theme,
   simba.component_buttonpanel,
   simba.form_main,
-  simba.form_tabs;
+  simba.form_scripttabs;
 
 type
   TShowDeclarationForm = class
@@ -219,9 +219,9 @@ end;
 procedure ShowDeclaration(StartPos, EndPos, Line: Integer; FileName: String);
 begin
   if FileExists(FileName) then
-    SimbaTabsForm.Open(FileName);
+    SimbaScriptTabsForm.Open(FileName);
 
-  with SimbaTabsForm.ActiveTab.Editor do
+  with SimbaScriptTabsForm.ActiveTab.Editor do
   begin
     SelStart := StartPos;
     SelEnd := EndPos;
@@ -244,9 +244,9 @@ begin
   if (Declaration.DocPos.FileName = '') or FileExists(Declaration.DocPos.FileName) then
   begin
     if FileExists(Declaration.DocPos.FileName) then
-      SimbaTabsForm.Open(Declaration.DocPos.FileName);
+      SimbaScriptTabsForm.Open(Declaration.DocPos.FileName);
 
-    with SimbaTabsForm.ActiveTab.Editor do
+    with SimbaScriptTabsForm.ActiveTab.Editor do
     begin
       SelStart := Declaration.StartPos;
       SelEnd := Declaration.EndPos;

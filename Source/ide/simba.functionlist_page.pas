@@ -78,10 +78,9 @@ implementation
 uses
   AnchorDocking,
   simba.functionlistpage_contextmenu,
+  simba.ide_controller,
   simba.ide_showdeclaration,
   simba.vartype_string,
-  simba.form_tabs,
-  simba.nativeinterface,
   simba.fs,
   simba.threading,
   simba.form_main;
@@ -326,7 +325,7 @@ begin
   if (FTreeView.Selected is TSimbaFunctionListNode) then
     with TSimbaFunctionListNode(FTreeView.Selected) do
       case NodeType of
-        ntFile:       SimbaTabsForm.Open(FileName);
+        ntFile:       SimbaController.OpenInTab(FileName);
         ntSimbaDecl:  ShowSimbaDeclaration(Hint, FileName);
         ntScriptDecl: ShowDeclaration(StartPos, EndPos, Line, FileName);
         ntPluginDecl: ShowPluginDeclaration(Hint, FileName);
@@ -458,7 +457,8 @@ var
   var
     Tab: TSimbaScriptTab;
   begin
-    Tab := SimbaTabsForm.FindTab(FTabID);
+    Tab := SimbaController.FindTab(FTabID);
+
     if (Tab <> nil) then
     begin
       Script := Tab.Script;

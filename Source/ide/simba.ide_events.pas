@@ -6,7 +6,7 @@
 unit simba.ide_events;
 
 {$i simba.inc}
-{.$DEFINE SIMBA_PRINT_IDE_EVENTS}
+{$DEFINE SIMBA_PRINT_IDE_EVENTS}
 
 interface
 
@@ -100,8 +100,6 @@ type
     ACTION_PICKTARGET,
     ACTION_PICKAREA,
     ACTION_CLEAROUTPUT,
-    // Data=PString
-    ACTION_OPEN_FILE,
 
     // Event called when codetools is setup. Data=nil
     CODETOOLS_SETUP,

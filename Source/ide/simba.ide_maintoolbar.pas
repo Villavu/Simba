@@ -83,6 +83,7 @@ uses
   LazFileUtils,
   simba.initializations,
   simba.ide_tab,
+  simba.ide_controller,
   simba.form_main;
 
 function TSimbaMainToolBar.AddButton(Image: Integer; Text: String; Event: ESimbaEvent; EventProducer: EEventProducer): TSimbaButton;
@@ -118,7 +119,7 @@ end;
 
 procedure TSimbaMainToolBar.DoOpenRecentFileClick(Sender: TObject);
 begin
-  SimbaEvents.Post(ESimbaEvent.ACTION_OPEN_FILE, @TMenuItem(Sender).Hint);
+  SimbaController.OpenInTab(TMenuItem(Sender).Hint);
 end;
 
 procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
@@ -277,8 +278,8 @@ begin
 end;
 
 initialization
-  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaMainToolBar');
-  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaMainToolBar');
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaMainToolBar', 5);  // seems some priority (before script tabs)
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaMainToolBar', 5);
 
 end.
 

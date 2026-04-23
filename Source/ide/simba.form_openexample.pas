@@ -51,7 +51,7 @@ implementation
 
 uses
   LCLType, AnchorDocking, simba.vartype_string,
-  simba.form_main, simba.form_tabs, simba.fs, simba.component_theme;
+  simba.form_main, simba.fs, simba.component_theme, simba.ide_controller;
 
 function ReadResourceString(ResourceName: String): String;
 begin
@@ -150,7 +150,7 @@ procedure TSimbaOpenExampleForm.DoButtonOkClick(Sender: TObject);
 begin
   if Editor.Visible then
   begin
-    SimbaTabsForm.AddTab().Editor.Text := Editor.Text;
+    SimbaController.NewTab(Editor.Text);
     if (Sender is TTreeView) then
       Close();
   end;

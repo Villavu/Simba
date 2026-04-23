@@ -137,6 +137,7 @@ uses
   simba.ide_simpleformatter,
   simba.ide_dockinghelpers,
   simba.ide_dtmeditor,
+  simba.ide_controller,
 
   simba.form_shapebox,
   simba.form_colorpickhistory,
@@ -145,9 +146,9 @@ uses
   simba.form_filebrowser,
   simba.form_notes,
   simba.form_settings,
-  simba.form_tabs,
   simba.form_functionlist,
   simba.form_backups,
+  simba.form_scripttabs,
 
   simba.aca,
   simba.env,
@@ -208,7 +209,7 @@ begin
 
     if MessageDlg(Format(Message, [E.Message, ExtractRelativePath(SimbaEnv.DataPath, FileName)]), mtError, mbOKCancel, 0) = mrOk then
     begin
-      SimbaTabsForm.CloseAllTabs();
+      //SimbaTabsForm.CloseAllTabs();
 
       Halt(1);
     end;
@@ -227,30 +228,26 @@ procedure TSimbaMainForm.DoApplicationParameters;
 var
   FileName: String;
 begin
-  if (Application.ParamCount > 0) then
+  if Application.HasOption('open') then
   begin
-    if (Application.ParamCount = 1) and FileExists(Application.Params[1]) then
-      SimbaTabsForm.Open(Application.Params[1])
-    else if Application.HasOption('open') then
+    FileName := Application.Params[Application.ParamCount];
+    if FileExists(FileName) then
     begin
-      FileName := Application.Params[Application.ParamCount];
-      if FileExists(FileName) then
-      begin
-        SimbaEvents.Post(ESimbaEvent.ACTION_OPEN_FILE, @FileName);
-        if Application.HasOption('compile') then
-          SimbaEvents.Post(ESimbaEvent.ACTION_COMPILE, nil)
-        else if Application.HasOption('run') then
-          SimbaEvents.Post(ESimbaEvent.ACTION_RUN, nil);
-      end;
+      SimbaController.OpenInTab(FileName);
+
+      if Application.HasOption('compile') then
+        SimbaEvents.Post(ESimbaEvent.ACTION_COMPILE, nil)
+      else if Application.HasOption('run') then
+        SimbaEvents.Post(ESimbaEvent.ACTION_RUN, nil);
     end;
   end;
 end;
 
 procedure TSimbaMainForm.DoFocusEditor;
 begin
-  if Assigned(SimbaTabsForm.ActiveTab) then
-    if SimbaTabsForm.ActiveTab.Editor.CanSetFocus() then
-      SimbaTabsForm.ActiveTab.Editor.SetFocus();
+  //if Assigned(SimbaTabsForm.ActiveTab) then
+  //  if SimbaTabsForm.ActiveTab.Editor.CanSetFocus() then
+  //    SimbaTabsForm.ActiveTab.Editor.SetFocus();
 end;
 
 procedure TSimbaMainForm.TrayPopupExitClick(Sender: TObject);
@@ -287,12 +284,12 @@ procedure TSimbaMainForm.DoDefaultDocking;
 var
   Splitter: TAnchorDockSplitter;
 begin
-  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaTabsForm), DockPanel, alClient);
+  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaScriptTabsForm), DockPanel, alClient);
   DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaOutputForm), DockPanel, alBottom);
   DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFunctionListForm), DockPanel, alLeft);
   DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFileBrowserForm), DockPanel, alRight);
 
-  DockMaster.MakeVisible(SimbaTabsForm, False);
+  DockMaster.MakeVisible(SimbaScriptTabsForm, False);
   DockMaster.MakeVisible(SimbaOutputForm, False);
   DockMaster.MakeVisible(SimbaFunctionListForm, False);
   DockMaster.MakeVisible(SimbaFileBrowserForm, False);
@@ -301,16 +298,16 @@ begin
   Width := Scale96ToScreen(1200);
   Height := Scale96ToScreen(850);
 
-  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaTabsForm), akLeft, Splitter) then
+  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akLeft, Splitter) then
     Splitter.SetSplitterPosition(Scale96ToScreen(250));
-  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaTabsForm), akRight, Splitter) then
+  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akRight, Splitter) then
     Splitter.SetSplitterPosition(Scale96ToScreen(1200 - 250));
-  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaTabsForm), akBottom, Splitter) then
+  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akBottom, Splitter) then
     Splitter.SetSplitterPosition(Scale96ToScreen(500));
 
   Dockmaster.ScaleOnResize := True;
 
-  DockMaster.GetAnchorSite(SimbaTabsForm).Header.Visible := False;
+  DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
   DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
 
   MoveToDefaultPosition();
@@ -342,7 +339,7 @@ begin
     DockMaster.MakeDockPanel(DockPanel, admrpChild);
     DockMaster.DragTreshold := 40;
 
-    DockMaster.MakeDockable(SimbaTabsForm);
+    DockMaster.MakeDockable(SimbaScriptTabsForm);
     DockMaster.MakeDockable(SimbaOutputForm);
     DockMaster.MakeDockable(SimbaFileBrowserForm);
     DockMaster.MakeDockable(SimbaFunctionListForm);
@@ -357,8 +354,8 @@ begin
     begin
       DockMaster.LoadLayout(SimbaSettings.General.Layout.Value);
 
-      if (DockMaster.GetAnchorSite(SimbaTabsForm) <> nil) then
-        DockMaster.GetAnchorSite(SimbaTabsForm).Header.Visible := False;
+      if (DockMaster.GetAnchorSite(SimbaScriptTabsForm) <> nil) then
+        DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
       if (DockMaster.GetAnchorSite(SimbaOutputForm) <> nil) then
         DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
 
@@ -372,9 +369,6 @@ begin
   end;
 
   Caption := Format('Simba %.1f', [SIMBA_VERSION / 1000]);
-
-  // Add a tab
-  SimbaTabsForm.AddTab();
 
   QueueOnMainThread(@DoAssociateIfFirstLaunch);
   QueueOnMainThread(@DoApplicationParameters); // open/compile/run parameters
@@ -415,7 +409,7 @@ end;
 
 procedure TSimbaMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  if (not SimbaTabsForm.CloseAllTabs()) then
+  if (not SimbaScriptTabsForm.CloseAllTabs()) then
     CloseAction := caNone
   else
   begin

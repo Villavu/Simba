@@ -114,7 +114,7 @@ uses
   AnchorDocking,
   SynEditMarkupBracket, SynEditMarkupWordGroup,
   simba.ide_dockinghelpers, simba.misc,
-  simba.form_main, simba.form_tabs,  simba.form_settings,
+  simba.form_main, simba.form_scripttabs, simba.form_settings,
   simba.nativeinterface,
   simba.ide_tab, simba.ide_utils, simba.ide_codetools_base;
 
@@ -158,10 +158,10 @@ begin
   if (FMouseLink.DocPos.FileName <> '') then
   begin
     if FileExists(FMouseLink.DocPos.FileName) then
-      SimbaTabsForm.Open(FMouseLink.DocPos.FileName);
+      SimbaScriptTabsForm.Open(FMouseLink.DocPos.FileName);
 
     with FMouseLink.DocPos do
-      SimbaTabsForm.ActiveTab.Editor.FocusLine(Line, Col, $0000A5);
+      SimbaScriptTabsForm.ActiveTab.Editor.FocusLine(Line, Col, $0000A5);
 
     Exit;
   end;
@@ -172,7 +172,7 @@ begin
       SimbaNativeInterface.OpenDirectory(FMouseLink.Quote.FileName)
     else
     if FileExists(FMouseLink.Quote.FileName) and FMouseLink.Quote.FileName.EndsWith('.simba') then
-      SimbaTabsForm.Open(FMouseLink.Quote.FileName)
+      SimbaScriptTabsForm.Open(FMouseLink.Quote.FileName)
     else
     if FileExists(FMouseLink.Quote.FileName) then
       SimbaNativeInterface.OpenFile(FMouseLink.Quote.FileName);

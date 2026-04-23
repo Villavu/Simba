@@ -26,7 +26,7 @@ type
     end;
     THistoryList = specialize TSimbaList<THistoryPoint>;
   strict private
-    FIndex    : Integer;       // 1-based “next slot”; 0 means empty
+    FIndex    : Integer;       // 1-based "next slot"; 0 means empty
     FHistory  : THistoryList;
     FMaxDepth : Integer;
     FMoving   : Boolean;
@@ -60,9 +60,9 @@ implementation
 
 uses
   Math,
-  simba.form_tabs,
   simba.initializations,
   simba.ide_editor_mousecommands,
+  simba.ide_controller,
   simba.threading;
 
 procedure TSimbaEditorCaretHistory.DumpState(const msg: String);
@@ -203,18 +203,14 @@ begin
           (FHistory[FIndex-1].Caret.Y <> FHistory[FIndex].Caret.Y) or
           (FHistory[FIndex-1].Tab     <> FHistory[FIndex].Tab);
 
-    if FIndex = 0 then FIndex := 1;          // safety
+    if FIndex = 0 then FIndex := 1; // safety
 
     {$IFDEF DEBUG}
     DumpState('Back → '+IntToStr(FIndex));
     {$ENDIF}
 
     with FHistory[FIndex-1] do
-    begin
-      SimbaTabsForm.ActiveTab := Tab;
-      SimbaTabsForm.ActiveTab.Editor.CaretXY := Caret;
-      SimbaTabsForm.ActiveTab.Editor.TopLine := Caret.Y - (Tab.Editor.LinesInWindow div 2);
-    end;
+      SimbaController.OpenTab(Tab, Caret.X, Caret.Y);
   finally
     FMoving := False;
   end;
@@ -240,11 +236,7 @@ begin
   {$ENDIF}
 
   with FHistory[FIndex-1] do
-  begin
-    SimbaTabsForm.ActiveTab := Tab;
-    SimbaTabsForm.ActiveTab.Editor.CaretXY := Caret;
-    SimbaTabsForm.ActiveTab.Editor.TopLine := Caret.Y - (Tab.Editor.LinesInWindow div 2);
-  end;
+    SimbaController.OpenTab(Tab, Caret.X, Caret.Y);
 end;
 
 { ───── lifecycle ───── }

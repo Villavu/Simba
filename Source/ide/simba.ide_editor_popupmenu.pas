@@ -3,6 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
+// TODO: Use events
 unit simba.ide_editor_popupmenu;
 
 {$i simba.inc}
@@ -61,7 +62,7 @@ implementation
 uses
   LCLType,
   simba.base, simba.form_main, simba.ide_editor, simba.nativeinterface,
-  simba.ide_tab, simba.form_tabs, simba.ide_utils, simba.ide_codetools_debug,
+  simba.ide_tab, simba.form_scripttabs, simba.ide_utils, simba.ide_codetools_debug,
   simba.ide_editor_commands;
 
 type
@@ -144,7 +145,7 @@ end;
 
 procedure TSimbaTabPopupMenu.DoFind(Sender: TObject);
 begin
-  SimbaTabsForm.Find();
+  SimbaScriptTabsForm.Find();
 end;
 
 procedure TSimbaTabPopupMenu.DoReplace(Sender: TObject);
@@ -152,7 +153,7 @@ begin
   if ScriptTab.Editor.ReadOnly then
     Exit;
 
-  SimbaTabsForm.Replace();
+  SimbaScriptTabsForm.Replace();
 end;
 
 procedure TSimbaTabPopupMenu.DoDocComment(Sender: TObject);

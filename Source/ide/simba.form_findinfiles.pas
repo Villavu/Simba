@@ -99,11 +99,11 @@ uses
   Menus,
   AnchorDocking,
   simba.ide_dockinghelpers,
+  simba.ide_controller,
   simba.threading,
   simba.component_theme,
   simba.fs,
-  simba.settings,
-  simba.form_tabs;
+  simba.settings;
 
 procedure TResultsMemo.AddFileLine(FileName: String);
 var
@@ -149,9 +149,12 @@ var
   Line: Integer;
 begin
   Line := PixelsToRowColumn(TPoint.Create(X, Y)).Y;
-
-  if Assigned(LineInfo[Line - 1]) and SimbaTabsForm.Open(LineInfo[Line - 1].FileName) then
-    SimbaTabsForm.ActiveTab.GotoLine(LineInfo[Line - 1].Line);
+  if Assigned(LineInfo[Line - 1]) then
+    SimbaController.OpenInTab(
+      LineInfo[Line - 1].FileName,
+      1,
+      LineInfo[Line - 1].Line
+    );
 end;
 
 function TResultsMemo.GetLineInfo(Line: Integer): TLineInfo;
@@ -416,7 +419,7 @@ var
 begin
   for Line := 0 to FMemoResults.Lines.Count - 1 do
     if Assigned(FMemoResults.LineInfo[Line]) and FMemoResults.LineInfo[Line].isFile then
-      SimbaTabsForm.Open(FMemoResults.LineInfo[Line].FileName);
+      SimbaController.OpenInTab(FMemoResults.LineInfo[Line].FileName);
 end;
 
 procedure TSimbaFindInFilesForm.FormCreate(Sender: TObject);
@@ -463,15 +466,10 @@ begin
 end;
 
 procedure TSimbaFindInFilesForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-
-  procedure DoFindInFiles(Item: TMenuItem);
-  begin
-    DockMaster.Show(Self);
-  end;
-
 begin
   case Event of
-    ESimbaEvent.ACTION_FIND_IN_FILES: DoFindInFiles(TMenuItem(Data));
+    ESimbaEvent.ACTION_FIND_IN_FILES:
+      DockMaster.Show(Self);
   end;
 end;
 
