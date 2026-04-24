@@ -55,7 +55,8 @@ type
 
     function addCheckItem(
       Menu: TMenu;
-      Text: String; Shortcut: TShortCut;
+      Checked: Boolean;
+      Text: String;
       Event: ESimbaEvent
     ): TMenuItem;
 
@@ -106,11 +107,12 @@ begin
   Menu.Items.Add(Result);
 end;
 
-function TSimbaMainMenuBar.addCheckItem(Menu: TMenu; Text: String; Shortcut: TShortCut; Event: ESimbaEvent): TMenuItem;
+function TSimbaMainMenuBar.addCheckItem(Menu: TMenu; Checked: Boolean; Text: String; Event: ESimbaEvent): TMenuItem;
 begin
-  Result := addItem(Menu, IMG_NONE, Text, Shortcut, Event);
+  Result := addItem(Menu, IMG_NONE, Text, scNone, Event);
   Result.ShowAlwaysCheckable := True;
   Result.AutoCheck := True;
+  Result.Checked := Checked;
 end;
 
 function TSimbaMainMenuBar.addLine(Menu: TMenu): TMenuItem;
@@ -121,7 +123,6 @@ begin
   Menu.Items.Add(Result);
 end;
 
-// TODO: SaveAll handling
 procedure TSimbaMainMenuBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   // update run/pause/compile/stop enable
@@ -377,7 +378,7 @@ constructor TSimbaMainMenuBar.Create;
     FPause   := addItem(FScriptMenu, IMG_PAUSE, 'Pause', scNone, ESimbaEvent.ACTION_PAUSE);
     FStop    := addItem(FScriptMenu, IMG_STOP, 'Stop', ShortCut(VK_S, [ssAlt]), ESimbaEvent.ACTION_STOP);
     addLine(FScriptMenu);
-    addCheckItem(FScriptMenu, 'Compiler Hints', scNone, ESimbaEvent.ACTION_COMPILER_HINTS);
+    addCheckItem(FScriptMenu, SimbaSettings.Compiler.ShowHints.Value, 'Compiler Hints', ESimbaEvent.ACTION_COMPILER_HINTS);
   end;
 
   procedure addToolsMenu();
@@ -403,7 +404,7 @@ constructor TSimbaMainMenuBar.Create;
   begin
     FViewMenu := addMenu('View');
 
-    addCheckItem(FViewMenu, 'Tray Icon', scNone, ESimbaEvent.ACTION_VIEW_TRAYICON);
+    addCheckItem(FViewMenu, SimbaSettings.General.TrayIconVisible.Value, 'Tray Icon', ESimbaEvent.ACTION_VIEW_TRAYICON);
     addLine(FViewMenu);
     addItem(FViewMenu, IMG_NONE, 'Colour Picker History', scNone, ESimbaEvent.ACTION_VIEW_COLORHISTORY);
     addItem(FViewMenu, IMG_NONE, 'Debug Image', scNone, ESimbaEvent.ACTION_VIEW_DEBUGIMAGE);   // todo debugimage should be a control, not a form
@@ -417,7 +418,7 @@ constructor TSimbaMainMenuBar.Create;
     addItem(FViewMenu, IMG_NONE, 'Find In Files', scNone, ESimbaEvent.ACTION_VIEW_FINDINFILES);
     addLine(FViewMenu);
     addItem(FViewMenu, IMG_NONE, 'Reset Layout', scNone, ESimbaEvent.ACTION_RESET_LAYOUT);
-    addCheckItem(FViewMenu, 'Lock Layout', scNone, ESimbaEvent.ACTION_LOCK_LAYOUT);
+    addCheckItem(FViewMenu, SimbaSettings.General.LockLayout.Value, 'Lock Layout', ESimbaEvent.ACTION_LOCK_LAYOUT);
   end;
 
   procedure addHelpMenu();

@@ -81,12 +81,6 @@ type
   TSimbaMainForm = class(TForm)
     DockPanel: TAnchorDockPanel;
     Images: TImageList;
-    MenuEdit: TMenuItem;
-    MenuFile: TMenuItem;
-    MenuHelp: TMenuItem;
-    MenuItemScript: TMenuItem;
-    MenuTools: TMenuItem;
-    MenuView: TMenuItem;
     MainMenuPanel: TPanel;
     TrayIcon: TTrayIcon;
     TrayPopup: TPopupMenu;
@@ -107,7 +101,6 @@ type
     procedure DoException(Sender: TObject; E: Exception);
     procedure DoAssociateIfFirstLaunch;
     procedure DoApplicationParameters;
-    procedure DoFocusEditor;
     function DoGetTargetImage: TSimbaImage;
   public
     procedure Setup;
@@ -241,13 +234,6 @@ begin
   end;
 end;
 
-procedure TSimbaMainForm.DoFocusEditor;
-begin
-  //if Assigned(SimbaTabsForm.ActiveTab) then
-  //  if SimbaTabsForm.ActiveTab.Editor.CanSetFocus() then
-  //    SimbaTabsForm.ActiveTab.Editor.SetFocus();
-end;
-
 procedure TSimbaMainForm.TrayPopupExitClick(Sender: TObject);
 begin
   Close();
@@ -307,6 +293,7 @@ begin
 
   DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
   DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
+
 
   MoveToDefaultPosition();
   EnsureVisible();
@@ -368,9 +355,12 @@ begin
 
   Caption := Format('Simba %.1f', [SIMBA_VERSION / 1000]);
 
+  DockMaster.ShowHeader := not SimbaSettings.General.LockLayout.Value;
+  DockMaster.AllowDragging := not SimbaSettings.General.LockLayout.Value;
+  TrayIcon.Visible := SimbaSettings.General.TrayIconVisible.Value;
+
   QueueOnMainThread(@DoAssociateIfFirstLaunch);
   QueueOnMainThread(@DoApplicationParameters); // open/compile/run parameters
-  QueueOnMainThread(@DoFocusEditor); // finally focus the tab
 end;
 
 destructor TSimbaMainForm.Destroy;
@@ -428,12 +418,16 @@ procedure TSimbaMainForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoLockLayout(MenuItem: TMenuItem);
   begin
+    SimbaSettings.General.LockLayout.Value := MenuItem.Checked;
+
     DockMaster.ShowHeader := not MenuItem.Checked;
     DockMaster.AllowDragging := not MenuItem.Checked;
   end;
 
   procedure DoViewTrayIcon(MenuItem: TMenuItem);
   begin
+    SimbaSettings.General.TrayIconVisible.Value := MenuItem.Checked;
+
     TrayIcon.Visible := MenuItem.Checked;
   end;
 
@@ -487,18 +481,24 @@ procedure TSimbaMainForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     Close();
   end;
 
+  procedure DoCompilerHints(MenuItem: TMenuItem);
+  begin
+    SimbaSettings.Compiler.ShowHints.Value := MenuItem.Checked;
+  end;
+
 begin
   case Event of
-    ESimbaEvent.ACTION_RESET_LAYOUT:  DoResetLayout();
-    ESimbaEvent.ACTION_LOCK_LAYOUT:   DoLockLayout(TMenuItem(Data));
-    ESimbaEvent.ACTION_VIEW_TRAYICON: DoViewTrayIcon(TMenuItem(Data));
-    ESimbaEvent.ACTION_REPORTBUG:     DoReportBug();
-    ESimbaEvent.ACTION_SIMBAGITHUB:   DoSimbaGithub();
-    ESimbaEvent.ACTION_ONLINEDOCS:    DoOnlineDocs();
-    ESimbaEvent.ACTION_ASSOCIATE:     DoAssociate();
-    ESimbaEvent.ACTION_ACA:           DoACA();
-    ESimbaEvent.ACTION_DTM_EDITOR:    DoDTMEditor();
-    ESimbaEvent.ACTION_QUIT:          DoQuit();
+    ESimbaEvent.ACTION_RESET_LAYOUT:   DoResetLayout();
+    ESimbaEvent.ACTION_COMPILER_HINTS: DoCompilerHints(TMenuItem(Data));
+    ESimbaEvent.ACTION_LOCK_LAYOUT:    DoLockLayout(TMenuItem(Data));
+    ESimbaEvent.ACTION_VIEW_TRAYICON:  DoViewTrayIcon(TMenuItem(Data));
+    ESimbaEvent.ACTION_REPORTBUG:      DoReportBug();
+    ESimbaEvent.ACTION_SIMBAGITHUB:    DoSimbaGithub();
+    ESimbaEvent.ACTION_ONLINEDOCS:     DoOnlineDocs();
+    ESimbaEvent.ACTION_ASSOCIATE:      DoAssociate();
+    ESimbaEvent.ACTION_ACA:            DoACA();
+    ESimbaEvent.ACTION_DTM_EDITOR:     DoDTMEditor();
+    ESimbaEvent.ACTION_QUIT:           DoQuit();
   end;
 end;
 
