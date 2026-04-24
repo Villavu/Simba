@@ -31,6 +31,7 @@ type
     FMenuItemClose: TMenuItem;
     FMenuItemCloseOther: TMenuItem;
     FMenuItemCloseOnRight: TMenuItem;
+    FMenuItemCloseAll: TMenuItem;
 
     FMouseDown: Boolean;
     FMouseDownX: Integer;
@@ -391,6 +392,7 @@ begin
       if (Sender = FMenuItemClose)        then CloseTab(Tab);
       if (Sender = FMenuItemCloseOther)   then CloseOtherTabs(Tab);
       if (Sender = FMenuItemCloseOnRight) then CloseTabsOnRight(Tab);
+      if (Sender = FMenuItemCloseAll)     then CloseAllTabs();
     end;
   end;
 end;
@@ -583,10 +585,12 @@ begin
   FEditorFind := TSimbaEditorFind.Create(Self);
 
   FTabPopup := TPopupMenu.Create(Self);
-  FMenuItemNewTab := addItem(FTabPopup, IMG_NONE, 'New Tab', IMG_NEW);
-  FMenuItemClose := addItem(FTabPopup, IMG_NONE, 'Close Tab', IMG_CLOSE);
+  FTabPopup.Images := SimbaMainForm.Images;
+  FMenuItemNewTab := addItem(FTabPopup, IMG_NEW, 'New Tab', ShortCut(VK_N, [ssCtrl]));
+  FMenuItemClose := addItem(FTabPopup, IMG_CLOSE, 'Close Tab', ShortCut(VK_W, [ssCtrl]));
   FMenuItemCloseOther := addItem(FTabPopup, IMG_NONE, 'Close Other Tabs', scNone);
   FMenuItemCloseOnRight := addItem(FTabPopup, IMG_NONE, 'Close Tabs on Right', scNone);
+  FMenuItemCloseAll := addItem(FTabPopup, IMG_CLOSE_ALL, 'Close All Tabs', scNone);
 
   FTabControl := TSimbaTabControl.Create(Self, TSimbaScriptTab);
   FTabControl.Parent := Self;
