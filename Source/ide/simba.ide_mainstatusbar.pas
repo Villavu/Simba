@@ -33,7 +33,7 @@ implementation
 
 uses
   simba.initializations, simba.ide_mouselogger, simba.ide_tab,
-  simba.ide_editor_findreplace, simba.form_tabs,
+  simba.ide_editor_findreplace,
   simba.functionlist_page;
 
 procedure TSimbaMainStatusBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
@@ -85,8 +85,8 @@ end;
 
 procedure TSimbaMainStatusBar.DoTimerExecute(Sender: TObject);
 begin
-  if Assigned(SimbaTabsForm) and Assigned(SimbaTabsForm.ActiveTab) then
-    FStatusBar.PanelText[1] := SimbaTabsForm.ActiveTab.ScriptStateStr;
+  //if Assigned(SimbaTabsForm) and Assigned(SimbaTabsForm.ActiveTab) then
+  //  FStatusBar.PanelText[1] := SimbaTabsForm.ActiveTab.ScriptStateStr;
 end;
 
 constructor TSimbaMainStatusBar.Create;

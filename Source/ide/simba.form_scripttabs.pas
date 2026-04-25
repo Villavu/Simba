@@ -76,7 +76,6 @@ type
     function AddTab: TSimbaScriptTab;
     function CloseTab(Tab: TSimbaScriptTab; KeepOne: Boolean = True): Boolean;
     function CloseAllTabs(KeepOne: Boolean = True): Boolean;
-    function CheckForFileChanges: Boolean;
 
     procedure Find;
     procedure FindNext;
@@ -165,6 +164,11 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   procedure DoSave(Tab: TSimbaScriptTab);
   begin
     Tab.Save(Tab.ScriptFileName);
+  end;
+
+  procedure DoSaveAs(Tab: TSimbaScriptTab);
+  begin
+    Tab.Save('');
   end;
 
   procedure DoSaveAll;
@@ -324,6 +328,7 @@ begin
     ESimbaEvent.ACTION_CLOSE_TAB:       DoCloseTab(ActiveTab);
     ESimbaEvent.ACTION_CLOSE_ALL_TABS:  DoCloseAllTabs();
     ESimbaEvent.ACTION_SAVE:            DoSave(ActiveTab);
+    ESimbaEvent.ACTION_SAVE_AS:         DoSaveAs(ActiveTab);
     ESimbaEvent.ACTION_SAVE_ALL:        DoSaveAll();
     ESimbaEvent.ACTION_SAVE_AS_DEFAULT: DoSaveAsDefault(ActiveTab);
     ESimbaEvent.ACTION_NEW:             DoNew();
@@ -695,28 +700,6 @@ begin
       Result := False;
       Exit;
     end;
-end;
-
-function TSimbaScriptTabsForm.CheckForFileChanges: Boolean;
-var
-  Tab: TSimbaScriptTab;
-begin
-  Result := False;
-  Tab := ActiveTab;
-  if (Tab = nil) or (Tab.ScriptFileName = '') or (not FileExists(Tab.ScriptFileName)) then
-    Exit;
-
-  if (FileDateToDateTime(FileAge(Tab.ScriptFileName)) > Tab.DiskAge) then
-  begin
-    if MessageDlg('File "' + Tab.ScriptFileName + '" has changed on disk.' + sLineBreak + 'Do you want to reload it?',
-                  mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-    begin
-      Tab.Load(Tab.ScriptFileName);
-      Result := True;
-    end
-    else
-      Tab.UpdateDiskAge();
-  end;
 end;
 
 procedure DoCreate;

@@ -23,7 +23,8 @@ uses
   simba.plugin_dump, simba.script_runner,
   simba.initializations, simba.ide_analytics, simba.script,
   simba.openssl,
-  simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector;
+  simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector,
+  simba.ide_mainmenubar, simba.ide_maintoolbar, simba.ide_mainstatusbar;
 
 begin
   {$IF DECLARED(HEAPTRC)}

@@ -82,14 +82,12 @@ type
   end;
 
   TSimbaScriptTab = class(TSimbaTab)
-  private
-    procedure SetScript(AValue: String);
   protected
     FEditor: TSimbaEditor;
     FSavedText: String;
     FScriptFileName: String;
     FScriptTitle: String;
-    FDiskAge: TDateTime;
+    FDiskAge: Int64; // disk age when we loaded the file
 
     FScriptRunner: TSimbaScriptTabRunner;
 
@@ -110,6 +108,7 @@ type
 
     function GetScript: String;
     function GetScriptChanged: Boolean;
+    procedure SetScript(AValue: String);
   public
     property OutputBox: TSimbaOutputBox read FOutputBox;
 
@@ -119,12 +118,16 @@ type
     property ScriptChanged: Boolean read GetScriptChanged;
     property Script: String read GetScript write SetScript;
     property Editor: TSimbaEditor read FEditor;
-    property DiskAge: TDateTime read FDiskAge;
 
-    procedure UpdateDiskAge;
-    function SaveAsDialog: String;
+    function IsOutdatedOnDisk: Boolean;
+    function QueryReloadOutdated: Boolean;
 
+    // Save the script to a file.
+    // FileName='' will open a save dialog to query for filename
     function Save(FileName: String): Boolean;
+
+    // Load editor lines from file
+    // Will set editor to read only if file is such.
     function Load(FileName: String): Boolean;
 
     procedure GotoLine(Line: Integer);
@@ -154,7 +157,8 @@ uses
   simba.ide_scriptcommunication, simba.datetime, simba.ide_editor_popupmenu,
   simba.vartype_windowhandle,
   simba.vartype_string,
-  simba.ide_vars;
+  simba.ide_vars,
+  simba.dialog;
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var
@@ -345,20 +349,33 @@ begin
   Result := FEditor.Text <> FSavedText;
 end;
 
-procedure TSimbaScriptTab.UpdateDiskAge;
-begin
-  if (FScriptFileName <> '') and FileExists(FScriptFileName) then
-    FDiskAge := FileDateToDateTime(FileAge(FScriptFileName))
-  else
-    FDiskAge := 0;
-end;
-
 procedure TSimbaScriptTab.SetScript(AValue: String);
 begin
   FEditor.BeginUndoBlock();
   FEditor.ClearAll();
   FEditor.InsertTextAtCaret(Script);
   FEditor.EndUndoBlock();
+end;
+
+function TSimbaScriptTab.IsOutdatedOnDisk: Boolean;
+begin
+  Result := (FScriptFileName <> '') and FileExists(FScriptFileName) and
+            (FDiskAge > 0) and (FileAge(FScriptFileName) > FDiskAge);
+end;
+
+function TSimbaScriptTab.QueryReloadOutdated: Boolean;
+const
+  Message = 'File "%s" has changed on disk' + LINE_SEP + 'Do you want to reload it?';
+begin
+  Result := False;
+
+  if IsOutdatedOnDisk() then
+  begin
+    if (ShowQuestionDialog('Simba', Message, [FScriptFileName]) = ESimbaDialogButton.YES) then
+      Result := Load(FScriptFileName)
+    else
+      FDiskAge := FileAge(FScriptFileName);
+  end;
 end;
 
 procedure TSimbaScriptTab.LoadDefaultScript;
@@ -421,38 +438,19 @@ begin
   SimbaEvents.Post(ESimbaEvent.TAB_CARETMOVED, Self);
 end;
 
-function TSimbaScriptTab.SaveAsDialog: String;
-begin
-  Result := '';
-
-  with TSaveDialog.Create(Self) do
-  try
-    Filter := 'Simba Files|*.simba;*.pas;*.inc;|Any Files|*.*';
-    Options := Options + [ofOverwritePrompt];
-    InitialDir := ExtractFileDir(FScriptFileName);
-    if (InitialDir = '') then
-      InitialDir := SimbaEnv.ScriptsPath;
-
-    if Execute() then
-    begin
-      if (ExtractFileExt(FileName) = '') then
-        FileName := ChangeFileExt(FileName, '.simba');
-
-      Result := FileName;
-    end;
-  finally
-    Free();
-  end;
-end;
-
 function TSimbaScriptTab.Save(FileName: String): Boolean;
 begin
   Result := False;
 
   if (FileName = '') then
   begin
-    FileName := SaveAsDialog();
-    if (FileName = '') then
+    FileName := ShowSaveDialog(
+      IfThen(FScriptFileName = '', SimbaEnv.ScriptsPath, TSimbaPath.PathExtractDir(FScriptFileName)),
+      '.simba',
+      'Simba Files|*.simba;*.pas;*.inc;|Any Files|*.*'
+    );
+
+    if (FileName = '') then // dialog was cancelled
       Exit;
   end;
 
@@ -476,9 +474,9 @@ begin
   FScriptTitle := TSimbaPath.PathExtractName(FScriptFileName);
   if FScriptTitle.EndsWith('.simba') then
     FScriptTitle := FScriptTitle.Before('.simba');
+  FDiskAge := FileAge(FScriptFileName);
 
   Caption := FScriptTitle;
-  UpdateDiskAge();
 end;
 
 function TSimbaScriptTab.Load(FileName: String): Boolean;
@@ -503,13 +501,13 @@ begin
 
   FSavedText := FEditor.Text;
 
+  FDiskAge := FileAge(FileName);
   FScriptFileName := FileName;
   FScriptTitle := TSimbaPath.PathExtractName(FScriptFileName);
   if FScriptTitle.EndsWith('.simba') then
     FScriptTitle := FScriptTitle.Before('.simba');
 
   Caption := FScriptTitle;
-  UpdateDiskAge();
   if Result then
     SimbaEvents.Post(ESimbaEvent.TAB_LOADED, Self);
 end;
@@ -578,7 +576,7 @@ procedure TSimbaScriptTab.Run;
 begin
   //DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
 
-  if SimbaScriptTabsForm.CheckForFileChanges() then
+  if QueryReloadOutdated()  then
     Exit;
 
   if (FScriptRunner <> nil) then
@@ -600,7 +598,7 @@ procedure TSimbaScriptTab.Compile;
 begin
   //DebugLn('TSimbaScriptTab.Compile :: ' + ScriptTitle + ' ' + ScriptFileName);
 
-  if SimbaScriptTabsForm.CheckForFileChanges() then
+  if QueryReloadOutdated()  then
     Exit;
 
   if (FScriptRunner = nil) then

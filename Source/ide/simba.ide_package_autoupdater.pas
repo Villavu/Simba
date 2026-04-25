@@ -38,7 +38,7 @@ var
 implementation
 
 uses
-  simba.ide_package, simba.ide_package_installer, simba.ide_maintoolbar, simba.initializations, simba.ide_mainmenubar,
+  simba.ide_package, simba.ide_package_installer, simba.initializations,
   simba.form_main, simba.form_package, simba.form_output, simba.form_openexample,
   simba.vartype_string, simba.fs;
 
@@ -115,11 +115,11 @@ procedure TPackageUpdater.BuildMenu;
   var
     Menu: TPopupMenu;
   begin
-    for Menu in SimbaMainMenuBar.MenuBar.Menus do
-      if (Menu is TPackagePopupMenu) and (TPackagePopupMenu(Menu).PackageFullName = PackageFullName) then
-        Exit(TPackagePopupMenu(Menu));
-
-    Result := TPackagePopupMenu.Create(SimbaMainMenuBar.MenuBar);
+    //for Menu in SimbaMainMenuBar.MenuBar.Menus do
+    //  if (Menu is TPackagePopupMenu) and (TPackagePopupMenu(Menu).PackageFullName = PackageFullName) then
+    //    Exit(TPackagePopupMenu(Menu));
+    //
+    //Result := TPackagePopupMenu.Create(SimbaMainMenuBar.MenuBar);
   end;
 
 var
@@ -165,7 +165,7 @@ begin
       Menu.Items.Add(SubMenu);
     end;
 
-    SimbaMainMenuBar.MenuBar.AddMenu(Package.Name, Menu);
+    //SimbaMainMenuBar.MenuBar.AddMenu(Package.Name, Menu);
   end;
 end;
 
@@ -190,17 +190,17 @@ begin
   BuildMenu(); // Main menu bar
 
   // Update icon
-  if (FUpdates.Count > 0) then
-  begin
-    SimbaMainToolBar.ButtonPackage.Hint       := 'Open packages' + LineEnding + FUpdates.Text;
-    SimbaMainToolBar.ButtonPackage.ImageIndex := IMG_PACKAGE + Min(1 + FUpdates.Count, 9);
-  end else
-  begin
-    SimbaMainToolBar.ButtonPackage.Hint       := 'Open packages';
-    SimbaMainToolBar.ButtonPackage.ImageIndex := IMG_PACKAGE;
-  end;
-
-  SimbaMainToolBar.ButtonPackage.Invalidate();
+  //if (FUpdates.Count > 0) then
+  //begin
+  //  SimbaMainToolBar.ButtonPackage.Hint       := 'Open packages' + LineEnding + FUpdates.Text;
+  //  SimbaMainToolBar.ButtonPackage.ImageIndex := IMG_PACKAGE + Min(1 + FUpdates.Count, 9);
+  //end else
+  //begin
+  //  SimbaMainToolBar.ButtonPackage.Hint       := 'Open packages';
+  //  SimbaMainToolBar.ButtonPackage.ImageIndex := IMG_PACKAGE;
+  //end;
+  //
+  //SimbaMainToolBar.ButtonPackage.Invalidate();
 end;
 
 procedure TPackageUpdater.Execute;

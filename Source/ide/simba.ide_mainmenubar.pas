@@ -81,7 +81,7 @@ implementation
 
 uses
   Forms, LCLType, LMessages, LazFileUtils,
-  simba.initializations, simba.ide_maintoolbar, simba.form_main,
+  simba.initializations, simba.form_main,
   simba.ide_tab,
   simba.ide_editor,
   simba.ide_controller,
