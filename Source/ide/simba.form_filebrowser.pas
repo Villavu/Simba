@@ -261,8 +261,6 @@ procedure TSimbaFileBrowserForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
       Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - FTreeView.MaxRight);
   end;
 
-var
-  Splitter: TAnchorDockSplitter;
 begin
   case Event of
     ESimbaEvent.ACTION_VIEW_FILEBROWSER: DoViewFileBrowser(TMenuItem(Data));

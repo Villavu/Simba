@@ -22,6 +22,10 @@ type
   ESimbaEvent = (
     NONE,
 
+    // Called every ~500ms while a script is running, Data = TSimbaScriptTabRunner
+    // Warning: Is *NOT* called on main thread (FOutputThread)
+    SCRIPT_RUNNING,
+
     // "file" menu, Data=TMenuItem
     ACTION_NEW,
     ACTION_OPEN,
@@ -226,12 +230,14 @@ end;
 constructor TSimbaEvents.Create;
 begin
   inherited Create();
+
   FCallbacks := TCallbackList.Create();
 end;
 
 destructor TSimbaEvents.Destroy;
 begin
   FreeAndNil(FCallbacks);
+
   inherited Destroy();
 end;
 

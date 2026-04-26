@@ -3,7 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
   --------------------------------------------------------------------------
-  IDE variables for the lifespan of the process
+  Temporary IDE variables for the lifespan of the process
 }
 unit simba.ide_vars;
 

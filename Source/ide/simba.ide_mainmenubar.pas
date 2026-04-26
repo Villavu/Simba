@@ -46,7 +46,7 @@ type
 
     function addMenu(Text: String): TPopupMenu;
 
-    // Add item, storing the event in the items .tag
+    // Add item, storing the event in the items .Tag
     function addItem(
       Menu: TMenu;
       Image: Integer; Text: String; Shortcut: TShortCut;
@@ -133,7 +133,7 @@ procedure TSimbaMainMenuBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     if (not Tab.IsActiveTab) then
       Exit;
 
-    State := Tab.ScriptState;
+    State := Tab.RunningState;
 
     FRun.Enabled      := (State = ESimbaScriptState.PAUSED) or (State = ESimbaScriptState.NONE);
     FPause.Enabled    := (State = ESimbaScriptState.RUNNING);

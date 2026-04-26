@@ -595,7 +595,7 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     for I := 0 to FTabControl.TabCount - 1 do
       if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = Tab.OutputBox) then
       begin
-        case Tab.ScriptState of
+        case Tab.RunningState of
           ESimbaScriptState.RUNNING: TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PLAY;
           ESimbaScriptState.PAUSED:  TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PAUSE;
           else

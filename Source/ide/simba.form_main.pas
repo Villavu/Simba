@@ -136,7 +136,6 @@ uses
   simba.form_output,
   simba.form_filebrowser,
   simba.form_notes,
-  simba.form_settings,
   simba.form_functionlist,
   simba.form_backups,
   simba.form_scripttabs,

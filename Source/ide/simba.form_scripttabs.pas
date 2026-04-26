@@ -5,7 +5,6 @@
 }
 // TODO:
 //   - use simba.dialogs
-//   - CheckForFileChanges invoke should be in here, not ide_tab
 unit simba.form_scripttabs;
 
 {$i simba.inc}

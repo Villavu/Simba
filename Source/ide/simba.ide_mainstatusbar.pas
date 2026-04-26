@@ -10,7 +10,7 @@ unit simba.ide_mainstatusbar;
 interface
 
 uses
-  Classes, SysUtils, Controls, Forms, ExtCtrls,
+  Classes, SysUtils, Controls, Forms,
   simba.base,
   simba.component_statusbar,
   simba.ide_events;
@@ -21,7 +21,6 @@ type
     FStatusBar: TSimbaStatusBar;
 
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-    procedure DoTimerExecute(Sender: TObject);
   public
     constructor Create; reintroduce;
   end;
@@ -32,9 +31,12 @@ var
 implementation
 
 uses
-  simba.initializations, simba.ide_mouselogger, simba.ide_tab,
+  simba.initializations,
+  simba.ide_mouselogger,
+  simba.ide_tab,
   simba.ide_editor_findreplace,
-  simba.functionlist_page;
+  simba.functionlist_page,
+  simba.datetime;
 
 procedure TSimbaMainStatusBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
@@ -67,40 +69,44 @@ begin
 
     ESimbaEvent.TAB_CHANGE:
       begin
-        FStatusBar.PanelText[1] := TSimbaScriptTab(Data).ScriptStateStr;
+        case TSimbaScriptTab(Data).RunningState of
+          ESimbaScriptState.RUNNING: FStatusBar.PanelText[1] := 'Running';
+          ESimbaScriptState.PAUSED:  FStatusBar.PanelText[1] := 'Paused';
+          else
+            FStatusBar.PanelText[1] := 'Stopped';
+        end;
       end;
 
     ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:
       begin
         if TSimbaScriptTab(Data).IsActiveTab then
-          FStatusBar.PanelText[1] := TSimbaScriptTab(Data).ScriptStateStr;
+          case TSimbaScriptTab(Data).RunningState of
+            ESimbaScriptState.RUNNING: FStatusBar.PanelText[1] := 'Running';
+            ESimbaScriptState.PAUSED:  FStatusBar.PanelText[1] := 'Paused';
+            else
+              FStatusBar.PanelText[1] := 'Stopped';
+          end;
       end;
 
     ESimbaEvent.FUNCTIONLIST_SELECTION_CHANGE:
       begin
         FStatusBar.PanelText[3] := TSimbaFunctionListNode(Data).Hint;
       end;
-  end;
-end;
 
-procedure TSimbaMainStatusBar.DoTimerExecute(Sender: TObject);
-begin
-  //if Assigned(SimbaTabsForm) and Assigned(SimbaTabsForm.ActiveTab) then
-  //  FStatusBar.PanelText[1] := SimbaTabsForm.ActiveTab.ScriptStateStr;
+    ESimbaEvent.SCRIPT_RUNNING:
+      begin
+        if TSimbaScriptTabRunner(Data).Tab.IsActiveTab then
+          case TSimbaScriptTabRunner(Data).State of
+            ESimbaScriptState.RUNNING: FStatusBar.PanelText[1] := FormatMilliseconds(TSimbaScriptTabRunner(Data).TimeRunning, 'hh:mm:ss');
+            ESimbaScriptState.PAUSED:  FStatusBar.PanelText[1] := 'Paused';
+          end;
+      end;
+  end;
 end;
 
 constructor TSimbaMainStatusBar.Create;
 begin
   inherited Create(nil);
-
-  with TIdleTimer.Create(Self) do
-  begin
-    AutoEnabled := True;
-    AutoStartEvent := itaOnIdle;
-    AutoEndEvent := itaOnUserInput;
-    Interval := 750;
-    OnTimer := @DoTimerExecute;
-  end;
 
   FStatusBar := TSimbaStatusBar.Create(Application.MainForm);
   FStatusBar.Parent := Application.MainForm;
