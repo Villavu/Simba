@@ -25,6 +25,7 @@ type
   TSimbaScriptTabRunner = class(TComponent)
   protected
     FTab: TSimbaScriptTab;
+    FIsActiveTab: Boolean;
 
     FErrorSet: Boolean;
     FError: record
@@ -44,6 +45,8 @@ type
     FScript: String;
     FScriptTitle: String;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
     procedure Start(Args: TStringArray);
 
     procedure ShowError;
@@ -60,6 +63,7 @@ type
     property ScriptTitle: String read FScriptTitle;
 
     property Tab: TSimbaScriptTab read FTab;
+    property IsActiveTab: Boolean read FIsActiveTab;
 
     property Process: TProcess read FProcess;
     property State: ESimbaScriptState read FState write SetState;
@@ -228,6 +232,14 @@ begin
   SimbaEvents.Post(ESimbaEvent.TAB_SCRIPTSTATE_CHANGE, FTab);
 end;
 
+procedure TSimbaScriptTabRunner.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.TAB_CHANGE:
+      FIsActiveTab := FTab = TSimbaScriptTab(Data);
+  end;
+end;
+
 procedure TSimbaScriptTabRunner.Start(Args: TStringArray);
 begin
   FScriptFile := FTab.ScriptFileName;
@@ -309,6 +321,7 @@ begin
   inherited Create(ATab);
 
   FTab := ATab;
+  FIsActiveTab := ATab.IsActiveTab;
   FState := ESimbaScriptState.RUNNING;
 
   FProcess := TProcess.Create(Self);
@@ -316,6 +329,8 @@ begin
   FProcess.CurrentDirectory := Application.Location;
   FProcess.Options := FProcess.Options + [poUsePipes, poStderrToOutPut, poDetached];
   FProcess.Executable := Application.ExeName;
+
+  SimbaEvents.Register(Self, @DoSimbaEvent);
 end;
 
 procedure TSimbaScriptTabRunner.Kill;

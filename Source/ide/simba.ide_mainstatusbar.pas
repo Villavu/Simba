@@ -95,7 +95,7 @@ begin
 
     ESimbaEvent.SCRIPT_RUNNING:
       begin
-        if TSimbaScriptTabRunner(Data).Tab.IsActiveTab then
+        if TSimbaScriptTabRunner(Data).IsActiveTab then
           case TSimbaScriptTabRunner(Data).State of
             ESimbaScriptState.RUNNING: FStatusBar.PanelText[1] := FormatMilliseconds(TSimbaScriptTabRunner(Data).TimeRunning, 'hh:mm:ss');
             ESimbaScriptState.PAUSED:  FStatusBar.PanelText[1] := 'Paused';
