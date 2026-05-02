@@ -88,7 +88,15 @@ type
   TSimbaScriptTab = class(TSimbaTab)
   protected
     FEditor: TSimbaEditor;
-    FSavedText: String;
+
+    // The text we last saved or loaded, to detect changes
+    FUnmodifiedText: record
+      LineCount: SizeInt; // store line count for faster initial check
+      Text: String;
+    end;
+    FPostedCanSave: Boolean;
+    FPostedCantSave: Boolean;
+
     FScriptFileName: String;
     FScriptTitle: String;
     FFileAge: Int32; // disk age when we loaded the file
@@ -97,11 +105,16 @@ type
 
     FOutputBox: TSimbaOutputBox;
 
+    procedure UpdateModifiedText();
+    function CheckIsModified: Boolean;
+
     procedure LoadDefaultScript;
     procedure FindDeclarationAtCaretASync(Data: PtrInt);
 
     // Keep output tab in sync
     procedure TextChanged; override;
+    // Reset PostedCanSave & PostedCanSave
+    procedure VisibleChanged; override;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
@@ -111,18 +124,18 @@ type
     procedure DoEditorCaretMoved(Sender: TObject);
 
     function GetScript: String;
-    function GetScriptChanged: Boolean;
     procedure SetScript(AValue: String);
   public
     property OutputBox: TSimbaOutputBox read FOutputBox;
 
     property ScriptTitle: String read FScriptTitle;
     property ScriptFileName: String read FScriptFileName;
-    property ScriptChanged: Boolean read GetScriptChanged;
     property Script: String read GetScript write SetScript;
     property Editor: TSimbaEditor read FEditor;
 
+    // Has the file on disk changed since we loaded?
     function IsOutdatedOnDisk: Boolean;
+    // Query a reload if changed on disk
     function QueryReloadOutdated: Boolean;
 
     // Save the script to a file.
@@ -135,6 +148,7 @@ type
 
     procedure FindDeclarationAtCaret;
 
+    function CanSave: Boolean;
     function CanClose: Boolean;
 
     function RunningState: ESimbaScriptState;
@@ -360,11 +374,6 @@ begin
   Result := FEditor.Text;
 end;
 
-function TSimbaScriptTab.GetScriptChanged: Boolean;
-begin
-  Result := FEditor.Text <> FSavedText;
-end;
-
 procedure TSimbaScriptTab.SetScript(AValue: String);
 begin
   FEditor.BeginUndoBlock();
@@ -381,7 +390,8 @@ end;
 
 function TSimbaScriptTab.QueryReloadOutdated: Boolean;
 const
-  Message = 'File "%s" has changed on disk' + LINE_SEP + 'Do you want to reload it?';
+  Message = 'File "%s" has changed on disk' + LINE_SEP +
+            'Do you want to reload it?';
 begin
   Result := False;
 
@@ -392,6 +402,21 @@ begin
     else
       FFileAge := FileAge(FScriptFileName);
   end;
+end;
+
+procedure TSimbaScriptTab.UpdateModifiedText();
+begin
+  FPostedCanSave := False;
+  FPostedCantSave := False;
+
+  FUnmodifiedText.Text := FEditor.TextView.Text;
+  FUnmodifiedText.LineCount := FEditor.TextView.Count;
+end;
+
+function TSimbaScriptTab.CheckIsModified: Boolean;
+begin
+  Result := (FUnmodifiedText.LineCount <> FEditor.TextView.Count) or
+            (FUnmodifiedText.Text <> FEditor.TextView.Text);
 end;
 
 procedure TSimbaScriptTab.LoadDefaultScript;
@@ -409,6 +434,17 @@ begin
   inherited TextChanged();
 
   SimbaEvents.Post(ESimbaEvent.TAB_CAPTION, Self);
+end;
+
+procedure TSimbaScriptTab.VisibleChanged;
+begin
+  inherited VisibleChanged;
+
+  if Visible then
+  begin
+    FPostedCanSave := False;
+    FPostedCantSave := False;
+  end;
 end;
 
 procedure TSimbaScriptTab.Notification(AComponent: TComponent; Operation: TOperation);
@@ -436,10 +472,27 @@ end;
 
 procedure TSimbaScriptTab.DoEditorModified(Sender: TObject);
 begin
-  if ScriptChanged then
-    Caption := '*' + FScriptTitle
-  else
-    Caption := FScriptTitle;
+  if CheckIsModified() then
+  begin
+    if not FPostedCanSave then
+    begin
+      Caption := '*' + FScriptTitle;
+
+      SimbaEvents.Post(ESimbaEvent.TAB_CAN_SAVE, Self);
+      FPostedCanSave := True;
+      FPostedCantSave := False;
+    end;
+  end else
+  begin
+    if not FPostedCantSave then
+    begin
+      Caption := FScriptTitle;
+
+      SimbaEvents.Post(ESimbaEvent.TAB_CANNOT_SAVE, Self);
+      FPostedCantSave := True;
+      FPostedCanSave := False;
+    end;
+  end;
 
   SimbaEvents.Post(ESimbaEvent.TAB_MODIFIED, Self);
 end;
@@ -484,7 +537,7 @@ begin
     end;
   end;
 
-  FSavedText := FEditor.Text;
+  UpdateModifiedText();
 
   FScriptFileName := FileName;
   FScriptTitle := TSimbaPath.PathExtractName(FScriptFileName);
@@ -515,7 +568,7 @@ begin
 
   FEditor.ReadOnly := FileIsReadOnly(FileName);
 
-  FSavedText := FEditor.Text;
+  UpdateModifiedText();
 
   FFileAge := FileAge(FileName);
   FScriptFileName := FileName;
@@ -526,6 +579,11 @@ begin
   Caption := FScriptTitle;
   if Result then
     SimbaEvents.Post(ESimbaEvent.TAB_LOADED, Self);
+end;
+
+function TSimbaScriptTab.CanSave: Boolean;
+begin
+  Result := CheckIsModified();
 end;
 
 function TSimbaScriptTab.CanClose: Boolean;
@@ -547,7 +605,7 @@ begin
       FScriptRunner.Kill();
   end;
 
-  if ScriptChanged then
+  if CanSave() then
   begin
     Show();
 
@@ -572,9 +630,7 @@ end;
 
 procedure TSimbaScriptTab.Run;
 begin
-  //DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
-
-  if QueryReloadOutdated()  then
+  if QueryReloadOutdated() then
     Exit;
 
   if (FScriptRunner <> nil) then
@@ -594,9 +650,7 @@ end;
 
 procedure TSimbaScriptTab.Compile;
 begin
-  //DebugLn('TSimbaScriptTab.Compile :: ' + ScriptTitle + ' ' + ScriptFileName);
-
-  if QueryReloadOutdated()  then
+  if QueryReloadOutdated() then
     Exit;
 
   if (FScriptRunner = nil) then
@@ -611,16 +665,12 @@ end;
 
 procedure TSimbaScriptTab.Pause;
 begin
-  //DebugLn('TSimbaScriptTab.Pause :: ' + ScriptTitle + ' ' + ScriptFileName);
-
   if (FScriptRunner <> nil) then
     FScriptRunner.Pause();
 end;
 
 procedure TSimbaScriptTab.Stop;
 begin
-  //DebugLn('TSimbaScriptTab.Stop :: ' + ScriptTitle + ' ' + ScriptFileName);
-
   if (FScriptRunner <> nil) then
     FScriptRunner.Stop();
 end;
@@ -644,8 +694,7 @@ begin
   FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
 
   LoadDefaultScript();
-
-  FSavedText := FEditor.Text;
+  UpdateModifiedText();
 
   SimbaEvents.Post(ESimbaEvent.TAB_ADD, Self);
 end;

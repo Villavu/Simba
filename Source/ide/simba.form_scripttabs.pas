@@ -92,13 +92,15 @@ var
 implementation
 
 uses
-  LCLType, AnchorDocking,
+  LCLType, AnchorDocking, Clipbrd,
   simba.env,
   simba.vartype_string,
-  simba.form_main,
+  simba.images,
   simba.form_output,
   simba.ide_dockinghelpers,
   simba.ide_simpleformatter,
+  simba.ide_controller,
+  simba.ide_editor_commands,
   simba.settings,
   simba.initializations;
 
@@ -175,7 +177,7 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     I: Integer;
   begin
     for I := TabCount - 1 downto 0 do
-      if Tabs[I].ScriptChanged then
+      if Tabs[I].CanSave() then
       begin
         if (Tabs[I].ScriptFileName = '') then
           Tabs[I].Show();
@@ -312,6 +314,26 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     end;
   end;
 
+  procedure DoFindDeclAtCaret(Tab: TSimbaScriptTab);
+  begin
+    Tab.FindDeclarationAtCaret();
+  end;
+
+  procedure DoCopyFileName(Tab: TSimbaScriptTab);
+  begin
+    Clipboard.AsText := Tab.ScriptFileName;
+  end;
+
+  procedure DoOpenDirectory(Tab: TSimbaScriptTab);
+  begin
+    SimbaController.OpenInExplorer(ExtractFileDir(Tab.ScriptFileName));
+  end;
+
+  procedure DoDocComment(Tab: TSimbaScriptTab);
+  begin
+    Tab.Editor.ExecuteSimpleCommand(ecDocumentation);
+  end;
+
 begin
   if (FTabControl.TabCount = 0) then // for safety
     Exit;
@@ -350,6 +372,11 @@ begin
     ESimbaEvent.ACTION_GOTO_LINE: DoGotoLine();
 
     ESimbaEvent.ACTION_FORMAT_SCRIPT: DoFormatScript(ActiveTab);
+
+    ESimbaEvent.ACTION_FIND_DECL_AT_CARET: DoFindDeclAtCaret(ActiveTab);
+    ESimbaEvent.ACTION_COPY_FILENAME: DoCopyFileName(ActiveTab);
+    ESimbaEvent.ACTION_OPEN_DIRECTORY: DoOpenDirectory(ActiveTab);
+    ESimbaEvent.ACTION_DOC_COMMENT: DoDocComment(ActiveTab);
   end;
 end;
 
@@ -589,12 +616,12 @@ begin
   FEditorFind := TSimbaEditorFind.Create(Self);
 
   FTabPopup := TPopupMenu.Create(Self);
-  FTabPopup.Images := SimbaMainForm.Images;
-  FMenuItemNewTab := addItem(FTabPopup, IMG_NEW, 'New Tab', ShortCut(VK_N, [ssCtrl]));
-  FMenuItemClose := addItem(FTabPopup, IMG_CLOSE, 'Close Tab', ShortCut(VK_W, [ssCtrl]));
-  FMenuItemCloseOther := addItem(FTabPopup, IMG_NONE, 'Close Other Tabs', scNone);
-  FMenuItemCloseOnRight := addItem(FTabPopup, IMG_NONE, 'Close Tabs on Right', scNone);
-  FMenuItemCloseAll := addItem(FTabPopup, IMG_CLOSE_ALL, 'Close All Tabs', scNone);
+  FTabPopup.Images := SimbaImages;
+  FMenuItemNewTab := addItem(FTabPopup, SimbaImages.NEW, 'New Tab', ShortCut(VK_N, [ssCtrl]));
+  FMenuItemClose := addItem(FTabPopup, SimbaImages.CLOSE, 'Close Tab', ShortCut(VK_W, [ssCtrl]));
+  FMenuItemCloseOther := addItem(FTabPopup, -1, 'Close Other Tabs', scNone);
+  FMenuItemCloseOnRight := addItem(FTabPopup, -1, 'Close Tabs on Right', scNone);
+  FMenuItemCloseAll := addItem(FTabPopup, SimbaImages.CLOSE_ALL, 'Close All Tabs', scNone);
 
   FTabControl := TSimbaTabControl.Create(Self, TSimbaScriptTab);
   FTabControl.Parent := Self;
@@ -633,7 +660,7 @@ begin
 
   if FileExists(FileName) then
   begin
-    if (ActiveTab.ScriptFileName <> '') or ActiveTab.ScriptChanged then // Use current tab if default
+    if (ActiveTab.ScriptFileName <> '') or ActiveTab.CanSave() then // Use current tab if default
       ActiveTab := AddTab();
 
     Result := ActiveTab.Load(FileName);

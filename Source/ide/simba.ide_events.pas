@@ -11,7 +11,7 @@ unit simba.ide_events;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, ExtCtrls,
   simba.base,
   simba.colormath,
   simba.containers;
@@ -105,6 +105,12 @@ type
     ACTION_PICKAREA,
     ACTION_CLEAROUTPUT,
 
+    // Editor popup menu, Data=nil
+    ACTION_FIND_DECL_AT_CARET,
+    ACTION_COPY_FILENAME,
+    ACTION_OPEN_DIRECTORY,
+    ACTION_DOC_COMMENT,
+
     // Event called when codetools is setup. Data=nil
     CODETOOLS_SETUP,
 
@@ -118,6 +124,9 @@ type
     TAB_ADD,
     TAB_CLOSED,
     TAB_CAPTION,
+
+    TAB_CAN_SAVE,
+    TAB_CANNOT_SAVE,
 
     // Event called on a form dock/undock
     FORM_DOCK,
