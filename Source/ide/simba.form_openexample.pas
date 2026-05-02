@@ -55,9 +55,9 @@ implementation
 
 uses
   LCLType, AnchorDocking, simba.vartype_string,
-  simba.form_main,
-  simba.fs,
+  simba.component_images,
   simba.component_theme,
+  simba.fs,
   simba.ide_controller;
 
 function ReadResourceString(ResourceName: String): String;
@@ -89,7 +89,7 @@ begin
   if (Name.StartsWith('EXAMPLE_')) then
   begin
     Name := Name.After('EXAMPLE_').Replace('-', ' ').Replace('_', ' ').CapitalizeWords();
-    with TExampleNode(SimbaOpenExampleForm.TreeView.AddNode(SimbaOpenExampleForm.SimbaNode, Name, IMG_SIMBA)) do
+    with TExampleNode(SimbaOpenExampleForm.TreeView.AddNode(SimbaOpenExampleForm.SimbaNode, Name, SimbaImages.SIMBA)) do
       Script := ReadResourceString(ResourceName);
   end;
 
@@ -120,9 +120,9 @@ begin
   if Assigned(TreeView.Items.FindTopLvlNode(PackageName)) then
     TreeView.Items.FindTopLvlNode(PackageName).Free();
 
-  Node := TreeView.AddNode(PackageName, IMG_PACKAGE);
+  Node := TreeView.AddNode(PackageName, SimbaImages.PACKAGE);
   for I := 0 to High(Files) do
-    with TExampleNode(TreeView.AddNode(Node, TSimbaPath.PathExtractNameWithoutExt(Files[I]), IMG_SIMBA)) do
+    with TExampleNode(TreeView.AddNode(Node, TSimbaPath.PathExtractNameWithoutExt(Files[I]), SimbaImages.SIMBA)) do
       FileName := Files[I];
 
   TreeView.EndUpdate();
@@ -184,7 +184,7 @@ begin
   TreeView := TSimbaTreeView.Create(Self, TExampleNode);
   TreeView.Parent := LeftPanel;
   TreeView.Align := alClient;
-  TreeView.Images := SimbaMainForm.Images;
+  TreeView.Images := SimbaImages;
   TreeView.OnSelectionChange := @DoTreeViewSelectionChanged;
   TreeView.OnDoubleClick := @DoButtonOkClick;
 
@@ -203,7 +203,7 @@ begin
   ButtonPanel.Parent := Self;
   ButtonPanel.ButtonOk.OnClick := @DoButtonOkClick;
 
-  SimbaNode := TreeView.AddNode('Simba', IMG_PACKAGE);
+  SimbaNode := TreeView.AddNode('Simba', SimbaImages.PACKAGE);
 
   AddSimbaExamples();
   UpdateTreeSize();

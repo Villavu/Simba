@@ -47,7 +47,8 @@ type
 implementation
 
 uses
-  simba.form_main, simba.component_theme,
+  simba.component_images,
+  simba.component_theme,
   ATCanvasPrimitives;
 
 type
@@ -244,7 +245,7 @@ begin
   FButtonSize := 24;
 
   FImages := TImageList.Create(Self);
-  FImages.Assign(SimbaMainForm.Images); // Create a copy so OnImagesGetWidthForPPI isn't used globally
+  FImages.Assign(SimbaImages); // Create a copy since custom OnGetWidthForPPI
   FImages.OnGetWidthForPPI := @DoGetImageWidth;
 
   FFlowPanel := TFlowPanel.Create(Self);

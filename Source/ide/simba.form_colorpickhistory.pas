@@ -46,8 +46,6 @@ type
     procedure Add(APoint: TPoint; AColor: TColor; ExpandAndScroll: Boolean = False);
     procedure LoadColors;
     procedure SaveColors;
-
-    procedure MakeVisible;
   end;
 
 var
@@ -312,12 +310,6 @@ begin
   SimbaSettings.General.ColorPickerHistory.Value := Stream.DataString;
 
   Stream.Free();
-end;
-
-procedure TSimbaColorPickHistoryForm.MakeVisible;
-begin
-  if (HostDockSite is TSimbaAnchorDockHostSite) then
-    TSimbaAnchorDockHostSite(HostDockSite).MakeVisible();
 end;
 
 {$R *.lfm}

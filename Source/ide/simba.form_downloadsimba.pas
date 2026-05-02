@@ -100,8 +100,9 @@ implementation
 
 uses
   ATCanvasPrimitives,
+  simba.image,
   simba.component_theme,
-  simba.form_main,
+  simba.component_images,
   simba.vartype_string,
   simba.fs,
   simba.nativeinterface;
@@ -222,7 +223,7 @@ begin
   FTreeView.Align := alClient;
   FTreeView.FilterVisible := False;
   FTreeView.OnDoubleClick := @DoTreeDoubleClick;
-  FTreeView.Images := SimbaMainForm.Images;
+  FTreeView.Images := SimbaImages;
   if (SIMBA_COMMIT <> '') then
     {%H-}FTreeView.OnGetNodeColor := @DoGetNodeColor;
 
@@ -361,7 +362,7 @@ procedure TSimbaDownloadSimbaForm.DoPopulated(Sender: TObject);
 
   function AddDownloadNode(ParentNode: TTreeNode; Download, Commit: String): TDownloaderFormNode;
   begin
-    Result := TDownloaderFormNode(FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Download).Replace('%20', ' '), IMG_SIMBA));
+    Result := TDownloaderFormNode(FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Download).Replace('%20', ' '), SimbaImages.SIMBA));
     Result.DownloadURL := 'https://github.com/Villavu/Simba-Build-Archive/blob/main' + Download;
     Result.Commit := Commit;
   end;

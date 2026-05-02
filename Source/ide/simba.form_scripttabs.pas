@@ -95,7 +95,7 @@ uses
   LCLType, AnchorDocking, Clipbrd,
   simba.env,
   simba.vartype_string,
-  simba.images,
+  simba.component_images,
   simba.form_output,
   simba.ide_dockinghelpers,
   simba.ide_simpleformatter,

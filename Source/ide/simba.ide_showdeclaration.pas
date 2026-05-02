@@ -31,7 +31,7 @@ uses
   simba.env,
   simba.component_theme,
   simba.component_buttonpanel,
-  simba.form_main,
+  simba.component_images,
   simba.form_scripttabs;
 
 type
@@ -62,11 +62,11 @@ var
 begin
   FListBox.DoDefaultDrawItem(C, AIndex, ARect);
 
-  NIndentTop := (FListBox.ItemHeight - SimbaMainForm.Images.Height) div 2;
+  NIndentTop := (FListBox.ItemHeight - SimbaImages.Height) div 2;
   NIndentLeft := ARect.Left - FListBox.ScrollHorz;
-  NIndentLeft := NIndentLeft + (FListBox.ColumnWidth[0] - SimbaMainForm.Images.Width) div 2;
+  NIndentLeft := NIndentLeft + (FListBox.ColumnWidth[0] - SimbaImages.Width) div 2;
 
-  SimbaMainForm.Images.Draw(C, NIndentLeft, ARect.Top + NIndentTop, DeclarationImage(FDecls[AIndex]));
+  //SimbaImages.Draw(C, NIndentLeft, ARect.Top + NIndentTop, DeclarationImage(FDecls[AIndex]));
 end;
 
 constructor TShowDeclarationForm.Create(Decls: TDeclarationArray);
@@ -138,7 +138,7 @@ begin
   InitItems();
 
   Cols := [
-    SimbaMainForm.Images.Width + FListBox.IndentLeft * 2,
+    SimbaImages.Width + FListBox.IndentLeft * 2,
     MaxHeaderWidth             + FListBox.IndentLeft * 4,
     MaxLineLength              + FListBox.IndentLeft * 4,
     MaxFileWidth               + FListBox.IndentLeft * 4

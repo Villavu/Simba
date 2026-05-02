@@ -167,7 +167,11 @@ type
 implementation
 
 uses
-  simba.component_theme, simba.component_images, simba.form_main, simba.misc, LCLType,
+  simba.component_theme,
+  simba.component_images,
+  simba.form_main,
+  simba.misc,
+  LCLType,
   ATCanvasPrimitives;
 
 procedure TSimbaTransparentButton.Paint;
@@ -600,8 +604,8 @@ constructor TSimbaCheckButton.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  ImageList := SimbaComponentImages;
-  ImageIndex := SimbaComponentImages.TICK;
+  ImageList := SimbaImages;
+  ImageIndex := SimbaImages.TICK;
 
   YPadding := 3;
 end;

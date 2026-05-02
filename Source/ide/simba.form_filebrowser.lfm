@@ -8,7 +8,6 @@ object SimbaFileBrowserForm: TSimbaFileBrowserForm
   ShowInTaskBar = stAlways
   LCLVersion = '4.0.0.4'
   object Popup: TPopupMenu
-    Images = SimbaMainForm.Images
     OnMeasureItem = PopupMeasureItem
     OnPopup = PopupPopup
     Left = 176

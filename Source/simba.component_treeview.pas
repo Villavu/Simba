@@ -249,8 +249,8 @@ begin
   FTree.OnDragDrop := @DoDragDrop;
   FTree.OnDragOver := @DoDragOver;
   FTree.AddHandlerOnKeyDown(@DoKeyDown);
-  FTree.Indent := 12;
-  FTree.ExpandSignSize := 12;
+  FTree.Indent := Scale96ToFont(10);
+  FTree.ExpandSignSize := Scale96ToFont(10);
 
   FHint := TSimbaTreeViewHint.Create(FTree);
 
@@ -685,12 +685,12 @@ procedure TSimbaTreeView.DoDrawArrow(Sender: TCustomTreeView; const ARect: TRect
 var
   R: TScaledImageListResolution;
 begin
-  R := SimbaComponentImages.ResolutionForPPI[16, Sender.Font.PixelsPerInch, Sender.GetCanvasScaleFactor];
+  R := SimbaImages.ResolutionForPPI[16, Sender.Font.PixelsPerInch, Sender.GetCanvasScaleFactor];
   R.Draw(
     Sender.Canvas,
     ARect.Left + (ARect.Right - ARect.Left - R.Height) div 2,
     ARect.Top + (ARect.Bottom - ARect.Top - R.Height) div 2,
-    IfThen(ACollapsed, SimbaComponentImages.ARROW_RIGHT, SimbaComponentImages.ARROW_DOWN)
+    IfThen(ACollapsed, SimbaImages.ARROW_RIGHT, SimbaImages.ARROW_DOWN)
   );
 end;
 

@@ -11,7 +11,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, ImgList, Menus,
-  attabs;
+  attabs,
+  simba.base;
 
 type
   TSimbaTabControl = class;
@@ -37,6 +38,9 @@ type
   TSimbaTabClass = class of TSimbaTab;
 
   TSimbaTabControl = class(TCustomControl)
+  private
+    function GetImages: TImageList;
+    procedure SetImages(AValue: TImageList);
   public
   type
     TTabMovedEvent     = procedure(Sender: TSimbaTabControl; AFrom, ATo: Integer) of object;
@@ -98,6 +102,7 @@ type
     function DeleteTab(Tab: TSimbaTab): Boolean;
     procedure MoveTab(AFrom, ATo: Integer);
 
+    property Images: TImageList read GetImages write SetImages;
     property DefaultTitle: String read FDefaultTitle write FDefaultTitle;
     property IsClickingCloseButton: Boolean read GetIsClickingCloseButton;
     property CanMoveTabs: Boolean read GetCanMoveTabs write SetCanMoveTabs;
@@ -125,7 +130,8 @@ type
 implementation
 
 uses
-  simba.form_main, simba.base, simba.component_theme, simba.ide_utils;
+  simba.component_theme,
+  simba.ide_utils;
 
 function TSimbaTab.GetImageIndex: TImageIndex;
 begin
@@ -284,6 +290,16 @@ begin
   FTabs.OnMouseMove := Value;
 end;
 
+function TSimbaTabControl.GetImages: TImageList;
+begin
+  Result := FTabs.Images;
+end;
+
+procedure TSimbaTabControl.SetImages(AValue: TImageList);
+begin
+  FTabs.Images := AValue;
+end;
+
 function TSimbaTabControl.GetTabUID: Int64;
 begin
   Inc(FUID);
@@ -377,7 +393,6 @@ begin
 end;
 
 procedure TSimbaTabControl.DoTabClose(Sender: TObject; ATabIndex: Integer; var ACanClose, ACanContinue: Boolean);
-
 var
   Tab: TSimbaTab;
 begin
@@ -443,7 +458,6 @@ begin
   FTabs.OnTabChangeQuery := @DoTabChangeQuery;
   FTabs.OnContextPopup := @DoTabRightClick;
   FTabs.ColorFont := SimbaComponentTheme.ColorFont;
-  FTabs.Images := SimbaMainForm.Images;
   FTabs.BorderSpacing.Bottom := 5;
 
   FTabs.OptSpaceBeforeText := 12;

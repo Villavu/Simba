@@ -581,6 +581,9 @@ type
 
 implementation
 
+uses
+  simba.component_images;
+
 function TDeclarationList.GetByClass(const AClass: TDeclarationClass; const ExactClass: Boolean; const SubSearch: Boolean): TDeclarationArray;
 var
   Size: Integer;
@@ -2367,15 +2370,15 @@ begin
   Result := -1;
 
   case DeclarationKind(Decl) of
-    'property':    Result := 63;
-    'function':    Result := 43;
-    'procedure':   Result := 43;
-    'operator':    Result := 43;
-    'type':        Result := 45;
-    'const':       Result := 47;
-    'var':         Result := 46;
-    'enumelement': Result := 48;
-    'anchor':      Result := 49;
+    'property':    Result := SimbaImages.PROP;
+    'function':    Result := SimbaImages.METHOD;
+    'procedure':   Result := SimbaImages.METHOD;
+    'operator':    Result := SimbaImages.METHOD;
+    'type':        Result := SimbaImages.TYPE_DECL;
+    'const':       Result := SimbaImages.VARIABLE; // todo
+    'var':         Result := SimbaImages.VARIABLE;
+    'enumelement': Result := SimbaImages.ENUM;
+    'anchor':      Result := SimbaImages.ANCHOR;
     else
       Result := -1;
   end;

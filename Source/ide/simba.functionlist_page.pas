@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.functionlist_page;
 
 {$i simba.inc}
@@ -83,25 +88,7 @@ uses
   simba.vartype_string,
   simba.fs,
   simba.threading,
-  simba.form_main;
-
-function GetImage(const Decl: TDeclaration): Integer;
-begin
-  if (Decl is TDeclaration_Property) then
-    Result := IMG_PROPERTY
-  else if (Decl is TDeclaration_Method) then
-    Result := IMG_FUNC
-  else if (Decl is TDeclaration_Type) then
-    Result := IMG_TYPE
-  else if (Decl is TDeclaration_Var) then
-    Result := IMG_VAR
-  else if (Decl is TDeclaration_EnumElement) then
-    Result := IMG_ENUM
-  else if (Decl is TDeclaration_Anchor) then
-    Result := IMG_ANCHOR
-  else
-    Result := -1;
-end;
+  simba.component_images;
 
 function GetText(const Decl: TDeclaration): String;
 begin
@@ -137,8 +124,8 @@ begin
     Line     := Decl.DocPos.Line;
 
     Text := GetText(Decl);
-    ImageIndex := GetImage(Decl);
-    SelectedIndex := GetImage(Decl);
+    ImageIndex := DeclarationImage(Decl);
+    SelectedIndex := ImageIndex;
 
     if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
     begin
@@ -158,7 +145,7 @@ var
 begin
   if (FSimbaNode <> nil) then
     Exit;
-  FSimbaNode := FTreeView.AddNode('Simba', IMG_FOLDER);
+  FSimbaNode := FTreeView.AddNode('Simba', SimbaImages.SECTION);
 
   for I := 0 to TCodeinsight.BaseParsers.Count - 1 do
   begin
@@ -166,7 +153,7 @@ begin
     if (Parser = nil) or (Parser.Items.Count = 0) or (Parser.Lexer.FileName.StartsWith('!')) then
       Continue;
 
-    ParentNode := FTreeView.AddNode(FSimbaNode, Parser.Lexer.FileName, IMG_FILE);
+    ParentNode := FTreeView.AddNode(FSimbaNode, Parser.Lexer.FileName, SimbaImages.DOCUMENT);
     TSimbaFunctionListNode(ParentNode).NodeType := ntSimbaFile;
     for Decl in RemoveDuplicateProperties(Parser.Items.ToArray) do
       AddDecl(ParentNode, Decl, ntSimbaDecl);
@@ -222,7 +209,7 @@ procedure TSimbaFunctionListPage.AddIncludes(Parsers: TCodeParserList; ParentNod
     // include has multiple files so keep track of current file and add new nodes when needed
     if (Parser.LexersCount > 1) then
     begin
-      RootNode := FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Parser.Lexer.FileName), IMG_FOLDER);
+      RootNode := FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Parser.Lexer.FileName), SimbaImages.SECTION);
       TSimbaFunctionListNode(RootNode).NodeType := FileType;
       TSimbaFunctionListNode(RootNode).Hint := ShortenFileName(Parser.Lexer.FileName);
       TSimbaFunctionListNode(RootNode).FileName := Parser.Lexer.FileName;
@@ -239,7 +226,7 @@ procedure TSimbaFunctionListPage.AddIncludes(Parsers: TCodeParserList; ParentNod
         if (CurrentFile <> Decl.DocPos.FileName) then
         begin
           CurrentFile := Decl.DocPos.FileName;
-          CurrentNode := FTreeView.AddNode(RootNode, TSimbaPath.PathExtractNameWithoutExt(CurrentFile), IMG_FILE);
+          CurrentNode := FTreeView.AddNode(RootNode, TSimbaPath.PathExtractNameWithoutExt(CurrentFile), SimbaImages.DOCUMENT);
 
           with TSimbaFunctionListNode(CurrentNode) do
           begin
@@ -253,7 +240,7 @@ procedure TSimbaFunctionListPage.AddIncludes(Parsers: TCodeParserList; ParentNod
       end;
     end else
     begin
-      RootNode := FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Parser.Lexer.FileName), IMG_FILE);
+      RootNode := FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Parser.Lexer.FileName), SimbaImages.DOCUMENT);
       TSimbaFunctionListNode(RootNode).NodeType := FileType;
       TSimbaFunctionListNode(RootNode).FileName := Parser.Lexer.FileName;
       TSimbaFunctionListNode(RootNode).Hint := ShortenFileName(Parser.Lexer.FileName);
@@ -413,7 +400,7 @@ begin
   FTreeView := TSimbaTreeView.Create(Self, TSimbaFunctionListNode);
   FTreeView.Parent := Self;
   FTreeView.Align := alClient;
-  FTreeView.Images := SimbaMainForm.Images;
+  FTreeView.Images := SimbaImages;
   FTreeView.OnDoubleClick := @DoNodeDoubleClick;
   FTreeView.OnGetNodeHint := @DoGetNodeHint;
   FTreeView.OnSelectionChange := @DoSelectionChanged;
@@ -422,9 +409,9 @@ begin
   FTreeView.OnAfterFilter := @DoAfterFilter;
   FTreeView.PopupMenu := TFunctionListPage_ContextMenu.Create(Self);
 
-  FScriptNode   := FTreeView.AddNode('Script', IMG_FOLDER);
-  FIncludesNode := FTreeView.AddNode('Includes', IMG_FOLDER);
-  FPluginsNode  := FTreeView.AddNode('Plugins', IMG_FOLDER);
+  FScriptNode   := FTreeView.AddNode('Script', SimbaImages.SECTION);
+  FIncludesNode := FTreeView.AddNode('Includes', SimbaImages.SECTION);
+  FPluginsNode  := FTreeView.AddNode('Plugins', SimbaImages.SECTION);
 
   FScriptNodeState   := TTreeNodeExpandedState.Create(TTreeNode(nil));
   FIncludesNodeState := TTreeNodeExpandedState.Create(TTreeNode(nil));

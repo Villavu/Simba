@@ -20,10 +20,10 @@ implementation
 uses
   Controls, ComCtrls, Forms, fgl,
   simba.component_treeview,
+  simba.component_images,
   simba.ide_codetools_insight,
   simba.ide_codetools_parser,
   simba.ide_codetools_includes,
-  simba.form_main,
   simba.fs;
 
 procedure DebugSymbolTable(Script: String; ScriptName: String);
@@ -43,7 +43,7 @@ begin
   TreeView := TSimbaTreeView.Create(Form);
   TreeView.Parent := Form;
   TreeView.Align := alClient;
-  TreeView.Images := SimbaMainForm.Images;
+  //TreeView.Images := SimbaMainForm.Images;
 
   Codeinsight := TCodeinsight.Create();
   Codeinsight.SetScript(Script, ScriptName);
@@ -53,8 +53,8 @@ begin
     with Codeinsight.SymbolTable.Items[I] do
     begin
       n := TreeView.AddNode(Decls[0].Name);
-      for J := 0 to Count - 1 do
-        TreeView.AddNode(n, Decls[J].Dump, DeclarationImage(Decls[J]));
+      //for J := 0 to Count - 1 do
+      //  TreeView.AddNode(n, Decls[J].Dump, DeclarationImage(Decls[J]));
     end;
 
   Codeinsight.Free();
@@ -86,7 +86,7 @@ procedure DebugCache;
         if (List.Data[i] > List.Data[j]) then
           List.Exchange(i, j);
 
-    n := TreeView.AddNode(n, 'Class counts', IMG_TYPE);
+    n := TreeView.AddNode(n, 'Class counts', SimbaImages.TYPE_DECL);
     for i := 0 to List.Count - 1 do
       TreeView.AddNode(n, TDeclarationClass(List.Keys[i]).ClassName + ': ' + IntToStr(List.Data[i]));
 
@@ -108,19 +108,19 @@ begin
   TreeView := TSimbaTreeView.Create(Form);
   TreeView.Parent := Form;
   TreeView.Align := alClient;
-  TreeView.Images := SimbaMainForm.Images;
+  TreeView.Images := SimbaImages;
 
   CodetoolsIncludes.DebugEnter();
   for Parser in CodetoolsIncludes.Debug.ToArray do
   begin
-    n := TreeView.AddNode(TSimbaPath.PathExtractName(Parser.Lexer.FileName), IMG_FILE);
+    n := TreeView.AddNode(TSimbaPath.PathExtractName(Parser.Lexer.FileName), SimbaImages.DOCUMENT);
 
-    TreeView.AddNode(n, 'Size: ' + FormatFloat('0.00', Parser.SizeInBytes / (1024*1024)) + ' MB', IMG_INFO);
-    TreeView.AddNode(n, 'Declaration Count: ' + IntToStr(Parser.Garbage.Count), IMG_INFO);
-    TreeView.AddNode(n, 'Symbol Count: ' + IntToStr(Parser.SymbolTable.Count), IMG_INFO);
-    TreeView.AddNode(n, 'Max Stack Depth: ' + IntToStr(Parser.Stack.Max), IMG_INFO);
-    TreeView.AddNode(n, 'Ref Count: ' + IntToStr(TCodetoolsInclude(Parser).RefCount), IMG_INFO);
-    TreeView.AddNode(n, 'Last Used: ' + IntToStr(TCodetoolsInclude(Parser).LastUsed), IMG_INFO);
+    TreeView.AddNode(n, 'Size: ' + FormatFloat('0.00', Parser.SizeInBytes / (1024*1024)) + ' MB', SimbaImages.INFO);
+    TreeView.AddNode(n, 'Declaration Count: ' + IntToStr(Parser.Garbage.Count), SimbaImages.INFO);
+    TreeView.AddNode(n, 'Symbol Count: ' + IntToStr(Parser.SymbolTable.Count), SimbaImages.INFO);
+    TreeView.AddNode(n, 'Max Stack Depth: ' + IntToStr(Parser.Stack.Max), SimbaImages.INFO);
+    TreeView.AddNode(n, 'Ref Count: ' + IntToStr(TCodetoolsInclude(Parser).RefCount), SimbaImages.INFO);
+    TreeView.AddNode(n, 'Last Used: ' + IntToStr(TCodetoolsInclude(Parser).LastUsed), SimbaImages.INFO);
     TreeView.AddNode(n, 'InDefines: ' + TCodetoolsInclude(Parser).InDefines.ToString);
 
     DebugClassTypes(Parser, TreeView, n);

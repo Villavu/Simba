@@ -78,7 +78,7 @@ uses
   simba.env,
   simba.fs,
   simba.component_theme,
-  simba.form_main;
+  simba.component_images;
 
 type
   TBackupNode = class(TTreeNode)
@@ -155,9 +155,9 @@ begin
 
   for I := 0 to High(FBackups) do
   begin
-    CurrentNode := TreeView.AddNode(FBackups[I].FileName, IMG_FOLDER);
+    CurrentNode := TreeView.AddNode(FBackups[I].FileName, SimbaImages.FOLDER);
     for J := 0 to High(FBackups[I].Files) do
-      with TreeView.AddNode(CurrentNode, FBackups[I].Files[J].Time, IMG_FILE) as TBackupNode do
+      with TreeView.AddNode(CurrentNode, FBackups[I].Files[J].Time, SimbaImages.FOLDER) as TBackupNode do
         Contents := FBackups[I].Files[J].Contents;
   end;
 end;
@@ -251,7 +251,7 @@ begin
   TreeView.OnDoubleClick := @DoButtonOkClick;
   TreeView.FilterOnlyTopLevel := True;
   TreeView.FilterCollapseOnClear := True;
-  TreeView.Images := SimbaMainForm.Images;
+  TreeView.Images := SimbaImages;
 
   RightPanel.Color := SimbaComponentTheme.ColorBackground;
   RightPanel.Font.Color := SimbaComponentTheme.ColorFont;

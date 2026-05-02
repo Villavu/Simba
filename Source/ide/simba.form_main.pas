@@ -80,7 +80,6 @@ const
 type
   TSimbaMainForm = class(TForm)
     DockPanel: TAnchorDockPanel;
-    Images: TImageList;
     MainMenuPanel: TPanel;
     TrayIcon: TTrayIcon;
     TrayPopup: TPopupMenu;
@@ -199,7 +198,7 @@ begin
 
     if MessageDlg(Format(Message, [E.Message, ExtractRelativePath(SimbaEnv.DataPath, FileName)]), mtError, mbOKCancel, 0) = mrOk then
     begin
-      //SimbaTabsForm.CloseAllTabs();
+      SimbaController.CloseAllTabs();
 
       Halt(1);
     end;

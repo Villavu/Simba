@@ -114,9 +114,12 @@ uses
   AnchorDocking,
   SynEditMarkupBracket, SynEditMarkupWordGroup,
   simba.ide_dockinghelpers, simba.misc,
-  simba.form_main, simba.form_scripttabs, simba.form_settings,
+  simba.form_scripttabs, simba.form_settings,
   simba.nativeinterface,
-  simba.ide_tab, simba.ide_utils, simba.ide_codetools_base;
+  simba.component_images,
+  simba.ide_tab,
+  simba.ide_utils,
+  simba.ide_codetools_base;
 
 type
   TSimbaOutputTab = class(TSimbaTab)
@@ -489,7 +492,7 @@ var
   Tab: TSimbaOutputTab;
 begin
   Tab := FTabControl.AddTab('Simba') as TSimbaOutputTab;
-  Tab.ImageIndex := IMG_SIMBA;
+  Tab.ImageIndex := SimbaImages.SIMBA;
 
   Result := Tab.OutputBox;
   Result.PopupMenu := ContextMenu;
@@ -500,7 +503,7 @@ var
   Tab: TSimbaOutputTab;
 begin
   Tab := FTabControl.AddTab(TabTitle) as TSimbaOutputTab;
-  Tab.ImageIndex := IMG_STOP;
+  Tab.ImageIndex := SimbaImages.STOP;
 
   Result := Tab.OutputBox;
   Result.PopupMenu := ContextMenu;
@@ -596,10 +599,10 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
       if (TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox = Tab.OutputBox) then
       begin
         case Tab.RunningState of
-          ESimbaScriptState.RUNNING: TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PLAY;
-          ESimbaScriptState.PAUSED:  TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_PAUSE;
+          ESimbaScriptState.RUNNING: TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := SimbaImages.PLAY;
+          ESimbaScriptState.PAUSED:  TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := SimbaImages.PAUSE;
           else
-            TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := IMG_STOP;
+            TSimbaOutputTab(FTabControl.Tabs[I]).ImageIndex := SimbaImages.STOP;
         end;
         Exit;
       end;
@@ -661,6 +664,7 @@ begin
   FTabControl.CanAddTabOnDoubleClick := False;
   FTabControl.CanMoveTabs := False;
   FTabControl.ShowCloseButtons := False;
+  FTabControl.Images := SimbaImages;
 
   FTabControl.OnMouseMove := @FormMouseMove;
   FTabControl.OnMouseDown := @FormMouseDown;

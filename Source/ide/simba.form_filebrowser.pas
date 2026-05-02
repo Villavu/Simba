@@ -11,7 +11,9 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Menus, Masks,
-  simba.base, simba.component_treeview, simba.settings,
+  simba.base,
+  simba.component_treeview,
+  simba.settings,
   simba.ide_events;
 
 type
@@ -84,7 +86,7 @@ implementation
 uses
   Clipbrd, AnchorDocking,
   simba.ide_dockinghelpers,
-  simba.form_main,
+  simba.component_images,
   simba.ide_utils,
   simba.ide_controller,
   simba.fs;
@@ -96,11 +98,11 @@ procedure TSimbaFileBrowserForm.DoFindFiles;
     Result.Path := FileName;
     Result.Name := ExtractFileName(ExcludeTrailingPathDelimiter(FileName));
     if IsDirectory then
-      Result.Image := IMG_FOLDER
+      Result.Image := SimbaImages.SECTION
     else if FileName.EndsWith('.simba') then
-      Result.Image := IMG_SIMBA
+      Result.Image := SimbaImages.SIMBA
     else
-      Result.Image := IMG_FILE;
+      Result.Image := SimbaImages.DOCUMENT;
   end;
 
   procedure Build(const Node: PDirectoryInfo);
@@ -322,7 +324,7 @@ begin
   FTreeView := TSimbaTreeView.Create(Self, TSimbaFileBrowserNode);
   FTreeView.Parent := Self;
   FTreeView.Align := alClient;
-  FTreeView.Images := SimbaMainForm.Images;
+  FTreeView.Images := SimbaImages;
   FTreeView.OnGetNodeHint := @DoGetNodeHint;
   FTreeView.OnDoubleClick := @DoDoubleClick;
   FTreeView.OnAfterFilter := @DoAfterFilter;

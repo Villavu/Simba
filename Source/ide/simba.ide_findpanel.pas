@@ -41,7 +41,7 @@ type
 implementation
 
 uses
-  simba.form_main;
+  simba.component_images;
 
 procedure TSimbaFindPanel.DoResize(Sender: TObject);
 begin
@@ -130,10 +130,10 @@ begin
   with FButtonDown do
   begin
     Parent := Self;
-    ImageIndex := IMG_ARROW_DOWN;
+    ImageIndex := SimbaImages.ARROW_DOWN_RED;
     Hint := 'Find Next';
     ShowHint := True;
-    ImageList := SimbaMainForm.Images;
+    ImageList := SimbaImages;
 
     OnResize := @DoButtonResize;
 
@@ -152,10 +152,10 @@ begin
   with FButtonUp do
   begin
     Parent := Self;
-    ImageIndex := IMG_ARROW_UP;
+    ImageIndex := SimbaImages.ARROW_UP_GREEN;
     Hint := 'Find Previous';
     ShowHint := True;
-    ImageList := SimbaMainForm.Images;
+    ImageList := SimbaImages;
     OnResize := @DoButtonResize;
 
     Anchors := [akTop, akLeft, akBottom];

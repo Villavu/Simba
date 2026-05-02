@@ -9,6 +9,7 @@ object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
   DesignTimePPI = 192
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
+  LCLVersion = '4.0.0.4'
   OnCreate = FormCreate
   OnShow = FormShow
   object Notebook1: TNotebook

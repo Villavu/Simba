@@ -49,8 +49,6 @@ type
         Event: ESimbaEvent; EventProducer: EEventProducer = epMouseClick
       ): TSimbaButton;
 
-    procedure SetStates(ScriptState: ESimbaScriptState);
-
     procedure DoOpenRecentFileClick(Sender: TObject);
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoButtonClick(Sender: TObject);
@@ -82,9 +80,10 @@ implementation
 uses
   LazFileUtils,
   simba.initializations,
+  simba.component_images,
+  simba.form_main,
   simba.ide_tab,
-  simba.ide_controller,
-  simba.form_main;
+  simba.ide_controller;
 
 function TSimbaMainToolBar.AddButton(Image: Integer; Text: String; Event: ESimbaEvent; EventProducer: EEventProducer): TSimbaButton;
 begin
@@ -96,27 +95,6 @@ begin
   Result.Tag := Int32(Event);
 end;
 
-procedure TSimbaMainToolBar.SetStates(ScriptState: ESimbaScriptState);
-
-  procedure UpdateButtons(RunEnabled, PauseEnabed, CompileEnabled, StopEnabled: Boolean; StopImageIndex: Integer);
-  begin
-    FButtonRun.Enabled := RunEnabled;
-    FButtonPause.Enabled := PauseEnabed;
-    FButtonCompile.Enabled := CompileEnabled;
-
-    FButtonStop.Enabled := StopEnabled;
-    FButtonStop.ImageIndex := StopImageIndex;
-  end;
-
-begin
-  case ScriptState of
-    ESimbaScriptState.PAUSED:  UpdateButtons(True,  False, True,  True,  IMG_STOP);
-    ESimbaScriptState.STOP:    UpdateButtons(False, False, False, True,  IMG_POWER);
-    ESimbaScriptState.RUNNING: UpdateButtons(False, True,  False, True,  IMG_STOP);
-    ESimbaScriptState.NONE:    UpdateButtons(True,  False, True,  False, IMG_STOP);
-  end;
-end;
-
 procedure TSimbaMainToolBar.DoOpenRecentFileClick(Sender: TObject);
 begin
   SimbaController.OpenInTab(TMenuItem(Sender).Hint);
@@ -124,21 +102,45 @@ end;
 
 procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
-  procedure DoTabScriptStateChange(Tab: TSimbaScriptTab);
+  procedure DoCanSave(Tab: TSimbaScriptTab);
   begin
-    if Tab.IsActiveTab then
-      SetStates(Tab.RunningState);
+    FButtonSave.Enabled := True;
+  end;
+
+  procedure DoCannotSave(Tab: TSimbaScriptTab);
+  begin
+    FButtonSave.Enabled := False;
+  end;
+
+  procedure DoTabScriptStateChange(Tab: TSimbaScriptTab);
+  var
+    CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean;
+  begin
+    if Tab.IsActiveTab and SimbaController.GetScriptButtonStates(Tab, CanRun, CanPause, CanCompile, CanStop, CanForceStop) then
+    begin
+      FButtonRun.Enabled := CanRun;
+      FButtonPause.Enabled := CanPause;
+      FButtonCompile.Enabled := CanCompile;
+      FButtonStop.Enabled := CanStop;
+      FButtonStop.ImageIndex := IfThen(CanForceStop, SimbaImages.POWER, SimbaImages.STOP);
+    end;
   end;
 
   procedure DoTabChange(Tab: TSimbaScriptTab);
+  var
+    CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean;
+    CanSave, CanCut, CanCopy, CanPaste: Boolean;
   begin
-    FButtonSave.Enabled := Tab.ScriptChanged;
-    SetStates(Tab.RunningState);
-  end;
-
-  procedure DoTabModified(Tab: TSimbaScriptTab);
-  begin
-    FButtonSave.Enabled := Tab.ScriptChanged;
+    if SimbaController.GetScriptButtonStates(Tab, CanRun, CanPause, CanCompile, CanStop, CanForceStop) and
+       SimbaController.GetEditorButtonStates(Tab, CanSave, CanCut, CanCopy, CanPaste) then
+    begin
+      FButtonRun.Enabled := CanRun;
+      FButtonPause.Enabled := CanPause;
+      FButtonCompile.Enabled := CanCompile;
+      FButtonStop.Enabled := CanStop;
+      FButtonStop.ImageIndex := IfThen(CanForceStop, SimbaImages.POWER, SimbaImages.STOP);
+      FButtonSave.Enabled := CanSave;
+    end;
   end;
 
   procedure DoTabLoaded(Tab: TSimbaScriptTab);
@@ -172,9 +174,10 @@ procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
 begin
   case Event of
+    ESimbaEvent.TAB_CAN_SAVE:           DoCanSave(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_CANNOT_SAVE:        DoCannotSave(TSimbaScriptTab(Data));
     ESimbaEvent.TAB_SCRIPTSTATE_CHANGE: DoTabScriptStateChange(TSimbaScriptTab(Data));
     ESimbaEvent.TAB_CHANGE:             DoTabChange(TSimbaScriptTab(Data));
-    ESimbaEvent.TAB_MODIFIED:           DoTabModified(TSimbaScriptTab(Data));
     ESimbaEvent.TAB_LOADED:             DoTabLoaded(TSimbaScriptTab(Data));
   end;
 end;
@@ -224,9 +227,9 @@ begin
 
   FRecentFilesPopup := TPopupMenu.Create(Self);
 
-  FButtonNew := AddButton(IMG_NEW, 'New File (Ctrl + N)', ESimbaEvent.ACTION_NEW);
+  FButtonNew := AddButton(SimbaImages.NEW, 'New File (Ctrl + N)', ESimbaEvent.ACTION_NEW);
 
-  FButtonOpen := AddButton(IMG_OPEN, 'Open File (Ctrl + O)', ESimbaEvent.ACTION_OPEN);
+  FButtonOpen := AddButton(SimbaImages.FOLDER, 'Open File (Ctrl + O)', ESimbaEvent.ACTION_OPEN);
   FButtonOpen.Parent := FToolbar.AddGroup();
   FButtonOpen.Align := alClient;
   FButtonOpen.BorderSpacing.Right := 0;
@@ -236,27 +239,27 @@ begin
   FButtonOpenDrop.Align := alRight;
   FButtonOpenDrop.BorderSpacing.Left := 0;
 
-  FButtonSave := AddButton(IMG_SAVE, 'Save Script (Ctrl + S)', ESimbaEvent.ACTION_SAVE);
-  FButtonSaveAll := AddButton(IMG_SAVE_ALL, 'Save All', ESimbaEvent.ACTION_SAVE_ALL);
+  FButtonSave := AddButton(SimbaImages.SAVE, 'Save Script (Ctrl + S)', ESimbaEvent.ACTION_SAVE);
+  FButtonSaveAll := AddButton(SimbaImages.SAVE_ALL, 'Save All', ESimbaEvent.ACTION_SAVE_ALL);
 
   FToolBar.AddDivider();
 
-  FButtonCompile := AddButton(IMG_COMPILE, 'Compile Script (Alt + C)', ESimbaEvent.ACTION_COMPILE);
+  FButtonCompile := AddButton(SimbaImages.COMPILE, 'Compile Script (Alt + C)', ESimbaEvent.ACTION_COMPILE);
 
   FToolBar.AddDivider();
 
-  FButtonRun   := AddButton(IMG_PLAY,'Run Script (Alt + R)', ESimbaEvent.ACTION_RUN);
-  FButtonPause := AddButton(IMG_PAUSE, 'Pause Script', ESimbaEvent.ACTION_PAUSE);
-  FButtonStop  := AddButton(IMG_STOP, 'Stop Script (Alt + S)', ESimbaEvent.ACTION_STOP);
+  FButtonRun   := AddButton(SimbaImages.PLAY,  'Run Script (Alt + R)', ESimbaEvent.ACTION_RUN);
+  FButtonPause := AddButton(SimbaImages.PAUSE, 'Pause Script', ESimbaEvent.ACTION_PAUSE);
+  FButtonStop  := AddButton(SimbaImages.STOP, 'Stop Script (Alt + S)', ESimbaEvent.ACTION_STOP);
 
   FToolBar.AddDivider();
-  FButtonPickColor := AddButton(IMG_PICK, 'Color Picker', ESimbaEvent.ACTION_PICKCOLOR);
-  FButtonPickTarget := AddButton(IMG_TARGET, 'Target Selector', ESimbaEvent.ACTION_PICKTARGET, epMouseDown);
-  FButtonPickArea := AddButton(IMG_AREA, 'Area Selector', ESimbaEvent.ACTION_PICKAREA);
+  FButtonPickColor := AddButton(SimbaImages.COLOR_PICKER, 'Color Picker', ESimbaEvent.ACTION_PICKCOLOR);
+  FButtonPickTarget := AddButton(SimbaImages.TARGET_SELECTOR, 'Target Selector', ESimbaEvent.ACTION_PICKTARGET, epMouseDown);
+  FButtonPickArea := AddButton(SimbaImages.AREA_SELECTOR, 'Area Selector', ESimbaEvent.ACTION_PICKAREA);
   FToolBar.AddDivider();
-  AddButton(IMG_ERASER, 'Clear Output Box', ESimbaEvent.ACTION_CLEAROUTPUT);
+  AddButton(SimbaImages.ERASER, 'Clear Output Box', ESimbaEvent.ACTION_CLEAROUTPUT);
   FToolBar.AddDivider();
-  FButtonPackage := AddButton(IMG_PACKAGE, 'Open Packages', ESimbaEvent.ACTION_PACKAGES);
+  FButtonPackage := AddButton(SimbaImages.PACKAGE, 'Open Packages', ESimbaEvent.ACTION_PACKAGES);
 
   SimbaEvents.Register(Self, @DoSimbaEvent);
 
@@ -276,7 +279,7 @@ begin
 end;
 
 initialization
-  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaMainToolBar', 5);  // seems some priority (before script tabs)
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaMainToolBar', 5); // needs some priority (before script tabs)
   SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaMainToolBar', 5);
 
 end.
