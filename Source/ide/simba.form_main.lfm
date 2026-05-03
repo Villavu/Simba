@@ -24,16 +24,6 @@ object SimbaMainForm: TSimbaMainForm
     ParentFont = False
     TabOrder = 0
   end
-  object MainMenuPanel: TPanel
-    Left = 0
-    Height = 0
-    Top = 0
-    Width = 1624
-    Align = alTop
-    AutoSize = True
-    BevelOuter = bvNone
-    TabOrder = 1
-  end
   object TrayIcon: TTrayIcon
     PopUpMenu = TrayPopup
     Icon.Data = {

@@ -68,7 +68,6 @@ type
     Separator1: TMenuItem;
     FlushTimer: TTimer;
 
-    procedure ContextMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseLeave(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -635,11 +634,6 @@ procedure TSimbaOutputForm.FormMouseDown(Sender: TObject; Button: TMouseButton; 
 begin
   if CanAnchorDocking(X, Y) and (HostDockSite is TSimbaAnchorDockHostSite) then
     TSimbaAnchorDockHostSite(HostDockSite).Header.MouseDown(Button, Shift, X, Y);
-end;
-
-procedure TSimbaOutputForm.ContextMenuMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
-begin
-  MenuItemHeight(Sender as TMenuItem, ACanvas, AHeight);
 end;
 
 procedure TSimbaOutputForm.FormMouseLeave(Sender: TObject);

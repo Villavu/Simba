@@ -37,7 +37,6 @@ type
 
     procedure DoUpdate(Sender: TObject);
     procedure DoPopupClick(Sender: TObject);
-    procedure PopupMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
     procedure PopupMenu_UseFileMaskFilteringClick(Sender: TObject);
     procedure PopupPopup(Sender: TObject);
   protected
@@ -209,11 +208,6 @@ begin
     if (Sender = PopupMenu_OpenExternally) then
       SimbaController.OpenInExplorer(Node.Path);
   end;
-end;
-
-procedure TSimbaFileBrowserForm.PopupMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
-begin
-  MenuItemHeight(Sender as TMenuItem, ACanvas, AHeight);
 end;
 
 procedure TSimbaFileBrowserForm.PopupMenu_UseFileMaskFilteringClick(Sender: TObject);

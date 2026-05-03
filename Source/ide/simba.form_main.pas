@@ -80,7 +80,6 @@ const
 type
   TSimbaMainForm = class(TForm)
     DockPanel: TAnchorDockPanel;
-    MainMenuPanel: TPanel;
     TrayIcon: TTrayIcon;
     TrayPopup: TPopupMenu;
     TrayPopupExit: TMenuItem;

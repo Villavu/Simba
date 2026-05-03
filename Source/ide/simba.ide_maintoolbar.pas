@@ -58,6 +58,8 @@ type
     procedure DoSettingChanged_Size(Setting: TSimbaSetting);
     procedure DoSettingChanged_Position(Setting: TSimbaSetting);
   public
+    constructor Create; reintroduce;
+
     property ButtonNew: TSimbaButton read FButtonNew;
     property ButtonOpen: TSimbaButton read FButtonOpen;
     property ButtonSave: TSimbaButton read FButtonSave;
@@ -68,8 +70,6 @@ type
     property ButtonPause: TSimbaButton read FButtonPause;
     property ButtonColorPicker: TSimbaButton read FButtonPickColor;
     property ButtonPackage: TSimbaButton read FButtonPackage;
-
-    constructor Create; reintroduce;
   end;
 
 var
@@ -81,7 +81,6 @@ uses
   LazFileUtils,
   simba.initializations,
   simba.component_images,
-  simba.form_main,
   simba.ide_tab,
   simba.ide_controller;
 
@@ -203,18 +202,26 @@ begin
 end;
 
 procedure TSimbaMainToolBar.DoSettingChanged_Position(Setting: TSimbaSetting);
-
-  procedure SetPosition(AParent: TWinControl; AAlign: TAlign; AVertical: Boolean);
-  begin
-    FToolBar.Parent   := AParent;
-    FToolBar.Align    := AAlign;
-    FToolBar.Vertical := AVertical;
-  end;
-
 begin
-       if (Setting.Value = 'Top')   then SetPosition(SimbaMainForm.MainMenuPanel, alClient, False)
-  else if (Setting.Value = 'Left')  then SetPosition(SimbaMainForm, alLeft, True)
-  else if (Setting.Value = 'Right') then SetPosition(SimbaMainForm, alRight, True)
+  case String(Setting.Value) of
+    'Top':
+      begin
+        FToolBar.Align := alTop;
+        FToolbar.Vertical := False;
+      end;
+
+    'Left':
+      begin
+        FToolBar.Align := alLeft;
+        FToolbar.Vertical := True;
+      end;
+
+    'Right':
+      begin
+        FToolBar.Align := alRight;
+        FToolbar.Vertical := True;
+      end;
+  end;
 end;
 
 constructor TSimbaMainToolBar.Create;
@@ -222,8 +229,8 @@ begin
   inherited Create(nil);
 
   FToolBar := TSimbaToolbar.Create(Self);
-  FToolBar.Parent := SimbaMainForm.MainMenuPanel;
-  FToolBar.Align := alClient;
+  FToolBar.Parent := Application.MainForm;
+  FToolBar.Align := alTop;
 
   FRecentFilesPopup := TPopupMenu.Create(Self);
 

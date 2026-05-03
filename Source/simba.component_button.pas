@@ -169,7 +169,6 @@ implementation
 uses
   simba.component_theme,
   simba.component_images,
-  simba.form_main,
   simba.misc,
   LCLType,
   ATCanvasPrimitives;

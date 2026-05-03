@@ -32,6 +32,7 @@ implementation
 
 uses
   simba.initializations,
+  simba.ide_controller,
   simba.ide_mouselogger,
   simba.ide_tab,
   simba.ide_editor_findreplace,
@@ -108,7 +109,7 @@ constructor TSimbaMainStatusBar.Create;
 begin
   inherited Create(nil);
 
-  FStatusBar := TSimbaStatusBar.Create(Application.MainForm);
+  FStatusBar := TSimbaStatusBar.Create(Self);
   FStatusBar.Parent := Application.MainForm;
   FStatusBar.Align := alBottom;
   FStatusBar.PanelCount := 4;

@@ -39,7 +39,7 @@ implementation
 
 uses
   simba.ide_package, simba.ide_package_installer, simba.initializations,
-  simba.form_main, simba.form_package, simba.form_output, simba.form_openexample,
+  simba.form_package, simba.form_output, simba.form_openexample,
   simba.vartype_string, simba.fs;
 
 type

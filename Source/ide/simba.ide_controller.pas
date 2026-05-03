@@ -13,7 +13,7 @@ unit simba.ide_controller;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, Controls,
   simba.base,
   simba.ide_tab;
 
@@ -27,18 +27,23 @@ type
     class procedure OpenInTab(FileName: String); overload; static;
     class procedure OpenInTab(FileName: String; CaretX, CaretY: Integer); overload; static;
     class procedure OpenInExplorer(FileName: String); static;
-    class function CloseAllTabs: Boolean;
+    class function CloseAllTabs: Boolean; static;
 
-    class function GetScriptButtonStates(Tab: TSimbaScriptTab; out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean; overload;
-    class function GetScriptButtonStates(out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean; overload;
-    class function GetEditorButtonStates(Tab: TSimbaScriptTab; out CanSave, CanCut, CanCopy, CanPaste: Boolean): Boolean; overload;
-    class function GetEditorButtonStates(out CanSave, CanCut, CanCopy, CanPaste: Boolean): Boolean; overload;
+    class function GetScriptButtonStates(Tab: TSimbaScriptTab; out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean; static; overload;
+    class function GetScriptButtonStates(out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean; static; overload;
+    class function GetEditorButtonStates(Tab: TSimbaScriptTab; out CanSave, CanCut, CanCopy, CanPaste: Boolean): Boolean; static; overload;
+    class function GetEditorButtonStates(out CanSave, CanCut, CanCopy, CanPaste: Boolean): Boolean; static; overload;
+
+    class procedure ShowTrayNotifaction(Title, Message: String; Timeout: Integer); static;
+    class procedure SetWindowTitle(Title: String); static;
   end;
 
 implementation
 
 uses
   simba.nativeinterface,
+  simba.ide_maintoolbar,
+  simba.form_main,
   simba.form_scripttabs;
 
 {$DEFINE ASSERT_MAIN_THREAD :=
@@ -177,6 +182,19 @@ begin
   ASSERT_MAIN_THREAD
 
   Result := (SimbaScriptTabsForm <> nil) and GetEditorButtonStates(SimbaScriptTabsForm.ActiveTab, CanSave, CanCut, CanCopy, CanPaste);
+end;
+
+class procedure SimbaController.ShowTrayNotifaction(Title, Message: String; Timeout: Integer);
+begin
+  SimbaMainForm.TrayIcon.BalloonTitle   := Title;
+  SimbaMainForm.TrayIcon.BalloonHint    := Message;
+  SimbaMainForm.TrayIcon.BalloonTimeout := Timeout;
+  SimbaMainForm.TrayIcon.ShowBalloonHint();
+end;
+
+class procedure SimbaController.SetWindowTitle(Title: String);
+begin
+  SimbaMainForm.Caption := Title;
 end;
 
 end.

@@ -87,8 +87,7 @@ uses
   simba.ide_editor,
   simba.ide_controller,
   simba.settings,
-  simba.component_images,
-  simba.form_main;
+  simba.component_images;
 
 function TSimbaMainMenuBar.addMenu(Text: String): TPopupMenu;
 begin
@@ -420,8 +419,9 @@ begin
   inherited Create(nil);
 
   FMenuBar := TSimbaMenuBar.Create(Self);
-  FMenuBar.Parent := SimbaMainForm.MainMenuPanel;
+  FMenuBar.Parent := Application.MainForm;
   FMenuBar.Align := alTop;
+  FMenuBar.Top := -1; // important to ensure is always at the very top
 
   addFileMenu();
   addEditMenu();

@@ -2,6 +2,9 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+  Communication with a script process via pipes.
+  IDE is the "server" and script is the "client"
 }
 unit simba.ide_scriptcommunication;
 
@@ -49,7 +52,7 @@ type
 implementation
 
 uses
-  simba.form_main,
+  simba.ide_controller,
   simba.ide_debugimage,
   simba.ide_vars,
   simba.threading,
@@ -75,7 +78,7 @@ procedure TSimbaScriptInstanceCommunication.SetSimbaTitle;
 
   procedure Execute;
   begin
-    SimbaMainForm.Caption := FParams.ReadAnsiString();
+    SimbaController.SetWindowTitle(FParams.ReadAnsiString());
   end;
 
 begin
@@ -84,20 +87,17 @@ end;
 
 procedure TSimbaScriptInstanceCommunication.ShowTrayNotification;
 var
-  Title, Hint: String;
+  Title, Message: String;
   Timeout: Integer;
 
   procedure Execute;
   begin
-    SimbaMainForm.TrayIcon.BalloonTitle   := Title;
-    SimbaMainForm.TrayIcon.BalloonHint    := Hint;
-    SimbaMainForm.TrayIcon.BalloonTimeout := Timeout;
-    SimbaMainForm.TrayIcon.ShowBalloonHint();
+    SimbaController.ShowTrayNotifaction(Title,  Message, Timeout);
   end;
 
 begin
   Title := FParams.ReadAnsiString;
-  Hint  := FParams.ReadAnsiString;
+  Message := FParams.ReadAnsiString;
 
   FParams.Read(Timeout, SizeOf(Integer));
 
