@@ -24,6 +24,9 @@ type
     procedure DoVertScrollBarChange(Sender: TObject);
     procedure DoHorzScrollBarChange(Sender: TObject);
 
+    // Override to scroll horz when shift+scrollwheel
+    function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
+
     procedure UpdateBars;
     procedure StatusChanged(AChanges: TSynStatusChanges); override;
     procedure DoLineChanges(Sender: TSynEditStrings; aIndex, aCount: Integer);
@@ -67,6 +70,22 @@ end;
 procedure TSimbaSynEdit.DoHorzScrollBarChange(Sender: TObject);
 begin
   LeftChar := FScrollbarHorz.Position;
+end;
+
+function TSimbaSynEdit.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
+const
+  SCROLL_AMOUNT = 5;
+begin
+  if (ssShift in Shift) then
+  begin
+    if (WheelDelta > 0) then
+      FScrollbarHorz.Position := FScrollbarHorz.Position - SCROLL_AMOUNT
+    else
+      FScrollbarHorz.Position := FScrollbarHorz.Position + SCROLL_AMOUNT;
+
+    Result := True;
+  end else
+    Result := inherited DoMouseWheel(Shift, WheelDelta, MousePos);
 end;
 
 procedure TSimbaSynEdit.UpdateBars;
