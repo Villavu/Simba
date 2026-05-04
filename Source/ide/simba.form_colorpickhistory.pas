@@ -114,7 +114,7 @@ end;
 
 procedure TSimbaColorPickHistoryForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
-  procedure DoColorPicked(Picked: TSimbaEventData_ColorPicked);
+  procedure DoColorPicked(Picked: TSimbaEvents.TColorPicked);
   begin
     Add(Picked.Point, Picked.Color, True);
     DockMaster.Show(Self);
@@ -127,7 +127,7 @@ procedure TSimbaColorPickHistoryForm.DoSimbaEvent(Event: ESimbaEvent; Data: Poin
 
 begin
   case Event of
-    ESimbaEvent.COLOR_PICKED:             DoColorPicked(TSimbaEventData_ColorPicked(Data^));
+    ESimbaEvent.COLOR_PICKED:             DoColorPicked(TSimbaEvents.TColorPicked(Data^));
     ESimbaEvent.ACTION_VIEW_COLORHISTORY: DoViewColorHistory(TMenuItem(Data));
   end;
 end;

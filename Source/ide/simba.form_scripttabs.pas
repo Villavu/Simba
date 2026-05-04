@@ -442,8 +442,14 @@ begin
 end;
 
 procedure TSimbaScriptTabsForm.DoTabMoved(Sender: TSimbaTabControl; AFrom, ATo: Integer);
+var
+  Data: TSimbaEvents.TTabMoved;
 begin
-  SimbaOutputForm.MoveTab(AFrom, ATo);
+  Data.Tab := Self;
+  Data.FromIndex := AFrom;
+  Data.ToIndex := ATo;
+
+  SimbaEvents.Post(ESimbaEvent.TAB_MOVED, @Data);
 end;
 
 procedure TSimbaScriptTabsForm.DoTabClosed(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean);

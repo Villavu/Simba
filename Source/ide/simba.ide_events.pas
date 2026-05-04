@@ -124,6 +124,7 @@ type
     TAB_ADD,
     TAB_CLOSED,
     TAB_CAPTION,
+    TAB_MOVED,
 
     TAB_CAN_SAVE,
     TAB_CANNOT_SAVE,
@@ -147,14 +148,20 @@ type
   );
   {$POP}
 
-  TSimbaEventData_ColorPicked = record
-    Color: TColor;
-    Point: TPoint;
-  end;
-
   TSimbaEventCallback = procedure(Event: ESimbaEvent; Data: Pointer) of object;
 
   TSimbaEvents = class(TObject)
+  public type
+    TColorPicked = record
+      Color: TColor;
+      Point: TPoint;
+    end;
+
+    TTabMoved = record
+      Tab: Pointer;
+      FromIndex: Integer;
+      ToIndex: Integer;
+    end;
   private type
     TCallbackList = specialize TSimbaList<TSimbaEventCallback>;
   private

@@ -116,7 +116,7 @@ end;
 
 procedure TSimbaColorPicker.DoFormClosed(Sender: TObject; var CloseAction: TCloseAction);
 var
-  EventData: TSimbaEventData_ColorPicked;
+  EventData: TSimbaEvents.TColorPicked;
 begin
   if FPicked then
   begin

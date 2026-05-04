@@ -41,8 +41,6 @@ type
     procedure DoMouseLeave(Sender: TObject);
     procedure DoAllowMouseLink(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
     procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-
-    function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
   public
     constructor Create(AOwner: TComponent); reintroduce;
     destructor Destroy; override;
@@ -86,20 +84,14 @@ type
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
     procedure DebugLn(const S: String);
-
-    function GetActiveOutputBox: TSimbaOutputBox;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
     property SimbaOutputBox: TSimbaOutputBox read FSimbaOutputBox;
-    property ActiveOutputBox: TSimbaOutputBox read GetActiveOutputBox;
 
     function AddSimbaOutput: TSimbaOutputBox;
     function AddScriptOutput(TabTitle: String): TSimbaOutputBox;
-
-    procedure RemoveTab(OutputBox: TSimbaOutputBox);
-    procedure MoveTab(AFrom, ATo: Integer);
   end;
 
 var
@@ -117,7 +109,6 @@ uses
   simba.nativeinterface,
   simba.component_images,
   simba.ide_tab,
-  simba.ide_utils,
   simba.ide_codetools_base;
 
 type
@@ -224,22 +215,6 @@ end;
 procedure TSimbaOutputBox.DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   Application.QueueAsyncCall(@DoOpenLink, 0);
-end;
-
-function TSimbaOutputBox.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
-const
-  SCROLL_AMOUNT = 5;
-begin
-  if (ssShift in Shift) then
-  begin
-    if (WheelDelta > 0) then
-      FScrollbarHorz.Position := FScrollbarHorz.Position - SCROLL_AMOUNT
-    else
-      FScrollbarHorz.Position := FScrollbarHorz.Position + SCROLL_AMOUNT;
-
-    Result := True;
-  end else
-    Result := inherited DoMouseWheel(Shift, WheelDelta, MousePos);
 end;
 
 constructor TSimbaOutputBox.Create(AOwner: TComponent);
@@ -473,14 +448,6 @@ begin
     TSimbaOutputTab(FTabControl.Tabs[I]).OutputBox.Flush();
 end;
 
-function TSimbaOutputForm.GetActiveOutputBox: TSimbaOutputBox;
-begin
-  if (FTabControl.ActiveTab is TSimbaOutputTab) then
-    Result := TSimbaOutputTab(FTabControl.ActiveTab).OutputBox
-  else
-    Result := nil;
-end;
-
 procedure TSimbaOutputForm.DebugLn(const S: String);
 begin
   SimbaOutputBox.Add(S + LineEnding);
@@ -506,17 +473,6 @@ begin
 
   Result := Tab.OutputBox;
   Result.PopupMenu := ContextMenu;
-end;
-
-procedure TSimbaOutputForm.RemoveTab(OutputBox: TSimbaOutputBox);
-begin
-  if (OutputBox <> nil) and (OutputBox.Parent is TSimbaOutputTab) then
-    FTabControl.DeleteTab(TSimbaOutputTab(OutputBox.Parent));
-end;
-
-procedure TSimbaOutputForm.MoveTab(AFrom, ATo: Integer);
-begin
-  FTabControl.MoveTab(AFrom + 1, ATo + 1); // + 1 because of Simba tab
 end;
 
 procedure TSimbaOutputForm.MenuItemCopyClick(Sender: TObject);
@@ -567,7 +523,8 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   // clear active
   procedure DoClearOutput;
   begin
-    ActiveOutputBox.Empty();
+    if (FTabControl.ActiveTab <> nil)  then
+      TSimbaOutputTab(FTabControl.ActiveTab).OutputBox.Empty();
   end;
 
   // open output tab on tab switch
@@ -620,13 +577,20 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
       end;
   end;
 
+  procedure DoTabMoved(Data: TSimbaEvents.TTabMoved);
+  begin
+    FTabControl.MoveTab(Data.FromIndex + 1, Data.ToIndex + 1);
+  end;
+
 begin
   case Event of
-    ESimbaEvent.ACTION_VIEW_OUTPUT: DoViewOutput(TMenuItem(Data));
-    ESimbaEvent.ACTION_CLEAROUTPUT: DoClearOutput();
-    ESimbaEvent.TAB_CHANGE:         DoTabChange(TSimbaScriptTab(Data));
-    ESimbaEvent.TAB_CLOSED:         DoTabClosed(TSimbaScriptTab(Data));
-    ESimbaEvent.TAB_CAPTION:        DoTabCaption(TSimbaScriptTab(Data));
+    ESimbaEvent.ACTION_VIEW_OUTPUT:     DoViewOutput(TMenuItem(Data));
+    ESimbaEvent.ACTION_CLEAROUTPUT:     DoClearOutput();
+    ESimbaEvent.TAB_CHANGE:             DoTabChange(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_CLOSED:             DoTabClosed(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_CAPTION:            DoTabCaption(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_MOVED:              DoTabMoved(TSimbaEvents.TTabMoved(Data^));
+    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE: DoScriptStateChange(TSimbaScriptTab(Data));
   end;
 end;
 
