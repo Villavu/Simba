@@ -82,7 +82,7 @@ begin
   Width := Scale96ToScreen(500);
   Height := Scale96ToScreen(300);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_IMG_TO_STRING]);
 end;
 
 procedure TSimbaImageStringForm.FormDropFiles(Sender: TObject; const FileNames: array of string);

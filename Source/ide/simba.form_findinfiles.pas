@@ -447,7 +447,7 @@ begin
   Tab.FCheckboxOptions.Checked[1] := SimbaSettings.General.FindInFilesCaseSens.Value;
   Tab.FCheckboxOptions.Checked[2] := SimbaSettings.General.FindInFilesWholeWords.Value;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_FIND_IN_FILES]);
 end;
 
 procedure TSimbaFindInFilesForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);

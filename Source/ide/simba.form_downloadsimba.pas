@@ -249,7 +249,7 @@ begin
 
   Notebook1.PageIndex := 0;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_DOWNLOAD_SIMBA]);
 end;
 
 procedure TSimbaDownloadSimbaForm.DoGetNodeColor(Node: TTreeNode; var TheColor: TColor);

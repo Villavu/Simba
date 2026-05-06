@@ -356,7 +356,7 @@ begin
   OutputSynEdit.Font.Name := 'Consolas';
   {$ENDIF}
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_PACKAGES]);
 end;
 
 end.

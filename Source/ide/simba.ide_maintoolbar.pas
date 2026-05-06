@@ -268,7 +268,14 @@ begin
   FToolBar.AddDivider();
   FButtonPackage := AddButton(SimbaImages.PACKAGE, 'Open Packages', ESimbaEvent.ACTION_PACKAGES);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(
+    Self, @DoSimbaEvent,
+    [ESimbaEvent.TAB_CAN_SAVE,
+     ESimbaEvent.TAB_CANNOT_SAVE,
+     ESimbaEvent.TAB_SCRIPTSTATE_CHANGE,
+     ESimbaEvent.TAB_CHANGE,
+     ESimbaEvent.TAB_LOADED]
+  );
 
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.ToolbarSize, @DoSettingChanged_Size, True);
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.ToolbarPosition, @DoSettingChanged_Position, True);

@@ -633,7 +633,15 @@ begin
   SetCodetoolsMessageHandler(@DebugLn);
   OnDebugLn := @DebugLn;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [
+    ESimbaEvent.ACTION_VIEW_OUTPUT,
+    ESimbaEvent.ACTION_CLEAROUTPUT,
+    ESimbaEvent.TAB_CHANGE,
+    ESimbaEvent.TAB_CLOSED,
+    ESimbaEvent.TAB_CAPTION,
+    ESimbaEvent.TAB_MOVED,
+    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE
+  ]);
 end;
 
 destructor TSimbaOutputForm.Destroy;

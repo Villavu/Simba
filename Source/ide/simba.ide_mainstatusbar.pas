@@ -94,13 +94,12 @@ begin
         FStatusBar.PanelText[3] := TSimbaFunctionListNode(Data).Hint;
       end;
 
-    ESimbaEvent.SCRIPT_RUNNING:
+    ESimbaEvent.TAB_ACTIVE_750:
       begin
-        if TSimbaScriptTabRunner(Data).IsActiveTab then
-          case TSimbaScriptTabRunner(Data).State of
-            ESimbaScriptState.RUNNING: FStatusBar.PanelText[1] := FormatMilliseconds(TSimbaScriptTabRunner(Data).TimeRunning, 'hh:mm:ss');
-            ESimbaScriptState.PAUSED:  FStatusBar.PanelText[1] := 'Paused';
-          end;
+        case TSimbaScriptTab(Data).RunningState of
+          ESimbaScriptState.RUNNING: FStatusBar.PanelText[1] := FormatMilliseconds(TSimbaScriptTab(Data).RunningTime, 'hh:mm:ss');
+          ESimbaScriptState.PAUSED:  FStatusBar.PanelText[1] := 'Paused';
+        end;
       end;
   end;
 end;
@@ -117,7 +116,16 @@ begin
   FStatusBar.PanelTextMeasure[1] := '[000:000:000]';
   FStatusBar.PanelTextMeasure[2] := 'Line 1000, Col 1000';
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [
+    ESimbaEvent.MOUSELOGGER_CHANGE,
+    ESimbaEvent.TAB_CARETMOVED,
+    ESimbaEvent.TAB_LOADED,
+    ESimbaEvent.TAB_SEARCH,
+    ESimbaEvent.TAB_CHANGE,
+    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE,
+    ESimbaEvent.TAB_ACTIVE_750,
+    ESimbaEvent.FUNCTIONLIST_SELECTION_CHANGE
+  ]);
 end;
 
 procedure DoCreate;

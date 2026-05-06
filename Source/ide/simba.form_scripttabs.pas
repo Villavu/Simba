@@ -334,6 +334,11 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     Tab.Editor.ExecuteSimpleCommand(ecDocumentation);
   end;
 
+  procedure DoTabActiveTimer(Tab: TSimbaScriptTab);
+  begin
+    SimbaEvents.Post(ESimbaEvent.TAB_ACTIVE_750, Tab);
+  end;
+
 begin
   if (FTabControl.TabCount = 0) then // for safety
     Exit;
@@ -377,6 +382,8 @@ begin
     ESimbaEvent.ACTION_COPY_FILENAME: DoCopyFileName(ActiveTab);
     ESimbaEvent.ACTION_OPEN_DIRECTORY: DoOpenDirectory(ActiveTab);
     ESimbaEvent.ACTION_DOC_COMMENT: DoDocComment(ActiveTab);
+
+    ESimbaEvent.TIMER_750: DoTabActiveTimer(ActiveTab);
   end;
 end;
 
@@ -607,6 +614,7 @@ begin
   inherited Create(nil);
 
   Name := 'SimbaScriptTabsForm'; // important - docking requires control names
+  Caption := 'Script Tabs';
   OnDropFiles := @DoDropFiles;
 
   FFindPanel := TSimbaFindPanel.Create(Self);
@@ -644,7 +652,41 @@ begin
   FTabControl.DefaultTitle := 'Untitled';
   FTabControl.CanAddTabOnDoubleClick := True;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [
+    ESimbaEvent.ACTION_VIEW_EDITOR,
+    ESimbaEvent.ACTION_RUN,
+    ESimbaEvent.ACTION_COMPILE,
+    ESimbaEvent.ACTION_PAUSE,
+    ESimbaEvent.ACTION_STOP,
+    ESimbaEvent.ACTION_CLOSE_TAB,
+    ESimbaEvent.ACTION_CLOSE_ALL_TABS,
+    ESimbaEvent.ACTION_SAVE,
+    ESimbaEvent.ACTION_SAVE_AS,
+    ESimbaEvent.ACTION_SAVE_ALL,
+    ESimbaEvent.ACTION_SAVE_AS_DEFAULT,
+    ESimbaEvent.ACTION_NEW,
+    ESimbaEvent.ACTION_OPEN,
+    ESimbaEvent.ACTION_UNDO,
+    ESimbaEvent.ACTION_REDO,
+    ESimbaEvent.ACTION_CUT,
+    ESimbaEvent.ACTION_COPY,
+    ESimbaEvent.ACTION_PASTE,
+    ESimbaEvent.ACTION_SELECT_ALL,
+    ESimbaEvent.ACTION_SELECT_LINE,
+    ESimbaEvent.ACTION_SELECT_WORD,
+    ESimbaEvent.ACTION_LOWER_SELECTION,
+    ESimbaEvent.ACTION_UPPER_SELECTION,
+    ESimbaEvent.ACTION_FIND,
+    ESimbaEvent.ACTION_FIND_NEXT,
+    ESimbaEvent.ACTION_FIND_PREV,
+    ESimbaEvent.ACTION_REPLACE,
+    ESimbaEvent.ACTION_GOTO_LINE,
+    ESimbaEvent.ACTION_FORMAT_SCRIPT,
+    ESimbaEvent.ACTION_FIND_DECL_AT_CARET,
+    ESimbaEvent.ACTION_COPY_FILENAME,
+    ESimbaEvent.ACTION_OPEN_DIRECTORY,
+    ESimbaEvent.TIMER_750
+  ]);
 
   AddTab();
 end;

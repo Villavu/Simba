@@ -69,7 +69,7 @@ begin
   SynEdit.Parent := Self;
   SynEdit.Align := alClient;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_VIEW_NOTES]);
 end;
 
 {$R *.lfm}

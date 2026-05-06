@@ -249,7 +249,7 @@ begin
   FMaxDepth := 128;
   FMoving   := False;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.TAB_CLOSED, ESimbaEvent.TAB_CARETMOVED]);
 end;
 
 destructor TSimbaEditorCaretHistory.Destroy;

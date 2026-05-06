@@ -59,7 +59,7 @@ begin
   Width  := Scale96ToScreen(800);
   Height := Scale96ToScreen(600);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_SHAPE_BOX]);
 end;
 
 procedure TSimbaShapeBoxForm.FormHide(Sender: TObject);

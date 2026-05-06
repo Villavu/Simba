@@ -208,7 +208,7 @@ begin
   AddSimbaExamples();
   UpdateTreeSize();
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_OPEN_EXAMPLE]);
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);

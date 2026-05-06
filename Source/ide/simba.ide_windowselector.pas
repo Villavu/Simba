@@ -157,7 +157,7 @@ constructor TSimbaWindowSelector.Create;
 begin
   inherited Create(nil);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_PICKTARGET]);
 end;
 
 destructor TSimbaWindowSelector.Destroy;

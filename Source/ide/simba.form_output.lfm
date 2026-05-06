@@ -6,6 +6,7 @@ object SimbaOutputForm: TSimbaOutputForm
   Caption = 'Output'
   DesignTimePPI = 192
   ShowInTaskBar = stAlways
+  LCLVersion = '4.0.0.4'
   OnMouseDown = FormMouseDown
   OnMouseLeave = FormMouseLeave
   OnMouseMove = FormMouseMove

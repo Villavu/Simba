@@ -210,7 +210,6 @@ begin
   case Event of
     ESimbaEvent.FORM_DOCK,
     ESimbaEvent.FORM_UNDOCK:        DoDockOrUnDock();
-
     ESimbaEvent.ACTION_OPEN_BACKUP,
     ESimbaEvent.ACTION_VIEW_BACKUP: DoViewBackups();
   end;
@@ -267,7 +266,12 @@ begin
   Splitter.OnEnter := @DoSplitterEnterExit;
   Splitter.OnExit := @DoSplitterEnterExit;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [
+    ESimbaEvent.FORM_DOCK,
+    ESimbaEvent.FORM_UNDOCK,
+    ESimbaEvent.ACTION_OPEN_BACKUP,
+    ESimbaEvent.ACTION_VIEW_BACKUP
+  ]);
 end;
 
 procedure TSimbaBackupsForm.FormShow(Sender: TObject);

@@ -17,6 +17,9 @@ uses
 
 type
   TSimbaSynEdit = class(TSynEdit)
+  private
+    function GetFontName: String;
+    procedure SetFontName(AValue: String);
   protected
     FScrollbarVert: TSimbaScrollBar;
     FScrollbarHorz: TSimbaScrollBar;
@@ -38,6 +41,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
 
+    property FontName: String read GetFontName write SetFontName;
     property FontAntialising: Boolean read GetFontAntialising write SetFontAntialising;
   end;
 
@@ -48,6 +52,9 @@ type
   end;
 
 implementation
+
+uses
+  simba.misc;
 
 function TSimbaSynEdit.GetFontAntialising: Boolean;
 begin
@@ -60,6 +67,17 @@ begin
     True:  Font.Quality := fqCleartypeNatural;
     False: Font.Quality := fqNonAntialiased;
   end;
+end;
+
+function TSimbaSynEdit.GetFontName: String;
+begin
+  Result := Font.Name;
+end;
+
+procedure TSimbaSynEdit.SetFontName(AValue: String);
+begin
+  if IsFontFixed(AValue) then
+    Font.Name := AValue;
 end;
 
 procedure TSimbaSynEdit.DoVertScrollBarChange(Sender: TObject);

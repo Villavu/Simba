@@ -163,7 +163,7 @@ constructor TSimbaAreaSelector.Create;
 begin
   inherited Create(nil);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_PICKAREA]);
 end;
 
 destructor TSimbaAreaSelector.Destroy;

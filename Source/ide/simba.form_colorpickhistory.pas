@@ -104,7 +104,7 @@ begin
 
   LoadColors();
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.COLOR_PICKED,ESimbaEvent.ACTION_VIEW_COLORHISTORY]);
 end;
 
 procedure TSimbaColorPickHistoryForm.FormDestroy(Sender: TObject);

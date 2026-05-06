@@ -86,7 +86,7 @@ begin
   Width := Scale96ToScreen(550);
   Height := Scale96ToScreen(450);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_ABOUT]);
 end;
 
 procedure TSimbaAboutForm.VersionLabelClick(Sender: TObject);

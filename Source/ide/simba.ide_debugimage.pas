@@ -73,7 +73,7 @@ constructor TSimbaDebugImage.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_VIEW_DEBUGIMAGE]);
 end;
 
 procedure TSimbaDebugMatrix.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
@@ -170,7 +170,7 @@ begin
   FImageBox.OnImgMouseMove := @DoImgMouseMove;
   FImageBox.OnImgDoubleClick := @DoImgDoubleClick;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_VIEW_DEBUGMATRIX]);
 end;
 
 procedure DoCreate;

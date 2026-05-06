@@ -434,7 +434,7 @@ begin
   Application.AddOnKeyDownBeforeHandler(@DoApplicationKeyDown);
   Screen.AddHandlerActiveControlChanged(@DoActiveControlChange);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.TAB_LOADED]);
 end;
 
 destructor TSimbaMainMenuBar.Destroy;

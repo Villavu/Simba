@@ -22,9 +22,8 @@ type
   ESimbaEvent = (
     NONE,
 
-    // Called every ~500ms while a script is running, Data = TSimbaScriptTabRunner
-    // Warning: Is *NOT* called on main thread (FOutputThread)
-    SCRIPT_RUNNING,
+    // General use for timer execute every 750ms
+    TIMER_750,
 
     // "file" menu, Data=TMenuItem
     ACTION_NEW,
@@ -125,9 +124,9 @@ type
     TAB_CLOSED,
     TAB_CAPTION,
     TAB_MOVED,
-
     TAB_CAN_SAVE,
     TAB_CANNOT_SAVE,
+    TAB_ACTIVE_750,
 
     // Event called on a form dock/undock
     FORM_DOCK,
@@ -165,11 +164,14 @@ type
   private type
     TCallbackList = specialize TSimbaList<TSimbaEventCallback>;
   private
-    FCallbacks: TCallbackList;
+    FCallbacks: array[ESimbaEvent] of TCallbackList;
+    FTimer: TTimer;
+
+    procedure DoTimer(Sender: TObject);
   public
     procedure Post(Event: ESimbaEvent; Data: Pointer);
-    procedure Register(Owner: TComponent; Callback: TSimbaEventCallback); overload;
-    procedure Register(Callback: TSimbaEventCallback); overload;
+    procedure Register(Owner: TComponent;Callback: TSimbaEventCallback; Events: array of ESimbaEvent); overload;
+    procedure Register(Callback: TSimbaEventCallback; Events: array of ESimbaEvent); overload;
     procedure UnRegister(Callback: TSimbaEventCallback);
 
     constructor Create;
@@ -207,6 +209,11 @@ begin
   inherited Destroy();
 end;
 
+procedure TSimbaEvents.DoTimer(Sender: TObject);
+begin
+  SimbaEvents.Post(ESimbaEvent.TIMER_750, nil);
+end;
+
 procedure TSimbaEvents.Post(Event: ESimbaEvent; Data: Pointer);
 var
   I: Integer;
@@ -215,44 +222,61 @@ begin
   WriteLn(Event);
   {$ENDIF}
 
-  for I := 0 to FCallbacks.Count - 1 do
-    FCallbacks[I](Event, Data);
+  for I := 0 to FCallbacks[Event].Count - 1 do
+    FCallbacks[Event][I](Event, Data);
 end;
 
-procedure TSimbaEvents.Register(Owner: TComponent; Callback: TSimbaEventCallback);
+procedure TSimbaEvents.Register(Owner: TComponent; Callback: TSimbaEventCallback; Events: array of ESimbaEvent);
+var
+  Event: ESimbaEvent;
 begin
-  FCallbacks.Add(Callback);
+  for Event in Events do
+    FCallbacks[Event].Add(Callback);
   if (Owner <> nil) then
     TManagedEvent.Create(Owner, Callback);
 end;
 
-procedure TSimbaEvents.Register(Callback: TSimbaEventCallback);
+procedure TSimbaEvents.Register(Callback: TSimbaEventCallback; Events: array of ESimbaEvent);
 begin
-  Register(nil, Callback);
+  Register(nil, Callback, Events);
 end;
 
 procedure TSimbaEvents.UnRegister(Callback: TSimbaEventCallback);
 var
   I: Integer;
+  Event: ESimbaEvent;
 begin
-  for I := 0 to FCallbacks.Count - 1 do
-    if (FCallbacks[I] = Callback) then
-    begin
-      FCallbacks.Delete(I);
-      Exit;
-    end;
+  for Event in ESimbaEvent do
+    for I := 0 to FCallbacks[Event].Count - 1 do
+      if (FCallbacks[Event][I] = Callback) then
+      begin
+        FCallbacks[Event].Delete(I);
+        Exit;
+      end;
 end;
 
 constructor TSimbaEvents.Create;
+var
+  Event: ESimbaEvent;
 begin
   inherited Create();
 
-  FCallbacks := TCallbackList.Create();
+  for Event in ESimbaEvent do
+    FCallbacks[Event] := TCallbackList.Create();
+
+  FTimer := TTimer.Create(nil);
+  FTimer.OnTimer := @DoTimer;
+  FTimer.Interval := 750;
+  FTimer.Enabled := True;
 end;
 
 destructor TSimbaEvents.Destroy;
+var
+  Event: ESimbaEvent;
 begin
-  FreeAndNil(FCallbacks);
+  FreeAndNil(FTimer);
+  for Event in ESimbaEvent do
+    FreeAndNil(FCallbacks[Event]);
 
   inherited Destroy();
 end;

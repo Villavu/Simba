@@ -325,7 +325,7 @@ begin
   FTreeView.PopupMenu := Popup;
   FTreeView.OnCustomFilter := @DoCustomFilter;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_VIEW_FILEBROWSER, ESimbaEvent.SPLITTER_DOUBLE_CLICK]);
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.FileBrowserMasks, @DoSimbaSettingChanged, True);
 
   Fill();

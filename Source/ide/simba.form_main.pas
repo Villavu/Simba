@@ -302,7 +302,19 @@ begin
   Application.CaptureExceptions := True;
   Application.OnException := @Self.DoException;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [
+    ESimbaEvent.ACTION_RESET_LAYOUT,
+    ESimbaEvent.ACTION_COMPILER_HINTS,
+    ESimbaEvent.ACTION_LOCK_LAYOUT,
+    ESimbaEvent.ACTION_VIEW_TRAYICON,
+    ESimbaEvent.ACTION_REPORTBUG,
+    ESimbaEvent.ACTION_SIMBAGITHUB,
+    ESimbaEvent.ACTION_ONLINEDOCS,
+    ESimbaEvent.ACTION_ASSOCIATE,
+    ESimbaEvent.ACTION_ACA,
+    ESimbaEvent.ACTION_DTM_EDITOR,
+    ESimbaEvent.ACTION_QUIT
+  ]);
 
   FMouseLogger := TSimbaMouseLogger.Create();
 

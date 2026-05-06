@@ -8,6 +8,7 @@ object SimbaMainForm: TSimbaMainForm
   ClientWidth = 1624
   DesignTimePPI = 192
   Position = poScreenCenter
+  LCLVersion = '4.0.0.4'
   OnClose = FormClose
   OnDestroy = FormDestroy
   OnWindowStateChange = FormWindowStateChange

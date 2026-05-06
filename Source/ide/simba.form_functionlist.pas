@@ -47,6 +47,7 @@ implementation
 
 uses
   AnchorDocking, Menus,
+  simba.initializations,
   simba.ide_dockinghelpers,
   simba.threading;
 
@@ -97,7 +98,18 @@ constructor TSimbaFunctionListForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  Name := 'SimbaFunctionListForm'; // important - docking requires control names
+  Caption := 'Function List';
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [
+    ESimbaEvent.ACTION_VIEW_FUNCTIONLIST,
+    ESimbaEvent.CODETOOLS_SETUP,
+    ESimbaEvent.TAB_CHANGE,
+    ESimbaEvent.TAB_CLOSED,
+    ESimbaEvent.TAB_ADD,
+    ESimbaEvent.TAB_MODIFIED,
+    ESimbaEvent.SPLITTER_DOUBLE_CLICK
+  ]);
 
   with TIdleTimer.Create(Self) do
   begin
@@ -203,6 +215,18 @@ begin
   end;
 end;
 
-{$R *.lfm}
+procedure DoCreate;
+begin
+  SimbaFunctionListForm := TSimbaFunctionListForm.Create(nil);
+end;
+
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaFunctionListForm);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'SimbaFunctionListForm', 5);
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaFunctionListForm');
 
 end.

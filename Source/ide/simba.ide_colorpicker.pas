@@ -242,7 +242,7 @@ constructor TSimbaColorPicker.Create();
 begin
   inherited Create(nil);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_PICKCOLOR]);
 end;
 
 destructor TSimbaColorPicker.Destroy;

@@ -237,7 +237,7 @@ begin
   EditorKeybindingFrame.Align := alClient;
   EditorKeybindingFrame.ParentFont := True;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_SETTINGS]);
 end;
 
 end.
