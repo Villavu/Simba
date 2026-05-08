@@ -136,8 +136,6 @@ type
 
     // Event called when a tabs script state changes. Data=TSimbaScriptTab
     TAB_SCRIPTSTATE_CHANGE,
-    // Event called on mouselogger change. Data=TSimbaMouseLogger
-    MOUSELOGGER_CHANGE,
 
     //Data=TSimbaFunctionListNode
     FUNCTIONLIST_SELECTION_CHANGE,

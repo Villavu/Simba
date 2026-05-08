@@ -15,13 +15,38 @@ uses
   Classes, SysUtils,
   simba.base, simba.process;
 
-var
-  SimbaIDEVars: record
-    WindowSelection: TWindowHandle;
-    ProcessSelection: TProcessID;
+type
+  TSimbaIDEVars = record
+  private
+    FProcessSelection: TProcessID;
+    FWindowSelection: TWindowHandle;
+
+    function GetWindowSelection: TWindowHandle;
+    procedure SetWindowSelection(AValue: TWindowHandle);
+  public
+    property WindowSelection: TWindowHandle read GetWindowSelection write SetWindowSelection;
+    property ProcessSelection: TProcessID read FProcessSelection write FProcessSelection;
   end;
 
+var
+  SimbaIDEVars: TSimbaIDEVars;
+
 implementation
+
+uses
+  simba.vartype_windowhandle;
+
+function TSimbaIDEVars.GetWindowSelection: TWindowHandle;
+begin
+  if not FWindowSelection.IsValid() then
+    FWindowSelection := GetDesktopWindow();
+  Result := FWindowSelection;
+end;
+
+procedure TSimbaIDEVars.SetWindowSelection(AValue: TWindowHandle);
+begin
+  FWindowSelection := AValue;
+end;
 
 end.
 

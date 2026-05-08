@@ -14,7 +14,6 @@ uses
   Menus, ImgList, AnchorDockPanel,
   simba.base,
   simba.settings,
-  simba.ide_mouselogger,
   simba.ide_events,
   simba.image;
 
@@ -91,8 +90,6 @@ type
     procedure TrayIconClick(Sender: TObject);
     procedure TrayPopupExitClick(Sender: TObject);
   protected
-    FMouseLogger: TSimbaMouseLogger;
-
     procedure DoResetDocking;
     procedure DoDefaultDocking;
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
@@ -316,8 +313,6 @@ begin
     ESimbaEvent.ACTION_QUIT
   ]);
 
-  FMouseLogger := TSimbaMouseLogger.Create();
-
   // Docking
   BeginFormUpdate();
   try
@@ -381,13 +376,6 @@ end;
 
 procedure TSimbaMainForm.FormDestroy(Sender: TObject);
 begin
-  if (FMouseLogger <> nil) then
-  begin
-    FMouseLogger.Terminate();
-    FMouseLogger.WaitFor();
-
-    FreeAndNil(FMouseLogger);
-  end;
   SimbaSettings.Save();
 end;
 
