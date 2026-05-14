@@ -16,7 +16,7 @@ uses
   Classes, SysUtils, Interfaces, Forms,
   simba.base,
   simba.form_main, simba.form_about, simba.form_imagestring,
-  simba.form_output, simba.form_filebrowser,
+  simba.form_filebrowser,
   simba.form_notes, simba.form_settings, simba.form_openexample, simba.form_shapebox,
   simba.form_backups, simba.form_findinfiles, simba.form_downloadsimba, simba.form_package,
   simba.form_colorpickhistory,
@@ -25,7 +25,7 @@ uses
   simba.openssl,
   simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector,
   simba.ide_mainmenubar, simba.ide_maintoolbar, simba.ide_mainstatusbar,
-  simba.form_functionlist;
+  simba.form_functionlist, simba.form_output;
 
 begin
   {$IF DECLARED(HEAPTRC)}
@@ -132,7 +132,6 @@ begin
     Application.ShowMainForm := False;
     Application.CreateForm(TSimbaMainForm, SimbaMainForm);
     Application.CreateForm(TSimbaNotesForm, SimbaNotesForm);
-    Application.CreateForm(TSimbaOutputForm, SimbaOutputForm);
     Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
     Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);

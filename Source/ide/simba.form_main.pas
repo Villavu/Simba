@@ -128,12 +128,12 @@ uses
 
   simba.form_colorpickhistory,
   simba.form_findinfiles,
-  simba.form_output,
   simba.form_filebrowser,
   simba.form_notes,
   simba.form_functionlist,
   simba.form_backups,
   simba.form_scripttabs,
+  simba.form_output,
 
   simba.aca,
   simba.env,

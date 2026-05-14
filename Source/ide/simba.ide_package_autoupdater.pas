@@ -39,7 +39,7 @@ implementation
 
 uses
   simba.ide_package, simba.ide_package_installer, simba.initializations,
-  simba.form_package, simba.form_output, simba.form_openexample,
+  simba.form_package, simba.form_openexample,
   simba.vartype_string, simba.fs;
 
 type
@@ -231,33 +231,33 @@ begin
       DebugLn([EDebugLn.FOCUS, EDebugLn.YELLOW], 'Automatically updating %s', [Package.Name]);
       Sleep(750); // whatever, let above flush... TSimbaPackageInstaller directly writes to the synedit.
 
-      try
-        with TSimbaPackageInstaller.Create(Package, SimbaOutputForm.SimbaOutputBox) do
-        try
-          Version := Package.Versions[0];
-
-          if HasRemoteInstallOpts then
-            InstallOpts := RemoteInstallOpts
-          else
-          begin
-            // I guess we can auto update this way too...
-            InstallOpts := Default(TSimbaPackageInstallOptions);
-            InstallOpts.Path := Package.InstalledPath;
-          end;
-
-          if Install(InstallOpts) then
-          begin
-            DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Succesfully updated "%s"', [Package.Name]);
-            DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Now at version: %s', [Package.InstalledVersion]);
-          end else
-            DebugLn([EDebugLn.FOCUS, EDebugLn.RED], 'Failed to update: %s', [Package.Name]);
-        finally
-          Free();
-        end;
-      except
-        on E: Exception do
-          DebugLn([EDebugLn.FOCUS, EDebugLn.RED], 'Failed to update: %s (%s)', [Package.Name, E.Message]);
-      end;
+      //try
+      //  with TSimbaPackageInstaller.Create(Package, SimbaOutputForm.SimbaOutputBox) do
+      //  try
+      //    Version := Package.Versions[0];
+      //
+      //    if HasRemoteInstallOpts then
+      //      InstallOpts := RemoteInstallOpts
+      //    else
+      //    begin
+      //      // I guess we can auto update this way too...
+      //      InstallOpts := Default(TSimbaPackageInstallOptions);
+      //      InstallOpts.Path := Package.InstalledPath;
+      //    end;
+      //
+      //    if Install(InstallOpts) then
+      //    begin
+      //      DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Succesfully updated "%s"', [Package.Name]);
+      //      DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Now at version: %s', [Package.InstalledVersion]);
+      //    end else
+      //      DebugLn([EDebugLn.FOCUS, EDebugLn.RED], 'Failed to update: %s', [Package.Name]);
+      //  finally
+      //    Free();
+      //  end;
+      //except
+      //  on E: Exception do
+      //    DebugLn([EDebugLn.FOCUS, EDebugLn.RED], 'Failed to update: %s (%s)', [Package.Name, E.Message]);
+      //end;
     end;
   end;
 

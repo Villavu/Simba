@@ -15,7 +15,8 @@ interface
 uses
   Classes, SysUtils, Controls,
   simba.base,
-  simba.ide_tab;
+  simba.ide_tab,
+  simba.ide_output_components;
 
 type
   SimbaController = class
@@ -28,6 +29,7 @@ type
     class procedure OpenInTab(FileName: String; CaretX, CaretY: Integer); overload; static;
     class procedure OpenInExplorer(FileName: String); static;
     class function CloseAllTabs: Boolean; static;
+    class function FindOutputListForTab(TabID: Integer): TOutputListComponentReal;
 
     class function GetScriptButtonStates(Tab: TSimbaScriptTab; out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean; static; overload;
     class function GetScriptButtonStates(out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean; static; overload;
@@ -44,7 +46,8 @@ uses
   simba.nativeinterface,
   simba.ide_maintoolbar,
   simba.form_main,
-  simba.form_scripttabs;
+  simba.form_scripttabs,
+  simba.form_output;
 
 {$DEFINE ASSERT_MAIN_THREAD :=
   if (GetCurrentThreadId() <> MainThreadID) then
@@ -133,6 +136,13 @@ begin
   Result := SimbaScriptTabsForm.CloseAllTabs(False);
 end;
 
+class function SimbaController.FindOutputListForTab(TabID: Integer): TOutputListComponentReal;
+begin
+  ASSERT_MAIN_THREAD
+
+  Result := SimbaOutputForm.FindList(TabID);
+end;
+
 class function SimbaController.GetScriptButtonStates(Tab: TSimbaScriptTab; out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean;
 var
   State: ESimbaScriptState;
@@ -186,6 +196,8 @@ end;
 
 class procedure SimbaController.ShowTrayNotifaction(Title, Message: String; Timeout: Integer);
 begin
+  ASSERT_MAIN_THREAD
+
   SimbaMainForm.TrayIcon.BalloonTitle   := Title;
   SimbaMainForm.TrayIcon.BalloonHint    := Message;
   SimbaMainForm.TrayIcon.BalloonTimeout := Timeout;
@@ -194,6 +206,8 @@ end;
 
 class procedure SimbaController.SetWindowTitle(Title: String);
 begin
+  ASSERT_MAIN_THREAD
+
   SimbaMainForm.Caption := Title;
 end;
 

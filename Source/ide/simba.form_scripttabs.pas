@@ -96,7 +96,6 @@ uses
   simba.env,
   simba.vartype_string,
   simba.component_images,
-  simba.form_output,
   simba.ide_dockinghelpers,
   simba.ide_simpleformatter,
   simba.ide_controller,
@@ -138,9 +137,9 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   begin
     if (Event in [ESimbaEvent.ACTION_RUN, ESimbaEvent.ACTION_COMPILE]) then
     begin
-      Tab.OutputBox.MakeVisible();
-      if SimbaSettings.OutputBox.ClearOnCompile.Value then
-        Tab.OutputBox.Empty();
+      //Tab.OutputBox.MakeVisible();
+      //if SimbaSettings.OutputBox.ClearOnCompile.Value then
+      //  Tab.OutputBox.Empty();
     end;
 
          if (Event = ESimbaEvent.ACTION_RUN)     then Tab.Run()

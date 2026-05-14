@@ -38,11 +38,7 @@ type
   TSimbaTabClass = class of TSimbaTab;
 
   TSimbaTabControl = class(TCustomControl)
-  private
-    function GetImages: TImageList;
-    procedure SetImages(AValue: TImageList);
-  public
-  type
+  public type
     TTabMovedEvent     = procedure(Sender: TSimbaTabControl; AFrom, ATo: Integer) of object;
     TTabCanChangeEvent = procedure(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean) of object;
     TTabCloseEvent     = procedure(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean) of object;
@@ -84,7 +80,9 @@ type
     function GetOnMouseUp: TMouseEvent;
     function GetOnMouseLeave: TNotifyEvent;
     function GetOnMouseMove: TMouseMoveEvent;
+    function GetImages: TImageList;
 
+    procedure SetImages(AValue: TImageList);
     procedure SetActiveTab(Value: TSimbaTab);
     procedure SetCanAddTabOnDoubleClick(Value: Boolean);
     procedure SetCanMoveTabs(Value: Boolean);

@@ -14,8 +14,8 @@ uses
   simba.base,
   simba.ide_editor,
   simba.ide_events,
-  simba.form_output,
-  simba.component_tabcontrol;
+  simba.component_tabcontrol,
+  simba.ide_output_components;
 
 type
   TSimbaScriptTab = class;
@@ -37,6 +37,7 @@ type
     FStartTime: UInt64;
 
     FOutputThread: TThread;
+    FOutputBox: TOutputListComponentReal;
 
     FState: ESimbaScriptState;
 
@@ -99,8 +100,6 @@ type
 
     FScriptRunner: TSimbaScriptTabRunner;
 
-    FOutputBox: TSimbaOutputBox;
-
     procedure UpdateModifiedText();
     function CheckIsModified: Boolean;
 
@@ -122,8 +121,6 @@ type
     function GetScript: String;
     procedure SetScript(AValue: String);
   public
-    property OutputBox: TSimbaOutputBox read FOutputBox;
-
     property ScriptTitle: String read FScriptTitle;
     property ScriptFileName: String read FScriptFileName;
     property Script: String read GetScript write SetScript;
@@ -174,11 +171,12 @@ uses
   simba.ide_vars,
   simba.dialog,
   simba.vartype_string,
-  simba.vartype_windowhandle;
+  simba.vartype_windowhandle,
+  simba.ide_controller;
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var
-  ReadBuffer, RemainingBuffer: String;
+  ReadBuffer: String;
 
   procedure EmptyProcessOutput;
   var
@@ -188,23 +186,18 @@ var
     begin
       Count := FProcess.Output.Read(ReadBuffer[1], Length(ReadBuffer));
       if (Count > 0) then
-        RemainingBuffer := FTab.OutputBox.Add(RemainingBuffer + Copy(ReadBuffer, 1, Count));
+        FOutputBox.Add(@ReadBuffer[1], Count);
     end;
   end;
 
 begin
   try
     SetLength(ReadBuffer, 8192);
-    SetLength(RemainingBuffer, 0);
-
     while FProcess.Running do
     begin
       EmptyProcessOutput();
       Sleep(500);
     end;
-
-    //DebugLn('Script process[%d] terminated. Exit code: %d', [FProcess.ProcessID, FProcess.ExitCode]);
-
     EmptyProcessOutput();
   except
     on E: Exception do
@@ -282,7 +275,7 @@ end;
 
 procedure TSimbaScriptTabRunner.ShowOutputBox;
 begin
-  FTab.OutputBox.MakeVisible();
+  //FTab.OutputBox.MakeVisible();
 end;
 
 procedure TSimbaScriptTabRunner.Run(Args: TStringArray);
@@ -323,6 +316,7 @@ begin
   inherited Create(ATab);
 
   FTab := ATab;
+  FOutputBox := SimbaController.FindOutputListForTab(FTab.UID);
   FState := ESimbaScriptState.RUNNING;
 
   FProcess := TProcess.Create(Self);
@@ -683,8 +677,6 @@ begin
   FEditor.OnGetFileName := @DoEditorGetFileName;
   FEditor.RegisterCaretMoveHandler(@DoEditorCaretMoved);
   FEditor.PopupMenu := TSimbaTabPopupMenu.Create(Self);
-
-  FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
 
   LoadDefaultScript();
   UpdateModifiedText();
