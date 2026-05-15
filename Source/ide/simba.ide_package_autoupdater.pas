@@ -228,7 +228,8 @@ begin
 
     if Package.HasUpdate() and Package.AutoUpdateEnabled then
     begin
-      DebugLn([EDebugLn.FOCUS, EDebugLn.YELLOW], 'Automatically updating %s', [Package.Name]);
+      DebugLn(DEBUG_YELLOW + 'Automatically updating ' + Package.Name + DEBUG_RESET);
+      DebugLn(DEBUG_FOCUS);
       Sleep(750); // whatever, let above flush... TSimbaPackageInstaller directly writes to the synedit.
 
       //try

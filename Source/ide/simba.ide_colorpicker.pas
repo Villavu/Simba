@@ -120,7 +120,8 @@ var
 begin
   if FPicked then
   begin
-    DebugLn([EDebugLn.FOCUS], 'Color picked: %s at (%d, %d)', [ColorToStr(FColor), FPoint.X, FPoint.Y]);
+    DebugLn('Color picked: %s at (%d, %d)', [ColorToStr(FColor), FPoint.X, FPoint.Y]);
+    DebugLn(DEBUG_FOCUS);
 
     EventData.Color := FColor;
     EventData.Point := FPoint;

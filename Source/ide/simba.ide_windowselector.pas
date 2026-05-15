@@ -203,12 +203,14 @@ begin
       Pid := Selected.GetPID();
       Bounds := Selected.GetBounds();
 
-      DebugLn([EDebugLn.FOCUS], 'Window Selected: %d',  [Selected]);
-      DebugLn([EDebugLn.FOCUS], ' - Dimensions: %dx%d', [Bounds.Width - 1, Bounds.Height - 1]);
-      DebugLn([EDebugLn.FOCUS], ' - PID: %d (%s)',      [PID, IfThen(IsProcess64Bit(PID), '64 bit', '32 bit')]);
-      DebugLn([EDebugLn.FOCUS], ' - Title: "%s"',       [Selected.GetTitle()]);
-      DebugLn([EDebugLn.FOCUS], ' - ClassName: "%s"',   [Selected.GetClassName()]);
-      DebugLn([EDebugLn.FOCUS], ' - Executable: "%s"',  [GetProcessPath(PID)]);
+      Debug(DEBUG_GREEN);
+      DebugLn('Window Selected: %d',  [Selected]);
+      DebugLn(' - Dimensions: %dx%d', [Bounds.Width - 1, Bounds.Height - 1]);
+      DebugLn(' - PID: %d (%s)',      [PID, IfThen(IsProcess64Bit(PID), '64 bit', '32 bit')]);
+      DebugLn(' - Title: "%s"',       [Selected.GetTitle()]);
+      DebugLn(' - ClassName: "%s"',   [Selected.GetClassName()]);
+      DebugLn(' - Executable: "%s"',  [GetProcessPath(PID)]);
+      DebugLn(DEBUG_FOCUS);
 
       SimbaIDEVars.WindowSelection := Selected;
       SimbaIDEVars.ProcessSelection := Pid;

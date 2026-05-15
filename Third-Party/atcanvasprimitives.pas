@@ -106,8 +106,8 @@ function CanvasCollapseStringByDots(C: TCanvas;
   Width: integer;
   DotsString: string=''): string;
 
-function ColorBlend(c1, c2: UInt32; A: UInt32): UInt32; inline;
-function ColorBlendHalf(c1, c2: UInt32): UInt32; inline;
+function ColorBlend(const c1, c2, A: UInt32): UInt32; inline;
+function ColorBlendHalf(const c1, c2: UInt32): UInt32; inline;
 
 implementation
 
@@ -662,21 +662,19 @@ begin
     BitmapResize(b, SizeX, SizeY);
 end;
 
-function ColorBlend(c1, c2: UInt32; A: UInt32): UInt32;
+function ColorBlend(const c1, c2, A: UInt32): UInt32;
 //blend level: 0..255
 var
-  invA, rb, g: UInt32;
+  invA: UInt32;
 begin
-  {$PUSH}
-  {$R-}{$Q-}
+  {$PUSH}{$R-}{$Q-}
   invA := 256 - A;
-  rb := (A * (c1 and $00FF00FF) + invA * (c2 and $00FF00FF)) shr 8;
-  g  := (A * (c1 and $0000FF00) + invA * (c2 and $0000FF00)) shr 8;
-  Result := (rb and $00FF00FF) or (g and $0000FF00);
+  Result := ((((A * (c1 and $00FF00FF) + invA * (c2 and $00FF00FF)) shr 8) and $00FF00FF) or
+             (((A * (c1 and $0000FF00) + invA * (c2 and $0000FF00)) shr 8) and $0000FF00));
   {$POP}
 end;
 
-function ColorBlendHalf(c1, c2: UInt32): UInt32;
+function ColorBlendHalf(const c1, c2: UInt32): UInt32;
 begin
   {$PUSH}
   {$R-}{$Q-}

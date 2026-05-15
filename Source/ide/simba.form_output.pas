@@ -42,6 +42,8 @@ type
 
     function FindTab(ScriptTabUID: Int64): TOutputTab;
 
+    procedure DoDebugRedirect(const S: String);
+    procedure DoDebugLnRedirect(const S: String);
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
     // This form has no docking header and docking is performed on empty space here
@@ -49,6 +51,7 @@ type
     procedure DoTabControlMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
     constructor Create; reintroduce;
+    destructor Destroy; override;
 
     function FindList(ScriptTabUID: Int64): TOutputListComponentReal;
   end;
@@ -72,6 +75,16 @@ begin
     if (TOutputTab(FTabControl.Tabs[I]).FScriptTabUID = ScriptTabUID) then
       Exit(TOutputTab(FTabControl.Tabs[I]));
   Result := nil;
+end;
+
+procedure TSimbaOutputForm.DoDebugRedirect(const S: String);
+begin
+  FSimbaTab.FList.Add(S);
+end;
+
+procedure TSimbaOutputForm.DoDebugLnRedirect(const S: String);
+begin
+  FSimbaTab.FList.Add(S + LineEnding);
 end;
 
 procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
@@ -213,6 +226,15 @@ begin
     ESimbaEvent.TAB_MOVED,
     ESimbaEvent.TAB_SCRIPTSTATE_CHANGE
   ]);
+
+  SetDebugRedirects(@DoDebugRedirect, @DoDebugLnRedirect);
+end;
+
+destructor TSimbaOutputForm.Destroy;
+begin
+  SetDebugRedirects(nil, nil);
+
+  inherited Destroy();
 end;
 
 function TSimbaOutputForm.FindList(ScriptTabUID: Int64): TOutputListComponentReal;

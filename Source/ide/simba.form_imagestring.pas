@@ -134,7 +134,8 @@ begin
     except
     end;
 
-    DebugLn([EDebugLn.FOCUS], ImageString);
+    DebugLn(ImageString);
+    DebugLn(DEBUG_FOCUS);
   end;
 end;
 

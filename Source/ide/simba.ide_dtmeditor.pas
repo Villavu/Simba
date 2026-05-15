@@ -237,7 +237,8 @@ end;
 
 procedure TSimbaDTMEditor.DoPrintDTMClick(Sender: TObject);
 begin
-  DebugLn([EDebugLn.FOCUS], 'DTM := TDTM.CreateFromString(' + #39 + MakeDTM().ToString() + #39 + ');');
+  DebugLn('DTM := TDTM.CreateFromString(' + #39 + MakeDTM().ToString() + #39 + ');');
+  DebugLn(DEBUG_FOCUS);
 end;
 
 procedure TSimbaDTMEditor.DoDebugColorClick(Sender: TObject);

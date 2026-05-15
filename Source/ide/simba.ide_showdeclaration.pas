@@ -235,8 +235,9 @@ procedure ShowDeclaration(Declaration: TDeclaration);
 begin
   if (Declaration.Parser.SourceType = EParserSourceType.PLUGIN) then
   begin
-    DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [Declaration.DocPos.FileName]);
-    DebugLn([EDebugLn.FOCUS], Declaration.Header);
+    DebugLn('Declared internally in plugin: ' + Declaration.DocPos.FileName);
+    DebugLn(Declaration.Header);
+    DebugLn(DEBUG_FOCUS);
 
     Exit;
   end;
@@ -258,8 +259,9 @@ begin
     Exit;
   end;
 
-  DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [Declaration.DocPos.FileName]);
-  DebugLn([EDebugLn.FOCUS], Declaration.Header);
+  DebugLn('Declared internally in Simba: %s', [Declaration.DocPos.FileName]);
+  DebugLn(Declaration.Header);
+  DebugLn(DEBUG_FOCUS);
 end;
 
 procedure ShowSimbaDeclaration(Header: String; FileName: String);
@@ -267,8 +269,9 @@ begin
   if (Header = '') then
     Exit;
 
-  DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [FileName]);
-  DebugLn([EDebugLn.FOCUS], 'Declaration: %s', [Header]);
+  DebugLn('Declared internally in Simba: %s', [FileName]);
+  DebugLn('Declaration: %s', [Header]);
+  DebugLn(DEBUG_FOCUS);
 end;
 
 procedure ShowPluginDeclaration(Header: String; FileName: String);
@@ -276,8 +279,9 @@ begin
   if (Header = '') then
     Exit;
 
-  DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [FileName]);
-  DebugLn([EDebugLn.FOCUS], 'Declaration: %s', [Header]);
+  DebugLn('Declared internally in plugin: %s', [FileName]);
+  DebugLn('Declaration: %s', [Header]);
+  DebugLn(DEBUG_FOCUS);
 end;
 
 end.

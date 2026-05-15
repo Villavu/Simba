@@ -23,12 +23,13 @@ const
 
 type
   // the actual sequence that is encoded in the string
-  // example for "red background" in binary: #0#0#1#255#0#0#0
+  // Example for red background: #0#0#1'000000FF'
+  // Data must be encoded as hex because stdout expecting printable chars, not binary (0..127)
   PControlCode = ^TControlCode;
   TControlCode = packed record
     Sig: array[0..1] of Char; // #0#0
     Typ: UInt8;
-    Data: UInt32;
+    Data: array[0..7] of Char;
   end;
 
 // Exposing TSynEdit is just a ton unrelated mess so just wrap it.
@@ -179,7 +180,7 @@ begin
     LastControlCode := ControlCodesForLine[High(ControlCodesForLine)];
     if (LastControlCode.Typ = CC_SET_BACKGROUND) then
     begin
-      MarkupInfo.Background := ColorBlend(LastControlCode.Data, SimbaComponentTheme.ColorBackground, 200);
+      MarkupInfo.Background := ColorBlend(LastControlCode.Data, SimbaComponentTheme.ColorBackground, 50);
       FStart := Length(Lines[aRow - 1]) + 1;
     end;
   end;
@@ -244,11 +245,39 @@ procedure TOutputListComponent.ParseAndAddLine(const S: String);
   begin
     if (Count >= Length(FControlCodeBuffer)) then
       SetLength(FControlCodeBuffer, Length(FControlCodeBuffer) * 2);
-
     FControlCodeBuffer[Count].Typ := Typ;
     FControlCodeBuffer[Count].Data := Data;
     FControlCodeBuffer[Count].Index := Index;
     Inc(Count);
+  end;
+
+  procedure ParseAndAddControlCode(var Count: Integer; const Index: UInt32; ControlCode: PControlCode); inline;
+
+    function HexToUInt32(P: PAnsiChar): UInt32; inline;
+    var
+      N, I: Integer;
+      Val: AnsiChar;
+    begin
+      Result := 0;
+
+      for I := 1 to 8 do
+      begin
+        Val := P^;
+        case Val of
+          '0'..'9': N := Ord(Val) - Ord('0');
+          'a'..'f': N := Ord(Val) - (Ord('a') - 10);
+          'A'..'F': N := Ord(Val) - (Ord('A') - 10);
+          else
+            Exit(0);
+        end;
+        Result := (Result shl 4) or UInt32(N);
+
+        Inc(P);
+      end;
+    end;
+
+  begin
+    AddControlCode(Count, Index, ControlCode^.Typ, HexToUInt32(@ControlCode^.Data[0]));
   end;
 
   function HasControlCodeSignature: Boolean; inline;
@@ -331,7 +360,7 @@ begin
           Move(S[LastPos], CleanText[CleanTextLen + 1], I - LastPos);
           Inc(CleanTextLen, I - LastPos);
         end;
-        AddControlCode(ControlCodeCount, CleanTextLen, PControlCode(@S[I])^.Typ, PControlCode(@S[I])^.Data);
+        ParseAndAddControlCode(ControlCodeCount, CleanTextLen, PControlCode(@S[I]));
         I := I + SizeOf(TControlCode);
         LastPos := I;
       end
@@ -418,7 +447,7 @@ begin
         SetString(Line, StartP, LineLen);
 
         // prepend if has incomplete data from the last chunk
-        if FBuffer <> '' then
+        if (FBuffer <> '') then
         begin
           Line := FBuffer + Line;
           FBuffer := '';
@@ -609,7 +638,7 @@ begin
   else
   begin
     Result := FSpecialAttri;
-    Result.Background := ColorBlend(FColor, SimbaComponentTheme.ColorBackground, 200);
+    Result.Background := ColorBlend(FColor, SimbaComponentTheme.ColorBackground, 50);
   end;
 end;
 
@@ -679,7 +708,7 @@ end;
 
 procedure TOutputListComponentReal.Clear;
 begin
-  TOutputListComponent(FListComponent).Add(#0#0#3#255#0#0#0+LineEnding);
+  TOutputListComponent(FListComponent).Add(DEBUG_CLEAR + LineEnding);
 end;
 
 end.

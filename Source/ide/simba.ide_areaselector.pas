@@ -202,7 +202,8 @@ begin
 
     FForm.ShowModal();
     with FForm.BoundsRect do
-      DebugLn([EDebugLn.FOCUS], 'Area picked: [%d, %d, %d, %d]', [Left - TargetBounds.X1,Top - TargetBounds.Y1, Right - TargetBounds.X1, Bottom - TargetBounds.Y1]);
+      DebugLn('Area picked: [%d, %d, %d, %d]', [Left - TargetBounds.X1,Top - TargetBounds.Y1, Right - TargetBounds.X1, Bottom - TargetBounds.Y1]);
+    DebugLn(DEBUG_FOCUS);
   except
     on E: Exception do
     begin
