@@ -10,7 +10,8 @@ unit simba.ide_codetools_base;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.base;
 
 type
   // "Perfect Hashing"
@@ -54,17 +55,10 @@ type
 
   function HashStr(const Str: String; const Seed: UInt32 = $811C9DC5): UInt32; inline;
 
-type
-  TCodetoolsMessageHandler = procedure(const Message: String) of object;
-
   procedure CodetoolsMessage(Message: String); overload;
   procedure CodetoolsMessage(Message: String; Line, Col: Integer; FileName: String); overload;
-  procedure SetCodetoolsMessageHandler(Handler: TCodetoolsMessageHandler);
 
 implementation
-
-var
-  CodetoolsMessageHandler: TCodetoolsMessageHandler;
 
 procedure TKeywordDictionary.setSize(AValue: UInt32);
 begin
@@ -165,16 +159,7 @@ end;
 
 procedure CodetoolsMessage(Message: String);
 begin
-  if Assigned(CodetoolsMessageHandler) then
-    CodetoolsMessageHandler(Message)
-  else
-  begin
-    {$PUSH}
-    {$I-}
-    WriteLn(Message);
-    Flush(Output);
-    {$POP}
-  end;
+  DebugLn(Message);
 end;
 
 procedure CodetoolsMessage(Message: String; Line, Col: Integer; FileName: String);
@@ -184,11 +169,6 @@ begin
     Message := Message + ' in file "' + FileName + '"';
 
   CodetoolsMessage(Message);
-end;
-
-procedure SetCodetoolsMessageHandler(Handler: TCodetoolsMessageHandler);
-begin
-  CodetoolsMessageHandler := Handler;
 end;
 
 end.

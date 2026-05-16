@@ -34,7 +34,7 @@ type
 
 // Exposing TSynEdit is just a ton unrelated mess so just wrap it.
 type
-  TCheckLinkableEvent = function(const Line: String; X: Integer; out X1, X2: Integer): Boolean of object;
+  TCheckLinkableEvent = function(Sender: TObject; var Link: String; X: Integer; out X1, X2: Integer): Boolean of object;
   TLinkClickEvent = procedure(Sender: TObject; Link: String) of object;
 
   TOutputListComponentReal = class(TCustomControl)
@@ -98,6 +98,9 @@ type
     FCheckLinkable: TCheckLinkableEvent;
     FLinkClick: TLinkClickEvent;
     FWasLinkable: Boolean;
+    FLink: String;
+
+    procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
     procedure ParseAndAddLine(const S: String);
   public
@@ -219,15 +222,16 @@ begin
 
   FWasLinkable := False;
 
-  if Assigned(FCheckLinkable) then
+  if MouseInClient and Assigned(FCheckLinkable) then
   begin
     Line := TextView[XY.Y - 1];
     if (XY.X > Length(Line)) or (Length(Line) <= 1) then
       Exit;
 
-    FWasLinkable := FCheckLinkable(Line, XY.X, X1, X2);
+    FWasLinkable := FCheckLinkable(Self, Line, XY.X, X1, X2);
     if FWasLinkable then
     begin
+      FLink := Line;
       StartX := X1;
       EndX   := X2;
     end;
@@ -237,6 +241,12 @@ end;
 function TOutputListComponent.IsLinkable(Y, X1, X2: Integer): Boolean;
 begin
   Result := FWasLinkable;
+end;
+
+procedure TOutputListComponent.DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if Assigned(FLinkClick) then
+    FLinkClick(Self, FLink);
 end;
 
 procedure TOutputListComponent.ParseAndAddLine(const S: String);
@@ -253,7 +263,7 @@ procedure TOutputListComponent.ParseAndAddLine(const S: String);
 
   procedure ParseAndAddControlCode(var Count: Integer; const Index: UInt32; ControlCode: PControlCode); inline;
 
-    function HexToUInt32(P: PAnsiChar): UInt32; inline;
+    function HexToUInt32(P: PAnsiChar): UInt32;
     var
       N, I: Integer;
       Val: AnsiChar;
@@ -546,6 +556,7 @@ begin
   TabStop := False;
 
   MouseLinkColor.Style := [fsUnderline];
+  MouseLinkColor.Foreground := RGBToColor(80, 160, 240);
 
   MarkupByClass[TSynEditMarkupBracket].Enabled := False;
   MarkupByClass[TSynEditMarkupWordGroup].Enabled := False;
@@ -554,6 +565,8 @@ begin
   ResetMouseActions();
   with MouseTextActions.Add() do
     Command := emcMouseLink;
+
+  OnClickLink := @DoMouseLinkClick;
 end;
 
 destructor TOutputListComponent.Destroy;

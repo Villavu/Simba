@@ -6,9 +6,6 @@
 // TODO:
 // Context menu
 // Settings
-// Link clicks
-// SetCodetoolsMessageHandler(@DebugLn);
-// OnDebugLn := @DebugLn;
 // DoRunCompileStopPause scripttabs. Maybe use event tho?
 // TSimbaScriptTabRunner.ShowOutputBox
 // Package updater
@@ -19,7 +16,7 @@ unit simba.form_output;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Dialogs, Menus,
+  Classes, SysUtils, Forms, Controls, Dialogs, Menus, RegExpr,
   simba.base,
   simba.ide_events,
   simba.ide_tab,
@@ -40,11 +37,17 @@ type
     FTabControl: TSimbaTabControl;
     FSimbaTab: TOutputTab;
 
+    FRegexError: TRegExpr;
+    FRegexTrace: TRegExpr;
+
     function FindTab(ScriptTabUID: Int64): TOutputTab;
 
     procedure DoDebugRedirect(const S: String);
     procedure DoDebugLnRedirect(const S: String);
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+    function DoCheckLinkable(Sender: TObject; var Line: String; X: Integer; out X1, X2: Integer): Boolean;
+    procedure DoLinkClick(Sender: TObject; Link: String);
 
     // This form has no docking header and docking is performed on empty space here
     procedure DoTabControlMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -65,7 +68,10 @@ uses
   AnchorDocking,
   simba.initializations,
   simba.component_images,
-  simba.ide_dockinghelpers;
+  simba.ide_dockinghelpers,
+  simba.ide_controller,
+  simba.ide_codetools_base,
+  simba.fs;
 
 function TSimbaOutputForm.FindTab(ScriptTabUID: Int64): TOutputTab;
 var
@@ -89,6 +95,7 @@ end;
 
 procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
+  // Flush all tabs (adding text to component from buffer)
   procedure DoFlush;
   var
     I: Integer;
@@ -120,6 +127,7 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
       OutputTab.Show();
   end;
 
+  // Add a output tab for the script tab
   procedure DoTabAdd(Tab: TSimbaScriptTab);
   var
     NewTab: TOutputTab;
@@ -127,6 +135,8 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     NewTab := TOutputTab(FTabControl.AddTab(Tab.Caption));
     NewTab.FScriptTabUID := Tab.UID;
     NewTab.ImageIndex := SimbaImages.STOP;
+    NewTab.FList.OnCheckLinkable := @DoCheckLinkable;
+    NewTab.FList.OnLinkClick := @DoLinkClick;
   end;
 
   // remove the tab
@@ -162,6 +172,7 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
       OutputTab.Caption := Tab.Caption;
   end;
 
+  // keep order inline with script tabs
   procedure DoTabMoved(Data: TSimbaEvents.TTabMoved);
   begin
     FTabControl.MoveTab(Data.FromIndex + 1, Data.ToIndex + 1);
@@ -178,6 +189,69 @@ begin
     ESimbaEvent.TAB_CAPTION:            DoTabCaption(TSimbaScriptTab(Data));
     ESimbaEvent.TAB_MOVED:              DoTabMoved(TSimbaEvents.TTabMoved(Data^));
     ESimbaEvent.TAB_SCRIPTSTATE_CHANGE: DoScriptStateChange(TSimbaScriptTab(Data));
+  end;
+end;
+
+function TSimbaOutputForm.DoCheckLinkable(Sender: TObject; var Line: String; X: Integer; out X1, X2: Integer): Boolean;
+var
+  StartQuoteX, EndQuoteX: Integer;
+  QuotedText: String;
+begin
+  Result := False;
+
+  // DocPos that spans the entire line
+  if Line.Contains('in file') and (FRegexTrace.Exec(Line) or FRegexError.Exec(Line)) then
+  begin
+    X1 := 1;
+    X2 := Length(Line) + 1;
+
+    Result := True;
+  end
+  else // check if quoted text at X
+  begin
+    StartQuoteX := X;
+    while (StartQuoteX >= 1) and (Line[StartQuoteX] <> '"') do
+      Dec(StartQuoteX);
+    EndQuoteX := X;
+    while (EndQuoteX <= Length(Line)) and (Line[EndQuoteX] <> '"') do
+      Inc(EndQuoteX);
+
+    // text is quoted somewhat...
+    if (StartQuoteX > 0) and (EndQuoteX <= Length(Line)) and (StartQuoteX <> EndQuoteX) then
+    begin
+      QuotedText := Copy(Line, StartQuoteX + 1, (EndQuoteX - StartQuoteX) - 1);
+
+      // either link, or file exists
+      Result := QuotedText.StartsWith('http') or FileExists(QuotedText);
+      if Result then
+      begin
+        X1 := StartQuoteX;
+        X2 := EndQuoteX+1;
+        Line := QuotedText;
+      end;
+    end;
+  end;
+end;
+
+procedure TSimbaOutputForm.DoLinkClick(Sender: TObject; Link: String);
+begin
+  if Link.Contains('in file') then
+  begin
+    if FRegexError.Exec(Link) then
+      SimbaController.OpenInTab(FRegexError.Match[3], StrToInt(FRegexError.Match[1]), StrToInt(FRegexError.Match[2]))
+    else if FRegexError.Exec(Link) then
+      SimbaController.OpenInTab(FRegexError.Match[3], 1, StrToInt(FRegexError.Match[1]));
+  end
+  else if Link.StartsWith('http://') or Link.StartsWith('https://') then
+  begin
+    SimbaController.OpenInBrowser(Link);
+  end
+  else if FileExists(Link) then
+  begin
+    if TSimbaFile.FileIsText(Link) then
+      SimbaController.OpenInTab(Link)
+    else
+      SimbaController.OpenInExplorer(Link);
   end;
 end;
 
@@ -200,6 +274,12 @@ begin
   Name := 'SimbaOutputForm';
   Caption := 'Output';
   TabStop := False;
+
+  // Line 13 in "main" in file "Untitled"
+  // Line 11 in function "hmm" in file "Untitled"
+  FRegexError := TRegExpr.Create('at line (\d+), column (\d+) in file "([^"]+)"');
+  // Unknown declaration "hmm" at line 13, column 3 in file "Untitled"
+  FRegexTrace := TRegExpr.Create('Line (\d+) in "([^"]+)" in file "([^"]+)"');
 
   FTabControl := TSimbaTabControl.Create(Self, TOutputTab);
   FTabControl.Parent := Self;
@@ -233,6 +313,9 @@ end;
 destructor TSimbaOutputForm.Destroy;
 begin
   SetDebugRedirects(nil, nil);
+
+  FreeAndNil(FRegexTrace);
+  FreeAndNil(FRegexError);
 
   inherited Destroy();
 end;

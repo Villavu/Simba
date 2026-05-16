@@ -28,6 +28,7 @@ type
     class procedure OpenInTab(FileName: String); overload; static;
     class procedure OpenInTab(FileName: String; CaretX, CaretY: Integer); overload; static;
     class procedure OpenInExplorer(FileName: String); static;
+    class procedure OpenInBrowser(URL: String); static;
     class function CloseAllTabs: Boolean; static;
     class function FindOutputListForTab(TabID: Integer): TOutputListComponentReal;
 
@@ -127,6 +128,13 @@ begin
     SimbaNativeInterface.OpenDirectory(FileName)
   else if FileExists(FileName) then
     SimbaNativeInterface.OpenFile(FileName);
+end;
+
+class procedure SimbaController.OpenInBrowser(URL: String);
+begin
+  ASSERT_MAIN_THREAD
+
+  SimbaNativeInterface.OpenURL(URL);
 end;
 
 class function SimbaController.CloseAllTabs: Boolean;
