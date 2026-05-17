@@ -292,7 +292,7 @@ procedure TOutputListComponent.ParseAndAddLine(const S: String);
 
   function HasControlCodeSignature: Boolean; inline;
   begin
-    Result := (Length(S) >= SizeOf(TControlCode)) and (IndexWord(S[1], Length(S) div 2, 0) > -1);
+    Result := (Length(S) >= SizeOf(TControlCode)) and (Pos(#0#0, S) > 0);
   end;
 
   function ParseClearOrFocus: Boolean;

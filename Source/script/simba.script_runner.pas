@@ -95,6 +95,7 @@ begin
         FScript.SimbaCommunication.ScriptError(Message, DocPos.Line, DocPos.Col, DocPos.FileName);
     end;
   Debug(DEBUG_RESET);
+  Debug(DEBUG_FOCUS);
 end;
 
 procedure TSimbaScriptRunner.Execute;

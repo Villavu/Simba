@@ -48,7 +48,6 @@ type
     procedure Start(Args: TStringArray);
 
     procedure ShowError;
-    procedure ShowOutputBox;
 
     procedure DoOutputThread;
     procedure DoOutputThreadTerminated(Sender: TObject);
@@ -176,7 +175,7 @@ uses
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var
-  ReadBuffer: String;
+  ReadBuffer: array[0..Pred(8192)] of Char;
 
   procedure EmptyProcessOutput;
   var
@@ -184,15 +183,14 @@ var
   begin
     while (FProcess.Output.NumBytesAvailable > 0) do
     begin
-      Count := FProcess.Output.Read(ReadBuffer[1], Length(ReadBuffer));
+      Count := FProcess.Output.Read(ReadBuffer[0], Length(ReadBuffer));
       if (Count > 0) then
-        FOutputBox.Add(@ReadBuffer[1], Count);
+        FOutputBox.Add(@ReadBuffer[0], Count);
     end;
   end;
 
 begin
   try
-    SetLength(ReadBuffer, 8192);
     while FProcess.Running do
     begin
       EmptyProcessOutput();
@@ -212,10 +210,7 @@ begin
     FProcess.Terminate(0);
 
   if FErrorSet then
-  begin
     ShowError();
-    ShowOutputBox();
-  end;
 
   Self.Free();
 end;
@@ -256,6 +251,8 @@ begin
   FOutputThread.OnTerminate := @DoOutputThreadTerminated;
 
   State := ESimbaScriptState.RUNNING;
+
+  SimbaEvents.Post(ESimbaEvent.TAB_SCRIPT_START, FTab);
 end;
 
 procedure TSimbaScriptTabRunner.ShowError;
@@ -271,11 +268,6 @@ begin
     SimbaScriptTabsForm.ActiveTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
 
   FTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
-end;
-
-procedure TSimbaScriptTabRunner.ShowOutputBox;
-begin
-  //FTab.OutputBox.MakeVisible();
 end;
 
 procedure TSimbaScriptTabRunner.Run(Args: TStringArray);

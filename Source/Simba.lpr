@@ -97,6 +97,8 @@ begin
     else
       SimbaProcessType := ESimbaProcessType.SCRIPT;
 
+    SimbaOutputControlCodes := Application.HasOption('simbacommunication') or Application.HasOption('keep-formatting');
+
     // Script will be sent though communication
     if (Application.Params[Application.ParamCount] = '--run') or (Application.Params[Application.ParamCount] = '--compile') then
     begin

@@ -285,10 +285,10 @@ const
   DEBUG_CLEAR  = #0#0#3'00000000';
   DEBUG_FOCUS  = #0#0#4'00000000';
 
-procedure Debug(const Msg: String); overload;
-procedure Debug(const Msg: String; Args: array of const); overload;
-procedure DebugLn(const Msg: String); overload;
-procedure DebugLn(const Msg: String; Args: array of const); overload;
+procedure Debug(Msg: String); overload;
+procedure Debug(Msg: String; Args: array of const); overload;
+procedure DebugLn(Msg: String); overload;
+procedure DebugLn(Msg: String; Args: array of const); overload;
 
 type
   TDebugRedirectMethod = procedure(const S: String) of object;
@@ -361,6 +361,7 @@ procedure SimbaException(Message: String); overload;
 // Writable const
 const
   SimbaProcessType: ESimbaProcessType = ESimbaProcessType.UNKNOWN;
+  SimbaOutputControlCodes: Boolean = True;
 
 implementation
 
@@ -376,14 +377,61 @@ begin
   Result := GetEnumName(TypeInfo(_T), UInt32(Param));
 end;
 
+function StripControlCodes(const S: string): string;
+type
+  TControlCode = packed record
+    Sig: array[0..1] of Char;
+    Typ: UInt8;
+    Data: array[0..7] of Char;
+  end;
+var
+  ReadIdx, WriteIdx, Len, ChunkStart: Integer;
+begin
+  if (Length(S) < SizeOf(TControlCode)) or (Pos(#0#0, S) = 0) then
+    Exit(S);
+
+  Len := Length(S);
+  SetLength(Result, Len);
+  WriteIdx := 1;
+  ReadIdx := 1;
+  ChunkStart := 1;
+
+  while ReadIdx <= Len - (SizeOf(TControlCode) - 1) do
+  begin
+    if (S[ReadIdx] = #0) and (S[ReadIdx + 1] = #0) then
+    begin
+      if (ReadIdx > ChunkStart) then
+      begin
+        Move(S[ChunkStart], Result[WriteIdx], (ReadIdx - ChunkStart));
+        Inc(WriteIdx, ReadIdx - ChunkStart);
+      end;
+      Inc(ReadIdx, SizeOf(TControlCode));
+      ChunkStart := ReadIdx;
+    end
+    else
+      Inc(ReadIdx);
+  end;
+
+  if ChunkStart <= Len then
+  begin
+    Move(S[ChunkStart], Result[WriteIdx], (Len - ChunkStart + 1));
+    Inc(WriteIdx, Len - ChunkStart + 1);
+  end;
+
+  SetLength(Result, WriteIdx - 1);
+end;
+
 procedure SetDebugRedirects(DebugRedirect, DebugLnRedirect: TDebugRedirectMethod);
 begin
   DebugRedirectMethod := DebugRedirect;
   DebugLnRedirectMethod := DebugLnRedirect;
 end;
 
-procedure Debug(const Msg: String);
+procedure Debug(Msg: String);
 begin
+  if not SimbaOutputControlCodes then
+    Msg := StripControlCodes(Msg);
+
   if Assigned(DebugRedirectMethod) then
     DebugRedirectMethod(Msg)
   else
@@ -394,13 +442,16 @@ begin
   end;
 end;
 
-procedure Debug(const Msg: String; Args: array of const);
+procedure Debug(Msg: String; Args: array of const);
 begin
   Debug(Format(Msg, Args));
 end;
 
-procedure DebugLn(const Msg: String);
+procedure DebugLn(Msg: String);
 begin
+  if not SimbaOutputControlCodes then
+    Msg := StripControlCodes(Msg);
+
   if Assigned(DebugLnRedirectMethod) then
     DebugLnRedirectMethod(Msg)
   else
@@ -412,7 +463,7 @@ begin
   end;
 end;
 
-procedure DebugLn(const Msg: String; Args: array of const);
+procedure DebugLn(Msg: String; Args: array of const);
 begin
   DebugLn(Format(Msg, Args));
 end;

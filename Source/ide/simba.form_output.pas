@@ -6,8 +6,6 @@
 // TODO:
 // Context menu
 // Settings
-// DoRunCompileStopPause scripttabs. Maybe use event tho?
-// TSimbaScriptTabRunner.ShowOutputBox
 // Package updater
 unit simba.form_output;
 
@@ -70,14 +68,15 @@ uses
   simba.component_images,
   simba.ide_dockinghelpers,
   simba.ide_controller,
-  simba.ide_codetools_base,
+  simba.settings,
   simba.fs;
 
 function TSimbaOutputForm.FindTab(ScriptTabUID: Int64): TOutputTab;
 var
   I: Integer;
 begin
-  for I := 0 to FTabControl.TabCount - 1 do
+  // I := 1 to skip the Simba tab
+  for I := 1 to FTabControl.TabCount - 1 do
     if (TOutputTab(FTabControl.Tabs[I]).FScriptTabUID = ScriptTabUID) then
       Exit(TOutputTab(FTabControl.Tabs[I]));
   Result := nil;
@@ -178,6 +177,19 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     FTabControl.MoveTab(Data.FromIndex + 1, Data.ToIndex + 1);
   end;
 
+  procedure DoTabScriptStart(Tab: TSimbaScriptTab);
+  var
+    OutputTab: TOutputTab;
+  begin
+    OutputTab := FindTab(Tab.UID);
+    if (OutputTab <> nil) then
+    begin
+      OutputTab.Show();
+      if SimbaSettings.OutputBox.ClearOnCompile.Value then
+        OutputTab.FList.Clear();
+    end;
+  end;
+
 begin
   case Event of
     ESimbaEvent.TIMER_750:              DoFlush();
@@ -189,6 +201,7 @@ begin
     ESimbaEvent.TAB_CAPTION:            DoTabCaption(TSimbaScriptTab(Data));
     ESimbaEvent.TAB_MOVED:              DoTabMoved(TSimbaEvents.TTabMoved(Data^));
     ESimbaEvent.TAB_SCRIPTSTATE_CHANGE: DoScriptStateChange(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_SCRIPT_START:       DoTabScriptStart(TSimbaScriptTab(Data));
   end;
 end;
 
@@ -304,7 +317,8 @@ begin
     ESimbaEvent.TAB_CLOSED,
     ESimbaEvent.TAB_CAPTION,
     ESimbaEvent.TAB_MOVED,
-    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE
+    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE,
+    ESimbaEvent.TAB_SCRIPT_START
   ]);
 
   SetDebugRedirects(@DoDebugRedirect, @DoDebugLnRedirect);

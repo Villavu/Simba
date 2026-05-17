@@ -127,6 +127,7 @@ type
     TAB_CAN_SAVE,
     TAB_CANNOT_SAVE,
     TAB_ACTIVE_750,
+    TAB_SCRIPT_START,
 
     // Event called on a form dock/undock
     FORM_DOCK,
@@ -217,7 +218,8 @@ var
   I: Integer;
 begin
   {$IFDEF SIMBA_PRINT_IDE_EVENTS}
-  WriteLn(Event);
+  if (Event <> ESimbaEvent.TIMER_750) and (Event <> ESimbaEvent.TAB_ACTIVE_750) then
+    WriteLn(Event);
   {$ENDIF}
 
   for I := 0 to FCallbacks[Event].Count - 1 do

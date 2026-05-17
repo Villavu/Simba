@@ -135,13 +135,6 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoRunCompileStopPause(Tab: TSimbaScriptTab);
   begin
-    if (Event in [ESimbaEvent.ACTION_RUN, ESimbaEvent.ACTION_COMPILE]) then
-    begin
-      //Tab.OutputBox.MakeVisible();
-      //if SimbaSettings.OutputBox.ClearOnCompile.Value then
-      //  Tab.OutputBox.Empty();
-    end;
-
          if (Event = ESimbaEvent.ACTION_RUN)     then Tab.Run()
     else if (Event = ESimbaEvent.ACTION_COMPILE) then Tab.Compile()
     else if (Event = ESimbaEvent.ACTION_PAUSE)   then Tab.Pause()
