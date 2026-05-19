@@ -4,8 +4,6 @@
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
 // TODO:
-// Context menu
-// Settings
 // Package updater
 unit simba.form_output;
 
@@ -19,7 +17,8 @@ uses
   simba.ide_events,
   simba.ide_tab,
   simba.ide_output_components,
-  simba.component_tabcontrol;
+  simba.component_tabcontrol,
+  simba.settings;
 
 type
   TSimbaOutputForm = class(TForm)
@@ -32,6 +31,7 @@ type
       constructor Create(AOwner: TComponent); override;
     end;
   protected
+    FContextMenu: TPopupMenu;
     FTabControl: TSimbaTabControl;
     FSimbaTab: TOutputTab;
 
@@ -43,9 +43,10 @@ type
     procedure DoDebugRedirect(const S: String);
     procedure DoDebugLnRedirect(const S: String);
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-
+    procedure DoContextMenuClick(Sender: TObject);
     function DoCheckLinkable(Sender: TObject; var Line: String; X: Integer; out X1, X2: Integer): Boolean;
     procedure DoLinkClick(Sender: TObject; Link: String);
+    procedure DoSimbaSettingChange(Setting: TSimbaSetting);
 
     // This form has no docking header and docking is performed on empty space here
     procedure DoTabControlMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -68,7 +69,6 @@ uses
   simba.component_images,
   simba.ide_dockinghelpers,
   simba.ide_controller,
-  simba.settings,
   simba.fs;
 
 function TSimbaOutputForm.FindTab(ScriptTabUID: Int64): TOutputTab;
@@ -136,6 +136,7 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     NewTab.ImageIndex := SimbaImages.STOP;
     NewTab.FList.OnCheckLinkable := @DoCheckLinkable;
     NewTab.FList.OnLinkClick := @DoLinkClick;
+    NewTab.FList.ContextMenu := FContextMenu;
   end;
 
   // remove the tab
@@ -205,6 +206,24 @@ begin
   end;
 end;
 
+procedure TSimbaOutputForm.DoContextMenuClick(Sender: TObject);
+var
+  Tab: TOutputTab;
+begin
+  Tab := TOutputTab(FTabControl.ActiveTab);
+  if (Tab = nil) then
+    Exit;
+
+  case TMenuItem(Sender).Tag of
+    1: Tab.FList.Clear();
+    2: Tab.FList.CopyAll();
+    3: Tab.FList.CopySelection();
+    4: Tab.FList.CopyLine();
+    5: Tab.FList.SelectAll();
+    6: SimbaController.OpenSettings('Output Box');
+  end;
+end;
+
 function TSimbaOutputForm.DoCheckLinkable(Sender: TObject; var Line: String; X: Integer; out X1, X2: Integer): Boolean;
 var
   StartQuoteX, EndQuoteX: Integer;
@@ -268,6 +287,21 @@ begin
   end;
 end;
 
+procedure TSimbaOutputForm.DoSimbaSettingChange(Setting: TSimbaSetting);
+var
+  I: Integer;
+begin
+  for I := 0 to FTabControl.TabCount - 1 do
+  begin
+    if (Setting = SimbaSettings.OutputBox.FontAntiAliased) then
+      TOutputTab(FTabControl.Tabs[I]).FList.Memo.FontAntialising := Setting.Value
+    else if (Setting = SimbaSettings.OutputBox.FontName) then
+      TOutputTab(FTabControl.Tabs[I]).FList.Memo.FontName := Setting.Value
+    else if (Setting = SimbaSettings.OutputBox.FontSize) then
+      TOutputTab(FTabControl.Tabs[I]).FList.Memo.Font.Size := Setting.Value;
+  end;
+end;
+
 procedure TSimbaOutputForm.DoTabControlMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
   if FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging) and (HostDockSite is TSimbaAnchorDockHostSite) then
@@ -281,12 +315,31 @@ begin
 end;
 
 constructor TSimbaOutputForm.Create;
+
+  function Add(ACaption: String; ID: Integer): TMenuItem;
+  begin
+    Result := TMenuItem.Create(Self);
+    Result.Caption := ACaption;
+    Result.Tag := ID;
+    Result.OnClick := @DoContextMenuClick;
+  end;
+
 begin
   inherited Create(nil);
 
   Name := 'SimbaOutputForm';
   Caption := 'Output';
   TabStop := False;
+
+  FContextMenu := TPopupMenu.Create(Self);
+  FContextMenu.Items.Add(Add('Clear', 1));
+  FContextMenu.Items.Add(NewLine());
+  FContextMenu.Items.Add(Add('Copy All', 2));
+  FContextMenu.Items.Add(Add('Copy Selection', 3));
+  FContextMenu.Items.Add(Add('Copy Line', 4));
+  FContextMenu.Items.Add(Add('Select All', 5));
+  FContextMenu.Items.Add(NewLine());
+  FContextMenu.Items.Add(Add('Customize', 6));
 
   // Line 13 in "main" in file "Untitled"
   // Line 11 in function "hmm" in file "Untitled"
@@ -307,6 +360,7 @@ begin
   FSimbaTab := TOutputTab(FTabControl.AddTab());
   FSimbaTab.Caption := 'Simba';
   FSimbaTab.ImageIndex := SimbaImages.SIMBA;
+  FSimbaTab.FList.ContextMenu := FContextMenu;
 
   SimbaEvents.Register(Self, @DoSimbaEvent, [
     ESimbaEvent.TIMER_750,
@@ -320,6 +374,10 @@ begin
     ESimbaEvent.TAB_SCRIPTSTATE_CHANGE,
     ESimbaEvent.TAB_SCRIPT_START
   ]);
+
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.OutputBox.FontName, @DoSimbaSettingChange, True);
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.OutputBox.FontSize, @DoSimbaSettingChange, True);
+  SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.OutputBox.FontAntiAliased, @DoSimbaSettingChange, True);
 
   SetDebugRedirects(@DoDebugRedirect, @DoDebugLnRedirect);
 end;

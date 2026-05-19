@@ -31,7 +31,7 @@ type
     class procedure OpenInBrowser(URL: String); static;
     class function CloseAllTabs: Boolean; static;
     class function FindOutputListForTab(TabID: Integer): TOutputListComponentReal;
-
+    class procedure OpenSettings(Page: String);
     class function GetScriptButtonStates(Tab: TSimbaScriptTab; out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean; static; overload;
     class function GetScriptButtonStates(out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean; static; overload;
     class function GetEditorButtonStates(Tab: TSimbaScriptTab; out CanSave, CanCut, CanCopy, CanPaste: Boolean): Boolean; static; overload;
@@ -48,7 +48,8 @@ uses
   simba.ide_maintoolbar,
   simba.form_main,
   simba.form_scripttabs,
-  simba.form_output;
+  simba.form_output,
+  simba.form_settings;
 
 {$DEFINE ASSERT_MAIN_THREAD :=
   if (GetCurrentThreadId() <> MainThreadID) then
@@ -149,6 +150,13 @@ begin
   ASSERT_MAIN_THREAD
 
   Result := SimbaOutputForm.FindList(TabID);
+end;
+
+class procedure SimbaController.OpenSettings(Page: String);
+begin
+  ASSERT_MAIN_THREAD
+
+  SimbaSettingsForm.Open(Page);
 end;
 
 class function SimbaController.GetScriptButtonStates(Tab: TSimbaScriptTab; out CanRun, CanPause, CanCompile, CanStop, CanForceStop: Boolean): Boolean;

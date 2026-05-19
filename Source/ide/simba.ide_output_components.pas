@@ -10,7 +10,7 @@ unit simba.ide_output_components;
 interface
 
 uses
-  Classes, SysUtils, Controls, Graphics,
+  Classes, SysUtils, Controls, Graphics, Menus,
   simba.base,
   simba.containers,
   simba.component_synedit;
@@ -41,20 +41,30 @@ type
   private
     FListComponent: TComponent;
 
+    function GetMemo: TSimbaMemo;
     function GetCheckLinkable: TCheckLinkableEvent;
     function GetLinkClick: TLinkClickEvent;
+    function GetContextMenu: TPopupMenu;
     procedure SetCheckLinkable(AValue: TCheckLinkableEvent);
     procedure SetLinkClick(AValue: TLinkClickEvent);
+    procedure SetContextMenu(AValue: TPopupMenu);
   public
     constructor Create(AOwner: TComponent); override;
 
+    property Memo: TSimbaMemo read GetMemo;
     property OnCheckLinkable: TCheckLinkableEvent read GetCheckLinkable write SetCheckLinkable;
     property OnLinkClick: TLinkClickEvent read GetLinkClick write SetLinkClick;
+    property ContextMenu: TPopupMenu read GetContextMenu write SetContextMenu;
 
     procedure Add(const S: String); overload;
     procedure Add(Buf: PChar; Len: SizeInt); overload;
     procedure Flush;
     procedure Clear;
+
+    procedure CopyAll;
+    procedure CopySelection;
+    procedure CopyLine;
+    procedure SelectAll;
   end;
 
 implementation
@@ -675,6 +685,11 @@ begin
   Result := -1;
 end;
 
+function TOutputListComponentReal.GetMemo: TSimbaMemo;
+begin
+  Result := TSimbaMemo(FListComponent);
+end;
+
 function TOutputListComponentReal.GetCheckLinkable: TCheckLinkableEvent;
 begin
   Result := TOutputListComponent(FListComponent).OnCheckLinkable;
@@ -685,6 +700,11 @@ begin
   Result := TOutputListComponent(FListComponent).OnLinkClick;
 end;
 
+function TOutputListComponentReal.GetContextMenu: TPopupMenu;
+begin
+  Result := TOutputListComponent(FListComponent).PopupMenu;
+end;
+
 procedure TOutputListComponentReal.SetCheckLinkable(AValue: TCheckLinkableEvent);
 begin
   TOutputListComponent(FListComponent).OnCheckLinkable := AValue;
@@ -693,6 +713,11 @@ end;
 procedure TOutputListComponentReal.SetLinkClick(AValue: TLinkClickEvent);
 begin
   TOutputListComponent(FListComponent).OnLinkClick := AValue;
+end;
+
+procedure TOutputListComponentReal.SetContextMenu(AValue: TPopupMenu);
+begin
+  TOutputListComponent(FListComponent).PopupMenu := AValue;
 end;
 
 constructor TOutputListComponentReal.Create(AOwner: TComponent);
@@ -722,6 +747,33 @@ end;
 procedure TOutputListComponentReal.Clear;
 begin
   TOutputListComponent(FListComponent).Add(DEBUG_CLEAR + LineEnding);
+end;
+
+procedure TOutputListComponentReal.CopyAll;
+begin
+  TOutputListComponent(FListComponent).DoCopyToClipboard(TOutputListComponent(FListComponent).Text);
+end;
+
+procedure TOutputListComponentReal.CopySelection;
+begin
+  TOutputListComponent(FListComponent).CopyToClipboard();
+end;
+
+procedure TOutputListComponentReal.CopyLine;
+var
+  Line: Integer;
+begin
+  with TOutputListComponent(FListComponent) do
+  begin
+    Line := PixelsToRowColumn(ScreenToClient(ContextMenu.PopupPoint), []).Y;
+    if (Line > 0) and (Line <= Lines.Count) then
+      DoCopyToClipboard(Lines[Line - 1]);
+  end;
+end;
+
+procedure TOutputListComponentReal.SelectAll;
+begin
+  TOutputListComponent(FListComponent).SelectAll();
 end;
 
 end.
