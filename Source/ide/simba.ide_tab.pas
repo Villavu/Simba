@@ -118,7 +118,7 @@ type
     procedure DoEditorCaretMoved(Sender: TObject);
 
     function GetScript: String;
-    procedure SetScript(AValue: String);
+    procedure SetScript(Value: String);
   public
     property ScriptTitle: String read FScriptTitle;
     property ScriptFileName: String read FScriptFileName;
@@ -345,11 +345,11 @@ begin
   Result := FEditor.Text;
 end;
 
-procedure TSimbaScriptTab.SetScript(AValue: String);
+procedure TSimbaScriptTab.SetScript(Value: String);
 begin
   FEditor.BeginUndoBlock();
   FEditor.ClearAll();
-  FEditor.InsertTextAtCaret(Script);
+  FEditor.InsertTextAtCaret(Value);
   FEditor.EndUndoBlock();
 end;
 

@@ -3,11 +3,9 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
   --------------------------------------------------------------------------
-
-  Checks for new package Versions.
-    - Also handles auto updating
-    - Menu bar building
-    - Example form
+  Checks for new package versions and updates if auto-update is enabled.
+  Once finished posts ESimbaEvent.PACKAGE_INSTALLS_CHANGED
+  Is also ran on package form close to post above event.
 }
 unit simba.ide_package_autoupdater;
 
@@ -16,15 +14,16 @@ unit simba.ide_package_autoupdater;
 interface
 
 uses
-  Classes, SysUtils, Forms, ExtCtrls, Menus,
-  simba.base;
+  Classes, SysUtils, ExtCtrls,
+  simba.base,
+  simba.ide_events;
 
 type
   TPackageAutoUpdater = class(TComponent)
   protected
     FTimer: TTimer;
 
-    procedure DoPackageFormClosed(Sender: TObject; var CloseAction: TCloseAction);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoTimer(Sender: TObject);
   public
     constructor Create; reintroduce;
@@ -38,50 +37,29 @@ var
 implementation
 
 uses
-  simba.ide_package, simba.ide_package_installer, simba.initializations,
-  simba.form_package, simba.form_openexample,
-  simba.vartype_string, simba.fs;
-
-type
-  TPackagePopupMenu = class(TPopupMenu)
-  public
-    PackageFullName: String;
-    Hash: UInt32;
-  end;
-
-  TPackageMenuItem = class(TMenuItem)
-  public
-    FileName: String;
-
-    procedure Click; override;
-  end;
-
-procedure TPackageMenuItem.Click;
-begin
-  //if SimbaTabsForm.Open(FileName, True) and (Caption = 'Run') then
-  //  SimbaMainForm.MenuItemRun.Click();
-end;
+  simba.initializations,
+  simba.ide_package,
+  simba.ide_package_installer;
 
 type
   TPackageUpdater = class(TThread)
   protected
     FPackages: TSimbaPackageArray;
-    FUpdates: TStringList;
     FDelay: Integer;
 
-    procedure BuildMenu;
-    procedure BuildExamples;
-
-    procedure DoTerminateOnMainThread(Sender: TObject);
+    procedure DoTerminated(Sender: TObject);
     procedure Execute; override;
   public
     constructor Create(Delay: Integer = 0); reintroduce;
     destructor Destroy; override;
   end;
 
-procedure TPackageAutoUpdater.DoPackageFormClosed(Sender: TObject; var CloseAction: TCloseAction);
+procedure TPackageAutoUpdater.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
-  Run();
+  case Event of
+    ESimbaEvent.PACKAGE_FORM_CLOSED:
+      Run();
+  end;
 end;
 
 procedure TPackageAutoUpdater.DoTimer(Sender: TObject);
@@ -98,7 +76,7 @@ begin
   FTimer.Interval := 60000 * 10;
   FTimer.Enabled := True;
 
-  SimbaPackageForm.AddHandlerClose(@DoPackageFormClosed);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.PACKAGE_FORM_CLOSED]);
 
   // Run on create, in a few seconds
   TPackageUpdater.Create(2500);
@@ -109,98 +87,12 @@ begin
   TPackageUpdater.Create();
 end;
 
-procedure TPackageUpdater.BuildMenu;
-
-  function GetMenu(PackageFullName: String): TPackagePopupMenu;
-  var
-    Menu: TPopupMenu;
-  begin
-    //for Menu in SimbaMainMenuBar.MenuBar.Menus do
-    //  if (Menu is TPackagePopupMenu) and (TPackagePopupMenu(Menu).PackageFullName = PackageFullName) then
-    //    Exit(TPackagePopupMenu(Menu));
-    //
-    //Result := TPackagePopupMenu.Create(SimbaMainMenuBar.MenuBar);
-  end;
-
-var
-  I: Integer;
-  Menu: TPackagePopupMenu;
-  MenuItemOpen, MenuItemRun: TPackageMenuItem;
-  SubMenu: TMenuItem;
-  Package: TSimbaPackage;
-  Hash: UInt32;
-  Files: TStringArray;
+procedure TPackageUpdater.DoTerminated(Sender: TObject);
 begin
-  for Package in FPackages do
-  begin
-    Files := Package.ScriptFiles;
-    if (Length(Files) = 0) then
-      Continue;
+  if (FatalException <> nil) then
+    DebugLn('Package updating exception: ' + Exception(FatalException).Message);
 
-    Hash := ''.Join(Files).Hash();
-    Menu := GetMenu(Package.Name);
-    if (Menu.Hash = Hash) then // Already built and no changes
-      Continue;
-
-    Menu.PackageFullName := Package.Name;
-    Menu.Hash := Hash;
-    Menu.Items.Clear();
-
-    for I := 0 to High(Files) do
-    begin
-      SubMenu := TMenuItem.Create(Menu);
-      SubMenu.Caption := TSimbaPath.PathExtractNameWithoutExt(Files[I]);
-
-      MenuItemOpen := TPackageMenuItem.Create(SubMenu);
-      MenuItemOpen.Caption := 'Open';
-      MenuItemOpen.FileName := Files[I];
-
-      MenuItemRun := TPackageMenuItem.Create(SubMenu);
-      MenuItemRun.Caption := 'Run';
-      MenuItemRun.FileName := Files[I];
-
-      SubMenu.Add(MenuItemOpen);
-      SubMenu.Add(MenuItemRun);
-
-      Menu.Items.Add(SubMenu);
-    end;
-
-    //SimbaMainMenuBar.MenuBar.AddMenu(Package.Name, Menu);
-  end;
-end;
-
-procedure TPackageUpdater.BuildExamples;
-var
-  Package: TSimbaPackage;
-  Files: TStringArray;
-begin
-  for Package in FPackages do
-  begin
-    Files := Package.ExampleFiles;
-    if (Length(Files) = 0) then
-      Continue;
-
-    SimbaOpenExampleForm.AddPackageExamples(Package.Name, Files);
-  end;
-end;
-
-procedure TPackageUpdater.DoTerminateOnMainThread(Sender: TObject);
-begin
-  BuildExamples(); // Open example form
-  BuildMenu(); // Main menu bar
-
-  // Update icon
-  //if (FUpdates.Count > 0) then
-  //begin
-  //  SimbaMainToolBar.ButtonPackage.Hint       := 'Open packages' + LineEnding + FUpdates.Text;
-  //  SimbaMainToolBar.ButtonPackage.ImageIndex := IMG_PACKAGE + Min(1 + FUpdates.Count, 9);
-  //end else
-  //begin
-  //  SimbaMainToolBar.ButtonPackage.Hint       := 'Open packages';
-  //  SimbaMainToolBar.ButtonPackage.ImageIndex := IMG_PACKAGE;
-  //end;
-  //
-  //SimbaMainToolBar.ButtonPackage.Invalidate();
+  SimbaEvents.Post(ESimbaEvent.PACKAGE_INSTALLS_CHANGED, Pointer(FPackages));
 end;
 
 procedure TPackageUpdater.Execute;
@@ -230,41 +122,36 @@ begin
     begin
       DebugLn(DEBUG_YELLOW + 'Automatically updating ' + Package.Name + DEBUG_RESET);
       DebugLn(DEBUG_FOCUS);
-      Sleep(750); // whatever, let above flush... TSimbaPackageInstaller directly writes to the synedit.
 
-      //try
-      //  with TSimbaPackageInstaller.Create(Package, SimbaOutputForm.SimbaOutputBox) do
-      //  try
-      //    Version := Package.Versions[0];
-      //
-      //    if HasRemoteInstallOpts then
-      //      InstallOpts := RemoteInstallOpts
-      //    else
-      //    begin
-      //      // I guess we can auto update this way too...
-      //      InstallOpts := Default(TSimbaPackageInstallOptions);
-      //      InstallOpts.Path := Package.InstalledPath;
-      //    end;
-      //
-      //    if Install(InstallOpts) then
-      //    begin
-      //      DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Succesfully updated "%s"', [Package.Name]);
-      //      DebugLn([EDebugLn.FOCUS, EDebugLn.GREEN], 'Now at version: %s', [Package.InstalledVersion]);
-      //    end else
-      //      DebugLn([EDebugLn.FOCUS, EDebugLn.RED], 'Failed to update: %s', [Package.Name]);
-      //  finally
-      //    Free();
-      //  end;
-      //except
-      //  on E: Exception do
-      //    DebugLn([EDebugLn.FOCUS, EDebugLn.RED], 'Failed to update: %s (%s)', [Package.Name, E.Message]);
-      //end;
+      try
+        with TSimbaPackageInstaller.Create(Package) do
+        try
+          Version := Package.Versions[0];
+
+          if HasRemoteInstallOpts then
+            InstallOpts := RemoteInstallOpts
+          else
+          begin
+            // I guess we can auto update this way too...
+            InstallOpts := Default(TSimbaPackageInstallOptions);
+            InstallOpts.Path := Package.InstalledPath;
+          end;
+
+          if Install(InstallOpts) then
+          begin
+            DebugLn(DEBUG_GREEN + 'Succesfully updated "%s"' + DEBUG_RESET, [Package.Name]);
+            DebugLn(DEBUG_GREEN + 'Now at version: %s' + DEBUG_RESET, [Package.InstalledVersion]);
+          end else
+            DebugLn(DEBUG_RED + 'Failed to update: %s' + DEBUG_RESET, [Package.Name]);
+        finally
+          Free();
+        end;
+      except
+        on E: Exception do
+          DebugLn(DEBUG_RED + 'Failed to update: %s (%s)' + DEBUG_RESET, [Package.Name, E.Message]);
+      end;
     end;
   end;
-
-  for I := 0 to High(FPackages) do
-    if FPackages[I].HasUpdate() then
-      FUpdates.Add('%s can be updated to version %s', [FPackages[I].Name, FPackages[I].LatestVersion]);
 
   // find in this thread - these are cached.
   for I := 0 to High(FPackages) do
@@ -279,19 +166,15 @@ begin
   inherited Create(False, 512*512);
 
   FreeOnTerminate := True;
-  OnTerminate := @DoTerminateOnMainThread;
+  OnTerminate := @DoTerminated;
 
   FDelay := Delay;
-
-  FUpdates := TStringList.Create();
-  FUpdates.SkipLastLineBreak := True;
 end;
 
 destructor TPackageUpdater.Destroy;
 var
   I: Integer;
 begin
-  FUpdates.Free();
   for I := 0 to High(FPackages) do
     FPackages[I].Free();
 

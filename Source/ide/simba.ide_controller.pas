@@ -27,6 +27,7 @@ type
     class procedure OpenTab(Tab: TSimbaScriptTab; CaretX, CaretY: Integer); static;
     class procedure OpenInTab(FileName: String); overload; static;
     class procedure OpenInTab(FileName: String; CaretX, CaretY: Integer); overload; static;
+    class procedure OpenInTabAndRun(FileName: String); static;
     class procedure OpenInExplorer(FileName: String); static;
     class procedure OpenInBrowser(URL: String); static;
     class function CloseAllTabs: Boolean; static;
@@ -119,6 +120,14 @@ begin
       Editor.CaretY  := CaretY;
       Editor.TopLine := CaretY - (Editor.LinesInWindow div 2);
     end;
+end;
+
+class procedure SimbaController.OpenInTabAndRun(FileName: String);
+begin
+  ASSERT_MAIN_THREAD
+
+  if SimbaScriptTabsForm.Open(FileName) then
+    SimbaScriptTabsForm.ActiveTab.Run();
 end;
 
 class procedure SimbaController.OpenInExplorer(FileName: String);

@@ -82,7 +82,8 @@ uses
   simba.initializations,
   simba.component_images,
   simba.ide_tab,
-  simba.ide_controller;
+  simba.ide_controller,
+  simba.ide_package;
 
 function TSimbaMainToolBar.AddButton(Image: Integer; Text: String; Event: ESimbaEvent; EventProducer: EEventProducer): TSimbaButton;
 begin
@@ -171,13 +172,40 @@ procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     Files.Free();
   end;
 
+  procedure DoPackageInstallsChanged(Packages: TSimbaPackageArray);
+  var
+    Pkg: TSimbaPackage;
+    Updates: TStringList;
+  begin
+    Updates := TStringList.Create();
+    Updates.TrailingLineBreak := False;
+
+    for Pkg in Packages do
+      if Pkg.HasUpdate() then
+        Updates.Add('%s can be updated to version %s', [Pkg.Name, Pkg.LatestVersion]);
+
+    if (Updates.Count > 0) then
+      FButtonPackage.Hint := Updates.Text
+    else
+      FButtonPackage.Hint := 'Packages';
+
+    if (Updates.Count > 0) then
+      FButtonPackage.ImageIndex := SimbaImages.PACKAGE_UPDATES
+    else
+      FButtonPackage.ImageIndex := SimbaImages.PACKAGE;
+    FButtonPackage.Invalidate();
+
+    Updates.Free();
+  end;
+
 begin
   case Event of
-    ESimbaEvent.TAB_CAN_SAVE:           DoCanSave(TSimbaScriptTab(Data));
-    ESimbaEvent.TAB_CANNOT_SAVE:        DoCannotSave(TSimbaScriptTab(Data));
-    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE: DoTabScriptStateChange(TSimbaScriptTab(Data));
-    ESimbaEvent.TAB_CHANGE:             DoTabChange(TSimbaScriptTab(Data));
-    ESimbaEvent.TAB_LOADED:             DoTabLoaded(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_CAN_SAVE:             DoCanSave(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_CANNOT_SAVE:          DoCannotSave(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_SCRIPTSTATE_CHANGE:   DoTabScriptStateChange(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_CHANGE:               DoTabChange(TSimbaScriptTab(Data));
+    ESimbaEvent.TAB_LOADED:               DoTabLoaded(TSimbaScriptTab(Data));
+    ESimbaEvent.PACKAGE_INSTALLS_CHANGED: DoPackageInstallsChanged(TSimbaPackageArray(Data));
   end;
 end;
 
@@ -273,7 +301,8 @@ begin
      ESimbaEvent.TAB_CANNOT_SAVE,
      ESimbaEvent.TAB_SCRIPTSTATE_CHANGE,
      ESimbaEvent.TAB_CHANGE,
-     ESimbaEvent.TAB_LOADED
+     ESimbaEvent.TAB_LOADED,
+     ESimbaEvent.PACKAGE_INSTALLS_CHANGED
   ]);
 
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.ToolbarSize, @DoSettingChanged_Size, True);

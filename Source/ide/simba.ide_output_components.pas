@@ -24,7 +24,7 @@ const
 type
   // the actual sequence that is encoded in the string
   // Example for red background: #0#0#1'000000FF'
-  // Data must be encoded as hex because stdout expecting printable chars, not binary (0..127)
+  // Data must be encoded as hex because stdout expecting printable chars (0..127) not binary
   PControlCode = ^TControlCode;
   TControlCode = packed record
     Sig: array[0..1] of Char; // #0#0
@@ -85,7 +85,7 @@ type
   TLineControlCode = record
     Index: Int32; // column where this control code activates
     Typ: UInt8;
-    Data: UInt32;
+    Data: Int32;
   end;
   TLineControlCodeArray = array of TLineControlCode;
   TLineControlCodes = specialize TSimbaList<TLineControlCodeArray>;
@@ -181,6 +181,7 @@ procedure TEndOfLineWhitespaceMarkup.PrepareMarkupForRow(aRow: Integer);
 var
   ControlCodesForLine: TLineControlCodeArray;
   LastControlCode: TLineControlCode;
+  //i: Integer;
 begin
   Assert(aRow-1 >= 0);
   Assert(aRow-1 < FControlCodes.Count);
@@ -191,9 +192,20 @@ begin
   if (ControlCodesForLine <> nil) then
   begin
     LastControlCode := ControlCodesForLine[High(ControlCodesForLine)];
+    // If last is reset background, paint the entire line?
+    //if (LastControlCode.Typ = CC_RESET_BACKGROUND) then
+    //begin
+    //  for i := High(ControlCodesForLine) - 1 downto 0 do
+    //    if (ControlCodesForLine[i].Typ = CC_SET_BACKGROUND) then
+    //    begin
+    //      MarkupInfo.Background := ColorBlend(UInt32(ControlCodesForLine[i].Data), SimbaComponentTheme.ColorBackground, 50);
+    //      FStart := Length(Lines[aRow - 1]) + 1;
+    //      Exit;
+    //    end;
+    //end else
     if (LastControlCode.Typ = CC_SET_BACKGROUND) then
     begin
-      MarkupInfo.Background := ColorBlend(LastControlCode.Data, SimbaComponentTheme.ColorBackground, 50);
+      MarkupInfo.Background := ColorBlend(UInt32(LastControlCode.Data), SimbaComponentTheme.ColorBackground, 50);
       FStart := Length(Lines[aRow - 1]) + 1;
     end;
   end;
@@ -261,7 +273,7 @@ end;
 
 procedure TOutputListComponent.ParseAndAddLine(const S: String);
 
-  procedure AddControlCode(var Count: Integer; const Index: UInt32; const Typ: UInt8; const Data: UInt32); inline;
+  procedure AddControlCode(var Count: Integer; const Index: UInt32; const Typ: UInt8; const Data: Int32); inline;
   begin
     if (Count >= Length(FControlCodeBuffer)) then
       SetLength(FControlCodeBuffer, Length(FControlCodeBuffer) * 2);
@@ -273,7 +285,7 @@ procedure TOutputListComponent.ParseAndAddLine(const S: String);
 
   procedure ParseAndAddControlCode(var Count: Integer; const Index: UInt32; ControlCode: PControlCode); inline;
 
-    function HexToUInt32(P: PAnsiChar): UInt32;
+    function HexToInt32(P: PAnsiChar): Int32;
     var
       N, I: Integer;
       Val: AnsiChar;
@@ -290,14 +302,14 @@ procedure TOutputListComponent.ParseAndAddLine(const S: String);
           else
             Exit(0);
         end;
-        Result := (Result shl 4) or UInt32(N);
+        Result := (Result shl 4) or Int32(N);
 
         Inc(P);
       end;
     end;
 
   begin
-    AddControlCode(Count, Index, ControlCode^.Typ, HexToUInt32(@ControlCode^.Data[0]));
+    AddControlCode(Count, Index, ControlCode^.Typ, HexToInt32(@ControlCode^.Data[0]));
   end;
 
   function HasControlCodeSignature: Boolean; inline;
@@ -661,7 +673,7 @@ begin
   else
   begin
     Result := FSpecialAttri;
-    Result.Background := ColorBlend(FColor, SimbaComponentTheme.ColorBackground, 50);
+    Result.Background := ColorBlend(UInt32(FColor), SimbaComponentTheme.ColorBackground, 50);
   end;
 end;
 

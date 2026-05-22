@@ -12,6 +12,7 @@ object SimbaPackageForm: TSimbaPackageForm
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
   LCLVersion = '4.0.0.4'
+  OnClose = FormClose
   OnShow = FormShow
   object Notebook1: TNotebook
     Left = 0

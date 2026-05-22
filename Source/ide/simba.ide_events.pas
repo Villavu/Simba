@@ -14,7 +14,8 @@ uses
   Classes, SysUtils, ExtCtrls,
   simba.base,
   simba.colormath,
-  simba.containers;
+  simba.containers,
+  simba.ide_package;
 
 type
   {$PUSH}
@@ -142,7 +143,12 @@ type
     FUNCTIONLIST_SELECTION_CHANGE,
 
     // Color selector used. Data=TSimbaEventData_ColorPicked
-    COLOR_PICKED
+    COLOR_PICKED,
+
+    // Package installations changed. Data=TSimbaPackageArray
+    PACKAGE_INSTALLS_CHANGED,
+    // Package from closed. Data=nil
+    PACKAGE_FORM_CLOSED
   );
   {$POP}
 
@@ -169,7 +175,7 @@ type
     procedure DoTimer(Sender: TObject);
   public
     procedure Post(Event: ESimbaEvent; Data: Pointer);
-    procedure Register(Owner: TComponent;Callback: TSimbaEventCallback; Events: array of ESimbaEvent); overload;
+    procedure Register(Owner: TComponent; Callback: TSimbaEventCallback; Events: array of ESimbaEvent); overload;
     procedure Register(Callback: TSimbaEventCallback; Events: array of ESimbaEvent); overload;
     procedure UnRegister(Callback: TSimbaEventCallback);
 

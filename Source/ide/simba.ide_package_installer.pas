@@ -55,7 +55,7 @@ type
     OnStartInstall: TNotifyEvent;
     OnEndInstall: TNotifyEvent;
 
-    constructor Create(Package: TSimbaPackage; Output: TSynEdit);
+    constructor Create(Package: TSimbaPackage; Output: TSynEdit = nil);
     destructor Destroy; override;
 
     property Version: TSimbaPackageVersion read FVersion write SetVersion;
@@ -168,6 +168,12 @@ end;
 
 procedure TSimbaPackageInstaller.Log(S: String; Flush: Boolean);
 begin
+  if (FOutput = nil) then
+  begin
+    DebugLn(S);
+    Exit;
+  end;
+
   FProgressBufferLock.Enter();
   try
     if (FProgressLast <> S) then

@@ -43,6 +43,7 @@ type
     TARGET_SELECTOR: Integer;
     ERASER: Integer;
     PACKAGE: Integer;
+    PACKAGE_UPDATES: Integer;
     SETTINGS: Integer;
     COLORS: Integer;
     SHAPES: Integer;
@@ -161,6 +162,7 @@ begin
   SimbaImages.AREA_SELECTOR   := Add('ALIGN');
   SimbaImages.ERASER          := Add('ERASER');
   SimbaImages.PACKAGE         := Add('PACKAGE');
+  SimbaImages.PACKAGE_UPDATES := Add('PACKAGE_UPDATES');
   SimbaImages.SETTINGS        := Add('SETTINGS');
   SimbaImages.COLORS          := Add('COLOR');
   SimbaImages.SHAPES          := Add('SHAPE');

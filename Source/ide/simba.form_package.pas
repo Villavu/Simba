@@ -38,6 +38,7 @@ type
     ButtonAddRepository: TToolButton;
     ToolButton1: TToolButton;
 
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure InstallingButtonClick(Sender: TObject);
     procedure ButtonAddRepositoryClick(Sender: TObject);
     procedure ButtonRefreshClick(Sender: TObject);
@@ -201,6 +202,11 @@ end;
 procedure TSimbaPackageForm.InstallingButtonClick(Sender: TObject);
 begin
   BottomNotebook.ShowControl(PageVersions);
+end;
+
+procedure TSimbaPackageForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  SimbaEvents.Post(ESimbaEvent.PACKAGE_FORM_CLOSED, nil);
 end;
 
 procedure TSimbaPackageForm.ButtonRefreshClick(Sender: TObject);

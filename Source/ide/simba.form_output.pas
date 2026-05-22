@@ -34,11 +34,8 @@ type
     FContextMenu: TPopupMenu;
     FTabControl: TSimbaTabControl;
     FSimbaTab: TOutputTab;
-
     FRegexError: TRegExpr;
     FRegexTrace: TRegExpr;
-
-    function FindTab(ScriptTabUID: Int64): TOutputTab;
 
     procedure DoDebugRedirect(const S: String);
     procedure DoDebugLnRedirect(const S: String);
@@ -55,6 +52,7 @@ type
     constructor Create; reintroduce;
     destructor Destroy; override;
 
+    function FindTab(ScriptTabUID: Int64): TOutputTab;
     function FindList(ScriptTabUID: Int64): TOutputListComponentReal;
   end;
 

@@ -86,8 +86,33 @@ uses
   simba.ide_tab,
   simba.ide_editor,
   simba.ide_controller,
+  simba.ide_package,
   simba.settings,
-  simba.component_images;
+  simba.component_images,
+  simba.vartype_string,
+  simba.fs;
+
+type
+  TPackagePopupMenu = class(TPopupMenu)
+  public
+    PackageFullName: String;
+    Hash: UInt32;
+  end;
+
+  TPackageMenuItem = class(TMenuItem)
+  public
+    FileName: String;
+
+    procedure Click; override;
+  end;
+
+procedure TPackageMenuItem.Click;
+begin
+  if (Caption = 'Run') then
+    SimbaController.OpenInTabAndRun(FileName)
+  else
+    SimbaController.OpenInTab(FileName);
+end;
 
 function TSimbaMainMenuBar.addMenu(Text: String): TPopupMenu;
 begin
@@ -158,9 +183,70 @@ procedure TSimbaMainMenuBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     Files.Free();
   end;
 
+  procedure DoPackageInstallsChanged(Packages: TSimbaPackageArray);
+
+    function GetMenu(PackageFullName: String): TPackagePopupMenu;
+    var
+      Menu: TPopupMenu;
+    begin
+      for Menu in FMenuBar.Menus do
+        if (Menu is TPackagePopupMenu) and (TPackagePopupMenu(Menu).PackageFullName = PackageFullName) then
+          Exit(TPackagePopupMenu(Menu));
+
+      Result := TPackagePopupMenu.Create(FMenuBar);
+    end;
+
+  var
+    I: Integer;
+    Menu: TPackagePopupMenu;
+    MenuItemOpen, MenuItemRun: TPackageMenuItem;
+    SubMenu: TMenuItem;
+    Package: TSimbaPackage;
+    Hash: UInt32;
+    Files: TStringArray;
+  begin
+    for Package in Packages do
+    begin
+      Files := Package.ScriptFiles;
+      if (Length(Files) = 0) then
+        Continue;
+
+      Hash := ''.Join(Files).Hash();
+      Menu := GetMenu(Package.Name);
+      if (Menu.Hash = Hash) then // Already built and no changes
+        Continue;
+
+      Menu.PackageFullName := Package.Name;
+      Menu.Hash := Hash;
+      Menu.Items.Clear();
+
+      for I := 0 to High(Files) do
+      begin
+        SubMenu := TMenuItem.Create(Menu);
+        SubMenu.Caption := TSimbaPath.PathExtractNameWithoutExt(Files[I]);
+
+        MenuItemOpen := TPackageMenuItem.Create(SubMenu);
+        MenuItemOpen.Caption := 'Open';
+        MenuItemOpen.FileName := Files[I];
+
+        MenuItemRun := TPackageMenuItem.Create(SubMenu);
+        MenuItemRun.Caption := 'Run';
+        MenuItemRun.FileName := Files[I];
+
+        SubMenu.Add(MenuItemOpen);
+        SubMenu.Add(MenuItemRun);
+
+        Menu.Items.Add(SubMenu);
+      end;
+
+      MenuBar.AddMenu(Package.Name, Menu);
+    end;
+  end;
+
 begin
   case Event of
     ESimbaEvent.TAB_LOADED: DoTabLoaded(TSimbaScriptTab(Data));
+    ESimbaEvent.PACKAGE_INSTALLS_CHANGED: DoPackageInstallsChanged(TSimbaPackageArray(Data));
   end;
 end;
 
@@ -434,7 +520,7 @@ begin
   Application.AddOnKeyDownBeforeHandler(@DoApplicationKeyDown);
   Screen.AddHandlerActiveControlChanged(@DoActiveControlChange);
 
-  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.TAB_LOADED]);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.TAB_LOADED, ESimbaEvent.PACKAGE_INSTALLS_CHANGED]);
 end;
 
 destructor TSimbaMainMenuBar.Destroy;

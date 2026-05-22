@@ -37,11 +37,8 @@ type
     procedure DoButtonOkClick(Sender: TObject);
     procedure DoSplitterEnterExit(Sender: TObject);
     procedure DoTreeViewSelectionChanged(Sender: TObject);
-
     procedure UpdateTreeSize;
-
     procedure AddSimbaExamples;
-  public
     procedure ClearPackageExamples;
     procedure AddPackageExamples(PackageName: String; Files: TStringArray);
   end;
@@ -58,7 +55,8 @@ uses
   simba.component_images,
   simba.component_theme,
   simba.fs,
-  simba.ide_controller;
+  simba.ide_controller,
+  simba.ide_package;
 
 function ReadResourceString(ResourceName: String): String;
 begin
@@ -116,6 +114,9 @@ var
   I: Integer;
   Node: TTreeNode;
 begin
+  if (Length(Files) = 0) then
+    Exit;
+
   TreeView.BeginUpdate();
   if Assigned(TreeView.Items.FindTopLvlNode(PackageName)) then
     TreeView.Items.FindTopLvlNode(PackageName).Free();
@@ -154,10 +155,25 @@ begin
 end;
 
 procedure TSimbaOpenExampleForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoShowForm();
+  begin
+    ShowOnTop();
+  end;
+
+  procedure DoPackageExamples(Packages: TSimbaPackageArray);
+  var
+    Package: TSimbaPackage;
+  begin
+    ClearPackageExamples();
+    for Package in Packages do
+      AddPackageExamples(Package.Name, Package.ExampleFiles);
+  end;
+
 begin
   case Event of
-    ESimbaEvent.ACTION_OPEN_EXAMPLE:
-      ShowOnTop();
+    ESimbaEvent.ACTION_OPEN_EXAMPLE:      DoShowForm();
+    ESimbaEvent.PACKAGE_INSTALLS_CHANGED: DoPackageExamples(TSimbaPackageArray(Data));
   end;
 end;
 
@@ -208,7 +224,7 @@ begin
   AddSimbaExamples();
   UpdateTreeSize();
 
-  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_OPEN_EXAMPLE]);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_OPEN_EXAMPLE, ESimbaEvent.PACKAGE_INSTALLS_CHANGED]);
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);
