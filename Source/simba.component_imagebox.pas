@@ -102,7 +102,7 @@ type
   TImageBoxPaintEvent = procedure(Sender: TSimbaImageBox; Canvas: TSimbaImageBoxCanvas; R: TRect) of object;
   TImageBoxEvent = procedure(Sender: TSimbaImageBox) of object;
   TImageBoxClickEvent = procedure(Sender: TSimbaImageBox; X, Y: Integer) of object;
-  TImageBoxKeyEvent = procedure(Sender: TSimbaImageBox; var Key: Word; Shift: TShiftState) of object;
+  TImageBoxKeyEvent = procedure(Sender: TSimbaImageBox; var Key: UInt16; Shift: TShiftState) of object;
   TImageBoxMouseEvent = procedure(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer) of object;
   TImageBoxMouseMoveEvent = procedure(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer) of object;
 
