@@ -330,7 +330,7 @@ begin
        'CPUInfo'
     ).isConstant := True;
 
-    addGlobalType('strict Pointer', 'TThread');
+    addGlobalType('type Pointer', 'TThread');
     addGlobalFunc('property TThread.Name: String', @_LapeThread_Name_Read);
     addGlobalFunc('property TThread.Name(Value: String)', @_LapeThread_Name_Write);
     addGlobalFunc('property TThread.Running: Boolean', @_LapeThread_Running_Read);
@@ -342,7 +342,7 @@ begin
     addGlobalFunc('function TThread.WaitForTerminate(Timeout: Int32): Boolean; overload', @_LapeThread_WaitForTerminate2);
     addGlobalFunc('procedure TThread.Free;', @_LapeThread_Free);
 
-    addGlobalType('strict TBaseClass', 'TLock');
+    addGlobalType('type TBaseClass', 'TLock');
     addGlobalFunc('function TLock.Create: TLock; static;', @_LapeLock_Create);
     addGlobalFunc('function TLock.TryEnter: Boolean;', @_LapeLock_TryEnter);
     addGlobalFunc('procedure TLock.Enter;', @_LapeLock_Enter);
