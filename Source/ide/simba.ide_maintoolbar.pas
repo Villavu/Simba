@@ -49,6 +49,7 @@ type
         Event: ESimbaEvent; EventProducer: EEventProducer = epMouseClick
       ): TSimbaButton;
 
+    procedure DoFillRecentFilesPopup(Sender: TObject);
     procedure DoOpenRecentFileClick(Sender: TObject);
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoButtonClick(Sender: TObject);
@@ -93,6 +94,29 @@ begin
     epMouseDown:  Result.OnMouseDown := @DoButtonMouseDown;
   end;
   Result.Tag := Int32(Event);
+end;
+
+procedure TSimbaMainToolBar.DoFillRecentFilesPopup(Sender: TObject);
+var
+  RecentFiles: TStringList;
+  Item: TMenuItem;
+  I: Integer;
+begin
+  RecentFiles := TStringList.Create();
+  RecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
+
+  FRecentFilesPopup.Items.Clear();
+  for I := 0 to RecentFiles.Count - 1 do
+  begin
+    Item := TMenuItem.Create(FRecentFilesPopup);
+    Item.Caption := ShortDisplayFilename(RecentFiles[I]);
+    Item.Hint := RecentFiles[I];
+    Item.OnClick := @DoOpenRecentFileClick;
+
+    FRecentFilesPopup.Items.Add(Item);
+  end;
+
+  RecentFiles.Free();
 end;
 
 procedure TSimbaMainToolBar.DoOpenRecentFileClick(Sender: TObject);
@@ -146,7 +170,6 @@ procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   procedure DoTabLoaded(Tab: TSimbaScriptTab);
   var
     I: Integer;
-    Item: TMenuItem;
     Files: TStringList;
   begin
     Files := TStringList.Create();
@@ -156,19 +179,7 @@ procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     Files.Insert(0, Tab.ScriptFileName);
     while (Files.Count > 8) do
       Files.Delete(Files.Count - 1);
-
-    FRecentFilesPopup.Items.Clear();
-    for I := 0 to Files.Count - 1 do
-    begin
-      Item := TMenuItem.Create(FRecentFilesPopup);
-      Item.Caption := ShortDisplayFilename(Files[I]);
-      Item.Hint := Files[I];
-      Item.OnClick := @DoOpenRecentFileClick;
-
-      FRecentFilesPopup.Items.Add(Item);
-    end;
     SimbaSettings.General.RecentFiles.Value := Files.Text;
-
     Files.Free();
   end;
 
@@ -261,6 +272,7 @@ begin
   FToolBar.Align := alTop;
 
   FRecentFilesPopup := TPopupMenu.Create(Self);
+  FRecentFilesPopup.OnPopup := @DoFillRecentFilesPopup;
 
   FButtonNew := AddButton(SimbaImages.NEW, 'New File (Ctrl + N)', ESimbaEvent.ACTION_NEW);
 

@@ -67,6 +67,7 @@ type
     procedure DoMenuItemClick(Sender: TObject);
     procedure DoApplicationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoActiveControlChange(Sender: TObject; LastControl: TControl);
+    procedure DoFillRecentFilesPopup(Sender: TObject);
     procedure DoOpenRecentFileClick(Sender: TObject);
   public
     constructor Create; reintroduce;
@@ -157,7 +158,6 @@ procedure TSimbaMainMenuBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   procedure DoTabLoaded(Tab: TSimbaScriptTab);
   var
     I: Integer;
-    Item: TMenuItem;
     Files: TStringList;
   begin
     Files := TStringList.Create();
@@ -167,19 +167,6 @@ procedure TSimbaMainMenuBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     Files.Insert(0, Tab.ScriptFileName);
     while (Files.Count > 8) do
       Files.Delete(Files.Count - 1);
-
-    FRecentFilesMenu.Clear();
-    for I := 0 to Files.Count - 1 do
-    begin
-      Item := TMenuItem.Create(FRecentFilesMenu);
-      Item.Caption := ShortDisplayFilename(Files[I]);
-      Item.Hint := Files[I];
-      Item.OnClick := @DoOpenRecentFileClick;
-
-      FRecentFilesMenu.Add(Item);
-    end;
-    SimbaSettings.General.RecentFiles.Value := Files.Text;
-
     Files.Free();
   end;
 
@@ -374,6 +361,29 @@ begin
   FMenuBar.HotIndex := -1;
 end;
 
+procedure TSimbaMainMenuBar.DoFillRecentFilesPopup(Sender: TObject);
+var
+  RecentFiles: TStringList;
+  Item: TMenuItem;
+  I: Integer;
+begin
+  RecentFiles := TStringList.Create();
+  RecentFiles.Text := SimbaSettings.General.RecentFiles.Value;
+
+  FRecentFilesMenu.Clear();
+  for I := 0 to RecentFiles.Count - 1 do
+  begin
+    Item := TMenuItem.Create(FRecentFilesMenu);
+    Item.Caption := ShortDisplayFilename(RecentFiles[I]);
+    Item.Hint := RecentFiles[I];
+    Item.OnClick := @DoOpenRecentFileClick;
+
+    FRecentFilesMenu.Add(Item);
+  end;
+
+  RecentFiles.Free();
+end;
+
 procedure TSimbaMainMenuBar.DoOpenRecentFileClick(Sender: TObject);
 begin
   SimbaController.OpenInTab(TMenuItem(Sender).Hint);
@@ -384,7 +394,7 @@ constructor TSimbaMainMenuBar.Create;
   procedure addFileMenu();
   begin
     FFileMenu := addMenu('File');
-
+    FFileMenu.OnPopup := @DoFillRecentFilesPopup;
     addItem(FFileMenu, SimbaImages.NEW, 'New', ShortCut(VK_N, [ssCtrl]), ESimbaEvent.ACTION_NEW);
     addLine(FFileMenu);
     addItem(FFileMenu, SimbaImages.FOLDER, 'Open', ShortCut(VK_O, [ssCtrl]), ESimbaEvent.ACTION_OPEN);

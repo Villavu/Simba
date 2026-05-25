@@ -3,8 +3,6 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-// TODO:
-// Package updater
 unit simba.form_output;
 
 {$i simba.inc}

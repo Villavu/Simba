@@ -149,7 +149,6 @@ begin
       OldX := X * Scale;
       OldY := Y * Scale;
 
-      // todo
       if Skip[OldY * Image.Width + OldX] then
         Result.Data[Y * Result.Width + X] := Image.Data[OldY * Image.Width + OldX]
       else

@@ -3,8 +3,6 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-// TODO:
-//   - use simba.dialogs
 unit simba.form_scripttabs;
 
 {$i simba.inc}

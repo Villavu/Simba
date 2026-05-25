@@ -2375,7 +2375,7 @@ begin
     'procedure':   Result := SimbaImages.METHOD;
     'operator':    Result := SimbaImages.METHOD;
     'type':        Result := SimbaImages.TYPE_DECL;
-    'const':       Result := SimbaImages.VARIABLE; // todo
+    'const':       Result := SimbaImages.VARIABLE;
     'var':         Result := SimbaImages.VARIABLE;
     'enumelement': Result := SimbaImages.ENUM;
     'anchor':      Result := SimbaImages.ANCHOR;
