@@ -61,6 +61,7 @@ procedure DoCreate;
           Continue;
 
         Parser := TCodeParser.Create();
+        Parser.SourceType := EParserSourceType.SIMBA;
         Parser.SetScript(List.ValueFromIndex[I], List.Names[I]);
         Parser.Run();
 
@@ -81,7 +82,7 @@ begin
 
   CodetoolsSetup := True;
 
-  SimbaIDEEvents.Notify(SimbaIDEEvent.CODETOOLS_SETUP, nil);
+  SimbaEvents.Post(ESimbaEvent.CODETOOLS_SETUP, nil);
 end;
 
 procedure DoDestroy;

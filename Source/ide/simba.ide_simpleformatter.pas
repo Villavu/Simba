@@ -2,8 +2,9 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+  Simple code formatter. Simple being does not do a proper parse (like JCF) just tries to tidy code up token by token.
 }
-// Originally by niels at http://villavu.com/forum/showthread.php?t=35513
 unit simba.ide_simpleformatter;
 
 {$i simba.inc}
@@ -11,518 +12,570 @@ unit simba.ide_simpleformatter;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.base;
 
 function FormatScript(const Script: String): String;
 
 implementation
 
 uses
+  simba.containers,
   simba.ide_simplelexer;
 
+function FormatScript(const Script: String): String;
 type
-  TSimbaCodeFormatter = class
-  protected
-  type
-    EBlockType = (None, InFuncBlock, InFuncHeaderBlock, InVarBlock);
-  protected
-    FOutput: String;
-    FLexer: TPasLexer;
-
-    FInBlock: EBlockType;
-
-    FIndents: array[0..1000] of Integer;
-    FIndent: Integer;
-    FProcIndents: array[0..1000] of Integer;
-    FProcIndent: Integer;
-    FElseIndent: Integer;
-
-    FBeginCount: Integer;
-
-    FFirstInLine: Boolean;
-
-    FLastAsSpace: Boolean;
-    FLastWasKeyword: Boolean;
-    FLastWasComment: Boolean;
-
-    procedure Add;
-    procedure AddLine;
-    procedure AddDirective;
-  public
-    function Format(Script: String): String;
-
-    constructor Create;
-    destructor Destroy; override;
-  end;
-
-procedure TSimbaCodeFormatter.Add;
+  EBlockType = (None, InFuncBlock, InFuncHeaderBlock, InVarBlock);
+  EFormatFlag = (
+    fsFirstInLine,
+    fsLastAsSpace,
+    fsLastWasKeyword,
+    fsLastWasComment,
+    fsLastWasTypeGuard,
+    fsInDoubleQuotes
+  );
+  TFormatState = set of EFormatFlag;
 var
-  IsKeyword: Boolean;
-begin
-  IsKeyword := FLexer.TokenID in PasTokens_Keywords;
-  if FLastWasComment and (not FFirstInLine) then
-    AddLine();
+  Builder: TSimbaStringBuilder;
+  Lexer: TPasLexer;
 
-  FLastWasComment := False;
+  InBlock: EBlockType;
+  State: TFormatState;
 
-  if FFirstInLine then
-    if (FLexer.TokenID in [tkEnd, tkUntil]) then
-      FOutput := FOutput + StringOfChar(' ', 2 * (FIndents[FIndent] + FElseIndent - 1))
-    else
-      FOutput := FOutput + StringOfChar(' ', 2 * (FIndents[FIndent] + FElseIndent));
+  Indents: array of Integer;
+  Indent: Integer;
+  ProcIndents: array of Integer;
+  ProcIndent: Integer;
+  ElseIndent: Integer;
+  DirectiveIndent: Integer;
 
-  if IsKeyWord then
-  begin
-    if (FFirstInLine or FLastAsSpace) and (not (FLexer.TokenID in [tkAssign, tkAssignPlus, tkAssignDiv, tkAssignMinus, tkAssignMul])) then
-      FOutput := FOutput + LowerCase(FLexer.Token)
-    else
-      FOutput := FOutput + ' ' + LowerCase(FLexer.Token);
-
-    FLastAsSpace := False;
-  end else
-  begin
-    case FLexer.TokenID of
-      tkRoundOpen, tkSquareOpen:
-        begin
-          if FLastWasKeyword then
-            FOutput := FOutput + ' ' + FLexer.Token
-          else
-            FOutput := FOutput + FLexer.Token;
-
-          FLastAsSpace := True;
-        end;
-
-      tkDot, tkDotDot:
-        begin
-          FOutput := FOutput + FLexer.Token;
-
-          FLastAsSpace := True;
-        end;
-
-      tkComma:
-        begin
-          FOutput := FOutput + FLexer.Token;
-
-          FFirstInLine := False;
-          FLastAsSpace := False;
-          FLastWasKeyword := True;
-
-          Exit;
-        end;
-
-      tkColon, tkSemiColon, tkRoundClose, tkSquareClose:
-        begin
-          FOutput := FOutput + FLexer.Token;
-
-          FLastAsSpace := False;
-        end;
-
-      tkDiv, tkStar, tkMinus, tkPlus:
-        begin
-          //if (FLexer.TokenPos > 1) and (FLexer.Origin[FLexer.TokenPos - 1] <> #32) then
-          //  FOutput := FOutput + FLexer.Token
-          //else
-            FOutput := FOutput + ' ' + FLexer.Token;
-
-          FFirstInLine := False;
-          FLastAsSpace := False;
-          FLastWasKeyword := False;
-
-          Exit;
-        end;
-
-      tkAssign, tkAssignPlus, tkAssignDiv, tkAssignMinus, tkAssignMul:
-        begin
-          FOutput := FOutput + ' ' + FLexer.Token;
-          FFirstInLine := False;
-          FLastAsSpace := False;
-          FLastWasKeyword := True;
-
-          Exit;
-        end;
-      else
-      begin
-        if FFirstInLine or FLastAsSpace then
-          FOutput := FOutput + FLexer.Token
-        else
-          FOutput := FOutput + ' ' + FLexer.Token;
-
-        FLastAsSpace := False;
-      end;
-    end;
-  end;
-
-  FFirstInLine := False;
-  FLastWasKeyword := IsKeyword;
-end;
-
-procedure TSimbaCodeFormatter.AddLine;
-begin
-  if (FOutput <> '') and (not FOutput.EndsWith(LineEnding+LineEnding)) then
-    FOutput := FOutput + LineEnding;
-
-  FFirstInLine := True;
-end;
-
-procedure TSimbaCodeFormatter.AddDirective;
-begin
-  FOutput := FOutput + FLexer.Token;
-
-  FFirstInLine := False;
-  FLastAsSpace := False;
-  FLastWasKeyword := False;
-
-  AddLine();
-end;
-
-function TSimbaCodeFormatter.Format(Script: String): String;
-
-  procedure Reset;
-  begin
-    FOutput := '';
-
-    FLastAsSpace := False;
-    FLastWasKeyword := False;
-    FLastWasComment := False;
-
-    FBeginCount := 0;
-    FInBlock := None;
-    FFirstInLine := True;
-
-    FElseIndent := 0;
-    FProcIndent := 0;
-    FIndent := 0;
-
-    FillDWord(FIndents[0], Length(FIndents), 0);
-    FillDWord(FProcIndents[0], Length(FProcIndents), 0);
-  end;
-
-  procedure Next;
-  var
-    EmptyLineCount: Integer = 0;
-  begin
-    repeat
-      FLexer.Next();
-      if (FLexer.TokenID = tkLineEnding) then
-        Inc(EmptyLineCount);
-    until (not (FLexer.TokenID in [tkLineEnding, tkSpace]));
-
-    if (EmptyLineCount > 1) then
-    begin
-      if not FOutput.EndsWith(LineEnding) then
-        FOutput += LineEnding;
-      FOutput += LineEnding;
-    end;
-  end;
-
-var
+  BeginCount: Integer;
   BraceCount: Integer;
-begin
-  Reset();
 
-  FLexer.Origin := PChar(Script);
-
-  while (FLexer.TokenID <> tkNull) do
+  procedure AddLine;
   begin
-    case FLexer.TokenID of
-      tkDirective:
-        AddDirective();
+    if (Builder.Count > 0) and (not Builder.EndsWith(LineEnding)) then
+      Builder.Append(LineEnding);
 
-      tkProcedure, tkFunction, tkOperator:
-        begin
-          if (FInBlock = InVarBlock) and (FIndent > 0) then
-            Dec(FIndent);
+    Include(State, fsFirstInLine);
+  end;
 
-          FElseIndent := 0;
+  procedure Add;
+  var
+    IsKeyword: Boolean;
+    TokenStr: String;
+    SpaceCount: Integer;
+  begin
+    TokenStr := Lexer.Token;
 
-          if FProcIndent = 0 then
-            FIndents[FIndent] := 0
-          else
-            FIndents[FIndent] := FIndents[FIndent] + 1;
+    if (Lexer.TokenID in [tkAnsiComment, tkBorComment, tkSlashesComment]) then
+    begin
+      if (fsFirstInLine in State) then
+        Builder.Append(StringOfChar(' ', 2 * (Indents[Indent] + ElseIndent)))
+      else
+        Builder.Append(' ');
 
-          Inc(FProcIndent);
-          FProcIndents[FProcIndent] := FIndents[FIndent];
+      Builder.Append(TokenStr);
+      Include(State, fsLastWasComment);
+      Exclude(State, fsFirstInLine);
+      Exit;
+    end;
 
-          AddLine();
-          Add();
-          Next();
-          Add();
+    if (Lexer.TokenID in [tkEqual, tkColon, tkLower, tkPointerSymbol, tkOf]) then
+      Include(State, fsLastWasTypeGuard)
+    else
+      Exclude(State, fsLastWasTypeGuard);
 
-          FInBlock := InFuncHeaderBlock;
-        end;
+    IsKeyword := Lexer.TokenID in PasTokens_Keywords;
 
-      tkRoundOpen:
-        begin
-          if (FInBlock = InVarBlock) then
-            FLastWasKeyword := True;
+    if (fsLastWasComment in State) and not (fsFirstInLine in State) then
+      AddLine();
 
-          Add();
-          Next();
-          BraceCount := 1;
+    Exclude(State, fsLastWasComment);
 
-          while (FLexer.TokenID <> tkNull) and (BraceCount > 0) do
+    if (fsFirstInLine in State) then
+    begin
+      SpaceCount := Indents[Indent] + ElseIndent;
+
+      if Lexer.TokenID in [tkEnd, tkUntil] then
+        Dec(SpaceCount)
+      else if Lexer.TokenID = tkDirective then
+        Inc(SpaceCount, DirectiveIndent);
+
+      if SpaceCount > 0 then
+        Builder.Append(StringOfChar(' ', 2 * SpaceCount));
+    end;
+
+    if IsKeyword then
+    begin
+      if not ((fsFirstInLine in State) or (fsLastAsSpace in State)) then
+        Builder.Append(' ');
+
+      Builder.Append(LowerCase(TokenStr));
+      Exclude(State, fsLastAsSpace);
+    end else
+    begin
+      case Lexer.TokenID of
+        tkRoundOpen, tkSquareOpen:
           begin
-            if (FLexer.TokenID = tkRoundOpen) then
-              Inc(BraceCount)
-            else if (FLexer.TokenID = tkRoundClose) then
-              Dec(BraceCount);
+            if (fsLastWasKeyword in State) and not (fsLastAsSpace in State) then
+              Builder.Append(' ');
 
-            Add();
-            Next();
+            Builder.Append(TokenStr);
+            Include(State, fsLastAsSpace);
           end;
 
-          Continue;
-        end;
-
-      tkDo, tkThen:
-        begin
-          Add();
-          Next();
-
-          if (FLexer.TokenID = tkBegin) then
-            Continue
-          else if (FLexer.TokenID in [tkTry, tkRepeat]) then
+        tkDot, tkDotDot, tkAddress:
           begin
-            Inc(FElseIndent);
-            Continue;
-          end else
-          begin
-            Inc(FElseIndent);
-
-            AddLine();
-            Add();
+            Builder.Append(TokenStr);
+            Include(State, fsLastAsSpace);
           end;
-        end;
 
-      tkElse:
-        begin
-          if (not FFirstInLine) then
-            AddLine();
-          if (FElseIndent > 0) then
-            Dec(FElseIndent);
-
-          Add();
-          Next();
-
-          if (FLexer.TokenID in [tkBegin, tkIf]) then
-            Continue
-          else if (FLexer.TokenID in [tkTry, tkRepeat]) then
+        tkComma:
           begin
-            Inc(FElseIndent);
-            Continue;
-          end else
-          begin
-            Inc(FElseIndent);
-            AddLine();
-            Add();
+            Builder.Append(TokenStr);
+            Exclude(State, fsFirstInLine);
+            Exclude(State, fsLastAsSpace);
+            Include(State, fsLastWasKeyword);
+            Exit;
           end;
-        end;
 
-      tkColon:
-        begin
-          Add();
-
-          if (FInBlock = InFuncBlock) and (FBeginCount > 1) then
+        tkColon, tkSemiColon, tkRoundClose, tkSquareClose:
           begin
-            Next();
-            if (FLexer.TokenID in PasTokens_Keywords) then
+            Builder.Append(TokenStr);
+            Exclude(State, fsLastAsSpace);
+          end;
+
+        tkSlash, tkStar, tkMinus, tkPlus:
+          begin
+            if not (fsFirstInLine in State) then
+              Builder.Append(' ');
+            Builder.Append(TokenStr);
+
+            if (fsFirstInLine in State) or (fsLastAsSpace in State) or (fsLastWasKeyword in State) then
+              Include(State, fsLastAsSpace)
+            else
+              Exclude(State, fsLastAsSpace);
+
+            Exclude(State, fsFirstInLine);
+            Exclude(State, fsLastWasKeyword);
+            Exit;
+          end;
+
+        tkAssign, tkAssignPlus, tkAssignDiv, tkAssignMinus, tkAssignMul, tkEqual:
+          begin
+            if not ((fsFirstInLine in State) or (fsLastAsSpace in State)) then
+              Builder.Append(' ');
+
+            Builder.Append(TokenStr);
+            Builder.Append(' ');
+
+            Exclude(State, fsFirstInLine);
+            Include(State, fsLastAsSpace);
+            Exclude(State, fsLastWasKeyword);
+            Exit;
+          end;
+        else
+        begin
+          if (TokenStr = '"') then
+          begin
+            if not (fsInDoubleQuotes in State) then
             begin
-              Inc(FElseIndent);
-              AddLine();
-            end;
-
-            Continue;
-          end;
-        end;
-
-      tkOf:
-        begin
-          if (FInBlock = InVarBlock) or (FInBlock = InFuncHeaderBlock) then
-            FLastAsSpace := False;
-
-          Add();
-
-          if (FInBlock <> InVarBlock) and (FInBlock <> InFuncHeaderBlock) then
-          begin
-            Inc(FBeginCount);
-            Inc(FIndent);
-            FIndents[FIndent] := FIndents[FIndent - 1] + FElseIndent + 1;
-            AddLine();
-            FElseIndent := 0;
-          end;
-        end;
-
-      tkBegin, tkRepeat:
-        begin
-          if (FInBlock <> InFuncBlock) or (FBeginCount = 0) then
-          begin
-            FIndent := 0;
-            FElseIndent := 0;
-          end;
-
-          if (not FFirstInLine) or (FInBlock = None) then
-            AddLine();
-
-          Add();
-          Inc(FBeginCount);
-          Inc(FIndent);
-          FIndents[FIndent] := FIndents[FIndent - 1] + FElseIndent + 1;
-          AddLine();
-          FElseIndent := 0;
-          FInBlock := InFuncBlock;
-        end;
-
-      tkTry:
-        begin
-          if (not FFirstInLine) then
-            AddLine();
-
-          Add();
-          Inc(FBeginCount);
-          Inc(FIndent);
-          FIndents[FIndent] := FIndents[FIndent - 1] + FElseIndent + 1;
-          AddLine();
-          FElseIndent := 0;
-        end;
-
-      tkExcept, tkFinally:
-        begin
-          if (not FFirstInLine) then
-            AddLine();
-
-          FElseIndent := -1;
-          Add();
-          FElseIndent := 0;
-          AddLine();
-        end;
-
-      tkEnd, tkUntil:
-        begin
-          if (FBeginCount > 0) then
-            Dec(FBeginCount);
-          if (FBeginCount = 0) and (FInBlock = InFuncBlock) then
-            FInBlock := None;
-
-          if (not FFirstInLine) then
-            AddLine();
-
-          FElseIndent := 0;
-
-          Add();
-          if (FIndent > 0) then
-            Dec(FIndent);
-
-          if (FProcIndent > 0) and (FIndents[FIndent] = FProcIndents[FProcIndent]) then
-          begin
-            if (FIndents[FIndent] > 0) then
-              FIndents[FIndent] := FIndents[FIndent] - 1;
-            Dec(FProcIndent);
-          end;
-
-          if (FLexer.TokenID = tkEnd) then
-          begin
-            Next();
-            if (FLexer.TokenID <> tkSemiColon) and (FLexer.TokenID <> tkDot) then
-              AddLine();
-
-            Continue;
-          end;
-        end;
-
-      tkVar, tkConst, tkType, tkLabel:
-        begin
-          FIndent := 0;
-          FElseIndent := 0;
-
-          if (FInBlock <> InFuncHeaderBlock) then
-            AddLine()
-          else
-          if (not FFirstInLine) then
-            AddLine();
-
-          FInBlock := InVarBlock;
-
-          Add();
-          Inc(FIndent);
-          FIndents[FIndent] := FIndents[FIndent - 1] + FElseIndent + 1;
-          AddLine();
-        end;
-
-      tkRecord:
-        begin
-          FElseIndent := 0;
-          FInBlock := InVarBlock;
-
-          Add();
-          Inc(FIndent);
-          FIndents[FIndent] := FIndents[FIndent - 1] + FElseIndent + 1;
-          AddLine();
-        end;
-
-      tkSemiColon:
-        begin
-          if (not FFirstInLine) then
-          begin
-            Add();
-            Next();
-
-            if (FLexer.TokenID in [tkExternal, tkForward, tkOverload, tkOverride, tkStatic, tkConstRef]) then
-            begin
-              if (FLexer.TokenID in [tkExternal, tkForward]) then
-              begin
-                FInBlock := None;
-
-                if (FIndents[FIndent] > 0) then
-                  FIndents[FIndent] := FIndents[FIndent] - 1;
-
-                if (FProcIndent > 0) then
-                  Dec(FProcIndent);
-              end else
-                FInBlock := InFuncHeaderBlock;
+              if not ((fsFirstInLine in State) or (fsLastAsSpace in State)) then
+                Builder.Append(' ');
+              Builder.Append(TokenStr);
+              Include(State, fsLastAsSpace);
+              Include(State, fsInDoubleQuotes);
             end else
             begin
-              FElseIndent := 0;
-
-              AddLine();
+              Builder.Append(TokenStr);
+              Exclude(State, fsInDoubleQuotes);
+              Exclude(State, fsLastAsSpace);
             end;
+          end else
+          begin
+            if not ((fsFirstInLine in State) or (fsLastAsSpace in State)) then
+            begin
+              if not (fsInDoubleQuotes in State) then
+                Builder.Append(' ');
+            end;
+            Builder.Append(TokenStr);
 
-            Continue;
+            if (fsInDoubleQuotes in State) then
+              Include(State, fsLastAsSpace)
+            else
+              Exclude(State, fsLastAsSpace);
           end;
         end;
-      else
-        Add();
+      end;
     end;
 
-    Next();
+    Exclude(State, fsFirstInLine);
+
+    if IsKeyword then
+      Include(State, fsLastWasKeyword)
+    else
+      Exclude(State, fsLastWasKeyword);
   end;
 
-  Result := FOutput;
-end;
+  procedure NextToken(AllowEmptyLine: Boolean = True);
+  var
+    LineCount: Integer = 0;
+  begin
+    repeat
+      Lexer.Next();
+      if (Lexer.TokenID = tkLineEnding) then
+        Inc(LineCount);
+    until (not (Lexer.TokenID in [tkLineEnding, tkSpace]));
 
-constructor TSimbaCodeFormatter.Create;
-begin
-  FLexer := TPasLexer.Create();
-end;
+    if (LineCount > 0) then
+      Include(State, fsFirstInLine);
 
-destructor TSimbaCodeFormatter.Destroy;
-begin
-  if (FLexer <> nil) then
-    FreeAndNil(FLexer);
+    if (LineCount > 1) and AllowEmptyLine then
+    begin
+      if not Builder.EndsWith(LineEnding) then
+        Builder.Append(LineEnding);
+      Builder.Append(LineEnding);
+    end;
+  end;
 
-  inherited Destroy;
-end;
+  procedure PushIndent;
+  begin
+    Inc(Indent);
+    if (Indent >= Length(Indents)) then
+      SetLength(Indents, Length(Indents) + 32);
 
-function FormatScript(const Script: String): String;
-var
-  Formatter: TSimbaCodeFormatter;
+    Indents[Indent] := Indents[Indent - 1] + ElseIndent + 1;
+  end;
+
 begin
   Result := '';
 
-  Formatter := TSimbaCodeFormatter.Create();
+  State := [fsFirstInLine];
+
+  BeginCount := 0;
+  InBlock := None;
+  Indent := 0;
+  ElseIndent := 0;
+  ProcIndent := 0;
+  DirectiveIndent := 0;
+
+  SetLength(Indents, 32);
+  SetLength(ProcIndents, 16);
+
+  Lexer := TPasLexer.Create();
   try
-    Result := Formatter.Format(Script);
+    Lexer.Origin := PChar(Script);
+
+    while (Lexer.TokenID <> tkNull) do
+    begin
+      case Lexer.TokenID of
+
+        tkDirective:
+          begin
+            if (Pos('{$ENDIF', UpperCase(Lexer.Token)) = 1) or (Pos('{$ELSE', UpperCase(Lexer.Token)) = 1) then
+            begin
+              if (DirectiveIndent > 0) then
+                Dec(DirectiveIndent);
+            end;
+
+            if (fsFirstInLine in State) then
+              AddLine();
+
+            Add();
+            NextToken();
+
+            if (fsFirstInLine in State) and (Lexer.TokenID <> tkNull) then
+              AddLine();
+
+            if (Pos('{$IF', UpperCase(Lexer.Token)) = 1) or (Pos('{$ELSE', UpperCase(Lexer.Token)) = 1) then
+              Inc(DirectiveIndent);
+
+            Continue;
+          end;
+
+        tkAnsiComment, tkBorComment, tkSlashesComment:
+          begin
+            Add();
+            NextToken();
+            if (fsFirstInLine in State) and (Lexer.TokenID <> tkNull) then
+              AddLine();
+            Continue;
+          end;
+
+        tkProcedure, tkFunction, tkOperator, tkProperty:
+          begin
+            if (fsLastWasTypeGuard in State) then
+              Add()
+            else
+            begin
+              if (InBlock = InVarBlock) and (Indent > 0) then
+                Dec(Indent);
+
+              ElseIndent := 0;
+
+              if (ProcIndent = 0) then
+                Indents[Indent] := 0
+              else
+                Indents[Indent] := Indents[Indent] + 1;
+
+              Inc(ProcIndent);
+              if (ProcIndent >= Length(ProcIndents)) then
+                SetLength(ProcIndents, Length(ProcIndents) + 16);
+
+              ProcIndents[ProcIndent] := Indents[Indent];
+
+              AddLine();
+              Add();
+              NextToken(False);
+              Add();
+              InBlock := InFuncHeaderBlock;
+            end;
+          end;
+
+        tkRoundOpen, tkSquareOpen:
+          begin
+            if (InBlock = InVarBlock) then
+              Include(State, fsLastWasKeyword);
+
+            Add();
+            NextToken(False);
+            BraceCount := 1;
+
+            while (Lexer.TokenID <> tkNull) and (BraceCount > 0) do
+            begin
+              if (fsFirstInLine in State) then
+              begin
+                AddLine();
+                if not (Lexer.TokenID in [tkRoundClose, tkSquareClose]) then
+                  Builder.Append('  ');
+              end;
+
+              if (Lexer.TokenID in [tkRoundOpen, tkSquareOpen]) then
+                Inc(BraceCount)
+              else if (Lexer.TokenID in [tkRoundClose, tkSquareClose]) then
+                Dec(BraceCount);
+
+              Add();
+              NextToken();
+            end;
+            Continue;
+          end;
+
+        tkIf, tkWhile, tkFor, tkCase, tkWith:
+          begin
+            Add();
+            NextToken(False);
+            Continue;
+          end;
+
+        tkDo, tkThen:
+          begin
+            Add();
+            NextToken(False);
+            if (Lexer.TokenID in [tkBegin, tkTry, tkRepeat]) then
+            begin
+              AddLine();
+            end else
+            begin
+              Inc(ElseIndent);
+              if (fsFirstInLine in State) then
+                AddLine()
+              else
+                Exclude(State, fsLastAsSpace);
+            end;
+            Continue;
+          end;
+
+        tkElse:
+          begin
+            AddLine();
+
+            if (ElseIndent > 0) then
+              Dec(ElseIndent);
+
+            Add();
+            NextToken(False);
+
+            if (Lexer.TokenID = tkIf) then
+            begin
+              Exclude(State, fsFirstInLine);
+              Exclude(State, fsLastAsSpace);
+            end else if (Lexer.TokenID in [tkBegin, tkTry, tkRepeat]) then
+            begin
+              AddLine();
+            end else
+            begin
+              Inc(ElseIndent);
+              if (fsFirstInLine in State) then
+                AddLine()
+              else
+                Exclude(State, fsLastAsSpace);
+            end;
+            Continue;
+          end;
+
+        tkColon:
+          begin
+            Add();
+            if (InBlock = InFuncBlock) and (BeginCount > 1) then
+            begin
+              NextToken();
+              if (Lexer.TokenID in PasTokens_Keywords) then
+              begin
+                Inc(ElseIndent);
+                AddLine();
+              end;
+              Continue;
+            end;
+          end;
+
+        tkOf:
+          begin
+            if (InBlock = InVarBlock) or (InBlock = InFuncHeaderBlock) then
+              Exclude(State, fsLastAsSpace);
+
+            Add();
+
+            if (InBlock <> InVarBlock) and (InBlock <> InFuncHeaderBlock) then
+            begin
+              Inc(BeginCount);
+              PushIndent();
+              AddLine();
+              ElseIndent := 0;
+            end;
+          end;
+
+        tkBegin, tkRepeat:
+          begin
+            if (InBlock <> InFuncBlock) or (BeginCount = 0) then
+            begin
+              Indent := 0;
+              ElseIndent := 0;
+            end;
+
+            AddLine();
+            Add();
+            Inc(BeginCount);
+            PushIndent();
+            AddLine();
+            ElseIndent := 0;
+            InBlock := InFuncBlock;
+          end;
+
+        tkTry:
+          begin
+            AddLine();
+            Add();
+            Inc(BeginCount);
+            PushIndent();
+            AddLine();
+            ElseIndent := 0;
+          end;
+
+        tkExcept, tkFinally:
+          begin
+            AddLine();
+            ElseIndent := -1;
+            Add();
+            ElseIndent := 0;
+            AddLine();
+          end;
+
+        tkEnd, tkUntil:
+          begin
+            if (BeginCount > 0) then
+              Dec(BeginCount);
+
+            if (BeginCount = 0) and (InBlock = InFuncBlock) then
+              InBlock := None;
+
+            AddLine();
+            ElseIndent := 0;
+            Add();
+
+            if (Indent > 0) then
+              Dec(Indent);
+
+            if (ProcIndent > 0) and (Indents[Indent] = ProcIndents[ProcIndent]) then
+            begin
+              if (Indents[Indent] > 0) then
+                Indents[Indent] := Indents[Indent] - 1;
+              Dec(ProcIndent);
+            end;
+
+            if (Lexer.TokenID = tkEnd) then
+            begin
+              NextToken();
+              if (Lexer.TokenID <> tkSemiColon) and (Lexer.TokenID <> tkDot) then
+              begin
+                if not ((Lexer.TokenID in [tkAnsiComment, tkBorComment, tkSlashesComment]) and not (fsFirstInLine in State)) then
+                  AddLine();
+              end;
+
+              Continue;
+            end;
+          end;
+
+        tkVar, tkConst, tkType, tkLabel:
+          begin
+            Indent := 0;
+            ElseIndent := 0;
+
+            AddLine();
+            InBlock := InVarBlock;
+            Add();
+            PushIndent();
+            AddLine();
+          end;
+
+        tkRecord:
+          begin
+            ElseIndent := 0;
+            InBlock := InVarBlock;
+
+            Add();
+            PushIndent();
+            AddLine();
+          end;
+
+        tkSemiColon:
+          begin
+            Add();
+            NextToken();
+
+            if (Lexer.TokenID in [tkExternal, tkForward, tkOverload, tkOverride, tkStatic, tkConstRef]) then
+            begin
+              if (Lexer.TokenID in [tkExternal, tkForward]) then
+              begin
+                InBlock := None;
+
+                if (Indents[Indent] > 0) then
+                  Indents[Indent] := Indents[Indent] - 1;
+
+                if (ProcIndent > 0) then
+                  Dec(ProcIndent);
+              end else
+                InBlock := InFuncHeaderBlock;
+            end else
+            begin
+              ElseIndent := 0;
+              if not ((Lexer.TokenID in [tkAnsiComment, tkBorComment, tkSlashesComment]) and not (fsFirstInLine in State)) then
+                AddLine();
+            end;
+
+            Continue;
+          end;
+        else
+          Add();
+      end;
+
+      NextToken();
+    end;
+
+    Result := Builder.Str;
   finally
-    Formatter.Free();
+    Lexer.Free();
   end;
 end;
 

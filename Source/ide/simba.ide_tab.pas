@@ -10,8 +10,12 @@ unit simba.ide_tab;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, Controls, Dialogs, Process, SynEdit, SynEditTypes,
-  simba.base, simba.ide_editor, simba.form_output, simba.component_tabcontrol;
+  Classes, SysUtils, Controls, Process,
+  simba.base,
+  simba.ide_editor,
+  simba.ide_events,
+  simba.component_tabcontrol,
+  simba.ide_output_components;
 
 type
   TSimbaScriptTab = class;
@@ -33,6 +37,7 @@ type
     FStartTime: UInt64;
 
     FOutputThread: TThread;
+    FOutputBox: TOutputListComponentReal;
 
     FState: ESimbaScriptState;
 
@@ -43,7 +48,6 @@ type
     procedure Start(Args: TStringArray);
 
     procedure ShowError;
-    procedure ShowOutputBox;
 
     procedure DoOutputThread;
     procedure DoOutputThreadTerminated(Sender: TObject);
@@ -79,62 +83,68 @@ type
 
   TSimbaScriptTab = class(TSimbaTab)
   protected
-    FUID: Integer;
     FEditor: TSimbaEditor;
-    FSavedText: String;
+
+    // The text we last saved or loaded, to detect changes
+    FUnmodifiedText: record
+      LineCount: SizeInt; // store line count for faster initial check
+      Text: String;
+    end;
+    FPostedCanSave: Boolean;
+    FPostedCantSave: Boolean;
+
     FScriptFileName: String;
     FScriptTitle: String;
-    FDiskAge: TDateTime;
+    FFileAge: Int32; // disk age when we loaded the file
 
     FScriptRunner: TSimbaScriptTabRunner;
 
-    FOutputBox: TSimbaOutputBox;
+    procedure UpdateModifiedText();
+    function CheckIsModified: Boolean;
 
     procedure LoadDefaultScript;
     procedure FindDeclarationAtCaretASync(Data: PtrInt);
 
     // Keep output tab in sync
     procedure TextChanged; override;
+    // Reset PostedCanSave & PostedCanSave
+    procedure VisibleChanged; override;
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
     function DoEditorGetFileName(Sender: TObject): String;
     procedure DoEditorModified(Sender: TObject);
     procedure DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
+    procedure DoEditorCaretMoved(Sender: TObject);
 
     function GetScript: String;
-    function GetScriptChanged: Boolean;
+    procedure SetScript(Value: String);
   public
-    property UID: Integer read FUID;
-    property OutputBox: TSimbaOutputBox read FOutputBox;
-
     property ScriptTitle: String read FScriptTitle;
     property ScriptFileName: String read FScriptFileName;
-
-    property ScriptChanged: Boolean read GetScriptChanged;
-    property Script: String read GetScript;
+    property Script: String read GetScript write SetScript;
     property Editor: TSimbaEditor read FEditor;
-    property DiskAge: TDateTime read FDiskAge;
 
-    procedure UpdateDiskAge;
-    function SaveAsDialog: String;
+    // Has the file on disk changed since we loaded?
+    function IsOutdatedOnDisk: Boolean;
+    // Query a reload if changed on disk
+    function QueryReloadOutdated: Boolean;
 
+    // Save the script to a file.
+    // FileName='' will open a save dialog to query for filename
     function Save(FileName: String): Boolean;
+
+    // Load editor lines from file
+    // Will set editor to read only if file is such.
     function Load(FileName: String): Boolean;
-
-    procedure Undo;
-    procedure Redo;
-
-    procedure GotoLine(Line: Integer);
 
     procedure FindDeclarationAtCaret;
 
-    function IsActiveTab: Boolean;
+    function CanSave: Boolean;
     function CanClose: Boolean;
 
-    function ScriptStateStr: String;
-    function ScriptState: ESimbaScriptState;
+    function RunningState: ESimbaScriptState;
+    function RunningTime: UInt64;
 
     procedure Run;
     procedure Compile;
@@ -148,17 +158,24 @@ type
 implementation
 
 uses
-  Forms,
-  simba.fs, simba.settings, simba.ide_events,
-  simba.form_main, simba.form_tabs, simba.env, simba.ide_showdeclaration, simba.threading,
-  simba.ide_scriptcommunication, simba.datetime, simba.ide_editor_popupmenu,
-  simba.vartype_windowhandle,
+  Forms, Dialogs,
+  simba.fs,
+  simba.settings,
+  simba.form_scripttabs,
+  simba.env,
+  simba.ide_showdeclaration,
+  simba.threading,
+  simba.ide_scriptcommunication,
+  simba.ide_editor_popupmenu,
+  simba.ide_vars,
+  simba.dialog,
   simba.vartype_string,
-  simba.ide_vars;
+  simba.vartype_windowhandle,
+  simba.ide_controller;
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var
-  ReadBuffer, RemainingBuffer: String;
+  ReadBuffer: array[0..Pred(8192)] of Char;
 
   procedure EmptyProcessOutput;
   var
@@ -166,26 +183,19 @@ var
   begin
     while (FProcess.Output.NumBytesAvailable > 0) do
     begin
-      Count := FProcess.Output.Read(ReadBuffer[1], Length(ReadBuffer));
+      Count := FProcess.Output.Read(ReadBuffer[0], Length(ReadBuffer));
       if (Count > 0) then
-        RemainingBuffer := FTab.OutputBox.Add(RemainingBuffer + Copy(ReadBuffer, 1, Count));
+        FOutputBox.Add(@ReadBuffer[0], Count);
     end;
   end;
 
 begin
   try
-    SetLength(ReadBuffer, 8192);
-    SetLength(RemainingBuffer, 0);
-
     while FProcess.Running do
     begin
       EmptyProcessOutput();
-
       Sleep(500);
     end;
-
-    //DebugLn('Script process[%d] terminated. Exit code: %d', [FProcess.ProcessID, FProcess.ExitCode]);
-
     EmptyProcessOutput();
   except
     on E: Exception do
@@ -200,10 +210,7 @@ begin
     FProcess.Terminate(0);
 
   if FErrorSet then
-  begin
     ShowError();
-    ShowOutputBox();
-  end;
 
   Self.Free();
 end;
@@ -220,7 +227,7 @@ procedure TSimbaScriptTabRunner.SetState(Value: ESimbaScriptState);
 begin
   FState := Value;
 
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_SCRIPTSTATE_CHANGE, FTab);
+  SimbaEvents.Post(ESimbaEvent.TAB_SCRIPTSTATE_CHANGE, FTab);
 end;
 
 procedure TSimbaScriptTabRunner.Start(Args: TStringArray);
@@ -243,7 +250,9 @@ begin
   FOutputThread := RunInThread(@DoOutputThread);
   FOutputThread.OnTerminate := @DoOutputThreadTerminated;
 
-  State := ESimbaScriptState.STATE_RUNNING;
+  State := ESimbaScriptState.RUNNING;
+
+  SimbaEvents.Post(ESimbaEvent.TAB_SCRIPT_START, FTab);
 end;
 
 procedure TSimbaScriptTabRunner.ShowError;
@@ -255,15 +264,10 @@ begin
     FTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
   end else
   // else, open the file and display.
-  if SimbaTabsForm.Open(FError.FileName) then
-    SimbaTabsForm.CurrentEditor.FocusLine(FError.Line, FError.Col, $0000A5);
+  if SimbaScriptTabsForm.Open(FError.FileName) then
+    SimbaScriptTabsForm.ActiveTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
 
   FTab.Editor.FocusLine(FError.Line, FError.Col, $0000A5);
-end;
-
-procedure TSimbaScriptTabRunner.ShowOutputBox;
-begin
-  FTab.OutputBox.MakeVisible();
 end;
 
 procedure TSimbaScriptTabRunner.Run(Args: TStringArray);
@@ -278,23 +282,23 @@ end;
 
 procedure TSimbaScriptTabRunner.Resume;
 begin
-  FState := ESimbaScriptState.STATE_RUNNING;
+  FState := ESimbaScriptState.RUNNING;
   FProcess.Input.Write(FState, SizeOf(Int32));
 end;
 
 procedure TSimbaScriptTabRunner.Pause;
 begin
-  FState := ESimbaScriptState.STATE_PAUSED;
+  FState := ESimbaScriptState.PAUSED;
   FProcess.Input.Write(FState, SizeOf(Int32));
 end;
 
 procedure TSimbaScriptTabRunner.Stop;
 begin
-  if (FState = ESimbaScriptState.STATE_STOP) then
+  if (FState = ESimbaScriptState.STOP) then
     FProcess.Terminate(1001)
   else
   begin
-    FState := ESimbaScriptState.STATE_STOP;
+    FState := ESimbaScriptState.STOP;
     FProcess.Input.Write(FState, SizeOf(Int32));
   end;
 end;
@@ -304,7 +308,8 @@ begin
   inherited Create(ATab);
 
   FTab := ATab;
-  FState := ESimbaScriptState.STATE_RUNNING;
+  FOutputBox := SimbaController.FindOutputListForTab(FTab.UID);
+  FState := ESimbaScriptState.RUNNING;
 
   FProcess := TProcess.Create(Self);
   FProcess.PipeBufferSize := 16 * 1024;
@@ -330,30 +335,59 @@ end;
 
 destructor TSimbaScriptTabRunner.Destroy;
 begin
-  State := ESimbaScriptState.STATE_NONE;
+  State := ESimbaScriptState.NONE;
 
   inherited Destroy();
 end;
-
-var
-  __UID: Integer = 0;
 
 function TSimbaScriptTab.GetScript: String;
 begin
   Result := FEditor.Text;
 end;
 
-function TSimbaScriptTab.GetScriptChanged: Boolean;
+procedure TSimbaScriptTab.SetScript(Value: String);
 begin
-  Result := FEditor.Text <> FSavedText;
+  FEditor.BeginUndoBlock();
+  FEditor.ClearAll();
+  FEditor.InsertTextAtCaret(Value);
+  FEditor.EndUndoBlock();
 end;
 
-procedure TSimbaScriptTab.UpdateDiskAge;
+function TSimbaScriptTab.IsOutdatedOnDisk: Boolean;
 begin
-  if (FScriptFileName <> '') and FileExists(FScriptFileName) then
-    FDiskAge := FileDateToDateTime(FileAge(FScriptFileName))
-  else
-    FDiskAge := 0;
+  Result := (FScriptFileName <> '') and FileExists(FScriptFileName) and
+            (FFileAge > 0) and (FileAge(FScriptFileName) > FFileAge);
+end;
+
+function TSimbaScriptTab.QueryReloadOutdated: Boolean;
+const
+  Message = 'File "%s" has changed on disk' + LINE_SEP +
+            'Do you want to reload it?';
+begin
+  Result := False;
+
+  if IsOutdatedOnDisk() then
+  begin
+    if (ShowQuestionDialog('Simba', Message, [FScriptFileName]) = ESimbaDialogButton.YES) then
+      Result := Load(FScriptFileName)
+    else
+      FFileAge := FileAge(FScriptFileName);
+  end;
+end;
+
+procedure TSimbaScriptTab.UpdateModifiedText();
+begin
+  FPostedCanSave := False;
+  FPostedCantSave := False;
+
+  FUnmodifiedText.Text := FEditor.TextView.Text;
+  FUnmodifiedText.LineCount := FEditor.TextView.Count;
+end;
+
+function TSimbaScriptTab.CheckIsModified: Boolean;
+begin
+  Result := (FUnmodifiedText.LineCount <> FEditor.TextView.Count) or
+            (FUnmodifiedText.Text <> FEditor.TextView.Text);
 end;
 
 procedure TSimbaScriptTab.LoadDefaultScript;
@@ -370,8 +404,18 @@ procedure TSimbaScriptTab.TextChanged;
 begin
   inherited TextChanged();
 
-  if Assigned(FOutputBox) then
-    FOutputBox.TabTitle := Caption;
+  SimbaEvents.Post(ESimbaEvent.TAB_CAPTION, Self);
+end;
+
+procedure TSimbaScriptTab.VisibleChanged;
+begin
+  inherited VisibleChanged;
+
+  if Visible then
+  begin
+    FPostedCanSave := False;
+    FPostedCantSave := False;
+  end;
 end;
 
 procedure TSimbaScriptTab.Notification(AComponent: TComponent; Operation: TOperation);
@@ -399,12 +443,29 @@ end;
 
 procedure TSimbaScriptTab.DoEditorModified(Sender: TObject);
 begin
-  if ScriptChanged then
-    Caption := '*' + FScriptTitle
-  else
-    Caption := FScriptTitle;
+  if CheckIsModified() then
+  begin
+    if not FPostedCanSave then
+    begin
+      Caption := '*' + FScriptTitle;
 
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_MODIFIED, Self);
+      SimbaEvents.Post(ESimbaEvent.TAB_CAN_SAVE, Self);
+      FPostedCanSave := True;
+      FPostedCantSave := False;
+    end;
+  end else
+  begin
+    if not FPostedCantSave then
+    begin
+      Caption := FScriptTitle;
+
+      SimbaEvents.Post(ESimbaEvent.TAB_CANNOT_SAVE, Self);
+      FPostedCantSave := True;
+      FPostedCanSave := False;
+    end;
+  end;
+
+  SimbaEvents.Post(ESimbaEvent.TAB_MODIFIED, Self);
 end;
 
 procedure TSimbaScriptTab.DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -412,33 +473,9 @@ begin
   FindDeclarationAtCaret();
 end;
 
-procedure TSimbaScriptTab.DoEditorStatusChanges(Sender: TObject; Changes: TSynStatusChanges);
+procedure TSimbaScriptTab.DoEditorCaretMoved(Sender: TObject);
 begin
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_CARETMOVED, Self);
-end;
-
-function TSimbaScriptTab.SaveAsDialog: String;
-begin
-  Result := '';
-
-  with TSaveDialog.Create(Self) do
-  try
-    Filter := 'Simba Files|*.simba;*.pas;*.inc;|Any Files|*.*';
-    Options := Options + [ofOverwritePrompt];
-    InitialDir := ExtractFileDir(FScriptFileName);
-    if (InitialDir = '') then
-      InitialDir := SimbaEnv.ScriptsPath;
-
-    if Execute() then
-    begin
-      if (ExtractFileExt(FileName) = '') then
-        FileName := ChangeFileExt(FileName, '.simba');
-
-      Result := FileName;
-    end;
-  finally
-    Free();
-  end;
+  SimbaEvents.Post(ESimbaEvent.TAB_CARETMOVED, Self);
 end;
 
 function TSimbaScriptTab.Save(FileName: String): Boolean;
@@ -447,8 +484,13 @@ begin
 
   if (FileName = '') then
   begin
-    FileName := SaveAsDialog();
-    if (FileName = '') then
+    FileName := ShowSaveDialog(
+      IfThen(FScriptFileName = '', SimbaEnv.ScriptsPath, TSimbaPath.PathExtractDir(FScriptFileName)),
+      '.simba',
+      'Simba Files|*.simba;*.pas;*.inc;|Any Files|*.*'
+    );
+
+    if (FileName = '') then // dialog was cancelled
       Exit;
   end;
 
@@ -466,15 +508,15 @@ begin
     end;
   end;
 
-  FSavedText := FEditor.Text;
+  UpdateModifiedText();
 
   FScriptFileName := FileName;
   FScriptTitle := TSimbaPath.PathExtractName(FScriptFileName);
   if FScriptTitle.EndsWith('.simba') then
     FScriptTitle := FScriptTitle.Before('.simba');
+  FFileAge := FileAge(FScriptFileName);
 
   Caption := FScriptTitle;
-  UpdateDiskAge();
 end;
 
 function TSimbaScriptTab.Load(FileName: String): Boolean;
@@ -497,39 +539,22 @@ begin
 
   FEditor.ReadOnly := FileIsReadOnly(FileName);
 
-  FSavedText := FEditor.Text;
+  UpdateModifiedText();
 
+  FFileAge := FileAge(FileName);
   FScriptFileName := FileName;
   FScriptTitle := TSimbaPath.PathExtractName(FScriptFileName);
   if FScriptTitle.EndsWith('.simba') then
     FScriptTitle := FScriptTitle.Before('.simba');
 
   Caption := FScriptTitle;
-  UpdateDiskAge();
   if Result then
-    SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_LOADED, Self);
+    SimbaEvents.Post(ESimbaEvent.TAB_LOADED, Self);
 end;
 
-procedure TSimbaScriptTab.Undo;
+function TSimbaScriptTab.CanSave: Boolean;
 begin
-  FEditor.Undo();
-end;
-
-procedure TSimbaScriptTab.Redo;
-begin
-  FEditor.Redo();
-end;
-
-procedure TSimbaScriptTab.GotoLine(Line: Integer);
-begin
-  Editor.CaretX := 1;
-  Editor.CaretY := Line;
-  Editor.TopLine := (Line + 1) - (Editor.LinesInWindow div 2);
-end;
-
-function TSimbaScriptTab.IsActiveTab: Boolean;
-begin
-  Result := TabControl.ActiveTab = Self;
+  Result := CheckIsModified();
 end;
 
 function TSimbaScriptTab.CanClose: Boolean;
@@ -540,7 +565,7 @@ begin
   begin
     Show();
 
-    // Don't close if user doesn't want to focefully stop the script
+    // Don't close if user doesn't want to forcefully stop the script
     if (MessageDlg('Script is still running. Forcefully stop this script?', mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then
     begin
       Result := False;
@@ -551,7 +576,7 @@ begin
       FScriptRunner.Kill();
   end;
 
-  if ScriptChanged then
+  if CanSave() then
   begin
     Show();
 
@@ -567,29 +592,24 @@ begin
   end;
 end;
 
-function TSimbaScriptTab.ScriptStateStr: String;
+function TSimbaScriptTab.RunningState: ESimbaScriptState;
 begin
-  Result := 'Stopped';
-
-  if (FScriptRunner <> nil) then
-    case FScriptRunner.State of
-      ESimbaScriptState.STATE_RUNNING: Result := FormatMilliseconds(FScriptRunner.TimeRunning, 'hh:mm:ss');
-      ESimbaScriptState.STATE_PAUSED:  Result := 'Paused';
-    end;
-end;
-
-function TSimbaScriptTab.ScriptState: ESimbaScriptState;
-begin
-  Result := ESimbaScriptState.STATE_NONE;
+  Result := ESimbaScriptState.NONE;
   if (FScriptRunner <> nil) then
     Result := FScriptRunner.State;
 end;
 
+function TSimbaScriptTab.RunningTime: UInt64;
+begin
+  if (FScriptRunner <> nil) then
+    Result := FScriptRunner.TimeRunning
+  else
+    Result := 0;
+end;
+
 procedure TSimbaScriptTab.Run;
 begin
-  //DebugLn('TSimbaScriptTab.Run :: ' + ScriptTitle + ' ' + ScriptFileName);
-
-  if SimbaTabsForm.CheckForFileChanges() then
+  if QueryReloadOutdated() then
     Exit;
 
   if (FScriptRunner <> nil) then
@@ -609,9 +629,7 @@ end;
 
 procedure TSimbaScriptTab.Compile;
 begin
-  //DebugLn('TSimbaScriptTab.Compile :: ' + ScriptTitle + ' ' + ScriptFileName);
-
-  if SimbaTabsForm.CheckForFileChanges() then
+  if QueryReloadOutdated() then
     Exit;
 
   if (FScriptRunner = nil) then
@@ -626,16 +644,12 @@ end;
 
 procedure TSimbaScriptTab.Pause;
 begin
-  //DebugLn('TSimbaScriptTab.Pause :: ' + ScriptTitle + ' ' + ScriptFileName);
-
   if (FScriptRunner <> nil) then
     FScriptRunner.Pause();
 end;
 
 procedure TSimbaScriptTab.Stop;
 begin
-  //DebugLn('TSimbaScriptTab.Stop :: ' + ScriptTitle + ' ' + ScriptFileName);
-
   if (FScriptRunner <> nil) then
     FScriptRunner.Stop();
 end;
@@ -644,37 +658,28 @@ constructor TSimbaScriptTab.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  Inc(__UID);
-
-  FUID := __UID;
   FScriptTitle := 'Untitled';
   FScriptFileName := '';
 
   FEditor := TSimbaEditor.Create(Self, [seoColors, seoKeybindings]);
   FEditor.Parent := Self;
   FEditor.Align := alClient;
-  FEditor.RegisterStatusChangedHandler(@DoEditorStatusChanges, [scCaretX, scCaretY, scModified]);
   FEditor.OnClickLink := @DoEditorLinkClick;
   FEditor.OnModified := @DoEditorModified;
   FEditor.OnGetFileName := @DoEditorGetFileName;
+  FEditor.RegisterCaretMoveHandler(@DoEditorCaretMoved);
   FEditor.PopupMenu := TSimbaTabPopupMenu.Create(Self);
 
-  FOutputBox := SimbaOutputForm.AddScriptOutput('Untitled');
-  FOutputBox.TabImageIndex := IMG_STOP;
-
   LoadDefaultScript();
+  UpdateModifiedText();
 
-  FSavedText := FEditor.Text;
-
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_ADD, Self);
+  SimbaEvents.Post(ESimbaEvent.TAB_ADD, Self);
 end;
 
 destructor TSimbaScriptTab.Destroy;
 begin
   Application.RemoveAsyncCalls(Self);
-  SimbaIDEEvents.Notify(SimbaIDEEvent.TAB_CLOSED, Self);
-  if Assigned(SimbaOutputForm) then
-    SimbaOutputForm.RemoveTab(FOutputBox);
+  SimbaEvents.Post(ESimbaEvent.TAB_CLOSED, Self);
 
   inherited Destroy();
 end;

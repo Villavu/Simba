@@ -1,17 +1,17 @@
 object SimbaAboutForm: TSimbaAboutForm
   Left = 1162
-  Height = 646
+  Height = 1034
   Top = 607
-  Width = 788
+  Width = 1261
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'About'
-  ClientHeight = 646
-  ClientWidth = 788
-  DesignTimePPI = 120
-  OnCreate = FormCreate
+  ClientHeight = 1034
+  ClientWidth = 1261
+  DesignTimePPI = 192
   Position = poScreenCenter
-  LCLVersion = '3.4.0.0'
+  LCLVersion = '4.0.0.4'
+  OnCreate = FormCreate
   object AboutMemo: TMemo
     AnchorSideTop.Control = VersionLabel
     AnchorSideTop.Side = asrBottom
@@ -24,10 +24,10 @@ object SimbaAboutForm: TSimbaAboutForm
     Width = 768
     Align = alCustom
     Anchors = [akTop, akLeft, akRight, akBottom]
-    BorderSpacing.Left = 12
-    BorderSpacing.Top = 12
-    BorderSpacing.Right = 12
-    BorderSpacing.Bottom = 12
+    BorderSpacing.Left = 19
+    BorderSpacing.Top = 19
+    BorderSpacing.Right = 19
+    BorderSpacing.Bottom = 19
     ParentFont = False
     ReadOnly = True
     TabOrder = 0
@@ -40,15 +40,15 @@ object SimbaAboutForm: TSimbaAboutForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 190
+    Left = 304
     Height = 30
     Top = 604
     Width = 586
     Anchors = [akLeft, akRight, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 12
-    BorderSpacing.Right = 12
-    BorderSpacing.Bottom = 12
+    BorderSpacing.Left = 19
+    BorderSpacing.Right = 19
+    BorderSpacing.Bottom = 19
     Caption = 'Exit'
     ModalResult = 1
     ParentFont = False
@@ -58,14 +58,14 @@ object SimbaAboutForm: TSimbaAboutForm
   object LabelTitle: TLabel
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
-    Left = 12
+    Left = 19
     Height = 41
-    Top = 6
+    Top = 10
     Width = 82
-    BorderSpacing.Left = 12
-    BorderSpacing.Top = 6
+    BorderSpacing.Left = 19
+    BorderSpacing.Top = 10
     Caption = 'Simba'
-    Font.Height = -30
+    Font.Height = -48
     ParentColor = False
     ParentFont = False
   end
@@ -74,14 +74,14 @@ object SimbaAboutForm: TSimbaAboutForm
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 12
+    Left = 19
     Height = 64
     Top = 570
     Width = 166
     Anchors = [akLeft, akBottom]
     AutoSize = True
-    BorderSpacing.Left = 12
-    BorderSpacing.Bottom = 12
+    BorderSpacing.Left = 19
+    BorderSpacing.Bottom = 19
     Picture.Data = {
       0A544A706567496D616765FA2C0000FFD8FFE000104A46494600010101012C01
       2C0000FFE1057A4578696600004D4D002A000000080007011200030000000100
@@ -450,12 +450,12 @@ object SimbaAboutForm: TSimbaAboutForm
     AnchorSideLeft.Control = LabelTitle
     AnchorSideTop.Control = LabelTitle
     AnchorSideTop.Side = asrBottom
-    Left = 12
+    Left = 19
     Height = 1
-    Top = 47
+    Top = 75
     Width = 1
     Font.Color = clNavy
-    Font.Height = -14
+    Font.Height = -22
     ParentColor = False
     ParentFont = False
     OnClick = VersionLabelClick

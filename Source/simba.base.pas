@@ -193,7 +193,7 @@ type
   );
 
   ESimbaProcessType = (UNKNOWN, IDE, SCRIPT, SCRIPT_WITH_COMMUNICATION);
-  ESimbaScriptState = (STATE_PAUSED, STATE_STOP, STATE_RUNNING, STATE_NONE);
+  ESimbaScriptState = (NONE, STOP, RUNNING, PAUSED);
 
   ESimbaCommunicationMessage = (
     SIMBA_TITLE, SIMBA_PID, SIMBA_TARGET_PID, SIMBA_TARGET_WINDOW,
@@ -276,25 +276,25 @@ type
   PBox = ^TBox;
   PBoxArray = ^TBoxArray;
 
-{$PUSH}
-{$SCOPEDENUMS ON}
+const
+  // #0#0 + Typ + 8-char Hex String
+  DEBUG_COLOR_PREFIX = #0#0#1;
+  DEBUG_RED          = #0#0#1'000000FF';
+  DEBUG_YELLOW       = #0#0#1'0000FFFF';
+  DEBUG_GREEN        = #0#0#1'0000FF00';
+  DEBUG_RESET        = #0#0#2'00000000';
+  DEBUG_CLEAR        = #0#0#3'00000000';
+  DEBUG_FOCUS        = #0#0#4'00000000';
+
+procedure Debug(Msg: String); overload;
+procedure Debug(Msg: String; Args: array of const); overload;
+procedure DebugLn(Msg: String); overload;
+procedure DebugLn(Msg: String; Args: array of const); overload;
+
 type
-  EDebugLn = (CLEAR, YELLOW, RED, GREEN, FOCUS);
-  EDebugLnFlags = set of EDebugLn;
-{$POP}
+  TDebugRedirectMethod = procedure(const S: String) of object;
 
-var
-  OnDebugLn: procedure(const S: String) of object = nil;
-
-procedure Debug(const Msg: String); overload;
-procedure Debug(const Msg: String; Args: array of const); overload;
-procedure DebugLn(const Msg: String); overload;
-procedure DebugLn(const Msg: String; Args: array of const); overload;
-procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String); overload;
-procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String; Args: array of const); overload;
-
-function FlagsToString(const Flags: EDebugLnFlags): String;
-function FlagsFromString(var Str: String): EDebugLnFlags;
+procedure SetDebugRedirects(DebugRedirect, DebugLnRedirect: TDebugRedirectMethod);
 
 function InRange(const AValue, AMin, AMax: Integer): Boolean; inline; overload;
 function InRange(const AValue, AMin, AMax: Int64): Boolean; inline; overload;
@@ -362,62 +362,111 @@ procedure SimbaException(Message: String); overload;
 // Writable const
 const
   SimbaProcessType: ESimbaProcessType = ESimbaProcessType.UNKNOWN;
+  SimbaOutputControlCodes: Boolean = True;
 
 implementation
 
 uses
   Math, TypInfo, Variants;
 
+var
+  DebugRedirectMethod: TDebugRedirectMethod;
+  DebugLnRedirectMethod: TDebugRedirectMethod;
+
 generic function EnumToString<_T>(Param: _T): String;
 begin
   Result := GetEnumName(TypeInfo(_T), UInt32(Param));
 end;
 
-procedure Debug(const Msg: String);
+function StripControlCodes(const S: string): string;
+type
+  TControlCode = packed record
+    Sig: array[0..1] of Char;
+    Typ: UInt8;
+    Data: array[0..7] of Char;
+  end;
+var
+  ReadIdx, WriteIdx, Len, ChunkStart: Integer;
 begin
-  if Assigned(OnDebugLn) then
+  if (Length(S) < SizeOf(TControlCode)) or (Pos(#0#0, S) = 0) then
+    Exit(S);
+
+  Len := Length(S);
+  SetLength(Result, Len);
+  WriteIdx := 1;
+  ReadIdx := 1;
+  ChunkStart := 1;
+
+  while ReadIdx <= Len - (SizeOf(TControlCode) - 1) do
   begin
-    OnDebugLn(Msg);
-    Exit;
+    if (S[ReadIdx] = #0) and (S[ReadIdx + 1] = #0) then
+    begin
+      if (ReadIdx > ChunkStart) then
+      begin
+        Move(S[ChunkStart], Result[WriteIdx], (ReadIdx - ChunkStart));
+        Inc(WriteIdx, ReadIdx - ChunkStart);
+      end;
+      Inc(ReadIdx, SizeOf(TControlCode));
+      ChunkStart := ReadIdx;
+    end
+    else
+      Inc(ReadIdx);
   end;
 
-  {$I-}
-  Write(Msg);
-  {$I+}
+  if ChunkStart <= Len then
+  begin
+    Move(S[ChunkStart], Result[WriteIdx], (Len - ChunkStart + 1));
+    Inc(WriteIdx, Len - ChunkStart + 1);
+  end;
+
+  SetLength(Result, WriteIdx - 1);
 end;
 
-procedure Debug(const Msg: String; Args: array of const);
+procedure SetDebugRedirects(DebugRedirect, DebugLnRedirect: TDebugRedirectMethod);
+begin
+  DebugRedirectMethod := DebugRedirect;
+  DebugLnRedirectMethod := DebugLnRedirect;
+end;
+
+procedure Debug(Msg: String);
+begin
+  if not SimbaOutputControlCodes then
+    Msg := StripControlCodes(Msg);
+
+  if Assigned(DebugRedirectMethod) then
+    DebugRedirectMethod(Msg)
+  else
+  begin
+    {$I-}
+    Write(Msg);
+    {$I+}
+  end;
+end;
+
+procedure Debug(Msg: String; Args: array of const);
 begin
   Debug(Format(Msg, Args));
 end;
 
-procedure DebugLn(const Msg: String);
+procedure DebugLn(Msg: String);
 begin
-  if Assigned(OnDebugLn) then
-  begin
-    OnDebugLn(Msg);
-    Exit;
-  end;
+  if not SimbaOutputControlCodes then
+    Msg := StripControlCodes(Msg);
 
-  {$I-}
-  WriteLn(Msg);
-  Flush(Output);
-  {$I+}
+  if Assigned(DebugLnRedirectMethod) then
+    DebugLnRedirectMethod(Msg)
+  else
+  begin
+    {$I-}
+    WriteLn(Msg);
+    Flush(Output);
+    {$I+}
+  end;
 end;
 
-procedure DebugLn(const Msg: String; Args: array of const);
+procedure DebugLn(Msg: String; Args: array of const);
 begin
   DebugLn(Format(Msg, Args));
-end;
-
-procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String);
-begin
-  DebugLn(FlagsToString(Flags) + Msg);
-end;
-
-procedure DebugLn(const Flags: EDebugLnFlags; const Msg: String; Args: array of const);
-begin
-  DebugLn(FlagsToString(Flags) + Format(Msg, Args));
 end;
 
 procedure SimbaException(Message: String; Args: array of const);
@@ -428,50 +477,6 @@ end;
 procedure SimbaException(Message: String);
 begin
   raise ESimbaException.Create(Message);
-end;
-
-const
-  DebugLnFlagsHeader       = String(#0#0);
-  DebugLnFlagsHeaderLength = Length(DebugLnFlagsHeader) + 6;
-
-function FlagsToString(const Flags: EDebugLnFlags): String; inline;
-begin
-  Result := DebugLnFlagsHeader + IntToHex(Integer(Flags), 6);
-end;
-
-function FlagsFromString(var Str: String): EDebugLnFlags;
-
-  function HexToInt(P: PChar): Integer; inline;
-  var
-    N, I: Integer;
-    Val: Char;
-  begin
-    Result := 0;
-
-    for I := 1 to 6 do
-    begin
-      Val := P^;
-      case Val of
-        '0'..'9': N := Ord(Val) - (Ord('0'));
-        'a'..'f': N := Ord(Val) - (Ord('a') - 10);
-        'A'..'F': N := Ord(Val) - (Ord('A') - 10);
-        else
-          Exit(0);
-      end;
-      Inc(P);
-
-      Result := Result*16+N;
-    end;
-  end;
-
-begin
-  if (Length(Str) >= DebugLnFlagsHeaderLength) and (Str[1] = DebugLnFlagsHeader[1]) and (Str[2] = DebugLnFlagsHeader[2]) then
-  begin
-    Result := EDebugLnFlags(HexToInt(@Str[3]));
-
-    Delete(Str, 1, DebugLnFlagsHeaderLength);
-  end else
-    Result := [];
 end;
 
 function InRange(const AValue, AMin, AMax: Integer): Boolean;

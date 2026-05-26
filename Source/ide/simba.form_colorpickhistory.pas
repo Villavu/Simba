@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Menus,
-  simba.base, simba.component_treeview, simba.component_buttonpanel;
+  simba.base, simba.component_treeview, simba.component_buttonpanel, simba.ide_events;
 
 type
   TSimbaColorPickHistoryForm = class(TForm)
@@ -37,6 +37,7 @@ type
     FColorList: TSimbaTreeView;
     FButtonPanel: TSimbaButtonPanel;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoKeyDelete(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoKeyCopy(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoPickColorClick(Sender: TObject);
@@ -45,8 +46,6 @@ type
     procedure Add(APoint: TPoint; AColor: TColor; ExpandAndScroll: Boolean = False);
     procedure LoadColors;
     procedure SaveColors;
-
-    procedure MakeVisible;
   end;
 
 var
@@ -55,8 +54,8 @@ var
 implementation
 
 uses
-  Clipbrd, LCLType,
-  simba.ide_maintoolbar, simba.dialog,
+  Clipbrd, LCLType, AnchorDocking,
+  simba.dialog,
   simba.colormath, simba.component_theme, simba.settings, simba.vartype_string,
   simba.ide_dockinghelpers;
 
@@ -104,11 +103,33 @@ begin
   end;
 
   LoadColors();
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.COLOR_PICKED,ESimbaEvent.ACTION_VIEW_COLORHISTORY]);
 end;
 
 procedure TSimbaColorPickHistoryForm.FormDestroy(Sender: TObject);
 begin
   SaveColors();
+end;
+
+procedure TSimbaColorPickHistoryForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoColorPicked(Picked: TSimbaEvents.TColorPicked);
+  begin
+    Add(Picked.Point, Picked.Color, True);
+    DockMaster.Show(Self);
+  end;
+
+  procedure DoViewColorHistory(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.COLOR_PICKED:             DoColorPicked(TSimbaEvents.TColorPicked(Data^));
+    ESimbaEvent.ACTION_VIEW_COLORHISTORY: DoViewColorHistory(TMenuItem(Data));
+  end;
 end;
 
 procedure TSimbaColorPickHistoryForm.DoKeyDelete(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -190,7 +211,7 @@ end;
 
 procedure TSimbaColorPickHistoryForm.DoPickColorClick(Sender: TObject);
 begin
-  SimbaMainToolBar.ButtonColorPicker.Click();
+  SimbaEvents.Post(ESimbaEvent.ACTION_PICKCOLOR, nil);
 end;
 
 procedure TSimbaColorPickHistoryForm.DoPaintNode(ACanvas: TCanvas; Node: TTreeNode);
@@ -203,7 +224,7 @@ begin
 
   BaseRect := Node.DisplayRect(True);
 
-  ColorRect := baseRect;
+  ColorRect := BaseRect;
   ColorRect.Top += 5;
   ColorRect.Bottom -= 5;
   ColorRect.Left += 5;
@@ -289,12 +310,6 @@ begin
   SimbaSettings.General.ColorPickerHistory.Value := Stream.DataString;
 
   Stream.Free();
-end;
-
-procedure TSimbaColorPickHistoryForm.MakeVisible;
-begin
-  if (HostDockSite is TSimbaAnchorDockHostSite) then
-    TSimbaAnchorDockHostSite(HostDockSite).MakeVisible();
 end;
 
 {$R *.lfm}

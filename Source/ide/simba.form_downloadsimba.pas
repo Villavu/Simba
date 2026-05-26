@@ -16,6 +16,7 @@ interface
 uses
   Classes, SysUtils, Forms, ComCtrls, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls, Zipper, syncobjs,
   simba.base,
+  simba.ide_events,
   simba.httpclient,
   simba.component_treeview,
   simba.component_buttonpanel,
@@ -83,6 +84,7 @@ type
     FTreeView: TSimbaTreeView;
     FStatusLabel: TLabel;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoGetNodeColor(Node: TTreeNode; var TheColor: TColor);
     procedure DoTreeDoubleClick(Sender: TObject);
     procedure DoCheckClick(Sender: TObject);
@@ -98,8 +100,9 @@ implementation
 
 uses
   ATCanvasPrimitives,
+  simba.image,
   simba.component_theme,
-  simba.form_main,
+  simba.component_images,
   simba.vartype_string,
   simba.fs,
   simba.nativeinterface;
@@ -220,7 +223,7 @@ begin
   FTreeView.Align := alClient;
   FTreeView.FilterVisible := False;
   FTreeView.OnDoubleClick := @DoTreeDoubleClick;
-  FTreeView.Images := SimbaMainForm.Images;
+  FTreeView.Images := SimbaImages;
   if (SIMBA_COMMIT <> '') then
     {%H-}FTreeView.OnGetNodeColor := @DoGetNodeColor;
 
@@ -245,6 +248,8 @@ begin
   Label6.Font.Color := $FFE385;
 
   Notebook1.PageIndex := 0;
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_DOWNLOAD_SIMBA]);
 end;
 
 procedure TSimbaDownloadSimbaForm.DoGetNodeColor(Node: TTreeNode; var TheColor: TColor);
@@ -271,6 +276,19 @@ end;
 procedure TSimbaDownloadSimbaForm.Label6MouseLeave(Sender: TObject);
 begin
   TLabel(Sender).Font.Underline := False;
+end;
+
+procedure TSimbaDownloadSimbaForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoViewDownloadSimba;
+  begin
+    ShowOnTop();
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.ACTION_DOWNLOAD_SIMBA: DoViewDownloadSimba();
+  end;
 end;
 
 procedure TSimbaDownloadSimbaForm.DoTreeDoubleClick(Sender: TObject);
@@ -344,7 +362,7 @@ procedure TSimbaDownloadSimbaForm.DoPopulated(Sender: TObject);
 
   function AddDownloadNode(ParentNode: TTreeNode; Download, Commit: String): TDownloaderFormNode;
   begin
-    Result := TDownloaderFormNode(FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Download).Replace('%20', ' '), IMG_SIMBA));
+    Result := TDownloaderFormNode(FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Download).Replace('%20', ' '), SimbaImages.SIMBA));
     Result.DownloadURL := 'https://github.com/Villavu/Simba-Build-Archive/blob/main' + Download;
     Result.Commit := Commit;
   end;

@@ -15,6 +15,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
   SynEditMiscClasses, SynEditSearch, SynEditMouseCmds,
   simba.base,
+  simba.ide_events,
   simba.component_synedit,
   simba.component_button,
   simba.component_edit,
@@ -83,6 +84,8 @@ type
   private
     Tab: TFindInFilesTab;
     ButtonPanel: TSimbaButtonPanel;
+
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   end;
 
 var
@@ -93,11 +96,14 @@ implementation
 {$R *.lfm}
 
 uses
+  Menus,
+  AnchorDocking,
+  simba.ide_dockinghelpers,
+  simba.ide_controller,
   simba.threading,
   simba.component_theme,
   simba.fs,
-  simba.settings,
-  simba.form_tabs;
+  simba.settings;
 
 procedure TResultsMemo.AddFileLine(FileName: String);
 var
@@ -143,9 +149,12 @@ var
   Line: Integer;
 begin
   Line := PixelsToRowColumn(TPoint.Create(X, Y)).Y;
-
-  if Assigned(LineInfo[Line - 1]) and SimbaTabsForm.Open(LineInfo[Line - 1].FileName) then
-    SimbaTabsForm.CurrentTab.GotoLine(LineInfo[Line - 1].Line);
+  if Assigned(LineInfo[Line - 1]) then
+    SimbaController.OpenInTab(
+      LineInfo[Line - 1].FileName,
+      1,
+      LineInfo[Line - 1].Line
+    );
 end;
 
 function TResultsMemo.GetLineInfo(Line: Integer): TLineInfo;
@@ -410,7 +419,7 @@ var
 begin
   for Line := 0 to FMemoResults.Lines.Count - 1 do
     if Assigned(FMemoResults.LineInfo[Line]) and FMemoResults.LineInfo[Line].isFile then
-      SimbaTabsForm.Open(FMemoResults.LineInfo[Line].FileName);
+      SimbaController.OpenInTab(FMemoResults.LineInfo[Line].FileName);
 end;
 
 procedure TSimbaFindInFilesForm.FormCreate(Sender: TObject);
@@ -437,6 +446,8 @@ begin
   Tab.FCheckboxOptions.Checked[0] := SimbaSettings.General.FindInFilesSubDirs.Value;
   Tab.FCheckboxOptions.Checked[1] := SimbaSettings.General.FindInFilesCaseSens.Value;
   Tab.FCheckboxOptions.Checked[2] := SimbaSettings.General.FindInFilesWholeWords.Value;
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_FIND_IN_FILES]);
 end;
 
 procedure TSimbaFindInFilesForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -451,6 +462,14 @@ begin
     SimbaSettings.General.FindInFilesSubDirs.Value    := FCheckboxOptions.Checked[0];
     SimbaSettings.General.FindInFilesCaseSens.Value   := FCheckboxOptions.Checked[1];
     SimbaSettings.General.FindInFilesWholeWords.Value := FCheckboxOptions.Checked[2];
+  end;
+end;
+
+procedure TSimbaFindInFilesForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.ACTION_FIND_IN_FILES:
+      DockMaster.Show(Self);
   end;
 end;
 

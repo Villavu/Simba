@@ -31,8 +31,8 @@ uses
   simba.env,
   simba.component_theme,
   simba.component_buttonpanel,
-  simba.form_main,
-  simba.form_tabs;
+  simba.component_images,
+  simba.form_scripttabs;
 
 type
   TShowDeclarationForm = class
@@ -62,11 +62,11 @@ var
 begin
   FListBox.DoDefaultDrawItem(C, AIndex, ARect);
 
-  NIndentTop := (FListBox.ItemHeight - SimbaMainForm.Images.Height) div 2;
+  NIndentTop := (FListBox.ItemHeight - SimbaImages.Height) div 2;
   NIndentLeft := ARect.Left - FListBox.ScrollHorz;
-  NIndentLeft := NIndentLeft + (FListBox.ColumnWidth[0] - SimbaMainForm.Images.Width) div 2;
+  NIndentLeft := NIndentLeft + (FListBox.ColumnWidth[0] - SimbaImages.Width) div 2;
 
-  SimbaMainForm.Images.Draw(C, NIndentLeft, ARect.Top + NIndentTop, DeclarationImage(FDecls[AIndex]));
+  //SimbaImages.Draw(C, NIndentLeft, ARect.Top + NIndentTop, DeclarationImage(FDecls[AIndex]));
 end;
 
 constructor TShowDeclarationForm.Create(Decls: TDeclarationArray);
@@ -138,7 +138,7 @@ begin
   InitItems();
 
   Cols := [
-    SimbaMainForm.Images.Width + FListBox.IndentLeft * 2,
+    SimbaImages.Width + FListBox.IndentLeft * 2,
     MaxHeaderWidth             + FListBox.IndentLeft * 4,
     MaxLineLength              + FListBox.IndentLeft * 4,
     MaxFileWidth               + FListBox.IndentLeft * 4
@@ -219,9 +219,9 @@ end;
 procedure ShowDeclaration(StartPos, EndPos, Line: Integer; FileName: String);
 begin
   if FileExists(FileName) then
-    SimbaTabsForm.Open(FileName);
+    SimbaScriptTabsForm.Open(FileName);
 
-  with SimbaTabsForm.CurrentEditor do
+  with SimbaScriptTabsForm.ActiveTab.Editor do
   begin
     SelStart := StartPos;
     SelEnd := EndPos;
@@ -235,8 +235,9 @@ procedure ShowDeclaration(Declaration: TDeclaration);
 begin
   if (Declaration.Parser.SourceType = EParserSourceType.PLUGIN) then
   begin
-    DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [Declaration.DocPos.FileName]);
-    DebugLn([EDebugLn.FOCUS], Declaration.Header);
+    DebugLn('Declared internally in plugin: ' + Declaration.DocPos.FileName);
+    DebugLn(Declaration.Header);
+    DebugLn(DEBUG_FOCUS);
 
     Exit;
   end;
@@ -244,9 +245,9 @@ begin
   if (Declaration.DocPos.FileName = '') or FileExists(Declaration.DocPos.FileName) then
   begin
     if FileExists(Declaration.DocPos.FileName) then
-      SimbaTabsForm.Open(Declaration.DocPos.FileName);
+      SimbaScriptTabsForm.Open(Declaration.DocPos.FileName);
 
-    with SimbaTabsForm.CurrentEditor do
+    with SimbaScriptTabsForm.ActiveTab.Editor do
     begin
       SelStart := Declaration.StartPos;
       SelEnd := Declaration.EndPos;
@@ -258,8 +259,9 @@ begin
     Exit;
   end;
 
-  DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [Declaration.DocPos.FileName]);
-  DebugLn([EDebugLn.FOCUS], Declaration.Header);
+  DebugLn('Declared internally in Simba: %s', [Declaration.DocPos.FileName]);
+  DebugLn(Declaration.Header);
+  DebugLn(DEBUG_FOCUS);
 end;
 
 procedure ShowSimbaDeclaration(Header: String; FileName: String);
@@ -267,8 +269,9 @@ begin
   if (Header = '') then
     Exit;
 
-  DebugLn([EDebugLn.FOCUS], 'Declared internally in Simba: %s', [FileName]);
-  DebugLn([EDebugLn.FOCUS], 'Declaration: %s', [Header]);
+  DebugLn('Declared internally in Simba: %s', [FileName]);
+  DebugLn('Declaration: %s', [Header]);
+  DebugLn(DEBUG_FOCUS);
 end;
 
 procedure ShowPluginDeclaration(Header: String; FileName: String);
@@ -276,8 +279,9 @@ begin
   if (Header = '') then
     Exit;
 
-  DebugLn([EDebugLn.FOCUS], 'Declared internally in plugin: %s', [FileName]);
-  DebugLn([EDebugLn.FOCUS], 'Declaration: %s', [Header]);
+  DebugLn('Declared internally in plugin: %s', [FileName]);
+  DebugLn('Declaration: %s', [Header]);
+  DebugLn(DEBUG_FOCUS);
 end;
 
 end.

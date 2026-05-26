@@ -11,7 +11,10 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls, Zipper,
-  simba.ide_editor, simba.component_treeview, simba.component_buttonpanel;
+  simba.ide_editor,
+  simba.ide_events,
+  simba.component_treeview,
+  simba.component_buttonpanel;
 
 type
   TBackups = record
@@ -51,8 +54,7 @@ type
     procedure DoBackupsLoaded(Sender: TObject);
     procedure DoLoadBackups;
 
-    procedure DoFormDocked(Sender: TObject);
-    procedure DoFormUndocked(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
     procedure Activate; override;
     procedure Fill;
@@ -69,9 +71,14 @@ implementation
 {$R *.lfm}
 
 uses
-  AnchorDocking,
+  AnchorDocking, Menus,
+  simba.ide_dockinghelpers,
+  simba.ide_controller,
   simba.component_button,
-  simba.env, simba.fs, simba.component_theme, simba.ide_events, simba.form_main, simba.form_tabs;
+  simba.env,
+  simba.fs,
+  simba.component_theme,
+  simba.component_images;
 
 type
   TBackupNode = class(TTreeNode)
@@ -120,7 +127,7 @@ end;
 procedure TSimbaBackupsForm.DoButtonOkClick(Sender: TObject);
 begin
   if Editor.Visible then
-    SimbaTabsForm.AddTab().Editor.Text := Editor.Text;
+    SimbaController.NewTab(Editor.Text);
 end;
 
 procedure TSimbaBackupsForm.DoCreateStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
@@ -148,9 +155,9 @@ begin
 
   for I := 0 to High(FBackups) do
   begin
-    CurrentNode := TreeView.AddNode(FBackups[I].FileName, IMG_FOLDER);
+    CurrentNode := TreeView.AddNode(FBackups[I].FileName, SimbaImages.FOLDER);
     for J := 0 to High(FBackups[I].Files) do
-      with TreeView.AddNode(CurrentNode, FBackups[I].Files[J].Time, IMG_FILE) as TBackupNode do
+      with TreeView.AddNode(CurrentNode, FBackups[I].Files[J].Time, SimbaImages.FOLDER) as TBackupNode do
         Contents := FBackups[I].Files[J].Contents;
   end;
 end;
@@ -183,21 +190,28 @@ begin
   UnZipper.Free();
 end;
 
-procedure TSimbaBackupsForm.DoFormDocked(Sender: TObject);
-begin
-  if (Sender = HostDockSite) then
+procedure TSimbaBackupsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoDockOrUnDock;
   begin
-    ButtonPanel.ButtonCancel.Visible := False;
+    if (TObject(Data) <> HostDockSite) then
+      Exit;
+
+    ButtonPanel.ButtonCancel.Visible := (Event = ESimbaEvent.FORM_UNDOCK);
     Fill();
   end;
-end;
 
-procedure TSimbaBackupsForm.DoFormUndocked(Sender: TObject);
-begin
-  if (Sender = HostDockSite) then
+  procedure DoViewBackups();
   begin
-    ButtonPanel.ButtonCancel.Visible := True;
-    Fill();
+    DockMaster.Show(Self);
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.FORM_DOCK,
+    ESimbaEvent.FORM_UNDOCK:        DoDockOrUnDock();
+    ESimbaEvent.ACTION_OPEN_BACKUP,
+    ESimbaEvent.ACTION_VIEW_BACKUP: DoViewBackups();
   end;
 end;
 
@@ -236,7 +250,7 @@ begin
   TreeView.OnDoubleClick := @DoButtonOkClick;
   TreeView.FilterOnlyTopLevel := True;
   TreeView.FilterCollapseOnClear := True;
-  TreeView.Images := SimbaMainForm.Images;
+  TreeView.Images := SimbaImages;
 
   RightPanel.Color := SimbaComponentTheme.ColorBackground;
   RightPanel.Font.Color := SimbaComponentTheme.ColorFont;
@@ -252,8 +266,12 @@ begin
   Splitter.OnEnter := @DoSplitterEnterExit;
   Splitter.OnExit := @DoSplitterEnterExit;
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.FORM_DOCK, @DoFormDocked);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.FORM_UNDOCK, @DoFormUndocked);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [
+    ESimbaEvent.FORM_DOCK,
+    ESimbaEvent.FORM_UNDOCK,
+    ESimbaEvent.ACTION_OPEN_BACKUP,
+    ESimbaEvent.ACTION_VIEW_BACKUP
+  ]);
 end;
 
 procedure TSimbaBackupsForm.FormShow(Sender: TObject);

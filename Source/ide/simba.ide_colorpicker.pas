@@ -16,7 +16,7 @@ uses
   simba.component_imageboxzoom;
 
 type
-  TSimbaColorPicker = class(TObject)
+  TSimbaColorPicker = class(TComponent)
   private
     FForm: TForm;
     FHint: THintWindow;
@@ -27,15 +27,16 @@ type
     FColor: TColor;
     FWindowSelection: TWindowHandle;
 
+    procedure Pick;
+
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoFormClosed(Sender: TObject; var CloseAction: TCloseAction);
     procedure DoHintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
-    constructor Create;
+    constructor Create; reintroduce;
     destructor Destroy; override;
-
-    procedure Pick;
   end;
 
 var
@@ -53,8 +54,7 @@ uses
   simba.ide_vars,
   simba.vartype_windowhandle,
   simba.vartype_box,
-  simba.component_theme,
-  simba.form_colorpickhistory;
+  simba.component_theme;
 
 type
   TSimbaColorPickerHint = class(THintWindow)
@@ -106,14 +106,27 @@ begin
   Zoom.FrameColor := ColorBlendHalf(SimbaComponentTheme.ColorFrame, SimbaComponentTheme.ColorLine);
 end;
 
+procedure TSimbaColorPicker.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.ACTION_PICKCOLOR:
+      Pick();
+  end;
+end;
+
 procedure TSimbaColorPicker.DoFormClosed(Sender: TObject; var CloseAction: TCloseAction);
+var
+  EventData: TSimbaEvents.TColorPicked;
 begin
   if FPicked then
   begin
-    DebugLn([EDebugLn.FOCUS], 'Color picked: %s at (%d, %d)', [ColorToStr(FColor), FPoint.X, FPoint.Y]);
+    DebugLn('Color picked: %s at (%d, %d)', [ColorToStr(FColor), FPoint.X, FPoint.Y]);
+    DebugLn(DEBUG_FOCUS);
 
-    SimbaColorPickHistoryForm.Add(FPoint, FColor, True);
-    SimbaColorPickHistoryForm.MakeVisible();
+    EventData.Color := FColor;
+    EventData.Point := FPoint;
+
+    SimbaEvents.Post(ESimbaEvent.COLOR_PICKED, @EventData);
   end;
 
   FHint.Close();
@@ -226,9 +239,11 @@ begin
     FreeAndNil(DesktopImage);
 end;
 
-constructor TSimbaColorPicker.Create;
+constructor TSimbaColorPicker.Create();
 begin
-  inherited Create();
+  inherited Create(nil);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_PICKCOLOR]);
 end;
 
 destructor TSimbaColorPicker.Destroy;

@@ -1,23 +1,23 @@
 object SimbaOpenExampleForm: TSimbaOpenExampleForm
   Left = 3781
-  Height = 750
+  Height = 1200
   Top = 374
-  Width = 1125
+  Width = 1800
   Caption = 'Open Example'
-  ClientHeight = 750
-  ClientWidth = 1125
-  Constraints.MinHeight = 300
-  Constraints.MinWidth = 400
-  DesignTimePPI = 120
+  ClientHeight = 1200
+  ClientWidth = 1800
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 640
+  DesignTimePPI = 192
+  Position = poMainFormCenter
+  LCLVersion = '4.0.0.4'
   OnCreate = FormCreate
   OnShow = FormShow
-  Position = poMainFormCenter
-  LCLVersion = '3.6.0.0'
   object LeftPanel: TPanel
     Left = 0
     Height = 750
     Top = 0
-    Width = 213
+    Width = 341
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
@@ -26,7 +26,7 @@ object SimbaOpenExampleForm: TSimbaOpenExampleForm
     Left = 213
     Height = 750
     Top = 0
-    Width = 6
+    Width = 10
     OnPaint = SplitterPaint
   end
   object RightPanel: TPanel

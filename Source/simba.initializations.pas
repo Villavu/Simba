@@ -139,11 +139,15 @@ type
 
 procedure TApplicationHelper.CallDestroy(Sender: TObject);
 begin
-  SimbaInitialization_Call(ESimbaInit.DESTROY);
+  if (SimbaProcessType = ESimbaProcessType.IDE) then
+    SimbaInitialization_Call(ESimbaInit.IDE_DESTROY);
 end;
 
 initialization
   Application.OnDestroy := @Application.CallDestroy;
+
+finalization
+  SimbaInitialization_Call(ESimbaInit.DESTROY);
 
 end.
 

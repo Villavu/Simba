@@ -12,12 +12,15 @@ interface
 
 uses
   classes, sysutils, fileutil, forms, controls, graphics, dialogs,
-  stdctrls, extctrls;
+  stdctrls, extctrls,
+  simba.base,
+  simba.ide_events;
 
 type
   TSimbaAboutForm = class(TForm)
   protected
     procedure DoFirstShow; override;
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   published
     AboutMemo: TMemo;
     ButtonExit: TButton;
@@ -67,6 +70,12 @@ begin
   end;
 end;
 
+procedure TSimbaAboutForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  if (Event = ESimbaEvent.ACTION_ABOUT) then
+    ShowModal();
+end;
+
 procedure TSimbaAboutForm.ButtonExitClick(Sender: TObject);
 begin
   Close();
@@ -76,6 +85,8 @@ procedure TSimbaAboutForm.FormCreate(Sender: TObject);
 begin
   Width := Scale96ToScreen(550);
   Height := Scale96ToScreen(450);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_ABOUT]);
 end;
 
 procedure TSimbaAboutForm.VersionLabelClick(Sender: TObject);

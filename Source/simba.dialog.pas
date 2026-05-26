@@ -31,6 +31,9 @@ type
   procedure ShowErrorDialog(Title: String; Err: String; Args: array of const); overload;
   procedure ShowErrorDialog(Title: String; Err: TStringArray; Args: array of const); overload;
 
+  // Not custom drawn, just wraps TSaveDialog
+  function ShowSaveDialog(InitialDir, DefaultExt, Filter: String): String;
+
 implementation
 
 uses
@@ -39,6 +42,7 @@ uses
   StdCtrls,
   ExtCtrls,
   DialogRes,
+  Dialogs,
   LCLType,
   simba.component_theme,
   simba.component_button;
@@ -203,6 +207,25 @@ end;
 procedure ShowErrorDialog(Title: String; Err: TStringArray; Args: array of const);
 begin
   ShowErrorDialog(Title, ''.Join(LineEnding, Err), Args);
+end;
+
+function ShowSaveDialog(InitialDir: String; DefaultExt: String; Filter: String): String;
+var
+  Dialog: TSaveDialog;
+begin
+  Result := '';
+
+  Dialog := TSaveDialog.Create(nil);
+  Dialog.Filter := Filter;
+  Dialog.Options := Dialog.Options + [ofOverwritePrompt];
+  Dialog.InitialDir := IfThen(InitialDir = '', Application.Location, InitialDir);
+  if Dialog.Execute() then
+  begin
+    Result := Dialog.FileName;
+    if (DefaultExt <> '') and (ExtractFileExt(Result) = '') then
+      Result := ChangeFileExt(Result, DefaultExt);
+  end;
+  Dialog.Free();
 end;
 
 end.

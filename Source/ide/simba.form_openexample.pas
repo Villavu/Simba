@@ -13,8 +13,11 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ComCtrls, ExtCtrls,
-  simba.base, simba.ide_editor,
-  simba.component_treeview, simba.component_buttonpanel;
+  simba.base,
+  simba.ide_editor,
+  simba.ide_events,
+  simba.component_treeview,
+  simba.component_buttonpanel;
 
 type
   TSimbaOpenExampleForm = class(TForm)
@@ -30,14 +33,12 @@ type
     procedure FormShow(Sender: TObject);
     procedure SplitterPaint(Sender: TObject);
   protected
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoButtonOkClick(Sender: TObject);
     procedure DoSplitterEnterExit(Sender: TObject);
     procedure DoTreeViewSelectionChanged(Sender: TObject);
-
     procedure UpdateTreeSize;
-
     procedure AddSimbaExamples;
-  public
     procedure ClearPackageExamples;
     procedure AddPackageExamples(PackageName: String; Files: TStringArray);
   end;
@@ -51,7 +52,11 @@ implementation
 
 uses
   LCLType, AnchorDocking, simba.vartype_string,
-  simba.form_main, simba.form_tabs, simba.fs, simba.component_theme;
+  simba.component_images,
+  simba.component_theme,
+  simba.fs,
+  simba.ide_controller,
+  simba.ide_package;
 
 function ReadResourceString(ResourceName: String): String;
 begin
@@ -82,7 +87,7 @@ begin
   if (Name.StartsWith('EXAMPLE_')) then
   begin
     Name := Name.After('EXAMPLE_').Replace('-', ' ').Replace('_', ' ').CapitalizeWords();
-    with TExampleNode(SimbaOpenExampleForm.TreeView.AddNode(SimbaOpenExampleForm.SimbaNode, Name, IMG_SIMBA)) do
+    with TExampleNode(SimbaOpenExampleForm.TreeView.AddNode(SimbaOpenExampleForm.SimbaNode, Name, SimbaImages.SIMBA)) do
       Script := ReadResourceString(ResourceName);
   end;
 
@@ -109,13 +114,16 @@ var
   I: Integer;
   Node: TTreeNode;
 begin
+  if (Length(Files) = 0) then
+    Exit;
+
   TreeView.BeginUpdate();
   if Assigned(TreeView.Items.FindTopLvlNode(PackageName)) then
     TreeView.Items.FindTopLvlNode(PackageName).Free();
 
-  Node := TreeView.AddNode(PackageName, IMG_PACKAGE);
+  Node := TreeView.AddNode(PackageName, SimbaImages.PACKAGE);
   for I := 0 to High(Files) do
-    with TExampleNode(TreeView.AddNode(Node, TSimbaPath.PathExtractNameWithoutExt(Files[I]), IMG_SIMBA)) do
+    with TExampleNode(TreeView.AddNode(Node, TSimbaPath.PathExtractNameWithoutExt(Files[I]), SimbaImages.SIMBA)) do
       FileName := Files[I];
 
   TreeView.EndUpdate();
@@ -146,11 +154,34 @@ begin
   end;
 end;
 
+procedure TSimbaOpenExampleForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoShowForm();
+  begin
+    ShowOnTop();
+  end;
+
+  procedure DoPackageExamples(Packages: TSimbaPackageArray);
+  var
+    Package: TSimbaPackage;
+  begin
+    ClearPackageExamples();
+    for Package in Packages do
+      AddPackageExamples(Package.Name, Package.ExampleFiles);
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.ACTION_OPEN_EXAMPLE:      DoShowForm();
+    ESimbaEvent.PACKAGE_INSTALLS_CHANGED: DoPackageExamples(TSimbaPackageArray(Data));
+  end;
+end;
+
 procedure TSimbaOpenExampleForm.DoButtonOkClick(Sender: TObject);
 begin
   if Editor.Visible then
   begin
-    SimbaTabsForm.AddTab().Editor.Text := Editor.Text;
+    SimbaController.NewTab(Editor.Text);
     if (Sender is TTreeView) then
       Close();
   end;
@@ -169,7 +200,7 @@ begin
   TreeView := TSimbaTreeView.Create(Self, TExampleNode);
   TreeView.Parent := LeftPanel;
   TreeView.Align := alClient;
-  TreeView.Images := SimbaMainForm.Images;
+  TreeView.Images := SimbaImages;
   TreeView.OnSelectionChange := @DoTreeViewSelectionChanged;
   TreeView.OnDoubleClick := @DoButtonOkClick;
 
@@ -188,10 +219,12 @@ begin
   ButtonPanel.Parent := Self;
   ButtonPanel.ButtonOk.OnClick := @DoButtonOkClick;
 
-  SimbaNode := TreeView.AddNode('Simba', IMG_PACKAGE);
+  SimbaNode := TreeView.AddNode('Simba', SimbaImages.PACKAGE);
 
   AddSimbaExamples();
   UpdateTreeSize();
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_OPEN_EXAMPLE, ESimbaEvent.PACKAGE_INSTALLS_CHANGED]);
 end;
 
 procedure TSimbaOpenExampleForm.DoTreeViewSelectionChanged(Sender: TObject);

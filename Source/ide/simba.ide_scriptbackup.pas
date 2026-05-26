@@ -20,10 +20,8 @@ type
   TSimbaScriptBackup = class(TComponent)
   protected
     FTimer: TTimer;
-    FFiles: array of record
-      Name: String;
-      Contents: String;
-    end;
+    FTabNames: TStringArray;
+    FTabContents: TStringArray;
 
     procedure DoSettingChanged_BackupEnabled(Setting: TSimbaSetting);
     procedure DoSettingChanged_BackupInterval(Setting: TSimbaSetting);
@@ -34,26 +32,18 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
+var
+  SimbaScriptBackup: TSimbaScriptBackup;
+
 implementation
 
 uses
-  simba.zip, simba.fs, simba.env, simba.initializations, simba.form_tabs, simba.threading, simba.hash;
+  simba.zip, simba.fs, simba.env, simba.initializations, simba.threading, simba.hash,
+  simba.ide_controller;
 
 procedure TSimbaScriptBackup.DoFileCollecting(Sender: TObject);
-var
-  I: Integer;
 begin
-  CheckMainThread('TSimbaScriptBackup');
-
-  SetLength(FFiles, SimbaTabsForm.TabCount);
-  for I := 0 to SimbaTabsForm.TabCount - 1 do
-  begin
-    FFiles[I].Name := SimbaTabsForm.Tabs[I].ScriptTitle;
-    if (FFiles[I].Name = '') then
-      FFiles[I].Name := 'Untitled';
-
-    FFiles[I].Contents := SimbaTabsForm.Tabs[I].Script;
-  end;
+  SimbaController.GetTabContents(FTabNames, FTabContents);
 
   TThread.ExecuteInThread(@DoFileBackuping);
 end;
@@ -62,20 +52,24 @@ procedure TSimbaScriptBackup.DoFileBackuping;
 var
   I: Integer;
   ZipPath: String;
+  TabName, TabContents: String;
 begin
-  for I := 0 to High(FFiles) do
+  for I := 0 to High(FTabContents) do
   try
-    if (FFiles[I].Contents = '') then
+    if (FTabContents[I] = '') then
       Continue;
 
-    ZipPath := TSimbaPath.PathJoin([SimbaEnv.BackupsPath, FFiles[I].Name + '.zip']);
-    if ZipHasEntryCrc(ZipPath, CRC32(@FFiles[I].Contents[1], Length(FFiles[I].Contents))) then
+    TabName := FTabNames[I];
+    TabContents := FTabContents[I];
+
+    ZipPath := TSimbaPath.PathJoin([SimbaEnv.BackupsPath, TabName + '.zip']);
+    if ZipHasEntryCrc(ZipPath, CRC32(@TabContents, Length(TabContents))) then
       Continue;
 
-    if ZipAppend(ZipPath, '', FFiles[I].Contents) then
-      DebugLn('Backed up %s', [FFiles[I].Name])
+    if ZipAppend(ZipPath, '', TabContents) then
+      DebugLn('Backed up %s', [TabName])
     else
-      DebugLn('Failed to backup %s', [FFiles[I].Name]);
+      DebugLn('Failed to backup %s', [TabName]);
   except
     on E: Exception do
       DebugLn('Failed to backup "%s"', [E.Message]);
@@ -105,11 +99,17 @@ end;
 
 procedure DoCreate;
 begin
-  TSimbaScriptBackup.Create(SimbaTabsForm);
+  SimbaScriptBackup := TSimbaScriptBackup.Create(nil);
+end;
+
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaScriptBackup);
 end;
 
 initialization
   SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_SHOW, @DoCreate, 'ScriptBackup');
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'ScriptBackup');
 
 end.
 

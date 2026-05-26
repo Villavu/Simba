@@ -10,7 +10,9 @@ unit simba.ide_editor_popupmenu;
 interface
 
 uses
-  Classes, SysUtils, Controls, Menus, Graphics;
+  Classes, SysUtils, Controls, Menus, Graphics,
+  simba.base,
+  simba.ide_events;
 
 type
   TSimbaTabPopupMenu = class(TPopupMenu)
@@ -21,7 +23,6 @@ type
     FPaste: TMenuItem;
     FCut: TMenuItem;
     FCopy: TMenuItem;
-    FDelete: TMenuItem;
     FCopyFile: TMenuItem;
     FCopyDir: TMenuItem;
     FFind: TMenuItem;
@@ -29,29 +30,12 @@ type
     FDocComment: TMenuItem;
     FSelectAll: TMenuItem;
 
-    procedure DoFindDeclaration(Sender: TObject);
-    procedure DoOpenFileDir(Sender: TObject);
-    procedure DoCopyFileName(Sender: TObject);
-
-    procedure DoUndo(Sender: TObject);
-    procedure DoRedo(Sender: TObject);
-
-    procedure DoCut(Sender: TObject);
-    procedure DoCopy(Sender: TObject);
-    procedure DoPaste(Sender: TObject);
-
-    procedure DoDelete(Sender: TObject);
-    procedure DoSelectAll(Sender: TObject);
-
-    procedure DoFind(Sender: TObject);
-    procedure DoReplace(Sender: TObject);
-    procedure DoDocComment(Sender: TObject);
+    procedure DoClick(Sender: TObject);
 
     procedure DoCodetoolsSymbols(Sender: TObject);
     procedure DoCodetoolsCache(Sender: TObject);
 
     procedure DoPopup(Sender: TObject); override;
-    procedure DoMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
   public
     constructor Create(AOwner: TComponent); override;
   end;
@@ -60,8 +44,9 @@ implementation
 
 uses
   LCLType,
-  simba.base, simba.form_main, simba.ide_editor, simba.nativeinterface,
-  simba.ide_tab, simba.form_tabs, simba.ide_utils, simba.ide_codetools_debug,
+  simba.component_images,
+  simba.ide_editor, simba.nativeinterface,
+  simba.ide_tab, simba.form_scripttabs, simba.ide_utils, simba.ide_codetools_debug,
   simba.ide_editor_commands;
 
 type
@@ -77,90 +62,9 @@ begin
   Result := TSimbaScriptTab(Owner);
 end;
 
-procedure TSimbaTabPopupMenu.DoFindDeclaration(Sender: TObject);
+procedure TSimbaTabPopupMenu.DoClick(Sender: TObject);
 begin
-  ScriptTab.FindDeclarationAtCaret();
-end;
-
-procedure TSimbaTabPopupMenu.DoOpenFileDir(Sender: TObject);
-begin
-  SimbaNativeInterface.OpenDirectory(ExtractFileDir(ScriptTab.ScriptFileName));
-end;
-
-procedure TSimbaTabPopupMenu.DoCopyFileName(Sender: TObject);
-begin
-  ScriptTab.Editor.DoCopyToClipboard(ScriptTab.ScriptFileName);
-end;
-
-procedure TSimbaTabPopupMenu.DoUndo(Sender: TObject);
-begin
-  if ScriptTab.Editor.ReadOnly then
-    Exit;
-
-  ScriptTab.Editor.Undo();
-end;
-
-procedure TSimbaTabPopupMenu.DoRedo(Sender: TObject);
-begin
-  if ScriptTab.Editor.ReadOnly then
-    Exit;
-
-  ScriptTab.Editor.Redo();
-end;
-
-procedure TSimbaTabPopupMenu.DoCut(Sender: TObject);
-begin
-  if ScriptTab.Editor.ReadOnly then
-   Exit;
-
-  ScriptTab.Editor.CutToClipboard();
-end;
-
-procedure TSimbaTabPopupMenu.DoCopy(Sender: TObject);
-begin
-  ScriptTab.Editor.CopyToClipboard();
-end;
-
-procedure TSimbaTabPopupMenu.DoPaste(Sender: TObject);
-begin
-  if ScriptTab.Editor.ReadOnly then
-    Exit;
-
-  ScriptTab.Editor.PasteFromClipboard();
-end;
-
-procedure TSimbaTabPopupMenu.DoDelete(Sender: TObject);
-begin
-  if ScriptTab.Editor.ReadOnly then
-    Exit;
-
-  ScriptTab.Editor.ClearSelection();
-end;
-
-procedure TSimbaTabPopupMenu.DoSelectAll(Sender: TObject);
-begin
-  ScriptTab.Editor.SelectAll();
-end;
-
-procedure TSimbaTabPopupMenu.DoFind(Sender: TObject);
-begin
-  SimbaTabsForm.Find();
-end;
-
-procedure TSimbaTabPopupMenu.DoReplace(Sender: TObject);
-begin
-  if ScriptTab.Editor.ReadOnly then
-    Exit;
-
-  SimbaTabsForm.Replace();
-end;
-
-procedure TSimbaTabPopupMenu.DoDocComment(Sender: TObject);
-begin
-  if ScriptTab.Editor.ReadOnly then
-    Exit;
-
-  ScriptTab.Editor.ExecuteSimpleCommand(ecDocumentation);
+  SimbaEvents.Post(ESimbaEvent(TComponent(Sender).Tag), Owner);
 end;
 
 procedure TSimbaTabPopupMenu.DoCodetoolsSymbols(Sender: TObject);
@@ -175,7 +79,7 @@ end;
 
 procedure TSimbaTabPopupMenu.DoPopup(Sender: TObject);
 begin
-  with ScriptTab.Editor do
+  with TSimbaScriptTab(Owner).Editor do
   begin
     FFindDecl.Caption := IfThen(GetWordAtRowCol(CaretXY) <> '', 'Find Declaration of "' + GetWordAtRowCol(CaretXY) + '"', 'Find Declaration');
     FFindDecl.Enabled := IfThen(GetWordAtRowCol(CaretXY) <> '', True, False);
@@ -185,13 +89,7 @@ begin
     FPaste.Enabled  := CanPaste;
     FCut.Enabled    := SelAvail;
     FCopy.Enabled   := SelAvail;
-    FDelete.Enabled := SelAvail;
   end;
-end;
-
-procedure TSimbaTabPopupMenu.DoMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
-begin
-  MenuItemHeight(Sender as TMenuItem, ACanvas, AHeight);
 end;
 
 constructor TSimbaTabPopupMenu.Create(AOwner: TComponent);
@@ -201,49 +99,49 @@ constructor TSimbaTabPopupMenu.Create(AOwner: TComponent);
     Items.Add(NewLine());
   end;
 
-  function Add(ACaption: String; AImageIndex: Integer; Shortcut: TShortCut; AOnClick: TNotifyEvent): TMenuItem;
+  function Add(ACaption: String; AImageIndex: Integer; Shortcut: TShortCut; Event: ESimbaEvent): TMenuItem;
   begin
     Result := TMenuItem.Create(Self);
     Result.Caption := ACaption;
     Result.ImageIndex := AImageIndex;
-    Result.OnClick := AOnClick;
+    Result.Tag := Ord(Event);
     Result.ShortCut := Shortcut;
+    Result.OnClick := @DoClick;
 
     Items.Add(Result);
   end;
 
 begin
   inherited Create(AOwner);
-  OnMeasureItem := @DoMeasureItem;
-  Images := SimbaMainForm.Images;
 
-  FFindDecl   := Add('Find Declaration',          IMG_NONE,       0,                                       @DoFindDeclaration);
-                 AddLine();
+  Images := SimbaImages;
 
-  FUndo       := Add('Undo',                      IMG_UNDO,       ShortCut(VK_Z,       [ssCtrl]),          @DoUndo);
-  FRedo       := Add('Redo',                      IMG_REDO,       ShortCut(VK_Z,       [ssShift, ssCtrl]), @DoRedo);
-                 AddLine();
+  FFindDecl := Add('Find Declaration', -1, scNone, ESimbaEvent.ACTION_FIND_DECL_AT_CARET);
+  AddLine();
 
-  FCut        := Add('Cut',                       IMG_CUT,        ShortCut(VK_X,       [ssCtrl]),          @DoCut);
-  FCopy       := Add('Copy',                      IMG_COPY,       ShortCut(VK_C,       [ssCtrl]),          @DoCopy);
-  FPaste      := Add('Paste',                     IMG_PASTE,      ShortCut(VK_V,       [ssCtrl]),          @DoPaste);
-  FDelete     := Add('Delete',                    IMG_CLOSE,      ShortCut(VK_UNKNOWN, []),                @DoDelete);
-  FSelectAll  := Add('Select All',                IMG_SELECT_ALL, ShortCut(VK_A,       [ssCtrl]),          @DoSelectAll);
-                 AddLine();
+  FUndo := Add('Undo', SimbaImages.UNDO, ShortCut(VK_Z, [ssCtrl]),          ESimbaEvent.ACTION_UNDO);
+  FRedo := Add('Redo', SimbaImages.REDO, ShortCut(VK_Z, [ssShift, ssCtrl]), ESimbaEvent.ACTION_REDO);
+  AddLine();
 
-  FCopyFile   := Add('Copy Filename',             IMG_NONE,       ShortCut(VK_UNKNOWN, []),                @DoCopyFileName);
-  FCopyDir    := Add('Open Directory',            IMG_NONE,       ShortCut(VK_UNKNOWN, []),                @DoOpenFileDir);
-                 AddLine();
+  FCut := Add('Cut', SimbaImages.CUT, ShortCut(VK_X, [ssCtrl]), ESimbaEvent.ACTION_CUT);
+  FCopy := Add('Copy', SimbaImages.COPY, ShortCut(VK_C, [ssCtrl]), ESimbaEvent.ACTION_COPY);
+  FPaste := Add('Paste', SimbaImages.PASTE, ShortCut(VK_V, [ssCtrl]), ESimbaEvent.ACTION_PASTE);
+  FSelectAll := Add('Select All', SimbaImages.SELECT_ALL, ShortCut(VK_A, [ssCtrl]), ESimbaEvent.ACTION_SELECT_ALL);
+  AddLine();
 
-  FFind       := Add('Find',                      IMG_FIND,       ShortCut(VK_F,       [ssCtrl]),          @DoFind);
-  FReplace    := Add('Replace',                   IMG_REPLACE,    ShortCut(VK_R,       [ssCtrl]),          @DoReplace);
-                 AddLine();
+  FCopyFile := Add('Copy Filename', -1, scNone, ESimbaEvent.ACTION_COPY_FILENAME);
+  FCopyDir := Add('Open Directory', -1, scNone, ESimbaEvent.ACTION_OPEN_DIRECTORY);
+  AddLine();
 
-  FDocComment := Add('Add Documentation Comment', IMG_NONE,       ShortCut(VK_D,       [ssCtrl]),          @DoDocComment);
-                 AddLine();
+  FFind := Add('Find', SimbaImages.FIND, ShortCut(VK_F, [ssCtrl]), ESimbaEvent.ACTION_FIND);
+  FReplace := Add('Replace', SimbaImages.FIND_REPLACE, ShortCut(VK_R, [ssCtrl]), ESimbaEvent.ACTION_REPLACE);
+  AddLine();
 
-  Add('Codetools Symbols', IMG_NONE, 0, @DoCodetoolsSymbols);
-  Add('Codetools Cache', IMG_NONE, 0, @DoCodetoolsCache);
+  FDocComment := Add('Add Documentation Comment', -1, ShortCut(VK_D, [ssCtrl]), ESimbaEvent.ACTION_DOC_COMMENT);
+  //AddLine();
+
+  //Add('Codetools Symbols', -1, 0, @DoCodetoolsSymbols);
+  //Add('Codetools Cache', -1, 0, @DoCodetoolsCache);
 end;
 
 end.

@@ -14,10 +14,10 @@ procedure ImportBase(Script: TSimbaScript);
 implementation
 
 uses
-  Graphics, Variants,
+  Variants,
   simba.nativeinterface, simba.env, simba.baseclass, simba.vartype_ordarray,
   simba.vartype_string, simba.vartype_pointarray,
-  simba.vartype_box;
+  simba.vartype_box, simba.colormath;
 
 (*
 Base
@@ -472,6 +472,16 @@ begin
   DebugLn('');
 end;
 
+procedure _LapeSetWriteColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Debug(DEBUG_COLOR_PREFIX + IntToHex(PColor(Params^[0])^, 8));
+end;
+
+procedure _LapeResetWriteColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Debug(DEBUG_RESET);
+end;
+
 // Sort
 procedure _LapeSort_Int32Array(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -732,6 +742,8 @@ begin
 
     addGlobalFunc('procedure _Write(S: String); override', @_LapeWrite);
     addGlobalFunc('procedure _WriteLn; override', @_LapeWriteLn);
+    addGlobalFunc('procedure SetWriteColor(C: TColor);', @_LapeSetWriteColor);
+    addGlobalFunc('procedure ResetWriteColor();', @_LapeResetWriteColor);
 
     // add native versions for lape to use
     addMagic('_ArrayMin', ['TIntegerArray'], [lptNormal], 'Integer', @_LapeArrayMin_Int32Array);

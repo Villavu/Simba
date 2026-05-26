@@ -243,7 +243,7 @@ procedure TJsonItemTracked.NotifyUnfreed;
   end;
 
 begin
-  DebugLn([EDebugLn.YELLOW], '  ' + Dump());
+  DebugLn(DEBUG_YELLOW + '  ' + Dump() + DEBUG_RESET);
 end;
 
 constructor TJsonItemTracked.Create(AItem: TJSONData);

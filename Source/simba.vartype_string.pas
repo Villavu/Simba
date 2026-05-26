@@ -985,7 +985,7 @@ begin
       Inc(Current, Length(Values[I]));
     end;
 
-    if (I < High(Values)) then
+    if (I < High(Values)) and (Length(Self) > 0) then
     begin
       Move(Self[1], Result[Current], Length(Self));
       Inc(Current, Length(Self));

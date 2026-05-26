@@ -11,7 +11,10 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Menus, Masks,
-  simba.base, simba.component_treeview, simba.settings;
+  simba.base,
+  simba.component_treeview,
+  simba.settings,
+  simba.ide_events;
 
 type
   TSimbaFileBrowserNode = class(TTreeNode)
@@ -34,7 +37,6 @@ type
 
     procedure DoUpdate(Sender: TObject);
     procedure DoPopupClick(Sender: TObject);
-    procedure PopupMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
     procedure PopupMenu_UseFileMaskFilteringClick(Sender: TObject);
     procedure PopupPopup(Sender: TObject);
   protected
@@ -58,7 +60,7 @@ type
 
     FMaskList: TMaskList;
 
-    procedure DoDoubleClickSplitter(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoFindFiles;
     procedure DoPopluateTreeView(Sender: TObject);
     function DoGetNodeHint(Node: TTreeNode): String;
@@ -82,8 +84,11 @@ implementation
 
 uses
   Clipbrd, AnchorDocking,
-  simba.ide_events,
-  simba.form_main, simba.form_tabs, simba.nativeinterface, simba.ide_utils, simba.fs;
+  simba.ide_dockinghelpers,
+  simba.component_images,
+  simba.ide_utils,
+  simba.ide_controller,
+  simba.fs;
 
 procedure TSimbaFileBrowserForm.DoFindFiles;
 
@@ -92,11 +97,11 @@ procedure TSimbaFileBrowserForm.DoFindFiles;
     Result.Path := FileName;
     Result.Name := ExtractFileName(ExcludeTrailingPathDelimiter(FileName));
     if IsDirectory then
-      Result.Image := IMG_FOLDER
+      Result.Image := SimbaImages.SECTION
     else if FileName.EndsWith('.simba') then
-      Result.Image := IMG_SIMBA
+      Result.Image := SimbaImages.SIMBA
     else
-      Result.Image := IMG_FILE;
+      Result.Image := SimbaImages.DOCUMENT;
   end;
 
   procedure Build(const Node: PDirectoryInfo);
@@ -198,19 +203,11 @@ begin
       Clipboard.AsText := TSimbaPath.PathExtractRelative(Application.Location, Node.Path)
     else
     if (Sender = PopupMenu_Open) then
-      SimbaTabsForm.Open(Node.Path)
-    else
-    if (Sender = PopupMenu_OpenExternally) and Node.IsDirectory then
-      SimbaNativeInterface.OpenDirectory(Node.Path)
+      SimbaController.OpenInTab(Node.Path)
     else
     if (Sender = PopupMenu_OpenExternally) then
-      SimbaNativeInterface.OpenFile(Node.Path);
+      SimbaController.OpenInExplorer(Node.Path);
   end;
-end;
-
-procedure TSimbaFileBrowserForm.PopupMeasureItem(Sender: TObject; ACanvas: TCanvas; var AWidth, AHeight: Integer);
-begin
-  MenuItemHeight(Sender as TMenuItem, ACanvas, AHeight);
 end;
 
 procedure TSimbaFileBrowserForm.PopupMenu_UseFileMaskFilteringClick(Sender: TObject);
@@ -243,14 +240,28 @@ begin
   end;
 end;
 
-procedure TSimbaFileBrowserForm.DoDoubleClickSplitter(Sender: TObject);
-var
-  Splitter: TAnchorDockSplitter;
+procedure TSimbaFileBrowserForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+
+  procedure DoViewFileBrowser(Item: TMenuItem);
+  begin
+    DockMaster.Show(Self);
+  end;
+
+  procedure DoSplitterDoubleClick;
+  var
+    Splitter: TAnchorDockSplitter;
+  begin
+    if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = TObject(Data))) then
+      Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + FTreeView.MaxRight)
+    else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = TObject(Data))) then
+      Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - FTreeView.MaxRight);
+  end;
+
 begin
-  if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = Sender)) then
-    Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + FTreeView.MaxRight)
-  else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = Sender)) then
-    Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() + Width) - FTreeView.MaxRight);
+  case Event of
+    ESimbaEvent.ACTION_VIEW_FILEBROWSER: DoViewFileBrowser(TMenuItem(Data));
+    ESimbaEvent.SPLITTER_DOUBLE_CLICK:   DoSplitterDoubleClick();
+  end;
 end;
 
 procedure TSimbaFileBrowserForm.DoUpdate(Sender: TObject);
@@ -267,9 +278,9 @@ begin
   if (Node is TSimbaFileBrowserNode) then
   begin
     if Node.IsDirectory then
-      SimbaNativeInterface.OpenDirectory(Node.Path)
+      SimbaController.OpenInExplorer(Node.Path)
     else if TSimbaFile.FileIsText(Node.Path) then
-      SimbaTabsForm.Open(Node.Path);
+      SimbaController.OpenInTab(Node.Path);
   end;
 end;
 
@@ -307,14 +318,14 @@ begin
   FTreeView := TSimbaTreeView.Create(Self, TSimbaFileBrowserNode);
   FTreeView.Parent := Self;
   FTreeView.Align := alClient;
-  FTreeView.Images := SimbaMainForm.Images;
+  FTreeView.Images := SimbaImages;
   FTreeView.OnGetNodeHint := @DoGetNodeHint;
   FTreeView.OnDoubleClick := @DoDoubleClick;
   FTreeView.OnAfterFilter := @DoAfterFilter;
   FTreeView.PopupMenu := Popup;
   FTreeView.OnCustomFilter := @DoCustomFilter;
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.SPLITTER_DOUBLE_CLICK,  @DoDoubleClickSplitter);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_VIEW_FILEBROWSER, ESimbaEvent.SPLITTER_DOUBLE_CLICK]);
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.General.FileBrowserMasks, @DoSimbaSettingChanged, True);
 
   Fill();

@@ -15,7 +15,7 @@ uses
   simba.ide_events;
 
 type
-  TSimbaAreaSelector = class(TObject)
+  TSimbaAreaSelector = class(TComponent)
   protected type
     {$scopedenums on}
     EDragEdge = (
@@ -31,18 +31,19 @@ type
     FDownY: Integer;
     FDown: Boolean;
 
+    procedure Pick;
+
     function GetDragEdge(X, Y: Integer): EDragEdge;
 
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DoDblClick(Sender: TObject);
   public
-    constructor Create;
+    constructor Create; reintroduce;
     destructor Destroy; override;
-
-    procedure Pick;
   end;
 
 var
@@ -78,6 +79,14 @@ begin
     if (Y < 10)          then Exit(EDragEdge.TOP);
     if (X > Width - 10)  then Exit(EDragEdge.RIGHT);
     if (Y > Height - 10) then Exit(EDragEdge.BOTTOM);
+  end;
+end;
+
+procedure TSimbaAreaSelector.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.ACTION_PICKAREA:
+      Pick();
   end;
 end;
 
@@ -152,7 +161,9 @@ end;
 
 constructor TSimbaAreaSelector.Create;
 begin
-  inherited Create();
+  inherited Create(nil);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_PICKAREA]);
 end;
 
 destructor TSimbaAreaSelector.Destroy;
@@ -191,7 +202,8 @@ begin
 
     FForm.ShowModal();
     with FForm.BoundsRect do
-      DebugLn([EDebugLn.FOCUS], 'Area picked: [%d, %d, %d, %d]', [Left - TargetBounds.X1,Top - TargetBounds.Y1, Right - TargetBounds.X1, Bottom - TargetBounds.Y1]);
+      DebugLn('Area picked: [%d, %d, %d, %d]', [Left - TargetBounds.X1,Top - TargetBounds.Y1, Right - TargetBounds.X1, Bottom - TargetBounds.Y1]);
+    DebugLn(DEBUG_FOCUS);
   except
     on E: Exception do
     begin

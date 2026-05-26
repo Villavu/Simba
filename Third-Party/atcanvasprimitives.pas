@@ -106,8 +106,8 @@ function CanvasCollapseStringByDots(C: TCanvas;
   Width: integer;
   DotsString: string=''): string;
 
-function ColorBlend(c1, c2: Longint; A: Longint): Longint;
-function ColorBlendHalf(c1, c2: Longint): Longint;
+function ColorBlend(const c1, c2, A: UInt32): UInt32; inline;
+function ColorBlendHalf(const c1, c2: UInt32): UInt32; inline;
 
 implementation
 
@@ -658,53 +658,29 @@ var
 begin
   SizeX:= (W div StepW + 1)*StepW;
   SizeY:= (H div StepH + 1)*StepH;
-  if (SizeX>b.Width) or
-    (SizeY>b.Height) then
+  if (SizeX>b.Width) or (SizeY>b.Height) then
     BitmapResize(b, SizeX, SizeY);
 end;
 
-
-function ColorBlend(c1, c2: Longint; A: Longint): Longint;
+function ColorBlend(const c1, c2, A: UInt32): UInt32;
 //blend level: 0..255
 var
-  r, g, b, v1, v2: byte;
+  invA: UInt32;
 begin
-  {$PUSH}
-  {$R-}
-  {$Q-}
-  v1:= Byte(c1);
-  v2:= Byte(c2);
-  r:= A * (v1 - v2) shr 8 + v2;
-  v1:= Byte(c1 shr 8);
-  v2:= Byte(c2 shr 8);
-  g:= A * (v1 - v2) shr 8 + v2;
-  v1:= Byte(c1 shr 16);
-  v2:= Byte(c2 shr 16);
-  b:= A * (v1 - v2) shr 8 + v2;
-  Result := (b shl 16) + (g shl 8) + r;
+  {$PUSH}{$R-}{$Q-}
+  invA := 256 - A;
+  Result := ((((A * (c1 and $00FF00FF) + invA * (c2 and $00FF00FF)) shr 8) and $00FF00FF) or
+             (((A * (c1 and $0000FF00) + invA * (c2 and $0000FF00)) shr 8) and $0000FF00));
   {$POP}
 end;
 
-function ColorBlendHalf(c1, c2: Longint): Longint;
-var
-  r, g, b, v1, v2: byte;
+function ColorBlendHalf(const c1, c2: UInt32): UInt32;
 begin
   {$PUSH}
-  {$R-}
-  {$Q-}
-  v1:= Byte(c1);
-  v2:= Byte(c2);
-  r:= (v1+v2) shr 1;
-  v1:= Byte(c1 shr 8);
-  v2:= Byte(c2 shr 8);
-  g:= (v1+v2) shr 1;
-  v1:= Byte(c1 shr 16);
-  v2:= Byte(c2 shr 16);
-  b:= (v1+v2) shr 1;
-  Result := (b shl 16) + (g shl 8) + r;
+  {$R-}{$Q-}
+  Result := ((c1 and c2) + (((c1 xor c2) and $FEFEFEFE) shr 1)) and $00FFFFFF;
   {$POP}
 end;
-
 
 procedure CanvasPaintRoundedCorners(C: TCanvas; const R: TRect;
   Kinds: TATCanvasCornerKinds; ColorBackground, ColorBorder,

@@ -10,10 +10,15 @@ unit simba.form_imagestring;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtDlgs, ExtCtrls, ClipBrd;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtDlgs, ExtCtrls, ClipBrd,
+  simba.base,
+  simba.ide_events;
 
 type
   TSimbaImageStringForm = class(TForm)
+  protected
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+  published
     ClipboardButton: TButton;
     GroupBox: TGroupBox;
     ToStringButton: TButton;
@@ -36,7 +41,9 @@ implementation
 {$R *.lfm}
 
 uses
-  simba.base, simba.image, simba.image_lazbridge, simba.containers;
+  simba.image,
+  simba.image_lazbridge,
+  simba.containers;
 
 procedure TSimbaImageStringForm.OpenButtonClick(Sender: TObject);
 begin
@@ -47,6 +54,14 @@ begin
     GroupBox.Caption := Format('(%d,%d)', [ImagePreview.Picture.Width, ImagePreview.Picture.Height]);
   except
     ImagePreview.Picture.Clear();
+  end;
+end;
+
+procedure TSimbaImageStringForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.ACTION_IMG_TO_STRING:
+      ShowOnTop();
   end;
 end;
 
@@ -66,6 +81,8 @@ procedure TSimbaImageStringForm.FormCreate(Sender: TObject);
 begin
   Width := Scale96ToScreen(500);
   Height := Scale96ToScreen(300);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_IMG_TO_STRING]);
 end;
 
 procedure TSimbaImageStringForm.FormDropFiles(Sender: TObject; const FileNames: array of string);
@@ -117,7 +134,8 @@ begin
     except
     end;
 
-    DebugLn([EDebugLn.FOCUS], ImageString);
+    DebugLn(ImageString);
+    DebugLn(DEBUG_FOCUS);
   end;
 end;
 

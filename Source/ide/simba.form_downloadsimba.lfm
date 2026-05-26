@@ -1,11 +1,12 @@
 object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
   Left = 1085
-  Height = 470
+  Height = 940
   Top = 695
-  Width = 846
+  Width = 1692
   Caption = 'Download Simba'
-  ClientHeight = 470
-  ClientWidth = 846
+  ClientHeight = 940
+  ClientWidth = 1692
+  DesignTimePPI = 192
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
   LCLVersion = '4.0.0.4'
@@ -13,9 +14,9 @@ object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
   OnShow = FormShow
   object Notebook1: TNotebook
     Left = 0
-    Height = 470
+    Height = 940
     Top = 0
-    Width = 846
+    Width = 1692
     PageIndex = 0
     Align = alClient
     TabOrder = 0
@@ -34,7 +35,7 @@ object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
         Width = 846
         Align = alTop
         Alignment = taCenter
-        BorderSpacing.Top = 50
+        BorderSpacing.Top = 100
         Caption = 'No downloads found!'
         ParentFont = False
       end
@@ -46,7 +47,7 @@ object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
         AnchorSideRight.Side = asrBottom
         Left = 0
         Height = 25
-        Top = 75
+        Top = 150
         Width = 846
         Alignment = taCenter
         Anchors = [akTop, akLeft, akRight]
@@ -61,11 +62,11 @@ object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
         AnchorSideRight.Side = asrBottom
         Left = 0
         Height = 25
-        Top = 190
+        Top = 380
         Width = 846
         Alignment = taCenter
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Top = 15
+        BorderSpacing.Top = 30
         Caption = 'Development builds:'
         ParentFont = False
       end
@@ -76,12 +77,12 @@ object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = ErrorPage
         AnchorSideRight.Side = asrBottom
-        Left = 386
+        Left = 772
         Height = 25
-        Top = 125
+        Top = 250
         Width = 75
         Alignment = taCenter
-        BorderSpacing.Top = 25
+        BorderSpacing.Top = 50
         Caption = 'Releases: '
         ParentFont = False
       end
@@ -92,9 +93,9 @@ object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = Label3
         AnchorSideBottom.Side = asrBottom
-        Left = 235
+        Left = 470
         Height = 25
-        Top = 215
+        Top = 430
         Width = 376
         Caption = 'https://github.com/Villavu/Simba-Build-Archive'
         ParentColor = False
@@ -110,9 +111,9 @@ object SimbaDownloadSimbaForm: TSimbaDownloadSimbaForm
         AnchorSideTop.Side = asrBottom
         AnchorSideBottom.Control = Label4
         AnchorSideBottom.Side = asrBottom
-        Left = 256
+        Left = 512
         Height = 25
-        Top = 150
+        Top = 300
         Width = 334
         Caption = 'https://github.com/Villavu/Simba/releases'
         ParentColor = False

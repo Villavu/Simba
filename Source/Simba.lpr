@@ -15,17 +15,20 @@ uses
   simba.init,
   Classes, SysUtils, Interfaces, Forms,
   simba.base,
-  simba.form_main, simba.form_tabs, simba.form_about, simba.form_imagestring,
-  simba.form_functionlist, simba.form_output, simba.form_filebrowser,
+  simba.form_main, simba.form_about, simba.form_imagestring,
+  simba.form_filebrowser,
   simba.form_notes, simba.form_settings, simba.form_openexample, simba.form_shapebox,
   simba.form_backups, simba.form_findinfiles, simba.form_downloadsimba, simba.form_package,
   simba.form_colorpickhistory,
   simba.plugin_dump, simba.script_runner,
   simba.initializations, simba.ide_analytics, simba.script,
-  simba.openssl;
+  simba.openssl,
+  simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector,
+  simba.ide_mainmenubar, simba.ide_maintoolbar, simba.ide_mainstatusbar,
+  simba.form_functionlist, simba.form_output;
 
 begin
-  {$IF DECLARED(SetHeapTraceOutput)}
+  {$IF DECLARED(HEAPTRC)}
   SetHeapTraceOutput(Application.Location + '/' + IntToStr(GetProcessID()) + '.trc');
   {$ENDIF}
 
@@ -94,6 +97,8 @@ begin
     else
       SimbaProcessType := ESimbaProcessType.SCRIPT;
 
+    SimbaOutputControlCodes := Application.HasOption('simbacommunication') or Application.HasOption('keep-formatting');
+
     // Script will be sent though communication
     if (Application.Params[Application.ParamCount] = '--run') or (Application.Params[Application.ParamCount] = '--compile') then
     begin
@@ -128,10 +133,7 @@ begin
 
     Application.ShowMainForm := False;
     Application.CreateForm(TSimbaMainForm, SimbaMainForm);
-    Application.CreateForm(TSimbaTabsForm, SimbaTabsForm);
-    Application.CreateForm(TSimbaFunctionListForm, SimbaFunctionListForm);
     Application.CreateForm(TSimbaNotesForm, SimbaNotesForm);
-    Application.CreateForm(TSimbaOutputForm, SimbaOutputForm);
     Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
     Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);

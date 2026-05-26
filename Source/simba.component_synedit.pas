@@ -17,12 +17,18 @@ uses
 
 type
   TSimbaSynEdit = class(TSynEdit)
+  private
+    function GetFontName: String;
+    procedure SetFontName(AValue: String);
   protected
     FScrollbarVert: TSimbaScrollBar;
     FScrollbarHorz: TSimbaScrollBar;
 
     procedure DoVertScrollBarChange(Sender: TObject);
     procedure DoHorzScrollBarChange(Sender: TObject);
+
+    // Override to scroll horz when shift+scrollwheel
+    function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
 
     procedure UpdateBars;
     procedure StatusChanged(AChanges: TSynStatusChanges); override;
@@ -35,6 +41,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
 
+    property FontName: String read GetFontName write SetFontName;
     property FontAntialising: Boolean read GetFontAntialising write SetFontAntialising;
   end;
 
@@ -45,6 +52,9 @@ type
   end;
 
 implementation
+
+uses
+  simba.misc;
 
 function TSimbaSynEdit.GetFontAntialising: Boolean;
 begin
@@ -59,6 +69,17 @@ begin
   end;
 end;
 
+function TSimbaSynEdit.GetFontName: String;
+begin
+  Result := Font.Name;
+end;
+
+procedure TSimbaSynEdit.SetFontName(AValue: String);
+begin
+  if IsFontFixed(AValue) then
+    Font.Name := AValue;
+end;
+
 procedure TSimbaSynEdit.DoVertScrollBarChange(Sender: TObject);
 begin
   TopView := FScrollbarVert.Position;
@@ -67,6 +88,22 @@ end;
 procedure TSimbaSynEdit.DoHorzScrollBarChange(Sender: TObject);
 begin
   LeftChar := FScrollbarHorz.Position;
+end;
+
+function TSimbaSynEdit.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
+const
+  SCROLL_AMOUNT = 5;
+begin
+  if (ssShift in Shift) then
+  begin
+    if (WheelDelta > 0) then
+      FScrollbarHorz.Position := FScrollbarHorz.Position - SCROLL_AMOUNT
+    else
+      FScrollbarHorz.Position := FScrollbarHorz.Position + SCROLL_AMOUNT;
+
+    Result := True;
+  end else
+    Result := inherited DoMouseWheel(Shift, WheelDelta, MousePos);
 end;
 
 procedure TSimbaSynEdit.UpdateBars;

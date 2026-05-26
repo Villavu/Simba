@@ -11,7 +11,8 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.httpclient;
+  simba.base,
+  simba.httpclient;
 
 type
   TSimbaPackageVersion = record

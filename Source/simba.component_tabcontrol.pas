@@ -12,14 +12,17 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls, ImgList, Menus,
   attabs,
-  simba.settings;
+  simba.base;
 
 type
   TSimbaTabControl = class;
   TSimbaTab = class(TCustomControl)
   protected
+    FUID: Int64;
+
     procedure TextChanged; override;
 
+    function GetIsActiveTab: Boolean;
     function GetImageIndex: TImageIndex;
     function GetTabControl: TSimbaTabControl;
     function GetTabData: TATTabData;
@@ -27,19 +30,21 @@ type
   public
     constructor Create(AOwner: TComponent); override;
 
+    property UID: Int64 read FUID;
     property TabControl: TSimbaTabControl read GetTabControl;
     property ImageIndex: TImageIndex read GetImageIndex write SetImageIndex;
+    property IsActiveTab: Boolean read GetIsActiveTab;
   end;
   TSimbaTabClass = class of TSimbaTab;
 
   TSimbaTabControl = class(TCustomControl)
-  public
-  type
+  public type
     TTabMovedEvent     = procedure(Sender: TSimbaTabControl; AFrom, ATo: Integer) of object;
     TTabCanChangeEvent = procedure(Sender: TSimbaTabControl; OldTab, NewTab: TSimbaTab; var AllowChange: Boolean) of object;
     TTabCloseEvent     = procedure(Sender: TSimbaTabControl; Tab: TSimbaTab; var CanClose: Boolean) of object;
     TTabChangeEvent    = procedure(Sender: TSimbaTabControl; NewTab: TSimbaTab) of object;
   protected
+    FUID: Int64;
     FTabs: TATTabs;
     FTabClass: TSimbaTabClass;
     FTabMovedEvent: TTabMovedEvent;
@@ -48,6 +53,7 @@ type
     FTabChangeEvent: TTabChangeEvent;
     FDefaultTitle: String;
 
+    function GetTabUID: Int64;
     function GetTabHeight: Integer;
 
     procedure ShowControl(AControl: TControl); override;
@@ -56,7 +62,6 @@ type
 
     procedure CallTabChanged(Data: PtrInt);
 
-    procedure DoSettingChanged_ImageSize(Setting: TSimbaSetting);
     procedure DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
     procedure DoTabChanged(Sender: TObject);
     procedure DoTabPlusClick(Sender: TObject);
@@ -75,7 +80,9 @@ type
     function GetOnMouseUp: TMouseEvent;
     function GetOnMouseLeave: TNotifyEvent;
     function GetOnMouseMove: TMouseMoveEvent;
+    function GetImages: TImageList;
 
+    procedure SetImages(AValue: TImageList);
     procedure SetActiveTab(Value: TSimbaTab);
     procedure SetCanAddTabOnDoubleClick(Value: Boolean);
     procedure SetCanMoveTabs(Value: Boolean);
@@ -88,10 +95,12 @@ type
     constructor Create(AOwner: TComponent; TabClass: TSimbaTabClass; ADefaultTitle: String = ''); reintroduce;
     destructor Destroy; override;
 
+    function FindTab(ID: Int64): TSimbaTab;
     function AddTab(Title: String = ''): TSimbaTab;
     function DeleteTab(Tab: TSimbaTab): Boolean;
     procedure MoveTab(AFrom, ATo: Integer);
 
+    property Images: TImageList read GetImages write SetImages;
     property DefaultTitle: String read FDefaultTitle write FDefaultTitle;
     property IsClickingCloseButton: Boolean read GetIsClickingCloseButton;
     property CanMoveTabs: Boolean read GetCanMoveTabs write SetCanMoveTabs;
@@ -119,7 +128,8 @@ type
 implementation
 
 uses
-  simba.form_main, simba.base, simba.component_theme, simba.ide_utils;
+  simba.component_theme,
+  simba.ide_utils;
 
 function TSimbaTab.GetImageIndex: TImageIndex;
 begin
@@ -139,7 +149,7 @@ end;
 constructor TSimbaTab.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-
+  FUID := TabControl.GetTabUID();
   ControlStyle := ControlStyle + [csOpaque];
 end;
 
@@ -155,6 +165,11 @@ begin
     if (I > -1) then
       Result := GetTabData(I);
   end;
+end;
+
+function TSimbaTab.GetIsActiveTab: Boolean;
+begin
+  Result := TabControl.ActiveTab = Self;
 end;
 
 procedure TSimbaTab.TextChanged;
@@ -273,9 +288,25 @@ begin
   FTabs.OnMouseMove := Value;
 end;
 
+function TSimbaTabControl.GetImages: TImageList;
+begin
+  Result := FTabs.Images;
+end;
+
+procedure TSimbaTabControl.SetImages(AValue: TImageList);
+begin
+  FTabs.Images := AValue;
+end;
+
+function TSimbaTabControl.GetTabUID: Int64;
+begin
+  Inc(FUID);
+  Result := FUID;
+end;
+
 function TSimbaTabControl.GetTabHeight: Integer;
 var
-  FontHeight, ImageHeight: Integer;
+  FontHeight: Integer;
 begin
   with TBitmap.Create() do
   try
@@ -287,12 +318,7 @@ begin
     Free();
   end;
 
-  if SimbaSettings.General.CustomImageSize.IsDefault() then
-    ImageHeight := ImageWidthForDPI(Canvas.Font.PixelsPerInch)
-  else
-    ImageHeight := SimbaSettings.General.CustomImageSize.Value;
-
-  Result := Max(FontHeight, ImageHeight) + Scale96ToScreen(8);
+  Result := Max(FontHeight, ImageWidthForDPI(Canvas.Font.PixelsPerInch)) + Scale96ToScreen(8);
 end;
 
 procedure TSimbaTabControl.ShowControl(AControl: TControl);
@@ -335,14 +361,6 @@ begin
     DoTabChanged(FTabs);
 end;
 
-procedure TSimbaTabControl.DoSettingChanged_ImageSize(Setting: TSimbaSetting);
-begin
-  FTabs.Height := GetTabHeight();
-  FTabs.OptTabHeight := FTabs.Height;
-
-  Invalidate();
-end;
-
 procedure TSimbaTabControl.DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
 begin
   if (AIndexFrom = -1) or (AIndexTo = -1) then
@@ -373,7 +391,6 @@ begin
 end;
 
 procedure TSimbaTabControl.DoTabClose(Sender: TObject; ATabIndex: Integer; var ACanClose, ACanContinue: Boolean);
-
 var
   Tab: TSimbaTab;
 begin
@@ -439,7 +456,6 @@ begin
   FTabs.OnTabChangeQuery := @DoTabChangeQuery;
   FTabs.OnContextPopup := @DoTabRightClick;
   FTabs.ColorFont := SimbaComponentTheme.ColorFont;
-  FTabs.Images := SimbaMainForm.Images;
   FTabs.BorderSpacing.Bottom := 5;
 
   FTabs.OptSpaceBeforeText := 12;
@@ -463,9 +479,6 @@ begin
   FTabs.ColorTabActive := SimbaComponentTheme.ColorActive;
   FTabs.ColorActiveMark := SimbaComponentTheme.ColorActive;
   FTabs.ColorCloseBgOver := clNone;
-
-  with SimbaSettings do
-    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize);
 end;
 
 destructor TSimbaTabControl.Destroy;
@@ -473,6 +486,16 @@ begin
   Application.RemoveAsyncCalls(Self);
 
   inherited Destroy();
+end;
+
+function TSimbaTabControl.FindTab(ID: Int64): TSimbaTab;
+var
+  I: Integer;
+begin
+  for I := 0 to TabCount - 1 do
+    if (Tabs[I].UID = ID) then
+      Exit(Tabs[I]);
+  Result := nil;
 end;
 
 function TSimbaTabControl.AddTab(Title: String): TSimbaTab;

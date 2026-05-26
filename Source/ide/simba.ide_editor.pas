@@ -67,7 +67,7 @@ type
     FReadOnlyNotice: TPanel;
 
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
-    function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
+
 
     procedure FontChanged(Sender: TObject); override;
 
@@ -316,22 +316,6 @@ begin
     CaretXY := PixelsToRowColumn(Point(X, Y));
 
   inherited MouseDown(Button, Shift, X, Y);
-end;
-
-function TSimbaEditor.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
-const
-  SCROLL_AMOUNT = 5;
-begin
-  if (ssShift in Shift) then
-  begin
-    if (WheelDelta > 0) then
-      FScrollbarHorz.Position := FScrollbarHorz.Position - SCROLL_AMOUNT
-    else
-      FScrollbarHorz.Position := FScrollbarHorz.Position + SCROLL_AMOUNT;
-
-    Result := True;
-  end else
-    Result := inherited;
 end;
 
 procedure TSimbaEditor.FontChanged(Sender: TObject);

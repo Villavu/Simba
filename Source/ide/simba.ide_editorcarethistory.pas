@@ -10,8 +10,11 @@ unit simba.ide_editorcarethistory;
 interface
 
 uses
-  Classes, SysUtils, Math, SynEdit, SynEditMouseCmds, LazSynEditMouseCmdsTypes,
-  simba.base, simba.ide_tab, simba.containers;
+  Classes, SysUtils, SynEdit, SynEditMouseCmds, LazSynEditMouseCmdsTypes,
+  simba.base,
+  simba.containers,
+  simba.ide_tab,
+  simba.ide_events;
 
 type
   TSimbaEditorCaretHistory = class(TComponent)
@@ -23,7 +26,7 @@ type
     end;
     THistoryList = specialize TSimbaList<THistoryPoint>;
   strict private
-    FIndex    : Integer;       // 1-based “next slot”; 0 means empty
+    FIndex    : Integer;       // 1-based "next slot"; 0 means empty
     FHistory  : THistoryList;
     FMaxDepth : Integer;
     FMoving   : Boolean;
@@ -31,8 +34,7 @@ type
     procedure PruneIfNeeded;
     procedure DumpState(const msg: String);
 
-    procedure DoTabClose(Sender: TObject);
-    procedure DoTabCaretMoved(Sender: TObject);
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   public
     property MaxDepth: Integer read FMaxDepth write FMaxDepth;
 
@@ -57,10 +59,10 @@ var
 implementation
 
 uses
-  simba.form_tabs,
-  simba.ide_events,
+  Math,
   simba.initializations,
   simba.ide_editor_mousecommands,
+  simba.ide_controller,
   simba.threading;
 
 procedure TSimbaEditorCaretHistory.DumpState(const msg: String);
@@ -82,14 +84,14 @@ begin
   end;
 end;
 
-procedure TSimbaEditorCaretHistory.DoTabClose(Sender: TObject);
+procedure TSimbaEditorCaretHistory.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
-  Clear(Sender as TSimbaScriptTab);
-end;
-
-procedure TSimbaEditorCaretHistory.DoTabCaretMoved(Sender: TObject);
-begin
-  PushFromEditor(Sender as TSimbaScriptTab);
+  case Event of
+    // remove the tab from history
+    ESimbaEvent.TAB_CLOSED: Clear(TSimbaScriptTab(Data));
+    // add to history
+    ESimbaEvent.TAB_CARETMOVED: PushFromEditor(TSimbaScriptTab(Data));
+  end;
 end;
 
 procedure TSimbaEditorCaretHistory.PruneIfNeeded;
@@ -201,18 +203,14 @@ begin
           (FHistory[FIndex-1].Caret.Y <> FHistory[FIndex].Caret.Y) or
           (FHistory[FIndex-1].Tab     <> FHistory[FIndex].Tab);
 
-    if FIndex = 0 then FIndex := 1;          // safety
+    if FIndex = 0 then FIndex := 1; // safety
 
     {$IFDEF DEBUG}
     DumpState('Back → '+IntToStr(FIndex));
     {$ENDIF}
 
     with FHistory[FIndex-1] do
-    begin
-      SimbaTabsForm.CurrentTab := Tab;
-      SimbaTabsForm.CurrentTab.Editor.CaretXY := Caret;
-      SimbaTabsForm.CurrentTab.Editor.TopLine := Caret.Y - (Tab.Editor.LinesInWindow div 2);
-    end;
+      SimbaController.OpenTab(Tab, Caret.X, Caret.Y);
   finally
     FMoving := False;
   end;
@@ -238,11 +236,7 @@ begin
   {$ENDIF}
 
   with FHistory[FIndex-1] do
-  begin
-    SimbaTabsForm.CurrentTab := Tab;
-    SimbaTabsForm.CurrentTab.Editor.CaretXY := Caret;
-    SimbaTabsForm.CurrentTab.Editor.TopLine := Caret.Y - (Tab.Editor.LinesInWindow div 2);
-  end;
+    SimbaController.OpenTab(Tab, Caret.X, Caret.Y);
 end;
 
 { ───── lifecycle ───── }
@@ -255,8 +249,7 @@ begin
   FMaxDepth := 128;
   FMoving   := False;
 
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CLOSED, @DoTabClose);
-  SimbaIDEEvents.Register(Self, SimbaIDEEvent.TAB_CARETMOVED, @DoTabCaretMoved);
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.TAB_CLOSED, ESimbaEvent.TAB_CARETMOVED]);
 end;
 
 destructor TSimbaEditorCaretHistory.Destroy;

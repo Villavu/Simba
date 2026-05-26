@@ -13,8 +13,10 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, Graphics, StdCtrls, ComCtrls, LMessages, LCLType, ImgList, Types,
-  simba.component_edit, simba.component_treeviewhint, simba.component_scrollbar, simba.component_button,
-  simba.settings;
+  simba.component_edit,
+  simba.component_treeviewhint,
+  simba.component_scrollbar,
+  simba.component_button;
 
 type
   TSimbaInternalTreeView = class(TTreeView)
@@ -123,7 +125,6 @@ type
     procedure DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure DoCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
     procedure DoDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; Stage: TCustomDrawStage; var PaintImages, DefaultDraw: Boolean);
-    procedure DoSettingChanged_ImageSize(Setting: TSimbaSetting);
     procedure DoScrollHorzChange(Sender: TObject);
     procedure DoScrollVertChange(Sender: TObject);
     procedure DoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -248,8 +249,8 @@ begin
   FTree.OnDragDrop := @DoDragDrop;
   FTree.OnDragOver := @DoDragOver;
   FTree.AddHandlerOnKeyDown(@DoKeyDown);
-  FTree.Indent := 12;
-  FTree.ExpandSignSize := 12;
+  FTree.Indent := Scale96ToFont(10);
+  FTree.ExpandSignSize := Scale96ToFont(10);
 
   FHint := TSimbaTreeViewHint.Create(FTree);
 
@@ -277,9 +278,6 @@ begin
   FFilterClearButton.XPadding := 3;
 
   FScrollbarVert.ForwardScrollControl := FTree;
-
-  with SimbaSettings do
-    RegisterChangeHandler(Self, General.CustomImageSize, @DoSettingChanged_ImageSize, True);
 end;
 
 procedure TSimbaTreeView.HideRoot;
@@ -643,14 +641,6 @@ begin
     end;
 end;
 
-procedure TSimbaTreeView.DoSettingChanged_ImageSize(Setting: TSimbaSetting);
-begin
-  FTree.Indent := IfThen(Setting.IsDefault, 16, Setting.Value) - 4;
-  FTree.ExpandSignSize := IfThen(Setting.IsDefault, 16, Setting.Value) - 4;
-
-  Invalidate();
-end;
-
 procedure TSimbaTreeView.DoScrollVertChange(Sender: TObject);
 begin
   FTree.ScrolledTop := FScrollbarVert.Position;
@@ -695,12 +685,12 @@ procedure TSimbaTreeView.DoDrawArrow(Sender: TCustomTreeView; const ARect: TRect
 var
   R: TScaledImageListResolution;
 begin
-  R := SimbaComponentImages.ResolutionForPPI[16, Sender.Font.PixelsPerInch, Sender.GetCanvasScaleFactor];
+  R := SimbaImages.ResolutionForPPI[16, Sender.Font.PixelsPerInch, Sender.GetCanvasScaleFactor];
   R.Draw(
     Sender.Canvas,
     ARect.Left + (ARect.Right - ARect.Left - R.Height) div 2,
     ARect.Top + (ARect.Bottom - ARect.Top - R.Height) div 2,
-    IfThen(ACollapsed, SimbaComponentImages.ARROW_RIGHT, SimbaComponentImages.ARROW_DOWN)
+    IfThen(ACollapsed, SimbaImages.ARROW_RIGHT, SimbaImages.ARROW_DOWN)
   );
 end;
 

@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils,
   lptypes, lpvartypes, lpmessages,
-  simba.script, simba.base;
+  simba.base, simba.script;
 
 type
   TSimbaScriptRunner = class(TThread)
@@ -20,7 +20,7 @@ type
     FScript: TSimbaScript;
     FCompileOnly: Boolean;
 
-    procedure DoDebugLn(Flags: EDebugLnFlags; Text: String);
+    //procedure DoDebugLn(Flags: EDebugLnFlags; Text: String);
     procedure DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 
     procedure DoApplicationTerminate(Sender: TObject);
@@ -38,25 +38,26 @@ implementation
 
 uses
   Forms, FileUtil,
-  simba.env, simba.fs, simba.datetime, simba.script_communication, simba.vartype_string,
+  simba.env, simba.fs, simba.datetime, simba.script_communication,
   simba.baseclass;
 
-procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; Text: String);
-begin
-  if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then // Only add flags if we have communication with simba to use them
-    DebugLn(Flags, Text)
-  else
-  begin
-    if Application.HasOption('silent') and (Flags * [EDebugLn.YELLOW, EDebugLn.GREEN] <> []) then
-      Exit;
-
-    DebugLn(Text);
-  end;
-end;
+//procedure TSimbaScriptRunner.DoDebugLn(Flags: EDebugLnFlags; Text: String);
+//begin
+//  if (SimbaProcessType = ESimbaProcessType.SCRIPT_WITH_COMMUNICATION) then // Only add flags if we have communication with simba to use them
+//    DebugLn(Flags, Text)
+//  else
+//  begin
+//    if Application.HasOption('silent') and (Flags * [EDebugLn.YELLOW, EDebugLn.GREEN] <> []) then
+//      Exit;
+//
+//    DebugLn(Text);
+//  end;
+//end;
 
 procedure TSimbaScriptRunner.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  DoDebugLn([EDebugLn.YELLOW], Hint);
+  DebugLn(DEBUG_YELLOW + Hint);
+  Debug(DEBUG_CLEAR);
 end;
 
 procedure TSimbaScriptRunner.DoApplicationTerminate(Sender: TObject);
@@ -78,24 +79,23 @@ begin
 end;
 
 procedure TSimbaScriptRunner.DoError(E: Exception);
-var
-  Line: String;
 begin
   ExitCode := 1;
 
-  DoDebugLn([EDebugLn.RED, EDebugLn.FOCUS], E.Message);
-
+  DebugLn(DEBUG_RED + E.Message);
   if (E is lpException) then
     with lpException(E) do
     begin
-      for Line in StackTrace.Split(LineEnding) do
-        DoDebugLn([EDebugLn.RED, EDebugLn.FOCUS], Line);
-      for Line in Hint.Split(LineEnding) do
-        DoDebugLn([EDebugLn.YELLOW, EDebugLn.FOCUS], Line);
+      if (StackTrace <> '') then
+        DebugLn(DEBUG_RED + StackTrace);
+      if (Hint <> '') then
+        DebugLn(DEBUG_YELLOW + Hint);
 
       if (FScript.SimbaCommunication <> nil) then
         FScript.SimbaCommunication.ScriptError(Message, DocPos.Line, DocPos.Col, DocPos.FileName);
     end;
+  Debug(DEBUG_RESET);
+  Debug(DEBUG_FOCUS);
 end;
 
 procedure TSimbaScriptRunner.Execute;
@@ -105,7 +105,10 @@ begin
 
     try
       if FScript.Compile() then
-        DoDebugLn([EDebugLn.GREEN], 'Succesfully compiled in %.2f milliseconds.'.Format([FScript.CompileTime]));
+      begin
+        DebugLn(DEBUG_GREEN + 'Succesfully compiled in %.2f milliseconds.', [FScript.CompileTime]);
+        Debug(DEBUG_RESET);
+      end;
     except
       on E: Exception do
       begin
@@ -118,10 +121,12 @@ begin
     try
       FScript.Run();
 
+      Debug(DEBUG_GREEN);
       if (FScript.RunningTime < 10000) then
-        DoDebugLn([EDebugLn.GREEN], 'Succesfully executed in %.2f milliseconds.'.Format([FScript.RunningTime]))
+        DebugLn('Succesfully executed in %.2f milliseconds.', [FScript.RunningTime])
       else
-        DoDebugLn([EDebugLn.GREEN], 'Succesfully executed in %s.'.Format([FormatMilliseconds(Round(FScript.RunningTime), '\[hh:mm:ss\]')]));
+        DebugLn('Succesfully executed in %s.', [FormatMilliseconds(Round(FScript.RunningTime), '\[hh:mm:ss\]')]);
+      Debug(DEBUG_RESET);
     except
       on E: Exception do
         DoError(E);

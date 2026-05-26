@@ -18,12 +18,13 @@ uses
   simba.ide_events;
 
 type
-  TSimbaWindowSelector = class(TObject)
-  public
-    constructor Create;
-    destructor Destroy; override;
-
+  TSimbaWindowSelector = class(TComponent)
+  protected
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure Pick;
+  public
+    constructor Create; reintroduce;
+    destructor Destroy; override;
   end;
 
 var
@@ -154,12 +155,22 @@ end;
 
 constructor TSimbaWindowSelector.Create;
 begin
-  inherited Create();
+  inherited Create(nil);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_PICKTARGET]);
 end;
 
 destructor TSimbaWindowSelector.Destroy;
 begin
   inherited Destroy();
+end;
+
+procedure TSimbaWindowSelector.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  case Event of
+    ESimbaEvent.ACTION_PICKTARGET:
+      Pick();
+  end;
 end;
 
 procedure TSimbaWindowSelector.Pick;
@@ -192,17 +203,17 @@ begin
       Pid := Selected.GetPID();
       Bounds := Selected.GetBounds();
 
-      DebugLn([EDebugLn.FOCUS], 'Window Selected: %d',  [Selected]);
-      DebugLn([EDebugLn.FOCUS], ' - Dimensions: %dx%d', [Bounds.Width - 1, Bounds.Height - 1]);
-      DebugLn([EDebugLn.FOCUS], ' - PID: %d (%s)',      [PID, IfThen(IsProcess64Bit(PID), '64 bit', '32 bit')]);
-      DebugLn([EDebugLn.FOCUS], ' - Title: "%s"',       [Selected.GetTitle()]);
-      DebugLn([EDebugLn.FOCUS], ' - ClassName: "%s"',   [Selected.GetClassName()]);
-      DebugLn([EDebugLn.FOCUS], ' - Executable: "%s"',  [GetProcessPath(PID)]);
+      Debug(DEBUG_GREEN);
+      DebugLn('Window Selected: %d',  [Selected]);
+      DebugLn(' - Dimensions: %dx%d', [Bounds.Width - 1, Bounds.Height - 1]);
+      DebugLn(' - PID: %d (%s)',      [PID, IfThen(IsProcess64Bit(PID), '64 bit', '32 bit')]);
+      DebugLn(' - Title: "%s"',       [Selected.GetTitle()]);
+      DebugLn(' - ClassName: "%s"',   [Selected.GetClassName()]);
+      DebugLn(' - Executable: "%s"',  [GetProcessPath(PID)]);
+      DebugLn(DEBUG_FOCUS);
 
       SimbaIDEVars.WindowSelection := Selected;
       SimbaIDEVars.ProcessSelection := Pid;
-
-      SimbaIDEEvents.Notify(SimbaIDEEvent.WINDOW_SELECTED, nil);
     end;
   except
     on E: Exception do

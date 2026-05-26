@@ -14,8 +14,6 @@ uses
   simba.base;
 
 function ImageWidthForDPI(DPI: Integer): Integer;
-procedure MenuItemHeight(Item: TMenuItem; Canvas: TCanvas; var Height: Integer);
-
 function RunDump(FileName: String; Commands: TStringArray): TStringList;
 
 type
@@ -42,16 +40,10 @@ type
 implementation
 
 uses
-  simba.settings, simba.process, simba.fs, simba.env;
+  simba.process, simba.fs, simba.env;
 
 function ImageWidthForDPI(DPI: Integer): Integer;
 begin
-  if not SimbaSettings.General.CustomImageSize.IsDefault() then
-  begin
-    Result := SimbaSettings.General.CustomImageSize.Value;
-    Exit;
-  end;
-
   if (DPI <= 96) then
     Result := 16  // 100%, no scaling
   else
@@ -62,18 +54,6 @@ begin
     Result := 24  // 150%
   else
     Result := 32; // 200% +
-end;
-
-procedure MenuItemHeight(Item: TMenuItem; Canvas: TCanvas; var Height: Integer);
-var
-  ImgWidth: Integer;
-begin
-  if not Item.IsLine then
-  begin
-    ImgWidth := ImageWidthForDPI(Canvas.Font.PixelsPerInch);
-    if (ImgWidth > 16) then
-      Height := Round(ImgWidth * 1.5);
-  end;
 end;
 
 function RunDump(FileName: String; Commands: TStringArray): TStringList;
