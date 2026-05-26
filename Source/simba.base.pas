@@ -278,12 +278,13 @@ type
 
 const
   // #0#0 + Typ + 8-char Hex String
-  DEBUG_RED    = #0#0#1'000000FF';
-  DEBUG_YELLOW = #0#0#1'0000FFFF';
-  DEBUG_GREEN  = #0#0#1'0000FF00';
-  DEBUG_RESET  = #0#0#2'00000000';
-  DEBUG_CLEAR  = #0#0#3'00000000';
-  DEBUG_FOCUS  = #0#0#4'00000000';
+  DEBUG_COLOR_PREFIX = #0#0#1;
+  DEBUG_RED          = #0#0#1'000000FF';
+  DEBUG_YELLOW       = #0#0#1'0000FFFF';
+  DEBUG_GREEN        = #0#0#1'0000FF00';
+  DEBUG_RESET        = #0#0#2'00000000';
+  DEBUG_CLEAR        = #0#0#3'00000000';
+  DEBUG_FOCUS        = #0#0#4'00000000';
 
 procedure Debug(Msg: String); overload;
 procedure Debug(Msg: String; Args: array of const); overload;

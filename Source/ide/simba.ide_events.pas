@@ -6,7 +6,7 @@
 unit simba.ide_events;
 
 {$i simba.inc}
-{$DEFINE SIMBA_PRINT_IDE_EVENTS}
+{.$DEFINE SIMBA_PRINT_IDE_EVENTS}
 
 interface
 

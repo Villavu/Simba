@@ -9,7 +9,7 @@
 unit simba.initializations;
 
 {$i simba.inc}
-{$define SIMBA_DEBUG_INITIALZATIONS}
+{.$define SIMBA_DEBUG_INITIALZATIONS}
 
 interface
 

@@ -1,0 +1,15 @@
+begin
+  SetWriteColor(Colors.RED);
+  Write('Red');
+  ResetWriteColor();
+  Write(' ');
+  SetWriteColor(Colors.AQUA);
+  Write('Aqua');
+  ResetWriteColor();
+  WriteLn();
+
+  SetWriteColor(Colors.YELLOW);
+  WriteLn('Hello');
+  WriteLn('World');
+  ResetWriteColor();
+end;

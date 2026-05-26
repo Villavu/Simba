@@ -17,7 +17,7 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="191">
+      <Resources Count="192">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
         <Resource_2 FileName="..\Examples\static_method.simba" Type="RCDATA" ResourceName="EXAMPLE_STATIC_METHOD"/>
@@ -209,6 +209,7 @@
         <Resource_188 FileName="..\Images\package_updates.png" Type="RCDATA" ResourceName="PACKAGE_UPDATES"/>
         <Resource_189 FileName="..\Images\package_updates_150.png" Type="RCDATA" ResourceName="PACKAGE_UPDATES_150"/>
         <Resource_190 FileName="..\Images\package_updates_200.png" Type="RCDATA" ResourceName="PACKAGE_UPDATES_200"/>
+        <Resource_191 FileName="..\Examples\writeln-colors.simba" Type="RCDATA" ResourceName="EXAMPLE_WRITELN-COLORS"/>
       </Resources>
     </General>
     <VersionInfo>
