@@ -63,7 +63,7 @@ begin
     TabContents := FTabContents[I];
 
     ZipPath := TSimbaPath.PathJoin([SimbaEnv.BackupsPath, TabName + '.zip']);
-    if ZipHasEntryCrc(ZipPath, CRC32(@TabContents, Length(TabContents))) then
+    if ZipHasEntryCrc(ZipPath, CRC32(@TabContents[1], Length(TabContents))) then
       Continue;
 
     if ZipAppend(ZipPath, '', TabContents) then
