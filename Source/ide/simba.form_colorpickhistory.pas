@@ -57,7 +57,7 @@ uses
   Clipbrd, LCLType, AnchorDocking,
   simba.dialog,
   simba.colormath, simba.component_theme, simba.settings, simba.vartype_string,
-  simba.ide_dockinghelpers;
+  simba.ide_docking;
 
 type
   TColorHistoryValue = packed record

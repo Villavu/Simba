@@ -94,7 +94,7 @@ uses
   simba.env,
   simba.vartype_string,
   simba.component_images,
-  simba.ide_dockinghelpers,
+  simba.ide_docking,
   simba.ide_simpleformatter,
   simba.ide_controller,
   simba.ide_editor_commands,

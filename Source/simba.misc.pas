@@ -16,7 +16,6 @@ function GetDefaultFontSize: Integer;
 function GetFontSize(Control: TWinControl; IncAmount: Integer = 0): Integer;
 function IsFontFixed(FontName: String): Boolean;
 function GetFixedFonts: TStringArray;
-function GetDefaultFontName: String;
 
 generic function GetEnumDecl<EnumType>(IsScoped, HasGaps: Boolean): String;
 
@@ -25,10 +24,6 @@ implementation
 uses
   Graphics, LCLIntf, LCLType,
   simba.containers;
-
-var
-  DefaultFontName: String;
-  DefaultFontNameDone: Boolean = False;
 
 // Font size can be zero, so this is needed!
 function GetDefaultFontSize: Integer;
@@ -115,24 +110,6 @@ begin
     Result := Strings.ToStringArray();
   finally
     Strings.Free();
-  end;
-end;
-
-function GetDefaultFontName: String;
-begin
-  if DefaultFontNameDone then
-    Result := DefaultFontName
-  else
-  begin
-    with TBitmap.Create() do
-    try
-      DefaultFontName := GetFontData(Canvas.Font.Reference.Handle).Name;
-      DefaultFontNameDone := True;
-
-      Result := DefaultFontName;
-    finally
-      Free();
-    end;
   end;
 end;
 

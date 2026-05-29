@@ -98,7 +98,7 @@ implementation
 uses
   Menus,
   AnchorDocking,
-  simba.ide_dockinghelpers,
+  simba.ide_docking,
   simba.ide_controller,
   simba.threading,
   simba.component_theme,

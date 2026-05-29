@@ -48,7 +48,7 @@ uses
   Menus,
   AnchorDocking,
   Graphics,
-  simba.ide_dockinghelpers,
+  simba.ide_docking,
   simba.initializations,
   simba.vartype_matrix,
   simba.image_lazbridge,

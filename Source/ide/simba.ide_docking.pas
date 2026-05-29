@@ -3,23 +3,26 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
 }
-unit simba.ide_dockinghelpers;
+unit simba.ide_docking;
 
 {$I simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, Controls, Menus, Forms, Graphics, AnchorDocking,
+  Classes, SysUtils, Controls, Forms, AnchorDocking,
   simba.base;
+
+const
+  SIMBA_DOCKING_VERSION = 1; // update if saved layout will become invalid (think changing form names)
 
 type
   TSimbaAnchorDockHeader = class(TAnchorDockHeader)
   protected
     procedure ParentFontChanged; override;
     procedure Paint; override;
-
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: integer; WithThemeSpace: Boolean); override;
+    // force top alignment
     procedure SetAlign(Value: TAlign); override;
   public
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
@@ -37,18 +40,11 @@ type
 
     procedure DoShow; override;
     procedure DoHide; override;
-
     function GetHeader: TSimbaAnchorDockHeader;
-
     procedure SetVisible(Value: Boolean); override;
     procedure SetParent(Value: TWinControl); override;
   public
     constructor CreateNew(AOwner: TComponent; Num: Integer = 0); override;
-
-    procedure MakeVisible;
-
-    property NeedRestore: Boolean read FNeedRestore write FNeedRestore;
-    property NeedDefaultPosition: Boolean read FNeedDefaultPosition write FNeedDefaultPosition;
     property Header: TSimbaAnchorDockHeader read GetHeader;
   end;
 
@@ -56,11 +52,8 @@ type
   protected
     procedure Paint; override;
     procedure DblClick; override;
-
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
-  public
-    constructor Create(TheOwner: TComponent); override;
   end;
 
   TAnchorDockMasterHelper = class helper for TAnchorDockMaster
@@ -76,15 +69,16 @@ type
     function SaveLayout: String;
     function LoadLayout(Layout: String): Boolean;
 
-
     procedure Show(Form: TCustomForm);
   end;
 
 implementation
 
 uses
-  XMLPropStorage, LazConfigStorage,
-  simba.component_theme, simba.misc, simba.ide_events, simba.threading;
+  Graphics, XMLPropStorage, LazConfigStorage,
+  simba.ide_events,
+  simba.component_theme,
+  simba.misc;
 
 procedure TSimbaAnchorDockHeader.ParentFontChanged;
 begin
@@ -150,12 +144,9 @@ constructor TSimbaAnchorDockHeader.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  PopupMenu := nil;
-
   CloseButton.Parent := nil;
-  //MinimizeButton.Parent := nil;
+  MinimizeButton.Parent := nil;
 
-  ParentFont := True;
   Color := SimbaComponentTheme.ColorFrame;
 end;
 
@@ -195,18 +186,6 @@ begin
   inherited CreateNew(AOwner, Num);
 
   FNeedDefaultPosition := True;
-end;
-
-procedure TSimbaAnchorDockHostSite.MakeVisible;
-begin
-  if FNeedDefaultPosition then
-  begin
-    FNeedDefaultPosition := False;
-    with Application.MainForm.Monitor.WorkareaRect.CenterPoint do
-      BoundsRect := TRect.Create(X - (Width div 2), Y - (Height div 2), X + (Width div 2), Y + (Height div 2));
-  end;
-
-  EnsureVisible();
 end;
 
 procedure TSimbaAnchorDockHostSite.DoShow;
@@ -258,17 +237,11 @@ begin
   inherited MouseUp(Button, Shift, X, Y);
 end;
 
-constructor TSimbaAnchorDockSplitter.Create(TheOwner: TComponent);
-begin
-  inherited Create(TheOwner);
-
-  PopupMenu := nil;
-end;
-
 procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm);
 begin
   inherited MakeDockable(Form, False, False, True);
 
+  Form.Name := Form.ClassName;
   if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
     Form.AddHandlerClose(@OnFormClose, True);
 end;
@@ -283,7 +256,7 @@ begin
     Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
     if Screen.CustomForms[I].Showing and (Site is TSimbaAnchorDockHostSite) and Site.Floating then
     begin
-      Site.NeedRestore := True;
+      Site.FNeedRestore := True;
       Site.CloseSite();
     end;
   end;
@@ -297,10 +270,10 @@ begin
   for I := 0 to Screen.CustomFormCount - 1 do
   begin
     Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
-    if (Site is TSimbaAnchorDockHostSite) and Site.NeedRestore then
+    if (Site is TSimbaAnchorDockHostSite) and Site.FNeedRestore then
     begin
       inherited MakeVisible(Screen.CustomForms[I], False);
-      Site.NeedRestore := False;
+      Site.FNeedRestore := False;
     end;
   end;
 end;
@@ -379,11 +352,11 @@ function TAnchorDockMasterHelper.LoadLayout(Layout: String): Boolean;
 
         Config.UndoAppendBasePath();
 
-        if R.IsEmpty() then
-          Continue;
-
-        TSimbaAnchorDockHostSite(Form.HostDockSite).NeedDefaultPosition := False;
-        TSimbaAnchorDockHostSite(Form.HostDockSite).BoundsRect := R;
+        if not R.IsEmpty() then
+        begin
+          TSimbaAnchorDockHostSite(Form.HostDockSite).FNeedDefaultPosition := False;
+          TSimbaAnchorDockHostSite(Form.HostDockSite).BoundsRect := R;
+        end;
       end;
 
       Config.UndoAppendBasePath();
@@ -421,14 +394,14 @@ begin
 
     if Visible then
     begin
-      if Site.NeedDefaultPosition then
+      if Site.FNeedDefaultPosition then
       begin
         Center := Application.MainForm.Monitor.WorkareaRect.CenterPoint;
         Site.BoundsRect := Rect(
             Center.X - (Site.Width div 2), Center.Y - (Site.Height div 2),
             Center.X + (Site.Width div 2), Center.Y + (Site.Height div 2)
           );
-        Site.NeedDefaultPosition := False;
+        Site.FNeedDefaultPosition := False;
       end;
       Site.EnsureVisible();
     end else

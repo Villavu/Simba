@@ -63,7 +63,7 @@ uses
   AnchorDocking,
   simba.initializations,
   simba.component_images,
-  simba.ide_dockinghelpers,
+  simba.ide_docking,
   simba.ide_controller,
   simba.fs;
 

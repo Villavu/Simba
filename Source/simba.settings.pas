@@ -85,6 +85,7 @@ type
     General: record
       TrayIconVisible: TSimbaSetting;
       Layout: TSimbaSetting;
+      LayoutVersion: TSimbaSetting;
       LockLayout: TSimbaSetting;
       Notes: TSimbaSetting;
       RecentFiles: TSimbaSetting;
@@ -483,6 +484,7 @@ begin
   General.TrayIconVisible    := TSimbaSetting_Boolean.Create(Self, 'General', 'TrayIconVisible', True);
   General.LockLayout         := TSimbaSetting_Boolean.Create(Self, 'General', 'LockLayout', False);
   General.Layout             := TSimbaSetting_BinaryString.Create(Self, 'General', 'Layout', '');
+  General.LayoutVersion      := TSimbaSetting_Integer.Create(Self, 'General', 'LayoutVersion', -1);
   General.Notes              := TSimbaSetting_BinaryString.Create(Self, 'General', 'Notes', '');
   General.RecentFiles        := TSimbaSetting_BinaryString.Create(Self, 'General', 'RecentFiles', '');
   General.ToolbarSize        := TSimbaSetting_Integer.Create(Self, 'General', 'ToolbarSize', 24);

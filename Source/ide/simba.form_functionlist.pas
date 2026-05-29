@@ -48,7 +48,7 @@ implementation
 uses
   AnchorDocking, Menus,
   simba.initializations,
-  simba.ide_dockinghelpers,
+  simba.ide_docking,
   simba.threading;
 
 function TSimbaFunctionListForm.PageForTab(Tab: TSimbaScriptTab): TSimbaFunctionListPage;

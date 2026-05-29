@@ -122,7 +122,7 @@ uses
   simba.ide_scriptbackup,
   simba.ide_associate,
   simba.ide_debugimage,
-  simba.ide_dockinghelpers,
+  simba.ide_docking,
   simba.ide_dtmeditor,
   simba.ide_controller,
 
@@ -339,7 +339,8 @@ begin
     DockMaster.MakeDockable(SimbaBackupsForm);
     DockMaster.MakeDockable(SimbaFindInFilesForm);
 
-    if (SimbaSettings.General.Layout.Value <> '') then
+    if (SimbaSettings.General.Layout.Value <> '') and
+       (SimbaSettings.General.LayoutVersion.Value = SIMBA_DOCKING_VERSION) then
     begin
       DockMaster.LoadLayout(SimbaSettings.General.Layout.Value);
 
@@ -400,7 +401,10 @@ begin
   begin
     CloseAction := caFree;
     if (WindowState <> wsMinimized) then
+    begin
       SimbaSettings.General.Layout.Value := DockMaster.SaveLayout();
+      SimbaSettings.General.LayoutVersion.Value := SIMBA_DOCKING_VERSION;
+    end;
 
     Visible := False;
   end;

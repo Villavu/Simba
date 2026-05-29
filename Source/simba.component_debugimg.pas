@@ -57,7 +57,7 @@ type
 implementation
 
 uses
-  simba.ide_dockinghelpers,
+  simba.ide_docking,
   simba.image_lazbridge,
   simba.colormath, simba.datetime;
 

@@ -36,7 +36,7 @@ implementation
 
 uses
   AnchorDocking, Menus,
-  simba.ide_dockinghelpers;
+  simba.ide_docking;
 
 procedure TSimbaNotesForm.FormDestroy(Sender: TObject);
 begin

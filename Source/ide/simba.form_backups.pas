@@ -72,7 +72,7 @@ implementation
 
 uses
   AnchorDocking, Menus,
-  simba.ide_dockinghelpers,
+  simba.ide_docking,
   simba.ide_controller,
   simba.component_button,
   simba.env,
