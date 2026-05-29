@@ -20,7 +20,7 @@ const
 type
   TSimbaFile = class
   private
-    class function DoFileRead(const FileName: String; Len, Offset: Integer; out Bytes: TByteArray): Boolean;
+    class function DoFileRead(const FileName: String; Len, Offset: Int64; out Bytes: TByteArray): Boolean;
     class function DoFileWrite(const FileName: String; const Bytes: TByteArray; Seek: TSeekOrigin; Offset: Integer): Boolean;
   public
     // Read/Write String
@@ -372,7 +372,7 @@ begin
   Result := False;
 end;
 
-class function TSimbaFile.DoFileRead(const FileName: String; Len, Offset: Integer; out Bytes: TByteArray): Boolean;
+class function TSimbaFile.DoFileRead(const FileName: String; Len, Offset: Int64; out Bytes: TByteArray): Boolean;
 var
   Stream: TFileStream;
 begin
@@ -383,7 +383,7 @@ begin
   try
     Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
     if (Len = -1) then
-      Len := $FFFFFF;
+      Len := High(Int64);
     SetLength(Bytes, Min(Len, Stream.Size - Offset));
     if (Length(Bytes) > 0) then
     begin
