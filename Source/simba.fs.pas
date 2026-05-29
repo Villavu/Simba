@@ -375,6 +375,7 @@ end;
 class function TSimbaFile.DoFileRead(const FileName: String; Len, Offset: Int64; out Bytes: TByteArray): Boolean;
 var
   Stream: TFileStream;
+  BytesToRead: SizeInt;
 begin
   Result := False;
 
@@ -382,15 +383,20 @@ begin
   Stream := nil;
   try
     Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
-    if (Len = -1) then
-      Len := High(Int64);
-    SetLength(Bytes, Min(Len, Stream.Size - Offset));
-    if (Length(Bytes) > 0) then
+    if (Offset >= 0) and (Offset < Stream.Size) then
     begin
-      Stream.Seek(Offset, soBeginning);
-      Stream.ReadBuffer(Bytes[0], Length(Bytes));
+      BytesToRead := Stream.Size - Offset;
+      if (Len >= 0) and (Len < BytesToRead) then
+        BytesToRead := Len;
+      SetLength(Bytes, BytesToRead);
 
-      Result := True;
+      if (Length(Bytes) > 0) then
+      begin
+        Stream.Seek(Offset, soBeginning);
+        Stream.ReadBuffer(Bytes[0], Length(Bytes));
+
+        Result := True;
+      end;
     end;
   except
   end;
