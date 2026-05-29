@@ -25,7 +25,7 @@ uses
   simba.openssl,
   simba.ide_colorpicker, simba.ide_windowselector, simba.ide_areaselector,
   simba.ide_mainmenubar, simba.ide_maintoolbar, simba.ide_mainstatusbar,
-  simba.form_functionlist, simba.form_output;
+  simba.form_functionlist, simba.form_output, simba.ide_debugimage;
 
 begin
   {$IF DECLARED(HEAPTRC)}
