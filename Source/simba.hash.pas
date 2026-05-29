@@ -5,7 +5,7 @@
 }
 unit simba.hash;
 
-{$i simba.Inc}
+{$i simba.inc}
 
 interface
 

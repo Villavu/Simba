@@ -10,9 +10,8 @@ unit simba.component_debugimg;
 interface
 
 uses
-  Classes, SysUtils, Controls, Forms, Graphics,
+  Classes, SysUtils, Controls, Forms, Graphics, syncobjs,
   simba.base,
-  simba.threading,
   simba.component_imagebox;
 
 type
@@ -22,7 +21,7 @@ type
   protected
     FImageBox: TSimbaImageBox;
     FBackBuffer: TBitmap;
-    FUpdating: TEnterableLock;
+    FUpdating: TCriticalSection;
 
     FLastRepaint: Double;
     FNeedRepaint: Boolean;
@@ -59,7 +58,9 @@ implementation
 uses
   simba.ide_docking,
   simba.image_lazbridge,
-  simba.colormath, simba.datetime;
+  simba.colormath,
+  simba.datetime,
+  simba.threading;
 
 procedure TSimbaDebugImageForm.Close;
 var
@@ -113,6 +114,8 @@ constructor TSimbaDebugImageForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
+  FUpdating := TCriticalSection.Create();
+
   FMaxWidth := 1500;
   FMaxHeight := 1000;
 
@@ -132,6 +135,8 @@ begin
     FreeAndNil(FBackBuffer);
   if (FImageBox.Background <> nil) then
     FImageBox.Background.Free();
+  if (FUpdating <> nil) then
+    FreeAndNil(FUpdating);
 
   inherited Destroy();
 end;
