@@ -77,6 +77,7 @@ begin
     addGlobalType([
       'record',
       '  Glyphs: array of TPixelFontGlyph;',
+      '  GlyphSimilarities: array of TByteArray;',
       '  SpaceWidth: Integer;',
       '  MaxGlyphHeight: Integer;',
       '  MaxGlyphWidth: Integer;',

@@ -41,6 +41,12 @@ type
 
   TPixelFont = record
     Glyphs: array of TPixelFontGlyph;
+    // Store similaries to each other glyph in the set.
+    // Stored as a byte for memory optimization. (worst case if 255 glyphs = 64KB, aka nothing)
+    // Tiny bit of accuracy lost, but nothing really. `val / 255` to get single value back.
+    // If width and height between two glyphs aren't exactly the same the match is 0.
+    GlyphSimilarities: array of TByteArray;
+
     SpaceWidth: Integer;
     MaxGlyphWidth: Integer;
     MaxGlyphHeight: Integer;
@@ -356,11 +362,33 @@ begin
   end;
 end;
 
+function GlyphSimilarity(const A, B: TPixelFontGlyph): Single;
+var
+  Img: TByteArray;
+  P: TPoint;
+  Hit, Miss: Integer;
+begin
+  if (A.Width <> B.Width) or (A.Height <> B.Height) or (A.Width = 0) then
+    Exit(0.0);
+
+  SetLength(Img, A.Width * A.Height);
+  for P in A.Points do
+    Img[P.Y * A.Width + P.X] := 255;
+
+  Hit := 0;
+  for P in B.Points do
+    if Img[P.Y * A.Width + P.X] = 255 then
+      Inc(Hit);
+  Miss := Length(A.Points) + Length(B.Points) - (2 * Hit);
+
+  Result := 1.0 - (Miss / Length(Img));
+end;
+
 class function TPixelOCR.LoadFont(Dir: String; SpaceWidth: Integer): TPixelFont;
 var
   Image: TSimbaImage;
   Files: TStringArray;
-  I, Count: Integer;
+  I,J, Count: Integer;
   Character: String;
   Glyph: TPixelFontGlyph;
   B: TBox;
@@ -428,6 +456,12 @@ begin
 
     Image.Free();
   end;
+
+  SetLength(Result.GlyphSimilarities, Count, Count);
+  for I := 0 to Count-1 do
+    for J := 0 to Count-1 do
+      if (I <> J) then
+        Result.GlyphSimilarities[I][J] := Round(GlyphSimilarity(Result.Glyphs[I], Result.Glyphs[J]) * 255);
 end;
 
 class function TPixelOCR.TextToTPA(constref Font: TPixelFont; Text: String; out Background: TPointArray): TPointArray;
