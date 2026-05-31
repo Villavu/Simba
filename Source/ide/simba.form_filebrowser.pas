@@ -86,7 +86,6 @@ uses
   Clipbrd, AnchorDocking,
   simba.ide_docking,
   simba.component_images,
-  simba.ide_utils,
   simba.ide_controller,
   simba.fs;
 

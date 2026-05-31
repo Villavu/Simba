@@ -16,7 +16,8 @@ uses
   Classes, SysUtils, Controls,
   simba.base,
   simba.ide_tab,
-  simba.ide_output_components;
+  simba.ide_output_components,
+  simba.ide_codetools_parser;
 
 type
   SimbaController = class
@@ -40,6 +41,7 @@ type
 
     class procedure ShowTrayNotifaction(Title, Message: String; Timeout: Integer); static;
     class procedure SetWindowTitle(Title: String); static;
+    class procedure ShowDecl(Decl: TDeclaration); static;
   end;
 
 implementation
@@ -234,6 +236,46 @@ begin
   ASSERT_MAIN_THREAD
 
   SimbaMainForm.Caption := Title;
+end;
+
+class procedure SimbaController.ShowDecl(Decl: TDeclaration);
+begin
+  if (Decl = nil) then
+    Exit;
+
+  ASSERT_MAIN_THREAD
+
+  case Decl.Parser.SourceType of
+    EParserSourceType.SIMBA:
+      begin
+        DebugLn('Declared internally in Simba: %s', [Decl.DocPos.FileName]);
+        DebugLn('Declaration: %s', [Decl.Header]);
+        DebugLn(DEBUG_FOCUS);
+      end;
+
+    EParserSourceType.PLUGIN:
+      begin
+        DebugLn('Declared internally in plugin: %s', [Decl.DocPos.FileName]);
+        DebugLn('Declaration: %s', [Decl.Header]);
+        DebugLn(DEBUG_FOCUS);
+      end;
+
+    EParserSourceType.SCRIPT,
+    EParserSourceType.INCLUDE:
+      begin
+        if FileExists(Decl.DocPos.FileName) then
+          SimbaScriptTabsForm.Open(Decl.DocPos.FileName);
+
+        with SimbaScriptTabsForm.ActiveTab.Editor do
+        begin
+          SelStart := Decl.StartPos;
+          SelEnd := Decl.EndPos;
+          TopLine := (Decl.DocPos.Line + 1) - (LinesInWindow div 2);
+          if CanSetFocus() then
+            SetFocus();
+        end;
+      end;
+  end;
 end;
 
 end.

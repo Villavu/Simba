@@ -45,8 +45,8 @@ implementation
 uses
   LCLType,
   simba.component_images,
-  simba.ide_editor, simba.nativeinterface,
-  simba.ide_tab, simba.form_scripttabs, simba.ide_utils, simba.ide_codetools_debug,
+  simba.nativeinterface,
+  simba.ide_tab, simba.form_scripttabs, simba.ide_codetools_debug,
   simba.ide_editor_commands;
 
 type

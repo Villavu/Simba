@@ -14,8 +14,7 @@ uses
   Classes, SysUtils, ExtCtrls,
   simba.base,
   simba.colormath,
-  simba.containers,
-  simba.ide_package;
+  simba.containers;
 
 type
   {$PUSH}
@@ -139,7 +138,7 @@ type
     // Event called when a tabs script state changes. Data=TSimbaScriptTab
     TAB_SCRIPTSTATE_CHANGE,
 
-    //Data=TSimbaFunctionListNode
+    //Data=TDeclaration
     FUNCTIONLIST_SELECTION_CHANGE,
 
     // Color selector used. Data=TSimbaEventData_ColorPicked

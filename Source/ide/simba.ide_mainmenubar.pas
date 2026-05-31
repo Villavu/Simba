@@ -157,7 +157,6 @@ procedure TSimbaMainMenuBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   // update recent files submenu
   procedure DoTabLoaded(Tab: TSimbaScriptTab);
   var
-    I: Integer;
     Files: TStringList;
   begin
     Files := TStringList.Create();

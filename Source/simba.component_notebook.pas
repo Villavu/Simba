@@ -12,8 +12,7 @@ unit simba.component_notebook;
 interface
 
 uses
-  Classes, SysUtils, Controls, ExtCtrls,
-  simba.containers;
+  Classes, SysUtils, Controls, ExtCtrls;
 
 type
   TSimbaPageClass = class of TSimbaPage;

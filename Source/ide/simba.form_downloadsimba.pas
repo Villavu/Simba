@@ -100,7 +100,6 @@ implementation
 
 uses
   ATCanvasPrimitives,
-  simba.image,
   simba.component_theme,
   simba.component_images,
   simba.vartype_string,

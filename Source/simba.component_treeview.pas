@@ -29,18 +29,20 @@ type
       procedure BeginUpdate; override;
       procedure EndUpdate; override;
     end;
+  private
+    FNodeClass: TTreeNodeClass;
   protected
     FWasDragging: Boolean; // dont do what we do in MouseUp if we're dragging
     FLoading: Boolean;
     FScrollbarVert: TSimbaScrollBar;
     FScrollbarHorz: TSimbaScrollBar;
-
     FOnBeginUpdate: TNotifyEvent;
     FOnEndUpdate: TNotifyEvent;
 
+
     procedure DoBeginUpdate(Sender: TObject);
     procedure DoEndUpdate(Sender: TObject);
-
+    procedure DoCreateNodeClass(var NewNodeClass: TTreeNodeClass); override;
     function CreateNodes: TTreeNodes; override;
     procedure UpdateScrollBars;
     procedure DoSelectionChanged; override;
@@ -53,6 +55,11 @@ type
     procedure Paint; override;
     procedure SetLoading(Value: Boolean);
   public
+    constructor Create(AnOwner: TComponent; NodeClass: TTreeNodeClass); reintroduce;
+
+    function AddNodeWithClass(NodeClass: TTreeNodeClass; ParentNode: TTreeNode; NodeText: String; ImageIndex: Integer = -1): TTreeNode;
+    function AddNode(ParentNode: TTreeNode; NodeText: String; ImageIndex: Integer = -1): TTreeNode;
+
     function GetMaxLvl: integer; reintroduce;
 
     property Loading: Boolean read FLoading write SetLoading;
@@ -83,7 +90,6 @@ type
     FFilterUseCustom: Boolean;
     FOnClear: TNotifyEvent;
     FOnModify: TNotifyEvent;
-    FNodeClass: TTreeNodeClass;
     FTempBackgroundColor: TColor;
     FFilterOnlyTopLevel: Boolean;
     FFilterCollapseOnClear: Boolean;
@@ -123,7 +129,6 @@ type
     procedure DoClearFilterClick(Sender: TObject);
     procedure DoFilterEditChange(Sender: TObject);
     procedure DoMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure DoCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
     procedure DoDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; Stage: TCustomDrawStage; var PaintImages, DefaultDraw: Boolean);
     procedure DoScrollHorzChange(Sender: TObject);
     procedure DoScrollVertChange(Sender: TObject);
@@ -180,6 +185,8 @@ type
 
     function AddNode(const NodeText: String; const ImageIndex: Integer = -1): TTreeNode; overload;
     function AddNode(const ParentNode: TTreeNode; const NodeText: String; const ImageIndex: Integer = -1): TTreeNode; overload;
+    function AddNodeWithClass(NodeClass: TTreeNodeClass; NodeText: String; ImageIndex: Integer = -1): TTreeNode; overload;
+    function AddNodeWithClass(NodeClass: TTreeNodeClass; ParentNode: TTreeNode; NodeText: String; ImageIndex: Integer = -1): TTreeNode; overload;
 
     procedure AddKeyEvent(Key: Integer; Shift: TShiftState; Callback: TKeyEvent);
     procedure RemoveKeyEvent(Key: Integer; Shift: TShiftState; Callback: TKeyEvent);
@@ -202,8 +209,6 @@ begin
 
   ControlStyle := ControlStyle + [csOpaque];
 
-  FNodeClass := NodeClass;
-
   test := TCustomControl.Create(Self);
   test.Parent := Self;
   test.Align := alClient;
@@ -223,7 +228,7 @@ begin
   FScrollbarHorz.OnChange := @DoScrollHorzChange;
   FScrollbarHorz.Visible := True;
 
-  FTree := TSimbaInternalTreeView.Create(Self);
+  FTree := TSimbaInternalTreeView.Create(Self, NodeClass);
   FTree.Parent := test;
   FTree.Align := alClient;
   FTree.ScrollBars := ssNone;
@@ -234,7 +239,6 @@ begin
   FTree.ExpandSignType := tvestArrow;
   FTree.ExpandSignColor := clWhite;
   FTree.TreeLinePenStyle := psClear;
-  FTree.OnCreateNodeClass := @DoCreateNodeClass;
   FTree.OnCustomDrawArrow := @DoDrawArrow;
   FTree.OnMouseMove := @DoMouseMove;
   FTree.DragMode := dmAutomatic;
@@ -355,20 +359,22 @@ end;
 
 function TSimbaTreeView.AddNode(const NodeText: String; const ImageIndex: Integer): TTreeNode;
 begin
-  Result := FTree.Items.Add(nil, NodeText);
-  Result.ImageIndex := ImageIndex;
-  Result.SelectedIndex := ImageIndex;
+  Result := FTree.AddNode(nil, NodeText, ImageIndex);
 end;
 
 function TSimbaTreeView.AddNode(const ParentNode: TTreeNode; const NodeText: String; const ImageIndex: Integer): TTreeNode;
 begin
-  if (ParentNode = nil) then
-    Result := FTree.Items.Add(nil, NodeText)
-  else
-    Result := FTree.Items.AddChild(ParentNode, NodeText);
+  Result := FTree.AddNode(ParentNode, NodeText, ImageIndex);
+end;
 
-  Result.ImageIndex := ImageIndex;
-  Result.SelectedIndex := ImageIndex;
+function TSimbaTreeView.AddNodeWithClass(NodeClass: TTreeNodeClass; NodeText: String; ImageIndex: Integer): TTreeNode;
+begin
+  Result := FTree.AddNodeWithClass(NodeClass, nil, NodeText, ImageIndex);
+end;
+
+function TSimbaTreeView.AddNodeWithClass(NodeClass: TTreeNodeClass; ParentNode: TTreeNode; NodeText: String; ImageIndex: Integer): TTreeNode;
+begin
+  Result := FTree.AddNodeWithClass(NodeClass, ParentNode, NodeText, ImageIndex);
 end;
 
 procedure TSimbaTreeView.AddKeyEvent(Key: Integer; Shift: TShiftState; Callback: TKeyEvent);
@@ -608,14 +614,6 @@ begin
   end;
 end;
 
-procedure TSimbaTreeView.DoCreateNodeClass(Sender: TCustomTreeView; var NodeClass: TTreeNodeClass);
-begin
-  if Assigned(FNodeClass) then
-    NodeClass := FNodeClass
-  else
-    NodeClass := TTreeNode;
-end;
-
 procedure TSimbaTreeView.DoDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; Stage: TCustomDrawStage; var PaintImages, DefaultDraw: Boolean);
 var
   TheColor: TColor;
@@ -731,6 +729,12 @@ begin
   TSimbaInternalTreeNodes(Result).OnEndUpdate := @DoEndUpdate;
 end;
 
+procedure TSimbaInternalTreeView.DoCreateNodeClass(var NewNodeClass: TTreeNodeClass);
+begin
+  if (FNodeClass <> nil) then
+    NewNodeClass := FNodeClass;
+end;
+
 procedure TSimbaInternalTreeView.UpdateScrollBars();
 begin
   if FScrollbarVert=nil then Exit;
@@ -793,6 +797,40 @@ begin
   FLoading := Value;
 
   Invalidate();
+end;
+
+constructor TSimbaInternalTreeView.Create(AnOwner: TComponent; NodeClass: TTreeNodeClass);
+begin
+  inherited Create(AnOwner);
+
+  FNodeClass := NodeClass;
+end;
+
+function TSimbaInternalTreeView.AddNodeWithClass(NodeClass: TTreeNodeClass; ParentNode: TTreeNode; NodeText: String; ImageIndex: Integer): TTreeNode;
+var
+  OldNodeClass: TTreeNodeClass;
+begin
+  OldNodeClass := FNodeClass;
+
+  FNodeClass := NodeClass;
+  if (ParentNode = nil) then
+    Result := Items.Add(nil, NodeText)
+  else
+    Result := Items.AddChild(ParentNode, NodeText);
+  Result.ImageIndex := ImageIndex;
+  Result.SelectedIndex := ImageIndex;
+
+  FNodeClass := OldNodeClass;
+end;
+
+function TSimbaInternalTreeView.AddNode(ParentNode: TTreeNode; NodeText: String; ImageIndex: Integer): TTreeNode;
+begin
+  if (ParentNode = nil) then
+    Result := Items.Add(nil, NodeText)
+  else
+    Result := Items.AddChild(ParentNode, NodeText);
+  Result.ImageIndex := ImageIndex;
+  Result.SelectedIndex := ImageIndex;
 end;
 
 function TSimbaInternalTreeView.GetMaxLvl: integer;

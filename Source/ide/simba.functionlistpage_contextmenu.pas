@@ -1,3 +1,8 @@
+{
+  Author: Raymond van Venetië and Merlijn Wajer
+  Project: Simba (https://github.com/MerlijnWajer/Simba)
+  License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+}
 unit simba.functionlistpage_contextmenu;
 
 {$i simba.inc}
@@ -34,21 +39,22 @@ type
 implementation
 
 uses
+  ComCtrls,
   simba.settings,
   simba.nativeinterface;
 
 procedure TFunctionListPage_ContextMenu.DoOpenSimbaDocClick(Sender: TObject);
 var
-  Node: TSimbaFunctionListNode;
+  Node: TTreeNode;
   Section: String;
 begin
   Section := '';
-  Node := TSimbaFunctionListNode(FPage.TreeView.Selected);
-  if (Node is TSimbaFunctionListNode) then
-    case TSimbaFunctionListNode(Node).NodeType of
-      ntSimbaDecl: Section := IfThen(Node.Parent <> nil, Node.Parent.Text, '');
-      ntSimbaFile: Section := Node.Text;
-    end;
+
+  Node := FPage.TreeView.Selected;
+  if (Node is TSimbaSectionNode) then
+    Section := Node.Text
+  else if (Node is TDeclNode) and (Node.Parent is TSimbaSectionNode) then
+    Section := Node.Parent.Text;
 
   if (Section <> '') then
     SimbaNativeInterface.OpenURL(SIMBA_DOCS_URL + 'api/' + Section)
@@ -65,19 +71,33 @@ begin
   if (FPage.SimbaNode = nil) then
     Exit;
 
-  Hidden := SimbaSettings.FunctionList.HiddenSimbaSections.Value;
-
-  FHideShowSection.Clear();
-  for I := 0 to FPage.SimbaNode.Count - 1 do
+  if (FPage.TreeView.Selected = nil) or (not FPage.TreeView.Selected.HasAsParent(FPage.SimbaNode)) then
   begin
-    NewItem := TMenuItem.Create(FHideShowSection);
-    NewItem.Caption := FPage.SimbaNode.Items[I].Text;
-    NewItem.Checked := Pos('[' + FPage.SimbaNode.Items[I].Text + ']', Hidden) <= 0;
-    NewItem.AutoCheck := True;
-    NewItem.ShowAlwaysCheckable := True;
-    NewItem.OnClick := @DoUpdateHiddenSections;
+    FOpenSimbaDoc.Enabled := False;
+    FHideShowSection.Enabled := False;
+    FShowAll.Enabled := False;
+    FHideAll.Enabled := False;
+  end else
+  begin
+    FOpenSimbaDoc.Enabled := True;
+    FHideShowSection.Enabled := True;
+    FShowAll.Enabled := True;
+    FHideAll.Enabled := True;
 
-    FHideShowSection.Add(NewItem);
+    Hidden := SimbaSettings.FunctionList.HiddenSimbaSections.Value;
+
+    FHideShowSection.Clear();
+    for I := 0 to FPage.SimbaNode.Count - 1 do
+    begin
+      NewItem := TMenuItem.Create(FHideShowSection);
+      NewItem.Caption := FPage.SimbaNode.Items[I].Text;
+      NewItem.Checked := Pos('[' + FPage.SimbaNode.Items[I].Text + ']', Hidden) <= 0;
+      NewItem.AutoCheck := True;
+      NewItem.ShowAlwaysCheckable := True;
+      NewItem.OnClick := @DoUpdateHiddenSections;
+
+      FHideShowSection.Add(NewItem);
+    end;
   end;
 end;
 
@@ -158,13 +178,12 @@ begin
   Assert(AOwner is TSimbaFunctionListPage);
 
   FPage := AOwner as TSimbaFunctionListPage;
-  FHideShowSection := Add('Hide/Show Section', nil);
-  FOpenSimbaDoc := Add('Open Simba Documentation', @DoOpenSimbaDocClick, False, False);
+
   FTooltip := Add('Show Mouse-over tooltip', @DoMouseOverTooltipClick, True, SimbaSettings.FunctionList.ShowMouseoverHint.Value);
-
-  AddLine();
-
   FCollapseAll := Add('Collapse all', @DoCollapseAllClick);
+  AddLine();
+  FOpenSimbaDoc := Add('Open Simba Documentation', @DoOpenSimbaDocClick, False, False);
+  FHideShowSection := Add('Hide/Show Section', nil);
   FShowAll := Add('Show all', @DoShowAllClick);
   FHideAll := Add('Hide all', @DoHideAllClick);
 

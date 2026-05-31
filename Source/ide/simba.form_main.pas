@@ -86,7 +86,6 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
-    procedure ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
     procedure TrayIconClick(Sender: TObject);
     procedure TrayPopupExitClick(Sender: TObject);
   protected
@@ -114,10 +113,6 @@ uses
   AnchorDocking,
 
   simba.initializations,
-
-  simba.vartype_windowhandle,
-
-  simba.ide_utils,
   simba.ide_vars,
   simba.ide_scriptbackup,
   simba.ide_associate,
@@ -125,7 +120,6 @@ uses
   simba.ide_docking,
   simba.ide_dtmeditor,
   simba.ide_controller,
-
   simba.form_colorpickhistory,
   simba.form_findinfiles,
   simba.form_filebrowser,
@@ -134,11 +128,11 @@ uses
   simba.form_backups,
   simba.form_scripttabs,
   simba.form_output,
-
   simba.aca,
   simba.env,
   simba.nativeinterface,
-  simba.threading;
+  simba.threading,
+  simba.vartype_windowhandle;
 
 procedure TSimbaMainForm.DoException(Sender: TObject; E: Exception);
 
@@ -386,11 +380,6 @@ begin
     wsMinimized: DockMaster.Minimized();
     wsNormal:    DockMaster.Restored();
   end;
-end;
-
-procedure TSimbaMainForm.ImagesGetWidthForPPI(Sender: TCustomImageList; AImageWidth, APPI: Integer; var AResultWidth: Integer);
-begin
-  AResultWidth := ImageWidthForDPI(APPI);
 end;
 
 procedure TSimbaMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);

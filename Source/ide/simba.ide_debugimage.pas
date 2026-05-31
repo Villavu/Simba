@@ -196,5 +196,6 @@ end;
 initialization
   SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'DebugImage');
   SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'DebugImage');
+
 end.
 

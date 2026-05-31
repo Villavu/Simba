@@ -169,7 +169,6 @@ procedure TSimbaMainToolBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoTabLoaded(Tab: TSimbaScriptTab);
   var
-    I: Integer;
     Files: TStringList;
   begin
     Files := TStringList.Create();

@@ -6,6 +6,7 @@
 unit simba.functionlist_page;
 
 {$i simba.inc}
+{.$define DEBUG}
 
 interface
 
@@ -21,8 +22,6 @@ uses
   simba.settings;
 
 type
-  ENodeType = (ntNone, ntFile, ntSimbaFile, ntPluginFile, ntSimbaDecl, ntScriptDecl, ntPluginDecl);
-
   TSimbaFunctionListPage = class(TSimbaPage)
   protected
     FTabID: Int64;
@@ -40,8 +39,8 @@ type
     FPluginsNodeState: TTreeNodeExpandedState;
 
     procedure AddSimbaNode;
-    procedure AddDecl(ParentNode: TTreeNode; Decl: TDeclaration; ANodeType: ENodeType);
-    procedure AddIncludes(Parsers: TCodeParserList; ParentNode: TTreeNode; DeclType, FileType: ENodeType);
+    procedure AddDecl(ParentNode: TTreeNode; Decl: TDeclaration);
+    procedure AddIncludes(Parsers: TCodeParserList; ParentNode: TTreeNode);
 
     procedure DoHiddenSimbaSectionsChange(Setting: TSimbaSetting);
     procedure DoCustomOrderChange(Setting: TSimbaSetting);
@@ -67,15 +66,21 @@ type
     procedure Fill;
   end;
 
-  TSimbaFunctionListNode = class(TTreeNode)
+  TDeclNode = class(TTreeNode)
   public
-    NodeType: ENodeType;
-    Hint: String;
-    Line: Integer;
-    StartPos: Integer;
-    EndPos: Integer;
+    Decl: TDeclaration;
+  end;
+
+  TFileNode = class(TTreeNode)
+  public
     FileName: String;
-    Hash: String;
+  end;
+
+  TSimbaSectionNode = class(TTreeNode);
+
+  TParserNode = class(TTreeNode)
+  public
+    Parser: TCodeParser;
   end;
 
 implementation
@@ -84,56 +89,30 @@ uses
   AnchorDocking,
   simba.functionlistpage_contextmenu,
   simba.ide_controller,
-  simba.ide_showdeclaration,
   simba.vartype_string,
   simba.fs,
   simba.threading,
   simba.component_images;
 
-function GetText(const Decl: TDeclaration): String;
-begin
-  Result := Decl.FullName;
-end;
-
-function GetHint(const Decl: TDeclaration): String;
-begin
-  if (Decl is TDeclaration_Property) then
-    Result := PropertyHeader(Decl as TDeclaration_Property)
-  else
-    Result := Decl.Header;
-end;
-
-procedure TSimbaFunctionListPage.AddDecl(ParentNode: TTreeNode; Decl: TDeclaration; ANodeType: ENodeType);
+procedure TSimbaFunctionListPage.AddDecl(ParentNode: TTreeNode; Decl: TDeclaration);
 var
-  Node: TTreeNode;
+  Node: TDeclNode;
   I: Integer;
 begin
   if (Decl.Name = '') then
     Exit;
-  if (ANodeType = ntSimbaDecl) and ((Decl is TDeclaration_Method) and ((Decl.Name[1] = '_') or TDeclaration_Method(Decl).isOverride or TDeclaration_Method(Decl).isOperator)) then
+  if ParentNode.HasAsParent(FSimbaNode) and ((Decl is TDeclaration_Method) and ((Decl.Name[1] = '_') or TDeclaration_Method(Decl).isOverride or TDeclaration_Method(Decl).isOperator)) then
     Exit;
 
-  Node := FTreeView.AddNode(ParentNode, Decl.Name);
-  with TSimbaFunctionListNode(Node) do
-  begin
-    NodeType := ANodeType;
+  Node := TDeclNode(FTreeView.AddNodeWithClass(TDeclNode, ParentNode, Decl.Name, -1));
+  Node.Decl := Decl;
+  Node.Text := Decl.FullName;
+  Node.ImageIndex := DeclarationImage(Decl);
+  Node.SelectedIndex := Node.ImageIndex;
 
-    FileName := Decl.DocPos.FileName;
-    StartPos := Decl.StartPos;
-    EndPos   := Decl.EndPos;
-    Line     := Decl.DocPos.Line;
-
-    Text := GetText(Decl);
-    ImageIndex := DeclarationImage(Decl);
-    SelectedIndex := ImageIndex;
-
-    if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
-    begin
-      for I := 0 to Decl.Items.Count - 1 do
-        AddDecl(Node, Decl.Items[I], ANodeType);
-    end else
-      Hint := GetHint(Decl);
-  end;
+  if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
+    for I := 0 to Decl.Items.Count - 1 do
+      AddDecl(Node, Decl.Items[I]);
 end;
 
 procedure TSimbaFunctionListPage.AddSimbaNode;
@@ -153,10 +132,9 @@ begin
     if (Parser = nil) or (Parser.Items.Count = 0) or (Parser.Lexer.FileName.StartsWith('!')) then
       Continue;
 
-    ParentNode := FTreeView.AddNode(FSimbaNode, Parser.Lexer.FileName, SimbaImages.DOCUMENT);
-    TSimbaFunctionListNode(ParentNode).NodeType := ntSimbaFile;
+    ParentNode := FTreeView.AddNodeWithClass(TSimbaSectionNode, FSimbaNode, Parser.Lexer.FileName, SimbaImages.DOCUMENT);
     for Decl in RemoveDuplicateProperties(Parser.Items.ToArray) do
-      AddDecl(ParentNode, Decl, ntSimbaDecl);
+      AddDecl(ParentNode, Decl);
   end;
 
   //FSimbaNode.AlphaSort();
@@ -166,7 +144,7 @@ begin
   DoCustomOrderChange(SimbaSettings.FunctionList.CustomOrder);
 end;
 
-procedure TSimbaFunctionListPage.AddIncludes(Parsers: TCodeParserList; ParentNode: TTreeNode; DeclType, FileType: ENodeType);
+procedure TSimbaFunctionListPage.AddIncludes(Parsers: TCodeParserList; ParentNode: TTreeNode);
 
   function ShortenFileName(FileName: String): String;
   begin
@@ -176,24 +154,36 @@ procedure TSimbaFunctionListPage.AddIncludes(Parsers: TCodeParserList; ParentNod
       Result := FileName;
   end;
 
+  // If node doesn't exist in parsers or is outdated
   function NeedRemove(Node: TTreeNode): Boolean;
   var
     I: Integer;
+    NodeHash: String;
   begin
-    for I := 0 to Parsers.Count - 1 do
-      if (TSimbaFunctionListNode(Node).Hash = Parsers[I].Hash) then
-        Exit(False);
+    if (Node is TParserNode) then
+    begin
+      NodeHash := TParserNode(Node).Parser.Hash;
+      for I := 0 to Parsers.Count - 1 do
+        if (Parsers[I].Hash = NodeHash) then
+          Exit(False);
+    end;
 
     Result := True;
   end;
 
+  // if parser doesnt exist in nodes and is not outdated
   function NeedAdding(Parser: TCodeParser): Boolean;
   var
     I: Integer;
+    NodeHash: String;
   begin
     for I := 0 to ParentNode.Count - 1 do
-      if (TSimbaFunctionListNode(ParentNode[I]).Hash = Parser.Hash) then
-        Exit(False);
+      if (ParentNode[I] is TParserNode) then
+      begin
+        NodeHash := TParserNode(ParentNode[I]).Parser.Hash;
+        if (NodeHash = Parser.Hash) then
+          Exit(False);
+      end;
 
     Result := True;
   end;
@@ -209,11 +199,13 @@ procedure TSimbaFunctionListPage.AddIncludes(Parsers: TCodeParserList; ParentNod
     // include has multiple files so keep track of current file and add new nodes when needed
     if (Parser.LexersCount > 1) then
     begin
-      RootNode := FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Parser.Lexer.FileName), SimbaImages.SECTION);
-      TSimbaFunctionListNode(RootNode).NodeType := FileType;
-      TSimbaFunctionListNode(RootNode).Hint := ShortenFileName(Parser.Lexer.FileName);
-      TSimbaFunctionListNode(RootNode).FileName := Parser.Lexer.FileName;
-      TSimbaFunctionListNode(RootNode).Hash := Parser.Hash;
+      RootNode := FTreeView.AddNodeWithClass(
+        TParserNode,
+        ParentNode,
+        TSimbaPath.PathExtractNameWithoutExt(Parser.Lexer.FileName),
+        SimbaImages.SECTION
+      );
+      TParserNode(RootNode).Parser := Parser;
 
       CurrentFile := '';
       CurrentNode := nil;
@@ -226,27 +218,28 @@ procedure TSimbaFunctionListPage.AddIncludes(Parsers: TCodeParserList; ParentNod
         if (CurrentFile <> Decl.DocPos.FileName) then
         begin
           CurrentFile := Decl.DocPos.FileName;
-          CurrentNode := FTreeView.AddNode(RootNode, TSimbaPath.PathExtractNameWithoutExt(CurrentFile), SimbaImages.DOCUMENT);
-
-          with TSimbaFunctionListNode(CurrentNode) do
-          begin
-            Hint := ShortenFileName(CurrentFile);
-            FileName := CurrentFile;
-            NodeType := ntFile;
-          end;
+          CurrentNode := FTreeView.AddNodeWithClass(
+            TFileNode,
+            RootNode,
+            TSimbaPath.PathExtractNameWithoutExt(CurrentFile),
+            SimbaImages.DOCUMENT
+          );
+          TFileNode(CurrentNode).FileName := CurrentFile;
         end;
 
-        AddDecl(CurrentNode, Decl, DeclType);
+        AddDecl(CurrentNode, Decl);
       end;
     end else
     begin
-      RootNode := FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Parser.Lexer.FileName), SimbaImages.DOCUMENT);
-      TSimbaFunctionListNode(RootNode).NodeType := FileType;
-      TSimbaFunctionListNode(RootNode).FileName := Parser.Lexer.FileName;
-      TSimbaFunctionListNode(RootNode).Hint := ShortenFileName(Parser.Lexer.FileName);
-      TSimbaFunctionListNode(RootNode).Hash := Parser.Hash;
+      RootNode := FTreeView.AddNodeWithClass(
+        TParserNode,
+        ParentNode,
+        TSimbaPath.PathExtractNameWithoutExt(Parser.Lexer.FileName),
+        SimbaImages.DOCUMENT
+      );
+      TParserNode(RootNode).Parser := Parser;
       for I := 0 to Parser.Items.Count - 1 do
-        AddDecl(RootNode, Parser.Items[I], DeclType);
+        AddDecl(RootNode, Parser.Items[I]);
     end;
   end;
 
@@ -258,7 +251,7 @@ begin
     if NeedRemove(ParentNode[I]) then
     begin
       {$IFDEF DEBUG}
-      WriteLn('Removing include: ', TSimbaFunctionListNode(ParentNode[I]).FileName);
+      DebugLn('Removing include: ' + TParserNode(ParentNode[I]).Parser.Lexer.FileName);
       {$ENDIF}
       ParentNode[I].Free();
     end;
@@ -268,7 +261,7 @@ begin
     if NeedAdding(Parsers[I]) then
     begin
       {$IFDEF DEBUG}
-      WriteLn('Adding include: ', Parsers[I].Lexer.FileName);
+      DebugLn('Adding include: ' + Parsers[I].Lexer.FileName);
       {$ENDIF}
       Add(Parsers[I]);
     end;
@@ -303,32 +296,46 @@ end;
 
 procedure TSimbaFunctionListPage.DoSelectionChanged(Sender: TObject);
 begin
-  if (FTreeView.Selected is TSimbaFunctionListNode) then
-    SimbaEvents.Post(ESimbaEvent.FUNCTIONLIST_SELECTION_CHANGE, FTreeView.Selected);
+  if FTreeView.Items.IsUpdating or (not (FTreeView.Selected is TDeclNode)) then
+    Exit;
+  SimbaEvents.Post(ESimbaEvent.FUNCTIONLIST_SELECTION_CHANGE, TDeclNode(FTreeView.Selected).Decl);
 end;
 
 procedure TSimbaFunctionListPage.DoNodeDoubleClick(Sender: TObject);
 begin
-  if (FTreeView.Selected is TSimbaFunctionListNode) then
-    with TSimbaFunctionListNode(FTreeView.Selected) do
-      case NodeType of
-        ntFile:       SimbaController.OpenInTab(FileName);
-        ntSimbaDecl:  ShowSimbaDeclaration(Hint, FileName);
-        ntScriptDecl: ShowDeclaration(StartPos, EndPos, Line, FileName);
-        ntPluginDecl: ShowPluginDeclaration(Hint, FileName);
-      end;
+  if FTreeView.Items.IsUpdating then
+    Exit;
+
+  if (FTreeView.Selected is TDeclNode) then
+    SimbaController.ShowDecl(TDeclNode(FTreeView.Selected).Decl);
 end;
 
 function TSimbaFunctionListPage.DoGetNodeHint(Node: TTreeNode): String;
 begin
-  if not SimbaSettings.FunctionList.ShowMouseoverHint.Value then
+  if FTreeView.Items.IsUpdating or (not SimbaSettings.FunctionList.ShowMouseoverHint.Value) then
     Exit;
 
-  if (Node is TSimbaFunctionListNode) then
+  if (Node is TDeclNode) then
   begin
-    Result := TSimbaFunctionListNode(Node).Hint;
+    if (TDeclNode(Node).Decl is TDeclaration_Property) then
+      Result := PropertyHeader(TDeclaration_Property(TDeclNode(Node).Decl))
+    else
+      Result := TDeclNode(Node).Decl.Header;
+
     if (Length(Result) > 100) then
       Result := Copy(Result, 1, 100) + ' ...';
+  end
+  else if (Node is TFileNode) or (Node is TParserNode) then
+  begin
+    if (Node is TFileNode) then
+      Result := TFileNode(Node).FileName
+    else if (Node is TParserNode) then
+      Result := TParserNode(Node).Parser.Lexer.FileName
+    else
+      Result := '';
+
+    if TSimbaPath.PathIsInDir(Result, Application.Location) then
+      Result := TSimbaPath.PathExtractRelative(Application.Location, Result);
   end;
 end;
 
@@ -347,14 +354,17 @@ procedure TSimbaFunctionListPage.DoDragDrop(Sender, Source: TObject; X, Y: Integ
   end;
 
 var
-  Node: TSimbaFunctionListNode;
+  Node: TSimbaSectionNode;
   I: Integer;
 begin
+  if FTreeView.Items.IsUpdating then
+    Exit;
+
   if (FSimbaNode = nil) then
     Exit;
 
-  Node := TSimbaFunctionListNode(FTreeView.Selected);
-  if (Node is TSimbaFunctionListNode) and (TSimbaFunctionListNode(Node).NodeType = ntSimbaFile) then
+  Node := TSimbaSectionNode(FTreeView.Selected);
+  if (Node is TSimbaSectionNode) then
   begin
     for I := FSimbaNode.Count - 1 downto 0 do
       if (Y > FSimbaNode[I].DisplayRect(True).Top) then
@@ -367,11 +377,11 @@ begin
 end;
 
 procedure TSimbaFunctionListPage.DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
-var
-  Node: TSimbaFunctionListNode;
 begin
-  Node := TSimbaFunctionListNode(FTreeView.Selected);
-  Accept := (Node is TSimbaFunctionListNode) and (TSimbaFunctionListNode(Node).NodeType = ntSimbaFile);
+  if FTreeView.Items.IsUpdating then
+    Exit;
+
+  Accept := (FTreeView.Selected is TSimbaSectionNode);
 end;
 
 procedure TSimbaFunctionListPage.DoAfterFilter(Sender: TObject);
@@ -397,7 +407,7 @@ begin
 
   FCodeInsight := TCodeinsight.Create();
 
-  FTreeView := TSimbaTreeView.Create(Self, TSimbaFunctionListNode);
+  FTreeView := TSimbaTreeView.Create(Self);
   FTreeView.Parent := Self;
   FTreeView.Align := alClient;
   FTreeView.Images := SimbaImages;
@@ -466,11 +476,11 @@ var
   begin
     FScriptNode.DeleteChildren();
     for I := 0 to FCodeinsight.ScriptParser.Items.Count - 1 do
-      AddDecl(FScriptNode, FCodeinsight.ScriptParser.Items[I], ntScriptDecl);
+      AddDecl(FScriptNode, FCodeinsight.ScriptParser.Items[I]);
     FScriptNode.Expanded := ExpandScriptNode;
 
-    AddIncludes(FCodeInsight.IncludeParsers, FIncludesNode, ntScriptDecl, ntFile);
-    AddIncludes(FCodeInsight.PluginParsers, FPluginsNode, ntPluginDecl, ntPluginFile);
+    AddIncludes(FCodeInsight.IncludeParsers, FIncludesNode);
+    AddIncludes(FCodeInsight.PluginParsers, FPluginsNode);
     if (FSimbaNode = nil) then
       AddSimbaNode();
 
@@ -492,7 +502,7 @@ begin
   if FTreeView.Items.IsUpdating then
   try
     {$IFDEF DEBUG}
-    WriteLn('Need Update');
+    DebugLn('Need Update');
     {$ENDIF}
     FCodeInsight.SetScript(Script, ScriptFileName);
     FCodeInsight.Run();

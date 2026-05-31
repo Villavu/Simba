@@ -33,10 +33,10 @@ implementation
 uses
   simba.initializations,
   simba.vartype_windowhandle,
+  simba.ide_codetools_parser,
   simba.ide_vars,
   simba.ide_tab,
   simba.ide_editor_findreplace,
-  simba.functionlist_page,
   simba.datetime;
 
 procedure TSimbaMainStatusBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
@@ -67,9 +67,9 @@ procedure TSimbaMainStatusBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     FStatusBar.PanelText[3] := 'Find matches: ' + IntToStr(Find.Matches);
   end;
 
-  procedure DoFunctionListSelectionChange(Node: TSimbaFunctionListNode);
+  procedure DoFunctionListSelectionChange(Decl: TDeclaration);
   begin
-    FStatusBar.PanelText[3] := Node.Hint;
+    FStatusBar.PanelText[3] := Decl.Header;
   end;
 
   procedure DoUpdateRunningState(Tab: TSimbaScriptTab);
@@ -90,7 +90,7 @@ begin
     ESimbaEvent.TAB_SEARCH:                    DoTabSearch(TSimbaEditorFind(Data));
     ESimbaEvent.TAB_CHANGE:                    DoUpdateRunningState(TSimbaScriptTab(Data));
     ESimbaEvent.TAB_ACTIVE_750:                DoUpdateRunningState(TSimbaScriptTab(Data));
-    ESimbaEvent.FUNCTIONLIST_SELECTION_CHANGE: DoFunctionListSelectionChange(TSimbaFunctionListNode(Data));
+    ESimbaEvent.FUNCTIONLIST_SELECTION_CHANGE: DoFunctionListSelectionChange(TDeclaration(Data));
   end;
 end;
 
