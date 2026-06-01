@@ -90,6 +90,11 @@ end;
 
 procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
+  procedure DoSimbaSetupCompleted;
+  begin
+    SetDebugRedirects(@DoDebugRedirect, @DoDebugLnRedirect);
+  end;
+
   // Flush all tabs (adding text to component from buffer)
   procedure DoFlush;
   var
@@ -189,6 +194,7 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
 begin
   case Event of
+    ESimbaEvent.SIMBA_SETUP_COMPLETED:  DoSimbaSetupCompleted();
     ESimbaEvent.TIMER_750:              DoFlush();
     ESimbaEvent.ACTION_VIEW_OUTPUT:     DoViewOutput(TMenuItem(Data));
     ESimbaEvent.ACTION_CLEAROUTPUT:     DoClearOutput();
@@ -359,6 +365,7 @@ begin
   FSimbaTab.FList.ContextMenu := FContextMenu;
 
   SimbaEvents.Register(Self, @DoSimbaEvent, [
+    ESimbaEvent.SIMBA_SETUP_COMPLETED,
     ESimbaEvent.TIMER_750,
     ESimbaEvent.ACTION_VIEW_OUTPUT,
     ESimbaEvent.ACTION_CLEAROUTPUT,
@@ -374,8 +381,6 @@ begin
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.OutputBox.FontName, @DoSimbaSettingChange, True);
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.OutputBox.FontSize, @DoSimbaSettingChange, True);
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.OutputBox.FontAntiAliased, @DoSimbaSettingChange, True);
-
-  SetDebugRedirects(@DoDebugRedirect, @DoDebugLnRedirect);
 end;
 
 destructor TSimbaOutputForm.Destroy;

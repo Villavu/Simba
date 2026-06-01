@@ -22,7 +22,10 @@ type
   ESimbaEvent = (
     NONE,
 
-    // General use for timer execute every 750ms
+    // Simba has been setup completely and should now be showing. Data=nil
+    SIMBA_SETUP_COMPLETED,
+
+    // General use for timer execute every 750ms. Data=nil
     TIMER_750,
 
     // "file" menu, Data=TMenuItem

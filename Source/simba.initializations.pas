@@ -37,6 +37,7 @@ procedure SimbaInitialization_Call(Init: ESimbaInit);
 implementation
 
 uses
+  TypInfo,
   simba.threading;
 
 type
@@ -86,32 +87,21 @@ procedure Call(Init: ESimbaInit);
   end;
 
 var
+  Prefix: String;
   Method: TInitMethod;
 begin
-  // Use WriteLn on purpose so redirection to output wont happen
+  Prefix := '[' + GetEnumName(TypeInfo(ESimbaInit), Ord(Init)) + '] ';
 
   for Method in GetMethods() do
     if (Method.Init = Init) then
     try
       {$IFDEF SIMBA_DEBUG_INITIALZATIONS}
-      {$PUSH}
-      {$I-}
-      WriteLn(Format('Calling %s %s', [specialize EnumToString<ESimbaInit>(Method.Init), Method.Name]));
-      Flush(Output);
-      {$POP}
+      DebugLn(Prefix + 'Calling ' + Method.Name);
       {$ENDIF}
       Method.Proc();
     except
       on E: Exception do
-      begin
-        {$IFDEF SIMBA_DEBUG_INITIALZATIONS}
-        {$PUSH}
-        {$I-}
-        WriteLn(Format('Exception: %s', [E.Message]));
-        Flush(Output);
-        {$POP}
-        {$ENDIF}
-      end;
+        DebugLn(Prefix + Method.Name + ' Exception: ' + E.Message);
     end;
 end;
 
