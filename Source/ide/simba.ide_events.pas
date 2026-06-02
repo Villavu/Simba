@@ -255,12 +255,16 @@ var
   Event: ESimbaEvent;
 begin
   for Event in ESimbaEvent do
-    for I := 0 to FCallbacks[Event].Count - 1 do
+  begin
+    I := 0;
+    while (I < FCallbacks[Event].Count) do
+    begin
       if (FCallbacks[Event][I] = Callback) then
-      begin
-        FCallbacks[Event].Delete(I);
-        Exit;
-      end;
+        FCallbacks[Event].Delete(I)
+      else
+        Inc(I);
+    end;
+  end;
 end;
 
 constructor TSimbaEvents.Create;
