@@ -60,7 +60,7 @@ procedure TSimbaDebugImage.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoViewDebugImage(Item: TMenuItem);
   begin
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
 begin
@@ -80,7 +80,7 @@ procedure TSimbaDebugMatrix.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoViewDebugMatrix(Item: TMenuItem);
   begin
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
 begin

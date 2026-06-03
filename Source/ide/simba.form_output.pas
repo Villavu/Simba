@@ -107,7 +107,7 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   // show/hide ourselfs
   procedure DoViewOutput(Item: TMenuItem);
   begin
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
   // clear active
@@ -329,7 +329,6 @@ constructor TSimbaOutputForm.Create;
 begin
   inherited Create(nil);
 
-  Name := 'SimbaOutputForm';
   Caption := 'Output';
   TabStop := False;
 

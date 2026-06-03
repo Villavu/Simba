@@ -98,7 +98,6 @@ constructor TSimbaFunctionListForm.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
 
-  Name := 'SimbaFunctionListForm'; // important - docking requires control names
   Caption := 'Function List';
 
   SimbaEvents.Register(Self, @DoSimbaEvent, [
@@ -148,7 +147,7 @@ procedure TSimbaFunctionListForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer)
 
   procedure DoViewFunctionList(Item: TMenuItem);
   begin
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
   procedure DoCodetoolsSetup;

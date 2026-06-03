@@ -7,11 +7,7 @@ object SimbaMainForm: TSimbaMainForm
   ClientHeight = 861
   ClientWidth = 1624
   DesignTimePPI = 192
-  Position = poScreenCenter
-  LCLVersion = '4.0.0.4'
-  OnClose = FormClose
-  OnDestroy = FormDestroy
-  OnWindowStateChange = FormWindowStateChange
+  OnCloseQuery = FormCloseQuery
   object DockPanel: TAnchorDockPanel
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Side = asrBottom
@@ -22,6 +18,8 @@ object SimbaMainForm: TSimbaMainForm
     Width = 1624
     Align = alClient
     BevelOuter = bvNone
+    ParentBackground = False
+    ParentColor = False
     ParentFont = False
     TabOrder = 0
   end

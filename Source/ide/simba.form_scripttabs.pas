@@ -128,7 +128,7 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoViewEditor(Item: TMenuItem);
   begin
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
   procedure DoRunCompileStopPause(Tab: TSimbaScriptTab);

@@ -117,12 +117,12 @@ procedure TSimbaColorPickHistoryForm.DoSimbaEvent(Event: ESimbaEvent; Data: Poin
   procedure DoColorPicked(Picked: TSimbaEvents.TColorPicked);
   begin
     Add(Picked.Point, Picked.Color, True);
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
   procedure DoViewColorHistory(Item: TMenuItem);
   begin
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
 begin

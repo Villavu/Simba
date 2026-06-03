@@ -203,7 +203,7 @@ procedure TSimbaBackupsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoViewBackups();
   begin
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
 begin

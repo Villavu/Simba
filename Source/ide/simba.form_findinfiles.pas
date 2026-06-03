@@ -469,7 +469,7 @@ procedure TSimbaFindInFilesForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 begin
   case Event of
     ESimbaEvent.ACTION_FIND_IN_FILES:
-      DockMaster.Show(Self);
+      SimbaDocking.Show(Self);
   end;
 end;
 

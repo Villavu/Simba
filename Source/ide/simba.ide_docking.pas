@@ -11,10 +11,8 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, AnchorDocking,
-  simba.base;
-
-const
-  SIMBA_DOCKING_VERSION = 1; // update if saved layout will become invalid (think changing form names)
+  simba.base,
+  simba.ide_events;
 
 type
   TSimbaAnchorDockHeader = class(TAnchorDockHeader)
@@ -56,29 +54,53 @@ type
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
   end;
 
-  TAnchorDockMasterHelper = class helper for TAnchorDockMaster
+  TSimbaDocking = class(TComponent)
   private
-    procedure OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure SetVisible(Form: TCustomForm; Visible: Boolean);
-  public
+    FControlsNotFound: TStringArray;
+
+    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+    procedure DoCreateControl(Sender: TObject; aName: String; var AControl: TControl; DoDisableAutoSizing: Boolean);
+    procedure DoRestore(Sender: TObject);
+    procedure DoMinimize(Sender: TObject);
+    procedure DoMainFormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure DoSiteClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure DoDefaultDocking;
+
     procedure MakeDockable(Form: TCustomForm);
+    procedure MakeVisible(Form: TCustomForm; Visible: Boolean);
+    function Load(Layout: String): Boolean;
+    function Save: String;
+  public
+    constructor Create; reintroduce;
 
-    procedure Minimized;
-    procedure Restored;
-
-    function SaveLayout: String;
-    function LoadLayout(Layout: String): Boolean;
-
+    procedure SetLocked(Locked: Boolean);
     procedure Show(Form: TCustomForm);
+    procedure Reset;
   end;
+
+var
+  SimbaDocking: TSimbaDocking;
 
 implementation
 
 uses
-  Graphics, XMLPropStorage, LazConfigStorage,
-  simba.ide_events,
+  Menus, Graphics, XMLPropStorage, LazConfigStorage,
+  simba.ide_debugimage,
+  simba.dialog,
   simba.component_theme,
-  simba.misc;
+  simba.misc,
+  simba.settings,
+  simba.initializations,
+  simba.threading,
+  simba.form_main,
+  simba.form_colorpickhistory,
+  simba.form_findinfiles,
+  simba.form_filebrowser,
+  simba.form_notes,
+  simba.form_functionlist,
+  simba.form_backups,
+  simba.form_scripttabs,
+  simba.form_output;
 
 procedure TSimbaAnchorDockHeader.ParentFontChanged;
 begin
@@ -237,16 +259,97 @@ begin
   inherited MouseUp(Button, Shift, X, Y);
 end;
 
-procedure TAnchorDockMasterHelper.MakeDockable(Form: TCustomForm);
-begin
-  inherited MakeDockable(Form, False, False, True);
+procedure TSimbaDocking.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
-  Form.Name := Form.ClassName;
-  if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
-    Form.AddHandlerClose(@OnFormClose, True);
+  procedure DoResetLayout;
+  begin
+    QueueOnMainThread(@Reset);
+  end;
+
+  procedure DoLockLayout(MenuItem: TMenuItem);
+  begin
+    SimbaSettings.General.LockLayout.Value := MenuItem.Checked;
+
+    DockMaster.ShowHeader := not MenuItem.Checked;
+    DockMaster.AllowDragging := not MenuItem.Checked;
+  end;
+
+  procedure DoInit;
+  begin
+    Application.AddOnRestoreHandler(@DoRestore);
+    Application.AddOnMinimizeHandler(@DoMinimize);
+    SimbaMainForm.AddHandlerClose(@DoMainFormClose);
+
+    try
+      DockMaster.BeginUpdate();
+      DockMaster.SplitterWidth := SimbaMainForm.Scale96ToScreen(6);
+      DockMaster.HeaderClass := TSimbaAnchorDockHeader;
+      DockMaster.SplitterClass := TSimbaAnchorDockSplitter;
+      DockMaster.SiteClass := TSimbaAnchorDockHostSite;
+      DockMaster.HideHeaderCaptionFloatingControl := False;
+      DockMaster.HeaderAlignTop := $FFFFFF;
+      DockMaster.PageAreaInPercent := 0;
+      DockMaster.HeaderHint := 'Use the mouse to drag and dock this window';
+      DockMaster.MakeDockPanel(SimbaMainForm.DockPanel, admrpChild);
+      DockMaster.DragTreshold := 40;
+
+      MakeDockable(SimbaScriptTabsForm);
+      MakeDockable(SimbaOutputForm);
+      MakeDockable(SimbaFileBrowserForm);
+      MakeDockable(SimbaFunctionListForm);
+      MakeDockable(SimbaNotesForm);
+      MakeDockable(SimbaDebugImageForm);
+      MakeDockable(SimbaDebugMatrixForm);
+      MakeDockable(SimbaColorPickHistoryForm);
+      MakeDockable(SimbaBackupsForm);
+      MakeDockable(SimbaFindInFilesForm);
+
+      if Load(SimbaSettings.General.Layout.Value) and (Length(FControlsNotFound) = 0) then
+      begin
+        DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
+        DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
+
+        SimbaMainForm.ShowOnTop();
+      end else
+        QueueOnMainThread(@DoDefaultDocking);
+
+      SetLocked(SimbaSettings.General.LockLayout.Value);
+    finally
+      DockMaster.EndUpdate();
+    end;
+  end;
+
+begin
+  case Event of
+    ESimbaEvent.ACTION_LOCK_LAYOUT: DoLockLayout(TMenuItem(Data));
+    ESimbaEvent.ACTION_RESET_LAYOUT: DoResetLayout();
+    ESimbaEvent.SIMBA_SETUP_COMPLETED: DoInit();
+  end;
 end;
 
-procedure TAnchorDockMasterHelper.Minimized;
+procedure TSimbaDocking.DoCreateControl(Sender: TObject; aName: String; var AControl: TControl; DoDisableAutoSizing: Boolean);
+begin
+  FControlsNotFound := FControlsNotFound + [aName];
+  AControl := nil;
+end;
+
+procedure TSimbaDocking.DoRestore(Sender: TObject);
+var
+  I: Integer;
+  Site: TSimbaAnchorDockHostSite;
+begin
+  for I := 0 to Screen.CustomFormCount - 1 do
+  begin
+    Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
+    if (Site is TSimbaAnchorDockHostSite) and Site.FNeedRestore then
+    begin
+      DockMaster.MakeVisible(Screen.CustomForms[I], False);
+      Site.FNeedRestore := False;
+    end;
+  end;
+end;
+
+procedure TSimbaDocking.DoMinimize(Sender: TObject);
 var
   I: Integer;
   Site: TSimbaAnchorDockHostSite;
@@ -262,51 +365,13 @@ begin
   end;
 end;
 
-procedure TAnchorDockMasterHelper.Restored;
-var
-  I: Integer;
-  Site: TSimbaAnchorDockHostSite;
+procedure TSimbaDocking.DoMainFormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  for I := 0 to Screen.CustomFormCount - 1 do
-  begin
-    Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
-    if (Site is TSimbaAnchorDockHostSite) and Site.FNeedRestore then
-    begin
-      inherited MakeVisible(Screen.CustomForms[I], False);
-      Site.FNeedRestore := False;
-    end;
-  end;
+  if (CloseAction = caFree) and (TForm(Sender).WindowState <> wsMinimized) then
+    SimbaSettings.General.Layout.Value := Save();
 end;
 
-function TAnchorDockMasterHelper.SaveLayout: String;
-var
-  Config: TXMLConfigStorage;
-  Stream: TStringStream;
-  I: Integer;
-begin
-  Result := '';
-
-  Stream := TStringStream.Create();
-  Config := TXMLConfigStorage.Create('', False);
-
-  try
-    RestoreLayouts.Clear();
-    for I := 0 to Screen.CustomFormCount - 1 do
-      if Screen.CustomForms[I].Showing and (Screen.CustomForms[I].HostDockSite is TSimbaAnchorDockHostSite) and TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite).Floating then
-        RestoreLayouts.Add(CreateRestoreLayout(Screen.CustomForms[I].HostDockSite), True);
-
-    SaveLayoutToConfig(Config);
-
-    Config.SaveToStream(Stream);
-
-    Result := Stream.DataString;
-  finally
-    Stream.Free();
-    Config.Free();
-  end;
-end;
-
-procedure TAnchorDockMasterHelper.OnFormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure TSimbaDocking.DoSiteClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   Form: TCustomForm;
 begin
@@ -315,18 +380,107 @@ begin
   if (Sender is TCustomForm) then
   begin
     Form := TCustomForm(Sender);
-
     if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
     begin
       with TSimbaAnchorDockHostSite(Form.HostDockSite) do
         CloseSite();
-
       CloseAction := caNone;
     end;
   end;
 end;
 
-function TAnchorDockMasterHelper.LoadLayout(Layout: String): Boolean;
+{
+  |-------------------------------------|
+  |              |        |             |
+  | functionlist | editor | filebrowser |
+  |              |--------|             |
+  |              | output |             |
+  |-------------------------------------|
+}
+procedure TSimbaDocking.DoDefaultDocking;
+var
+  Splitter: TAnchorDockSplitter;
+  I: Integer;
+begin
+  // Reset everything
+  SimbaMainForm.Hide();
+  SimbaMainForm.WindowState := wsNormal;
+
+  for I := 0 to Screen.CustomFormCount - 1 do
+    if (Screen.CustomForms[I].HostDockSite is TCustomForm) then
+    begin
+      if (DockMaster.GetAnchorSite(Screen.CustomForms[I]) <> nil) then
+        DockMaster.GetAnchorSite(Screen.CustomForms[I]).Visible := False;
+      DockMaster.ManualFloat(Screen.CustomForms[I]);
+      if (DockMaster.GetAnchorSite(Screen.CustomForms[I]) <> nil) then
+        DockMaster.GetAnchorSite(Screen.CustomForms[I]).Header.Visible := True;
+    end;
+
+  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaScriptTabsForm), SimbaMainForm.DockPanel, alClient);
+  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaOutputForm), SimbaMainForm.DockPanel, alBottom);
+  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFunctionListForm), SimbaMainForm.DockPanel, alLeft);
+  DockMaster.ManualDock(DockMaster.GetAnchorSite(SimbaFileBrowserForm), SimbaMainForm.DockPanel, alRight);
+
+  DockMaster.MakeVisible(SimbaScriptTabsForm, False);
+  DockMaster.MakeVisible(SimbaOutputForm, False);
+  DockMaster.MakeVisible(SimbaFunctionListForm, False);
+  DockMaster.MakeVisible(SimbaFileBrowserForm, False);
+  DockMaster.ScaleOnResize := False;
+
+  SimbaMainForm.Width := 1000;
+  SimbaMainForm.Height := 800;
+
+  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akLeft, Splitter) then
+    Splitter.SetSplitterPosition(200);
+  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akRight, Splitter) then
+    Splitter.SetSplitterPosition(800);
+  if GetDockSplitter(DockMaster.GetAnchorSite(SimbaScriptTabsForm), akBottom, Splitter) then
+    Splitter.SetSplitterPosition(450);
+
+  DockMaster.ScaleOnResize := True;
+  DockMaster.GetAnchorSite(SimbaScriptTabsForm).Header.Visible := False;
+  DockMaster.GetAnchorSite(SimbaOutputForm).Header.Visible := False;
+
+  SimbaMainForm.WindowState := wsMaximized;
+  SimbaMainForm.ShowOnTop();
+end;
+
+procedure TSimbaDocking.MakeDockable(Form: TCustomForm);
+begin
+  Form.Name := Form.ClassName;
+
+  DockMaster.MakeDockable(Form, False, False, True);
+  if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
+    Form.AddHandlerClose(@DoSiteClose, True);
+end;
+
+procedure TSimbaDocking.MakeVisible(Form: TCustomForm; Visible: Boolean);
+var
+  Site: TSimbaAnchorDockHostSite;
+  Center: TPoint;
+begin
+  if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
+  begin
+    Site := TSimbaAnchorDockHostSite(Form.HostDockSite);
+
+    if Visible then
+    begin
+      if Site.FNeedDefaultPosition then
+      begin
+        Center := Application.MainForm.Monitor.WorkareaRect.CenterPoint;
+        Site.BoundsRect := Rect(
+            Center.X - (Site.Width div 2), Center.Y - (Site.Height div 2),
+            Center.X + (Site.Width div 2), Center.Y + (Site.Height div 2)
+          );
+        Site.FNeedDefaultPosition := False;
+      end;
+      Site.EnsureVisible();
+    end else
+      Site.CloseSite();
+  end;
+end;
+
+function TSimbaDocking.Load(Layout: String): Boolean;
 
   procedure LoadRestoredBounds(Config: TConfigStorage);
   var
@@ -371,47 +525,94 @@ var
 begin
   Result := False;
 
-  Stream := TStringStream.Create(Layout);
-  Config := TXMLConfigStorage.Create(Stream);
-  try
-    LoadRestoredBounds(Config);
-
-    Result := LoadLayoutFromConfig(Config, True);
-  finally
-    Config.Free();
-    Stream.Free();
-  end;
-end;
-
-procedure TAnchorDockMasterHelper.SetVisible(Form: TCustomForm; Visible: Boolean);
-var
-  Site: TSimbaAnchorDockHostSite;
-  Center: TPoint;
-begin
-  if (Form.HostDockSite is TSimbaAnchorDockHostSite) then
+  if (Layout <> '') then
   begin
-    Site := TSimbaAnchorDockHostSite(Form.HostDockSite);
+    Stream := TStringStream.Create(Layout);
+    Config := TXMLConfigStorage.Create(Stream);
+    try
+      LoadRestoredBounds(Config);
 
-    if Visible then
-    begin
-      if Site.FNeedDefaultPosition then
-      begin
-        Center := Application.MainForm.Monitor.WorkareaRect.CenterPoint;
-        Site.BoundsRect := Rect(
-            Center.X - (Site.Width div 2), Center.Y - (Site.Height div 2),
-            Center.X + (Site.Width div 2), Center.Y + (Site.Height div 2)
-          );
-        Site.FNeedDefaultPosition := False;
-      end;
-      Site.EnsureVisible();
-    end else
-      Site.CloseSite();
+      Result := DockMaster.LoadLayoutFromConfig(Config, True);
+    finally
+      Config.Free();
+      Stream.Free();
+    end;
   end;
 end;
 
-procedure TAnchorDockMasterHelper.Show(Form: TCustomForm);
+function TSimbaDocking.Save: String;
+var
+  Config: TXMLConfigStorage;
+  Stream: TStringStream;
+  I: Integer;
 begin
-  SetVisible(Form, True);
+  Result := '';
+
+  Stream := TStringStream.Create();
+  Config := TXMLConfigStorage.Create('', False);
+
+  try
+    DockMaster.RestoreLayouts.Clear();
+    for I := 0 to Screen.CustomFormCount - 1 do
+      if Screen.CustomForms[I].Showing and (Screen.CustomForms[I].HostDockSite is TSimbaAnchorDockHostSite) and TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite).Floating then
+        DockMaster.RestoreLayouts.Add(DockMaster.CreateRestoreLayout(Screen.CustomForms[I].HostDockSite), True);
+    DockMaster.SaveLayoutToConfig(Config);
+
+    Config.SaveToStream(Stream);
+    Result := Stream.DataString;
+  finally
+    Stream.Free();
+    Config.Free();
+  end;
 end;
+
+constructor TSimbaDocking.Create;
+begin
+  inherited Create(nil);
+
+  SimbaEvents.Register(Self, @DoSimbaEvent, [
+    ESimbaEvent.ACTION_LOCK_LAYOUT,
+    ESimbaEvent.ACTION_RESET_LAYOUT,
+    ESimbaEvent.SIMBA_SETUP_COMPLETED
+  ]);
+
+  DockMaster.OnCreateControl := @DoCreateControl;
+end;
+
+procedure TSimbaDocking.SetLocked(Locked: Boolean);
+begin
+  DockMaster.ShowHeader := not Locked;
+  DockMaster.AllowDragging := not Locked;
+end;
+
+procedure TSimbaDocking.Show(Form: TCustomForm);
+begin
+  MakeVisible(Form, True);
+end;
+
+procedure TSimbaDocking.Reset;
+begin
+  if (ShowQuestionDialog('Layout', 'Reset to default layout?', []) = ESimbaDialogButton.YES) then
+  begin
+    SimbaSettings.General.Layout.Value := '';
+    SimbaSettings.General.LockLayout.Value := False;
+
+    DoDefaultDocking();
+  end;
+end;
+
+procedure DoCreate;
+begin
+  SimbaDocking := TSimbaDocking.Create();
+end;
+
+procedure DoDestroy;
+begin
+  FreeAndNil(SimbaDocking);
+end;
+
+initialization
+  SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'SimbaDocking', 5);
+  SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'SimbaDocking', -5);
 
 end.

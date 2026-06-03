@@ -243,7 +243,7 @@ procedure TSimbaFileBrowserForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoViewFileBrowser(Item: TMenuItem);
   begin
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
   procedure DoSplitterDoubleClick;

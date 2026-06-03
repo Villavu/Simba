@@ -47,7 +47,7 @@ procedure TSimbaNotesForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoViewNotes(Item: TMenuItem);
   begin
-    DockMaster.Show(Self);
+    SimbaDocking.Show(Self);
   end;
 
 begin
