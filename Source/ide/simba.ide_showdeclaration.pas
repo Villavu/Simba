@@ -19,8 +19,6 @@ procedure FindAndShowDeclaration(Script, ScriptFileName: String; CaretPos: Integ
 
 procedure ShowDeclaration(StartPos, EndPos, Line: Integer; FileName: String); overload;
 procedure ShowDeclaration(Declaration: TDeclaration); overload;
-procedure ShowSimbaDeclaration(Header: String; FileName: String);
-procedure ShowPluginDeclaration(Header: String; FileName: String);
 
 procedure ShowDeclarationDialog(Decls: TDeclarationArray);
 
@@ -139,9 +137,9 @@ begin
 
   Cols := [
     SimbaImages.Width + FListBox.IndentLeft * 2,
-    MaxHeaderWidth             + FListBox.IndentLeft * 4,
-    MaxLineLength              + FListBox.IndentLeft * 4,
-    MaxFileWidth               + FListBox.IndentLeft * 4
+    MaxHeaderWidth    + FListBox.IndentLeft * 4,
+    MaxLineLength     + FListBox.IndentLeft * 4,
+    MaxFileWidth      + FListBox.IndentLeft * 4
   ];
 
   FListBox.ColumnSizes := Cols;
@@ -261,26 +259,6 @@ begin
 
   DebugLn('Declared internally in Simba: %s', [Declaration.DocPos.FileName]);
   DebugLn(Declaration.Header);
-  DebugLn(DEBUG_FOCUS);
-end;
-
-procedure ShowSimbaDeclaration(Header: String; FileName: String);
-begin
-  if (Header = '') then
-    Exit;
-
-  DebugLn('Declared internally in Simba: %s', [FileName]);
-  DebugLn('Declaration: %s', [Header]);
-  DebugLn(DEBUG_FOCUS);
-end;
-
-procedure ShowPluginDeclaration(Header: String; FileName: String);
-begin
-  if (Header = '') then
-    Exit;
-
-  DebugLn('Declared internally in plugin: %s', [FileName]);
-  DebugLn('Declaration: %s', [Header]);
   DebugLn(DEBUG_FOCUS);
 end;
 

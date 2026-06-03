@@ -86,6 +86,7 @@ uses
   simba.initializations,
   simba.ide_tab,
   simba.ide_editor,
+  simba.ide_editor_completionbox,
   simba.ide_controller,
   simba.ide_package,
   simba.settings,
@@ -274,9 +275,9 @@ procedure TSimbaMainMenuBar.DoApplicationKeyDown(Sender: TObject; var Key: Word;
     if (Key <> VK_F3) and (Shift * [ssShift, ssAlt, ssCtrl, ssMeta, ssAltGr] = []) then
       Exit;
 
-    // Only check these if editor is focused and doesnt have such a keystroke
-    if (Screen.ActiveControl is TSimbaEditor) and
-       (TSimbaEditor(Screen.ActiveControl).Keystrokes.FindKeycode(Key, Shift) = -1) then
+    // Only check these if completion form or editor is focused and doesnt have such a keystroke
+    if (Screen.ActiveControl is TSimbaCompletionBox_Form) or
+       ((Screen.ActiveControl is TSimbaEditor) and (TSimbaEditor(Screen.ActiveControl).Keystrokes.FindKeycode(Key, Shift) = -1)) then
     begin
       Msg := Default(TLMKey);
       Msg.CharCode := Key;

@@ -310,6 +310,9 @@ begin
 
   with TSimbaEditor(FEditor) do
   begin
+    if (CompletionBox <> nil) and CompletionBox.Form.Visible then
+      CompletionBox.Form.Hide();
+
     SearchOptions := [ssoEntireScope];
     if (frMatchCase in FDialog.Options) then
       SearchOptions := SearchOptions + [ssoMatchCase];
@@ -333,6 +336,9 @@ begin
 
   with TSimbaEditor(FEditor) do
   begin
+    if (CompletionBox <> nil) and CompletionBox.Form.Visible then
+      CompletionBox.Form.Hide();
+
     MaxCaret.Y := TextView.Count;
     MaxCaret.X := Length(TextView[TextView.Count - 1]) + 1;
 
@@ -358,6 +364,9 @@ begin
 
   with TSimbaEditor(FEditor) do
   begin
+    if (CompletionBox <> nil) and CompletionBox.Form.Visible then
+      CompletionBox.Form.Hide();
+
     SearchOptions := [ssoFindContinue];
 
     if (frMatchCase in FDialog.Options) then SearchOptions := SearchOptions + [ssoMatchCase];

@@ -54,7 +54,7 @@ procedure TSimbaFindPanel.DoButtonResize(Sender: TObject);
   procedure EnsureWidth(const A, B: TWinControl);
   begin
     if (A.Constraints.MinWidth < B.Width) then
-      B.Constraints.MinWidth := B.Width;
+      A.Constraints.MinWidth := B.Width;
   end;
 
 begin
