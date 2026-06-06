@@ -304,9 +304,9 @@ procedure TSimbaScriptTabsForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     end;
   end;
 
-  procedure DoFindDeclAtCaret(Tab: TSimbaScriptTab);
+  procedure DoFindDecl(Tab: TSimbaScriptTab);
   begin
-    Tab.FindDeclarationAtCaret();
+    Tab.Editor.DeclFinder.FindDeclAt(Tab.Editor.CaretX, Tab.Editor.CaretY);
   end;
 
   procedure DoCopyFileName(Tab: TSimbaScriptTab);
@@ -368,7 +368,7 @@ begin
 
     ESimbaEvent.ACTION_FORMAT_SCRIPT: DoFormatScript(ActiveTab);
 
-    ESimbaEvent.ACTION_FIND_DECL_AT_CARET: DoFindDeclAtCaret(ActiveTab);
+    ESimbaEvent.ACTION_FIND_DECL_AT_CARET: DoFindDecl(ActiveTab);
     ESimbaEvent.ACTION_COPY_FILENAME: DoCopyFileName(ActiveTab);
     ESimbaEvent.ACTION_OPEN_DIRECTORY: DoOpenDirectory(ActiveTab);
     ESimbaEvent.ACTION_DOC_COMMENT: DoDocComment(ActiveTab);

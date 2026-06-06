@@ -14,8 +14,8 @@ uses
   simba.base,
   simba.ide_editor,
   simba.ide_events,
-  simba.component_tabcontrol,
-  simba.ide_output_components;
+  simba.ide_output_components,
+  simba.component_tabcontrol;
 
 type
   TSimbaScriptTab = class;
@@ -103,7 +103,7 @@ type
     function CheckIsModified: Boolean;
 
     procedure LoadDefaultScript;
-    procedure FindDeclarationAtCaretASync(Data: PtrInt);
+
 
     // Keep output tab in sync
     procedure TextChanged; override;
@@ -114,7 +114,6 @@ type
 
     function DoEditorGetFileName(Sender: TObject): String;
     procedure DoEditorModified(Sender: TObject);
-    procedure DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure DoEditorCaretMoved(Sender: TObject);
 
     function GetScript: String;
@@ -137,8 +136,6 @@ type
     // Load editor lines from file
     // Will set editor to read only if file is such.
     function Load(FileName: String): Boolean;
-
-    procedure FindDeclarationAtCaret;
 
     function CanSave: Boolean;
     function CanClose: Boolean;
@@ -163,7 +160,6 @@ uses
   simba.settings,
   simba.form_scripttabs,
   simba.env,
-  simba.ide_showdeclaration,
   simba.threading,
   simba.ide_scriptcommunication,
   simba.ide_editor_popupmenu,
@@ -431,16 +427,6 @@ begin
   Result := FScriptFileName;
 end;
 
-procedure TSimbaScriptTab.FindDeclarationAtCaretASync(Data: PtrInt);
-begin
-  FindAndShowDeclaration(Script, ScriptFileName, Editor.GetCaretPos(True), Editor.GetExpressionEx(FEditor.CaretX, FEditor.CaretY));
-end;
-
-procedure TSimbaScriptTab.FindDeclarationAtCaret;
-begin
-  Application.QueueAsyncCall(@FindDeclarationAtCaretASync, 0); // queue the event to let synedit finishing painting
-end;
-
 procedure TSimbaScriptTab.DoEditorModified(Sender: TObject);
 begin
   if CheckIsModified() then
@@ -466,11 +452,6 @@ begin
   end;
 
   SimbaEvents.Post(ESimbaEvent.TAB_MODIFIED, Self);
-end;
-
-procedure TSimbaScriptTab.DoEditorLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  FindDeclarationAtCaret();
 end;
 
 procedure TSimbaScriptTab.DoEditorCaretMoved(Sender: TObject);
@@ -664,7 +645,6 @@ begin
   FEditor := TSimbaEditor.Create(Self, [seoColors, seoKeybindings]);
   FEditor.Parent := Self;
   FEditor.Align := alClient;
-  FEditor.OnClickLink := @DoEditorLinkClick;
   FEditor.OnModified := @DoEditorModified;
   FEditor.OnGetFileName := @DoEditorGetFileName;
   FEditor.RegisterCaretMoveHandler(@DoEditorCaretMoved);

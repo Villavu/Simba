@@ -42,6 +42,7 @@ type
     class procedure ShowTrayNotifaction(Title, Message: String; Timeout: Integer); static;
     class procedure SetWindowTitle(Title: String); static;
     class procedure ShowDecl(Decl: TDeclaration); static;
+    class procedure SelectAndShowDecl(Decls: TDeclarationArray); static;
   end;
 
 implementation
@@ -49,6 +50,7 @@ implementation
 uses
   simba.nativeinterface,
   simba.ide_maintoolbar,
+  simba.ide_selectdeclform,
   simba.form_main,
   simba.form_scripttabs,
   simba.form_output,
@@ -276,6 +278,17 @@ begin
         end;
       end;
   end;
+end;
+
+class procedure SimbaController.SelectAndShowDecl(Decls: TDeclarationArray);
+var
+  Decl: TDeclaration;
+begin
+  ASSERT_MAIN_THREAD
+
+  Decl := SelectDeclaration(Decls);
+  if (Decl <> nil) then
+    ShowDecl(Decl);
 end;
 
 end.

@@ -641,7 +641,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="92">
+    <Units Count="96">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1052,6 +1052,22 @@
         <Filename Value="ide/simba.form_functionlist.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit91>
+      <Unit92>
+        <Filename Value="simba.component_listbox.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="ide/simba.ide_editor_finddecl.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="ide/simba.ide_editor_codetools.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="ide/simba.ide_selectdeclform.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit95>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

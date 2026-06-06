@@ -27,6 +27,8 @@ uses
   simba.ide_editor_paramhint,
   simba.ide_editor_attributes,
   simba.ide_editor_modifiedlinegutter,
+  simba.ide_editor_codetools,
+  simba.ide_editor_finddecl,
   simba.component_synedit;
 
 type
@@ -65,6 +67,8 @@ type
     FSimbaOptions: ESimbaEditorOptions;
 
     FReadOnlyNotice: TPanel;
+    FCodetools: TSimbaEditor_Codetools;
+    FDeclFinder: TSimbaEditor_FindDecl;
 
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
 
@@ -93,6 +97,9 @@ type
     procedure SetColorModified(Value: TColor);
     procedure SetColorSaved(Value: TColor);
   public
+    property Codetools: TSimbaEditor_Codetools read FCodetools;
+    property DeclFinder: TSimbaEditor_FindDecl read FDeclFinder;
+
     property TextView;
     property CompletionBox: TSimbaCompletionBox read FCompletionBox;
     property ParamHint: TSimbaParamHint read FParamHint;
@@ -599,7 +606,9 @@ begin
   TSimbaEditorPlugin_CommentBlock.Create(Self);
   TSimbaEditorPlugin_MouseWheelZoom.Create(Self);
   TSimbaEditorPlugin_History.Create(Self);
+  FDeclFinder := TSimbaEditor_FindDecl.Create(Self);
   TSimbaCodeComplete.Create(Self);
+  FCodetools := TSimbaEditor_Codetools.Create(Self);
 
   FAttributes := TSimbaEditor_Attributes.Create(Self);
 

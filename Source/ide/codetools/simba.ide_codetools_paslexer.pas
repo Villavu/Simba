@@ -153,6 +153,13 @@ type
     function IsEqual(const Other: TSaveDefinesRec): Boolean;
   end;
 
+  TLexerTokenData = record
+    ID: ELexerToken;
+    Text: String;
+    Pos: Integer;
+  end;
+  TLexerTokenArray = array of TLexerTokenData;
+
   TPasLexer = class(TObject)
   protected
     fAheadLexer: TPasLexer;
@@ -257,6 +264,7 @@ type
     function SaveDefines: TSaveDefinesRec;
     procedure LoadDefines(const From: TSaveDefinesRec);
     function IsDefined(const ADefine: string): Boolean;
+    function GetTokenStream(MaxRunPos: Integer = -1): TLexerTokenArray;
 
     property FileName: String read fFileName;
     property FileAge: Integer read fFileAge;
@@ -1301,6 +1309,36 @@ begin
     if TokenLen = 3 then
       fTokenID := tokAsciiChar;
   end;
+end;
+
+function TPasLexer.GetTokenStream(MaxRunPos: Integer = -1): TLexerTokenArray;
+var
+  Count, Capacity: Integer;
+begin
+  Count := 0;
+  Capacity := 1024;
+  SetLength(Result, Capacity);
+
+  Self.NextNoJunk();
+  while (Self.TokenID <> tokNull) do
+  begin
+    if (MaxRunPos > -1) and (Self.TokenPos > MaxRunPos) then
+      Break;
+
+    if (Count >= Capacity) then
+    begin
+      Capacity := Capacity * 2;
+      SetLength(Result, Capacity);
+    end;
+
+    Result[Count].ID := Self.TokenID;
+    Result[Count].Text := Self.Token;
+    Result[Count].Pos := Self.TokenPos;
+
+    Inc(Count);
+    Self.NextNoJunk();
+  end;
+  SetLength(Result, Count);
 end;
 
 function TokenName(const Value: ELexerToken): String;
