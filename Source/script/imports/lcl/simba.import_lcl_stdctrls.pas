@@ -22,11 +22,13 @@ type
   PTextLayout = ^TTextLayout;
   PButton = ^TButton;
   PButtonLayout = ^TButtonLayout;
+  PCustomCheckBox = ^TCustomCheckBox;
   PCheckBox = ^TCheckBox;
+  PRadioButton = ^TRadioButton;
+  PToggleBox = ^TToggleBox;
   PCheckBoxState = ^TCheckBoxState;
   PComboBox = ^TComboBox;
   PComboBoxStyle = ^TComboBoxStyle;
-  PCustomCheckBox = ^TCustomCheckBox;
   PCustomComboBox = ^TCustomComboBox;
   PCustomEdit = ^TCustomEdit;
   PCustomListBox = ^TCustomListBox;
@@ -40,7 +42,6 @@ type
   PListBoxStyle = ^TListBoxStyle;
   PMemo = ^TMemo;
   PMemoScrollbar = ^TMemoScrollbar;
-  PRadioButton = ^TRadioButton;
   PScrollStyle = ^TScrollStyle;
   PSpeedButton = ^TSpeedButton;
   PBitmap = ^TBitmap;
@@ -837,6 +838,7 @@ begin
   PButton(Params^[0])^.OnMouseEnter := PNotifyEvent(Params^[1])^;
 end;
 
+
 procedure _LapeCustomCheckBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PCustomCheckBox(Result)^ := TCustomCheckBox.Create(PComponent(Params^[0])^);
@@ -876,6 +878,47 @@ procedure _LapeCheckBox_Create(const Params: PParamArray; const Result: Pointer)
 begin
   PCheckBox(Result)^ := TCheckBox.Create(PComponent(Params^[0])^);
 end;
+
+procedure _LapeCheckBox_Checked_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PCheckBox(Params^[0])^.Checked;
+end;
+
+procedure _LapeCheckBox_Checked_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PCheckBox(Params^[0])^.Checked := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeRadioButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PRadioButton(Result)^ := TRadioButton.Create(PComponent(Params^[0])^);
+end;
+
+procedure _LapeRadioButton_Checked_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PRadioButton(Params^[0])^.Checked;
+end;
+
+procedure _LapeRadioButton_Checked_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PRadioButton(Params^[0])^.Checked := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeToggleBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PToggleBox(Result)^ := TToggleBox.Create(PComponent(Params^[0])^);
+end;
+
+procedure _LapeToggleBox_Checked_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PToggleBox(Params^[0])^.Checked;
+end;
+
+procedure _LapeToggleBox_Checked_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PToggleBox(Params^[0])^.Checked := PBoolean(Params^[1])^;
+end;
+
 
 procedure _LapeLabel_AdjustFontForOptimalFill(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -1132,11 +1175,6 @@ begin
   PSpeedButton(Params^[0])^.Glyph := PBitmap(Params^[1])^;
 end;
 
-procedure _LapeRadioButton_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PRadioButton(Result)^ := TRadioButton.Create(PComponent(Params^[0])^);
-end;
-
 procedure ImportLCLStdCtrls(Script: TSimbaScript);
 begin
   with Script.Compiler do
@@ -1280,9 +1318,15 @@ begin
 
     addClass('TLazCheckBox', 'TLazCustomCheckBox', TCheckBox);
     addClassConstructor('TLazCheckBox', '(TheOwner: TLazComponent)', @_LapeCheckBox_Create);
+    addProperty('TLazCheckBox', 'Checked', 'Boolean', @_LapeCheckBox_Checked_Read, @_LapeCheckBox_Checked_Write);
+
+    addClass('TLazToggleBox', 'TLazCustomCheckBox', TToggleBox);
+    addClassConstructor('TLazToggleBox', '(AOwner: TLazComponent)', @_LapeToggleBox_Create);
+    addProperty('TLazToggleBox', 'Checked', 'Boolean', @_LapeToggleBox_Checked_Read, @_LapeToggleBox_Checked_Write);
 
     addClass('TLazRadioButton', 'TLazCustomCheckBox', TRadioButton);
     addClassConstructor('TLazRadioButton', '(AOwner: TLazComponent)', @_LapeRadioButton_Create);
+    addProperty('TLazRadioButton', 'Checked', 'Boolean', @_LapeRadioButton_Checked_Read, @_LapeRadioButton_Checked_Write);
 
     addClass('TLazLabel', 'TLazGraphicControl', TLabel);
     addClassConstructor('TLazLabel', '(TheOwner: TLazComponent)', @_LapeLabel_Create);
