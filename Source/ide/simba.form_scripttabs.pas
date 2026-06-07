@@ -603,8 +603,8 @@ constructor TSimbaScriptTabsForm.Create;
 begin
   inherited Create(nil);
 
-  Name := 'SimbaScriptTabsForm'; // important - docking requires control names
   Caption := 'Script Tabs';
+  AllowDropFiles := True;
   OnDropFiles := @DoDropFiles;
 
   FFindPanel := TSimbaFindPanel.Create(Self);
