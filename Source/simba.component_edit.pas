@@ -951,8 +951,8 @@ begin
 end;
 
 initialization
-  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'EditCaretFlasher');
-  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'EditCaretFlasher');
+  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'EditCaretFlasher', -10);
+  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'EditCaretFlasher', 10);
 
 end.
 

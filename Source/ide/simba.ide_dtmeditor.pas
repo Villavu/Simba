@@ -68,7 +68,7 @@ type
     procedure DoLoadFromString(Sender: TObject);
     procedure DoOffsetDTM(Sender: TObject);
   public
-    constructor Create(ImageSupplier: TACAImageSupplier); override;
+    constructor Create(ImageSupplier: TImageSupplier); override;
   end;
 
 implementation
@@ -436,7 +436,7 @@ begin
   end;
 end;
 
-constructor TSimbaDTMEditor.Create(ImageSupplier: TACAImageSupplier);
+constructor TSimbaDTMEditor.Create(ImageSupplier: TImageSupplier);
 
   function CreateListPopupMenu: TPopupMenu;
   begin

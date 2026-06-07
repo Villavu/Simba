@@ -25,8 +25,8 @@ uses
   simba.component_splitter;
 
 type
-  TACAImageSupplier = function(): TSimbaImage of object;
-  TACAImageSupplierLape = function(): TByteArray of object;
+  TImageSupplier = function(): TSimbaImage of object;
+  TImageSupplierLape = function(): TByteArray of object;
 
   TSimbaToolForm = class(TForm)
   private const
@@ -34,14 +34,15 @@ type
     DEF_HEIGHT = 650;
   protected
     FMenuBar: TSimbaMenuBar;
+    FImageMenu: TPopupMenu;
     FDrawColorMenu: TMenuItem;
     FDrawColor: TColor;
     FSidePanel: TPanel;
     FButtonPanel: TPanel;
     FImageBox: TSimbaImageBox;
     FImageBoxZoom: TSimbaImageBoxZoomPanel;
-    FImageSupplier: TACAImageSupplier;
-    FImageSupplierLape: TACAImageSupplierLape;
+    FImageSupplier: TImageSupplier;
+    FImageSupplierLape: TImageSupplierLape;
 
     procedure DoClose(var CloseAction: TCloseAction); override;
     procedure DoFirstShow; override;
@@ -63,11 +64,12 @@ type
   public
     FreeOnClose: Boolean;
 
-    constructor Create(ImageSupplier: TACAImageSupplier); virtual; reintroduce;
-    constructor CreateLape(ImageSupplier: TACAImageSupplierLape); virtual; reintroduce;
+    constructor Create(ImageSupplier: TImageSupplier); virtual; reintroduce;
+    constructor CreateLape(ImageSupplier: TImageSupplierLape); virtual; reintroduce;
 
     function addButton(ACaption: String; AOnClick: TNotifyEvent): TSimbaButton;
 
+    property DrawColor: TColor read FDrawColor write FDrawColor;
     property UserPanel: TPanel read GetUserPanel;
     property Image: TSimbaImage write SetImage;
     property ImageBox: TSimbaImageBox read FImageBox;
@@ -197,7 +199,7 @@ procedure TSimbaToolForm.DoImageUpdated;
 begin
 end;
 
-constructor TSimbaToolForm.Create(ImageSupplier: TACAImageSupplier);
+constructor TSimbaToolForm.Create(ImageSupplier: TImageSupplier);
 
   function CreateImageMenu: TPopupMenu;
   begin
@@ -208,11 +210,13 @@ constructor TSimbaToolForm.Create(ImageSupplier: TACAImageSupplier);
     FDrawColorMenu.Add(NewItem('Yellow', scNone, False, True, @DoDrawColorChange, 0, ''));
     FDrawColorMenu.Add(NewItem('Aqua', scNone, False, True, @DoDrawColorChange, 0, ''));
 
-    Result := TPopupMenu.Create(Self);
-    Result.Items.Add(NewItem('Load Image', scNone, False, True, @DoLoadImageClick, 0, ''));
-    Result.Items.Add(NewItem('Update Image', ShortCut(VK_F5, []), False, True, nil, 0, ''));
-    Result.Items.Add(NewLine());
-    Result.Items.Add(FDrawColorMenu);
+    FImageMenu := TPopupMenu.Create(Self);
+    FImageMenu.Items.Add(NewItem('Load Image', scNone, False, True, @DoLoadImageClick, 0, ''));
+    FImageMenu.Items.Add(NewItem('Update Image', ShortCut(VK_F5, []), False, True, nil, 0, ''));
+    FImageMenu.Items.Add(NewLine());
+    FImageMenu.Items.Add(FDrawColorMenu);
+
+    Result := FImageMenu;
   end;
 
 begin
@@ -287,7 +291,7 @@ begin
   FButtonPanel.BevelOuter := bvNone;
 end;
 
-constructor TSimbaToolForm.CreateLape(ImageSupplier: TACAImageSupplierLape);
+constructor TSimbaToolForm.CreateLape(ImageSupplier: TImageSupplierLape);
 begin
   Create(nil);
 

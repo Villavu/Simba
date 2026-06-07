@@ -20,6 +20,7 @@ uses
   simba.nativeinterface, simba.settings, simba.env,
   simba.dialog, simba.threading, simba.target,
   simba.colormath, simba.aca, simba.multiprocessing,
+  simba.toolform,
   simba.component_imagebox;
 
 type
@@ -489,7 +490,7 @@ type
 
 procedure _LapeACAForm_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PACAForm(Result)^ := TSimbaACA.CreateLape(TACAImageSupplierLape(Params^[0]^));
+  PACAForm(Result)^ := TSimbaACA.CreateLape(TImageSupplierLape(Params^[0]^));
 end;
 
 procedure _LapeACAForm_UserPanel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
