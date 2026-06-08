@@ -1,15 +1,27 @@
+const
+  Rainbow: TColorArray = [$000000FF,$00007FFF,$0000FFFF,$0000FF7F,$0000FF00,$00FFFF00,$00FF0000,$0082004B,$00D30094];
+var
+  Color: TColor;
 begin
-  SetWriteColor(Colors.RED);
-  Write('Red');
+  WriteLn('Single line...');
+  for Color in [$000000FF,$00007FFF,$0000FFFF,$0000FF7F,$0000FF00,$00FFFF00,$00FF0000,$0082004B,$00D30094] do
+  begin
+    SetWriteColor(Color);
+    Write(IntToHex(Color, 6));
+    ResetWriteColor;
+    Write(' ');
+  end;
   ResetWriteColor();
-  Write(' ');
-  SetWriteColor(Colors.AQUA);
-  Write('Aqua');
+  WriteLn;
+  WriteLn('Multi line');
+  for Color in [$000000FF,$00007FFF,$0000FFFF,$0000FF7F,$0000FF00,$00FFFF00,$00FF0000,$0082004B,$00D30094] do
+    with ColorToRGB(Color) do
+    begin
+      SetWriteColor(Color);
+      Write(PadR(ToStr(R), 3, ' '), ' ');
+      Write(PadR(ToStr(G), 3, ' '), ' ');
+      WriteLn(B);
+    end;
   ResetWriteColor();
-  WriteLn();
-
-  SetWriteColor(Colors.YELLOW);
-  WriteLn('Hello');
-  WriteLn('World');
-  ResetWriteColor();
+  WriteLn('Done!');
 end;

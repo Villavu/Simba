@@ -37,6 +37,11 @@ begin
   WriteLn('Tab changed to tab #', TLazPageControl(Sender).ActiveTabIndex);
 end;
 
+procedure DoCheckboxChange(Sender: TLazObject);
+begin
+  WriteLn('Checkbox is now: ', TLazCheckBox(Sender).Checked);
+end;
+
 procedure ShowMyForm;
 var
   Button: TLazButton;
@@ -50,12 +55,13 @@ var
   SpeedButton: TLazSpeedButton;
   LazBmp: TLazBitmap;
   Group: TLazGroupBox;
+  CheckBox: TLazCheckBox;
 begin
   Form := TLazForm.Create();
   Form.Caption := 'Example form';
   Form.OnMouseDown := @FormMouseDown;
   Form.OnMouseUp := @FormMouseUp;
-  Form.Width := 700;
+  Form.Width := 900;
   Form.Height := 700;
   Form.Position := ELazFormPosition.ScreenCenter;
   Form.Color := Colors.DARK_GREY;
@@ -65,14 +71,13 @@ begin
 
   Group := TLazGroupBox.Create(Form);
   Group.Parent := Form;
-  Group.SetBounds(400,200,200,200);
-  Group.AutoSize := True;
+  Group.SetBounds(500,200,300,300);
   Group.Caption := 'Target image';
   Group.Font.Size := 15;
 
   Img := TLazImage.Create(Group);
   Img.Parent := Group;
-  Img.SetBounds(400,200,200,200);
+  Img.Align := ELazAlign.Client;
   Img.Stretch := True;
   Img.Picture.Bitmap := SimbaImg.ToLazBitmap();
   Img.BorderSpacing.Around := 10;
@@ -92,7 +97,7 @@ begin
   Button.Parent := Form;
   Button.AutoSize := True;
   Button.Left := 300;
-  Button.Top := 100;
+  Button.Top := 120;
   Button.Caption := 'This is a bigger button';
   Button.Font.Size := 18;
   Button.OnClick := @DoButtonClick;
@@ -127,8 +132,8 @@ begin
 
   Tabs := TLazPageControl.Create(Form);
   Tabs.Parent := Form;
-  Tabs.Top := 450;
-  Tabs.Left := 50;
+  Tabs.Top := 470;
+  Tabs.Left := 25;
   Tabs.Width := 400;
   Tabs.OnChange := @DoTabChange;
   Tab1 := Tabs.AddTab();
@@ -148,20 +153,29 @@ begin
   Button.Caption := 'This button is on tab 2!';
 
   LazBmp := TLazBitmap.Create();
-  LazBmp.Width := 25;
-  LazBmp.Height := 25;
-  LazBmp.Canvas.Pen.Color := Colors.RED;
-  LazBmp.Canvas.Brush.Color := Colors.WHITE;
-  LazBmp.Canvas.Rectangle(0,0,25,25);
+  LazBmp.Width := 40;
+  LazBmp.Height := 40;
+  LazBmp.Canvas.Pen.Width := 5;
+  LazBmp.Canvas.Pen.Color := Colors.BLUEVIOLET;
+  LazBmp.Canvas.Brush.Color := Colors.SKYBLUE;
+  LazBmp.Canvas.Rectangle(0,0,40,40);
 
   SpeedButton := TLazSpeedButton.Create(Form);
   SpeedButton.Parent := Form;
-  SpeedButton.SetBounds(200,350,150,50);
-  SpeedButton.Caption := 'Hello World';
+  SpeedButton.SetBounds(25,380,350,60);
+  SpeedButton.Caption := 'Button with Image!';
   SpeedButton.Glyph := LazBmp;
-  SpeedButton.AutoSize := True;
 
-  Form.ShowModal();
+  CheckBox := TLazCheckBox.Create(Form);
+  CheckBox.Parent := Form;
+  CheckBox.Left := 550;
+  CheckBox.Top := 550;
+  Checkbox.Caption := 'Some Checkbox';
+  Checkbox.Checked := True;
+  Checkbox.OnChange := @DoCheckboxChange;
+
+  Form.ShowModal(); // ShowModal will block until the form is closed
+  Form.Free();
 
   WriteLn('Form has been closed.');
 end;
@@ -169,3 +183,4 @@ end;
 begin
   ShowMyForm();
 end.
+

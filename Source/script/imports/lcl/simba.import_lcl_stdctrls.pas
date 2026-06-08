@@ -41,6 +41,7 @@ type
   PMemo = ^TMemo;
   PMemoScrollbar = ^TMemoScrollbar;
   PRadioButton = ^TRadioButton;
+  PToggleBox = ^TToggleBox;
   PScrollStyle = ^TScrollStyle;
   PSpeedButton = ^TSpeedButton;
   PBitmap = ^TBitmap;
@@ -842,6 +843,19 @@ begin
   PCustomCheckBox(Result)^ := TCustomCheckBox.Create(PComponent(Params^[0])^);
 end;
 
+procedure _LapeCustomCheckBox_Checked_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PCustomCheckBox(Params^[0])^.State = cbChecked;
+end;
+
+procedure _LapeCustomCheckBox_Checked_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  if PBoolean(Params^[1])^ then
+    PCustomCheckBox(Params^[0])^.State := cbChecked
+  else
+    PCustomCheckBox(Params^[0])^.State := cbUnchecked;
+end;
+
 procedure _LapeCustomCheckBox_AllowGrayed_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PCustomCheckBox(Params^[0])^.AllowGrayed;
@@ -1137,6 +1151,11 @@ begin
   PRadioButton(Result)^ := TRadioButton.Create(PComponent(Params^[0])^);
 end;
 
+procedure _LapeToggleBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PToggleBox(Result)^ := TToggleBox.Create(PComponent(Params^[0])^);
+end;
+
 procedure ImportLCLStdCtrls(Script: TSimbaScript);
 begin
   with Script.Compiler do
@@ -1274,6 +1293,7 @@ begin
 
     addClass('TLazCustomCheckBox', 'TLazWinControl', TCustomCheckBox);
     addClassConstructor('TLazCustomCheckBox', '(TheOwner: TLazComponent)', @_LapeCustomCheckBox_Create);
+    addProperty('TLazCustomCheckBox', 'Checked', 'Boolean', @_LapeCustomCheckBox_Checked_Read, @_LapeCustomCheckBox_Checked_Write);
     addProperty('TLazCustomCheckBox', 'AllowGrayed', 'Boolean', @_LapeCustomCheckBox_AllowGrayed_Read, @_LapeCustomCheckBox_AllowGrayed_Write);
     addProperty('TLazCustomCheckBox', 'State', 'ELazCheckBoxState', @_LapeCustomCheckBox_State_Read, @_LapeCustomCheckBox_State_Write);
     addProperty('TLazCustomCheckBox', 'OnChange', 'TLazNotifyEvent', @_LapeCustomCheckBox_OnChange_Read, @_LapeCustomCheckBox_OnChange_Write);
@@ -1283,6 +1303,9 @@ begin
 
     addClass('TLazRadioButton', 'TLazCustomCheckBox', TRadioButton);
     addClassConstructor('TLazRadioButton', '(AOwner: TLazComponent)', @_LapeRadioButton_Create);
+
+    addClass('TLazToggleBox', 'TLazCustomCheckBox', TToggleBox);
+    addClassConstructor('TLazToggleBox', '(AOwner: TLazComponent)', @_LapeToggleBox_Create);
 
     addClass('TLazLabel', 'TLazGraphicControl', TLabel);
     addClassConstructor('TLazLabel', '(TheOwner: TLazComponent)', @_LapeLabel_Create);
