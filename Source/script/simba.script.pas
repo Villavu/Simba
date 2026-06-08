@@ -125,7 +125,7 @@ end;
 
 procedure TSimbaScript.DoCompilerHint(Sender: TLapeCompilerBase; Hint: lpString);
 begin
-  DebugLn(DEBUG_YELLOW + Hint + DEBUG_RESET);
+  DebugLn(DEBUG_YELLOW + Hint + DEBUG_RESET_EOL);
 end;
 
 procedure TSimbaScript.DoCompilerFindFile(Sender: TLapeCompiler; var FileName: lpString);

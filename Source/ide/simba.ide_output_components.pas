@@ -20,6 +20,7 @@ const
   CC_RESET_BACKGROUND = UInt8(2);
   CC_CLEAR = UInt8(3);
   CC_FOCUS = UInt8(4);
+  CC_RESET_AT_EOL = UInt8(5);
 
 type
   // the actual sequence that is encoded in the string
@@ -181,7 +182,7 @@ procedure TEndOfLineWhitespaceMarkup.PrepareMarkupForRow(aRow: Integer);
 var
   ControlCodesForLine: TLineControlCodeArray;
   LastControlCode: TLineControlCode;
-  //i: Integer;
+  i: Integer;
 begin
   Assert(aRow-1 >= 0);
   Assert(aRow-1 < FControlCodes.Count);
@@ -192,20 +193,20 @@ begin
   if (ControlCodesForLine <> nil) then
   begin
     LastControlCode := ControlCodesForLine[High(ControlCodesForLine)];
-    // If last is reset background, paint the entire line?
-    //if (LastControlCode.Typ = CC_RESET_BACKGROUND) then
-    //begin
-    //  for i := High(ControlCodesForLine) - 1 downto 0 do
-    //    if (ControlCodesForLine[i].Typ = CC_SET_BACKGROUND) then
-    //    begin
-    //      MarkupInfo.Background := ColorBlend(UInt32(ControlCodesForLine[i].Data), SimbaComponentTheme.ColorBackground, 50);
-    //      FStart := Length(Lines[aRow - 1]) + 1;
-    //      Exit;
-    //    end;
-    //end else
+
+    if (LastControlCode.Typ = CC_RESET_AT_EOL) then
+    begin
+      for i := High(ControlCodesForLine) - 1 downto 0 do
+        if (ControlCodesForLine[i].Typ = CC_SET_BACKGROUND) then
+        begin
+          MarkupInfo.Background := ColorBlend(UInt32(ControlCodesForLine[i].Data), SimbaComponentTheme.ColorBackground, 80);
+          FStart := Length(Lines[aRow - 1]) + 1;
+          Exit;
+        end;
+    end else
     if (LastControlCode.Typ = CC_SET_BACKGROUND) then
     begin
-      MarkupInfo.Background := ColorBlend(UInt32(LastControlCode.Data), SimbaComponentTheme.ColorBackground, 50);
+      MarkupInfo.Background := ColorBlend(UInt32(LastControlCode.Data), SimbaComponentTheme.ColorBackground, 80);
       FStart := Length(Lines[aRow - 1]) + 1;
     end;
   end;
@@ -317,27 +318,6 @@ procedure TOutputListComponent.ParseAndAddLine(const S: String);
     Result := (Length(S) >= SizeOf(TControlCode)) and (Pos(#0#0, S) > 0);
   end;
 
-  function ParseClearOrFocus: Boolean;
-  var
-    Code: TLineControlCode;
-    PendingItem: TPending;
-  begin
-    Result := (Length(S) = SizeOf(TControlCode)) and (S[1] = #0) and (S[2] = #0) and
-              (UInt8(S[3]) in [CC_CLEAR, CC_FOCUS]);
-
-    if Result then
-    begin
-      Code.Typ := UInt8(S[3]);
-      Code.Data := 0;
-      Code.Index := 0;
-
-      PendingItem.Codes := [Code];
-      PendingItem.Text := '';
-
-      FPending.Add(PendingItem);
-    end;
-  end;
-
 var
   I, LastPos, Len, Stop: Integer;
   CleanTextLen: Integer;
@@ -346,10 +326,6 @@ var
   Last: TLineControlCode;
   PendingItem: TPending;
 begin
-  // these two are special and cannot be nested in a string
-  if ParseClearOrFocus() then
-    Exit;
-
   Len := Length(S);
   if (Len = 0) then
     Exit;
@@ -506,9 +482,10 @@ end;
 
 procedure TOutputListComponent.Flush;
 var
-  I: Integer;
+  I, J: Integer;
   WasFullyScrolled: Boolean;
   Item: TPending;
+  HasVisualCode: Boolean;
 begin
   if not FNeedFlush then
     Exit;
@@ -525,23 +502,30 @@ begin
       for I := 0 to FPending.Count - 1 do
       begin
         Item := FPending[I];
-        // Maybe handle special codes
+
         if (Item.Codes <> nil) then
         begin
-          case Item.Codes[0].Typ of
-            CC_CLEAR:
-              begin
-                Lines.Clear();
-                FControlCodes.Clear();
-                Continue;
-              end;
-            CC_FOCUS:
-              begin
-                Parent.Show();
-                TopLine := Lines.Count;
-                Continue;
-              end;
+          HasVisualCode := False;
+          for J := 0 to High(Item.Codes) do
+          begin
+            case Item.Codes[J].Typ of
+              CC_CLEAR:
+                begin
+                  Lines.Clear();
+                  FControlCodes.Clear();
+                end;
+              CC_FOCUS:
+                begin
+                  Parent.Show();
+                  TopLine := Lines.Count;
+                end;
+              else
+                HasVisualCode := True;
+            end;
           end;
+
+          if (Item.Text = '') and (not HasVisualCode) then
+            Continue;
         end;
 
         Lines.Add(Item.Text);
@@ -673,7 +657,7 @@ begin
   else
   begin
     Result := FSpecialAttri;
-    Result.Background := ColorBlend(UInt32(FColor), SimbaComponentTheme.ColorBackground, 50);
+    Result.Background := ColorBlend(UInt32(FColor), SimbaComponentTheme.ColorBackground, 80);
   end;
 end;
 

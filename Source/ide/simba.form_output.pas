@@ -179,6 +179,7 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     FTabControl.MoveTab(Data.FromIndex + 1, Data.ToIndex + 1);
   end;
 
+  // script started; show output etc
   procedure DoTabScriptStart(Tab: TSimbaScriptTab);
   var
     OutputTab: TOutputTab;

@@ -285,6 +285,7 @@ const
   DEBUG_RESET        = #0#0#2'00000000';
   DEBUG_CLEAR        = #0#0#3'00000000';
   DEBUG_FOCUS        = #0#0#4'00000000';
+  DEBUG_RESET_EOL    = #0#0#5'00000000';
 
 procedure Debug(Msg: String); overload;
 procedure Debug(Msg: String; Args: array of const); overload;

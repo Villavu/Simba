@@ -479,7 +479,10 @@ end;
 
 procedure _LapeResetWriteColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  Debug(DEBUG_RESET);
+  if PBoolean(Params^[0])^ then
+    Debug(DEBUG_RESET_EOL)
+  else
+    Debug(DEBUG_RESET);
 end;
 
 // Sort
@@ -743,7 +746,7 @@ begin
     addGlobalFunc('procedure _Write(S: String); override', @_LapeWrite);
     addGlobalFunc('procedure _WriteLn; override', @_LapeWriteLn);
     addGlobalFunc('procedure SetWriteColor(C: TColor);', @_LapeSetWriteColor);
-    addGlobalFunc('procedure ResetWriteColor();', @_LapeResetWriteColor);
+    addGlobalFunc('procedure ResetWriteColor(AtEol: Boolean = False);', @_LapeResetWriteColor);
 
     // add native versions for lape to use
     addMagic('_ArrayMin', ['TIntegerArray'], [lptNormal], 'Integer', @_LapeArrayMin_Int32Array);
