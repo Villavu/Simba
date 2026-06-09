@@ -111,7 +111,8 @@ type
     FWasLinkable: Boolean;
     FLink: String;
 
-    procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseLeave; override;
 
     procedure ParseAndAddLine(const S: String);
   public
@@ -263,13 +264,22 @@ end;
 
 function TOutputListComponent.IsLinkable(Y, X1, X2: Integer): Boolean;
 begin
-  Result := FWasLinkable;
+  Result := MouseInClient and FWasLinkable;
 end;
 
-procedure TOutputListComponent.DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TOutputListComponent.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if Assigned(FLinkClick) then
+  inherited MouseDown(Button, Shift, X, Y);
+
+  if FWasLinkable and Assigned(FLinkClick) then
     FLinkClick(Self, FLink);
+end;
+
+procedure TOutputListComponent.MouseLeave;
+begin
+  LastMouseCaret := TPoint.Create(-1, -1);
+
+  inherited MouseLeave();
 end;
 
 procedure TOutputListComponent.ParseAndAddLine(const S: String);
@@ -571,8 +581,6 @@ begin
   ResetMouseActions();
   with MouseTextActions.Add() do
     Command := emcMouseLink;
-
-  OnClickLink := @DoMouseLinkClick;
 end;
 
 destructor TOutputListComponent.Destroy;

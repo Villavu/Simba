@@ -117,12 +117,14 @@ class procedure SimbaController.OpenInTab(FileName: String; CaretX, CaretY: Inte
 begin
   ASSERT_MAIN_THREAD
 
-  if SimbaScriptTabsForm.Open(FileName) then
+  if (FileName = 'Untitled') or SimbaScriptTabsForm.Open(FileName) then
     with SimbaScriptTabsForm.ActiveTab do
     begin
       Editor.CaretX  := CaretX;
       Editor.CaretY  := CaretY;
       Editor.TopLine := CaretY - (Editor.LinesInWindow div 2);
+      if Editor.CanSetFocus then
+        Editor.SetFocus();
     end;
 end;
 

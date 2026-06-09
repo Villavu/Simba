@@ -32,8 +32,11 @@ type
     FContextMenu: TPopupMenu;
     FTabControl: TSimbaTabControl;
     FSimbaTab: TOutputTab;
-    FRegexError: TRegExpr;
-    FRegexTrace: TRegExpr;
+    // Line 11 in "main" in file "Untitled"
+    // Line 6 in function "lol" in file "Untitled"
+    // at line 2, column 8 in file "Untitled"
+    // at line 7, column 1 in file "Untitled"
+    FRegexDocPos: TRegExpr;
 
     procedure DoDebugRedirect(const S: String);
     procedure DoDebugLnRedirect(const S: String);
@@ -235,7 +238,7 @@ begin
   Result := False;
 
   // DocPos that spans the entire line
-  if Line.Contains('in file') and (FRegexTrace.Exec(Line) or FRegexError.Exec(Line)) then
+  if Line.Contains('in file') and FRegexDocPos.Exec(Line) then
   begin
     X1 := 1;
     X2 := Length(Line) + 1;
@@ -272,10 +275,12 @@ procedure TSimbaOutputForm.DoLinkClick(Sender: TObject; Link: String);
 begin
   if Link.Contains('in file') then
   begin
-    if FRegexError.Exec(Link) then
-      SimbaController.OpenInTab(FRegexError.Match[3], StrToInt(FRegexError.Match[1]), StrToInt(FRegexError.Match[2]))
-    else if FRegexError.Exec(Link) then
-      SimbaController.OpenInTab(FRegexError.Match[3], 1, StrToInt(FRegexError.Match[1]));
+    if FRegexDocPos.Exec(Link) then
+      SimbaController.OpenInTab(
+        FRegexDocPos.Match[3],
+        StrToIntDef(FRegexDocPos.Match[2], 1),
+        StrToInt(FRegexDocPos.Match[1])
+      );
   end
   else if Link.StartsWith('http://') or Link.StartsWith('https://') then
   begin
@@ -343,11 +348,7 @@ begin
   FContextMenu.Items.Add(NewLine());
   FContextMenu.Items.Add(Add('Customize', 6));
 
-  // Line 13 in "main" in file "Untitled"
-  // Line 11 in function "hmm" in file "Untitled"
-  FRegexError := TRegExpr.Create('at line (\d+), column (\d+) in file "([^"]+)"');
-  // Unknown declaration "hmm" at line 13, column 3 in file "Untitled"
-  FRegexTrace := TRegExpr.Create('Line (\d+) in "([^"]+)" in file "([^"]+)"');
+  FRegexDocPos := TRegExpr.Create('(?i)(?:at\s+)?line\s+(\d+)(?:,\s*column\s+(\d+))?.*?in\s+file\s+"([^"]+)"');
 
   FTabControl := TSimbaTabControl.Create(Self, TOutputTab);
   FTabControl.Parent := Self;
@@ -387,8 +388,7 @@ destructor TSimbaOutputForm.Destroy;
 begin
   SetDebugRedirects(nil, nil);
 
-  FreeAndNil(FRegexTrace);
-  FreeAndNil(FRegexError);
+  FreeAndNil(FRegexDocPos);
 
   inherited Destroy();
 end;
