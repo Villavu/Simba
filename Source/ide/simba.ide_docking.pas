@@ -357,7 +357,7 @@ begin
   for I := 0 to Screen.CustomFormCount - 1 do
   begin
     Site := TSimbaAnchorDockHostSite(Screen.CustomForms[I].HostDockSite);
-    if Screen.CustomForms[I].Showing and (Site is TSimbaAnchorDockHostSite) and Site.Floating then
+    if (Site is TSimbaAnchorDockHostSite) and Site.Floating and Site.Showing then
     begin
       Site.FNeedRestore := True;
       Site.CloseSite();
