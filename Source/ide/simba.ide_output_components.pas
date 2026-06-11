@@ -111,7 +111,8 @@ type
     FWasLinkable: Boolean;
     FLink: String;
 
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure DoAllowMouseLink(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
+    procedure DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure MouseLeave; override;
 
     procedure ParseAndAddLine(const S: String);
@@ -267,12 +268,15 @@ begin
   Result := MouseInClient and FWasLinkable;
 end;
 
-procedure TOutputListComponent.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TOutputListComponent.DoAllowMouseLink(Sender: TObject; X, Y: Integer; var AllowMouseLink: Boolean);
 begin
-  inherited MouseDown(Button, Shift, X, Y);
+  AllowMouseLink := FWasLinkable;
+end;
 
-  if FWasLinkable and Assigned(FLinkClick) then
-    FLinkClick(Self, FLink);
+procedure TOutputListComponent.DoMouseLinkClick(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if Assigned(FLinkClick) and FWasLinkable then
+    FLinkClick(Sender, FLink);
 end;
 
 procedure TOutputListComponent.MouseLeave;
@@ -570,6 +574,8 @@ begin
   Highlighter := TOutputHighlighter.Create(Self);
   ReadOnly := True;
   TabStop := False;
+  OnMouseLink := @DoAllowMouseLink;
+  OnClickLink := @DoMouseLinkClick;
 
   MouseLinkColor.Style := [fsUnderline];
   MouseLinkColor.Foreground := RGBToColor(80, 160, 240);
@@ -577,10 +583,8 @@ begin
   MarkupByClass[TSynEditMarkupBracket].Enabled := False;
   MarkupByClass[TSynEditMarkupWordGroup].Enabled := False;
 
-  MouseOptions := [emUseMouseActions];
+  MouseOptions := [emUseMouseActions, emShowCtrlMouseLinks];
   ResetMouseActions();
-  with MouseTextActions.Add() do
-    Command := emcMouseLink;
 end;
 
 destructor TOutputListComponent.Destroy;
