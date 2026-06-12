@@ -195,6 +195,9 @@ type
   end;
 
 procedure TSyncObject.Execute;
+var
+  I: Integer;
+  Frames: PPointer;
 begin
   try
     if Assigned(Method)     then Method()      else
@@ -202,7 +205,16 @@ begin
     if Assigned(NestedProc) then NestedProc();
   except
     on E: Exception do
+    begin
       DebugLn('RunOnMainThread exception: ' + E.Message);
+
+      {$IFDEF SIMBA_HAS_DEBUGINFO}
+      DebugLn(BackTraceStrFunc(ExceptAddr));
+      Frames := ExceptFrames;
+      for I := 0 to ExceptFrameCount - 1 do
+        DebugLn(BackTraceStrFunc(Frames[I]));
+      {$ENDIF}
+    end;
   end;
 end;
 
