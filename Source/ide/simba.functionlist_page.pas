@@ -79,8 +79,14 @@ type
   TSimbaSectionNode = class(TTreeNode);
 
   TParserNode = class(TTreeNode)
+  protected
+    FParser: TCodeParser;
+
+    procedure SetParser(Value: TCodeParser);
   public
-    Parser: TCodeParser;
+    destructor Destroy; override;
+
+    property Parser: TCodeParser read FParser write SetParser;
   end;
 
 implementation
@@ -509,6 +515,27 @@ begin
   finally
     RunInMainThread(@EndUpdate);
   end;
+end;
+
+procedure TParserNode.SetParser(Value: TCodeParser);
+begin
+  if (FParser = Value) then
+    Exit;
+
+  FParser := Value;
+  if (FParser <> nil) then
+    FParser.IncRef();
+end;
+
+destructor TParserNode.Destroy;
+begin
+  if (FParser <> nil) then
+  begin
+    FParser.DecRef();
+    FParser := nil;
+  end;
+
+  inherited Destroy();
 end;
 
 end.

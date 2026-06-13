@@ -563,6 +563,9 @@ type
     procedure Reset; override;
     procedure Run; override;
 
+    function IncRef: TCodeParser; virtual;
+    function DecRef: TCodeParser; virtual;
+
     constructor Create; override;
     destructor Destroy; override;
   end;
@@ -2191,6 +2194,16 @@ begin
   inherited Run;
 
   BuildSymbolTable(FSymbolTable, Self);
+end;
+
+function TCodeParser.IncRef: TCodeParser;
+begin
+  { nothing }
+end;
+
+function TCodeParser.DecRef: TCodeParser;
+begin
+  { nothing }
 end;
 
 function TSymbolTable.IndexOf(Name: String): Integer;

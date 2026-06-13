@@ -195,9 +195,11 @@ type
   end;
 
 procedure TSyncObject.Execute;
+{$IFDEF SIMBA_HAS_DEBUGINFO}
 var
   I: Integer;
   Frames: PPointer;
+{$ENDIF}
 begin
   try
     if Assigned(Method)     then Method()      else
@@ -206,7 +208,7 @@ begin
   except
     on E: Exception do
     begin
-      DebugLn('RunOnMainThread exception: ' + E.Message);
+      DebugLn('RunOnMainThread: ' + E.Message);
 
       {$IFDEF SIMBA_HAS_DEBUGINFO}
       DebugLn(BackTraceStrFunc(ExceptAddr));
@@ -231,13 +233,27 @@ type
   end;
 
 procedure TThreaded.Execute;
+{$IFDEF SIMBA_HAS_DEBUGINFO}
+var
+  I: Integer;
+  Frames: PPointer;
+{$ENDIF}
 begin
   try
-    if Assigned(FMethod)     then FMethod() else
-    if Assigned(FProc)       then FProc();
+    if Assigned(FMethod) then FMethod() else
+    if Assigned(FProc)   then FProc();
   except
     on E: Exception do
-      DebugLn('RunInThread exception: ' + E.Message);
+    begin
+      DebugLn('RunInThread: ' + E.Message);
+
+      {$IFDEF SIMBA_HAS_DEBUGINFO}
+      DebugLn(BackTraceStrFunc(ExceptAddr));
+      Frames := ExceptFrames;
+      for I := 0 to ExceptFrameCount - 1 do
+        DebugLn(BackTraceStrFunc(Frames[I]));
+      {$ENDIF}
+    end;
   end;
 end;
 
@@ -268,13 +284,27 @@ type
   end;
 
 procedure TQueueObject.Execute(Data: PtrInt);
+{$IFDEF SIMBA_HAS_DEBUGINFO}
+var
+  I: Integer;
+  Frames: PPointer;
+{$ENDIF}
 begin
   try
     if Assigned(Method) then Method() else
     if Assigned(Proc)   then Proc();
   except
     on E: Exception do
-      DebugLn('QueueOnMainThread exception: ' + E.Message);
+    begin
+      DebugLn('QueueOnMainThread: ' + E.Message);
+
+      {$IFDEF SIMBA_HAS_DEBUGINFO}
+      DebugLn(BackTraceStrFunc(ExceptAddr));
+      Frames := ExceptFrames;
+      for I := 0 to ExceptFrameCount - 1 do
+        DebugLn(BackTraceStrFunc(Frames[I]));
+      {$ENDIF}
+    end;
   end;
 
   Free();

@@ -66,8 +66,8 @@ type
     property InDefines: TSaveDefinesRec read FInDefines;
 
     function IsOutdated: Boolean;
-    function IncRef: TCodetoolsInclude;
-    function DecRef: TCodetoolsInclude;
+    function IncRef: TCodeParser; override;
+    function DecRef: TCodeParser; override;
   end;
 
   TCodetoolsPlugin = class(TCodetoolsInclude)
@@ -166,23 +166,23 @@ begin
   Result := False;
 end;
 
-function TCodetoolsInclude.IncRef: TCodetoolsInclude;
+function TCodetoolsInclude.IncRef: TCodeParser;
 begin
   Inc(FRefCount);
   Result := Self;
 
   {$IFDEF PARSER_CACHE_DEBUG}
-  DebugLn('IncRef: %s -> %d', [Lexer.FileName, FRefCount]);
+  DebugLn('IncRef: "%s" -> %d', [TSimbaPath.PathExtractRelative(Lexer.FileName), FRefCount]);
   {$ENDIF}
 end;
 
-function TCodetoolsInclude.DecRef: TCodetoolsInclude;
+function TCodetoolsInclude.DecRef: TCodeParser;
 begin
   Dec(FRefCount);
   Result := Self;
 
   {$IFDEF PARSER_CACHE_DEBUG}
-  DebugLn('DecRef: %s -> %d', [Lexer.FileName, FRefCount]);
+  DebugLn('DecRef: "%s" -> %d', [TSimbaPath.PathExtractRelative(Lexer.FileName), FRefCount]);
   {$ENDIF}
 end;
 
@@ -210,7 +210,7 @@ begin
           if IsOutdated() then
           begin
             {$IFDEF PARSER_CACHE_DEBUG}
-            DebugLn('[Codetools]: Cache hit "%s" but is outdated %d', [Lexer.FileName, FRefCount]);
+            DebugLn('[Codetools]: Cache hit "%s" but is outdated %d', [TSimbaPath.PathExtractRelative(Lexer.FileName), FRefCount]);
             {$ENDIF}
 
             FLastUsed := 1000;
@@ -225,7 +225,7 @@ begin
 
     if (Result = nil) then
     begin
-      DebugLn('[Codetools] Caching %s', [FileName]);
+      DebugLn('[Codetools]: Caching "%s"', [TSimbaPath.PathExtractRelative(FileName)]);
 
       Result := TCodetoolsPlugin.Create(FileName);
       Result.Run();
@@ -259,7 +259,7 @@ begin
       if (FRefCount > 0) or (FLastUsed < PurgeThreshold) then
         Continue;
 
-      DebugLn('Purge include: %s [%d]', [Lexer.FileName, FLastUsed]);
+      DebugLn('[Codetools]: Purge "%s" [%d]', [TSimbaPath.PathExtractRelative(Lexer.FileName), FLastUsed]);
 
       FParsers.Delete(I);
     end;
@@ -310,7 +310,7 @@ begin
           if not FInDefines.IsEqual(Defines) then
           begin
             {$IFDEF PARSER_CACHE_DEBUG}
-            DebugLn('[Codetools]: Cache hit "%s" but not used (defines mismatch) %d, %d', [Lexer.FileName, FRefCount, FLastUsed + 1]);
+            DebugLn('[Codetools]: Cache hit "%s" but not used (defines mismatch) %d, %d', [TSimbaPath.PathExtractRelative(Lexer.FileName), FRefCount, FLastUsed + 1]);
             {$ENDIF}
 
             FLastUsed := FLastUsed + 1;
@@ -320,7 +320,7 @@ begin
           if IsOutdated() then
           begin
             {$IFDEF PARSER_CACHE_DEBUG}
-            DebugLn('[Codetools]: Cache hit "%s" but is outdated %d', [Lexer.FileName, FRefCount]);
+            DebugLn('[Codetools]: Cache hit "%s" but is outdated %d', [TSimbaPath.PathExtractRelative(Lexer.FileName), FRefCount]);
             {$ENDIF}
 
             FLastUsed := 1000;
@@ -335,7 +335,7 @@ begin
 
     if (Result = nil) then
     begin
-      DebugLn('[Codetools]: Caching %s', [FileName]);
+      DebugLn('[Codetools]: Caching "%s"', [TSimbaPath.PathExtractRelative(FileName)]);
 
       Result := TCodetoolsInclude.Create(FileName, Defines, IncludedFiles);
       Result.Run();

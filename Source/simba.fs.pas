@@ -11,7 +11,8 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.hash;
+  simba.base,
+  simba.hash;
 
 const
   PATH_SEP = DirectorySeparator;
@@ -68,7 +69,8 @@ type
     class function PathIncludeTrailingSep(Path: String): String;
     class function PathExcludeLeadingSep(Path: String): String;
     class function PathIncludeLeadingSep(Path: String): String;
-    class function PathExtractRelative(BasePath, DestPath: String): String;
+    class function PathExtractRelative(BasePath, DestPath: String): String; overload;
+    class function PathExtractRelative(DestPath: String): String; overload;
     class function PathChangeExt(Path, NewExt: String): String;
     class function PathIsInDir(Path, Directory: String): Boolean;
     class function PathHasExt(Path: String; Extensions: array of String): Boolean;
@@ -105,8 +107,10 @@ uses
   {$IFDEF UNIX}
   BaseUnix,
   {$ENDIF}
-  FileUtil, LazFileUtils, IniFiles,
-  simba.containers, simba.vartype_string, simba.vartype_ordarray;
+  Forms, FileUtil, LazFileUtils, IniFiles,
+  simba.containers,
+  simba.vartype_string,
+  simba.vartype_ordarray;
 
 class function TSimbaDir.DirList(Path: String; Recursive: Boolean): TStringArray;
 var
@@ -347,6 +351,11 @@ end;
 class function TSimbaPath.PathExtractRelative(BasePath, DestPath: String): String;
 begin
   Result := ExtractRelativePath(BasePath, DestPath);
+end;
+
+class function TSimbaPath.PathExtractRelative(DestPath: String): String;
+begin
+  Result := ExtractRelativePath(Application.Location, DestPath);
 end;
 
 class function TSimbaPath.PathChangeExt(Path, NewExt: String): String;
