@@ -49,9 +49,14 @@ begin
     DebugLn('  Simba.exe [options] "path/to/script.simba"');
     DebugLn('');
     DebugLn('Options:');
-    DebugLn('  --run       Run a script');
-    DebugLn('  --compile   Compile a script');
-    DebugLn('  --open      Open a script in Simba');
+    DebugLn('  --run             Run a script');
+    DebugLn('  --compile         Compile a script');
+    DebugLn('  --open            Open a script in Simba');
+    DebugLn('  --keep-formatting Keep formatting (colors etc) in debug');
+    DebugLn('  --extractopenssl  Extract OpenSSL binaries on start (always happens on IDE launch)');
+    {$IFDEF WINDOWS}
+    DebugLn('  --disablewgc Disable windows graphic capture (Win10+');
+    {$ENDIF}
     DebugLn('');
     DebugLn('Examples:');
     DebugLn('  Run a script without opening Simba:');

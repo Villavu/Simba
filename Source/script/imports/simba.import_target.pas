@@ -1104,6 +1104,28 @@ begin
   PInteger(Result)^ := PLapeObjectTarget(Params^[0])^^.GetBrightness(ESimbaTargetBrightnessAlgo(Params^[1]^), PBox(Params^[2])^);
 end;
 
+{$IFDEF USE_WGCAPTURE}
+procedure _LapeTarget_WGCEnabled_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PLapeObjectTarget(Params^[0])^^.WGCEnabled;
+end;
+
+procedure _LapeTarget_WGCEnabled_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectTarget(Params^[0])^^.WGCEnabled := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeTarget_WGCSupported_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PLapeObjectTarget(Params^[0])^^.WGCSupported;
+end;
+
+procedure _LapeTarget_GetLastWGCError_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := PLapeObjectTarget(Params^[0])^^.WGCLastError;
+end;
+{$ENDIF}
+
 procedure ImportTarget(Script: TSimbaScript);
 begin
   with Script.Compiler do
@@ -1264,6 +1286,11 @@ begin
 
     addGlobalFunc('function TTarget.GetBrightness(Algo: EBrightnessAlgo; Bounds: TBox = [-1,-1,-1,-1]): Integer;', @_LapeFinder_GetBrightness);
 
+    {$IFDEF USE_WGCAPTURE}
+    addProperty('TTarget', 'WGCEnabled', 'Boolean', @_LapeTarget_WGCEnabled_Read, @_LapeTarget_WGCEnabled_Write);
+    addProperty('TTarget', 'WGCSupported', 'Boolean', @_LapeTarget_WGCSupported_Read);
+    addProperty('TTarget', 'WGCLastError', 'String', @_LapeTarget_GetLastWGCError_Read);
+    {$ENDIF}
 
     addDelayedCode([
       'function ToString(constref Target: TTarget): String; override;',

@@ -341,8 +341,6 @@ var
   PendingItem: TPending;
 begin
   Len := Length(S);
-  if (Len = 0) then
-    Exit;
 
   ControlCodeCount := 0;
   Stop := Len - SizeOf(TControlCode) + 1;

@@ -14,6 +14,10 @@
   {$Optimization noDFA}
 {$ENDIF}
 
+{$IF DEFINED(WINDOWS)}
+  {$DEFINE USE_WGCAPTURE}
+{$ENDIF}
+
 // Set in project options > custom options "-CfSSE"
 //{$IF Defined(CPU386)}
 //  {$FPUTYPE SSE3}
