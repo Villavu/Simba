@@ -40,7 +40,7 @@ type
 
     procedure Expected(Sym: ELexerToken); virtual;
 
-    procedure Anchor; virtual;
+    procedure Marker; virtual;
     procedure NextToken; virtual;
     procedure SkipJunk; virtual;
     procedure SemiColon; virtual;
@@ -258,7 +258,7 @@ begin
     NextToken;
 end;
 
-procedure TPasParser.Anchor;
+procedure TPasParser.Marker;
 begin
   fLexer.Next();
 end;
@@ -2183,8 +2183,8 @@ end;
 
 procedure TPasParser.OnIDEDirective(Sender: TPasLexer);
 begin
-  if (Sender.CompilerDirective = 'ANCHOR') then
-    Anchor();
+  if (Sender.CompilerDirective = 'MARKER') then
+    Marker();
 end;
 
 end.

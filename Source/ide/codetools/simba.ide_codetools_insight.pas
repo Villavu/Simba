@@ -311,6 +311,7 @@ function TCodeinsight.GetGlobals: TDeclarationArray;
               (Decl.ClassType = TDeclaration_Var) or
               (Decl.ClassType = TDeclaration_Const) or
               (Decl.ClassType = TDeclaration_EnumElement) or
+              (Decl.ClassType = TDeclaration_Marker) or
               (Decl is TDeclaration_Type);
   end;
 

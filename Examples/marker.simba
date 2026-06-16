@@ -1,0 +1,17 @@
+procedure hello;
+begin
+
+end;
+
+{%MARKER ThisShowsUpInCodeTools}
+
+procedure world;
+begin
+
+end;
+
+{%MARKER AndAgain!}
+
+begin
+
+end.

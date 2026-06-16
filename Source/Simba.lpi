@@ -17,7 +17,7 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="192">
+      <Resources Count="190">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
         <Resource_2 FileName="..\Examples\static_method.simba" Type="RCDATA" ResourceName="EXAMPLE_STATIC_METHOD"/>
@@ -143,73 +143,71 @@
         <Resource_122 FileName="..\Images\close_all.png" Type="RCDATA" ResourceName="CLOSE_ALL"/>
         <Resource_123 FileName="..\Images\close_all_150.png" Type="RCDATA" ResourceName="CLOSE_ALL_150"/>
         <Resource_124 FileName="..\Images\close_all_200.png" Type="RCDATA" ResourceName="CLOSE_ALL_200"/>
-        <Resource_125 FileName="..\Images\anchor.png" Type="RCDATA" ResourceName="ANCHOR"/>
-        <Resource_126 FileName="..\Images\anchor_150.png" Type="RCDATA" ResourceName="ANCHOR_150"/>
-        <Resource_127 FileName="..\Images\anchor_200.png" Type="RCDATA" ResourceName="ANCHOR_200"/>
-        <Resource_128 FileName="..\Images\constant.png" Type="RCDATA" ResourceName="CONSTANT"/>
-        <Resource_129 FileName="..\Images\constant_150.png" Type="RCDATA" ResourceName="CONSTANT_150"/>
-        <Resource_130 FileName="..\Images\constant_200.png" Type="RCDATA" ResourceName="CONSTANT_200"/>
-        <Resource_131 FileName="..\Images\method.png" Type="RCDATA" ResourceName="METHOD"/>
-        <Resource_132 FileName="..\Images\method_150.png" Type="RCDATA" ResourceName="METHOD_150"/>
-        <Resource_133 FileName="..\Images\method_200.png" Type="RCDATA" ResourceName="METHOD_200"/>
-        <Resource_134 FileName="..\Images\prop.png" Type="RCDATA" ResourceName="PROP"/>
-        <Resource_135 FileName="..\Images\prop_150.png" Type="RCDATA" ResourceName="PROP_150"/>
-        <Resource_136 FileName="..\Images\prop_200.png" Type="RCDATA" ResourceName="PROP_200"/>
-        <Resource_137 FileName="..\Images\variable.png" Type="RCDATA" ResourceName="VARIABLE"/>
-        <Resource_138 FileName="..\Images\variable_150.png" Type="RCDATA" ResourceName="VARIABLE_150"/>
-        <Resource_139 FileName="..\Images\variable_200.png" Type="RCDATA" ResourceName="VARIABLE_200"/>
-        <Resource_140 FileName="..\Images\folder.png" Type="RCDATA" ResourceName="FOLDER"/>
-        <Resource_141 FileName="..\Images\folder_150.png" Type="RCDATA" ResourceName="FOLDER_150"/>
-        <Resource_142 FileName="..\Images\folder_200.png" Type="RCDATA" ResourceName="FOLDER_200"/>
-        <Resource_143 FileName="..\Images\document.png" Type="RCDATA" ResourceName="DOCUMENT"/>
-        <Resource_144 FileName="..\Images\document_150.png" Type="RCDATA" ResourceName="DOCUMENT_150"/>
-        <Resource_145 FileName="..\Images\document_200.png" Type="RCDATA" ResourceName="DOCUMENT_200"/>
-        <Resource_146 FileName="..\Images\folder_recent.png" Type="RCDATA" ResourceName="FOLDER_RECENT"/>
-        <Resource_147 FileName="..\Images\folder_recent_150.png" Type="RCDATA" ResourceName="FOLDER_RECENT_150"/>
-        <Resource_148 FileName="..\Images\folder_recent_200.png" Type="RCDATA" ResourceName="FOLDER_RECENT_200"/>
-        <Resource_149 FileName="..\Images\eye.png" Type="RCDATA" ResourceName="EYE"/>
-        <Resource_150 FileName="..\Images\eye_150.png" Type="RCDATA" ResourceName="EYE_150"/>
-        <Resource_151 FileName="..\Images\eye_200.png" Type="RCDATA" ResourceName="EYE_200"/>
-        <Resource_152 FileName="..\Images\save_as.png" Type="RCDATA" ResourceName="SAVE_AS"/>
-        <Resource_153 FileName="..\Images\save_as_150.png" Type="RCDATA" ResourceName="SAVE_AS_150"/>
-        <Resource_154 FileName="..\Images\save_as_200.png" Type="RCDATA" ResourceName="SAVE_AS_200"/>
-        <Resource_155 FileName="..\Images\find_in_files.png" Type="RCDATA" ResourceName="FIND_IN_FILES"/>
-        <Resource_156 FileName="..\Images\find_in_files_150.png" Type="RCDATA" ResourceName="FIND_IN_FILES_150"/>
-        <Resource_157 FileName="..\Images\find_in_files_200.png" Type="RCDATA" ResourceName="FIND_IN_FILES_200"/>
-        <Resource_158 FileName="..\Images\mark.png" Type="RCDATA" ResourceName="MARK"/>
-        <Resource_159 FileName="..\Images\mark_150.png" Type="RCDATA" ResourceName="MARK_150"/>
-        <Resource_160 FileName="..\Images\mark_200.png" Type="RCDATA" ResourceName="MARK_200"/>
-        <Resource_161 FileName="..\Images\bug_write.png" Type="RCDATA" ResourceName="BUG_WRITE"/>
-        <Resource_162 FileName="..\Images\bug_write_150.png" Type="RCDATA" ResourceName="BUG_WRITE_150"/>
-        <Resource_163 FileName="..\Images\bug_write_200.png" Type="RCDATA" ResourceName="BUG_WRITE_200"/>
-        <Resource_164 FileName="..\Images\color.png" Type="RCDATA" ResourceName="COLOR"/>
-        <Resource_165 FileName="..\Images\color_150.png" Type="RCDATA" ResourceName="COLOR_150"/>
-        <Resource_166 FileName="..\Images\color_200.png" Type="RCDATA" ResourceName="COLOR_200"/>
-        <Resource_167 FileName="..\Images\shape.png" Type="RCDATA" ResourceName="SHAPE"/>
-        <Resource_168 FileName="..\Images\shape_150.png" Type="RCDATA" ResourceName="SHAPE_150"/>
-        <Resource_169 FileName="..\Images\shape_200.png" Type="RCDATA" ResourceName="SHAPE_200"/>
-        <Resource_170 FileName="..\Images\settings.png" Type="RCDATA" ResourceName="SETTINGS"/>
-        <Resource_171 FileName="..\Images\settings_150.png" Type="RCDATA" ResourceName="SETTINGS_150"/>
-        <Resource_172 FileName="..\Images\settings_200.png" Type="RCDATA" ResourceName="SETTINGS_200"/>
-        <Resource_173 FileName="..\Images\type.png" Type="RCDATA" ResourceName="TYPE"/>
-        <Resource_174 FileName="..\Images\type_150.png" Type="RCDATA" ResourceName="TYPE_150"/>
-        <Resource_175 FileName="..\Images\type_200.png" Type="RCDATA" ResourceName="TYPE_200"/>
-        <Resource_176 FileName="..\Images\enum.png" Type="RCDATA" ResourceName="ENUM"/>
-        <Resource_177 FileName="..\Images\enum_150.png" Type="RCDATA" ResourceName="ENUM_150"/>
-        <Resource_178 FileName="..\Images\enum_200.png" Type="RCDATA" ResourceName="ENUM_200"/>
-        <Resource_179 FileName="..\Images\info.png" Type="RCDATA" ResourceName="INFO"/>
-        <Resource_180 FileName="..\Images\info_150.png" Type="RCDATA" ResourceName="INFO_150"/>
-        <Resource_181 FileName="..\Images\info_200.png" Type="RCDATA" ResourceName="INFO_200"/>
-        <Resource_182 FileName="..\Images\section.png" Type="RCDATA" ResourceName="SECTION"/>
-        <Resource_183 FileName="..\Images\section_150.png" Type="RCDATA" ResourceName="SECTION_150"/>
-        <Resource_184 FileName="..\Images\section_200.png" Type="RCDATA" ResourceName="SECTION_200"/>
-        <Resource_185 FileName="..\Images\book.png" Type="RCDATA" ResourceName="BOOK"/>
-        <Resource_186 FileName="..\Images\book_150.png" Type="RCDATA" ResourceName="BOOK_150"/>
-        <Resource_187 FileName="..\Images\book_200.png" Type="RCDATA" ResourceName="BOOK_200"/>
-        <Resource_188 FileName="..\Images\package_updates.png" Type="RCDATA" ResourceName="PACKAGE_UPDATES"/>
-        <Resource_189 FileName="..\Images\package_updates_150.png" Type="RCDATA" ResourceName="PACKAGE_UPDATES_150"/>
-        <Resource_190 FileName="..\Images\package_updates_200.png" Type="RCDATA" ResourceName="PACKAGE_UPDATES_200"/>
-        <Resource_191 FileName="..\Examples\writeln-colors.simba" Type="RCDATA" ResourceName="EXAMPLE_WRITELN-COLORS"/>
+        <Resource_125 FileName="..\Images\constant.png" Type="RCDATA" ResourceName="CONSTANT"/>
+        <Resource_126 FileName="..\Images\constant_150.png" Type="RCDATA" ResourceName="CONSTANT_150"/>
+        <Resource_127 FileName="..\Images\constant_200.png" Type="RCDATA" ResourceName="CONSTANT_200"/>
+        <Resource_128 FileName="..\Images\method.png" Type="RCDATA" ResourceName="METHOD"/>
+        <Resource_129 FileName="..\Images\method_150.png" Type="RCDATA" ResourceName="METHOD_150"/>
+        <Resource_130 FileName="..\Images\method_200.png" Type="RCDATA" ResourceName="METHOD_200"/>
+        <Resource_131 FileName="..\Images\prop.png" Type="RCDATA" ResourceName="PROP"/>
+        <Resource_132 FileName="..\Images\prop_150.png" Type="RCDATA" ResourceName="PROP_150"/>
+        <Resource_133 FileName="..\Images\prop_200.png" Type="RCDATA" ResourceName="PROP_200"/>
+        <Resource_134 FileName="..\Images\variable.png" Type="RCDATA" ResourceName="VARIABLE"/>
+        <Resource_135 FileName="..\Images\variable_150.png" Type="RCDATA" ResourceName="VARIABLE_150"/>
+        <Resource_136 FileName="..\Images\variable_200.png" Type="RCDATA" ResourceName="VARIABLE_200"/>
+        <Resource_137 FileName="..\Images\folder.png" Type="RCDATA" ResourceName="FOLDER"/>
+        <Resource_138 FileName="..\Images\folder_150.png" Type="RCDATA" ResourceName="FOLDER_150"/>
+        <Resource_139 FileName="..\Images\folder_200.png" Type="RCDATA" ResourceName="FOLDER_200"/>
+        <Resource_140 FileName="..\Images\document.png" Type="RCDATA" ResourceName="DOCUMENT"/>
+        <Resource_141 FileName="..\Images\document_150.png" Type="RCDATA" ResourceName="DOCUMENT_150"/>
+        <Resource_142 FileName="..\Images\document_200.png" Type="RCDATA" ResourceName="DOCUMENT_200"/>
+        <Resource_143 FileName="..\Images\folder_recent.png" Type="RCDATA" ResourceName="FOLDER_RECENT"/>
+        <Resource_144 FileName="..\Images\folder_recent_150.png" Type="RCDATA" ResourceName="FOLDER_RECENT_150"/>
+        <Resource_145 FileName="..\Images\folder_recent_200.png" Type="RCDATA" ResourceName="FOLDER_RECENT_200"/>
+        <Resource_146 FileName="..\Images\eye.png" Type="RCDATA" ResourceName="EYE"/>
+        <Resource_147 FileName="..\Images\eye_150.png" Type="RCDATA" ResourceName="EYE_150"/>
+        <Resource_148 FileName="..\Images\eye_200.png" Type="RCDATA" ResourceName="EYE_200"/>
+        <Resource_149 FileName="..\Images\save_as.png" Type="RCDATA" ResourceName="SAVE_AS"/>
+        <Resource_150 FileName="..\Images\save_as_150.png" Type="RCDATA" ResourceName="SAVE_AS_150"/>
+        <Resource_151 FileName="..\Images\save_as_200.png" Type="RCDATA" ResourceName="SAVE_AS_200"/>
+        <Resource_152 FileName="..\Images\find_in_files.png" Type="RCDATA" ResourceName="FIND_IN_FILES"/>
+        <Resource_153 FileName="..\Images\find_in_files_150.png" Type="RCDATA" ResourceName="FIND_IN_FILES_150"/>
+        <Resource_154 FileName="..\Images\find_in_files_200.png" Type="RCDATA" ResourceName="FIND_IN_FILES_200"/>
+        <Resource_155 FileName="..\Images\mark.png" Type="RCDATA" ResourceName="MARK"/>
+        <Resource_156 FileName="..\Images\mark_150.png" Type="RCDATA" ResourceName="MARK_150"/>
+        <Resource_157 FileName="..\Images\mark_200.png" Type="RCDATA" ResourceName="MARK_200"/>
+        <Resource_158 FileName="..\Images\bug_write.png" Type="RCDATA" ResourceName="BUG_WRITE"/>
+        <Resource_159 FileName="..\Images\bug_write_150.png" Type="RCDATA" ResourceName="BUG_WRITE_150"/>
+        <Resource_160 FileName="..\Images\bug_write_200.png" Type="RCDATA" ResourceName="BUG_WRITE_200"/>
+        <Resource_161 FileName="..\Images\color.png" Type="RCDATA" ResourceName="COLOR"/>
+        <Resource_162 FileName="..\Images\color_150.png" Type="RCDATA" ResourceName="COLOR_150"/>
+        <Resource_163 FileName="..\Images\color_200.png" Type="RCDATA" ResourceName="COLOR_200"/>
+        <Resource_164 FileName="..\Images\shape.png" Type="RCDATA" ResourceName="SHAPE"/>
+        <Resource_165 FileName="..\Images\shape_150.png" Type="RCDATA" ResourceName="SHAPE_150"/>
+        <Resource_166 FileName="..\Images\shape_200.png" Type="RCDATA" ResourceName="SHAPE_200"/>
+        <Resource_167 FileName="..\Images\settings.png" Type="RCDATA" ResourceName="SETTINGS"/>
+        <Resource_168 FileName="..\Images\settings_150.png" Type="RCDATA" ResourceName="SETTINGS_150"/>
+        <Resource_169 FileName="..\Images\settings_200.png" Type="RCDATA" ResourceName="SETTINGS_200"/>
+        <Resource_170 FileName="..\Images\type.png" Type="RCDATA" ResourceName="TYPE"/>
+        <Resource_171 FileName="..\Images\type_150.png" Type="RCDATA" ResourceName="TYPE_150"/>
+        <Resource_172 FileName="..\Images\type_200.png" Type="RCDATA" ResourceName="TYPE_200"/>
+        <Resource_173 FileName="..\Images\enum.png" Type="RCDATA" ResourceName="ENUM"/>
+        <Resource_174 FileName="..\Images\enum_150.png" Type="RCDATA" ResourceName="ENUM_150"/>
+        <Resource_175 FileName="..\Images\enum_200.png" Type="RCDATA" ResourceName="ENUM_200"/>
+        <Resource_176 FileName="..\Images\info.png" Type="RCDATA" ResourceName="INFO"/>
+        <Resource_177 FileName="..\Images\info_150.png" Type="RCDATA" ResourceName="INFO_150"/>
+        <Resource_178 FileName="..\Images\info_200.png" Type="RCDATA" ResourceName="INFO_200"/>
+        <Resource_179 FileName="..\Images\section.png" Type="RCDATA" ResourceName="SECTION"/>
+        <Resource_180 FileName="..\Images\section_150.png" Type="RCDATA" ResourceName="SECTION_150"/>
+        <Resource_181 FileName="..\Images\section_200.png" Type="RCDATA" ResourceName="SECTION_200"/>
+        <Resource_182 FileName="..\Images\package_updates.png" Type="RCDATA" ResourceName="PACKAGE_UPDATES"/>
+        <Resource_183 FileName="..\Images\package_updates_150.png" Type="RCDATA" ResourceName="PACKAGE_UPDATES_150"/>
+        <Resource_184 FileName="..\Images\package_updates_200.png" Type="RCDATA" ResourceName="PACKAGE_UPDATES_200"/>
+        <Resource_185 FileName="..\Examples\writeln-colors.simba" Type="RCDATA" ResourceName="EXAMPLE_WRITELN-COLORS"/>
+        <Resource_186 FileName="..\Images\pen.png" Type="RCDATA" ResourceName="PEN"/>
+        <Resource_187 FileName="..\Images\pen_150.png" Type="RCDATA" ResourceName="PEN_150"/>
+        <Resource_188 FileName="..\Images\pen_200.png" Type="RCDATA" ResourceName="PEN_200"/>
+        <Resource_189 FileName="..\Examples\marker.simba" Type="RCDATA" ResourceName="EXAMPLE_MARKER"/>
       </Resources>
     </General>
     <VersionInfo>

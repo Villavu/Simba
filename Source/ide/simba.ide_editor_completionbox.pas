@@ -629,6 +629,7 @@ const
   COLUMN_ENUM:    TColumnFormat = (Text: 'enum';        Color: $3182f5);
   COLUMN_CONST:   TColumnFormat = (Text: 'const';       Color: $b1d8ff);
   COLUMN_KEYWORD: TColumnFormat = (Text: 'keyword';     Color: $BB7DC7);
+  COLUMN_MARK:    TColumnFormat = (Text: 'marker';      Color: $40e0f0);
   COLUMN_UNKNOWN: TColumnFormat = (Text: '';            Color: $000000);
 var
   Column: TColumnFormat;
@@ -642,6 +643,7 @@ begin
     'var':         Column := COLUMN_VAR;
     'enumelement': Column := COLUMN_ENUM;
     'keyword':     Column := COLUMN_KEYWORD;
+    'marker':      Column := COLUMN_MARK;
     else
       Column := COLUMN_UNKNOWN;
   end;

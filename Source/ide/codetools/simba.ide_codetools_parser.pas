@@ -132,7 +132,7 @@ type
     constructor Create(Keyword: String); reintroduce;
   end;
 
-  TDeclaration_Anchor = class(TDeclaration)
+  TDeclaration_Marker = class(TDeclaration)
   protected
     function GetHeader: String; override;
   end;
@@ -462,7 +462,7 @@ type
     procedure OnLibraryDirect(Sender: TPasLexer); override;
     procedure OnIncludeDirect(Sender: TPasLexer); override;
 
-    procedure Anchor; override;
+    procedure Marker; override;
 
     procedure TypeKind; override;
 
@@ -1050,10 +1050,10 @@ begin
   FName := Keyword;
 end;
 
-function TDeclaration_Anchor.GetHeader: String;
+function TDeclaration_Marker.GetHeader: String;
 begin
   if FHeader.IsNull then
-    FHeader := 'Anchor "' + Name + '"';
+    FHeader := 'Marker "' + Name + '"';
 
   Result := FHeader;
 end;
@@ -1664,11 +1664,11 @@ begin
     FOnHandleInclude(Sender);
 end;
 
-procedure TCodeParser.Anchor;
+procedure TCodeParser.Marker;
 var
-  Decl: TDeclaration_Anchor;
+  Decl: TDeclaration_Marker;
 begin
-  Decl := TDeclaration_Anchor.Create(Self, FRoot, FLexer.TokenPos, FLexer.TokenPos);
+  Decl := TDeclaration_Marker.Create(Self, FRoot, FLexer.TokenPos, FLexer.TokenPos);
   Decl.Name := Lexer.DirectiveParamOriginal;
 
   FRoot.Items.Add(Decl);
@@ -2374,7 +2374,7 @@ begin
     if (Decl is TDeclaration_Var)         then Exit('var');
     if (Decl is TDeclaration_EnumElement) then Exit('enumelement');
     if (Decl is TDeclaration_Keyword)     then Exit('keyword');
-    if (Decl is TDeclaration_Anchor)      then Exit('anchor');
+    if (Decl is TDeclaration_Marker)      then Exit('marker');
   end;
 end;
 
@@ -2391,7 +2391,7 @@ begin
     'const':       Result := SimbaImages.VARIABLE;
     'var':         Result := SimbaImages.VARIABLE;
     'enumelement': Result := SimbaImages.ENUM;
-    'anchor':      Result := SimbaImages.ANCHOR;
+    'marker':      Result := SimbaImages.PEN;
     else
       Result := -1;
   end;
