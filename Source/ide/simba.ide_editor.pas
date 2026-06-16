@@ -71,8 +71,6 @@ type
     FDeclFinder: TSimbaEditor_FindDecl;
 
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
-
-
     procedure FontChanged(Sender: TObject); override;
 
     procedure DoSettingChanged_Colors(Setting: TSimbaSetting);

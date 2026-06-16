@@ -405,12 +405,19 @@ end;
 
 procedure TSimbaScriptTab.VisibleChanged;
 begin
-  inherited VisibleChanged;
+  inherited VisibleChanged();
 
   if Visible then
   begin
     FPostedCanSave := False;
     FPostedCantSave := False;
+  end
+  else if (Editor <> nil) then
+  begin
+    if (Editor.CompletionBox <> nil) then
+      Editor.CompletionBox.Form.Hide();
+    if (Editor.ParamHint <> nil) then
+      Editor.ParamHint.Form.Hide();
   end;
 end;
 
