@@ -24,6 +24,7 @@ type
   PTargetEvent = ^ETargetEvent;
   PQuad = ^TQuad;
   PSimbaTargetOptions = ^TSimbaTargetOptions;
+  PPluginTargetData = ^TPluginTargetData;
 
 (*
 Target
@@ -250,7 +251,7 @@ TTarget.SetImage
 procedure TTarget.SetImage(TImage: TImage);
 ```
 
-Sets the TSimbaImage as a target.
+Sets the TImage as a target.
 
 ```{note}
 Ownership of the image is taken. It will be freed whenever the target is changed or freed
@@ -323,6 +324,56 @@ procedure _LapeTarget_SetPlugin2(const Params: PParamArray); LAPE_WRAPPER_CALLIN
 begin
   PLapeObjectTarget(Params^[0])^^.SetPlugin(PString(Params^[1])^, PString(Params^[2])^, TSimbaExternalCanvas(Params^[3]^));
 end;
+
+
+(*
+TTarget.WindowTarget
+--------------------
+```
+property TTarget.WindowTarget: TWindowHandle;
+```
+*)
+procedure _LapeTarget_GetWindowTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PWindowHandle(Result)^ := PLapeObjectTarget(Params^[0])^^.GetWindowTarget();
+end;
+
+(*
+TTarget.ImageTarget
+-------------------
+```
+property TTarget.ImageTarget: TImage;
+```
+*)
+procedure _LapeTarget_GetImageTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectImage(Result)^^ := PLapeObjectTarget(Params^[0])^^.GetImageTarget();
+end;
+
+(*
+TTarget.EIOSTarget
+------------------
+```
+property TTarget.EIOSTarget: TPluginTargetData;
+```
+*)
+procedure _LapeTarget_GetEIOSTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPluginTargetData(Result)^ := PLapeObjectTarget(Params^[0])^^.GetEIOSTarget();
+end;
+
+(*
+TTarget.PluginTarget
+--------------------
+```
+property TTarget.PluginTarget: TPluginTargetData;
+```
+*)
+procedure _LapeTarget_GetPluginTarget(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PPluginTargetData(Result)^ := PLapeObjectTarget(Params^[0])^^.GetPluginTarget();
+end;
+
 
 (*
 TTarget.FreezeImage
@@ -410,6 +461,7 @@ procedure _LapeTarget_Focus(const Params: PParamArray; const Result: Pointer); L
 begin
   PBoolean(Result)^ := PLapeObjectTarget(Params^[0])^^.Focus();
 end;
+
 
 (*
 TTarget.ToString
@@ -1210,6 +1262,21 @@ begin
     addGlobalFunc('procedure TTarget.SetEIOS(Plugin, Args: String)', @_LapeTarget_SetEIOS);
     addGlobalFunc('procedure TTarget.SetPlugin(Plugin, Args: String); overload', @_LapeTarget_SetPlugin1);
     addGlobalFunc('procedure TTarget.SetPlugin(Plugin, Args: String; out Canvas: TExternalCanvas); overload', @_LapeTarget_SetPlugin2);
+
+    addGlobalType(
+      [
+        'record',
+        '  Filename: String;',
+        '  Target: Pointer;',
+        'end;'
+      ], 'TPluginTargetData'
+    );
+
+
+    addProperty('TTarget', 'WindowTarget', 'TWindowHandle', @_LapeTarget_GetWindowTarget);
+    addProperty('TTarget', 'ImageTarget', 'TImage', @_LapeTarget_GetImageTarget);
+    addProperty('TTarget', 'EIOSTarget', 'TPluginTargetData', @_LapeTarget_GetEIOSTarget);
+    addProperty('TTarget', 'PluginTarget', 'TPluginTargetData', @_LapeTarget_GetPluginTarget);
 
     addGlobalFunc('procedure TTarget.FreezeImage(Bounds: TBox = [-1,-1,-1,-1]);', @_LapeTarget_FreezeImage);
     addGlobalFunc('procedure TTarget.UnFreezeImage;', @_LapeTarget_UnFreezeImage);

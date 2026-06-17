@@ -31,6 +31,11 @@ const
   TargetName: array[ESimbaTargetKind] of String = ('NONE', 'IMAGE', 'WINDOW', 'EIOS', 'PLUGIN');
 
 type
+  TPluginTargetData = record
+    Filename: String;
+    Target: Pointer;
+  end;
+
   TSimbaTargetMethods = record
     GetDimensions: procedure(Target: Pointer; out W, H: Integer);
     GetImageData: function(Target: Pointer; X, Y, Width, Height: Integer; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
@@ -194,6 +199,11 @@ type
     procedure SetEIOS(FileName, Args: String);
     procedure SetPlugin(FileName, Args: String); overload;
     procedure SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalCanvas); overload;
+
+    function GetWindowTarget(): TWindowHandle;
+    function GetImageTarget(): TSimbaImage;
+    function GetEIOSTarget(): TPluginTargetData;
+    function GetPluginTarget(): TPluginTargetData;
 
     function GetImageDataAsImage(var ABounds: TBox; out Image: TSimbaImage): Boolean;
     function GetImageData(var ABounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
@@ -1185,6 +1195,48 @@ begin
   TargetChanged();
 end;
 
+
+function TSimbaTarget.GetWindowTarget(): TWindowHandle;
+begin
+  if Self.FTargetKind <> ESimbaTargetKind.WINDOW then
+    Exit(0);
+  Result := Self.FTargetWindow;
+end;
+
+function TSimbaTarget.GetImageTarget(): TSimbaImage;
+begin
+  if Self.FTargetKind <> ESimbaTargetKind.IMAGE then
+    Exit(nil);
+  Result := Self.FTargetImage;
+end;
+
+function TSimbaTarget.GetEIOSTarget(): TPluginTargetData;
+begin
+  if Self.FTargetKind <> ESimbaTargetKind.EIOS then
+  begin
+    Result.Filename := '';
+    Result.Target := nil;
+    Exit;
+  end;
+
+  Result.Filename := Self.FTargetEIOS.FileName;
+  Result.Target := Self.FTargetEIOS.Target;
+end;
+
+function TSimbaTarget.GetPluginTarget(): TPluginTargetData;
+begin
+  if Self.FTargetKind <> ESimbaTargetKind.PLUGIN then
+  begin
+    Result.Filename := '';
+    Result.Target := nil;
+    Exit;
+  end;
+
+  Result.Filename := Self.FTargetPlugin.FileName;
+  Result.Target := Self.FTargetPlugin.Target;
+end;
+
+
 function TSimbaTarget.ValidateBounds(var ABounds: TBox): Boolean;
 
   procedure ValidateBoundsInCustomClientArea;
@@ -1370,5 +1422,6 @@ begin
       Result += TargetName[FTargetKind];
   end;
 end;
+
 
 end.
