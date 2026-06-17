@@ -87,7 +87,6 @@ type
     constructor Create(FileName: String); overload;
     constructor CreateFromString(Str: String);
     constructor CreateFromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
-    constructor CreateFromWindow(Window: TWindowHandle);
     destructor Destroy; override;
 
     property DataOwner: Boolean read FDataOwner;
@@ -2008,22 +2007,6 @@ begin
   Create();
 
   FromData(AWidth, AHeight, AData, ADataWidth);
-end;
-
-constructor TSimbaImage.CreateFromWindow(Window: TWindowHandle);
-var
-  B: TBox;
-  ImageData: PColorBGRA = nil;
-begin
-  Create();
-
-  if SimbaNativeInterface.GetWindowBounds(Window, B) and
-     SimbaNativeInterface.GetWindowImage(Window, 0, 0, B.Width - 1, B.Height - 1, ImageData) then
-  try
-    FromData(B.Width - 1, B.Height - 1, ImageData, B.Width - 1);
-  finally
-    FreeMem(ImageData);
-  end;
 end;
 
 destructor TSimbaImage.Destroy;

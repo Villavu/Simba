@@ -51,10 +51,10 @@ uses
   simba.dialog,
   simba.image,
   simba.colormath,
-  simba.ide_vars,
   simba.vartype_windowhandle,
   simba.vartype_box,
-  simba.component_theme;
+  simba.component_theme,
+  simba.ide_controller;
 
 type
   TSimbaColorPickerHint = class(THintWindow)
@@ -205,9 +205,9 @@ begin
 
     DesktopWindow := GetDesktopWindow();
     DesktopBounds := DesktopWindow.GetBounds();
-    DesktopImage := TSimbaImage.CreateFromWindow(DesktopWindow);
+    DesktopImage := SimbaController.GetDesktopImage();
 
-    FWindowSelection := SimbaIDEVars.WindowSelection.EnsureValid();
+    FWindowSelection := SimbaController.WindowSelection.EnsureValid();
 
     FForm.Left := DesktopBounds.X1;
     FForm.Top := DesktopBounds.Y1;

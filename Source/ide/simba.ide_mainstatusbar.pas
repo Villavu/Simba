@@ -34,7 +34,7 @@ uses
   simba.initializations,
   simba.vartype_windowhandle,
   simba.ide_codetools_parser,
-  simba.ide_vars,
+  simba.ide_controller,
   simba.ide_tab,
   simba.ide_editor_findreplace,
   simba.datetime;
@@ -44,7 +44,7 @@ procedure TSimbaMainStatusBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   procedure DoUpdateMouse;
   begin
     try
-      with SimbaIDEVars.WindowSelection.GetRelativeCursorPos() do
+      with SimbaController.WindowSelection.GetRelativeCursorPos() do
         FStatusBar.PanelText[0] := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
     except
       FStatusBar.PanelText[0] := '(-1, -1)';

@@ -46,9 +46,9 @@ implementation
 
 uses
   simba.env,
-  simba.ide_vars,
   simba.vartype_windowhandle,
-  simba.image;
+  simba.image,
+  simba.ide_controller;
 
 procedure TSimbaShapeBoxForm.FormCreate(Sender: TObject);
 begin
@@ -90,10 +90,7 @@ end;
 
 procedure TSimbaShapeBoxForm.MenuItemLoadTargetImageClick(Sender: TObject);
 begin
-  if SimbaIDEVars.WindowSelection.IsValid() then
-    ShapeBox.SetImage(TSimbaImage.CreateFromWindow(SimbaIDEVars.WindowSelection))
-  else
-    ShapeBox.SetImage(TSimbaImage.CreateFromWindow(GetDesktopWindow()));
+  ShapeBox.SetImage(SimbaController.GetTargetImage());
 end;
 
 procedure TSimbaShapeBoxForm.MenuItemLoadImageClick(Sender: TObject);

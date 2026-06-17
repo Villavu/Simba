@@ -3,8 +3,8 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
   -------------------------------------------------------------------------
-  Common functions used throughout the IDE to prevent the need for constantly
-  referencing different files.
+  Common methods and variables used throughout the IDE to prevent the need for
+  constantly referencing different files.
 }
 unit simba.ide_controller;
 
@@ -17,10 +17,17 @@ uses
   simba.base,
   simba.ide_tab,
   simba.ide_output_components,
-  simba.ide_codetools_parser;
+  simba.ide_codetools_parser,
+  simba.target,
+  simba.image,
+  simba.process;
 
 type
   SimbaController = class
+  private class var
+    FProcessSelection: TProcessID;
+    FWindowSelection: TWindowHandle;
+    FTarget: TSimbaTarget;
   public
     class procedure GetTabContents(out Names, Contents: TStringArray);
     class function FindTab(TabID: Integer): TSimbaScriptTab; static;
@@ -43,12 +50,22 @@ type
     class procedure SetWindowTitle(Title: String); static;
     class procedure ShowDecl(Decl: TDeclaration); static;
     class procedure SelectAndShowDecl(Decls: TDeclarationArray); static;
+
+    { Get GetTargetImage will return desktop image if invalid handle }
+    class function GetTargetImage: TSimbaImage; static;
+    class function GetDesktopImage: TSimbaImage; static;
+
+    class property WindowSelection: TWindowHandle read FWindowSelection write FWindowSelection;
+    class property ProcessSelection: TProcessID read FProcessSelection write FProcessSelection;
+
+    class destructor Destroy;
   end;
 
 implementation
 
 uses
   simba.nativeinterface,
+  simba.vartype_windowhandle,
   simba.ide_maintoolbar,
   simba.ide_selectdeclform,
   simba.form_main,
@@ -291,6 +308,37 @@ begin
   Decl := SelectDeclaration(Decls);
   if (Decl <> nil) then
     ShowDecl(Decl);
+end;
+
+class function SimbaController.GetTargetImage: TSimbaImage;
+begin
+  ASSERT_MAIN_THREAD
+
+  if (FTarget = nil) then
+    FTarget := TSimbaTarget.Create();
+
+  if FWindowSelection.IsValid() then
+    FTarget.SetWindow(FWindowSelection)
+  else
+    FTarget.SetDesktop();
+
+  Result := FTarget.GetImage();
+end;
+
+class function SimbaController.GetDesktopImage: TSimbaImage;
+begin
+  ASSERT_MAIN_THREAD
+
+  if (FTarget = nil) then
+    FTarget := TSimbaTarget.Create();
+  FTarget.SetDesktop();
+
+  Result := FTarget.GetImage();
+end;
+
+class destructor SimbaController.Destroy;
+begin
+  FreeAndNil(FTarget);
 end;
 
 end.

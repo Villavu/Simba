@@ -39,7 +39,7 @@ uses
   {$IFDEF DARWIN}
   CocoaAll, CocoaWSForms, CocoaUtils,
   {$ENDIF}
-  simba.ide_vars,
+  simba.ide_controller,
   simba.vartype_windowhandle,
   simba.vartype_box,
   simba.process,
@@ -206,14 +206,14 @@ begin
       Debug(DEBUG_GREEN);
       DebugLn('Window Selected: %d',  [Selected]);
       DebugLn(' - Dimensions: %dx%d', [Bounds.Width - 1, Bounds.Height - 1]);
-      DebugLn(' - PID: %d (%s)',      [PID, IfThen(IsProcess64Bit(PID), '64 bit', '32 bit')]);
+      DebugLn(' - PID: %d (%s)',      [Pid, IfThen(IsProcess64Bit(Pid), '64 bit', '32 bit')]);
       DebugLn(' - Title: "%s"',       [Selected.GetTitle()]);
       DebugLn(' - ClassName: "%s"',   [Selected.GetClassName()]);
-      DebugLn(' - Executable: "%s"',  [GetProcessPath(PID)]);
+      DebugLn(' - Executable: "%s"',  [GetProcessPath(Pid)]);
       DebugLn(DEBUG_FOCUS);
 
-      SimbaIDEVars.WindowSelection := Selected;
-      SimbaIDEVars.ProcessSelection := Pid;
+      SimbaController.WindowSelection := Selected;
+      SimbaController.ProcessSelection := Pid;
     end;
   except
     on E: Exception do

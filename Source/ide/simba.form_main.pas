@@ -49,7 +49,6 @@ implementation
 
 uses
   simba.initializations,
-  simba.ide_vars,
   simba.ide_scriptbackup,
   simba.ide_associate,
   simba.ide_debugimage,
@@ -280,10 +279,7 @@ end;
 
 function TSimbaMainForm.DoGetTargetImage: TSimbaImage;
 begin
-  if SimbaIDEVars.WindowSelection.IsValid() then
-    Result := TSimbaImage.CreateFromWindow(SimbaIDEVars.WindowSelection)
-  else
-    Result := TSimbaImage.CreateFromWindow(GetDesktopWindow());
+  Result := SimbaController.GetTargetImage();
 end;
 
 procedure TSimbaMainForm.TrayIconClick(Sender: TObject);

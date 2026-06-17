@@ -54,7 +54,6 @@ implementation
 uses
   simba.ide_controller,
   simba.ide_debugimage,
-  simba.ide_vars,
   simba.threading,
   simba.process;
 
@@ -113,13 +112,13 @@ end;
 // Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetWindow;
 begin
-  FResult.Write(SimbaIDEVars.WindowSelection, SizeOf(TWindowHandle));
+  FResult.Write(SimbaController.WindowSelection, SizeOf(TWindowHandle));
 end;
 
 // Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetPID;
 begin
-  FResult.Write(SimbaIDEVars.ProcessSelection, SizeOf(TProcessID));
+  FResult.Write(SimbaController.ProcessSelection, SizeOf(TProcessID));
 end;
 
 procedure TSimbaScriptInstanceCommunication.ScriptStateChanged;

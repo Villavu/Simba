@@ -163,7 +163,6 @@ uses
   simba.threading,
   simba.ide_scriptcommunication,
   simba.ide_editor_popupmenu,
-  simba.ide_vars,
   simba.dialog,
   simba.vartype_string,
   simba.vartype_windowhandle,
@@ -608,8 +607,8 @@ begin
       Save(FScriptFileName);
 
     FScriptRunner := TSimbaScriptTabRunner.Create(Self);
-    if (SimbaIDEVars.WindowSelection.IsValid()) then
-      FScriptRunner.Run(['--target=' + IntToStr(SimbaIDEVars.WindowSelection)])
+    if (SimbaController.WindowSelection.IsValid()) then
+      FScriptRunner.Run(['--target=' + IntToStr(SimbaController.WindowSelection)])
     else
       FScriptRunner.Run([]);
   end;
