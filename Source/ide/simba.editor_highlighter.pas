@@ -12,6 +12,7 @@ interface
 uses
   Classes,
   SysUtils,
+  Graphics,
   SynEditHighlighter,
   SynHighlighterPas,
   simba.base,
@@ -95,6 +96,21 @@ begin
   FOverrides.Sorted := True;
 
   Reset();
+
+  KeyAttri.Foreground := RGBToColor(199, 125, 187);
+  StringAttri.Foreground := RGBToColor(232, 191, 106);
+  SymbolAttri.Foreground := RGBToColor(190, 20, 20);
+  CommentAttri.Foreground := RGBToColor(95, 130, 107);
+  CommentAttri.Style := [fsBold];
+  IdentifierAttri.Foreground := RGBToColor(242, 242, 242);
+  NumberAttri.Foreground := RGBToColor(87, 170, 247);
+  DirectiveAttri.Foreground := RGBToColor(13, 161, 149);
+  DirectiveAttri.Style := [fsBold];
+
+  NestedComments := True;
+  TypeHelpers := True;
+  StringKeywordMode := spsmNone;
+  StringMultilineMode := [spmsmDoubleQuote];
 
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.Editor.CustomTokenAttris, @DoSettingChanged, True);
 end;

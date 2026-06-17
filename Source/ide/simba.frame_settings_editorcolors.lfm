@@ -1,14 +1,15 @@
 object EditorColorsFrame: TEditorColorsFrame
   Left = 0
-  Height = 894
+  Height = 1390
   Top = 0
-  Width = 1362
-  ClientHeight = 894
-  ClientWidth = 1362
-  DesignTimePPI = 120
-  OnResize = FrameResize
+  Width = 2179
+  ClientHeight = 1390
+  ClientWidth = 2179
+  DesignTimePPI = 192
+  ParentBackground = False
   ParentFont = False
   TabOrder = 0
+  OnResize = FrameResize
   DesignLeft = 3662
   DesignTop = 270
   object Panel1: TPanel
@@ -21,6 +22,7 @@ object EditorColorsFrame: TEditorColorsFrame
     BevelOuter = bvNone
     ClientHeight = 894
     ClientWidth = 1362
+    ParentBackground = False
     TabOrder = 0
     object GroupBox3: TGroupBox
       AnchorSideLeft.Control = Panel1
@@ -32,38 +34,38 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideBottom.Side = asrBottom
       Left = 0
       Height = 672
-      Top = 222
+      Top = 355
       Width = 1362
       Anchors = [akTop, akLeft, akRight, akBottom]
       AutoSize = True
       Caption = 'Customize'
       ClientHeight = 647
       ClientWidth = 1358
+      ParentBackground = False
       TabOrder = 0
       object TreeView: TTreeView
         AnchorSideLeft.Control = GroupBox3
         AnchorSideTop.Control = GroupBox3
         AnchorSideBottom.Control = ButtonResetAttribute
-        Left = 5
+        Left = -25
         Height = 602
         Top = 5
-        Width = 250
+        Width = 280
         Align = alCustom
         Anchors = [akTop, akLeft, akRight, akBottom]
         AutoExpand = True
-        BorderSpacing.Left = 5
-        BorderSpacing.Top = 5
-        BorderSpacing.Bottom = 5
-        Constraints.MaxWidth = 250
-        Constraints.MinWidth = 175
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
+        BorderSpacing.Bottom = 8
+        Constraints.MaxWidth = 400
+        Constraints.MinWidth = 280
         ReadOnly = True
         ScrollBars = ssAutoBoth
         ShowRoot = False
-        ShowSeparators = False
         TabOrder = 0
+        Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoToolTips, tvoThemedDraw]
         OnDeletion = TreeViewDeletion
         OnSelectionChanged = TreeViewSelectionChanged
-        Options = [tvoAutoExpand, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoToolTips, tvoThemedDraw]
       end
       object Panel2: TPanel
         AnchorSideLeft.Control = TreeView
@@ -74,17 +76,18 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = GroupBox3
         AnchorSideBottom.Side = asrBottom
-        Left = 260
+        Left = 416
         Height = 492
-        Top = 150
+        Top = 240
         Width = 1088
         Anchors = [akTop, akLeft, akRight, akBottom]
-        BorderSpacing.Left = 5
-        BorderSpacing.Right = 10
-        BorderSpacing.Bottom = 5
+        BorderSpacing.Left = 8
+        BorderSpacing.Right = 16
+        BorderSpacing.Bottom = 8
         BevelOuter = bvNone
         ClientHeight = 492
         ClientWidth = 1088
+        ParentBackground = False
         TabOrder = 1
         OnResize = Panel2Resize
         object ForegoundColorBox: TColorListBox
@@ -94,14 +97,14 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideRight.Control = LabelBackground
           AnchorSideBottom.Control = Panel2
           AnchorSideBottom.Side = asrBottom
-          Left = 5
+          Left = 8
           Height = 470
-          Top = 22
-          Width = 202
-          ColorRectWidth = 31
+          Top = 35
+          Width = 323
+          ColorRectWidth = 50
           Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
           Anchors = [akTop, akLeft, akBottom]
-          BorderSpacing.Top = 2
+          BorderSpacing.Top = 3
           ItemHeight = 0
           OnSelectionChange = ForegoundColorBoxSelectionChange
           TabOrder = 0
@@ -109,11 +112,11 @@ object EditorColorsFrame: TEditorColorsFrame
         object LabelForeground: TLabel
           AnchorSideLeft.Control = Panel2
           AnchorSideTop.Control = Panel2
-          Left = 5
+          Left = 8
           Height = 20
           Top = 0
           Width = 77
-          BorderSpacing.Left = 5
+          BorderSpacing.Left = 8
           Caption = 'Foreground'
           Layout = tlCenter
           ParentColor = False
@@ -121,7 +124,7 @@ object EditorColorsFrame: TEditorColorsFrame
         object LabelBackground: TLabel
           AnchorSideLeft.Control = BackgroundColorBox
           AnchorSideTop.Control = Panel2
-          Left = 217
+          Left = 347
           Height = 20
           Top = 0
           Width = 79
@@ -136,15 +139,15 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideRight.Control = FrameColorBox
           AnchorSideBottom.Control = Panel2
           AnchorSideBottom.Side = asrBottom
-          Left = 217
+          Left = 347
           Height = 470
-          Top = 22
-          Width = 178
-          ColorRectWidth = 31
+          Top = 35
+          Width = 285
+          ColorRectWidth = 50
           Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
           Anchors = [akTop, akLeft, akBottom]
-          BorderSpacing.Left = 10
-          BorderSpacing.Top = 2
+          BorderSpacing.Left = 16
+          BorderSpacing.Top = 3
           ItemHeight = 0
           OnSelectionChange = BackgroundColorBoxSelectionChange
           TabOrder = 1
@@ -157,15 +160,15 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideRight.Side = asrBottom
           AnchorSideBottom.Control = Panel2
           AnchorSideBottom.Side = asrBottom
-          Left = 405
+          Left = 648
           Height = 470
-          Top = 22
-          Width = 200
-          ColorRectWidth = 31
+          Top = 35
+          Width = 320
+          ColorRectWidth = 50
           Style = [cbStandardColors, cbCustomColor, cbPrettyNames]
           Anchors = [akTop, akLeft, akBottom]
-          BorderSpacing.Left = 10
-          BorderSpacing.Top = 2
+          BorderSpacing.Left = 16
+          BorderSpacing.Top = 3
           ItemHeight = 0
           OnSelectionChange = FrameColorBoxSelectionChange
           TabOrder = 2
@@ -173,7 +176,7 @@ object EditorColorsFrame: TEditorColorsFrame
         object LabelFrame: TLabel
           AnchorSideLeft.Control = FrameColorBox
           AnchorSideTop.Control = Panel2
-          Left = 405
+          Left = 648
           Height = 20
           Top = 0
           Width = 41
@@ -195,10 +198,10 @@ object EditorColorsFrame: TEditorColorsFrame
         Align = alCustom
         Anchors = [akLeft, akRight, akBottom]
         AutoSize = True
-        BorderSpacing.Bottom = 5
+        BorderSpacing.Bottom = 8
         Caption = 'Reset Selected'
-        OnClick = ButtonResetAttributeClick
         TabOrder = 2
+        OnClick = ButtonResetAttributeClick
       end
       object DividerBevel1: TDividerBevel
         AnchorSideLeft.Control = TreeView
@@ -207,22 +210,22 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideTop.Side = asrBottom
         AnchorSideRight.Control = GroupBox3
         AnchorSideRight.Side = asrBottom
-        Left = 265
+        Left = 424
         Height = 20
-        Top = 130
+        Top = 208
         Width = 1093
         Anchors = [akTop, akLeft, akRight]
-        BorderSpacing.Left = 10
+        BorderSpacing.Left = 16
         Style = gsHorLines
       end
       object Label1: TLabel
         AnchorSideLeft.Control = Panel2
         AnchorSideTop.Control = TreeView
-        Left = 265
+        Left = 424
         Height = 20
-        Top = 5
+        Top = 8
         Width = 71
-        BorderSpacing.Left = 5
+        BorderSpacing.Left = 8
         Caption = 'Font Styles'
         ParentColor = False
       end
@@ -230,20 +233,20 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideLeft.Control = Panel2
         AnchorSideTop.Control = Label1
         AnchorSideTop.Side = asrBottom
-        Left = 265
-        Height = 100
-        Top = 30
-        Width = 160
-        BorderSpacing.Left = 5
-        BorderSpacing.Top = 5
+        Left = 424
+        Height = 160
+        Top = 48
+        Width = 256
+        BorderSpacing.Left = 8
+        BorderSpacing.Top = 8
         Items.Strings = (
           'Bold'
           'Italic'
           'Underline'
         )
-        ItemHeight = 21
-        OnClickCheck = CheckListBox1ClickCheck
+        ItemHeight = 34
         TabOrder = 3
+        OnClickCheck = CheckListBox1ClickCheck
         Data = {
           03000000000000
         }
@@ -252,11 +255,11 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideLeft.Control = CheckListBox1
         AnchorSideLeft.Side = asrBottom
         AnchorSideTop.Control = TreeView
-        Left = 435
+        Left = 696
         Height = 20
-        Top = 5
+        Top = 8
         Width = 39
-        BorderSpacing.Left = 10
+        BorderSpacing.Left = 16
         Caption = 'Alpha'
         ParentColor = False
       end
@@ -265,15 +268,16 @@ object EditorColorsFrame: TEditorColorsFrame
         AnchorSideTop.Control = CheckListBox1
         AnchorSideBottom.Control = CheckListBox1
         AnchorSideBottom.Side = asrBottom
-        Left = 435
+        Left = 696
         Height = 100
-        Top = 30
+        Top = 48
         Width = 195
         Anchors = [akTop, akLeft, akBottom]
         AutoSize = True
         BevelOuter = bvNone
         ClientHeight = 100
         ClientWidth = 195
+        ParentBackground = False
         TabOrder = 4
         object Label3: TLabel
           AnchorSideLeft.Control = AlphaPanel
@@ -282,7 +286,7 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideBottom.Side = asrBottom
           Left = 0
           Height = 28
-          Top = 30
+          Top = 48
           Width = 77
           Anchors = [akTop, akLeft, akBottom]
           Caption = 'Foreground'
@@ -308,31 +312,31 @@ object EditorColorsFrame: TEditorColorsFrame
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Control = BackgroundAlphaEdit
           AnchorSideTop.Side = asrBottom
-          Left = 84
+          Left = 134
           Height = 28
-          Top = 30
-          Width = 106
-          BorderSpacing.Left = 5
-          BorderSpacing.Top = 2
-          BorderSpacing.Right = 5
+          Top = 48
+          Width = 170
+          BorderSpacing.Left = 8
+          BorderSpacing.Top = 3
+          BorderSpacing.Right = 8
           MaxValue = 255
-          OnChange = ForegroundAlphaEditChange
           TabOrder = 0
+          OnChange = ForegroundAlphaEditChange
         end
         object BackgroundAlphaEdit: TSpinEdit
           AnchorSideLeft.Control = Label2
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Control = AlphaPanel
           AnchorSideRight.Side = asrBottom
-          Left = 84
+          Left = 134
           Height = 28
           Top = 0
-          Width = 106
-          BorderSpacing.Left = 5
-          BorderSpacing.Right = 5
+          Width = 170
+          BorderSpacing.Left = 8
+          BorderSpacing.Right = 8
           MaxValue = 255
-          OnChange = BackgroundAlphaEditChange
           TabOrder = 1
+          OnChange = BackgroundAlphaEditChange
         end
       end
     end
@@ -346,14 +350,14 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideBottom.Side = asrBottom
       Left = 0
       Height = 30
-      Top = 70
+      Top = 112
       Width = 345
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
-      BorderSpacing.Top = 5
+      BorderSpacing.Top = 8
       Caption = 'Save To File'
-      OnClick = DoSaveButtonClick
       TabOrder = 1
+      OnClick = DoSaveButtonClick
     end
     object LoadButton: TButton
       AnchorSideLeft.Control = Panel1
@@ -366,28 +370,28 @@ object EditorColorsFrame: TEditorColorsFrame
       Width = 345
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
-      BorderSpacing.Bottom = 5
+      BorderSpacing.Bottom = 8
       Caption = 'Load From File'
-      OnClick = LoadButtonClick
       TabOrder = 2
+      OnClick = LoadButtonClick
     end
     object ButtonLoadFromURL: TButton
       AnchorSideLeft.Control = Panel1
       AnchorSideTop.Control = LoadButton
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = Panel3
-      Left = 2
+      Left = 3
       Height = 30
-      Top = 35
+      Top = 56
       Width = 343
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
-      BorderSpacing.Left = 2
-      BorderSpacing.Top = 5
-      BorderSpacing.Right = 10
+      BorderSpacing.Left = 3
+      BorderSpacing.Top = 8
+      BorderSpacing.Right = 16
       Caption = 'Load From URL'
-      OnClick = ButtonLoadFromURLClick
       TabOrder = 3
+      OnClick = ButtonLoadFromURLClick
     end
     object ResetButton: TButton
       AnchorSideLeft.Control = Panel1
@@ -399,28 +403,29 @@ object EditorColorsFrame: TEditorColorsFrame
       AnchorSideBottom.Side = asrBottom
       Left = 0
       Height = 30
-      Top = 105
+      Top = 168
       Width = 345
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
-      BorderSpacing.Top = 5
+      BorderSpacing.Top = 8
       Caption = 'Reset'
-      OnClick = DoResetButtonClick
       TabOrder = 4
+      OnClick = DoResetButtonClick
     end
     object Panel3: TPanel
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 355
-      Height = 220
+      Left = -246
+      Height = 352
       Top = 0
-      Width = 1002
+      Width = 1603
       Anchors = [akTop, akRight]
-      BorderSpacing.Right = 5
-      BorderSpacing.Bottom = 2
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 3
       BevelOuter = bvNone
+      ParentBackground = False
       TabOrder = 5
     end
   end

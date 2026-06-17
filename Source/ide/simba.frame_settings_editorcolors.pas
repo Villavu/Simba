@@ -78,8 +78,11 @@ implementation
 {$R *.lfm}
 
 uses
-  SynEditTypes, SynEditMiscClasses,
-  simba.settings, simba.ide_editor_attributes, simba.env, simba.base,
+  SynEditTypes,
+  SynEditMiscClasses,
+  simba.settings,
+  simba.env,
+  simba.component_syneditstyler,
   simba.httpclient;
 
 type
@@ -109,7 +112,7 @@ begin
       AlphaPanel.Hide();
     end;
 
-    if SelectedAttr is TSimbaEditor_Attribute then
+    if (SelectedAttr is TSimbaSynEditCustomAttribute) then
     begin
       LabelForeground.Caption := 'Color';
 
@@ -144,7 +147,7 @@ end;
 
 procedure TEditorColorsFrame.Load;
 begin
-  FEditor.Attributes.LoadFromFile(SimbaSettings.Editor.CustomColors.Value);
+  FEditor.Styler.LoadFromFile(SimbaSettings.Editor.CustomColors.Value);
 
   TreeView.Selected := TreeView.Items.FindNodeWithText('Background');
 end;
@@ -182,7 +185,7 @@ var
 begin
   FileName := SimbaEnv.DataPath + 'colors_editor.ini';
 
-  FEditor.Attributes.SaveToFile(FileName);
+  FEditor.Styler.SaveToFile(FileName);
 
   SimbaSettings.Editor.CustomColors.Value := FileName;
   SimbaSettings.Editor.CustomColors.Changed();
@@ -202,7 +205,7 @@ begin
     begin
       FileName := ChangeFileExt(FileName, '.ini');
 
-      FEditor.Attributes.SaveToFile(FileName);
+      FEditor.Styler.SaveToFile(FileName);
 
       SimbaSettings.Editor.CustomColors.Value := FileName;
       SimbaSettings.Editor.CustomColors.Changed();
@@ -221,7 +224,7 @@ begin
     Filter := 'INI Files (*.ini)|*.ini';
 
     if Execute then
-      FEditor.Attributes.LoadFromFile(FileName);
+      FEditor.Styler.LoadFromFile(FileName);
   finally
     Free();
   end;
@@ -325,7 +328,7 @@ begin
   try
     Contents := URLFetch(Value);
     if (Contents <> '') then
-      FEditor.Attributes.LoadFromStream(TStringStream.Create(Contents), True);
+      FEditor.Styler.LoadFromStream(TStringStream.Create(Contents), True);
   except
     on E: Exception do
       ShowMessage(E.Message);
@@ -418,8 +421,8 @@ begin
   TreeView.Items.Clear();
 
   DefaultEditor := TSimbaEditor.Create(Self, [seoKeybindings]);
-  for I := 0 to High(FEditor.Attributes.Attributes) do
-    AddAttribute(FEditor.Attributes.Attributes[I], DefaultEditor.Attributes.Attributes[I]);
+  for I := 0 to High(FEditor.Styler.Attributes) do
+    AddAttribute(FEditor.Styler.Attributes[I], DefaultEditor.Styler.Attributes[I]);
 
   TreeView.AlphaSort();
   TreeView.EndUpdate();

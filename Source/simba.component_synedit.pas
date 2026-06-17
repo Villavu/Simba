@@ -11,23 +11,28 @@ interface
 
 uses
   Classes, SysUtils, Controls, Forms, StdCtrls, Graphics,
-  SynEdit, SynEditTypes, SynEditFoldedView, SynEditTextBuffer, SynEditMarkupSelection, {%H-}SynEditWrappedView,
   LazSynEditText,
-  simba.component_theme, simba.component_scrollbar;
+  SynEdit,
+  SynEditTypes,
+  SynEditFoldedView,
+  SynEditTextBuffer,
+  SynEditHighlighter,
+  {%H-}SynEditWrappedView,
+  simba.component_theme,
+  simba.component_scrollbar,
+  simba.component_syneditstyler;
 
 type
   TSimbaSynEdit = class(TSynEdit)
-  private
-    function GetFontName: String;
-    procedure SetFontName(AValue: String);
   protected
+    FStyler: TSimbaSynEditStyler;
     FScrollbarVert: TSimbaScrollBar;
     FScrollbarHorz: TSimbaScrollBar;
 
     procedure DoVertScrollBarChange(Sender: TObject);
     procedure DoHorzScrollBarChange(Sender: TObject);
 
-    // Override to scroll horz when shift+scrollwheel
+    // Override to scroll horizontally when shift + mouse wheel
     function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
 
     procedure UpdateBars;
@@ -37,10 +42,13 @@ type
     procedure SetVisible(Value: Boolean); override;
 
     function GetFontAntialising: Boolean;
+    function GetFontName: String;
     procedure SetFontAntialising(Value: Boolean);
+    procedure SetFontName(AValue: String);
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(AOwner: TComponent; HighlighterClass: TSynCustomHighlighterClass); virtual; reintroduce;
 
+    property Styler: TSimbaSynEditStyler read FStyler;
     property FontName: String read GetFontName write SetFontName;
     property FontAntialising: Boolean read GetFontAntialising write SetFontAntialising;
   end;
@@ -159,7 +167,7 @@ begin
   FScrollbarVert.Visible := Value;
 end;
 
-constructor TSimbaSynEdit.Create(AOwner: TComponent);
+constructor TSimbaSynEdit.Create(AOwner: TComponent; HighlighterClass: TSynCustomHighlighterClass);
 begin
   inherited Create(AOwner);
 
@@ -178,21 +186,21 @@ begin
 
   ScrollBars := ssNone;
   BorderStyle := bsNone;
-
-  TSynEditMarkupSelection(MarkupByClass[TSynEditMarkupSelection]).MarkupInfoSeletion.Background := SimbaComponentTheme.ColorActive;
-
-  Color := SimbaComponentTheme.ColorBackground;
+  if (HighlighterClass <> nil) then
+    Highlighter := HighlighterClass.Create(Self);
 
   Font.Color := SimbaComponentTheme.ColorFont;
   Font.Size := SynDefaultFontSize;
   Font.Name := SynDefaultFontName;
-
+  Font.Quality := fqCleartypeNatural;
   FontAntialising := True;
+
+  FStyler := TSimbaSynEditStyler.Create(Self);
 end;
 
 constructor TSimbaMemo.Create(AOwner: TComponent; LineWrapping: Boolean);
 begin
-  inherited Create(AOwner);
+  inherited Create(AOwner, nil);
 
   Gutter.Visible := False;
   RightGutter.Visible := False;

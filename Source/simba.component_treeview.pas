@@ -191,6 +191,8 @@ type
     procedure AddKeyEvent(Key: Integer; Shift: TShiftState; Callback: TKeyEvent);
     procedure RemoveKeyEvent(Key: Integer; Shift: TShiftState; Callback: TKeyEvent);
 
+    procedure SetItemHeight(AValue: Integer);
+
     function MaxRight: Integer;
   end;
 
@@ -395,6 +397,13 @@ begin
       Delete(FKeyEvents, I, 1);
       Break;
     end;
+end;
+
+procedure TSimbaTreeView.SetItemHeight(AValue: Integer);
+begin
+  FTree.Options := FTree.Options - [tvoAutoItemHeight];
+  FTree.DefaultItemHeight := AValue;
+  FTree.Invalidate();
 end;
 
 function TSimbaTreeView.MaxRight: Integer;

@@ -25,7 +25,6 @@ uses
   simba.settings,
   simba.ide_editor_completionbox,
   simba.ide_editor_paramhint,
-  simba.ide_editor_attributes,
   simba.ide_editor_modifiedlinegutter,
   simba.ide_editor_codetools,
   simba.ide_editor_finddecl,
@@ -47,7 +46,6 @@ type
     FCompletionBox: TSimbaCompletionBox;
     FParamHint: TSimbaParamHint;
 
-    FAttributes: TSimbaEditor_Attributes;
     FModifiedLinesGutter: TSimbaEditorModifiedLinesGutter;
 
     FFocusedLinesUpdating: Boolean;
@@ -56,9 +54,6 @@ type
       Line: Integer;
       Color: TColor;
     end;
-
-    FColorModified: TColor;
-    FColorSaved: TColor;
 
     FLastTextChangeStamp: Int64;
     FModifiedEvent: TNotifyEvent;
@@ -91,9 +86,6 @@ type
     procedure SetUpdateState(NewUpdating: Boolean; Sender: TObject); override;
 
     function GetFileName: String;
-
-    procedure SetColorModified(Value: TColor);
-    procedure SetColorSaved(Value: TColor);
   public
     property Codetools: TSimbaEditor_Codetools read FCodetools;
     property DeclFinder: TSimbaEditor_FindDecl read FDeclFinder;
@@ -102,13 +94,9 @@ type
     property CompletionBox: TSimbaCompletionBox read FCompletionBox;
     property ParamHint: TSimbaParamHint read FParamHint;
     property ModifiedLinesGutter: TSimbaEditorModifiedLinesGutter read FModifiedLinesGutter;
-    property Attributes: TSimbaEditor_Attributes read FAttributes;
 
     property OnModified: TNotifyEvent read FModifiedEvent write FModifiedEvent;
     property OnGetFileName: TSimbaEditorFileNameEvent read FGetFileNameEvent write FGetFileNameEvent;
-
-    property ColorSaved: TColor read FColorSaved write SetColorSaved;
-    property ColorModified: TColor read FColorModified write SetColorModified;
 
     property FileName: String read GetFileName;
 
@@ -141,7 +129,6 @@ type
     procedure FocusLine(Line, Column: Integer; AColor: TColor);
 
     constructor Create(AOwner: TComponent; SimbaOptions: ESimbaEditorOptions); reintroduce;
-    destructor Destroy; override;
   end;
 
 implementation
@@ -294,26 +281,6 @@ begin
       Dec(Result);
 end;
 
-procedure TSimbaEditor.SetColorModified(Value: TColor);
-begin
-  if (FColorModified = Value) then
-    Exit;
-  FColorModified := Value;
-
-  Gutter.ChangesPart.ModifiedColor := FColorModified;
-  ModifiedLinesGutter.Color := FColorModified;
-end;
-
-procedure TSimbaEditor.SetColorSaved(Value: TColor);
-begin
-  if (FColorSaved = Value) then
-    Exit;
-  FColorSaved := Value;
-
-  Gutter.ChangesPart.SavedColor := FColorSaved;
-  ModifiedLinesGutter.ColorSaved := FColorSaved;
-end;
-
 procedure TSimbaEditor.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   // Mouse link fix
@@ -336,7 +303,7 @@ end;
 procedure TSimbaEditor.DoSettingChanged_Colors(Setting: TSimbaSetting);
 begin
   if (seoColors in FSimbaOptions) then
-    FAttributes.LoadFromFile(Setting.Value);
+    FStyler.LoadFromFile(Setting.Value);
 end;
 
 procedure TSimbaEditor.DoSettingChanged_Keystrokes(Setting: TSimbaSetting);
@@ -544,7 +511,7 @@ end;
 
 constructor TSimbaEditor.Create(AOwner: TComponent; SimbaOptions: ESimbaEditorOptions);
 begin
-  inherited Create(AOwner);
+  inherited Create(AOwner, TSimbaEditorHighlighter);
 
   FSimbaOptions := SimbaOptions;
 
@@ -561,10 +528,6 @@ begin
   BlockIndent := 2;
 
   OnSpecialLineMarkup := @DoSpecialLineColor;
-
-  MouseActions.AddCommand(emcOverViewGutterScrollTo, False, LazSynEditMouseCmdsTypes.mbLeft, ccSingle, cdDown, [], []);
-
-  Highlighter := TSimbaEditorHighlighter.Create(Self);
 
   FScreenCaretPainterClass {%H-}:= TSynEditScreenCaretPainterInternal;
   if (FScreenCaret.Painter.ClassType <> TSynEditScreenCaretPainterInternal) then
@@ -588,6 +551,8 @@ begin
 
   with TSynGutterLineOverview.Create(RightGutter.Parts) do
   begin
+    MouseActions.AddCommand(emcOverViewGutterScrollTo, False, LazSynEditMouseCmdsTypes.mbLeft, ccSingle, cdDown, [], []);
+
     FModifiedLinesGutter := TSimbaEditorModifiedLinesGutter.Create(Providers);
     FModifiedLinesGutter.Priority := 1;
     FModifiedLinesGutter.Color := Gutter.ChangesPart.ModifiedColor;
@@ -607,8 +572,6 @@ begin
   FDeclFinder := TSimbaEditor_FindDecl.Create(Self);
   TSimbaCodeComplete.Create(Self);
   FCodetools := TSimbaEditor_Codetools.Create(Self);
-
-  FAttributes := TSimbaEditor_Attributes.Create(Self);
 
   Gutter.LeftOffset := Scale96ToScreen(12);
   Gutter.MarksPart.Visible := False;
@@ -634,14 +597,8 @@ begin
     RegisterChangeHandler(Self, Editor.FontSize,           @DoSettingChanged_FontSize,           True);
     RegisterChangeHandler(Self, Editor.FontName,           @DoSettingChanged_FontName,           True);
   end;
-end;
 
-destructor TSimbaEditor.Destroy;
-begin
-  if (FAttributes <> nil) then
-    FreeAndNil(FAttributes);
-
-  inherited Destroy();
+  FStyler.Changed();
 end;
 
 end.
