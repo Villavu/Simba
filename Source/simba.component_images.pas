@@ -75,6 +75,7 @@ type
     INFO: Integer;
     SECTION: Integer;
     PEN: Integer;
+    WINDOW: Integer;
   end;
 
 var
@@ -196,6 +197,7 @@ begin
   SimbaImages.INFO      := Add('INFO');
   SimbaImages.SECTION   := Add('SECTION');
   SimbaImages.PEN       := Add('PEN');
+  SimbaImages.WINDOW    := Add('WINDOW');
 end;
 
 initialization

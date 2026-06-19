@@ -96,7 +96,8 @@ type
     destructor Destroy; override;
 
     function FindTab(ID: Int64): TSimbaTab;
-    function AddTab(Title: String = ''): TSimbaTab;
+    function AddTab(Title: String = ''): TSimbaTab; overload;
+    function AddTab(Title: String; ATabClass: TSimbaTabClass): TSimbaTab; overload;
     function DeleteTab(Tab: TSimbaTab): Boolean;
     procedure MoveTab(AFrom, ATo: Integer);
 
@@ -108,7 +109,7 @@ type
     property ShowCloseButtons: Boolean read GetShowCloseButtons write SetShowCloseButtons;
 
     property TabCount: Integer read GetTabCount;
-    property Tabs[Index: Integer]: TSimbaTab read GetTabByIndex;
+    property Tabs[Index: Integer]: TSimbaTab read GetTabByIndex; default;
     property ActiveTab: TSimbaTab read GetActiveTab write SetActiveTab;
 
     property OnMouseDown: TMouseEvent read GetOnMouseDown write SetOnMouseDown;
@@ -123,6 +124,10 @@ type
 
     function InEmptySpace(X, Y: Integer): Boolean;
     function GetTabAt(X, Y: Integer): TSimbaTab;
+
+    function TabStripScreenRect: TRect;
+    function InTabStrip(X, Y: Integer): Boolean;
+    function IndexOfTab(Tab: TSimbaTab): Integer;
   end;
 
 implementation
@@ -499,10 +504,15 @@ begin
 end;
 
 function TSimbaTabControl.AddTab(Title: String): TSimbaTab;
+begin
+  Result := AddTab(Title, FTabClass);
+end;
+
+function TSimbaTabControl.AddTab(Title: String; ATabClass: TSimbaTabClass): TSimbaTab;
 var
   NeedChangeEvent: Boolean;
 begin
-  Result := FTabClass.Create(Self);
+  Result := ATabClass.Create(Self);
   Result.Parent := Self;
 
   Result.Anchors := [akTop,akBottom, akLeft, akRight];
@@ -544,6 +554,24 @@ var
   PressedX: Boolean;
 begin
   Result := GetTabByIndex(FTabs.GetTabAt(X, Y, PressedX));
+end;
+
+function TSimbaTabControl.TabStripScreenRect: TRect;
+var
+  TopLeft: TPoint;
+begin
+  TopLeft := ClientToScreen(Point(0, 0));
+  Result := Bounds(TopLeft.X, TopLeft.Y, Width, FTabs.Height);
+end;
+
+function TSimbaTabControl.InTabStrip(X, Y: Integer): Boolean;
+begin
+  Result := (Y >= 0) and (Y <= FTabs.Height);
+end;
+
+function TSimbaTabControl.IndexOfTab(Tab: TSimbaTab): Integer;
+begin
+  Result := FTabs.FindTabByObject(Tab);
 end;
 
 end.

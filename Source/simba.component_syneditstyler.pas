@@ -55,8 +55,7 @@ uses
   SynEditMarkupWordGroup,
   SynEditMarkupFoldColoring,
   SynEditPointClasses,
-  simba.component_theme,
-  simba.editor_highlighter;
+  simba.component_theme;
 
 type
   TSynAttributeProtectedAccess = class(TSynHighlighterAttributes);

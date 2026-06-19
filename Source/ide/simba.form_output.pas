@@ -45,16 +45,14 @@ type
     function DoCheckLinkable(Sender: TObject; var Line: String; X: Integer; out X1, X2: Integer): Boolean;
     procedure DoLinkClick(Sender: TObject; Link: String);
     procedure DoSimbaSettingChange(Setting: TSimbaSetting);
-
-    // This form has no docking header and docking is performed on empty space here
-    procedure DoTabControlMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure DoTabControlMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
     constructor Create; reintroduce;
     destructor Destroy; override;
 
     function FindTab(ScriptTabUID: Int64): TOutputTab;
     function FindList(ScriptTabUID: Int64): TOutputListComponentReal;
+
+    property TabControl: TSimbaTabControl read FTabControl;
   end;
 
 var
@@ -63,7 +61,6 @@ var
 implementation
 
 uses
-  AnchorDocking,
   simba.initializations,
   simba.component_images,
   simba.ide_docking,
@@ -76,7 +73,7 @@ var
 begin
   // I := 1 to skip the Simba tab
   for I := 1 to FTabControl.TabCount - 1 do
-    if (TOutputTab(FTabControl.Tabs[I]).FScriptTabUID = ScriptTabUID) then
+    if (FTabControl.Tabs[I] is TOutputTab) and (TOutputTab(FTabControl.Tabs[I]).FScriptTabUID = ScriptTabUID) then
       Exit(TOutputTab(FTabControl.Tabs[I]));
   Result := nil;
 end;
@@ -104,7 +101,8 @@ procedure TSimbaOutputForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     I: Integer;
   begin
     for I := 0 to FTabControl.TabCount - 1 do
-      TOutputTab(FTabControl.Tabs[I]).FList.Flush();
+      if (FTabControl.Tabs[I] is TOutputTab) then
+        TOutputTab(FTabControl.Tabs[I]).FList.Flush();
   end;
 
   // show/hide ourselfs
@@ -301,6 +299,9 @@ var
 begin
   for I := 0 to FTabControl.TabCount - 1 do
   begin
+    if not (FTabControl.Tabs[I] is TOutputTab) then
+      Continue;
+
     if (Setting = SimbaSettings.OutputBox.FontAntiAliased) then
       TOutputTab(FTabControl.Tabs[I]).FList.Memo.FontAntialising := Setting.Value
     else if (Setting = SimbaSettings.OutputBox.FontName) then
@@ -308,18 +309,6 @@ begin
     else if (Setting = SimbaSettings.OutputBox.FontSize) then
       TOutputTab(FTabControl.Tabs[I]).FList.Memo.Font.Size := Setting.Value;
   end;
-end;
-
-procedure TSimbaOutputForm.DoTabControlMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-begin
-  if FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging) and (HostDockSite is TSimbaAnchorDockHostSite) then
-    TSimbaAnchorDockHostSite(HostDockSite).Header.MouseMove(Shift, X, Y);
-end;
-
-procedure TSimbaOutputForm.DoTabControlMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  if FTabControl.InEmptySpace(X, Y) and (not FTabControl.Dragging) and (HostDockSite is TSimbaAnchorDockHostSite) then
-    TSimbaAnchorDockHostSite(HostDockSite).Header.MouseDown(Button, Shift, X, Y);
 end;
 
 constructor TSimbaOutputForm.Create;
@@ -357,8 +346,6 @@ begin
   FTabControl.CanAddTabOnDoubleClick := False;
   FTabControl.CanMoveTabs := False;
   FTabControl.ShowCloseButtons := False;
-  FTabControl.OnMouseMove := @DoTabControlMouseMove;
-  FTabControl.OnMouseDown := @DoTabControlMouseDown;
 
   FSimbaTab := TOutputTab(FTabControl.AddTab());
   FSimbaTab.Caption := 'Simba';
@@ -398,7 +385,7 @@ var
   I: Integer;
 begin
   for I := 0 to FTabControl.TabCount - 1 do
-    if (TOutputTab(FTabControl.Tabs[I]).FScriptTabUID = ScriptTabUID) then
+    if (FTabControl.Tabs[I] is TOutputTab) and (TOutputTab(FTabControl.Tabs[I]).FScriptTabUID = ScriptTabUID) then
       Exit(TOutputTab(FTabControl.Tabs[I]).FList);
   Result := nil;
 end;

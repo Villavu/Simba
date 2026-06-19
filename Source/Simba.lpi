@@ -17,7 +17,7 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="190">
+      <Resources Count="193">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
         <Resource_2 FileName="..\Examples\static_method.simba" Type="RCDATA" ResourceName="EXAMPLE_STATIC_METHOD"/>
@@ -208,6 +208,9 @@
         <Resource_187 FileName="..\Images\pen_150.png" Type="RCDATA" ResourceName="PEN_150"/>
         <Resource_188 FileName="..\Images\pen_200.png" Type="RCDATA" ResourceName="PEN_200"/>
         <Resource_189 FileName="..\Examples\marker.simba" Type="RCDATA" ResourceName="EXAMPLE_MARKER"/>
+        <Resource_190 FileName="..\Images\window.png" Type="RCDATA" ResourceName="WINDOW"/>
+        <Resource_191 FileName="..\Images\window_150.png" Type="RCDATA" ResourceName="WINDOW_150"/>
+        <Resource_192 FileName="..\Images\window_200.png" Type="RCDATA" ResourceName="WINDOW_200"/>
       </Resources>
     </General>
     <VersionInfo>

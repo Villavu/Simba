@@ -205,6 +205,8 @@ begin
   Gutter.Visible := False;
   RightGutter.Visible := False;
   Options := Options + [eoHideRightMargin];
+  LineHighlightColor.Background := clNone;
+  LineHighlightColor.Foreground := clNone;
 
   if LineWrapping then
   begin
