@@ -283,7 +283,6 @@ uses
   simba.colormath_distance,
   simba.colormath_conversion,
   simba.zip,
-  simba.nativeinterface,
   simba.containers,
   simba.threading;
 

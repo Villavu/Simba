@@ -14,7 +14,7 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.base, simba.baseclass, simba.image, simba.image_utils, simba.image_textdrawer,
+  simba.base, simba.baseclass, simba.image, simba.image_textdrawer,
   simba.threading,
   simba.vartype_quad;
 
@@ -157,7 +157,7 @@ implementation
 
 uses
   Math,
-  simba.vartype_box, simba.vartype_pointarray;
+  simba.image_utils, simba.vartype_box, simba.vartype_pointarray;
 
 procedure TSimbaExternalCanvas.Invalidate(b: TBox);
 begin

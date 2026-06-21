@@ -46,8 +46,7 @@ type
 implementation
 
 uses
-  simba.settings,
-  simba.misc;
+  simba.settings;
 
 {$R *.lfm}
 

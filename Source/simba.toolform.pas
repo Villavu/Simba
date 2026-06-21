@@ -20,9 +20,7 @@ uses
   simba.component_imageboxcanvas,
   simba.component_imageboxzoom,
   simba.component_button,
-  simba.component_edit,
-  simba.component_menubar,
-  simba.component_splitter;
+  simba.component_menubar;
 
 type
   TImageSupplier = function(): TSimbaImage of object;
@@ -79,6 +77,7 @@ implementation
 
 uses
   LCLType, Dialogs,
+  simba.component_edit, simba.component_splitter,
   simba.env,
   simba.component_divider,
   simba.component_theme,

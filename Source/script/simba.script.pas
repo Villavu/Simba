@@ -13,7 +13,6 @@ uses
   Classes, SysUtils,
   lptypes, lpvartypes, lpcompiler, lpparser, lpinterpreter, lpmessages,
   simba.base,
-  simba.target,
   simba.script_compiler,
   simba.script_communication,
   simba.script_plugin;
@@ -73,6 +72,7 @@ implementation
 
 uses
   simba.env, simba.fs, simba.datetime,
+  simba.target,
   simba.vartype_string,
   simba.script_pluginloader,
   simba.script_imports;

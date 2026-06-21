@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.containers, simba.threading;
+  simba.base;
 
 type
   TSimbaBaseClass = class
@@ -54,6 +54,9 @@ type
   function GetSimbaObjectsOfClass(ClassType: TSimbaBaseClassType): TSimbaBaseClassArray;
 
 implementation
+
+uses
+  simba.containers, simba.threading;
 
 type
   TTrackedObjects = specialize TSimbaThreadsafeObjectList<TSimbaBaseClass>;

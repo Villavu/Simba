@@ -15,7 +15,7 @@ interface
 uses
   Classes, SysUtils,
   fpjson, jsonscanner,
-  simba.base, simba.baseclass;
+  simba.base;
 
 type
   {$SCOPEDENUMS ON}
@@ -107,7 +107,7 @@ implementation
 
 uses
   TypInfo,
-  simba.jsonparser;
+  simba.baseclass, simba.jsonparser;
 
 procedure TSimbaJSONItemHelper.CheckIsTyp(ATyp: EJSONItemType);
 begin

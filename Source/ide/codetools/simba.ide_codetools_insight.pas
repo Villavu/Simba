@@ -19,7 +19,6 @@ interface
 uses
   Classes, SysUtils,
   simba.base,
-  simba.containers,
   simba.ide_codetools_paslexer,
   simba.ide_codetools_parser;
 
@@ -86,6 +85,7 @@ type
 implementation
 
 uses
+  simba.containers,
   simba.settings,
   simba.ide_codetools_includes,
   simba.ide_codetools_exprparser,

@@ -46,7 +46,6 @@ implementation
 
 uses
   simba.env,
-  simba.vartype_windowhandle,
   simba.image,
   simba.ide_controller;
 

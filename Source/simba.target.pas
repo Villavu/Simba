@@ -11,8 +11,8 @@ interface
 
 uses
   Classes, SysUtils, syncobjs,
-  simba.base, simba.baseclass, simba.image, simba.image_utils, simba.externalcanvas,
-  simba.target_eios, simba.target_window, simba.target_image, simba.target_plugin,
+  simba.base, simba.baseclass, simba.image, simba.externalcanvas,
+  simba.target_eios, simba.target_plugin,
   simba.colormath, simba.dtm,
   simba.vartype_quad
   {$IFDEF USE_WGCAPTURE},
@@ -295,6 +295,7 @@ implementation
 uses
   Forms,
   simba.nativeinterface, simba.vartype_box, simba.target_movemouse, simba.random,
+  simba.target_window, simba.target_image, simba.image_utils,
   simba.finder_color, simba.finder_image, simba.finder_dtm;
 
 function TSimbaTargetEventManager.Add(Event: ETargetEvent; Method: TSimbaTargetEvent; UserData: Pointer; UserDataSize: Integer): Integer;

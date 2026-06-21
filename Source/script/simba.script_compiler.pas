@@ -14,7 +14,7 @@ interface
 uses
   Classes, SysUtils,
   lpcompiler, lptypes, lpvartypes, lptree, lpffiwrappers, ffi,
-  simba.base, simba.containers, simba.vartype_string;
+  simba.base, simba.containers;
 
 type
   TScriptCompiler = class(TLapeCompiler)
@@ -84,6 +84,7 @@ type
 implementation
 
 uses
+  simba.vartype_string,
   lpeval, lpparser, lpinterpreter, lpmessages;
 
 type

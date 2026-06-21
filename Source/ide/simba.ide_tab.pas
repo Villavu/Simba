@@ -13,7 +13,6 @@ uses
   Classes, SysUtils, Controls, Process,
   simba.base,
   simba.ide_editor,
-  simba.ide_events,
   simba.ide_output_components,
   simba.component_tabcontrol;
 
@@ -156,6 +155,7 @@ implementation
 
 uses
   Forms, Dialogs,
+  simba.ide_events,
   simba.fs,
   simba.settings,
   simba.form_scripttabs,

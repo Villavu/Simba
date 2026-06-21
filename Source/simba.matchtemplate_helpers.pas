@@ -14,7 +14,7 @@ interface
 
 uses
   classes, sysutils,
-  simba.baseclass, simba.base, simba.matchtemplate_matrix;
+  simba.base, simba.matchtemplate_matrix;
 
 function MaskFromTemplate(Templ: TIntegerMatrix): TRGBMatrix;
 

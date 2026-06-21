@@ -19,8 +19,7 @@ uses
   simba.component_imageboxcanvas,
   simba.image,
   simba.dtm,
-  simba.colormath,
-  simba.target;
+  simba.colormath;
 
 const
   ZOOM_LEVELS: TIntegerArray = (
@@ -211,7 +210,7 @@ type
 implementation
 
 uses
-  simba.datetime, simba.component_theme,
+  simba.datetime, simba.component_theme, simba.target,
   LCLIntf;
 
 generic procedure ZoomOut<_T>(Ratio, SrcX, SrcY, LoopEndX, LoopEndY: Integer; SrcImg, DestImg: TRawImage);

@@ -15,7 +15,7 @@ implementation
 
 uses
   Variants,
-  simba.nativeinterface, simba.env, simba.baseclass, simba.vartype_ordarray,
+  simba.nativeinterface, simba.baseclass, simba.vartype_ordarray,
   simba.vartype_string, simba.vartype_pointarray,
   simba.vartype_box, simba.colormath;
 

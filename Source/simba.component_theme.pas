@@ -106,7 +106,7 @@ begin
 
   with ATScrollbarTheme do
   begin
-    InitialSize := 18;
+    InitialSize := 15;
     ThumbMinSize := 60;
     ThumbRoundedRect := False;
     DirectJumpOnClickPageUpDown := True;

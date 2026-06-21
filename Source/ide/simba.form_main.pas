@@ -60,8 +60,7 @@ uses
   simba.aca,
   simba.env,
   simba.nativeinterface,
-  simba.threading,
-  simba.vartype_windowhandle;
+  simba.threading;
 
 procedure TSimbaMainForm.DoException(Sender: TObject; E: Exception);
 
