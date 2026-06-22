@@ -18,7 +18,6 @@ uses
   SynEditTextBuffer,
   SynEditHighlighter,
   {%H-}SynEditWrappedView,
-  simba.component_theme,
   simba.component_scrollbar,
   simba.component_syneditstyler;
 
@@ -28,9 +27,17 @@ type
     FStyler: TSimbaSynEditStyler;
     FScrollbarVert: TSimbaScrollBar;
     FScrollbarHorz: TSimbaScrollBar;
+    FShowVertScroll: Boolean;
+    FShowHorzScroll: Boolean;
+    FAllowVertScroll: Boolean;
+    FAllowHorzScroll: Boolean;
 
     procedure DoVertScrollBarChange(Sender: TObject);
     procedure DoHorzScrollBarChange(Sender: TObject);
+    procedure SetShowVertScroll(Value: Boolean);
+    procedure SetShowHorzScroll(Value: Boolean);
+    procedure SetAllowVertScroll(Value: Boolean);
+    procedure SetAllowHorzScroll(Value: Boolean);
 
     // Override to scroll horizontally when shift + mouse wheel
     function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
@@ -51,6 +58,13 @@ type
     property Styler: TSimbaSynEditStyler read FStyler;
     property FontName: String read GetFontName write SetFontName;
     property FontAntialising: Boolean read GetFontAntialising write SetFontAntialising;
+    // Whether the vertical / horizontal scrollbar is shown.
+    property ShowVertScroll: Boolean read FShowVertScroll write SetShowVertScroll;
+    property ShowHorzScroll: Boolean read FShowHorzScroll write SetShowHorzScroll;
+    // Whether the view may scroll vertically / horizontally. When False the view is
+    // pinned to the top / left - for editors that shouldn't scroll that way.
+    property AllowVertScroll: Boolean read FAllowVertScroll write SetAllowVertScroll;
+    property AllowHorzScroll: Boolean read FAllowHorzScroll write SetAllowHorzScroll;
   end;
 
   // Hide gutters and such so the synedit acts more like the "memo" component.
@@ -62,6 +76,7 @@ type
 implementation
 
 uses
+  simba.component_theme,
   simba.misc;
 
 function TSimbaSynEdit.GetFontAntialising: Boolean;
@@ -88,6 +103,48 @@ begin
     Font.Name := AValue;
 end;
 
+procedure TSimbaSynEdit.SetShowVertScroll(Value: Boolean);
+begin
+  if (FShowVertScroll = Value) then
+    Exit;
+  FShowVertScroll := Value;
+
+  if (FScrollbarVert <> nil) then
+    FScrollbarVert.Visible := FShowVertScroll and Visible;
+end;
+
+procedure TSimbaSynEdit.SetShowHorzScroll(Value: Boolean);
+begin
+  if (FShowHorzScroll = Value) then
+    Exit;
+  FShowHorzScroll := Value;
+
+  if (FScrollbarHorz <> nil) then
+    FScrollbarHorz.Visible := FShowHorzScroll and Visible;
+end;
+
+procedure TSimbaSynEdit.SetAllowVertScroll(Value: Boolean);
+begin
+  if (FAllowVertScroll = Value) then
+    Exit;
+  FAllowVertScroll := Value;
+
+  if (not FAllowVertScroll) then
+    TopView := 1;
+  UpdateBars();
+end;
+
+procedure TSimbaSynEdit.SetAllowHorzScroll(Value: Boolean);
+begin
+  if (FAllowHorzScroll = Value) then
+    Exit;
+  FAllowHorzScroll := Value;
+
+  if (not FAllowHorzScroll) then
+    LeftChar := 1;
+  UpdateBars();
+end;
+
 procedure TSimbaSynEdit.DoVertScrollBarChange(Sender: TObject);
 begin
   TopView := FScrollbarVert.Position;
@@ -102,7 +159,7 @@ function TSimbaSynEdit.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; Mou
 const
   SCROLL_AMOUNT = 5;
 begin
-  if (ssShift in Shift) then
+  if FAllowHorzScroll and (ssShift in Shift) then
   begin
     if (WheelDelta > 0) then
       FScrollbarHorz.Position := FScrollbarHorz.Position - SCROLL_AMOUNT
@@ -111,6 +168,9 @@ begin
 
     Result := True;
   end else
+  if (not FAllowVertScroll) and (not (ssShift in Shift)) then
+    Result := True // vertical scrolling disabled - swallow the wheel
+  else
     Result := inherited DoMouseWheel(Shift, WheelDelta, MousePos);
 end;
 
@@ -119,24 +179,37 @@ begin
   if FScrollbarVert=nil then Exit;
   if FScrollbarHorz=nil then Exit;
 
-  FScrollbarVert.Min := 1;
-  FScrollbarVert.Max := TextView.ViewedCount + 1;
-  if (eoScrollPastEof in Options) then
-    FScrollbarVert.Max := FScrollbarVert.Max + (LinesInWindow - 1);
-  FScrollbarVert.PageSize := LinesInWindow;
-  FScrollbarVert.Position := TopView;
+  if FAllowVertScroll then
+  begin
+    FScrollbarVert.Min := 1;
+    FScrollbarVert.Max := TextView.ViewedCount + 1;
+    if (eoScrollPastEof in Options) then
+      FScrollbarVert.Max := FScrollbarVert.Max + (LinesInWindow - 1);
+    FScrollbarVert.PageSize := LinesInWindow;
+    FScrollbarVert.Position := TopView;
+  end;
 
-  FScrollbarHorz.Min := 1;
-  FScrollbarHorz.Max := TextView.LengthOfLongestLine + 1;
-  if (eoScrollPastEol in Options) and (FScrollbarHorz.Max < MaxLeftChar + 1) then
-    FScrollbarHorz.Max := MaxLeftChar + 1;
-  FScrollbarHorz.PageSize := CharsInWindow;
-  FScrollbarHorz.Position := LeftChar;
+  if FAllowHorzScroll then
+  begin
+    FScrollbarHorz.Min := 1;
+    FScrollbarHorz.Max := TextView.LengthOfLongestLine + 1;
+    if (eoScrollPastEol in Options) and (FScrollbarHorz.Max < MaxLeftChar + 1) then
+      FScrollbarHorz.Max := MaxLeftChar + 1;
+    FScrollbarHorz.PageSize := CharsInWindow;
+    FScrollbarHorz.Position := LeftChar;
+  end;
 end;
 
 procedure TSimbaSynEdit.StatusChanged(AChanges: TSynStatusChanges);
 begin
   inherited StatusChanged(AChanges);
+
+  // Keep the view pinned when scrolling is disabled (e.g. the caret being moved
+  // off-screen would otherwise scroll the view).
+  if (not FAllowHorzScroll) and (scLeftChar in AChanges) and (LeftChar <> 1) then
+    LeftChar := 1;
+  if (not FAllowVertScroll) and (scTopLine in AChanges) and (TopView <> 1) then
+    TopView := 1;
 
   if (AChanges * [scLeftChar, scTopLine, scLinesInWindow, scCharsInWindow] <> []) then
     UpdateBars();
@@ -163,13 +236,18 @@ procedure TSimbaSynEdit.SetVisible(Value: Boolean);
 begin
   inherited SetVisible(Value);
 
-  FScrollbarHorz.Visible := Value;
-  FScrollbarVert.Visible := Value;
+  FScrollbarHorz.Visible := Value and FShowHorzScroll;
+  FScrollbarVert.Visible := Value and FShowVertScroll;
 end;
 
 constructor TSimbaSynEdit.Create(AOwner: TComponent; HighlighterClass: TSynCustomHighlighterClass);
 begin
   inherited Create(AOwner);
+
+  FShowVertScroll  := True;
+  FShowHorzScroll  := True;
+  FAllowVertScroll := True;
+  FAllowHorzScroll := True;
 
   FScrollbarVert := TSimbaScrollBar.Create(Self);
   FScrollbarVert.Kind := sbVertical;
@@ -210,7 +288,8 @@ begin
 
   if LineWrapping then
   begin
-    FScrollbarHorz.Visible := False;
+    AllowHorzScroll := False;
+    ShowHorzScroll := False;
     Options := Options - [eoScrollPastEol];
     TLazSynEditLineWrapPlugin.Create(Self);
   end;

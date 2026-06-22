@@ -99,13 +99,7 @@ type
       ScrollBarSize: TSimbaSetting; // in 96 DPI
       ScrollBarArrowSize: TSimbaSetting;
 
-      FindInFilesWidth: TSimbaSetting;
-      FindInFilesHeight: TSimbaSetting;
-      FindInFilesSearch: TSimbaSetting;
-      FindInFilesLocation: TSimbaSetting;
-      FindInFilesSubDirs: TSimbaSetting;
-      FindInFilesWholeWords: TSimbaSetting;
-      FindInFilesCaseSens: TSimbaSetting;
+      FindInFilesSearchHistory: TSimbaSetting;
 
       FileBrowserMasks: TSimbaSetting;
     end;
@@ -198,7 +192,7 @@ implementation
 uses
   Forms, SynEdit, LCLType,
   simba.base, simba.encoding, simba.env, simba.ide_editor_docgenerator,
-  simba.initializations, simba.component_theme, simba.misc;
+  simba.initializations, simba.component_theme;
 
 var
   SimbaSettingsInstance: TSimbaSettings = nil;
@@ -496,13 +490,7 @@ begin
   General.ScrollBarSize      := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarSize', SimbaComponentTheme.ScrollBarSize);
   General.ScrollBarArrowSize := TSimbaSetting_Integer.Create(Self, 'General', 'ScrollBarArrowSize', SimbaComponentTheme.ScrollBarArrowSize);
 
-  General.FindInFilesWidth      := TSimbaSetting_Integer.Create(Self, 'General', 'FindInFilesWidth', 700);
-  General.FindInFilesHeight     := TSimbaSetting_Integer.Create(Self, 'General', 'FindInFilesHeight', 400);
-  General.FindInFilesSearch     := TSimbaSetting_BinaryString.Create(Self, 'General', 'FindInFilesSearch', '');
-  General.FindInFilesLocation   := TSimbaSetting_BinaryString.Create(Self, 'General', 'FindInFilesLocation', '');
-  General.FindInFilesSubDirs    := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesSubDirs', False);
-  General.FindInFilesWholeWords := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesWholeWords', False);
-  General.FindInFilesCaseSens   := TSimbaSetting_Boolean.Create(Self, 'General', 'FindInFilesCaseSens', False);
+  General.FindInFilesSearchHistory := TSimbaSetting_BinaryString.Create(Self, 'General', 'FindInFilesSearchHistory', '');
 
   General.FileBrowserMasks := TSimbaSetting_Boolean.Create(Self, 'General', 'FileBrowserMasks', False);
 

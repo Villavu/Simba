@@ -146,7 +146,6 @@ begin
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
     Application.CreateForm(TSimbaShapeBoxForm, SimbaShapeBoxForm);
     Application.CreateForm(TSimbaBackupsForm, SimbaBackupsForm);
-    Application.CreateForm(TSimbaFindInFilesForm, SimbaFindInFilesForm);
     Application.CreateForm(TSimbaDownloadSimbaForm, SimbaDownloadSimbaForm);
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
     Application.CreateForm(TSimbaColorPickHistoryForm, SimbaColorPickHistoryForm);

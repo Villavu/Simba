@@ -268,6 +268,7 @@ begin
   inherited;
 
   EditCaretFlasher.Add(Self);
+  Invalidate();
 end;
 
 procedure TSimbaEdit.WMKillFocus(var Message: TLMKillFocus);
@@ -748,18 +749,23 @@ procedure TSimbaEdit.KeyPress(var Key: Char);
 begin
   inherited KeyPress(Key);
 
-  AddCharAtCursor(Key);
-
-  Key := #0;
+  // Only consume printable characters - let control keys (Tab, Escape, ...) fall through
+  if (Key >= #32) then
+  begin
+    AddCharAtCursor(Key);
+    Key := #0;
+  end;
 end;
 
 procedure TSimbaEdit.UTF8KeyPress(var UTF8Key: TUTF8Char);
 begin
   inherited UTF8KeyPress(UTF8Key);
 
-  AddCharAtCursor(UTF8Decode(UTF8Key)[1]);
-
-  UTF8Key := '';
+  if (UTF8Key <> '') and (UTF8Key[1] >= #32) then
+  begin
+    AddCharAtCursor(UTF8Decode(UTF8Key)[1]);
+    UTF8Key := '';
+  end;
 end;
 
 procedure TSimbaEdit.SetColor(Value: TColor);
