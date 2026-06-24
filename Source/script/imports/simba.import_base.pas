@@ -685,8 +685,8 @@ begin
     addBaseDefine('SIMBAMAJOR' + Format('%d', [SIMBA_MAJOR]));
     addBaseDefine('SIMBACOMMIT_' + SIMBA_COMMIT);
     addBaseDefine('FPC' + Format('%d', [FPC_FULLVERSION]));
-    addBaseDefine(CPU);
-    addBaseDefine(OS);
+    addBaseDefine(CPU_TYPE);
+    addBaseDefine(OS_TYPE);
 
     addGlobalType('UInt8', 'Byte');
     addGlobalType('Int32', 'Integer');

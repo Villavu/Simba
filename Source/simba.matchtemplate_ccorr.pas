@@ -23,7 +23,6 @@
 unit simba.matchtemplate_ccorr;
 
 {$i simba.inc}
-
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface

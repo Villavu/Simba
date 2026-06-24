@@ -15,14 +15,13 @@ unit simba.fftpack4;
   limitations under the License.
 [==============================================================================}
 {$i simba.inc}
-
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
 
 uses
-  sysutils, math,
-  simba.math, simba.base, simba.matchtemplate_matrix;
+  Classes, SysUtils, Math,
+  simba.base, simba.math, simba.matchtemplate_matrix;
 
 type
   TFFTPACK = record

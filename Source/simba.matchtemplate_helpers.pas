@@ -5,9 +5,7 @@
 }
 unit simba.matchtemplate_helpers;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
-
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface

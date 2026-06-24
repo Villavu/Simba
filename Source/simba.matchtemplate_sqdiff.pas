@@ -23,7 +23,6 @@
 unit simba.matchtemplate_sqdiff;
 
 {$i simba.inc}
-
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface

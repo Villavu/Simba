@@ -15,7 +15,6 @@ unit simba.matchtemplate;
   limitations under the License.
 [==============================================================================}
 {$i simba.inc}
-
 {$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
