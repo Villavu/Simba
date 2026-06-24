@@ -16,29 +16,15 @@ uses
 type
   TSimbaScrollBar = class(TATScrollBar)
   protected
-    function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
-
     procedure DoSettingChange_ScrollBarSize(Setting: TSimbaSetting);
     procedure DoSettingChange_ScrollBarArrowSize(Setting: TSimbaSetting);
   public
-    ForwardScrollControl: TControl;
-
     procedure Assign(Source: TPersistent); override;
 
     constructor Create(AOwner: TComponent); override;
   end;
 
 implementation
-
-uses
-  LMessages;
-
-function TSimbaScrollBar.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
-begin
-  Result := Assigned(ForwardScrollControl);
-  if Result then
-    ForwardScrollControl.Perform(LM_MOUSEWHEEL, 1*WheelDelta*65536, 0);
-end;
 
 procedure TSimbaScrollBar.DoSettingChange_ScrollBarSize(Setting: TSimbaSetting);
 begin

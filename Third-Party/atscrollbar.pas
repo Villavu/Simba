@@ -18,11 +18,7 @@ Mouse usage:
 
 unit ATScrollBar;
 
-{$ifdef FPC}
-  {$mode delphi}
-{$else}
-  {$define windows}
-{$endif}
+{$mode delphi}
 
 interface
 
@@ -30,11 +26,10 @@ uses
   {$ifdef windows}
   Windows, Messages,
   {$endif}
-  {$ifdef FPC}
   InterfaceBase,
   LCLIntf,
   LCLType,
-  {$endif}
+  LMessages,
   Classes, Types, Graphics,
   Controls, ExtCtrls, Forms,
   ATCanvasPrimitives;
@@ -92,7 +87,8 @@ type
     ArrowSize: integer;
     ArrowLengthPercents: integer;
     BorderSize: integer;
-    TimerInterval: integer;
+    TimerInterval: integer;       // initial delay (ms) before press-and-hold auto-repeat starts
+    TimerIntervalRepeat: integer; // interval (ms) between auto-repeat ticks once it has started
     DirectJumpOnClickPageUpDown: boolean;
     ClickFocusesParentControl: boolean;
 
@@ -114,13 +110,6 @@ type
 
   TATScrollbar = class(TCustomControl)
   private
-    FTimerMouseover: TTimer;
-
-    {$ifndef FPC}
-    FOnMouseLeave: TNotifyEvent;
-    FOnMouseEnter: TNotifyEvent;
-    {$endif}
-
     FKind: TScrollBarKind;
     FIndentCorner: Integer;
     FTheme: PATScrollbarTheme;
@@ -143,7 +132,6 @@ type
     FRectPageDown: TRect;
 
     FBitmap: TBitmap;
-    FTimer: TTimer;
     FOnChange: TNotifyEvent;
     FOnOwnerDraw: TATScrollbarDrawEvent;
 
@@ -156,21 +144,12 @@ type
     FMouseDownOnPageUp,
     FMouseDownOnPageDown: boolean;
 
-    {$ifndef FPC}
-    procedure CMMouseEnter(var msg: TMessage);
-      message CM_MOUSEENTER;
-    procedure CMMouseLeave(var msg: TMessage);
-      message CM_MOUSELEAVE;
-    {$endif}
-
     function EffectiveRectSize: integer;
-    procedure TimerMouseoverTick(Sender: TObject);
 
     procedure DoPaintArrow(C: TCanvas; const R: TRect; AType: TATScrollbarElemType);
     procedure DoPaintBackAndThumb(C: TCanvas);
     procedure DoPaintBackScrolling(C: TCanvas);
     procedure DoPaintTo(C: TCanvas);
-
     procedure DoPaintStd_Corner(C: TCanvas; const R: TRect);
     procedure DoPaintStd_Back(C: TCanvas; const R: TRect);
     procedure DoPaintStd_BackScrolling(C: TCanvas; const R: TRect);
@@ -183,17 +162,16 @@ type
     procedure DoUpdateCornerRect;
     procedure DoUpdatePosOnDrag(X, Y: Integer);
     procedure DoScrollBy(NDelta: Integer);
-    function PosToCoord(APos: Integer): Integer;
+    function WheelTargetControl: TControl;
+    function PosToCoord(APos: Double): Integer;
     function DoScale(AValue: integer): integer;
-
-    procedure TimerTimer(Sender: TObject);
+    procedure RepeatStep; // one arrow/page repeat tick, driven by the shared repeat timer
     procedure SetKind(AValue: TScrollBarKind);
     procedure SetPos(AValue: Int64);
     procedure SetMin(Value: Int64);
     procedure SetMax(Value: Int64);
     procedure SetPageSize(Value: Int64);
-    function DoDrawEvent(AType: TATScrollbarElemType;
-      ACanvas: TCanvas; const ARect, ARect2: TRect): boolean;
+    function DoDrawEvent(AType: TATScrollbarElemType; ACanvas: TCanvas; const ARect, ARect2: TRect): boolean;
     function BetterPtInRect(R: TRect; P: TPoint): boolean;
   public
     constructor Create(AOnwer: TComponent); override;
@@ -201,38 +179,26 @@ type
     function CanFocus: boolean; override;
     property Theme: PATScrollbarTheme read FTheme write FTheme;
     procedure Update; reintroduce;
-
+    procedure WheelScroll(AWheelDelta: Integer);
   protected
-    {$ifdef FPC}
-     procedure MouseLeave; override;
-     procedure MouseEnter; override;
-    {$endif}
+    procedure MouseLeave; override;
+    procedure MouseEnter; override;
     procedure Paint; override;
     procedure Resize; override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
     procedure Click; override;
-    {$ifndef FPC}
-    procedure DoMouseEnter; dynamic;
-    procedure DoMouseLeave; dynamic;
-    {$endif}
     {$ifdef windows}
     procedure WMEraseBkgnd(var Message: TMessage); message WM_ERASEBKGND;
     {$endif}
   published
     procedure ScrollBy(Delta: Integer); reintroduce;
 
-    {$ifndef FPC}
-    property OnMouseEnter: TNotifyEvent read FOnMouseEnter write FOnMouseEnter;
-    property OnMouseLeave: TNotifyEvent read FOnMouseLeave write FOnMouseLeave;
-    {$endif}
-
     property Align;
     property Anchors;
-    {$ifdef FPC}
     property BorderSpacing;
-    {$endif}
     property Constraints;
     property Enabled;
     property DoubleBuffered;
@@ -253,6 +219,7 @@ type
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnMouseDown;
     property OnMouseUp;
+    property OnMouseEnter;
     property OnOwnerDraw: TATScrollbarDrawEvent read FOnOwnerDraw write FOnOwnerDraw;
     property OnContextPopup;
     property OnResize;
@@ -263,58 +230,94 @@ implementation
 uses
   SysUtils, Math;
 
+type
+  { TATScrollbarRepeater - Single shared timer drives the arrow/page
+    press-and-hold repeat for whichever scrollbar is currently held, instead of
+    every scrollbar owning its own timer (wasteful with many bars in a heavy app). }
+  TATScrollbarRepeater = class
+  private
+    FRepeatTimer: TTimer;
+    FRepeatBar: TATScrollbar;
+    FRepeatInterval: Integer; // fast interval to switch to after the initial delay
+    procedure DoRepeatTimer(Sender: TObject);
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure StartRepeat(ABar: TATScrollbar; AInitialDelay, ARepeatInterval: Integer);
+    procedure StopRepeat(ABar: TATScrollbar);
+  end;
+
+var
+  ScrollbarRepeater: TATScrollbarRepeater = nil;
+
+constructor TATScrollbarRepeater.Create;
+begin
+  inherited Create();
+
+  FRepeatTimer := TTimer.Create(nil);
+  FRepeatTimer.Enabled := false;
+  FRepeatTimer.OnTimer := DoRepeatTimer;
+end;
+
+destructor TATScrollbarRepeater.Destroy;
+begin
+  FreeAndNil(FRepeatTimer);
+  inherited Destroy();
+end;
+
+procedure TATScrollbarRepeater.DoRepeatTimer(Sender: TObject);
+begin
+  // Only one scrollbar can be held at a time, so a single timer works
+  if Assigned(FRepeatBar) then
+    FRepeatBar.RepeatStep;
+
+  // First tick fires after the longer initial delay; subsequent ticks use faster interval
+  if (FRepeatTimer.Interval <> FRepeatInterval) then
+    FRepeatTimer.Interval := FRepeatInterval;
+end;
+
+procedure TATScrollbarRepeater.StartRepeat(ABar: TATScrollbar; AInitialDelay, ARepeatInterval: Integer);
+begin
+  FRepeatBar := ABar;
+  FRepeatInterval := ARepeatInterval;
+  FRepeatTimer.Interval := AInitialDelay;
+  FRepeatTimer.Enabled := True;
+end;
+
+procedure TATScrollbarRepeater.StopRepeat(ABar: TATScrollbar);
+begin
+  if (FRepeatBar = ABar) then
+  begin
+    FRepeatBar := nil;
+    FRepeatTimer.Enabled := False;
+  end;
+end;
+
 function IsDoubleBufferedNeeded: boolean;
 begin
-  {$ifdef FPC}
-  Result:= WidgetSet.GetLCLCapability(lcCanDrawOutsideOnPaint) = LCL_CAPABILITY_YES;
-  {$else}
-  Result:= true;
-  {$endif}
+  Result := WidgetSet.GetLCLCapability(lcCanDrawOutsideOnPaint) = LCL_CAPABILITY_YES;
 end;
 
 { TATScrollbar }
 
-procedure TATScrollbar.TimerMouseoverTick(Sender: TObject);
-//timer is workaround for LCL issue, where MouseLeave not called
-//if mouse leaves app window area (at least on Linux)
-{$ifdef FPC}
-var
-  Pnt: TPoint;
-{$endif}
-begin
-  {$ifdef FPC}
-  Pnt:= ScreenToClient(Mouse.CursorPos);
-  if not PtInRect(ClientRect, Pnt) then
-    MouseLeave;
-  {$endif}
-end;
-
-{$ifdef FPC}
 procedure TATScrollbar.MouseLeave;
 begin
   inherited;
-  FTimerMouseover.Enabled:= false;
-  //FOver:= false;
   Invalidate;
 end;
 
 procedure TATScrollbar.MouseEnter;
 begin
   inherited;
-  //FOver:= true;
   Invalidate;
-  FTimerMouseover.Enabled:= true;
 end;
-{$endif}
 
 constructor TATScrollbar.Create(AOnwer: TComponent);
 begin
   inherited;
 
   Caption:= '';
-  {$ifdef FPC}
   BorderStyle:= bsNone;
-  {$endif}
   ControlStyle:= ControlStyle+[csOpaque];
 
   FKind:= sbHorizontal;
@@ -336,24 +339,14 @@ begin
   FBitmap:= TBitmap.Create;
   BitmapResize(FBitmap, 600, 50);
 
-  FTimer:= TTimer.Create(Self);
-  FTimer.Enabled:= false;
-  FTimer.Interval:= 100;
-  FTimer.OnTimer:= TimerTimer;
-
-  FTimerMouseover:= TTimer.Create(Self);
-  FTimerMouseover.Enabled:= false;
-  FTimerMouseover.Interval:= 1000;
-  FTimerMouseover.OnTimer:= TimerMouseoverTick;
-
   FMouseDown:= false;
   FMouseDragOffset:= 0;
 end;
 
 destructor TATScrollbar.Destroy;
 begin
-  FTimer.Enabled:= false;
-  FreeAndNil(FTimer);
+  if Assigned(ScrollbarRepeater) then
+    ScrollbarRepeater.StopRepeat(Self);
   FreeAndNil(FBitmap);
   inherited;
 end;
@@ -366,9 +359,9 @@ end;
 procedure TATScrollbar.Update;
 begin
   if IsHorz then
-    Height:= DoScale(FTheme^.InitialSize)
+    Height := DoScale(FTheme^.InitialSize)
   else
-    Width:= DoScale(FTheme^.InitialSize);
+    Width := DoScale(FTheme^.InitialSize);
 
   Invalidate;
 end;
@@ -518,7 +511,6 @@ begin
       DoPaintStd_BackScrolling(C, FRectPageDown);
 end;
 
-
 function TATScrollbar.BetterPtInRect(R: TRect; P: TPoint): boolean;
 //this wrapper is to catch MouseDown on the right-most pixels
 begin
@@ -529,8 +521,7 @@ begin
   Result:= PtInRect(R, P);
 end;
 
-procedure TATScrollbar.MouseDown(Button: TMouseButton; Shift: TShiftState;
-  X, Y: Integer);
+procedure TATScrollbar.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   ScrollVal: integer;
 begin
@@ -552,18 +543,16 @@ begin
 
   if FMouseDown then
   begin
-    FTimer.Interval:= FTheme^.TimerInterval;
-
     if FMouseDownOnUp then
     begin
       DoScrollBy(-FSmallChange);
-      FTimer.Enabled:= true;
+      ScrollbarRepeater.StartRepeat(Self, FTheme^.TimerInterval, FTheme^.TimerIntervalRepeat);
     end
     else
     if FMouseDownOnDown then
     begin
       DoScrollBy(FSmallChange);
-      FTimer.Enabled:= true;
+      ScrollbarRepeater.StartRepeat(Self, FTheme^.TimerInterval, FTheme^.TimerIntervalRepeat);
     end
     else
     if FMouseDownOnPageUp or FMouseDownOnPageDown then
@@ -586,7 +575,7 @@ begin
         else
           DoScrollBy(ScrollVal);
 
-        FTimer.Enabled:= true;
+        ScrollbarRepeater.StartRepeat(Self, FTheme^.TimerInterval, FTheme^.TimerIntervalRepeat);
       end;
     end;
   end;
@@ -603,7 +592,8 @@ begin
   FMouseDownOnUp:= false;
   FMouseDownOnDown:= false;
 
-  FTimer.Enabled:= false;
+  if Assigned(ScrollbarRepeater) then
+    ScrollbarRepeater.StopRepeat(Self);
   Invalidate;
 end;
 
@@ -625,30 +615,6 @@ begin
 end;
 {$endif}
 
-{$ifndef FPC}
-procedure TATScrollbar.CMMouseEnter(var msg: TMessage);
-begin
-  DoMouseEnter;
-end;
-
-procedure TATScrollbar.CMMouseLeave(var msg: TMessage);
-begin
-  DoMouseLeave;
-end;
-
-procedure TATScrollbar.DoMouseEnter;
-begin
-  Invalidate;
-  if Assigned(FOnMouseEnter) then FOnMouseEnter(Self);
-end;
-
-procedure TATScrollbar.DoMouseLeave;
-begin
-  Invalidate;
-  if Assigned(FOnMouseLeave) then FOnMouseLeave(Self);
-end;
-{$endif}
-
 procedure TATScrollbar.Click;
 var
   Ctl: TWinControl;
@@ -664,8 +630,7 @@ begin
     end;
 end;
 
-function TATScrollbar.DoDrawEvent(AType: TATScrollbarElemType;
-  ACanvas: TCanvas; const ARect, ARect2: TRect): boolean;
+function TATScrollbar.DoDrawEvent(AType: TATScrollbarElemType; ACanvas: TCanvas; const ARect, ARect2: TRect): boolean;
 begin
   Result:= true;
   if Assigned(FOnOwnerDraw) then
@@ -689,16 +654,14 @@ begin
   end;
 end;
 
-procedure TATScrollbar.DoPaintArrow(C: TCanvas; const R: TRect;
-  AType: TATScrollbarElemType);
+procedure TATScrollbar.DoPaintArrow(C: TCanvas; const R: TRect; AType: TATScrollbarElemType);
 begin
   if IsRectEmpty(R) then exit;
   if DoDrawEvent(AType, C, R, R) then
     DoPaintStd_Arrow(C, R, AType);
 end;    
 
-procedure TATScrollbar.DoPaintStd_Arrow(C: TCanvas; R: TRect;
-  AType: TATScrollbarElemType);
+procedure TATScrollbar.DoPaintStd_Arrow(C: TCanvas; R: TRect; AType: TATScrollbarElemType);
 var
   P: TPoint;
   NSize: Integer;
@@ -764,7 +727,7 @@ begin
     Result:= 1;
 end;
 
-function TATScrollbar.PosToCoord(APos: Integer): Integer;
+function TATScrollbar.PosToCoord(APos: Double): Integer;
 var
   N0: Integer;
 begin
@@ -776,7 +739,7 @@ begin
   begin
     N0:= FRectMain.Top;
   end;
-  Result:= N0 + (APos-FMin) * EffectiveRectSize div Math.Max(1, FMax-FMin);
+  Result:= N0 + Round((APos-FMin) * EffectiveRectSize / Math.Max(1, FMax-FMin));
 end;
 
 procedure TATScrollbar.DoUpdateThumbRect;
@@ -828,7 +791,7 @@ begin
 end;
 
 procedure TATScrollbar.DoPaintStd_Thumb(C: TCanvas; const R: TRect);
-  //
+
   procedure PaintMarkerHorz(X: integer; NDecorSize, NDecorSpace, NOffset, NInc: integer);
   var
     i: integer;
@@ -844,7 +807,7 @@ procedure TATScrollbar.DoPaintStd_Thumb(C: TCanvas; const R: TRect);
       end;
     end;
   end;
-  //
+
   procedure PaintMarkerVert(Y: integer; NDecorSize, NDecorSpace, NOffset, NInc: integer);
   var
     i: integer;
@@ -860,7 +823,7 @@ procedure TATScrollbar.DoPaintStd_Thumb(C: TCanvas; const R: TRect);
       end;
     end;
   end;
-  //
+
 var
   P: TPoint;
   NColorFill, NColorBorder, NColorBack: TColor;
@@ -1047,7 +1010,64 @@ begin
   SetPos(N);
 end;
 
-procedure TATScrollbar.TimerTimer(Sender: TObject);
+procedure TATScrollbar.WheelScroll(AWheelDelta: Integer);
+var
+  LinesPerNotch, Step, NewPos: Int64;
+begin
+  LinesPerNotch:= Mouse.WheelScrollLines;
+  if (LinesPerNotch < 0) then
+  begin
+    LinesPerNotch:= FPageSize - 1;
+    if (LinesPerNotch < 1) then
+      LinesPerNotch:= 1;
+  end;
+
+  Step:= (AWheelDelta * LinesPerNotch) div 120;
+  if (Step = 0) then
+    if (AWheelDelta > 0) then Step:= 1 else Step:= -1;
+
+  NewPos:= FPos - Step;
+  if (NewPos > FMax - FPageSize) then NewPos:= FMax - FPageSize;
+  if (NewPos < FMin) then NewPos:= FMin;
+  SetPos(NewPos);
+end;
+
+function TATScrollbar.WheelTargetControl: TControl;
+var
+  i: Integer;
+  C: TControl;
+begin
+  // Find the "sibling" control that fills the parent (alClient)
+  // Other scrollbars and the bar itself are skipped.
+  Result:= nil;
+  if (Parent = nil) then
+    Exit;
+  for i:= 0 to Parent.ControlCount-1 do
+  begin
+    C := Parent.Controls[i];
+    if (C = Self) or (C is TATScrollbar) or (not C.Visible) then
+      Continue;
+    if (C.Align = alClient) then
+      Exit(C);
+    if (Result = nil) then
+      Result := C; // fallback when nothing is alClient
+  end;
+end;
+
+function TATScrollbar.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
+var
+  Target: TControl;
+begin
+  Target := WheelTargetControl;
+  if Assigned(Target) then
+    Target.Perform(LM_MOUSEWHEEL, WheelDelta shl 16, 0) // WheelDelta goes in the high word of WParam
+  else
+    WheelScroll(WheelDelta);
+
+  Result := True;
+end;
+
+procedure TATScrollbar.RepeatStep;
 var
   P: TPoint;
 begin
@@ -1137,7 +1157,6 @@ begin
 end;
 
 initialization
-
   with ATScrollbarTheme do
   begin
     ColorCorner := $d0d0d0;
@@ -1165,7 +1184,8 @@ initialization
     ArrowSize:= 2;
     ArrowLengthPercents:= 100;
     BorderSize:= 0;
-    TimerInterval:= 200;
+    TimerInterval:= 300;
+    TimerIntervalRepeat:= 30;
     DirectJumpOnClickPageUpDown:= false;
     ClickFocusesParentControl:= true;
 
@@ -1176,7 +1196,12 @@ initialization
     ThumbMarkerDecorSize:= 2;
     ThumbMarkerDecorSpace:= 2;
     ThumbMarkerDecorDouble:= false;
-    ThumbRoundedRect:= {$ifdef darwin} false {$else} true {$endif};
+    ThumbRoundedRect := {$ifdef darwin} false {$else} true {$endif};
   end;
+
+  ScrollbarRepeater := TATScrollbarRepeater.Create();
+
+finalization
+  FreeAndNil(ScrollbarRepeater);
 
 end.
