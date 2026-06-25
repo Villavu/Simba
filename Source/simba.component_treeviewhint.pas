@@ -2,8 +2,8 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-
-  Custom drawn hint window for TTreeView which ensures the hint is hidden under under multiple circumstances.
+  --------------------------------------------------------------------------
+  TTreeView node hint for mouse-over
 }
 unit simba.component_treeviewhint;
 
@@ -12,12 +12,12 @@ unit simba.component_treeviewhint;
 interface
 
 uses
-  classes, sysutils, controls, comctrls, graphics, forms, extctrls;
+  Classes, SysUtils, Controls, ComCtrls, Graphics, Forms, ExtCtrls;
 
 type
   TSimbaTreeViewHint = class(TComponent)
   protected
-    FTreeView: TTreeView;
+    FTreeView: TTreeView;     // treeview owning the currently shown hint
     FHintWindow: THintWindow;
     FNodeRect: TRect;
     FTimer: TTimer;
@@ -25,13 +25,17 @@ type
     procedure DoTimerExecute(Sender: TObject);
     procedure DoHintWindowHide(Sender: TObject);
     procedure DoHintWindowShow(Sender: TObject);
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
-    constructor Create(AOwner: TTreeView); reintroduce;
+    constructor Create; reintroduce;
     destructor Destroy; override;
 
-    procedure Show(Node: TTreeNode; Caption: String);
+    procedure Show(ATreeView: TTreeView; Node: TTreeNode; Caption: String);
     procedure Hide;
   end;
+
+// One shared hint - only one can be visible at a time.
+function GetTreeViewHint: TSimbaTreeViewHint;
 
 implementation
 
@@ -47,6 +51,16 @@ type
     procedure EraseBackground(DC: HDC); override;
   end;
 
+var
+  _TreeViewHint: TSimbaTreeViewHint = nil;
+
+function GetTreeViewHint: TSimbaTreeViewHint;
+begin
+  if (_TreeViewHint = nil) then
+    _TreeViewHint := TSimbaTreeViewHint.Create();
+  Result := _TreeViewHint;
+end;
+
 procedure TCustomHintWindow.EraseBackground(DC: HDC);
 begin
   { nothing }
@@ -55,11 +69,16 @@ end;
 procedure TCustomHintWindow.Paint;
 var
   TextStyle: TTextStyle;
+  TreeView: TTreeView;
 begin
+  TreeView := TSimbaTreeViewHint(Owner).FTreeView;
+  if (TreeView = nil) then
+    Exit;
+
   TextStyle := Default(TTextStyle);
   TextStyle.Layout := tlCenter;
 
-  Canvas.Font := TSimbaTreeViewHint(Owner).FTreeView.Font;
+  Canvas.Font := TreeView.Font;
   Canvas.Font.Color := clWhite;
   Canvas.Pen.Color := SimbaComponentTheme.ColorActive;
   Canvas.Brush.Color := SimbaComponentTheme.ColorBackground;
@@ -69,7 +88,7 @@ end;
 
 procedure TSimbaTreeViewHint.DoTimerExecute(Sender: TObject);
 begin
-  if (not FNodeRect.Contains(Mouse.CursorPos)) or (not FTreeView.Visible) or (not Application.Active) then
+  if (FTreeView = nil) or (not FNodeRect.Contains(Mouse.CursorPos)) or (not FTreeView.Visible) or (not Application.Active) then
     FHintWindow.Visible := False;
 end;
 
@@ -83,12 +102,20 @@ begin
   FTimer.Enabled := True;
 end;
 
-constructor TSimbaTreeViewHint.Create(AOwner: TTreeView);
+procedure TSimbaTreeViewHint.Notification(AComponent: TComponent; Operation: TOperation);
 begin
-  inherited Create(AOwner);
+  inherited Notification(AComponent, Operation);
 
-  if (not (Owner is TTreeView)) then
-    raise Exception.Create('TSimbaTreeViewHint.Create: Owner is not a TTreeView');
+  if (Operation = opRemove) and (AComponent = FTreeView) then
+  begin
+    FHintWindow.Visible := False;
+    FTreeView := nil;
+  end;
+end;
+
+constructor TSimbaTreeViewHint.Create;
+begin
+  inherited Create(nil);
 
   FTimer          := TTimer.Create(Self);
   FTimer.Enabled  := False;
@@ -99,8 +126,6 @@ begin
   FHintWindow.OnHide := @DoHintWindowHide;
   FHintWindow.OnShow := @DoHintWindowShow;
   FHintWindow.Color  := clRed; // disable "UseBGThemes" to stop flickering. We custom draw so this color doesn't matter.
-
-  FTreeView := AOwner;
 end;
 
 destructor TSimbaTreeViewHint.Destroy;
@@ -112,12 +137,22 @@ begin
   inherited Destroy();
 end;
 
-procedure TSimbaTreeViewHint.Show(Node: TTreeNode; Caption: String);
+procedure TSimbaTreeViewHint.Show(ATreeView: TTreeView; Node: TTreeNode; Caption: String);
 begin
   if (Caption = '') then
   begin
     FHintWindow.Visible := False;
     Exit;
+  end;
+
+  // Track the owning treeview so we get told (Notification) if it is freed while
+  // the hint is up - otherwise our reference to it would dangle.
+  if (FTreeView <> ATreeView) then
+  begin
+    if Assigned(FTreeView) then
+      FTreeView.RemoveFreeNotification(Self);
+    FTreeView := ATreeView;
+    FTreeView.FreeNotification(Self);
   end;
 
   FNodeRect := Node.DisplayRect(True);
@@ -133,5 +168,7 @@ begin
   FHintWindow.Visible := False;
 end;
 
-end.
+finalization
+  FreeAndNil(_TreeViewHint);
 
+end.

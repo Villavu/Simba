@@ -39,7 +39,6 @@ type
     FOnBeginUpdate: TNotifyEvent;
     FOnEndUpdate: TNotifyEvent;
 
-
     procedure DoBeginUpdate(Sender: TObject);
     procedure DoEndUpdate(Sender: TObject);
     procedure DoCreateNodeClass(var NewNodeClass: TTreeNodeClass); override;
@@ -78,7 +77,6 @@ type
     FFilterPanel: TCustomControl;
     FFilterEdit: TSimbaEdit;
     FFilterClearButton: TSimbaButton;
-    FHint: TSimbaTreeViewHint;
     FTree: TSimbaInternalTreeView;
     FScrollbarVert: TSimbaScrollBar;
     FScrollbarHorz: TSimbaScrollBar;
@@ -258,8 +256,6 @@ begin
   FTree.Indent := Scale96ToFont(10);
   FTree.ExpandSignSize := Scale96ToFont(10);
 
-  FHint := TSimbaTreeViewHint.Create(FTree);
-
   FFilterPanel := TCustomControl.Create(Self);
   FFilterPanel.Parent := Self;
   FFilterPanel.Align := alBottom;
@@ -282,8 +278,6 @@ begin
   FFilterClearButton.Image := ESimbaButtonImage.CLEAR_FILTER;
   FFilterClearButton.BorderSpacing.Around := 2;
   FFilterClearButton.XPadding := 3;
-
-  FScrollbarVert.ForwardScrollControl := FTree;
 end;
 
 procedure TSimbaTreeView.HideRoot;
@@ -616,9 +610,9 @@ begin
       HintText := FOnGetNodeHint(Node);
 
       if (HintText = '') then
-        FHint.Hide()
+        GetTreeViewHint().Hide()
       else
-        FHint.Show(Node, HintText);
+        GetTreeViewHint().Show(FTree, Node, HintText);
     end;
   end;
 end;
@@ -745,19 +739,32 @@ begin
 end;
 
 procedure TSimbaInternalTreeView.UpdateScrollBars();
+var
+  Node: TTreeNode;
+  ItemHeight: Integer;
 begin
   if FScrollbarVert=nil then Exit;
   if FScrollbarHorz=nil then Exit;
+
+  Node := Items.GetFirstNode();
+  if Assigned(Node) and (Node.Height > 0) then
+    ItemHeight := Node.Height
+  else
+    ItemHeight := DefaultItemHeight;
+  if (ItemHeight < 1) then
+    ItemHeight := Scale96ToFont(17);
 
   FScrollbarVert.Min := 0;
   FScrollbarVert.PageSize := Height;
   FScrollbarVert.Max := GetMaxScrollTop + FScrollbarVert.PageSize;
   FScrollbarVert.Position := ScrolledTop;
+  FScrollbarVert.SmallChange := ItemHeight;
 
   FScrollbarHorz.Min := 0;
   FScrollbarHorz.PageSize := Max(1, ClientWidth);
   FScrollbarHorz.Max := Max(1, GetMaxScrollLeft + FScrollbarHorz.PageSize);
   FScrollbarHorz.Position := Max(0, ScrolledLeft);
+  FScrollbarHorz.SmallChange := ItemHeight;
 
   FScrollbarVert.Update();
   FScrollbarHorz.Update();
