@@ -24,6 +24,7 @@ uses
 type
   TSimbaSynEdit = class(TSynEdit)
   protected
+    FFoldView: TSynEditFoldedView;
     FStyler: TSimbaSynEditStyler;
     FScrollbarVert: TSimbaScrollBar;
     FScrollbarHorz: TSimbaScrollBar;
@@ -40,12 +41,16 @@ type
     procedure SetAllowHorzScroll(Value: Boolean);
 
     // Override to scroll horizontally when shift + mouse wheel
+    // or to do nothing if scrolling is disabled.
     function DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean; override;
 
     procedure UpdateBars;
+    procedure UpdateScrollbarReserve;
+    procedure LayoutScrollbars;
     procedure StatusChanged(AChanges: TSynStatusChanges); override;
     procedure DoLineChanges(Sender: TSynEditStrings; aIndex, aCount: Integer);
     procedure SetParent(NewParent: TWinControl); override;
+    procedure Resize; override;
     procedure SetVisible(Value: Boolean); override;
 
     function GetFontAntialising: Boolean;
@@ -55,14 +60,20 @@ type
   public
     constructor Create(AOwner: TComponent; HighlighterClass: TSynCustomHighlighterClass); virtual; reintroduce;
 
+    property FoldView: TSynEditFoldedView read FFoldView;
+    property TopView;
+
     property Styler: TSimbaSynEditStyler read FStyler;
     property FontName: String read GetFontName write SetFontName;
     property FontAntialising: Boolean read GetFontAntialising write SetFontAntialising;
-    // Whether the vertical / horizontal scrollbar is shown.
+
+    property ScrollbarVert: TSimbaScrollBar read FScrollbarVert;
+    property ScrollbarHorz: TSimbaScrollBar read FScrollbarHorz;
+    // Scrollbar visible?
     property ShowVertScroll: Boolean read FShowVertScroll write SetShowVertScroll;
     property ShowHorzScroll: Boolean read FShowHorzScroll write SetShowHorzScroll;
-    // Whether the view may scroll vertically / horizontally. When False the view is
-    // pinned to the top / left - for editors that shouldn't scroll that way.
+    // Allow scrolling (this includes outside of scrollbars)
+    // Will be pinned to the left or top depending on scrollbar.
     property AllowVertScroll: Boolean read FAllowVertScroll write SetAllowVertScroll;
     property AllowHorzScroll: Boolean read FAllowHorzScroll write SetAllowHorzScroll;
   end;
@@ -76,6 +87,7 @@ type
 implementation
 
 uses
+  SynEditMarkupSelection,
   simba.component_theme,
   simba.misc;
 
@@ -110,7 +122,10 @@ begin
   FShowVertScroll := Value;
 
   if (FScrollbarVert <> nil) then
+  begin
     FScrollbarVert.Visible := FShowVertScroll and Visible;
+    UpdateScrollbarReserve();
+  end;
 end;
 
 procedure TSimbaSynEdit.SetShowHorzScroll(Value: Boolean);
@@ -120,7 +135,10 @@ begin
   FShowHorzScroll := Value;
 
   if (FScrollbarHorz <> nil) then
+  begin
     FScrollbarHorz.Visible := FShowHorzScroll and Visible;
+    UpdateScrollbarReserve();
+  end;
 end;
 
 procedure TSimbaSynEdit.SetAllowVertScroll(Value: Boolean);
@@ -156,19 +174,17 @@ begin
 end;
 
 function TSimbaSynEdit.DoMouseWheel(Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint): Boolean;
-const
-  SCROLL_AMOUNT = 5;
 begin
   if FAllowHorzScroll and (ssShift in Shift) then
   begin
     if (WheelDelta > 0) then
-      FScrollbarHorz.Position := FScrollbarHorz.Position - SCROLL_AMOUNT
+      FScrollbarHorz.Position := FScrollbarHorz.Position - 5
     else
-      FScrollbarHorz.Position := FScrollbarHorz.Position + SCROLL_AMOUNT;
+      FScrollbarHorz.Position := FScrollbarHorz.Position + 5;
 
     Result := True;
-  end else
-  if (not FAllowVertScroll) and (not (ssShift in Shift)) then
+  end
+  else if (not FAllowVertScroll) and (not (ssShift in Shift)) then
     Result := True // vertical scrolling disabled - swallow the wheel
   else
     Result := inherited DoMouseWheel(Shift, WheelDelta, MousePos);
@@ -204,8 +220,6 @@ procedure TSimbaSynEdit.StatusChanged(AChanges: TSynStatusChanges);
 begin
   inherited StatusChanged(AChanges);
 
-  // Keep the view pinned when scrolling is disabled (e.g. the caret being moved
-  // off-screen would otherwise scroll the view).
   if (not FAllowHorzScroll) and (scLeftChar in AChanges) and (LeftChar <> 1) then
     LeftChar := 1;
   if (not FAllowVertScroll) and (scTopLine in AChanges) and (TopView <> 1) then
@@ -224,12 +238,62 @@ procedure TSimbaSynEdit.SetParent(NewParent: TWinControl);
 begin
   inherited SetParent(NewParent);
 
-  FScrollbarHorz.Parent := NewParent;
-  FScrollbarHorz.Align := alBottom;
-  FScrollbarHorz.IndentCorner := 100;
-
   FScrollbarVert.Parent := NewParent;
-  FScrollbarVert.Align := alRight;
+  FScrollbarVert.Anchors := [akLeft, akTop];
+  FScrollbarHorz.Parent := NewParent;
+  FScrollbarHorz.Anchors := [akLeft, akTop];
+
+  UpdateScrollbarReserve();
+end;
+
+procedure TSimbaSynEdit.UpdateScrollbarReserve;
+begin
+  if (FScrollbarVert = nil) or (FScrollbarHorz = nil) then
+    Exit;
+
+  if FScrollbarVert.Visible then
+    BorderSpacing.Right := FScrollbarVert.Width
+  else
+    BorderSpacing.Right := 0;
+
+  if FScrollbarHorz.Visible then
+    BorderSpacing.Bottom := FScrollbarHorz.Height
+  else
+    BorderSpacing.Bottom := 0;
+
+  LayoutScrollbars();
+end;
+
+procedure TSimbaSynEdit.LayoutScrollbars;
+var
+  VertW, HorzH: Integer;
+begin
+  if (FScrollbarVert = nil) or (FScrollbarHorz = nil) or (Parent = nil) then
+    Exit;
+
+  VertW := FScrollbarVert.Width;
+  HorzH := FScrollbarHorz.Height;
+  if not FScrollbarVert.Visible then VertW := 0;
+  if not FScrollbarHorz.Visible then HorzH := 0;
+
+  if FScrollbarVert.Visible then
+    FScrollbarVert.SetBounds(Left + Width, Top, VertW, Height);
+
+  if FScrollbarHorz.Visible then
+  begin
+    if FScrollbarVert.Visible then
+      FScrollbarHorz.IndentCorner := 100
+    else
+      FScrollbarHorz.IndentCorner := 0;
+    FScrollbarHorz.SetBounds(Left, Top + Height, Width + VertW, HorzH);
+  end;
+end;
+
+procedure TSimbaSynEdit.Resize;
+begin
+  inherited Resize();
+
+  LayoutScrollbars();
 end;
 
 procedure TSimbaSynEdit.SetVisible(Value: Boolean);
@@ -238,6 +302,8 @@ begin
 
   FScrollbarHorz.Visible := Value and FShowHorzScroll;
   FScrollbarVert.Visible := Value and FShowVertScroll;
+
+  UpdateScrollbarReserve();
 end;
 
 constructor TSimbaSynEdit.Create(AOwner: TComponent; HighlighterClass: TSynCustomHighlighterClass);
@@ -252,14 +318,15 @@ begin
   FScrollbarVert := TSimbaScrollBar.Create(Self);
   FScrollbarVert.Kind := sbVertical;
   FScrollbarVert.OnChange := @DoVertScrollBarChange;
-  FScrollbarVert.ForwardScrollControl := Self;
 
   FScrollbarHorz := TSimbaScrollBar.Create(Self);
   FScrollbarHorz.Kind := sbHorizontal;
   FScrollbarHorz.OnChange := @DoHorzScrollBarChange;
 
-  with FoldedTextBuffer as TSynEditFoldedView do
-    AddChangeHandler(senrLineMappingChanged, @DoLineChanges);
+  FStyler := TSimbaSynEditStyler.Create(Self);
+
+  FFoldView := TSynEditFoldedView(FoldedTextBuffer);
+  FFoldView.AddChangeHandler(senrLineMappingChanged, @DoLineChanges);
   TextView.AddChangeHandler(senrLineCount, @DoLineChanges);
 
   ScrollBars := ssNone;
@@ -271,20 +338,17 @@ begin
   Font.Size := SynDefaultFontSize;
   Font.Name := SynDefaultFontName;
   Font.Quality := fqCleartypeNatural;
-  FontAntialising := True;
-
-  FStyler := TSimbaSynEditStyler.Create(Self);
 end;
 
 constructor TSimbaMemo.Create(AOwner: TComponent; LineWrapping: Boolean);
+var
+  I: Integer;
 begin
   inherited Create(AOwner, nil);
 
+  Options := Options + [eoHideRightMargin];
   Gutter.Visible := False;
   RightGutter.Visible := False;
-  Options := Options + [eoHideRightMargin];
-  LineHighlightColor.Background := clNone;
-  LineHighlightColor.Foreground := clNone;
 
   if LineWrapping then
   begin
@@ -293,6 +357,10 @@ begin
     Options := Options - [eoScrollPastEol];
     TLazSynEditLineWrapPlugin.Create(Self);
   end;
+
+  for I := 0 to MarkupCount - 1 do
+    if (Markup[I] <> nil) then
+      Markup[I].Enabled := Markup[I] is TSynEditMarkupSelection;
 end;
 
 end.

@@ -153,8 +153,7 @@ implementation
 uses
   Math, Clipbrd,
   simba.component_theme,
-  simba.misc,
-  simba.initializations;
+  simba.misc;
 
 type
   TCaretFlasher = class
@@ -172,13 +171,13 @@ type
   end;
 
 var
-  EditCaretFlasher: TCaretFlasher;
+  CaretFlasher: TCaretFlasher;
 
 procedure TCaretFlasher.DoTimer(Sender: TObject);
 var
   I: Integer;
 begin
-  for I := 0 to FList.Count -1 do
+  for I := 0 to FList.Count - 1 do
     TSimbaEdit(FList[I]).Invalidate();
 end;
 
@@ -187,34 +186,32 @@ begin
   inherited Create();
 
   FList := TList.Create();
+
+  FTimer := TTimer.Create(nil);
+  FTimer.Enabled := False;
+  FTimer.Interval := 500; // caret blink rate
+  FTimer.OnTimer := @DoTimer;
 end;
 
 destructor TCaretFlasher.Destroy;
 begin
-  if (FList <> nil) then
-    FreeAndNil(FList);
-  if (FTimer <> nil) then
-    FreeAndNil(FTimer);
-  inherited Destroy;
+  FreeAndNil(FTimer);
+  FreeAndNil(FList);
+
+  inherited Destroy();
 end;
 
 procedure TCaretFlasher.Add(Edit: TSimbaEdit);
 begin
-  FList.Add(Edit);
-
-  if (FTimer = nil) then
-  begin
-    FTimer := TTimer.Create(nil);
-    FTimer.OnTimer := @DoTimer;
-    FTimer.Interval := 500;
-  end;
+  if (FList.IndexOf(Edit) < 0) then
+    FList.Add(Edit);
   FTimer.Enabled := True;
 end;
 
 procedure TCaretFlasher.Remove(Edit: TSimbaEdit);
 begin
   FList.Remove(Edit);
-  if (FList.Count = 0) and (FTimer <> nil) then
+  if (FList.Count = 0) then
     FTimer.Enabled := False;
 end;
 
@@ -267,7 +264,7 @@ procedure TSimbaEdit.WMSetFocus(var Message: TLMSetFocus);
 begin
   inherited;
 
-  EditCaretFlasher.Add(Self);
+  CaretFlasher.Add(Self);
   Invalidate();
 end;
 
@@ -275,7 +272,7 @@ procedure TSimbaEdit.WMKillFocus(var Message: TLMKillFocus);
 begin
   inherited;
 
-  EditCaretFlasher.Remove(Self);
+  CaretFlasher.Remove(Self);
   ClearSelection();
   Invalidate();
 end;
@@ -824,7 +821,7 @@ end;
 
 destructor TSimbaEdit.Destroy;
 begin
-  EditCaretFlasher.Remove(Self);
+  CaretFlasher.Remove(Self);
 
   inherited Destroy();
 end;
@@ -946,19 +943,11 @@ begin
   FEdit.BorderSpacing.Left := 5;
 end;
 
-procedure DoCreate;
-begin
-  EditCaretFlasher := TCaretFlasher.Create();
-end;
-
-procedure DoDestroy;
-begin
-  FreeAndNil(EditCaretFlasher);
-end;
-
 initialization
-  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'EditCaretFlasher', -10);
-  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'EditCaretFlasher', 10);
+  CaretFlasher := TCaretFlasher.Create();
+
+finalization
+  FreeAndNil(CaretFlasher);
 
 end.
 
