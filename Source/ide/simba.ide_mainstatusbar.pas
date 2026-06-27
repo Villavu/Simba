@@ -44,7 +44,7 @@ procedure TSimbaMainStatusBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   procedure DoUpdateMouse;
   begin
     try
-      with SimbaController.WindowSelection.GetRelativeCursorPos() do
+      with SimbaController.WindowSelection.EnsureValid().GetRelativeCursorPos() do
         FStatusBar.PanelText[0] := '(' + IntToStr(X) + ', ' + IntToStr(Y) + ')';
     except
       FStatusBar.PanelText[0] := '(-1, -1)';
