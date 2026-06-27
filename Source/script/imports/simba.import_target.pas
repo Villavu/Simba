@@ -23,6 +23,8 @@ type
   PKeyCode = ^EKeyCode;
   PTargetEvent = ^ETargetEvent;
   PQuad = ^TQuad;
+  PSimbaTargetKind = ^ESimbaTargetKind;
+  PSimbaTargetInfo = ^TSimbaTargetInfo;
   PSimbaTargetOptions = ^TSimbaTargetOptions;
 
 (*
@@ -496,6 +498,32 @@ Returns the targets dimensions as in a TSize.
 procedure _LapeTarget_Size(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSize(Result)^ := PLapeObjectTarget(Params^[0])^^.Size;
+end;
+
+(*
+TTarget.Info
+------------
+```
+property TTarget.Info: TTargetInfo;
+```
+Return (read only) info for the current target.
+This includes the target type and such info relating to what is targetted.
+
+```
+  TTargetInfo = record
+    Kind: ETargetKind;
+    Image: TImage;
+    Window: TWindowHandle;
+    PluginFile: String;
+    PluginTarget: Pointer;
+    EIOSFile: String;
+    EIOSTarget: Pointer;
+  end;
+```
+*)
+procedure _LapeTarget_Info_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaTargetInfo(Result)^ := PLapeObjectTarget(Params^[0])^^.TargetInfo;
 end;
 
 (*
@@ -1136,6 +1164,7 @@ begin
     with addGlobalVar('TTarget', '[]', 'Target') do
       Used := duTrue;
 
+    addGlobalType(specialize GetEnumDecl<ESimbaTargetKind>(True, False), 'ETargetKind');
     addGlobalType(specialize GetEnumDecl<ETargetEvent>(True, False), 'ETargetEvent');
     addGlobalType(specialize GetEnumDecl<EMouseButton>(True, False), 'EMouseButton');
     addGlobalType(specialize GetEnumDecl<EKeyCode>(True, True), 'EKeyCode');
@@ -1198,6 +1227,19 @@ begin
     );
     addGlobalType('procedure(Target: TTarget; Data: TTargetEventData) of object', 'TTargetEvent', FFI_DEFAULT_ABI);
 
+    addGlobalType([
+      'record',
+      '  Kind: ETargetKind;',
+      '  Image: TImage;',
+      '  Window: TWindowHandle;',
+      '  PluginFile: String;',
+      '  PluginTarget: Pointer;',
+      '  EIOSFile: String;',
+      '  EIOSTarget: Pointer;',
+      'end;'],
+      'TTargetInfo'
+    );
+
     addGlobalFunc('function TTarget.Construct: TTarget; static;', @_LapeTarget_Construct);
     addGlobalFunc('procedure TTarget.Destroy;', @_LapeTarget_Destroy);
 
@@ -1221,6 +1263,7 @@ begin
     addGlobalFunc('function TTarget.Focus: Boolean', @_LapeTarget_Focus);
     addGlobalFunc('function TTarget.ToString: String;', @_LapeTarget_ToString);
 
+    addProperty('TTarget', 'Info', 'TTargetInfo', @_LapeTarget_Info_Read);
     addProperty('TTarget', 'Options', 'TTargetOptions', @_LapeTarget_Options_Read);
     addProperty('TTarget', 'CustomClientArea', 'Boolean', @_LapeTarget_SetCustomClientArea, @_LapeTarget_GetCustomClientArea);
     addProperty('TTarget', 'Bounds', 'TBox', @_LapeTarget_Bounds);

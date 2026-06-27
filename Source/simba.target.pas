@@ -124,6 +124,16 @@ type
     constructor Create;
   end;
 
+  TSimbaTargetInfo = record
+    Kind: ESimbaTargetKind;
+    Image: TSimbaImage;
+    Window: TWindowHandle;
+    PluginFile: String;
+    PluginTarget: Pointer;
+    EIOSFile: String;
+    EIOSTarget: Pointer;
+  end;
+
   PSimbaTarget = ^TSimbaTarget;
   TSimbaTarget = class(TSimbaBaseClass)
   private
@@ -169,11 +179,11 @@ type
     procedure CheckInvalidTarget;
     procedure CheckAutoFocus;
 
+    function GetTargetInfo: TSimbaTargetInfo;
     function GetBounds: TBox;
     function GetHeight: Integer;
     function GetWidth: Integer;
     function GetSize: TSize;
-
     function GetMouseX: Integer;
     function GetMouseY: Integer;
     function GetMouseXY: TPoint;
@@ -212,12 +222,14 @@ type
 
     function ToString: String; override;
 
+    property TargetInfo: TSimbaTargetInfo read GetTargetInfo;
     property TargetKind: ESimbaTargetKind read FTargetKind;
+
     property Bounds: TBox read GetBounds;
     property Width: Integer read GetWidth;
     property Height: Integer read GetHeight;
     property Size: TSize read GetSize;
-    property Options: TSimbaTargetOptions read FOptions write FOptions;
+    property Options: TSimbaTargetOptions read FOptions;
 
     property CustomClientArea: TBox read FCustomClientArea write FCustomClientArea;
 
@@ -450,8 +462,8 @@ begin
   Self.MousePressMin := 40;
   Self.MousePressMax := 220;
   Self.MouseSpeed    := 10;
-  Self.MouseGravity  := 12;
-  Self.MouseWind     := 4;
+  Self.MouseGravity  := 12; // 9
+  Self.MouseWind     := 4; // 3
   Self.MouseTimeout  := 15000;
 
   Self.KeyPressMin := 20;
@@ -1253,6 +1265,32 @@ begin
   FUseWGC := AValue;
 end;
 {$ENDIF}
+
+function TSimbaTarget.GetTargetInfo: TSimbaTargetInfo;
+begin
+  Result := Default(TSimbaTargetInfo);
+  Result.Kind := FTargetKind;
+
+  case FTargetKind of
+    ESimbaTargetKind.IMAGE:
+      Result.Image := FTargetImage;
+
+    ESimbaTargetKind.WINDOW:
+      Result.Window := FTargetWindow;
+
+    ESimbaTargetKind.PLUGIN:
+      begin
+        Result.PluginFile := FTargetPlugin.FileName;
+        Result.PluginTarget := FTargetPlugin.Target;
+      end;
+
+    ESimbaTargetKind.EIOS:
+      begin
+        Result.EIOSFile := FTargetEIOS.FileName;
+        Result.EIOSTarget := FTargetEIOS.Target;
+      end;
+  end;
+end;
 
 function TSimbaTarget.GetImageDataAsImage(var ABounds: TBox; out Image: TSimbaImage): Boolean;
 var

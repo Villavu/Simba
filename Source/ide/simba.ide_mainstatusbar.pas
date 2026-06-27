@@ -53,7 +53,7 @@ procedure TSimbaMainStatusBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
 
   procedure DoCaretMoved(Tab: TSimbaScriptTab);
   begin
-    FStatusBar.PanelText[2] := 'Line ' + IntToStr(Tab.Editor.CaretY) + ',' +
+    FStatusBar.PanelText[2] := 'Line ' + IntToStr(Tab.Editor.CaretY) + ', ' +
                                'Col ' + IntToStr(Tab.Editor.CaretX);
   end;
 
