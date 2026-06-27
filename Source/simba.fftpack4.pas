@@ -1,7 +1,6 @@
-unit simba.fftpack4;
 {==============================================================================]
   Copyright © 2021, Jarl Krister Holta
-  
+
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -14,78 +13,145 @@ unit simba.fftpack4;
   See the License for the specific language governing permissions and
   limitations under the License.
 [==============================================================================}
+unit simba.fftpack4;
+
 {$i simba.inc}
-{$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
 
 uses
   Classes, SysUtils, Math,
-  simba.base, simba.math, simba.matchtemplate_matrix;
+  simba.base,
+  simba.math;
 
 type
-  TFFTPACK = record
-    function OptimalDFTSize(const target: Integer): Integer;
+  TComplex = record
+    Re, Im: Single;
+  end;
+  TComplexArray = array of TComplex;
 
-    function InitFFT(const n: Integer): TComplexArray;
-    function FFT(const a, wsave: TComplexArray; const Inplace: Boolean = False): TComplexArray;
-    function IFFT(const a, wsave: TComplexArray; const Inplace: Boolean = False): TComplexArray;
-
-    function InitRFFT(const n: Integer): TSingleArray;
-    function RFFT(const a, wsave: TSingleArray; const Inplace: Boolean = False): TSingleArray;
-    function IRFFT(const a, wsave: TSingleArray; const Inplace: Boolean = False): TSingleArray;
-
-    function FFT2(const m: TComplexMatrix): TComplexMatrix;
-    function IFFT2(const m: TComplexMatrix): TComplexMatrix;
+  // flattened (contiguous) complex matrix: element (Y,X) = Data[Y*Width + X]
+  TComplexMatrix = record
+    Data: TComplexArray;
+    FWidth, FHeight: Integer;
+    function Width: Integer; inline;
+    function Height: Integer; inline;
+    procedure SetSize(AWidth, AHeight: Integer);
   end;
 
-var
-  FFTPACK: TFFTPACK;
+// picks a 5-smooth transform size
+function OptimalDFTSize(const target: Integer): Integer;
+// forward 2D transform
+function FFT2(const m: TComplexMatrix): TComplexMatrix;
+// inverse 2D transform
+function IFFT2(const m: TComplexMatrix): TComplexMatrix;
 
 implementation
 
 uses
-  simba.fftpack4_core;
+  syncobjs,
+  simba.fftpack4_core,
+  simba.threading;
+
+{$DEFINE CPLX_BUFFSZ := 2*n + 15 + (FFT_PLAN_ALIGN div SizeOf(TComplex))}
 
 const
-  __OptimalDFT: array[0..168] of Integer = (
+  FFT_MIN_AREA = 40000;   // below this a transform runs single-threaded (200x200)
+  FFT_WORKERS_WANTED = 6; // max threads to use (including) the caller
+  FFT_PLAN_ALIGN = 32;    // Align plan to 32 bit
+
+  OptimalDFTs: array of Integer = (
     8, 9, 10, 12, 15, 16, 18, 20, 24, 25, 27, 30, 32, 36, 40, 45, 48,
-    50, 54, 60, 64, 72, 75, 80, 81, 90, 96, 100, 108, 120, 125, 128,
-    135, 144, 150, 160, 162, 180, 192, 200, 216, 225, 240, 243, 250,
-    256, 270, 288, 300, 320, 324, 360, 375, 384, 400, 405, 432, 450,
-    480, 486, 500, 512, 540, 576, 600, 625, 640, 648, 675, 720, 729,
-    750, 768, 800, 810, 864, 900, 960, 972, 1000, 1024, 1080, 1125,
-    1152, 1200, 1215, 1250, 1280, 1296, 1350, 1440, 1458, 1500, 1536,
-    1600, 1620, 1728, 1800, 1875, 1920, 1944, 2000, 2025, 2048, 2160,
-    2187, 2250, 2304, 2400, 2430, 2500, 2560, 2592, 2700, 2880, 2916,
-    3000, 3072, 3125, 3200, 3240, 3375, 3456, 3600, 3645, 3750, 3840,
-    3888, 4000, 4050, 4096, 4320, 4374, 4500, 4608, 4800, 4860, 5000,
-    5120, 5184, 5400, 5625, 5760, 5832, 6000, 6075, 6144, 6250, 6400,
-    6480, 6561, 6750, 6912, 7200, 7290, 7500, 7680, 7776, 8000, 8100,
-    8192, 8640, 8748, 9000, 9216, 9375, 9600, 9720, 10000
+    50, 54, 60, 64, 72, 75, 80, 81, 90, 96, 108, 120, 128, 144, 150,
+    160, 180, 192, 200, 225, 256, 300, 320, 324, 375, 400, 432, 500,
+    576, 648, 675, 729, 768, 810, 864, 972, 1080, 1152, 1296, 1350,
+    1440, 1620, 1728, 1800, 1920, 1944, 2025, 2048, 2160, 2187, 2250,
+    2304, 2400, 2430, 2500, 2560, 2592, 2700, 2880, 2916, 3000, 3072,
+    3125, 3200, 3240, 3375, 3456, 3600, 3645, 3750, 3840, 3888, 4000,
+    4050, 4096, 4320, 4374, 4500, 4608, 4800, 4860, 5000, 5120, 5184,
+    5400, 5625, 5760, 5832, 6000, 6075, 6144, 6250, 6400, 6480, 6561,
+    6750, 6912, 7200, 7290, 7500, 7680, 7776, 8000, 8100, 8192, 8640,
+    8748, 9000, 9216, 9375, 9600, 9720, 10000
   );
 
-{$DEFINE CPLX_BUFFSZ := 2*n + 15}
-{$DEFINE REAL_BUFFSZ := 2*n + 15}
+function TComplexMatrix.Width: Integer;
+begin
+  Result := FWidth;
+end;
 
-// --------------------------------------------------------------------------------
-// Compute the optimal size for FFT
+function TComplexMatrix.Height: Integer;
+begin
+  Result := FHeight;
+end;
 
-function TFFTPACK.OptimalDFTSize(const target: Integer): Integer;
+procedure TComplexMatrix.SetSize(AWidth, AHeight: Integer);
+begin
+  FWidth  := AWidth;
+  FHeight := AHeight;
+  SetLength(Data, AHeight * AWidth);
+end;
+
+// Transposes a matrix of complex numbers using a cache-blocked (tiled) algorithm.
+// The matrix is processed in small sub-blocks rather than element-by-element
+// improving memory locality and performance on large matrices.
+// Output is the standard transpose: element at (i, j) is moved to (j, i)
+procedure TransposeComplexBlocked(const src, dst: PInt64; const SrcH, SrcW: Integer);
+const
+  B = 8;
+var
+  y, x, yEnd, xEnd: Integer;
+  srcRow, dstCol, cur, curDest, srcRowEnd, curEnd: PInt64;
+begin
+  y := 0;
+  while (y < SrcH) do
+  begin
+    yEnd := y + B;
+    if yEnd > SrcH then
+      yEnd := SrcH;
+
+    x := 0;
+    while (x < SrcW) do
+    begin
+      xEnd := x + B;
+      if xEnd > SrcW then
+        xEnd := SrcW;
+
+      srcRow    := @src[y * SrcW + x];   // src[y][x]
+      srcRowEnd := @src[yEnd * SrcW + x];
+      dstCol    := @dst[x * SrcH + y];   // dst[x][y]
+      while (PtrUInt(srcRow) < PtrUInt(srcRowEnd)) do   // each source row in the tile
+      begin
+        cur     := srcRow;
+        curDest := dstCol;
+        curEnd  := @srcRow[xEnd - x];
+        while (PtrUInt(cur) < PtrUInt(curEnd)) do
+        begin
+          curDest^ := cur^;
+          Inc(cur);              // contiguous source
+          Inc(curDest, SrcH);    // strided destination column
+        end;
+        Inc(srcRow, SrcW);
+        Inc(dstCol);
+      end;
+      x := x + B;
+    end;
+    y := y + B;
+  end;
+end;
+
+function OptimalDFTSize(const target: Integer): Integer;
 var
   n,match,quotient,p2,p5,p35: Integer;
 begin
   if (target <= 6) then
     Exit(target);
-  
-  if NextPower2(target) = target then
-    Exit(target);
-  
+
   n := 0;
-  if target <= __OptimalDFT[High(__OptimalDFT)] then
+  if (target <= OptimalDFTs[High(OptimalDFTs)]) then
   begin
-    while __OptimalDFT[n] < target do Inc(n);
-    Exit(__OptimalDFT[n]);
+    while (OptimalDFTs[n] < target) do
+      Inc(n);
+    Exit(OptimalDFTs[n]);
   end;
 
   match := $7FFFFFFF;
@@ -115,115 +181,422 @@ begin
   Result := Min(p5, match);
 end;
 
-// --------------------------------------------------------------------------------
-// complex 2 complex FFT
-
-function TFFTPACK.InitFFT(const n: Integer): TComplexArray;
+function AlignPlan(const w: TComplexArray): PSingle; inline;
 begin
-  SetLength(Result, CPLX_BUFFSZ);
-  cffti(n, @Result[0]);
+  Result := PSingle((PtrUInt(@w[0]) + (FFT_PLAN_ALIGN - 1)) and not PtrUInt(FFT_PLAN_ALIGN - 1));
 end;
 
-function TFFTPACK.FFT(const a, wsave: TComplexArray; const Inplace: Boolean): TComplexArray;
-var n: Integer;
+procedure InitFFT(var Plan: TComplexArray; const n: Integer);
 begin
-  if Inplace then Result := a
-  else            Result := Copy(a);
-  n := Length(a); 
-  Assert(Length(wsave) = CPLX_BUFFSZ, Format('Invalid work array for fft size (a: %d, w: %d)',[CPLX_BUFFSZ, Length(wsave)]));
-  cfftf(n, @Result[0], @wsave[0]);
+  if (Length(Plan) < CPLX_BUFFSZ) then
+    SetLength(Plan, CPLX_BUFFSZ);
+  cffti(n, AlignPlan(Plan));
 end;
 
-function TFFTPACK.IFFT(const a, wsave: TComplexArray; const Inplace: Boolean): TComplexArray;
+function ShouldParallelFFT(const Area: Int64): Boolean; inline;
+begin
+  {$IFDEF MT_THREADING}
+  Result := (Area >= FFT_MIN_AREA);
+  {$ELSE}
+  Result := False;
+  {$ENDIF}
+end;
+
+type
+  TFFTPass = procedure(const Lo, Hi: Integer) of object;
+
+  // a 2D-FFT engine with its own scratch buffers (Work/Spec) + twiddle tables (PlanW/PlanH) the FFT2/IFFT2 ops.
+  TFFT2D = record
+  private
+    Work, Spec: TComplexArray;
+    W, H: Integer;
+    PlanW, PlanH: TComplexArray;
+    PlanWdim, PlanHdim: Integer;
+    procedure EnsureW(len: Integer); // build only when the length changes
+    procedure EnsureH(len: Integer); // ..
+    procedure Prepare(AW, AH: Integer);
+    procedure RowFwd(const Lo, Hi: Integer); // the four 1-D passes (forward/inverse x rows/cols)
+    procedure ColFwd(const Lo, Hi: Integer);
+    procedure ColInv(const Lo, Hi: Integer);
+    procedure RowInv(const Lo, Hi: Integer);
+    procedure TransposeForward;
+    procedure TransposeInverse;
+    procedure RunForward;
+    procedure RunInverse;
+  public
+    function FFT2(const m: TComplexMatrix): TComplexMatrix;
+    function IFFT2(const m: TComplexMatrix): TComplexMatrix;
+  end;
+
+  TFFTWorker = class(TThread)
+  public
+    Wake, Done: TSimpleEvent;
+    Pass: TFFTPass;
+    Lo, Hi: Integer;
+    constructor Create;
+    destructor Destroy; override;
+    procedure Execute; override;
+  end;
+
+  TFFTThreadPool = class
+  private
+    FWorkers: array of TFFTWorker;
+    FLock: TCriticalSection;        // guards EnsureSetup
+    FAcquireLock: TCriticalSection; // held by the ONE transform currently using the workers
+    FReady: Boolean;
+
+    procedure EnsureSetup;
+    procedure Run(const Hi: Integer; const Pass: TFFTPass); // split [0,Hi] across caller + workers
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function Acquire: Boolean;
+    procedure Leave;
+    // Parallel forward / inverse transform on Engine. The caller must already hold Acquire
+    procedure RunForward(var Eng: TFFT2D);
+    procedure RunInverse(var Eng: TFFT2D);
+  end;
+
 var
-  n: Integer;
-  f: Single;
-begin
-  if Inplace then Result := a
-  else            Result := Copy(a);
-  n := Length(a);
-  Assert(Length(wsave) = CPLX_BUFFSZ, Format('Invalid work array for fft size (a: %d, w: %d)',[CPLX_BUFFSZ, Length(wsave)]));
-  cfftb(n, @Result[0], @wsave[0]);
+  ThreadPool: TFFTThreadPool;
 
-  f := 1.0 / n;
-  for n:=0 to High(a) do
+threadvar
+  FFTEngine: TFFT2D; // Each thread's own FFT engine (scratch buffers + plan)
+                     // reused across that thread's FFT2/IFFT2 calls.
+
+constructor TFFTWorker.Create;
+begin
+  Wake := TSimpleEvent.Create();
+  Done := TSimpleEvent.Create();
+  inherited Create(False, 256 * 1024); // all data on heap, dont need big stack size
+  Priority := tpHigher;
+end;
+
+destructor TFFTWorker.Destroy;
+begin
+  Terminate();
+  Wake.SetEvent(); // unblock so Execute sees Terminated
+  inherited Destroy(); // WaitFor
+  Wake.Free();
+  Done.Free();
+end;
+
+procedure TFFTWorker.Execute;
+begin
+  SetThreadPCore(); // maybe pin this thread to PCores
+
+  while (not Terminated) do
   begin
-    Result[n].re *= f;
-    Result[n].im *= f;
+    Wake.WaitFor(INFINITE);
+    if Terminated then
+      Break;
+    Wake.ResetEvent();
+    try
+      Pass(Lo, Hi);
+    except
+      on E: Exception do
+        DebugLn('FFT pass exception: ' + E.Message);
+    end;
+    Done.SetEvent();
   end;
 end;
 
-// --------------------------------------------------------------------------------
-// real 2 real FFT
-
-function TFFTPACK.InitRFFT(const n: Integer): TSingleArray;
+constructor TFFTThreadPool.Create;
 begin
-  SetLength(Result, REAL_BUFFSZ);
-  rffti(n, @Result[0]);
+  inherited Create();
+
+  FLock := TCriticalSection.Create();
+  FAcquireLock := TCriticalSection.Create();
 end;
 
-function TFFTPACK.RFFT(const a, wsave: TSingleArray; const Inplace: Boolean): TSingleArray;
-var n: Integer;
-begin
-  if Inplace then Result := a
-  else            Result := Copy(a);
-  n := Length(a);
-  Assert(Length(wsave) = REAL_BUFFSZ, Format('Invalid work array for fft size (a: %d, w: %d)',[REAL_BUFFSZ, Length(wsave)]));
-  rfftf(n, @Result[0], @wsave[0]);
-end;
-
-function TFFTPACK.IRFFT(const a, wsave: TSingleArray; const Inplace: Boolean): TSingleArray;
+destructor TFFTThreadPool.Destroy;
 var
-  n: Integer;
+  i: Integer;
+begin
+  for i := 0 to High(FWorkers) do
+    FWorkers[i].Free();
+  FWorkers := nil;
+  FAcquireLock.Free();
+  FLock.Free();
+
+  inherited Destroy();
+end;
+
+function TFFTThreadPool.Acquire: Boolean;
+begin
+  Result := FAcquireLock.TryEnter();
+end;
+
+procedure TFFTThreadPool.Leave;
+begin
+  FAcquireLock.Release();
+end;
+
+procedure TFFTThreadPool.EnsureSetup;
+var
+  i, want: Integer;
+begin
+  if FReady then
+    Exit;
+
+  FLock.Acquire();
+  try
+    if FReady then
+      Exit;
+    want := FFT_WORKERS_WANTED;
+    if (SimbaCPUInfo.PCoreCount > 0) and (want > SimbaCPUInfo.PCoreCount) then
+      want := SimbaCPUInfo.PCoreCount;
+
+    if (want > SimbaCPUInfo.ThreadCount) then
+      want := SimbaCPUInfo.ThreadCount;
+    if (want < 1) then
+      want := 1;
+
+    SetLength(FWorkers, want - 1); // the caller is the +1
+    for i := 0 to High(FWorkers) do
+      FWorkers[i] := TFFTWorker.Create();
+    FReady := True;
+  finally
+    FLock.Release();
+  end;
+end;
+
+procedure TFFTThreadPool.Run(const Hi: Integer; const Pass: TFFTPass);
+var
+  total, n, per, i, clo, chi, started: Integer;
+begin
+  total := Hi + 1;
+  if (total <= 0) then
+    Exit;
+
+  n := Length(FWorkers) + 1;
+  if (n > total) then
+    n := total;
+
+  if (n <= 1) then // pool has only the caller -> run the whole range directly
+  begin
+    Pass(0, Hi);
+    Exit;
+  end;
+
+  per := (total + n - 1) div n;
+  started := 0;
+  for i := 1 to n - 1 do
+  begin
+    clo := i * per;
+    if (clo > Hi) then
+      Break;
+    chi := clo + per - 1;
+    if (chi > Hi) then
+      chi := Hi;
+
+    FWorkers[i - 1].Pass := Pass;
+    FWorkers[i - 1].Lo   := clo;
+    FWorkers[i - 1].Hi   := chi;
+    FWorkers[i - 1].Done.ResetEvent();
+    FWorkers[i - 1].Wake.SetEvent();
+
+    Inc(started);
+  end;
+
+  chi := per - 1;
+  if (chi > Hi) then
+    chi := Hi;
+
+  Pass(0, chi); // caller runs chunk 0
+  for i := 0 to started - 1 do
+    FWorkers[i].Done.WaitFor(INFINITE);
+end;
+
+procedure TFFTThreadPool.RunForward(var Eng: TFFT2D);
+begin
+  EnsureSetup();
+  Run(Eng.H - 1, @Eng.RowFwd);
+  Eng.TransposeForward;
+  Run(Eng.W - 1, @Eng.ColFwd);
+end;
+
+procedure TFFTThreadPool.RunInverse(var Eng: TFFT2D);
+begin
+  EnsureSetup();
+  Run(Eng.W - 1, @Eng.ColInv);
+  Eng.TransposeInverse;
+  Run(Eng.H - 1, @Eng.RowInv);
+end;
+
+procedure TFFT2D.EnsureW(len: Integer);
+begin
+  if (PlanWdim <> len) then
+  begin
+    InitFFT(PlanW, len);
+    PlanWdim := len;
+  end;
+end;
+
+procedure TFFT2D.EnsureH(len: Integer);
+begin
+  if (PlanHdim <> len) then
+  begin
+    InitFFT(PlanH, len);
+    PlanHdim := len;
+  end;
+end;
+
+procedure TFFT2D.Prepare(AW, AH: Integer);
+var
+  need, want: Integer;
+begin
+  W := AW;
+  H := AH;
+  need := AW * AH;
+  if (Length(Work) < need) then
+  begin
+    want := need + need div 10; // over allocate a tad
+    SetLength(Work, want);
+    SetLength(Spec, want);
+  end;
+end;
+
+procedure TFFT2D.RowFwd(const Lo, Hi: Integer);
+var
+  y: Integer;
+begin
+  FFTEngine.EnsureW(Self.W);
+  for y := Lo to Hi do
+    cfftf(Self.W, PSingle(@Self.Work[y * Self.W]), AlignPlan(FFTEngine.PlanW));
+end;
+
+procedure TFFT2D.ColFwd(const Lo, Hi: Integer);
+var
+  y: Integer;
+begin
+  FFTEngine.EnsureH(Self.H);
+  for y := Lo to Hi do
+    cfftf(Self.H, PSingle(@Self.Spec[y * Self.H]), AlignPlan(FFTEngine.PlanH));
+end;
+
+procedure TFFT2D.ColInv(const Lo, Hi: Integer);
+var
+  y, i: Integer;
+  pr: PSingle;
   f: Single;
 begin
-  if Inplace then Result := a
-  else            Result := Copy(a);
-  n := Length(a);
-  Assert(Length(wsave) = REAL_BUFFSZ, Format('Invalid work array for fft size (a: %d, w: %d)',[REAL_BUFFSZ, Length(wsave)]));
-  rfftb(n, @Result[0], @wsave[0]);
-
-  f := 1.0 / n;
-  for n:=0 to High(a) do Result[n] *= f;
+  FFTEngine.EnsureH(Self.H);
+  f := 1.0 / Self.H;
+  for y := Lo to Hi do
+  begin
+    pr := PSingle(@Self.Work[y * Self.H]);
+    cfftb(Self.H, pr, AlignPlan(FFTEngine.PlanH));
+    for i := 0 to 2 * Self.H - 1 do
+      pr[i] *= f;
+  end;
 end;
 
-// --------------------------------------------------------------------------------
-// 2d complex fft
-
-function TFFTPACK.FFT2(const m: TComplexMatrix): TComplexMatrix;
+procedure TFFT2D.RowInv(const Lo, Hi: Integer);
 var
-  Y: Integer;
-  plan: TComplexArray;
-  rot: TComplexMatrix;
+  y, i: Integer;
+  pr: PSingle;
+  f: Single;
 begin
-  plan := InitFFT(m.Width);
-  for Y := 0 to m.Height - 1 do
-    FFTPACK.FFT(m[Y], Plan, True);
-
-  rot := Rot90(m);
-  plan := InitFFT(rot.Width);
-  for Y := 0 to rot.Height - 1 do
-    FFTPACK.FFT(rot[Y], Plan, True);
-
-  Result := Rot90(rot);
+  FFTEngine.EnsureW(Self.W);
+  f := 1.0 / Self.W;
+  for y := Lo to Hi do
+  begin
+    pr := PSingle(@Self.Spec[y * Self.W]);
+    cfftb(Self.W, pr, AlignPlan(FFTEngine.PlanW));
+    for i := 0 to 2 * Self.W - 1 do
+      pr[i] *= f;
+  end;
 end;
 
-function TFFTPACK.IFFT2(const m: TComplexMatrix): TComplexMatrix;
+procedure TFFT2D.TransposeForward;
+begin
+  TransposeComplexBlocked(PInt64(@Work[0]), PInt64(@Spec[0]), H, W);
+end;
+
+procedure TFFT2D.TransposeInverse;
+begin
+  TransposeComplexBlocked(PInt64(@Work[0]), PInt64(@Spec[0]), W, H);
+end;
+
+procedure TFFT2D.RunForward;
+begin
+  RowFwd(0, H - 1);
+  TransposeForward();
+  ColFwd(0, W - 1);
+end;
+
+procedure TFFT2D.RunInverse;
+begin
+  ColInv(0, W - 1);
+  TransposeInverse();
+  RowInv(0, H - 1);
+end;
+
+// 2D FFT, leaving the spectrum stored TRANSPOSED (skips the final transpose-back) so
+// the FFT2 -> multiply -> IFFT2 chain halves its transposes.
+function TFFT2D.FFT2(const m: TComplexMatrix): TComplexMatrix;
 var
-  Y: Integer;
-  plan: TComplexArray;
-  rot: TComplexMatrix;
+  n: Integer;
 begin
-  plan := InitFFT(m.Width);
-  for Y := 0 to m.Height - 1 do
-    FFTPACK.IFFT(m[Y], Plan, True);
+  Result.SetSize(m.Height, m.Width);
+  n := m.Width * m.Height;
+  if (n = 0) then
+    Exit;
 
-  rot := Rot90(m);
-  plan := InitFFT(rot.Width);
-  for Y := 0 to rot.Height - 1 do
-    FFTPACK.IFFT(rot[Y], Plan, True);
+  Prepare(m.Width, m.Height);
+  Move(m.Data[0], Work[0], n * SizeOf(TComplex));
+  if ShouldParallelFFT(Int64(W) * H) and ThreadPool.Acquire() then // big enough + got the workers
+    try
+      ThreadPool.RunForward(Self);
+    finally
+      ThreadPool.Leave();
+    end
+  else
+    Self.RunForward(); // too small or pool busy, no threading
 
-  Result := Rot90(rot);
+  Move(Spec[0], Result.Data[0], n * SizeOf(TComplex));
 end;
+
+// Inverse 2D FFT consuming a transposed spectrum and returning the natural result.
+function TFFT2D.IFFT2(const m: TComplexMatrix): TComplexMatrix;
+var
+  n: Integer;
+begin
+  Result.SetSize(m.Height, m.Width);
+  n := m.Width * m.Height;
+  if (n = 0) then
+    Exit;
+
+  Prepare(m.Height, m.Width);
+  Move(m.Data[0], Work[0], n * SizeOf(TComplex));
+  if ShouldParallelFFT(Int64(W) * H) and ThreadPool.Acquire() then // big enough + got the workers
+    try
+      ThreadPool.RunInverse(Self);
+    finally
+      ThreadPool.Leave();
+    end
+  else
+    Self.RunInverse(); // too small or pool busy, no threading
+
+  Move(Spec[0], Result.Data[0], n * SizeOf(TComplex));
+end;
+
+function FFT2(const m: TComplexMatrix): TComplexMatrix;
+begin
+  Result := FFTEngine.FFT2(m);
+end;
+
+function IFFT2(const m: TComplexMatrix): TComplexMatrix;
+begin
+  Result := FFTEngine.IFFT2(m);
+end;
+
+initialization
+  ThreadPool := TFFTThreadPool.Create();
+
+finalization
+  FreeAndNil(ThreadPool);
 
 end.

@@ -10,11 +10,11 @@ interface
 uses
   simba.fftpack4_core;
 
-procedure cfftf1_sse2(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef; const isign: Int32);
+procedure cfftf1_sse2(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
 
 implementation
 
-procedure passf2(const ido, l1: Int32; const cc,chp,wa1: RealArrayRef; const isign: Int32);
+procedure passf2(const ido, l1: Int32; const cc,chp,wa1: PSingle; const isign: Int32);
 begin
   asm
   // --- strides, mask, bases ---
@@ -112,7 +112,7 @@ end; // passf2
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf3(const ido, l1: Int32; const cc, chp, wa1,wa2: RealArrayRef; const isign: Int32);
+procedure passf3(const ido, l1: Int32; const cc, chp, wa1,wa2: PSingle; const isign: Int32);
 // radix-3. taui = $3F5DB3D7, taur(-0.5) = $BF000000 (exact single bit patterns).
 // staui = isign*taui is embedded per-isign. wa2 = wa1+ido (floats). One unified
 // loop: EVEN mask (xmm7) for the i*C3 rotation; TW mask (xmm8) for the twiddle
@@ -263,7 +263,7 @@ end; (* passf3 *)
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf4(const o1, l1: Int32; const cc, chp, wa1, wa2, wa3: RealArrayRef; const isign: Int32);
+procedure passf4(const o1, l1: Int32; const cc, chp, wa1, wa2, wa3: PSingle; const isign: Int32);
 // radix-4. wa2=wa1+o1, wa3=wa1+2*o1 (floats) so they are derived from wa1+o1b.
 // One unified loop: maskrot (EVEN for isign=+1, ODD for -1) is used both for the
 // i*(A1-A3) rotation (giving iD_eff) and the twiddle multiply, so C2=T1+iD_eff,
@@ -430,7 +430,7 @@ end; (* passf4 *)
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf5(const ido, l1: Int32; const cc,chp,wa1,wa2,wa3,wa4: RealArrayRef; const isign: Int32);
+procedure passf5(const ido, l1: Int32; const cc,chp,wa1,wa2,wa3,wa4: PSingle; const isign: Int32);
 // radix-5. Trig consts as exact single bit patterns; sti11/sti12 = isign*ti11/ti12
 // embedded per-isign. wa{2,3,4} = wa1+{1,2,3}*ido. One unified loop: EVEN mask
 // (xmm11) for the i*C rotations; TW (xmm12) for the twiddle multiplies.
@@ -700,11 +700,11 @@ begin
 end; (* passf5 *)
 
 
-procedure cfftf1_sse2(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef; const isign: Int32);
+procedure cfftf1_sse2(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
 var
   na, nac: Boolean;
   idot,i,k1,l1,l2,nf,ip,iw, ix2,ix3,ix4,ido,idl1: Int32;
-  cinput, coutput: RealArrayRef;
+  cinput, coutput: PSingle;
 begin
   nf := ifac[1];
   na := False;

@@ -10,11 +10,11 @@ interface
 uses
   simba.fftpack4_core;
 
-procedure cfftf1_avx2(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef; const isign: Int32);
+procedure cfftf1_avx2(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
 
 implementation
 
-procedure passf4_avx2(const o1, l1: Int32; const cc, chp, wa1, wa2, wa3: RealArrayRef; const isign: Int32);
+procedure passf4_avx2(const o1, l1: Int32; const cc, chp, wa1, wa2, wa3: PSingle; const isign: Int32);
 begin
   asm
     mov      eax, isign
@@ -160,7 +160,7 @@ begin
        'xmm0','xmm1','xmm2','xmm3','xmm4','xmm5','xmm6','xmm7'];
 end;
 
-procedure passf2_avx2(const ido, l1: Int32; const cc,chp,wa1: RealArrayRef; const isign: Int32);
+procedure passf2_avx2(const ido, l1: Int32; const cc,chp,wa1: PSingle; const isign: Int32);
 begin
   asm
     mov      eax, isign
@@ -249,7 +249,7 @@ begin
 end;
 
 
-procedure passf3_avx2(const ido, l1: Int32; const cc, chp, wa1,wa2: RealArrayRef; const isign: Int32);
+procedure passf3_avx2(const ido, l1: Int32; const cc, chp, wa1,wa2: PSingle; const isign: Int32);
 begin
   asm
     vpcmpeqd ymm7, ymm7, ymm7
@@ -386,7 +386,7 @@ begin
 end;
 
 
-procedure passf5_avx2(const ido, l1: Int32; const cc,chp,wa1,wa2,wa3,wa4: RealArrayRef; const isign: Int32);
+procedure passf5_avx2(const ido, l1: Int32; const cc,chp,wa1,wa2,wa3,wa4: PSingle; const isign: Int32);
 begin
   asm
     vpcmpeqd ymm11, ymm11, ymm11
@@ -621,11 +621,11 @@ end;
   Complex FFT driver. Mirrors simba.fftpack4_core_sse.cfftf1 but dispatches the
   radix-4 pass to passf4_avx2; the other radices reuse the (exported) SSE passes.
 ---------------------------------------------------------------------- *)
-procedure cfftf1_avx2(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef; const isign: Int32);
+procedure cfftf1_avx2(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
 var
   na, nac: Boolean;
   idot,i,k1,l1,l2,nf,ip,iw, ix2,ix3,ix4,ido,idl1: Int32;
-  cinput, coutput: RealArrayRef;
+  cinput, coutput: PSingle;
 begin
   nf := ifac[1];
   na := False;

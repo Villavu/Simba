@@ -29,6 +29,9 @@
   {$DEFINE SIMBA_FFT_SIMD_X86_64}
 {$ENDIF}
 
+{$DEFINE MT_PACKED} // pack two real colour channels into one complex FFT (R->Re, G->Im) rather than transforming all three separately
+{$DEFINE MT_THREADING} // multithreead FFT row/column passes
+
 {$MACRO ON}
 
 {$MODESWITCH ADVANCEDRECORDS}

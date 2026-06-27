@@ -1,0 +1,83 @@
+{$IFDEF WINDOWS}{$IFDEF CPU32}
+begin
+  // todo, be more memory efficent
+end.
+{$ENDIF}{$ENDIF} // rest of file wont even be parsed
+
+var
+  fails: Integer;
+
+type
+  TMatchTemplateFunc = function(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+
+procedure CheckMatches(prefix: String; fn: TMatchTemplateFunc; formula: ETMFormula; addMask: Integer; img: TImage; templs: TImageArray; expectedPeaks: TPointArray; expectedMatches: TSingleArray);
+var
+  i:Integer;
+  mat: TSingleMatrix;
+  templ: TImage;
+begin
+  for i := 0 to High(templs) do
+  begin
+    templ := templs[i];
+    if (addMask > 0) then
+    begin
+      templ := templ.Copy();
+      templ.DrawColor := 0;
+      templ.DrawCircleInverted(templ.Center, addMask);
+      //templ.Show();
+      //Halt;
+    end;
+
+    mat := fn(img.ToMatrix, templ.ToMatrix, formula);
+    //WriteLn(mat.ArgMax);
+    //WriteLn(FormatFloat('0.000', mat[mat.ArgMax.Y,mat.ArgMax.X]));
+    //Continue;
+
+    if (mat.ArgMax <> expectedPeaks[i]) then
+    begin
+      WriteLn(prefix, ' Test[',i,'] ArgMax: ', mat.ArgMax, ' <> ', expectedPeaks[i]);
+      Inc(fails);
+    end;
+    if (Abs(mat[mat.ArgMax.Y, mat.ArgMax.X] - expectedMatches[i]) > 0.001) then
+    begin
+      WriteLn(prefix, ' Test[',i,'] Match: ', mat[mat.ArgMax.Y, mat.ArgMax.X], ' <> ', expectedMatches[i]);
+      Inc(fails);
+    end;
+  end;
+end;
+
+var
+  world: TImage;
+  test1, test2, test3: TImage;
+  bigImage, bigTempl, hugeTempl: TImage;
+  t: Double;
+begin
+  world := new TImage(); world.FromZip('Tests/images.zip', 'world.png');
+  test1 := new TImage(); test1.FromZip('Tests/images.zip', 'mm1.png');
+  test2 := new TImage(); test2.FromZip('Tests/images.zip', 'mm2.png');
+  test3 := new TImage(); test3.FromZip('Tests/images.zip', 'mm3.png');
+
+  bigImage := world.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, world.Width*4, world.Height*4);
+  bigTempl := bigImage.Copy([800,2500,950,2650]).Blur(EImageBlurAlgo.BOX,5);
+  hugeTempl := bigImage.Copy([1000,2000,2000,3000]).Blur(EImageBlurAlgo.BOX,5);
+
+  t := PerformanceTime();
+
+  CheckMatches('Test1', @MatchTemplate, TM_CCOEFF_NORMED, 0, world, [test1,test2,test3], [[245, 802], [130, 139], [471, 888]], [0.511, 0.468, 0.467]);
+  CheckMatches('Test2', @MatchTemplate, TM_CCORR_NORMED, 0, world, [test1,test2,test3], [[455,895] ,[1,180], [556,903]], [0.970, 0.940, 0.993]);
+  CheckMatches('Test3', @MatchTemplate, TM_SQDIFF_NORMED, 0, world, [test1,test2,test3], [[448,0], [483,10], [31,0]], [1.00,1.00,1.00]);
+
+  CheckMatches('Test4', @MatchTemplateMask, TM_CCOEFF_NORMED, 30, world, [test1, test2, test3], [[245, 802], [130, 139], [471, 888]], [0.509, 0.47, 0.509]);
+  CheckMatches('Test5', @MatchTemplateMask, TM_CCORR_NORMED, 30, world, [test1, test2, test3], [[443,894], [1,180], [554,902]], [0.971, 0.939, 0.992]);
+  CheckMatches('Test6', @MatchTemplateMask, TM_SQDIFF_NORMED, 26, world, [test1, test2, test3], [[482,13], [485,10], [473,19]], [1.623, 1.147, 2.479]);
+
+  // Just ensure giant matching still works
+  CheckMatches('Test7', @MatchTemplate, TM_CCOEFF_NORMED, 0, bigImage, [bigTempl, hugeTempl], [[800,2500],[1000,2000]], [0.944, 0.922]);
+  CheckMatches('Test8', @MatchTemplateMask, TM_CCOEFF_NORMED, 90, bigImage, [bigTempl, hugeTempl], [[800,2500],[1000,2000]], [0.942, 0.897]);
+
+  WriteLn('Tests took ', Round(PerformanceTime()-t), ' ms');
+  if (fails > 0) then
+    raise "Failed";
+end;
+
+

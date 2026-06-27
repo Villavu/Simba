@@ -59,7 +59,7 @@ jobs:
             runs-on: ubuntu-22.04-arm
             build-mode: Linux Arm
             binary: Simba-Linux
-            #test: Simba-Linux TODO: fails on matchtemplatemask
+            test: Simba-Linux
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-aarch64-linux
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
             fpclazup-fpccommit: d3a5f442eeff766a60cd7177536a9db7cc54875c # 3.2.4
@@ -68,7 +68,7 @@ jobs:
             runs-on: macos-26
             build-mode: Mac Arm
             binary: Simba-Mac-Arm.dmg 
-            #test: Simba TODO: fails on matchtemplatemask
+            test: Simba
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-aarch64-darwin
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
             fpclazup-fpccommit: aa8050f30ce7a23f8881de844c07c0f17033409e # trunk (~3.3)
