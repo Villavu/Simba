@@ -19,12 +19,9 @@
 
   Third party copyrights are property of their respective owners.
 }
-
 unit simba.matchtemplate_ccoeff;
 
 {$i simba.inc}
-
-{$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
 
@@ -32,17 +29,15 @@ uses
   Classes, SysUtils,
   simba.base, simba.matchtemplate_core;
 
-function MatchTemplate_CCOEFF(var Cache: TMatchTemplateCache; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-function MatchTemplateMask_CCOEFF(var Cache: TMatchTemplateCache; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplate_CCOEFF(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplateMask_CCOEFF(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 
 implementation
 
 uses
   simba.vartype_matrix;
 
-// MatchTemplate_CCOEFF -- image spectrum + integral images come from the cache (a throwaway one in the
-// Image overload, or a persistent var-param cache). imgW/imgH = IMAGE dims.
-function MatchTemplate_CCOEFF(var Cache: TMatchTemplateCache; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplate_CCOEFF(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 var
   x,y, lastX,lastY, templW,templH, imgW,imgH, outW,outH: Integer;
   invSize, numer, denom, tplSdv, tplSigma, wndSum2, wndMean2, diff2: Double;
@@ -51,6 +46,9 @@ var
   sumR, sumG, sumB, sum2r, sum2g, sum2b: TDoubleMatrix;
   templR,templG,templB: TSingleMatrix;
   crossCorr: TSingleMatrix;
+  curSumR,curSumRBot, curSumG,curSumGBot, curSumB,curSumBBot: PDouble;
+  curSum2R,curSum2RBot, curSum2G,curSum2GBot, curSum2B,curSum2BBot: PDouble;
+  curCross, curResult: PSingle;
 begin
   SplitChannels(Template, templR, templG, templB);
 
@@ -58,8 +56,11 @@ begin
   imgH := Cache.Height;
   outW := imgW - templR.Width  + 1;
   outH := imgH - templR.Height + 1;
-  crossCorr := CorrelateChannelsSum(Cache.Spectra,
-                                    ForwardTransformChannels(templR, templG, templB, imgW, imgH), outW, outH);
+  crossCorr := CorrelateChannelsSum(
+    Cache.Spectra,
+    ForwardTransformChannels(templR, templG, templB, imgW, imgH),
+    outW, outH
+  );
 
   templW := Template.Width;
   templH := Template.Height;
@@ -79,7 +80,7 @@ begin
     templB.MeanStdev(meanB, stdevB);
 
     tplSdv := Sqr(stdevR) + Sqr(stdevG) + Sqr(stdevB);
-    if tplSdv < DBL_EPSILON then   // OpenCV: templNorm < DBL_EPSILON => degenerate template
+    if (tplSdv < DBL_EPSILON) then
     begin
       Result.SetSize(crossCorr.Width, crossCorr.Height);
       Result.Fill(1);
@@ -100,43 +101,45 @@ begin
   lastX := imgW-templW-1;
   lastY := imgH-templH-1;
   for y := 0 to lastY do
+  begin
+    curSumR := @sumR[Y][0]; curSumRBot := @sumR[Y+templH][0]; curSumG := @sumG[Y][0]; curSumGBot := @sumG[Y+templH][0];
+    curSumB := @sumB[Y][0]; curSumBBot := @sumB[Y+templH][0];
+    curSum2R := @sum2r[Y][0]; curSum2RBot := @sum2r[Y+templH][0]; curSum2G := @sum2g[Y][0]; curSum2GBot := @sum2g[Y+templH][0];
+    curSum2B := @sum2b[Y][0]; curSum2BBot := @sum2b[Y+templH][0];
+    curCross := @crossCorr[Y][0]; curResult := @Result[Y][0];
     for x := 0 to lastX do
     begin
-      wndSumR  := sumR[Y, X] - sumR[Y,X+templW] - sumR[Y+templH,X] + sumR[Y+templH,X+templW];
-      wndSumG  := sumG[Y, X] - sumG[Y,X+templW] - sumG[Y+templH,X] + sumG[Y+templH,X+templW];
-      wndSumB  := sumB[Y, X] - sumB[Y,X+templW] - sumB[Y+templH,X] + sumB[Y+templH,X+templW];
+      wndSumR  := curSumR[X] - curSumR[X+templW] - curSumRBot[X] + curSumRBot[X+templW];
+      wndSumG  := curSumG[X] - curSumG[X+templW] - curSumGBot[X] + curSumGBot[X+templW];
+      wndSumB  := curSumB[X] - curSumB[X+templW] - curSumBBot[X] + curSumBBot[X+templW];
 
-      numer    := crossCorr[Y, X] - ((wndSumR * meanR) + (wndSumG * meanG) + (wndSumB * meanB));
+      numer    := curCross[X] - ((wndSumR * meanR) + (wndSumG * meanG) + (wndSumB * meanB));
       if Normed then
       begin
-        wndSum2  := sum2r[Y, X] - sum2r[Y,X+templW] - sum2r[Y+templH,X] + sum2r[Y+templH,X+templW];
-        wndSum2  += sum2g[Y, X] - sum2g[Y,X+templW] - sum2g[Y+templH,X] + sum2g[Y+templH,X+templW];
-        wndSum2  += sum2b[Y, X] - sum2b[Y,X+templW] - sum2b[Y+templH,X] + sum2b[Y+templH,X+templW];
+        wndSum2  := curSum2R[X] - curSum2R[X+templW] - curSum2RBot[X] + curSum2RBot[X+templW];
+        wndSum2  += curSum2G[X] - curSum2G[X+templW] - curSum2GBot[X] + curSum2GBot[X+templW];
+        wndSum2  += curSum2B[X] - curSum2B[X+templW] - curSum2BBot[X] + curSum2BBot[X+templW];
 
         wndMean2 := Sqr(wndSumR) + Sqr(wndSumG) + Sqr(wndSumB);
         wndMean2 := wndMean2 * invSize;
 
         diff2 := Max(0, wndSum2 - wndMean2);
-        // OpenCV common_matchTemplate: zero the denom on tiny-variance windows; clamp band = denom*1.125
         if diff2 <= Min(0.5, 10 * FLT_EPSILON * wndSum2) then
           denom := 0
         else
           denom := tplSigma * Sqrt(diff2);
 
         if Abs(numer) < denom then
-          Result[Y, X] := numer / denom
+          curResult[X] := numer / denom
         else if Abs(numer) < denom * 1.125 then
-          if numer > 0 then Result[Y, X] := 1 else Result[Y, X] := -1;
+          if numer > 0 then curResult[X] := 1 else curResult[X] := -1;
       end else
-        Result[Y, X] := numer;
+        curResult[X] := numer;
     end;
+  end;
 end;
 
-
-// MatchTemplateMask_CCOEFF
-// Image-side spectra (ImgSpectra = FFT of I_c, ImgSqSpectra = FFT of I_c^2) passed in -- computed fresh
-// by the non-cached wrapper or pulled from a TMatchTemplateCache. imgW/imgH are the IMAGE dims.
-function __MatchTemplateMask_CCOEFF(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplateMask_CCOEFF(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 var
   templR,templG,templB, Mask, Mask2: TSingleMatrix;
   templMaskR,templMaskG,templMaskB: TSingleMatrix;     // mean-subtracted masked template per channel
@@ -148,17 +151,25 @@ var
   cIM, cIMSq, cISqMSq, e, nrm, imgNorm, numer, denom: Single; // per-pixel scratch (Single)
   x, y, ch, imgW, imgH, outW, outH: Integer;
   corrImgMask, corrImgSqMaskSq, corrImgMaskSq: TChannelCorrelations;
+  curIM, curIMSq, curISqMSq: array[0..2] of PSingle;
+  curNumer, curResult: PSingle;
 begin
   imgW := Cache.Width;
   imgH := Cache.Height;
 
-  Mask    := MaskFromTemplate(Template);   // single-channel mask
+  Mask    := MaskFromTemplate(Template);
   MaskSum := Sum(Mask);
 
   SplitChannels(Template, templR, templG, templB);
 
   outW := imgW - Template.Width  + 1;
   outH := imgH - Template.Height + 1;
+
+  if MaskSum <= 0 then
+  begin
+    Result.SetSize(outW, outH);
+    Exit;
+  end;
 
   Mask2          := MultiplyElements(Mask, Mask);   // computed once, reused for the FFT operand and the sum
   MaskSumSquared := Sum(Mask2);
@@ -182,7 +193,11 @@ begin
   corrImgMaskSq   := Cache.MaskCorrIMSq(Mask, Mask2, outW, outH);    // CCorr(I_c, M^2)
 
   // numerator correlation Sum_c CCorr(I_c, T'_c) -- template-dependent, recomputed every call
-  numerCorr := CorrelateChannelsSum(Cache.Spectra, ForwardTransformChannels(templMaskR, templMaskG, templMaskB, imgW, imgH), outW, outH);
+  numerCorr := CorrelateChannelsSum(
+    Cache.Spectra,
+    ForwardTransformChannels(templMaskR, templMaskG, templMaskB, imgW, imgH),
+    outW, outH
+  );
 
   // loop-invariant scalars, rounded to Single to match the matrix-operator coercions exactly
   invMaskSum    := 1 / MaskSum;
@@ -198,40 +213,41 @@ begin
   //   result    = numerator / (norm(I') * norm(T'))      [only when Normed]
   Result.SetSize(outW, outH);
   for y := 0 to outH - 1 do
+  begin
+    for ch := 0 to 2 do
+    begin
+      curIM[ch] := @corrImgMask[ch][y][0]; curIMSq[ch] := @corrImgMaskSq[ch][y][0]; curISqMSq[ch] := @corrImgSqMaskSq[ch][y][0];
+    end;
+    curNumer := @numerCorr[y][0]; curResult := @Result[y][0];
     for x := 0 to outW - 1 do
     begin
-      numer := numerCorr[y, x]
-             - (corrImgMask[0][y, x] * kR + corrImgMask[1][y, x] * kG + corrImgMask[2][y, x] * kB);
+      numer := curNumer[x] - (curIM[0][x] * kR + curIM[1][x] * kG + curIM[2][x] * kB);
 
       if Normed then
       begin
         nrm := 0;
         for ch := 0 to 2 do
         begin
-          cIM     := corrImgMask[ch][y, x];       // CCorr(I_c, M)
-          cIMSq   := corrImgMaskSq[ch][y, x];     // CCorr(I_c, M^2)
-          cISqMSq := corrImgSqMaskSq[ch][y, x];   // CCorr(I_c^2, M^2)
+          cIM     := curIM[ch][x];       // CCorr(I_c, M)
+          cIMSq   := curIMSq[ch][x];     // CCorr(I_c, M^2)
+          cISqMSq := curISqMSq[ch][x];   // CCorr(I_c^2, M^2)
           e   := (cIM * invMaskSum) * (cIM * maskSqOverSum - (cIMSq + cIMSq));   // (cIMSq+cIMSq) = exact 2*cIMSq
           nrm := nrm + (cISqMSq + e);
         end;
-        if nrm > 0 then imgNorm := Sqrt(nrm) else imgNorm := 0; 
+        if nrm > 0 then imgNorm := Sqrt(nrm) else imgNorm := 0;
         denom := imgNorm * normTempl;
         if denom > 0 then
-          Result[y, x] := numer / denom
+          curResult[x] := numer / denom
         else
-          Result[y, x] := 0;                                   
+          curResult[x] := 0;
       end
       else
-        Result[y, x] := numer;
+        curResult[x] := numer;
     end;
+  end;
 
   if Normed then
     Result.ReplaceNaNAndInf(0);
-end;
-
-function MatchTemplateMask_CCOEFF(var Cache: TMatchTemplateCache; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-begin
-  Result := __MatchTemplateMask_CCOEFF(Cache, Template, Normed);
 end;
 
 end.

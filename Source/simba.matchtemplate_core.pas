@@ -22,7 +22,7 @@ const
 type
 {$IFDEF MT_PACKED}
   TImgSpectra = record
-    RG: TComplexMatrix;   // R packed into Re, G into Im
+    RG: TComplexMatrix; // R packed into Re, G into Im
     B: TComplexMatrix;
   end;
 {$ELSE}
@@ -30,7 +30,7 @@ type
     R, G, B: TComplexMatrix;
   end;
 {$ENDIF}
-  TChannelCorrelations = array[0..2] of TSingleMatrix;   // per-channel correlation results (R, G, B)
+  TChannelCorrelations = array[0..2] of TSingleMatrix; // per-channel correlation results (R, G, B)
 
   // Image-side cache for matching templates against the SAME image.
   // Template can change however will not be able to cache as much.
@@ -62,7 +62,7 @@ type
     function MaskCorrISqMSq(const Mask, Mask2: TSingleMatrix; outW, outH: Integer): TChannelCorrelations; // CCorr(I_c^2, M^2)
   end;
 
-function MaskFromTemplate(Templ: TIntegerMatrix): TSingleMatrix;
+function MaskFromTemplate(const Templ: TIntegerMatrix): TSingleMatrix;
 procedure SplitChannels(const Image: TIntegerMatrix; out R, G, B: TSingleMatrix);
 
 // pad real channel a to OptimalDFTSize(outW) x OptimalDFTSize(outH) and forward-transform.
@@ -99,12 +99,14 @@ implementation
 uses
   simba.vartype_matrix;
 
-// Plain-sum + sum-of-squares integral images (summed-area tables), padded by one row/col. Used by the
-// cache to build per-channel normalisers (EnsureSums).
+// Plain-sum + sum-of-squares integral images (summed-area tables), padded by one row/col.
 function SumsPd(const Matrix: TSingleMatrix; out Square: TDoubleMatrix): TDoubleMatrix;
 var
   x,y,W,H: Integer;
   sum,sqsum: Double;
+  curMatrix: PSingle;
+  prevResult, curResult, prevSquare, curSquare: PDouble;
+  mv: Single;
 begin
   H := Length(Matrix);
   W := Length(Matrix[0]);
@@ -127,14 +129,21 @@ begin
 
   for y:=2 to H do
   begin
-    sum   := Matrix[y-1,0];
+    curMatrix := @Matrix[y-1][0];
+    prevResult := @Result[y-1][0];
+    curResult := @Result[y][0];
+    prevSquare := @Square[y-1][0];
+    curSquare := @Square[y][0];
+
+    sum   := curMatrix[0];
     sqsum := Sqr(sum);
     for x:=2 to W do
     begin
-      sum += Matrix[y-1,x-1];
-      Result[y,x] := Result[y-1,x] + sum;
-      sqsum += Sqr(Matrix[y-1,x-1]);
-      Square[y,x] := Square[y-1,x] + sqsum;
+      mv := curMatrix[x-1];
+      sum += mv;
+      curResult[x] := prevResult[x] + sum;
+      sqsum += Sqr(mv);
+      curSquare[x] := prevSquare[x] + sqsum;
     end;
   end;
 end;
@@ -165,7 +174,9 @@ end;
 
 procedure SplitChannels(const Image: TIntegerMatrix; out R, G, B: TSingleMatrix);
 var
-  W, H, X, Y: Integer;
+  W, H, X, Y, pv: Integer;
+  curImage: PInteger;
+  curR, curG, curB: PSingle;
 begin
   W := Image.Width;
   H := Image.Height;
@@ -175,26 +186,38 @@ begin
   Dec(W);
   Dec(H);
   for Y := 0 to H do
+  begin
+    curImage := @Image[Y][0];
+    curR := @R[Y][0];
+    curG := @G[Y][0];
+    curB := @B[Y][0];
     for X := 0 to W do
     begin
-      R[Y, X] := Image[Y, X]        and $FF;
-      G[Y, X] := Image[Y, X] shr 08 and $FF;
-      B[Y, X] := Image[Y, X] shr 16 and $FF;
+      pv := curImage[X];
+      curR[X] := pv        and $FF;
+      curG[X] := pv shr 08 and $FF;
+      curB[X] := pv shr 16 and $FF;
     end;
+  end;
 end;
 
 function ForwardTransform(const a: TSingleMatrix; const outW, outH: Integer): TComplexMatrix;
 var
   Spectrum: TComplexMatrix;
-  X, Y, W, H, sw: Integer;
+  X, Y, W, H, sw, base: Integer;
+  curA: PSingle;
 begin
   Spectrum.SetSize(OptimalDFTSize(outW), OptimalDFTSize(outH));
   sw := Spectrum.Width;
   W := a.Width - 1;
   H := a.Height - 1;
   for Y := 0 to H do
+  begin
+    curA := @a[Y][0];
+    base := Y * sw;
     for X := 0 to W do
-      Spectrum.Data[Y * sw + X].Re := a[Y, X];
+      Spectrum.Data[base + X].Re := curA[X];
+  end;
   Result := FFT2(Spectrum);
 end;
 
@@ -216,7 +239,8 @@ end;
 function Correlate(const fa, fb: TComplexMatrix; const outW, outH: Integer): TSingleMatrix;
 var
   Spectrum: TComplexMatrix;
-  X, Y, W, H, sw: Integer;
+  X, Y, W, H, sw, base: Integer;
+  curResult: PSingle;
 begin
   Spectrum := CorrSpectrum(fa, fb);
   Result.SetSize(outW, outH);
@@ -224,48 +248,63 @@ begin
   W := outW - 1;
   H := outH - 1;
   for Y := 0 to H do
+  begin
+    curResult := @Result[Y][0]; base := Y * sw;
     for X := 0 to W do
-      Result[Y, X] := Spectrum.Data[Y * sw + X].Re;
+      curResult[X] := Spectrum.Data[base + X].Re;
+  end;
 end;
 
 procedure CorrelateInto(const fa, fb: TComplexMatrix; const outW, outH: Integer; var Acc: TSingleMatrix);
 var
   Spectrum: TComplexMatrix;
-  X, Y, W, H, sw: Integer;
+  X, Y, W, H, sw, base: Integer;
+  curAcc: PSingle;
 begin
   Spectrum := CorrSpectrum(fa, fb);
   sw := Spectrum.Width;
   W := outW - 1;
   H := outH - 1;
   for Y := 0 to H do
+  begin
+    curAcc := @Acc[Y][0]; base := Y * sw;
     for X := 0 to W do
-      Acc[Y, X] := Acc[Y, X] + Spectrum.Data[Y * sw + X].Re;
+      curAcc[X] := curAcc[X] + Spectrum.Data[base + X].Re;
+  end;
 end;
 
 function ForwardTransformPacked(const a, b: TSingleMatrix; const outW, outH: Integer): TComplexMatrix;
 var
   Spectrum: TComplexMatrix;
-  X, Y, W, H, sw: Integer;
+  X, Y, W, H, sw, base: Integer;
+  curA, curB: PSingle;
 begin
   Spectrum.SetSize(OptimalDFTSize(outW), OptimalDFTSize(outH));
   sw := Spectrum.Width;
   W := a.Width - 1;
   H := a.Height - 1;
   for Y := 0 to H do
+  begin
+    curA := @a[Y][0]; base := Y * sw;
     for X := 0 to W do
-      Spectrum.Data[Y * sw + X].Re := a[Y, X];
+      Spectrum.Data[base + X].Re := curA[X];
+  end;
   W := b.Width - 1;
   H := b.Height - 1;
   for Y := 0 to H do
+  begin
+    curB := @b[Y][0]; base := Y * sw;
     for X := 0 to W do
-      Spectrum.Data[Y * sw + X].Im := b[Y, X];
+      Spectrum.Data[base + X].Im := curB[X];
+  end;
   Result := FFT2(Spectrum);
 end;
 
 procedure CorrelatePacked(const fImg, fOp: TComplexMatrix; const outW, outH: Integer; out re, im: TSingleMatrix);
 var
   Spectrum: TComplexMatrix;
-  i, n, X, Y, W, H, sw: Integer;
+  i, n, X, Y, W, H, sw, base: Integer;
+  curRe, curIm: PSingle;
 begin
   Spectrum.SetSize(fImg.Width, fImg.Height);
   n := fImg.Width * fImg.Height;
@@ -281,11 +320,14 @@ begin
   W := outW - 1;
   H := outH - 1;
   for Y := 0 to H do
+  begin
+    curRe := @re[Y][0]; curIm := @im[Y][0]; base := Y * sw;
     for X := 0 to W do
     begin
-      re[Y, X] := Spectrum.Data[Y * sw + X].Re;
-      im[Y, X] := Spectrum.Data[Y * sw + X].Im;
+      curRe[X] := Spectrum.Data[base + X].Re;
+      curIm[X] := Spectrum.Data[base + X].Im;
     end;
+  end;
 end;
 
 function ForwardTransformChannels(const a, b, c: TSingleMatrix; const outW, outH: Integer): TImgSpectra;
@@ -303,35 +345,56 @@ end;
 function ForwardTransformSquared(const a: TSingleMatrix; const outW, outH: Integer): TComplexMatrix;
 var
   Spectrum: TComplexMatrix;
-  X, Y, W, H, sw: Integer;
+  X, Y, W, H, sw, base: Integer;
+  curA: PSingle; av: Single;
 begin
   Spectrum.SetSize(OptimalDFTSize(outW), OptimalDFTSize(outH));
   sw := Spectrum.Width;
   W := a.Width - 1;
   H := a.Height - 1;
   for Y := 0 to H do
+  begin
+    curA := @a[Y][0]; base := Y * sw;
     for X := 0 to W do
-      Spectrum.Data[Y * sw + X].Re := a[Y, X] * a[Y, X];
+    begin
+      av := curA[X];
+      Spectrum.Data[base + X].Re := av * av;
+    end;
+  end;
   Result := FFT2(Spectrum);
 end;
 
 function ForwardTransformPackedSquared(const a, b: TSingleMatrix; const outW, outH: Integer): TComplexMatrix;
 var
   Spectrum: TComplexMatrix;
-  X, Y, W, H, sw: Integer;
+  X, Y, W, H, sw, base: Integer;
+  curA, curB: PSingle; v: Single;
 begin
   Spectrum.SetSize(OptimalDFTSize(outW), OptimalDFTSize(outH));
   sw := Spectrum.Width;
   W := a.Width - 1;
   H := a.Height - 1;
   for Y := 0 to H do
+  begin
+    curA := @a[Y][0];
+    base := Y * sw;
     for X := 0 to W do
-      Spectrum.Data[Y * sw + X].Re := a[Y, X] * a[Y, X];
+    begin
+      v := curA[X];
+      Spectrum.Data[base + X].Re := v * v;
+    end;
+  end;
   W := b.Width - 1;
   H := b.Height - 1;
   for Y := 0 to H do
+  begin
+    curB := @b[Y][0]; base := Y * sw;
     for X := 0 to W do
-      Spectrum.Data[Y * sw + X].Im := b[Y, X] * b[Y, X];
+    begin
+      v := curB[X];
+      Spectrum.Data[base + X].Im := v * v;
+    end;
+  end;
   Result := FFT2(Spectrum);
 end;
 
@@ -403,19 +466,28 @@ end;
 function SumChannelsMax(const R, G, B: TSingleMatrix; out maxVal: Double): TSingleMatrix;
 var
   X, Y, W, H: Integer;
-  v: Single;
+  v, mx: Single;
+  curR, curG, curB, curResult: PSingle;
 begin
   Result.SetSize(R.Width, R.Height);
-  maxVal := 0;
   W := R.Width - 1;
   H := R.Height - 1;
+  mx := 0;
   for Y := 0 to H do
+  begin
+    curR := @R[Y][0];
+    curG := @G[Y][0];
+    curB := @B[Y][0];
+    curResult := @Result[Y][0];
     for X := 0 to W do
     begin
-      v := R[Y, X] + G[Y, X] + B[Y, X];
-      Result[Y, X] := v;
-      if v > maxVal then maxVal := v;
+      v := curR[X] + curG[X] + curB[X];
+      curResult[X] := v;
+      if v > mx then
+        mx := v;
     end;
+  end;
+  maxVal := mx;
 end;
 
 function SubtractScalar(const m: TSingleMatrix; const s: Double): TSingleMatrix;
@@ -430,6 +502,121 @@ begin
       Result[Y, X] := m[Y, X] - s;
 end;
 
+{$IFDEF SIMBA_FFT_SIMD_X86_64}
+{$asmmode intel}
+procedure NormalizeMasked(var Res: TSingleMatrix; const energy: TSingleMatrix; const maxEnergy, constFac: Double; const degenVal, loClamp, hiClamp: Single);
+var
+  h, n, y: Integer;
+  thr: Double;
+  consts: array[0..7] of Single;
+  constsPtr: PSingle;
+  resRows, enRows: Pointer;
+begin
+  n := Res.Width;              // row width in elements
+  h := Res.Height - 1;         // last row index
+  thr := maxEnergy * 1e-4;
+  consts[0] := constFac; consts[1] := thr;     consts[2] := degenVal;
+  consts[3] := loClamp;  consts[4] := hiClamp; consts[7] := 1.0;
+  constsPtr := @consts[0];
+  resRows := Pointer(Res);     // &Res[0]    -> contiguous array of row pointers
+  enRows  := Pointer(energy);  // &energy[0] -> contiguous array of row pointers
+  asm
+    mov      eax, h
+    test     eax, eax
+    js       @@done                          // h < 0 (empty) -> no rows
+    xor      eax, eax
+    mov      y, eax                           // y := 0
+  @@row:
+    mov      r11d, y                          // r11 = y (zero-extended; y >= 0)
+    mov      r10, resRows
+    mov      rax, [r10+r11*8]                 // rax = @Res[y][0]     (row to normalise)
+    mov      r10, enRows
+    mov      rdx, [r10+r11*8]                 // rdx = @energy[y][0]
+    mov      r9,  constsPtr
+    mov      r8d, n
+    mov      ecx, r8d
+    shr      ecx, 2                         // 4-lane vectors
+    and      r8d, 3
+    test     ecx, ecx
+    jz       @@rem
+  @@loop4:
+    movups   xmm0, [rdx]                    // e
+    movss    xmm1, [r9]
+    shufps   xmm1, xmm1, 0                  // cf
+    mulps    xmm1, xmm0                     // arg = cf*e
+    movups   xmm2, [rax]                    // r
+    movss    xmm5, [r9+4]
+    shufps   xmm5, xmm5, 0                  // thr
+    movaps   xmm4, xmm0
+    cmpps    xmm4, xmm5, 2                  // e <= thr
+    xorps    xmm3, xmm3
+    movaps   xmm5, xmm1
+    cmpps    xmm5, xmm3, 2                  // arg <= 0
+    orps     xmm4, xmm5                     // degenerate mask (xmm4)
+    movss    xmm5, [r9+28]
+    shufps   xmm5, xmm5, 0                  // 1.0
+    movaps   xmm3, xmm4
+    andps    xmm5, xmm3                     // mask & 1.0
+    andnps   xmm3, xmm1                     // ~mask & arg
+    orps     xmm5, xmm3                     // argSafe (>0)
+    sqrtps   xmm5, xmm5
+    divps    xmm2, xmm5                     // v = r/sqrt(argSafe)
+    movss    xmm5, [r9+12]
+    shufps   xmm5, xmm5, 0                  // lo
+    maxps    xmm2, xmm5
+    movss    xmm5, [r9+16]
+    shufps   xmm5, xmm5, 0                  // hi
+    minps    xmm2, xmm5
+    movss    xmm5, [r9+8]
+    shufps   xmm5, xmm5, 0                  // degen
+    andps    xmm5, xmm4                     // degen & mask
+    andnps   xmm4, xmm2                     // ~mask & v
+    orps     xmm5, xmm4                     // result
+    movups   [rax], xmm5
+    add      rdx, 16
+    add      rax, 16
+    dec      ecx
+    jnz      @@loop4
+  @@rem:
+    test     r8d, r8d
+    jz       @@rownext
+  @@rloop:
+    movss    xmm0, [rdx]
+    movss    xmm1, [r9]
+    mulss    xmm1, xmm0                     // arg
+    movss    xmm2, [rax]
+    movss    xmm4, [r9+4]
+    ucomiss  xmm0, xmm4
+    jbe      @@rdeg                         // e <= thr
+    xorps    xmm4, xmm4
+    ucomiss  xmm1, xmm4
+    jbe      @@rdeg                         // arg <= 0
+    sqrtss   xmm3, xmm1
+    divss    xmm2, xmm3
+    movss    xmm4, [r9+12]
+    maxss    xmm2, xmm4
+    movss    xmm4, [r9+16]
+    minss    xmm2, xmm4
+    movss    [rax], xmm2
+    jmp      @@rnext
+  @@rdeg:
+    movss    xmm3, [r9+8]
+    movss    [rax], xmm3
+  @@rnext:
+    add      rdx, 4
+    add      rax, 4
+    dec      r8d
+    jnz      @@rloop
+  @@rownext:
+    mov      eax, y
+    inc      eax
+    mov      y, eax
+    cmp      eax, h
+    jle      @@row                          // for y := 0 to h
+  @@done:
+  end;
+end;
+{$ELSE}
 procedure NormalizeMasked(var Res: TSingleMatrix; const energy: TSingleMatrix; const maxEnergy, constFac: Double; const degenVal, loClamp, hiClamp: Single);
 var
   x, y, w, h: Integer;
@@ -443,7 +630,7 @@ begin
     for x := 0 to w do
     begin
       arg := constFac * energy[y, x];
-      if (energy[y, x] <= thr) or (arg <= 0) then  
+      if (energy[y, x] <= thr) or (arg <= 0) then
         Res[y, x] := degenVal
       else
       begin
@@ -456,8 +643,9 @@ begin
       end;
     end;
 end;
+{$ENDIF}
 
-function MaskFromTemplate(Templ: TIntegerMatrix): TSingleMatrix;
+function MaskFromTemplate(const Templ: TIntegerMatrix): TSingleMatrix;
 var
   X, Y, W, H: Integer;
 begin

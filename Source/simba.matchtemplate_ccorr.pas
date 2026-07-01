@@ -33,22 +33,23 @@ uses
   simba.base,
   simba.matchtemplate_core;
 
-function MatchTemplate_CCORR(var Cache: TMatchTemplateCache; Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-function MatchTemplateMask_CCORR(var Cache: TMatchTemplateCache; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplate_CCORR(var Cache: TMatchTemplateCache; const Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplateMask_CCORR(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 
 implementation
 
 uses
   simba.vartype_matrix;
 
-// MatchTemplate_CCORR
-function MatchTemplate_CCORR(var Cache: TMatchTemplateCache; Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplate_CCORR(var Cache: TMatchTemplateCache; const Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 var
   x,y, lastX,lastY, templW,templH, imgW,imgH, outW,outH: Integer;
   invSize, numer, denom, tplSdv, tplMean, tplSigma, meanR,meanG,meanB, stdevR,stdevG,stdevB, wndSum2: Double;
   sum2r, sum2g, sum2b: TDoubleMatrix;
   crossCorr: TSingleMatrix;
   templR,templG,templB: TSingleMatrix;
+  curSum2R,curSum2RBot, curSum2G,curSum2GBot, curSum2B,curSum2BBot: PDouble;   // hoisted row pointers Y and Y+templH
+  curCross, curResult: PSingle;
 begin
   SplitChannels(Templ, templR, templG, templB);
 
@@ -57,8 +58,11 @@ begin
   outW := imgW - templR.Width  + 1;
   outH := imgH - templR.Height + 1;
 
-  crossCorr := CorrelateChannelsSum(Cache.Spectra,
-                                    ForwardTransformChannels(templR, templG, templB, imgW, imgH), outW, outH);
+  crossCorr := CorrelateChannelsSum(
+    Cache.Spectra,
+    ForwardTransformChannels(templR, templG, templB, imgW, imgH),
+    outW, outH
+  );
 
   if not Normed then
     Exit(crossCorr);
@@ -89,30 +93,31 @@ begin
   lastX := imgW-templW-1;
   lastY := imgH-templH-1;
   for y := 0 to lastY do
+  begin
+    curSum2R := @sum2r[Y][0]; curSum2RBot := @sum2r[Y+templH][0]; curSum2G := @sum2g[Y][0]; curSum2GBot := @sum2g[Y+templH][0];
+    curSum2B := @sum2b[Y][0]; curSum2BBot := @sum2b[Y+templH][0];
+    curCross := @crossCorr[Y][0]; curResult := @Result[Y][0];
     for x := 0 to lastX do
     begin
-      wndSum2 := sum2r[Y,X] - sum2r[Y,X+templW] - sum2r[Y+templH,X] + sum2r[Y+templH,X+templW];
-      wndSum2 += sum2g[Y,X] - sum2g[Y,X+templW] - sum2g[Y+templH,X] + sum2g[Y+templH,X+templW];
-      wndSum2 += sum2b[Y,X] - sum2b[Y,X+templW] - sum2b[Y+templH,X] + sum2b[Y+templH,X+templW];
+      wndSum2 := curSum2R[X] - curSum2R[X+templW] - curSum2RBot[X] + curSum2RBot[X+templW];
+      wndSum2 += curSum2G[X] - curSum2G[X+templW] - curSum2GBot[X] + curSum2GBot[X+templW];
+      wndSum2 += curSum2B[X] - curSum2B[X+templW] - curSum2BBot[X] + curSum2BBot[X+templW];
 
-      numer := crossCorr[Y, X];
-      // OpenCV common_matchTemplate: zero the denom on tiny-variance windows; clamp band = denom*1.125
+      numer := curCross[X];
       if wndSum2 <= Min(0.5, 10 * FLT_EPSILON * wndSum2) then
         denom := 0
       else
         denom := tplSigma * Sqrt(wndSum2);
 
       if Abs(numer) < denom then
-        Result[Y, X] := numer / denom
+        curResult[X] := numer / denom
       else if Abs(numer) < denom * 1.125 then
-        if numer > 0 then Result[Y, X] := 1 else Result[Y, X] := -1;
+        if numer > 0 then curResult[X] := 1 else curResult[X] := -1;
     end;
+  end;
 end;
 
-
-// MatchTemplateMask_CCORR
-// Image-side spectra passed in (fresh from the wrapper or from a TMatchTemplateCache); imgW/imgH = IMAGE dims.
-function __MatchTemplateMask_CCORR(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplateMask_CCORR(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 var
   templR,templG,templB, Mask, Mask2, TempResult: TSingleMatrix;
   channelCorr: TChannelCorrelations;
@@ -122,7 +127,7 @@ begin
   imgW := Cache.Width;
   imgH := Cache.Height;
 
-  Mask := MaskFromTemplate(Template);     // single-channel mask
+  Mask := MaskFromTemplate(Template);
   SplitChannels(Template, templR, templG, templB);
 
   Mask2 := MultiplyElements(Mask, Mask);
@@ -130,8 +135,11 @@ begin
   outH := imgH - templR.Height + 1;
 
   // Result = Sum_c CCorr(im_c, tp_c*mask2)
-  Result := CorrelateChannelsSum(Cache.Spectra,
-                                 ForwardTransformChannels(MultiplyElements(templR, Mask2), MultiplyElements(templG, Mask2), MultiplyElements(templB, Mask2), imgW, imgH), outW, outH);
+  Result := CorrelateChannelsSum(
+    Cache.Spectra,
+    ForwardTransformChannels(MultiplyElements(templR, Mask2), MultiplyElements(templG, Mask2), MultiplyElements(templB, Mask2), imgW, imgH),
+    outW, outH
+  );
 
   if Normed then
   begin
@@ -145,13 +153,8 @@ begin
 
     // result /= sqrt(templ2_mask2_sum * temp_result); guard degenerate windows -> 0, clamp [-1,1]
     NormalizeMasked(Result, TempResult, maxEnergy, Templ2Mask2Sum, 0, -1, 1);
-    Result.ReplaceNaNAndInf(0);   // only the normed division can produce NaN/Inf
+    Result.ReplaceNaNAndInf(0);
   end;
-end;
-
-function MatchTemplateMask_CCORR(var Cache: TMatchTemplateCache; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-begin
-  Result := __MatchTemplateMask_CCORR(Cache, Template, Normed);
 end;
 
 end.
