@@ -1,0 +1,72 @@
+{$IFDEF WINDOWS}{$IFDEF CPU32}
+begin
+  // todo, be more memory efficent
+end.
+{$ENDIF}{$ENDIF} // rest of file wont even be parsed
+
+type
+  TMatchTemplateFunc = function(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+  TMatchTemplateCacheFunc = function(Image, Template: TIntegerMatrix; Formula: ETMFormula; var cache: TMatchTemplateCache): TSingleMatrix;
+
+procedure bench(prefix: String; img, templ: TIntegerMatrix; fn: TMatchTemplateFunc; fnc: TMatchTemplateCacheFunc);
+var
+  t: Double;
+  cache: TMatchTemplateCache;
+begin
+  FFT_THREADING := False;
+  t := PerformanceTime();
+  fn(img, templ, TM_CCOEFF_NORMED);
+  WriteLn(prefix, ' (-cache,-threading): ', Round(PerformanceTime()-t), 'ms');
+
+  FFT_THREADING := True;
+  t := PerformanceTime();
+  fn(img, templ, TM_CCOEFF_NORMED);
+  WriteLn(prefix, ' (-cache,+threading): ', Round(PerformanceTime()-t), 'ms');
+
+  // get cache
+  fnc(img, templ, TM_CCOEFF_NORMED, cache);
+
+  FFT_THREADING := False;
+  t := PerformanceTime();
+  fnc(img, templ, TM_CCOEFF_NORMED, cache);
+  WriteLn(prefix, ' (+cache,-threading): ', Round(PerformanceTime()-t), 'ms');
+
+  FFT_THREADING := True;
+  t := PerformanceTime();
+  fnc(img, templ, TM_CCOEFF_NORMED, cache);
+  WriteLn(prefix, ' (+cache,+threading): ', Round(PerformanceTime()-t), 'ms');
+end;
+
+var
+  world: TImage;
+  img, templ, templWithMask: TImage;
+  t: Double;
+  cache: TMatchTemplateCache;
+begin
+  world := new TImage();
+  world.FromZip('Tests/images.zip', 'world.png');
+
+  img := world.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, world.Width*5, world.Height*5);
+  templ := img.Copy([1000,2500,1100,2600]).Blur(EImageBlurAlgo.BOX, 5);
+  templWithMask := templ.Copy();
+  templWithMask.DrawColor := 0;
+  templWithMask.DrawCircleInverted(templ.Center, 50);
+
+  WriteLn('img: ', img.Width, 'x', img.Height);
+  WriteLn('templ: ', templ.Width, 'x', templ.Height);
+
+  bench('MatchTemplate', img.ToMatrix(), templ.ToMatrix(), @MatchTemplate, @MatchTemplate);
+  bench('MatchTemplateMask', img.ToMatrix(), templ.ToMatrix(), @MatchTemplateMask, @MatchTemplateMask);
+
+  img := img.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, img.Width div 8, img.Height div 8);
+  templ := templ.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, templ.Width div 3, templ.Height div 3);
+  templWithMask := templWithMask.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, templ.Width div 3, templ.Height div 3);
+
+  WriteLn('img: ', img.Width, 'x', img.Height);
+  WriteLn('templ: ', templ.Width, 'x', templ.Height);
+
+  bench('MatchTemplate', img.ToMatrix(), templ.ToMatrix(), @MatchTemplate, @MatchTemplate);
+  bench('MatchTemplateMask', img.ToMatrix(), templ.ToMatrix(), @MatchTemplateMask, @MatchTemplateMask);
+end;
+
+
