@@ -11,7 +11,8 @@ interface
 
 uses
   classes, sysutils,
-  simba.base, simba.fftpack4;
+  simba.base,
+  simba.fftpack4;
 
 const
   // C math.h epsilons used by OpenCV

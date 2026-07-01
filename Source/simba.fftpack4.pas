@@ -24,13 +24,20 @@ uses
   simba.base,
   simba.math;
 
+const
+  FFT_PLAN_ALIGN = 32;                  // Align plan to 32 bit
+  FFT_THREADING: Boolean = True;        // runtime on/off switch
+  FFT_THREADING_DEBUG: Boolean = False; // live debug on threading status
+  FFT_MIN_AREA: Integer = 40000;        // W*H below this always runs single-threaded (200x200)
+  FFT_MAX_THREADS: Integer = 6;         // max threads to use; users may raise it
+
 type
   TComplex = record
     Re, Im: Single;
   end;
   TComplexArray = array of TComplex;
 
-  // flattened (contiguous) complex matrix: element (Y,X) = Data[Y*Width + X]
+  // flattened (contiguous) complex matrix: element (Y,X) = Data[Y*Width+X]
   TComplexMatrix = record
     Data: TComplexArray;
     FWidth, FHeight: Integer;
@@ -56,10 +63,6 @@ uses
 {$DEFINE CPLX_BUFFSZ := 2*n + 15 + (FFT_PLAN_ALIGN div SizeOf(TComplex))}
 
 const
-  FFT_MIN_AREA = 40000;   // below this a transform runs single-threaded (200x200)
-  FFT_WORKERS_WANTED = 6; // max threads to use (including) the caller
-  FFT_PLAN_ALIGN = 32;    // Align plan to 32 bit
-
   OptimalDFTs: array of Integer = (
     8, 9, 10, 12, 15, 16, 18, 20, 24, 25, 27, 30, 32, 36, 40, 45, 48,
     50, 54, 60, 64, 72, 75, 80, 81, 90, 96, 108, 120, 128, 144, 150,
@@ -186,7 +189,7 @@ begin
   Result := PSingle((PtrUInt(@w[0]) + (FFT_PLAN_ALIGN - 1)) and not PtrUInt(FFT_PLAN_ALIGN - 1));
 end;
 
-procedure InitFFT(var Plan: TComplexArray; const n: Integer);
+procedure InitFFT(var Plan: TComplexArray; const n: Integer); inline;
 begin
   if (Length(Plan) < CPLX_BUFFSZ) then
     SetLength(Plan, CPLX_BUFFSZ);
@@ -196,7 +199,7 @@ end;
 function ShouldParallelFFT(const Area: Int64): Boolean; inline;
 begin
   {$IFDEF MT_THREADING}
-  Result := (Area >= FFT_MIN_AREA);
+  Result := FFT_THREADING and (Area >= FFT_MIN_AREA);
   {$ELSE}
   Result := False;
   {$ENDIF}
@@ -244,9 +247,12 @@ type
     FLock: TCriticalSection;        // guards EnsureSetup
     FAcquireLock: TCriticalSection; // held by the ONE transform currently using the workers
     FReady: Boolean;
+    FBuiltThreads: Integer;         // worker count the live pool was built for (tracks FFT_MAX_THREADS)
 
+    function WantWorkers: Integer; inline; // FFT_MAX_THREADS clamped to the available cores
+    function ThreadsForArea(const Area: Int64): Integer; // scale worker count with transform size
     procedure EnsureSetup;
-    procedure Run(const Hi: Integer; const Pass: TFFTPass); // split [0,Hi] across caller + workers
+    procedure Run(const Hi: Integer; const Pass: TFFTPass; const MaxN: Integer); // split [0,Hi] across up to MaxN (caller + workers)
   public
     constructor Create;
     destructor Destroy; override;
@@ -296,7 +302,7 @@ begin
       Pass(Lo, Hi);
     except
       on E: Exception do
-        DebugLn('FFT pass exception: ' + E.Message);
+        DebugLn('[FFT Threading]: Pass(%d..%d) exception: %s', [Lo, Hi, E.Message]);
     end;
     Done.SetEvent();
   end;
@@ -333,36 +339,62 @@ begin
   FAcquireLock.Release();
 end;
 
+function TFFTThreadPool.WantWorkers: Integer;
+begin
+  Result := FFT_MAX_THREADS;                    // user-controlled; may be raised above the P-core count
+  if (Result > SimbaCPUInfo.ThreadCount) then   // never spawn more workers than logical CPUs
+    Result := SimbaCPUInfo.ThreadCount;
+  if (Result < 1) then
+    Result := 1;
+end;
+
+function TFFTThreadPool.ThreadsForArea(const Area: Int64): Integer;
+begin
+  if (FFT_MIN_AREA < 1) then // disabled - use the whole pool
+    Result := FBuiltThreads
+  else
+  begin
+    // scale threads to use count with one thread per FFT_MIN_AREA of area
+    // e.g. 200x200 -> 2, 300x300 -> 3, >=512x512 -> FBuiltThreads
+    Result := 1 + (Area div FFT_MIN_AREA);
+    if (Result > FBuiltThreads) then
+      Result := FBuiltThreads;
+  end;
+  if (Result < 1) then
+    Result := 1;
+end;
+
 procedure TFFTThreadPool.EnsureSetup;
 var
   i, want: Integer;
 begin
-  if FReady then
+  want := WantWorkers();
+  if FReady and (FBuiltThreads = want) then // already built for the current FFT_MAX_THREADS
     Exit;
 
   FLock.Acquire();
   try
-    if FReady then
+    want := WantWorkers();
+    if FReady and (FBuiltThreads = want) then
       Exit;
-    want := FFT_WORKERS_WANTED;
-    if (SimbaCPUInfo.PCoreCount > 0) and (want > SimbaCPUInfo.PCoreCount) then
-      want := SimbaCPUInfo.PCoreCount;
 
-    if (want > SimbaCPUInfo.ThreadCount) then
-      want := SimbaCPUInfo.ThreadCount;
-    if (want < 1) then
-      want := 1;
+    if FFT_THREADING_DEBUG then
+      DebugLn('[FFT Threading]: Setup %d sized thread pool', [want]);
 
+    for i := 0 to High(FWorkers) do
+      FWorkers[i].Free();
     SetLength(FWorkers, want - 1); // the caller is the +1
     for i := 0 to High(FWorkers) do
       FWorkers[i] := TFFTWorker.Create();
+
+    FBuiltThreads := want;
     FReady := True;
   finally
     FLock.Release();
   end;
 end;
 
-procedure TFFTThreadPool.Run(const Hi: Integer; const Pass: TFFTPass);
+procedure TFFTThreadPool.Run(const Hi: Integer; const Pass: TFFTPass; const MaxN: Integer);
 var
   total, n, per, i, clo, chi, started: Integer;
 begin
@@ -371,6 +403,8 @@ begin
     Exit;
 
   n := Length(FWorkers) + 1;
+  if (n > MaxN) then
+    n := MaxN;
   if (n > total) then
     n := total;
 
@@ -410,19 +444,29 @@ begin
 end;
 
 procedure TFFTThreadPool.RunForward(var Eng: TFFT2D);
+var
+  n: Integer;
 begin
   EnsureSetup();
-  Run(Eng.H - 1, @Eng.RowFwd);
+  n := ThreadsForArea(Int64(Eng.W) * Eng.H);
+  if FFT_THREADING_DEBUG then
+    DebugLn('[FFT Threading]: Using %d/%d threads', [n, FBuiltThreads]);
+  Run(Eng.H - 1, @Eng.RowFwd, n);
   Eng.TransposeForward;
-  Run(Eng.W - 1, @Eng.ColFwd);
+  Run(Eng.W - 1, @Eng.ColFwd, n);
 end;
 
 procedure TFFTThreadPool.RunInverse(var Eng: TFFT2D);
+var
+  n: Integer;
 begin
   EnsureSetup();
-  Run(Eng.W - 1, @Eng.ColInv);
+  n := ThreadsForArea(Int64(Eng.W) * Eng.H);
+  if FFT_THREADING_DEBUG then
+    DebugLn('[FFT Threading]: Using %d/%d threads', [n, FBuiltThreads]);
+  Run(Eng.W - 1, @Eng.ColInv, n);
   Eng.TransposeInverse;
-  Run(Eng.H - 1, @Eng.RowInv);
+  Run(Eng.H - 1, @Eng.RowInv, n);
 end;
 
 procedure TFFT2D.EnsureW(len: Integer);
@@ -554,7 +598,15 @@ begin
       ThreadPool.Leave();
     end
   else
-    Self.RunForward(); // too small or pool busy, no threading
+  begin
+    if FFT_THREADING_DEBUG and FFT_THREADING then
+      if ShouldParallelFFT(Int64(W) * H) then
+        DebugLn('[FFT Threading]: Pool not available')
+      else
+        DebugLn('[FFT Threading]: Area < FFT_MIN_AREA');
+
+    Self.RunForward(); // no threading
+  end;
 
   Move(Spec[0], Result.Data[0], n * SizeOf(TComplex));
 end;
@@ -578,7 +630,15 @@ begin
       ThreadPool.Leave();
     end
   else
-    Self.RunInverse(); // too small or pool busy, no threading
+  begin
+    if FFT_THREADING_DEBUG and FFT_THREADING then
+      if ShouldParallelFFT(Int64(W) * H) then
+        DebugLn('[FFT Threading]: Pool not available')
+      else
+        DebugLn('[FFT Threading]: Area < FFT_MIN_AREA');
+
+    Self.RunInverse(); // no threading
+  end;
 
   Move(Spec[0], Result.Data[0], n * SizeOf(TComplex));
 end;
@@ -594,6 +654,8 @@ begin
 end;
 
 initialization
+  if (SimbaCPUInfo.PCoreCount > 0) and (SimbaCPUInfo.PCoreCount < FFT_MAX_THREADS) then
+    FFT_MAX_THREADS := SimbaCPUInfo.PCoreCount;
   ThreadPool := TFFTThreadPool.Create();
 
 finalization

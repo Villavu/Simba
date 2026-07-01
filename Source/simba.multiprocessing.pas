@@ -16,11 +16,6 @@ uses
 
 type
   TSimbaMultiprocessingStrategy = record
-    TemplateFinder: record
-      Enabled: Boolean;
-      SliceWidth: Integer;
-      SliceHeight: Integer;
-    end;
     ColorFinder: record
       Enabled: Boolean;
       SliceWidth: Integer;
@@ -33,7 +28,6 @@ type
     end;
 
     function SlicesFor(Enabled: Boolean; SliceWidth, SliceHeight, SearchWidth, SearchHeight: Integer): Integer;
-    function SlicesForTemplateFinder(SearchWidth, SearchHeight: Integer): Integer;
     function SlicesForColorFinder(SearchWidth, SearchHeight: Integer): Integer;
     function SlicesForImageFinder(SearchWidth, SearchHeight: Integer): Integer;
 
@@ -100,12 +94,6 @@ begin
   // not possible to slice into at least `SliceHeight` pixels so 1 thread it is
 end;
 
-function TSimbaMultiprocessingStrategy.SlicesForTemplateFinder(SearchWidth, SearchHeight: Integer): Integer;
-begin
-  with TemplateFinder do
-    Result := SlicesFor(Enabled, SliceWidth, SliceHeight, SearchWidth, SearchHeight);
-end;
-
 function TSimbaMultiprocessingStrategy.SlicesForColorFinder(SearchWidth, SearchHeight: Integer): Integer;
 begin
   with ColorFinder do
@@ -121,10 +109,6 @@ end;
 class function TSimbaMultiprocessingStrategy.Create: TSimbaMultiprocessingStrategy;
 begin
   Result := Default(TSimbaMultiprocessingStrategy);
-
-  Result.TemplateFinder.Enabled := True;
-  Result.TemplateFinder.SliceWidth := 250;
-  Result.TemplateFinder.SliceHeight := 250;
 
   Result.ColorFinder.Enabled := True;
   Result.ColorFinder.SliceWidth := 250;

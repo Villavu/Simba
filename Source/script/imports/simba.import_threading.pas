@@ -325,6 +325,7 @@ begin
        '  CoreCount: Int32;'      + LineEnding +
        '  ThreadCount: Int32;'    + LineEnding +
        '  PhysicalMemory: Int32;' + LineEnding +
+       '  PCoreCount: Int32;'     + LineEnding +
        'end;',
        @SimbaCPUInfo,
        'CPUInfo'
