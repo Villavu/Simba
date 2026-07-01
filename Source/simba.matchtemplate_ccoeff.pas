@@ -145,7 +145,7 @@ var
   templMaskSumR,templMaskSumG,templMaskSumB: Double;
   MaskSum, MaskSumSquared: Single;
   invMaskSum, maskSqOverSum, kR, kG, kB, normTempl: Single;   // loop-invariant scalars (Single)
-  cIM, cIMSq, cISqMSq, e, nrm, imgNorm, numer: Single;        // per-pixel scratch (Single)
+  cIM, cIMSq, cISqMSq, e, nrm, imgNorm, numer, denom: Single; // per-pixel scratch (Single)
   x, y, ch, imgW, imgH, outW, outH: Integer;
   corrImgMask, corrImgSqMaskSq, corrImgMaskSq: TChannelCorrelations;
 begin
@@ -214,15 +214,19 @@ begin
           e   := (cIM * invMaskSum) * (cIM * maskSqOverSum - (cIMSq + cIMSq));   // (cIMSq+cIMSq) = exact 2*cIMSq
           nrm := nrm + (cISqMSq + e);
         end;
-        imgNorm := Sqrt(nrm);
-        Result[y, x] := numer / (imgNorm * normTempl);
+        if nrm > 0 then imgNorm := Sqrt(nrm) else imgNorm := 0; 
+        denom := imgNorm * normTempl;
+        if denom > 0 then
+          Result[y, x] := numer / denom
+        else
+          Result[y, x] := 0;                                   
       end
       else
         Result[y, x] := numer;
     end;
 
   if Normed then
-    Result.ReplaceNaNAndInf(0);   // only the normed division can produce NaN/Inf
+    Result.ReplaceNaNAndInf(0);
 end;
 
 function MatchTemplateMask_CCOEFF(var Cache: TMatchTemplateCache; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;

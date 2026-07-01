@@ -95,7 +95,10 @@ begin
       numer   := Max(0, wndSum2 - Double(2.0) * crossCorr[Y, X] + tplSum2);
       if Normed then
       begin
-        denom := tplSigma * Sqrt(wndSum2);
+        if wndSum2 > 0 then
+          denom := tplSigma * Sqrt(wndSum2)
+        else
+          denom := 0;
         if Abs(numer) < denom then
           Result[Y, X] := numer / denom
         else

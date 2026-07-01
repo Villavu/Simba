@@ -433,7 +433,7 @@ end;
 procedure NormalizeMasked(var Res: TSingleMatrix; const energy: TSingleMatrix; const maxEnergy, constFac: Double; const degenVal, loClamp, hiClamp: Single);
 var
   x, y, w, h: Integer;
-  thr: Double;
+  thr, arg: Double;
   v: Single;
 begin
   w := Res.Width - 1;
@@ -441,17 +441,20 @@ begin
   thr := maxEnergy * 1e-4;
   for y := 0 to h do
     for x := 0 to w do
-      if energy[y, x] <= thr then
+    begin
+      arg := constFac * energy[y, x];
+      if (energy[y, x] <= thr) or (arg <= 0) then  
         Res[y, x] := degenVal
       else
       begin
-        v := Res[y, x] / Sqrt(constFac * energy[y, x]);
+        v := Res[y, x] / Sqrt(arg);
         if v < loClamp then
           v := loClamp
         else if v > hiClamp then
           v := hiClamp;
         Res[y, x] := v;
       end;
+    end;
 end;
 
 function MaskFromTemplate(Templ: TIntegerMatrix): TSingleMatrix;
