@@ -141,6 +141,9 @@ uses
   simba.form_scripttabs,
   simba.form_output;
 
+const
+  SimbaLayoutVersion = 1; // bump when incompatible layouts so default is loaded
+
 type
   TControlAccess = class(TControl);
 
@@ -927,13 +930,15 @@ begin
     BeginLayoutBuild();
     try
       try
-        LoadRestoredBounds(Config);
-
-        Result := DockMaster.LoadLayoutFromConfig(Config, True);
-        if Result then
+        if (Config.GetValue('SimbaLayoutVersion', 0) = SimbaLayoutVersion) then
         begin
-          LoadRestoredTab(Config, Names, Indices);
-          RestoreDockedTabs(Names, Indices);
+          LoadRestoredBounds(Config);
+          Result := DockMaster.LoadLayoutFromConfig(Config, True);
+          if Result then
+          begin
+            LoadRestoredTab(Config, Names, Indices);
+            RestoreDockedTabs(Names, Indices);
+          end;
         end;
       except
         // A corrupt or incompatible saved layout - fall back to the default layout.
@@ -995,6 +1000,7 @@ begin
         DockMaster.RestoreLayouts.Add(DockMaster.CreateRestoreLayout(Screen.CustomForms[I].HostDockSite), True);
     DockMaster.SaveLayoutToConfig(Config);
     SaveOutputTabs(Config);
+    Config.SetValue('SimbaLayoutVersion', SimbaLayoutVersion);
 
     Config.SaveToStream(Stream);
     Result := Stream.DataString;
