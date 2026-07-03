@@ -166,7 +166,8 @@ uses
   simba.dialog,
   simba.vartype_string,
   simba.vartype_windowhandle,
-  simba.ide_controller;
+  simba.ide_controller,
+  simba.ide_minimap;
 
 procedure TSimbaScriptTabRunner.DoOutputThread;
 var
@@ -660,6 +661,9 @@ begin
   UpdateModifiedText();
 
   SimbaEvents.Post(ESimbaEvent.TAB_ADD, Self);
+
+  with TMinimapControl.Create(Self, FEditor) do
+    Parent := Self;
 end;
 
 destructor TSimbaScriptTab.Destroy;

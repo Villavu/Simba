@@ -1,0 +1,91 @@
+object EditorMinimapFrame: TEditorMinimapFrame
+  Left = 0
+  Height = 480
+  Top = 0
+  Width = 640
+  ClientHeight = 480
+  ClientWidth = 640
+  DesignTimePPI = 192
+  LCLVersion = '4.8.0.0'
+  ParentBackground = False
+  ParentFont = False
+  TabOrder = 0
+  DesignLeft = 362
+  DesignTop = 46
+  object CheckboxEnabled: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 0
+    Height = 36
+    Top = 0
+    Width = 116
+    Caption = 'Enabled'
+    TabOrder = 0
+  end
+  object CheckboxDocked: TCheckBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = CheckboxEnabled
+    AnchorSideTop.Side = asrBottom
+    Left = 0
+    Height = 36
+    Top = 44
+    Width = 112
+    BorderSpacing.Top = 8
+    Caption = 'Docked'
+    TabOrder = 1
+  end
+  object EditWidth: TSpinEdit
+    AnchorSideLeft.Control = Label2
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = CheckboxDocked
+    AnchorSideTop.Side = asrBottom
+    Left = 103
+    Height = 40
+    Top = 88
+    Width = 281
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 8
+    TabOrder = 2
+  end
+  object Label1: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = CheckboxDocked
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = EditWidth
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 40
+    Top = 88
+    Width = 64
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Top = 8
+    Caption = 'Width'
+    Layout = tlCenter
+  end
+  object Label2: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = EditFontSize
+    AnchorSideBottom.Control = EditFontSize
+    AnchorSideBottom.Side = asrBottom
+    Left = 0
+    Height = 40
+    Top = 136
+    Width = 98
+    Anchors = [akTop, akLeft, akBottom]
+    Caption = 'Font Size'
+    Layout = tlCenter
+  end
+  object EditFontSize: TSpinEdit
+    AnchorSideLeft.Control = Label2
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = EditWidth
+    AnchorSideTop.Side = asrBottom
+    Left = 103
+    Height = 40
+    Top = 136
+    Width = 281
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 8
+    TabOrder = 3
+  end
+end

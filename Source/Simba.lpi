@@ -642,7 +642,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="98">
+    <Units Count="100">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1074,6 +1074,16 @@
         <Filename Value="simba.wgcapture_bindings.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit97>
+      <Unit98>
+        <Filename Value="ide/simba.ide_minimap.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="ide/simba.frame_settings_editorminimap.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="EditorMinimapFrame"/>
+        <ResourceBaseClass Value="Frame"/>
+      </Unit99>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -161,6 +161,13 @@ type
       ShowHints: TSimbaSetting;
     end;
 
+    MiniMap: record
+      Enabled: TSimbaSetting;
+      Docked: TSimbaSetting;
+      FontSize: TSimbaSetting;
+      Width: TSimbaSetting;
+    end;
+
     property FirstLaunch: Boolean read FFirstLaunch;
 
     class function GetINIFile: TINIFile;
@@ -542,6 +549,12 @@ begin
 
   // Compiler
   Compiler.ShowHints := TSimbaSetting_Boolean.Create(Self, 'Compiler', 'ShowHints', False);
+
+  // MiniMap
+  MiniMap.Enabled    := TSimbaSetting_Boolean.Create(Self, 'MiniMap', 'Enabled', True);
+  MiniMap.Docked     := TSimbaSetting_Boolean.Create(Self, 'MiniMap', 'Docked', False);
+  MiniMap.FontSize   := TSimbaSetting_Integer.Create(Self, 'MiniMap', 'FontSize', 3);
+  MiniMap.Width      := TSimbaSetting_Integer.Create(Self, 'MiniMap', 'Width', 170);
 end;
 
 destructor TSimbaSettings.Destroy;

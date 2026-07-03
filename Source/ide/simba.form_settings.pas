@@ -21,7 +21,8 @@ uses
   simba.frame_settings_general,
   simba.frame_settings_output,
   simba.frame_settings_backup,
-  simba.frame_settings_codetools;
+  simba.frame_settings_codetools,
+  simba.frame_settings_editorminimap;
 
 type
   TSimbaSettingsForm = class(TForm)
@@ -48,6 +49,7 @@ type
     EditorDefaultFrame: TEditorDefaultFrame;
     EditorKeybindingFrame: TSimbaEditorHotkeyFrame;
     EditorCustomTokenAttriFrame: TEditorCustomTokenAttriFrame;
+    EditorMinimapFrame: TEditorMinimapFrame;
 
     procedure ShowPage(Title: String);
     procedure Open(Page: String);
@@ -125,6 +127,7 @@ begin
   EditorColorsFrame.Load();
   EditorDefaultFrame.Load();
   EditorKeybindingFrame.Load();
+  EditorMinimapFrame.Load();
   SimbaOutputBoxFrame.Load();
   SimbaBackupFrame.Load();
 
@@ -152,6 +155,7 @@ begin
   EditorCustomTokenAttriFrame.Save();
   EditorDefaultFrame.Save();
   EditorKeybindingFrame.Save();
+  EditorMinimapFrame.Save();
   SimbaOutputBoxFrame.Save();
   SimbaBackupFrame.Save();
 end;
@@ -177,8 +181,8 @@ var
 begin
   inherited Create(AOwner);
 
-  Width  := Scale96ToScreen(800);
-  Height := Scale96ToScreen(600);
+  Width  := Scale96ToScreen(700);
+  Height := Scale96ToScreen(500);
 
   Constraints.MinWidth  := Round(Width * 0.75);
   Constraints.MinHeight := Round(Height * 0.75);
@@ -236,6 +240,11 @@ begin
   EditorKeybindingFrame.Parent := AddPage('Keybindings', Node);
   EditorKeybindingFrame.Align := alClient;
   EditorKeybindingFrame.ParentFont := True;
+
+  EditorMinimapFrame := TEditorMinimapFrame.Create(Self);
+  EditorMinimapFrame.Parent := AddPage('Minimap', Node);
+  EditorMinimapFrame.Align := alClient;
+  EditorMinimapFrame.ParentFont := True;
 
   SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_SETTINGS]);
 end;

@@ -12,6 +12,7 @@ interface
 uses
   Classes, SysUtils, Controls, Forms, StdCtrls, Graphics,
   LazSynEditText,
+  LazSynTextArea,
   SynEdit,
   SynEditTypes,
   SynEditFoldedView,
@@ -62,6 +63,7 @@ type
 
     property FoldView: TSynEditFoldedView read FFoldView;
     property TopView;
+    property TextArea: TLazSynTextArea read FTextArea;
 
     property Styler: TSimbaSynEditStyler read FStyler;
     property FontName: String read GetFontName write SetFontName;

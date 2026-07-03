@@ -9,7 +9,7 @@ object SimbaSettingsForm: TSimbaSettingsForm
   DesignTimePPI = 192
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
-  LCLVersion = '4.0.0.4'
+  LCLVersion = '4.8.0.0'
   OnShow = FormShow
   object TreeView: TTreeView
     Left = 0
