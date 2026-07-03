@@ -19,282 +19,156 @@
 
   Third party copyrights are property of their respective owners.
 }
-
 unit simba.matchtemplate_sqdiff;
 
 {$i simba.inc}
-
-{$MODESWITCH ARRAYOPERATORS OFF}
 
 interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.matchtemplate, simba.matchtemplate_matrix, simba.matchtemplate_helpers;
+  simba.base, simba.matchtemplate_core;
 
-function MatchTemplate_SQDIFF(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-function MatchTemplateMask_SQDIFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-
-function MatchTemplateMask_SQDIFF_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;
-function MatchTemplateMask_SQDIFF_Cache(ACache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplate_SQDIFF(var Cache: TMatchTemplateCache; const Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplateMask_SQDIFF(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 
 implementation
 
 uses
-  simba.vartype_matrix,
-  simba.threading,
-  simba.multiprocessing;
+  simba.vartype_matrix;
 
-// MatchTemplate_SQDIFF
-function __MatchTemplate_SQDIFF(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplate_SQDIFF(var Cache: TMatchTemplateCache; const Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 var
-  x,y,w,h,tw,th,iw,ih: Integer;
+  x,y, lastX,lastY, templW,templH, imgW,imgH, outW,outH: Integer;
   invSize, numer, denom, tplSigma, tplSum2, wndSum2: Double;
-  tplMean, tplSdv, mR,sR, mG,sG, mB,sB:Double;
+  tplMean, tplSdv, meanR,stdevR, meanG,stdevG, meanB,stdevB: Double;
   sum2r, sum2g, sum2b: TDoubleMatrix;
-  Corr: TSingleMatrix;
-  ImageChannels, TemplChannels: TRGBMatrix;
+  crossCorr: TSingleMatrix;
+  templR,templG,templB: TSingleMatrix;
+  curSum2R,curSum2RBot, curSum2G,curSum2GBot, curSum2B,curSum2BBot: PDouble;
+  curCross, curResult: PSingle;
 begin
-  ImageChannels := TRGBMatrix.Create(Image);
-  TemplChannels := TRGBMatrix.Create(Templ);
-  Corr := CrossCorrRGB(ImageChannels, TemplChannels).Merge();
+  SplitChannels(Templ, templR, templG, templB);
 
-  tw := Templ.Width;
-  th := Templ.Height;
+  imgW := Cache.Width;
+  imgH := Cache.Height;
+  outW := imgW - templR.Width  + 1;
+  outH := imgH - templR.Height + 1;
+  crossCorr := CorrelateChannelsSum(
+    Cache.Spectra,
+    ForwardTransformChannels(templR, templG, templB, imgW, imgH),
+    outW, outH
+  );
 
-  invSize := Double(1.0) / Double(tw*th);
+  templW := Templ.Width;
+  templH := Templ.Height;
 
-  TemplChannels.R.MeanStdev(mR, sR);
-  TemplChannels.G.MeanStdev(mG, sG);
-  TemplChannels.B.MeanStdev(mB, sB);
+  invSize := Double(1.0) / Double(templW*templH);
 
-  tplMean := Sqr(mR) + Sqr(mG) + Sqr(mB);
-  tplSdv  := Sqr(sR) + Sqr(sG) + Sqr(sB);
+  templR.MeanStdev(meanR, stdevR);
+  templG.MeanStdev(meanG, stdevG);
+  templB.MeanStdev(meanB, stdevB);
+
+  tplMean := Sqr(meanR) + Sqr(meanG) + Sqr(meanB);
+  tplSdv  := Sqr(stdevR) + Sqr(stdevG) + Sqr(stdevB);
 
   tplSigma := Sqrt(tplSdv + tplMean) / Sqrt(invSize);
   tplSum2  := (tplSdv + tplMean) / invSize;
 
-  SumsPd(ImageChannels.R, sum2r);
-  SumsPd(ImageChannels.G, sum2g);
-  SumsPd(ImageChannels.B, sum2b);
+  sum2r := Cache.SumSq[0];
+  sum2g := Cache.SumSq[1];
+  sum2b := Cache.SumSq[2];
 
-  iw := sum2r.Width;
-  ih := sum2r.Height;
+  imgW := sum2r.Width;
+  imgH := sum2r.Height;
 
-  Result.SetSize(iw-tw, ih-th);
+  Result.SetSize(imgW-templW, imgH-templH);
 
-  w := iw-tw-1;
-  h := ih-th-1;
-  for y := 0 to h do
-    for x := 0 to w do
+  lastX := imgW-templW-1;
+  lastY := imgH-templH-1;
+  for y := 0 to lastY do
+  begin
+    curSum2R := @sum2r[Y][0]; curSum2RBot := @sum2r[Y+templH][0]; curSum2G := @sum2g[Y][0]; curSum2GBot := @sum2g[Y+templH][0];
+    curSum2B := @sum2b[Y][0]; curSum2BBot := @sum2b[Y+templH][0];
+    curCross := @crossCorr[Y][0]; curResult := @Result[Y][0];
+    for x := 0 to lastX do
     begin
-      wndSum2 := sum2r[Y, X] - sum2r[Y,X+tw] - sum2r[Y+th,X] + sum2r[Y+th,X+tw];
-      wndSum2 += sum2g[Y, X] - sum2g[Y,X+tw] - sum2g[Y+th,X] + sum2g[Y+th,X+tw];
-      wndSum2 += sum2b[Y, X] - sum2b[Y,X+tw] - sum2b[Y+th,X] + sum2b[Y+th,X+tw];
+      wndSum2 := curSum2R[X] - curSum2R[X+templW] - curSum2RBot[X] + curSum2RBot[X+templW];
+      wndSum2 += curSum2G[X] - curSum2G[X+templW] - curSum2GBot[X] + curSum2GBot[X+templW];
+      wndSum2 += curSum2B[X] - curSum2B[X+templW] - curSum2BBot[X] + curSum2BBot[X+templW];
 
-      numer   := Max(0, wndSum2 - Double(2.0) * Corr[Y, X] + tplSum2);
+      numer   := Max(0, wndSum2 - Double(2.0) * curCross[X] + tplSum2);
       if Normed then
       begin
-        denom := tplSigma * Sqrt(wndSum2);
-        if Abs(numer) < denom then
-          Result[Y, X] := numer / denom
+        if wndSum2 > 0 then
+          denom := tplSigma * Sqrt(wndSum2)
         else
-          Result[Y, X] := 1;
+          denom := 0;
+        if Abs(numer) < denom then
+          curResult[X] := numer / denom
+        else
+          curResult[X] := 1;
       end else
-        Result[Y, X] := numer;
+        curResult[X] := numer;
     end;
+  end;
 end;
 
-function MatchTemplate_SQDIFF(Image, Templ: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-begin
-  Result := Multithread(Image, Templ, @__MatchTemplate_SQDIFF, Normed);
-end;
-
-// MatchTemplateMask_SQDIFF
-function __MatchTemplateMask_SQDIFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
+function MatchTemplateMask_SQDIFF(var Cache: TMatchTemplateCache; const Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
 var
-  MaskChannels, TemplateChannels, ImageChannels: TRGBMatrix;
-  Img2, Mask2, TemplMulMask2: TRGBMatrix;
-  Templ2Mask2Sum: Double;
-  TempResult: TSingleMatrix;
-  W, H, X, Y: Integer;
+  templR,templG,templB, Mask, Mask2, TempResult: TSingleMatrix;
+  channelCorr: TChannelCorrelations;
+  Templ2Mask2Sum, maxEnergy: Double;
+  templ2Mask2SumS, energy, negTwoCorr: Single;
+  x, y, imgW, imgH, outW, outH: Integer;
+  curCorr0, curCorr1, curCorr2, curTemp, curResult: PSingle;
 begin
-  MaskChannels     := MaskFromTemplate(Template);
-  TemplateChannels := TRGBMatrix.Create(Template);
-  ImageChannels    := TRGBMatrix.Create(Image);
+  imgW := Cache.Width;
+  imgH := Cache.Height;
 
-  // Mat img2 = img.mul(img);
-  Img2 := (ImageChannels * ImageChannels);
-  // mask.mul(mask);
-  Mask2 := (MaskChannels * MaskChannels);
+  Mask := MaskFromTemplate(Template);
+  SplitChannels(Template, templR, templG, templB);
+
+  Mask2 := MultiplyElements(Mask, Mask); // mask.mul(mask)
+  outW := imgW - templR.Width  + 1;
+  outH := imgH - templR.Height + 1;
+
   // double templ2_mask2_sum = norm(templ.mul(mask), NORM_L2SQR);
-  Templ2Mask2Sum := SumOfSquares(TemplateChannels * MaskChannels);
-  // templ.mul(mask2)
-  TemplMulMask2 := TemplateChannels * Mask2;
+  Templ2Mask2Sum := SumOfSquaresChannels(MultiplyElements(templR, Mask), MultiplyElements(templG, Mask), MultiplyElements(templB, Mask));
 
-  // crossCorr(img2, mask2, temp_result, Point(0,0), 0, 0);
-  TempResult := CrossCorrRGB(Img2, Mask2).Merge();
+  // CCorr(I_c^2, M^2) per channel (its channel-sum is the window energy TempResult); mask-only -> cached.
+  channelCorr := Cache.MaskCorrISqMSq(Mask, Mask2, outW, outH);
+  Result := CorrelateChannelsSum(
+    Cache.Spectra,
+    ForwardTransformChannels(MultiplyElements(templR, Mask2), MultiplyElements(templG, Mask2), MultiplyElements(templB, Mask2), imgW, imgH),
+    outW, outH
+  );
 
-  // crossCorr(img, templ.mul(mask2), result, Point(0,0), 0, 0);
-  Result := CrossCorrRGB(ImageChannels, templMulMask2).Merge();
-  Result := -2 * Result + TempResult + Templ2Mask2Sum;
-
-  if Normed then
+  // TempResult = Sum_c CCorr(I_c^2, M^2);   Result = -2*numerator + TempResult + templ2Mask2Sum
+  templ2Mask2SumS := Templ2Mask2Sum;
+  maxEnergy := 0;
+  TempResult.SetSize(outW, outH);
+  for y := 0 to outH - 1 do
   begin
-    W := Result.Width - 1;
-    H := Result.Height - 1;
-    for Y := 0 to H do
-      for X := 0 to W do
-        Result[Y, X] := Result[Y, X] / Sqrt(Templ2Mask2Sum * TempResult[Y, X]);
-  end;
-
-  Result.ReplaceNaNAndInf(0);
-end;
-
-function MatchTemplateMask_SQDIFF(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-begin
-  Result := Multithread(Image, Template, @__MatchTemplateMask_SQDIFF, Normed);
-end;
-
-// MatchTemplateMask_SQDIFF_Cache
-type
-  TMatchTemplateCache_SQDIFF = class(TMatchTemplateCacheBase)
-  public
-  type
-    TSliceCache = record
-      Lo, Hi: Integer;
-      Img: TSingleMatrix;
-      TempResult: TSingleMatrix;
-      ImgFFT: TRGBComplexMatrix;
+    curCorr0 := @channelCorr[0][y][0]; curCorr1 := @channelCorr[1][y][0]; curCorr2 := @channelCorr[2][y][0];
+    curTemp := @TempResult[y][0]; curResult := @Result[y][0];
+    for x := 0 to outW - 1 do
+    begin
+      energy := (curCorr0[x] + curCorr1[x]) + curCorr2[x];
+      curTemp[x] := energy;
+      if energy > maxEnergy then
+        maxEnergy := energy;
+      negTwoCorr := -2 * curResult[x];
+      curResult[x] := (negTwoCorr + energy) + templ2Mask2SumS;
     end;
-  public
-    Lock: TEnterableLock;
-    SliceCaches: array of TSliceCache;
-
-    Img2, Mask2: TRGBMatrix;
-    TempResult: TSingleMatrix;
-
-    ImageChannels: TRGBMatrix;
-    MaskChannels: TRGBMatrix;
-
-    Img: TIntegerMatrix;
-
-    function GetSliceCache(Lo, Hi: Integer): TSliceCache;
-
-    constructor Create(Image, Template: TIntegerMatrix);
   end;
-
-function TMatchTemplateCache_SQDIFF.GetSliceCache(Lo, Hi: Integer): TSliceCache;
-var
-  ImgSlice: TRGBMatrix;
-  I: Integer;
-begin
-  Lock.Enter();
-
-  try
-    for I := 0 to High(SliceCaches) do
-      if (SliceCaches[I].Lo = Lo) and (SliceCaches[I].Hi = Hi) then
-        Exit(SliceCaches[I]);
-
-    //DebugLn('TMatchTemplateCache_SQDIFF.GetSliceCache(%d, %d)', [Lo, Hi]);
-
-    ImgSlice := ImageChannels.Copy(Lo, Hi);
-
-    Result.Lo := Lo;
-    Result.Hi := Hi;
-    Result.Img := ImgSlice.Merge();
-    Result.ImgFFT := FFT2_RGB(ImgSlice);
-
-    Result.TempResult := TempResult.Copy(Lo, Lo + (Hi - Lo) - MaskChannels.Height + 1);
-
-    SetLength(SliceCaches, Length(SliceCaches) + 1);
-    SliceCaches[High(SliceCaches)] := Result;
-  finally
-    Lock.Leave();
-  end;
-end;
-
-constructor TMatchTemplateCache_SQDIFF.Create(Image, Template: TIntegerMatrix);
-begin
-  inherited Create();
-
-  Img := Image;
-
-  ImageChannels := TRGBMatrix.Create(Image);
-  MaskChannels  := MaskFromTemplate(Template);
-
-  Img2 := (ImageChannels * ImageChannels);
-  Mask2 := (MaskChannels * MaskChannels);
-  TempResult := CrossCorrRGB(Img2, Mask2).Merge();
-
-  Width := Image.Width;
-  Height := Image.Height;
-end;
-
-function MatchTemplateMask_SQDIFF_Cache_Sliced(Cache: TMatchTemplateCache_SQDIFF; Template: TIntegerMatrix; Normed: Boolean; ImgStartY, ImgEndY: Integer): TSingleMatrix;
-var
-  TemplChannels, TemplMulMask2: TRGBMatrix;
-  SliceCache: TMatchTemplateCache_SQDIFF.TSliceCache;
-  Templ2Mask2Sum: Double;
-  X, Y, W, H: Integer;
-begin
-  SliceCache := Cache.GetSliceCache(ImgStartY, ImgEndY);
-
-  TemplChannels := TRGBMatrix.Create(Template);
-  Templ2Mask2Sum := SumOfSquares(TemplChannels * Cache.MaskChannels);
-  TemplMulMask2 := TemplChannels * Cache.Mask2;
-
-  Result := CrossCorrRGB(SliceCache.ImgFFT, TemplMulMask2).Merge();
-  Result := -2 * Result + SliceCache.TempResult + Templ2Mask2Sum;
 
   if Normed then
   begin
-    Result.GetSizeMinusOne(W, H);
-    for Y := 0 to H do
-      for X := 0 to W do
-        Result[Y, X] := Result[Y, X] / Sqrt(Templ2Mask2Sum * SliceCache.TempResult[Y, X]);
+    // result /= sqrt(templ2_mask2_sum * temp_result);
+    NormalizeMasked(Result, TempResult, maxEnergy, Templ2Mask2Sum, 1, 0, 1e30);
+    Result.ReplaceNaNAndInf(0);
   end;
-
-  Result.ReplaceNaNAndInf(0);
-end;
-
-function MatchTemplateMask_SQDIFF_Cache(ACache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-var
-  Cache: TMatchTemplateCache_SQDIFF absolute ACache;
-  RowSize: Integer;
-
-  procedure Execute(const Index, Lo, Hi: Integer);
-  var
-    Mat: TSingleMatrix;
-    Y: Integer;
-  begin
-    Mat := MatchTemplateMask_SQDIFF_Cache_Sliced(Cache, Template, Normed, Lo, Min(Hi + Template.Height, Cache.Height));
-    for Y := 0 to Mat.Height - 1 do
-      Move(Mat[Y,0], Result[Lo+Y,0], RowSize);
-  end;
-
-begin
-  if (not (ACache is TMatchTemplateCache_SQDIFF)) then
-    raise Exception.Create('[MatchTemplateMask_SQDIFF_Cache]: Invalid cache');
-
-  Result.SetSize(
-    (Cache.Width - Template.Width) + 1,
-    (Cache.Height - Template.Height) + 1
-  );
-  RowSize := Result.Width * SizeOf(Single);
-
-  SimbaMultiprocessing.Run(
-    SimbaMultiprocessingStrategy.SlicesForTemplateFinder(Cache.Width, Cache.Height),
-    0,
-    Cache.Height - Template.Height,
-    @Execute
-  );
-end;
-
-function MatchTemplateMask_SQDIFF_CreateCache(Image, Template: TIntegerMatrix): TMatchTemplateCacheBase;
-begin
-  Result := TMatchTemplateCache_SQDIFF.Create(Image, Template);
 end;
 
 end.
-

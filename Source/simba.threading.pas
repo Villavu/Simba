@@ -29,6 +29,9 @@ type
   function RunInThread(Proc: TThreadProc; FreeOnTerminate: Boolean = False): TThread; overload;
   function RunInThread(Method: TThreadMethod; FreeOnTerminate: Boolean = False): TThread; overload;
 
+  // Attempt to put the CALLING thread to the performance cores
+  procedure SetThreadPCore;
+
 type
   TWaitableLock = record
   private
@@ -89,12 +92,13 @@ var
     CoreCount: Integer;
     ThreadCount: Integer;
     PhysicalMemory: Integer;
+    PCoreCount: Integer; // performance cores (0 = non-hybrid / unknown)
   end;
 
 implementation
 
 uses
-  NumCPULib;
+  NumCPULib{$IFDEF WINDOWS}, Windows{$ENDIF};
 
 procedure TLimit.Inc;
 begin
@@ -129,7 +133,7 @@ end;
 
 class operator TEnterableLock.Initialize(var Self: TEnterableLock);
 begin
-  Self.FLock := TCriticalSection.Create();
+  Self.FLock := SyncObjs.TCriticalSection.Create();
 end;
 
 class operator TEnterableLock.Finalize(var Self: TEnterableLock);
@@ -401,10 +405,91 @@ begin
   FLock.Unlock();
 end;
 
+{$IFDEF WINDOWS}
+type
+  {$PUSH}
+  {$PACKRECORDS C}
+  TSysCpuSetInfo = record
+    Size: DWORD; InfoType: DWORD;
+    Id: DWORD; Group: WORD;
+    LogicalProcessorIndex, CoreIndex, LastLevelCacheIndex, NumaNodeIndex, EfficiencyClass, AllFlags: Byte;
+    Reserved1: DWORD; AllocationTag: UInt64;
+  end;
+  {$POP}
+  PSysCpuSetInfo = ^TSysCpuSetInfo;
+
+var
+  PCoreMask: DWORD_PTR = 0;
+
+// Detect the performance cores if possible.
+procedure DetectPCores;
+type
+  TGetSystemCpuSetInformation = function(Info: PSysCpuSetInfo; BufLen: DWORD; var Ret: DWORD; Proc: THandle; Flags: DWORD): LongBool; stdcall;
+var
+  GetSystemCpuSetInformation: TGetSystemCpuSetInformation;
+  BufLen, ReturnedLen, Offset: DWORD;
+  Buf: array of Byte;
+  Info: PSysCpuSetInfo;
+  MaxClass: Byte;
+  SeenCore: array[Byte] of Boolean;
+begin
+  Pointer(GetSystemCpuSetInformation) := GetProcAddress(GetModuleHandle('kernel32'), 'GetSystemCpuSetInformation');
+  if not Assigned(GetSystemCpuSetInformation) then
+    Exit;
+  BufLen := 0;
+  GetSystemCpuSetInformation(nil, 0, BufLen, GetCurrentProcess(), 0);
+  if (BufLen = 0) then
+    Exit;
+
+  SetLength(Buf, BufLen);
+  ReturnedLen := 0;
+  if not GetSystemCpuSetInformation(@Buf[0], BufLen, ReturnedLen, GetCurrentProcess(), 0) then
+    Exit;
+
+  MaxClass := 0;
+  Offset := 0;
+  while (Offset < ReturnedLen) do
+  begin
+    Info := PSysCpuSetInfo(@Buf[Offset]);
+    if (Info^.EfficiencyClass > MaxClass) then
+      MaxClass := Info^.EfficiencyClass;
+    Inc(Offset, Info^.Size);
+  end;
+
+  FillChar(SeenCore, SizeOf(SeenCore), 0);
+  Offset := 0;
+  while (Offset < ReturnedLen) do
+  begin
+    Info := PSysCpuSetInfo(@Buf[Offset]);
+    if (Info^.EfficiencyClass = MaxClass) then
+    begin
+      PCoreMask := PCoreMask or (PtrUInt(1) shl Info^.LogicalProcessorIndex);
+      if not SeenCore[Info^.CoreIndex] then
+      begin
+        SeenCore[Info^.CoreIndex] := True;
+        Inc(SimbaCPUInfo.PCoreCount);
+      end;
+    end;
+    Inc(Offset, Info^.Size);
+  end;
+end;
+{$ENDIF}
+
+procedure SetThreadPCore;
+begin
+  {$IFDEF WINDOWS}
+  if (PCoreMask <> 0) then
+    SetThreadAffinityMask(GetCurrentThread(), PCoreMask);
+  {$ENDIF}
+end;
+
 initialization
   SimbaCPUInfo.ThreadCount    := TNumCPULib.GetLogicalCPUCount();
   SimbaCPUInfo.CoreCount      := TNumCPULib.GetPhysicalCPUCount();
   SimbaCPUInfo.PhysicalMemory := TNumCPULib.GetTotalPhysicalMemory();
+  {$IFDEF WINDOWS}
+  DetectPCores();
+  {$ENDIF}
 
 end.
 

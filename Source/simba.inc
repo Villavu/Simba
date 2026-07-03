@@ -25,6 +25,13 @@
 //  {$FPUTYPE SSE64}
 //{$ENDIF}
 
+{$IF DEFINED(CPUX86_64)}
+  {$DEFINE SIMBA_FFT_SIMD_X86_64}
+{$ENDIF}
+
+{$DEFINE MT_PACKED} // pack two real colour channels into one complex FFT (R->Re, G->Im) rather than transforming all three separately
+{$DEFINE MT_THREADING} // multithreead FFT row/column passes
+
 {$MACRO ON}
 
 {$MODESWITCH ADVANCEDRECORDS}
@@ -70,21 +77,21 @@
 {$DEFINE G_MASK := $00FF00}
 {$DEFINE R_MASK := $0000FF}
 
-// cpu string
+// CPU_TYPE string
 {$IF DEFINED(CPU32)}
-  {$DEFINE CPU := 'CPU32'}
+  {$DEFINE CPU_TYPE := 'CPU32'}
 {$ELSEIF DEFINED(CPUAARCH64)}
-  {$DEFINE CPU := 'CPUAARCH64'}
+  {$DEFINE CPU_TYPE := 'CPUAARCH64'}
 {$ELSEIF DEFINED(CPU64)}
-  {$DEFINE CPU := 'CPU64'}
+  {$DEFINE CPU_TYPE := 'CPU64'}
 {$ENDIF}
 
-// os string
+// OS_TYPE string
 {$IF DEFINED(WINDOWS)}
-  {$DEFINE OS := 'WINDOWS'}
+  {$DEFINE OS_TYPE := 'WINDOWS'}
 {$ELSEIF DEFINED(DARWIN)}
-  {$DEFINE OS := 'DARWIN'}
+  {$DEFINE OS_TYPE := 'DARWIN'}
 {$ELSEIF DEFINED(LINUX)}
-  {$DEFINE OS := 'LINUX'}
+  {$DEFINE OS_TYPE := 'LINUX'}
 {$ENDIF}
 

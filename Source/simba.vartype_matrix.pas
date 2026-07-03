@@ -801,12 +801,16 @@ end;
 procedure TSingleMatrixHelper.ReplaceNaNAndInf(const ReplaceWith: Single);
 var
   X, Y, W, H: Integer;
+  curRow: PSingle;
 begin
   if Self.GetSizeMinusOne(W, H) then
     for Y := 0 to H do
+    begin
+      curRow := @Self[Y][0];
       for X := 0 to W do
-        if not IsNumber(Self[Y,X]) then
-          Self[Y,X] := ReplaceWith;
+        if not IsNumber(curRow[X]) then
+          curRow[X] := ReplaceWith;
+    end;
 end;
 
 function TSingleMatrixHelper.Rot90: TSingleMatrix;

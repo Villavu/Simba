@@ -21,7 +21,8 @@ uses
   simba.dialog, simba.threading, simba.target,
   simba.colormath, simba.aca, simba.multiprocessing,
   simba.toolform,
-  simba.component_imagebox;
+  simba.component_imagebox,
+  simba.fftpack4;
 
 type
   PProcessID = ^TProcessID;
@@ -574,13 +575,13 @@ begin
     addGlobalVar(Script.ScriptFileName, 'SCRIPT_FILE').isConstant := True;
     addGlobalVar(SimbaNativeInterface.UnixTime(), 'SCRIPT_START_TIME').isConstant := True;
 
+    addGlobalVar(ltBoolean, @FFT_THREADING, 'FFT_THREADING');
+    addGlobalVar(ltBoolean, @FFT_THREADING_DEBUG, 'FFT_THREADING_DEBUG');
+    addGlobalVar(ltInt32, @FFT_MIN_AREA, 'FFT_MIN_AREA');
+    addGlobalVar(ltInt32, @FFT_MAX_THREADS, 'FFT_MAX_THREADS');
+
     addGlobalVar(
       'record'                    + LineEnding +
-      '  TemplateFinder: record'  + LineEnding +
-      '    Enabled: Boolean;'     + LineEnding +
-      '    SliceWidth: Integer;'  + LineEnding +
-      '    SliceHeight: Integer;' + LineEnding +
-      '  end;'                    + LineEnding +
       '  ColorFinder: record'     + LineEnding +
       '    Enabled: Boolean;'     + LineEnding +
       '    SliceWidth: Integer;'  + LineEnding +

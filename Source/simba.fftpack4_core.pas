@@ -10,29 +10,37 @@ unit simba.fftpack4_core;
 [==============================================================================}
 {$i simba.inc}
 
-{$MODESWITCH ARRAYOPERATORS OFF}
-
 interface
 
 uses
-  sysutils;
+  Classes, SysUtils;
 
 type
-  RealArrayRef = PSingle;
-  IntArrayRef  = PInt32;
+  TCfftf1Proc = procedure(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
 
-procedure cfftf(const n: Int32; const c, wsave: RealArrayRef);
-procedure cfftb(const n: Int32; const c, wsave: RealArrayRef);
-procedure cffti(const n: Int32; const wsave: RealArrayRef);
+procedure cfftf(const n: Int32; const c, wsave: PSingle);
+procedure cfftb(const n: Int32; const c, wsave: PSingle);
+procedure cffti(const n: Int32; const wsave: PSingle);
 
-procedure rfftf(const n: Int32; const r, wsave: RealArrayRef);
-procedure rfftb(const n: Int32; const r, wsave: RealArrayRef);
-procedure rffti(const n: Int32; const wsave: RealArrayRef);
+procedure rfftf(const n: Int32; const r, wsave: PSingle);
+procedure rfftb(const n: Int32; const r, wsave: PSingle);
+procedure rffti(const n: Int32; const wsave: PSingle);
+
+// Generic radix>5 pass, exposed so the SSE/AVX driver units can reuse it
+procedure passf(out nac: Boolean; const ido,ip,l1,idl1: Int32; const cc,ch,wa: PSingle; const isign: Int32);
+
+var
+  Cfftf1Dispatch: TCfftf1Proc;
 
 implementation
 
 uses
-  math; //used as a platform fallback
+  Math
+  {$IFDEF SIMBA_FFT_SIMD_X86_64},
+  cpu,
+  simba.fftpack4_core_sse,
+  simba.fftpack4_core_avx
+  {$ENDIF};
 
 const
   TWOPI: Single = 6.28318530717959;
@@ -46,58 +54,90 @@ type
    passf2, passf3, passf4, passf5, passf. Complex FFT passes fwd and bwd.
 ---------------------------------------------------------------------- *)
 
+// Fixed in trunk by MR !1024 (commit 9d55e3aa).
+{$ifdef CPUI386}
+{$push}
+{$optimization noregvar}
+{$endif}
+
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf2(const ido, l1: Int32; const cc,ch,wa1: RealArrayRef; const isign: Int32);
+procedure passf2(const ido, l1: Int32; const cc,ch,wa1: PSingle; const isign: Int32);
 var
-  i,k: Int32;
+  i,k,d1: Int32;
   re,im: Single;
-  ah,ac: RealArrayRef;
+  ah,ac: PSingle;
 begin
+  d1 := l1 * ido; // FPC does not hoist l1*ido out of the inner loops; precompute once.
   if ido<=2 then
   begin
     for k:=0 to l1-1 do
     begin
       ah := ch + k*ido;
       ac := cc + k*ido*2;
-      ah[0]       := ac[0] + ac[ido];   //re
-      ah[1]       := ac[1] + ac[ido+1]; //im
-      ah[ido*l1]  := ac[0] - ac[ido];   //re
-      ah[ido*l1+1]:= ac[1] - ac[ido+1]; //im
+      ah[0]    := ac[0] + ac[ido];   //re
+      ah[1]    := ac[1] + ac[ido+1]; //im
+      ah[d1]   := ac[0] - ac[ido];   //re
+      ah[d1+1] := ac[1] - ac[ido+1]; //im
     end;
   end else
   begin
-    for k:=0 to l1-1 do
-    begin
-      i := 0;
-      ah := ch + k*ido;
-      ac := cc + 2*k*ido;
-      while i < ido-1 do
+    // isign is constant for the whole call; hoist it out of the inner loop.
+    if isign = 1 then
+      for k:=0 to l1-1 do
       begin
-        ah[0] := ac[0] + ac[ido];   //re
-        ah[1] := ac[1] + ac[ido+1]; //im
-        re    := ac[0] - ac[ido];
-        im    := ac[1] - ac[ido+1];
-        ah[l1*ido]   := wa1[i]*re - isign*wa1[i+1]*im; //re
-        ah[l1*ido+1] := wa1[i]*im + isign*wa1[i+1]*re; //im
-        Inc(i, 2);
-        Inc(ac, 2); Inc(ah, 2);
+        i := 0;
+        ah := ch + k*ido;
+        ac := cc + 2*k*ido;
+        while i < ido-1 do
+        begin
+          ah[0]  := ac[0] + ac[ido];   //re
+          ah[1]  := ac[1] + ac[ido+1]; //im
+          re     := ac[0] - ac[ido];
+          im     := ac[1] - ac[ido+1];
+          ah[d1]   := wa1[i]*re - wa1[i+1]*im; //re
+          ah[d1+1] := wa1[i]*im + wa1[i+1]*re; //im
+          Inc(i, 2);
+          Inc(ac, 2); Inc(ah, 2);
+        end;
+      end
+    else
+      for k:=0 to l1-1 do
+      begin
+        i := 0;
+        ah := ch + k*ido;
+        ac := cc + 2*k*ido;
+        while i < ido-1 do
+        begin
+          ah[0]  := ac[0] + ac[ido];   //re
+          ah[1]  := ac[1] + ac[ido+1]; //im
+          re     := ac[0] - ac[ido];
+          im     := ac[1] - ac[ido+1];
+          ah[d1]   := wa1[i]*re + wa1[i+1]*im; //re
+          ah[d1+1] := wa1[i]*im - wa1[i+1]*re; //im
+          Inc(i, 2);
+          Inc(ac, 2); Inc(ah, 2);
+        end;
       end;
-    end;
   end;
 end; // passf2
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf3(const ido, l1: Int32; const cc, ch, wa1,wa2: RealArrayRef; const isign: Int32);
+procedure passf3(const ido, l1: Int32; const cc, ch, wa1,wa2: PSingle; const isign: Int32);
 const
-  taur: Single =-0.5;
   taui: Single = 0.866025403784439;
 var
-  i,k,ac,ah: Int32;
+  i,k,ac,ah,d1,d2: Int32;
   ci2,ci3,di2,di3,cr2,cr3: Single;
   dr2,dr3: Single;
   ti2,tr2: Single;
+  staui,swai,taur: Single;
 begin
+  staui := isign * taui; // fold the constant sign once instead of per element
+  swai  := isign;        // signed twiddle factor as float (avoids int->float per element)
+  taur  := -0.5;         // keep in XMM register; FPC re-loads proc consts from memory each use
+  d1 := l1 * ido;       // FPC does not hoist l1*ido / 2*l1*ido out of the inner loops
+  d2 := 2 * d1;
   if ido=2 then
   begin
     for k:=1 to l1 do
@@ -110,12 +150,12 @@ begin
       ti2 := cc[ac+1] + cc[ac+ido+1];
       ci2 := cc[ac-ido+1] + taur*ti2;
       ch[ah+1] := cc[ac-ido+1]+ti2;
-      cr3 := isign*taui * (cc[ac]-cc[ac+ido]);
-      ci3 := isign*taui * (cc[ac+1]-cc[ac+ido+1]);
-      ch[ah+l1*ido]     := cr2 - ci3;
-      ch[ah+2*l1*ido]   := cr2 + ci3;
-      ch[ah+l1*ido+1]   := ci2 + cr3;
-      ch[ah+2*l1*ido+1] := ci2 - cr3;
+      cr3 := staui * (cc[ac]-cc[ac+ido]);
+      ci3 := staui * (cc[ac+1]-cc[ac+ido+1]);
+      ch[ah+d1]   := cr2 - ci3;
+      ch[ah+d2]   := cr2 + ci3;
+      ch[ah+d1+1] := ci2 + cr3;
+      ch[ah+d2+1] := ci2 - cr3;
     end;
   end else
   begin
@@ -132,17 +172,17 @@ begin
         ti2 := cc[ac+1] + cc[ac+ido+1];
         ci2 := cc[ac-ido+1] + taur*ti2;
         ch[ah+1] := cc[ac-ido+1] + ti2;
-        cr3 := isign*taui * (cc[ac]-cc[ac+ido]);
-        ci3 := isign*taui * (cc[ac+1]-cc[ac+ido+1]);
+        cr3 := staui * (cc[ac]-cc[ac+ido]);
+        ci3 := staui * (cc[ac+1]-cc[ac+ido+1]);
         dr2 := cr2 - ci3;
         dr3 := cr2 + ci3;
         di2 := ci2 + cr3;
         di3 := ci2 - cr3;
-        ch[ah+l1*ido+1]   := wa1[i]*di2 + isign*wa1[i+1]*dr2;
-        ch[ah+l1*ido]     := wa1[i]*dr2 - isign*wa1[i+1]*di2;
-        ch[ah+2*l1*ido+1] := wa2[i]*di3 + isign*wa2[i+1]*dr3;
-        ch[ah+2*l1*ido]   := wa2[i]*dr3 - isign*wa2[i+1]*di3;
-      
+        ch[ah+d1+1] := wa1[i]*di2 + swai*wa1[i+1]*dr2;
+        ch[ah+d1]   := wa1[i]*dr2 - swai*wa1[i+1]*di2;
+        ch[ah+d2+1] := wa2[i]*di3 + swai*wa2[i+1]*dr3;
+        ch[ah+d2]   := wa2[i]*dr3 - swai*wa2[i+1]*di3;
+
         Inc(i, 2);
       end;
     end;
@@ -151,12 +191,12 @@ end; (* passf3 *)
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf4(const o1, l1: Int32; const cc, ch, wa1, wa2, wa3: RealArrayRef; const isign: Int32);
+procedure passf4(const o1, l1: Int32; const cc, ch, wa1, wa2, wa3: PSingle; const isign: Int32);
 var
   i,k,o2,o3,d1,d2,d3: Int32;
   ci2,ci3,ci4,cr2,cr3,cr4: Single;
   ti1,ti2,ti3,ti4,tr1,tr2,tr3,tr4: Single;
-  ic,ih,ac,ah: RealArrayRef;
+  ic,ih,ac,ah: PSingle;
 begin
   if o1=2 then
   begin
@@ -179,10 +219,15 @@ begin
       ah[1]    := ti2 + ti3;
       ah[d2]   := tr2 - tr3;
       ah[d2+1] := ti2 - ti3;
-      ah[d1]   := tr1 + isign*tr4;
-      ah[d1+1] := ti1 + isign*ti4;
-      ah[d3]   := tr1 - isign*tr4;
-      ah[d3+1] := ti1 - isign*ti4;
+      if isign = 1 then
+      begin
+        ah[d1]   := tr1 + tr4;  ah[d1+1] := ti1 + ti4;
+        ah[d3]   := tr1 - tr4;  ah[d3+1] := ti1 - ti4;
+      end else
+      begin
+        ah[d1]   := tr1 - tr4;  ah[d1+1] := ti1 - ti4;
+        ah[d3]   := tr1 + tr4;  ah[d3+1] := ti1 + ti4;
+      end;
       Inc(ac, 8);
       Inc(ah, 2);
     end;
@@ -191,31 +236,32 @@ begin
     d1 := l1*o1;
     o2 := 2*o1; d2 := l1*o2;
     o3 := 3*o1; d3 := l1*o3;
-    for k:=0 to l1-1 do
-    begin
-      i  := 0;
-      ac := cc + (k*4*o1);
-      ah := ch + (k*o1);
-      while i < o1-1 do
+    // isign is constant for the whole call; hoist the branch out of the hot
+    // inner loop (loop unswitching) so each variant is straight-line code.
+    if isign = 1 then
+      for k:=0 to l1-1 do
       begin
-        ic  := ac+1;
-        ih  := ah+1;
-        ti1 := ic[0]  - ic[o2];
-        ti2 := ic[0]  + ic[o2];
-        ti3 := ic[o1] + ic[o3];
-        tr4 := ic[o3] - ic[o1];
-        tr1 := ac[0]  - ac[o2];
-        tr2 := ac[0]  + ac[o2];
-        ti4 := ac[o1] - ac[o3];
-        tr3 := ac[o1] + ac[o3];
-
-        ah[0] := tr2 + tr3;
-        ah[1] := ti2 + ti3;
-        cr3   := tr2 - tr3;
-        ci3   := ti2 - ti3;
-
-        if isign = 1 then
+        i  := 0;
+        ac := cc + (k*4*o1);
+        ah := ch + (k*o1);
+        while i < o1-1 do
         begin
+          ic  := ac+1;
+          ih  := ah+1;
+          ti1 := ic[0]  - ic[o2];
+          ti2 := ic[0]  + ic[o2];
+          ti3 := ic[o1] + ic[o3];
+          tr4 := ic[o3] - ic[o1];
+          tr1 := ac[0]  - ac[o2];
+          tr2 := ac[0]  + ac[o2];
+          ti4 := ac[o1] - ac[o3];
+          tr3 := ac[o1] + ac[o3];
+
+          ah[0] := tr2 + tr3;
+          ah[1] := ti2 + ti3;
+          cr3   := tr2 - tr3;
+          ci3   := ti2 - ti3;
+
           cr2 := tr1 + tr4;  ci2 := ti1 + ti4;
           cr4 := tr1 - tr4;  ci4 := ti1 - ti4;
           ah[d1] := wa1[i]*cr2 - wa1[i+1]*ci2;
@@ -224,8 +270,36 @@ begin
           ih[d2] := wa2[i]*ci3 + wa2[i+1]*cr3;
           ah[d3] := wa3[i]*cr4 - wa3[i+1]*ci4;
           ih[d3] := wa3[i]*ci4 + wa3[i+1]*cr4;
-        end else
+
+          Inc(i, 2);
+          Inc(ac, 2);
+          Inc(ah, 2);
+        end;
+      end
+    else
+      for k:=0 to l1-1 do
+      begin
+        i  := 0;
+        ac := cc + (k*4*o1);
+        ah := ch + (k*o1);
+        while i < o1-1 do
         begin
+          ic  := ac+1;
+          ih  := ah+1;
+          ti1 := ic[0]  - ic[o2];
+          ti2 := ic[0]  + ic[o2];
+          ti3 := ic[o1] + ic[o3];
+          tr4 := ic[o3] - ic[o1];
+          tr1 := ac[0]  - ac[o2];
+          tr2 := ac[0]  + ac[o2];
+          ti4 := ac[o1] - ac[o3];
+          tr3 := ac[o1] + ac[o3];
+
+          ah[0] := tr2 + tr3;
+          ah[1] := ti2 + ti3;
+          cr3   := tr2 - tr3;
+          ci3   := ti2 - ti3;
+
           cr2 := tr1 - tr4;  ci2 := ti1 - ti4;
           cr4 := tr1 + tr4;  ci4 := ti1 + ti4;
           ah[d1] := wa1[i]*cr2 + wa1[i+1]*ci2;
@@ -234,19 +308,21 @@ begin
           ih[d2] := wa2[i]*ci3 - wa2[i+1]*cr3;
           ah[d3] := wa3[i]*cr4 + wa3[i+1]*ci4;
           ih[d3] := wa3[i]*ci4 - wa3[i+1]*cr4;
-        end;
 
-        Inc(i, 2);
-        Inc(ac, 2);
-        Inc(ah, 2);
+          Inc(i, 2);
+          Inc(ac, 2);
+          Inc(ah, 2);
+        end;
       end;
-    end;
   end;
 end; (* passf4 *)
+{$ifdef CPUI386}
+{$pop}
+{$endif}
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf5(const ido, l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: RealArrayRef; const isign: Int32);
+procedure passf5(const ido, l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: PSingle; const isign: Int32);
 const
   tr11: Single = 0.309016994374947;
   ti11: Single = 0.951056516295154;
@@ -350,7 +426,7 @@ end; (* passf5 *)
 
 
 // isign = +1 for backward transform and -1 for forward transforms
-procedure passf(out nac: Boolean; const ido,ip,l1,idl1: Int32; const cc,ch,wa: RealArrayRef; const isign: Int32);
+procedure passf(out nac: Boolean; const ido,ip,l1,idl1: Int32; const cc,ch,wa: PSingle; const isign: Int32);
 var
   idij,idlj, idot,ipph, i,j,k,l,jc,lc,ik, idj,idl,ic,idp, t1,t2,t3,t4: Int32;
   wai, war: Single;
@@ -519,7 +595,7 @@ end; (* passf *)
 radf2,radb2, radf3,radb3, radf4,radb4, radf5,radb5, radfg,radbg.
 Treal FFT passes fwd and bwd.
 ---------------------------------------------------------------------- *)
-procedure radf2(const ido, l1: Int32; const cc,ch,wa1: RealArrayRef);
+procedure radf2(const ido, l1: Int32; const cc,ch,wa1: PSingle);
 var
   i,k,ic: Int32;
   ti2,tr2: Single;
@@ -560,7 +636,7 @@ begin
 end; (* radf2 *)
 
 
-procedure radb2(const ido, l1: Int32; const cc,ch,wa1: RealArrayRef);
+procedure radb2(const ido, l1: Int32; const cc,ch,wa1: PSingle);
 var
   i,k,ic: Int32;
   ti2,tr2: Single;
@@ -601,7 +677,7 @@ begin
 end; (* radb2 *)
 
 
-procedure radf3(const ido,l1: Int32; const cc,ch,wa1,wa2: RealArrayRef);
+procedure radf3(const ido,l1: Int32; const cc,ch,wa1,wa2: PSingle);
 const
   TAUR: Single = -0.5;
   TAUI: Single = 0.866025403784439;
@@ -647,7 +723,7 @@ begin
 end; (* radf3 *)
 
 
-procedure radb3(const ido,l1: Int32; const cc,ch,wa1,wa2: RealArrayRef);
+procedure radb3(const ido,l1: Int32; const cc,ch,wa1,wa2: PSingle);
 const
   TAUR: Single = -0.5;
   TAUI: Single = 0.866025403784439;
@@ -660,7 +736,7 @@ begin
     tr2 := 2*cc[ido-1+(3*k+1)*ido];
     cr2 := cc[3*k*ido] + taur*tr2;
     ch[k*ido] := cc[3*k*ido] + tr2;
-    ci3 := 2*taui*cc[3*k+2*ido];
+    ci3 := 2*taui*cc[(3*k+2)*ido];
     ch[(k+  l1)*ido] := cr2 - ci3;
     ch[(k+2*l1)*ido] := cr2 + ci3;
   end;
@@ -676,7 +752,7 @@ begin
       tr2 := cc[i-1+(3*k+2)*ido] + cc[ic-1+(3*k+1)*ido];
       cr2 := cc[i-1+3*k*ido] + taur*tr2;
       ch[i-1+k*ido] := cc[i-1+3*k*ido] + tr2;
-      ti2 := cc[i+(3*k+2*ido)] - cc[ic+(3*k+1)*ido];
+      ti2 := cc[i+(3*k+2)*ido] - cc[ic+(3*k+1)*ido];
       ci2 := cc[i+3*k*ido] + taur*ti2;
       ch[i+k*ido] := cc[i+3*k*ido] + ti2;
       cr3 := taui*(cc[i-1+(3*k+2)*ido] - cc[ic-1+(3*k+1)*ido]);
@@ -696,7 +772,7 @@ begin
 end; (* radb3 *)
 
 
-procedure radf4(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3: RealArrayRef);
+procedure radf4(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3: PSingle);
 const
   hsqt2: Single = 0.7071067811865475;
 var
@@ -767,7 +843,7 @@ begin
 end; (* radf4 *)
 
 
-procedure radb4(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3: RealArrayRef);
+procedure radb4(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3: PSingle);
 const
   SQRT2: Single = 1.414213562373095;
 var
@@ -842,7 +918,7 @@ begin
 end;(* radb4 *)
 
 
-procedure radf5(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: RealArrayRef);
+procedure radf5(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: PSingle);
 const
   tr11: Single = 0.309016994374947;
   ti11: Single = 0.951056516295154;
@@ -920,7 +996,7 @@ begin
 end;(* radf5 *)
 
 
-procedure radb5(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: RealArrayRef);
+procedure radb5(const ido,l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: PSingle);
 const
   tr11: Single = 0.309016994374947;
   ti11: Single = 0.951056516295154;
@@ -1001,7 +1077,7 @@ begin
 end;(* radb5 *)
 
 
-procedure radfg(const ido,ip,l1,idl1: Int32; const cc,ch,wa: RealArrayRef);
+procedure radfg(const ido,ip,l1,idl1: Int32; const cc,ch,wa: PSingle);
 var
   idij,ipph,i,j,k,l,j2,ic,jc,lc,ik,iz,nbd: Int32;
   dc2,ds2,dcp,arg,dsp,ar1h,ar2h: Single;
@@ -1216,7 +1292,7 @@ end;
 (* radfg *)
 
 
-procedure radbg(const ido,ip,l1,idl1: Int32; const cc,ch,wa: RealArrayRef);
+procedure radbg(const ido,ip,l1,idl1: Int32; const cc,ch,wa: PSingle);
 var
   idij,ipph,i,j,k,l,j2,ic,jc,lc,ik,iz: Int32;
   dc2,ds2,nbd,dcp,arg,dsp,ar1h,ar2h: Single;
@@ -1429,11 +1505,11 @@ end; (* radbg *)
 (* ----------------------------------------------------------------------
 cfftf1, cfftf, cfftb, cffti1, cffti. Complex FFTs.
 ---------------------------------------------------------------------- *)
-procedure cfftf1(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef; const isign: Int32);
+procedure cfftf1(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
 var
   na, nac: Boolean;
   idot,i,k1,l1,l2,nf,ip,iw, ix2,ix3,ix4,ido,idl1: Int32;
-  cinput, coutput: RealArrayRef;
+  cinput, coutput: PSingle;
 begin
   nf := ifac[1];
   na := False;
@@ -1493,23 +1569,23 @@ begin
 end; (* cfftf1 *)
 
 
-procedure cfftf(const n: Int32; const c, wsave: RealArrayRef);
+procedure cfftf(const n: Int32; const c, wsave: PSingle);
 var iw1,iw2: Int32;
 begin
   if n=1 then Exit;
   iw1  := 2*n;
   iw2  := iw1+2*n;
-  cfftf1(n,c,wsave,wsave+iw1, IntArrayRef(wsave+iw2), -1);
+  Cfftf1Dispatch(n,c,wsave,wsave+iw1, PInt32(wsave+iw2), -1);
 end; (* cfftf *)
 
 
-procedure cfftb(const n: Int32; const c, wsave: RealArrayRef);
+procedure cfftb(const n: Int32; const c, wsave: PSingle);
 var iw1, iw2: Int32;
 begin
   if n=1 then Exit;
   iw1 := 2*n;
   iw2 := iw1+2*n;
-  cfftf1(n,c,wsave,wsave+iw1, IntArrayRef(wsave+iw2), +1);
+  Cfftf1Dispatch(n,c,wsave,wsave+iw1, PInt32(wsave+iw2), +1);
 end; (* cfftb *)
 
 
@@ -1519,7 +1595,7 @@ end; (* cfftb *)
   the factors start from ifac[2].
 *)
                             //ifac[MAXFAC+2]     ntryh[NSPECIAL])
-procedure Factorize(const n: Int32; const ifac: IntArrayRef; const ntryh: TSPECIAL);
+procedure Factorize(const n: Int32; const ifac: PInt32; const ntryh: TSPECIAL);
 var
   ntry,i,j,ib,nf,nl,nq,nr: Int32;
 label
@@ -1562,7 +1638,7 @@ begin
 end;
 
 
-procedure cffti1(const n: Int32; const wa: RealArrayRef; const ifac: IntArrayRef);
+procedure cffti1(const n: Int32; const wa: PSingle; const ifac: PInt32);
 const
   twopi: Single = 2*PI;
   ntryh: TSPECIAL = (3,4,2,5); // Do not change the order of these.
@@ -1612,25 +1688,25 @@ begin
 end; (* cffti1 *)
 
 
-procedure cffti(const n: Int32; const wsave: RealArrayRef);
+procedure cffti(const n: Int32; const wsave: PSingle);
 var
   iw1,iw2: Int32;
 begin
   if n=1 then Exit;
   iw1 := 2*n;
   iw2 := iw1+2*n;
-  cffti1(n,wsave+iw1, IntArrayRef(wsave+iw2));
+  cffti1(n,wsave+iw1, PInt32(wsave+iw2));
 end; (* cffti *)
 
 
 (* ----------------------------------------------------------------------
 rfftf1, rfftb1, rfftf, rfftb, rffti1, rffti. Treal FFTs.
 ---------------------------------------------------------------------- *)
-procedure rfftf1(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef);
+procedure rfftf1(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32);
 var
   na: Boolean;
   i,k1,l1,l2,kh,nf,ip,iw,ix2,ix3,ix4,ido,idl1: Int32;
-  cinput, coutput: RealArrayRef;
+  cinput, coutput: PSingle;
 begin      
   nf := ifac[1];
   na := True;
@@ -1699,11 +1775,11 @@ begin
 end; (* rfftf1 *)
 
 
-procedure rfftb1(const n: Int32; const c,ch,wa: RealArrayRef; const ifac: IntArrayRef);
+procedure rfftb1(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32);
 var
   na: Boolean;
   i,k1,l1,l2,nf,ip,iw,ix2,ix3,ix4,ido,idl1: Int32;
-  cinput, coutput: RealArrayRef;
+  cinput, coutput: PSingle;
 begin      
   nf := ifac[1];
   na := False;
@@ -1765,21 +1841,21 @@ begin
 end; (* rfftb1 *)
 
 
-procedure rfftf(const n: Int32; const r, wsave: RealArrayRef);
+procedure rfftf(const n: Int32; const r, wsave: PSingle);
 begin
   if n=1 then Exit;
-  rfftf1(n,r,wsave,wsave+n, IntArrayRef(wsave+2*n));
+  rfftf1(n,r,wsave,wsave+n, PInt32(wsave+2*n));
 end; (* rfftf *)
 
 
-procedure rfftb(const n: Int32; const r, wsave: RealArrayRef);
+procedure rfftb(const n: Int32; const r, wsave: PSingle);
 begin
   if n=1 then Exit;
-  rfftb1(n,r,wsave, wsave+n, IntArrayRef(wsave+2*n));
+  rfftb1(n,r,wsave, wsave+n, PInt32(wsave+2*n));
 end; (* rfftb *)
 
 
-procedure rffti1(const n: Int32; const wa: RealArrayRef; const ifac: IntArrayRef);
+procedure rffti1(const n: Int32; const wa: PSingle; const ifac: PInt32);
 const
   ntryh: TSPECIAL = (4,2,3,5); (* Do not change the order of these. *)
 var
@@ -1822,11 +1898,20 @@ begin
   end;
 end; (* rffti1 *)
 
-
-procedure rffti(const n: Int32; const wsave: RealArrayRef);
+procedure rffti(const n: Int32; const wsave: PSingle);
 begin
   if n=1 then Exit;
-  rffti1(n, wsave+n, IntArrayRef(wsave+2*n));
+  rffti1(n, wsave+n, PInt32(wsave+2*n));
 end; (* rffti *)
+
+initialization
+  Cfftf1Dispatch := @cfftf1;
+
+  {$IFDEF SIMBA_FFT_SIMD_X86_64}
+  if AVX2Support() then
+    Cfftf1Dispatch := @cfftf1_avx2
+  else
+    Cfftf1Dispatch := @cfftf1_sse2;
+  {$ENDIF}
 
 end.

@@ -16,13 +16,12 @@ unit simba.matchtemplate;
 [==============================================================================}
 {$i simba.inc}
 
-{$MODESWITCH ARRAYOPERATORS OFF}
-
 interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.baseclass, simba.image;
+  simba.base,
+  simba.matchtemplate_core;
 
 type
   PTMFormula = ^ETMFormula;
@@ -35,68 +34,21 @@ type
     TM_SQDIFF_NORMED
   );
 
-  PMatchTemplateCacheBase = ^TMatchTemplateCacheBase;
-  TMatchTemplateCacheBase = class(TSimbaBaseClass)
-  public
-    Width: Integer;
-    Height: Integer;
-  end;
+function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
 
-// TIntegerMatrix
-function MatchTemplateCache(Image, Template: TIntegerMatrix; Formula: ETMFormula): TMatchTemplateCacheBase; overload;
-function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload;
-function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload;
-function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix; overload;
-
-// TSimbaImage
-function MatchTemplateCache(Image, Template: TSimbaImage; Formula: ETMFormula): TMatchTemplateCacheBase; overload;
-function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix; overload;
-function MatchTemplateMask(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix; overload;
-function MatchTemplate(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix; overload;
-
-type
-  TMatchTemplate = function(Image, Template: TIntegerMatrix; Normed: Boolean): TSingleMatrix;
-
-function Multithread(Image, Templ: TIntegerMatrix; MatchTemplate: TMatchTemplate; Normed: Boolean): TSingleMatrix;
+// Cache variants - if `Cache` var is empty build it else use it.
+// Image cannot change for such cache, so pass a fresh var if different image.
+function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula; var Cache: TMatchTemplateCache): TSingleMatrix;
+function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula; var Cache: TMatchTemplateCache): TSingleMatrix;
 
 implementation
 
 uses
+  simba.vartype_matrix,
   simba.matchtemplate_ccorr,
   simba.matchtemplate_sqdiff,
-  simba.matchtemplate_ccoeff,
-  simba.vartype_matrix,
-  simba.threading,
-  simba.multiprocessing;
-
-function Multithread(Image, Templ: TIntegerMatrix; MatchTemplate: TMatchTemplate; Normed: Boolean): TSingleMatrix;
-var
-  RowSize: Integer;
-
-  procedure Execute(const Index, Lo, Hi: Integer);
-  var
-    Mat: TSingleMatrix;
-    Y: Integer;
-  begin
-    Mat := MatchTemplate(Image.Copy(Lo, Min(Hi + Templ.Height, Image.Height)), Templ, Normed);
-    for Y := 0 to Mat.Height - 1 do
-      Move(Mat[Y, 0], Result[Lo+Y, 0], RowSize);
-  end;
-
-begin
-  Result.SetSize(
-    (Image.Width - Templ.Width) + 1,
-    (Image.Height - Templ.Height) + 1
-  );
-  RowSize := Result.Width * SizeOf(Single);
-
-  SimbaMultiprocessing.Run(
-    SimbaMultiprocessingStrategy.SlicesForTemplateFinder(Image.Width, Image.Height),
-    0,
-    Image.Height - Templ.Height,
-    @Execute
-  );
-end;
+  simba.matchtemplate_ccoeff;
 
 procedure Validate(ImageWidth, ImageHeight, TemplateWidth, TemplateHeight: Integer);
 begin
@@ -108,80 +60,50 @@ begin
     raise Exception.Create('MatchTemplate: Template must be smaller than image');
 end;
 
-function MatchTemplateCache(Image, Template: TIntegerMatrix; Formula: ETMFormula): TMatchTemplateCacheBase;
+function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula; var Cache: TMatchTemplateCache): TSingleMatrix;
 begin
   Validate(Image.Width, Image.Height, Template.Width, Template.Height);
+  if (Cache.Width = 0) then
+    Cache.Init(Image);
 
   case Formula of
-    TM_CCOEFF, TM_CCOEFF_NORMED:
-      Result := MatchTemplateMask_CCOEFF_CreateCache(Image, Template);
-    TM_CCORR, TM_CCORR_NORMED:
-      Result := MatchTemplateMask_CCORR_CreateCache(Image, Template);
-    TM_SQDIFF, TM_SQDIFF_NORMED:
-      Result := MatchTemplateMask_SQDIFF_CreateCache(Image, Template);
+    TM_CCOEFF:        Result := MatchTemplate_CCOEFF(Cache, Template, False);
+    TM_CCOEFF_NORMED: Result := MatchTemplate_CCOEFF(Cache, Template, True);
+    TM_SQDIFF:        Result := MatchTemplate_SQDIFF(Cache, Template, False);
+    TM_SQDIFF_NORMED: Result := MatchTemplate_SQDIFF(Cache, Template, True);
+    TM_CCORR:         Result := MatchTemplate_CCORR(Cache, Template, False);
+    TM_CCORR_NORMED:  Result := MatchTemplate_CCORR(Cache, Template, True);
   end;
 end;
 
-function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
-begin
-  Validate(Cache.Width, Cache.Height, Template.Width, Template.Height);
-
-  case Formula of
-    TM_CCOEFF:        Result := MatchTemplateMask_CCOEFF_Cache(Cache, Template, False);
-    TM_CCOEFF_NORMED: Result := MatchTemplateMask_CCOEFF_Cache(Cache, Template, True);
-    TM_SQDIFF:        Result := MatchTemplateMask_SQDIFF_Cache(Cache, Template, False);
-    TM_SQDIFF_NORMED: Result := MatchTemplateMask_SQDIFF_Cache(Cache, Template, True);
-    TM_CCORR:         Result := MatchTemplateMask_CCORR_Cache(Cache, Template, False);
-    TM_CCORR_NORMED:  Result := MatchTemplateMask_CCORR_Cache(Cache, Template, True);
-  end;
-end;
-
-function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula; var Cache: TMatchTemplateCache): TSingleMatrix;
 begin
   Validate(Image.Width, Image.Height, Template.Width, Template.Height);
+  if Cache.Width = 0 then
+    Cache.Init(Image);
 
   case Formula of
-    TM_CCOEFF:        Result := MatchTemplateMask_CCOEFF(Image, Template, False);
-    TM_CCOEFF_NORMED: Result := MatchTemplateMask_CCOEFF(Image, Template, True);
-    TM_SQDIFF:        Result := MatchTemplateMask_SQDIFF(Image, Template, False);
-    TM_SQDIFF_NORMED: Result := MatchTemplateMask_SQDIFF(Image, Template, True);
-    TM_CCORR:         Result := MatchTemplateMask_CCORR(Image, Template, False);
-    TM_CCORR_NORMED:  Result := MatchTemplateMask_CCORR(Image, Template, True);
+    TM_CCOEFF:        Result := MatchTemplateMask_CCOEFF(Cache, Template, False);
+    TM_CCOEFF_NORMED: Result := MatchTemplateMask_CCOEFF(Cache, Template, True);
+    TM_SQDIFF:        Result := MatchTemplateMask_SQDIFF(Cache, Template, False);
+    TM_SQDIFF_NORMED: Result := MatchTemplateMask_SQDIFF(Cache, Template, True);
+    TM_CCORR:         Result := MatchTemplateMask_CCORR(Cache, Template, False);
+    TM_CCORR_NORMED:  Result := MatchTemplateMask_CCORR(Cache, Template, True);
   end;
 end;
 
 function MatchTemplate(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+var
+  Cache: TMatchTemplateCache;
 begin
-  Validate(Image.Width, Image.Height, Template.Width, Template.Height);
-
-  case Formula of
-    TM_CCOEFF:        Result := MatchTemplate_CCOEFF(Image, Template, False);
-    TM_CCOEFF_NORMED: Result := MatchTemplate_CCOEFF(Image, Template, True);
-    TM_SQDIFF:        Result := MatchTemplate_SQDIFF(Image, Template, False);
-    TM_SQDIFF_NORMED: Result := MatchTemplate_SQDIFF(Image, Template, True);
-    TM_CCORR:         Result := MatchTemplate_CCORR(Image, Template, False);
-    TM_CCORR_NORMED:  Result := MatchTemplate_CCORR(Image, Template, True);
-  end;
+  Result := MatchTemplate(Image, Template, Formula, Cache);
 end;
 
-function MatchTemplateCache(Image, Template: TSimbaImage; Formula: ETMFormula): TMatchTemplateCacheBase;
+function MatchTemplateMask(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
+var
+  Cache: TMatchTemplateCache;
 begin
-  Result := MatchTemplateCache(Image.ToMatrix(), Template.ToMatrix(), Formula);
-end;
-
-function MatchTemplateMask(Cache: TMatchTemplateCacheBase; Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
-begin
-  Result := MatchTemplateMask(Cache, Template.ToMatrix(), Formula);
-end;
-
-function MatchTemplateMask(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
-begin
-  Result := MatchTemplateMask(Image.ToMatrix(), Template.ToMatrix(), Formula);
-end;
-
-function MatchTemplate(Image, Template: TSimbaImage; Formula: ETMFormula): TSingleMatrix;
-begin
-  Result := MatchTemplate(Image.ToMatrix(), Template.ToMatrix(), Formula);
+  Result := MatchTemplateMask(Image, Template, Formula, Cache);
 end;
 
 end.

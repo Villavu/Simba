@@ -268,7 +268,7 @@ begin
 
   if Target.GetImageDataAsImage(Bounds, Image) then
   try
-    Mat := MatchTemplate(Image, Templ, TM_CCOEFF_NORMED);
+    Mat := MatchTemplate(Image.ToMatrix(), Templ.ToMatrix(), TM_CCOEFF_NORMED);
 
     Best := Mat.ArgMax;
     Match := Mat[Best.Y, Best.X];
