@@ -19,6 +19,8 @@ For :code:`TTarget.MouseMove` there are variables to control the movement, these
 
 You can read a more in depth article about the algorithm used (WindMouse) `here <https://ben.land/post/2021/04/25/windmouse-human-mouse-movement>`_
 
+Try the interactive :doc:`../tools/Mouse Path Preview` to see how Speed, Wind and Gravity shape the path.
+
 -----
 
 Clicking the mouse

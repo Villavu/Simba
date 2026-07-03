@@ -1,26 +1,37 @@
 var
   Paths: T2DPointArray; // stores the teleport events so we can view at the end
+  img: TImage;
+  Start, Dest: TPoint;
 
 procedure MouseTeleportEvent(Target: TTarget; Data: TTargetEventData);
 begin
   Paths[High(Paths)] += [Data.MouseTeleport.X, Data.MouseTeleport.Y];
 end;
 
-var img: TImage;
 begin
-  // uncomment the following for a consistent result every run!
+  // uncomment below for a consistent result every run!
   //RandSeed := 123;
+
+  Start := [100, 100];
+  Dest  := [1000+Random(400), 200+Random(500)];
 
   Target.AddEvent(ETargetEvent.MOUSE_TELEPORT, @MouseTeleportEvent);
 
   for 1 to 5 do
   begin
     SetLength(Paths, Length(Paths) + 1);
-    Target.MouseTeleport([200,200]);
-    Target.MouseMove([1400,800]);
+    Target.MouseTeleport(Start);
+    Target.MouseMove(Dest);
   end;
 
-  img := new TImage(1800, 1200);
+  img := new TImage(1500, 800);
+  img.DrawColor := $404040;
+  img.DrawLineAA(Start, Dest);
+  img.DrawColor := $FF;
+  img.DrawCross(Start, 10);
+  img.DrawColor := $FF;
+  img.DrawCross(Dest, 10);
+  img.DrawColor := -1;
   img.DrawATPA(Paths);
   img.Show();
 end;

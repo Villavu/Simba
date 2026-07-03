@@ -7,4 +7,5 @@ Simba
 
    simba/index
    tutorials/index
+   tools/index
    api/index

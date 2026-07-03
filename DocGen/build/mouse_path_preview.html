@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WindMouseEnhanced - path preview</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0b0e; }
+  canvas { position: absolute; inset: 0; }
+  #hud {
+    position: absolute; top: 14px; left: 14px; z-index: 10;
+    background: rgba(18,18,24,.88); border: 1px solid #2a2a33; border-radius: 10px;
+    padding: 14px 18px; width: 300px; box-sizing: border-box;
+    font: 13px/1.45 'Segoe UI', sans-serif; color: #cfcfd8;
+    user-select: none;
+  }
+  #hud h1 { font-size: 14px; margin: 0 0 10px; color: #fff; font-weight: 600; }
+  .row { display: flex; align-items: center; gap: 10px; margin: 7px 0; }
+  .row label { width: 60px; color: #9a9aa8; flex: none; }
+  .row input[type=range] { flex: 1; min-width: 0; accent-color: #ff9632; }
+  .row .val { width: 34px; text-align: right; color: #ffb545; font-variant-numeric: tabular-nums; flex: none; }
+  button {
+    margin-top: 10px; width: 100%; padding: 8px 0; cursor: pointer;
+    background: #ff9632; color: #1a1208; border: 0; border-radius: 7px;
+    font: 600 13px 'Segoe UI', sans-serif;
+  }
+  button:hover { background: #ffab55; }
+  #legend { margin-top: 12px; max-height: 40vh; overflow-y: auto; }
+  #legend .lg { display: flex; align-items: center; gap: 8px; padding: 3px 6px; border-radius: 5px; cursor: pointer; }
+  #legend .lg:hover, #legend .lg.on { background: rgba(255,255,255,.09); }
+  #legend .sw { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  #legend .lg span { color: #b4b4c0; font-size: 12px; }
+</style>
+</head>
+<body>
+<canvas id="trail"></canvas>
+<canvas id="cursor"></canvas>
+<div id="hud">
+  <h1>Mouse Path Inspector</h1>
+  <div class="row"><label>Speed</label><input id="speed" type="range" min="1" max="50" step="1" value="10"><span class="val" id="speedV">10</span></div>
+  <div class="row"><label>Wind</label><input id="wind" type="range" min="0" max="20" step="1" value="4"><span class="val" id="windV">4</span></div>
+  <div class="row"><label>Gravity</label><input id="gravity" type="range" min="1" max="48" step="1" value="12"><span class="val" id="gravityV">12</span></div>
+  <div class="row"><label>Paths</label><input id="count" type="range" min="1" max="12" step="1" value="3"><span class="val" id="countV">3</span></div>
+  <button id="newPath">New route &nbsp;(Space)</button>
+  <div id="legend"></div>
+</div>
+<script>
+'use strict';
+
+// ---- faithful JS port of WindMouseEnhanced (simba.target_movemouse.pas) ----
+
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const randSkew = (near, far) => near + (far - near) * Math.random() * Math.random();
+
+function smoothStep(e0, e1, v) {
+  if (e1 <= e0) return v >= e1 ? 1 : 0;
+  const t = clamp((v - e0) / (e1 - e0), 0, 1);
+  return t * t * (3 - 2 * t);
+}
+
+function windMouseEnhanced(x1, y1, x2, y2, speed, wind, gravity) {
+  const FLICK_CHANCE = 0.65;  // start with a directional flick kick
+  const TAPER_CHANCE = 0.45;  // keep some arc into the endgame (arrive misaligned, then correct)
+  const PAUSE_CHANCE = 0.10;  // hesitate mid-move (further scaled down by short distance)
+  const GUST_CHANCE  = 0.10;  // gust of much stronger wind
+  const JOLT_CHANCE  = 0.60;  // skid off-path when braking, and re-engage jolt on pickup
+  const TWITCH_CHANCE = 0.04; // micro-twitch per held step during a stall
+
+  let x = x1, y = y1, moveX = 0, moveY = 0;
+  let segDist = Math.max(1, Math.hypot(x1 - x2, y1 - y2));
+
+  const vmax = randSkew(10.0, 10.0 * 1.30) * (speed / 10) *
+               clamp(Math.sqrt(segDist / 600), 0.65, 2.3);
+  let arcScale = 2.8 * wind / Math.max(1, gravity);
+  const arcPull = clamp(gravity / 12, 0.3, 3);
+  if (Math.random() < GUST_CHANCE) arcScale *= 1.7 + Math.random() * 0.6; // gust ~2x wind
+  const vmin = Math.max(1, vmax * 0.07);
+  const endZone = Math.max(4, vmax);
+
+  const accelShape = 0.60 + Math.random() * 0.80;
+  const decelShape = 0.60 + Math.random() * 0.80;
+  const accelAt = 0.32 * Math.pow(Math.random(), 3.5);
+  const decelAt = 0.99 - 0.40 * Math.pow(Math.random(), 3.0);
+  const inertia = 0.31 + 0.17 * Math.random() ** 2;
+
+  if (Math.random() < FLICK_CHANCE) {
+    const a = Math.random() * 2 * Math.PI;
+    const m = Math.min(Math.random() ** 2 * 6.5 * arcScale, vmax * 1.5);
+    moveX = Math.cos(a) * m; moveY = Math.sin(a) * m;
+  }
+
+  const taperFloor = Math.random() < TAPER_CHANCE ? Math.random() * 0.35 : 0;
+  const endWobble = Math.random() ** 2 * 0.22;
+
+  let pauseAt = 2.0, pauseDepth = 0, pauseHold = 0, pauseLeft = 0;
+  if (Math.random() < PAUSE_CHANCE * clamp((segDist - 120) / 130, 0, 1)) {
+    pauseAt = 0.20 + Math.random() * 0.55;
+    pauseDepth = 0.90 + Math.random() * 0.10;
+    pauseHold = 30 + Math.round(Math.random() ** 2 * 120);
+  }
+
+  let arcAmp = Math.min((0.030 + Math.random() ** 2 * 0.130) * arcScale, 0.45);
+  const arcSkew = 0.55 + Math.random() * 0.60;
+  const arcDecay = (0.5 + Math.random() * 1.9) * arcPull;
+  const arcSpan = 1.0 - Math.random() ** 2 * 0.45;
+  if (Math.random() >= 0.5) arcAmp = -arcAmp;
+  const u0 = Math.random();
+  const arcFreq = u0 < 0.45 ? 1 : (u0 < 0.85 ? 2 : 3);
+
+  const rippleAmp = 0.20 + Math.random() ** 2 * 0.35;
+  const rippleRate1 = 0.12 + Math.random() * 0.28;
+  const rippleRate2 = rippleRate1 * (1.5 + Math.random() * 0.8);
+  let ripplePhase1 = Math.random() * 2 * Math.PI;
+  let ripplePhase2 = Math.random() * 2 * Math.PI;
+
+  let overshot = false, prevR = 1e30, recedeN = 0, chasing = false;
+  const steps = [];
+
+  for (let iter = 0; iter < 100000; iter++) {
+    const remaining = Math.hypot(x - x2, y - y2);
+    if (remaining <= 1.0) break;
+    if (remaining > segDist) segDist = remaining;
+    const progress = clamp(1 - remaining / segDist, 0, 1);
+
+    const env = Math.pow(smoothStep(0, accelAt, progress), accelShape) *
+                Math.pow(1 - smoothStep(decelAt, 1, progress), decelShape);
+    const ripple = 1 + rippleAmp * (0.65 * Math.sin(ripplePhase1) + 0.35 * Math.sin(ripplePhase2)) *
+                   (0.25 + 0.75 * Math.sqrt(env));
+    const u = (progress > decelAt) ? clamp(remaining * 0.07, vmin, Math.max(4, vmax * 0.25)) : vmin;
+    let vcur = (u + (vmax - u) * env) * ripple;
+    ripplePhase1 += rippleRate1;
+    ripplePhase2 += rippleRate2;
+
+    // chase latch (only fires when a live target keeps escaping; inert here)
+    if (remaining > endZone && remaining >= prevR) recedeN++; else recedeN = 0;
+    if (recedeN >= 5) chasing = true;
+    if (progress > accelAt) chasing = false;
+    if (chasing) vcur = Math.max(vcur, 0.6 * vmax * ripple);
+    prevR = remaining;
+
+    // hesitation: brake/stop with skid, twitches, re-engage jolt
+    if (progress >= pauseAt) {
+      pauseAt = 2.0;
+      pauseLeft = pauseHold;
+      if (Math.random() < JOLT_CHANCE) {
+        const a = Math.random() * 2 * Math.PI;
+        const m = Math.min((0.5 + Math.random() ** 2 * 4.5) * arcScale, vmax);
+        moveX += Math.cos(a) * m; moveY += Math.sin(a) * m;
+      }
+    }
+    if (pauseLeft > 0) {
+      pauseLeft--;
+      vcur *= (1 - pauseDepth);
+      if (Math.random() < TWITCH_CHANCE) {
+        const a = Math.random() * 2 * Math.PI;
+        moveX += Math.cos(a) * (0.4 + Math.random());
+        moveY += Math.sin(a) * (0.4 + Math.random());
+      }
+      if (pauseLeft === 0 && Math.random() < JOLT_CHANCE) {
+        const a = Math.random() * 2 * Math.PI;
+        const m = Math.min(Math.random() ** 2 * 6.5 * arcScale, vmax);
+        moveX += Math.cos(a) * m; moveY += Math.sin(a) * m;
+      }
+    }
+
+    const dirX = (x2 - x) / remaining, dirY = (y2 - y) / remaining;
+    let moveLen;
+    if (remaining <= endZone) {
+      moveLen = overshot ? Math.min(vcur, remaining)
+                         : Math.min(vcur, remaining + remaining * remaining / endZone);
+      if (moveLen > remaining) overshot = true;
+      const a = (Math.random() * 2 - 1) * endWobble;
+      moveX = (dirX * Math.cos(a) - dirY * Math.sin(a)) * moveLen;
+      moveY = (dirX * Math.sin(a) + dirY * Math.cos(a)) * moveLen;
+    } else {
+      let bow = arcAmp * segDist * Math.exp(-arcDecay * progress) *
+                Math.sin(arcFreq * Math.PI * Math.pow(Math.min(1, progress / arcSpan), arcSkew));
+      bow *= taperFloor + (1 - taperFloor) * clamp((remaining - endZone) / endZone, 0, 1);
+      bow = clamp(bow, -0.5 * remaining, 0.5 * remaining);
+      const aimX = (x2 - dirY * bow) - x;
+      const aimY = (y2 + dirX * bow) - y;
+      const aimLen = Math.max(1, Math.hypot(aimX, aimY));
+      moveX += ((aimX / aimLen) * vcur - moveX) * inertia;
+      moveY += ((aimY / aimLen) * vcur - moveY) * inertia;
+      moveLen = Math.hypot(moveX, moveY);
+    }
+
+    x += moveX; y += moveY;
+    steps.push({ x: Math.round(x), y: Math.round(y), idle: 2.7 * (moveLen / ripple / vmax) + 2.7 });
+  }
+  return steps;
+}
+
+// ---- page: route generation, real-time looping playback ----
+
+const trailC = document.getElementById('trail');
+const cursorC = document.getElementById('cursor');
+const trail = trailC.getContext('2d');
+const cursor = cursorC.getContext('2d');
+const dpr = window.devicePixelRatio || 1;
+let W = 0, H = 0;
+
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  for (const c of [trailC, cursorC]) {
+    c.width = W * dpr; c.height = H * dpr;
+    c.style.width = W + 'px'; c.style.height = H + 'px';
+    c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+}
+
+let route = null;   // one shared start/stop for the whole sample
+let lanes = [];     // each: {color, steps, totalMs, playIdx, playClock, phase, holdLeft}
+let hoverLane = null;
+let lastTs = null;
+
+// true if (x,y) sits over (or just around) the HUD panel
+function overPanel(x, y) {
+  const h = document.getElementById('hud').getBoundingClientRect();
+  const pad = 22;
+  return x >= h.left - pad && x <= h.right + pad && y >= h.top - pad && y <= h.bottom + pad;
+}
+
+function pickRoute() {
+  const m = 70;
+  const diag = Math.hypot(W - 2 * m, H - 2 * m);
+  const minDist = Math.max(400, diag * 0.45); // always a good distance
+  for (let i = 0; i < 400; i++) {
+    const x1 = m + Math.random() * (W - 2 * m), y1 = m + Math.random() * (H - 2 * m);
+    const x2 = m + Math.random() * (W - 2 * m), y2 = m + Math.random() * (H - 2 * m);
+    if (overPanel(x1, y1) || overPanel(x2, y2)) continue; // never behind the panel
+    if (Math.hypot(x1 - x2, y1 - y2) >= minDist) return { x1, y1, x2, y2 };
+  }
+  return { x1: W - m, y1: m, x2: W * 0.4, y2: H - m }; // clear-of-panel fallback
+}
+
+function params() {
+  return {
+    speed: +document.getElementById('speed').value,
+    wind: +document.getElementById('wind').value,
+    gravity: +document.getElementById('gravity').value
+  };
+}
+function laneCount() { return +document.getElementById('count').value; }
+function colorFor(i, n) { return `hsl(${Math.round((i / n) * 360)} 85% 62%)`; }
+
+// Build one lane's path on the shared route + current params; reset its playback.
+function buildLanePath(lane) {
+  const p = params();
+  lane.steps = windMouseEnhanced(route.x1, route.y1, route.x2, route.y2, p.speed, p.wind, p.gravity);
+  let t = 0;
+  for (const s of lane.steps) { t += s.idle; s.t = t; }
+  lane.totalMs = t;
+  lane.playIdx = 0; lane.playClock = 0;
+  lane.phase = 'preHold'; lane.holdLeft = 150 + Math.random() * 500; // stagger starts
+}
+
+function rebuildLanes() {   // same route, current count + params
+  const n = laneCount();
+  lanes = [];
+  for (let i = 0; i < n; i++) {
+    const lane = { color: colorFor(i, n) };
+    buildLanePath(lane);
+    lanes.push(lane);
+  }
+  hoverLane = null;
+  buildLegend();
+}
+
+function newRoute() { route = pickRoute(); rebuildLanes(); }
+
+function buildLegend() {
+  const leg = document.getElementById('legend');
+  leg.innerHTML = '';
+  lanes.forEach((lane, i) => {
+    const row = document.createElement('div');
+    row.className = 'lg';
+    row.innerHTML = `<div class="sw" style="background:${lane.color}"></div><span>Path ${i + 1} &middot; ${lane.steps.length} steps &middot; ${Math.round(lane.totalMs)} ms</span>`;
+    row.addEventListener('mouseenter', () => { hoverLane = i; row.classList.add('on'); });
+    row.addEventListener('mouseleave', () => { if (hoverLane === i) hoverLane = null; row.classList.remove('on'); });
+    leg.appendChild(row);
+  });
+}
+
+function drawMarker(ctx, x, y, color, size) {
+  ctx.strokeStyle = color; ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.moveTo(x - size, y - size); ctx.lineTo(x + size, y + size);
+  ctx.moveTo(x - size, y + size); ctx.lineTo(x + size, y - size);
+  ctx.stroke();
+}
+
+function animate(ts) {
+  if (lastTs === null) lastTs = ts;
+  const dt = Math.min(ts - lastTs, 100);
+  lastTs = ts;
+
+  trail.clearRect(0, 0, W, H);
+  cursor.clearRect(0, 0, W, H);
+
+  // shared reference line + endpoints, drawn once for the whole sample
+  trail.globalAlpha = 0.13; trail.strokeStyle = '#fff'; trail.lineWidth = 1;
+  trail.beginPath(); trail.moveTo(route.x1, route.y1); trail.lineTo(route.x2, route.y2); trail.stroke();
+  trail.globalAlpha = 1;
+  drawMarker(trail, route.x1, route.y1, '#3fbf6f', 9);
+  drawMarker(trail, route.x2, route.y2, '#e04444', 9);
+
+  lanes.forEach((lane, i) => {
+    // advance this lane's independent state machine
+    if (lane.phase === 'preHold') {
+      lane.holdLeft -= dt;
+      if (lane.holdLeft <= 0) lane.phase = 'playing';
+    } else if (lane.phase === 'playing') {
+      lane.playClock += dt;
+      while (lane.playIdx < lane.steps.length && lane.steps[lane.playIdx].t <= lane.playClock) lane.playIdx++;
+      if (lane.playIdx >= lane.steps.length) { lane.phase = 'endHold'; lane.holdLeft = 650 + Math.random() * 500; }
+    } else { // endHold -> replay
+      lane.holdLeft -= dt;
+      if (lane.holdLeft <= 0) { lane.playIdx = 0; lane.playClock = 0; lane.phase = 'preHold'; lane.holdLeft = 120 + Math.random() * 380; }
+    }
+
+    // hovering a legend row spotlights that lane and fades the rest
+    const hovered = hoverLane === i;
+    const a = hoverLane === null ? 0.6 : (hovered ? 1.0 : 0.05);
+    const r = hovered ? 1.9 : 1.2;
+
+    trail.globalAlpha = a; trail.fillStyle = lane.color;
+    for (let k = 0; k < lane.playIdx; k++) { const s = lane.steps[k]; trail.fillRect(s.x - r, s.y - r, r * 2, r * 2); }
+    trail.globalAlpha = 1;
+
+    // cursor dot at the live position
+    const cx = lane.playIdx === 0 ? route.x1 : lane.steps[lane.playIdx - 1].x;
+    const cy = lane.playIdx === 0 ? route.y1 : lane.steps[lane.playIdx - 1].y;
+    cursor.globalAlpha = hoverLane === null ? 1 : (hovered ? 1 : 0.12);
+    cursor.fillStyle = lane.color;
+    cursor.beginPath(); cursor.arc(cx, cy, hovered ? 4.5 : 3.5, 0, 7); cursor.fill();
+    cursor.globalAlpha *= 0.55; cursor.strokeStyle = lane.color; cursor.lineWidth = 2;
+    cursor.beginPath(); cursor.arc(cx, cy, hovered ? 8.5 : 7, 0, 7); cursor.stroke();
+    cursor.globalAlpha = 1;
+  });
+
+  requestAnimationFrame(animate);
+}
+
+for (const id of ['speed', 'wind', 'gravity']) {
+  document.getElementById(id).addEventListener('input', () => {
+    document.getElementById(id + 'V').textContent = document.getElementById(id).value;
+    rebuildLanes(); // same route, new params
+  });
+}
+document.getElementById('count').addEventListener('input', () => {
+  document.getElementById('countV').textContent = document.getElementById('count').value;
+  rebuildLanes(); // same route, new count
+});
+document.getElementById('newPath').addEventListener('click', newRoute);
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space' || e.code === 'KeyN') { e.preventDefault(); newRoute(); }
+});
+
+// click sets a new destination; the old destination becomes the new start
+window.addEventListener('click', e => {
+  if (e.target.closest('#hud')) return; // ignore clicks on the panel
+  route = { x1: route.x2, y1: route.y2, x2: e.clientX, y2: e.clientY };
+  rebuildLanes();
+});
+
+// resizing keeps the current route/paths (they redraw from stored steps each frame)
+window.addEventListener('resize', resize);
+
+resize();
+newRoute();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
