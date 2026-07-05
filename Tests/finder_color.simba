@@ -1,9 +1,6 @@
 {$assertions on}
 
 // Very simple CountColor "test"
-// - in case of small optimizations, or corrections this test can fail
-// - I've added some tolerance of 1% of total pixels
-
 const
   TESTS := [
     ColorTolerance($906E80, 18.496, EColorSpace.RGB,    [1.386, 0.808, 0.808]),
@@ -20,23 +17,26 @@ const
     24717,
     24713,
     22999,
-    24204,
-    44815,
-    55037
+    24186,
+    44689,
+    54460
   ];
 
-var
-  Bitmap: TImage;
-  I: Integer;
+  // in case of small optimizations, or corrections this test can fail without tolerance
+  TEST_TOL = 0.01;
+
+function pass(got, wanted: Integer): Boolean;
 begin
-  Bitmap := new TImage(500, 500);
-  Bitmap.DrawHSLCircle(Bitmap.Center, 200); // roughly  628300 pixels, so 0.1% error is 628
+  Result := Abs(got - wanted) <= wanted * TEST_TOL;
+end;
 
-  Target.SetImage(Bitmap);
-
-  for I := 0 to High(TESTS) do
-  begin
-    WriteLn(Target.CountColor(TESTS[I]), ' vs ', TEST_RESULTS[i]);
-    Assert(Abs(Target.CountColor(TESTS[I]) - TEST_RESULTS[I]) <= 6283);
-  end;
+var
+  img: TImage;
+  i: Integer;
+begin
+  img := new TImage(500, 500);
+  img.DrawHSLCircle(img.Center, 200);
+  Target.SetImage(img);
+  for i := 0 to High(TESTS) do
+    Assert(pass(Target.CountColor(TESTS[i]), TEST_RESULTS[i]));
 end.

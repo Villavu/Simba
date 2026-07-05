@@ -18,7 +18,8 @@ uses
   simba.base, simba.math, simba.colormath;
 
 const
-  XYZ_GAMMA_LUT: array[0..255] of Single = (
+  // RGB byte (0..255) to linear light (0..1)
+  RGB_TO_LINEAR: array[0..255] of Single = (
     0.000000, 0.000304, 0.000607, 0.000911, 0.001214, 0.001518, 0.001821, 0.002125, 0.002428, 0.002732, 0.003035, 0.003345, 0.003677, 0.004025, 0.004391, 0.004777, 0.005182, 0.005605, 0.006049, 0.006512, 0.006995, 0.007499, 0.008023, 0.008568, 0.009134, 0.009721, 0.010330, 0.010960, 0.011612, 0.012286, 0.012983, 0.013702, 0.014444, 0.015209, 0.015996, 0.016807, 0.017642, 0.018500, 0.019382, 0.020289, 0.021219, 0.022174, 0.023153, 0.024158, 0.025187, 0.026241, 0.027321, 0.028426, 0.029557, 0.030713, 0.031896, 0.033105,
     0.034340, 0.035601, 0.036889, 0.038204, 0.039546, 0.040915, 0.042311, 0.043735, 0.045186, 0.046665, 0.048172, 0.049707, 0.051269, 0.052861, 0.054480, 0.056128, 0.057805, 0.059511, 0.061246, 0.063010, 0.064803, 0.066626, 0.068478, 0.070360, 0.072272, 0.074214, 0.076185, 0.078187, 0.080220, 0.082283, 0.084376, 0.086500, 0.088656, 0.090842, 0.093059, 0.095307, 0.097587, 0.099899, 0.102242, 0.104616, 0.107023, 0.109462, 0.111932, 0.114435, 0.116971, 0.119538, 0.122139, 0.124772, 0.127438, 0.130136, 0.132868, 0.135633,
     0.138432, 0.141263, 0.144128, 0.147027, 0.149960, 0.152926, 0.155926, 0.158961, 0.162029, 0.165132, 0.168269, 0.171441, 0.174647, 0.177888, 0.181164, 0.184475, 0.187821, 0.191202, 0.194618, 0.198069, 0.201556, 0.205079, 0.208637, 0.212231, 0.215861, 0.219526, 0.223228, 0.226966, 0.230740, 0.234551, 0.238398, 0.242281, 0.246201, 0.250158, 0.254152, 0.258183, 0.262251, 0.266356, 0.270498, 0.274677, 0.278894, 0.283149, 0.287441, 0.291771, 0.296138, 0.300544, 0.304987, 0.309469, 0.313989, 0.318547, 0.323143, 0.327778,
@@ -29,6 +30,9 @@ const
   ONE_DIV_THREE:     Single =  1.0 / 3.0;
   TWO_DIV_THREE:     Single =  2.0 / 3.0;
   NEG_ONE_DIV_THREE: Single = -1.0 / 3.0;
+
+  // D65 white point, pre-inverted so XYZ normalisation is a multiply not a divide
+  D65_INV: record X, Y, Z: Single; end = (X: 1.0 / 0.95047; Y: 1.0 / 1.00000; Z: 1.0 / 1.08883);
 
 type
   TSimbaColorConversion = class
@@ -58,10 +62,46 @@ type
     class function XYZToRGB(const XYZ: TColorXYZ): TColorRGB; static;
   end;
 
-  function fcbrt(x: Single): Single; inline;
+function fcbrt(x: Single): Single; {$IFNDEF CPUX86_64}inline;{$ENDIF}
+function fast_atan2(y, x: Single): Single; inline;
 
 implementation
 
+{$IFDEF CPUX86_64}
+{$ASMMODE INTEL}
+function fcbrt(x: Single): Single; assembler; nostackframe;  // x and Result in xmm0 (win64 + SysV)
+asm
+  movd   eax, xmm0             // seed: y = bits(4/3 * 127*2^23) - bits(x)/3
+  mov    ecx, eax
+  mov    eax, $AAAAAAAB        // bits div 3  via  (bits * 0xAAAAAAAB) >> 33
+  mul    ecx
+  shr    edx, 1
+  mov    eax, 1419910245
+  sub    eax, edx
+  movd   xmm1, eax             // xmm1 = y0
+  movss  xmm4, dword ptr [rip+ONE_DIV_THREE]   // xmm4 = 1/3
+  mov    eax, $40800000        // xmm5 = 4.0f, materialised inline (no data const)
+  movd   xmm5, eax
+  movaps xmm2, xmm1            // Newton step 1:  y := y * (4 - x*y^3) / 3
+  mulss  xmm2, xmm1
+  mulss  xmm2, xmm1
+  mulss  xmm2, xmm0
+  movaps xmm3, xmm5            // 4.0
+  subss  xmm3, xmm2
+  mulss  xmm1, xmm3
+  mulss  xmm1, xmm4
+  movaps xmm2, xmm1            // Newton step 2
+  mulss  xmm2, xmm1
+  mulss  xmm2, xmm1
+  mulss  xmm2, xmm0
+  movaps xmm3, xmm5            // 4.0
+  subss  xmm3, xmm2
+  mulss  xmm1, xmm3
+  mulss  xmm1, xmm4
+  mulss  xmm1, xmm1            // cbrt = x * y^2
+  mulss  xmm0, xmm1
+end;
+{$ELSE}
 (*
  * 2-4x speedup over Power(x, 1/3) in LAB colorspace finding
  * Not a generalizable solution, but good for small numbers
@@ -71,10 +111,26 @@ implementation
 function fcbrt(x: Single): Single; inline;
 begin
   Result := Sqrt(x);
-  Result := (2.0 * Result + x / Sqr(Result)) / 3.0;
-  Result := (2.0 * Result + x / Sqr(Result)) / 3.0;
-  Result := (2.0 * Result + x / Sqr(Result)) / 3.0;
-//Result := (2.0 * Result + x / Sqr(Result)) / 3.0; // Can't see that we need one more
+  Result := (2*Result + x/Sqr(Result)) * Single(1.0/3.0);
+  Result := (2*Result + x/Sqr(Result)) * Single(1.0/3.0);
+  Result := (2*Result + x/Sqr(Result)) * Single(1.0/3.0);
+end;
+{$ENDIF}
+
+// Fast single-precision atan2, max error ~1.2e-5 rad (< 0.001 deg)
+function fast_atan2(y, x: Single): Single; inline;
+var
+  ax, ay, z, z2, a: Single;
+begin
+  ax := Abs(x);  ay := Abs(y);
+  if ax >= ay then z := ay / (ax + Single(1.0e-20))
+  else             z := ax / (ay + Single(1.0e-20));
+  z2 := z * z;
+  a := z * (Single(0.9998660) + z2 * (Single(-0.3302995) + z2 * (Single(0.1801410) + z2 * (Single(-0.0851330) + z2 * Single(0.0208351)))));
+  if ay > ax then a := Single(PI / 2) - a;
+  if x < 0   then a := Single(PI) - a;
+  if y < 0   then a := -a;
+  Result := a;
 end;
 
 class function TSimbaColorConversion.ColorToBGRA(const Color: TColor; const Alpha: Byte): TColorBGRA;
@@ -112,57 +168,43 @@ end;
 class function TSimbaColorConversion.RGBToXYZ(const RGB: TColorRGB): TColorXYZ;
 var
   vR,vG,vB: Single;
-const
-  // D65 White Point
-  D65_Xn: Single = 0.95047;
-  D65_Yn: Single = 1.00000;
-  D65_Zn: Single = 1.08883;
 begin
-  vR := XYZ_GAMMA_LUT[RGB.R];
-  vG := XYZ_GAMMA_LUT[RGB.G];
-  vB := XYZ_GAMMA_LUT[RGB.B];
+  vR := RGB_TO_LINEAR[RGB.R];
+  vG := RGB_TO_LINEAR[RGB.G];
+  vB := RGB_TO_LINEAR[RGB.B];
 
   vR := vR * 100;
   vG := vG * 100;
   vB := vB * 100;
 
   // Illuminant = D65
-  Result.X := (vR * 0.4124 + vG * 0.3576 + vB * 0.1805);
-  Result.Y := (vR * 0.2126 + vG * 0.7152 + vB * 0.0722);
-  Result.Z := (vR * 0.0193 + vG * 0.1192 + vB * 0.9505);
-  
-  // Normalize XYZ by D65 white point
-  Result.X /= D65_Xn;
-  Result.Y /= D65_Yn;
-  Result.Z /= D65_Zn;
+  Result.X := (vR * Single(0.4124) + vG * Single(0.3576) + vB * Single(0.1805)) * D65_INV.X;
+  Result.Y := (vR * Single(0.2126) + vG * Single(0.7152) + vB * Single(0.0722)) * D65_INV.Y;
+  Result.Z := (vR * Single(0.0193) + vG * Single(0.1192) + vB * Single(0.9505)) * D65_INV.Z;
 end;
 
 class function TSimbaColorConversion.RGBToLAB(const RGB: TColorRGB): TColorLAB;
 var
   vR,vG,vB, X,Y,Z: Single;
-const
-  D65_Xn_Inv: Single = 1.0 / 0.95047;
-  D65_Yn_Inv: Single = 1.0 / 1.00000;
-  D65_Zn_Inv: Single = 1.0 / 1.08883;
 begin
-  vR := XYZ_GAMMA_LUT[RGB.R];
-  vG := XYZ_GAMMA_LUT[RGB.G];
-  vB := XYZ_GAMMA_LUT[RGB.B];
+  vR := RGB_TO_LINEAR[RGB.R];
+  vG := RGB_TO_LINEAR[RGB.G];
+  vB := RGB_TO_LINEAR[RGB.B];
 
   // Illuminant = D65 & Normalize D65
-  X := (vR * 0.4124 + vG * 0.3576 + vB * 0.1805) * D65_Xn_Inv;
-  Y := (vR * 0.2126 + vG * 0.7152 + vB * 0.0722) * D65_Yn_Inv;
-  Z := (vR * 0.0193 + vG * 0.1192 + vB * 0.9505) * D65_Zn_Inv;
+  X := (vR * Single(0.4124) + vG * Single(0.3576) + vB * Single(0.1805)) * D65_INV.X;
+  Y := (vR * Single(0.2126) + vG * Single(0.7152) + vB * Single(0.0722)) * D65_INV.Y;
+  Z := (vR * Single(0.0193) + vG * Single(0.1192) + vB * Single(0.9505)) * D65_INV.Z;
 
   // XYZ To LAB
-  if X > 0.008856 then X := fcbrt(x)
-  else                 X := (7.787 * X) + 0.137931;
-  if Y > 0.008856 then Y := fcbrt(y)
-  else                 Y := (7.787 * Y) + 0.137931;
-  if Z > 0.008856 then Z := fcbrt(z)
-  else                 Z := (7.787 * Z) + 0.137931;
+  if X > Single(0.008856) then X := fcbrt(X)
+  else                         X := (Single(7.787) * X) + Single(0.137931);
+  if Y > Single(0.008856) then Y := fcbrt(Y)
+  else                         Y := (Single(7.787) * Y) + Single(0.137931);
+  if Z > Single(0.008856) then Z := fcbrt(Z)
+  else                         Z := (Single(7.787) * Z) + Single(0.137931);
 
-  Result.L := (116.0 * Y) - 16.0;
+  Result.L := (Single(116.0) * Y) - Single(16.0);
   Result.A := 500 * (X - Y);
   Result.B := 200 * (Y - Z);
 end;
@@ -174,21 +216,21 @@ begin
   LAB := RGBToLab(RGB);
   Result.L := LAB.L;
   Result.C := Sqrt(Sqr(LAB.A) + Sqr(LAB.B));
-  Result.H := ArcTan2(LAB.B, LAB.A);
+  Result.H := fast_atan2(LAB.B, LAB.A);
 
   if (Result.H > 0) then
-    Result.H := (Result.H / PI) * 180
+    Result.H := (Result.H / Single(PI)) * 180
   else
-    Result.H := 360 - (Abs(Result.H) / PI) * 180;
+    Result.H := 360 - (Abs(Result.H) / Single(PI)) * 180;
 end;
 
 class function TSimbaColorConversion.RGBToHSV(const RGB: TColorRGB): TColorHSV;
 var
   Chroma,R,G,B,K: Single;
 begin
-  R := RGB.R / 255;
-  G := RGB.G / 255;
-  B := RGB.B / 255;
+  R := RGB.R * Single(1.0/255.0);
+  G := RGB.G * Single(1.0/255.0);
+  B := RGB.B * Single(1.0/255.0);
   K := 0.0;
 
   if (G < b) then
@@ -204,11 +246,11 @@ begin
   end;
 
   Chroma := R - Min(G, B);
-  Result.S := Chroma / (R + 1.0e-10)  * 100;
-  if (Result.S < 1.0e-10) then
+  Result.S := Chroma / (R + Single(1.0e-10)) * 100;
+  if (Result.S < Single(1.0e-10)) then
     Result.H := 0
   else
-    Result.H := Abs(K + (G - B) / (6.0 * Chroma + 1.0e-20)) * 360;
+    Result.H := Abs(K + (G - B) / (Single(6.0) * Chroma + Single(1.0e-20))) * 360;
   Result.V := R * 100;
 end;
 
@@ -292,22 +334,22 @@ class function TSimbaColorConversion.RGBToHSL(const RGB: TColorRGB): TColorHSL;
 var
   R,G,B,deltaC,cMax,cMin: Single;
 begin
-  R := RGB.R / 255;
-  G := RGB.G / 255;
-  B := RGB.B / 255;
+  R := RGB.R * Single(1.0/255.0);
+  G := RGB.G * Single(1.0/255.0);
+  B := RGB.B * Single(1.0/255.0);
   cMin := Min(R,Min(G,B));
   cMax := Max(R,Max(G,B));
   deltaC := cMax - cMin;
 
-  Result.L := (cMax + cMin) * 0.5;
+  Result.L := (cMax + cMin) * Single(0.5);
   if deltaC = 0 then
   begin
     Result.H := 0;
     Result.S := 0;
   end else
   begin
-    if Result.L < 0.5 then Result.S := deltaC / (cMax + cMin)
-    else                   Result.S := deltaC / (2 - cMax - cMin);
+    if Result.L < Single(0.5) then Result.S := deltaC / (cMax + cMin)
+    else                           Result.S := deltaC / (2 - cMax - cMin);
 
     if     (R = cMax) then Result.H := (    (G - B) / deltaC) * 60
     else if(G = cMax) then Result.H := (2 + (B - R) / deltaC) * 60
@@ -426,12 +468,12 @@ class function TSimbaColorConversion.LABToLCH(const LAB: TColorLAB): TColorLCH;
 begin
   Result.L := LAB.L;
   Result.C := Sqrt(Sqr(LAB.A) + Sqr(LAB.B));
-  Result.H := ArcTan2(LAB.B, LAB.A);
+  Result.H := fast_atan2(LAB.B, LAB.A);
 
   if (Result.H > 0) then
-    Result.H := (Result.H / PI) * 180
+    Result.H := (Result.H / Single(PI)) * 180
   else
-    Result.H := 360 - (Abs(Result.H) / PI) * 180;
+    Result.H := 360 - (Abs(Result.H) / Single(PI)) * 180;
 end;
 
 class function TSimbaColorConversion.LCHToLAB(const LCH: TColorLCH): TColorLAB;

@@ -2,7 +2,7 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-
+  --------------------------------------------------------------------------
   FPC doesn't support "force inline" so these are "unrolled" color distance
   where color conversion and distance are all in one function.
 
@@ -10,14 +10,15 @@
 }
 unit simba.colormath_distance_unrolled;
 
-{$DEFINE SIMBA_MAX_OPTIMIZATION}
 {$i simba.inc}
 
 interface
 
 uses
-  Classes, SysUtils, Math,
-  simba.base, simba.colormath, simba.colormath_conversion;
+  Classes, SysUtils,
+  simba.base,
+  simba.colormath,
+  simba.colormath_conversion;
 
 function DistanceRGB_UnRolled(const C1: PColorRGB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
@@ -36,65 +37,59 @@ end;
 
 function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 var
-  R,G,B,deltaC,deltaH,cMax,cMin: Single;
-  Color1, Color2: TColorHSL;
+  R,G,B,deltaC,deltaH,cMax,cMin, H,S,L: Single;
 begin
-  Color1 := C1^;
-
   // function RGBToHSL
-  R := C2.R / 255;
-  G := C2.G / 255;
-  B := C2.B / 255;
+  R := C2.R * Single(1.0/255.0);
+  G := C2.G * Single(1.0/255.0);
+  B := C2.B * Single(1.0/255.0);
 
   cMin := Min(R, Min(G, B));
   cMax := Max(R, Max(G, B));
-
   deltaC := cMax - cMin;
 
-  Color2.L := (cMax + cMin) * 0.5;
+  L := (cMax + cMin) * Single(0.5);
   if (deltaC = 0) then
   begin
-    Color2.H := 0;
-    Color2.S := 0;
+    H := 0;
+    S := 0;
   end else
   begin
-    if (Color2.L < 0.5) then Color2.S := deltaC / (cMax + cMin)
-    else                     Color2.S := deltaC / (2 - cMax - cMin);
+    if (L < Single(0.5)) then S := deltaC / (cMax + cMin)
+    else                      S := deltaC / (2 - cMax - cMin);
 
-    if     (R = cMax) then Color2.H := (    (G - B) / deltaC) * 60
-    else if(G = cMax) then Color2.H := (2 + (B - R) / deltaC) * 60
-    else{if(B = cMax) then}Color2.H := (4 + (R - G) / deltaC) * 60;
+    if     (R = cMax) then H := (    (G - B) / deltaC) * 60
+    else if(G = cMax) then H := (2 + (B - R) / deltaC) * 60
+    else{if(B = cMax) then}H := (4 + (R - G) / deltaC) * 60;
 
-    if (Color2.H < 0) then Color2.H += 360;
+    if (H < 0) then H += 360;
   end;
-  Color2.S *= 100;
-  Color2.L *= 100;
+  S *= 100;
+  L *= 100;
 
   // function DistanceHSL
-  if (Color1.S < 1.0e-10) or (Color2.S < 1.0e-10) then // no saturation = gray (hue has no value here)
+  if (C1^.S < Single(1.0e-10)) or (S < Single(1.0e-10)) then
     deltaH := 0
   else
   begin
-    deltaH := Abs(Color1.H - Color2.H);
-    if (deltaH >= 180) then
-      deltaH := 360 - deltaH;
-    deltaH *= Max(Color1.S, Color2.S) / 100;
+    deltaH := Abs(C1^.H - H);
+    deltaH := Min(deltaH, 360 - deltaH);
+    deltaH *= Max(C1^.S, S) / 100;
   end;
 
-  Result := Sqrt(Sqr(deltaH * mul[0]) + Sqr((Color1.S - Color2.S) * mul[1]) + Sqr((Color1.L - Color2.L) * mul[2]));
+  Result := Sqrt(Sqr(deltaH * mul[0]) + Sqr((C1^.S - S) * mul[1]) + Sqr((C1^.L - L) * mul[2]));
 end;
 
 function DistanceHSV_UnRolled(const C1: PColorHSV; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 var
   R, G, B: Single;
   Chroma,t, k, deltaH: Single;
-  Color1, Color2: TColorHSV;
+  H, S, V: Single;
 begin
-  Color1 := C1^;
-
-  R := C2.R / 255;
-  G := C2.G / 255;
-  B := C2.B / 255;
+  // function ColorToHSV
+  R := C2.R * Single(1.0/255.0);
+  G := C2.G * Single(1.0/255.0);
+  B := C2.B * Single(1.0/255.0);
 
   if (g < b) then
   begin
@@ -110,213 +105,173 @@ begin
   end;
 
   Chroma := R - Min(G, B);
-  Color2.S := Chroma / (R + 1.0e-10)  * 100;
-  if (Color2.S < 1.0e-10) then
-    Color2.H := 0
+  S := Chroma / (R + Single(1.0e-10)) * 100;
+  if (S < Single(1.0e-10)) then
+    H := 0
   else
-    Color2.H := Abs(K + (G - B) / (6.0 * Chroma + 1.0e-20)) * 360;
-  Color2.V := R * 100;
+    H := Abs(K + (G - B) / (Single(6.0) * Chroma + Single(1.0e-20))) * 360;
+  V := R * 100;
 
   // function DistanceHSV
-  if (Color1.S < 1.0e-10) or (Color2.S < 1.0e-10) then // no saturation = gray (hue has no value here)
+  if (C1^.S < Single(1.0e-10)) or (S < Single(1.0e-10)) then // no saturation = gray (hue has no value here)
     deltaH := 0
   else
   begin
-    deltaH := Abs(Color1.H - Color2.H);
+    deltaH := Abs(C1^.H - H);
     if (deltaH >= 180) then
       deltaH := 360 - deltaH;
-    deltaH *= Max(Color1.S, Color2.S) / 100;
+    deltaH *= Max(C1^.S, S) / 100;
   end;
 
-  Result := Sqrt(Sqr(deltaH * mul[0]) + Sqr((Color1.S - Color2.S) * mul[1]) + Sqr((Color1.V - Color2.V) * mul[2]));
+  Result := Sqrt(Sqr(deltaH * mul[0]) + Sqr((C1^.S - S) * mul[1]) + Sqr((C1^.V - V) * mul[2]));
 end;
 
 function DistanceXYZ_UnRolled(const C1: PColorXYZ; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 var
-  vR,vG,vB: Single;
-  Color1, Color2: TColorXYZ;
-const
-  D65_Xn_Inv: Single = 1.0 / 0.95047;
-  D65_Yn_Inv: Single = 1.0 / 1.00000;
-  D65_Zn_Inv: Single = 1.0 / 1.08883;
+  linearR, linearG, linearB: Single;
+  X, Y, Z: Single;
 begin
-  Color1 := C1^;
-
   // function RGBToXYZ
-  with C2 do
-  begin
-    vR := XYZ_GAMMA_LUT[R];
-    vG := XYZ_GAMMA_LUT[G];
-    vB := XYZ_GAMMA_LUT[B];
-  end;
+  linearR := RGB_TO_LINEAR[C2.R];
+  linearG := RGB_TO_LINEAR[C2.G];
+  linearB := RGB_TO_LINEAR[C2.B];
 
-  vR := vR * 100;
-  vG := vG * 100;
-  vB := vB * 100;
+  linearR := linearR * 100;
+  linearG := linearG * 100;
+  linearB := linearB * 100;
 
-  Color2.X := (vR * 0.4124 + vG * 0.3576 + vB * 0.1805) * D65_Xn_Inv;
-  Color2.Y := (vR * 0.2126 + vG * 0.7152 + vB * 0.0722) * D65_Yn_Inv;
-  Color2.Z := (vR * 0.0193 + vG * 0.1192 + vB * 0.9505) * D65_Zn_Inv;
-
-  // function DistanceXYZ
-  Result := Sqrt(Sqr((Color1.X - Color2.X) * mul[0]) + Sqr((Color1.Y - Color2.Y) * mul[1]) + Sqr((Color1.Z - Color2.Z) * mul[2]));
+  X := (linearR * Single(0.4124) + linearG * Single(0.3576) + linearB * Single(0.1805)) * D65_INV.X;
+  Y := (linearR * Single(0.2126) + linearG * Single(0.7152) + linearB * Single(0.0722)) * D65_INV.Y;
+  Z := (linearR * Single(0.0193) + linearG * Single(0.1192) + linearB * Single(0.9505)) * D65_INV.Z;
+  
+  // function DistanceXY
+  Result := Sqrt(Sqr((C1^.X - X) * mul[0]) + Sqr((C1^.Y - Y) * mul[1]) + Sqr((C1^.Z - Z) * mul[2]));
 end;
 
 function DistanceLAB_UnRolled(const C1: PColorLAB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 var
-  vR,vG,vB, X,Y,Z: Single;
-  Color1, Color2: TColorLAB;
-const
-  D65_Xn_Inv: Single = 1.0 / 0.95047;
-  D65_Yn_Inv: Single = 1.0 / 1.00000;
-  D65_Zn_Inv: Single = 1.0 / 1.08883;
+  linearR, linearG, linearB: Single;
+  X, Y, Z: Single;
+  L, A, B: Single;
 begin
-  Color1 := C1^;
-
   // function RGBToLAB
-  with C2 do
-  begin
-    vR := XYZ_GAMMA_LUT[R];
-    vG := XYZ_GAMMA_LUT[G];
-    vB := XYZ_GAMMA_LUT[B];
-  end;
+  linearR := RGB_TO_LINEAR[C2.R];
+  linearG := RGB_TO_LINEAR[C2.G];
+  linearB := RGB_TO_LINEAR[C2.B];
 
-  X := (vR * 0.4124 + vG * 0.3576 + vB * 0.1805) * D65_Xn_Inv;
-  Y := (vR * 0.2126 + vG * 0.7152 + vB * 0.0722) * D65_Yn_Inv;
-  Z := (vR * 0.0193 + vG * 0.1192 + vB * 0.9505) * D65_Zn_Inv;
+  X := (linearR * Single(0.4124) + linearG * Single(0.3576) + linearB * Single(0.1805)) * D65_INV.X;
+  Y := (linearR * Single(0.2126) + linearG * Single(0.7152) + linearB * Single(0.0722)) * D65_INV.Y;
+  Z := (linearR * Single(0.0193) + linearG * Single(0.1192) + linearB * Single(0.9505)) * D65_INV.Z;
 
-  if X > 0.008856 then X := fcbrt(X)
-  else                 X := (7.787 * X) + 0.137931;
-  if Y > 0.008856 then Y := fcbrt(Y)
-  else                 Y := (7.787 * Y) + 0.137931;
-  if Z > 0.008856 then Z := fcbrt(Z)
-  else                 Z := (7.787 * Z) + 0.137931;
+  if X > Single(0.008856) then X := fcbrt(X)
+  else                         X := (Single(7.787) * X) + Single(0.137931);
+  if Y > Single(0.008856) then Y := fcbrt(Y)
+  else                         Y := (Single(7.787) * Y) + Single(0.137931);
+  if Z > Single(0.008856) then Z := fcbrt(Z)
+  else                         Z := (Single(7.787) * Z) + Single(0.137931);
 
-  Color2.L := (116.0 * Y) - 16.0;
-  Color2.A := 500 * (X - Y);
-  Color2.B := 200 * (Y - Z);
+  L := (Single(116.0) * Y) - Single(16.0);
+  A := 500 * (X - Y);
+  B := 200 * (Y - Z);
 
   // function DistanceLAB
-  Result := Sqrt(Sqr((Color1.L - Color2.L) * mul[0]) + Sqr((Color1.A - Color2.A) * mul[1]) + Sqr((Color1.B - Color2.B) * mul[2]));
+  Result := Sqrt(Sqr((C1^.L - L) * mul[0]) + Sqr((C1^.A - A) * mul[1]) + Sqr((C1^.B - B) * mul[2]));
 end;
 
 function DistanceLCH_UnRolled(const C1: PColorLCH; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 var
-  vR,vG,vB, X,Y,Z, L,A,B, deltaH: Single;
-  Color1, Color2: TColorLCH;
-const
-  D65_Xn_Inv: Single = 1.0 / 0.95047;
-  D65_Yn_Inv: Single = 1.0 / 1.00000;
-  D65_Zn_Inv: Single = 1.0 / 1.08883;
+  linearR, linearG, linearB: Single;
+  X, Y, Z: Single;
+  L, A, B: Single;
+  chroma, hue, deltaHue: Single;
 begin
-  Color1 := C1^;
-
   // function RGBToLAB
-  with C2 do
-  begin
-    vR := XYZ_GAMMA_LUT[R];
-    vG := XYZ_GAMMA_LUT[G];
-    vB := XYZ_GAMMA_LUT[B];
-  end;
+  linearR := RGB_TO_LINEAR[C2.R];
+  linearG := RGB_TO_LINEAR[C2.G];
+  linearB := RGB_TO_LINEAR[C2.B];
 
-  X := (vR * 0.4124 + vG * 0.3576 + vB * 0.1805) * D65_Xn_Inv;
-  Y := (vR * 0.2126 + vG * 0.7152 + vB * 0.0722) * D65_Yn_Inv;
-  Z := (vR * 0.0193 + vG * 0.1192 + vB * 0.9505) * D65_Zn_Inv;
+  X := (linearR * Single(0.4124) + linearG * Single(0.3576) + linearB * Single(0.1805)) * D65_INV.X;
+  Y := (linearR * Single(0.2126) + linearG * Single(0.7152) + linearB * Single(0.0722)) * D65_INV.Y;
+  Z := (linearR * Single(0.0193) + linearG * Single(0.1192) + linearB * Single(0.9505)) * D65_INV.Z;
 
-  if X > 0.008856 then X := fcbrt(X)
-  else                 X := (7.787 * X) + 0.137931;
-  if Y > 0.008856 then Y := fcbrt(Y)
-  else                 Y := (7.787 * Y) + 0.137931;
-  if Z > 0.008856 then Z := fcbrt(Z)
-  else                 Z := (7.787 * Z) + 0.137931;
+  if X > Single(0.008856) then X := fcbrt(X)
+  else                         X := (Single(7.787) * X) + Single(0.137931);
+  if Y > Single(0.008856) then Y := fcbrt(Y)
+  else                         Y := (Single(7.787) * Y) + Single(0.137931);
+  if Z > Single(0.008856) then Z := fcbrt(Z)
+  else                         Z := (Single(7.787) * Z) + Single(0.137931);
 
-  L := (116.0 * Y) - 16.0;
+  L := (Single(116.0) * Y) - Single(16.0);
   A := 500 * (X - Y);
   B := 200 * (Y - Z);
 
-  // function RGBToLCH
-  Color2.L := L;
-  Color2.C := Sqrt(Sqr(A) + Sqr(B));
-  Color2.H := ArcTan2(B, A);
-
-  if (Color2.H > 0) then
-    Color2.H := (Color2.H / PI) * 180
-  else
-    Color2.H := 360 - (Abs(Color2.H) / PI) * 180;
-
+  chroma := Sqrt(Sqr(A) + Sqr(B));
   // function DistanceLCH
-  deltaH := Abs(Color1.H - Color2.H);
-  if deltaH >= 180 then
-    deltaH := 360 - deltaH;
-  deltaH *= Max(Color1.C, Color2.C) / 100;
-
-  if (Color1.C < 0.4) or (Color2.C < 0.4) then // no chromaticity = gray (hue has no value here)
-    deltaH := 0
+  if (C1^.C < Single(0.4)) or (chroma < Single(0.4)) then // achromatic (gray): hue has no meaning
+    deltaHue := 0
   else
   begin
-    deltaH := Abs(Color1.H - Color2.H);
-    if (deltaH >= 180) then
-      deltaH := 360 - deltaH;
-    deltaH *= Max(Color1.C, Color2.C) / 142;
+    hue := fast_atan2(B, A);
+    if (hue > 0) then
+      hue := (hue / Single(PI)) * 180
+    else
+      hue := 360 - (Abs(hue) / Single(PI)) * 180;
+
+    deltaHue := Abs(C1^.H - hue);
+    deltaHue := Min(deltaHue, 360 - deltaHue);
+    deltaHue *= Max(C1^.C, chroma) / 142;
   end;
 
-  Result := Sqrt(Sqr((Color1.L - Color2.L) * mul[0]) + Sqr((Color1.C - Color2.C) * mul[1]) + Sqr(deltaH * mul[2]));
+  Result := Sqrt(Sqr((C1^.L - L) * mul[0]) + Sqr((C1^.C - chroma) * mul[1]) + Sqr(deltaHue * mul[2]));
 end;
 
 function DistanceDeltaE_UnRolled(const C1: PColorLAB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 var
-  vR,vG,vB, X,Y,Z: Single;
-  xC1,xC2,xDL,xDC,xDE,xDH,xSC,xSH: Single;
-  Color1, Color2: TColorLAB;
-const
-  D65_Xn_Inv: Single = 1.0 / 0.95047;
-  D65_Yn_Inv: Single = 1.0 / 1.00000;
-  D65_Zn_Inv: Single = 1.0 / 1.08883;
+  linearR, linearG, linearB: Single;
+  X, Y, Z: Single;
+  L, A, B: Single;
+  chroma1, chroma2: Single;
+  deltaL, deltaChroma, deltaHue: Single;
+  deltaESq, deltaHueSq: Single;
+  chromaWeight, hueWeight: Single;
 begin
-  Color1 := C1^;
-
   // function RGBToLAB
-  with C2 do
-  begin
-    vR := XYZ_GAMMA_LUT[R];
-    vG := XYZ_GAMMA_LUT[G];
-    vB := XYZ_GAMMA_LUT[B];
-  end;
+  linearR := RGB_TO_LINEAR[C2.R];
+  linearG := RGB_TO_LINEAR[C2.G];
+  linearB := RGB_TO_LINEAR[C2.B];
 
-  X := (vR * 0.4124 + vG * 0.3576 + vB * 0.1805) * D65_Xn_Inv;
-  Y := (vR * 0.2126 + vG * 0.7152 + vB * 0.0722) * D65_Yn_Inv;
-  Z := (vR * 0.0193 + vG * 0.1192 + vB * 0.9505) * D65_Zn_Inv;
+  X := (linearR * Single(0.4124) + linearG * Single(0.3576) + linearB * Single(0.1805)) * D65_INV.X;
+  Y := (linearR * Single(0.2126) + linearG * Single(0.7152) + linearB * Single(0.0722)) * D65_INV.Y;
+  Z := (linearR * Single(0.0193) + linearG * Single(0.1192) + linearB * Single(0.9505)) * D65_INV.Z;
 
-  if X > 0.008856 then X := fcbrt(X)
-  else                 X := (7.787 * X) + 0.137931;
-  if Y > 0.008856 then Y := fcbrt(Y)
-  else                 Y := (7.787 * Y) + 0.137931;
-  if Z > 0.008856 then Z := fcbrt(Z)
-  else                 Z := (7.787 * Z) + 0.137931;
+  if X > Single(0.008856) then X := fcbrt(X)
+  else                         X := (Single(7.787) * X) + Single(0.137931);
+  if Y > Single(0.008856) then Y := fcbrt(Y)
+  else                         Y := (Single(7.787) * Y) + Single(0.137931);
+  if Z > Single(0.008856) then Z := fcbrt(Z)
+  else                         Z := (Single(7.787) * Z) + Single(0.137931);
 
-  Color2.L := (116.0 * Y) - 16.0;
-  Color2.A := 500 * (X - Y);
-  Color2.B := 200 * (Y - Z);
+  L := (Single(116.0) * Y) - Single(16.0);
+  A := 500 * (X - Y);
+  B := 200 * (Y - Z);
 
   // function DistanceDeltaE
-  xC1 := Sqrt(Sqr(Color1.A) + Sqr(Color1.B));
-  xC2 := Sqrt(Sqr(Color2.A) + Sqr(Color2.B));
-  xDL := Color2.L - Color1.L;
-  xDC := xC2 - xC1;
-  xDE := Sqrt(Sqr(Color1.L - Color2.L) + Sqr(Color1.A - Color2.A) + Sqr(Color1.B - Color2.B));
+  chroma1 := Sqrt(Sqr(C1^.A) + Sqr(C1^.B));
+  chroma2 := Sqrt(Sqr(A) + Sqr(B));
+  deltaL := L - C1^.L;
+  deltaChroma := chroma2 - chroma1;
 
-  if Sqrt(xDE) > Sqrt(Abs(xDL)) + Sqrt(Abs(xDC))  then
-    xDH := Sqrt(Sqr(xDE) - Sqr(xDL) - Sqr(xDC))
-  else
-    xDH := 0;
+  // deltaHue = sqrt(deltaE^2 - deltaL^2 - deltaChroma^2), clamped to avoid the sqrt of a negative
+  deltaESq := Sqr(C1^.L - L) + Sqr(C1^.A - A) + Sqr(C1^.B - B);
+  deltaHueSq := deltaESq - Sqr(deltaL) - Sqr(deltaChroma);
+  if deltaHueSq > 0 then 
+    deltaHue := Sqrt(deltaHueSq) else deltaHue := 0;
+  chromaWeight := 1 + (Single(0.045) * (chroma1 + chroma2) / 2);
+  hueWeight    := 1 + (Single(0.015) * (chroma1 + chroma2) / 2);
+  deltaChroma /= chromaWeight;
+  deltaHue    /= hueWeight;
 
-  xSC := 1 + (0.045 * (xC1+xC2)/2);
-  xSH := 1 + (0.015 * (xC1+xC2)/2);
-
-  xDC /= xSC;
-  xDH /= xSH;
-
-  Result := Sqrt(Sqr(xDL * mul[0]) + Sqr(xDC * mul[1]) + Sqr(xDH * mul[2]));
+  Result := Sqrt(Sqr(deltaL * mul[0]) + Sqr(deltaChroma * mul[1]) + Sqr(deltaHue * mul[2]));
 end;
 
 end.
