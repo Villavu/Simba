@@ -32,7 +32,9 @@ implementation
 
 function DistanceRGB_UnRolled(const C1: PColorRGB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
 begin
-  Result := Sqrt(Sqr((C1^.R-C2.R) * mul[0]) + Sqr((C1^.G-C2.G) * mul[1]) + Sqr((C1^.B-C2.B) * mul[2]));
+  Result := Sqrt(Sqr((ByteToSingle[C1^.R] - ByteToSingle[C2.R]) * mul[0])
+               + Sqr((ByteToSingle[C1^.G] - ByteToSingle[C2.G]) * mul[1])
+               + Sqr((ByteToSingle[C1^.B] - ByteToSingle[C2.B]) * mul[2]));
 end;
 
 function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
@@ -40,9 +42,9 @@ var
   R,G,B,deltaC,deltaH,cMax,cMin, H,S,L: Single;
 begin
   // function RGBToHSL
-  R := C2.R * Single(1.0/255.0);
-  G := C2.G * Single(1.0/255.0);
-  B := C2.B * Single(1.0/255.0);
+  R := ByteToSingle[C2.R] * Single(1.0/255.0);
+  G := ByteToSingle[C2.G] * Single(1.0/255.0);
+  B := ByteToSingle[C2.B] * Single(1.0/255.0);
 
   cMin := Min(R, Min(G, B));
   cMax := Max(R, Max(G, B));
@@ -87,9 +89,9 @@ var
   H, S, V: Single;
 begin
   // function ColorToHSV
-  R := C2.R * Single(1.0/255.0);
-  G := C2.G * Single(1.0/255.0);
-  B := C2.B * Single(1.0/255.0);
+  R := ByteToSingle[C2.R] * Single(1.0/255.0);
+  G := ByteToSingle[C2.G] * Single(1.0/255.0);
+  B := ByteToSingle[C2.B] * Single(1.0/255.0);
 
   if (g < b) then
   begin
