@@ -92,7 +92,7 @@ var
 
   function Match(const BufferPtr: TColorBGRA; const BitmapPtr: PByte): Boolean; inline;
   begin
-    Result := (CompareFunc(BitmapPtr + 1, BufferPtr, Multipliers) / MaxDistance * 100 <= Tolerance);
+    Result := (CompareFunc(BitmapPtr + 1, @BufferPtr, Multipliers) / MaxDistance * 100 <= Tolerance);
   end;
 
   function Hit(BufferPtr: PColorBGRA): Boolean;

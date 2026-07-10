@@ -43,15 +43,12 @@ function SimilarRGB(const Color1, Color2: TColorBGRA; const Tol: Single): Boolea
 
 implementation
 
-uses
-  simba.colormath_conversion; // ByteToSingle table (avoids the per-channel int->float conversion)
-
 // ----| RGB |-----------------------------------------------------------------
 function DistanceRGB(const Color1, Color2: TColorRGB; const mul: TChannelMultipliers): Single;
 begin
-  Result := Sqrt(Sqr((ByteToSingle[Color1.R]-ByteToSingle[Color2.R]) * mul[0])
-               + Sqr((ByteToSingle[Color1.G]-ByteToSingle[Color2.G]) * mul[1])
-               + Sqr((ByteToSingle[Color1.B]-ByteToSingle[Color2.B]) * mul[2]));
+  Result := Sqrt(Sqr((Color1.R-Color2.R) * mul[0])
+               + Sqr((Color1.G-Color2.G) * mul[1])
+               + Sqr((Color1.B-Color2.B) * mul[2]));
 end;
 
 function DistanceRGB_Max(const mul: TChannelMultipliers): Single;

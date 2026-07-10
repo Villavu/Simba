@@ -6,6 +6,9 @@
 unit simba.image_utils;
 
 {$i simba.inc}
+{$IFDEF CPUX86_64}
+{$asmmode att}
+{$ENDIF}
 
 interface
 

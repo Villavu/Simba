@@ -74,7 +74,7 @@ type
   PChannelMultipliers = ^TChannelMultipliers;
   TChannelMultipliers = array[0..2] of Single;
 
-  TColorDistanceFunc = function(const Color1: Pointer; const Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
+  TColorDistanceFunc = function(const Color1: Pointer; const Color2: PColorBGRA; const mul: TChannelMultipliers): Single;
 
   PColorTolerance = ^TColorTolerance;
   TColorTolerance = record

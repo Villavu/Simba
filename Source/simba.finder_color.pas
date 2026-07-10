@@ -143,7 +143,7 @@ begin
   Dec(SearchWidth);
 
   Cache.Color := RowPtr^;
-  Cache.Dist := {%H-}CompareFunc(TargetColor, Cache.Color, Multipliers) / MaxDistance * 100;
+  Cache.Dist := {%H-}CompareFunc(TargetColor, @Cache.Color, Multipliers) / MaxDistance * 100;
 
   for Y := 0 to SearchHeight do
   begin
@@ -153,7 +153,7 @@ begin
       if not Cache.Color.EqualsIgnoreAlpha(Ptr^) then
       begin
         Cache.Color := Ptr^;
-        Cache.Dist  := CompareFunc(TargetColor, Cache.Color, Multipliers) / MaxDistance * 100;
+        Cache.Dist  := CompareFunc(TargetColor, @Cache.Color, Multipliers) / MaxDistance * 100;
       end;
 
       MACRO_FINDCOLORS_COMPARE

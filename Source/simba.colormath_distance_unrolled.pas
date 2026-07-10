@@ -20,32 +20,36 @@ uses
   simba.colormath,
   simba.colormath_conversion;
 
-function DistanceRGB_UnRolled(const C1: PColorRGB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
-function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
-function DistanceHSV_UnRolled(const C1: PColorHSV; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
-function DistanceXYZ_UnRolled(const C1: PColorXYZ; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
-function DistanceLAB_UnRolled(const C1: PColorLAB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
-function DistanceLCH_UnRolled(const C1: PColorLCH; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
-function DistanceDeltaE_UnRolled(const C1: PColorLAB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceRGB_UnRolled(const C1: PColorRGB; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceHSV_UnRolled(const C1: PColorHSV; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceXYZ_UnRolled(const C1: PColorXYZ; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceLAB_UnRolled(const C1: PColorLAB; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceLCH_UnRolled(const C1: PColorLCH; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceDeltaE_UnRolled(const C1: PColorLAB; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
 
 implementation
 
-function DistanceRGB_UnRolled(const C1: PColorRGB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceRGB_UnRolled(const C1: PColorRGB; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
+{$IF DEFINED(COLORDIST_ASM) and DEFINED(CPUX86_64)}
+  {$I asm/distancergb_x64_86.inc}
+{$ELSE}
 begin
-  Result := Sqrt(Sqr((ByteToSingle[C1^.R] - ByteToSingle[C2.R]) * mul[0])
-               + Sqr((ByteToSingle[C1^.G] - ByteToSingle[C2.G]) * mul[1])
-               + Sqr((ByteToSingle[C1^.B] - ByteToSingle[C2.B]) * mul[2]));
+  Result := Sqrt(Sqr((C1^.R - C2^.R) * mul[0]) + Sqr((C1^.G - C2^.G) * mul[1]) + Sqr((C1^.B - C2^.B) * mul[2]));
 end;
+{$ENDIF}
 
-function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
+{$IF DEFINED(COLORDIST_ASM) and DEFINED(CPUX86_64)}
+  {$I asm/distancehsl_x64_86.inc}
+{$ELSE}
 var
   R,G,B,deltaC,deltaH,cMax,cMin, H,S,L: Single;
 begin
   // function RGBToHSL
-  R := ByteToSingle[C2.R] * Single(1.0/255.0);
-  G := ByteToSingle[C2.G] * Single(1.0/255.0);
-  B := ByteToSingle[C2.B] * Single(1.0/255.0);
-
+  R := C2^.R * Single(1.0/255.0);
+  G := C2^.G * Single(1.0/255.0);
+  B := C2^.B * Single(1.0/255.0);
   cMin := Min(R, Min(G, B));
   cMax := Max(R, Max(G, B));
   deltaC := cMax - cMin;
@@ -81,17 +85,21 @@ begin
 
   Result := Sqrt(Sqr(deltaH * mul[0]) + Sqr((C1^.S - S) * mul[1]) + Sqr((C1^.L - L) * mul[2]));
 end;
+{$ENDIF}
 
-function DistanceHSV_UnRolled(const C1: PColorHSV; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceHSV_UnRolled(const C1: PColorHSV; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
+{$IF DEFINED(COLORDIST_ASM) and DEFINED(CPUX86_64)}
+  {$I asm/distancehsv_x64_86.inc}
+{$ELSE}
 var
   R, G, B: Single;
   Chroma,t, k, deltaH: Single;
   H, S, V: Single;
 begin
   // function ColorToHSV
-  R := ByteToSingle[C2.R] * Single(1.0/255.0);
-  G := ByteToSingle[C2.G] * Single(1.0/255.0);
-  B := ByteToSingle[C2.B] * Single(1.0/255.0);
+  R := C2^.R * Single(1.0/255.0);
+  G := C2^.G * Single(1.0/255.0);
+  B := C2^.B * Single(1.0/255.0);
 
   if (g < b) then
   begin
@@ -127,16 +135,17 @@ begin
 
   Result := Sqrt(Sqr(deltaH * mul[0]) + Sqr((C1^.S - S) * mul[1]) + Sqr((C1^.V - V) * mul[2]));
 end;
+{$ENDIF}
 
-function DistanceXYZ_UnRolled(const C1: PColorXYZ; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceXYZ_UnRolled(const C1: PColorXYZ; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
 var
   linearR, linearG, linearB: Single;
   X, Y, Z: Single;
 begin
   // function RGBToXYZ
-  linearR := RGB_TO_LINEAR[C2.R];
-  linearG := RGB_TO_LINEAR[C2.G];
-  linearB := RGB_TO_LINEAR[C2.B];
+  linearR := RGB_TO_LINEAR[C2^.R];
+  linearG := RGB_TO_LINEAR[C2^.G];
+  linearB := RGB_TO_LINEAR[C2^.B];
 
   linearR := linearR * 100;
   linearG := linearG * 100;
@@ -145,21 +154,21 @@ begin
   X := (linearR * Single(0.4124) + linearG * Single(0.3576) + linearB * Single(0.1805)) * D65_INV.X;
   Y := (linearR * Single(0.2126) + linearG * Single(0.7152) + linearB * Single(0.0722)) * D65_INV.Y;
   Z := (linearR * Single(0.0193) + linearG * Single(0.1192) + linearB * Single(0.9505)) * D65_INV.Z;
-  
+
   // function DistanceXY
   Result := Sqrt(Sqr((C1^.X - X) * mul[0]) + Sqr((C1^.Y - Y) * mul[1]) + Sqr((C1^.Z - Z) * mul[2]));
 end;
 
-function DistanceLAB_UnRolled(const C1: PColorLAB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceLAB_UnRolled(const C1: PColorLAB; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
 var
   linearR, linearG, linearB: Single;
   X, Y, Z: Single;
   L, A, B: Single;
 begin
   // function RGBToLAB
-  linearR := RGB_TO_LINEAR[C2.R];
-  linearG := RGB_TO_LINEAR[C2.G];
-  linearB := RGB_TO_LINEAR[C2.B];
+  linearR := RGB_TO_LINEAR[C2^.R];
+  linearG := RGB_TO_LINEAR[C2^.G];
+  linearB := RGB_TO_LINEAR[C2^.B];
 
   X := (linearR * Single(0.4124) + linearG * Single(0.3576) + linearB * Single(0.1805)) * D65_INV.X;
   Y := (linearR * Single(0.2126) + linearG * Single(0.7152) + linearB * Single(0.0722)) * D65_INV.Y;
@@ -180,7 +189,7 @@ begin
   Result := Sqrt(Sqr((C1^.L - L) * mul[0]) + Sqr((C1^.A - A) * mul[1]) + Sqr((C1^.B - B) * mul[2]));
 end;
 
-function DistanceLCH_UnRolled(const C1: PColorLCH; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceLCH_UnRolled(const C1: PColorLCH; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
 var
   linearR, linearG, linearB: Single;
   X, Y, Z: Single;
@@ -188,9 +197,9 @@ var
   chroma, hue, deltaHue: Single;
 begin
   // function RGBToLAB
-  linearR := RGB_TO_LINEAR[C2.R];
-  linearG := RGB_TO_LINEAR[C2.G];
-  linearB := RGB_TO_LINEAR[C2.B];
+  linearR := RGB_TO_LINEAR[C2^.R];
+  linearG := RGB_TO_LINEAR[C2^.G];
+  linearB := RGB_TO_LINEAR[C2^.B];
 
   X := (linearR * Single(0.4124) + linearG * Single(0.3576) + linearB * Single(0.1805)) * D65_INV.X;
   Y := (linearR * Single(0.2126) + linearG * Single(0.7152) + linearB * Single(0.0722)) * D65_INV.Y;
@@ -227,7 +236,7 @@ begin
   Result := Sqrt(Sqr((C1^.L - L) * mul[0]) + Sqr((C1^.C - chroma) * mul[1]) + Sqr(deltaHue * mul[2]));
 end;
 
-function DistanceDeltaE_UnRolled(const C1: PColorLAB; const C2: TColorBGRA; const mul: TChannelMultipliers): Single;
+function DistanceDeltaE_UnRolled(const C1: PColorLAB; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
 var
   linearR, linearG, linearB: Single;
   X, Y, Z: Single;
@@ -238,9 +247,9 @@ var
   chromaWeight, hueWeight: Single;
 begin
   // function RGBToLAB
-  linearR := RGB_TO_LINEAR[C2.R];
-  linearG := RGB_TO_LINEAR[C2.G];
-  linearB := RGB_TO_LINEAR[C2.B];
+  linearR := RGB_TO_LINEAR[C2^.R];
+  linearG := RGB_TO_LINEAR[C2^.G];
+  linearB := RGB_TO_LINEAR[C2^.B];
 
   X := (linearR * Single(0.4124) + linearG * Single(0.3576) + linearB * Single(0.1805)) * D65_INV.X;
   Y := (linearR * Single(0.2126) + linearG * Single(0.7152) + linearB * Single(0.0722)) * D65_INV.Y;
@@ -266,7 +275,7 @@ begin
   // deltaHue = sqrt(deltaE^2 - deltaL^2 - deltaChroma^2), clamped to avoid the sqrt of a negative
   deltaESq := Sqr(C1^.L - L) + Sqr(C1^.A - A) + Sqr(C1^.B - B);
   deltaHueSq := deltaESq - Sqr(deltaL) - Sqr(deltaChroma);
-  if deltaHueSq > 0 then 
+  if deltaHueSq > 0 then
     deltaHue := Sqrt(deltaHueSq) else deltaHue := 0;
   chromaWeight := 1 + (Single(0.045) * (chroma1 + chroma2) / 2);
   hueWeight    := 1 + (Single(0.015) * (chroma1 + chroma2) / 2);
