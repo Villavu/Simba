@@ -28,7 +28,7 @@
 {$IF DEFINED(CPUX86_64)}
   {$ASMMODE intel}
   {$DEFINE COLORDIST_ASM}
-  {$DEFINE SIMBA_FFT_SIMD_X86_64}
+  {$DEFINE FFT_ASM}
 {$ENDIF}
 
 {$DEFINE MT_PACKED} // pack two real colour channels into one complex FFT (R->Re, G->Im) rather than transforming all three separately

@@ -25,11 +25,11 @@ uses
   simba.math;
 
 const
-  FFT_PLAN_ALIGN = 32;                  // Align plan to 32 bit
-  FFT_THREADING: Boolean = True;        // runtime on/off switch
-  FFT_THREADING_DEBUG: Boolean = False; // live debug on threading status
-  FFT_MIN_AREA: Integer = 40000;        // W*H below this always runs single-threaded (200x200)
-  FFT_MAX_THREADS: Integer = 6;         // max threads to use; users may raise it
+  FFT_PLAN_ALIGN = 32;                     // Align plan to 32 bit
+  FFT_THREADING: Boolean = True;           // runtime on/off switch
+  FFT_THREADING_DEBUG: Boolean = False;    // live debug on threading status
+  FFT_THREADING_MIN_AREA: Integer = 40000; // W*H below this always runs single-threaded (200x200)
+  FFT_MAX_THREADS: Integer = 6;            // max threads to use; users may raise it
 
 type
   TComplex = record
@@ -199,7 +199,7 @@ end;
 function ShouldParallelFFT(const Area: Int64): Boolean; inline;
 begin
   {$IFDEF MT_THREADING}
-  Result := FFT_THREADING and (Area >= FFT_MIN_AREA);
+  Result := FFT_THREADING and (Area >= FFT_THREADING_MIN_AREA);
   {$ELSE}
   Result := False;
   {$ENDIF}
@@ -350,13 +350,13 @@ end;
 
 function TFFTThreadPool.ThreadsForArea(const Area: Int64): Integer;
 begin
-  if (FFT_MIN_AREA < 1) then // disabled - use the whole pool
+  if (FFT_THREADING_MIN_AREA < 1) then // disabled - use the whole pool
     Result := FBuiltThreads
   else
   begin
-    // scale threads to use count with one thread per FFT_MIN_AREA of area
+    // scale threads to use count with one thread per FFT_THREADING_MIN_AREA of area
     // e.g. 200x200 -> 2, 300x300 -> 3, >=512x512 -> FBuiltThreads
-    Result := 1 + (Area div FFT_MIN_AREA);
+    Result := 1 + (Area div FFT_THREADING_MIN_AREA);
     if (Result > FBuiltThreads) then
       Result := FBuiltThreads;
   end;
@@ -603,7 +603,7 @@ begin
       if ShouldParallelFFT(Int64(W) * H) then
         DebugLn('[FFT Threading]: Pool not available')
       else
-        DebugLn('[FFT Threading]: Area < FFT_MIN_AREA');
+        DebugLn('[FFT Threading]: Area < FFT_THREADING_MIN_AREA');
 
     Self.RunForward(); // no threading
   end;
@@ -635,7 +635,7 @@ begin
       if ShouldParallelFFT(Int64(W) * H) then
         DebugLn('[FFT Threading]: Pool not available')
       else
-        DebugLn('[FFT Threading]: Area < FFT_MIN_AREA');
+        DebugLn('[FFT Threading]: Area < FFT_THREADING_MIN_AREA');
 
     Self.RunInverse(); // no threading
   end;

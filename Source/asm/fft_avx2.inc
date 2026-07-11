@@ -1,18 +1,226 @@
-unit simba.fftpack4_core_avx;
-{==============================================================================]
-  FFTPACK4_core_avx.pas: AVX2 complex-FFT passes (256-bit, 4 complex/iter).
-[==============================================================================}
-{$i simba.inc}
-{$asmmode intel}
+procedure passf2_avx2(const ido, l1: Int32; const cc,chp,wa1: PSingle; const isign: Int32);
+begin
+  asm
+    mov      eax, isign
+    vpcmpeqd ymm7, ymm7, ymm7
+    vpslld   ymm7, ymm7, 31
+    cmp      eax, 1
+    je       @@even
+    vpsllq   ymm7, ymm7, 32         // ODD
+    jmp      @@mdone
+  @@even:
+    vpsrlq   ymm7, ymm7, 32         // EVEN
+  @@mdone:
+    mov      r8d, ido
+    shl      r8, 2                  // idob (A1 stride / per-k ac gap)
+    mov      eax, l1
+    imul     rax, r8                // d1b
+    mov      r10, rax
+    mov      r13d, ido
+    shr      r13d, 1                // ido_complex
+    mov      r14d, r13d
+    and      r14d, 3                // rem
+    shr      r13d, 2                // nquad
+    mov      rax, cc
+    mov      rdx, chp
+    mov      rsi, wa1
+    mov      ebx, l1
+    test     ebx, ebx
+    jz       @@done
+  @@k:
+    mov      rcx, rsi
+    mov      r12d, r13d
+    test     r12d, r12d
+    jz       @@rem
+  @@quad:
+    vmovups   ymm0, [rax]           // A0
+    vmovups   ymm1, [rax+r8]        // A1
+    vaddps    ymm2, ymm0, ymm1      // out0
+    vmovups   [rdx], ymm2
+    vsubps    ymm0, ymm0, ymm1      // D
+    vmovups   ymm5, [rcx]           // W
+    vshufps   ymm1, ymm0, ymm0, $b1
+    vmovshdup ymm6, ymm5
+    vmulps    ymm1, ymm1, ymm6
+    vxorps    ymm1, ymm1, ymm7
+    vmovsldup ymm5, ymm5
+    vmulps    ymm0, ymm0, ymm5
+    vaddps    ymm0, ymm0, ymm1
+    vmovups   [rdx+r10], ymm0       // out1
+    add      rax, 32
+    add      rdx, 32
+    add      rcx, 32
+    dec      r12d
+    jnz      @@quad
+  @@rem:
+    test     r14d, r14d
+    jz       @@knext
+    mov      r15d, r14d
+  @@remloop:
+    vmovq     xmm0, [rax]
+    vmovq     xmm1, [rax+r8]
+    vaddps    xmm2, xmm0, xmm1
+    vmovq     [rdx], xmm2
+    vsubps    xmm0, xmm0, xmm1
+    vmovq     xmm5, [rcx]
+    vshufps   xmm1, xmm0, xmm0, $b1
+    vmovshdup xmm6, xmm5
+    vmulps    xmm1, xmm1, xmm6
+    vxorps    xmm1, xmm1, xmm7
+    vmovsldup xmm5, xmm5
+    vmulps    xmm0, xmm0, xmm5
+    vaddps    xmm0, xmm0, xmm1
+    vmovq     [rdx+r10], xmm0
+    add      rax, 8
+    add      rdx, 8
+    add      rcx, 8
+    dec      r15d
+    jnz      @@remloop
+  @@knext:
+    add      rax, r8                // gap = idob
+    dec      ebx
+    jnz      @@k
+  @@done:
+    vzeroupper
+  end ['rax','rbx','rcx','rdx','rsi','r8','r10','r12','r13','r14','r15',
+       'xmm0','xmm1','xmm2','xmm5','xmm6','xmm7'];
+end;
 
-interface
-
-uses
-  simba.fftpack4_core;
-
-procedure cfftf1_avx2(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
-
-implementation
+procedure passf3_avx2(const ido, l1: Int32; const cc, chp, wa1,wa2: PSingle; const isign: Int32);
+begin
+  asm
+    vpcmpeqd ymm7, ymm7, ymm7
+    vpslld   ymm7, ymm7, 31
+    vpsrlq   ymm7, ymm7, 32         // EVEN
+    mov      eax, $BF000000
+    vmovd    xmm4, eax
+    vbroadcastss ymm4, xmm4         // taur
+    mov      eax, isign
+    cmp      eax, 1
+    jne      @@neg
+    mov      eax, $3F5DB3D7
+    vmovd    xmm6, eax
+    vbroadcastss ymm6, xmm6         // staui = +taui
+    vmovaps  ymm8, ymm7             // TW = EVEN
+    jmp      @@cdone
+  @@neg:
+    mov      eax, $BF5DB3D7
+    vmovd    xmm6, eax
+    vbroadcastss ymm6, xmm6         // staui = -taui
+    vpcmpeqd ymm8, ymm8, ymm8
+    vpslld   ymm8, ymm8, 31
+    vpsllq   ymm8, ymm8, 32         // TW = ODD
+  @@cdone:
+    mov      r8d, ido
+    shl      r8, 2                  // idob
+    mov      eax, l1
+    imul     rax, r8                // d1b
+    mov      r10, rax
+    mov      r13d, ido
+    shr      r13d, 1
+    mov      r14d, r13d
+    and      r14d, 3
+    shr      r13d, 2                // nquad
+    mov      rax, cc                // X0 base
+    mov      rdx, chp
+    mov      rsi, wa1
+    mov      ebx, l1
+    test     ebx, ebx
+    jz       @@done
+  @@k:
+    mov      rcx, rsi
+    mov      r12d, r13d
+    test     r12d, r12d
+    jz       @@rem
+  @@quad:
+    vmovups   ymm1, [rax+r8]        // X1
+    vmovups   ymm2, [rax+r8*2]      // X2
+    vaddps    ymm0, ymm1, ymm2      // T2
+    vsubps    ymm1, ymm1, ymm2      // Xd
+    vmulps    ymm1, ymm1, ymm6      // C3 = staui*Xd
+    vmovups   ymm2, [rax]           // X0
+    vaddps    ymm3, ymm2, ymm0      // out0
+    vmovups   [rdx], ymm3
+    vmulps    ymm0, ymm0, ymm4      // T2*taur
+    vaddps    ymm0, ymm0, ymm2      // C2
+    vshufps   ymm1, ymm1, ymm1, $b1
+    vxorps    ymm1, ymm1, ymm7      // iC3
+    vaddps    ymm3, ymm0, ymm1      // D2
+    vsubps    ymm0, ymm0, ymm1      // D3
+    vmovups   ymm5, [rcx]           // wa1
+    vshufps   ymm1, ymm3, ymm3, $b1
+    vmovshdup ymm2, ymm5
+    vmulps    ymm1, ymm1, ymm2
+    vxorps    ymm1, ymm1, ymm8
+    vmovsldup ymm5, ymm5
+    vmulps    ymm3, ymm3, ymm5
+    vaddps    ymm3, ymm3, ymm1
+    vmovups   [rdx+r10], ymm3       // out1
+    vmovups   ymm5, [rcx+r8]        // wa2
+    vshufps   ymm1, ymm0, ymm0, $b1
+    vmovshdup ymm2, ymm5
+    vmulps    ymm1, ymm1, ymm2
+    vxorps    ymm1, ymm1, ymm8
+    vmovsldup ymm5, ymm5
+    vmulps    ymm0, ymm0, ymm5
+    vaddps    ymm0, ymm0, ymm1
+    vmovups   [rdx+r10*2], ymm0     // out2
+    add      rax, 32
+    add      rdx, 32
+    add      rcx, 32
+    dec      r12d
+    jnz      @@quad
+  @@rem:
+    test     r14d, r14d
+    jz       @@knext
+    mov      r15d, r14d
+  @@remloop:
+    vmovq     xmm1, [rax+r8]
+    vmovq     xmm2, [rax+r8*2]
+    vaddps    xmm0, xmm1, xmm2
+    vsubps    xmm1, xmm1, xmm2
+    vmulps    xmm1, xmm1, xmm6
+    vmovq     xmm2, [rax]
+    vaddps    xmm3, xmm2, xmm0
+    vmovq     [rdx], xmm3
+    vmulps    xmm0, xmm0, xmm4
+    vaddps    xmm0, xmm0, xmm2
+    vshufps   xmm1, xmm1, xmm1, $b1
+    vxorps    xmm1, xmm1, xmm7
+    vaddps    xmm3, xmm0, xmm1
+    vsubps    xmm0, xmm0, xmm1
+    vmovq     xmm5, [rcx]
+    vshufps   xmm1, xmm3, xmm3, $b1
+    vmovshdup xmm2, xmm5
+    vmulps    xmm1, xmm1, xmm2
+    vxorps    xmm1, xmm1, xmm8
+    vmovsldup xmm5, xmm5
+    vmulps    xmm3, xmm3, xmm5
+    vaddps    xmm3, xmm3, xmm1
+    vmovq     [rdx+r10], xmm3
+    vmovq     xmm5, [rcx+r8]
+    vshufps   xmm1, xmm0, xmm0, $b1
+    vmovshdup xmm2, xmm5
+    vmulps    xmm1, xmm1, xmm2
+    vxorps    xmm1, xmm1, xmm8
+    vmovsldup xmm5, xmm5
+    vmulps    xmm0, xmm0, xmm5
+    vaddps    xmm0, xmm0, xmm1
+    vmovq     [rdx+r10*2], xmm0
+    add      rax, 8
+    add      rdx, 8
+    add      rcx, 8
+    dec      r15d
+    jnz      @@remloop
+  @@knext:
+    lea      rax, [rax+r8*2]        // X0 gap = 2*ido
+    dec      ebx
+    jnz      @@k
+  @@done:
+    vzeroupper
+  end ['rax','rbx','rcx','rdx','rsi','r8','r10','r12','r13','r14','r15',
+       'xmm0','xmm1','xmm2','xmm3','xmm4','xmm5','xmm6','xmm7','xmm8'];
+end;
 
 procedure passf4_avx2(const o1, l1: Int32; const cc, chp, wa1, wa2, wa3: PSingle; const isign: Int32);
 begin
@@ -159,232 +367,6 @@ begin
   end ['rax','rbx','rcx','rdx','rsi','r8','r9','r10','r11','r12','r13','r14','r15',
        'xmm0','xmm1','xmm2','xmm3','xmm4','xmm5','xmm6','xmm7'];
 end;
-
-procedure passf2_avx2(const ido, l1: Int32; const cc,chp,wa1: PSingle; const isign: Int32);
-begin
-  asm
-    mov      eax, isign
-    vpcmpeqd ymm7, ymm7, ymm7
-    vpslld   ymm7, ymm7, 31
-    cmp      eax, 1
-    je       @@even
-    vpsllq   ymm7, ymm7, 32         // ODD
-    jmp      @@mdone
-  @@even:
-    vpsrlq   ymm7, ymm7, 32         // EVEN
-  @@mdone:
-    mov      r8d, ido
-    shl      r8, 2                  // idob (A1 stride / per-k ac gap)
-    mov      eax, l1
-    imul     rax, r8                // d1b
-    mov      r10, rax
-    mov      r13d, ido
-    shr      r13d, 1                // ido_complex
-    mov      r14d, r13d
-    and      r14d, 3                // rem
-    shr      r13d, 2                // nquad
-    mov      rax, cc
-    mov      rdx, chp
-    mov      rsi, wa1
-    mov      ebx, l1
-    test     ebx, ebx
-    jz       @@done
-  @@k:
-    mov      rcx, rsi
-    mov      r12d, r13d
-    test     r12d, r12d
-    jz       @@rem
-  @@quad:
-    vmovups   ymm0, [rax]           // A0
-    vmovups   ymm1, [rax+r8]        // A1
-    vaddps    ymm2, ymm0, ymm1      // out0
-    vmovups   [rdx], ymm2
-    vsubps    ymm0, ymm0, ymm1      // D
-    vmovups   ymm5, [rcx]           // W
-    vshufps   ymm1, ymm0, ymm0, $b1
-    vmovshdup ymm6, ymm5
-    vmulps    ymm1, ymm1, ymm6
-    vxorps    ymm1, ymm1, ymm7
-    vmovsldup ymm5, ymm5
-    vmulps    ymm0, ymm0, ymm5
-    vaddps    ymm0, ymm0, ymm1
-    vmovups   [rdx+r10], ymm0       // out1
-    add      rax, 32
-    add      rdx, 32
-    add      rcx, 32
-    dec      r12d
-    jnz      @@quad
-  @@rem:
-    test     r14d, r14d
-    jz       @@knext
-    mov      r15d, r14d
-  @@remloop:
-    vmovq     xmm0, [rax]
-    vmovq     xmm1, [rax+r8]
-    vaddps    xmm2, xmm0, xmm1
-    vmovq     [rdx], xmm2
-    vsubps    xmm0, xmm0, xmm1
-    vmovq     xmm5, [rcx]
-    vshufps   xmm1, xmm0, xmm0, $b1
-    vmovshdup xmm6, xmm5
-    vmulps    xmm1, xmm1, xmm6
-    vxorps    xmm1, xmm1, xmm7
-    vmovsldup xmm5, xmm5
-    vmulps    xmm0, xmm0, xmm5
-    vaddps    xmm0, xmm0, xmm1
-    vmovq     [rdx+r10], xmm0
-    add      rax, 8
-    add      rdx, 8
-    add      rcx, 8
-    dec      r15d
-    jnz      @@remloop
-  @@knext:
-    add      rax, r8                // gap = idob
-    dec      ebx
-    jnz      @@k
-  @@done:
-    vzeroupper
-  end ['rax','rbx','rcx','rdx','rsi','r8','r10','r12','r13','r14','r15',
-       'xmm0','xmm1','xmm2','xmm5','xmm6','xmm7'];
-end;
-
-
-procedure passf3_avx2(const ido, l1: Int32; const cc, chp, wa1,wa2: PSingle; const isign: Int32);
-begin
-  asm
-    vpcmpeqd ymm7, ymm7, ymm7
-    vpslld   ymm7, ymm7, 31
-    vpsrlq   ymm7, ymm7, 32         // EVEN
-    mov      eax, $BF000000
-    vmovd    xmm4, eax
-    vbroadcastss ymm4, xmm4         // taur
-    mov      eax, isign
-    cmp      eax, 1
-    jne      @@neg
-    mov      eax, $3F5DB3D7
-    vmovd    xmm6, eax
-    vbroadcastss ymm6, xmm6         // staui = +taui
-    vmovaps  ymm8, ymm7             // TW = EVEN
-    jmp      @@cdone
-  @@neg:
-    mov      eax, $BF5DB3D7
-    vmovd    xmm6, eax
-    vbroadcastss ymm6, xmm6         // staui = -taui
-    vpcmpeqd ymm8, ymm8, ymm8
-    vpslld   ymm8, ymm8, 31
-    vpsllq   ymm8, ymm8, 32         // TW = ODD
-  @@cdone:
-    mov      r8d, ido
-    shl      r8, 2                  // idob
-    mov      eax, l1
-    imul     rax, r8                // d1b
-    mov      r10, rax
-    mov      r13d, ido
-    shr      r13d, 1
-    mov      r14d, r13d
-    and      r14d, 3
-    shr      r13d, 2                // nquad
-    mov      rax, cc                // X0 base
-    mov      rdx, chp
-    mov      rsi, wa1
-    mov      ebx, l1
-    test     ebx, ebx
-    jz       @@done
-  @@k:
-    mov      rcx, rsi
-    mov      r12d, r13d
-    test     r12d, r12d
-    jz       @@rem
-  @@quad:
-    vmovups   ymm1, [rax+r8]        // X1
-    vmovups   ymm2, [rax+r8*2]      // X2
-    vaddps    ymm0, ymm1, ymm2      // T2
-    vsubps    ymm1, ymm1, ymm2      // Xd
-    vmulps    ymm1, ymm1, ymm6      // C3 = staui*Xd
-    vmovups   ymm2, [rax]           // X0
-    vaddps    ymm3, ymm2, ymm0      // out0
-    vmovups   [rdx], ymm3
-    vmulps    ymm0, ymm0, ymm4      // T2*taur
-    vaddps    ymm0, ymm0, ymm2      // C2
-    vshufps   ymm1, ymm1, ymm1, $b1
-    vxorps    ymm1, ymm1, ymm7      // iC3
-    vaddps    ymm3, ymm0, ymm1      // D2
-    vsubps    ymm0, ymm0, ymm1      // D3
-    vmovups   ymm5, [rcx]           // wa1
-    vshufps   ymm1, ymm3, ymm3, $b1
-    vmovshdup ymm2, ymm5
-    vmulps    ymm1, ymm1, ymm2
-    vxorps    ymm1, ymm1, ymm8
-    vmovsldup ymm5, ymm5
-    vmulps    ymm3, ymm3, ymm5
-    vaddps    ymm3, ymm3, ymm1
-    vmovups   [rdx+r10], ymm3       // out1
-    vmovups   ymm5, [rcx+r8]        // wa2
-    vshufps   ymm1, ymm0, ymm0, $b1
-    vmovshdup ymm2, ymm5
-    vmulps    ymm1, ymm1, ymm2
-    vxorps    ymm1, ymm1, ymm8
-    vmovsldup ymm5, ymm5
-    vmulps    ymm0, ymm0, ymm5
-    vaddps    ymm0, ymm0, ymm1
-    vmovups   [rdx+r10*2], ymm0     // out2
-    add      rax, 32
-    add      rdx, 32
-    add      rcx, 32
-    dec      r12d
-    jnz      @@quad
-  @@rem:
-    test     r14d, r14d
-    jz       @@knext
-    mov      r15d, r14d
-  @@remloop:
-    vmovq     xmm1, [rax+r8]
-    vmovq     xmm2, [rax+r8*2]
-    vaddps    xmm0, xmm1, xmm2
-    vsubps    xmm1, xmm1, xmm2
-    vmulps    xmm1, xmm1, xmm6
-    vmovq     xmm2, [rax]
-    vaddps    xmm3, xmm2, xmm0
-    vmovq     [rdx], xmm3
-    vmulps    xmm0, xmm0, xmm4
-    vaddps    xmm0, xmm0, xmm2
-    vshufps   xmm1, xmm1, xmm1, $b1
-    vxorps    xmm1, xmm1, xmm7
-    vaddps    xmm3, xmm0, xmm1
-    vsubps    xmm0, xmm0, xmm1
-    vmovq     xmm5, [rcx]
-    vshufps   xmm1, xmm3, xmm3, $b1
-    vmovshdup xmm2, xmm5
-    vmulps    xmm1, xmm1, xmm2
-    vxorps    xmm1, xmm1, xmm8
-    vmovsldup xmm5, xmm5
-    vmulps    xmm3, xmm3, xmm5
-    vaddps    xmm3, xmm3, xmm1
-    vmovq     [rdx+r10], xmm3
-    vmovq     xmm5, [rcx+r8]
-    vshufps   xmm1, xmm0, xmm0, $b1
-    vmovshdup xmm2, xmm5
-    vmulps    xmm1, xmm1, xmm2
-    vxorps    xmm1, xmm1, xmm8
-    vmovsldup xmm5, xmm5
-    vmulps    xmm0, xmm0, xmm5
-    vaddps    xmm0, xmm0, xmm1
-    vmovq     [rdx+r10*2], xmm0
-    add      rax, 8
-    add      rdx, 8
-    add      rcx, 8
-    dec      r15d
-    jnz      @@remloop
-  @@knext:
-    lea      rax, [rax+r8*2]        // X0 gap = 2*ido
-    dec      ebx
-    jnz      @@k
-  @@done:
-    vzeroupper
-  end ['rax','rbx','rcx','rdx','rsi','r8','r10','r12','r13','r14','r15',
-       'xmm0','xmm1','xmm2','xmm3','xmm4','xmm5','xmm6','xmm7','xmm8'];
-end;
-
 
 procedure passf5_avx2(const ido, l1: Int32; const cc,chp,wa1,wa2,wa3,wa4: PSingle; const isign: Int32);
 begin
@@ -617,61 +599,3 @@ begin
        'xmm10','xmm11','xmm12'];
 end;
 
-(* ----------------------------------------------------------------------
-  Complex FFT driver. Mirrors simba.fftpack4_core_sse.cfftf1 but dispatches the
-  radix-4 pass to passf4_avx2; the other radices reuse the (exported) SSE passes.
----------------------------------------------------------------------- *)
-procedure cfftf1_avx2(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
-var
-  na, nac: Boolean;
-  idot,i,k1,l1,l2,nf,ip,iw, ix2,ix3,ix4,ido,idl1: Int32;
-  cinput, coutput: PSingle;
-begin
-  nf := ifac[1];
-  na := False;
-  l1 := 1;
-  iw := 0;
-  for k1:=2 to nf+1 do
-  begin
-    ip := ifac[k1];
-    l2 := ip*l1;
-    ido := n div l2;
-    idot := ido+ido;
-    idl1 := idot*l1;
-    if na then begin cinput := ch; coutput := c; end
-    else begin cinput := c; coutput := ch; end;
-
-    case ip of
-      4:begin
-          ix2 := iw+idot; ix3 := ix2+idot;
-          passf4_avx2(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],@wa[ix3],isign);
-          na := not na;
-        end;
-      2:begin
-          passf2_avx2(idot,l1,cinput,coutput,@wa[iw],isign);
-          na := not na;
-        end;
-      3:begin
-          ix2 := iw+idot;
-          passf3_avx2(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],isign);
-          na := not na;
-        end;
-      5:begin
-          ix2 := iw+idot; ix3 := ix2+idot; ix4 := ix3+idot;
-          passf5_avx2(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],@wa[ix3],@wa[ix4],isign);
-          na := not na;
-        end;
-      else
-      begin
-        passf(nac,idot,ip,l1,idl1,cinput,coutput,@wa[iw],isign);
-        if nac then na := not na;
-      end;
-    end;
-    l1 := l2;
-    Inc(iw, (ip - 1)*idot);
-  end;
-  if not na then Exit;
-  for i:=0 to 2*n-1 do c[i] := ch[i];
-end;
-
-end.

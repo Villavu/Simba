@@ -1,20 +1,4 @@
-unit simba.fftpack4_core_sse;
-{==============================================================================]
-  FFTPACK4_core_sse.pas: SSE2 complex-FFT passes (passf2/3/4/5), hand-written.
-[==============================================================================}
-{$i simba.inc}
-{$asmmode intel}
-
-interface
-
-uses
-  simba.fftpack4_core;
-
-procedure cfftf1_sse2(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
-
-implementation
-
-procedure passf2(const ido, l1: Int32; const cc,chp,wa1: PSingle; const isign: Int32);
+procedure passf2_sse(const ido, l1: Int32; const cc,chp,wa1: PSingle; const isign: Int32);
 begin
   asm
   // --- strides, mask, bases ---
@@ -110,13 +94,7 @@ begin
        'xmm0','xmm1','xmm2','xmm3','xmm5','xmm7'];
 end; // passf2
 
-
-// isign = +1 for backward transform and -1 for forward transforms
-procedure passf3(const ido, l1: Int32; const cc, chp, wa1,wa2: PSingle; const isign: Int32);
-// radix-3. taui = $3F5DB3D7, taur(-0.5) = $BF000000 (exact single bit patterns).
-// staui = isign*taui is embedded per-isign. wa2 = wa1+ido (floats). One unified
-// loop: EVEN mask (xmm7) for the i*C3 rotation; TW mask (xmm8) for the twiddle
-// (EVEN for isign=+1, ODD for -1). ido=2 falls out as npairs=0/tail=1.
+procedure passf3_sse(const ido, l1: Int32; const cc, chp, wa1,wa2: PSingle; const isign: Int32);
 begin
   asm
     pcmpeqd xmm7, xmm7
@@ -261,13 +239,7 @@ begin
        'xmm0','xmm1','xmm2','xmm3','xmm4','xmm5','xmm6','xmm7','xmm8'];
 end; (* passf3 *)
 
-
-// isign = +1 for backward transform and -1 for forward transforms
-procedure passf4(const o1, l1: Int32; const cc, chp, wa1, wa2, wa3: PSingle; const isign: Int32);
-// radix-4. wa2=wa1+o1, wa3=wa1+2*o1 (floats) so they are derived from wa1+o1b.
-// One unified loop: maskrot (EVEN for isign=+1, ODD for -1) is used both for the
-// i*(A1-A3) rotation (giving iD_eff) and the twiddle multiply, so C2=T1+iD_eff,
-// C4=T1-iD_eff with no per-isign branch. ido=2 falls out as npairs=0/tail=1.
+procedure passf4_sse(const o1, l1: Int32; const cc, chp, wa1, wa2, wa3: PSingle; const isign: Int32);
 begin
   asm
     mov     eax, isign
@@ -428,13 +400,7 @@ begin
        'xmm0','xmm1','xmm2','xmm3','xmm4','xmm5','xmm7'];
 end; (* passf4 *)
 
-
-// isign = +1 for backward transform and -1 for forward transforms
-procedure passf5(const ido, l1: Int32; const cc,chp,wa1,wa2,wa3,wa4: PSingle; const isign: Int32);
-// radix-5. Trig consts as exact single bit patterns; sti11/sti12 = isign*ti11/ti12
-// embedded per-isign. wa{2,3,4} = wa1+{1,2,3}*ido. One unified loop: EVEN mask
-// (xmm11) for the i*C rotations; TW (xmm12) for the twiddle multiplies.
-//   xmm7=tr11 xmm8=tr12 xmm9=sti11 xmm10=sti12 xmm11=EVEN xmm12=TW ; compute xmm0..6
+procedure passf5_sse(const ido, l1: Int32; const cc,chp,wa1,wa2,wa3,wa4: PSingle; const isign: Int32);
 begin
   asm
     pcmpeqd xmm11, xmm11
@@ -698,69 +664,3 @@ begin
        'xmm0','xmm1','xmm2','xmm3','xmm4','xmm5','xmm6','xmm7','xmm8','xmm9',
        'xmm10','xmm11','xmm12'];
 end; (* passf5 *)
-
-
-procedure cfftf1_sse2(const n: Int32; const c,ch,wa: PSingle; const ifac: PInt32; const isign: Int32);
-var
-  na, nac: Boolean;
-  idot,i,k1,l1,l2,nf,ip,iw, ix2,ix3,ix4,ido,idl1: Int32;
-  cinput, coutput: PSingle;
-begin
-  nf := ifac[1];
-  na := False;
-  l1 := 1;
-  iw := 0;
-  for k1:=2 to nf+1 do
-  begin
-    ip := ifac[k1];
-    l2 := ip*l1;
-    ido := n div l2;
-    idot := ido+ido;
-    idl1 := idot*l1;
-    if na then begin
-      cinput := ch;
-      coutput := c;
-    end else begin
-      cinput := c;
-      coutput := ch;
-    end;
-
-    case ip of
-      4:begin
-          ix2 := iw+idot;
-          ix3 := ix2+idot;
-          passf4(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],@wa[ix3],isign);
-          na := not na;
-        end;
-      2:begin
-          passf2(idot,l1,cinput,coutput,@wa[iw],isign);
-          na := not na;
-        end;
-      3:begin
-          ix2 := iw+idot;
-          passf3(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],isign);
-          na := not na;
-        end;
-      5:begin
-          ix2 := iw+idot;
-          ix3 := ix2+idot;
-          ix4 := ix3+idot;
-          passf5(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],@wa[ix3],@wa[ix4],isign);
-          na := not na;
-        end;
-      else
-      begin
-        passf(nac,idot,ip,l1,idl1,cinput,coutput,@wa[iw],isign);
-        if nac then
-          na := not na;
-      end;
-    end;
-    l1 := l2;
-    Inc(iw, (ip - 1)*idot);
-  end;
-  if not na then Exit;
-
-  for i:=0 to 2*n-1 do c[i] := ch[i];
-end; (* cfftf1_sse *)
-
-end.

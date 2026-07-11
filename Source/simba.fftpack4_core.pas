@@ -26,20 +26,12 @@ procedure rfftf(const n: Int32; const r, wsave: PSingle);
 procedure rfftb(const n: Int32; const r, wsave: PSingle);
 procedure rffti(const n: Int32; const wsave: PSingle);
 
-// Generic radix>5 pass, exposed so the SSE/AVX driver units can reuse it
-procedure passf(out nac: Boolean; const ido,ip,l1,idl1: Int32; const cc,ch,wa: PSingle; const isign: Int32);
-
-var
-  Cfftf1Dispatch: TCfftf1Proc;
-
 implementation
 
 uses
   Math
-  {$IFDEF SIMBA_FFT_SIMD_X86_64},
-  cpu,
-  simba.fftpack4_core_sse,
-  simba.fftpack4_core_avx
+  {$IFDEF FFT_ASM},
+  cpu
   {$ENDIF};
 
 const
@@ -49,6 +41,13 @@ const
 
 type
   TSPECIAL = array[0..NSPECIAL-1] of Int32;
+
+var
+  passfDispatch: procedure(out nac: Boolean; const ido,ip,l1,idl1: Int32; const cc,ch,wa: PSingle; const isign: Int32);
+  passf2Dispatch: procedure(const ido, l1: Int32; const cc,ch,wa1: PSingle; const isign: Int32);
+  passf3Dispatch: procedure(const ido, l1: Int32; const cc,ch,wa1,wa2: PSingle; const isign: Int32);
+  passf4Dispatch: procedure(const o1, l1: Int32; const cc,ch,wa1,wa2,wa3: PSingle; const isign: Int32);
+  passf5Dispatch: procedure(const ido, l1: Int32; const cc,ch,wa1,wa2,wa3,wa4: PSingle; const isign: Int32);
 
 (* ----------------------------------------------------------------------
    passf2, passf3, passf4, passf5, passf. Complex FFT passes fwd and bwd.
@@ -1522,10 +1521,14 @@ begin
     ido := n div l2;
     idot := ido+ido;
     idl1 := idot*l1;
-    if na then begin
+
+    if na then
+    begin
       cinput := ch;
       coutput := c;
-    end else begin
+    end
+    else
+    begin
       cinput := c;
       coutput := ch;
     end;
@@ -1534,28 +1537,28 @@ begin
       4:begin
           ix2 := iw+idot;
           ix3 := ix2+idot;
-          passf4(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],@wa[ix3],isign);
+          passf4Dispatch(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],@wa[ix3],isign);
           na := not na;
         end;
       2:begin
-          passf2(idot,l1,cinput,coutput,@wa[iw],isign);
+          passf2Dispatch(idot,l1,cinput,coutput,@wa[iw],isign);
           na := not na;
         end;
       3:begin
           ix2 := iw+idot;
-          passf3(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],isign);
+          passf3Dispatch(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],isign);
           na := not na;
         end;
       5:begin
           ix2 := iw+idot;
           ix3 := ix2+idot;
           ix4 := ix3+idot;
-          passf5(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],@wa[ix3],@wa[ix4],isign);
+          passf5Dispatch(idot,l1,cinput,coutput,@wa[iw],@wa[ix2],@wa[ix3],@wa[ix4],isign);
           na := not na;
         end;
       else
       begin
-        passf(nac,idot,ip,l1,idl1,cinput,coutput,@wa[iw],isign);
+        passfDispatch(nac,idot,ip,l1,idl1,cinput,coutput,@wa[iw],isign);
         if nac then
           na := not na;
       end;
@@ -1563,9 +1566,10 @@ begin
     l1 := l2;
     Inc(iw, (ip - 1)*idot);
   end;
-  if not na then Exit;
 
-  for i:=0 to 2*n-1 do c[i] := ch[i];
+  if na then
+    for i:=0 to 2*n-1 do
+      c[i] := ch[i];
 end; (* cfftf1 *)
 
 
@@ -1575,7 +1579,7 @@ begin
   if n=1 then Exit;
   iw1  := 2*n;
   iw2  := iw1+2*n;
-  Cfftf1Dispatch(n,c,wsave,wsave+iw1, PInt32(wsave+iw2), -1);
+  Cfftf1(n,c,wsave,wsave+iw1, PInt32(wsave+iw2), -1);
 end; (* cfftf *)
 
 
@@ -1585,7 +1589,7 @@ begin
   if n=1 then Exit;
   iw1 := 2*n;
   iw2 := iw1+2*n;
-  Cfftf1Dispatch(n,c,wsave,wsave+iw1, PInt32(wsave+iw2), +1);
+  Cfftf1(n,c,wsave,wsave+iw1, PInt32(wsave+iw2), +1);
 end; (* cfftb *)
 
 
@@ -1904,14 +1908,33 @@ begin
   rffti1(n, wsave+n, PInt32(wsave+2*n));
 end; (* rffti *)
 
-initialization
-  Cfftf1Dispatch := @cfftf1;
+{$IFDEF FFT_ASM}
+  {$i fft_avx2.inc}
+  {$i fft_sse.inc}
+{$ENDIF}
 
-  {$IFDEF SIMBA_FFT_SIMD_X86_64}
+initialization
+  passfDispatch  := @passf;
+  passf2Dispatch := @passf2;
+  passf3Dispatch := @passf3;
+  passf4Dispatch := @passf4;
+  passf5Dispatch := @passf5;
+
+  {$IFDEF FFT_ASM}
   if AVX2Support() then
-    Cfftf1Dispatch := @cfftf1_avx2
+  begin
+    passf2Dispatch := @passf2_avx2;
+    passf3Dispatch := @passf3_avx2;
+    passf4Dispatch := @passf4_avx2;
+    passf5Dispatch := @passf5_avx2;
+  end
   else
-    Cfftf1Dispatch := @cfftf1_sse2;
+  begin
+    passf2Dispatch := @passf2_sse;
+    passf3Dispatch := @passf3_sse;
+    passf4Dispatch := @passf4_sse;
+    passf5Dispatch := @passf5_sse;
+  end;
   {$ENDIF}
 
 end.

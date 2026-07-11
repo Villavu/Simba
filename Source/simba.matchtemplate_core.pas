@@ -502,8 +502,7 @@ begin
       Result[Y, X] := m[Y, X] - s;
 end;
 
-{$IFDEF SIMBA_FFT_SIMD_X86_64}
-{$asmmode intel}
+{$IFDEF FFT_ASM}
 procedure NormalizeMasked(var Res: TSingleMatrix; const energy: TSingleMatrix; const maxEnergy, constFac: Double; const degenVal, loClamp, hiClamp: Single);
 var
   h, n, y: Integer;
