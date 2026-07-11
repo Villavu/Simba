@@ -10,136 +10,94 @@ unit simba.multiprocessing;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, syncobjs,
   simba.base,
   simba.threading;
 
+const
+  FINDER_THREADING: Boolean = True;           // runtime on/off switch
+  FINDER_THREADING_DEBUG: Boolean = False;    // live debug on threading status
+  FINDER_THREADING_MIN_AREA: Integer = 40000; // W*H below this always runs single-threaded (200x200)
+  FINDER_THREADING_MIN_ROWS: Integer = 8;     // the search is split into horizontal bands, so each band needs >= this many rows to be worth a thread; keeps a wide-short target (e.g. 5000x10) single-threaded regardless of area
+  FINDER_MAX_THREADS: Integer = 6;            // max threads to use; users may raise it
+
 type
-  TSimbaMultiprocessingStrategy = record
-    ColorFinder: record
-      Enabled: Boolean;
-      SliceWidth: Integer;
-      SliceHeight: Integer;
-    end;
-    ImageFinder: record
-      Enabled: Boolean;
-      SliceWidth: Integer;
-      SliceHeight: Integer;
-    end;
-
-    function SlicesFor(Enabled: Boolean; SliceWidth, SliceHeight, SearchWidth, SearchHeight: Integer): Integer;
-    function SlicesForColorFinder(SearchWidth, SearchHeight: Integer): Integer;
-    function SlicesForImageFinder(SearchWidth, SearchHeight: Integer): Integer;
-
-    class function Create: TSimbaMultiprocessingStrategy; static;
-  end;
-
   TSimbaMultiprocessingMethod = procedure(const Index, Lo, Hi: Integer) is nested;
   TSimbaMultiprocessing = class
   protected
   type
-    TPoolThread = class(TThread)
+    TPoolWorker = class(TThread)
     protected
       procedure Execute; override;
     public
-      IdleLock: TWaitableLock;   // Locked = thread is being used right now.
-      MethodLock: TWaitableLock; // Locked = idle, waiting for method to call
-
-      Index: Integer;
-      Lo: Integer;
-      Hi: Integer;
+      Wake, Done: TSimpleEvent;
+      Busy: Boolean; // claim state only read/written under the pools FLock so is guarded
 
       Method: TSimbaMultiprocessingMethod;
+      Index, Lo, Hi: Integer;
 
       constructor Create; reintroduce;
       destructor Destroy; override;
     end;
-    TPoolThreadArray = array of TPoolThread;
+    TPoolWorkerArray = array of TPoolWorker;
   protected
-    FThreadCount: Integer;
-    FThreads: TPoolThreadArray;
-    FLock: TEnterableLock;
+    FWorkers: TPoolWorkerArray;
+    FLock: TCriticalSection; // guards EnsureSetup + the per-worker Busy claim flags
+    FBuiltThreads: Integer;  // total slices the pool is built for (workers + the caller); tracks FINDER_MAX_THREADS, grow-only
 
-    function GetIdleThreads(MaxThreads: Integer): TPoolThreadArray;
+    function ClaimWorkers(Max: Integer): TPoolWorkerArray; // returns up to `Max` idle workers
+    procedure EnsureSetup;                                 // build/grow the worker pool to WantThreads() (mirrors the FFT TFFTThreadPool)
   public
-    constructor Create(AThreadCount: Integer);
+    constructor Create();
     destructor Destroy; override;
 
-    property ThreadCount: Integer read FThreadCount;
-
+    function WantThreads: Integer; // FINDER_MAX_THREADS but clamped to threadcount
+    function ThreadsForArea(Width, Height: Integer): Integer;
     function Run(MaxThreads: Integer; Lo, Hi: Integer; Method: TSimbaMultiprocessingMethod): Integer;
   end;
 
 var
-  SimbaMultiprocessingStrategy: TSimbaMultiprocessingStrategy;
   SimbaMultiprocessing: TSimbaMultiprocessing;
 
 implementation
 
-uses
-  simba.initializations;
-
-function TSimbaMultiprocessingStrategy.SlicesFor(Enabled: Boolean; SliceWidth, SliceHeight, SearchWidth, SearchHeight: Integer): Integer;
-var
-  I: Integer;
+procedure InvokeSlice(const Method: TSimbaMultiprocessingMethod; const Index, Lo, Hi: Integer);
 begin
-  Result := 1;
-
-  if Enabled and (SearchWidth >= SliceWidth) and (SearchHeight >= SliceHeight) then // not worth
-  begin
-    for I := SimbaMultiprocessing.ThreadCount - 1 downto 2 do
-      if (SearchHeight div I) > SliceHeight then // Each slice is at least `SliceHeight` pixels
-        Exit(I);
+  try
+    Method(Index, Lo, Hi);
+  except
+    on E: Exception do
+    begin
+      DebugLn('[Finder Threading]: slice %d (rows %d..%d) exception: %s', [Index, Lo, Hi, E.Message]);
+      {$IFDEF SIMBA_HAS_DEBUGINFO}
+      DumpExceptionBacktrace(Output);
+      {$ENDIF}
+    end;
   end;
-  // not possible to slice into at least `SliceHeight` pixels so 1 thread it is
 end;
 
-function TSimbaMultiprocessingStrategy.SlicesForColorFinder(SearchWidth, SearchHeight: Integer): Integer;
-begin
-  with ColorFinder do
-    Result := SlicesFor(Enabled, SliceWidth, SliceHeight, SearchWidth, SearchHeight);
-end;
-
-function TSimbaMultiprocessingStrategy.SlicesForImageFinder(SearchWidth, SearchHeight: Integer): Integer;
-begin
-  with ImageFinder do
-    Result := SlicesFor(Enabled, SliceWidth, SliceHeight, SearchWidth, SearchHeight);
-end;
-
-class function TSimbaMultiprocessingStrategy.Create: TSimbaMultiprocessingStrategy;
-begin
-  Result := Default(TSimbaMultiprocessingStrategy);
-
-  Result.ColorFinder.Enabled := True;
-  Result.ColorFinder.SliceWidth := 250;
-  Result.ColorFinder.SliceHeight := 250;
-
-  Result.ImageFinder.Enabled := True;
-  Result.ImageFinder.SliceWidth := 250;
-  Result.ImageFinder.SliceHeight := 250;
-end;
-
-function TSimbaMultiprocessing.GetIdleThreads(MaxThreads: Integer): TPoolThreadArray;
+function TSimbaMultiprocessing.ClaimWorkers(Max: Integer): TPoolWorkerArray;
 var
   I, Count: Integer;
 begin
-  SetLength(Result, MaxThreads);
+  Result := nil;
+  if (Max < 1) then
+    Exit;
+
+  SetLength(Result, Max);
   Count := 0;
 
   FLock.Enter();
   try
-    for I := 0 to High(FThreads) do
-    begin
-      if FThreads[I].IdleLock.IsLocked() then
-        Continue;
-
-      Result[Count] := FThreads[I];
-      Result[Count].IdleLock.Lock();
-      Inc(Count);
-
-      if (Count = MaxThreads) then
-        Break;
-    end;
+    for I := 0 to High(FWorkers) do
+      if not FWorkers[I].Busy then
+      begin
+        FWorkers[I].Busy := True;
+        Result[Count] := FWorkers[I];
+        Inc(Count);
+        if (Count = Max) then
+          Break;
+      end;
   finally
     FLock.Leave();
   end;
@@ -147,136 +105,206 @@ begin
   SetLength(Result, Count);
 end;
 
-constructor TSimbaMultiprocessing.Create(AThreadCount: Integer);
-var
-  I: Integer;
+constructor TSimbaMultiprocessing.Create;
 begin
   inherited Create();
 
-  FThreadCount := AThreadCount;
-  SetLength(FThreads, FThreadCount);
-  for I := 0 to High(FThreads) do
-    FThreads[I] := TPoolThread.Create();
+  FLock := TCriticalSection.Create();
 end;
 
 destructor TSimbaMultiprocessing.Destroy;
 var
   I: Integer;
 begin
-  for I := 0 to High(FThreads) do
-    FThreads[I].Free();
-  FThreads := nil;
+  for I := 0 to High(FWorkers) do
+    if (FWorkers[I] <> nil) then // only the workers we actually spun up
+      FWorkers[I].Free();
+  FWorkers := nil;
+  FLock.Free();
 
   inherited Destroy();
+end;
+
+function TSimbaMultiprocessing.WantThreads: Integer;
+begin
+  Result := FINDER_MAX_THREADS;                 // can be raised above the P-core count
+  if (Result > SimbaCPUInfo.ThreadCount) then   // but never spawn more workers than logical CPUs
+    Result := SimbaCPUInfo.ThreadCount;
+  if (Result < 1) then
+    Result := 1;
+end;
+
+function TSimbaMultiprocessing.ThreadsForArea(Width, Height: Integer): Integer;
+var
+  Area: Int64;
+  Cap, ByArea, ByRows: Integer;
+begin
+  if not FINDER_THREADING then
+  begin
+    if FINDER_THREADING_DEBUG then
+      DebugLn('[Finder Threading]: FINDER_THREADING is disabled');
+    Exit(1);
+  end;
+
+  Cap  := WantThreads();
+  Area := Int64(Width) * Height;
+
+  if (FINDER_THREADING_MIN_AREA < 1) then   // area gate disabled -> whole pool
+    ByArea := Cap
+  else
+    ByArea := Area div FINDER_THREADING_MIN_AREA;
+
+  if (FINDER_THREADING_MIN_ROWS > 0) then   // horizontal-band split -> bounded by the row count
+    ByRows := Height div FINDER_THREADING_MIN_ROWS
+  else
+    ByRows := Cap;
+
+  Result := ByArea;
+  if (Result > ByRows) then Result := ByRows;
+  if (Result > Cap)    then Result := Cap;
+  if (Result < 1)      then Result := 1;
+
+  if FINDER_THREADING_DEBUG then
+    DebugLn('[Finder Threading]: %dx%d area=%d -> %d threads (byArea=%d, byRows=%d, cap=%d)', [Width, Height, Area, Result, ByArea, ByRows, Cap]);
+end;
+
+procedure TSimbaMultiprocessing.EnsureSetup;
+var
+  I, Want: Integer;
+begin
+  Want := WantThreads();
+  if (FBuiltThreads >= Want) then // already big enough -> no lock
+    Exit;
+
+  FLock.Enter();
+  try
+    Want := WantThreads();
+    if (FBuiltThreads >= Want) then
+      Exit;
+
+    SetLength(FWorkers, Want - 1);   // caller is the +1
+    for I := 0 to High(FWorkers) do
+      if (FWorkers[I] = nil) then    // only spin up the newly-added slots
+        FWorkers[I] := TPoolWorker.Create();
+    FBuiltThreads := Want;
+
+    if FINDER_THREADING_DEBUG then
+      DebugLn('[Finder Threading]: Setup pool for %d threads (%d workers + caller)', [FBuiltThreads, Length(FWorkers)]);
+  finally
+    FLock.Leave();
+  end;
 end;
 
 function TSimbaMultiprocessing.Run(MaxThreads: Integer; Lo, Hi: Integer; Method: TSimbaMultiprocessingMethod): Integer;
 var
-  Threads: TPoolThreadArray;
-  I, Size: Integer;
+  Workers: TPoolWorkerArray;
+  Slices, Total, Per, Rem, I, Cnt, Cursor, CallerLo, CallerHi: Integer;
 begin
-  if (MaxThreads > 1) then
-    Threads := GetIdleThreads(Min(FThreadCount, MaxThreads))
+  Total := (Hi - Lo) + 1;
+
+  EnsureSetup(); // build/grow the pool for a (possibly raised) FINDER_MAX_THREADS
+
+  // Calling thread runs one slice so we only need to borrow `Slices - 1`
+  Slices := Min(FBuiltThreads, MaxThreads);
+  if (Slices > Total) then Slices := Total;
+  if (Slices < 1)     then Slices := 1;
+
+  if (Slices > 1) then
+    Workers := ClaimWorkers(Slices - 1) // may hand back fewer if the pool is busy
   else
-    Threads := [];
+    Workers := [];
 
-  Result := Max(1, Length(Threads));
+  Slices := Length(Workers) + 1;
+  Result := Slices;
 
-  if (Length(Threads) > 1) then
+  if FINDER_THREADING_DEBUG then
+    DebugLn('[Finder Threading]: Using %d/%d threads (rows %d..%d, requested %d)', [Result, FBuiltThreads, Lo, Hi, MaxThreads]);
+
+  Per := Total div Slices;
+  Rem := Total mod Slices;
+
+  CallerLo := Lo;
+  CallerHi := Lo - 1;
+  Cursor   := Lo;
+  for I := 0 to Slices - 1 do
   begin
-    Size := ((Hi - Lo) + 1) div Result;
+    Cnt := Per;
+    if (I < Rem) then Inc(Cnt);             // spread the remainder over the first slices
 
-    for I := 0 to High(Threads) do
+    if (I = 0) then
     begin
-      Threads[I].Index := I;
-      Threads[I].Method := Method;
-
-      if (I = 0) then
-      begin
-        Threads[I].Lo := 0;
-        Threads[I].Hi := Size;
-      end else
-      begin
-        Threads[I].Lo := Threads[I-1].Hi + 1;
-        Threads[I].Hi := Threads[I-1].Hi + Size;
-      end;
-
-      if (I = High(Threads)) then
-        Threads[I].Hi := Hi;
-
-      Threads[I].MethodLock.Unlock();
-      if Threads[I].Suspended then
-        Threads[I].Start();
+      CallerLo := Cursor;                   // slice 0 -> the caller
+      CallerHi := Cursor + Cnt - 1;
+    end else
+    begin
+      Workers[I-1].Index  := I;
+      Workers[I-1].Lo     := Cursor;
+      Workers[I-1].Hi     := Cursor + Cnt - 1;
+      Workers[I-1].Method := Method;
+      Workers[I-1].Done.ResetEvent();
+      Workers[I-1].Wake.SetEvent();         // hand off the slice + wake the worker
     end;
 
-    for I := 0 to High(Threads) do
-      Threads[I].IdleLock.WaitLocked();
-  end else
-    Method(0, Lo, Hi);
+    Inc(Cursor, Cnt);
+  end;
+
+  InvokeSlice(Method, 0, CallerLo, CallerHi); // caller talks part with a slice
+  for I := 0 to High(Workers) do
+    Workers[I].Done.WaitFor(INFINITE); // wait for all workers
+
+  if (Length(Workers) > 0) then // unlock workers
+  begin
+    FLock.Enter();
+    try
+      for I := 0 to High(Workers) do
+        Workers[I].Busy := False;
+    finally
+      FLock.Leave();
+    end;
+  end;
 end;
 
-procedure TSimbaMultiprocessing.TPoolThread.Execute;
+procedure TSimbaMultiprocessing.TPoolWorker.Execute;
 begin
-  while True do
+  SetThreadPCore(); // try pin to pcore if possible
+
+  while (not Terminated) do
   begin
-    MethodLock.WaitLocked();
+    Wake.WaitFor(INFINITE);
     if Terminated then
       Break;
+    Wake.ResetEvent();
 
-    if Assigned(Method) then
-    try
-      Method(Index, Lo, Hi);
-    except
-      on E: Exception do
-      begin
-        DebugLn('[SimbaMultiprocessing]: Exception occurred while executing a method: ' + E.Message);
-        {$IFDEF SIMBA_HAS_DEBUGINFO}
-        DumpExceptionBacktrace(Output);
-        {$ENDIF}
-      end;
-    end;
+    InvokeSlice(Method, Index, Lo, Hi);
 
-    Method := nil;
-    MethodLock.Lock();
-    IdleLock.Unlock();
+    Done.SetEvent();
   end;
 end;
 
-constructor TSimbaMultiprocessing.TPoolThread.Create;
+constructor TSimbaMultiprocessing.TPoolWorker.Create;
 begin
-  inherited Create(True, 512 * 512); // default = 4MiB, we set 256KiB
-                                     // also start suspended until we need it.
-  MethodLock.Lock();
+  Wake := TSimpleEvent.Create();
+  Done := TSimpleEvent.Create();
+
+  inherited Create(False, 512 * 512);
 end;
 
-destructor TSimbaMultiprocessing.TPoolThread.Destroy;
+destructor TSimbaMultiprocessing.TPoolWorker.Destroy;
 begin
-  IdleLock.WaitLocked(); // Wait if running something
-  MethodLock.Unlock();   // Wake `Execute` loop if not running
-
-  if (not Suspended) then
-  begin
-    Terminate();
-    WaitFor();
-  end;
-
-  inherited Destroy();
-end;
-
-procedure DoCreate;
-begin
-  SimbaMultiprocessingStrategy := TSimbaMultiprocessingStrategy.Create();
-  SimbaMultiprocessing := TSimbaMultiprocessing.Create(SimbaCPUInfo.CoreCount);
-end;
-
-procedure DoDestroy;
-begin
-  FreeAndNil(SimbaMultiprocessing);
+  Terminate();         // set the flag first...
+  Wake.SetEvent();     // ...then wake, so Execute is guaranteed to see it and break
+  inherited Destroy(); // WaitFor
+  Wake.Free();
+  Done.Free();
 end;
 
 initialization
-  SimbaInitialization_Add(ESimbaInit.CREATE, @DoCreate, 'SimbaMultiprocessing');
-  SimbaInitialization_Add(ESimbaInit.DESTROY, @DoDestroy, 'SimbaMultiprocessing');
+  if (SimbaCPUInfo.PCoreCount > 0) and (SimbaCPUInfo.PCoreCount < FINDER_MAX_THREADS) then
+    FINDER_MAX_THREADS := SimbaCPUInfo.PCoreCount;
+  SimbaMultiprocessing := TSimbaMultiprocessing.Create();
+
+finalization
+  FreeAndNil(SimbaMultiprocessing);
 
 end.
 

@@ -25,10 +25,11 @@ uses
   simba.math;
 
 const
-  FFT_PLAN_ALIGN = 32;                     // Align plan to 32 bit
+  FFT_PLAN_ALIGN = 32;                     // Align plan data to 32 bit
   FFT_THREADING: Boolean = True;           // runtime on/off switch
   FFT_THREADING_DEBUG: Boolean = False;    // live debug on threading status
   FFT_THREADING_MIN_AREA: Integer = 40000; // W*H below this always runs single-threaded (200x200)
+  FFT_THREADING_MIN_LINES: Integer = 2;    // each pass slice needs >= this many lines
   FFT_MAX_THREADS: Integer = 6;            // max threads to use; users may raise it
 
 type
@@ -199,7 +200,8 @@ end;
 function ShouldParallelFFT(const Area: Int64): Boolean; inline;
 begin
   {$IFDEF MT_THREADING}
-  Result := FFT_THREADING and (Area >= FFT_THREADING_MIN_AREA);
+  // below this ThreadsForArea yields a single thread so exit early here
+  Result := FFT_THREADING and (Area >= 2 * Int64(FFT_THREADING_MIN_AREA));
   {$ELSE}
   Result := False;
   {$ENDIF}
@@ -354,9 +356,7 @@ begin
     Result := FBuiltThreads
   else
   begin
-    // scale threads to use count with one thread per FFT_THREADING_MIN_AREA of area
-    // e.g. 200x200 -> 2, 300x300 -> 3, >=512x512 -> FBuiltThreads
-    Result := 1 + (Area div FFT_THREADING_MIN_AREA);
+    Result := Area div FFT_THREADING_MIN_AREA;
     if (Result > FBuiltThreads) then
       Result := FBuiltThreads;
   end;
@@ -407,6 +407,8 @@ begin
     n := MaxN;
   if (n > total) then
     n := total;
+  if (FFT_THREADING_MIN_LINES > 1) and (n > total div FFT_THREADING_MIN_LINES) then
+    n := total div FFT_THREADING_MIN_LINES;
 
   if (n <= 1) then // pool has only the caller -> run the whole range directly
   begin

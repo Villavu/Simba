@@ -239,7 +239,7 @@ begin
 
   if Target.GetImageData(Bounds, Buffer, BufferWidth) then
   try
-    SetLength(SliceResults, SimbaMultiprocessingStrategy.SlicesForImageFinder(Bounds.Width, Bounds.Height)); // Cannot exceed this
+    SetLength(SliceResults, SimbaMultiprocessing.ThreadsForArea(Bounds.Width, Bounds.Height)); // Cannot exceed this
     {$IFDEF SIMBA_BENCHMARKS}
     T := HighResolutionTime();
     ThreadsUsed :=

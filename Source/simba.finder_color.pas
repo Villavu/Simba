@@ -240,7 +240,7 @@ begin
     T := HighResolutionTime();
     {$ENDIF}
 
-    SetLength(SliceResults, SimbaMultiprocessingStrategy.SlicesForColorFinder(Bounds.Width, Bounds.Height)); // Cannot exceed this
+    SetLength(SliceResults, SimbaMultiprocessing.ThreadsForArea(Bounds.Width, Bounds.Height)); // Cannot exceed this
     {$IFDEF SIMBA_BENCHMARKS}ThreadsUsed := {$ENDIF}SimbaMultiprocessing.Run(Length(SliceResults), 0, Bounds.Height - 1, @Execute);
     Result := SliceResults.Merge();
 
@@ -284,7 +284,7 @@ begin
     ThreadsUsed :=
     {$ENDIF}
     SimbaMultiprocessing.Run(
-      SimbaMultiprocessingStrategy.SlicesForColorFinder(Bounds.Width, Bounds.Height),
+      SimbaMultiprocessing.ThreadsForArea(Bounds.Width, Bounds.Height),
       0,
       Bounds.Height - 1,
       @Execute
@@ -344,7 +344,7 @@ begin
 
   if Target.GetImageData(Bounds, Buffer, BufferWidth) then
   try
-    SetLength(SliceResults, SimbaMultiprocessingStrategy.SlicesForColorFinder(Bounds.Width, Bounds.Height)); // Cannot exceed this
+    SetLength(SliceResults, SimbaMultiprocessing.ThreadsForArea(Bounds.Width, Bounds.Height)); // Cannot exceed this
     {$IFDEF SIMBA_BENCHMARKS}
     T := HighResolutionTime();
     ThreadsUsed :=
@@ -412,7 +412,7 @@ begin
     {$ENDIF}
 
     SimbaMultiprocessing.Run(
-      SimbaMultiprocessingStrategy.SlicesForColorFinder(Bounds.Width, Bounds.Height),
+      SimbaMultiprocessing.ThreadsForArea(Bounds.Width, Bounds.Height),
       0,
       Bounds.Height - 1,
       @Execute

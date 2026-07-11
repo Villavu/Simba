@@ -577,24 +577,13 @@ begin
 
     addGlobalVar(ltBoolean, @FFT_THREADING, 'FFT_THREADING');
     addGlobalVar(ltBoolean, @FFT_THREADING_DEBUG, 'FFT_THREADING_DEBUG');
-    addGlobalVar(ltInt32, @FFT_MIN_AREA, 'FFT_MIN_AREA');
+    addGlobalVar(ltInt32, @FFT_THREADING_MIN_AREA, 'FFT_THREADING_MIN_AREA');
     addGlobalVar(ltInt32, @FFT_MAX_THREADS, 'FFT_MAX_THREADS');
 
-    addGlobalVar(
-      'record'                    + LineEnding +
-      '  ColorFinder: record'     + LineEnding +
-      '    Enabled: Boolean;'     + LineEnding +
-      '    SliceWidth: Integer;'  + LineEnding +
-      '    SliceHeight: Integer;' + LineEnding +
-      '  end;'                    + LineEnding +
-      '  ImageFinder: record'     + LineEnding +
-      '    Enabled: Boolean;'     + LineEnding +
-      '    SliceWidth: Integer;'  + LineEnding +
-      '    SliceHeight: Integer;' + LineEnding +
-      '  end;'                    + LineEnding +
-      'end;',
-      @SimbaMultiprocessingStrategy,
-      'MultiprocessingStrategy');
+    addGlobalVar(ltBoolean, @FINDER_THREADING, 'FINDER_THREADING');
+    addGlobalVar(ltBoolean, @FINDER_THREADING_DEBUG, 'FINDER_THREADING_DEBUG');
+    addGlobalVar(ltInt32, @FINDER_THREADING_MIN_AREA, 'FINDER_THREADING_MIN_AREA');
+    addGlobalVar(ltInt32, @FINDER_MAX_THREADS, 'FINDER_MAX_THREADS');
 
     addGlobalFunc(
       'function GetTimeRunning: UInt64;', [
