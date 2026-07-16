@@ -79,13 +79,13 @@ procedure Sleep(Milliseconds: UInt32);
 PreciseSleep
 ------------
 ```
-procedure PreciseSleep(Milliseconds: UInt32);
+procedure PreciseSleep(Milliseconds: Double);
 ```
 High resolution sleep, like `PerformanceTime` use this when needing to sleep very short time intervals accurately.
 *)
 procedure _LapePreciseSleep(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SimbaNativeInterface.PreciseSleep(PUInt32(Params^[0])^);
+  SimbaNativeInterface.PreciseSleep(PDouble(Params^[0])^);
 end;
 
 (*
@@ -308,7 +308,7 @@ begin
 
     addGlobalFunc('function Time: Int64;', @_LapeTime);
 
-    addGlobalFunc('procedure PreciseSleep(Milliseconds: UInt32);', @_LapePreciseSleep);
+    addGlobalFunc('procedure PreciseSleep(Milliseconds: Double);', @_LapePreciseSleep);
     addGlobalFunc('function PerformanceTime: Double;', @_LapePerformanceTime);
     addGlobalFunc('function MillisecondsToTime(Time: Int64; out Days, Hours, Mins, Secs: Integer): Integer; overload', @_LapeMillisecondsToTime1);
     addGlobalFunc('function MillisecondsToTime(Time: Int64; out Years, Months, Weeks, Days, Hours, Mins, Secs: Integer): Integer; overload', @_LapeMillisecondsToTime2);

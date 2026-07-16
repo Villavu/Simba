@@ -66,7 +66,7 @@ type
     procedure OpenDirectory(Path: String); virtual; abstract;
 
     // Not abstract
-    procedure PreciseSleep(Milliseconds: UInt32); virtual;
+    procedure PreciseSleep(Milliseconds: Double); virtual;
 
     procedure PlaySound(Path: String); virtual;
     procedure StopSound; virtual;
@@ -97,9 +97,9 @@ uses
   simba.nativeinterface_darwin;
   {$ENDIF}
 
-procedure TSimbaNativeInterface.PreciseSleep(Milliseconds: UInt32);
+procedure TSimbaNativeInterface.PreciseSleep(Milliseconds: Double);
 begin
-  Sleep(Milliseconds);
+  Sleep(Round(Milliseconds));
 end;
 
 procedure TSimbaNativeInterface.PlaySound(Path: String);

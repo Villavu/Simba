@@ -74,7 +74,7 @@ type
 
     function HighResolutionTime: Double; override;
     function UnixTime: Int64; override;
-    procedure PreciseSleep(Milliseconds: UInt32); override;
+    procedure PreciseSleep(Milliseconds: Double); override;
 
     procedure OpenDirectory(Path: String); override;
 
@@ -860,28 +860,31 @@ begin
   Result := (PInt64(@FileTime)^ - UnixFileTimeDelta) div MilliSecsPerFileTime;
 end;
 
-procedure TSimbaNativeInterface_Windows.PreciseSleep(Milliseconds: UInt32);
+procedure TSimbaNativeInterface_Windows.PreciseSleep(Milliseconds: Double);
 var
+  Target: Double;
   Time: Int64;
 begin
-  if (Milliseconds = 0) then
+  if (Milliseconds <= 0) then
   begin
     ThreadSwitch();
     Exit;
   end;
 
+  Target := HighResolutionTime() + Milliseconds;
+
   if FHasWaitableTimer then
   begin
-    Time := -Round((Milliseconds - 0.25) * 1000) * 10; // in 100 nanosecond intervals
+    Time := -Round(Milliseconds * 10000.0);
+    if (not SetWaitableTimer(FWaitableTimer, Time, 0, nil, nil, False)) or
+       (WaitForSingleObject(FWaitableTimer, INFINITE) <> WAIT_OBJECT_0) then
+      inherited PreciseSleep(Milliseconds); // fallback to normal sleep
+  end else
+    inherited PreciseSleep(Milliseconds);
 
-    if SetWaitableTimer(FWaitableTimer, Time, 0, nil, nil, False) then
-    begin
-      WaitForSingleObject(FWaitableTimer, INFINITE);
-      Exit;
-    end;
-  end;
-
-  inherited PreciseSleep(Milliseconds); // Fallback to normal sleep
+  // Only spin if the timer happened to wake early
+  while (HighResolutionTime() < Target) do
+    ThreadSwitch();
 end;
 
 procedure TSimbaNativeInterface_Windows.OpenDirectory(Path: String);

@@ -82,7 +82,7 @@ type
 
     function HighResolutionTime: Double; override;
     function UnixTime: Int64; override;
-    procedure PreciseSleep(Milliseconds: UInt32); override;
+    procedure PreciseSleep(Milliseconds: Double); override;
 
     procedure OpenDirectory(Path: String); override;
   end;
@@ -615,7 +615,7 @@ end;
 
 function TSimbaNativeInterface_Darwin.HighResolutionTime: Double;
 begin
-  Result := Double((mach_absolute_time * timeInfo.numer) / ((1000 * 1000) * timeInfo.denom));
+  Result := mach_absolute_time * (timeInfo.numer / (1000000.0 * timeInfo.denom));
 end;
 
 function TSimbaNativeInterface_Darwin.UnixTime: Int64;
@@ -626,27 +626,24 @@ begin
   result := (Int64(tz.tv_sec) * 1000) + tz.tv_usec div 1000;
 end;
 
-procedure TSimbaNativeInterface_Darwin.PreciseSleep(Milliseconds: UInt32);
+procedure TSimbaNativeInterface_Darwin.PreciseSleep(Milliseconds: Double);
 const
-  MilliSecsPerSec = 1000;
-  NanoSecsPerMilliSec = 1000000;
+  NanoSecsPerSec = 1000000000;
 var
   timeout: TTimespec;
-  s: cardinal;
+  ns: Int64;
 begin
-  timeout.tv_sec := 0;
-  if Milliseconds = 0 then
-    timeout.tv_nsec := 10000 // 10us is around timer resolution on modern HW
-  else if Milliseconds < 1000 then
-    timeout.tv_nsec := Milliseconds * NanoSecsPerMilliSec
-  else
+  if (Milliseconds <= 0) then
   begin
-    s := Milliseconds div MilliSecsPerSec;
-    timeout.tv_sec := s;
-    timeout.tv_nsec := (Milliseconds - s * MilliSecsPerSec) * NanoSecsPerMilliSec;
+    ThreadSwitch();
+    Exit;
   end;
 
-  fpnanosleep(@timeout, nil)
+  ns := Round(Milliseconds * 1000000.0);
+  timeout.tv_sec  := ns div NanoSecsPerSec;
+  timeout.tv_nsec := ns mod NanoSecsPerSec;
+
+  fpnanosleep(@timeout, nil);
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindows: TWindowHandleArray;
