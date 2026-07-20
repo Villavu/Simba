@@ -462,8 +462,8 @@ begin
   Self.MousePressMin := 40;
   Self.MousePressMax := 220;
   Self.MouseSpeed    := 10;
-  Self.MouseGravity  := 12; // 9
-  Self.MouseWind     := 4; // 3
+  Self.MouseGravity  := 11;
+  Self.MouseWind     := 3;
   Self.MouseTimeout  := 15000;
 
   Self.KeyPressMin := 20;

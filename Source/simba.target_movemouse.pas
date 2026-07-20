@@ -29,304 +29,294 @@ uses
   Math,
   simba.nativeinterface;
 
-procedure MoveMouseOnTarget(Target: TSimbaTarget; Dest: TPoint; MouseMoveEvent: TMoveMouseEvent);
+const
+  HESITATE_CHANCE = 0.03; // ~3% long moves pause mid-way (further scaled down by distance) < 120px will never fire.
+  GUST_CHANCE     = 0.05; // ~5% moves get a stronger "wind gust"
+  SUBSTEP_CHANCE  = 0.02; // ~2% steps add an extra mid-step
 
-  procedure Move(const X, Y, Idle: Double);
-  var
-    P: TPoint;
-  begin
-    P.X := Round(X);
-    P.Y := Round(Y);
+type
+  // WindMouse by BenLand100 but enhanced by AI.
+  // Speed   = pace
+  // Wind    = wander (0 = straight)
+  // Gravity = pull to line
+  TWindMouse = record
+    Target: TSimbaTarget;
 
-    Target.MouseTeleport(P);
-    SimbaNativeInterface.PreciseSleep(Round(Idle));
+    // move inputs (constant for the move; read across Plan/Step)
+    DestX, DestY, Speed, Wind, Gravity: Double;
+
+    // live cursor position, velocity and progress
+    X, Y, MoveX, MoveY, TotalDist, RemainingDist, Progress: Double;
+
+    // per-move plan (rebuilt by Plan)
+    MaxStep, EndStep, Gap: Double;
+    DecelRate, Inertia, LaunchScale: Double;
+    ArcScale, ArcAmp, ArcDecay, ArcFreq, ArcSkew: Double;
+    HesitateAt: Double;          // >1 = none this move, else the trigger progress
+    Coasting, Overshot: Boolean; // will overshoot past the dest / is correcting back
+
+    class function RandFloat(const Lo, Hi: Double): Double; static;
+    class function RandSkew(const Near, Far: Double): Double; static; // biased toward Near
+    class function SmoothStep(const T: Double): Double; static;       // Hermite, t in [0, 1]
+    class function Clamp(const V, Lo, Hi: Double): Double; static;
+
+    procedure Teleport(AX, AY: Double; Sleep: Double = -1); // Sleep < 0 = pace by Gap
+    procedure Flick(Scale: Double = 1.0); // Scale > 1 = a larger kick
+    procedure Plan(const FromX, FromY: Double);
+    function HesitationStep: Boolean;
+    procedure Step;
+    procedure Run(ATarget: TSimbaTarget; ADest: TPoint; OnMove: TMoveMouseEvent);
   end;
 
-  // Hermite smoothstep: 0..1 with zero slope at both ends
-  function SmoothStep(const Edge0, Edge1, Value: Double): Double;
-  var
-    T: Double;
-  begin
-    if (Edge1 <= Edge0) then
-      Exit(Ord(Value >= Edge1));
-    T := EnsureRange((Value - Edge0) / (Edge1 - Edge0), 0, 1);
-    Result := T * T * (3 - 2 * T);
-  end;
-
-  // Random in [Near, Far], biased toward Near
-  function RandSkew(const Near, Far: Double): Double;
-  begin
-    Result := Near + (Far - Near) * Random() * Random();
-  end;
-
-  // WindMouse by BenLand100 but enhanced:
-  // The random walk is replaced by a per-move plan + feedback loop.
-  // Same knobs: Speed = pace, Wind = wander (0 = straight).
-  // Gravity = pull back toward the line. Changes from the original:
-  //   * Speed envelope (ease in / hold / ease out) with a two-sine ripple on the
-  //     pace; scales with distance (Fitts); geometric crawl floor - no inching in
-  //   * Path is a decaying 1-3 half-wave arc, random side/peak/span, may rejoin
-  //     the line early; floored (never laser-straight), capped (never orbits)
-  //   * Start flick; ~10% hesitation on long moves (brake or dead stop, with skid,
-  //     twitches, re-engage jolt); end-zone tremor; misaligned arrivals that
-  //     visibly correct; at most one overshoot
-  //   * Velocity inertia smooths all steering; a destination moved live by
-  //     MouseMoveEvent is tracked at pace, even if it keeps escaping
-  procedure WindMouseEnhanced(X1, Y1, X2, Y2, Speed, Wind, Gravity: Double; Timeout: Integer);
-  const
-    FLICK_CHANCE  = 0.65; // start with a directional flick kick
-    TAPER_CHANCE  = 0.45; // keep some arc into the endgame (arrive misaligned, then correct)
-    PAUSE_CHANCE  = 0.10; // hesitate mid-move (further scaled down by short distance)
-    GUST_CHANCE   = 0.10; // gust of much stronger wind
-    JOLT_CHANCE   = 0.60; // skid off-path when braking, and re-engage jolt on pickup
-    TWITCH_CHANCE = 0.04; // micro-twitch per held step during a stall
-  var
-    X, Y, DirX, DirY: Double;
-    MoveX, MoveY, MoveLen, AimX, AimY, AimLen: Double;
-    Vmax, Vcur, Vmin, ArcScale, ArcPull, EndZone, Inertia, Progress, Env, Bow: Double;
-    SegDist, RemainingDist: Double;
-    AccelAt, DecelAt, AccelShape, DecelShape: Double;
-    ArcAmp, ArcSkew, ArcDecay, ArcFreq, ArcSpan: Double;
-    FlickAngle, FlickMag, TaperFloor, EndWobble, EndAngle, U: Double;
-    Ripple, RippleAmp, RippleRate1, RippleRate2, RipplePhase1, RipplePhase2: Double;
-    PauseAt, PauseDepth: Double;
-    PauseHold, PauseLeft: Integer;
-    PrevR: Double;
-    RecedeN: Integer;
-    T: UInt64;
-    Stop, Overshot, Chasing: Boolean;
-  begin
-    X := X1; Y := Y1;
-    MoveX := 0; MoveY := 0;
-    SegDist := Max(1.0, Hypot(X1 - X2, Y1 - Y2));
-
-    // Peak px/step: ~10-13 per 10 Speed, higher for longer moves (600px = 1x reference)
-    Vmax := RandSkew(10.0, 10.0 * 1.30) * (Speed / 10.0) *
-            EnsureRange(Sqrt(SegDist / 600.0), 0.65, 2.3);
-
-    // Wind pushes off the line, gravity pulls back (defaults 4/12 -> ArcScale ~0.93)
-    ArcScale := 2.8 * Wind / Max(1.0, Gravity);
-    ArcPull  := EnsureRange(Gravity / 12.0, 0.3, 3.0);
-    // Gust: some moves wander much harder, as if the wind briefly ~doubled - an
-    // occasional wide sweep among the normal arcs (Wind stays 0 = dead straight)
-    if (Random() < GUST_CHANCE) then
-      ArcScale := ArcScale * (1.7 + Random() * 0.6);
-
-    Vmin := Max(1.0, Vmax * 0.07); // absolute crawl floor
-    EndZone := Max(4.0, Vmax);     // within this distance: straight final approach
-
-    // Envelope: where full speed is reached / where the ease-out starts / ramp shapes
-    AccelShape := 0.60 + Random() * 0.80;
-    DecelShape := 0.60 + Random() * 0.80;
-    AccelAt    := 0.32 * Power(Random(), 3.5);
-    DecelAt    := 0.99 - 0.40 * Power(Random(), 3.0);
-    Inertia    := 0.31 + 0.17 * Sqr(Random()); // arm weight
-
-    // Start flick: an initial kick in a random direction, reabsorbed by inertia
-    if (Random() < FLICK_CHANCE) then
-    begin
-      FlickAngle := Random() * 2 * PI;
-      FlickMag   := Min(Sqr(Random()) * 6.5 * ArcScale, Vmax * 1.5);
-      MoveX := Cos(FlickAngle) * FlickMag;
-      MoveY := Sin(FlickAngle) * FlickMag;
-    end;
-
-    // End traits: some arc may survive into the endgame (arrive misaligned, correct),
-    // plus a small angular tremor while homing in
-    if (Random() < TAPER_CHANCE) then
-      TaperFloor := Random() * 0.35
-    else
-      TaperFloor := 0;
-    EndWobble := Sqr(Random()) * 0.22;
-
-    // Hesitation: a deep mid-move brake, held for a beat (steps, so it always ends).
-    // Chance fades in with distance: 0 below ~120px, ~10% from 250px up.
-    if (Random() < PAUSE_CHANCE * EnsureRange((SegDist - 120) / 130, 0, 1)) then
-    begin
-      PauseAt    := 0.20 + Random() * 0.55;          // trigger point along the path
-      PauseDepth := 0.90 + Random() * 0.10;          // slow smear .. dead stop
-      PauseHold  := 30 + Round(Sqr(Random()) * 120); // ~80..400ms
-    end
-    else
-    begin
-      PauseAt    := 2.0; // never triggers
-      PauseDepth := 0;
-      PauseHold  := 0;
-    end;
-    PauseLeft := 0;
-
-    // Arc: peak sideways offset (floored so no move is laser-straight, capped so
-    // hostile Wind/Gravity can't orbit), where it peaks, how fast it's pulled in,
-    // and how much of the path it spans - a short span rejoins the line early and
-    // rides it in, instead of only meeting it at the target
-    ArcAmp   := Min((0.030 + Sqr(Random()) * 0.130) * ArcScale, 0.45);
-    ArcSkew  := 0.55 + Random() * 0.60;
-    ArcDecay := (0.5 + Random() * 1.9) * ArcPull;
-    ArcSpan  := 1.0 - Sqr(Random()) * 0.45;
-    if (Random() >= 0.5) then ArcAmp := -ArcAmp; // which side of the line
-
-    // 1..3 half-waves: bow / S-curve / double wave
-    U := Random();
-    if (U < 0.45) then ArcFreq := 1.0
-    else if (U < 0.85) then ArcFreq := 2.0
-    else ArcFreq := 3.0;
-
-    // Speed ripple: two slow sines swell/dip the pace (band-limited, no stutter)
-    RippleAmp    := 0.20 + Sqr(Random()) * 0.35;
-    RippleRate1  := 0.12 + Random() * 0.28;
-    RippleRate2  := RippleRate1 * (1.5 + Random() * 0.8);
-    RipplePhase1 := Random() * 2 * PI;
-    RipplePhase2 := Random() * 2 * PI;
-
-    Overshot := False; // at most one overshoot of the target
-    PrevR := 1e30;
-    RecedeN := 0;
-    Chasing := False;
-
-    T := GetTickCount64() + Timeout;
-    while (T > GetTickCount64()) do
-    begin
-      if Assigned(MouseMoveEvent) then
-      begin
-        MouseMoveEvent(X, Y, X2, Y2, Stop);
-        if Stop then
-          Exit;
-      end;
-
-      RemainingDist := Hypot(X - X2, Y - Y2);
-      if (RemainingDist <= 1.0) then
-        Break;
-
-      // A destination moved live by MouseMoveEvent needs no re-plan: direction is
-      // recomputed from it every step, and the segment only ever grows to cover it
-      // (also handles the overshoot pass) - progress tracks the actual approach
-      if (RemainingDist > SegDist) then
-        SegDist := RemainingDist;
-
-      Progress := EnsureRange(1 - RemainingDist / SegDist, 0, 1);
-
-      // Envelope times ripple; the ripple's gate is full on the plateau, 0.25 floor
-      // through the ramps and crawl
-      Env    := Power(SmoothStep(0, AccelAt, Progress), AccelShape) *
-                Power(1 - SmoothStep(DecelAt, 1, Progress), DecelShape);
-      Ripple := 1.0 + RippleAmp * (0.65 * Sin(RipplePhase1) + 0.35 * Sin(RipplePhase2)) *
-                      (0.25 + 0.75 * Sqrt(Env));
-
-      // While easing out, floor the crawl at ~7% of what's left (geometric approach;
-      // pixel-fine steps only near the very end)
-      if (Progress > DecelAt) then
-        U := EnsureRange(RemainingDist * 0.07, Vmin, Max(4.0, Vmax * 0.25))
-      else
-        U := Vmin;
-      Vcur := (U + (Vmax - U) * Env) * Ripple;
-      RipplePhase1 := RipplePhase1 + RippleRate1;
-      RipplePhase2 := RipplePhase2 + RippleRate2;
-
-      // A destination that keeps escaping (no net approach for several steps - can't
-      // happen on a static move) would outrun the ease-in/crawl forever: latch onto
-      // it at pace until the envelope has caught up (past AccelAt = plateau)
-      if (RemainingDist > EndZone) and (RemainingDist >= PrevR) then
-        Inc(RecedeN)
-      else
-        RecedeN := 0;
-      if (RecedeN >= 5) then
-        Chasing := True;
-      if (Progress > AccelAt) then
-        Chasing := False;
-      if Chasing then
-        Vcur := Max(Vcur, 0.6 * Vmax * Ripple);
-      PrevR := RemainingDist;
-
-      // Hesitation: brake for PauseHold steps once PauseAt is crossed; jolts on
-      // braking (skid off the path), while held (twitch) and on pickup
-      if (Progress >= PauseAt) then
-      begin
-        PauseAt   := 2.0; // one hesitation per move
-        PauseLeft := PauseHold;
-        if (Random() < JOLT_CHANCE) then
-        begin
-          FlickAngle := Random() * 2 * PI;
-          FlickMag   := Min((0.5 + Sqr(Random()) * 4.5) * ArcScale, Vmax);
-          MoveX := MoveX + Cos(FlickAngle) * FlickMag;
-          MoveY := MoveY + Sin(FlickAngle) * FlickMag;
-        end;
-      end;
-      if (PauseLeft > 0) then
-      begin
-        Dec(PauseLeft);
-        Vcur := Vcur * (1.0 - PauseDepth);
-        if (Random() < TWITCH_CHANCE) then
-        begin
-          FlickAngle := Random() * 2 * PI;
-          MoveX := MoveX + Cos(FlickAngle) * (0.4 + Random());
-          MoveY := MoveY + Sin(FlickAngle) * (0.4 + Random());
-        end;
-        if (PauseLeft = 0) and (Random() < JOLT_CHANCE) then
-        begin
-          FlickAngle := Random() * 2 * PI;
-          FlickMag   := Min(Sqr(Random()) * 6.5 * ArcScale, Vmax);
-          MoveX := MoveX + Cos(FlickAngle) * FlickMag;
-          MoveY := MoveY + Sin(FlickAngle) * FlickMag;
-        end;
-      end;
-
-      // Direction to the live target
-      DirX := (X2 - X) / RemainingDist;
-      DirY := (Y2 - Y) / RemainingDist;
-
-      if (RemainingDist <= EndZone) then
-      begin
-        // Final approach: home in with a tremor; allow a single momentum overshoot,
-        // after that only ever close the distance
-        if (not Overshot) then
-          MoveLen := Min(Vcur, RemainingDist + Sqr(RemainingDist) / EndZone)
-        else
-          MoveLen := Min(Vcur, RemainingDist);
-        if (MoveLen > RemainingDist) then
-          Overshot := True;
-        EndAngle := (Random() * 2 - 1) * EndWobble;
-        MoveX := (DirX * Cos(EndAngle) - DirY * Sin(EndAngle)) * MoveLen;
-        MoveY := (DirX * Sin(EndAngle) + DirY * Cos(EndAngle)) * MoveLen;
-      end else
-      begin
-        // Arc: aim at a point offset sideways from the target; decaying 1..3
-        // half-waves, tapered off toward EndZone (down to TaperFloor)
-        Bow := ArcAmp * SegDist * Exp(-ArcDecay * Progress) *
-               Sin(ArcFreq * PI * Power(Min(1.0, Progress / ArcSpan), ArcSkew));
-        Bow := Bow * (TaperFloor + (1.0 - TaperFloor) * EnsureRange((RemainingDist - EndZone) / EndZone, 0, 1));
-        // Never offset more than half the distance left: keeps the aim leaning
-        // homeward, so the move terminates even under hostile Wind/Gravity
-        Bow := EnsureRange(Bow, -0.5 * RemainingDist, 0.5 * RemainingDist);
-        AimX := (X2 - DirY * Bow) - X;
-        AimY := (Y2 + DirX * Bow) - Y;
-        AimLen := Max(1.0, Hypot(AimX, AimY));
-
-        // Inertia: ease the emitted motion toward the desired velocity
-        MoveX := MoveX + ((AimX / AimLen) * Vcur - MoveX) * Inertia;
-        MoveY := MoveY + ((AimY / AimLen) * Vcur - MoveY) * Inertia;
-        MoveLen := Hypot(MoveX, MoveY);
-      end;
-
-      X := X + MoveX;
-      Y := Y + MoveY;
-
-      // Idle: ~2.7..5.4ms cadence scaled by step length
-      Move(X, Y, 2.7 * (MoveLen / Ripple / Vmax) + 2.7);
-    end;
-
-    if (GetTickCount64() >= T) then
-      SimbaException('MouseMove timed out after %dms. Start: (%d,%d), Dest: (%d,%d)', [Timeout, Round(X1), Round(Y1), Round(X2), Round(Y2)]);
-  end;
-
+class function TWindMouse.RandFloat(const Lo, Hi: Double): Double;
 begin
-  WindMouseEnhanced(
-    Target.MouseX, Target.MouseY,
-    Dest.X, Dest.Y,
-    Target.Options.MouseSpeed,
-    Target.Options.MouseWind,
-    Target.Options.MouseGravity,
-    Target.Options.MouseTimeout
-  );
+  Result := Lo + Random() * (Hi - Lo);
+end;
+
+class function TWindMouse.RandSkew(const Near, Far: Double): Double;
+begin
+  Result := Near + (Far - Near) * Random() * Random();
+end;
+
+class function TWindMouse.SmoothStep(const T: Double): Double;
+begin
+  Result := T * T * (3 - 2 * T);
+end;
+
+class function TWindMouse.Clamp(const V, Lo, Hi: Double): Double;
+begin
+  Result := Min(Hi, Max(Lo, V));
+end;
+
+procedure TWindMouse.Teleport(AX, AY: Double; Sleep: Double);
+var
+  P: TPoint;
+begin
+  P.X := Round(AX);
+  P.Y := Round(AY);
+  Target.MouseTeleport(P);
+
+  if (Sleep < 0) then
+  begin
+    Sleep := Gap * RandFloat(0.925, 1.075);
+    if (Random() < 0.015) then
+      Sleep := Sleep * RandFloat(1.5, 2.5); // ~1.5% randomness
+  end;
+
+  SimbaNativeInterface.PreciseSleep(Sleep);
+end;
+
+// Nudge the motion in a random direction (reabsorbed by inertia)
+procedure TWindMouse.Flick(Scale: Double);
+var
+  Angle, Mag: Double;
+begin
+  Mag := Min(Sqr(Random()) * 6.5 * ArcScale, MaxStep) * Scale;
+  Angle := Random() * 2 * PI;
+  MoveX := MoveX + Cos(Angle) * Mag;
+  MoveY := MoveY + Sin(Angle) * Mag;
+end;
+
+// (Re)build the per-move plan:
+// Either runs at the start and again if the dest jumps mid-move.
+procedure TWindMouse.Plan(const FromX, FromY: Double);
+var
+  MoveTime: Double;
+  N: Integer;
+begin
+  TotalDist := Max(1.0, Hypot(FromX - DestX, FromY - DestY));
+
+  // Total move time = reaction floor + sqrt-distance travel, speed-scaled, +/-22%
+  MoveTime := (100.0 + 14.0 * Sqrt(TotalDist) / (Speed / 10.0)) * RandFloat(0.78, 1.22);
+  Gap := RandFloat(6.0, 9.0);
+  N := Max(3, Round(MoveTime / Gap));
+  MaxStep := Min((TotalDist / N) / 0.80, TotalDist * 0.5);
+
+  // Wind off the line vs gravity back
+  ArcScale := Clamp(2.8 * Wind / Gravity, 0.4, 2.5);
+  if (Random() < GUST_CHANCE) then // gust: wanders harder
+    ArcScale := ArcScale * (1.4 + Random() * 0.5);
+
+  LaunchScale := RandFloat(0.15, 0.30);
+  DecelRate := RandFloat(0.42, 0.65);   // arrival slowdown speed
+  if (Random() < 0.22) then             // but 22% of moves get an much harder stop
+    DecelRate := RandFloat(0.7, 0.88);
+  Inertia := 0.31 + 0.17 * Sqr(Random());
+  EndStep := Min(2.0 + Sqr(Random()) * 2.5, MaxStep);
+
+  // Hesitation chance scaled up by distance (but none below ~120px)
+  HesitateAt := 2.0;
+  if (Random() < HESITATE_CHANCE * Clamp((TotalDist - 120) / 130, 0, 1)) then
+    HesitateAt := RandFloat(0.20, 0.75);
+
+  Coasting := (Random() < 0.06) and (TotalDist > 3.0);
+  Overshot := False;
+
+  // Arc: sideways offset, decay, skew (crest position), then pick a side
+  ArcAmp   := Min((0.030 + Sqr(Random()) * 0.130) * ArcScale, 0.45) * TotalDist;
+  ArcDecay := 1.45 * Clamp(Gravity / 12.0, 0.3, 3.0);
+  ArcSkew  := 0.50 + Sqr(Random()) * 0.58;
+  if (Random() >= 0.5) then
+    ArcAmp := -ArcAmp;
+
+  // Arc shape: mostly a single bow held to one side
+  if (Random() < 0.80) then
+    ArcFreq := 1.0
+  else
+  begin
+    ArcFreq := 2.0;
+    ArcAmp  := ArcAmp * 0.6; // gentle S: crosses the line but only a small distance each side
+  end;
+end;
+
+// Mid-move hesitation: brake to rest, sleep then later re-accelerate.
+// True = handled this step, do not do a normal step.
+function TWindMouse.HesitationStep: Boolean;
+begin
+  Result := (HesitateAt <= 1.0) and (Progress >= HesitateAt);
+  if (not Result) then
+    Exit;
+
+  // brake toward rest: velocity decays by (1 - Inertia) each step until it stalls and the pause fires
+  MoveX := MoveX * (1 - Inertia);
+  MoveY := MoveY * (1 - Inertia);
+  X := X + MoveX;
+  Y := Y + MoveY;
+  if (Hypot(MoveX, MoveY) < 0.75) then // at rest: sleep the hesitation, done
+  begin
+    HesitateAt := 2.0;
+    if (Random() < 0.60) then
+      Flick(1.0 + Sqr(Random()) * 5.0); // hesitation twitch
+    Teleport(X, Y, RandSkew(80, 600));
+  end else
+    Teleport(X, Y);
+end;
+
+procedure TWindMouse.Step;
+var
+  Envelope, CurStep: Double;
+  DirX, DirY, MoveLen, ArcOffset, AimX, AimY, AimLen: Double;
+begin
+  if HesitationStep() then // mid-move hesitation did this step
+    Exit;
+
+  DirX := (DestX - X) / RemainingDist;
+  DirY := (DestY - Y) / RemainingDist;
+
+  if (Overshot or (RemainingDist * DecelRate <= MaxStep)) then
+  begin
+    // Decelerate into the target
+    // A coasting move overshoots the dest. The same branch then corrects it back (Overshot).
+    MoveLen := Max(RemainingDist * DecelRate * RandFloat(0.7, 1.3), EndStep);
+    if Coasting and (MoveLen >= RemainingDist - 0.5) then
+    begin
+      MoveLen := RemainingDist + Clamp(MaxStep * 0.3, 3.0, 8.0);
+      Coasting := False;
+      Overshot := True;
+    end else
+      MoveLen := Min(MoveLen, RemainingDist);
+    MoveX := DirX * MoveLen;
+    MoveY := DirY * MoveLen;
+  end else
+  begin
+    Envelope := Max(SmoothStep(Clamp(Progress / 0.012, 0, 1)), LaunchScale);
+    CurStep := MaxStep * Envelope;
+    // aim at a decaying sideways offset, faded to 0 over the last MaxStep px + clamped so it terminates
+    ArcOffset := ArcAmp * Exp(-ArcDecay * Progress) * Sin(ArcFreq * PI * Power(Progress, ArcSkew));
+    ArcOffset := ArcOffset * Clamp((RemainingDist - MaxStep) / MaxStep, 0, 1);
+    ArcOffset := Clamp(ArcOffset, -0.5 * RemainingDist, 0.5 * RemainingDist);
+    AimX := (DestX - DirY * ArcOffset) - X;
+    AimY := (DestY + DirX * ArcOffset) - Y;
+    AimLen := Max(1.0, Hypot(AimX, AimY));
+    // ease velocity toward the aim (length CurStep) by Inertia
+    MoveX := MoveX + ((AimX / AimLen) * CurStep - MoveX) * Inertia;
+    MoveY := MoveY + ((AimY / AimLen) * CurStep - MoveY) * Inertia;
+  end;
+
+  X := X + MoveX;
+  Y := Y + MoveY;
+
+  // ~2% chance of a sub-step
+  if (Random() < SUBSTEP_CHANCE) and (Hypot(MoveX, MoveY) > 3.0) then
+  begin
+    Envelope := RandFloat(0.35, 0.70); // reuse local as the split fraction
+    Teleport(X - MoveX * Envelope, Y - MoveY * Envelope, Gap * RandFloat(0.3, 0.6));
+  end;
+
+  Teleport(X, Y);
+end;
+
+procedure TWindMouse.Run(ATarget: TSimbaTarget; ADest: TPoint; OnMove: TMoveMouseEvent);
+var
+  StartX, StartY, LastDestX, LastDestY: Double;
+  Timeout: UInt64;
+  Stop: Boolean;
+begin
+  Self := Default(TWindMouse);
+
+  Target  := ATarget;
+  DestX   := ADest.X;
+  DestY   := ADest.Y;
+  Speed   := Clamp(ATarget.Options.MouseSpeed, 2.0, 30.0);
+  Wind    := Clamp(ATarget.Options.MouseWind, 0.0, 15.0);
+  Gravity := Clamp(ATarget.Options.MouseGravity, 1.0, 30.0);
+  Timeout := GetTickCount64() + ATarget.Options.MouseTimeout;
+
+  StartX := ATarget.MouseX;
+  StartY := ATarget.MouseY;
+  X := StartX;
+  Y := StartY;
+  Plan(StartX, StartY);
+
+  MoveY := (LaunchScale * MaxStep) * (DestY - StartY) / TotalDist;
+  MoveX := (LaunchScale * MaxStep) * (DestX - StartX) / TotalDist;
+  if (Random() < 0.50) then
+    Flick();
+  LastDestX := DestX;
+  LastDestY := DestY;
+
+  while (Timeout > GetTickCount64()) do
+  begin
+    if Assigned(OnMove) then
+    begin
+      OnMove(X, Y, DestX, DestY, Stop);
+      if Stop then
+        Exit;
+      // dest jumped > 25% of the remaining distance -> re-plan from here
+      if (Hypot(DestX - LastDestX, DestY - LastDestY) > Hypot(X - LastDestX, Y - LastDestY) * 0.25) then
+        Plan(X, Y);
+
+      LastDestX := DestX;
+      LastDestY := DestY;
+    end;
+
+    RemainingDist := Hypot(X - DestX, Y - DestY);
+    if (RemainingDist <= 2.0) and (not Coasting) then // within 2px -> just land on the dest (unless coasting past)
+      Break;
+
+    if (RemainingDist > TotalDist) then
+      TotalDist := RemainingDist;
+    Progress := Clamp(1 - RemainingDist / TotalDist, 0, 1);
+
+    Step;
+  end;
+
+  if (GetTickCount64() >= Timeout) and (Hypot(X - DestX, Y - DestY) > EndStep) then
+    SimbaException(
+      'MouseMove timed out after %dms. Start=%d,%d Dest=%d,%d XY=%d,%d',
+      [ATarget.Options.MouseTimeout, Round(StartX), Round(StartY), Round(DestX), Round(DestY), Round(X), Round(Y)]
+    );
+
+  // Step directly on the dest if needed
+  if (Round(X) <> DestX) or (Round(Y) <> DestY) then
+    Teleport(DestX, DestY);
+end;
+
+procedure MoveMouseOnTarget(Target: TSimbaTarget; Dest: TPoint; MouseMoveEvent: TMoveMouseEvent);
+var
+  WindMouse: TWindMouse;
+begin
+  WindMouse.Run(Target, Dest, MouseMoveEvent);
 end;
 
 end.
