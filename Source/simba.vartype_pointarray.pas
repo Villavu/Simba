@@ -1119,7 +1119,7 @@ var
   Edges: TPointArray;
 begin
   Result := Default(TPointArray);
-  if (Length(Self) = 0) or (Iterations = 0) then
+  if (Length(Self) = 0) or (Iterations < 1) then
     Exit;
 
   B := Self.Bounds();
@@ -1204,7 +1204,7 @@ var
   B: TBox;
 begin
   Result := Default(TPointArray);
-  if (Length(Self) = 0) or (Iterations = 0) then
+  if (Length(Self) = 0) or (Iterations < 1) then
     Exit;
 
   B := Self.Bounds();
@@ -2855,9 +2855,9 @@ var
 begin
   Result := Self.ExtractSize(0, __GT__);
 
-  SetLength(Weights, Length(Self));
-  for I := 0 to High(Self) do
-    Weights[I] := Sqr(From.X - Self[I][0].X) + Sqr(From.Y - Self[I][0].Y);
+  SetLength(Weights, Length(Result));
+  for I := 0 to High(Result) do
+    Weights[I] := Sqr(From.X - Result[I][0].X) + Sqr(From.Y - Result[I][0].Y);
 
   specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), True);
 end;
@@ -2869,9 +2869,9 @@ var
 begin
   Result := Self.ExtractSize(0, __GT__);
 
-  SetLength(Weights, Length(Self));
-  for I := 0 to High(Self) do
-    Weights[I] := Sqr(From.X - Self[I][0].X);
+  SetLength(Weights, Length(Result));
+  for I := 0 to High(Result) do
+    Weights[I] := Sqr(From.X - Result[I][0].X);
 
   specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), True);
 end;
@@ -2883,11 +2883,11 @@ var
 begin
   Result := Self.ExtractSize(0, __GT__);
 
-  SetLength(Weights, Length(Self));
-  for I := 0 to High(Self) do
-    Weights[I] := Sqr(From.Y - Self[I][0].Y);
+  SetLength(Weights, Length(Result));
+  for I := 0 to High(Result) do
+    Weights[I] := Sqr(From.Y - Result[I][0].Y);
 
-  specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Self), High(Self), True);
+  specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), True);
 end;
 
 function T2DPointArrayHelper.SortFrom(From: TPoint): T2DPointArray;
