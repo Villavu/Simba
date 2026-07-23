@@ -182,8 +182,7 @@ end;
 
 function TBoxHelper.Expand(SizeMod: Integer; MaxBounds: TBox): TBox;
 begin
-  Result := Self.Expand(SizeMod);
-  Result.Clip(MaxBounds);
+  Result := Self.Expand(SizeMod).Clip(MaxBounds);
 end;
 
 function TBoxHelper.Expand(WidMod, HeiMod: Integer): TBox;
@@ -196,8 +195,7 @@ end;
 
 function TBoxHelper.Expand(WidMod, HeiMod: Integer; MaxBounds: TBox): TBox;
 begin
-  Result := Self.Expand(WidMod, HeiMod);
-  Result.Clip(MaxBounds);
+  Result := Self.Expand(WidMod, HeiMod).Clip(MaxBounds);
 end;
 
 function TBoxHelper.Contains(p: TPoint): Boolean;
