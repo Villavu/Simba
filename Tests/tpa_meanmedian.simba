@@ -1,0 +1,41 @@
+{$assertions on}
+
+procedure TestMean;
+var
+  arr: TPointArray;
+  i: Int32;
+begin
+  Assert(TPointArray([]).Mean() = Point(0, 0), 'Mean of empty');
+  Assert(TPointArray([Point(1, 1), Point(2, 2)]).Mean() = Point(1, 1), 'Mean truncates');
+
+  arr := TPointArray.CreateFromBox(TBox.Create(0, 0, 10, 10), True);
+  Assert(arr.Mean() = Point(5, 5), 'Mean of symmetric box');
+  arr += Point(1000, 1000);
+  Assert(arr.Mean() = Point(13, 13), 'Mean should be dragged by outlier');
+
+  // check overflowing
+  SetLength(arr, 2000);
+  for i := 0 to High(arr) do
+    arr[i] := Point(2000000, 2000000);
+  Assert(arr.Mean() = Point(2000000, 2000000), 'Mean overflowed on a large sum');
+end;
+
+procedure TestMedian;
+var
+  arr: TPointArray;
+begin
+  Assert(TPointArray([]).Median() = Point(0, 0), 'Median of empty');
+  Assert(TPointArray([Point(9, 9), Point(1, 1), Point(5, 5)]).Median() = Point(5, 5), 'Median odd');
+  Assert(TPointArray([Point(1, 1), Point(3, 3), Point(5, 5), Point(7, 7)]).Median() = Point(4, 4), 'Median even');
+  Assert(TPointArray([Point(0, 10), Point(5, 0), Point(10, 5)]).Median() = Point(5, 5), 'Median is per axis');
+
+  arr := TPointArray.CreateFromBox(TBox.Create(0, 0, 10, 10), True);
+  Assert(arr.Median() = Point(5, 5), 'Median of symmetric box');
+  arr += Point(1000, 1000);
+  Assert(arr.Median() = Point(5, 5), 'Median outlier should be unaffected');
+end;
+
+begin
+  TestMean();
+  TestMedian();
+end.

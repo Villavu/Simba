@@ -987,21 +987,26 @@ function TPointArrayHelper.Mean: TPoint;
 var
   Ptr: PPoint;
   Upper: PtrUInt;
+  SumX, SumY: Int64;
 begin
   Result := TPoint.ZERO;
   if (Length(Self) = 0) then
     Exit;
 
+  SumX := 0;
+  SumY := 0;
+
   Ptr := @Self[0];
   Upper := PtrUInt(Ptr) + (Length(Self) * SizeOf(TPoint));
   while (PtrUInt(Ptr) < Upper) do
   begin
-    Inc(Result.X, Ptr^.X);
-    Inc(Result.Y, Ptr^.Y);
+    Inc(SumX, Ptr^.X);
+    Inc(SumY, Ptr^.Y);
     Inc(Ptr);
   end;
 
-  Result := Result div Length(Self);
+  Result.X := SumX div Length(Self);
+  Result.Y := SumY div Length(Self);
 end;
 
 function TPointArrayHelper.MinAreaRect: TQuad;
@@ -2783,14 +2788,14 @@ begin
 
     Mid := Length(Self) div 2;
 
-    if (Length(Self) mod 2) = 0 then
+    if (Length(Self) mod 2) = 1 then
     begin
       Result.X := X[Mid];
       Result.Y := Y[Mid];
     end else
     begin
-      Result.X := Round((X[Mid] + X[Mid+1]) / 2);
-      Result.Y := Round((Y[Mid] + Y[Mid+1]) / 2);
+      Result.X := Round((X[Mid-1] + X[Mid]) / 2);
+      Result.Y := Round((Y[Mid-1] + Y[Mid]) / 2);
     end;
   end;
 end;
