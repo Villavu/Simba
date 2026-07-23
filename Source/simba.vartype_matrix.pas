@@ -236,9 +236,16 @@ end;
 
 procedure TIntegerMatrixHelper.Fill(Box: TBox; Value: Integer);
 var
-  X, Y: Integer;
+  W, H, X, Y: Integer;
 begin
-  Box.Clip(TBox.Create(0, 0, Width - 1, Height - 1));
+  if not Self.GetSize(W, H) then
+    Exit;
+
+  Box.X1 := Math.Max(Box.X1, 0);
+  Box.Y1 := Math.Max(Box.Y1, 0);
+  Box.X2 := Math.Min(Box.X2, W - 1);
+  Box.Y2 := Math.Min(Box.Y2, H - 1);
+
   for Y := Box.Y1 to Box.Y2 do
     for X := Box.X1 to Box.X2 do
       Self[Y, X] := Value;
@@ -552,9 +559,16 @@ end;
 
 procedure TSingleMatrixHelper.Fill(Box: TBox; Value: Single);
 var
-  X, Y: Integer;
+  W, H, X, Y: Integer;
 begin
-  Box.Clip(TBox.Create(0, 0, Width - 1, Height - 1));
+  if not Self.GetSize(W, H) then
+    Exit;
+
+  Box.X1 := Math.Max(Box.X1, 0);
+  Box.Y1 := Math.Max(Box.Y1, 0);
+  Box.X2 := Math.Min(Box.X2, W - 1);
+  Box.Y2 := Math.Min(Box.Y2, H - 1);
+
   for Y := Box.Y1 to Box.Y2 do
     for X := Box.X1 to Box.X2 do
       Self[Y, X] := Value;
