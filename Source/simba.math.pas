@@ -10,7 +10,8 @@ unit simba.math;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,
+  simba.base;
 
 const
   HALF_PI = Double(PI / 2);
@@ -44,7 +45,7 @@ function DistManhattan(const X1,Y1,X2,Y2: Double): Single; inline; overload;
 function DistChebyshev(const P1,P2: TPoint): Single; inline; overload;
 function DistChebyshev(const X1,Y1,X2,Y2: Double): Single; inline; overload;
 
-function NextPower2(const n: Integer): Integer;
+function NextPower2(const n: Int64): Int64;
 
 function IsNumber(const n: Double): Boolean; inline; overload;
 function IsNumber(const n: Single): Boolean; inline; overload;
@@ -146,8 +147,13 @@ begin
   Result := X - Floor(X / Y) * Y;
 end;
 
-function NextPower2(const n: Integer): Integer;
+function NextPower2(const n: Int64): Int64;
 begin
+  if (n <= 1) then
+    Exit(1);
+  if (n > $4000000000000000) then
+    SimbaException('%d has no power of two above it', [n]);
+
   Result := n - 1;
   Result := Result or (Result shr 1);
   Result := Result or (Result shr 2);

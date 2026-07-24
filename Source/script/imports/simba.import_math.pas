@@ -184,12 +184,13 @@ end;
 NextPower2
 ----------
 ```
-function NextPower2(n: Integer): Integer;
+function NextPower2(n: Int64): Int64;
 ```
+Rounds `n` up to a power of two.
 *)
 procedure _LapeNextPower2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := NextPower2(PInteger(Params^[0])^);
+  PInt64(Result)^ := NextPower2(PInt64(Params^[0])^);
 end;
 
 (*
@@ -357,7 +358,7 @@ begin
     addGlobalFunc('function RadNormalize(Rad: Double): Double', @_LapeRadNormalize);
     addGlobalFunc('function DegNormalize(Deg: Double): Double', @_LapeDegNormalize);
 
-    addGlobalFunc('function NextPower2(const n: Integer): Integer', @_LapeNextPower2);
+    addGlobalFunc('function NextPower2(const n: Int64): Int64', @_LapeNextPower2);
 
     addGlobalFunc('function Modulo(const X, Y: Integer): Integer; overload', @_LapeModulo);
     addGlobalFunc('function Modulo(const X, Y: Double): Double; overload', @_LapeModuloF);
