@@ -216,7 +216,7 @@ implementation
 uses
   Math,
   simba.containers, simba.geometry, simba.math,
-  simba.container_kdpointtree,
+  simba.container_pointset, simba.container_kdpointtree,
   simba.vartype_matrix, simba.vartype_ordarray,
   simba.vartype_box, simba.vartype_point, simba.vartype_triangle,
   simba.array_algorithm;
@@ -3195,20 +3195,43 @@ end;
 
 function T2DPointArrayHelper.Intersection: TPointArray;
 var
-  I: Integer;
+  I, J, SmallestIndex: Integer;
+  B: TBox;
+  HashSet: TPointHashSet;
+  ScanSet: TPointScanLineSet;
 begin
-  if (Length(Self) = 0) then
-    Exit(Default(TPointArray));
-  if (Length(Self) = 1) then
-    Exit(Self[0]);
+  Result := Default(TPointArray);
 
-  Result := Self[0].Intersection(Self[1]);
+  if (Length(Self) = 0) then Exit;
+  if (Length(Self) = 1) then Exit(System.Copy(Self[0]));
 
-  if (Length(Result) > 0) and (Length(Self) > 1) then
+  // A point must be in the smallest array to be in all of them
+  SmallestIndex := 0;
+  for I := 1 to High(Self) do
+    if (Length(Self[I]) < Length(Self[SmallestIndex])) then
+      SmallestIndex := I;
+  if (Length(Self[SmallestIndex]) = 0) then
+    Exit;
+
+  B := Self[SmallestIndex].Bounds();
+  if CanScanlineSet(B, Length(Self[SmallestIndex])) then
   begin
-    for I := 2 to High(Self) do
-      Result := Result + Result.Intersection(Self[i]);
-    Result := Result.Unique();
+    ScanSet.Init(B);
+    for J := 0 to High(Self[SmallestIndex]) do
+      ScanSet.Add(Self[SmallestIndex][J]);
+    for I := 0 to High(Self) do
+      ScanSet.MarkAll(Self[I], I);
+
+    Result := ScanSet.ToArray(Length(Self));
+  end else
+  begin
+    HashSet.Init(Length(Self[SmallestIndex]));
+    for J := 0 to High(Self[SmallestIndex]) do
+      HashSet.Add(Self[SmallestIndex][J]);
+    for I := 0 to High(Self) do
+      HashSet.MarkAll(Self[I], I);
+
+    Result := HashSet.ToArray(Length(Self));
   end;
 end;
 

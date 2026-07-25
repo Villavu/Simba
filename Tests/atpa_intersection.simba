@@ -1,0 +1,83 @@
+{$assertions on}
+
+// Intersection = points present in *every* array
+
+// Standardize result (scanline vs hash)
+function SameSet(Got, Want: TPointArray): Boolean;
+begin
+  Result := Got.SortByColumn().Equals(Want.SortByColumn());
+end;
+
+procedure ScanLine;
+var
+  A, B, C: TPointArray;
+  arr: T2DPointArray;
+  i,j: Int32;
+begin
+  Assert(SameSet(T2DPointArray([]).Intersection(), []), 'empty');
+  Assert(T2DPointArray([[Point(1, 1)]]).Intersection().Equals([Point(1, 1)]), 'one array');
+
+  A := [Point(1, 1), Point(2, 2), Point(3, 3)];
+  B := [Point(2, 2), Point(3, 3), Point(4, 4)];
+  C := [Point(3, 3)];
+
+  Assert(SameSet(T2DPointArray([A, B]).Intersection(), [Point(2, 2), Point(3, 3)]), 'narrow to two');
+  Assert(SameSet(T2DPointArray([A, B, C]).Intersection(), [Point(3, 3)]), 'narrow to one');
+  Assert(SameSet(T2DPointArray([A, [Point(0,0),Point(1,2),Point(4,4),Point(9, 9)]]).Intersection(), []), 'disjoint');
+
+
+  Assert(SameSet(T2DPointArray([[Point(1, 1), Point(1, 1), Point(2, 2)],
+                                [Point(1, 1), Point(2, 2), Point(2, 2)],
+                                [Point(2, 2), Point(1000, 1000), Point(100, 100), Point(1, 1)],
+                                [Point(1, 1), Point(2,2), Point(1,2)],
+                                [Point(100,100), Point(2,2), Point(1,1)]]).Intersection(),
+                 [Point(1, 1), Point(2, 2)]), 'duplicates once');
+
+  // Large
+  for i:=0 to 100 do
+    arr += TPointArray.CreateFromBox([50-i,50-i,99+i,99+i],True);
+  Assert(SameSet(arr.Intersection, TPointArray.CreateFromBox([50,50,99,99],True)), 'large');
+end;
+
+// Same as ScanLine scaled by D so bounds always exceed MAX_SPACE (or are too sparse)
+procedure Hashing;
+const
+  D = 1000000;
+var
+  A, B, C, arr, expected: TPointArray;
+  i: Int32;
+begin
+  Assert(SameSet(T2DPointArray([]).Intersection(), []), 'empty');
+  Assert(T2DPointArray([[Point(D, D)]]).Intersection().Equals([Point(D, D)]), 'one array');
+
+  A := [Point(D, D), Point(2*D, 2*D), Point(3*D, 3*D)];
+  B := [Point(2*D, 2*D), Point(3*D, 3*D), Point(4*D, 4*D)];
+  C := [Point(3*D, 3*D)];
+
+  Assert(SameSet(T2DPointArray([A, B]).Intersection(), [Point(2*D, 2*D), Point(3*D, 3*D)]), 'narrow to two');
+  Assert(SameSet(T2DPointArray([A, B, C]).Intersection(), [Point(3*D, 3*D)]), 'narrow to one');
+  Assert(SameSet(T2DPointArray([A, [Point(0,0),Point(D,2*D),Point(4*D,4*D),Point(9*D, 9*D)]]).Intersection(), []), 'disjoint');
+
+  Assert(SameSet(T2DPointArray([[Point(D, D), Point(D, D), Point(2*D, 2*D)],
+                                [Point(D, D), Point(2*D, 2*D), Point(2*D, 2*D)],
+                                [Point(2*D, 2*D), Point(1000*D, 1000*D), Point(100*D, 100*D), Point(D, D)],
+                                [Point(D, D), Point(2*D, 2*D), Point(D, 2*D)],
+                                [Point(100*D, 100*D), Point(2*D, 2*D), Point(D, D)]]).Intersection(),
+                 [Point(D, D), Point(2*D, 2*D)]), 'duplicates once');
+
+  SetLength(A, 5000);
+  SetLength(B, 5000);
+  for i := 0 to 4999 do
+  begin
+    A[i] := Point(i * 1000, i * 1000);
+    B[i] := Point((i + 2000) * 1000, (i + 2000) * 1000);
+  end;
+  for i := 2000 to 4999 do
+    expected += Point(i * 1000, i * 1000);
+  Assert(SameSet(T2DPointArray([A, B]).Intersection(), expected), 'large');
+end;
+
+begin
+  ScanLine();
+  Hashing();
+end.
