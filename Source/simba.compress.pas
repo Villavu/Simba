@@ -48,9 +48,9 @@ type
   TOutStream = class(TStream)
   protected
     FData: Pointer;
-    FDataSize: UInt32;
-    FPosition: Int32;
-    FSize: Int32;
+    FDataSize: PtrInt;
+    FPosition: PtrInt;
+    FSize: PtrInt;
   public
     constructor Create(Data: Pointer); reintroduce;
 
@@ -170,6 +170,9 @@ procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; v
 
 begin
   OutSize := 0;
+  if (InSize < 0) or (InSize > High(Int32)) then
+    SimbaException('CompressData: InSize %d is out of range (0 .. %d)', [InSize, High(Int32)]);
+
   case Algo of
     ESimbaCompressAlgo.ZLIB:  CompressWithZLib();
     ESimbaCompressAlgo.SYNLZ: CompressWithSynLZ();
@@ -248,6 +251,9 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
 
   procedure DecompressWithRLE;
   begin
+    if (InSize < SizeOf(Int32)) then
+      SimbaException('DecompressData: RLE data is too small (%d bytes)', [InSize]);
+
     OutSize := PInt32(InData)^;
 
     // no rle
@@ -259,12 +265,15 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
     end else
     begin
       AllocOrGrowMemory(OutData, OutSize);
-      OutSize := RleUnCompress(@InData[SizeOf(Int32)], OutData, InSize - SizeOf(Int32));
+      OutSize := RleUnCompressPartial(@InData[SizeOf(Int32)], OutData, InSize - SizeOf(Int32), OutSize);
     end;
   end;
 
 begin
   OutSize := 0;
+  if (InSize < 0) or (InSize > High(Int32)) then
+    SimbaException('DecompressData: InSize %d is out of range (0 .. %d)', [InSize, High(Int32)]);
+
   case Algo of
     ESimbaCompressAlgo.ZLIB:  DecompressWithZLib();
     ESimbaCompressAlgo.SYNLZ: DecompressWithSynLZ();
@@ -281,10 +290,15 @@ var
   OutSize: Int64;
 begin
   OutData := nil;
-  CompressData(Algo, InData, InSize, OutData, OutSize);
-  SetLength(Result, OutSize);
-  Move(OutData^, Result[0], Length(Result));
-  FreeMem(OutData);
+  try
+    CompressData(Algo, InData, InSize, OutData, OutSize);
+    SetLength(Result, OutSize);
+    if (OutSize > 0) then
+      Move(OutData^, Result[0], OutSize);
+  finally
+    if (OutData <> nil) then
+      FreeMem(OutData);
+  end;
 end;
 
 function DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64): TByteArray;
@@ -293,10 +307,15 @@ var
   OutSize: Int64;
 begin
   OutData := nil;
-  DecompressData(Algo, InData, InSize, OutData, OutSize);
-  SetLength(Result, OutSize);
-  Move(OutData^, Result[0], Length(Result));
-  FreeMem(OutData);
+  try
+    DecompressData(Algo, InData, InSize, OutData, OutSize);
+    SetLength(Result, OutSize);
+    if (OutSize > 0) then
+      Move(OutData^, Result[0], OutSize);
+  finally
+    if (OutData <> nil) then
+      FreeMem(OutData);
+  end;
 end;
 
 function CompressBytes(Algo: ESimbaCompressAlgo; Bytes: TByteArray): TByteArray;
@@ -305,10 +324,15 @@ var
   OutSize: Int64;
 begin
   OutData := nil;
-  CompressData(Algo, @Bytes[0], Length(Bytes), OutData, OutSize);
-  SetLength(Result, OutSize);
-  Move(OutData^, Result[0], OutSize);
-  FreeMem(OutData);
+  try
+    CompressData(Algo, Pointer(Bytes), Length(Bytes), OutData, OutSize);
+    SetLength(Result, OutSize);
+    if (OutSize > 0) then
+      Move(OutData^, Result[0], OutSize);
+  finally
+    if (OutData <> nil) then
+      FreeMem(OutData);
+  end;
 end;
 
 function DecompressBytes(Algo: ESimbaCompressAlgo; Bytes: TByteArray): TByteArray;
@@ -317,10 +341,15 @@ var
   OutSize: Int64;
 begin
   OutData := nil;
-  DecompressData(Algo, @Bytes[0], Length(Bytes), OutData, OutSize);
-  SetLength(Result, OutSize);
-  Move(OutData^, Result[0], OutSize);
-  FreeMem(OutData);
+  try
+    DecompressData(Algo, Pointer(Bytes), Length(Bytes), OutData, OutSize);
+    SetLength(Result, OutSize);
+    if (OutSize > 0) then
+      Move(OutData^, Result[0], OutSize);
+  finally
+    if (OutData <> nil) then
+      FreeMem(OutData);
+  end;
 end;
 
 function CompressString(Algo: ESimbaCompressAlgo; Encoding: EBaseEncoding; Str: String): String;
@@ -329,10 +358,15 @@ var
   OutSize: Int64;
 begin
   OutData := nil;
-  CompressData(Algo, @Str[1], Length(Str), OutData, OutSize);
-  SetLength(Str, OutSize);
-  Move(OutData^, Str[1], OutSize);
-  FreeMem(OutData);
+  try
+    CompressData(Algo, Pointer(Str), Length(Str), OutData, OutSize);
+    SetLength(Str, OutSize);
+    if (OutSize > 0) then
+      Move(OutData^, Str[1], OutSize);
+  finally
+    if (OutData <> nil) then
+      FreeMem(OutData);
+  end;
 
   Result := BaseEncode(Encoding, Str);
 end;
@@ -344,11 +378,15 @@ var
 begin
   OutData := nil;
   Str := BaseDecode(Encoding, Str);
-  DecompressData(Algo, @Str[1], Length(Str), OutData, OutSize);
-
-  SetLength(Result, OutSize);
-  Move(OutData^, Result[1], OutSize);
-  FreeMem(OutData);
+  try
+    DecompressData(Algo, Pointer(Str), Length(Str), OutData, OutSize);
+    SetLength(Result, OutSize);
+    if (OutSize > 0) then
+      Move(OutData^, Result[1], OutSize);
+  finally
+    if (OutData <> nil) then
+      FreeMem(OutData);
+  end;
 end;
 
 end.
