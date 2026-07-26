@@ -153,7 +153,7 @@ procedure CompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64; v
 
   procedure CompressWithRle();
   begin
-    OutSize := InSize + SizeOf(Int32);
+    OutSize := RleCompressDestLen(InSize) + SizeOf(Int32);
     AllocOrGrowMemory(OutData, OutSize);
     OutSize := RleCompress(InData, @OutData[SizeOf(Int32)], InSize, OutSize - SizeOf(Int32));
     if (OutSize = -1) then
