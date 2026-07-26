@@ -1,0 +1,25 @@
+{$assertions on}
+
+var
+  Algo: ECompressAlgo;
+  Encoding: EBaseEncoding;
+  I: Integer;
+  Str, Comp, Decomp: String;
+begin
+  Str := '';
+  for I := 1 to 1234 do
+    Str += IntToStr(I);
+
+  for Algo in ECompressAlgo do
+    for Encoding in EBaseEncoding do
+    begin
+      // empty input
+      Comp := CompressString(Algo, Encoding, '');
+      Assert(DecompressString(Algo, Encoding, Comp) = '', 'empty');
+
+      // text input
+      Comp := CompressString(Algo, Encoding, Str);
+      Decomp := DecompressString(Algo, Encoding, Comp);
+      Assert(Decomp = Str, 'round-trip mismatch');
+    end;
+end.

@@ -1,0 +1,106 @@
+{$assertions on}
+
+// LCG: worst case for the compressors
+function IncompressibleBytes(Len: Integer): TByteArray;
+var
+  I: Integer;
+  Seed: Int64;
+begin
+  SetLength(Result, Len);
+  Seed := 123456789;
+  for I := 0 to High(Result) do
+  begin
+    Seed := (Seed * 1103515245 + 12345) and $7FFFFFFF;
+    Result[I] := Byte((Seed shr 16) and $FF);
+  end;
+end;
+
+// long runs of repeated bytes
+function CompressibleBytes(Len: Integer): TByteArray;
+var
+  I: Integer;
+begin
+  SetLength(Result, Len);
+  for I := 0 to High(Result) do
+    Result[I] := Byte((I div 37) and $FF);
+end;
+
+// constant consecutive byte values
+function ConsecutiveBytes(Len: Integer): TByteArray;
+var
+  I: Integer;
+  Val: Byte;
+begin
+  SetLength(Result, Len);
+  for I := 0 to High(Result) do
+  begin
+    Result[I] := Val;
+    if (Val = 255) then
+      Val := 0
+    else
+      Val := Val + 1;
+  end;
+end;
+
+procedure RoundTrip(Algo: ECompressAlgo; InData: Pointer; InLen: Int64; Kind: String);
+var
+  Comp, Decomp: Pointer;
+  CompSize, DecompSize: Int64;
+  T: Double;
+begin
+  Comp := nil;
+  Decomp := nil;
+
+  T := PerformanceTime();
+  CompressData(Algo, InData, InLen, Comp, CompSize);
+  DecompressData(Algo, Comp, CompSize, Decomp, DecompSize);
+  T := PerformanceTime() - T;
+
+  Assert(CompSize > 0, 'compressed size must be > 0');
+  Assert(DecompSize = InLen, 'decompressed size mismatch');
+  if (InLen > 0) then
+    Assert(CompareMem(InData^, Decomp^, InLen), 'round-trip: ' + Kind + ' size=' + IntToStr(InLen));
+
+  if (Comp <> nil) then FreeMem(Comp);
+  if (Decomp <> nil) then FreeMem(Decomp);
+
+  // debug ratio and timing on 10mb
+  if (InLen = 1048576) then
+    WriteLn(Format('%-20s %-5s : %.2f -> %.2fmb (%.1fx) in %.2f ms', [
+      Kind, ToStr(Algo).After('.'),
+      InLen / 1048576.0,
+      CompSize / 1048576.0,
+      InLen / CompSize,
+      T
+    ]));
+end;
+
+var
+  Algo: ECompressAlgo;
+  Sizes: TIntegerArray;
+  Size: Integer;
+  Bytes: TByteArray;
+begin
+  Sizes := [1, 2, 3, 4, 5, 10, 100, 4095, 4096, 4097, 8192, 9999, 10000, 100000, 1000000, 1048576];
+
+  for Algo in ECompressAlgo do
+    for Size in Sizes do
+    begin
+      Bytes := CompressibleBytes(Size);
+      RoundTrip(Algo, @Bytes[0], Length(Bytes), 'CompressibleBytes');
+    end;
+
+  for Algo in ECompressAlgo do
+    for Size in Sizes do
+    begin
+      Bytes := ConsecutiveBytes(Size);
+      RoundTrip(Algo, @Bytes[0], Length(Bytes), 'ConsecutiveBytes');
+    end;
+
+  for Algo in ECompressAlgo do
+    for Size in Sizes do
+    begin
+      Bytes := IncompressibleBytes(Size);
+      RoundTrip(Algo, @Bytes[0], Length(Bytes), 'IncompressibleBytes');
+    end;
+end.
