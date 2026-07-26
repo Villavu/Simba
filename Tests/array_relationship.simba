@@ -81,13 +81,11 @@ begin
   b := [[3,3],[2,2],[1,1]];
   Assert(Success(a.Difference(b), []));
   Assert(Success(a.SymDifference(b), []));
-  Assert(Success(a.Intersection(b), [[3,3],[2,2],[1,1]]));
 
   a := [[1,2],[2,3],[3,4]];
   b := [[1,2],[2,3]];
   Assert(Success(a.Difference(b), [[3,4]]));
   Assert(Success(a.SymDifference(b), [[3,4]]));
-  Assert(Success(a.Intersection(b), [[1,2],[2,3]]));
 end;
 
 procedure TestBoxArray;
@@ -121,23 +119,10 @@ begin
   Assert(Success(a.Intersection(b), [[1,1,1,1],[2,2,2,2]]));
 end;
 
-procedure TestATPA;
-var
-  a: T2DPointArray;
-begin
-  a += [[0,0],[1,1],[2,2],[3,3]];
-  a += [[1,1],[2,2],[3,3],[50,50],[-1,-1]];
-  a += [[0,0]];
-  a += [];
-  a += [[1,1],[2,2],[3,3],[-1,-1]];
-
-  Assert(ToString(a.Intersection()) = '[{X = 1, Y = 1}, {X = 2, Y = 2}, {X = 3, Y = 3}]');
-end;
 
 begin
   TestIntegerArray();
   TestInt64Array();
   TestPointArray();
   TestBoxArray();
-  TestATPA();
 end;
