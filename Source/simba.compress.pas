@@ -81,18 +81,16 @@ end;
 
 function TOutStream.Write(const Buffer; Count: Longint): Longint;
 begin
-  if (FPosition + Count > FSize) then
-    FSize := FPosition + Count;
-
   if (FPosition + Count > FDataSize) then
   begin
-    FDataSize := Max(4096, (FDataSize + Count) * 2);
-    ReAllocMem(FData, (FDataSize + Count) * 2);
+    FDataSize := Max(4096, (FPosition + Count) * 2);
+    ReAllocMem(FData, FDataSize);
   end;
 
   Move(Buffer, (FData + FPosition)^, Count);
   Inc(FPosition, Count);
-  Inc(FSize, Count);
+  if (FPosition > FSize) then
+    FSize := FPosition;
 
   Result := Count;
 end;
