@@ -1413,29 +1413,40 @@ end;
 
 function TPointArrayHelper.ExcludePoints(Points: TPointArray): TPointArray;
 var
+  I, Count: Integer;
   Box: TBox;
-  test: TBooleanArray;
-  w,h: Integer;
-  i,c: Integer;
+  ScanSet: TPointSet;
+  HashSet: TPointHashSet;
 begin
-  Box := Points.Bounds;
-  w := box.Width;
-  h := box.Height;
-  SetLength(test, box.Area);
-  for i:=0 to High(Points) do
-    test[(Points[i].y - box.y1) * w + (Points[i].x - box.x1)] := True;
-
   SetLength(Result, Length(Self));
-  c := 0;
-  for i:=0 to High(Self) do
+  Count := 0;
+
+  Box := Points.Bounds();
+  if ShouldHashSet(Box, Length(Points)) then
   begin
-    if InRange(Self[i].x - box.x1, 0, w-1) and InRange(Self[i].y - box.y1, 0, h-1) and
-      (test[(Self[i].y - box.y1) * w + (Self[i].x - box.x1)]) then
-      Continue;
-    Result[c] := Self[i];
-    Inc(c);
+    HashSet.Init(Length(Points));
+    for I := 0 to High(Points) do
+      HashSet.Add(Points[I]);
+    for I := 0 to High(Self) do
+      if not HashSet.Contains(Self[I]) then
+      begin
+        Result[Count] := Self[I];
+        Inc(Count);
+      end;
+  end else
+  begin
+    ScanSet.Init(Box);
+    for I := 0 to High(Points) do
+      ScanSet.Add(Points[I]);
+    for I := 0 to High(Self) do
+      if not ScanSet.Contains(Self[I]) then
+      begin
+        Result[Count] := Self[I];
+        Inc(Count);
+      end;
   end;
-  SetLength(Result, c);
+
+  SetLength(Result, Count);
 end;
 
 function TPointArrayHelper.ExtractDist(Center: TPoint; MinDist, MaxDist: Single): TPointArray;

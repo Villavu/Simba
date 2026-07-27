@@ -1,0 +1,35 @@
+{$assertions on}
+
+procedure ScanLine;
+var
+  A: TPointArray;
+begin
+  A := [Point(1, 1), Point(2, 2), Point(3, 3), Point(4, 4)];
+
+  Assert(TPointArray([]).ExcludePoints([]).Equals([]), 'both empty');
+  Assert(TPointArray([]).ExcludePoints(A).Equals([]), 'self empty');
+  Assert(A.ExcludePoints([]).Equals(A), 'exclude nothing');
+  Assert(A.ExcludePoints([Point(9, 9)]).Equals(A), 'no overlap');
+  Assert(A.ExcludePoints([Point(2, 2), Point(4, 4)]).Equals([Point(1, 1), Point(3, 3)]), 'some removed');
+  Assert(A.ExcludePoints(A).Equals([]), 'all removed');
+  Assert(TPointArray([Point(1, 1), Point(1, 1), Point(2, 2), Point(1, 1)]).ExcludePoints([Point(2, 2)]).Equals([Point(1, 1), Point(1, 1), Point(1, 1)]), 'self dups kept');
+  Assert(TPointArray([Point(1, 1), Point(2, 2), Point(1, 1)]).ExcludePoints([Point(1, 1)]).Equals([Point(2, 2)]), 'all occurrences removed');
+  Assert(TPointArray([Point(-50, -50), Point(2, 2)]).ExcludePoints([Point(2, 2), Point(3, 3)]).Equals([Point(-50, -50)]), 'outside bounds kept');
+end;
+
+procedure Hashing;
+const
+  D = 1000000;
+var
+  A: TPointArray;
+begin
+  A := [Point(1*D, 1*D), Point(2*D, 2*D), Point(3*D, 3*D), Point(4*D, 4*D)];
+
+  Assert(A.ExcludePoints([Point(2*D, 2*D), Point(4*D, 4*D)]).Equals([Point(1*D, 1*D), Point(3*D, 3*D)]), 'some removed');
+  Assert(A.ExcludePoints(A).Equals([]), 'all removed');
+end;
+
+begin
+  ScanLine();
+  Hashing();
+end.
