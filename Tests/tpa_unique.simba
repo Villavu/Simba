@@ -1,0 +1,23 @@
+{$assertions on}
+
+procedure ScanLine;
+begin
+  Assert(TPointArray([]).Unique().Equals([]), 'empty');
+  Assert(TPointArray([Point(4, 4)]).Unique().Equals([Point(4, 4)]), 'single');
+  Assert(TPointArray([Point(3, 3), Point(1, 1), Point(2, 2)]).Unique().Equals([Point(3, 3), Point(1, 1), Point(2, 2)]), 'order kept');
+  Assert(TPointArray([Point(1, 1), Point(1, 1), Point(2, 2), Point(1, 1), Point(3, 3), Point(2, 2)]).Unique().Equals([Point(1, 1), Point(2, 2), Point(3, 3)]), 'dedup');
+  Assert(TPointArray([Point(5, 5), Point(5, 5), Point(5, 5)]).Unique().Equals([Point(5, 5)]), 'all same');
+end;
+
+procedure Hashing;
+const
+  D = 1000000;
+begin
+  Assert(TPointArray([Point(3*D, 3*D), Point(1*D, 1*D), Point(2*D, 2*D)]).Unique().Equals([Point(3*D, 3*D), Point(1*D, 1*D), Point(2*D, 2*D)]), 'order kept');
+  Assert(TPointArray([Point(1*D, 1*D), Point(1*D, 1*D), Point(2*D, 2*D), Point(1*D, 1*D), Point(3*D, 3*D), Point(2*D, 2*D)]).Unique().Equals([Point(1*D, 1*D), Point(2*D, 2*D), Point(3*D, 3*D)]), 'dedup');
+end;
+
+begin
+  ScanLine();
+  Hashing();
+end.

@@ -1271,47 +1271,39 @@ end;
 
 function TPointArrayHelper.Unique: TPointArray;
 var
-  Width, Index: Integer;
-  Box: TBox;
-  BoxArea: Int64;
-  Seen: TBooleanArray;
-  SrcPtr, DstPtr: PPoint;
-  SrcUpper: PtrUInt;
+  I, Count: Integer;
+  B: TBox;
+  ScanSet: TPointSet;
+  HashSet: TPointHashSet;
 begin
   if (High(Self) < 0) then Exit([]);
   if (High(Self) = 0) then Exit([Self[0]]);
 
-  { Fallback to safe dictionary:
-     * Fewer than 1 in area of 5000
-     * Larger than 512MB in memory (approx 25K*25K area)
-  }
-  Box := Self.Bounds;
-  BoxArea := Box.Area;
-  Width := Box.Width;
-  if (BoxArea * SizeOf(TPoint) > $20000000) or
-     (Length(Self) / BoxArea < 0.0002) then
-    Exit(specialize TArrayUnique<TPoint>.Unique(Self));
-
   SetLength(Result, Length(Self));
-  SetLength(Seen, BoxArea);
+  Count := 0;
+  B := Self.Bounds();
 
-  SrcUpper := PtrUInt(@Self[High(Self)]);
-  SrcPtr := @Self[0];
-  DstPtr := @Result[0];
-
-  while (PtrUInt(SrcPtr) <= SrcUpper) do
+  if ShouldHashSet(B, Length(Self)) then
   begin
-    Index := (SrcPtr^.Y - Box.Y1) * Width + (SrcPtr^.X - Box.X1);
-    if not Seen[Index] then
-    begin
-      Seen[Index] := True;
-
-      DstPtr^ := SrcPtr^;
-      Inc(DstPtr);
-    end;
-    Inc(SrcPtr);
+    HashSet.Init(Length(Self));
+    for I := 0 to High(Self) do
+      if HashSet.Add(Self[I]) then
+      begin
+        Result[Count] := Self[I];
+        Inc(Count);
+      end;
+  end else
+  begin
+    ScanSet.Init(B);
+    for I := 0 to High(Self) do
+      if ScanSet.Add(Self[I]) then
+      begin
+        Result[Count] := Self[I];
+        Inc(Count);
+      end;
   end;
-  SetLength(Result, (PtrUInt(DstPtr) - PtrUInt(@Result[0])) div SizeOf(TPoint));
+
+  SetLength(Result, Count);
 end;
 
 function TPointArrayHelper.ReduceByDistance(Dist: Integer): TPointArray;
