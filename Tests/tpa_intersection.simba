@@ -1,0 +1,61 @@
+{$assertions on}
+
+// Intersection = points in both arrays
+
+// Standardize result (scanline vs hash output differs)
+function SameSet(Got, Want: TPointArray): Boolean;
+begin
+  Result := Got.SortByColumn().Equals(Want.SortByColumn());
+end;
+
+procedure ScanLine;
+var
+  A, B: TPointArray;
+begin
+  A := [Point(1, 1), Point(2, 2), Point(3, 3)];
+  B := [Point(2, 2), Point(3, 3), Point(4, 4)];
+
+  Assert(SameSet(TPointArray([]).Intersection([]), []), 'both empty');
+  Assert(SameSet(A.Intersection([]), []), 'one empty');
+  Assert(SameSet(A.Intersection(B), [Point(2, 2), Point(3, 3)]), 'common');
+  Assert(SameSet(A.Intersection([Point(7, 7), Point(8, 8)]), []), 'disjoint');
+
+  Assert(SameSet(TPointArray([Point(1, 1), Point(1, 1), Point(2, 2), Point(1, 2)]).Intersection([Point(0,0), Point(1, 1), Point(2, 2), Point(2, 2), Point(2, 1)]),
+                 [Point(1, 1), Point(2, 2)]), 'duplicates once');
+
+  Assert(SameSet(TPointArray.CreateFromBox([0, 0, 199, 199], True).Intersection(TPointArray.CreateFromBox([100, 100, 299, 299], True)),
+                 TPointArray.CreateFromBox([100, 100, 199, 199], True)), 'large');
+end;
+
+// coordinates spread by D so the smallest array forces the hash backend
+procedure Hashing;
+const
+  D = 1000000;
+var
+  A, B, x, y, expected: TPointArray;
+  i: Int32;
+begin
+  A := [Point(D, D), Point(2*D, 2*D), Point(3*D, 3*D)];
+  B := [Point(2*D, 2*D), Point(3*D, 3*D), Point(4*D, 4*D)];
+
+  Assert(SameSet(A.Intersection(B), [Point(2*D, 2*D), Point(3*D, 3*D)]), 'common');
+  Assert(SameSet(A.Intersection([Point(7*D, 7*D), Point(8*D, 8*D)]), []), 'disjoint');
+  Assert(SameSet(TPointArray([Point(D, D), Point(D, D), Point(2*D, 2*D)]).Intersection([Point(D, D), Point(2*D, 2*D), Point(2*D, 2*D)]),
+                 [Point(D, D), Point(2*D, 2*D)]), 'duplicates once');
+
+  SetLength(x, 5000);
+  SetLength(y, 5000);
+  for i := 0 to 4999 do
+  begin
+    x[i] := Point(i * 1000, i * 1000);
+    y[i] := Point((i + 2000) * 1000, (i + 2000) * 1000);
+  end;
+  for i := 2000 to 4999 do
+    expected += Point(i * 1000, i * 1000);
+  Assert(SameSet(x.Intersection(y), expected), 'large');
+end;
+
+begin
+  ScanLine();
+  Hashing();
+end.

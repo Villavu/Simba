@@ -43,6 +43,9 @@ type
     // Adds P with a count of zero. False if it was already there.
     function Add(const P: TPoint): Boolean;
 
+    // True if P has been added.
+    function Contains(const P: TPoint): Boolean; inline;
+
     // Mark(P, Group) gives P stamp group, but only if it already holds every earlier one.
     // Miss a group or repeat one and P can never catch up.
     function Mark(const P: TPoint; const Group: Integer = 0): Boolean; inline;
@@ -68,6 +71,8 @@ type
     procedure Init(const ABounds: TBox);
     // Adds P with a count of zero. False if it was already there.
     function Add(const P: TPoint): Boolean;
+    // True if P has been added.
+    function Contains(const P: TPoint): Boolean; inline;
     // Mark(P, Group) gives P stamp group, but only if it already holds every earlier one.
     // Miss a group or repeat one and P can never catch up.
     function Mark(const P: TPoint; const Group: Integer = 0): Boolean; inline;
@@ -176,6 +181,11 @@ begin
   end;
 end;
 
+function TPointHashSet.Contains(const P: TPoint): Boolean;
+begin
+  Result := (FSlots <> nil) and (FSlots[SlotOf(Int64(P))].Data <> 0);
+end;
+
 function TPointHashSet.Mark(const P: TPoint; const Group: Integer): Boolean;
 var
   Slot: Integer;
@@ -265,6 +275,14 @@ begin
     FSpace[Index] := 1; // a count of zero
     Inc(FCount);
   end;
+end;
+
+function TPointScanLineSet.Contains(const P: TPoint): Boolean;
+var
+  Index: Integer;
+begin
+  Index := IndexOf(P);
+  Result := (Index >= 0) and (FSpace[Index] <> 0);
 end;
 
 function TPointScanLineSet.Mark(const P: TPoint; const Group: Integer): Boolean;

@@ -2245,49 +2245,38 @@ end;
 
 function TPointArrayHelper.Intersection(Other: TPointArray): TPointArray;
 var
-  box: TBox;
-  test: TBooleanArray;
-  tmp,x,y: TPointArray;
-  w,h,i,c: Integer;
+  I: Integer;
+  X, Y, Tmp: TPointArray;
+  B: TBox;
+  HashSet: TPointHashSet;
+  ScanSet: TPointScanLineSet;
 begin
-  // smallest array (x) define bounds and scanline
-  x := Self;
-  y := Other;
-  if Length(x) > Length(y) then
+  // fill point set from smaller array, then mark larger
+  X := Self;
+  Y := Other;
+  if (Length(X) > Length(Y)) then
   begin
-    tmp := x;
-    x   := y;
-    y   := tmp;
-  end;
-  box := x.Bounds();
-
-  { Fallback to safe dictionary:
-     * Fewer than 1 in area of 5000
-     * Larger than 512MB in memory (approx 25K*25K area) 
-  }
-  if (box.Area*SizeOf(TPoint) > $20000000) or
-     (Length(x)/box.Area < 0.0002) then
-  begin
-    Exit(specialize TArrayRelationship<TPoint>.Intersection(x, y));
+    Tmp := X;
+    X := Y;
+    Y := Tmp;
   end;
 
-  SetLength(test, box.Area);
-
-  w := box.Width;
-  h := box.Height;
-  for i:=0 to High(x) do
-    test[(x[i].y - box.y1) * w + (x[i].x - box.x1)] := True;
-  
-  SetLength(Result, Min(Length(x),Length(y)));
-  c := 0;
-  for i:=0 to High(y) do
-    if InRange(y[i].x - box.x1, 0, w-1) and InRange(y[i].y - box.y1, 0, h-1) and
-       (test[(y[i].y - box.y1) * w + (y[i].x - box.x1)]) then
-    begin
-      Result[c] := y[i];
-      Inc(c);
-    end;
-  SetLength(Result, c); 
+  B := X.Bounds();
+  if CanScanlineSet(B, Length(X)) then
+  begin
+    ScanSet.Init(B);
+    for I := 0 to High(X) do
+      ScanSet.Add(X[I]);
+    ScanSet.MarkAll(Y, 0);
+    Result := ScanSet.ToArray(1);
+  end else
+  begin
+    HashSet.Init(Length(X));
+    for I := 0 to High(X) do
+      HashSet.Add(X[I]);
+    HashSet.MarkAll(Y, 0);
+    Result := HashSet.ToArray(1);
+  end;
 end;
 
 function TPointArrayHelper.SymmetricDifference(Other: TPointArray): TPointArray;
