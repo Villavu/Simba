@@ -20,7 +20,8 @@ type
     ZLIB,
     SYNLZ,
     GZ,
-    RLE
+    RLE,
+    BZIP2
   );
 {$POP}
 
@@ -42,7 +43,8 @@ uses
   ZStream,
   castle_gz,
   mormot2_synlz,
-  mormot2_rle;
+  mormot2_rle,
+  bzip2stream;
 
 type
   TOutStream = class(TStream)
@@ -178,7 +180,9 @@ begin
     ESimbaCompressAlgo.SYNLZ: CompressWithSynLZ();
     ESimbaCompressAlgo.GZ:    CompressWithGZ();
     ESimbaCompressAlgo.RLE:   CompressWithRle();
+    ESimbaCompressAlgo.BZIP2: SimbaException('BZip2 compression is not supported.');
   end;
+
   if Truncate then
     ReAllocMem(OutData, OutSize);
 end;
@@ -269,6 +273,34 @@ procedure DecompressData(Algo: ESimbaCompressAlgo; InData: PByte; InSize: Int64;
     end;
   end;
 
+  procedure DecompressWithBZip2;
+  var
+    InStream: TMemoryStream;
+    OutStream: TOutStream;
+    BZStream: TDecompressBzip2Stream;
+    Count: Integer;
+    Chunk: array[0..4095] of Byte;
+  begin
+    InStream := TMemoryStream.Create();
+    InStream.Write(InData^, InSize);
+    InStream.Position := 0;
+    OutStream := TOutStream.Create(OutData);
+    BZStream := TDecompressBzip2Stream.Create(InStream);
+    try
+      repeat
+        Count := BZStream.Read(Chunk[0], Length(Chunk));
+        if (Count > 0) then
+          OutStream.Write(Chunk[0], Count);
+      until (Count = 0);
+      OutSize := OutStream.Position;
+      OutData := OutStream.Data;
+    finally
+      InStream.Free();
+      OutStream.Free();
+      BZStream.Free();
+    end;
+  end;
+
 begin
   OutSize := 0;
   if (InSize < 0) or (InSize > High(Int32)) then
@@ -279,6 +311,7 @@ begin
     ESimbaCompressAlgo.SYNLZ: DecompressWithSynLZ();
     ESimbaCompressAlgo.GZ:    DecompressWithGZ();
     ESimbaCompressAlgo.RLE:   DecompressWithRLE();
+    ESimbaCompressAlgo.BZIP2: DecompressWithBZip2();
   end;
   if Truncate then
     ReAllocMem(OutData, OutSize);

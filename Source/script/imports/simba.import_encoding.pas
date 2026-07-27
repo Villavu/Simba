@@ -401,7 +401,7 @@ begin
     addGlobalFunc('function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32);
     addGlobalFunc('function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32String);
 
-    addGlobalType('enum(ZLIB, SYNLZ, GZ, RLE)', 'ECompressAlgo');
+    addGlobalType('enum(ZLIB, SYNLZ, GZ, RLE, BZIP2)', 'ECompressAlgo');
 
     addGlobalFunc('procedure CompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; var OutData: Pointer; out OutSize: Int64; Truncate: Boolean = True);', @_LapeCompressData);
     addGlobalFunc('function CompressBytes(Algo: ECompressAlgo; Bytes: TByteArray): TByteArray', @_LapeCompressBytes);
