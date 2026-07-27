@@ -2248,10 +2248,9 @@ var
   I: Integer;
   X, Y, Tmp: TPointArray;
   B: TBox;
-  HashSet: TPointHashSet;
-  ScanSet: TPointScanLineSet;
+  HashSet: TPointTallyHashSet;
+  ScanSet: TPointTallySet;
 begin
-  // fill point set from smaller array, then mark larger
   X := Self;
   Y := Other;
   if (Length(X) > Length(Y)) then
@@ -2262,20 +2261,22 @@ begin
   end;
 
   B := X.Bounds();
-  if CanScanlineSet(B, Length(X)) then
-  begin
-    ScanSet.Init(B);
-    for I := 0 to High(X) do
-      ScanSet.Add(X[I]);
-    ScanSet.MarkAll(Y, 0);
-    Result := ScanSet.ToArray(1);
-  end else
+  if ShouldHashSet(B, Length(X)) then
   begin
     HashSet.Init(Length(X));
     for I := 0 to High(X) do
       HashSet.Add(X[I]);
-    HashSet.MarkAll(Y, 0);
+    for I := 0 to High(Y) do
+      HashSet.IncrementIf(Y[I], 0);
     Result := HashSet.ToArray(1);
+  end else
+  begin
+    ScanSet.Init(B);
+    for I := 0 to High(X) do
+      ScanSet.Add(X[I]);
+    for I := 0 to High(Y) do
+      ScanSet.IncrementIf(Y[I], 0);
+    Result := ScanSet.ToArray(1);
   end;
 end;
 
@@ -3186,8 +3187,8 @@ function T2DPointArrayHelper.Intersection: TPointArray;
 var
   I, J, SmallestIndex: Integer;
   B: TBox;
-  HashSet: TPointHashSet;
-  ScanSet: TPointScanLineSet;
+  HashSet: TPointTallyHashSet;
+  ScanSet: TPointTallySet;
 begin
   Result := Default(TPointArray);
 
@@ -3203,24 +3204,26 @@ begin
     Exit;
 
   B := Self[SmallestIndex].Bounds();
-  if CanScanlineSet(B, Length(Self[SmallestIndex])) then
-  begin
-    ScanSet.Init(B);
-    for J := 0 to High(Self[SmallestIndex]) do
-      ScanSet.Add(Self[SmallestIndex][J]);
-    for I := 0 to High(Self) do
-      ScanSet.MarkAll(Self[I], I);
-
-    Result := ScanSet.ToArray(Length(Self));
-  end else
+  if ShouldHashSet(B, Length(Self[SmallestIndex])) then
   begin
     HashSet.Init(Length(Self[SmallestIndex]));
     for J := 0 to High(Self[SmallestIndex]) do
       HashSet.Add(Self[SmallestIndex][J]);
     for I := 0 to High(Self) do
-      HashSet.MarkAll(Self[I], I);
+      for J := 0 to High(Self[I]) do
+        HashSet.IncrementIf(Self[I][J], I);
 
     Result := HashSet.ToArray(Length(Self));
+  end else
+  begin
+    ScanSet.Init(B);
+    for J := 0 to High(Self[SmallestIndex]) do
+      ScanSet.Add(Self[SmallestIndex][J]);
+    for I := 0 to High(Self) do
+      for J := 0 to High(Self[I]) do
+        ScanSet.IncrementIf(Self[I][J], I);
+
+    Result := ScanSet.ToArray(Length(Self));
   end;
 end;
 
