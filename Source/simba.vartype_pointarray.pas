@@ -2284,64 +2284,51 @@ begin
 end;
 
 function TPointArrayHelper.SymmetricDifference(Other: TPointArray): TPointArray;
+var
+  Buffer: TSimbaPointBuffer;
 begin
-  Result := specialize TArrayRelationship<TPoint>.SymmetricDifference(Self, Other);
+  Buffer.Init();
+  Buffer.Add(Self.Difference(Other));
+  Buffer.Add(Other.Difference(Self));
+  Result := Buffer.ToArray(False);
 end;
 
 function TPointArrayHelper.Difference(Other: TPointArray): TPointArray;
 var
-  box: TBox;
-  test: TBooleanArray;
-  x,y: TPointArray;
-  w,h,i,c: Integer;
+  I, Count: Integer;
+  Box: TBox;
+  ScanSet: TPointSet;
+  HashSet: TPointHashSet;
 begin
-  x := Self;
-  y := Other;
+  SetLength(Result, Length(Self));
+  Count := 0;
 
-  box := y.Bounds(); // bounds of the array we're subtracting
-
-  { Fallback to safe dictionary:
-     * Fewer than 1 in area of 5000
-     * Larger than 512MB in memory (approx 25K*25K area)
-  }
-  if (box.Area*SizeOf(TPoint) > $20000000) or
-     (Length(y)/box.Area < 0.0002) then
+  Box := Self.Bounds();
+  if ShouldHashSet(Box, Length(Self) + Length(Other)) then
   begin
-    Exit(specialize TArrayRelationship<TPoint>.Difference(x, y));
+    HashSet.Init(Length(Self) + Length(Other));
+    for I := 0 to High(Other) do
+      HashSet.Add(Other[I]);
+    for I := 0 to High(Self) do
+      if HashSet.Add(Self[I]) then
+      begin
+        Result[Count] := Self[I];
+        Inc(Count);
+      end;
+  end else
+  begin
+    ScanSet.Init(Box);
+    for I := 0 to High(Other) do
+      ScanSet.Add(Other[I]);
+    for I := 0 to High(Self) do
+      if ScanSet.Add(Self[I]) then
+      begin
+        Result[Count] := Self[I];
+        Inc(Count);
+      end;
   end;
 
-  SetLength(test, box.Area);
-  w := box.Width;
-  h := box.Height;
-
-  // Mark points of `Other` (y) within the bounds as True in `test`
-  for i := 0 to High(y) do
-  begin
-    if InRange(y[i].x - box.x1, 0, w - 1) and InRange(y[i].y - box.y1, 0, h - 1) then
-      test[(y[i].y - box.y1) * w + (y[i].x - box.x1)] := True;
-  end;
-
-  SetLength(Result, Length(x));
-  c := 0;
-
-  // Iterate through 'Self' (x)
-  for i := 0 to High(x) do
-  begin
-    // Check if the point is within the bounds of 'Other
-    // if it's outside the bounds we can add this difference
-    if not (InRange(x[i].x - box.x1, 0, w - 1) and InRange(x[i].y - box.y1, 0, h - 1)) then
-    begin
-      Result[c] := x[i];
-      Inc(c);
-    end
-    else if not test[(x[i].y - box.y1) * w + (x[i].x - box.x1)] then
-    begin
-      // If it's INSIDE the bounds but NOT marked in 'test', it's also in the difference
-      Result[c] := x[i];
-      Inc(c);
-    end;
-  end;
-  SetLength(Result, c);
+  SetLength(Result, Count);
 end;
 
 function TPointArrayHelper.DistanceTransform: TSingleMatrix;

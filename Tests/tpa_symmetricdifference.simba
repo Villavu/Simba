@@ -1,0 +1,45 @@
+{$assertions on}
+
+// SymDifference: the distinct points in exactly one of the two arrays
+
+function SameSet(Got, Want: TPointArray): Boolean;
+begin
+  Result := Got.SortByColumn().Equals(Want.SortByColumn());
+end;
+
+// scanline backend
+procedure ScanLine;
+var
+  A, B: TPointArray;
+begin
+  A := [Point(1, 1), Point(2, 2), Point(3, 3)];
+  B := [Point(2, 2), Point(3, 3), Point(4, 4)];
+
+  Assert(SameSet(TPointArray([]).SymDifference([]), []), 'both empty');
+  Assert(SameSet(A.SymDifference([]), A), 'other empty');
+  Assert(SameSet(TPointArray([]).SymDifference(A), A), 'self empty');
+  Assert(SameSet(A.SymDifference(B), [Point(1, 1), Point(4, 4)]), 'symmetric');
+  Assert(SameSet(A.SymDifference(A), []), 'same');
+  Assert(SameSet(TPointArray([Point(1, 1), Point(1, 1)]).SymDifference([Point(2, 2)]), [Point(1, 1), Point(2, 2)]), 'dedups');
+  Assert(SameSet(TPointArray([Point(1, 1), Point(2, 2), Point(2, 2)]).SymDifference([Point(2, 2)]), [Point(1, 1)]), 'common dropped');
+end;
+
+// hash backend
+procedure Hashing;
+const
+  D = 1000000;
+var
+  A, B: TPointArray;
+begin
+  A := [Point(1*D, 1*D), Point(2*D, 2*D), Point(3*D, 3*D)];
+  B := [Point(2*D, 2*D), Point(3*D, 3*D), Point(4*D, 4*D)];
+
+  Assert(SameSet(A.SymDifference(B), [Point(1*D, 1*D), Point(4*D, 4*D)]), 'symmetric');
+  Assert(SameSet(A.SymDifference(A), []), 'same');
+  Assert(SameSet(A.SymDifference([]), A), 'other empty');
+end;
+
+begin
+  ScanLine();
+  Hashing();
+end.

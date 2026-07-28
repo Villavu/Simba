@@ -1,0 +1,65 @@
+{$assertions on}
+
+{ TPointArray.Difference(Other) = the distinct points of Self that are not in
+  Other. It is a set difference, so Self's own duplicates collapse to one.
+
+  The backend is chosen from Self: small coordinates keep its bounds dense for a
+  scanline presence set; coordinates spread by D force the hash set. }
+
+// Compared as a set - order is not part of the contract.
+function SameSet(Got, Want: TPointArray): Boolean;
+begin
+  Result := Got.SortByColumn().Equals(Want.SortByColumn());
+end;
+
+// dense bounds -> scanline backend
+procedure ScanLine;
+var
+  A, B: TPointArray;
+begin
+  A := [Point(1, 1), Point(2, 2), Point(3, 3), Point(4, 4)];
+  B := [Point(2, 2), Point(4, 4), Point(9, 9)];
+
+  Assert(SameSet(TPointArray([]).Difference([]), []), 'both empty');
+  Assert(SameSet(A.Difference([]), A), 'minus nothing');
+  Assert(SameSet(TPointArray([]).Difference(A), []), 'empty self');
+  Assert(SameSet(A.Difference(B), [Point(1, 1), Point(3, 3)]), 'some removed');
+  Assert(SameSet(A.Difference(A), []), 'minus self');
+
+  // set semantics: Self's duplicates collapse to one
+  Assert(SameSet(TPointArray([Point(1, 1), Point(1, 1), Point(2, 2)]).Difference([Point(2, 2)]), [Point(1, 1)]), 'dedups self');
+  // a Self point outside Other's bounds survives
+  Assert(SameSet(TPointArray([Point(-9, -9), Point(2, 2)]).Difference([Point(2, 2)]), [Point(-9, -9)]), 'kept when outside other');
+end;
+
+// huge bounds -> hash fallback backend
+procedure Hashing;
+const
+  D = 1000000;
+var
+  A, B, Big, Sub, Want: TPointArray;
+  I: Int32;
+begin
+  A := [Point(1*D, 1*D), Point(2*D, 2*D), Point(3*D, 3*D), Point(4*D, 4*D)];
+  B := [Point(2*D, 2*D), Point(4*D, 4*D)];
+
+  Assert(SameSet(A.Difference(B), [Point(1*D, 1*D), Point(3*D, 3*D)]), 'some removed');
+  Assert(SameSet(A.Difference(A), []), 'minus self');
+  Assert(SameSet(A.Difference([]), A), 'minus nothing');
+
+  // larger: subtract the odd-indexed points, keep the even ones
+  for I := 0 to 4999 do
+  begin
+    Big += Point(I * D, I * D);
+    if (I mod 2 = 0) then
+      Want += Point(I * D, I * D)
+    else
+      Sub += Point(I * D, I * D);
+  end;
+  Assert(SameSet(Big.Difference(Sub), Want), 'large difference');
+end;
+
+begin
+  ScanLine();
+  Hashing();
+end.

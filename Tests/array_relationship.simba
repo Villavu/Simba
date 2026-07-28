@@ -61,33 +61,6 @@ begin
   Assert(Success(a.Intersection(b), [3, 4]));
 end;
 
-procedure TestPointArray;
-
-  function Success(a,b: TPointArray): Boolean;
-  var i: Int32;
-  begin
-    if (Length(a) <> Length(b)) then
-      Exit(False);
-    for i:=0 to High(a) do
-      if not Contains(a[i], b) then
-        Exit(False);
-    Result := True;
-  end;
-
-var
-  a,b: TPointArray;
-begin
-  a := [[1,1],[2,2],[3,3]];
-  b := [[3,3],[2,2],[1,1]];
-  Assert(Success(a.Difference(b), []));
-  Assert(Success(a.SymDifference(b), []));
-
-  a := [[1,2],[2,3],[3,4]];
-  b := [[1,2],[2,3]];
-  Assert(Success(a.Difference(b), [[3,4]]));
-  Assert(Success(a.SymDifference(b), [[3,4]]));
-end;
-
 procedure TestBoxArray;
 
   function Success(a,b: TBoxArray): Boolean;
@@ -120,9 +93,36 @@ begin
 end;
 
 
+procedure TestDuplicates;
+
+  function Success(a,b: TIntegerArray): Boolean;
+  var i: Int32;
+  begin
+    if (Length(a) <> Length(b)) then
+      Exit(False);
+    for i:=0 to High(a) do
+      if not Contains(a[i], b) then
+        Exit(False);
+    Result := True;
+  end;
+
+var
+  a,b: TIntegerArray;
+begin
+  a := [1,2,2,3];
+  b := [2,2,3,3,4];
+  Assert(Success(a.Intersection(b), [2,3]), 'intersection dups');
+  Assert(Success(a.Difference(b), [1]), 'difference dups');
+  Assert(Success(a.SymDifference(b), [1,4]), 'symdifference dups');
+
+  Assert(Success(TIntegerArray([1]).Intersection([1,1,1]), [1]), 'intersection overflow');
+  Assert(Success(TIntegerArray([5,5]).Intersection([5,5,5,5]), [5]), 'intersection overflow 2');
+end;
+
+
 begin
   TestIntegerArray();
   TestInt64Array();
-  TestPointArray();
   TestBoxArray();
+  TestDuplicates();
 end;

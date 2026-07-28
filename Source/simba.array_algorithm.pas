@@ -170,11 +170,12 @@ begin
     y   := tmp;
   end;
 
-  SetLength(Result, Min(Length(y),Length(x)));
+  SetLength(Result, Length(x)); 
   for i:=0 to High(x) do dict[x[i]] := 1;
   for i:=0 to High(y) do
-    if dict.Contains(y[i]) then
+    if (dict.GetDef(y[i], 0) = 1) then // in x, and not taken yet
     begin
+      dict[y[i]] := 0; // take once
       Result[c] := y[i];
       Inc(c);
     end;
@@ -386,7 +387,12 @@ begin
   if IsManagedType(_T) then
     SimbaException('Requires EqualsFunc');
 
-  Result := (Length(A) = Length(B)) and ((Length(A) = 0) and (Length(B) = 0)) or CompareMem(@A[0], @B[0], Length(A) * SizeOf(_T))
+  if (Length(A) <> Length(B)) then
+    Exit(False);
+  if (Length(A) = 0) then
+    Exit(True);
+
+  Result := CompareMem(@A[0], @B[0], Length(A) * SizeOf(_T));
 end;
 
 class function TArrayEquals.Equals(A, B: TArr; EqualFunc: TEqualFunc): Boolean;
