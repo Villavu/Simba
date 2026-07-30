@@ -1,0 +1,61 @@
+{$assertions on}
+
+
+var
+  Raw: TByteArray;
+
+procedure Check(Algo: ECompressAlgo; Count, WantLen: Int32; const WantCRC: String);
+var
+  Part, Comp, Back: TByteArray;
+  What, GotCRC: String;
+begin
+  What := Format('%s/%d', [ToStr(Algo).After('.'), Count]);
+  Part := Copy(Raw, 0, Count);
+  Comp := CompressBytes(Algo, Part);
+
+  if (Length(Comp) <> WantLen) then
+    raise Format('%s: compressed to %d bytes, expected %d', [What, Length(Comp), WantLen]);
+
+  GotCRC := HashData(EHashAlgo.CRC32, @Comp[0], Length(Comp));
+  if (GotCRC <> WantCRC) then
+    raise Format('%s: compressed CRC32 is %s, expected %s', [What, GotCRC, WantCRC]);
+
+  Back := DecompressBytes(Algo, Comp);
+  if (Length(Back) <> Count) or (not CompareMem(Back[0], Part[0], Count)) then
+    raise Format('%s: did not decompress back to the input', [What]);
+end;
+
+var
+  Text: String;
+begin
+  Text := ('the quick brown fox jumps over the lazy dog 0123456789' * 800) +
+          ('a' * 20000) +
+          ('abcdefghijklmnopqrstuvwxyz' * 400);
+
+  Raw := Text.ToBytes();
+
+
+  // python zlib.compress(data, 6)
+  Check(ECompressAlgo.ZLIB,     5000,      89, '8B21EC2B');
+  Check(ECompressAlgo.ZLIB,    73600,     287, 'E8F056AF');
+
+  // python gzip.compress(data, compresslevel=6, mtime=0)
+  Check(ECompressAlgo.GZ,       5000,     101, 'A771A9E6');
+  Check(ECompressAlgo.GZ,      73600,     299, '28469CCA');
+
+  // python bz2.compress(data, 9), which is bzip2 -9
+  Check(ECompressAlgo.BZIP2,    5000,     171, 'F6C4E6A0');
+  Check(ECompressAlgo.BZIP2,   73600,     272, '973944BD');
+
+  // python lzma, FORMAT_ALONE, LZMA1 preset 6 - liblzma
+  Check(ECompressAlgo.LZMA,     5000,     102, '59B05B95');
+  Check(ECompressAlgo.LZMA,    73600,     179, 'B6021987');
+
+  // python-lz4 LZ4FrameCompressor, 4MB blocks, independent, content size + checksum
+  Check(ECompressAlgo.LZ4,      5000,     114, 'F9ADDC5C');
+  Check(ECompressAlgo.LZ4,     73600,     414, 'D7AF5028');
+
+  // upstream mORMot2 SynLZcompress1asm
+  Check(ECompressAlgo.SYNLZ,    5000,     128, 'DEA78C89');
+  Check(ECompressAlgo.SYNLZ,   73600,   23214, 'CC530D38');
+end.

@@ -26,9 +26,11 @@
 //{$ENDIF}
 
 {$IF DEFINED(CPUX86_64)}
-  {$ASMMODE intel}
+  {$ASMMODE INTEL}
+
   {$DEFINE COLORDIST_ASM}
   {$DEFINE FFT_ASM}
+  {$DEFINE SYNLZ_ASM}
 {$ENDIF}
 
 {$DEFINE MT_PACKED} // pack two real colour channels into one complex FFT (R->Re, G->Im) rather than transforming all three separately
