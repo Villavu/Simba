@@ -477,9 +477,9 @@ begin
   Result := Default(TPixelFont);
   Result.SpaceWidth := SpaceWidth;
 
-  if (Length(Images) <> 95) then
+  if (Length(Images) <> 255) then
     Exit;
-  SetLength(Result.Glyphs, 95);
+  SetLength(Result.Glyphs, 255);
   Count := 0;
 
   Image := TSimbaImage.Create();
@@ -488,7 +488,7 @@ begin
     begin
         Image := Images[I];
         Glyph := Default(TPixelFontGlyph);
-        Glyph.Value := Char(I+32);
+        Glyph.Value := Char(I);
         Glyph.Width := Image.Width;
         Glyph.Height := Image.Height;
         if (Glyph.Value > #32) then // not a space
