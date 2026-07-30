@@ -468,60 +468,60 @@ end;
 class function TPixelOCR.LoadFont(const Images: TSimbaImageArray; SpaceWidth: Integer): TPixelFont;
 var
   Image: TSimbaImage;
-  Files: TStringArray;
   I,J, Count: Integer;
-  Character: String;
   Glyph: TPixelFontGlyph;
   B: TBox;
 begin
   Result := Default(TPixelFont);
   Result.SpaceWidth := SpaceWidth;
 
-  if (Length(Images) <> 255) then
+  if (Length(Images) <> 256) then
     Exit;
-  SetLength(Result.Glyphs, 255);
+  SetLength(Result.Glyphs, 256);
   Count := 0;
 
-  Image := TSimbaImage.Create();
   try
     for I := 0 to High(Images) do
     begin
-        Image := Images[I];
-        Glyph := Default(TPixelFontGlyph);
-        Glyph.Value := Char(I);
-        Glyph.Width := Image.Width;
-        Glyph.Height := Image.Height;
-        if (Glyph.Value > #32) then // not a space
-        begin
-          Glyph.Points := Image.FindColor($FFFFFF, 0, TBox.Create(-1,-1,-1,-1));
-          if (Length(Glyph.Points) = 0) then // if not a space, must have points otherwise skip
-            Continue;
-          Glyph.Shadow := Image.FindColor($0000FF, 0, TBox.Create(-1,-1,-1,-1));
-          Glyph.ForegroundBounds := TPointArray(Glyph.Points + Glyph.Shadow).Bounds;
+      if (I >= 32) and (I <= 126) then
+      begin
+       Image := Images[I];
+       Glyph := Default(TPixelFontGlyph);
+       Glyph.Value := Char(I);
+       Glyph.Width := Image.Width;
+       Glyph.Height := Image.Height;
+       if (Glyph.Value > #32) then // not a space
+       begin
+         Glyph.Points := Image.FindColor($FFFFFF, 0, TBox.Create(-1,-1,-1,-1));
+         if (Length(Glyph.Points) = 0) then // if not a space, must have points otherwise skip
+           Continue;
+         Glyph.Shadow := Image.FindColor($0000FF, 0, TBox.Create(-1,-1,-1,-1));
+         Glyph.ForegroundBounds := TPointArray(Glyph.Points + Glyph.Shadow).Bounds;
 
-          B := Glyph.Points.Bounds;
-          if (B.X1 > 0) then
-          begin
-            Glyph.Points := Glyph.Points.Offset(-B.X1, 0);
-            Glyph.Shadow := Glyph.Shadow.Offset(-B.X1, 0);
-          end;
-          B := TPointArray(Glyph.Points + Glyph.Shadow).Bounds;
+         B := Glyph.Points.Bounds;
+         if (B.X1 > 0) then
+         begin
+           Glyph.Points := Glyph.Points.Offset(-B.X1, 0);
+           Glyph.Shadow := Glyph.Shadow.Offset(-B.X1, 0);
+         end;
+         B := TPointArray(Glyph.Points + Glyph.Shadow).Bounds;
 
-          Glyph.Background := TPointArray(Glyph.Points + Glyph.Shadow).Invert(B.Expand(1));
-          Glyph.BackgroundBounds := B;
-          Glyph.PointsShadowWidth := B.Width;
+         Glyph.Background := TPointArray(Glyph.Points + Glyph.Shadow).Invert(B.Expand(1));
+         Glyph.BackgroundBounds := B;
+         Glyph.PointsShadowWidth := B.Width;
 
-          if (Length(Glyph.Shadow) > 0) then
-            Glyph.BestMatch := Length(Glyph.Points) + Length(Glyph.Shadow)
-          else
-            Glyph.BestMatch := Length(Glyph.Points) + Length(Glyph.Background);
+         if (Length(Glyph.Shadow) > 0) then
+           Glyph.BestMatch := Length(Glyph.Points) + Length(Glyph.Shadow)
+         else
+           Glyph.BestMatch := Length(Glyph.Points) + Length(Glyph.Background);
 
-          Result.MaxGlyphWidth := Max(Result.MaxGlyphWidth, Glyph.Background.Bounds.Width-1);
-          Result.MaxGlyphHeight := Max(Result.MaxGlyphHeight, Glyph.Background.Bounds.Height-1);
-        end;
+         Result.MaxGlyphWidth := Max(Result.MaxGlyphWidth, Glyph.Background.Bounds.Width-1);
+         Result.MaxGlyphHeight := Max(Result.MaxGlyphHeight, Glyph.Background.Bounds.Height-1);
+       end;
 
-        Result.Glyphs[Count] := Glyph;
-        Inc(Count);
+       Result.Glyphs[Count] := Glyph;
+       Inc(Count);
+     end;
     end;
   finally
     SetLength(Result.Glyphs, Count);
