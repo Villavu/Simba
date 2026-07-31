@@ -416,10 +416,9 @@ end;
 class function TSimbaFile.DoFileWrite(const FileName: String; const Bytes: TByteArray; Seek: TSeekOrigin; Offset: Integer): Boolean;
 var
   Stream: TFileStream;
+  Written: Int64;
 begin
   Result := False;
-  if (Length(Bytes) = 0) then
-    Exit;
 
   Stream := nil;
   try
@@ -431,7 +430,11 @@ begin
     if (Seek = soBeginning) then
       Stream.Size := 0;
 
-    Result := Stream.Write(Bytes[0], Length(Bytes)) = Length(Bytes);
+    Written := 0;
+    if (Length(Bytes) > 0) then
+      Written := Stream.Write(Bytes[0], Length(Bytes));
+
+    Result := (Written = Length(Bytes));
   except
   end;
 

@@ -24,7 +24,7 @@ function LoadSSL(Debug: Boolean = False): Boolean;
 implementation
 
 uses
-  LCLType, Forms, openssl, castle_gz,
+  LCLType, Forms, openssl, simba.compress_gz,
   simba.base, simba.settings, simba.env, simba.fs, simba.initializations
   {$IF defined(WINDOWS)},
   windows
@@ -39,21 +39,14 @@ end;
 
 function ExtractLib(Stream: TStream; FileName: String): String;
 var
-  Buffer: array[1..4096] of Byte;
-  InputStream, OutputStream: TStream;
-  Count: Integer;
+  OutputStream: TFileStream;
 begin
-  Result := '';
-
-  InputStream := TGZFileStream.Create(Stream, False);
   OutputStream := TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite);
-
-  repeat
-    Count := InputStream.Read({%H-}Buffer[1], Length(Buffer));
-  until OutputStream.Write(Buffer[1], Count) = 0;
-
-  InputStream.Free();
-  OutputStream.Free();
+  try
+    Gz.Decompress(Stream, OutputStream);
+  finally
+    OutputStream.Free();
+  end;
 
   Result := TSimbaFile.FileHash(FileName);
 end;

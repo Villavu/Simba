@@ -19,7 +19,7 @@ uses
   simba.image,
   simba.httpclient,
   simba.json,
-  simba.resource;
+  simba.resourcefile;
 
 {
  Lape objects internally are just dynarray of byte.
