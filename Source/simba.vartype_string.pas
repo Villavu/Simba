@@ -651,7 +651,7 @@ end;
 
 function TSimbaStringHelper.Hash(Seed: UInt32 = 0): UInt32;
 begin
-  Result := Hash32(Self, Seed);
+  Result := simba.hash.Hash(Self, Seed);
 end;
 
 function TSimbaStringHelper.ToUpper: String;

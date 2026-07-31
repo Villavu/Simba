@@ -5,15 +5,14 @@ var
   TestFile: String := GetTempFileName();
 
 begin
-  Assert(Hash32(Test) = $B1FD16EE);
-  Assert(Hash32(@Test[1], Length(Test)) = $B1FD16EE);
-  Assert(Hash32(Test, 123) = $12FB8355);
-  Assert(Hash32(@Test[1], Length(Test), 123) = $12FB8355);
+  Assert(Hash(Test) = $B1FD16EE);
+  Assert(Hash(@Test[1], Length(Test)) = $B1FD16EE);
+  Assert(Hash(Test, 123) = $12FB8355);
+  Assert(Hash(@Test[1], Length(Test), 123) = $12FB8355);
 
   FileWrite(TestFile, Test);
 
   Assert(HashFile(EHashAlgo.CRC32,  TestFile) = '4A17B156');
-  Assert(HashFile(EHashAlgo.CRC64,  TestFile) = 'C71FC235B4C63C86');
   Assert(HashFile(EHashAlgo.MD4,    TestFile) = '77a781b995cf1cfaf39d9e2f5910c2cf');
   Assert(HashFile(EHashAlgo.MD5,    TestFile) = 'b10a8db164e0754105b7a99be72e3fe5');
   Assert(HashFile(EHashAlgo.SHA1,   TestFile) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
@@ -21,7 +20,6 @@ begin
   Assert(HashFile(EHashAlgo.SHA512, TestFile) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
 
   Assert(HashString(EHashAlgo.CRC32,  Test) = '4A17B156');
-  Assert(HashString(EHashAlgo.CRC64,  Test) = 'C71FC235B4C63C86');
   Assert(HashString(EHashAlgo.MD4,    Test) = '77a781b995cf1cfaf39d9e2f5910c2cf');
   Assert(HashString(EHashAlgo.MD5,    Test) = 'b10a8db164e0754105b7a99be72e3fe5');
   Assert(HashString(EHashAlgo.SHA1,   Test) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
@@ -29,7 +27,6 @@ begin
   Assert(HashString(EHashAlgo.SHA512, Test) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
 
   Assert(HashData(EHashAlgo.CRC32, @Test[1], Length(Test)) = '4A17B156');
-  Assert(HashData(EHashAlgo.CRC64, @Test[1], Length(Test)) = 'C71FC235B4C63C86');
   Assert(HashData(EHashAlgo.MD4,    @Test[1], Length(Test)) = '77a781b995cf1cfaf39d9e2f5910c2cf');
   Assert(HashData(EHashAlgo.MD5,    @Test[1], Length(Test)) = 'b10a8db164e0754105b7a99be72e3fe5');
   Assert(HashData(EHashAlgo.SHA1,   @Test[1], Length(Test)) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
@@ -39,7 +36,6 @@ begin
   // Test larger data
   Test := '0' + StringOfChar('1', 12345);
   Assert(HashString(EHashAlgo.CRC32, Test)  = '093BA824');
-  Assert(HashString(EHashAlgo.CRC64, Test)  = 'E7173AC128D32F2B');
   Assert(HashString(EHashAlgo.MD4,    Test) = '22ddc15f98c5c4a642054b95e70a2245');
   Assert(HashString(EHashAlgo.MD5,    Test) = 'b583b65752035b35972e91e0553ed30d');
   Assert(HashString(EHashAlgo.SHA1,   Test) = '7c2bab947eae5fede01d44a37017c6e2571c8c7b');

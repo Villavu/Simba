@@ -66,12 +66,12 @@ type
     class function XYZToRGB(const XYZ: TColorXYZ): TColorRGB; static;
   end;
 
-function fcbrt(x: Single): Single; {$IFNDEF CPUX86_64}inline;{$ENDIF}
+function fcbrt(x: Single): Single; {$IFNDEF COLORMATH_ASM}inline;{$ENDIF}
 function fast_atan2(y, x: Single): Single; inline;
 
 implementation
 
-{$IFDEF CPUX86_64}
+{$IFDEF COLORMATH_ASM}
 function fcbrt(x: Single): Single; assembler; nostackframe;  // x and Result in xmm0 (win64 + SysV)
 asm
   movd   eax, xmm0             // seed: y = bits(4/3 * 127*2^23) - bits(x)/3

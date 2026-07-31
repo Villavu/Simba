@@ -19,7 +19,7 @@ uses
   simba.encoding,
   simba.hash,
   simba.compress,
-  simba.resource;
+  simba.resourcefile;
 
 (*
 Encoding
@@ -31,7 +31,7 @@ Encoding & Hashing
 EHashAlgo
 ---------
 ```
-type EHashAlgo = enum(SHA1, SHA256, SHA384, SHA512, MD5);
+type EHashAlgo = enum(CRC32, MD4, MD5, SHA1, SHA256, SHA512);
 ```
 
 ```{note}
@@ -88,31 +88,31 @@ begin
 end;
 
 (*
-Hash32
-------
+Hash
+----
 ```
-function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32;
+function Hash(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32;
 ```
 Computes a UInt32 hash of data using xxhash32 algorithm.
 https://xxhash.com/
 *)
-procedure _LapeHash32(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeHash(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PUInt32(Result)^ := Hash32(PPointer(Params^[0])^, PInteger(Params^[1])^, PUInt32(Params^[2])^);
+  PUInt32(Result)^ := Hash(PPointer(Params^[0])^, PInteger(Params^[1])^, PUInt32(Params^[2])^);
 end;
 
 (*
-Hash32
-------
+Hash
+----
 ```
-function Hash32(S: String; Seed: UInt32 = 0): UInt32;
+function Hash(S: String; Seed: UInt32 = 0): UInt32;
 ```
 Computes a UInt32 hash of string using xxhash32 algorithm.
 https://xxhash.com/
 *)
-procedure _LapeHash32String(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeHashStr(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PUInt32(Result)^ := Hash32(PString(Params^[0])^, PUInt32(Params^[1])^);
+  PUInt32(Result)^ := Hash(PString(Params^[0])^, PUInt32(Params^[1])^);
 end;
 
 (*
@@ -144,9 +144,8 @@ end;
 ECompressAlgo
 -------------
 ```
-type ECompressAlgo = enum(ZLIB, SYNLZ, GZ);
+type ECompressAlgo = enum(ZLIB, SYNLZ, GZ, BZIP2, LZ4, LZMA);
 ```
-
 ```{note}
 This enum is scoped, so must be used like `ECompressAlgo.ZLIB`
 ```
@@ -385,7 +384,7 @@ begin
   begin
     DumpSection := 'Encoding';
 
-    addGlobalType('enum(CRC32, CRC64, MD4, MD5, SHA1, SHA256, SHA512)', 'EHashAlgo');
+    addGlobalType('enum(CRC32, MD4, MD5, SHA1, SHA256, SHA512)', 'EHashAlgo');
     addGlobalType('enum(b64URL, b64, b32, b32Hex, b16)', 'EBaseEncoding');
 
     addGlobalFunc('function HOTPCalculateToken(Secret: String; Counter: Integer): Integer', @_LapeHOTPCalculateToken);
@@ -398,10 +397,10 @@ begin
     addGlobalFunc('function HashString(Algo: EHashAlgo; S: String): String', @_LapeHashString);
     addGlobalFunc('function HashFile(Algo: EHashAlgo; FileName: String): String', @_LapeHashFile);
 
-    addGlobalFunc('function Hash32(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32);
-    addGlobalFunc('function Hash32(S: String; Seed: UInt32 = 0): UInt32; overload', @_LapeHash32String);
+    addGlobalFunc('function Hash(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32; overload', @_LapeHash);
+    addGlobalFunc('function Hash(S: String; Seed: UInt32 = 0): UInt32; overload', @_LapeHashStr);
 
-    addGlobalType('enum(ZLIB, SYNLZ, GZ, RLE)', 'ECompressAlgo');
+    addGlobalType('enum(ZLIB, SYNLZ, GZ, BZIP2, LZ4, LZMA)', 'ECompressAlgo');
 
     addGlobalFunc('procedure CompressData(Algo: ECompressAlgo; InData: Pointer; InSize: Int64; var OutData: Pointer; out OutSize: Int64; Truncate: Boolean = True);', @_LapeCompressData);
     addGlobalFunc('function CompressBytes(Algo: ECompressAlgo; Bytes: TByteArray): TByteArray', @_LapeCompressBytes);

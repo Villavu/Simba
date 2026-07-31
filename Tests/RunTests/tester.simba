@@ -1,8 +1,12 @@
 var
+  Files: TStringArray;
   FileName, Output: String;
   Fail, Pass: Integer;
 begin
-  for FileName in DirSearch(DirParent({$macro DIR}), '*.simba') do
+  Files := DirSearch(DirParent({$macro DIR}), '*.simba');
+  Files.Sort();
+
+  for FileName in Files do
   begin
     WriteLn('Testing: ' + PathExtractNameWithoutExt(FileName));
 

@@ -219,13 +219,13 @@
       <CharSet Value="04B0"/>
       <StringTable FileDescription="https://github.com/Villavu/Simba" OriginalFilename="Simba.exe" ProductName="Simba" ProductVersion="2.0"/>
     </VersionInfo>
-    <BuildModes Count="9">
+    <BuildModes Count="7">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Win32">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../Simba-Win32"/>
+            <Filename Value="../Simba_windows_i386"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
@@ -275,7 +275,7 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../Simba-Win64"/>
+            <Filename Value="../Simba_windows_x86_64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
@@ -321,54 +321,11 @@
           </Other>
         </CompilerOptions>
       </Item3>
-      <Item4 Name="Win64 DebugInfo">
+      <Item4 Name="Linux">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../Simba-Win64-Debug"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
-            <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <CStyleMacros Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="win64"/>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf3"/>
-            </Debugging>
-            <Options>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-            </Options>
-          </Linking>
-          <Other>
-            <CompilerMessages>
-              <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
-            </CompilerMessages>
-            <CustomOptions Value="-CfSSE64
--dStaticFFI
--dLape_CDECL
--dLape_NoExtended"/>
-            <CreateMakefileOnBuild Value="True"/>
-          </Other>
-        </CompilerOptions>
-      </Item4>
-      <Item5 Name="Linux">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../Simba-Linux64"/>
+            <Filename Value="../Simba_linux_x86_64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
@@ -411,12 +368,12 @@
             <CreateMakefileOnBuild Value="True"/>
           </Other>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="Linux DebugInfo">
+      </Item4>
+      <Item5 Name="Linux Arm">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../Simba-Linux64-Debug"/>
+            <Filename Value="../Simba_linux_aarch64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
@@ -429,13 +386,67 @@
             </SyntaxOptions>
           </Parsing>
           <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="aarch64"/>
             <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <DebugInfoType Value="dsDwarf3"/>
+              <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <StripSymbols Value="True"/>
             </Debugging>
+            <LinkSmart Value="True"/>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dLape_CDECL
+-dLape_NoExtended"/>
+            <CreateMakefileOnBuild Value="True"/>
+          </Other>
+        </CompilerOptions>
+      </Item5>
+      <Item6 Name="Mac">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../Simba_darwin_x86_64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
+            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <CStyleMacros Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
             <Options>
               <Win32>
                 <GraphicApplication Value="True"/>
@@ -453,11 +464,11 @@
           </Other>
         </CompilerOptions>
       </Item6>
-      <Item7 Name="Linux Arm">
+      <Item7 Name="Mac Arm">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../Simba-Linux"/>
+            <Filename Value="../Simba_darwin_aarch64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
@@ -472,7 +483,7 @@
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="aarch64"/>
-            <TargetOS Value="linux"/>
+            <TargetOS Value="darwin"/>
             <Optimizations>
               <OptimizationLevel Value="3"/>
             </Optimizations>
@@ -500,111 +511,6 @@
           </Other>
         </CompilerOptions>
       </Item7>
-      <Item8 Name="Mac">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../Simba"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
-            <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <CStyleMacros Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="darwin"/>
-            <Optimizations>
-              <OptimizationLevel Value="3"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <DebugInfoType Value="dsDwarf2Set"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-            <LinkSmart Value="True"/>
-            <Options>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-            </Options>
-          </Linking>
-          <Other>
-            <CompilerMessages>
-              <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
-            </CompilerMessages>
-            <CustomOptions Value="-CfSSE64
--dLape_CDECL
--dLape_NoExtended"/>
-            <ExecuteAfter>
-              <Command Value="macosbundle/make.sh"/>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteAfter>
-            <CreateMakefileOnBuild Value="True"/>
-          </Other>
-        </CompilerOptions>
-      </Item8>
-      <Item9 Name="Mac Arm">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../Simba"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
-            <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <CStyleMacros Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
-            <TargetCPU Value="aarch64"/>
-            <TargetOS Value="darwin"/>
-            <Optimizations>
-              <OptimizationLevel Value="3"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <DebugInfoType Value="dsDwarf2Set"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-            <LinkSmart Value="True"/>
-            <Options>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-            </Options>
-          </Linking>
-          <Other>
-            <CompilerMessages>
-              <IgnoredMessages idx6058="True" idx5094="True" idx5093="True" idx5092="True" idx5091="True" idx5089="True" idx5024="True" idx4105="True" idx4104="True" idx4055="True" idx2054="True" idx2005="True"/>
-            </CompilerMessages>
-            <CustomOptions Value="-dLape_CDECL
--dLape_NoExtended"/>
-            <ExecuteAfter>
-              <Command Value="macosbundle/make.sh"/>
-              <ShowAllMessages Value="True"/>
-              <CompileReasons Run="False"/>
-            </ExecuteAfter>
-            <CreateMakefileOnBuild Value="True"/>
-          </Other>
-        </CompilerOptions>
-      </Item9>
       <SharedMatrixOptions Count="1">
         <Item1 ID="760724751738" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>

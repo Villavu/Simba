@@ -38,7 +38,7 @@ var
 implementation
 
 uses
-  simba.zip, simba.fs, simba.env, simba.initializations, simba.threading, simba.hash,
+  simba.zip, simba.fs, simba.env, simba.initializations, simba.threading, simba.crc,
   simba.ide_controller;
 
 procedure TSimbaScriptBackup.DoFileCollecting(Sender: TObject);

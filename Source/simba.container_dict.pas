@@ -78,7 +78,7 @@ type
     procedure Clear; inline;
 
     // function used to hash the key
-    function Hash(constref key:K): UInt32;
+    function HashKey(constref key:K): UInt32;
     function Compare(constref A,B: K): Boolean;
 
     // Returns position `pos` of they item `key`
@@ -180,7 +180,7 @@ end;
 
 class function TDictionary<K, V>.HashString(constref k: String): UInt32;
 begin
-  Result := Hash32(@k[1], Length(k));
+  Result := Hash(@k[1], Length(k));
 end;
 
 class function TDictionary<K, V>.CompareBool(constref A, B: Boolean): Boolean;
@@ -305,10 +305,10 @@ begin
 end;
 
 
-function TDictionary<K,V>.Hash(constref key: K): UInt32;
+function TDictionary<K,V>.HashKey(constref key: K): UInt32;
 begin
   if FHashData then
-    Result := UInt32(Hash32(@key, SizeOf(K)) and FSize)
+    Result := UInt32(Hash(@key, SizeOf(K)) and FSize)
   else
     Result := UInt32(FHashFunc(key) and FSize);
 end;
@@ -349,7 +349,7 @@ begin
   FHigh := 0;
   for i:=0 to hi-1 do
   begin
-    hval := self.hash(temp[i].key);
+    hval := self.HashKey(temp[i].key);
     self._addItem(hval, temp[i].key, temp[i].val, False);
   end;
 end;
@@ -387,7 +387,7 @@ function TDictionary<K,V>.Find(constref key: K; out pos:THashIndex): Boolean;
 var
   l: Int32;
 begin
-  pos.hash := Hash(key);
+  pos.hash := HashKey(key);
   l := High(FData[pos.hash]);
   pos.idx := 0;
   while pos.idx <= l do
