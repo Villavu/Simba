@@ -1,12 +1,15 @@
 name: build
 
-on: 
+on:
   push:
     branches:
       - '**'
   pull_request:
     branches:
       - '**'
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -18,21 +21,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:  
+        config:
           - name: Win64
             runs-on: windows-latest
             build-mode: Win64
-            binary: Simba-Win64.exe  
-            test: Simba-Win64.exe
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-x86_64-win64.exe
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
             fpclazup-fpccommit: d3a5f442eeff766a60cd7177536a9db7cc54875c # 3.2.4
 
-          - name: Win64 DebugInfo
+          - name: Win64 (Debug)
             runs-on: windows-latest
-            build-mode: Win64 DebugInfo
-            binary: Simba-Win64-Debug.exe 
-            test: Simba-Win64-Debug.exe  
+            build-mode: Win64
+            opt: "-g -gl -gw2 -Xs-"
+            output: "Simba_windows_x86_64_debug"
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-x86_64-win64.exe
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
             fpclazup-fpccommit: d3a5f442eeff766a60cd7177536a9db7cc54875c # 3.2.4
@@ -40,26 +41,20 @@ jobs:
           - name: Win32
             runs-on: windows-latest
             build-mode: Win32
-            binary: Simba-Win32.exe
-            test: Simba-Win32.exe  
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-x86_64-win64.exe
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
             fpclazup-fpccommit: d3a5f442eeff766a60cd7177536a9db7cc54875c # 3.2.4
 
           - name: Linux64
-            runs-on: ubuntu-22.04
+            runs-on: ubuntu-24.04
             build-mode: Linux
-            binary: Simba-Linux64
-            test: Simba-Linux64
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-x86_64-linux
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
             fpclazup-fpccommit: d3a5f442eeff766a60cd7177536a9db7cc54875c # 3.2.4
 
           - name: Linux arm64
-            runs-on: ubuntu-22.04-arm
+            runs-on: ubuntu-24.04-arm
             build-mode: Linux Arm
-            binary: Simba-Linux
-            test: Simba-Linux
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-aarch64-linux
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
             fpclazup-fpccommit: d3a5f442eeff766a60cd7177536a9db7cc54875c # 3.2.4
@@ -67,8 +62,6 @@ jobs:
           - name: Mac arm64
             runs-on: macos-26
             build-mode: Mac Arm
-            binary: Simba-Mac-Arm.dmg 
-            test: Simba
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-aarch64-darwin
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
             fpclazup-fpccommit: aa8050f30ce7a23f8881de844c07c0f17033409e # trunk (~3.3)
@@ -76,53 +69,84 @@ jobs:
           - name: Mac intel
             runs-on: macos-15-intel
             build-mode: Mac
-            binary: Simba-Mac.dmg  
-            test: Simba
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-x86_64-darwin
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
-            fpclazup-fpccommit: aa8050f30ce7a23f8881de844c07c0f17033409e # trunk (~3.3)  
-    
+            fpclazup-fpccommit: aa8050f30ce7a23f8881de844c07c0f17033409e # trunk (~3.3)
+
+          - name: Mac intel (Debug)
+            runs-on: macos-15-intel
+            build-mode: Mac
+            opt: "-g -gw2 -Xs-"
+            output: "Simba_darwin_x86_64_debug"
+            fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-x86_64-darwin
+            fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
+            fpclazup-fpccommit: aa8050f30ce7a23f8881de844c07c0f17033409e # trunk (~3.3)
+
     steps:
       - uses: actions/checkout@v6.0.1
-        with: 
+        with:
           submodules: true
 
+      - name: Setup
+        run: |
+          echo "OS=$RUNNER_OS" >> "$GITHUB_ENV"
+          echo "BUILD_MODE=${{ matrix.config.build-mode }}" >> "$GITHUB_ENV"
+          echo "OPT=${{ matrix.config.opt }}" >> "$GITHUB_ENV"
+          echo "OUTPUT=${{ matrix.config.output }}" >> "$GITHUB_ENV"
+
       - name: Install Custom Lazarus
-        uses: ollydev/setup-lazarus@v4.1
+        uses: ollydev/setup-lazarus@v4.2
         with:
           fpclazup-url: ${{ matrix.config.fpclazup-url }}
           fpclazup-lazcommit: ${{ matrix.config.fpclazup-lazcommit }}
           fpclazup-fpccommit: ${{ matrix.config.fpclazup-fpccommit }}
-          
+
       - name: Build Simba
         run: |
-          echo "${{ matrix.config.build-mode }}"
           export GITHUB_SHORT_SHA=$(git rev-parse --short HEAD)
-          lazbuild --build-mode="${{ matrix.config.build-mode }}" "Source/Simba.lpi"
+          lazbuild --build-mode="$BUILD_MODE" --opt="$OPT" "Source/Simba.lpi"
+
+          EXE=$(find . -maxdepth 1 -type f -name 'Simba*'); EXE=${EXE#./}
+          if [ -n "$OUTPUT" ]; then
+            case "$EXE" in *.*) NEW="$OUTPUT.${EXE##*.}";; *) NEW="$OUTPUT";; esac
+            mv "$EXE" "$NEW"; EXE="$NEW"
+          fi
+          echo "EXE=$EXE" >> "$GITHUB_ENV"
+
+      - name: macOS debug symbols
+        if: env.OS == 'macOS'
+        run: dsymutil "$EXE"
+
+      - name: Linux display
+        if: env.OS == 'Linux'
+        run: |
+          command -v Xvfb >/dev/null || { sudo apt-get update && sudo apt-get install -y xvfb; }
+          Xvfb :1 >/dev/null 2>&1 &
+          sleep 3
+          echo "DISPLAY=:1" >> "$GITHUB_ENV"
 
       - name: Test Simba
-        if: matrix.config.test != ''
         run: |
-          # Simba needs a display of some sort
-          if [[ "${{ matrix.config.runs-on }}" == ubuntu* ]]; then
-              export DISPLAY=:1
-              Xvfb :1 & sleep 2
-          fi
-          
-          chmod +x ${{ matrix.config.test }}
-          ./${{ matrix.config.test }} --run "Tests/RunTests/tester.simba"
-
+          chmod +x "$EXE"
+          "./$EXE" --run "Tests/RunTests/tester.simba"
       - name: Create Mac Image
-        if: startsWith(matrix.config.name, 'Mac') == true
+        if: env.OS == 'macOS'
         run: |
+          rm -rf Simba.app
+          cp -R Source/macosbundle/Simba.app .
+          cp "$EXE" Simba.app/Contents/MacOS/Simba
+          rm -f Simba.app/Contents/MacOS/.gitkeep
+
           brew install create-dmg
-          for i in {1..10}; 
-          do 
-            create-dmg --window-size 500 330 --icon-size 48 --icon "Simba.app" 130 135 --app-drop-link 380 135 --background "Source/macosbundle/installer.tff" "${{ matrix.config.binary }}" "Simba.app" && break || sleep 15; 
+          for i in {1..10}; do
+            create-dmg --window-size 500 330 --icon-size 48 --icon "Simba.app" 130 135 \
+              --app-drop-link 380 135 --background "Source/macosbundle/installer.tff" \
+              "$EXE.dmg" "Simba.app" && break || sleep 15
           done
 
-      - name: Upload Simba Binary 
+      - name: Upload Simba Binary
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: ${{ matrix.config.name }}
-          path: ${{ matrix.config.binary }}    
+          name: ${{ env.EXE }}
+          path: ${{ env.OS == 'macOS' && format('{0}.dmg', env.EXE) || env.EXE }}
+          if-no-files-found: error
