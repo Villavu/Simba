@@ -189,8 +189,8 @@ end;
 
 procedure DoDestroy;
 begin
-  SimbaDebugImageForm.Free();
-  SimbaDebugMatrixForm.Free();
+  FreeAndNil(SimbaDebugImageForm);
+  FreeAndNil(SimbaDebugMatrixForm);
 end;
 
 initialization

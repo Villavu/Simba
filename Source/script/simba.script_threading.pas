@@ -262,9 +262,9 @@ end;
 
 destructor TSimbaThread.Destroy;
 begin
-  FreeAndNil(FCodeRunner);
+  inherited Destroy(); // WaitFor's the thread first - the worker may still be inside FCodeRunner.Run
 
-  inherited Destroy();
+  FreeAndNil(FCodeRunner);
 end;
 
 function TSimbaThread.WaitForTerminate(Timeout: Int32): Boolean;

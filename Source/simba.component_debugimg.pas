@@ -133,7 +133,7 @@ begin
 
   if (FBackBuffer <> nil) then
     FreeAndNil(FBackBuffer);
-  if (FImageBox.Background <> nil) then
+  if (FImageBox <> nil) and (FImageBox.Background <> nil) then
     FImageBox.Background.Free();
   if (FUpdating <> nil) then
     FreeAndNil(FUpdating);

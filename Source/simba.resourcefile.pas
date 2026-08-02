@@ -438,8 +438,8 @@ var
   Size: PtrUInt;
   Data: PByte;
 begin
-  // width,height,pixels
-  // todo eventually implement metadata stuff and store width/height there
+  // Width, Height then pixel data.
+  // TODO: impl metadata stuff and store width/height there
   Size := SizeOf(Int32)*2 + ((Image.Width * Image.Height) * SizeOf(TColorBGRA));
   Data := GetMem(Size);
   try

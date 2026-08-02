@@ -359,7 +359,8 @@ end;
 
 destructor TManagedSimbaSetting.Destroy;
 begin
-  SimbaSettings.UnRegisterChangeHandler(Owner, Setting, Event);
+  if (SimbaSettingsInstance <> nil) then
+    SimbaSettingsInstance.UnRegisterChangeHandler(Owner, Setting, Event);
 
   inherited Destroy;
 end;
