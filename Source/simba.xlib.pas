@@ -520,7 +520,7 @@ end;
 
 procedure DoDestroy;
 begin
-  FreeAndNil(SimbaXLib);
+  SimbaXLib.Free();
 end;
 
 initialization
