@@ -26,7 +26,7 @@ type
   private
     function GetCorners: TPointArray; inline;
     function GetMean: TPoint; inline;
-    function GetArea: Integer; inline;
+    function GetArea: Int64; inline;
     function GetBounds: TBox; inline;
     function GetShortSideLen: Integer; inline;
     function GetLongSideLen: Integer; inline;
@@ -49,7 +49,7 @@ type
 
     property Corners: TPointArray read GetCorners;
     property Mean: TPoint read GetMean;
-    property Area: Integer read GetArea;
+    property Area: Int64 read GetArea;
     property Bounds: TBox read GetBounds;
     property ShortSideLen: Integer read GetShortSideLen;
     property LongSideLen: Integer read GetLongSideLen;
@@ -171,7 +171,7 @@ begin
   Result.Y := (Self.Top.Y + Self.Right.Y + Self.Bottom.Y + Self.Left.Y) div 4;
 end;
 
-function TQuadHelper.GetArea: Integer;
+function TQuadHelper.GetArea: Int64;
 begin
   Result := Round(DistEuclidean(Self.Bottom, Self.Right)) * Round(DistEuclidean(Self.Bottom, Self.Left));
 end;
@@ -364,7 +364,7 @@ end;
 
 function TQuadArrayHelper.SortByArea(LowToHigh: Boolean): TQuadArray;
 var
-  Weights: TIntegerArray;
+  Weights: TDoubleArray;
   I: Integer;
 begin
   SetLength(Weights, Length(Self));

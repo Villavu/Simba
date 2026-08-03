@@ -448,7 +448,7 @@ end;
 
 function TBoxArrayHelper.SortByArea(LowToHigh: Boolean): TBoxArray;
 var
-  Weights: TIntegerArray;
+  Weights: TDoubleArray;
   I: Integer;
 begin
   SetLength(Weights, Length(Self));
@@ -535,7 +535,8 @@ type
 var
   Weights: TIntegerArray;
   I, J: Integer;
-  StartWidth, Area, MaxWidth: Integer;
+  StartWidth, MaxWidth: Integer;
+  Area: Int64;
   Width, Height: Integer;
   Blocks, Spaces: TBlockArray;
   Len: Integer;
@@ -556,7 +557,7 @@ begin
     Blocks[I] := Block(0, 0, Self[I].Width - 1, Self[I].Height - 1, I);
     Weights[I] := Blocks[I].H;
 
-    Area += Blocks[I].W * Blocks[I].H;
+    Area += Int64(Blocks[I].W) * Blocks[I].H;
     MaxWidth := Max(MaxWidth, Blocks[I].W);
   end;
 

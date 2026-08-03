@@ -142,12 +142,11 @@ end;
 
 function ShouldHashSet(const ABounds: TBox; PointCount: Integer): Boolean;
 var
-  W, H: Integer;
-  Space: Int64;
+  W, H, Space: Int64;
 begin
-  W := (ABounds.X2 - ABounds.X1) + 1;
-  H := (ABounds.Y2 - ABounds.Y1) + 1;
-  Space := Int64(W) * H;
+  W := (Int64(ABounds.X2) - ABounds.X1) + 1;
+  H := (Int64(ABounds.Y2) - ABounds.Y1) + 1;
+  Space := W * H;
 
   // hash when a scanline would be too big to allocate or too sparse to be worth it
   Result := (W < 1) or (H < 1) or (Space > MAX_SPACE) or

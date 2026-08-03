@@ -31,8 +31,7 @@ jobs:
 
           - name: Win64 (Debug)
             runs-on: windows-latest
-            build-mode: Win64
-            opt: "-g -gl -gw2 -Xs-"
+            build-mode: Default
             output: "Simba_windows_x86_64_debug"
             fpclazup-url: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/releases/download/v2.4.0g/fpclazup-x86_64-win64.exe
             fpclazup-lazcommit: 98f9c7a7a102139e43b39050ebbb5c48d805f59f # 4.4
@@ -90,7 +89,6 @@ jobs:
         run: |
           echo "OS=$RUNNER_OS" >> "$GITHUB_ENV"
           echo "BUILD_MODE=${{ matrix.config.build-mode }}" >> "$GITHUB_ENV"
-          echo "OPT=${{ matrix.config.opt }}" >> "$GITHUB_ENV"
           echo "OUTPUT=${{ matrix.config.output }}" >> "$GITHUB_ENV"
 
       - name: Install Custom Lazarus
@@ -103,7 +101,7 @@ jobs:
       - name: Build Simba
         run: |
           export GITHUB_SHORT_SHA=$(git rev-parse --short HEAD)
-          lazbuild --build-mode="$BUILD_MODE" --opt="$OPT" "Source/Simba.lpi"
+          lazbuild --build-mode="$BUILD_MODE" "Source/Simba.lpi"
 
           EXE=$(find . -maxdepth 1 -type f -name 'Simba*'); EXE=${EXE#./}
           if [ -n "$OUTPUT" ]; then

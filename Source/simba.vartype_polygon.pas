@@ -267,7 +267,7 @@ begin
           Abs(TSimbaGeometry.CrossProduct(Self[i], Self[(i + 1) mod n], Self[j])) do
       j := (j + 1) mod n;
 
-    dist := Sqr(Self[i].x - Self[j].x) + Sqr(Self[i].y - Self[j].y);
+    dist := Sqr(Int64(Self[i].x - Self[j].x)) + Sqr(Int64(Self[i].y - Self[j].y));
     if dist > maxDist then
     begin
       maxDist := dist;

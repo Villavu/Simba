@@ -178,12 +178,12 @@ end;
 TQuad.Area
 ----------
 ```
-property TQuad.Area: Integer;
+property TQuad.Area: Int64;
 ```
 *)
 procedure _LapeQuad_Area_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PInteger(Result)^ := PQuad(Params^[0])^.Area;
+  PInt64(Result)^ := PQuad(Params^[0])^.Area;
 end;
 
 (*
@@ -385,7 +385,7 @@ begin
     addGlobalFunc('function TQuad.RandomPoint: TPoint', @_LapeQuad_RandomPoint);
     addGlobalFunc('function TQuad.RandomPointCenter: TPoint', @_LapeQuad_RandomPointCenter);
 
-    addProperty('TQuad', 'Area', 'Integer', @_LapeQuad_Area_Read);
+    addProperty('TQuad', 'Area', 'Int64', @_LapeQuad_Area_Read);
     addProperty('TQuad', 'Corners', 'TPointArray', @_LapeQuad_Corners_Read);
     addProperty('TQuad', 'Bounds', 'TBox', @_LapeQuad_Bounds_Read);
     addProperty('TQuad', 'ShortSideLen', 'Integer', @_LapeQuad_ShortSideLen_Read);

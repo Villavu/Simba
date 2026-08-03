@@ -91,7 +91,7 @@ end;
 
 function TCircleHelper.GetArea: Double;
 begin
-  Result := PI * Sqr(Self.Radius);
+  Result := PI * Sqr(Int64(Self.Radius));
 end;
 
 class function TCircleHelper.Create(AX, AY: Integer; ARadius: Integer): TCircle;
@@ -199,7 +199,7 @@ begin
     if (Test < Smallest) then
       Smallest := Test;
   end;
-  Result := Sqr(Smallest) / Sqr(Self.Radius);
+  Result := Sqr(Smallest) / Sqr(Int64(Self.Radius));
 end;
 
 operator in(const P: TPoint; const Circle: TCircle): Boolean;

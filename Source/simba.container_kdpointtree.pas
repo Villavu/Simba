@@ -248,7 +248,7 @@ var
 
     if not this^.hidden then
     begin
-      dist := Sqr(this^.split.x - pt.x) + Sqr(this^.split.y - pt.y);
+      dist := Sqr(Int64(this^.split.x - pt.x)) + Sqr(Int64(this^.split.y - pt.y));
       if (dist < resDist) and not((dist = 0) and notEqual) then
       begin
         resDist := dist;
@@ -261,7 +261,7 @@ var
     if (test <> NONE) then
       __nearest(test, depth+1);
 
-    if (Sqr(delta) >= resDist) then Exit();
+    if (Sqr(Int64(delta)) >= resDist) then Exit();
 
     if delta > 0 then test := this^.r else test := this^.l;
     if (test <> NONE) then
@@ -269,7 +269,7 @@ var
   end;
 
 begin
-  resDist := High(Integer);
+  resDist := High(Int64);
   resNode := nil;
   __nearest(0);
   Result := resNode;
@@ -400,7 +400,7 @@ begin
     for i:=0 to High(nodes) do
     begin
       pt := Nodes[i]^.split;
-      if Sqr(pt.X-query.x) * SqY + Sqr(pt.Y-query.y) * SqX <= xxyy then
+      if Sqr(Double(pt.X-query.x)) * SqY + Sqr(Double(pt.Y-query.y)) * SqX <= xxyy then
       begin
         Result[c] := pt;
         Inc(c);
@@ -411,7 +411,7 @@ begin
     for i:=0 to High(nodes) do
     begin
       pt := Nodes[i]^.split;
-      if Sqr(pt.x-query.x) + Sqr(pt.y-query.y) <= SqX then
+      if Sqr(Double(pt.x-query.x)) + Sqr(Double(pt.y-query.y)) <= SqX then
       begin
         Result[c] := pt;
         Inc(c);
@@ -447,8 +447,8 @@ begin
   for i:=0 to High(nodes) do
   begin
     pt := Nodes[i]^.split;
-    if (Sqr(pt.X-query.x) * hisqy + Sqr(pt.Y-query.y) * hisqx <= hixxyy) and
-       (Sqr(pt.X-query.x) * losqy + Sqr(pt.Y-query.y) * losqx >= loxxyy) then
+    if (Sqr(Double(pt.X-query.x)) * hisqy + Sqr(Double(pt.Y-query.y)) * hisqx <= hixxyy) and
+       (Sqr(Double(pt.X-query.x)) * losqy + Sqr(Double(pt.Y-query.y)) * losqx >= loxxyy) then
     begin
       Result[c] := pt;
       Inc(c);
@@ -475,7 +475,7 @@ var
   *)
   function Fits(const p,c: TPoint): Boolean; inline;
   begin
-    Result := (Sqr(p.x-c.x)*sqry)+(Sqr(p.y-c.y)*sqrx) <= sqrxy;
+    Result := (Sqr(Double(p.x-c.x))*sqry)+(Sqr(Double(p.y-c.y))*sqrx) <= sqrxy;
   end;
 
   procedure Cluster(const Test: TPoint; var Result: TPointArray; const This: PNode; const Depth:Integer=0);

@@ -61,7 +61,7 @@ end;
 
 function TPointHelper.Magnitude: Double;
 begin
-  Result := Sqrt(Sqr(Self.X) + Sqr(Self.Y));
+  Result := Sqrt(Sqr(Int64(Self.X)) + Sqr(Int64(Self.Y)));
 end;
 
 function TPointHelper.AngleBetween(Other: TPoint): Double;

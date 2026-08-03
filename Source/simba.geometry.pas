@@ -91,14 +91,15 @@ end;
 
 class function TSimbaGeometry.DistToLine(const P, P1, P2: TPoint; out Nearest: TPoint): Double;
 var
-  dx,dy,d:Integer;
+  dx,dy:Integer;
+  d:Int64;
   f: Single;
 begin
   Nearest.X := P1.X;
   Nearest.Y := P1.Y;
   dx := P2.X - P1.X;
   dy := P2.Y - P1.Y;
-  d := dx*dx + dy*dy;
+  d := Int64(dx)*dx + Int64(dy)*dy;
   if (d = 0) then
     Exit(Hypot(P.X-P1.X, P.Y-P1.Y));
   f := ((P.X - P1.X) * (dx) + (P.Y - P1.Y) * (dy)) / d;
@@ -116,12 +117,13 @@ end;
 
 class function TSimbaGeometry.DistToLine(const P, P1, P2: TPoint): Double;
 var
-  dx,dy,d:Integer;
+  dx,dy:Integer;
+  d:Int64;
   f: Single;
 begin
   dx := P2.X - P1.X;
   dy := P2.Y - P1.Y;
-  d := dx*dx + dy*dy;
+  d := Int64(dx)*dx + Int64(dy)*dy;
   if (d = 0) then
     Exit(Hypot(P.X-P1.X, P.Y-P1.Y));
   f := ((P.X - P1.X) * (dx) + (P.Y - P1.Y) * (dy)) / d;
@@ -173,7 +175,7 @@ end;
 
 class function TSimbaGeometry.PointInCircle(const P, Center: TPoint; const Radius: Double): Boolean;
 begin
-  Result := Sqr(P.X - Center.X) + Sqr(P.Y - Center.Y) <= Sqr(Radius);
+  Result := Sqr(Int64(P.X - Center.X)) + Sqr(Int64(P.Y - Center.Y)) <= Sqr(Radius);
 end;
 
 class function TSimbaGeometry.PointInEllipse(const P, Center: TPoint; const YRadius, XRadius: Double): Boolean;
@@ -183,7 +185,7 @@ begin
   X := P.X - Center.X;
   Y := P.Y - Center.Y;
 
-  Result := (Sqr(X) * Sqr(YRadius)) + (Sqr(Y) * Sqr(XRadius)) <= (Sqr(YRadius) * Sqr(XRadius));
+  Result := (Sqr(Int64(X)) * Sqr(YRadius)) + (Sqr(Int64(Y)) * Sqr(XRadius)) <= (Sqr(YRadius) * Sqr(XRadius));
 end;
 
 class function TSimbaGeometry.CrossProduct(const r, p, q: TPoint): Int64;
@@ -201,7 +203,7 @@ var
   UpperX, UpperY, LowerX, LowerY: Integer;
   ax, bx, cx: Integer;
   ay, by, cy: Integer;
-  D, F, E: Integer;
+  D, F, E: Int64;
   Ratio: Double;
 begin
   ax := P2.X - P1.X;
@@ -240,14 +242,14 @@ begin
 
   cx := P1.X - Q1.X;
   cy := P1.Y - Q1.Y;
-  d  := (by * cx) - (bx * cy);
-  f  := (ay * bx) - (ax * by);
+  d  := (Int64(by) * cx) - (Int64(bx) * cy);
+  f  := (Int64(ay) * bx) - (Int64(ax) * by);
 
   if ((f > 0) and ((d < 0) or (d > f))) or
      ((f <= 0) and ((d > 0) or (d < f))) then
     Exit(False);
 
-  e := (ax * cy) - (ay * cx);
+  e := (Int64(ax) * cy) - (Int64(ay) * cx);
 
   if ((f > 0) and ((e < 0) or (e > f))) or
      ((f <= 0) and ((e > 0) or (e < f))) then
@@ -278,7 +280,7 @@ var
   UpperX, UpperY, LowerX, LowerY: Integer;
   ax, bx, cx: Integer;
   ay, by, cy: Integer;
-  D, F, E: Integer;
+  D, F, E: Int64;
 begin
   ax := P2.X - P1.X;
   bx := Q1.X - Q2.X;
@@ -316,14 +318,14 @@ begin
 
   cx := P1.X - Q1.X;
   cy := P1.Y - Q1.Y;
-  d  := (by * cx) - (bx * cy);
-  f  := (ay * bx) - (ax * by);
+  d  := (Int64(by) * cx) - (Int64(bx) * cy);
+  f  := (Int64(ay) * bx) - (Int64(ax) * by);
 
   if ((f > 0) and ((d < 0) or (d > f))) or
      ((f <= 0) and ((d > 0) or (d < f))) then
     Exit(False);
 
-  e := (ax * cy) - (ay * cx);
+  e := (Int64(ax) * cy) - (Int64(ay) * cx);
 
   if ((f > 0) and ((e < 0) or (e > f))) or
      ((f <= 0) and ((e > 0) or (e < f))) then

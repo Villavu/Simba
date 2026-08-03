@@ -123,6 +123,7 @@ type
     function FurthestPoint(Other: TPoint): TPoint;
 
     function Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): TPointArray; overload;
+    function Sort(Weights: TInt64Array; LowToHigh: Boolean = True): TPointArray; overload;
     function Sort(Weights: TSingleArray; LowToHigh: Boolean = True): TPointArray; overload;
     function Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): TPointArray; overload;
 
@@ -169,6 +170,7 @@ type
     function Offset(P: TPoint): T2DPointArray;
 
     function Sort(Weights: TIntegerArray; LowToHigh: Boolean = True): T2DPointArray; overload;
+    function Sort(Weights: TInt64Array; LowToHigh: Boolean = True): T2DPointArray; overload;
     function Sort(Weights: TDoubleArray; LowToHigh: Boolean = True): T2DPointArray; overload;
     function SortFromSize(Size: Integer): T2DPointArray;
     function SortFromIndex(From: TPoint; Index: Integer = 0): T2DPointArray;
@@ -1310,7 +1312,8 @@ function TPointArrayHelper.ReduceByDistance(Dist: Integer): TPointArray;
 var
   Tree: TKDPointTree;
   Nodes: TNodeRefArray;
-  I, J, DistSqr: Integer;
+  I, J: Integer;
+  DistSqr: Int64;
   Query: TPoint;
   Buffer: TSimbaPointBuffer;
 begin
@@ -1320,7 +1323,7 @@ begin
   begin
     Tree := TKDPointTree.Create(Self.Unique());
 
-    DistSqr := Sqr(Dist);
+    DistSqr := Sqr(Int64(Dist));
     for I := 0 to High(Tree.Data) do
       if (not Tree.Data[I].Hidden) then
       with Tree.Data[I].Split do
@@ -1332,7 +1335,7 @@ begin
 
         for J := 0 to High(Nodes) do
           with Nodes[J]^.Split do
-            Nodes[J]^.Hidden := Sqr(X - Query.X) + Sqr(Y - Query.Y) <= DistSqr;
+            Nodes[J]^.Hidden := Sqr(Int64(X - Query.X)) + Sqr(Int64(Y - Query.Y)) <= DistSqr;
 
         Buffer.Add(Tree.Data[I].Split);
       end;
@@ -1353,7 +1356,7 @@ begin
   MaxDistSqr := Sqr(MaxDist);
   for I := 0 to High(Self) do
   begin
-    Dist := Sqr(Self[I].X - Center.X) + Sqr(Self[I].Y - Center.Y);
+    Dist := Sqr(Int64(Self[I].X - Center.X)) + Sqr(Int64(Self[I].Y - Center.Y));
     if (Dist <= MinDistSqr) or (Dist >= MaxDistSqr) then
       Buffer.Add(Self[I]);
   end;
@@ -1461,7 +1464,7 @@ begin
   MaxDistSqr := Sqr(MaxDist);
   for I := 0 to High(Self) do
   begin
-    Dist := Sqr(Self[I].X - Center.X) + Sqr(Self[I].Y - Center.Y);
+    Dist := Sqr(Int64(Self[I].X - Center.X)) + Sqr(Int64(Self[I].Y - Center.Y));
     if (Dist >= MinDistSqr) and (Dist <= MaxDistSqr) then
       Buffer.Add(Self[I]);
   end;
@@ -1708,12 +1711,12 @@ var
 begin
   if (Length(Self) > 0) then
   begin
-    BestDist := Sqr(Self[0].x-Other.x) + Sqr(Self[0].y-Other.y);
+    BestDist := Sqr(Int64(Self[0].x-Other.x)) + Sqr(Int64(Self[0].y-Other.y));
     Result := Self[0];
 
     for I := 1 to High(Self) do
     begin
-      Dist := Sqr(Self[I].x-Other.x) + Sqr(Self[I].y-Other.y);
+      Dist := Sqr(Int64(Self[I].x-Other.x)) + Sqr(Int64(Self[I].y-Other.y));
       if (Dist < BestDist) then
       begin
         BestDist := Dist;
@@ -1731,12 +1734,12 @@ var
 begin
   if (Length(Self) > 0) then
   begin
-    BestDist := Sqr(Self[0].x-Other.x) + Sqr(Self[0].y-Other.y);
+    BestDist := Sqr(Int64(Self[0].x-Other.x)) + Sqr(Int64(Self[0].y-Other.y));
     Result := Self[0];
 
     for I := 1 to High(Self) do
     begin
-      Dist := Sqr(Self[I].x-Other.x) + Sqr(Self[I].y-Other.y);
+      Dist := Sqr(Int64(Self[I].x-Other.x)) + Sqr(Int64(Self[I].y-Other.y));
       if (Dist > BestDist) then
       begin
         BestDist := Dist;
@@ -1753,6 +1756,14 @@ begin
   Weights := Copy(Weights);
 
   specialize TArraySortWeighted<TPoint, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
+end;
+
+function TPointArrayHelper.Sort(Weights: TInt64Array; LowToHigh: Boolean): TPointArray;
+begin
+  Result := Copy(Self);
+  Weights := Copy(Weights);
+
+  specialize TArraySortWeighted<TPoint, Int64>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
 end;
 
 function TPointArrayHelper.Sort(Weights: TSingleArray; LowToHigh: Boolean): TPointArray;
@@ -1774,11 +1785,11 @@ end;
 function TPointArrayHelper.SortFrom(From: TPoint): TPointArray;
 var
   I: Integer;
-  Weights: TIntegerArray;
+  Weights: TInt64Array;
 begin
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
-    Weights[I] := Sqr(From.X - Self[i].X) + Sqr(From.Y - Self[i].Y);
+    Weights[I] := Sqr(Int64(From.X - Self[i].X)) + Sqr(Int64(From.Y - Self[i].Y));
 
   Result := Sort(Weights, True);
 end;
@@ -1826,28 +1837,28 @@ end;
 
 function TPointArrayHelper.SortByRow(LowToHigh: Boolean = True): TPointArray;
 var
-  Weights: TIntegerArray;
+  Weights: TInt64Array;
   Width, I: Integer;
 begin
   Width := Self.Bounds.Width;
 
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
-    Weights[i] := Self[i].Y * Width + Self[i].X;
+    Weights[i] := Int64(Self[i].Y) * Width + Self[i].X;
 
   Result := Self.Sort(Weights, LowToHigh);
 end;
 
 function TPointArrayHelper.SortByColumn(LowToHigh: Boolean = True): TPointArray;
 var
-  Weights: TIntegerArray;
+  Weights: TInt64Array;
   Height, I: Integer;
 begin
   Height := Self.Bounds.Height;
 
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
-    Weights[i] := Self[i].X * Height + Self[i].Y;
+    Weights[i] := Int64(Self[i].X) * Height + Self[i].Y;
 
   Result := Self.Sort(Weights, LowToHigh);
 end;
@@ -1942,7 +1953,7 @@ begin
         PointIndex := 0;
         while (PointIndex <= (LastPointIndex - ProcessedCount)) do
         begin
-          if Sqr(Current[ClusterPointIndex].X - Points[PointIndex].X) * ysq + Sqr(Current[ClusterPointIndex].Y - Points[PointIndex].Y) * xsq <= xxyy then
+          if Sqr(Double(Current[ClusterPointIndex].X - Points[PointIndex].X)) * ysq + Sqr(Double(Current[ClusterPointIndex].Y - Points[PointIndex].Y)) * xsq <= xxyy then
           begin
             Current.Add(Points[PointIndex]);
             Points[PointIndex] := Points[LastPointIndex - ProcessedCount];
@@ -2059,7 +2070,7 @@ begin
               if not PointScan[Y, X].HasPoints then
                 Continue;
 
-              if Sqr(X - P.X) * ysq + Sqr(Y - P.Y) * xsq <= xxyy then
+              if Sqr(Double(X - P.X)) * ysq + Sqr(Double(Y - P.Y)) * xsq <= xxyy then
               begin
                 Buffer.Add(X + OffsetX, Y + OffsetY);
                 PointScan[Y, X].HasPoints := False;
@@ -2149,7 +2160,8 @@ type
   end;
   TScanArray = array of TScan;
 var
-  I, J, Len, DistSqr: Integer;
+  I, J, Len: Integer;
+  DistSqr: Int64;
   Scans: TScanArray;
   ScanCount: Integer;
 label
@@ -2164,7 +2176,7 @@ begin
     Result := [Copy(Self)]
   else
   begin
-    DistSqr := Sqr(Dist);
+    DistSqr := Sqr(Int64(Dist));
 
     SetLength(Scans, 32);
     ScanCount := 0;
@@ -2173,7 +2185,7 @@ begin
       with Self[I] do
       begin
         for J := 0 to ScanCount - 1 do
-          if Sqr(X - Scans[J].X) + Sqr(Y - Scans[J].Y) <= DistSqr then
+          if Sqr(Int64(X - Scans[J].X)) + Sqr(Int64(Y - Scans[J].Y)) <= DistSqr then
           begin
             Scans[J].Arr.Add(X, Y);
 
@@ -2792,6 +2804,18 @@ begin
   specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
 end;
 
+function T2DPointArrayHelper.Sort(Weights: TInt64Array; LowToHigh: Boolean): T2DPointArray;
+var
+  I: Integer;
+begin
+  Weights := Copy(Weights);
+  SetLength(Result, Length(Self));
+  for I := 0 to High(Result) do
+    Result[I] := Copy(Self[I]);
+
+  specialize TArraySortWeighted<TPointArray, Int64>.QuickSort(Result, Weights, Low(Result), High(Result), LowToHigh);
+end;
+
 function T2DPointArrayHelper.Sort(Weights: TDoubleArray; LowToHigh: Boolean): T2DPointArray;
 var
   I: Integer;
@@ -2819,7 +2843,7 @@ end;
 function T2DPointArrayHelper.SortFromIndex(From: TPoint; Index: Integer): T2DPointArray;
 var
   I: Integer;
-  Weights: TIntegerArray;
+  Weights: TInt64Array;
 begin
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
@@ -2827,7 +2851,7 @@ begin
     if (Index >= Length(Self[I])) then
       raise Exception.CreateFmt('T2DPointArray.SortFromIndex: Index %d out of range', [Index]);
 
-    Weights[I] := Sqr(From.X - Self[I][Index].X) + Sqr(From.Y - Self[I][Index].Y);
+    Weights[I] := Sqr(Int64(From.X - Self[I][Index].X)) + Sqr(Int64(From.Y - Self[I][Index].Y));
   end;
 
   Result := Self.Sort(Weights, True);
@@ -2836,54 +2860,54 @@ end;
 function T2DPointArrayHelper.SortFromFirstPoint(From: TPoint): T2DPointArray;
 var
   I: Integer;
-  Weights: TIntegerArray;
+  Weights: TInt64Array;
 begin
   Result := Self.ExtractSize(0, __GT__);
 
   SetLength(Weights, Length(Result));
   for I := 0 to High(Result) do
-    Weights[I] := Sqr(From.X - Result[I][0].X) + Sqr(From.Y - Result[I][0].Y);
+    Weights[I] := Sqr(Int64(From.X - Result[I][0].X)) + Sqr(Int64(From.Y - Result[I][0].Y));
 
-  specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), True);
+  specialize TArraySortWeighted<TPointArray, Int64>.QuickSort(Result, Weights, Low(Result), High(Result), True);
 end;
 
 function T2DPointArrayHelper.SortFromFirstPointX(From: TPoint): T2DPointArray;
 var
   I: Integer;
-  Weights: TIntegerArray;
+  Weights: TInt64Array;
 begin
   Result := Self.ExtractSize(0, __GT__);
 
   SetLength(Weights, Length(Result));
   for I := 0 to High(Result) do
-    Weights[I] := Sqr(From.X - Result[I][0].X);
+    Weights[I] := Sqr(Int64(From.X - Result[I][0].X));
 
-  specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), True);
+  specialize TArraySortWeighted<TPointArray, Int64>.QuickSort(Result, Weights, Low(Result), High(Result), True);
 end;
 
 function T2DPointArrayHelper.SortFromFirstPointY(From: TPoint): T2DPointArray;
 var
   I: Integer;
-  Weights: TIntegerArray;
+  Weights: TInt64Array;
 begin
   Result := Self.ExtractSize(0, __GT__);
 
   SetLength(Weights, Length(Result));
   for I := 0 to High(Result) do
-    Weights[I] := Sqr(From.Y - Result[I][0].Y);
+    Weights[I] := Sqr(Int64(From.Y - Result[I][0].Y));
 
-  specialize TArraySortWeighted<TPointArray, Integer>.QuickSort(Result, Weights, Low(Result), High(Result), True);
+  specialize TArraySortWeighted<TPointArray, Int64>.QuickSort(Result, Weights, Low(Result), High(Result), True);
 end;
 
 function T2DPointArrayHelper.SortFrom(From: TPoint): T2DPointArray;
 var
   I: Integer;
-  Weights: TIntegerArray;
+  Weights: TInt64Array;
 begin
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
     with Self[I].Mean() do
-      Weights[I] := Sqr(From.X - X) + Sqr(From.Y - Y);
+      Weights[I] := Sqr(Int64(From.X - X)) + Sqr(Int64(From.Y - Y));
 
   Result := Sort(Weights, True);
 end;

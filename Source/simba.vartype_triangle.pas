@@ -31,7 +31,7 @@ type
   private
     function GetCorners: TPointArray; inline;
     function GetMean: TPoint; inline;
-    function GetArea: Integer; inline;
+    function GetArea: Int64; inline;
     function GetBounds: TBox; inline;
   public const
     EMPTY: TTriangle = (A: (X:0; Y:0); B: (X:0; Y:0); C: (X:0; Y:0));
@@ -57,7 +57,7 @@ type
 
     property Corners: TPointArray read GetCorners;
     property Mean: TPoint read GetMean;
-    property Area: Integer read GetArea;
+    property Area: Int64 read GetArea;
     property Bounds: TBox read GetBounds;
   end;
 
@@ -107,7 +107,7 @@ begin
 end;
 
 
-function TTriangleHelper.GetArea: Integer;
+function TTriangleHelper.GetArea: Int64;
 begin
   Result := Ceil(Abs((A.x * (B.y - C.y) + B.x * (C.y - A.y) + C.x * (A.y - B.y)) / 2));
 end;
@@ -129,9 +129,9 @@ var
 begin
   with Self do
   begin
-    ar := Sqr(B.X - C.X) + Sqr(B.Y - C.Y);
-    br := Sqr(A.X - C.X) + Sqr(A.Y - C.Y);
-    cr := Sqr(A.X - B.X) + Sqr(A.Y - B.Y);
+    ar := Sqr(Int64(B.X - C.X)) + Sqr(Int64(B.Y - C.Y));
+    br := Sqr(Int64(A.X - C.X)) + Sqr(Int64(A.Y - C.Y));
+    cr := Sqr(Int64(A.X - B.X)) + Sqr(Int64(A.Y - B.Y));
 
     KA := WeightedIntersection(B,C, br,cr);
     KB := WeightedIntersection(A,C, ar,cr);
@@ -215,9 +215,9 @@ end;
 function TTriangleHelper.IsObtuse(out Obstuse: TPoint): Boolean;
 var ab,ac,bc,len: Int64;
 begin
-  ab := Sqr(Self.A.x-Self.B.x) + Sqr(Self.A.y-Self.B.y);
-  ac := Sqr(Self.A.x-Self.C.x) + Sqr(Self.A.y-Self.C.y);
-  bc := Sqr(Self.B.x-Self.C.x) + Sqr(Self.B.y-Self.C.y);
+  ab := Sqr(Int64(Self.A.x-Self.B.x)) + Sqr(Int64(Self.A.y-Self.B.y));
+  ac := Sqr(Int64(Self.A.x-Self.C.x)) + Sqr(Int64(Self.A.y-Self.C.y));
+  bc := Sqr(Int64(Self.B.x-Self.C.x)) + Sqr(Int64(Self.B.y-Self.C.y));
 
   len := Max(ab, Max(ac, bc));
   if len = ab then begin Result := ab > ac+bc; Obstuse := Self.C; end;
@@ -229,9 +229,9 @@ end;
 function TTriangleHelper.IsObtuse(): Boolean; overload;
 var ab,ac,bc,len: Int64;
 begin
-  ab := Sqr(Self.A.x-Self.B.x) + Sqr(Self.A.y-Self.B.y);
-  ac := Sqr(Self.A.x-Self.C.x) + Sqr(Self.A.y-Self.C.y);
-  bc := Sqr(Self.B.x-Self.C.x) + Sqr(Self.B.y-Self.C.y);
+  ab := Sqr(Int64(Self.A.x-Self.B.x)) + Sqr(Int64(Self.A.y-Self.B.y));
+  ac := Sqr(Int64(Self.A.x-Self.C.x)) + Sqr(Int64(Self.A.y-Self.C.y));
+  bc := Sqr(Int64(Self.B.x-Self.C.x)) + Sqr(Int64(Self.B.y-Self.C.y));
 
   len := Max(ab, Max(ac, bc));
   Result := ((len = ab) and (ab > ac+bc)) or

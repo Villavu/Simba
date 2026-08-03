@@ -229,12 +229,12 @@ end;
 TTriangle.Area
 --------------
 ```
-property TTriangle.Area: Integer;
+property TTriangle.Area: Int64;
 ```
 *)
 procedure _LapeTriangle_Area_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  Integer(Result^) := TTriangle(Params^[0]^).Area;
+  Int64(Result^) := TTriangle(Params^[0]^).Area;
 end;
 
 (*
@@ -310,7 +310,7 @@ begin
     addGlobalFunc('function TTriangle.RandomPoint: TPoint', @_LapeTriangle_RandomPoint);
     addGlobalFunc('function TTriangle.RandomPointCenter: TPoint', @_LapeTriangle_RandomPointCenter);
 
-    addProperty('TTriangle', 'Area',    'Integer',     @_LapeTriangle_Area_Read);
+    addProperty('TTriangle', 'Area',    'Int64',       @_LapeTriangle_Area_Read);
     addProperty('TTriangle', 'Corners', 'TPointArray', @_LapeTriangle_Corners_Read);
     addProperty('TTriangle', 'Bounds',  'TBox',        @_LapeTriangle_Bounds_Read);
     addProperty('TTriangle', 'Mean',    'TPoint',      @_LapeTriangle_Mean_Read);

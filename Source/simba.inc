@@ -64,7 +64,9 @@
 // Use mORMot2 memory manager. This should be better than default FPC (until FPC 3.3 releases!)
 // This will only be used on x86_64 Windows & Linux.
 // https://github.com/synopse/mORMot2/blob/master/src/core/mormot.core.fpcx64mm.pas
-{$DEFINE SIMBA_CUSTOM_MM}
+{$IF DEFINED(CPUX86_64) and (DEFINED(WINDOWS) or DEFINED(LINUX))}
+  {$DEFINE SIMBA_CUSTOM_MM}
+{$ENDIF}
 
 {$IFDEF Lape_CDECL}
   {$DEFINE LAPE_WRAPPER_CALLING_CONV := cdecl;}
