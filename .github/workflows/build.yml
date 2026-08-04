@@ -148,11 +148,3 @@ jobs:
           name: ${{ env.EXE }}
           path: ${{ env.OS == 'macOS' && format('{0}.dmg', env.EXE) || env.EXE }}
           if-no-files-found: error
-
-      - name: Upload dSYM
-        if: env.OS == 'macOS' && env.OUTPUT != ''
-        uses: actions/upload-artifact@v6.0.0
-        with:
-          name: ${{ env.EXE }}.dSYM
-          path: ${{ env.EXE }}.dSYM
-          if-no-files-found: error

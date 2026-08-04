@@ -11,9 +11,13 @@ jobs:
   deploy:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == 'Villavu/Simba' && !startsWith(github.event.workflow_run.head_branch, 'dev/')
     runs-on: ubuntu-latest
+    concurrency: archive-push
+    permissions:
+      actions: read
+      contents: read
     steps:     
       - name: Download artifacts
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
@@ -35,6 +39,9 @@ jobs:
 
       - name: Push
         shell: bash     
+        env:
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           git config --global http.postBuffer 500M
           git config --global user.email "villavu-bot"
@@ -47,26 +54,33 @@ jobs:
           date_year=$(date +"%Y")
           date_month_day=$(date +"%m-%d")
 
-          branch=${{ github.event.workflow_run.head_branch }}
-          sha=${{ github.event.workflow_run.head_sha }}
+          branch="$BRANCH"
+          sha="$SHA"
           commit=${sha::10}
-          echo "$date_year/$date_month_day | $branch | [$commit](https://github.com/Villavu/Simba/commit/$commit) | [Win32](/$date_year/$date_month_day%20$branch%20$commit/Win32.zip?raw=true) - [Win64](/$date_year/$date_month_day%20$branch%20$commit/Win64.zip?raw=true) - [Win64&nbsp;Debug](/$date_year/$date_month_day%20$branch%20$commit/Win64%20DebugInfo.zip?raw=true)<br>[Mac](/$date_year/$date_month_day%20$branch%20$commit/Mac%20intel.zip?raw=true) - [Mac Arm](/$date_year/$date_month_day%20$branch%20$commit/Mac%20arm64.zip?raw=true)<br>[Linux](/$date_year/$date_month_day%20$branch%20$commit/Linux64.zip?raw=true) - [Linux Arm](/$date_year/$date_month_day%20$branch%20$commit/Linux%20arm64.zip?raw=true)" > row.txt
+          url="$date_year/$date_month_day%20$branch%20$commit"
+
+          row="$date_year/$date_month_day | $branch | [$commit](https://github.com/Villavu/Simba/commit/$commit) | "
+          row+="[Win32](/$url/Simba_windows_i386.exe.zip?raw=true) - "
+          row+="[Win64](/$url/Simba_windows_x86_64.exe.zip?raw=true) - "
+          row+="[Win64&nbsp;Debug](/$url/Simba_windows_x86_64_debug.exe.zip?raw=true)<br>"
+          row+="[Mac](/$url/Simba_darwin_x86_64.zip?raw=true) - "
+          row+="[Mac Arm](/$url/Simba_darwin_aarch64.zip?raw=true)<br>"
+          row+="[Linux](/$url/Simba_linux_x86_64.zip?raw=true) - "
+          row+="[Linux Arm](/$url/Simba_linux_aarch64.zip?raw=true)"
           
           cd Simba-Build-Archive
           mkdir -p "$date_year/$date_month_day $branch $commit"
           mv ../*.zip "$date_year/$date_month_day $branch $commit"
 
-          echo "Inserting row:"
-          cat ../row.txt
-          sed -i "6r ../row.txt" README.md
+          sed -i "6r /dev/stdin" README.md <<< "$row"
 
-          echo "https://github.com/Villavu/Simba-Build-Archive/blob/main/$date_year/$date_month_day%20$branch%20$commit/Win32.zip?raw=true" > latest.win32
-          echo "https://github.com/Villavu/Simba-Build-Archive/blob/main/$date_year/$date_month_day%20$branch%20$commit/Win64.zip?raw=true" > latest.win64
-          echo "https://github.com/Villavu/Simba-Build-Archive/blob/main/$date_year/$date_month_day%20$branch%20$commit/Win64%20DebugInfo.zip?raw=true" > latest.win64debuginfo
-          echo "https://github.com/Villavu/Simba-Build-Archive/blob/main/$date_year/$date_month_day%20$branch%20$commit/Linux64.zip?raw=true" > latest.linux64
-          echo "https://github.com/Villavu/Simba-Build-Archive/blob/main/$date_year/$date_month_day%20$branch%20$commit/Linux%20arm64.zip?raw=true" > latest.linuxarm64
-          echo "https://github.com/Villavu/Simba-Build-Archive/blob/main/$date_year/$date_month_day%20$branch%20$commit/Mac%20intel.zip?raw=true" > latest.macintel
-          echo "https://github.com/Villavu/Simba-Build-Archive/blob/main/$date_year/$date_month_day%20$branch%20$commit/Mac%20arm64.zip?raw=true" > latest.macarm64
+          archive="https://github.com/Villavu/Simba-Build-Archive/blob/main/$url"
+          echo "$archive/Simba_windows_i386.exe.zip?raw=true"   > latest.win32
+          echo "$archive/Simba_windows_x86_64.exe.zip?raw=true" > latest.win64
+          echo "$archive/Simba_linux_x86_64.zip?raw=true"       > latest.linux64
+          echo "$archive/Simba_linux_aarch64.zip?raw=true"      > latest.linuxarm64
+          echo "$archive/Simba_darwin_x86_64.zip?raw=true"      > latest.macintel
+          echo "$archive/Simba_darwin_aarch64.zip?raw=true"     > latest.macarm64
 
           git add .
           git commit --message "$commit"
