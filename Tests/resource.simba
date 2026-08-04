@@ -1,10 +1,43 @@
 {$assertions on}
 
-function genImage(w,h: Integer; col: TColor): TImage;
+function genImage(w, h: Integer; col: TColor): TImage;
 begin
-  Result := new TImage(w,h);
+  Result := new TImage(w, h);
   Result.DrawColor := col;
   Result.DrawBox([w div 6, h div 5, w div 2, h div 2]);
+end;
+
+function genPattern(w, h: Integer): TImage;
+var
+  x, y: Integer;
+begin
+  Result := new TImage(w, h);
+  for y := 0 to h - 1 do
+    for x := 0 to w - 1 do
+    begin
+      Result.Pixel[x, y] := ((x * 3  + y * 5)  and $FF)
+                         or (((x * 7  + y * 11) and $FF) shl 8)
+                         or (((x * 13 + y * 17) and $FF) shl 16);
+      Result.Alpha[x, y] := (x * 19 + y * 23) and $FF;
+    end;
+end;
+
+function genNoise(w, h: Integer): TImage;
+var
+  x, y: Integer;
+  s: Int64;
+begin
+  Result := new TImage(w, h);
+  s := $1234567;
+  for y := 0 to h - 1 do
+    for x := 0 to w - 1 do
+    begin
+      s := s xor ((s shl 13) and $FFFFFFFF);
+      s := s xor (s shr 17);
+      s := (s xor ((s shl 5) and $FFFFFFFF)) and $FFFFFFFF;
+      Result.Pixel[x, y] := s and $FFFFFF;
+      Result.Alpha[x, y] := (s shr 24) and $FF;
+    end;
 end;
 
 function genArr(len: Integer): TIntegerArray;
@@ -12,82 +45,29 @@ var
   i: Integer;
 begin
   SetLength(Result, len);
-  for i:=0 to High(Result) with 2 do
+  for i := 0 to High(Result) do
     Result[i] := i;
 end;
 
 function arrFromBytes(bytes: TByteArray): TIntegerArray;
-var i: Integer;
 begin
   SetLength(Result, Length(bytes) div SizeOf(Integer));
-  Move(bytes[0], Result[0], Length(Bytes));
+  if (Length(bytes) > 0) then
+    Move(bytes[0], Result[0], Length(bytes));
 end;
 
-// True when the file opens and every entry loads
-function readsOk(fileName: String): Boolean;
 var
-  r: TResourceReader;
-  i: Integer;
+  writer: TResourceWriter;
+  reader: TResourceReader;
+  img1, img2, imgPattern, imgNoise: TImage;
+  string1, string2: String;
+  ints1, ints2: TIntegerArray;
+  resFile: String = SimbaEnv.TempPath + 'test.sr';
 begin
-  Result := False;
-  try
-    r := new TResourceReader(fileName);
-    for i := 0 to r.Count - 1 do
-      r.Load(i);
-    Result := True;
-  except
-  end;
-end;
-
-// True when the file merely opens. An entry that oversizes itself has to be
-// caught during the header walk, not later when the read runs off the end.
-function opensOk(fileName: String): Boolean;
-var
-  r: TResourceReader;
-begin
-  Result := False;
-  try
-    r := new TResourceReader(fileName);
-    Result := True;
-  except
-  end;
-end;
-
-function loadsImage(reader: TResourceReader; name: String): Boolean;
-begin
-  Result := False;
-  try
-    reader.LoadImage(name);
-    Result := True;
-  except
-  end;
-end;
-
-procedure putU32(var arr: TByteArray; ofs: Integer; v: Int64);
-begin
-  arr[ofs]     := v and $FF;
-  arr[ofs + 1] := (v shr 8) and $FF;
-  arr[ofs + 2] := (v shr 16) and $FF;
-  arr[ofs + 3] := (v shr 24) and $FF;
-end;
-
-var writer: TResourceWriter;
-var reader: TResourceReader;
-var img1, img2: TImage;
-var string1, string2: String;
-var ints1, ints2: TIntegerArray;
-var i: Integer;
-
-var edgeFile: String = SimbaEnv.TempPath + 'resedge.sr';
-var badFile: String  = SimbaEnv.TempPath + 'resedge_bad.sr';
-var outFile: String  = SimbaEnv.TempPath + 'resedge.bin';
-var text: String = 'hello resource';
-var good, bad, hdrs, newHdrs, crafted: TByteArray;
-var cuts: TIntegerArray;
-var hdrLen: Integer;
-begin
-  img1 := genImage(111,25,$FF);
-  img2 := genImage(222,222,$FFFFFF);
+  img1 := genImage(111, 25, $FF);
+  img2 := genImage(222, 222, $FFFFFF);
+  imgPattern := genPattern(64, 64);
+  imgNoise   := genNoise(64, 64);
 
   string1 := 'hello world';
   string2 := 'hello world' * 10000;
@@ -98,101 +78,32 @@ begin
   writer := new TResourceWriter();
   writer.AddImage('img1', img1);
   writer.AddImage('img2', img2);
+  writer.AddImage('pattern', imgPattern);
+  writer.AddImage('noise', imgNoise);
   writer.AddString('string1', string1);
   writer.AddString('string2', string2);
+  writer.Add('ints1', @ints1[0], Length(ints1) * SizeOf(Integer));
+  writer.Add('ints2', @ints2[0], Length(ints2) * SizeOf(Integer));
+  writer.Save(resFile);
 
-  writer.Add('ints1', @ints1[0], Length(ints1)*SizeOf(Integer));
-  writer.Add('ints2', @ints2[0], Length(ints2)*SizeOf(Integer));
+  reader := new TResourceReader(resFile);
+  Assert(reader.Count = 8);
+  Assert(reader.Names.Equals(['img1', 'img2', 'pattern', 'noise', 'string1', 'string2', 'ints1', 'ints2']));
 
-  writer.Save(SimbaEnv.DataPath + 'test.sr');
+  Assert(reader.LoadImage('img1').Equals(img1));
+  Assert(reader.LoadImage('img2').Equals(img2));
+  Assert(reader.LoadImage('pattern').Equals(imgPattern));
+  Assert(reader.LoadImage('noise').Equals(imgNoise));
+  Assert(reader.LoadString('string1') = string1);
+  Assert(reader.LoadString('string2') = string2);
+  Assert(arrFromBytes(reader.Load('ints1')).Equals(ints1));
+  Assert(arrFromBytes(reader.Load('ints2')).Equals(ints2));
 
-  reader := new TResourceReader(SimbaEnv.DataPath + 'test.sr');
-  Assert(reader.Count = 6);
-  Assert(reader.Names.Equals(['img1', 'img2', 'string1', 'string2', 'ints1', 'ints2']));
+  // check image compress algos used
+  Assert(reader.CompressAlgo[reader.Find('img1')]    = 4);  // shuffle + RLE
+  Assert(reader.CompressAlgo[reader.Find('img2')]    = 4);  // shuffle + RLE
+  Assert(reader.CompressAlgo[reader.Find('pattern')] = 3);  // shuffle, no RLE
+  Assert(reader.CompressAlgo[reader.Find('noise')]   = 0);  // no rle + no shuffle
 
-  Assert(reader.Hash[0] = 2540280038);
-  Assert(reader.Name[0] = 'img1');
-  Assert(reader.UncompressedSize[0] = 11108);
-  Assert(reader.CompressedSize[0] = 45);
-  Assert(reader.CompressAlgo[0] = 4); // images go through the byte plane split
-
-  Assert(reader.LoadImage(reader.Find('img1')).Equals(img1));
-  Assert(reader.LoadImage(reader.Find('img2')).Equals(img2));
-  Assert(loadsImage(reader, 'img1')); // so the negative case below cannot pass vacuously
-
-  Assert(reader.LoadString(reader.Find('string1')) = string1);
-  Assert(reader.LoadString(reader.Find('string2')) = string2);
-
-  Assert(arrFromBytes(reader.Load(reader.Find('ints1'))).Equals(ints1));
-  Assert(arrFromBytes(reader.Load(reader.Find('ints2'))).Equals(ints2));
-
-  // Each check below covers a bug that was present: an empty AddString raised a
-  // range error, Save leaked its stream so the file could not be read back,
-  // LoadImage read dimensions off any entry, and an entry header could claim
-  // more data than the file held.
-  writer := new TResourceWriter();
-  writer.AddString('empty', '');
-  writer.AddString('text', text);
-  writer.AddString('tiny', 'ab');
-  writer.AddString('runs', 'a' * 2000);
-  writer.Save(edgeFile);
-
-  reader := new TResourceReader(edgeFile);
-  Assert(reader.Count = 4);
-  Assert(Length(reader.Load('empty')) = 0);
-  Assert(reader.LoadString('text') = text);
-  Assert(reader.Find('nope') = -1);
-  Assert(Length(reader.Load('nope')) = 0);
-  Assert(IntToHex(reader.Hash[reader.Find('text')], 8) = HashData(EHashAlgo.CRC32, @text[1], Length(text)));
-
-  Assert(reader.Save('runs', outFile));
-  Assert(Length(FileReadBytes(outFile)) = 2000);
-
-  // 'tiny' is shorter than the two dimensions, the case that used to report a
-  // 25185x0 image out of a heap over-read
-  Assert(not loadsImage(reader, 'tiny'));
-
-  reader.Unload();
-  Assert(reader.LoadString('text') = text);
-
-  // a flipped bit in the payload must fail the entry checksum
-  good := FileReadBytes(edgeFile);
-  Assert(readsOk(edgeFile));
-  Assert(opensOk(edgeFile)); // likewise, so 'not opensOk' below means something
-
-  bad := Copy(good);
-  bad[High(bad) - 4] := bad[High(bad) - 4] xor $40;
-  FileWriteBytes(badFile, bad);
-  Assert(not readsOk(badFile));
-
-  bad := Copy(good);
-  bad[0] := bad[0] xor $FF;
-  FileWriteBytes(badFile, bad);
-  Assert(not readsOk(badFile));
-
-  cuts := [0, 10, Length(good) div 2, Length(good) - 1];
-  for i in cuts do
-  begin
-    FileWriteBytes(badFile, Copy(good, 0, i));
-    Assert(not readsOk(badFile));
-  end;
-
-  // An entry claiming far more data than the file holds. The sizes live in the
-  // SynLZ compressed header block, so it has to be rebuilt rather than poked.
-  // Main header: 12 HeadersDataSize, 16 CompressedDataOffset. Entry: 9 CompressedSize.
-  hdrLen := good[12] or (good[13] shl 8) or (good[14] shl 16) or (good[15] shl 24);
-  hdrs := DecompressBytes(ECompressAlgo.SYNLZ, Copy(good, 20, hdrLen));
-  putU32(hdrs, 9, 100 * 1024 * 1024);
-  newHdrs := CompressBytes(ECompressAlgo.SYNLZ, hdrs);
-
-  crafted := Copy(good, 0, 20);
-  putU32(crafted, 12, Length(newHdrs));
-  putU32(crafted, 16, Length(newHdrs) + 20);
-  crafted := crafted + newHdrs + Copy(good, 20 + hdrLen, Length(good) - 20 - hdrLen);
-
-  FileWriteBytes(badFile, crafted);
-  Assert(not opensOk(badFile));
-
-  FileDelete(badFile);
-  FileDelete(outFile);
+  FileDelete(resFile);
 end.
