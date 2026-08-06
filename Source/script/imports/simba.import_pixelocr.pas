@@ -14,7 +14,7 @@ implementation
 
 uses
   lptypes, lpvartypes,
-  simba.pixelocr,
+  simba.pixelocr, simba.image,
   simba.script_objectutil;
 
 type
@@ -24,6 +24,23 @@ type
 procedure _LapePixelOCR_LoadFont(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPixelFont(Result)^ := TPixelOCR.LoadFont(PString(Params^[0])^, PInteger(Params^[1])^);
+end;
+
+procedure _LapePixelOCR_LoadFontImages(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+type
+  TLapeObjectArray = array of TLapeObject;
+var
+  Objs: TLapeObjectArray;
+  Images: TSimbaImageArray;
+  I: Integer;
+begin
+  Objs := TLapeObjectArray(Params^[0]^);
+  SetLength(Images, Length(Objs));
+  for I := 0 to High(Objs) do
+    if (Pointer(Objs[I]) <> nil) then
+      Images[I] := PLapeObjectImage(@Objs[I])^^;
+
+  PPixelFont(Result)^ := TPixelOCR.LoadFont(Images, PInteger(Params^[1])^);
 end;
 
 procedure _LapePixelOCR_TextToTPA(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -115,7 +132,8 @@ begin
     if (getGlobalType('TPixelOCR').Size <> SizeOf(TPixelOCR)) then
       SimbaException('TPixelOCR import is wrong');
 
-    addGlobalFunc('function TPixelOCR.LoadFont(Path: String; SpaceWidth: Integer): TPixelFont; static;', @_LapePixelOCR_LoadFont);
+    addGlobalFunc('function TPixelOCR.LoadFont(Path: String; SpaceWidth: Integer): TPixelFont; static; overload;', @_LapePixelOCR_LoadFont);
+    addGlobalFunc('function TPixelOCR.LoadFont(Images: TImageArray; SpaceWidth: Integer): TPixelFont; static; overload;', @_LapePixelOCR_LoadFontImages);
     addGlobalFunc('function TPixelOCR.TextToTPA(constref Font: TPixelFont; Text: String): TPointArray; static;', @_LapePixelOCR_TextToTPA);
     addGlobalFunc('function TPixelOCR.Locate(Image: TImage; constref Font: TPixelFont; Text: String): Single;', @_LapePixelOCR_Locate);
     addGlobalFunc('function TPixelOCR.Recognize(Image: TImage; constref Font: TPixelFont; P: TPoint): String; overload;', @_LapePixelOCR_Recognize1);

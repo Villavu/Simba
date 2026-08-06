@@ -70,7 +70,8 @@ type
     function _RecognizeX(const Image: TSimbaImage; const Font: PPixelFont; X, Y: Integer; const isBinary: Boolean): TPixelOCRMatch;
     function _RecognizeXY(const Image: TSimbaImage; const Font: PPixelFont; X, Y, Height: Integer; const isBinary: Boolean): TPixelOCRMatch;
   public
-    class function LoadFont(Dir: String; SpaceWidth: Integer): TPixelFont; static;
+    class function LoadFont(Dir: String; SpaceWidth: Integer): TPixelFont; overload; static;
+    class function LoadFont(Images: TSimbaImageArray; SpaceWidth: Integer): TPixelFont; overload; static;
     class function TextToTPA(constref Font: TPixelFont; Text: String; out Background: TPointArray): TPointArray; overload; static;
     class function TextToTPA(constref Font: TPixelFont; Text: String): TPointArray; overload; static;
 
@@ -384,25 +385,80 @@ begin
   Result := 1.0 - (Miss / Length(Img));
 end;
 
-class function TPixelOCR.LoadFont(Dir: String; SpaceWidth: Integer): TPixelFont;
+class function TPixelOCR.LoadFont(Images: TSimbaImageArray; SpaceWidth: Integer): TPixelFont;
 var
   Image: TSimbaImage;
-  Files: TStringArray;
-  I,J, Count: Integer;
-  Character: String;
+  I, J, Count: Integer;
   Glyph: TPixelFontGlyph;
   B: TBox;
 begin
   Result := Default(TPixelFont);
   Result.SpaceWidth := SpaceWidth;
 
-  Files := TSimbaDir.DirList(dir);
-  if (Length(Files) = 0) then
-    Exit;
-  SetLength(Result.Glyphs, Length(Files));
+  SetLength(Result.Glyphs, Length(Images));
   Count := 0;
 
-  Image := TSimbaImage.Create();
+  for I := 0 to High(Images) do
+  begin
+    Image := Images[I];
+    if (Image = nil) then // nil is skipped - array index glyph char value
+      Continue;
+
+    Glyph := Default(TPixelFontGlyph);
+    Glyph.Value := Char(I);
+    Glyph.Width := Image.Width;
+    Glyph.Height := Image.Height;
+    if (Glyph.Value > #32) then // not a space
+    begin
+      Glyph.Points := Image.FindColor($FFFFFF, 0, TBox.Create(-1,-1,-1,-1));
+      if (Length(Glyph.Points) = 0) then // if not a space, must have points otherwise skip
+        Continue;
+      Glyph.Shadow := Image.FindColor($0000FF, 0, TBox.Create(-1,-1,-1,-1));
+      Glyph.ForegroundBounds := TPointArray(Glyph.Points + Glyph.Shadow).Bounds;
+
+      B := Glyph.Points.Bounds;
+      if (B.X1 > 0) then
+      begin
+        Glyph.Points := Glyph.Points.Offset(-B.X1, 0);
+        Glyph.Shadow := Glyph.Shadow.Offset(-B.X1, 0);
+      end;
+      B := TPointArray(Glyph.Points + Glyph.Shadow).Bounds;
+
+      Glyph.Background := TPointArray(Glyph.Points + Glyph.Shadow).Invert(B.Expand(1));
+      Glyph.BackgroundBounds := B;
+      Glyph.PointsShadowWidth := B.Width;
+
+      if (Length(Glyph.Shadow) > 0) then
+        Glyph.BestMatch := Length(Glyph.Points) + Length(Glyph.Shadow)
+      else
+        Glyph.BestMatch := Length(Glyph.Points) + Length(Glyph.Background);
+
+      Result.MaxGlyphWidth := Max(Result.MaxGlyphWidth, Glyph.Background.Bounds.Width-1);
+      Result.MaxGlyphHeight := Max(Result.MaxGlyphHeight, Glyph.Background.Bounds.Height-1);
+    end;
+
+    Result.Glyphs[Count] := Glyph;
+    Inc(Count);
+  end;
+  SetLength(Result.Glyphs, Count);
+
+  SetLength(Result.GlyphSimilarities, Count, Count);
+  for I := 0 to Count-1 do
+    for J := 0 to Count-1 do
+      if (I <> J) then
+        Result.GlyphSimilarities[I][J] := Round(GlyphSimilarity(Result.Glyphs[I], Result.Glyphs[J]) * 255);
+end;
+
+class function TPixelOCR.LoadFont(Dir: String; SpaceWidth: Integer): TPixelFont;
+var
+  Images: TSimbaImageArray;
+  Files: TStringArray;
+  I, Value: Integer;
+  Character: String;
+begin
+  Files := TSimbaDir.DirList(Dir);
+
+  SetLength(Images, 256); // index = char value
   try
     for I := 0 to High(Files) do
     begin
@@ -412,56 +468,18 @@ begin
       Character := TSimbaPath.PathExtractNameWithoutExt(Files[I]);
       if Character.IsNumeric and (Character.ToInt >= 32) and (Character.ToInt <= 126) then
       begin
-        Image.Load(Files[I]);
-
-        Glyph := Default(TPixelFontGlyph);
-        Glyph.Value := Char(Character.ToInt);
-        Glyph.Width := Image.Width;
-        Glyph.Height := Image.Height;
-        if (Glyph.Value > #32) then // not a space
-        begin
-          Glyph.Points := Image.FindColor($FFFFFF, 0, TBox.Create(-1,-1,-1,-1));
-          if (Length(Glyph.Points) = 0) then // if not a space, must have points otherwise skip
-            Continue;
-          Glyph.Shadow := Image.FindColor($0000FF, 0, TBox.Create(-1,-1,-1,-1));
-          Glyph.ForegroundBounds := TPointArray(Glyph.Points + Glyph.Shadow).Bounds;
-
-          B := Glyph.Points.Bounds;
-          if (B.X1 > 0) then
-          begin
-            Glyph.Points := Glyph.Points.Offset(-B.X1, 0);
-            Glyph.Shadow := Glyph.Shadow.Offset(-B.X1, 0);
-          end;
-          B := TPointArray(Glyph.Points + Glyph.Shadow).Bounds;
-
-          Glyph.Background := TPointArray(Glyph.Points + Glyph.Shadow).Invert(B.Expand(1));
-          Glyph.BackgroundBounds := B;
-          Glyph.PointsShadowWidth := B.Width;
-
-          if (Length(Glyph.Shadow) > 0) then
-            Glyph.BestMatch := Length(Glyph.Points) + Length(Glyph.Shadow)
-          else
-            Glyph.BestMatch := Length(Glyph.Points) + Length(Glyph.Background);
-
-          Result.MaxGlyphWidth := Max(Result.MaxGlyphWidth, Glyph.Background.Bounds.Width-1);
-          Result.MaxGlyphHeight := Max(Result.MaxGlyphHeight, Glyph.Background.Bounds.Height-1);
-        end;
-
-        Result.Glyphs[Count] := Glyph;
-        Inc(Count);
+        Value := Character.ToInt;
+        Images[Value] := TSimbaImage.Create();
+        Images[Value].Load(Files[I]);
       end;
     end;
+
+    Result := TPixelOCR.LoadFont(Images, SpaceWidth);
   finally
-    SetLength(Result.Glyphs, Count);
-
-    Image.Free();
+    for I := 0 to High(Images) do
+      if (Images[I] <> nil) then
+        Images[I].Free();
   end;
-
-  SetLength(Result.GlyphSimilarities, Count, Count);
-  for I := 0 to Count-1 do
-    for J := 0 to Count-1 do
-      if (I <> J) then
-        Result.GlyphSimilarities[I][J] := Round(GlyphSimilarity(Result.Glyphs[I], Result.Glyphs[J]) * 255);
 end;
 
 class function TPixelOCR.TextToTPA(constref Font: TPixelFont; Text: String; out Background: TPointArray): TPointArray;
