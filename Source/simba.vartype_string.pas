@@ -76,7 +76,6 @@ type
     function Equals(Other: String; CaseSensitive: Boolean = True): Boolean;
     function Compare(Other: String): Integer;
     function Similarity(Other: String): Double;
-    function Hash(Seed: UInt32 = 0): UInt32;
 
     property IsUpper: Boolean read GetIsUpper;
     property IsLower: Boolean read GetIsLower;
@@ -180,7 +179,7 @@ implementation
 
 uses
   RegExpr, StrUtils, DateUtils,
-  simba.containers, simba.hash, simba.array_algorithm;
+  simba.containers, simba.array_algorithm;
 
 function TSimbaCharHelper.GetIsUpper: Boolean;
 begin
@@ -647,11 +646,6 @@ begin
 
   MaxLen := Max(System.Length(Self), System.Length(Other));
   Result := Double(MaxLen - LevDistance(Self, Other)) / Double(MaxLen);
-end;
-
-function TSimbaStringHelper.Hash(Seed: UInt32 = 0): UInt32;
-begin
-  Result := simba.hash.Hash(Self, Seed);
 end;
 
 function TSimbaStringHelper.ToUpper: String;

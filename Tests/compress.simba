@@ -16,7 +16,7 @@ begin
   if (Length(Comp) <> WantLen) then
     raise Format('%s: compressed to %d bytes, expected %d', [What, Length(Comp), WantLen]);
 
-  GotCRC := HashData(EHashAlgo.CRC32, @Comp[0], Length(Comp));
+  GotCRC := IntToHex(CrcData(@Comp[0], Length(Comp)), 8);
   if (GotCRC <> WantCRC) then
     raise Format('%s: compressed CRC32 is %s, expected %s', [What, GotCRC, WantCRC]);
 

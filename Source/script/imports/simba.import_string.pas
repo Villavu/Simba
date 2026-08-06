@@ -204,18 +204,6 @@ begin
 end;
 
 (*
-String.Hash
------------
-```
-function String.Hash(Seed: UInt32 = 0): UInt32;
-```
-*)
-procedure _LapeString_Hash(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PUInt32(Result)^ := PString(Params^[0])^.Hash(PUInt32(Params^[1])^);
-end;
-
-(*
 String.EndsWith
 ---------------
 ```
@@ -1112,7 +1100,6 @@ begin
     addGlobalFunc('function String.Equals(Other: String; CaseSensitive: Boolean = True): Boolean;', @_LapeString_Equals);
     addGlobalFunc('function String.Compare(Other: String): Integer;', @_LapeString_Compare);
     addGlobalFunc('function String.Similarity(Other: String): Double;', @_LapeString_Similarity);
-    addGlobalFunc('function String.Hash(Seed: UInt32 = 0): UInt32;', @_LapeString_Hash);
 
     addGlobalFunc('function String.ToUpper: String;', @_LapeString_ToUpper);
     addGlobalFunc('function String.ToLower: String;', @_LapeString_ToLower);

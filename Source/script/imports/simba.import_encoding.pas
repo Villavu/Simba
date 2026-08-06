@@ -28,14 +28,14 @@ Encoding & Hashing
 *)
 
 (*
-EHashAlgo
----------
+EDigest
+-------
 ```
-type EHashAlgo = enum(CRC32, MD4, MD5, SHA1, SHA256, SHA512);
+type EDigest = enum(MD4, MD5, SHA1, SHA256, SHA512, WHIRLPOOL);
 ```
 
 ```{note}
-This enum is scoped, so must be used like `EHashAlgo.SHA512`
+This enum is scoped, so must be used like `EDigest.SHA512`
 ```
 *)
 
@@ -52,67 +52,121 @@ This enum is scoped, so must be used like `EBaseEncoding.b64`
 *)
 
 (*
-HashData
---------
+DigestString
+------------
 ```
-function HashData(Algo: EHashAlgo; Buf: PByte; Len: Int32): String;
+function DigestString(Algo: EDigest; S: String): String;
 ```
+Cryptographic digest (lowercase hex) of a string.
 *)
-procedure _LapeHashData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeDigestString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashBuffer(EHashAlgo(Params^[0]^), PPointer(Params^[1])^, PInteger(Params^[2])^);
+  PString(Result)^ := DigestString(EDigest(Params^[0]^), PString(Params^[1])^);
+end;
+
+(*
+DigestFile
+----------
+```
+function DigestFile(Algo: EDigest; FileName: String): String;
+```
+Cryptographic digest (lowercase hex) of a file's contents.
+*)
+procedure _LapeDigestFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := DigestFile(EDigest(Params^[0]^), PString(Params^[1])^);
+end;
+
+(*
+DigestData
+----------
+```
+function DigestData(Algo: EDigest; Data: Pointer; Len: Int32): String;
+```
+Cryptographic digest (lowercase hex) of a raw buffer.
+*)
+procedure _LapeDigestData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PString(Result)^ := DigestData(EDigest(Params^[0]^), PPointer(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
+CrcString
+---------
+```
+function CrcString(S: String): UInt32;
+```
+CRC32 checksum of a string.
+*)
+procedure _LapeCrcString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt32(Result)^ := CrcString(PString(Params^[0])^);
+end;
+
+(*
+CrcFile
+-------
+```
+function CrcFile(FileName: String): UInt32;
+```
+CRC32 checksum of a file's contents.
+*)
+procedure _LapeCrcFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt32(Result)^ := CrcFile(PString(Params^[0])^);
+end;
+
+(*
+CrcData
+-------
+```
+function CrcData(Data: Pointer; Len: Int32): UInt32;
+```
+CRC32 checksum of a raw buffer.
+*)
+procedure _LapeCrcData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PUInt32(Result)^ := CrcData(PPointer(Params^[0])^, PInteger(Params^[1])^);
 end;
 
 (*
 HashString
 ----------
 ```
-function HashString(Algo: EHashAlgo; S: String): String;
+function HashString(S: String; Seed: UInt32 = 0): UInt32;
 ```
+Fast non-cryptographic 32-bit hash (xxHash32) of a string.
+https://xxhash.com/
 *)
 procedure _LapeHashString(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashString(EHashAlgo(Params^[0]^), PString(Params^[1])^);
+  PUInt32(Result)^ := HashString(PString(Params^[0])^, PUInt32(Params^[1])^);
 end;
 
 (*
 HashFile
 --------
 ```
-function HashFile(Algo: EHashAlgo; FileName: String): String;
+function HashFile(FileName: String; Seed: UInt32 = 0): UInt32;
 ```
+Fast non-cryptographic 32-bit hash (xxHash32) of a file's contents.
 *)
 procedure _LapeHashFile(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := HashFile(EHashAlgo(Params^[0]^), PString(Params^[1])^);
+  PUInt32(Result)^ := HashFile(PString(Params^[0])^, PUInt32(Params^[1])^);
 end;
 
 (*
-Hash
-----
+HashData
+--------
 ```
-function Hash(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32;
+function HashData(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32;
 ```
-Computes a UInt32 hash of data using xxhash32 algorithm.
-https://xxhash.com/
+Fast non-cryptographic 32-bit hash (xxHash32) of a raw buffer.
 *)
-procedure _LapeHash(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeHashData(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PUInt32(Result)^ := Hash(PPointer(Params^[0])^, PInteger(Params^[1])^, PUInt32(Params^[2])^);
-end;
-
-(*
-Hash
-----
-```
-function Hash(S: String; Seed: UInt32 = 0): UInt32;
-```
-Computes a UInt32 hash of string using xxhash32 algorithm.
-https://xxhash.com/
-*)
-procedure _LapeHashStr(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PUInt32(Result)^ := Hash(PString(Params^[0])^, PUInt32(Params^[1])^);
+  PUInt32(Result)^ := HashData(PPointer(Params^[0])^, PInteger(Params^[1])^, PUInt32(Params^[2])^);
 end;
 
 (*
@@ -384,7 +438,7 @@ begin
   begin
     DumpSection := 'Encoding';
 
-    addGlobalType('enum(CRC32, MD4, MD5, SHA1, SHA256, SHA512)', 'EHashAlgo');
+    addGlobalType('enum(MD4, MD5, SHA1, SHA256, SHA512, WHIRLPOOL)', 'EDigest');
     addGlobalType('enum(b64URL, b64, b32, b32Hex, b16)', 'EBaseEncoding');
 
     addGlobalFunc('function HOTPCalculateToken(Secret: String; Counter: Integer): Integer', @_LapeHOTPCalculateToken);
@@ -393,12 +447,17 @@ begin
     addGlobalFunc('function BaseEncode(Encoding: EBaseEncoding; const S: String): String', @_LapeBaseEncode);
     addGlobalFunc('function BaseDecode(Encoding: EBaseEncoding; const S: String): String', @_LapeBaseDecode);
 
-    addGlobalFunc('function HashData(Algo: EHashAlgo; Data: Pointer; Len: Int32): String', @_LapeHashData);
-    addGlobalFunc('function HashString(Algo: EHashAlgo; S: String): String', @_LapeHashString);
-    addGlobalFunc('function HashFile(Algo: EHashAlgo; FileName: String): String', @_LapeHashFile);
+    addGlobalFunc('function DigestString(Algo: EDigest; S: String): String', @_LapeDigestString);
+    addGlobalFunc('function DigestFile(Algo: EDigest; FileName: String): String', @_LapeDigestFile);
+    addGlobalFunc('function DigestData(Algo: EDigest; Data: Pointer; Len: Int32): String', @_LapeDigestData);
 
-    addGlobalFunc('function Hash(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32; overload', @_LapeHash);
-    addGlobalFunc('function Hash(S: String; Seed: UInt32 = 0): UInt32; overload', @_LapeHashStr);
+    addGlobalFunc('function CrcString(S: String): UInt32', @_LapeCrcString);
+    addGlobalFunc('function CrcFile(FileName: String): UInt32', @_LapeCrcFile);
+    addGlobalFunc('function CrcData(Data: Pointer; Len: Int32): UInt32', @_LapeCrcData);
+
+    addGlobalFunc('function HashString(S: String; Seed: UInt32 = 0): UInt32', @_LapeHashString);
+    addGlobalFunc('function HashFile(FileName: String; Seed: UInt32 = 0): UInt32', @_LapeHashFile);
+    addGlobalFunc('function HashData(Data: Pointer; Len: Int32; Seed: UInt32 = 0): UInt32', @_LapeHashData);
 
     addGlobalType('enum(ZLIB, SYNLZ, GZ, BZIP2, LZ4, LZMA)', 'ECompressAlgo');
 

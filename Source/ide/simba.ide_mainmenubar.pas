@@ -91,7 +91,7 @@ uses
   simba.ide_package,
   simba.settings,
   simba.component_images,
-  simba.vartype_string,
+  simba.vartype_string, simba.hash,
   simba.fs;
 
 type
@@ -198,7 +198,7 @@ procedure TSimbaMainMenuBar.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
       if (Length(Files) = 0) then
         Continue;
 
-      Hash := ''.Join(Files).Hash();
+      Hash := HashString(''.Join(Files));
       Menu := GetMenu(Package.Name);
       if (Menu.Hash = Hash) then // Already built and no changes
         Continue;

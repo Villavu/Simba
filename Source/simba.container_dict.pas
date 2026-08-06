@@ -180,7 +180,7 @@ end;
 
 class function TDictionary<K, V>.HashString(constref k: String): UInt32;
 begin
-  Result := Hash(@k[1], Length(k));
+  Result := HashData(@k[1], Length(k));
 end;
 
 class function TDictionary<K, V>.CompareBool(constref A, B: Boolean): Boolean;
@@ -308,7 +308,7 @@ end;
 function TDictionary<K,V>.HashKey(constref key: K): UInt32;
 begin
   if FHashData then
-    Result := UInt32(Hash(@key, SizeOf(K)) and FSize)
+    Result := UInt32(HashData(@key, SizeOf(K)) and FSize)
   else
     Result := UInt32(FHashFunc(key) and FSize);
 end;

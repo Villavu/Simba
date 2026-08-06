@@ -46,7 +46,7 @@ type
     class function FileLastWriteTime(FileName: String): TDateTime;
     class function FileSize(FileName: String): Int64;
     class function FileSizeInMegaBytes(FileName: String): Single;
-    class function FileHash(FileName: String; Algo: EHashAlgo = EHashAlgo.SHA1): String;
+    class function FileHash(FileName: String; Algo: EDigest = EDigest.SHA1): String;
     class function FileIsText(FileName: String): Boolean;
 
     class function FileLock(FileName: String): Pointer;
@@ -603,9 +603,9 @@ begin
   Result := FileUtil.FileSize(FileName) / (1024 * 1024);
 end;
 
-class function TSimbaFile.FileHash(FileName: String; Algo: EHashAlgo): String;
+class function TSimbaFile.FileHash(FileName: String; Algo: EDigest): String;
 begin
-  Result := HashFile(Algo, FileName);
+  Result := DigestFile(Algo, FileName);
 end;
 
 class function TSimbaFile.FileIsText(FileName: String): Boolean;

@@ -1,0 +1,42 @@
+{$assertions on}
+
+var
+  Test: String = 'Hello World';
+  TestFile: String := GetTempFileName();
+
+begin
+  FileWrite(TestFile, Test);
+
+  // DigestString
+  Assert(DigestString(EDigest.MD4,    Test) = '77a781b995cf1cfaf39d9e2f5910c2cf');
+  Assert(DigestString(EDigest.MD5,    Test) = 'b10a8db164e0754105b7a99be72e3fe5');
+  Assert(DigestString(EDigest.SHA1,   Test) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
+  Assert(DigestString(EDigest.SHA256, Test) = 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e');
+  Assert(DigestString(EDigest.SHA512, Test) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
+  Assert(DigestString(EDigest.WHIRLPOOL, Test) = 'b77b284bffc952efee36a94397a0ce11e8624668e33b7020a80eb2fb21096f0a08518c50d023de12b010c2e30b93b5837dc471d899608d786fe9a6b60112ea4a');
+
+  // DigestData
+  Assert(DigestData(EDigest.MD4,    @Test[1], Length(Test)) = '77a781b995cf1cfaf39d9e2f5910c2cf');
+  Assert(DigestData(EDigest.MD5,    @Test[1], Length(Test)) = 'b10a8db164e0754105b7a99be72e3fe5');
+  Assert(DigestData(EDigest.SHA1,   @Test[1], Length(Test)) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
+  Assert(DigestData(EDigest.SHA256, @Test[1], Length(Test)) = 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e');
+  Assert(DigestData(EDigest.SHA512, @Test[1], Length(Test)) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
+  Assert(DigestData(EDigest.WHIRLPOOL, @Test[1], Length(Test)) = 'b77b284bffc952efee36a94397a0ce11e8624668e33b7020a80eb2fb21096f0a08518c50d023de12b010c2e30b93b5837dc471d899608d786fe9a6b60112ea4a');
+
+  // DigestFile
+  Assert(DigestFile(EDigest.MD4,    TestFile) = '77a781b995cf1cfaf39d9e2f5910c2cf');
+  Assert(DigestFile(EDigest.MD5,    TestFile) = 'b10a8db164e0754105b7a99be72e3fe5');
+  Assert(DigestFile(EDigest.SHA1,   TestFile) = '0a4d55a8d778e5022fab701977c5d840bbc486d0');
+  Assert(DigestFile(EDigest.SHA256, TestFile) = 'a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e');
+  Assert(DigestFile(EDigest.SHA512, TestFile) = '2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b');
+  Assert(DigestFile(EDigest.WHIRLPOOL, TestFile) = 'b77b284bffc952efee36a94397a0ce11e8624668e33b7020a80eb2fb21096f0a08518c50d023de12b010c2e30b93b5837dc471d899608d786fe9a6b60112ea4a');
+
+  // Larger data ~0.3 MB
+  Test := 'The quick brown fox jumps over the lazy dog. ' * 6667;
+  Assert(DigestString(EDigest.MD4,    Test) = '9fd436619bba6a35c3031987b7b4c6fc');
+  Assert(DigestString(EDigest.MD5,    Test) = '558462c65447ee65480fea67744fea54');
+  Assert(DigestString(EDigest.SHA1,   Test) = '4336060aa991b17e510bb272ece780fbc4830e0a');
+  Assert(DigestString(EDigest.SHA256, Test) = '9344e7019a1ebb9d459e3d32d50e713346af4b87031e20889a78055392b387ab');
+  Assert(DigestString(EDigest.SHA512, Test) = '0ef896df76ed8911601edce3744e5c0e0dfdaf963f04e21162704f6ce2f980e7b1896cdc02ef893a50d5fe3faa3aecf6007d57b53b3c7bbb56033737613fe3b0');
+  Assert(DigestString(EDigest.WHIRLPOOL, Test) = 'acebf827ca92dad286fcb785f35a5856155a47bef0627c5aafcfbb0e761eccb50d255c014a016d1d7f29c70bc0f230188c4a2388339d8557449c67ab29ffc50a');
+end.
