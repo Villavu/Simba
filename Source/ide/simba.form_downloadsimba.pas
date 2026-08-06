@@ -78,7 +78,6 @@ type
       Date: String;
       Branch: String;
       Commit: String;
-      Link: String;
       Downloads: TStringArray;
     end;
     FTreeView: TSimbaTreeView;
@@ -106,6 +105,10 @@ uses
   simba.fs,
   simba.nativeinterface;
 
+const
+  ARCHIVE_RAW_URL    = 'https://github.com/Villavu/Simba-Build-Archive/raw/main';
+  ARCHIVE_README_URL = 'https://raw.githubusercontent.com/Villavu/Simba-Build-Archive/main/README.md';
+
 procedure TDownloader.DoStatusTimer(Sender: TObject);
 begin
   FStatusLock.Enter();
@@ -115,10 +118,12 @@ end;
 
 procedure TDownloader.DoDownloadProgress(Sender: TObject; URL, ContentType: String; Pos, Size: Int64);
 begin
+  FStatusLock.Enter();
   if (Size > 0) then
-    FStatus := 'Downloading: %f / %f MB'.Format([Pos / (1024 * 1024), Size / (1024 * 1024)])
+    FStatus := 'Downloading: %.2f / %.2f MB'.Format([Pos / (1024 * 1024), Size / (1024 * 1024)])
   else
-    FStatus := 'Downloading: %f MB'.Format([Pos / (1024 * 1024)]);
+    FStatus := 'Downloading: %.2f MB'.Format([Pos / (1024 * 1024)]);
+  FStatusLock.Leave();
 end;
 
 procedure TDownloader.DoUnZipperInput(Sender: TObject; var Stream: TStream);
@@ -131,7 +136,8 @@ end;
 
 procedure TDownloader.DoUnZipOutput(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
 begin
-  FFile := Application.Location + TSimbaPath.PathExtractNameWithoutExt(AItem.ArchiveFileName) + '_' + FCommit + TSimbaPath.PathExtractExt(AItem.ArchiveFileName);
+  // save as "Simba_<commit><ext>", not the raw per-platform build name
+  FFile := Application.Location + 'Simba_' + FCommit + TSimbaPath.PathExtractExt(AItem.ArchiveFileName);
   if FileExists(FFile) then
     AStream := TFileStream.Create(FFile, fmOpenReadWrite)
   else
@@ -141,10 +147,20 @@ end;
 procedure TDownloader.Execute;
 begin
   try
-    if FHttpClient.Get(FURL, FData) > 0 then
-      FUnZipper.UnZipAllFiles()
+    if (FHttpClient.Get(FURL, FData) <= 0) then
+      FError := 'No data received'
     else
-      FError := 'No data received';
+    begin
+      // zip starts with the "PK" signature; a 404 / error page does not
+      FData.Position := 0;
+      if (FData.Size >= 2) and (FData.ReadByte = Ord('P')) and (FData.ReadByte = Ord('K')) then
+      begin
+        FData.Position := 0; // make sure to rewind
+        FUnZipper.UnZipAllFiles();
+      end
+      else
+        FError := 'Download had unexpected data (not a zip?)';
+    end;
   except
     on E: Exception do
       FError := E.Message;
@@ -340,13 +356,14 @@ var
   Lines, Args: TStringArray;
   I: Integer;
 begin
-  Lines := URLFetch('https://raw.githubusercontent.com/Villavu/Simba-Build-Archive/main/README.md').SplitLines();
+  Lines := URLFetch(ARCHIVE_README_URL).SplitLines();
 
   if (Length(Lines) > 0) then
   begin
     FDefaultBranch := Lines[0].Between('<!--', '-->');
 
     SetLength(FData, Length(Lines));
+    // rows begin at line 7
     for I := 6 to High(Lines) do
     begin
       Args := Lines[I].Split(' | ');
@@ -360,9 +377,19 @@ end;
 procedure TSimbaDownloadSimbaForm.DoPopulated(Sender: TObject);
 
   function AddDownloadNode(ParentNode: TTreeNode; Download, Commit: String): TDownloaderFormNode;
+  var
+    Name: String;
   begin
-    Result := TDownloaderFormNode(FTreeView.AddNode(ParentNode, TSimbaPath.PathExtractNameWithoutExt(Download).Replace('%20', ' '), SimbaImages.SIMBA));
-    Result.DownloadURL := 'https://github.com/Villavu/Simba-Build-Archive/blob/main' + Download;
+    // "Simba_windows_x86_64.exe.zip" -> "Windows (64bit)"; "Simba_linux_aarch64.zip" -> "Linux (aarch64)"
+    Name := TSimbaPath.PathExtractName(Download).Before('.').After('Simba_');
+    Name := Name.Replace('_x86_64', ' (64bit)').Replace('_i386', ' (32bit)').Replace('_aarch64', ' (aarch64)').Replace('_debug', ' debug');
+    Name := Name.Replace('windows', 'Windows').Replace('linux', 'Linux').Replace('macos', 'macOS');
+
+    Result := TDownloaderFormNode(FTreeView.AddNode(ParentNode, Name, SimbaImages.SIMBA));
+    if Download.StartsWith('http') then
+      Result.DownloadURL := Download
+    else
+      Result.DownloadURL := ARCHIVE_RAW_URL + Download;
     Result.Commit := Commit;
   end;
 

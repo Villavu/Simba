@@ -221,7 +221,7 @@
     </VersionInfo>
     <BuildModes Count="7">
       <Item1 Name="Default" Default="True"/>
-      <Item2 Name="Win32">
+      <Item2 Name="Windows (32bit)">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -271,7 +271,7 @@
           </Other>
         </CompilerOptions>
       </Item2>
-      <Item3 Name="Win64">
+      <Item3 Name="Windows (64bit)">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -321,7 +321,7 @@
           </Other>
         </CompilerOptions>
       </Item3>
-      <Item4 Name="Linux">
+      <Item4 Name="Linux (64bit)">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -369,7 +369,7 @@
           </Other>
         </CompilerOptions>
       </Item4>
-      <Item5 Name="Linux Arm">
+      <Item5 Name="Linux (aarch64)">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -416,11 +416,11 @@
           </Other>
         </CompilerOptions>
       </Item5>
-      <Item6 Name="Mac">
+      <Item6 Name="macOS (64bit)">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../Simba_darwin_x86_64"/>
+            <Filename Value="../Simba_macos_x86_64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
@@ -464,11 +464,11 @@
           </Other>
         </CompilerOptions>
       </Item6>
-      <Item7 Name="Mac Arm">
+      <Item7 Name="macOS (aarch64)">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../Simba_darwin_aarch64"/>
+            <Filename Value="../Simba_macos_aarch64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>

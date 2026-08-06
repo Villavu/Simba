@@ -5,17 +5,16 @@ on:
     workflows:
       - build
     types:
-      - completed    
+      - completed
 
 jobs:
   deploy:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == 'Villavu/Simba' && !startsWith(github.event.workflow_run.head_branch, 'dev/')
     runs-on: ubuntu-latest
-    concurrency: archive-push
     permissions:
       actions: read
       contents: read
-    steps:     
+    steps:
       - name: Download artifacts
         uses: actions/github-script@v7
         with:
@@ -38,13 +37,13 @@ jobs:
             }
 
       - name: Push
-        shell: bash     
+        shell: bash
         env:
           BRANCH: ${{ github.event.workflow_run.head_branch }}
           SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           git config --global http.postBuffer 500M
-          git config --global user.email "villavu-bot"
+          git config --global user.email "villavu-bot@users.noreply.github.com"
           git config --global user.name "villavu-bot"
           git clone --depth 1 https://github.com/Villavu/Simba-Build-Archive
 
@@ -58,30 +57,41 @@ jobs:
           sha="$SHA"
           commit=${sha::10}
           url="$date_year/$date_month_day%20$branch%20$commit"
+          raw="https://github.com/Villavu/Simba-Build-Archive/raw/main/$url"
 
           row="$date_year/$date_month_day | $branch | [$commit](https://github.com/Villavu/Simba/commit/$commit) | "
-          row+="[Win32](/$url/Simba_windows_i386.exe.zip?raw=true) - "
-          row+="[Win64](/$url/Simba_windows_x86_64.exe.zip?raw=true) - "
-          row+="[Win64&nbsp;Debug](/$url/Simba_windows_x86_64_debug.exe.zip?raw=true)<br>"
-          row+="[Mac](/$url/Simba_darwin_x86_64.zip?raw=true) - "
-          row+="[Mac Arm](/$url/Simba_darwin_aarch64.zip?raw=true)<br>"
-          row+="[Linux](/$url/Simba_linux_x86_64.zip?raw=true) - "
-          row+="[Linux Arm](/$url/Simba_linux_aarch64.zip?raw=true)"
-          
-          cd Simba-Build-Archive
-          mkdir -p "$date_year/$date_month_day $branch $commit"
-          mv ../*.zip "$date_year/$date_month_day $branch $commit"
+          row+="[Win32]($raw/Simba_windows_i386.exe.zip) - "
+          row+="[Win64]($raw/Simba_windows_x86_64.exe.zip) - "
+          row+="[Win64&nbsp;Debug]($raw/Simba_windows_x86_64_debug.exe.zip)<br>"
+          row+="[Mac]($raw/Simba_macos_x86_64.zip) - "
+          row+="[Mac Arm]($raw/Simba_macos_aarch64.zip)<br>"
+          row+="[Linux]($raw/Simba_linux_x86_64.zip) - "
+          row+="[Linux Arm]($raw/Simba_linux_aarch64.zip)"
 
+          cd Simba-Build-Archive
+          dest="$date_year/$date_month_day $branch $commit"
+          mkdir -p "$dest"
+          mv ../*.zip "$dest"
+
+          # fail (rather than ship dead links) if one is missing.
+          for f in Simba_windows_i386.exe.zip Simba_windows_x86_64.exe.zip Simba_windows_x86_64_debug.exe.zip \
+                   Simba_macos_x86_64.zip Simba_macos_aarch64.zip Simba_linux_x86_64.zip Simba_linux_aarch64.zip; do
+            if [ ! -f "$dest/$f" ]; then
+              echo "::error::Artifact '$f' not found. build.yml artifact names changed?"
+              exit 1
+            fi
+          done
+
+          # Insert new row after the 6-line header
           sed -i "6r /dev/stdin" README.md <<< "$row"
 
-          archive="https://github.com/Villavu/Simba-Build-Archive/blob/main/$url"
-          echo "$archive/Simba_windows_i386.exe.zip?raw=true"   > latest.win32
-          echo "$archive/Simba_windows_x86_64.exe.zip?raw=true" > latest.win64
-          echo "$archive/Simba_linux_x86_64.zip?raw=true"       > latest.linux64
-          echo "$archive/Simba_linux_aarch64.zip?raw=true"      > latest.linuxarm64
-          echo "$archive/Simba_darwin_x86_64.zip?raw=true"      > latest.macintel
-          echo "$archive/Simba_darwin_aarch64.zip?raw=true"     > latest.macarm64
+          echo "$raw/Simba_windows_i386.exe.zip"   > latest.win32
+          echo "$raw/Simba_windows_x86_64.exe.zip" > latest.win64
+          echo "$raw/Simba_linux_x86_64.zip"       > latest.linux64
+          echo "$raw/Simba_linux_aarch64.zip"      > latest.linuxarm64
+          echo "$raw/Simba_macos_x86_64.zip"      > latest.macintel
+          echo "$raw/Simba_macos_aarch64.zip"     > latest.macarm64
 
           git add .
           git commit --message "$commit"
-          git push https://${{ secrets.API_TOKEN_GITHUB }}@github.com/villavu/simba-build-archive
+          git push "https://${{ secrets.API_TOKEN_GITHUB }}@github.com/villavu/simba-build-archive"
