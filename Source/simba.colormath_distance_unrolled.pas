@@ -31,8 +31,8 @@ function DistanceDeltaE_UnRolled(const C1: PColorLAB; const C2: PColorBGRA; cons
 implementation
 
 function DistanceRGB_UnRolled(const C1: PColorRGB; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
-{$IF DEFINED(COLORDIST_ASM) and DEFINED(CPUX86_64)}
-  {$I asm/distancergb_x64_86.inc}
+{$IF DEFINED(COLORDIST_ASM)}
+  {$I asm/distancergb_x86_64.inc}
 {$ELSE}
 begin
   Result := Sqrt(Sqr((C1^.R - C2^.R) * mul[0]) + Sqr((C1^.G - C2^.G) * mul[1]) + Sqr((C1^.B - C2^.B) * mul[2]));
@@ -40,8 +40,8 @@ end;
 {$ENDIF}
 
 function DistanceHSL_UnRolled(const C1: PColorHSL; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
-{$IF DEFINED(COLORDIST_ASM) and DEFINED(CPUX86_64)}
-  {$I asm/distancehsl_x64_86.inc}
+{$IF DEFINED(COLORDIST_ASM)}
+  {$I asm/distancehsl_x86_64.inc}
 {$ELSE}
 var
   R,G,B,deltaC,deltaH,cMax,cMin, H,S,L: Single;
@@ -88,8 +88,8 @@ end;
 {$ENDIF}
 
 function DistanceHSV_UnRolled(const C1: PColorHSV; const C2: PColorBGRA; const mul: TChannelMultipliers): Single;
-{$IF DEFINED(COLORDIST_ASM) and DEFINED(CPUX86_64)}
-  {$I asm/distancehsv_x64_86.inc}
+{$IF DEFINED(COLORDIST_ASM)}
+  {$I asm/distancehsv_x86_64.inc}
 {$ELSE}
 var
   R, G, B: Single;

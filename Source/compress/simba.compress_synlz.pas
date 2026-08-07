@@ -72,8 +72,8 @@ begin
 end;
 
 {$IF DEFINED(SYNLZ_ASM)}
-  {$I ../asm/synlzcompress_x64.inc}
-  {$I ../asm/synlzdecompress_x64.inc}
+  {$I ../asm/synlzcompress_x86_64.inc}
+  {$I ../asm/synlzdecompress_x86_64.inc}
 {$ENDIF}
 
 function SynLZCompressPas(Src: PByte; Size: Int32; Dst: PByte): Int32;

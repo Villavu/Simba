@@ -31,6 +31,7 @@
   {$DEFINE COLORMATH_ASM}
   {$DEFINE FFT_ASM}
   {$DEFINE SYNLZ_ASM}
+  {$DEFINE IMAGE_ASM}
 {$ENDIF}
 
 {$DEFINE MT_PACKED} // pack two real colour channels into one complex FFT (R->Re, G->Im) rather than transforming all three separately

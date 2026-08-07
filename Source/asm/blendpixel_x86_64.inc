@@ -1,0 +1,40 @@
+// x86-64 SSE alpha blend of one pixel: dst = (dst*(255-a) + src*a) / 255 per channel, with
+// the /255 as the exact (t*32897) shr 23 (pmulhuw + psrlw). Where dst.A = 0 the source is
+// copied, matching the scalar path. `const Color` is passed by reference. Bit-identical to
+// the scalar blend for opaque or fully-transparent destinations.
+assembler; nostackframe;
+asm
+{$IFDEF UNIX}
+  mov    rcx, rdi                 // Pixel
+  mov    rdx, rsi                 // @Color
+{$ENDIF}
+  movzx  eax, byte ptr [rcx+3]    // dst.A
+  test   eax, eax
+  jz     @copy
+  movd   xmm0, [rcx]              // dst pixel
+  movd   xmm1, [rdx]              // src color
+  pxor   xmm2, xmm2
+  punpcklbw xmm0, xmm2            // dst -> 4 words
+  punpcklbw xmm1, xmm2            // src -> 4 words
+  pshuflw xmm3, xmm1, $FF         // a = src.A, broadcast to 4 words
+  mov    eax, 255
+  pinsrw xmm1, eax, 3             // src.A lane -> 255, so the A addend is 255*a
+  pcmpeqw xmm4, xmm4
+  psrlw  xmm4, 8                  // 255 in each word
+  psubw  xmm4, xmm3               // ia = 255 - a
+  pmullw xmm0, xmm4               // dst * ia
+  pmullw xmm1, xmm3               // addend: src*a  (A lane = 255*a)
+  paddw  xmm0, xmm1
+  mov    eax, 32897
+  movd   xmm5, eax
+  pshuflw xmm5, xmm5, 0           // div-255 magic, broadcast
+  pmulhuw xmm0, xmm5              // (t * 32897) >> 16
+  psrlw  xmm0, 7                  // >> 7  =>  t / 255
+  packuswb xmm0, xmm0
+  movd   [rcx], xmm0
+  jmp    @done
+@copy:
+  mov    eax, [rdx]
+  mov    [rcx], eax
+@done:
+end;
