@@ -76,10 +76,14 @@ end;
 *)
 procedure _BuildPolygonFilled(APoints: TPointArray; ARect: TRect; AOffset: TPoint);
 var
-  scanlineY, scanLineY1, scanLineY2: Integer;
+  scanlineY, scanLineY1, scanLineY2, yLo, yHi: Integer;
   lPoints, pts: TPointFArray;
   I: Integer;
+  yMin, yMax: Double;
 begin
+  if (Length(APoints) < 3) then // a polygon needs at least 3 vertices
+    Exit;
+
   if (APoints[0] <> APoints[High(APoints)]) then
   begin
     SetLength(APoints, Length(APoints) + 1);
@@ -96,13 +100,23 @@ begin
     scanLineY2 := ARect.Top;
   end;
 
-  // Prepare points as needed by the GetLinePolygonIntersectionPoints procedure
+  // Prepare points (apply offset) and track the polygon's Y extent
   SetLength(pts, Length(APoints));
+  yMin := APoints[0].Y + AOffset.Y;
+  yMax := yMin;
   for I := 0 to High(APoints) do
   begin
     pts[I].x := APoints[I].X + AOffset.X;
     pts[I].y := APoints[I].Y + AOffset.Y;
+    if (pts[I].y < yMin) then yMin := pts[I].y;
+    if (pts[I].y > yMax) then yMax := pts[I].y;
   end;
+
+  // Only scan the polygon's own Y-extent (clamped to ARect), not the whole rect
+  yLo := Trunc(yMin) - 1;
+  yHi := Trunc(yMax) + 1;
+  if (yLo > scanLineY1) then scanLineY1 := yLo;
+  if (yHi < scanLineY2) then scanLineY2 := yHi;
 
   // Fill polygon by drawing horizontal line segments
   scanlineY := scanlineY1;

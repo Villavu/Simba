@@ -65,7 +65,7 @@ begin
   BGRA := Image.DrawColorAsBGRA;
 
   for Point in TPA do
-    if (Point.X >= 0) and (Point.Y >= 0) and (Point.X < Image.Width) and (Point.Y < Image.Height) then
+    if (UInt32(Point.X) < UInt32(Image.Width)) and (UInt32(Point.Y) < UInt32(Image.Height)) then
       Image.Data[Point.Y * Image.Width + Point.X] := BGRA;
 end;
 
@@ -77,7 +77,7 @@ begin
   BGRA := Image.DrawColorAsBGRA;
 
   for Point in TPA do
-    if (Point.X >= 0) and (Point.Y >= 0) and (Point.X < Image.Width) and (Point.Y < Image.Height) then
+    if (UInt32(Point.X) < UInt32(Image.Width)) and (UInt32(Point.Y) < UInt32(Image.Height)) then
       BlendPixel(@Image.Data[Point.Y * Image.Width + Point.X], BGRA);
 end;
 
@@ -87,7 +87,7 @@ var
 
   procedure _Pixel(const X, Y: Integer); inline;
   begin
-    if (X >= 0) and (Y >= 0) and (X < Image.Width) and (Y < Image.Height) then
+    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
       Image.Data[Y * Image.Width + X] := BGRA;
   end;
 
@@ -105,7 +105,7 @@ var
 
   procedure _Pixel(const X, Y: Integer);
   begin
-    if (X >= 0) and (Y >= 0) and (X < Image.Width) and (Y < Image.Height) then
+    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
       BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
   end;
 
@@ -123,7 +123,7 @@ var
 
   procedure _Pixel(const X, Y: Integer); inline;
   begin
-    if (X >= 0) and (Y >= 0) and (X < Image.Width) and (Y < Image.Height) then
+    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
       Image.Data[Y * Image.Width + X] := BGRA;
   end;
 
@@ -141,7 +141,7 @@ var
 
   procedure _Pixel(const X, Y: Integer);
   begin
-    if (X >= 0) and (Y >= 0) and (X < Image.Width) and (Y < Image.Height) then
+    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
       BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
   end;
 
@@ -281,7 +281,7 @@ var
 
   procedure _Row(const Y: Integer; X1, X2: Integer);
   begin
-    if (Y >= 0) and (Y < Image.Height) then
+    if (UInt32(Y) < UInt32(Image.Height)) then
     begin
       X1 := EnsureRange(X1, 0, Image.Width - 1);
       X2 := EnsureRange(X2, 0, Image.Width - 1);
@@ -308,7 +308,7 @@ var
     Ptr: PColorBGRA;
     Upper: PtrUInt;
   begin
-    if (Y >= 0) and (Y < Image.Height) then
+    if (UInt32(Y) < UInt32(Image.Height)) then
     begin
       X1 := EnsureRange(X1, 0, Image.Width - 1);
       X2 := EnsureRange(X2, 0, Image.Width - 1);
@@ -381,7 +381,7 @@ var
 
   procedure _Pixel(const X, Y: Integer); inline;
   begin
-    if (X >= 0) and (Y >= 0) and (X < Image.Width) and (Y < Image.Height) then
+    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
       Image.Data[Y * Image.Width + X] := BGRA;
   end;
 
@@ -399,7 +399,7 @@ var
 
   procedure _Pixel(const X, Y: Integer); inline;
   begin
-    if (X >= 0) and (Y >= 0) and (X < Image.Width) and (Y < Image.Height) then
+    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
       BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
   end;
 

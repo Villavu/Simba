@@ -1938,7 +1938,7 @@ end;
 
 function TSimbaImage.InImage(const X, Y: Integer): Boolean;
 begin
-  Result := (X >= 0) and (Y >= 0) and (X < FWidth) and (Y < FHeight);
+  Result := (UInt32(X) < UInt32(FWidth)) and (UInt32(Y) < UInt32(FHeight));
 end;
 
 function TSimbaImage.DataRange(out Lo, Hi: PColorBGRA): Boolean;

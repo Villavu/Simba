@@ -63,7 +63,7 @@ begin
   begin
     X := TPA[I].X + DrawInfo.Offset.X;
     Y := TPA[I].Y + DrawInfo.Offset.Y;
-    if (X >= 0) and (Y >= 0) and (X < DrawInfo.Width) and (Y < DrawInfo.Height) then
+    if (UInt32(X) < UInt32(DrawInfo.Width)) and (UInt32(Y) < UInt32(DrawInfo.Height)) then
       PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ := Color;
   end;
 end;
@@ -76,7 +76,7 @@ var
 
   procedure _Pixel(const X, Y: Integer); inline;
   begin
-    if (X >= 0) and (Y >= 0) and (X < DrawInfo.Width) and (Y < DrawInfo.Height) then
+    if (UInt32(X) < UInt32(DrawInfo.Width)) and (UInt32(Y) < UInt32(DrawInfo.Height)) then
       PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ := Color;
   end;
 
@@ -99,7 +99,7 @@ var
 
   procedure _Pixel(const X, Y: Integer); inline;
   begin
-    if (X >= 0) and (Y >= 0) and (X < DrawInfo.Width) and (Y < DrawInfo.Height) then
+    if (UInt32(X) < UInt32(DrawInfo.Width)) and (UInt32(Y) < UInt32(DrawInfo.Height)) then
       PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ := Color;
   end;
 
@@ -122,7 +122,7 @@ var
 
   procedure _Pixel(const X, Y: Integer); inline;
   begin
-    if (X >= 0) and (Y >= 0) and (X < DrawInfo.Width) and (Y < DrawInfo.Height) then
+    if (UInt32(X) < UInt32(DrawInfo.Width)) and (UInt32(Y) < UInt32(DrawInfo.Height)) then
       PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ := Color;
   end;
 
@@ -131,7 +131,7 @@ var
     Ptr: PByte;
     Upper: PtrUInt;
   begin
-    if (Y >= 0) and (Y < DrawInfo.Height) then
+    if (UInt32(Y) < UInt32(DrawInfo.Height)) then
     begin
       X1 := EnsureRange(X1, 0, DrawInfo.Width - 1);
       X2 := EnsureRange(X2, 0, DrawInfo.Width - 1);
@@ -172,7 +172,7 @@ var
     Ptr: PByte;
     Upper: PtrUInt;
   begin
-    if (Y >= 0) and (Y < DrawInfo.Height) then
+    if (UInt32(Y) < UInt32(DrawInfo.Height)) then
     begin
       X1 := EnsureRange(X1, 0, DrawInfo.Width - 1);
       X2 := EnsureRange(X2, 0, DrawInfo.Width - 1);
@@ -241,7 +241,7 @@ var
 
   procedure _Pixel(const X, Y: Integer); inline;
   begin
-    if (X >= 0) and (Y >= 0) and (X < DrawInfo.Width) and (Y < DrawInfo.Height) then
+    if (UInt32(X) < UInt32(DrawInfo.Width)) and (UInt32(Y) < UInt32(DrawInfo.Height)) then
       PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ := Color;
   end;
 
@@ -267,7 +267,7 @@ var
     Ptr: PByte;
     Upper: PtrUInt;
   begin
-    if (Y >= 0) and (Y < DrawInfo.Height) then
+    if (UInt32(Y) < UInt32(DrawInfo.Height)) then
     begin
       X1 := EnsureRange(X1, 0, DrawInfo.Width - 1);
       X2 := EnsureRange(X2, 0, DrawInfo.Width - 1);
@@ -308,7 +308,7 @@ var
     Ptr: PByte;
     Upper: PtrUInt;
   begin
-    if (Y >= 0) and (Y < DrawInfo.Height) then
+    if (UInt32(Y) < UInt32(DrawInfo.Height)) then
     begin
       X1 := EnsureRange(X1, 0, DrawInfo.Width - 1);
       X2 := EnsureRange(X2, 0, DrawInfo.Width - 1);

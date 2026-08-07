@@ -4,7 +4,8 @@
 
 procedure _BuildEllipseFilled(centerX, centerY, radiusX, radiusY: Integer);
 var
-  RadX, RadY, DeltaX, DeltaY, R, RX, RY: Integer;
+  RadX, RadY: Integer;
+  DeltaX, DeltaY, R, RX, RY: Int64;
   X1, X2, Y1, Y2, OldY: Integer;
 begin
   X1 := CenterX - RadiusX;
@@ -19,9 +20,9 @@ begin
   Y2 := Y1;
   OldY := Y1;
 
-  DeltaX := (RadX * RadX);
-  DeltaY := (RadY * RadY);
-  R  := RadX * RadY * RadY;
+  DeltaX := Int64(RadX) * RadX;
+  DeltaY := Int64(RadY) * RadY;
+  R  := Int64(RadX) * RadY * RadY;
   RX := R;
   RY := 0;
 
