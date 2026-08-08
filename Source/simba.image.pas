@@ -176,7 +176,7 @@ type
     procedure DrawTPA(TPA: TPointArray);
 
     // Line
-    procedure DrawLine(Start, Stop: TPoint);
+    procedure DrawLine(Start, Stop: TPoint; Thickness: Integer = 1);
     procedure DrawLineGap(Start, Stop: TPoint; GapSize: Integer);
     procedure DrawCrosshairs(ACenter: TPoint; Size: Integer);
     procedure DrawCross(ACenter: TPoint; Radius: Integer);
@@ -197,7 +197,7 @@ type
     procedure DrawQuadInverted(Quad: TQuad);
 
     // Circle
-    procedure DrawCircle(ACenter: TPoint; Radius: Integer);
+    procedure DrawCircle(ACenter: TPoint; Radius: Integer; Thickness: Integer = 1);
     procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer);
     procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer);
 
@@ -887,8 +887,15 @@ begin
   end;
 end;
 
-procedure TSimbaImage.DrawLine(Start, Stop: TPoint);
+procedure TSimbaImage.DrawLine(Start, Stop: TPoint; Thickness: Integer);
 begin
+  if (Thickness > 1) then
+  begin
+    if (FDrawAlpha = ALPHA_OPAQUE) then
+      SimbaImage_DrawLineThick(Self, Start, Stop, Thickness)
+    else
+      SimbaImage_DrawLineThickAlpha(Self, Start, Stop, Thickness);
+  end else
   if (FDrawAlpha = ALPHA_OPAQUE) then
     SimbaImage_DrawLine(Self, Start, Stop)
   else
@@ -905,8 +912,13 @@ end;
 
 procedure TSimbaImage.DrawPolygon(Poly: TPolygon);
 begin
-  if (Length(Poly) >= 3) then
-    Self.DrawTPA(TPointArray(Poly).Connect());
+  if (Length(Poly) < 3) then
+    Exit;
+
+  if (FDrawAlpha = ALPHA_OPAQUE) then
+    SimbaImage_DrawPolygon(Self, Poly)
+  else
+    SimbaImage_DrawPolygonAlpha(Self, Poly);
 end;
 
 procedure TSimbaImage.DrawPolygonFilled(Poly: TPolygon);
@@ -931,13 +943,22 @@ begin
   end;
 end;
 
-procedure TSimbaImage.DrawCircle(ACenter: TPoint; Radius: Integer);
+procedure TSimbaImage.DrawCircle(ACenter: TPoint; Radius: Integer; Thickness: Integer);
 begin
-  if (Radius >= 1) then
+  if (Radius < 1) then
+    Exit;
+
+  if (Thickness > 1) then
+  begin
     if (FDrawAlpha = ALPHA_OPAQUE) then
-      SimbaImage_DrawCircleEdge(Self, ACenter, Radius)
+      SimbaImage_DrawCircleThick(Self, ACenter, Radius, Thickness)
     else
-      SimbaImage_DrawCircleEdgeAlpha(Self, ACenter, Radius);
+      SimbaImage_DrawCircleThickAlpha(Self, ACenter, Radius, Thickness);
+  end else
+  if (FDrawAlpha = ALPHA_OPAQUE) then
+    SimbaImage_DrawCircleEdge(Self, ACenter, Radius)
+  else
+    SimbaImage_DrawCircleEdgeAlpha(Self, ACenter, Radius);
 end;
 
 procedure TSimbaImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer);

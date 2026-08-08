@@ -39,11 +39,20 @@ procedure SimbaImage_DrawCircleInvertedAlpha(Image: TSimbaImage; ACenter: TPoint
 procedure SimbaImage_DrawCircleEdge(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
 procedure SimbaImage_DrawCircleEdgeAlpha(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
 
+procedure SimbaImage_DrawCircleThick(Image: TSimbaImage; ACenter: TPoint; Radius, Thickness: Integer);
+procedure SimbaImage_DrawCircleThickAlpha(Image: TSimbaImage; ACenter: TPoint; Radius, Thickness: Integer);
+
 procedure SimbaImage_DrawPolygonFilled(Image: TSimbaImage; Poly: TPolygon);
 procedure SimbaImage_DrawPolygonFilledAlpha(Image: TSimbaImage; Poly: TPolygon);
 
 procedure SimbaImage_DrawPolygonInverted(Image: TSimbaImage; Poly: TPolygon);
 procedure SimbaImage_DrawPolygonInvertedAlpha(Image: TSimbaImage; Poly: TPolygon);
+
+procedure SimbaImage_DrawPolygon(Image: TSimbaImage; Poly: TPolygon);
+procedure SimbaImage_DrawPolygonAlpha(Image: TSimbaImage; Poly: TPolygon);
+
+procedure SimbaImage_DrawLineThick(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Integer);
+procedure SimbaImage_DrawLineThickAlpha(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Integer);
 
 procedure SimbaImage_DrawQuadInverted(Image: TSimbaImage; Quad: TQuad);
 procedure SimbaImage_DrawQuadInvertedAlpha(Image: TSimbaImage; Quad: TQuad);
@@ -411,6 +420,49 @@ begin
     _BuildCircle(ACenter.X, ACenter.Y, Radius);
 end;
 
+procedure SimbaImage_DrawCircleThick(Image: TSimbaImage; ACenter: TPoint; Radius, Thickness: Integer);
+var
+  BGRA: TColorBGRA;
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); // spans are pre-clamped by the builder
+  begin
+    FillData(@Image.Data[Y * Image.Width + X1], (X2 - X1) + 1, BGRA);
+  end;
+
+  {$i shapebuilder_circlethick.inc}
+
+begin
+  BGRA := Image.DrawColorAsBGRA;
+
+  _BuildCircleThick(ACenter.X, ACenter.Y, Radius, Thickness, Image.Width, Image.Height);
+end;
+
+procedure SimbaImage_DrawCircleThickAlpha(Image: TSimbaImage; ACenter: TPoint; Radius, Thickness: Integer);
+var
+  BGRA: TColorBGRA;
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); // spans are pre-clamped by the builder
+  var
+    Ptr: PColorBGRA;
+    Upper: PtrUInt;
+  begin
+    Ptr := @Image.Data[Y * Image.Width + X1];
+    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
+    while (PtrUInt(Ptr) <= Upper) do
+    begin
+      BlendPixel(Ptr, BGRA);
+      Inc(Ptr);
+    end;
+  end;
+
+  {$i shapebuilder_circlethick.inc}
+
+begin
+  BGRA := Image.DrawColorAsBGRA;
+
+  _BuildCircleThick(ACenter.X, ACenter.Y, Radius, Thickness, Image.Width, Image.Height);
+end;
+
 procedure SimbaImage_DrawPolygonFilled(Image: TSimbaImage; Poly: TPolygon);
 var
   BGRA: TColorBGRA;
@@ -526,6 +578,87 @@ begin
     for Y := B.Y1 to B.Y2 do
       if not Quad.Contains(TPoint.Create(X, Y)) then
         BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
+end;
+
+procedure SimbaImage_DrawPolygon(Image: TSimbaImage; Poly: TPolygon);
+var
+  BGRA: TColorBGRA;
+
+  procedure _Pixel(const X, Y: Integer); inline;
+  begin
+    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
+      Image.Data[Y * Image.Width + X] := BGRA;
+  end;
+
+  {$i shapebuilder_line.inc}
+  {$i shapebuilder_polygon.inc}
+
+begin
+  BGRA := Image.DrawColorAsBGRA;
+
+  _BuildPolygon(Poly);
+end;
+
+procedure SimbaImage_DrawPolygonAlpha(Image: TSimbaImage; Poly: TPolygon);
+var
+  BGRA: TColorBGRA;
+
+  procedure _Pixel(const X, Y: Integer);
+  begin
+    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
+      BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
+  end;
+
+  {$i shapebuilder_line.inc}
+  {$i shapebuilder_polygon.inc}
+
+begin
+  BGRA := Image.DrawColorAsBGRA;
+
+  _BuildPolygon(Poly);
+end;
+
+procedure SimbaImage_DrawLineThick(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Integer);
+var
+  BGRA: TColorBGRA;
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); // spans are pre-clamped by the builder
+  begin
+    FillData(@Image.Data[Y * Image.Width + X1], (X2 - X1) + 1, BGRA);
+  end;
+
+  {$i shapebuilder_linethick.inc}
+
+begin
+  BGRA := Image.DrawColorAsBGRA;
+
+  _BuildLineThick(Start, Stop, Thickness, Image.Width, Image.Height);
+end;
+
+procedure SimbaImage_DrawLineThickAlpha(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Integer);
+var
+  BGRA: TColorBGRA;
+
+  procedure _Row(const Y: Integer; X1, X2: Integer); // spans are pre-clamped by the builder
+  var
+    Ptr: PColorBGRA;
+    Upper: PtrUInt;
+  begin
+    Ptr := @Image.Data[Y * Image.Width + X1];
+    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
+    while (PtrUInt(Ptr) <= Upper) do
+    begin
+      BlendPixel(Ptr, BGRA);
+      Inc(Ptr);
+    end;
+  end;
+
+  {$i shapebuilder_linethick.inc}
+
+begin
+  BGRA := Image.DrawColorAsBGRA;
+
+  _BuildLineThick(Start, Stop, Thickness, Image.Width, Image.Height);
 end;
 
 procedure SimbaImage_DrawLineAA(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Single);
