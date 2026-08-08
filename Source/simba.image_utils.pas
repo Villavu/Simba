@@ -50,13 +50,13 @@ const
   ALPHA_OPAQUE      = Byte(255);
   ALPHA_TRANSPARENT = Byte(0);
 
-procedure BlendPixel(const Data: PColorBGRA; const DataW, DataH: Integer; const X,Y: Integer; const Color: TColorBGRA); overload; inline;
-procedure BlendPixel(const Pixel: PColorBGRA; const Color: TColorBGRA); overload;
+procedure BlendPixel(const Data: PColorBGRA; const DataW, DataH: Integer; const X,Y: Integer; constref Color: TColorBGRA); overload; inline;
+procedure BlendPixel(const Pixel: PColorBGRA; constref Color: TColorBGRA); overload;
 
 function GetDistinctColor(const Index: Integer): Integer;
 function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
 
-procedure FillData(const Data: PColorBGRA; const Count: SizeInt; const Value: TColorBGRA);
+procedure FillData(const Data: PColorBGRA; const Count: SizeInt; constref Value: TColorBGRA);
 
 implementation
 
@@ -186,7 +186,7 @@ begin
   BSum := D.B - B.B - C.B + A.B;
 end;
 
-procedure BlendPixel(const Pixel: PColorBGRA; const Color: TColorBGRA);
+procedure BlendPixel(const Pixel: PColorBGRA; constref Color: TColorBGRA);
 {$IF DEFINED(IMAGE_ASM1)}
   {$I asm/blendpixel_x86_64.inc}
 {$ELSE}
@@ -208,7 +208,7 @@ begin
 end;
 {$ENDIF}
 
-procedure BlendPixel(const Data: PColorBGRA; const DataW, DataH: Integer; const X, Y: Integer; const Color: TColorBGRA);
+procedure BlendPixel(const Data: PColorBGRA; const DataW, DataH: Integer; const X, Y: Integer; constref Color: TColorBGRA);
 begin
   if (UInt32(X) < UInt32(DataW)) and (UInt32(Y) < UInt32(DataH)) then
     BlendPixel(@Data[Y * DataW + X], Color);
@@ -233,7 +233,7 @@ begin
   Result := B.Bounds();
 end;
 
-procedure FillData(const Data: PColorBGRA; const Count: SizeInt; const Value: TColorBGRA);
+procedure FillData(const Data: PColorBGRA; const Count: SizeInt; constref Value: TColorBGRA);
 {$IF DEFINED(IMAGE_ASM)}
   {$I asm/filldata_x86_64.inc}
 {$ELSE}
