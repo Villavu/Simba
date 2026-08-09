@@ -41,6 +41,8 @@ type
     procedure ShowFloating;
     function MouseInFloatArea: Boolean;
     function MouseNearScrollbar: Boolean;
+    // Enabled, not docked and currently hidden
+    function CanSummon: Boolean;
     procedure PollFloat;
     procedure DetachFromPoller;
     procedure UpdatePoller;
@@ -65,11 +67,11 @@ type
     // Drag scrolling
     procedure HandleMiniMouseDown(Sender: TObject; Button: TMouseButton; {%H-}Shift: TShiftState; {%H-}X, Y: Integer);
     procedure HandleMiniMouseMove(Sender: TObject; {%H-}Shift: TShiftState; {%H-}X, Y: Integer);
-    procedure HandleMiniMouseUp(Sender: TObject; {%H-}Button: TMouseButton; {%H-}Shift: TShiftState; {%H-}X, {%H-}Y: Integer);
+    procedure HandleMiniMouseUp(Sender: TObject; Button: TMouseButton; {%H-}Shift: TShiftState; {%H-}X, {%H-}Y: Integer);
     // Vert scrollbar: Float on mouse enter if style=floating
     procedure HandleScrollbarEnter({%H-}Sender: TObject);
     // Editor mouse-move: float when the cursor comes within tolerance of the scrollbar
-    procedure HandleSourceMouseMove(Sender: TObject; {%H-}Shift: TShiftState; {%H-}X, {%H-}Y: Integer);
+    procedure HandleSourceMouseMove(Sender: TObject; Shift: TShiftState; {%H-}X, {%H-}Y: Integer);
   protected
     procedure SetVisible(Value: Boolean); override;
   public
@@ -264,7 +266,8 @@ end;
 
 procedure TMinimapControl.HandleMiniMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  FDragging := False;
+  if (Button = mbLeft) then
+    FDragging := False;
 end;
 
 procedure TMinimapControl.SyncViewWindow;
@@ -291,7 +294,9 @@ end;
 procedure TMinimapControl.DoSettingChange_Enabled(Setting: TSimbaSetting);
 begin
   FEnabled := Setting.Value;
-  if not FEnabled then
+  if FEnabled then
+    ApplyLayout()
+  else
     Visible := False;
 end;
 
@@ -399,15 +404,24 @@ begin
   Result := PtInRect(R, Mouse.CursorPos);
 end;
 
+function TMinimapControl.CanSummon: Boolean;
+begin
+  Result := (not FDocked) and FEnabled and (not Visible);
+end;
+
 procedure TMinimapControl.HandleScrollbarEnter(Sender: TObject);
 begin
-  if (not FDocked) and FEnabled and (not Visible) then
+  if CanSummon() then
     ShowFloating();
 end;
 
 procedure TMinimapControl.HandleSourceMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
-  if (not FDocked) and FEnabled and (not Visible) and MouseNearScrollbar() then
+  // Don't show while a mouse button is held (like dragging)
+  if (Shift * [ssLeft, ssRight, ssMiddle] <> []) then
+    Exit;
+
+  if CanSummon() and MouseNearScrollbar() then
     ShowFloating();
 end;
 
@@ -427,7 +441,7 @@ end;
 
 procedure TMinimapControl.UpdatePoller;
 begin
-  if Visible and (not FDocked) and Assigned(FSourceSynEdit) then
+  if Visible and (not FDocked) and Assigned(FSourceSynEdit) and Assigned(FloatPoller) then
     FloatPoller.Attach(Self)
   else
     DetachFromPoller();
