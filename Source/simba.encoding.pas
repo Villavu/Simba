@@ -19,11 +19,13 @@ type
   EBaseEncoding = (b64URL, b64, b32, b32Hex, b16);
 {$POP}
 
-function BaseEncode(Encoding: EBaseEncoding; const Data: String): String;
-function BaseDecode(Encoding: EBaseEncoding; const Data: String): String;
+function BaseEncode(Encoding: EBaseEncoding; const Data: String): String; overload;
+function BaseEncode(Encoding: EBaseEncoding; Stream: TStream): String; overload;
+function BaseDecode(Encoding: EBaseEncoding; const Data: String): String; overload;
+procedure BaseDecode(Encoding: EBaseEncoding; const Data: String; Stream: TStream); overload;
 
-function BaseEncodeBytes(Encoding: EBaseEncoding; Bytes: TBytes): String;
-function BaseDecodeBytes(Encoding: EBaseEncoding; const Data: String): TBytes;
+function BaseEncodeBytes(Encoding: EBaseEncoding; Bytes: TByteArray): String;
+function BaseDecodeBytes(Encoding: EBaseEncoding; const Data: String): TByteArray;
 
 function HOTPCalculateToken(const aSecret: String; const Counter: Integer): Integer;
 function TOTPCalculateToken(const aSecret: String): Integer;
@@ -49,7 +51,7 @@ begin
     Result := '';
 end;
 
-function BaseEncodeBytes(Encoding: EBaseEncoding; Bytes: TBytes): String;
+function BaseEncodeBytes(Encoding: EBaseEncoding; Bytes: TByteArray): String;
 begin
   if (Length(Bytes) > 0) then
   begin
@@ -66,7 +68,7 @@ end;
 
 function BaseDecode(Encoding: EBaseEncoding; const Data: String): String;
 var
-  Bytes: TBytes;
+  Bytes: TByteArray;
 begin
   if (Length(Data) > 0) then
   begin
@@ -83,7 +85,7 @@ begin
     Result := '';
 end;
 
-function BaseDecodeBytes(Encoding: EBaseEncoding; const Data: String): TBytes;
+function BaseDecodeBytes(Encoding: EBaseEncoding; const Data: String): TByteArray;
 begin
   if (Length(Data) > 0) then
   begin
@@ -96,6 +98,28 @@ begin
     end;
   end else
     Result := [];
+end;
+
+// Encodes from the stream's current position to the end.
+function BaseEncode(Encoding: EBaseEncoding; Stream: TStream): String;
+var
+  Bytes: TByteArray;
+begin
+  SetLength(Bytes, Stream.Size - Stream.Position);
+  if (Length(Bytes) > 0) then
+    Stream.ReadBuffer(Bytes[0], Length(Bytes));
+
+  Result := BaseEncodeBytes(Encoding, Bytes);
+end;
+
+// Decodes and writes the bytes at the stream's current position.
+procedure BaseDecode(Encoding: EBaseEncoding; const Data: String; Stream: TStream);
+var
+  Bytes: TByteArray;
+begin
+  Bytes := BaseDecodeBytes(Encoding, Data);
+  if (Length(Bytes) > 0) then
+    Stream.WriteBuffer(Bytes[0], Length(Bytes));
 end;
 
 // https://gitlab.com/freepascal.org/fpc/source/-/blob/main/packages/fcl-hash/src/onetimepass.pp
@@ -120,7 +144,7 @@ var
   Key: UInt32;
   Offset: Longint;
   Part1, Part2, Part3, Part4: UInt32;
-  SecretBinBuf: TBytes;
+  SecretBinBuf: TByteArray;
   STime, SSecretBin: RawbyteString;
   Time: Longint;
 begin
