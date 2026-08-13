@@ -357,8 +357,8 @@ type
 type
   ESimbaException = class(Exception);
 
-procedure SimbaException(Message: String; Args: array of const); overload;
-procedure SimbaException(Message: String); overload;
+procedure SimbaException(Message: String; Args: array of const); overload; noreturn;
+procedure SimbaException(Message: String); overload; noreturn;
 
 // Writable const
 const
