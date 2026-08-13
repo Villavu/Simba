@@ -187,7 +187,7 @@ begin
 end;
 
 procedure BlendPixel(const Pixel: PColorBGRA; constref Color: TColorBGRA);
-{$IF DEFINED(IMAGE_ASM1)}
+{$IF DEFINED(IMAGE_ASM)}
   {$I asm/blendpixel_x86_64.inc}
 {$ELSE}
 var

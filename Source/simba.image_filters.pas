@@ -38,76 +38,76 @@ uses
 function SimbaImage_GreyScale(Image: TSimbaImage): TSimbaImage;
 var
   I: Integer;
-  Src, Dest: PColorBGRA;
+  Src, Dst: PColorBGRA;
   Lum: Byte;
 begin
   Result := TSimbaImage.Create(Image.Width, Image.Height);
 
   Src := Image.Data;
-  Dest := Result.Data;
+  Dst := Result.Data;
 
   for I := (Image.Height * Image.Width - 1) downto 0 do
   begin
     Lum := Round(Src^.R * 0.299 + Src^.G * 0.587 + Src^.B * 0.114);
 
-    Dest^.R := Lum;
-    Dest^.G := Lum;
-    Dest^.B := Lum;
-    Dest^.A := ALPHA_OPAQUE;
+    Dst^.R := Lum;
+    Dst^.G := Lum;
+    Dst^.B := Lum;
+    Dst^.A := ALPHA_OPAQUE;
 
     Inc(Src);
-    Inc(Dest);
+    Inc(Dst);
   end;
 end;
 
 function SimbaImage_Brightness(Image: TSimbaImage; Value: Integer): TSimbaImage;
 var
   I: Integer;
-  Src, Dest: PColorBGRA;
+  Src, Dst: PColorBGRA;
 begin
   Result := TSimbaImage.Create(Image.Width, Image.Height);
 
   Src := Image.Data;
-  Dest := Result.Data;
+  Dst := Result.Data;
 
   for I := (Image.Height * Image.Width - 1) downto 0 do
   begin
-    Dest^.R := EnsureRange(Src^.R + Value, 0, 255);
-    Dest^.G := EnsureRange(Src^.G + Value, 0, 255);
-    Dest^.B := EnsureRange(Src^.B + Value, 0, 255);
-    Dest^.A := ALPHA_OPAQUE;
+    Dst^.R := EnsureRange(Src^.R + Value, 0, 255);
+    Dst^.G := EnsureRange(Src^.G + Value, 0, 255);
+    Dst^.B := EnsureRange(Src^.B + Value, 0, 255);
+    Dst^.A := ALPHA_OPAQUE;
 
     Inc(Src);
-    Inc(Dest);
+    Inc(Dst);
   end;
 end;
 
 function SimbaImage_Invert(Image: TSimbaImage): TSimbaImage;
 var
   I: Integer;
-  Src, Dest: PColorBGRA;
+  Src, Dst: PColorBGRA;
 begin
   Result := TSimbaImage.Create(Image.Width, Image.Height);
 
   Src := Image.Data;
-  Dest := Result.Data;
+  Dst := Result.Data;
 
   for I := (Image.Height * Image.Width - 1) downto 0 do
   begin
-    Dest^.R := not Src^.R;
-    Dest^.G := not Src^.G;
-    Dest^.B := not Src^.B;
-    Dest^.A := ALPHA_OPAQUE;
+    Dst^.R := not Src^.R;
+    Dst^.G := not Src^.G;
+    Dst^.B := not Src^.B;
+    Dst^.A := ALPHA_OPAQUE;
 
     Inc(Src);
-    Inc(Dest);
+    Inc(Dst);
   end;
 end;
 
 function SimbaImage_Posterize(Image: TSimbaImage; Value: Integer): TSimbaImage;
 var
   I: Integer;
-  Src, Dest: PColorBGRA;
+  Src, Dst: PColorBGRA;
 begin
   if not InRange(Value, 1, 255) then
     SimbaException('TSimbaImage.Posterize: Value(%d) out of range[1..255]', [Value]);
@@ -115,29 +115,31 @@ begin
   Result := TSimbaImage.Create(Image.Width, Image.Height);
 
   Src := Image.Data;
-  Dest := Result.Data;
+  Dst := Result.Data;
 
   for I := (Image.Height * Image.Width - 1) downto 0 do
   begin
-    Dest^.A := ALPHA_OPAQUE;
-    Dest^.R := Min(Round(Src^.R / Value) * Value, 255);
-    Dest^.G := Min(Round(Src^.G / Value) * Value, 255);
-    Dest^.B := Min(Round(Src^.B / Value) * Value, 255);
+    Dst^.A := ALPHA_OPAQUE;
+    Dst^.R := Min(Round(Src^.R / Value) * Value, 255);
+    Dst^.G := Min(Round(Src^.G / Value) * Value, 255);
+    Dst^.B := Min(Round(Src^.B / Value) * Value, 255);
 
     Inc(Src);
-    Inc(Dest);
+    Inc(Dst);
   end;
 end;
 
 function SimbaImage_Sobel(Image: TSimbaImage): TSimbaImage;
 var
-  x,y,xx,yy,W,H,gx,gy: Integer;
+  x,y,xx,yy,W,H,gx,gy,SrcWidth: Integer;
   opx,opy: TIntegerMatrix;
   Grey: TByteMatrix;
-  Ptr: PColorBGRA;
+  Ptr, DstPtr: PColorBGRA;
 begin
   Grey := Image.ToGreyMatrix;
   Result := TSimbaImage.Create(Image.Width, Image.Height);
+  DstPtr := Result.Data;
+  SrcWidth := Image.Width;
 
   SetLength(opx, 3,3);
   opx[0][0] := -1; opx[0][1] := 0; opx[0][2] := 1;
@@ -163,7 +165,7 @@ begin
           gy := gy + (opy[yy][xx] * Grey[y + yy - 1][x + xx - 1]);
         end;
 
-      Ptr := @Result.Data[Y * Result.Width + X];
+      Ptr := @DstPtr[Y * SrcWidth + X];
       Ptr^.B := Byte(EnsureRange(Trunc(Sqrt(gx*gx + gy*gy)), 0, 255));
       Ptr^.G := Ptr^.B;
       Ptr^.R := Ptr^.B;
@@ -172,19 +174,24 @@ end;
 
 function SimbaImage_Enhance(Image: TSimbaImage; Enchantment: Byte; C: Single): TSimbaImage;
 var
-  W,H,x,y,R,G,B:Integer;
+  W,H,x,y,R,G,B,SrcWidth,Idx:Integer;
   mid: Single;
+  SrcPtr, DstPtr: PColorBGRA;
 begin
   Result := TSimbaImage.Create(Image.Width, Image.Height);
+  SrcPtr := Image.Data;
+  DstPtr := Result.Data;
+  SrcWidth := Image.Width;
   Mid := 127 * C;
   W := Image.Width - 1;
   H := Image.Height - 1;
   for y:=0 to H do
     for x:=0 to W do
     begin
-      R := Image.Data[Y * Image.Width + X].R;
-      G := Image.Data[Y * Image.Width + X].G;
-      B := Image.Data[Y * Image.Width + X].B;
+      Idx := Y * SrcWidth + X;
+      R := SrcPtr[Idx].R;
+      G := SrcPtr[Idx].G;
+      B := SrcPtr[Idx].B;
 
       if R > mid then
       begin
@@ -216,17 +223,18 @@ begin
         if (B < 0) then B:=0;
       end;
 
-      Result.Data[Y * Result.Width + X].R := R;
-      Result.Data[Y * Result.Width + X].G := G;
-      Result.Data[Y * Result.Width + X].B := B;
+      DstPtr[Idx].R := R;
+      DstPtr[Idx].G := G;
+      DstPtr[Idx].B := B;
     end;
 end;
 
 function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Integer): TSimbaImage;
 var
-  X, Y, XX, YY, W, H: Integer;
+  X, Y, XX, YY, W, H, SrcWidth, Idx: Integer;
   Size: Integer;
   B: TBox;
+  SrcPtr, DstPtr: PColorBGRA;
   Sum: record
     R,G,B: UInt64;
   end;
@@ -245,6 +253,9 @@ begin
 
   W := Image.Width - 1;
   H := Image.Height - 1;
+  SrcPtr := Image.Data;
+  DstPtr := Result.Data;
+  SrcWidth := Image.Width;
 
   if UseIntergal then
   begin
@@ -260,12 +271,10 @@ begin
         Size := ((B.X2-B.X1) + 1) * ((B.Y2-B.Y1) + 1);
 
         IntegralImage.Query(B.X1, B.Y1, B.X2, B.Y2, Sum.R, Sum.G, Sum.B);
-        with Result.Data[Y * Image.Width + X] do
-        begin
-          R := Sum.R div Size;
-          G := Sum.G div Size;
-          B := Sum.B div Size;
-        end;
+        Idx := Y * SrcWidth + X;
+        DstPtr[Idx].R := Sum.R div Size;
+        DstPtr[Idx].G := Sum.G div Size;
+        DstPtr[Idx].B := Sum.B div Size;
       end;
   end else
   begin
@@ -284,195 +293,156 @@ begin
 
         for YY := B.Y1 to B.Y2 do
           for XX := B.X1 to B.X2 do
-            with Image.Data[YY * Image.Width + XX] do
-            begin
-              Sum.R += R;
-              Sum.G += G;
-              Sum.B += B;
-            end;
+          begin
+            Idx := YY * SrcWidth + XX;
+            Sum.R += SrcPtr[Idx].R;
+            Sum.G += SrcPtr[Idx].G;
+            Sum.B += SrcPtr[Idx].B;
+          end;
 
-        with Result.Data[Y * Image.Width + X] do
-        begin
-          R := Sum.R div Size;
-          G := Sum.G div Size;
-          B := Sum.B div Size;
-        end;
+        Idx := Y * SrcWidth + X;
+        DstPtr[Idx].R := Sum.R div Size;
+        DstPtr[Idx].G := Sum.G div Size;
+        DstPtr[Idx].B := Sum.B div Size;
       end;
   end;
 end;
 
-// https://blog.ivank.net/fastest-gaussian-blur.html
-procedure GaussBlurApprox(var Src, Dst: TByteArray; w, h, r: Integer);
-var
-  Hi: Integer;
+// 3-box approximation of a Gaussian blur (Ivan Kutski @ https://blog.ivank.net/fastest-gaussian-blur.html)
+procedure GaussBlurApprox(var Src, Dst: TByteArray; Width, Height, Radius: Integer);
 
-  function OutOfRange(const Index: Integer): Boolean; inline;
-  begin
-    Result := (Index < 0) or (Index > Hi);
-  end;
-
-  procedure DoPass(var scl, tcl: TByteArray; w, h, r: Integer);
-
-    procedure Horz(var scl, tcl: TByteArray; w, h, r: Integer);
-    var
-      i, j, ti, li, ri, fv, lv, val: Integer;
-      iarr: Double;
-    begin
-      hi := High(scl);
-      iarr := 1 / (r+r+1);
-
-      for i := 0 to h - 1 do
-      begin
-        ti := i * w;
-        li := ti;
-        ri := ti + r;
-        fv := scl[li];
-        lv := scl[ti + (w - 1)];
-        val := (r + 1) * fv;
-
-        for j := 0 to r - 1 do
-        begin
-          if OutOfRange(ti + j) then
-            Continue;
-
-          val := val + scl[ti + j];
-        end;
-
-        for j := 0 to r do
-        begin
-          if OutOfRange(ri) or OutOfRange(ti) then
-            Continue;
-
-          val := val + scl[ri] - fv;
-          tcl[ti] := Round(val * iarr);
-          ri := ri + 1;
-          ti := ti + 1;
-        end;
-
-        for j := r + 1 to w - r - 1 do
-        begin
-          if OutOfRange(ri) or OutOfRange(li) then
-            Continue;
-
-          val := val + scl[ri] - scl[li];
-          tcl[ti] := Round(val * iarr);
-          li := li + 1;
-          ri := ri + 1;
-          ti := ti + 1;
-        end;
-
-        for j := w - r to w - 1 do
-        begin
-          if OutOfRange(li) or OutOfRange(ti) then
-            Continue;
-
-          val := val + lv - scl[li];
-          tcl[ti] := Round(val * iarr);
-          li := li + 1;
-          ti := ti + 1;
-        end;
-      end;
-    end;
-
-    procedure Vert(var scl, tcl: TByteArray; w, h, r: Integer);
-    var
-      i, j, ti, li, ri, fv, lv, val: Integer;
-      iarr: Double;
-    begin
-      hi := High(scl);
-      iarr := 1 / (r+r+1);
-
-      for i := 0 to w - 1 do
-      begin
-        ti := i;
-        li := ti;
-        ri := ti + r * w;
-        fv := scl[ti];
-        lv := scl[ti + w * (h - 1)];
-        val := (r + 1) * fv;
-
-        for j := 0 to r - 1 do
-        begin
-          if OutOfRange(ti + j * w) then
-            Continue;
-          val := val + scl[ti + j * w];
-        end;
-
-        for j := 0 to r do
-        begin
-          if OutOfRange(ri) or OutOfRange(ti) then
-            Continue;
-
-          val := val + scl[ri] - fv;
-          tcl[ti] := Round(val * iarr);
-          ri := ri + w;
-          ti := ti + w;
-        end;
-
-        for j := r + 1 to h - r - 1 do
-        begin
-          if OutOfRange(ri) or OutOfRange(li) or OutOfRange(ti) then
-            Continue;
-
-          val := val + scl[ri] - scl[li];
-          tcl[ti] := Round(val * iarr);
-          li := li + w;
-          ri := ri + w;
-          ti := ti + w;
-        end;
-
-        for j := h - r to h - 1 do
-        begin
-          if OutOfRange(li) or OutOfRange(ti) then
-            Continue;
-
-          val := val + lv - scl[li];
-          tcl[ti] := Round(val * iarr);
-          li := li + w;
-          ti := ti + w;
-        end;
-      end;
-    end;
-
-  begin
-    tcl := Copy(scl);
-
-    Horz(tcl, scl, w, h, r);
-    Vert(scl, tcl, w, h, r);
-  end;
-
-  function BoxesForGauss(sigma: Double): TIntegerArray;
-  const
-    N = 3;
+  procedure BlurRows(const Source: TByteArray; var Target: TByteArray; Width, Height, Radius: Integer);
   var
-    wl, wu, m, i: Integer;
+    Row, k, FirstVal, LastVal, Sum: Integer;
+    Recip: Integer;
+    RowStart, SubPtr, AddPtr, OutPtr: PByte;
   begin
-    wl := Floor(Sqrt((12 * sigma * sigma / n) + 1));
-    if wl mod 2 = 0 then
-      wl := wl - 1;
-    wu := wl + 2;
+    if (Radius > (Width - 1) div 2) then
+      Radius := (Width - 1) div 2;
+    Recip := ((1 shl 22) + Radius) div (2 * Radius + 1); // Q22 reciprocal of the window size
 
-    m := Round((12 * sigma * sigma - (wl * wl * n) - 4.0 * n * wl - 3.0 * n) / (-4.0 * wl - 4));
+    for Row := 0 to Height - 1 do
+    begin
+      RowStart := @Source[Row * Width];
+      OutPtr   := @Target[Row * Width];
+      FirstVal := RowStart^;
+      LastVal  := (RowStart + Width - 1)^;
+      SubPtr   := RowStart;
+      AddPtr   := RowStart + Radius;
 
-    SetLength(Result, N);
-    for i := 0 to N - 1 do
-      if (i < m) then
-        Result[i] := wl
-      else
-        Result[i] := wu;
+      Sum := (Radius + 1) * FirstVal;
+      for k := 0 to Radius - 1 do
+        Sum := Sum + (RowStart + k)^;
+
+      for k := 0 to Radius do                         // left edge: window hangs off the start
+      begin
+        Sum := Sum + AddPtr^ - FirstVal;
+        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
+        Inc(AddPtr); Inc(OutPtr);
+      end;
+      for k := Radius + 1 to Width - Radius - 1 do     // window fully inside the row
+      begin
+        Sum := Sum + AddPtr^ - SubPtr^;
+        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
+        Inc(SubPtr); Inc(AddPtr); Inc(OutPtr);
+      end;
+      for k := Width - Radius to Width - 1 do          // right edge: window hangs off the end
+      begin
+        Sum := Sum + LastVal - SubPtr^;
+        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
+        Inc(SubPtr); Inc(OutPtr);
+      end;
+    end;
+  end;
+
+  procedure BlurCols(const Source: TByteArray; var Target: TByteArray; Width, Height, Radius: Integer);
+  var
+    Col, k, FirstVal, LastVal, Sum: Integer;
+    Recip: Integer;
+    ColStart, SubPtr, AddPtr, OutPtr: PByte;
+  begin
+    if (Radius > (Height - 1) div 2) then
+      Radius := (Height - 1) div 2;
+    Recip := ((1 shl 22) + Radius) div (2 * Radius + 1); // Q22 reciprocal of the window size
+
+    for Col := 0 to Width - 1 do
+    begin
+      ColStart := @Source[Col];
+      OutPtr   := @Target[Col];
+      FirstVal := ColStart^;
+      LastVal  := (ColStart + Width * (Height - 1))^;
+      SubPtr   := ColStart;
+      AddPtr   := ColStart + Radius * Width;
+
+      Sum := (Radius + 1) * FirstVal;
+      for k := 0 to Radius - 1 do
+        Sum := Sum + (ColStart + k * Width)^;
+
+      for k := 0 to Radius do
+      begin
+        Sum := Sum + AddPtr^ - FirstVal;
+        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
+        Inc(AddPtr, Width); Inc(OutPtr, Width);
+      end;
+      for k := Radius + 1 to Height - Radius - 1 do
+      begin
+        Sum := Sum + AddPtr^ - SubPtr^;
+        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
+        Inc(SubPtr, Width); Inc(AddPtr, Width); Inc(OutPtr, Width);
+      end;
+      for k := Height - Radius to Height - 1 do
+      begin
+        Sum := Sum + LastVal - SubPtr^;
+        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
+        Inc(SubPtr, Width); Inc(OutPtr, Width);
+      end;
+    end;
+  end;
+
+  procedure BoxBlur(var Buffer, Scratch: TByteArray; Width, Height, Radius: Integer);
+  begin
+    BlurRows(Buffer, Scratch, Width, Height, Radius);
+    BlurCols(Scratch, Buffer, Width, Height, Radius);
+  end;
+
+  // The three box-blur widths (odd) whose repetition approximates a Gaussian of the given sigma:
+  // the first LoCount boxes use width Lower, the rest use Lower + 2. Three boxes is the standard
+  // sweet spot -- already Gaussian to the eye, more passes barely change it. (Ivan Kutskir)
+  function BoxesForGauss(Sigma: Double): TIntegerArray;
+  var
+    Lower, LoCount, AllWide, PerBox: Integer;
+    Target: Double;
+  begin
+    Lower := Floor(Sqrt(4 * Sigma * Sigma + 1)); // ideal box width for 3 boxes, forced odd
+    if (Lower mod 2 = 0) then
+      Dec(Lower);
+
+    Target  := 12 * Sigma * Sigma;
+    AllWide := 3 * (Lower + 1) * (Lower + 3);
+    PerBox  := 4 * (Lower + 1);
+    LoCount := Round((AllWide - Target) / PerBox);
+
+    Result := [
+      IfThen(LoCount > 0, Lower, Lower + 2),
+      IfThen(LoCount > 1, Lower, Lower + 2),
+      IfThen(LoCount > 2, Lower, Lower + 2)
+    ];
   end;
 
 var
-  Temp: TByteArray;
+  Scratch: TByteArray;
   Boxes: TIntegerArray;
 begin
-  Temp := Copy(Src);
-  Hi := High(Src);
-  Boxes := BoxesForGauss(r);
+  if (Width <= 0) or (Height <= 0) then
+    Exit;
 
-  DoPass(Temp, Dst, w, h, (Boxes[0] - 1) div 2);
-  DoPass(Dst, Temp, w, h, (Boxes[1] - 1) div 2);
-  DoPass(Temp, Dst, w, h, (Boxes[2] - 1) div 2);
+  Move(Src[0], Dst[0], Width * Height); // work in Dst; Src stays as the untouched input
+  SetLength(Scratch, Width * Height);
+  Boxes := BoxesForGauss(Radius);
+
+  BoxBlur(Dst, Scratch, Width, Height, (Boxes[0] - 1) div 2);
+  BoxBlur(Dst, Scratch, Width, Height, (Boxes[1] - 1) div 2);
+  BoxBlur(Dst, Scratch, Width, Height, (Boxes[2] - 1) div 2);
 end;
 
 function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Integer): TSimbaImage;
