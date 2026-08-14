@@ -27,18 +27,6 @@ type
     function Query(const Left, Top, Right, Bottom: Integer): Double; overload;
   end;
 
-  TSimbaIntegralImageRGB = record
-  public
-  type
-    TData = record R, G, B: UInt64; end;
-    TDataMatrix = array of array of TData;
-  public
-    Data: TDataMatrix;
-
-    class function Create(const From: TSimbaImage): TSimbaIntegralImageRGB; static;
-    procedure Query(const Left, Top, Right, Bottom: Integer; out RSum, GSum, BSum: UInt64);
-  end;
-
 // https://sashamaps.net/docs/resources/20-colors/
 const
   DISTINCT_COLORS: TColorArray = (
@@ -123,67 +111,6 @@ var
   _: Double;
 begin
   Query(Left, Top, Right, Bottom, Result, _);
-end;
-
-class function TSimbaIntegralImageRGB.Create(const From: TSimbaImage): TSimbaIntegralImageRGB;
-var
-  X, Y: Integer;
-begin
-  SetLength(Result.Data, From.Height, From.Width);
-
-  // Compute the first row of the integral image
-  for X := 0 to From.Width - 1 do
-  begin
-    Result.Data[0, X].R := From.Data[X].R;
-    Result.Data[0, X].G := From.Data[X].G;
-    Result.Data[0, X].B := From.Data[X].B;
-
-    if (X > 0) then
-    begin
-      Result.Data[0, X].R += Result.Data[0, X - 1].R;
-      Result.Data[0, X].G += Result.Data[0, X - 1].G;
-      Result.Data[0, X].B += Result.Data[0, X - 1].B;
-    end;
-  end;
-
-  // Compute the first column of the integral image
-  for Y := 1 to From.Height - 1 do
-  begin
-    Result.Data[Y, 0].R := From.Data[Y * From.Width].R + Result.Data[Y - 1, 0].R;
-    Result.Data[Y, 0].G := From.Data[Y * From.Width].G + Result.Data[Y - 1, 0].G;
-    Result.Data[Y, 0].B := From.Data[Y * From.Width].B + Result.Data[Y - 1, 0].B;
-  end;
-
-  // Compute the rest of the integral image
-  for Y := 1 to From.Height - 1 do
-    for X := 1 to From.Width - 1 do
-    begin
-      Result.Data[Y, X].R := From.Data[Y * From.Width + X].R + Result.Data[Y - 1, X].R + Result.Data[Y, X - 1].R - Result.Data[Y - 1, X - 1].R;
-      Result.Data[Y, X].G := From.Data[Y * From.Width + X].G + Result.Data[Y - 1, X].G + Result.Data[Y, X - 1].G - Result.Data[Y - 1, X - 1].G;
-      Result.Data[Y, X].B := From.Data[Y * From.Width + X].B + Result.Data[Y - 1, X].B + Result.Data[Y, X - 1].B - Result.Data[Y - 1, X - 1].B;
-    end;
-end;
-
-procedure TSimbaIntegralImageRGB.Query(const Left, Top, Right, Bottom: Integer; out RSum, GSum, BSum: UInt64);
-var
-  A,B,C,D: TData;
-begin
-  A := Default(TData);
-  B := Default(TData);
-  C := Default(TData);
-  D := Default(TData);
-
-  if (Left - 1 >= 0) and (Top - 1 >= 0) then
-    A := Data[Top - 1, Left - 1];
-  if (Top - 1 >= 0) then
-    B := Data[Top - 1, Right];
-  if (Left - 1 >= 0) then
-    C := Data[Bottom, Left - 1];
-  D := Data[Bottom, Right];
-
-  RSum := D.R - B.R - C.R + A.R;
-  GSum := D.G - B.G - C.G + A.G;
-  BSum := D.B - B.B - C.B + A.B;
 end;
 
 procedure BlendPixel(const Pixel: PColorBGRA; constref Color: TColorBGRA);

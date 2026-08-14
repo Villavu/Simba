@@ -19,8 +19,8 @@ function SimbaImage_Invert(Image: TSimbaImage): TSimbaImage;
 function SimbaImage_Posterize(Image: TSimbaImage; Value: Integer): TSimbaImage;
 function SimbaImage_Sobel(Image: TSimbaImage): TSimbaImage;
 function SimbaImage_Enhance(Image: TSimbaImage; Enchantment: Byte; C: Single): TSimbaImage;
-function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Integer): TSimbaImage;
-function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Integer): TSimbaImage;
+function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Single): TSimbaImage;
+function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Single): TSimbaImage;
 function SimbaImage_Threshold(Image: TSimbaImage; Invert: Boolean; C: Integer): TSimbaImage;
 function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Integer): TSimbaImage;
 function SimbaImage_ThresholdAdaptiveSauvola(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Single): TSimbaImage;
@@ -229,87 +229,256 @@ begin
     end;
 end;
 
-function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Integer): TSimbaImage;
-var
-  X, Y, XX, YY, W, H, SrcWidth, Idx: Integer;
-  Size: Integer;
-  B: TBox;
-  SrcPtr, DstPtr: PColorBGRA;
-  Sum: record
-    R,G,B: UInt64;
-  end;
-  UseIntergal: Boolean;
-  IntegralImage: TSimbaIntegralImageRGB;
-begin
-  if (Radius <= 1) or (not Odd(Radius)) then
-    SimbaException('Blur: Radius(%d) must be odd (1,3,5 etc).', [Radius]);
+// Box blur Pillow style (BoxBlur.c)
+function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Single): TSimbaImage;
 
-  UseIntergal := Radius >= 9;
-  Radius := Radius div 2;
+  procedure LineBoxBlur(OutP, InP: PByte; LastX, Rad, EdgeA, EdgeB: Integer; ww, fw: UInt32);
+  var
+    X: Integer;
+    a0,a1,a2,a3, i0,i1,i2,i3, l0,l1,l2,l3, s0,s1,s2,s3: UInt32;
+    pAdd, pSub, pFar, pOut, pLast: PByte;
+  begin
+    i0 := InP[0];
+    i1 := InP[1];
+    i2 := InP[2];
+    i3 := InP[3];
+
+    pLast := InP + LastX * 4;
+    l0 := pLast[0];
+    l1 := pLast[1];
+    l2 := pLast[2];
+    l3 := pLast[3];
+
+    a0 := i0 * UInt32(Rad + 1);
+    a1 := i1 * UInt32(Rad + 1);
+    a2 := i2 * UInt32(Rad + 1);
+    a3 := i3 * UInt32(Rad + 1);
+
+    pAdd := InP;
+    for X := 0 to EdgeA - 2 do
+    begin
+      a0 += pAdd[0];
+      a1 += pAdd[1];
+      a2 += pAdd[2];
+      a3 += pAdd[3];
+      Inc(pAdd, 4);
+    end;
+
+    a0 += l0 * UInt32(Rad - EdgeA + 1);
+    a1 += l1 * UInt32(Rad - EdgeA + 1);
+    a2 += l2 * UInt32(Rad - EdgeA + 1);
+    a3 += l3 * UInt32(Rad - EdgeA + 1);
+
+    if (EdgeA <= EdgeB) then
+    begin
+      pAdd := InP + Rad * 4;
+      pFar := InP + (Rad + 1) * 4;
+      pOut := OutP;
+
+      for X := 0 to EdgeA - 1 do
+      begin
+        a0 := a0 + pAdd[0] - i0;
+        a1 := a1 + pAdd[1] - i1;
+        a2 := a2 + pAdd[2] - i2;
+        a3 := a3 + pAdd[3] - i3;
+        pOut[0] := UInt32(a0 * ww + (i0 + pFar[0]) * fw + (1 shl 23)) shr 24;
+        pOut[1] := UInt32(a1 * ww + (i1 + pFar[1]) * fw + (1 shl 23)) shr 24;
+        pOut[2] := UInt32(a2 * ww + (i2 + pFar[2]) * fw + (1 shl 23)) shr 24;
+        pOut[3] := UInt32(a3 * ww + (i3 + pFar[3]) * fw + (1 shl 23)) shr 24;
+        Inc(pAdd, 4);
+        Inc(pFar, 4);
+        Inc(pOut, 4);
+      end;
+
+      pAdd := InP + (EdgeA + Rad) * 4;
+      pSub := InP + (EdgeA - Rad - 1) * 4;
+      pFar := InP + (EdgeA + Rad + 1) * 4;
+      pOut := OutP + EdgeA * 4;
+
+      for X := EdgeA to EdgeB - 1 do
+      begin
+        s0 := pSub[0];
+        s1 := pSub[1];
+        s2 := pSub[2];
+        s3 := pSub[3];
+        a0 := a0 + pAdd[0] - s0;
+        a1 := a1 + pAdd[1] - s1;
+        a2 := a2 + pAdd[2] - s2;
+        a3 := a3 + pAdd[3] - s3;
+        pOut[0] := UInt32(a0 * ww + (s0 + pFar[0]) * fw + (1 shl 23)) shr 24;
+        pOut[1] := UInt32(a1 * ww + (s1 + pFar[1]) * fw + (1 shl 23)) shr 24;
+        pOut[2] := UInt32(a2 * ww + (s2 + pFar[2]) * fw + (1 shl 23)) shr 24;
+        pOut[3] := UInt32(a3 * ww + (s3 + pFar[3]) * fw + (1 shl 23)) shr 24;
+        Inc(pAdd, 4);
+        Inc(pSub, 4);
+        Inc(pFar, 4);
+        Inc(pOut, 4);
+      end;
+
+      pSub := InP + (EdgeB - Rad - 1) * 4;
+      pOut := OutP + EdgeB * 4;
+      for X := EdgeB to LastX do
+      begin
+        s0 := pSub[0];
+        s1 := pSub[1];
+        s2 := pSub[2];
+        s3 := pSub[3];
+        a0 := a0 + l0 - s0;
+        a1 := a1 + l1 - s1;
+        a2 := a2 + l2 - s2;
+        a3 := a3 + l3 - s3;
+        pOut[0] := UInt32(a0 * ww + (s0 + l0) * fw + (1 shl 23)) shr 24;
+        pOut[1] := UInt32(a1 * ww + (s1 + l1) * fw + (1 shl 23)) shr 24;
+        pOut[2] := UInt32(a2 * ww + (s2 + l2) * fw + (1 shl 23)) shr 24;
+        pOut[3] := UInt32(a3 * ww + (s3 + l3) * fw + (1 shl 23)) shr 24;
+        Inc(pSub, 4);
+        Inc(pOut, 4);
+      end;
+    end else
+    begin
+      pAdd := InP + Rad * 4;
+      pFar := InP + (Rad + 1) * 4;
+      pOut := OutP;
+      for X := 0 to EdgeB - 1 do
+      begin
+        a0 := a0 + pAdd[0] - i0;
+        a1 := a1 + pAdd[1] - i1;
+        a2 := a2 + pAdd[2] - i2;
+        a3 := a3 + pAdd[3] - i3;
+        pOut[0] := UInt32(a0 * ww + (i0 + pFar[0]) * fw + (1 shl 23)) shr 24;
+        pOut[1] := UInt32(a1 * ww + (i1 + pFar[1]) * fw + (1 shl 23)) shr 24;
+        pOut[2] := UInt32(a2 * ww + (i2 + pFar[2]) * fw + (1 shl 23)) shr 24;
+        pOut[3] := UInt32(a3 * ww + (i3 + pFar[3]) * fw + (1 shl 23)) shr 24;
+        Inc(pAdd, 4);
+        Inc(pFar, 4);
+        Inc(pOut, 4);
+      end;
+
+      pOut := OutP + EdgeB * 4;
+      for X := EdgeB to EdgeA - 1 do
+      begin
+        a0 := a0 + l0 - i0;
+        a1 := a1 + l1 - i1;
+        a2 := a2 + l2 - i2;
+        a3 := a3 + l3 - i3;
+        pOut[0] := UInt32(a0 * ww + (i0 + l0) * fw + (1 shl 23)) shr 24;
+        pOut[1] := UInt32(a1 * ww + (i1 + l1) * fw + (1 shl 23)) shr 24;
+        pOut[2] := UInt32(a2 * ww + (i2 + l2) * fw + (1 shl 23)) shr 24;
+        pOut[3] := UInt32(a3 * ww + (i3 + l3) * fw + (1 shl 23)) shr 24;
+        Inc(pOut, 4);
+      end;
+
+      pSub := InP + (EdgeA - Rad - 1) * 4;
+      pOut := OutP + EdgeA * 4;
+      for X := EdgeA to LastX do
+      begin
+        s0 := pSub[0];
+        s1 := pSub[1];
+        s2 := pSub[2];
+        s3 := pSub[3];
+        a0 := a0 + l0 - s0;
+        a1 := a1 + l1 - s1;
+        a2 := a2 + l2 - s2;
+        a3 := a3 + l3 - s3;
+        pOut[0] := UInt32(a0 * ww + (s0 + l0) * fw + (1 shl 23)) shr 24;
+        pOut[1] := UInt32(a1 * ww + (s1 + l1) * fw + (1 shl 23)) shr 24;
+        pOut[2] := UInt32(a2 * ww + (s2 + l2) * fw + (1 shl 23)) shr 24;
+        pOut[3] := UInt32(a3 * ww + (s3 + l3) * fw + (1 shl 23)) shr 24;
+        Inc(pSub, 4);
+        Inc(pOut, 4);
+      end;
+    end;
+  end;
+
+  procedure HorizBoxBlur(Src, Dst: PColorBGRA; Width, Height, Rad: Integer; ww, fw: UInt32);
+  var
+    Y, EdgeA, EdgeB: Integer;
+    InRow, OutRow: PColorBGRA;
+  begin
+    EdgeA := Min(Rad + 1, Width);
+    EdgeB := Max(Width - Rad - 1, 0);
+    for Y := 0 to Height - 1 do
+    begin
+      InRow := Src + Y * Width;
+      OutRow := Dst + Y * Width;
+      LineBoxBlur(PByte(OutRow), PByte(InRow), Width - 1, Rad, EdgeA, EdgeB, ww, fw);
+    end;
+  end;
+
+  // Cache-blocked (tiled) transpose, after TransposeComplexBlocked in simba.fftpack4.
+  procedure Transpose(Src, Dst: PColorBGRA; Width, Height: Integer);
+  const
+    B = 8;
+  var
+    X, Y, XEnd, YEnd: Integer;
+    SrcRow, DstCol, Cur, CurDest, SrcRowEnd, CurEnd: PColorBGRA;
+  begin
+    Y := 0;
+    while (Y < Height) do
+    begin
+      YEnd := Y + B;
+      if (YEnd > Height) then
+        YEnd := Height;
+
+      X := 0;
+      while (X < Width) do
+      begin
+        XEnd := X + B;
+        if (XEnd > Width) then
+          XEnd := Width;
+
+        SrcRow := @Src[Y * Width + X];
+        SrcRowEnd := @Src[YEnd * Width + X];
+        DstCol := @Dst[X * Height + Y];
+        while (PtrUInt(SrcRow) < PtrUInt(SrcRowEnd)) do
+        begin
+          Cur := SrcRow;
+          CurDest := DstCol;
+          CurEnd := @SrcRow[XEnd - X];
+          while (PtrUInt(Cur) < PtrUInt(CurEnd)) do
+          begin
+            CurDest^ := Cur^;
+            Inc(Cur);
+            Inc(CurDest, Height);
+          end;
+          Inc(SrcRow, Width);
+          Inc(DstCol);
+        end;
+
+        X := X + B;
+      end;
+
+      Y := Y + B;
+    end;
+  end;
+
+var
+  W, H, Rad: Integer;
+  ww, fw: UInt32;
+  Scratch: array of TColorBGRA;
+begin
+  if (Radius < 0) then
+    SimbaException('Blur radius must be >= 0');
 
   Result := TSimbaImage.Create(Image.Width, Image.Height);
   if (Result.Width = 0) or (Result.Height = 0) then
     Exit;
 
-  W := Image.Width - 1;
-  H := Image.Height - 1;
-  SrcPtr := Image.Data;
-  DstPtr := Result.Data;
-  SrcWidth := Image.Width;
+  W := Image.Width;
+  H := Image.Height;
+  Rad := Trunc(Radius);                         // integer part = window half-width
+  ww := Trunc((1 shl 24) / (2 * Radius + 1));   // float radius: fractional part handled by fw
+  fw := ((1 shl 24) - (2 * Rad + 1) * ww) div 2;
 
-  if UseIntergal then
-  begin
-    IntegralImage := TSimbaIntegralImageRGB.Create(Image);
-
-    for Y := 0 to H do
-      for X := 0 to W do
-      begin
-        B.X1 := Max(X-Radius, 0);
-        B.Y1 := Max(Y-Radius, 0);
-        B.X2 := Min(X+Radius, Image.Width - 1);
-        B.Y2 := Min(Y+Radius, Image.Height - 1);
-        Size := ((B.X2-B.X1) + 1) * ((B.Y2-B.Y1) + 1);
-
-        IntegralImage.Query(B.X1, B.Y1, B.X2, B.Y2, Sum.R, Sum.G, Sum.B);
-        Idx := Y * SrcWidth + X;
-        DstPtr[Idx].R := Sum.R div Size;
-        DstPtr[Idx].G := Sum.G div Size;
-        DstPtr[Idx].B := Sum.B div Size;
-      end;
-  end else
-  begin
-    for Y := 0 to H do
-      for X := 0 to W do
-      begin
-        B.X1 := Max(X-Radius, 0);
-        B.Y1 := Max(Y-Radius, 0);
-        B.X2 := Min(X+Radius, Image.Width - 1);
-        B.Y2 := Min(Y+Radius, Image.Height - 1);
-        Size := ((B.X2-B.X1) + 1) * ((B.Y2-B.Y1) + 1);
-
-        Sum.R := 0;
-        Sum.G := 0;
-        Sum.B := 0;
-
-        for YY := B.Y1 to B.Y2 do
-          for XX := B.X1 to B.X2 do
-          begin
-            Idx := YY * SrcWidth + XX;
-            Sum.R += SrcPtr[Idx].R;
-            Sum.G += SrcPtr[Idx].G;
-            Sum.B += SrcPtr[Idx].B;
-          end;
-
-        Idx := Y * SrcWidth + X;
-        DstPtr[Idx].R := Sum.R div Size;
-        DstPtr[Idx].G := Sum.G div Size;
-        DstPtr[Idx].B := Sum.B div Size;
-      end;
-  end;
+  SetLength(Scratch, W * H);
+  HorizBoxBlur(Image.Data,   @Scratch[0], W, H, Rad, ww, fw); // horizontal
+  Transpose(@Scratch[0],     Result.Data, W, H);              // -> H x W
+  HorizBoxBlur(Result.Data,  @Scratch[0], H, W, Rad, ww, fw); // horizontal on transposed (= vertical)
+  Transpose(@Scratch[0],     Result.Data, H, W);              // -> W x H
 end;
 
 // 3-box approximation of a Gaussian blur (Ivan Kutski @ https://blog.ivank.net/fastest-gaussian-blur.html)
-procedure GaussBlurApprox(var Src, Dst: TByteArray; Width, Height, Radius: Integer);
+procedure GaussBlurApprox(var Src, Dst: TByteArray; Width, Height: Integer; Radius: Single);
 
   procedure BlurRows(const Source: TByteArray; var Target: TByteArray; Width, Height, Radius: Integer);
   var
@@ -445,7 +614,7 @@ begin
   BoxBlur(Dst, Scratch, Width, Height, (Boxes[2] - 1) div 2);
 end;
 
-function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Integer): TSimbaImage;
+function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Single): TSimbaImage;
 var
   inR, inG, inB: TByteArray;
   outR, outG, outB: TByteArray;
