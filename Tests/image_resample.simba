@@ -1,0 +1,77 @@
+{$assertions on}
+
+const
+  SUNSET_150 = 'IMG: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';
+  SUNSET_75  = 'IMG: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';
+
+function Load(const Str: String): TImage;
+begin
+  Result := new TImage();
+  Result.FromString(Str);
+end;
+
+// Upscale the 75 to 150 - should match the real 150.
+procedure TestUpscale;
+var
+  Algo: EImageResizeAlgo;
+  Resized, Reference: TImage;
+begin
+  Reference := Load(SUNSET_150);
+  for Algo := Low(EImageResizeAlgo) to High(EImageResizeAlgo) do
+  begin
+    Resized := Load(SUNSET_75).Resize(Algo, 150, 150);
+
+    Assert(Resized.Width = 150);
+    Assert(Resized.Height = 150);
+    Assert(Resized.Compare(Reference) > 0.99);
+  end;
+end;
+
+// Downscale the 150 to 75 - should match the real 75.
+procedure TestDownscale;
+var
+  Algo: EImageResizeAlgo;
+  Resized, Reference: TImage;
+begin
+  Reference := Load(SUNSET_75);
+  for Algo := Low(EImageResizeAlgo) to High(EImageResizeAlgo) do
+  begin
+    Resized := Load(SUNSET_150).Resize(Algo, 75, 75);
+    Assert(Resized.Width = 75);
+    Assert(Resized.Height = 75);
+    Assert(Resized.Compare(Reference) > 0.99);
+  end;
+end;
+
+procedure TestIgnorePoints;
+
+  // Paint the ignored box cyan, then check no cyan-like pixels exist after resize.
+  procedure Test(const Str: String; NewWidth, NewHeight: Integer);
+  var
+    Algo: EImageResizeAlgo;
+    Ignore: TPointArray;
+    Img: TImage;
+  begin
+    Ignore := TPointArray.CreateFromBox([40, 40, 60, 60], True);
+
+    for Algo := Low(EImageResizeAlgo) to High(EImageResizeAlgo) do // incl. NEAREST_NEIGHBOUR
+    begin
+      Img := Load(Str);
+      Img.DrawColor := Colors.CYAN;
+      Img.DrawBoxFilled([40, 40, 60, 60]);
+
+      // resize and make sure nothing close to cyan was used in the blend
+      Assert(Img.Resize(Algo, NewWidth, NewHeight, Ignore).FindColor(Img.DrawColor, 25).Length = 0);
+    end;
+  end;
+
+begin
+  Test(SUNSET_150, 75, 75);  // downscale
+  Test(SUNSET_75, 150, 150); // upscale
+end;
+
+begin
+  TestUpscale();
+  TestDownscale();
+  TestIgnorePoints();
+end.

@@ -19,7 +19,7 @@ type
   {$SCOPEDENUMS ON}
   EImageMirrorStyle  = (WIDTH, HEIGHT, LINE);
   EImageThreshMethod = (MEAN, MIN_MAX);
-  EImageResizeAlgo   = (NEAREST_NEIGHBOUR, BILINEAR);
+  EImageResizeAlgo   = (NEAREST_NEIGHBOUR, BILINEAR, LANCZOS, BOX, HAMMING, BICUBIC);
   EImageRotateAlgo   = (NEAREST_NEIGHBOUR, BILINEAR);
   EImageBlurAlgo     = (BOX, GAUSS);
   {$POP}
@@ -31,7 +31,6 @@ type
   end;
 
   TSimbaImage = class;
-  TSimbaImageLineStarts = array of PColorBGRA;
   TSimbaImageArray = array of TSimbaImage;
 
   PSimbaImage = ^TSimbaImage;
@@ -43,8 +42,6 @@ type
 
     FData: PColorBGRA;
     FDataOwner: Boolean;
-
-    FLineStarts: TSimbaImageLineStarts;
 
     FTextDrawer: TSimbaTextDrawer;
 
@@ -65,9 +62,7 @@ type
     function GetFontSize: Single;
     function GetFontBold: Boolean;
     function GetFontItalic: Boolean;
-    function GetLineStart(const Y: Integer): PColorBGRA;
     function GetDrawColorAsBGRA: TColorBGRA;
-    function GetDataSize: SizeUInt;
 
     procedure SetPixel(const X, Y: Integer; const Color: TColor);
     procedure SetAlpha(const X, Y: Integer; const Value: Byte);
@@ -95,9 +90,6 @@ type
     property Width: Integer read FWidth;
     property Height: Integer read FHeight;
     property Center: TPoint read FCenter;
-
-    property LineStarts: TSimbaImageLineStarts read FLineStarts;
-    property LineStart[Line: Integer]: PColorBGRA read GetLineStart;
 
     property DrawColor: TColor read FDrawColor write FDrawColor;
     property DrawAlpha: Byte read FDrawAlpha write FDrawAlpha;
@@ -154,8 +146,7 @@ type
     function Rotate(Algo: EImageRotateAlgo; Radians: Single; Expand: Boolean): TSimbaImage;
     function Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer): TSimbaImage; overload;
     function Resize(Algo: EImageResizeAlgo; Scale: Single): TSimbaImage; overload;
-    function Downsample(Scale: Integer): TSimbaImage; overload;
-    function Downsample(Scale: Integer; IgnorePoints: TPointArray): TSimbaImage; overload;
+    function Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer; IgnorePoints: TPointArray): TSimbaImage; overload;
     function Mirror(Style: EImageMirrorStyle): TSimbaImage;
 
     // text measure
@@ -229,7 +220,7 @@ type
     function ThresholdAdaptiveSauvola(Inv: Boolean; Radius: Integer; C: Single): TSimbaImage;
     function Blend(Points: TPointArray; Radius: Integer): TSimbaImage; overload;
     function Blend(Points: TPointArray; Radius: Integer; IgnorePoints: TPointArray): TSimbaImage; overload;
-    function Blur(Algo: EImageBlurAlgo; Radius: Integer): TSimbaImage;
+    function Blur(Algo: EImageBlurAlgo; Radius: Single): TSimbaImage;
 
     // Matrix
     procedure FromMatrix(Matrix: TIntegerMatrix); overload;
@@ -276,6 +267,7 @@ uses
   simba.image_utils,
   simba.image_lazbridge,
   simba.image_resizerotate,
+  simba.image_resample,
   simba.image_stringconv,
   simba.image_filters,
   simba.image_draw,
@@ -317,7 +309,7 @@ begin
   if (not InImage(Box.X2, Box.Y2)) then RaiseOutOfImageException(Box.X2, Box.Y2);
 
   for Y := Box.Y1 to Box.Y2 do
-    Move(FData[Y * FWidth + Box.X1], FData[(Y-Box.Y1) * FWidth], FWidth * SizeOf(TColorBGRA));
+    Move(FData[Y * FWidth + Box.X1], FData[(Y-Box.Y1) * FWidth], Box.Width * SizeOf(TColorBGRA));
 
   SetSize(Box.Width, Box.Height);
 end;
@@ -595,86 +587,49 @@ end;
 // Author: slackydev
 function TSimbaImage.Compare(Other: TSimbaImage): Single;
 var
-  invSize, sigmaR, sigmaG, sigmaB, isum, tsum: Single;
-  x, y, W, H: Integer;
-  tcR, tcG, tcB, icR, icG, icB: TSingleMatrix;
+  X, Y, W, H: Integer;
+  N: Int64;
+  sumIR, sumIG, sumIB, sumTR, sumTG, sumTB: Double;
+  meanIR, meanIG, meanIB, meanTR, meanTG, meanTB: Double;
+  dIR, dIG, dIB, dTR, dTG, dTB: Double;
+  cross, isum, tsum: Double;
 begin
   if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
     SimbaException('TSimbaImage.Compare: Both images must be equal dimensions');
 
-  invSize := 1 / (FWidth * FHeight);
-
-  // compute T' for template
-  tcR.SetSize(FWidth, FHeight);
-  tcG.SetSize(FWidth, FHeight);
-  tcB.SetSize(FWidth, FHeight);
-
-  sigmaR := 0;
-  sigmaG := 0;
-  sigmaB := 0;
-
   W := FWidth - 1;
   H := FHeight - 1;
-  for y:=0 to H do
-    for x:=0 to W do
-      with Other.Data[y*FWidth+x] do
-      begin
-        sigmaR += R;
-        sigmaG += G;
-        sigmaB += B;
-      end;
+  N := Int64(FWidth) * FHeight;
+  if (N = 0) then
+    Exit(0);
 
-  for y:=0 to H do
-    for x:=0 to W do
-      with Other.Data[y*FWidth+x] do
-      begin
-        tcR[y,x] := R - invSize * sigmaR;
-        tcG[y,x] := G - invSize * sigmaG;
-        tcB[y,x] := B - invSize * sigmaB;
-      end;
-
-  // compute I' for image
-  icR.SetSize(Width, Height);
-  icG.SetSize(Width, Height);
-  icB.SetSize(Width, Height);
-
-  sigmaR := 0;
-  sigmaG := 0;
-  sigmaB := 0;
-
-  for y:=0 to H do
-    for x:=0 to W do
-      with FData[y*Width+x] do
-      begin
-        sigmaR += R;
-        sigmaG += G;
-        sigmaB += B;
-      end;
-
-  for y:=0 to H do
-    for x:=0 to W do
-      with FData[y*Width+x] do
-      begin
-        icR[y,x] := R - invsize * sigmaR;
-        icG[y,x] := G - invsize * sigmaG;
-        icB[y,x] := B - invsize * sigmaB;
-      end;
-
-  // ccoeff
-  Result := 0;
-  for y:=0 to H do
-    for x:=0 to W do
-      Result += ((icR[y,x] * tcR[y,x]) + (icG[y,x] * tcG[y,x]) + (icB[y,x] * tcB[y,x]));
-
-  isum := 0;
-  tsum := 0;
-  for y:=0 to H do
-    for x:=0 to W do
+  // pass 1: per-channel means for both images (Double accumulators, exact for byte data)
+  sumIR := 0; sumIG := 0; sumIB := 0;
+  sumTR := 0; sumTG := 0; sumTB := 0;
+  for Y := 0 to H do
+    for X := 0 to W do
     begin
-      isum += Sqr(icR[y,x]) + Sqr(icG[y,x]) + Sqr(icB[y,x]);
-      tsum += Sqr(tcR[y,x]) + Sqr(tcG[y,x]) + Sqr(tcB[y,x]);
+      with FData[Y*FWidth+X]      do begin sumIR += R; sumIG += G; sumIB += B; end;
+      with Other.Data[Y*FWidth+X] do begin sumTR += R; sumTG += G; sumTB += B; end;
     end;
-  Result := Result / Sqrt(isum * tsum);
+  meanIR := sumIR / N; meanIG := sumIG / N; meanIB := sumIB / N;
+  meanTR := sumTR / N; meanTG := sumTG / N; meanTB := sumTB / N;
+
+  // pass 2: TM_CCOEFF_NORMED, channels combined (centered cross-correlation / norms)
+  cross := 0; isum := 0; tsum := 0;
+  for Y := 0 to H do
+    for X := 0 to W do
+    begin
+      with FData[Y*FWidth+X]      do begin dIR := R - meanIR; dIG := G - meanIG; dIB := B - meanIB; end;
+      with Other.Data[Y*FWidth+X] do begin dTR := R - meanTR; dTG := G - meanTG; dTB := B - meanTB; end;
+      cross += dIR*dTR + dIG*dTG + dIB*dTB;
+      isum  += dIR*dIR + dIG*dIG + dIB*dIB;
+      tsum  += dTR*dTR + dTG*dTG + dTB*dTB;
+    end;
+
+  if (isum = 0) or (tsum = 0) then // a solid (zero-variance) image -> correlation undefined
+    Exit(0);
+  Result := cross / Sqrt(isum * tsum);
 end;
 
 function TSimbaImage.PixelDifference(Other: TSimbaImage; Tolerance: Single; AOffset: TPoint): TPointArray;
@@ -720,6 +675,8 @@ begin
   FData := TempBitmap.Data;
   FWidth := TempBitmap.Width;
   FHeight := TempBitmap.Height;
+
+  FCenter := TPoint.Create(FWidth div 2, FHeight div 2);
 
   TempBitmap.FData := nil; // data is now ours
   TempBitmap.Free();
@@ -795,12 +752,11 @@ begin
 
   Bounds.X2 -= Image.Width;
   Bounds.Y2 -= Image.Height;
-  Ptr := FData;
 
   for Y := Bounds.Y1 to Bounds.Y2 do
   begin
-    Ptr := @FData[Y * FWidth];
-    for X := 0 to Bounds.X2 do
+    Ptr := @FData[Y * FWidth + Bounds.X1];
+    for X := Bounds.X1 to Bounds.X2 do
     begin
       if Hit(Ptr) then
       begin
@@ -1310,8 +1266,8 @@ begin
 
   SetLength(Result, Box.Width * Box.Height);
   Count := 0;
-  for Y := Box.Y1 to Box.Y2 - 1 do
-    for X := Box.X1 to Box.X2 - 1 do
+  for Y := Box.Y1 to Box.Y2 do
+    for X := Box.X1 to Box.X2 do
     begin
       Result[Count] := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
       Inc(Count);
@@ -1388,14 +1344,10 @@ end;
 function TSimbaImage.Convolute(Matrix: TDoubleMatrix): TSimbaImage;
 var
   X, Y, YY, XX, CX, CY: Integer;
-  SrcRows, DestRows: TSimbaImageLineStarts;
   MatWidth, MatHeight, MidX, MidY: Integer;
   NewR, NewG, NewB: Double;
 begin
   Result := TSimbaImage.Create(FWidth, FHeight);
-
-  SrcRows := LineStarts;
-  DestRows := Result.LineStarts;
 
   if Matrix.GetSize(MatWidth, MatHeight) then
   begin
@@ -1418,14 +1370,20 @@ begin
             CX := EnsureRange(X+XX-MidX, 0, FWidth-1);
             CY := EnsureRange(Y+YY-MidY, 0, FHeight-1);
 
-            NewR += (Matrix[YY, XX] * SrcRows[CY, CX].R);
-            NewG += (Matrix[YY, XX] * SrcRows[CY, CX].G);
-            NewB += (Matrix[YY, XX] * SrcRows[CY, CX].B);
+            with FData[CY * FWidth + CX] do
+            begin
+              NewR += (Matrix[YY, XX] * R);
+              NewG += (Matrix[YY, XX] * G);
+              NewB += (Matrix[YY, XX] * B);
+            end;
           end;
 
-        DestRows[Y, X].R := Round(NewR);
-        DestRows[Y, X].G := Round(NewG);
-        DestRows[Y, X].B := Round(NewB);
+        with Result.FData[Y * FWidth + X] do
+        begin
+          R := EnsureRange(Round(NewR), 0, 255);
+          G := EnsureRange(Round(NewG), 0, 255);
+          B := EnsureRange(Round(NewB), 0, 255);
+        end;
       end;
   end;
 end;
@@ -1457,7 +1415,7 @@ begin
         Result := TSimbaImage.Create(FHeight, FWidth);
 
         for Y := FHeight - 1 downto 0 do
-          for X := FHeight - 1 downto 0 do
+          for X := FWidth - 1 downto 0 do
             Result.FData[X*FHeight+Y] := FData[Y*FWidth+X];
       end;
 
@@ -1528,16 +1486,6 @@ begin
     end;
 end;
 
-function TSimbaImage.Downsample(Scale: Integer): TSimbaImage;
-begin
-  Result := SimbaImage_Downsample(Self, Scale);
-end;
-
-function TSimbaImage.Downsample(Scale: Integer; IgnorePoints: TPointArray): TSimbaImage;
-begin
-  Result := SimbaImage_Downsample(Self, Scale, IgnorePoints);
-end;
-
 function TSimbaImage.GetFontAntialiasing: Boolean;
 begin
   Result := FTextDrawer.Antialiased;
@@ -1568,22 +1516,12 @@ begin
   Result := FTextDrawer.Italic;
 end;
 
-function TSimbaImage.GetLineStart(const Y: Integer): PColorBGRA;
-begin
-  Result := FLineStarts[Y];
-end;
-
 function TSimbaImage.GetDrawColorAsBGRA: TColorBGRA;
 begin
   if (FDrawColor = -1) then
     Result := TSimbaColorConversion.ColorToBGRA(GetDistinctColor(0), FDrawAlpha)
   else
     Result := TSimbaColorConversion.ColorToBGRA(FDrawColor, FDrawAlpha);
-end;
-
-function TSimbaImage.GetDataSize: SizeUInt;
-begin
-  Result := (FWidth * FHeight) * SizeOf(TColorBGRA);
 end;
 
 procedure TSimbaImage.SetFontAntialiasing(Value: Boolean);
@@ -1683,11 +1621,8 @@ begin
     FData := NewData;
     FWidth := NewWidth;
     FHeight := NewHeight;
-    FCenter := TPoint.Create(FWidth div 2, FHeight div 2);
 
-    SetLength(FLineStarts, FHeight);
-    for I := 0 to High(FLineStarts) do
-      FLineStarts[I] := @FData[FWidth * I];
+    FCenter := TPoint.Create(FWidth div 2, FHeight div 2);
   end;
 end;
 
@@ -1699,6 +1634,8 @@ begin
   FData := NewData;
   FWidth := DataWidth;
   FHeight := DataHeight;
+
+  FCenter := TPoint.Create(FWidth div 2, FHeight div 2);
 end;
 
 procedure TSimbaImage.ResetExternalData(NewWidth, NewHeight: Integer);
@@ -1716,17 +1653,28 @@ end;
 
 function TSimbaImage.Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer): TSimbaImage;
 begin
-  case Algo of
-    EImageResizeAlgo.NEAREST_NEIGHBOUR: Result := SimbaImage_ResizeNN(Self, NewWidth, NewHeight);
-    EImageResizeAlgo.BILINEAR:          Result := SimbaImage_ResizeBilinear(Self, NewWidth, NewHeight);
-    else
-      Result := nil;
-  end;
+  Result := SimbaImage_Resample(Self, NewWidth, NewHeight, Algo);
 end;
 
 function TSimbaImage.Resize(Algo: EImageResizeAlgo; Scale: Single): TSimbaImage;
 begin
   Result := Resize(Algo, Trunc(FWidth * Scale), Trunc(FHeight * Scale));
+end;
+
+function TSimbaImage.Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer; IgnorePoints: TPointArray): TSimbaImage;
+var
+  Ignore: TBooleanArray;
+  P: TPoint;
+begin
+  if (Length(IgnorePoints) = 0) then
+    Exit(Resize(Algo, NewWidth, NewHeight)); // nothing ignored -> the fast unmasked path
+
+  SetLength(Ignore, FWidth * FHeight);
+  for P in IgnorePoints do
+    if (P.X >= 0) and (P.Y >= 0) and (P.X < FWidth) and (P.Y < FHeight) then
+      Ignore[P.Y * FWidth + P.X] := True;
+
+  Result := SimbaImage_ResampleMasked(Self, NewWidth, NewHeight, Algo, Ignore);
 end;
 
 function TSimbaImage.Rotate(Algo: EImageRotateAlgo; Radians: Single; Expand: Boolean): TSimbaImage;
@@ -1739,7 +1687,7 @@ begin
   end;
 end;
 
-function TSimbaImage.Blur(Algo: EImageBlurAlgo; Radius: Integer): TSimbaImage;
+function TSimbaImage.Blur(Algo: EImageBlurAlgo; Radius: Single): TSimbaImage;
 begin
   case Algo of
     EImageBlurAlgo.BOX:   Result := SimbaImage_BlurBox(Self, Radius);
@@ -1795,7 +1743,7 @@ begin
       if (X < 0) or (Y < 0) or (X >= FWidth) or (Y >= FHeight) then
         RaiseOutOfImageException(X, Y);
 
-      FData[Y * FWidth + X] := TSimbaColorConversion.ColorToBGRA(Colors[I], FDrawAlpha);
+      FData[Y * FWidth + X] := TSimbaColorConversion.ColorToBGRA(Colors[I], ALPHA_OPAQUE);
     end;
 end;
 
@@ -1866,7 +1814,7 @@ begin
       if (DestX >= 0) and (DestY >= 0) and (DestX < FWidth) and (DestY < FHeight) then
       begin
         BGRA := TheData[LoopY * DataW + LoopX];
-        BGRA.A := FDrawAlpha;
+        BGRA.A := Alpha;
 
         BlendPixel(@FData[DestY * FWidth + DestX], BGRA);
       end;
@@ -1903,7 +1851,7 @@ var
 begin
   if DataRange(Ptr, Upper) then
   begin
-    while (Ptr <= Upper) and ((Ptr^.R = 0) and (Ptr^.G = 0) and (Ptr^.B = 0)) or ((Ptr^.R = 255) and (Ptr^.G = 255) and (Ptr^.B = 255)) do
+    while (Ptr <= Upper) and (((Ptr^.R = 0) and (Ptr^.G = 0) and (Ptr^.B = 0)) or ((Ptr^.R = 255) and (Ptr^.G = 255) and (Ptr^.B = 255))) do
       Inc(Ptr);
     Result := Ptr > Upper;
   end else

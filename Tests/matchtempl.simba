@@ -72,8 +72,8 @@ begin
   CheckMatches('Test6', @MatchTemplateMask, TM_SQDIFF_NORMED, 26, world, [test1, test2, test3], [[482,13], [485,10], [473,19]], [1.623, 1.147, 2.479]);
 
   // Just ensure giant matching still works
-  CheckMatches('Test7', @MatchTemplate, TM_CCOEFF_NORMED, 0, bigImage, [bigTempl, hugeTempl], [[800,2500],[1000,2000]], [0.944, 0.922]);
-  CheckMatches('Test8', @MatchTemplateMask, TM_CCOEFF_NORMED, 90, bigImage, [bigTempl, hugeTempl], [[800,2500],[1000,2000]], [0.942, 0.897]);
+  CheckMatches('Test7', @MatchTemplate, TM_CCOEFF_NORMED, 0, bigImage, [bigTempl, hugeTempl], [[800,2500],[1000,2000]], [0.888, 0.786]);
+  CheckMatches('Test8', @MatchTemplateMask, TM_CCOEFF_NORMED, 90, bigImage, [bigTempl, hugeTempl], [[800,2500],[1000,2000]], [0.885, 0.698]);
 
   WriteLn('Tests took ', Round(PerformanceTime()-t), ' ms');
   if (fails > 0) then

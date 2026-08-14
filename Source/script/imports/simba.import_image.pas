@@ -37,6 +37,29 @@ Images are now objects so there is no need to free them - it is done automatical
 *)
 
 (*
+EImageResizeAlgo
+----------------
+```
+enum(NEAREST_NEIGHBOUR, BILINEAR, LANCZOS, BOX, HAMMING, BICUBIC)
+```
+The resampling filter used by `TImage.Resize`, from fastest to highest quality:
+
+- `NEAREST_NEIGHBOUR`: No blending - fastest, but blocky. Good for pixel-art.
+- `BOX`: Simple averaging - cheap, mainly for downscaling.
+- `BILINEAR`: Fast and smooth, but a little soft.
+- `HAMMING`: A little sharper than bilinear.
+- `BICUBIC`: Smooth and sharp - a good default.
+- `LANCZOS`: Sharpest and highest quality, but the slowest.
+
+![enlarging comparison](../../images/resample_upscale.png)
+![downscale and rebuild comparison](../../images/resample_roundtrip.png)
+
+```{note}
+This enum is scoped so use like `EImageResizeAlgo.BILINEAR`
+```
+*)
+
+(*
 TImage.Construct
 ----------------
 ```
@@ -654,8 +677,9 @@ end;
 TImage.Resize
 -------------
 ```
-function TImage.Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer): TSimbaImage;
+function TImage.Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer): TImage;
 ```
+Returns a new image resized to `NewWidth` by `NewHeight`, sampled with the given `Algo` filter (see `EImageResizeAlgo`). The original image is left unchanged.
 *)
 procedure _LapeImage_Resize1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -666,12 +690,26 @@ end;
 TImage.Resize
 -------------
 ```
-function TImage.Resize(Algo: EImageResizeAlgo; Scale: Single): TSimbaImage;
+function TImage.Resize(Algo: EImageResizeAlgo; Scale: Single): TImage;
 ```
+Resizes by a `Scale` factor instead of absolute dimensions - e.g. `0.5` halves the width and height and `2.0` doubles them.
 *)
 procedure _LapeImage_Resize2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Resize(EImageResizeAlgo(Params^[1]^), PSingle(Params^[2])^);
+end;
+
+(*
+TImage.Resize
+-------------
+```
+function TImage.Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer; IgnorePoints: TPointArray): TImage;
+```
+Resize, but source pixels listed in `IgnorePoints` are excluded from sampling.
+*)
+procedure _LapeImage_Resize3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Resize(EImageResizeAlgo(Params^[1]^), PInteger(Params^[2])^, PInteger(Params^[3])^, PPointArray(Params^[4])^);
 end;
 
 (*
@@ -684,32 +722,6 @@ function TImage.Rotate(Algo: EImageRotateAlgo; Radians: Single; Expand: Boolean)
 procedure _LapeImage_Rotate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Rotate(EImageRotateAlgo(Params^[1]^), PSingle(Params^[2])^, PBoolean(Params^[3])^);
-end;
-
-(*
-TImage.Downsample
------------------
-```
-function TImage.Downsample(Scale: Integer): TImage;
-```
-*)
-procedure _LapeImage_DownSample1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Downsample(PInteger(Params^[1])^);
-end;
-
-(*
-TImage.Downsample
------------------
-```
-function TImage.Downsample(Scale: Integer; IgnorePoints: TPointArray): TImage;
-```
-
-Downsample but points in `IgnorePoints` are not sampled from.
-*)
-procedure _LapeImage_DownSample2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Downsample(PInteger(Params^[1])^, PPointArray(Params^[2])^);
 end;
 
 (*
@@ -1339,20 +1351,18 @@ end;
 TImage.Blur
 -----------
 ```
-function TImage.Blur(Algo: EImageBlurAlgo; Radius: Integer): TSimbaImage;
-```
-
-Algo can be either EImageBlurAlgo.BOX, EImageBlurAlgo.GAUSS.
+function TImage.Blur(Algo: EImageBlurAlgo; Radius: Single): TSimbaImage;
+``
+Algo can be either `EImageBlurAlgo.BOX` or `EImageBlurAlgo.GAUSS`.
 
 ```{note}
-EImageBlurAlgo.GAUSS is not true gaussian blur it's an approximation (in linear time).
-
+Gauss is not true gaussian blur it's an approximation (in linear time).
 <https://blog.ivank.net/fastest-gaussian-blur.html>
 ```
 *)
 procedure _LapeImage_Blur(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Blur(EImageBlurAlgo(Params^[1]^), PInteger(Params^[2])^);
+  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Blur(EImageBlurAlgo(Params^[1]^), PSingle(Params^[2])^);
 end;
 
 (*
@@ -1685,7 +1695,7 @@ begin
 
     addGlobalType('array of TImage', 'TImageArray');
     addGlobalType('enum(WIDTH, HEIGHT, LINE)', 'EImageMirrorStyle');
-    addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR)', 'EImageResizeAlgo');
+    addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR, LANCZOS, BOX, HAMMING, BICUBIC)', 'EImageResizeAlgo');
     addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR)', 'EImageRotateAlgo');
     addGlobalType('enum(BOX, GAUSS)', 'EImageBlurAlgo');
     addGlobalType('set of enum(LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM)', 'EImageTextAlign');
@@ -1748,9 +1758,8 @@ begin
 
     addGlobalFunc('function TImage.Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer): TImage; overload;', @_LapeImage_Resize1);
     addGlobalFunc('function TImage.Resize(Algo: EImageResizeAlgo; Scale: Single): TImage; overload;', @_LapeImage_Resize2);
+    addGlobalFunc('function TImage.Resize(Algo: EImageResizeAlgo; NewWidth, NewHeight: Integer; IgnorePoints: TPointArray): TImage; overload;', @_LapeImage_Resize3);
     addGlobalFunc('function TImage.Rotate(Algo: EImageRotateAlgo; Radians: Single; Expand: Boolean): TImage;', @_LapeImage_Rotate);
-    addGlobalFunc('function TImage.Downsample(Scale: Integer): TImage; overload', @_LapeImage_Downsample1);
-    addGlobalFunc('function TImage.Downsample(Scale: Integer; IgnorePoints: TPointArray): TImage; overload', @_LapeImage_Downsample2);
     addGlobalFunc('function TImage.Mirror(Style: EImageMirrorStyle): TImage', @_LapeImage_Mirror);
 
     addGlobalFunc('function TImage.TextWidth(Text: String): Integer;', @_LapeImage_TextWidth);
@@ -1815,7 +1824,7 @@ begin
     addGlobalFunc('function TImage.ThresholdAdaptiveSauvola(Invert: Boolean = False; Radius: Integer = 25; C: Single = 0.2): TImage', @_LapeImage_ThresholdAdaptiveSauvola);
     addGlobalFunc('function TImage.Blend(Points: TPointArray; Radius: Integer): TImage; overload', @_LapeImage_Blend1);
     addGlobalFunc('function TImage.Blend(Points: TPointArray; Radius: Integer; IgnorePoints: TPointArray): TImage; overload', @_LapeImage_Blend2);
-    addGlobalFunc('function TImage.Blur(Algo: EImageBlurAlgo; Radius: Integer): TImage;', @_LapeImage_Blur);
+    addGlobalFunc('function TImage.Blur(Algo: EImageBlurAlgo; Radius: Single): TImage;', @_LapeImage_Blur);
 
     addGlobalFunc('function TImage.ToGreyMatrix: TByteMatrix', @_LapeImage_ToGreyMatrix);
     addGlobalFunc('function TImage.ToMatrix: TIntegerMatrix; overload', @_LapeImage_ToMatrix1);

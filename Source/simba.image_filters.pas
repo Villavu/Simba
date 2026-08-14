@@ -2,6 +2,13 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+  Blur derived from the Python Imaging Library (Pillow),
+  src/libImaging/BoxBlur.c, used under the HPND License:
+
+  Copyright (c) 1997-2011 by Secret Labs AB
+  Copyright (c) 1995-2011 by Fredrik Lundh and contributors
+  Copyright (c) 2010 by Jeffrey A. Clark and contributors
 }
 unit simba.image_filters;
 
