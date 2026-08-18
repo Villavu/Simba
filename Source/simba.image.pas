@@ -275,7 +275,7 @@ uses
   simba.colormath_distance,
   simba.colormath_conversion,
   simba.zip,
-  simba.containers,
+  simba.container_point,
   simba.threading;
 
 function TSimbaImage.Copy: TSimbaImage;
@@ -636,7 +636,7 @@ function TSimbaImage.PixelDifference(Other: TSimbaImage; Tolerance: Single; AOff
 var
   P1, P2: PColorBGRA;
   X, Y, W, H: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   if (FWidth <> Other.Width) or (FHeight <> Other.Height) then
     SimbaException('TSimbaImage.PixelDifference: Both images must be equal dimensions');
@@ -687,7 +687,7 @@ var
   Col: TColorBGRA;
   Ptr: PColorBGRA;
   X, Y: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Col := TSimbaColorConversion.ColorToBGRA(Color);
 
@@ -778,7 +778,7 @@ function TSimbaImage.FindAlpha(Value: Byte): TPointArray;
 var
   Ptr: PColorBGRA;
   X,Y,W,H: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Ptr := FData;
 

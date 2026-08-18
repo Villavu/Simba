@@ -132,7 +132,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.containers, simba.container_heaparray, simba.vartype_pointarray, simba.vartype_box;
+  simba.math, simba.container_point, simba.container_heaparray, simba.vartype_pointarray, simba.vartype_box;
 
 function TIntegerMatrixHelper.GetWidth: Integer;
 begin
@@ -274,7 +274,7 @@ end;
 function TIntegerMatrixHelper.Indices(Value: Integer; Comparator: EComparator): TPointArray;
 var
   W, H, X, Y: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   W := Self.Width - 1;
   H := Self.Height - 1;
@@ -691,7 +691,7 @@ end;
 function TSingleMatrixHelper.Indices(Value: Single; Comparator: EComparator): TPointArray;
 var
   W, H, X, Y: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   W := Self.Width - 1;
   H := Self.Height - 1;
@@ -842,7 +842,7 @@ end;
 function TSingleMatrixHelper.ArgExtrema(Count: Int32; HiLo: Boolean = True; XYIntersection: Boolean = True): TPointArray;
 var
   W, H: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 
   function pass_x(): TPointArray;
   var

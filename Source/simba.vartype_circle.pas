@@ -60,7 +60,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.vartype_pointarray, simba.random, simba.containers, simba.geometry,
+  simba.math, simba.vartype_pointarray, simba.random, simba.container_point, simba.geometry,
   simba.vartype_box, simba.vartype_polygon;
 
 function TCircleHelper.GetCenter: TPoint;
@@ -133,7 +133,7 @@ end;
 function TCircleHelper.Extract(Points: TPointArray): TPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init(Length(Points));
   for I := 0 to High(Points) do
@@ -146,7 +146,7 @@ end;
 function TCircleHelper.Exclude(Points: TPointArray): TPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init(Length(Points));
   for I := 0 to High(Points) do

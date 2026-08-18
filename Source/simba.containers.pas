@@ -170,13 +170,6 @@ type
 
   TSimbaIntegerBuffer    = specialize TSimbaArrayBuffer<Integer>;
   TSimbaStringBuffer     = specialize TSimbaArrayBuffer<String>;
-  TSimbaPointBuffer      = specialize TSimbaArrayBuffer<TPoint>;
-  TSimbaPointArrayBuffer = specialize TSimbaArrayBuffer<TPointArray>;
-
-  TSimbaPointBufferHelper = record helper for TSimbaPointBuffer
-  public
-    procedure Add(const X, Y: Integer); overload; inline;
-  end;
 
   TSimbaStringBuilder = record
   private
@@ -506,17 +499,6 @@ begin
     FLength := FLength * 2;
 
   SetLength(FArr, FLength);
-end;
-
-procedure TSimbaPointBufferHelper.Add(const X, Y: Integer);
-begin
-  if (FCount+1 >= FLength) then
-    Grow();
-
-  FArr[FCount].X := X;
-  FArr[FCount].Y := Y;
-
-  Inc(FCount);
 end;
 
 function TSimbaArrayBuffer.GetItem(const Index: Integer): _T;

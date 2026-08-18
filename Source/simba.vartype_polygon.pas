@@ -50,7 +50,7 @@ uses
   Math,
   simba.math,
   simba.geometry,
-  simba.containers,
+  simba.container_point,
   simba.vartype_point,
   simba.vartype_pointarray,
   simba.vector;
@@ -343,7 +343,7 @@ end;
 function TPolygonHelper.Connect: TPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init();
 

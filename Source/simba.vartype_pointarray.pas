@@ -217,8 +217,8 @@ implementation
 
 uses
   Math,
-  simba.containers, simba.geometry, simba.math,
-  simba.container_pointset, simba.container_kdpointtree,
+  simba.geometry, simba.math,
+  simba.container_point, simba.container_kdpointtree,
   simba.vartype_matrix, simba.vartype_ordarray,
   simba.vartype_box, simba.vartype_point, simba.vartype_triangle,
   simba.array_algorithm;
@@ -277,7 +277,7 @@ end;
 
 class function TPointArrayHelper.CreateFromLine(Start, Stop: TPoint): TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 
   procedure Create;
 
@@ -300,7 +300,7 @@ end;
 
 class function TPointArrayHelper.CreateFromCircle(Center: TPoint; Radius: Integer; Filled: Boolean): TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 
   procedure Create;
 
@@ -344,7 +344,7 @@ end;
 
 class function TPointArrayHelper.CreateFromEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Filled: Boolean): TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 
   procedure Create;
 
@@ -388,7 +388,7 @@ end;
 
 class function TPointArrayHelper.CreateFromBox(Box: TBox; Filled: Boolean): TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 
   procedure _Pixel(const X, Y: Integer); inline;
   begin
@@ -441,7 +441,7 @@ class function TPointArrayHelper.CreateFromPolygon(Poly: TPointArray; Filled: Bo
 
   procedure CreateFilled;
   var
-    Buffer: TSimbaPointBuffer;
+    Buffer: TPointBuffer;
 
     procedure _Row(const Y: Integer; const X1, X2: Integer);
     var
@@ -562,7 +562,7 @@ function TPointArrayHelper.Invert(ABounds: TBox): TPointArray;
 var
   Matrix: TBooleanMatrix;
   I, W, H, X, Y: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init(ABounds.Area div 2);
 
@@ -589,7 +589,7 @@ end;
 function TPointArrayHelper.Connect: TPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init();
 
@@ -622,7 +622,7 @@ var
   I: Integer;
   P: TPoint;
   W, H: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init();
 
@@ -658,7 +658,7 @@ var
   Adj: TPointArray;
   Start, Prev, Finish: TPoint;
   B: TBox;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 label
   IsSet;
 begin
@@ -850,8 +850,8 @@ var
   B: TBox;
   Width, Height: Integer;
   Checked: TBooleanMatrix;
-  Queue: TSimbaPointBuffer;
-  Arr: TSimbaPointBuffer;
+  Queue: TPointBuffer;
+  Arr: TPointBuffer;
 
   procedure Push(const X, Y: Integer); inline;
   begin
@@ -906,7 +906,7 @@ end;
 
 function TPointArrayHelper.ShapeFill: TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 
   procedure HorzLine(Y: Integer; XStart, XStop: Integer);
   var
@@ -1119,7 +1119,7 @@ function TPointArrayHelper.Erode(Iterations: Integer): TPointArray;
 var
   I, J, X, Y: Integer;
   Matrix: TByteMatrix; // 0 = removed, 1 = filled, 2 = enqueued
-  QueueA, QueueB: TSimbaPointBuffer;
+  QueueA, QueueB: TPointBuffer;
   face: TPointArray;
   pt: TPoint;
   B: TBox;
@@ -1205,7 +1205,7 @@ function TPointArrayHelper.Grow(Iterations: Integer): TPointArray;
 var
   I,J,X,Y: Integer;
   Matrix: TBooleanMatrix;
-  QueueA, QueueB: TSimbaPointBuffer;
+  QueueA, QueueB: TPointBuffer;
   face:TPointArray;
   pt:TPoint;
   B: TBox;
@@ -1315,7 +1315,7 @@ var
   I, J: Integer;
   DistSqr: Int64;
   Query: TPoint;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init();
 
@@ -1346,7 +1346,7 @@ end;
 
 function TPointArrayHelper.ExcludeDist(Center: TPoint; MinDist, MaxDist: Double): TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
   I: Integer;
   Dist, MinDistSqr, MaxDistSqr: Double;
 begin
@@ -1454,7 +1454,7 @@ end;
 
 function TPointArrayHelper.ExtractDist(Center: TPoint; MinDist, MaxDist: Single): TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
   I: Integer;
   Dist, MinDistSqr, MaxDistSqr: Double;
 begin
@@ -1475,7 +1475,7 @@ end;
 function TPointArrayHelper.ExtractPolygon(Polygon: TPolygon): TPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   SetLength(Result, Length(Self));
   for I := 0 to High(Self) do
@@ -1487,7 +1487,7 @@ end;
 function TPointArrayHelper.ExtractBox(Box: TBox): TPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init();
   
@@ -1519,7 +1519,7 @@ var
   StartD, EndD: Double;
   I: Integer;
   Over180: Boolean;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   StartD := DegNormalize(StartDegree);
   EndD   := DegNormalize(EndDegree);
@@ -1602,7 +1602,7 @@ var
   CosA, SinA: Single;
   OldBounds, NewBounds: TBox;
   Corners: TPointArray;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   if (Length(Self) > 0) then
   begin
@@ -1649,7 +1649,7 @@ function TPointArrayHelper.PointsNearby(Other: TPointArray; MinDist, MaxDist: Do
 var
   Tree: TKDPointTree;
   I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init();
 
@@ -1667,7 +1667,7 @@ function TPointArrayHelper.PointsNearby(Other: TPointArray; MinDistX, MinDistY, 
 var
   Tree: TKDPointTree;
   I: Integer;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init();
 
@@ -1867,7 +1867,7 @@ function TPointArrayHelper.Rows: T2DPointArray;
 var
   TPA: TPointArray;
   I, Len, Start, Current: Integer;
-  Buffer: TSimbaPointArrayBuffer;
+  Buffer: TPointArrayBuffer;
 begin
   TPA := SortByRow();
 
@@ -1890,7 +1890,7 @@ function TPointArrayHelper.Columns: T2DPointArray;
 var
   TPA: TPointArray;
   I, Len, Start, Current: Integer;
-  Buffer: TSimbaPointArrayBuffer;
+  Buffer: TPointArrayBuffer;
 begin
   TPA := SortByColumn();
 
@@ -1915,8 +1915,8 @@ var
   ProcessedCount: Integer;
   ClusterSize, ClusterPointIndex: Integer;
   Points: TPointArray;
-  Current: TSimbaPointBuffer;
-  Clusters: TSimbaPointArrayBuffer;
+  Current: TPointBuffer;
+  Clusters: TPointArrayBuffer;
   xsq, ysq, xxyy: Single;
 begin
   if (Length(Self) = 0) then
@@ -1991,13 +1991,13 @@ var
   xr, yr: Integer;
   xsq, ysq, xxyy: Single;
   PointScan: TPointScanMatrix;
-  Queue: TSimbaPointBuffer;
+  Queue: TPointBuffer;
   TPA: TPointArray;
   ScanBounds: TBox;
   P: TPoint;
   SkipRow: Boolean;
-  Buffer: TSimbaPointBuffer;
-  ResultBuffer: TSimbaPointArrayBuffer;
+  Buffer: TPointBuffer;
+  ResultBuffer: TPointArrayBuffer;
 begin
   Len := Length(Self);
 
@@ -2101,7 +2101,7 @@ function TPointArrayHelper.Partition(Width, Height: Integer): T2DPointArray;
 type
   TScan = record
     X, Y: Integer;
-    Arr: TSimbaPointBuffer;
+    Arr: TPointBuffer;
   end;
   TScanArray = array of TScan;
 var
@@ -2156,7 +2156,7 @@ function TPointArrayHelper.Partition(Dist: Integer): T2DPointArray;
 type
   TScan = record
     X, Y: Integer;
-    Arr: TSimbaPointBuffer;
+    Arr: TPointBuffer;
   end;
   TScanArray = array of TScan;
 var
@@ -2214,7 +2214,7 @@ function TPointArrayHelper.PartitionEx(StartPoint: TPoint; BoxWidth, BoxHeight: 
 var
   I, X, Y, ColCount, RowCount, ResultCount: Integer;
   B: TBox;
-  Buffers: array of TSimbaPointBuffer;
+  Buffers: array of TPointBuffer;
 begin
   Result := Default(T2DPointArray);
 
@@ -2297,7 +2297,7 @@ end;
 
 function TPointArrayHelper.SymmetricDifference(Other: TPointArray): TPointArray;
 var
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   Buffer.Init();
   Buffer.Add(Self.Difference(Other));
@@ -2452,7 +2452,7 @@ var
   p,n,b: TPoint;
   base: single;
   validTip,growing: Boolean;
-  Res: TSimbaPointBuffer;
+  Res: TPointBuffer;
 begin
   b   := Self.Bounds.Corners[0];
   dt  := Self.DistanceTransform();
@@ -2628,7 +2628,7 @@ end;
 function TPointArrayHelper.ConcaveHull(Epsilon:Double=2.5; kCount:Int32=5): TPolygon;
 var
   TPA, pts: TPointArray;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
   tree: TKDPointTree;
   i: Int32;
   B: TBox;
@@ -2668,7 +2668,7 @@ var
   tree: TKDPointTree;
   i: Int32;
   B: TBox;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   B := Self.Bounds();
   TPA := Self.PartitionEx(TPoint.Create(B.X1-Round(Epsilon), B.Y1-Round(Epsilon)), Round(Epsilon*2-1), Round(Epsilon*2-1)).Means();
@@ -2707,7 +2707,7 @@ var
   pt: TPoint;
   concavePoly: TPointArray;
   convex: TPointArray;
-  Buffer: TSimbaPointBuffer;
+  Buffer: TPointBuffer;
 begin
   concavePoly := Self;
   convex := ConcavePoly.ConvexHull();
@@ -3008,7 +3008,7 @@ end;
 function T2DPointArrayHelper.ExtractSize(Len: Integer; KeepIf: EComparator): T2DPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointArrayBuffer;
+  Buffer: TPointArrayBuffer;
 begin
   Buffer.Init(Length(Self));
 
@@ -3028,7 +3028,7 @@ end;
 function T2DPointArrayHelper.ExtractSizeEx(MinLen, MaxLen: Integer): T2DPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointArrayBuffer;
+  Buffer: TPointArrayBuffer;
 begin
   Buffer.Init(Length(Self));
 
@@ -3042,7 +3042,7 @@ end;
 function T2DPointArrayHelper.ExtractDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointArrayBuffer;
+  Buffer: TPointArrayBuffer;
 begin
   Buffer.Init(Length(Self));
 
@@ -3062,7 +3062,7 @@ end;
 function T2DPointArrayHelper.ExcludeSize(Len: Integer; RemoveIf: EComparator): T2DPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointArrayBuffer;
+  Buffer: TPointArrayBuffer;
 begin
   Buffer.Init(Length(Self));
 
@@ -3082,7 +3082,7 @@ end;
 function T2DPointArrayHelper.ExcludeSizeEx(MinLen, MaxLen: Integer): T2DPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointArrayBuffer;
+  Buffer: TPointArrayBuffer;
 begin
   Buffer.Init(Length(Self));
 
@@ -3096,7 +3096,7 @@ end;
 function T2DPointArrayHelper.ExcludeDimensions(MinShortSide, MinLongSide, MaxShortSide, MaxLongSide: Integer): T2DPointArray;
 var
   I: Integer;
-  Buffer: TSimbaPointArrayBuffer;
+  Buffer: TPointArrayBuffer;
 begin
   Buffer.Init(Length(Self));
 

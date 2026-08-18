@@ -56,7 +56,7 @@ uses
   simba.vartype_pointarray,
   simba.vartype_matrix,
   simba.vartype_box,
-  simba.containers,
+  simba.container_point,
   simba.threading,
   simba.multiprocessing;
 
@@ -173,7 +173,7 @@ end;
 function FindColorsOnBuffer(Formula: EColorSpace; Color: TColor; Tolerance: Single; Multipliers: TChannelMultipliers;
                             Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer): TPointArray;
 var
-  PointBuffer: TSimbaPointBuffer;
+  PointBuffer: TPointBuffer;
 
   {$DEFINE MACRO_FINDCOLORS_BEGIN :=
     Result := [];
@@ -525,7 +525,7 @@ function FindEdgesOnBuffer(Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth
                            MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers): TPointArray;
 var
   X, Y, W, H: Integer;
-  PointBuffer: TSimbaPointBuffer;
+  PointBuffer: TPointBuffer;
   First, Second, Third: TColor;
 begin
   W := SearchWidth - 2;

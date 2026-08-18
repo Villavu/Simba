@@ -39,7 +39,7 @@ function FindDTMRotatedOnTarget(constref Target: TSimbaTarget;
 implementation
 
 uses
-  simba.colormath_distance, simba.containers, simba.vartype_box;
+  simba.colormath_distance, simba.containers, simba.container_point, simba.vartype_box;
 
 type
   TSearchPoint = record
@@ -138,7 +138,7 @@ var
 var
   I, H, X, Y: Integer;
   MainPointArea: TBox;
-  PointBuffer: TSimbaPointBuffer;
+  PointBuffer: TPointBuffer;
 label
   Next;
 begin

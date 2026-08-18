@@ -28,7 +28,7 @@ function FindTemplateOnTarget(Target: TSimbaTarget; Templ: TSimbaImage; out Matc
 implementation
 
 uses
-  simba.containers,
+  simba.container_point,
   simba.matchtemplate,
   simba.threading,
   simba.multiprocessing,
@@ -122,7 +122,7 @@ var
 var
   X, Y: Integer;
   RowPtr: PColorBGRA;
-  PointBuffer: TSimbaPointBuffer;
+  PointBuffer: TPointBuffer;
 begin
   Result := [];
 
