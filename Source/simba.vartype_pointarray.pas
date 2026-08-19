@@ -1911,67 +1911,74 @@ end;
 
 function TPointArrayHelper.Split(DistX, DistY: Single): T2DPointArray;
 var
-  PointIndex, LastPointIndex: Integer;
-  ProcessedCount: Integer;
-  ClusterSize, ClusterPointIndex: Integer;
-  Points: TPointArray;
-  Current: TPointBuffer;
-  Clusters: TPointArrayBuffer;
-  xsq, ysq, xxyy: Single;
+  Index, ClusterCount, Head, Tail, Neighbour, DeltaX, DeltaY: Integer;
+  Curr: TPoint;
+  RadiusXSq, RadiusYSq, MaxDist: Single;
+  Visited: TBooleanArray;
+  ClusterPts: TPointArray;
+  Grid: TPointSpatialHash;
 begin
+  if (DistX <= 0) or (DistY <= 0) then
+    SimbaException('TPointArray.Split: DistX and DistY must be > 0');
+
   if (Length(Self) = 0) then
-    Result := []
-  else
+    Exit([]);
   if (Length(Self) = 1) then
-    Result := [Copy(Self)]
-  else
+    Exit([Copy(Self)]);
+
+  RadiusXSq := Sqr(DistX);
+  RadiusYSq := Sqr(DistY);
+  MaxDist := RadiusXSq * RadiusYSq;
+
+  Grid.Init(Self, DistX, DistY);
+
+  SetLength(Visited, Length(Self));
+  SetLength(ClusterPts, Length(Self));
+  SetLength(Result, Min(Length(Self), 64));
+  ClusterCount := 0;
+
+  for Index := 0 to High(Self) do
   begin
-    Clusters.Init(64);
-    Current.Init(256);
+    if Visited[Index] then
+      Continue;
 
-    xsq := Sqr(DistX);
-    ysq := Sqr(DistY);
-    xxyy := xsq * ysq;
-
-    Points := Copy(Self);
-    LastPointIndex := High(Points);
-    ProcessedCount := 0;
-    while ((LastPointIndex - ProcessedCount) >= 0) do
+    Head := 0;
+    Tail := 0;
+    ClusterPts[Tail] := Self[Index];
+    Inc(Tail);
+    Visited[Index] := True;
+    while (Head < Tail) do
     begin
-      if (Current.Count > 0) then
-        Clusters.Add(Current.ToArray());
-      Current.Clear();
-      Current.Add(Points[0]);
+      Curr := ClusterPts[Head];
+      Inc(Head);
 
-      Points[0] := Points[LastPointIndex - ProcessedCount];
-      Inc(ProcessedCount);
-      ClusterSize := 1;
-      ClusterPointIndex := 0;
-
-      while (ClusterPointIndex < ClusterSize) do
-      begin
-        PointIndex := 0;
-        while (PointIndex <= (LastPointIndex - ProcessedCount)) do
+      for DeltaY := -1 to 1 do
+        for DeltaX := -1 to 1 do
         begin
-          if Sqr(Double(Current[ClusterPointIndex].X - Points[PointIndex].X)) * ysq + Sqr(Double(Current[ClusterPointIndex].Y - Points[PointIndex].Y)) * xsq <= xxyy then
+          Neighbour := Grid.MoveTo(Curr, DeltaX, DeltaY);
+          while (Neighbour >= 0) do
           begin
-            Current.Add(Points[PointIndex]);
-            Points[PointIndex] := Points[LastPointIndex - ProcessedCount];
-            Inc(ProcessedCount);
-            Inc(ClusterSize);
-            Dec(PointIndex);
+            if (not Visited[Neighbour]) then
+              if (Sqr(Double(Curr.X - Self[Neighbour].X)) * RadiusYSq +
+                  Sqr(Double(Curr.Y - Self[Neighbour].Y)) * RadiusXSq <= MaxDist) then
+              begin
+                Visited[Neighbour] := True;
+                ClusterPts[Tail] := Self[Neighbour];
+                Inc(Tail);
+              end;
+            Neighbour := Grid.Next[Neighbour];
           end;
-          Inc(PointIndex);
         end;
-        Inc(ClusterPointIndex);
-      end;
     end;
 
-    if (Current.Count > 0) then
-      Clusters.Add(Current.ToArray());
-
-    Result := Clusters.ToArray(False);
+    if (ClusterCount > High(Result)) then
+      SetLength(Result, 2 * Length(Result));
+    SetLength(Result[ClusterCount], Tail);
+    Move(ClusterPts[0], Result[ClusterCount][0], Tail * SizeOf(TPoint));
+    Inc(ClusterCount);
   end;
+
+  SetLength(Result, ClusterCount);
 end;
 
 function TPointArrayHelper.Split(Dist: Single): T2DPointArray;
