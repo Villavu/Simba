@@ -883,24 +883,22 @@ end;
 TPointArray.Split
 -----------------
 ```
-function TPointArray.Split(rad: Integer): T2DPointArray;
+function TPointArray.Split(Dist: Single): T2DPointArray;
+function TPointArray.Split(DistX, DistY: Single): T2DPointArray;
 ```
-Groups points which are within the given distance of **rad**.
+Groups points into clusters - points within **Dist** of one another end up in the same cluster.
+![Points clustered at a growing distance](../../images/tpa_clustering.webp)
+
+```{note}
+**Cluster** produces the same result and should be used.
+It's usually faster and automatically uses `Split` when it wouldn't be.
+```
 *)
 procedure _LapeTPASplit1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Split(PSingle(Params^[1])^);
 end;
 
-(*
-TPointArray.Split
------------------
-```
-function TPointArray.Split(xRad, yRad: Single): T2DPointArray;
-
-Groups points which are within the given distance of **xRad** and **yRad**.
-```
-*)
 procedure _LapeTPASplit2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Split(PSingle(Params^[1])^, PSingle(Params^[2])^);
@@ -910,23 +908,17 @@ end;
 TPointArray.Cluster
 -------------------
 ```
-function TPointArray.Cluster(rad: Single): T2DPointArray;
+function TPointArray.Cluster(Dist: Single): T2DPointArray;
+function TPointArray.Cluster(DistX, DistY: Single): T2DPointArray;
 ```
-Groups points which are within the given distance of **rad**.
+Groups points into clusters - points within **Dist** of one another end up in the same cluster.
+![Points clustered at a growing distance](../../images/tpa_clustering.webp)
 *)
 procedure _LapeTPACluster1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Cluster(PSingle(Params^[1])^);
 end;
 
-(*
-TPointArray.Cluster
--------------------
-```
-function TPointArray.Cluster(xRad, yRad: Single): T2DPointArray;
-```
-Groups points which are within the given distance of **xRad** and **yRad**.
-*)
 procedure _LapeTPACluster2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   P2DPointArray(Result)^ := PPointArray(Params^[0])^.Cluster(PSingle(Params^[1])^, PSingle(Params^[2])^);

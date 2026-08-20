@@ -23,11 +23,6 @@
   - QuickSkeleton
 }
 
-{
-  Jani Lähdesmäki - Janilabo
-
-  - Cluster
-}
 
 unit simba.vartype_pointarray;
 
@@ -1909,6 +1904,9 @@ begin
   Result := Buffer.ToArray(False);
 end;
 
+// Single-linkage clustering by BFS flood-fill over a spatial hash: points bucket into DistX x DistY
+// cells, so a point's only candidate neighbours are the 3x3 block of cells around it. A neighbour joins
+// if it's inside the ellipse distance.
 function TPointArrayHelper.Split(DistX, DistY: Single): T2DPointArray;
 var
   Index, ClusterCount, Head, Tail, Neighbour, DeltaX, DeltaY: Integer;
@@ -1986,117 +1984,203 @@ begin
   Result := Split(Dist, Dist);
 end;
 
+// Same grouping as Split but the flood-fill runs over a bit-packed occupancy grid (not a spatial hash)
+// 1 bit per pixel so the BFS consumes 64 pixels at a time.
+// - Cluster is O(bounding-box area) at one bit per pixel.
+// - Split is O(point count) so Cluster wins on dense sets but falls back to Split when the grid would be too sparse or large.
 function TPointArrayHelper.Cluster(DistX, DistY: Single): T2DPointArray;
-type
-  TPointScan = record
-    SkipRow: Boolean;
-    HasPoints: Boolean;
-  end;
-  TPointScanMatrix = array of array of TPointScan;
+const
+  AllBits = not UInt64(0);
+  OneBit  = UInt64(1);
 var
-  I, X, Y, OffsetX, OffsetY, Len: Integer;
-  xr, yr: Integer;
-  xsq, ysq, xxyy: Single;
-  PointScan: TPointScanMatrix;
-  Queue: TPointBuffer;
-  TPA: TPointArray;
-  ScanBounds: TBox;
-  P: TPoint;
-  SkipRow: Boolean;
-  Buffer: TPointBuffer;
-  ResultBuffer: TPointArrayBuffer;
-begin
-  Len := Length(Self);
+  RadiusY: Integer;
+  BitStride: Int64;
+  RowSpans: TIntegerArray;
+  GridBits: array of UInt64; // occupancy grid
+  Queue: array of TPoint;    // BFS queue (grid pixels)
 
-  if (Len = 0) then
-    Result := []
-  else
-  if (Len = 1) then
-    Result := [Copy(Self)]
-  else
-  if (Len < 700) then // Split is cheaper on small arrays
-    Result := Split(DistX, DistY)
-  else
+  // per-row ellipse half-spans
+  function EllipseRowSpans: TIntegerArray;
+  var
+    xSq, ySq: Single;
+    dy, adx: Integer;
   begin
-    ResultBuffer.Init(64);
-    Buffer.Init(256);
-    Queue.Init(256);
+    xSq := Sqr(DistX);
+    ySq := Sqr(DistY);
+    SetLength(Result, Trunc(DistY) + 1);
 
-    xr := Round(DistX);
-    yr := Round(DistY);
-    xsq := Sqr(DistX);
-    ysq := Sqr(DistY);
-    xxyy := xsq * ysq;
-
-    with Self.Bounds() do
-    begin
-      OffsetX := X1 - xr;
-      OffsetY := Y1 - yr;
-
-      SetLength(PointScan,
-        Height + (yr * 2),
-        Width  + (xr * 2)
-      );
-    end;
-
-    TPA := Self.Offset(-OffsetX, -OffsetY);
-    for I := 0 to High(TPA) do
-      PointScan[TPA[I].Y, TPA[I].X].HasPoints := True;
-
-    for I := 0 to High(TPA) do
-      if PointScan[TPA[I].Y, TPA[I].X].HasPoints then
+    adx := Trunc(DistX) + 1;
+    dy  := 0;
+    while (dy <= High(Result)) do
+      if (adx >= 0) and (Sqr(Double(adx)) * ysq + Sqr(Double(dy)) * xsq > (xsq * ysq)) then
+        Dec(adx)
+      else
       begin
-        if (Buffer.Count > 0) then
-          ResultBuffer.Add(Buffer.ToArray());
+        Result[dy] := adx;
+        Inc(dy);
+      end;
+  end;
 
-        Buffer.Clear();
-        Buffer.Add(TPA[I].X + OffsetX, TPA[I].Y + OffsetY);
-
-        Queue.Clear();
-        Queue.Add(TPA[I]);
-
-        PointScan[TPA[I].Y, TPA[I].X].HasPoints := False;
-
-        while (Queue.Count > 0) do
+  // consume a popped pixel's neighbourhood into the queue; returns new tail
+  function ScanNeighbourhood(CenterX, CenterY, QueueTail: Integer): Integer;
+  var
+    DeltaY, RowY, HalfSpan: Integer;
+    LoBit, HiBit, FirstChunk, LastChunk, ChunkIndex, RowStartBit, ChunkBaseX: Int64;
+    Occupied, SpanMask: UInt64;
+  begin
+    Result := QueueTail;
+    RowY := CenterY - RadiusY;                        // first row
+    RowStartBit := Int64(RowY) * BitStride;           // rows advance additively
+    for DeltaY := -RadiusY to RadiusY do
+    begin
+      HalfSpan := RowSpans[Abs(DeltaY)];              // row half-width
+      if (HalfSpan >= 0) then
+      begin
+        LoBit := RowStartBit + (CenterX - HalfSpan);  // row span bits
+        HiBit := RowStartBit + (CenterX + HalfSpan);
+        FirstChunk := LoBit shr 6;
+        if (FirstChunk = (HiBit shr 6)) then
         begin
-          P := Queue.Pop;
-
-          ScanBounds.X1 := (P.X - xr);
-          ScanBounds.Y1 := (P.Y - yr);
-          ScanBounds.X2 := (P.X + xr);
-          ScanBounds.Y2 := (P.Y + yr);
-
-          for Y := ScanBounds.Y1 to ScanBounds.Y2 do
+          // span in one chunk (fast path)
+          SpanMask := (AllBits shl (LoBit and 63)) and (AllBits shr (63 - (HiBit and 63)));
+          Occupied := GridBits[FirstChunk] and SpanMask;
+          if (Occupied <> 0) then
           begin
-            if PointScan[Y, ScanBounds.X2].SkipRow then
-              Continue;
+            GridBits[FirstChunk] := GridBits[FirstChunk] xor Occupied;   // consume
+            ChunkBaseX := (FirstChunk shl 6) - RowStartBit;
+            repeat
+              Queue[Result].X := Integer(ChunkBaseX + BsfQWord(Occupied));
+              Queue[Result].Y := RowY;
+              Inc(Result);
+              Occupied := Occupied and (Occupied - 1);
+            until (Occupied = 0);
+          end;
+        end
+        else
+        begin
+          // span crosses chunks: masked ends, full interior
+          LastChunk := HiBit shr 6;
+          ChunkIndex := FirstChunk;
+          while (ChunkIndex <= LastChunk) do
+          begin
+            if (ChunkIndex = FirstChunk) then
+              SpanMask := AllBits shl (LoBit and 63)
+            else if (ChunkIndex = LastChunk) then
+              SpanMask := AllBits shr (63 - (HiBit and 63))
+            else
+              SpanMask := AllBits;
 
-            SkipRow := True;
-            for X := ScanBounds.X1 to ScanBounds.X2 do
+            Occupied := GridBits[ChunkIndex] and SpanMask;
+            if (Occupied <> 0) then
             begin
-              if not PointScan[Y, X].HasPoints then
-                Continue;
-
-              if Sqr(Double(X - P.X)) * ysq + Sqr(Double(Y - P.Y)) * xsq <= xxyy then
-              begin
-                Buffer.Add(X + OffsetX, Y + OffsetY);
-                PointScan[Y, X].HasPoints := False;
-                Queue.Add(X, Y);
-              end else
-                SkipRow := False;
+              GridBits[ChunkIndex] := GridBits[ChunkIndex] xor Occupied;
+              ChunkBaseX := (ChunkIndex shl 6) - RowStartBit;
+              repeat
+                Queue[Result].X := Integer(ChunkBaseX + BsfQWord(Occupied)); Queue[Result].Y := RowY; Inc(Result);
+                Occupied := Occupied and (Occupied - 1);
+              until (Occupied = 0);
             end;
 
-            if SkipRow then
-              PointScan[Y, ScanBounds.X2].SkipRow := True;
+            Inc(ChunkIndex);
           end;
         end;
       end;
-
-    if (Buffer.Count > 0) then
-      ResultBuffer.Add(Buffer.ToArray());
-
-    Result := ResultBuffer.ToArray(False);
+      Inc(RowY);
+      RowStartBit := RowStartBit + BitStride;
+    end;
   end;
+
+var
+  Index, RadiusX, OffsetX, OffsetY: Integer;
+  MinX, MinY, ChunksPerRow: Integer;
+  ClusterCount, QueueHead, QueueTail, CenterX, CenterY, PixelIndex: Integer;
+  PixelBit, GridArea, GridChunks: Int64;
+begin
+  if (DistX <= 0) or (DistY <= 0) then
+    SimbaException('TPointArray.Cluster: DistX and DistY must be > 0');
+
+  if (Length(Self) = 0) then
+    Exit([]);
+  if (Length(Self) = 1) then
+    Exit([Copy(Self)]);
+
+  // ellipse as per-row spans (flood does no distance math)
+  // RadiusY = rows
+  // RadiusX = widest half-span
+  RowSpans := EllipseRowSpans();
+  RadiusY := High(RowSpans);
+  RadiusX := RowSpans[0];
+
+  // grid sized to bbox: 1 bit/pixel, 64/chunk, whole chunks/row (BitStride), radius-padded
+  with Self.Bounds() do
+  begin
+    MinX := X1;
+    MinY := Y1;
+
+    ChunksPerRow := (Width + 2 * RadiusX + 63) shr 6;
+    GridChunks   := Int64(ChunksPerRow) * (Int64(Height) + 2 * RadiusY);          // UInt64s allocated
+    GridArea     := (Int64(Width) + 2 * RadiusX) * (Int64(Height) + 2 * RadiusY); // grid cells (density)
+
+    // fall back to Split when too sparse for the grid to win (>640 cells/point), or the grid would
+    // exceed ~128mb (16M eight-byte chunks). All Int64 so a huge point count or bbox can't overflow the test.
+    if (GridArea > Int64(High(Self)) * 640) or (GridChunks > 16 * 1024 * 1024) then
+    begin
+      Result := Split(DistX, DistY);
+      Exit;
+    end;
+
+    BitStride := Int64(ChunksPerRow) * 64;
+    SetLength(GridBits, GridChunks);
+  end;
+  SetLength(Queue, Length(Self));
+  OffsetX := MinX - RadiusX;
+  OffsetY := MinY - RadiusY;
+
+  // rasterize: 1 bit/point
+  for Index := 0 to High(Self) do
+  begin
+    PixelBit := Int64(Self[Index].Y - MinY + RadiusY) * BitStride + (Self[Index].X - MinX + RadiusX);
+    GridBits[PixelBit shr 6] := GridBits[PixelBit shr 6] or (OneBit shl (PixelBit and 63));
+  end;
+
+  // flood each component from an unconsumed seed
+  SetLength(Result, Min(64, Length(Self)));
+  ClusterCount := 0;
+  for Index := 0 to High(Self) do
+  begin
+    CenterX := Self[Index].X - MinX + RadiusX;
+    CenterY := Self[Index].Y - MinY + RadiusY;
+    PixelBit := Int64(CenterY) * BitStride + CenterX;
+    if (GridBits[PixelBit shr 6] and (OneBit shl (PixelBit and 63))) = 0 then  // already taken
+      Continue;
+
+    GridBits[PixelBit shr 6] := GridBits[PixelBit shr 6] and not (OneBit shl (PixelBit and 63));
+    Queue[0].X := CenterX;
+    Queue[0].Y := CenterY;
+    QueueTail := 1;
+    QueueHead := 0;
+
+    // BFS: consume each popped pixel's neighbourhood
+    while (QueueHead < QueueTail) do
+    begin
+      CenterX := Queue[QueueHead].X;
+      CenterY := Queue[QueueHead].Y;
+      Inc(QueueHead);
+      QueueTail := ScanNeighbourhood(CenterX, CenterY, QueueTail);
+    end;
+
+    if (ClusterCount > High(Result)) then
+      SetLength(Result, 2 * Length(Result));
+    SetLength(Result[ClusterCount], QueueTail);
+
+    for PixelIndex := 0 to QueueTail - 1 do
+      Result[ClusterCount][PixelIndex] := TPoint.Create(
+        Queue[PixelIndex].X + OffsetX,
+        Queue[PixelIndex].Y + OffsetY
+      );
+    Inc(ClusterCount);
+  end;
+  SetLength(Result, ClusterCount);
 end;
 
 function TPointArrayHelper.Cluster(Dist: Single): T2DPointArray;
