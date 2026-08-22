@@ -323,7 +323,7 @@ var
     {$i shapebuilder_circlefilled.inc}
 
   begin
-    Buffer.Init(Radius * Radius);
+    Buffer.Init((Radius * Radius * 7) div 2);
 
     _BuildCircleFilled(Center.X, Center.Y, Radius);
   end;
@@ -367,7 +367,7 @@ var
     {$i shapebuilder_ellipsefilled.inc}
 
   begin
-    Buffer.Init(RadiusX * RadiusY);
+    Buffer.Init((RadiusX * RadiusY * 7) div 2);
 
     _BuildEllipseFilled(Center.X, Center.Y, RadiusX, RadiusY);
   end;
@@ -449,6 +449,8 @@ class function TPointArrayHelper.CreateFromPolygon(Poly: TPointArray; Filled: Bo
     {$i shapebuilder_polygonfilled.inc}
 
   begin
+    Buffer.Init(Poly.Bounds.Area div 2);
+
     _BuildPolygonFilled(Poly, TRect(Poly.Bounds), TPoint.ZERO);
 
     Result := Buffer.ToArray(False);
@@ -467,6 +469,9 @@ var
   dx,dy,ptx,pty,SinR,CosR: Double;
   pt : TPoint;
 begin
+  if (Sides < 1) then // avoid the 360/Sides divide-by-zero
+    Exit(nil);
+
   ptx := Center.X + Size;
   pty := Center.Y + Size;
   SinR := Sin(DegToRad(360.0 / Sides));

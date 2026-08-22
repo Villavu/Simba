@@ -2,87 +2,64 @@
   {$ERROR _BuildPolygonFilled requires "procedure _Row(Y: Integer; X1, X2: Integer)"}
 {$ENDIF}
 
-(*
-  https://gitlab.com/freepascal.org/lazarus/lazarus/-/blob/main/components/fpvectorial/fpvutils.pas#L765
-
-  Calculates the intersection points of a vertical (ACoordIsX = true) or horizontal
-  (ACoordIsX = false) line with border of the polygon specified by APoints.
-  Returns the coordinates of the intersection points.
-*)
-
-type
-  TPointFArray = array of record X,Y: Double; end;
-
-procedure GetLinePolygonIntersectionPoints(const ACoord: Double; const APoints: TPointFArray; const ACoordIsX: Boolean; out lpoints: TPointFArray);
+function GetScanlineCrossings(const ACoord: Integer; const APoints: TPointArray; var Crossings: TIntegerArray): Integer;
 var
-  I, Count: Integer;
-  Arr: TDoubleArray;
+  I, J, D: Integer;
   dx, dy: Double;
 begin
-  SetLength(Arr, Length(APoints));
-  Count := 0;
-
-  if ACoordIsX then
-  begin
-    for I := 0 to High(APoints) - 1 do
-      if ((APoints[I].X <= ACoord) and (ACoord < APoints[I+1].X)) or
-         ((APoints[I+1].X <= ACoord) and (ACoord < APoints[I].X)) then
-      begin
-        dx := APoints[I+1].X - APoints[I].X;
-        dy := APoints[I+1].Y - APoints[I].Y;
-
-        Arr[Count] := APoints[I].Y + (ACoord - APoints[I].X) * dy / dx;
-        Inc(Count);
-      end;
-  end else
-  begin
-    for I := 0 to High(APoints) - 1 do
-      if ((APoints[I].Y <= ACoord) and (ACoord < APoints[I+1].Y)) or
-         ((APoints[I+1].Y <= ACoord) and (ACoord < APoints[I].Y)) then
-      begin
-        dy := APoints[I+1].Y - APoints[I].Y;
-        dx := APoints[I+1].X - APoints[I].X;
-
-        Arr[Count] := APoints[I].X + (ACoord - APoints[I].Y) * dx / dy;
-        Inc(Count);
-      end;
-  end;
-
-  SetLength(lpoints, Count);
-  if (Count = 0) then
-    Exit;
-
-  specialize TArraySort<Double>.QuickSort(Arr, 0, Count - 1);
-
-  if ACoordIsX then
-    for I := 0 to High(lpoints) do
+  Result := 0;
+  for I := 0 to High(APoints) - 1 do
+    if ((APoints[I].Y <= ACoord) and (ACoord < APoints[I+1].Y)) or
+       ((APoints[I+1].Y <= ACoord) and (ACoord < APoints[I].Y)) then
     begin
-      lpoints[I].X := ACoord;
-      lpoints[I].Y := Arr[I];
-    end
+      dy := APoints[I+1].Y - APoints[I].Y;
+      dx := APoints[I+1].X - APoints[I].X;
+
+      Crossings[Result] := Round(APoints[I].X + (ACoord - APoints[I].Y) * dx / dy);
+      Inc(Result);
+    end;
+
+  // Crossings are almost always 2 else insertion sort.
+  if (Result = 2) then
+  begin
+    if (Crossings[0] > Crossings[1]) then
+    begin
+      D := Crossings[0];
+      Crossings[0] := Crossings[1];
+      Crossings[1] := D;
+    end;
+  end
   else
-    for I := 0 to High(lpoints) do
+    for I := 1 to Result - 1 do
     begin
-      lpoints[I].X := Arr[I];
-      lpoints[I].Y := ACoord;
+      D := Crossings[I];
+      J := I - 1;
+      while (J >= 0) and (Crossings[J] > D) do
+      begin
+        Crossings[J + 1] := Crossings[J];
+        Dec(J);
+      end;
+      Crossings[J + 1] := D;
     end;
 end;
 
 (*
-  Fills a polygon with the color of the current brush. The routine can handle
-  non-contiguous polygons (holes!) correctly using the ScanLine algorithm and
-  the even-odd rule
-  http://www.tutorialspoint.com/computer_graphics/polygon_filling_algorithm
+  Fills a polygon with the current colour using the scan-line algorithm and the
+  even-odd rule, so non-convex polygons and holes fill correctly.
+  https://www.tutorialspoint.com/computer_graphics/polygon_filling_algorithm.html
 *)
 procedure _BuildPolygonFilled(APoints: TPointArray; ARect: TRect; AOffset: TPoint);
 var
-  scanlineY, scanLineY1, scanLineY2, yLo, yHi: Integer;
-  lPoints, pts: TPointFArray;
-  I: Integer;
-  yMin, yMax: Double;
+  scanlineY, scanLineY1, scanLineY2: Integer;
+  Crossings: TIntegerArray;
+  I, Count, x1, prevEnd: Integer;
+  yMin, yMax: Integer;
 begin
   if (Length(APoints) < 3) then // a polygon needs at least 3 vertices
     Exit;
+
+  // Make sure not to modify the input
+  APoints := Copy(APoints);
 
   if (APoints[0] <> APoints[High(APoints)]) then
   begin
@@ -100,45 +77,43 @@ begin
     scanLineY2 := ARect.Top;
   end;
 
-  // Prepare points (apply offset) and track the polygon's Y extent
-  SetLength(pts, Length(APoints));
+  // Apply the offset and track the polygon's Y extent
   yMin := APoints[0].Y + AOffset.Y;
   yMax := yMin;
   for I := 0 to High(APoints) do
   begin
-    pts[I].x := APoints[I].X + AOffset.X;
-    pts[I].y := APoints[I].Y + AOffset.Y;
-    if (pts[I].y < yMin) then yMin := pts[I].y;
-    if (pts[I].y > yMax) then yMax := pts[I].y;
+    APoints[I].X := APoints[I].X + AOffset.X;
+    APoints[I].Y := APoints[I].Y + AOffset.Y;
+    if (APoints[I].Y < yMin) then yMin := APoints[I].Y;
+    if (APoints[I].Y > yMax) then yMax := APoints[I].Y;
   end;
 
-  // Only scan the polygon's own Y-extent (clamped to ARect), not the whole rect
-  yLo := Trunc(yMin) - 1;
-  yHi := Trunc(yMax) + 1;
-  if (yLo > scanLineY1) then scanLineY1 := yLo;
-  if (yHi < scanLineY2) then scanLineY2 := yHi;
+  if (yMin > scanLineY1) then scanLineY1 := yMin;
+  if (yMax < scanLineY2) then scanLineY2 := yMax;
 
-  // Fill polygon by drawing horizontal line segments
-  scanlineY := scanlineY1;
-  while (scanlineY <= scanlineY2) do
+  SetLength(Crossings, Length(APoints));
+
+  scanlineY := scanLineY1;
+  while (scanlineY <= scanLineY2) do
   begin
-    // Find intersection points of horizontal scan line with polygon
-    // with polygon
-    GetLinePolygonIntersectionPoints(scanlineY, pts, false, lpoints);
-    if Length(lPoints) < 2 then
-    begin
-      Inc(scanlineY);
-      Continue;
-    end;
-    // Draw lines between intersection points, skip every second pair
+    Count := GetScanlineCrossings(scanlineY, APoints, Crossings);
+
+    // Fill between successive crossing pairs (even-odd rule). Where a span starts on
+    // the previous span's end pixel, skip that shared pixel so it isn't drawn twice.
     I := 0;
-    while I < High(lPoints) do
+    prevEnd := Low(Integer);
+    while (I < Count - 1) do
     begin
-      _Row(Round(lPoints[I].Y), Round(lPoints[I].X), Round(lPoints[I+1].X));
+      x1 := Crossings[I];
+      if (x1 <= prevEnd) then
+        x1 := prevEnd + 1;
+      if (x1 <= Crossings[I+1]) then
+        _Row(scanlineY, x1, Crossings[I+1]);
+
+      prevEnd := Crossings[I+1];
       Inc(I, 2);
     end;
-    // Proceed to next scan line
+
     Inc(scanlineY);
   end;
 end;
-

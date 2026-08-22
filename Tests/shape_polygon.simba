@@ -1,40 +1,84 @@
 {$assertions on}
 
+// fill a polygon using contains
+function Interior(p: TPolygon): TPointArray;
 var
-  p: TPolygon;
-  tpa: TPointArray;
-  x,y,i: Integer;
+  x, y: Integer;
+  b: TBox;
 begin
-  // concave
-  p := [[49,8], [87,32], [64,67], [39,34], [14,60], [5,14]];
+  Result := [];
+  b := TPointArray(p).Bounds;
+  for y := b.Y1 to b.Y2 do
+    for x := b.X1 to b.X2 do
+      if p.Contains([x, y]) then
+        Result += [x, y];
+end;
 
-  Assert(Abs(p.Area - 2665) <= 5);
-  Assert(p.IsConvex = False);
+function Same(A, B: TPointArray): Boolean;
+begin
+  Result := A.SortByColumn().Equals(B.SortByColumn());
+end;
 
-  tpa := [];
-  for y:=0 to 200 do
-    for x := 0 to 200 do
-      if p.Contains([x,y]) then
-        tpa += [x,y];
+procedure TestFill(p: TPolygon; msg: String);
+var
+  filled, inside: TPointArray;
+begin
+  filled := TPointArray.CreateFromPolygon(p, True);
+  inside := Interior(p);
 
-  Assert(Abs(tpa.Bounds.X1 - TPointArray(p).Bounds.X1) <= 2);
-  Assert(Abs(tpa.Bounds.Y1 - TPointArray(p).Bounds.Y1) <= 2);
-  Assert(Abs(tpa.Bounds.X2 - TPointArray(p).Bounds.X2) <= 2);
-  Assert(Abs(tpa.Bounds.Y2 - TPointArray(p).Bounds.Y2) <= 2);
+  Assert(inside.Difference(filled).Length = 0,
+         msg + ': whole interior covered');
+  Assert(filled.Difference(inside).Difference(p.Connect()).Length = 0,
+         msg + ': nothing filled outside the shape or its edge');
+  Assert(filled.Unique().Length = Length(filled),
+         msg + ': no duplicate points');
+end;
 
-  // convex
-  p := [[39,7], [69,26], [69,56], [40,76], [9,56], [9,25]];
-  Assert(Abs(p.Area - 2985) <= 5);
-  Assert(p.IsConvex = True);
+var
+  convex, concave: TPolygon;
+begin
+  // A convex polygon bulges outward everywhere
+  // A concave polygon has at least one "dented-in" vertex
 
-  tpa := [];
-  for y:=0 to 200 do
-    for x := 0 to 200 do
-      if p.Contains([x,y]) then
-        tpa += [x,y];
+  {
+           ######
+        ############
+     ##################
+    ####################
+    ####################
+    ####################
+    ####################
+    ####################
+     ##################
+        ############
+           ######
+  }
+  convex := [[39,7], [69,26], [69,56], [40,76], [9,56], [9,25]];
 
-  Assert(Abs(tpa.Bounds.X1 - TPointArray(p).Bounds.X1) <= 2);
-  Assert(Abs(tpa.Bounds.Y1 - TPointArray(p).Bounds.Y1) <= 2);
-  Assert(Abs(tpa.Bounds.X2 - TPointArray(p).Bounds.X2) <= 2);
-  Assert(Abs(tpa.Bounds.Y2 - TPointArray(p).Bounds.Y2) <= 2);
+  {
+    ##################
+     ####################
+     ########################
+      ##########################
+      #########  ##############
+      #######     ###########
+       ####         ########
+       ##            ######
+                       ##
+  }
+  concave := [[49,8], [87,32], [64,67], [39,34], [14,60], [5,14]];
+
+  TestFill(convex,  'convex');
+  TestFill(concave, 'concave');
+
+  Assert(Same(
+      TPointArray.CreateFromPolygon([[10,10],[100,10],[100,100],[10,100]], True),
+      TPointArray.CreateFromBox(TBox.Create(10, 10, 100, 99), True)),
+         'square: same region as CreateFromBox'
+  );
+
+  Assert(Same(TPointArray.CreateFromPolygon(concave, False), concave.Connect()), 'outline: connected edges');
+
+  Assert(Length(TPointArray.CreateFromPolygon([[5,5],[9,9]], True)) = 0,          'degenerate: empty');
+  Assert(Length(TPointArray.CreateFromPolygon([[5,5],[20,5],[12,18]], True)) > 0, 'triangle: filled');
 end.

@@ -1595,10 +1595,10 @@ begin
     addGlobalFunc('function TPointArray.SortByRow(Reverse: Boolean = False): TPointArray', @_LapeTPASortByRow);
     addGlobalFunc('function TPointArray.SortByColumn(Reverse: Boolean = False): TPointArray', @_LapeTPASortByColumn);
 
-    addGlobalFunc('function TPointArray.Split(Rad: Single): T2DPointArray; overload', @_LapeTPASplit1);
-    addGlobalFunc('function TPointArray.Split(xRad, yRad: Single): T2DPointArray; overload', @_LapeTPASplit2);
-    addGlobalFunc('function TPointArray.Cluster(Rad: Single): T2DPointArray; overload', @_LapeTPACluster1);
-    addGlobalFunc('function TPointArray.Cluster(xRad, yRad: Single): T2DPointArray; overload', @_LapeTPACluster2);
+    addGlobalFunc('function TPointArray.Split(Dist: Single): T2DPointArray; overload', @_LapeTPASplit1);
+    addGlobalFunc('function TPointArray.Split(DistX, DistY: Single): T2DPointArray; overload', @_LapeTPASplit2);
+    addGlobalFunc('function TPointArray.Cluster(Dist: Single): T2DPointArray; overload', @_LapeTPACluster1);
+    addGlobalFunc('function TPointArray.Cluster(DistX, DistY: Single): T2DPointArray; overload', @_LapeTPACluster2);
 
     addGlobalFunc('function TPointArray.Partition(Dist: Integer): T2DPointArray; overload', @_LapeTPAPartition1);
     addGlobalFunc('function TPointArray.Partition(Width, Height: Integer): T2DPointArray; overload', @_LapeTPAPartition2);
