@@ -418,7 +418,7 @@ begin
   BGRA.B := AColor.Blue div 257;
   BGRA.A := AColor.Alpha shr 8;
 
-  BlendPixel(FCurrentColor, BGRA);
+  BlendPixel(FCurrentColor, @BGRA);
 
   if FDrawn then
   begin

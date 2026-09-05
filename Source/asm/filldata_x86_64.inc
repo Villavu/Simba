@@ -53,7 +53,8 @@ asm
   mov    [rax], r9d
   add    rax, 4
   dec    rcx
-  jmp    @align
+  jnz    @align                   // defensive: stop if the whole count was consumed while aligning (no NT stores -> no fence)
+  jmp    @done
 @lbulk:
   mov    edx, ecx
   and    rcx, -4
@@ -64,7 +65,7 @@ asm
   sub    rcx, 4
   jnz    @lloop
 @ltail:
-  and    edx, 3
+  and    edx, 3                   // 0..3 scalar leftover
   jz     @lfence
 @ltloop:
   mov    [rax], r9d

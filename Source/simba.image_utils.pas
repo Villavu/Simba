@@ -38,8 +38,7 @@ const
   ALPHA_OPAQUE      = Byte(255);
   ALPHA_TRANSPARENT = Byte(0);
 
-procedure BlendPixel(const Data: PColorBGRA; const DataW, DataH: Integer; const X,Y: Integer; constref Color: TColorBGRA); overload; inline;
-procedure BlendPixel(const Pixel: PColorBGRA; constref Color: TColorBGRA); overload;
+procedure BlendPixel(const Pixel: PColorBGRA; const Color: PColorBGRA); {$IF NOT DEFINED(IMAGE_ASM)}inline;{$ENDIF}
 
 function GetDistinctColor(const Index: Integer): Integer;
 function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
@@ -113,7 +112,7 @@ begin
   Query(Left, Top, Right, Bottom, Result, _);
 end;
 
-procedure BlendPixel(const Pixel: PColorBGRA; constref Color: TColorBGRA);
+procedure BlendPixel(const Pixel: PColorBGRA; const Color: PColorBGRA);
 {$IF DEFINED(IMAGE_ASM)}
   {$I asm/blendpixel_x86_64.inc}
 {$ELSE}
@@ -122,24 +121,18 @@ var
 begin
   if (Pixel^.A > 0) then
   begin
-    A := Color.A;
+    A := Color^.A;
     AInv := UInt32(255) - A;
 
-    Pixel^.B := (Pixel^.B * AInv + Color.B * A) div 255;
-    Pixel^.G := (Pixel^.G * AInv + Color.G * A) div 255;
-    Pixel^.R := (Pixel^.R * AInv + Color.R * A) div 255;
+    Pixel^.B := (Pixel^.B * AInv + Color^.B * A) div 255;
+    Pixel^.G := (Pixel^.G * AInv + Color^.G * A) div 255;
+    Pixel^.R := (Pixel^.R * AInv + Color^.R * A) div 255;
     Pixel^.A := A + (Pixel^.A * AInv div 255);
   end
   else
-    Pixel^ := Color;
+    Pixel^ := Color^;
 end;
 {$ENDIF}
-
-procedure BlendPixel(const Data: PColorBGRA; const DataW, DataH: Integer; const X, Y: Integer; constref Color: TColorBGRA);
-begin
-  if (UInt32(X) < UInt32(DataW)) and (UInt32(Y) < UInt32(DataH)) then
-    BlendPixel(@Data[Y * DataW + X], Color);
-end;
 
 function GetDistinctColor(const Index: Integer): Integer;
 begin
