@@ -56,6 +56,21 @@ function Modulo(const X, Y: Integer): Integer; inline; overload;
 
 function CeilTo(const n: Double; const Precision: Int8 = 0): Double;
 
+// 2.5 would always go up to 3
+function RoundHalfUp(const V: Double): Integer; inline;
+// 2.5 would always go down to 2
+function RoundHalfDown(const V: Double): Integer; inline;
+// 4.2 would be 4
+function FloorInt(const V: Double): Integer; inline;
+// 4.2 would be 5
+function CeilInt(const V: Double): Integer; inline;
+// Ceil(V) held to [Lo, Hi]
+function CeilClamp(const V: Single; const Lo, Hi: Integer): Integer; inline;
+// Floor(V) held to [Lo, Hi]
+function FloorClamp(const V: Single; const Lo, Hi: Integer): Integer; inline;
+// Trunc(V) held to [Lo, Hi]
+function TruncClamp(const V: Single; const Lo, Hi: Integer): Integer; inline;
+
 implementation
 
 uses
@@ -170,6 +185,64 @@ begin
     Result := Ceil(n)
   else
     Result := RoundTo(n + 0.5 * 10**(-Double(Precision)), -Precision);
+end;
+
+function RoundHalfUp(const V: Double): Integer;
+begin
+  Result := Round(V);
+  if (V - Result = 0.5) then
+    Inc(Result);
+end;
+
+function RoundHalfDown(const V: Double): Integer;
+begin
+  Result := Round(V);
+  if (Result - V = 0.5) then
+    Dec(Result);
+end;
+
+function FloorInt(const V: Double): Integer;
+begin
+  Result := Trunc(V);
+  if (V < Result) then
+    Dec(Result);
+end;
+
+function CeilInt(const V: Double): Integer;
+begin
+  Result := Trunc(V);
+  if (V > Result) then
+    Inc(Result);
+end;
+
+function CeilClamp(const V: Single; const Lo, Hi: Integer): Integer; inline;
+begin
+  if not (V > Lo) then
+    Result := Lo
+  else if (V >= Hi) then
+    Result := Hi
+  else
+    Result := CeilInt(V);
+end;
+
+function FloorClamp(const V: Single; const Lo, Hi: Integer): Integer; inline;
+begin
+  if not (V > Lo) then
+    Result := Lo
+  else if (V >= Hi) then
+    Result := Hi
+  else
+    Result := FloorInt(V);
+end;
+
+function TruncClamp(const V: Single; const Lo, Hi: Integer): Integer; inline;
+begin
+  if not (V > Lo) then
+    Result := Lo
+  else if (V >= Hi) then
+    Result := Hi
+  else
+    Result := Trunc(V);
 end;
 
 end.
