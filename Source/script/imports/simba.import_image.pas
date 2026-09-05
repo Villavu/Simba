@@ -215,6 +215,71 @@ begin
 end;
 
 (*
+TImage.DrawAntialiasing
+-----------------------
+```
+property TImage.DrawAntialiasing: Boolean;
+property TImage.DrawAntialiasing(Value: Boolean);
+```
+
+When True the shape drawing methods - lines, boxes, polygons, quads, circles, ellipses, crosses, points and
+their inverted fills - render anti-aliased instead of aliased, with DrawFeather softening the edge. Filled
+shapes are unaffected. False by default.
+*)
+procedure _LapeImage_DrawAntialiasing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PLapeObjectImage(Params^[0])^^.DrawAntialiasing;
+end;
+
+procedure _LapeImage_DrawAntialiasing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectImage(Params^[0])^^.DrawAntialiasing := PBoolean(Params^[1])^;
+end;
+
+(*
+TImage.DrawThickness
+--------------------
+```
+property TImage.DrawThickness: Single;
+property TImage.DrawThickness(Value: Single);
+```
+
+The stroke width used by the shape drawing methods. Applies to thick lines and circles when aliased, and to
+every shape when DrawAntialiasing is True. 1 by default.
+*)
+procedure _LapeImage_DrawThickness_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := PLapeObjectImage(Params^[0])^^.DrawThickness;
+end;
+
+procedure _LapeImage_DrawThickness_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectImage(Params^[0])^^.DrawThickness := PSingle(Params^[1])^;
+end;
+
+(*
+TImage.DrawFeather
+------------------
+```
+property TImage.DrawFeather: Single;
+property TImage.DrawFeather(Value: Single);
+```
+
+Softens the anti-aliased edge by widening the alpha ramp (only takes effect when DrawAntialiasing is True).
+1 by default, giving every shape - including axis-aligned ones like boxes, which have no sub-pixel edge to
+antialias on their own - a soft edge; set to 0 for crisp anti-aliasing.
+*)
+procedure _LapeImage_DrawFeather_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := PLapeObjectImage(Params^[0])^^.DrawFeather;
+end;
+
+procedure _LapeImage_DrawFeather_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectImage(Params^[0])^^.DrawFeather := PSingle(Params^[1])^;
+end;
+
+(*
 TImage.FontName
 ---------------
 ```
@@ -852,24 +917,12 @@ end;
 TImage.DrawLine
 ---------------
 ```
-procedure TImage.DrawLine(Start, Stop: TPoint; Thickness: Integer = 1);
+procedure TImage.DrawLine(Start, Stop: TPoint);
 ```
 *)
 procedure _LapeImage_DrawLine(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLapeObjectImage(Params^[0])^^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^);
-end;
-
-(*
-TImage.DrawLineGap
-------------------
-```
-procedure TImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer);
-```
-*)
-procedure _LapeImage_DrawLineGap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectImage(Params^[0])^^.DrawLineGap(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^);
+  PLapeObjectImage(Params^[0])^^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^);
 end;
 
 (*
@@ -1008,13 +1061,13 @@ end;
 TImage.DrawCircle
 -----------------
 ```
-procedure TImage.DrawCircle(Center: TPoint; Radius: Integer; Thickness: Integer = 1);
-procedure TImage.DrawCircle(Circle: TCircle; Thickness: Integer = 1);
+procedure TImage.DrawCircle(Center: TPoint; Radius: Integer);
+procedure TImage.DrawCircle(Circle: TCircle);
 ```
 *)
 procedure _LapeImage_DrawCircle1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLapeObjectImage(Params^[0])^^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+  PLapeObjectImage(Params^[0])^^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
@@ -1046,7 +1099,7 @@ end;
 
 procedure _LapeImage_DrawCircle2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLapeObjectImage(Params^[0])^^.DrawCircle(Point(TCircle(Params^[1]^).X, TCircle(Params^[1]^).Y), TCircle(Params^[1]^).Radius, PInteger(Params^[2])^);
+  PLapeObjectImage(Params^[0])^^.DrawCircle(Point(TCircle(Params^[1]^).X, TCircle(Params^[1]^).Y), TCircle(Params^[1]^).Radius);
 end;
 
 procedure _LapeImage_DrawCircleFilled2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -1060,45 +1113,42 @@ begin
 end;
 
 (*
-TImage.DrawLineAA
------------------
+TImage.DrawEllipse
+------------------
 ```
-procedure TImage.DrawLineAA(Start, Stop: TPoint; Color: TColor; Thickness: Single = 1.5);
+procedure TImage.DrawEllipse(ACenter: TPoint; XRadius, YRadius: Integer);
+```
+Draws an ellipse outline. When `DrawAntialiasing` is True it is drawn anti-aliased using `DrawThickness` and `DrawFeather`.
+*)
+procedure _LapeImage_DrawEllipse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectImage(Params^[0])^^.DrawEllipse(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
+end;
+
+
+(*
+TImage.DrawEllipseFilled
+------------------------
+```
+procedure TImage.DrawEllipseFilled(ACenter: TPoint; XRadius, YRadius: Integer);
 ```
 *)
-procedure _LapeImage_DrawLineAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_DrawEllipseFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLapeObjectImage(Params^[0])^^.DrawLineAA(PPoint(Params^[1])^, PPoint(Params^[2])^, PSingle(Params^[3])^);
+  PLapeObjectImage(Params^[0])^^.DrawEllipseFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
-TImage.DrawEllipseAA
---------------------
+TImage.DrawEllipseInverted
+--------------------------
 ```
-procedure TImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Color: TColor; Thickness: Single = 1.5);
+procedure TImage.DrawEllipseInverted(ACenter: TPoint; XRadius, YRadius: Integer);
 ```
+Fills everything outside the ellipse.
 *)
-procedure _LapeImage_DrawEllipseAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_DrawEllipseInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLapeObjectImage(Params^[0])^^.DrawEllipseAA(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PSingle(Params^[4])^);
-end;
-
-(*
-TImage.DrawCircleAA
---------------------
-```
-procedure TImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Color: TColor; Thickness: Single = 1.5);
-procedure TImage.DrawCircleAA(Circle: TCircle; Color: TColor; Thickness: Single = 1.5);
-```
-*)
-procedure _LapeImage_DrawCircleAA1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectImage(Params^[0])^^.DrawCircleAA(TPoint(Params^[1]^), Integer(Params^[2]^), PSingle(Params^[3])^);
-end;
-
-procedure _LapeImage_DrawCircleAA2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectImage(Params^[0])^^.DrawCircleAA(Point(TCircle(Params^[1]^).X, TCircle(Params^[1]^).Y), TCircle(Params^[1]^).Radius, PSingle(Params^[3])^);
+  PLapeObjectImage(Params^[0])^^.DrawEllipseInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 (*
@@ -1712,6 +1762,9 @@ begin
     addProperty('TImage', 'DefaultPixel', 'TColorBGRA', @_LapeImage_DefaultPixel_Read, @_LapeImage_DefaultPixel_Write);
     addProperty('TImage', 'DrawColor', 'TColor', @_LapeImage_DrawColor_Read, @_LapeImage_DrawColor_Write);
     addProperty('TImage', 'DrawAlpha', 'Byte', @_LapeImage_DrawAlpha_Read, @_LapeImage_DrawAlpha_Write);
+    addProperty('TImage', 'DrawThickness', 'Single', @_LapeImage_DrawThickness_Read, @_LapeImage_DrawThickness_Write);
+    addProperty('TImage', 'DrawAntialiasing', 'Boolean', @_LapeImage_DrawAntialiasing_Read, @_LapeImage_DrawAntialiasing_Write);
+    addProperty('TImage', 'DrawFeather', 'Single', @_LapeImage_DrawFeather_Read, @_LapeImage_DrawFeather_Write);
     addProperty('TImage', 'FontName', 'String', @_LapeImage_FontName_Read, @_LapeImage_FontName_Write);
     addProperty('TImage', 'FontSize', 'Single', @_LapeImage_FontSize_Read, @_LapeImage_FontSize_Write);
     addProperty('TImage', 'FontAntialiasing', 'Boolean', @_LapeImage_FontAntialiasing_Read, @_LapeImage_FontAntialiasing_Write);
@@ -1774,8 +1827,7 @@ begin
     addGlobalFunc('procedure TImage.DrawATPA(ATPA: T2DPointArray);', @_LapeImage_DrawATPA);
     addGlobalFunc('procedure TImage.DrawTPA(TPA: TPointArray);', @_LapeImage_DrawTPA);
 
-    addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint; Thickness: Integer = 1)', @_LapeImage_DrawLine);
-    addGlobalFunc('procedure TImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer)', @_LapeImage_DrawLineGap);
+    addGlobalFunc('procedure TImage.DrawLine(Start, Stop: TPoint)', @_LapeImage_DrawLine);
     addGlobalFunc('procedure TImage.DrawCrosshairs(ACenter: TPoint; Size: Integer);', @_LapeImage_DrawCrosshairs);
     addGlobalFunc('procedure TImage.DrawCross(ACenter: TPoint; Radius: Integer);', @_LapeImage_DrawCross);
 
@@ -1791,19 +1843,18 @@ begin
     addGlobalFunc('procedure TImage.DrawQuadFilled(Quad: TQuad);', @_LapeImage_DrawQuadFilled);
     addGlobalFunc('procedure TImage.DrawQuadInverted(Quad: TQuad);', @_LapeImage_DrawQuadInverted);
     
-    addGlobalFunc('procedure TImage.DrawCircle(Center: TPoint; Radius: Integer; Thickness: Integer = 1); overload', @_LapeImage_DrawCircle1);
+    addGlobalFunc('procedure TImage.DrawCircle(Center: TPoint; Radius: Integer); overload', @_LapeImage_DrawCircle1);
     addGlobalFunc('procedure TImage.DrawCircleFilled(Center: TPoint; Radius: Integer); overload', @_LapeImage_DrawCircleFilled1);
     addGlobalFunc('procedure TImage.DrawCircleInverted(Center: TPoint; Radius: Integer); overload', @_LapeImage_DrawCircleInverted1);
 
-    addGlobalFunc('procedure TImage.DrawCircle(Circle: TCircle; Thickness: Integer = 1); overload', @_LapeImage_DrawCircle2);
+    addGlobalFunc('procedure TImage.DrawCircle(Circle: TCircle); overload', @_LapeImage_DrawCircle2);
     addGlobalFunc('procedure TImage.DrawCircleFilled(Circle: TCircle); overload', @_LapeImage_DrawCircleFilled2);
     addGlobalFunc('procedure TImage.DrawCircleInverted(Circle: TCircle); overload', @_LapeImage_DrawCircleInverted2);
 
-    addGlobalFunc('procedure TImage.DrawLineAA(Start, Stop: TPoint; Thickness: Single = 1.5);', @_LapeImage_DrawLineAA);
-    addGlobalFunc('procedure TImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single = 1.5);', @_LapeImage_DrawEllipseAA);
-    addGlobalFunc('procedure TImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single = 1.5); overload', @_LapeImage_DrawCircleAA1);
-    addGlobalFunc('procedure TImage.DrawCircleAA(Circle: TCircle; Thickness: Single = 1.5); overload', @_LapeImage_DrawCircleAA2);
-    
+    addGlobalFunc('procedure TImage.DrawEllipse(ACenter: TPoint; XRadius, YRadius: Integer);', @_LapeImage_DrawEllipse);
+    addGlobalFunc('procedure TImage.DrawEllipseFilled(ACenter: TPoint; XRadius, YRadius: Integer);', @_LapeImage_DrawEllipseFilled);
+    addGlobalFunc('procedure TImage.DrawEllipseInverted(ACenter: TPoint; XRadius, YRadius: Integer);', @_LapeImage_DrawEllipseInverted);
+
     addGlobalFunc('procedure TImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean);', @_LapeImage_DrawQuadArray);
     addGlobalFunc('procedure TImage.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);', @_LapeImage_DrawBoxArray);
     addGlobalFunc('procedure TImage.DrawPolygonArray(Polygons: TPolygonArray; Filled: Boolean);', @_LapeImage_DrawPolygonArray);

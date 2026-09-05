@@ -11,8 +11,12 @@ interface
 
 uses
   Classes, SysUtils, Graphics,
-  simba.base, simba.baseclass, simba.image_textdrawer, simba.colormath,
-  simba.vartype_polygon, simba.vartype_quad;
+  simba.base,
+  simba.baseclass,
+  simba.image_textdrawer,
+  simba.colormath,
+  simba.vartype_polygon,
+  simba.vartype_quad;
 
 type
   {$PUSH}
@@ -47,11 +51,13 @@ type
 
     FDrawColor: TColor;
     FDrawAlpha: Byte;
+    FDrawThickness: Single;
+    FDrawAntialiasing: Boolean;
+    FDrawFeather: Single;
 
     function DetachData: TDetachedImageData;
 
-    procedure DrawData(TheData: PColorBGRA; DataW, DataH: Integer; P: TPoint);
-    procedure DrawDataAlpha(TheData: PColorBGRA; DataW, DataH: Integer; P: TPoint; Alpha: Byte);
+    procedure DrawData(Src: PColorBGRA; SrcW, SrcH: Integer; P: TPoint; Alpha: Byte = 255);
 
     procedure RaiseOutOfImageException(X, Y: Integer);
 
@@ -94,6 +100,13 @@ type
     property DrawColor: TColor read FDrawColor write FDrawColor;
     property DrawAlpha: Byte read FDrawAlpha write FDrawAlpha;
     property DrawColorAsBGRA: TColorBGRA read GetDrawColorAsBGRA;
+
+    // DrawXX stroke width
+    property DrawThickness: Single read FDrawThickness write FDrawThickness;
+    // DrawXX render anti-aliased
+    property DrawAntialiasing: Boolean read FDrawAntialiasing write FDrawAntialiasing;
+    // Edge softening when anti-aliasing. (0 = Crisp)
+    property DrawFeather: Single read FDrawFeather write FDrawFeather;
 
     property FontName: String read GetFontName write SetFontName;
     property FontSize: Single read GetFontSize write SetFontSize;
@@ -167,8 +180,7 @@ type
     procedure DrawTPA(TPA: TPointArray);
 
     // Line
-    procedure DrawLine(Start, Stop: TPoint; Thickness: Integer = 1);
-    procedure DrawLineGap(Start, Stop: TPoint; GapSize: Integer);
+    procedure DrawLine(Start, Stop: TPoint);
     procedure DrawCrosshairs(ACenter: TPoint; Size: Integer);
     procedure DrawCross(ACenter: TPoint; Radius: Integer);
 
@@ -188,14 +200,14 @@ type
     procedure DrawQuadInverted(Quad: TQuad);
 
     // Circle
-    procedure DrawCircle(ACenter: TPoint; Radius: Integer; Thickness: Integer = 1);
+    procedure DrawCircle(ACenter: TPoint; Radius: Integer);
     procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer);
     procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer);
 
-    // Antialiased
-    procedure DrawLineAA(Start, Stop: TPoint; Thickness: Single = 1.5);
-    procedure DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single = 1.5);
-    procedure DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single = 1.5);
+    // Ellipse
+    procedure DrawEllipse(ACenter: TPoint; XRadius, YRadius: Integer);
+    procedure DrawEllipseFilled(ACenter: TPoint; XRadius, YRadius: Integer);
+    procedure DrawEllipseInverted(ACenter: TPoint; XRadius, YRadius: Integer);
 
     // Arrays
     procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean);
@@ -271,6 +283,7 @@ uses
   simba.image_stringconv,
   simba.image_filters,
   simba.image_draw,
+  simba.image_drawantialias,
   simba.image_drawmatrix,
   simba.colormath_distance,
   simba.colormath_conversion,
@@ -798,10 +811,10 @@ end;
 
 procedure TSimbaImage.DrawTPA(TPA: TPointArray);
 begin
-  if (FDrawAlpha = ALPHA_OPAQUE) then
-    SimbaImage_DrawTPA(Self, TPA)
+  if FDrawAntialiasing then
+    SimbaImage_DrawTPAAA(Self, TPA, FDrawThickness, FDrawFeather)   // a dot DrawThickness wide per point
   else
-    SimbaImage_DrawTPAAlpha(Self, TPA);
+    SimbaImage_DrawTPA(Self, TPA, FDrawThickness);
 end;
 
 procedure TSimbaImage.DrawATPA(ATPA: T2DPointArray);
@@ -843,130 +856,111 @@ begin
   end;
 end;
 
-procedure TSimbaImage.DrawLine(Start, Stop: TPoint; Thickness: Integer);
+procedure TSimbaImage.DrawLine(Start, Stop: TPoint);
 begin
-  if (Thickness > 1) then
-  begin
-    if (FDrawAlpha = ALPHA_OPAQUE) then
-      SimbaImage_DrawLineThick(Self, Start, Stop, Thickness)
-    else
-      SimbaImage_DrawLineThickAlpha(Self, Start, Stop, Thickness);
-  end else
-  if (FDrawAlpha = ALPHA_OPAQUE) then
-    SimbaImage_DrawLine(Self, Start, Stop)
+  if FDrawAntialiasing then
+    SimbaImage_DrawLineAA(Self, Start, Stop, FDrawThickness, FDrawFeather)
   else
-    SimbaImage_DrawLineAlpha(Self, Start, Stop);
-end;
-
-procedure TSimbaImage.DrawLineGap(Start, Stop: TPoint; GapSize: Integer);
-begin
-  if (FDrawAlpha = ALPHA_OPAQUE) then
-    SimbaImage_DrawLineGap(Self, Start, Stop, GapSize)
-  else
-    SimbaImage_DrawLineGapAlpha(Self, Start, Stop, GapSize);
+    SimbaImage_DrawLine(Self, Start, Stop, FDrawThickness);
 end;
 
 procedure TSimbaImage.DrawPolygon(Poly: TPolygon);
 begin
   if (Length(Poly) < 3) then
     Exit;
-
-  if (FDrawAlpha = ALPHA_OPAQUE) then
-    SimbaImage_DrawPolygon(Self, Poly)
+  if FDrawAntialiasing then
+    SimbaImage_DrawPolygonEdgeAA(Self, Poly, FDrawThickness, FDrawFeather)
   else
-    SimbaImage_DrawPolygonAlpha(Self, Poly);
+    SimbaImage_DrawPolygonEdge(Self, Poly, FDrawThickness);
 end;
 
 procedure TSimbaImage.DrawPolygonFilled(Poly: TPolygon);
 begin
-  if (Length(Poly) >= 3) then
-    if (FDrawAlpha = ALPHA_OPAQUE) then
-      SimbaImage_DrawPolygonFilled(Self, Poly)
-    else
-      SimbaImage_DrawPolygonFilledAlpha(Self, Poly)
+  if (Length(Poly) < 3) then
+    Exit;
+  if FDrawAntialiasing then
+    SimbaImage_DrawPolygonAA(Self, Poly, FDrawFeather, False)
+  else
+    SimbaImage_DrawPolygon(Self, Poly, False);
 end;
 
 procedure TSimbaImage.DrawPolygonInverted(Poly: TPolygon);
 begin
-  if (Length(Poly) >= 3) then
-  begin
-    Self.DrawBoxInverted(Poly.Bounds().Clip(TBox.Create(0, 0, FWidth-1, FHeight-1)));
-
-    if (FDrawAlpha = ALPHA_OPAQUE) then
-      SimbaImage_DrawPolygonInverted(Self, Poly)
-    else
-      SimbaImage_DrawPolygonInvertedAlpha(Self, Poly);
-  end;
+  if (Length(Poly) < 3) then
+    Exit;
+  if FDrawAntialiasing then
+    SimbaImage_DrawPolygonAA(Self, Poly, FDrawFeather, True)
+  else
+    SimbaImage_DrawPolygon(Self, Poly, True);
 end;
 
-procedure TSimbaImage.DrawCircle(ACenter: TPoint; Radius: Integer; Thickness: Integer);
+procedure TSimbaImage.DrawCircle(ACenter: TPoint; Radius: Integer);
 begin
-  if (Radius < 1) then
-    Exit;
-
-  if (Thickness > 1) then
-  begin
-    if (FDrawAlpha = ALPHA_OPAQUE) then
-      SimbaImage_DrawCircleThick(Self, ACenter, Radius, Thickness)
-    else
-      SimbaImage_DrawCircleThickAlpha(Self, ACenter, Radius, Thickness);
-  end else
-  if (FDrawAlpha = ALPHA_OPAQUE) then
-    SimbaImage_DrawCircleEdge(Self, ACenter, Radius)
-  else
-    SimbaImage_DrawCircleEdgeAlpha(Self, ACenter, Radius);
+  DrawEllipse(ACenter, Radius, Radius);
 end;
 
 procedure TSimbaImage.DrawCircleFilled(ACenter: TPoint; Radius: Integer);
 begin
-  if (Radius >= 1) then
-    if (FDrawAlpha = ALPHA_OPAQUE) then
-      SimbaImage_DrawCircleFilled(Self, ACenter, Radius)
-    else
-      SimbaImage_DrawCircleFilledAlpha(Self, ACenter, Radius);
+  DrawEllipseFilled(ACenter, Radius, Radius);
 end;
 
 procedure TSimbaImage.DrawCircleInverted(ACenter: TPoint; Radius: Integer);
 begin
-  if (Radius >= 1) then
-  begin
-    Self.DrawBoxInverted(
-      TBox.Create(Max(ACenter.X-Radius, 0), Max(ACenter.Y-Radius, 0), Min(ACenter.X+Radius, FWidth-1), Min(ACenter.Y+Radius, FHeight-1))
-    );
+  DrawEllipseInverted(ACenter, Radius, Radius);
+end;
 
-    if (FDrawAlpha = ALPHA_OPAQUE) then
-      SimbaImage_DrawCircleInverted(Self, ACenter, Radius)
-    else
-      SimbaImage_DrawCircleInvertedAlpha(Self, ACenter, Radius);
-  end;
+procedure TSimbaImage.DrawEllipse(ACenter: TPoint; XRadius, YRadius: Integer);
+begin
+  if (XRadius < 1) or (YRadius < 1) then
+    Exit;
+  if FDrawAntialiasing then
+    SimbaImage_DrawEllipseEdgeAA(Self, ACenter, XRadius, YRadius, FDrawThickness, FDrawFeather)
+  else
+    SimbaImage_DrawEllipseEdge(Self, ACenter, XRadius, YRadius, FDrawThickness);
+end;
+
+procedure TSimbaImage.DrawEllipseFilled(ACenter: TPoint; XRadius, YRadius: Integer);
+begin
+  if (XRadius < 1) or (YRadius < 1) then
+    Exit;
+  if FDrawAntialiasing then
+    SimbaImage_DrawEllipseAA(Self, ACenter, XRadius, YRadius, FDrawFeather, False)
+  else
+    SimbaImage_DrawEllipse(Self, ACenter, XRadius, YRadius, False);
+end;
+
+procedure TSimbaImage.DrawEllipseInverted(ACenter: TPoint; XRadius, YRadius: Integer);
+begin
+  if (XRadius < 1) or (YRadius < 1) then
+    Exit;
+  if FDrawAntialiasing then
+    SimbaImage_DrawEllipseAA(Self, ACenter, XRadius, YRadius, FDrawFeather, True)
+  else
+    SimbaImage_DrawEllipse(Self, ACenter, XRadius, YRadius, True);
 end;
 
 procedure TSimbaImage.DrawBox(Box: TBox);
 begin
-  if (FDrawAlpha = ALPHA_OPAQUE) then
-    SimbaImage_DrawBoxEdge(Self, Box)
+  if FDrawAntialiasing then
+    SimbaImage_DrawBoxEdgeAA(Self, Box, FDrawThickness, FDrawFeather)
   else
-    SimbaImage_DrawBoxEdgeAlpha(Self, Box);
+    SimbaImage_DrawBoxEdge(Self, Box, FDrawThickness);
 end;
 
 procedure TSimbaImage.DrawBoxFilled(Box: TBox);
 begin
-  if (FDrawAlpha = ALPHA_OPAQUE) then
-    SimbaImage_DrawBoxFilled(Self, Box)
+  if FDrawAntialiasing then
+    SimbaImage_DrawBoxAA(Self, Box, FDrawFeather, False)
   else
-    SimbaImage_DrawBoxFilledAlpha(Self, Box);
+    SimbaImage_DrawBox(Self, Box, False);
 end;
 
 procedure TSimbaImage.DrawBoxInverted(B: TBox);
 begin
-  Self.DrawBoxFilled(TBox.Create(0,        0,        B.X1 - 1, B.Y1 - 1   )); //Top Left
-  Self.DrawBoxFilled(TBox.Create(0,        B.Y1,     B.X1 - 1, B.Y2       )); //Mid Left
-  Self.DrawBoxFilled(TBox.Create(0,        B.Y2 + 1, B.X1 - 1, FHeight - 1)); //Btm Left
-  Self.DrawBoxFilled(TBox.Create(B.X1,     0,        B.X2,     B.Y1 - 1   )); //Top Mid
-  Self.DrawBoxFilled(TBox.Create(B.X1,     B.Y2 + 1, B.X2,     FHeight - 1)); //Btm Mid
-  Self.DrawBoxFilled(TBox.Create(B.X2 + 1, 0,        FWidth-1, B.Y1 - 1   )); //Top Right
-  Self.DrawBoxFilled(TBox.Create(B.X2 + 1, B.Y1,     FWidth-1, B.Y2       )); //Mid Right
-  Self.DrawBoxFilled(TBox.Create(B.X2 + 1, B.Y2 + 1, FWidth-1, FHeight - 1)); //Btm Right
+  if FDrawAntialiasing then
+    SimbaImage_DrawBoxAA(Self, B, FDrawFeather, True)
+  else
+    SimbaImage_DrawBox(Self, B, True);
 end;
 
 procedure TSimbaImage.DrawQuad(Quad: TQuad);
@@ -981,14 +975,7 @@ end;
 
 procedure TSimbaImage.DrawQuadInverted(Quad: TQuad);
 begin
-  Self.DrawBoxInverted(
-    Quad.Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1))
-  );
-
-  if (FDrawAlpha = ALPHA_OPAQUE) then
-    SimbaImage_DrawQuadInverted(Self, Quad)
-  else
-    SimbaImage_DrawQuadInvertedAlpha(Self, Quad);
+  DrawPolygonInverted([Quad.Top, Quad.Right, Quad.Bottom, Quad.Left]);
 end;
 
 procedure TSimbaImage.DrawQuadArray(Quads: TQuadArray; Filled: Boolean);
@@ -1151,23 +1138,14 @@ end;
 
 procedure TSimbaImage.Clear(Box: TBox);
 var
-  W: Integer;
-
-  procedure _Row(const Y: Integer; const X1, X2: Integer);
-  begin
-    FillData(@FData[Y * FWidth + X1], W, DefaultPixel);
-  end;
-
-  {$i shapebuilder_boxfilled.inc}
-
+  Y: Integer;
 begin
+  if (Box.X2 < 0) or (Box.Y2 < 0) or (Box.X1 >= FWidth) or (Box.Y1 >= FHeight) then   // entirely off-screen
+    Exit;
   Box := Box.Clip(TBox.Create(0, 0, FWidth - 1, FHeight - 1));
-  if (Box.Width > 1) and (Box.Height > 1) then
-  begin
-    W := Box.Width;
-
-    _BuildBoxFilled(Box);
-  end;
+  if (Box.X1 <= Box.X2) and (Box.Y1 <= Box.Y2) then   // FillData does not clip: the box must be fully inside
+    for Y := Box.Y1 to Box.Y2 do
+      FillData(@FData[Y * FWidth + Box.X1], Box.Width, DefaultPixel);
 end;
 
 procedure TSimbaImage.ClearInverted(Box: TBox);
@@ -1242,10 +1220,7 @@ end;
 
 procedure TSimbaImage.DrawImage(Image: TSimbaImage; Location: TPoint);
 begin
-  if (FDrawAlpha = ALPHA_OPAQUE) then
-    DrawData(Image.Data, Image.Width, Image.Height, Location)
-  else
-    DrawDataAlpha(Image.Data, Image.Width, Image.Height, Location, DrawAlpha);
+  DrawData(Image.Data, Image.Width, Image.Height, Location, FDrawAlpha);
 end;
 
 function TSimbaImage.GetColors: TColorArray;
@@ -1749,74 +1724,46 @@ end;
 
 procedure TSimbaImage.SetAlphas(Points: TPointArray; Value: Byte);
 var
-  Ptr, Upper: PPoint;
+  I: Integer;
 begin
-  if (Length(Points) = 0) then
-    Exit;
-
-  Ptr := @Points[0];
-  Upper := @Points[High(Points)];
-  while (Ptr <= Upper) do
-  begin
-    if (Ptr^.X >= 0) and (Ptr^.Y >= 0) and (Ptr^.X < FWidth) and (Ptr^.Y < FHeight) then
-      FData[Ptr^.Y * FWidth + Ptr^.X].A := Value
-    else
-      RaiseOutOfImageException(Ptr^.X, Ptr^.Y);
-
-    Inc(Ptr);
-  end;
-end;
-
-procedure TSimbaImage.DrawData(TheData: PColorBGRA; DataW, DataH: Integer; P: TPoint);
-var
-  W, H: Integer;
-  LoopX, LoopY, DestX, DestY: Integer;
-  BGRA: TColorBGRA;
-begin
-  W := DataW - 1;
-  H := DataH - 1;
-
-  for LoopY := 0 to H do
-    for LoopX := 0 to W do
+  for I := 0 to High(Points) do
+    with Points[I] do
     begin
-      if (TheData[LoopY * DataW + LoopX].A = 0) then
-        Continue;
+      if (X < 0) or (Y < 0) or (X >= FWidth) or (Y >= FHeight) then
+        RaiseOutOfImageException(X, Y);
 
-      DestX := LoopX + P.X;
-      DestY := LoopY + P.Y;
-      if (DestX >= 0) and (DestY >= 0) and (DestX < FWidth) and (DestY < FHeight) then
-      begin
-        BGRA := TheData[LoopY * DataW + LoopX];
-        BGRA.A := ALPHA_OPAQUE;
-
-        FData[DestY * FWidth + DestX] := BGRA;
-      end;
+      FData[Y * FWidth + X].A := Value;
     end;
 end;
 
-procedure TSimbaImage.DrawDataAlpha(TheData: PColorBGRA; DataW, DataH: Integer; P: TPoint; Alpha: Byte);
+procedure TSimbaImage.DrawData(Src: PColorBGRA; SrcW, SrcH: Integer; P: TPoint; Alpha: Byte);
 var
   W, H: Integer;
   LoopX, LoopY, DestX, DestY: Integer;
   BGRA: TColorBGRA;
+  UseAlpha: Boolean;
 begin
-  W := DataW - 1;
-  H := DataH - 1;
+  W := SrcW - 1;
+  H := SrcH - 1;
+  UseAlpha := (Alpha <> ALPHA_OPAQUE);
 
   for LoopY := 0 to H do
     for LoopX := 0 to W do
     begin
-      if (TheData[LoopY * DataW + LoopX].A = 0) then
+      if (Src[LoopY * SrcW + LoopX].A = 0) then
         Continue;
 
       DestX := LoopX + P.X;
       DestY := LoopY + P.Y;
       if (DestX >= 0) and (DestY >= 0) and (DestX < FWidth) and (DestY < FHeight) then
       begin
-        BGRA := TheData[LoopY * DataW + LoopX];
+        BGRA := Src[LoopY * SrcW + LoopX];
         BGRA.A := Alpha;
 
-        BlendPixel(@FData[DestY * FWidth + DestX], BGRA);
+        if UseAlpha then
+          BlendPixel(@FData[DestY * FWidth + DestX], @BGRA)
+        else
+          FData[DestY * FWidth + DestX] := BGRA;
       end;
     end;
 end;
@@ -1920,21 +1867,6 @@ begin
   end;
 end;
 
-procedure TSimbaImage.DrawLineAA(Start, Stop: TPoint; Thickness: Single);
-begin
-  SimbaImage_DrawLineAA(Self, Start, Stop, Thickness);
-end;
-
-procedure TSimbaImage.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single);
-begin
-  SimbaImage_DrawEllipseAA(Self, ACenter, XRadius, YRadius, Thickness);
-end;
-
-procedure TSimbaImage.DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single);
-begin
-  DrawEllipseAA(ACenter, Radius, Radius, Thickness);
-end;
-
 constructor TSimbaImage.Create;
 begin
   inherited Create();
@@ -1947,6 +1879,9 @@ begin
 
   FDrawColor := -1;
   FDrawAlpha := 255;
+  FDrawThickness := 1;
+  FDrawAntialiasing := False;
+  FDrawFeather := 1;
 end;
 
 constructor TSimbaImage.Create(AWidth, AHeight: Integer);
