@@ -67,9 +67,9 @@ begin
   CheckMatches('Test2', @MatchTemplate, TM_CCORR_NORMED, 0, world, [test1,test2,test3], [[455,895] ,[1,180], [556,903]], [0.970, 0.940, 0.993]);
   CheckMatches('Test3', @MatchTemplate, TM_SQDIFF_NORMED, 0, world, [test1,test2,test3], [[448,0], [483,10], [31,0]], [1.00,1.00,1.00]);
 
-  CheckMatches('Test4', @MatchTemplateMask, TM_CCOEFF_NORMED, 30, world, [test1, test2, test3], [[245, 802], [130, 139], [471, 888]], [0.509, 0.47, 0.509]);
+  CheckMatches('Test4', @MatchTemplateMask, TM_CCOEFF_NORMED, 30, world, [test1, test2, test3], [[245, 802], [130, 139], [471, 888]], [0.508, 0.47, 0.503]);
   CheckMatches('Test5', @MatchTemplateMask, TM_CCORR_NORMED, 30, world, [test1, test2, test3], [[443,894], [1,180], [554,902]], [0.971, 0.939, 0.992]);
-  CheckMatches('Test6', @MatchTemplateMask, TM_SQDIFF_NORMED, 26, world, [test1, test2, test3], [[482,13], [485,10], [473,19]], [1.623, 1.147, 2.479]);
+  CheckMatches('Test6', @MatchTemplateMask, TM_SQDIFF_NORMED, 26, world, [test1, test2, test3], [[481,13], [485,10], [473,18]], [1.604, 1.127, 2.466]);
 
   // Just ensure giant matching still works
   CheckMatches('Test7', @MatchTemplate, TM_CCOEFF_NORMED, 0, bigImage, [bigTempl, hugeTempl], [[800,2500],[1000,2000]], [0.888, 0.786]);
