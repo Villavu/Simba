@@ -1,0 +1,207 @@
+var
+  Img: TImage;
+
+procedure Caption(Text: String; X, Y: Integer);
+var
+  Color: TColor;
+begin
+  Color := Img.DrawColor;
+  Img.DrawColor := $D0C8C0;
+  Img.DrawText(Text, TBox.Create(X - 68, Y + 50, X + 68, Y + 88), [EImageTextAlign.CENTER, EImageTextAlign.TOP]);
+  Img.DrawColor := Color;
+end;
+
+procedure Heading(Text: String; Y: Integer);
+begin
+  Img.DrawColor := $F0F0F0;
+  Img.FontSize := 14;
+  Img.FontBold := True;
+  Img.DrawText(Text, [8, Y - 54]);
+  Img.FontSize := 13;
+  Img.FontBold := False;
+end;
+
+procedure Divider(Y: Integer);
+begin
+  Img.DrawColor := $52423B;
+  Img.DrawAntialiasing := True;
+  Img.DrawThickness := 2;
+  Img.DrawFeather := 0;
+  Img.DrawLine([0, Y], [Img.Width - 1, Y]);
+end;
+
+procedure DrawLines(Y: Integer);
+begin
+  Heading('DrawLine', Y);
+  Img.DrawColor := $70C06C;
+  Img.DrawFeather := 0;
+
+  Img.DrawAntialiasing := False; Img.DrawThickness := 1;
+  Img.DrawLine([8, Y + 22], [128, Y - 22]);
+  Caption('aliased' + #10 + 'thickness 1', 68, Y);
+
+  Img.DrawAntialiasing := False; Img.DrawThickness := 4;
+  Img.DrawLine([144, Y + 22], [264, Y - 22]);
+  Caption('aliased' + #10 + 'thickness 4', 204, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 1;
+  Img.DrawLine([280, Y + 22], [400, Y - 22]);
+  Caption('antialiased' + #10 + 'thickness 1', 340, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 4;
+  Img.DrawLine([416, Y + 22], [536, Y - 22]);
+  Caption('antialiased' + #10 + 'thickness 4', 476, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 4; Img.DrawFeather := 2;
+  Img.DrawLine([552, Y + 22], [672, Y - 22]);
+  Caption('antialiased' + #10 + 'thickness 4, feather 2', 612, Y);
+  Divider(Y + 92);
+end;
+
+procedure DrawBoxes(Y: Integer);
+begin
+  Heading('DrawBox', Y);
+  Img.DrawColor := $EF8D5B;
+  Img.DrawFeather := 0;
+
+  Img.DrawAntialiasing := False; Img.DrawThickness := 1;
+  Img.DrawBox([13, Y - 28, 123, Y + 28]);
+  Caption('aliased' + #10 + 'thickness 1', 68, Y);
+
+  Img.DrawAntialiasing := False; Img.DrawThickness := 4;
+  Img.DrawBox([149, Y - 28, 259, Y + 28]);
+  Caption('aliased' + #10 + 'thickness 4', 204, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 1;
+  Img.DrawBox([285, Y - 28, 395, Y + 28]);
+  Caption('antialiased' + #10 + 'thickness 1', 340, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 4;
+  Img.DrawBox([421, Y - 28, 531, Y + 28]);
+  Caption('antialiased' + #10 + 'thickness 4', 476, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 4; Img.DrawFeather := 2;
+  Img.DrawBox([557, Y - 28, 667, Y + 28]);
+  Caption('antialiased' + #10 + 'thickness 4, feather 2', 612, Y);
+  Divider(Y + 92);
+end;
+
+procedure DrawCircles(Y: Integer);
+begin
+  Heading('DrawCircle', Y);
+  Img.DrawColor := $C9C13F;
+  Img.DrawFeather := 0;
+
+  Img.DrawAntialiasing := False; Img.DrawThickness := 1;
+  Img.DrawCircle([68, Y], 30);
+  Caption('aliased' + #10 + 'thickness 1', 68, Y);
+
+  Img.DrawAntialiasing := False; Img.DrawThickness := 4;
+  Img.DrawCircle([204, Y], 30);
+  Caption('aliased' + #10 + 'thickness 4', 204, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 1;
+  Img.DrawCircle([340, Y], 30);
+  Caption('antialiased' + #10 + 'thickness 1', 340, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 4;
+  Img.DrawCircle([476, Y], 30);
+  Caption('antialiased' + #10 + 'thickness 4', 476, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 4; Img.DrawFeather := 2;
+  Img.DrawCircle([612, Y], 30);
+  Caption('antialiased' + #10 + 'thickness 4, feather 2', 612, Y);
+  Divider(Y + 92);
+end;
+
+procedure DrawCirclesFilled(Y: Integer);
+begin
+  Heading('DrawCircleFilled', Y);
+  Img.DrawColor := $388CF2;
+  Img.DrawFeather := 0;
+
+  Img.DrawAntialiasing := False;
+  Img.DrawCircleFilled([68, Y], 30);
+  Caption('aliased', 68, Y - 6);
+
+  Img.DrawAntialiasing := True;
+  Img.DrawCircleFilled([204, Y], 30);
+  Caption('antialiased', 204, Y - 6);
+
+  Img.DrawAntialiasing := True; Img.DrawFeather := 1;
+  Img.DrawCircleFilled([340, Y], 30);
+  Caption('antialiased, feather 1', 340, Y - 6);
+
+  Img.DrawAntialiasing := True; Img.DrawFeather := 3;
+  Img.DrawCircleFilled([476, Y], 30);
+  Caption('antialiased, feather 3', 476, Y - 6);
+  Divider(Y + 70);
+end;
+
+procedure DrawPolygons(Y: Integer);
+begin
+  Heading('DrawPolygon', Y - 12);
+  Img.DrawColor := $6B56E5;
+  Img.DrawFeather := 0;
+
+  Img.DrawAntialiasing := False; Img.DrawThickness := 1;
+  Img.DrawPolygon(TPointArray.CreateFromPolygon([68, Y], 5, 32, False).ConvexHull());
+  Caption('aliased' + #10 + 'thickness 1', 68, Y);
+
+  Img.DrawAntialiasing := False; Img.DrawThickness := 4;
+  Img.DrawPolygon(TPointArray.CreateFromPolygon([204, Y], 5, 32, False).ConvexHull());
+  Caption('aliased' + #10 + 'thickness 4', 204, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 1;
+  Img.DrawPolygon(TPointArray.CreateFromPolygon([340, Y], 5, 32, False).ConvexHull());
+  Caption('antialiased' + #10 + 'thickness 1', 340, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 4;
+  Img.DrawPolygon(TPointArray.CreateFromPolygon([476, Y], 5, 32, False).ConvexHull());
+  Caption('antialiased' + #10 + 'thickness 4', 476, Y);
+
+  Img.DrawAntialiasing := True; Img.DrawThickness := 4; Img.DrawFeather := 2;
+  Img.DrawPolygon(TPointArray.CreateFromPolygon([612, Y], 5, 32, False).ConvexHull());
+  Caption('antialiased' + #10 + 'thickness 4, feather 2', 612, Y);
+  Divider(Y + 92);
+end;
+
+procedure DrawPolygonsFilled(Y: Integer);
+begin
+  Heading('DrawPolygonFilled', Y - 12);
+  Img.DrawColor := $EA6BA6;
+  Img.DrawFeather := 0;
+
+  Img.DrawAntialiasing := False;
+  Img.DrawPolygonFilled(TPointArray.CreateFromPolygon([68, Y], 5, 32, False).ConvexHull());
+  Caption('aliased', 68, Y - 6);
+
+  Img.DrawAntialiasing := True;
+  Img.DrawPolygonFilled(TPointArray.CreateFromPolygon([204, Y], 5, 32, False).ConvexHull());
+  Caption('antialiased', 204, Y - 6);
+
+  Img.DrawAntialiasing := True; Img.DrawFeather := 1;
+  Img.DrawPolygonFilled(TPointArray.CreateFromPolygon([340, Y], 5, 32, False).ConvexHull());
+  Caption('antialiased, feather 1', 340, Y - 6);
+
+  Img.DrawAntialiasing := True; Img.DrawFeather := 3;
+  Img.DrawPolygonFilled(TPointArray.CreateFromPolygon([476, Y], 5, 32, False).ConvexHull());
+  Caption('antialiased, feather 3', 476, Y - 6);
+  Divider(Y + 70);
+end;
+
+begin
+  Img := new TImage(690, 932);
+  Img.Fill($40342E);
+  Img.FontSize := 13;
+  Img.FontAntialiasing := True;
+
+  DrawLines(68);
+  DrawBoxes(226);
+  DrawCircles(384);
+  DrawCirclesFilled(542);
+  DrawPolygons(690);
+  DrawPolygonsFilled(860);
+
+  Img.Show();
+end.
