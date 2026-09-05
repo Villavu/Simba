@@ -2,6 +2,8 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+  Aliased shape drawing for TSimbaImage
 }
 unit simba.image_draw;
 
@@ -13,908 +15,343 @@ uses
   Classes, SysUtils, Math,
   simba.base,
   simba.image,
-  simba.vartype_polygon,
-  simba.vartype_quad;
+  simba.vartype_polygon;
 
-procedure SimbaImage_DrawTPA(Image: TSimbaImage; TPA: TPointArray);
-procedure SimbaImage_DrawTPAAlpha(Image: TSimbaImage; TPA: TPointArray);
+procedure SimbaImage_DrawTPA(Image: TSimbaImage; TPA: TPointArray; Thickness: Single);
+procedure SimbaImage_DrawLine(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Single);
 
-procedure SimbaImage_DrawLine(Image: TSimbaImage; Start, Stop: TPoint);
-procedure SimbaImage_DrawLineAlpha(Image: TSimbaImage; Start, Stop: TPoint);
+procedure SimbaImage_DrawBox(Image: TSimbaImage; Box: TBox; Inverted: Boolean);
+procedure SimbaImage_DrawBoxEdge(Image: TSimbaImage; Box: TBox; Thickness: Single);
 
-procedure SimbaImage_DrawLineGap(Image: TSimbaImage; Start, Stop: TPoint; GapSize: Integer);
-procedure SimbaImage_DrawLineGapAlpha(Image: TSimbaImage; Start, Stop: TPoint; GapSize: Integer);
+procedure SimbaImage_DrawEllipse(Image: TSimbaImage; ACenter: TPoint; XRadius, YRadius: Integer; Inverted: Boolean);
+procedure SimbaImage_DrawEllipseEdge(Image: TSimbaImage; ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single);
 
-procedure SimbaImage_DrawBoxFilled(Image: TSimbaImage; Box: TBox);
-procedure SimbaImage_DrawBoxFilledAlpha(Image: TSimbaImage; Box: TBox);
-
-procedure SimbaImage_DrawBoxEdge(Image: TSimbaImage; Box: TBox);
-procedure SimbaImage_DrawBoxEdgeAlpha(Image: TSimbaImage; Box: TBox);
-
-procedure SimbaImage_DrawCircleFilled(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
-procedure SimbaImage_DrawCircleFilledAlpha(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
-procedure SimbaImage_DrawCircleInverted(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
-procedure SimbaImage_DrawCircleInvertedAlpha(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
-
-procedure SimbaImage_DrawCircleEdge(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
-procedure SimbaImage_DrawCircleEdgeAlpha(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
-
-procedure SimbaImage_DrawCircleThick(Image: TSimbaImage; ACenter: TPoint; Radius, Thickness: Integer);
-procedure SimbaImage_DrawCircleThickAlpha(Image: TSimbaImage; ACenter: TPoint; Radius, Thickness: Integer);
-
-procedure SimbaImage_DrawPolygonFilled(Image: TSimbaImage; Poly: TPolygon);
-procedure SimbaImage_DrawPolygonFilledAlpha(Image: TSimbaImage; Poly: TPolygon);
-
-procedure SimbaImage_DrawPolygonInverted(Image: TSimbaImage; Poly: TPolygon);
-procedure SimbaImage_DrawPolygonInvertedAlpha(Image: TSimbaImage; Poly: TPolygon);
-
-procedure SimbaImage_DrawPolygon(Image: TSimbaImage; Poly: TPolygon);
-procedure SimbaImage_DrawPolygonAlpha(Image: TSimbaImage; Poly: TPolygon);
-
-procedure SimbaImage_DrawLineThick(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Integer);
-procedure SimbaImage_DrawLineThickAlpha(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Integer);
-
-procedure SimbaImage_DrawQuadInverted(Image: TSimbaImage; Quad: TQuad);
-procedure SimbaImage_DrawQuadInvertedAlpha(Image: TSimbaImage; Quad: TQuad);
-
-procedure SimbaImage_DrawLineAA(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Single = 1.5);
-procedure SimbaImage_DrawEllipseAA(Image: TSimbaImage; ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single = 1.5);
+procedure SimbaImage_DrawPolygon(Image: TSimbaImage; Poly: TPolygon; Inverted: Boolean);
+procedure SimbaImage_DrawPolygonEdge(Image: TSimbaImage; Poly: TPolygon; Thickness: Single);
 
 implementation
 
 uses
-  simba.image_utils, simba.array_algorithm,
+  simba.image_utils, simba.math,
   simba.vartype_point, simba.vartype_box;
 
-procedure SimbaImage_DrawTPA(Image: TSimbaImage; TPA: TPointArray);
-var
-  BGRA: TColorBGRA;
-  Point: TPoint;
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  for Point in TPA do
-    if (UInt32(Point.X) < UInt32(Image.Width)) and (UInt32(Point.Y) < UInt32(Image.Height)) then
-      Image.Data[Point.Y * Image.Width + Point.X] := BGRA;
-end;
-
-procedure SimbaImage_DrawTPAAlpha(Image: TSimbaImage; TPA: TPointArray);
-var
-  BGRA: TColorBGRA;
-  Point: TPoint;
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  for Point in TPA do
-    if (UInt32(Point.X) < UInt32(Image.Width)) and (UInt32(Point.Y) < UInt32(Image.Height)) then
-      BlendPixel(@Image.Data[Point.Y * Image.Width + Point.X], BGRA);
-end;
-
-procedure SimbaImage_DrawLine(Image: TSimbaImage; Start, Stop: TPoint);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Pixel(const X, Y: Integer); inline;
-  begin
-    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
-      Image.Data[Y * Image.Width + X] := BGRA;
+type
+  TDrawer = record
+  private
+    FData: PColorBGRA;
+    FImgW, FImgH: Integer;
+    FColor: TColorBGRA;
+    FUseAlpha: Boolean;
+    FBuffered: Boolean;        
+    FRowHead: TIntegerArray;   
+    FSpans: array of record   
+      Next, X1, XEnd: Integer;
+    end;
+    FCount, FMinY, FMaxY: Integer;
+    procedure Grow;
+    function PushSpan(Y, X1, XEnd: Integer): Boolean; inline;
+  public
+    Clip: TBox;
+    procedure Init(Image: TSimbaImage; Buffered: Boolean = False);
+    procedure Row(Y, X1, X2: Integer); inline;
+    procedure Pixel(const X, Y: Integer); inline;
+    procedure Pixels(const Points: TPointArray);
+    procedure Flush;
   end;
 
-  {$i shapebuilder_line.inc}
-
+procedure TDrawer.Init(Image: TSimbaImage; Buffered: Boolean);
 begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildLine(Start, Stop);
-end;
-
-procedure SimbaImage_DrawLineAlpha(Image: TSimbaImage; Start, Stop: TPoint);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Pixel(const X, Y: Integer);
+  Clip      := TBox.Create(0, 0, Image.Width - 1, Image.Height - 1);
+  FData     := Image.Data;
+  FImgW     := Image.Width;
+  FImgH     := Image.Height;
+  FColor    := Image.DrawColorAsBGRA;
+  FUseAlpha := (Image.DrawAlpha <> ALPHA_OPAQUE);
+  FBuffered := FUseAlpha and Buffered;
+  FCount    := 0;
+  if FBuffered then
   begin
-    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
-      BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
-  end;
-
-  {$i shapebuilder_line.inc}
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildLine(Start, Stop);
-end;
-
-procedure SimbaImage_DrawLineGap(Image: TSimbaImage; Start, Stop: TPoint; GapSize: Integer);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Pixel(const X, Y: Integer); inline;
-  begin
-    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
-      Image.Data[Y * Image.Width + X] := BGRA;
-  end;
-
-  {$i shapebuilder_linegap.inc}
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildLineGap(Start, Stop, GapSize);
-end;
-
-procedure SimbaImage_DrawLineGapAlpha(Image: TSimbaImage; Start, Stop: TPoint; GapSize: Integer);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Pixel(const X, Y: Integer);
-  begin
-    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
-      BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
-  end;
-
-  {$i shapebuilder_linegap.inc}
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildLineGap(Start, Stop, GapSize);
-end;
-
-procedure SimbaImage_DrawBoxFilled(Image: TSimbaImage; Box: TBox);
-var
-  BGRA: TColorBGRA;
-  W: Integer;
-
-  procedure _Row(const Y: Integer; const X1, X2: Integer);
-  begin
-    FillData(@Image.Data[Y * Image.Width + X1], W, BGRA);
-  end;
-
-  {$i shapebuilder_boxfilled.inc}
-
-begin
-  Box := Box.Clip(TBox.Create(0, 0, Image.Width-1, Image.Height - 1));
-
-  if (Box.Width > 1) and (Box.Height > 1) then
-  begin
-    BGRA := Image.DrawColorAsBGRA;
-    W := Box.Width;
-
-    _BuildBoxFilled(Box);
+    FMinY    := FImgH;
+    FMaxY    := -1;
+    FRowHead := nil;
+    SetLength(FRowHead, FImgH);
+    SetLength(FSpans, 768);
   end;
 end;
 
-procedure SimbaImage_DrawBoxFilledAlpha(Image: TSimbaImage; Box: TBox);
+procedure TDrawer.Row(Y, X1, X2: Integer);
 var
-  BGRA: TColorBGRA;
+  Ptr, PEnd: PColorBGRA;
+begin
+  if (UInt32(Y) >= UInt32(FImgH)) then
+    Exit;
+  X1 := Max(X1, 0);
+  X2 := Min(X2, FImgW - 1);
+  if (X1 > X2) then
+    Exit;
 
-  procedure _Row(const Y: Integer; const X1, X2: Integer);
-  var
-    Ptr: PColorBGRA;
-    Upper: PtrUInt;
+  if FBuffered then
   begin
-    Ptr := @Image.Data[Y * Image.Width + X1];
-    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
-
-    while (PtrUInt(Ptr) <= Upper) do
+    while not PushSpan(Y, X1, X2 + 1) do
+      Grow;
+  end
+  else if FUseAlpha then
+  begin
+    Ptr  := @FData[Int64(Y) * FImgW + X1];
+    PEnd := @Ptr[X2 - X1];
+    while (PtrUInt(Ptr) <= PtrUInt(PEnd)) do
     begin
-      BlendPixel(Ptr, BGRA);
-
+      BlendPixel(Ptr, @FColor);
       Inc(Ptr);
     end;
-  end;
-
-  {$i shapebuilder_boxfilled.inc}
-
-begin
-  Box := Box.Clip(TBox.Create(0, 0, Image.Width - 1, Image.Height - 1));
-
-  if (Box.Width > 1) and (Box.Height > 1) then
-  begin
-    BGRA := Image.DrawColorAsBGRA;
-
-    _BuildBoxFilled(Box);
-  end;
+  end
+  else
+    FillData(@FData[Int64(Y) * FImgW + X1], (X2 - X1) + 1, FColor);
 end;
 
-procedure SimbaImage_DrawBoxEdge(Image: TSimbaImage; Box: TBox);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Pixel(const X, Y: Integer); inline;
-  begin
-    Image.Data[Y * Image.Width + X] := BGRA;
-  end;
-
-  procedure _Row(const Y: Integer; const X1, X2: Integer);
-  begin
-    FillData(@Image.Data[Y * Image.Width + X1], (X2 - X1) + 1, BGRA);
-  end;
-
-  {$i shapebuilder_boxedge.inc}
-
+procedure TDrawer.Pixel(const X, Y: Integer);
 begin
-  Box := Box.Clip(TBox.Create(0, 0, Image.Width - 1, Image.Height - 1));
-
-  if (Box.Width > 1) and (Box.Height > 1) then
+  if (UInt32(X) >= UInt32(FImgW)) or (UInt32(Y) >= UInt32(FImgH)) then
+    Exit;
+  if FBuffered then
   begin
-    BGRA := Image.DrawColorAsBGRA;
-
-    _BuildBoxEdge(Box);
-  end;
+    while not PushSpan(Y, X, X + 1) do
+      Grow;
+  end
+  else if FUseAlpha then
+    BlendPixel(@FData[Int64(Y) * FImgW + X], @FColor)
+  else
+    FData[Int64(Y) * FImgW + X] := FColor;
 end;
 
-procedure SimbaImage_DrawBoxEdgeAlpha(Image: TSimbaImage; Box: TBox);
+procedure TDrawer.Pixels(const Points: TPointArray);
 var
-  BGRA: TColorBGRA;
+  Point, PointEnd: PPoint;
+  W, H: Integer;
+  Data: PColorBGRA;
+  Col: TColorBGRA;
+begin
+  if (Length(Points) = 0) then
+    Exit;
+  W := FImgW;
+  H := FImgH;
+  Data := FData;
+  Col := FColor;
+  Point    := @Points[0];
+  PointEnd := @Points[High(Points)];
 
-  procedure _Pixel(const X, Y: Integer); inline;
-  begin
-    BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
-  end;
-
-  procedure _Row(const Y: Integer; const X1, X2: Integer);
-  var
-    Ptr: PColorBGRA;
-    Upper: PtrUInt;
-  begin
-    Ptr := @Image.Data[Y * Image.Width + X1];
-    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
-
-    while (PtrUInt(Ptr) <= Upper) do
+  if FUseAlpha then
+    while (PtrUInt(Point) <= PtrUInt(PointEnd)) do
     begin
-      BlendPixel(Ptr, BGRA);
-
-      Inc(Ptr);
+      if (UInt32(Point^.X) < UInt32(W)) and (UInt32(Point^.Y) < UInt32(H)) then
+        BlendPixel(@Data[Int64(Point^.Y) * W + Point^.X], @Col);
+      Inc(Point);
+    end
+  else
+    while (PtrUInt(Point) <= PtrUInt(PointEnd)) do
+    begin
+      if (UInt32(Point^.X) < UInt32(W)) and (UInt32(Point^.Y) < UInt32(H)) then
+        Data[Int64(Point^.Y) * W + Point^.X] := Col;
+      Inc(Point);
     end;
-  end;
-
-  {$i shapebuilder_boxedge.inc}
-
-begin
-  Box := Box.Clip(TBox.Create(0, 0, Image.Width - 1, Image.Height - 1));
-
-  if (Box.Width > 1) and (Box.Height > 1) then
-  begin
-    BGRA := Image.DrawColorAsBGRA;
-
-    _BuildBoxEdge(Box);
-  end;
 end;
 
-procedure SimbaImage_DrawCircleFilled(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
-var
-  BGRA: TColorBGRA;
+procedure TDrawer.Grow;
+begin
+  SetLength(FSpans, Length(FSpans) * 2);
+end;
 
-  procedure _Row(const Y: Integer; X1, X2: Integer);
+function TDrawer.PushSpan(Y, X1, XEnd: Integer): Boolean;
+var
+  Prev, Cur, N: Integer;
+begin
+  Result := True;
+  Prev := -1;
+  Cur  := FRowHead[Y] - 1;
+  while (Cur >= 0) and (FSpans[Cur].XEnd < X1) do
   begin
-    if (UInt32(Y) < UInt32(Image.Height)) then
+    Prev := Cur;
+    Cur  := FSpans[Cur].Next;
+  end;
+
+  if (Cur >= 0) and (FSpans[Cur].X1 <= XEnd) then
+  begin
+    if (FSpans[Cur].X1 < X1) then
+      X1 := FSpans[Cur].X1;
+    if (FSpans[Cur].XEnd > XEnd) then
+      XEnd := FSpans[Cur].XEnd;
+    N := FSpans[Cur].Next;
+    while (N >= 0) and (FSpans[N].X1 <= XEnd) do
     begin
-      X1 := EnsureRange(X1, 0, Image.Width - 1);
-      X2 := EnsureRange(X2, 0, Image.Width - 1);
-      if ((X2 - X1) + 1 > 0) then
-        FillData(@Image.Data[Y * Image.Width + X1], (X2 - X1) + 1, BGRA);
+      if (FSpans[N].XEnd > XEnd) then
+        XEnd := FSpans[N].XEnd;
+      N := FSpans[N].Next;
     end;
+    FSpans[Cur].X1   := X1;
+    FSpans[Cur].XEnd := XEnd;
+    FSpans[Cur].Next := N;
+    Exit;
   end;
 
-  {$i shapebuilder_circlefilled.inc}
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  if (Radius >= 1) then
-    _BuildCircleFilled(ACenter.X, ACenter.Y, Radius);
+  if (FCount = Length(FSpans)) then
+    Exit(False);
+  FSpans[FCount].Next := Cur;                                
+  FSpans[FCount].X1   := X1;
+  FSpans[FCount].XEnd := XEnd;
+  if (Prev < 0) then
+    FRowHead[Y] := FCount + 1
+  else
+    FSpans[Prev].Next := FCount;
+  Inc(FCount);
+  if (Y < FMinY) then FMinY := Y;
+  if (Y > FMaxY) then FMaxY := Y;
 end;
 
-procedure SimbaImage_DrawCircleFilledAlpha(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
+procedure TDrawer.Flush;
 var
-  BGRA: TColorBGRA;
+  Y, Idx: Integer;
+  RowPtr, Ptr, PEnd: PColorBGRA;
+begin
+  if (FCount = 0) then
+    Exit;
 
-  procedure _Row(const Y: Integer; X1, X2: Integer);
-  var
-    Ptr: PColorBGRA;
-    Upper: PtrUInt;
+  for Y := FMinY to FMaxY do
   begin
-    if (UInt32(Y) < UInt32(Image.Height)) then
-    begin
-      X1 := EnsureRange(X1, 0, Image.Width - 1);
-      X2 := EnsureRange(X2, 0, Image.Width - 1);
-
-      if ((X2 - X1) + 1 > 0) then
+    RowPtr := @FData[Int64(Y) * FImgW];
+    Idx := FRowHead[Y] - 1;
+    while (Idx >= 0) do
+      with FSpans[Idx] do
       begin
-        Ptr := @Image.Data[Y * Image.Width + X1];
-        Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
-
-        while (PtrUInt(Ptr) <= Upper) do
+        Ptr  := @RowPtr[X1];
+        PEnd := @RowPtr[XEnd];
+        while (PtrUInt(Ptr) < PtrUInt(PEnd)) do
         begin
-          BlendPixel(Ptr, BGRA);
-
+          BlendPixel(Ptr, @FColor);
           Inc(Ptr);
         end;
+        Idx := Next;
       end;
-    end;
   end;
-
-  {$i shapebuilder_circlefilled.inc}
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  if (Radius >= 1) then
-    _BuildCircleFilled(ACenter.X, ACenter.Y, Radius);
 end;
 
-procedure SimbaImage_DrawCircleInverted(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
+procedure SimbaImage_DrawTPA(Image: TSimbaImage; TPA: TPointArray; Thickness: Single);
 var
-  BGRA: TColorBGRA;
-  B: TBox;
-  X,Y: Integer;
+  Drawer: TDrawer;
+  I, Radius: Integer;
+
+  {$define _Row := Drawer.Row}
+  {$i shapebuilders/shapebuilder_ellipse.inc}
+
 begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  B.X1 := Max(ACenter.X-Radius, 0);
-  B.Y1 := Max(ACenter.Y-Radius, 0);
-  B.X2 := Min(ACenter.X+Radius, Image.Width - 1);
-  B.Y2 := Min(ACenter.Y+Radius, Image.Height - 1);
-
-  for X := B.X1 to B.X2 do
-    for Y := B.Y1 to B.Y2 do
-      if Sqr(X - ACenter.X) + Sqr(Y - ACenter.Y) > Sqr(Radius) then
-        Image.Data[Y * Image.Width + X] := BGRA;
-end;
-
-procedure SimbaImage_DrawCircleInvertedAlpha(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
-var
-  BGRA: TColorBGRA;
-  B: TBox;
-  X,Y: Integer;
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  B.X1 := Max(ACenter.X-Radius, 0);
-  B.Y1 := Max(ACenter.Y-Radius, 0);
-  B.X2 := Min(ACenter.X+Radius, Image.Width - 1);
-  B.Y2 := Min(ACenter.Y+Radius, Image.Height - 1);
-
-  for X := B.X1 to B.X2 do
-    for Y := B.Y1 to B.Y2 do
-      if Sqr(X - ACenter.X) + Sqr(Y - ACenter.Y) > Sqr(Radius) then
-        BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
-end;
-
-procedure SimbaImage_DrawCircleEdge(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Pixel(const X, Y: Integer); inline;
+  if (Round(Thickness) <= 1) then
   begin
-    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
-      Image.Data[Y * Image.Width + X] := BGRA;
+    Drawer.Init(Image);
+    Drawer.Pixels(TPA);
+    Exit;
   end;
 
-  {$i shapebuilder_circle.inc}
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-  if (Radius >= 1) then
-    _BuildCircle(ACenter.X, ACenter.Y, Radius);
+  Radius := Round(Thickness) div 2;
+  Drawer.Init(Image, True);
+  for I := 0 to High(TPA) do
+    _BuildEllipse(TPA[I].X, TPA[I].Y, Radius, Radius, False, Drawer.Clip);
+  Drawer.Flush;
 end;
 
-procedure SimbaImage_DrawCircleEdgeAlpha(Image: TSimbaImage; ACenter: TPoint; Radius: Integer);
+procedure SimbaImage_DrawLine(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Single);
 var
-  BGRA: TColorBGRA;
+  Drawer: TDrawer;
 
-  procedure _Pixel(const X, Y: Integer); inline;
-  begin
-    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
-      BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
-  end;
-
-  {$i shapebuilder_circle.inc}
+  {$define _Row := Drawer.Row}
+  {$define _Pixel := Drawer.Pixel}
+  {$i shapebuilders/shapebuilder_line.inc}
 
 begin
-  BGRA := Image.DrawColorAsBGRA;
-  if (Radius >= 1) then
-    _BuildCircle(ACenter.X, ACenter.Y, Radius);
+  Drawer.Init(Image);
+  _BuildLine(Start, Stop, Round(Thickness), Drawer.Clip);
 end;
 
-procedure SimbaImage_DrawCircleThick(Image: TSimbaImage; ACenter: TPoint; Radius, Thickness: Integer);
+procedure SimbaImage_DrawBox(Image: TSimbaImage; Box: TBox; Inverted: Boolean);
 var
-  BGRA: TColorBGRA;
+  Drawer: TDrawer;
 
-  procedure _Row(const Y: Integer; X1, X2: Integer); // spans are pre-clamped by the builder
-  begin
-    FillData(@Image.Data[Y * Image.Width + X1], (X2 - X1) + 1, BGRA);
-  end;
-
-  {$i shapebuilder_circlethick.inc}
+  {$define _Row := Drawer.Row}
+  {$i shapebuilders/shapebuilder_box.inc}
 
 begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildCircleThick(ACenter.X, ACenter.Y, Radius, Thickness, Image.Width, Image.Height);
+  if (Image.Width < 1) or (Image.Height < 1) then
+    Exit;
+  Drawer.Init(Image);
+  _BuildBox(Box, Inverted, Drawer.Clip);
 end;
 
-procedure SimbaImage_DrawCircleThickAlpha(Image: TSimbaImage; ACenter: TPoint; Radius, Thickness: Integer);
+procedure SimbaImage_DrawBoxEdge(Image: TSimbaImage; Box: TBox; Thickness: Single);
 var
-  BGRA: TColorBGRA;
+  Drawer: TDrawer;
 
-  procedure _Row(const Y: Integer; X1, X2: Integer); // spans are pre-clamped by the builder
-  var
-    Ptr: PColorBGRA;
-    Upper: PtrUInt;
-  begin
-    Ptr := @Image.Data[Y * Image.Width + X1];
-    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
-    while (PtrUInt(Ptr) <= Upper) do
-    begin
-      BlendPixel(Ptr, BGRA);
-      Inc(Ptr);
-    end;
-  end;
-
-  {$i shapebuilder_circlethick.inc}
+  {$define _Row := Drawer.Row}
+  {$define _Pixel := Drawer.Pixel}
+  {$i shapebuilders/shapebuilder_boxedge.inc}
 
 begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildCircleThick(ACenter.X, ACenter.Y, Radius, Thickness, Image.Width, Image.Height);
+  if (Image.Width < 1) or (Image.Height < 1) then
+    Exit;
+  Drawer.Init(Image);
+  _BuildBoxEdge(Box, Round(Thickness), Drawer.Clip);
 end;
 
-procedure SimbaImage_DrawPolygonFilled(Image: TSimbaImage; Poly: TPolygon);
+procedure SimbaImage_DrawEllipse(Image: TSimbaImage; ACenter: TPoint; XRadius, YRadius: Integer; Inverted: Boolean);
 var
-  BGRA: TColorBGRA;
+  Drawer: TDrawer;
 
-  procedure _Row(const Y: Integer; X1, X2: Integer);
-  begin
-    // Y is already clipped in _PolygonFilled
-    X1 := EnsureRange(X1, 0, Image.Width - 1);
-    X2 := EnsureRange(X2, 0, Image.Width - 1);
-
-    if ((X2 - X1) + 1 > 0) then
-      FillData(@Image.Data[Y * Image.Width + X1], (X2 - X1) + 1, BGRA);
-  end;
-
-  {$i shapebuilder_polygonfilled.inc}
+  {$define _Row := Drawer.Row}
+  {$i shapebuilders/shapebuilder_ellipse.inc}
 
 begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildPolygonFilled(Poly, TRect.Create(0, 0, Image.Width-1, Image.Height-1), TPoint.ZERO);
+  Drawer.Init(Image);
+  _BuildEllipse(ACenter.X, ACenter.Y, XRadius, YRadius, Inverted, Drawer.Clip);
 end;
 
-procedure SimbaImage_DrawPolygonFilledAlpha(Image: TSimbaImage; Poly: TPolygon);
+procedure SimbaImage_DrawEllipseEdge(Image: TSimbaImage; ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single);
 var
-  BGRA: TColorBGRA;
+  Drawer: TDrawer;
 
-  procedure _Row(const Y: Integer; X1, X2: Integer);
-  var
-    Ptr: PColorBGRA;
-    Upper: PtrUInt;
-  begin
-    // Y is already clipped in _PolygonFilled
-    X1 := EnsureRange(X1, 0, Image.Width - 1);
-    X2 := EnsureRange(X2, 0, Image.Width - 1);
-
-    if ((X2 - X1) + 1 > 0) then
-    begin
-      Ptr := @Image.Data[Y * Image.Width + X1];
-      Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
-
-      while (PtrUInt(Ptr) <= Upper) do
-      begin
-        BlendPixel(Ptr, BGRA);
-
-        Inc(Ptr);
-      end;
-    end;
-  end;
-
-  {$i shapebuilder_polygonfilled.inc}
+  {$define _Row := Drawer.Row}
+  {$define _Pixel := Drawer.Pixel}
+  {$i shapebuilders/shapebuilder_ellipseedge.inc}
 
 begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildPolygonFilled(Poly, TRect.Create(0, 0, Image.Width-1, Image.Height-1), TPoint.ZERO);
+  if (XRadius < 1) or (YRadius < 1) then
+    Exit;
+  Drawer.Init(Image);
+  _BuildEllipseEdge(ACenter.X, ACenter.Y, XRadius, YRadius, Round(Thickness), Drawer.Clip);
 end;
 
-procedure SimbaImage_DrawPolygonInverted(Image: TSimbaImage; Poly: TPolygon);
+procedure SimbaImage_DrawPolygon(Image: TSimbaImage; Poly: TPolygon; Inverted: Boolean);
 var
-  BGRA: TColorBGRA;
-  B: TBox;
-  X,Y: Integer;
-begin
-  BGRA := Image.DrawColorAsBGRA;
-  B := Poly.Bounds().Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
+  Drawer: TDrawer;
 
-  for X := B.X1 to B.X2 do
-    for Y := B.Y1 to B.Y2 do
-      if not Poly.Contains(TPoint.Create(X, Y)) then
-        Image.Data[Y * Image.Width + X] := BGRA;
+  {$define _Row := Drawer.Row}
+  {$i shapebuilders/shapebuilder_polygon.inc}
+
+begin
+  Drawer.Init(Image);
+  _BuildPolygon(Poly, Inverted, Drawer.Clip);
 end;
 
-procedure SimbaImage_DrawPolygonInvertedAlpha(Image: TSimbaImage; Poly: TPolygon);
+procedure SimbaImage_DrawPolygonEdge(Image: TSimbaImage; Poly: TPolygon; Thickness: Single);
 var
-  BGRA: TColorBGRA;
-  B: TBox;
-  X,Y: Integer;
-begin
-  BGRA := Image.DrawColorAsBGRA;
-  B := Poly.Bounds().Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
+  Drawer: TDrawer;
 
-  for X := B.X1 to B.X2 do
-    for Y := B.Y1 to B.Y2 do
-      if not Poly.Contains(TPoint.Create(X, Y)) then
-        BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
-end;
-
-procedure SimbaImage_DrawQuadInverted(Image: TSimbaImage; Quad: TQuad);
-var
-  BGRA: TColorBGRA;
-  B: TBox;
-  X,Y: Integer;
-begin
-  BGRA := Image.DrawColorAsBGRA;
-  B := Quad.Bounds.Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
-
-  for X := B.X1 to B.X2 do
-    for Y := B.Y1 to B.Y2 do
-      if not Quad.Contains(TPoint.Create(X, Y)) then
-        Image.Data[Y * Image.Width + X] := BGRA;
-end;
-
-procedure SimbaImage_DrawQuadInvertedAlpha(Image: TSimbaImage; Quad: TQuad);
-var
-  BGRA: TColorBGRA;
-  B: TBox;
-  X,Y: Integer;
-begin
-  BGRA := Image.DrawColorAsBGRA;
-  B := Quad.Bounds.Clip(TBox.Create(0, 0, Image.Width-1, Image.Height-1));
-
-  for X := B.X1 to B.X2 do
-    for Y := B.Y1 to B.Y2 do
-      if not Quad.Contains(TPoint.Create(X, Y)) then
-        BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
-end;
-
-procedure SimbaImage_DrawPolygon(Image: TSimbaImage; Poly: TPolygon);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Pixel(const X, Y: Integer); inline;
-  begin
-    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
-      Image.Data[Y * Image.Width + X] := BGRA;
-  end;
-
-  {$i shapebuilder_line.inc}
-  {$i shapebuilder_polygon.inc}
+  {$define _Row := Drawer.Row}
+  {$define _Pixel := Drawer.Pixel}
+  {$i shapebuilders/shapebuilder_polygonedge.inc}
 
 begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildPolygon(Poly);
-end;
-
-procedure SimbaImage_DrawPolygonAlpha(Image: TSimbaImage; Poly: TPolygon);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Pixel(const X, Y: Integer);
-  begin
-    if (UInt32(X) < UInt32(Image.Width)) and (UInt32(Y) < UInt32(Image.Height)) then
-      BlendPixel(@Image.Data[Y * Image.Width + X], BGRA);
-  end;
-
-  {$i shapebuilder_line.inc}
-  {$i shapebuilder_polygon.inc}
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildPolygon(Poly);
-end;
-
-procedure SimbaImage_DrawLineThick(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Integer);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Row(const Y: Integer; X1, X2: Integer); // spans are pre-clamped by the builder
-  begin
-    FillData(@Image.Data[Y * Image.Width + X1], (X2 - X1) + 1, BGRA);
-  end;
-
-  {$i shapebuilder_linethick.inc}
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildLineThick(Start, Stop, Thickness, Image.Width, Image.Height);
-end;
-
-procedure SimbaImage_DrawLineThickAlpha(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Integer);
-var
-  BGRA: TColorBGRA;
-
-  procedure _Row(const Y: Integer; X1, X2: Integer); // spans are pre-clamped by the builder
-  var
-    Ptr: PColorBGRA;
-    Upper: PtrUInt;
-  begin
-    Ptr := @Image.Data[Y * Image.Width + X1];
-    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(TColorBGRA));
-    while (PtrUInt(Ptr) <= Upper) do
-    begin
-      BlendPixel(Ptr, BGRA);
-      Inc(Ptr);
-    end;
-  end;
-
-  {$i shapebuilder_linethick.inc}
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _BuildLineThick(Start, Stop, Thickness, Image.Width, Image.Height);
-end;
-
-procedure SimbaImage_DrawLineAA(Image: TSimbaImage; Start, Stop: TPoint; Thickness: Single);
-var
-  BGRA: TColorBGRA;
-  Alpha: Byte absolute BGRA.A;
-
-  // https://zingl.github.io/bresenham.js
-  procedure _LineAntialias(x0, y0, x1, y1: Integer; Thickness: Single);
-  var
-    dx, dy, err: Integer;
-    e2, x2, y2: Integer;
-    ed: Single;
-    sx, sy: Integer;
-  begin
-    dx := Abs(x1 - x0);
-    dy := Abs(y1 - y0);
-
-    if (x0 < x1) then sx := 1 else sx := -1;
-    if (y0 < y1) then sy := 1 else sy := -1;
-
-    err := dx-dy;
-    if (dx+dy = 0) then
-      ed := 1
-    else
-      ed := Sqrt(Double(dx*dx) + Double(dy*dy));
-
-    Thickness := (Thickness + 1) / 2;
-    while True do
-    begin
-      Alpha := Round(255 - Max(0, 255 * (Abs(err-dx+dy)/ed-Thickness+1)));
-      BlendPixel(Image.Data, Image.Width, Image.Height, x0, y0, BGRA);
-
-      e2 := err;
-      x2 := x0;
-      if (2*e2 >= -dx) then
-      begin
-        e2 += dy;
-        y2 := y0;
-        while (e2 < ed*Thickness) and ((y1 <> y2) or (dx > dy)) do
-        begin
-          y2 += sy;
-
-          Alpha := Round(255 - Max(0, 255 * (Abs(e2)/ed-Thickness+1)));
-          BlendPixel(Image.Data, Image.Width, Image.Height, x0, y2, BGRA);
-
-          e2 += dx;
-        end;
-        if (x0 = x1) then
-          Break;
-
-        e2 := err;
-        err -= dy;
-        x0 += sx;
-      end;
-
-      if (2*e2 <= dy) then
-      begin
-        e2 := dx-e2;
-        while (e2 < ed*Thickness) and ((x1 <> x2) or (dx < dy)) do
-        begin
-          x2 += sx;
-
-          Alpha := Round(255 - Max(0, 255 * (Abs(e2)/ed-Thickness+1)));
-          BlendPixel(Image.Data, Image.Width, Image.Height, x2, y0, BGRA);
-
-          e2 += dy;
-        end;
-        if (y0 = y1) then
-          Break;
-
-        err += dx;
-        y0 += sy;
-      end;
-    end;
-  end;
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _LineAntialias(
-    Start.X, Start.Y,
-    Stop.X, Stop.Y,
-    Thickness
-  );
-end;
-
-procedure SimbaImage_DrawEllipseAA(Image: TSimbaImage; ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single);
-var
-  BGRA: TColorBGRA;
-  Alpha: Byte absolute BGRA.A;
-
-  // https://zingl.github.io/bresenham.js
-  procedure _EllipseAntialias(x0, y0, x1, y1: Integer; Thickness: Single);
-  var
-    a,b,b1: Integer;
-    a2,b2: Single;
-    dx,dy: Single;
-    err: Single;
-    dx2,dy2,e2,ed: Single;
-    i: Single;
-  begin
-    a := Abs(x1 - x0);
-    b := Abs(y1 - y0);
-    if (a = 0) or (b = 0) then
-      Exit;
-
-    b1 := b and 1;
-    a2 := a-2*Thickness;
-    b2 := b-2*Thickness;
-    dx := 4*(a-1)*b*b;
-    dy := 4*(b1-1)*a*a;
-
-    i := a+b2;
-    err := b1*a*a;
-
-    if ((Thickness-1) * (2*b-Thickness) > a*a) then
-      b2 := Sqrt(a*(b-a)*i*a2) / (a-Thickness);
-
-    if ((Thickness-1) * (2*a-Thickness) > b*b) then
-    begin
-      a2 := Sqrt(b*(a-b)*i*b2) / (b-Thickness);
-      Thickness := (a-a2) / 2;
-    end;
-
-    if (x0 > x1) then
-    begin
-      x0 := x1;
-      x1 += a;
-    end;
-
-    if (y0 > y1) then
-      y0 := y1;
-
-    if (b2 <= 0) then
-      Thickness := a;
-
-    e2 := Thickness - Floor(Thickness);
-    Thickness := x0+Thickness-e2;
-    dx2 := 4*(a2+2*e2-1)*b2*b2;
-    dy2 := 4*(b1-1)*a2*a2;
-    e2 := dx2*e2;
-    y0 += (b+1) shr 1;
-    y1 := y0-b1;
-    a := 8*a*a;
-    b1 := 8*b*b;
-    a2 := 8*a2*a2;
-    b2 := 8*b2*b2;
-
-    repeat
-      while True do
-      begin
-        if (err < 0) or (x0 > x1) then
-        begin
-          i := x0;
-          Break;
-        end;
-
-        i := Min(dx,dy);
-        ed := Max(dx,dy);
-
-        if ((y0 = y1+1) and (2*err > dx) and (a > b1)) then
-          ed := a/4
-        else
-          ed += 2*ed*i*i/(4*ed*ed+i*i+1)+1;
-        i := 255*err/ed;
-
-        Alpha := 255-Byte(Round(i));
-
-        BlendPixel(Image.Data, Image.Width, Image.Height, x0, y0, BGRA);
-        BlendPixel(Image.Data, Image.Width, Image.Height, x0, y1, BGRA);
-        BlendPixel(Image.Data, Image.Width, Image.Height, x1, y0, BGRA);
-        BlendPixel(Image.Data, Image.Width, Image.Height, x1, y1, BGRA);
-
-        if (err+dy+a < dx) then
-        begin
-          i := x0+1;
-          Break;
-        end;
-
-        x0 += 1;
-        x1 -= 1;
-        err -= dx;
-        dx -= b1;
-      end;
-
-      Alpha := 255;
-
-      while (i < Thickness) and (2*i <= x0+x1) do
-      begin
-        BlendPixel(Image.Data, Image.Width, Image.Height, Round(i),       y0, BGRA);
-        BlendPixel(Image.Data, Image.Width, Image.Height, Round(x0+x1-i), y0, BGRA);
-        BlendPixel(Image.Data, Image.Width, Image.Height, Round(i),       y1, BGRA);
-        BlendPixel(Image.Data, Image.Width, Image.Height, Round(x0+x1-i), y1, BGRA);
-
-        i += 1.0;
-      end;
-
-      while ((e2 > 0) and (x0+x1 >= 2*Thickness)) do
-      begin
-         i := Min(dx2, dy2);
-         ed := Max(dx2, dy2);
-
-         if (y0 = y1+1) and (2*e2 > dx2) and (a2 > b2) then
-           ed := a2/4
-         else
-           ed += 2*ed*i*i/(4*ed*ed+i*i);
-
-         Alpha := 255-Byte(Round(255-255*e2/ed));
-
-         BlendPixel(Image.Data, Image.Width, Image.Height, Round(Thickness),       y0, BGRA);
-         BlendPixel(Image.Data, Image.Width, Image.Height, Round(x0+x1-Thickness), y0, BGRA);
-         BlendPixel(Image.Data, Image.Width, Image.Height, Round(Thickness),       y1, BGRA);
-         BlendPixel(Image.Data, Image.Width, Image.Height, Round(x0+x1-Thickness), y1, BGRA);
-
-         if (e2+dy2+a2 < dx2) then
-           Break;
-
-         Thickness += 1;
-         e2 -= dx2;
-         dx2 -= b2;
-      end;
-
-      dy2 += a2;
-      e2 += dy2;
-      y0 += 1;
-      y1 -= 1;
-      dy += a;
-      err += dy;
-    until (x0 >= x1);
-
-    while (y0-y1 <= b) do
-    begin
-      Alpha := 255 - Byte(Round(255*4*err/b1));
-
-      BlendPixel(Image.Data, Image.Width, Image.Height, x0, y0, BGRA);
-      BlendPixel(Image.Data, Image.Width, Image.Height, x1, y0, BGRA);
-      BlendPixel(Image.Data, Image.Width, Image.Height, x0, y1, BGRA);
-      BlendPixel(Image.Data, Image.Width, Image.Height, x1, y1, BGRA);
-
-      y0 += 1;
-      y1 -= 1;
-      dy += a;
-      err += dy;
-    end;
-  end;
-
-begin
-  BGRA := Image.DrawColorAsBGRA;
-
-  _EllipseAntialias(
-    ACenter.X - XRadius, ACenter.Y - YRadius,
-    ACenter.X + XRadius, ACenter.Y + YRadius,
-    Thickness
-  );
+  if (Length(Poly) < 2) or (Image.Width < 1) or (Image.Height < 1) then
+    Exit;
+  Drawer.Init(Image, True);
+  _BuildPolygonEdge(Poly, Round(Thickness), Drawer.Clip);
+  Drawer.Flush;
 end;
 
 end.
-
