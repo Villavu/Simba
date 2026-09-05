@@ -182,6 +182,36 @@ begin
   PSimbaExternalCanvas(Params^[0])^.DrawAlpha := PByte(Params^[1])^;
 end;
 
+procedure _LapeExternalCanvas_DrawAntialiasing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaExternalCanvas(Params^[0])^.DrawAntialiasing;
+end;
+
+procedure _LapeExternalCanvas_DrawAntialiasing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalCanvas(Params^[0])^.DrawAntialiasing := PBoolean(Params^[1])^;
+end;
+
+procedure _LapeExternalCanvas_DrawThickness_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := PSimbaExternalCanvas(Params^[0])^.DrawThickness;
+end;
+
+procedure _LapeExternalCanvas_DrawThickness_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalCanvas(Params^[0])^.DrawThickness := PSingle(Params^[1])^;
+end;
+
+procedure _LapeExternalCanvas_DrawFeather_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSingle(Result)^ := PSimbaExternalCanvas(Params^[0])^.DrawFeather;
+end;
+
+procedure _LapeExternalCanvas_DrawFeather_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaExternalCanvas(Params^[0])^.DrawFeather := PSingle(Params^[1])^;
+end;
+
 procedure _LapeExternalCanvas_DrawText(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaExternalCanvas(Params^[0])^.DrawText(PString(Params^[1])^, PPoint(Params^[2])^);
@@ -227,19 +257,19 @@ begin
   PSimbaExternalCanvas(Params^[0])^.DoubleBuffered := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeExternalCanvas_DrawCircleAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeExternalCanvas_DrawEllipse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalCanvas(Params^[0])^.DrawCircleAA(PPoint(Params^[1])^, PInteger(Params^[2])^, PSingle(Params^[3])^);
+  PSimbaExternalCanvas(Params^[0])^.DrawEllipse(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
-procedure _LapeExternalCanvas_DrawLineAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeExternalCanvas_DrawEllipseFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalCanvas(Params^[0])^.DrawLineAA(PPoint(Params^[1])^, PPoint(Params^[2])^, PSingle(Params^[3])^);
+  PSimbaExternalCanvas(Params^[0])^.DrawEllipseFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
-procedure _LapeExternalCanvas_DrawEllipseAA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeExternalCanvas_DrawEllipseInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaExternalCanvas(Params^[0])^.DrawEllipseAA(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PSingle(Params^[4])^);
+  PSimbaExternalCanvas(Params^[0])^.DrawEllipseInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
 procedure _LapeExternalCanvas_DrawImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -337,11 +367,6 @@ begin
   PSimbaExternalCanvas(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^);
 end;
 
-procedure _LapeExternalCanvas_DrawLineGap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaExternalCanvas(Params^[0])^.DrawLineGap(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^);
-end;
-
 procedure _LapeExternalCanvas_FillWithAlpha(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaExternalCanvas(Params^[0])^.FillWithAlpha(PByte(Params^[1])^);
@@ -417,6 +442,9 @@ begin
 
     addProperty('TExternalCanvas', 'DrawColor', 'TColor', @_LapeExternalCanvas_DrawColor_Read, @_LapeExternalCanvas_DrawColor_Write);
     addProperty('TExternalCanvas', 'DrawAlpha', 'Byte', @_LapeExternalCanvas_DrawAlpha_Read, @_LapeExternalCanvas_DrawAlpha_Write);
+    addProperty('TExternalCanvas', 'DrawThickness', 'Single', @_LapeExternalCanvas_DrawThickness_Read, @_LapeExternalCanvas_DrawThickness_Write);
+    addProperty('TExternalCanvas', 'DrawAntialiasing', 'Boolean', @_LapeExternalCanvas_DrawAntialiasing_Read, @_LapeExternalCanvas_DrawAntialiasing_Write);
+    addProperty('TExternalCanvas', 'DrawFeather', 'Single', @_LapeExternalCanvas_DrawFeather_Read, @_LapeExternalCanvas_DrawFeather_Write);
 
     addPropertyIndexed('TExternalCanvas', 'Alpha', 'X, Y: Integer', 'Byte', @_LapeExternalCanvas_Alpha_Read, @_LapeExternalCanvas_Alpha_Write);
     addPropertyIndexed('TExternalCanvas', 'Pixel', 'X, Y: Integer', 'TColor', @_LapeExternalCanvas_Pixel_Read, @_LapeExternalCanvas_Pixel_Write);
@@ -468,11 +496,11 @@ begin
     addGlobalFunc('procedure TExternalCanvas.DrawCross(ACenter: TPoint; Radius: Integer);', @_LapeExternalCanvas_DrawCross);
 
     addGlobalFunc('procedure TExternalCanvas.DrawLine(Start, Stop: TPoint);', @_LapeExternalCanvas_DrawLine);
-    addGlobalFunc('procedure TExternalCanvas.DrawLineGap(Start, Stop: TPoint; GapSize: Integer);', @_LapeExternalCanvas_DrawLineGap);
 
-    addGlobalFunc('procedure TExternalCanvas.DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single = 1.5)', @_LapeExternalCanvas_DrawCircleAA);
-    addGlobalFunc('procedure TExternalCanvas.DrawLineAA(Start, Stop: TPoint; Thickness: Single = 1.5)', @_LapeExternalCanvas_DrawLineAA);
-    addGlobalFunc('procedure TExternalCanvas.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single = 1.5)', @_LapeExternalCanvas_DrawEllipseAA);
+    addGlobalFunc('procedure TExternalCanvas.DrawEllipse(ACenter: TPoint; XRadius, YRadius: Integer);', @_LapeExternalCanvas_DrawEllipse);
+    addGlobalFunc('procedure TExternalCanvas.DrawEllipseFilled(ACenter: TPoint; XRadius, YRadius: Integer);', @_LapeExternalCanvas_DrawEllipseFilled);
+    addGlobalFunc('procedure TExternalCanvas.DrawEllipseInverted(ACenter: TPoint; XRadius, YRadius: Integer);', @_LapeExternalCanvas_DrawEllipseInverted);
+
 
     addGlobalFunc('procedure TExternalCanvas.DrawQuadArray(Quads: TQuadArray; Filled: Boolean);', @_LapeExternalCanvas_DrawQuadArray);
     addGlobalFunc('procedure TExternalCanvas.DrawBoxArray(Boxes: TBoxArray; Filled: Boolean);', @_LapeExternalCanvas_DrawBoxArray);

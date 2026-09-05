@@ -59,6 +59,12 @@ type
     procedure SetDefaultPixel(AValue: TColorBGRA);
     procedure SetDrawAlpha(const AValue: Byte);
     procedure SetDrawColor(const AValue: TColor);
+    function GetDrawThickness: Single;
+    function GetDrawAntialiasing: Boolean;
+    function GetDrawFeather: Single;
+    procedure SetDrawThickness(const AValue: Single);
+    procedure SetDrawAntialiasing(const AValue: Boolean);
+    procedure SetDrawFeather(const AValue: Single);
   public
     UserData: Pointer;
     AutoResize: Boolean;
@@ -79,6 +85,9 @@ type
 
     property DrawColor: TColor read GetDrawColor write SetDrawColor;
     property DrawAlpha: Byte read GetDrawAlpha write SetDrawAlpha;
+    property DrawThickness: Single read GetDrawThickness write SetDrawThickness;
+    property DrawAntialiasing: Boolean read GetDrawAntialiasing write SetDrawAntialiasing;
+    property DrawFeather: Single read GetDrawFeather write SetDrawFeather;
 
     property FontName: String read GetFontName write SetFontName;
     property FontSize: Single read GetFontSize write SetFontSize;
@@ -118,7 +127,6 @@ type
     procedure DrawCrosshairs(ACenter: TPoint; Size: Integer);
     procedure DrawCross(ACenter: TPoint; Radius: Integer);
     procedure DrawLine(Start, Stop: TPoint);
-    procedure DrawLineGap(Start, Stop: TPoint; GapSize: Integer);
 
     // Box
     procedure DrawBox(Box: TBox);
@@ -140,10 +148,12 @@ type
     procedure DrawCircleFilled(ACenter: TPoint; Radius: Integer);
     procedure DrawCircleInverted(ACenter: TPoint; Radius: Integer);
 
-    // Antialiased
-    procedure DrawLineAA(Start, Stop: TPoint; Thickness: Single = 1.5);
-    procedure DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single = 1.5);
-    procedure DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single = 1.5);
+    // Ellipse
+    procedure DrawEllipse(ACenter: TPoint; XRadius, YRadius: Integer);
+    procedure DrawEllipseFilled(ACenter: TPoint; XRadius, YRadius: Integer);
+    procedure DrawEllipseInverted(ACenter: TPoint; XRadius, YRadius: Integer);
+
+    // Misc
 
     // Arrays
     procedure DrawQuadArray(Quads: TQuadArray; Filled: Boolean);
@@ -158,6 +168,22 @@ implementation
 uses
   Math,
   simba.image_utils, simba.vartype_box, simba.vartype_pointarray;
+
+// How far the current stroke can bleed past a shape's nominal bounds, so double-buffered invalidation covers
+// the thick/anti-aliased edge. Uses DrawThickness (+ the feather grow model when antialiasing). Over-covering
+// is harmless - Flush clips to the image.
+function StrokeBleed(Img: TSimbaImage): Integer;
+var
+  T, Grow: Single;
+begin
+  T := Img.DrawThickness;
+  if Img.DrawAntialiasing then
+  begin
+    Grow := Img.DrawFeather * (T * 0.5 + 0.5);
+    T := T + 2 * Grow + 1;
+  end;
+  Result := Max(1, Ceil(T * 0.5) + 1);   // never shrink the invalidation (guards a negative DrawThickness)
+end;
 
 procedure TSimbaExternalCanvas.Invalidate(b: TBox);
 begin
@@ -266,6 +292,36 @@ end;
 procedure TSimbaExternalCanvas.SetDrawColor(const AValue: TColor);
 begin
   FImg.DrawColor := AValue;
+end;
+
+function TSimbaExternalCanvas.GetDrawThickness: Single;
+begin
+  Result := FImg.DrawThickness;
+end;
+
+function TSimbaExternalCanvas.GetDrawAntialiasing: Boolean;
+begin
+  Result := FImg.DrawAntialiasing;
+end;
+
+function TSimbaExternalCanvas.GetDrawFeather: Single;
+begin
+  Result := FImg.DrawFeather;
+end;
+
+procedure TSimbaExternalCanvas.SetDrawThickness(const AValue: Single);
+begin
+  FImg.DrawThickness := AValue;
+end;
+
+procedure TSimbaExternalCanvas.SetDrawAntialiasing(const AValue: Boolean);
+begin
+  FImg.DrawAntialiasing := AValue;
+end;
+
+procedure TSimbaExternalCanvas.SetDrawFeather(const AValue: Single);
+begin
+  FImg.DrawFeather := AValue;
 end;
 
 procedure TSimbaExternalCanvas.SetDefaultPixel(AValue: TColorBGRA);
@@ -416,7 +472,8 @@ procedure TSimbaExternalCanvas.FillWithAlpha(Value: Byte);
 begin
   FLock.Enter();
   try
-    InvalidateAll();
+    if FDoubleBuffered then
+      InvalidateAll();
 
     FImg.FillWithAlpha(Value);
   finally
@@ -429,7 +486,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(ATPA.Bounds);
+      Invalidate(ATPA.Bounds.Expand(StrokeBleed(FImg)));
 
     FImg.DrawATPA(ATPA);
   finally
@@ -442,7 +499,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(TPA.Bounds);
+      Invalidate(TPA.Bounds.Expand(StrokeBleed(FImg)));
 
     FImg.DrawTPA(TPA);
   finally
@@ -455,7 +512,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(TBox.Create(ACenter, Size, Size));
+      Invalidate(TBox.Create(ACenter, Size, Size).Expand(StrokeBleed(FImg)));
 
     FImg.DrawCrosshairs(ACenter, Size);
   finally
@@ -468,7 +525,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(TBox.Create(ACenter, Radius, Radius));
+      Invalidate(TBox.Create(ACenter, Radius, Radius).Expand(StrokeBleed(FImg)));
 
     FImg.DrawCross(ACenter, Radius);
   finally
@@ -481,22 +538,9 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(TBox.Create(Start.X, Start.Y, Stop.X, Stop.Y));
+      Invalidate(TBox.Create(Start.X, Start.Y, Stop.X, Stop.Y).Expand(StrokeBleed(FImg)));
 
     FImg.DrawLine(Start, Stop);
-  finally
-    FLock.Leave();
-  end;
-end;
-
-procedure TSimbaExternalCanvas.DrawLineGap(Start, Stop: TPoint; GapSize: Integer);
-begin
-  FLock.Enter();
-  try
-    if FDoubleBuffered then
-      Invalidate(TBox.Create(Start.X, Start.Y, Stop.X, Stop.Y));
-
-    FImg.DrawLineGap(Start, Stop, GapSize);
   finally
     FLock.Leave();
   end;
@@ -522,7 +566,7 @@ begin
     if FDoubleBuffered then
       Invalidate(Box);
 
-    FImg.Clear();
+    FImg.Clear(Box);
   finally
     FLock.Leave();
   end;
@@ -626,7 +670,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(Box);
+      Invalidate(Box.Expand(StrokeBleed(FImg)));
 
     FImg.DrawBox(Box);
   finally
@@ -665,7 +709,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(Points.Bounds);
+      Invalidate(Points.Bounds.Expand(StrokeBleed(FImg)));
 
     FImg.DrawPolygon(Points);
   finally
@@ -704,7 +748,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(Quad.Bounds);
+      Invalidate(Quad.Bounds.Expand(StrokeBleed(FImg)));
 
     FImg.DrawQuad(Quad);
   finally
@@ -716,7 +760,8 @@ procedure TSimbaExternalCanvas.DrawQuadFilled(Quad: TQuad);
 begin
   FLock.Enter();
   try
-    Invalidate(Quad.Bounds);
+    if FDoubleBuffered then
+      Invalidate(Quad.Bounds);
 
     FImg.DrawQuadFilled(Quad);
   finally
@@ -742,7 +787,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(TBox.Create(ACenter, Radius, Radius));
+      Invalidate(TBox.Create(ACenter, Radius, Radius).Expand(StrokeBleed(FImg)));
 
     FImg.DrawCircle(ACenter, Radius);
   finally
@@ -776,43 +821,40 @@ begin
   end;
 end;
 
-procedure TSimbaExternalCanvas.DrawLineAA(Start, Stop: TPoint; Thickness: Single);
+procedure TSimbaExternalCanvas.DrawEllipse(ACenter: TPoint; XRadius, YRadius: Integer);
 begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-    begin
-      Invalidate(TBox.Create(Ceil(Start.X - Thickness), Ceil(Start.Y - Thickness), Ceil(Stop.X - Thickness), Ceil(Stop.Y - Thickness)));
-      Invalidate(TBox.Create(Ceil(Start.X + Thickness), Ceil(Start.Y + Thickness), Ceil(Stop.X + Thickness), Ceil(Stop.Y + Thickness)));
-    end;
+      Invalidate(TBox.Create(ACenter, XRadius, YRadius).Expand(StrokeBleed(FImg)));
 
-    FImg.DrawLineAA(Start, Stop, Thickness);
+    FImg.DrawEllipse(ACenter, XRadius, YRadius);
   finally
     FLock.Leave();
   end;
 end;
 
-procedure TSimbaExternalCanvas.DrawEllipseAA(ACenter: TPoint; XRadius, YRadius: Integer; Thickness: Single);
+procedure TSimbaExternalCanvas.DrawEllipseFilled(ACenter: TPoint; XRadius, YRadius: Integer);
 begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(TBox.Create(ACenter, Ceil(XRadius + Thickness), Ceil(YRadius + Thickness)));
+      Invalidate(TBox.Create(ACenter, XRadius, YRadius));
 
-    FImg.DrawEllipseAA(ACenter, XRadius, YRadius, Thickness);
+    FImg.DrawEllipseFilled(ACenter, XRadius, YRadius);
   finally
     FLock.Leave();
   end;
 end;
 
-procedure TSimbaExternalCanvas.DrawCircleAA(ACenter: TPoint; Radius: Integer; Thickness: Single);
+procedure TSimbaExternalCanvas.DrawEllipseInverted(ACenter: TPoint; XRadius, YRadius: Integer);
 begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(TBox.Create(ACenter, Ceil(Radius + Thickness), Ceil(Radius + Thickness)));
+      InvalidateAll();
 
-    FImg.DrawCircleAA(ACenter, Radius, Thickness);
+    FImg.DrawEllipseInverted(ACenter, XRadius, YRadius);
   finally
     FLock.Leave();
   end;
@@ -826,7 +868,7 @@ begin
   try
     if FDoubleBuffered then
       for I := 0 to High(Quads) do
-        Invalidate(Quads[I].Bounds);
+        Invalidate(Quads[I].Bounds.Expand(StrokeBleed(FImg)));
 
     FImg.DrawQuadArray(Quads, Filled);
   finally
@@ -839,7 +881,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(Boxes.Merge());
+      Invalidate(Boxes.Merge().Expand(StrokeBleed(FImg)));
 
     FImg.DrawBoxArray(Boxes, Filled);
   finally
@@ -852,7 +894,7 @@ begin
   FLock.Enter();
   try
     if FDoubleBuffered then
-      Invalidate(Polygons.Bounds);
+      Invalidate(Polygons.Bounds.Expand(StrokeBleed(FImg)));
 
     FImg.DrawPolygonArray(Polygons, Filled);
   finally
@@ -868,7 +910,7 @@ begin
   try
     if FDoubleBuffered then
       for I := 0 to High(Centers) do
-        Invalidate(TBox.Create(Centers[I], Radius, Radius));
+        Invalidate(TBox.Create(Centers[I], Radius, Radius).Expand(StrokeBleed(FImg)));
 
     FImg.DrawCircleArray(Centers, Radius, Filled);
   finally
@@ -884,7 +926,7 @@ begin
   try
     if FDoubleBuffered then
       for I := 0 to High(Points) do
-        Invalidate(TBox.Create(Points[I], Radius, Radius));
+        Invalidate(TBox.Create(Points[I], Radius, Radius).Expand(StrokeBleed(FImg)));
 
     FImg.DrawCrossArray(Points, Radius);
   finally
