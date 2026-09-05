@@ -330,11 +330,6 @@ begin
   PSimbaImageBoxCanvas(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
 end;
 
-procedure _LapeImageBoxCanvas_DrawLineGap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawLineGap(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^);
-end;
-
 procedure _LapeImageBoxCanvas_DrawCross(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaImageBoxCanvas(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
@@ -428,7 +423,6 @@ begin
     addGlobalFunc('procedure TImageBoxCanvas.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeImageBoxCanvas_DrawText);
     addGlobalFunc('procedure TImageBoxCanvas.DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign; Color: TColor); overload', @_LapeImageBoxCanvas_DrawTextEx);
     addGlobalFunc('procedure TImageBoxCanvas.DrawLine(Start, Stop: TPoint; Color: TColor);', @_LapeImageBoxCanvas_DrawLine);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor);', @_LapeImageBoxCanvas_DrawLineGap);
     addGlobalFunc('procedure TImageBoxCanvas.DrawCross(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeImageBoxCanvas_DrawCross);
     addGlobalFunc('procedure TImageBoxCanvas.DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);', @_LapeImageBoxCanvas_DrawCrossArray);
     addGlobalFunc('procedure TImageBoxCanvas.DrawBox(Box: TBox; Color: TColor);', @_LapeImageBoxCanvas_DrawBox);

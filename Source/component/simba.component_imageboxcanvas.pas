@@ -87,7 +87,6 @@ type
     function TextSize(Text: String): TPoint;
 
     procedure DrawLine(Start, Stop: TPoint; Color: TColor);
-    procedure DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor);
 
     procedure DrawCross(Center: TPoint; Radius: Integer; Color: TColor);
     procedure DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);
@@ -318,18 +317,6 @@ begin
     ELazPixelFormat.BGR:  specialize DoDrawLine<TColorBGR>(Start, Stop, GetDrawInfo(Color));
     ELazPixelFormat.BGRA: specialize DoDrawLine<TColorBGRA>(Start, Stop, GetDrawInfo(Color));
     ELazPixelFormat.ARGB: specialize DoDrawLine<TColorARGB>(Start, Stop, GetDrawInfo(Color));
-  end;
-end;
-
-procedure TSimbaImageBoxCanvas.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor);
-begin
-  Start := Start.Offset(FOffset);
-  Stop := Stop.Offset(FOffset);
-
-  case FPixelFormat of
-    ELazPixelFormat.BGR:  specialize DoDrawLineGap<TColorBGR>(Start, Stop, GapSize, GetDrawInfo(Color));
-    ELazPixelFormat.BGRA: specialize DoDrawLineGap<TColorBGRA>(Start, Stop, GapSize, GetDrawInfo(Color));
-    ELazPixelFormat.ARGB: specialize DoDrawLineGap<TColorARGB>(Start, Stop, GapSize, GetDrawInfo(Color));
   end;
 end;
 

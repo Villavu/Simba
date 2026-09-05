@@ -16,7 +16,8 @@ uses
   simba.colormath,
   simba.image,
   simba.image_drawmatrix,
-  simba.image_utils;
+  simba.image_utils,
+  simba.math;
 
 type
   TDrawInfo = record
@@ -31,7 +32,6 @@ type
 
 generic procedure DoDrawPoints<_T>(TPA: TPointArray; DrawInfo: TDrawInfo);
 generic procedure DoDrawLine<_T>(Start, Stop: TPoint; DrawInfo: TDrawInfo);
-generic procedure DoDrawLineGap<_T>(Start, Stop: TPoint; GapSize: Integer; DrawInfo: TDrawInfo);
 generic procedure DoDrawBoxEdge<_T>(Box: TBox; DrawInfo: TDrawInfo);
 generic procedure DoDrawBoxFilled<_T>(Box: TBox; DrawInfo: TDrawInfo);
 generic procedure DoDrawBoxFilledEx<_T>(Box: TBox; Transparency: Single; DrawInfo: TDrawInfo);
@@ -45,7 +45,7 @@ implementation
 
 uses
   Math,
-  simba.vartype_matrix, simba.array_algorithm, simba.vartype_box, simba.geometry;
+  simba.vartype_matrix, simba.array_algorithm, simba.vartype_box, simba.vartype_pointarray, simba.geometry;
 
 generic procedure DoDrawPoints<_T>(TPA: TPointArray; DrawInfo: TDrawInfo);
 type
@@ -74,13 +74,39 @@ type
 var
   Color: _T;
 
-  procedure _Pixel(const X, Y: Integer); inline;
+  procedure DoPixel(const X, Y: Integer); inline;
   begin
     if (UInt32(X) < UInt32(DrawInfo.Width)) and (UInt32(Y) < UInt32(DrawInfo.Height)) then
       PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ := Color;
   end;
 
-  {$i shapebuilder_line.inc}
+  procedure DoRow(Y: Integer; X1, X2: Integer);
+  var
+    Ptr: PByte;
+    Upper: PtrUInt;
+  begin
+    if (UInt32(Y) >= UInt32(DrawInfo.Height)) then
+      Exit;
+    if (X1 < 0) then
+      X1 := 0;
+    if (X2 >= DrawInfo.Width) then
+      X2 := DrawInfo.Width - 1;
+    if (X1 > X2) then   // empty, or entirely off-screen (clamping both ends would leave an edge pixel)
+      Exit;
+
+    Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
+    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
+    while (PtrUInt(Ptr) <= Upper) do
+    begin
+      PType(Ptr)^ := Color;
+
+      Inc(Ptr, SizeOf(_T));
+    end;
+  end;
+
+  {$define _Pixel := DoPixel}
+  {$define _Row := DoRow}
+  {$i shapebuilders/shapebuilder_line.inc}
 
 begin
   Color := Default(_T);
@@ -88,30 +114,7 @@ begin
   Color.G := DrawInfo.Color.G;
   Color.B := DrawInfo.Color.B;
 
-  _BuildLine(Start, Stop);
-end;
-
-generic procedure DoDrawLineGap<_T>(Start, Stop: TPoint; GapSize: Integer; DrawInfo: TDrawInfo);
-type
-  PType = ^_T;
-var
-  Color: _T;
-
-  procedure _Pixel(const X, Y: Integer); inline;
-  begin
-    if (UInt32(X) < UInt32(DrawInfo.Width)) and (UInt32(Y) < UInt32(DrawInfo.Height)) then
-      PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ := Color;
-  end;
-
-  {$i shapebuilder_linegap.inc}
-
-begin
-  Color := Default(_T);
-  Color.R := DrawInfo.Color.R;
-  Color.G := DrawInfo.Color.G;
-  Color.B := DrawInfo.Color.B;
-
-  _BuildLineGap(Start, Stop, GapSize);
+  _BuildLine(Start, Stop, 1, TBox.Create(0, 0, DrawInfo.Width - 1, DrawInfo.Height - 1));
 end;
 
 generic procedure DoDrawBoxEdge<_T>(Box: TBox; DrawInfo: TDrawInfo);
@@ -120,37 +123,39 @@ type
 var
   Color: _T;
 
-  procedure _Pixel(const X, Y: Integer); inline;
+  procedure DoPixel(const X, Y: Integer); inline;
   begin
     if (UInt32(X) < UInt32(DrawInfo.Width)) and (UInt32(Y) < UInt32(DrawInfo.Height)) then
       PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ := Color;
   end;
 
-  procedure _Row(Y: Integer; X1, X2: Integer);
+  procedure DoRow(Y: Integer; X1, X2: Integer);
   var
     Ptr: PByte;
     Upper: PtrUInt;
   begin
-    if (UInt32(Y) < UInt32(DrawInfo.Height)) then
+    if (UInt32(Y) >= UInt32(DrawInfo.Height)) then
+      Exit;
+    if (X1 < 0) then
+      X1 := 0;
+    if (X2 >= DrawInfo.Width) then
+      X2 := DrawInfo.Width - 1;
+    if (X1 > X2) then   // empty, or entirely off-screen (clamping both ends would leave an edge pixel)
+      Exit;
+
+    Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
+    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
+    while (PtrUInt(Ptr) <= Upper) do
     begin
-      X1 := EnsureRange(X1, 0, DrawInfo.Width - 1);
-      X2 := EnsureRange(X2, 0, DrawInfo.Width - 1);
+      PType(Ptr)^ := Color;
 
-      if ((X2 - X1) + 1 > 0) then
-      begin
-        Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
-        Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
-        while (PtrUInt(Ptr) <= Upper) do
-        begin
-          PType(Ptr)^ := Color;
-
-          Inc(Ptr, SizeOf(_T));
-        end;
-      end;
+      Inc(Ptr, SizeOf(_T));
     end;
   end;
 
-  {$i shapebuilder_boxedge.inc}
+  {$define _Pixel := DoPixel}
+  {$define _Row := DoRow}
+  {$i shapebuilders/shapebuilder_boxedge.inc}
 
 begin
   Color := Default(_T);
@@ -158,7 +163,7 @@ begin
   Color.G := DrawInfo.Color.G;
   Color.B := DrawInfo.Color.B;
 
-  _BuildBoxEdge(Box);
+  _BuildBoxEdge(Box, 1, TBox.Create(0, 0, DrawInfo.Width - 1, DrawInfo.Height - 1));
 end;
 
 generic procedure DoDrawBoxFilled<_T>(Box: TBox; DrawInfo: TDrawInfo);
@@ -167,31 +172,32 @@ type
 var
   Color: _T;
 
-  procedure _Row(Y: Integer; X1, X2: Integer);
+  procedure DoRow(Y: Integer; X1, X2: Integer);
   var
     Ptr: PByte;
     Upper: PtrUInt;
   begin
-    if (UInt32(Y) < UInt32(DrawInfo.Height)) then
+    if (UInt32(Y) >= UInt32(DrawInfo.Height)) then
+      Exit;
+    if (X1 < 0) then
+      X1 := 0;
+    if (X2 >= DrawInfo.Width) then
+      X2 := DrawInfo.Width - 1;
+    if (X1 > X2) then   // empty, or entirely off-screen (clamping both ends would leave an edge pixel)
+      Exit;
+
+    Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
+    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
+    while (PtrUInt(Ptr) <= Upper) do
     begin
-      X1 := EnsureRange(X1, 0, DrawInfo.Width - 1);
-      X2 := EnsureRange(X2, 0, DrawInfo.Width - 1);
+      PType(Ptr)^ := Color;
 
-      if ((X2 - X1) + 1 > 0) then
-      begin
-        Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
-        Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
-        while (PtrUInt(Ptr) <= Upper) do
-        begin
-          PType(Ptr)^ := Color;
-
-          Inc(Ptr, SizeOf(_T));
-        end;
-      end;
+      Inc(Ptr, SizeOf(_T));
     end;
   end;
 
-  {$i shapebuilder_boxfilled.inc}
+  {$define _Row := DoRow}
+  {$i shapebuilders/shapebuilder_box.inc}
 
 begin
   Color := Default(_T);
@@ -199,7 +205,7 @@ begin
   Color.G := DrawInfo.Color.G;
   Color.B := DrawInfo.Color.B;
 
-  _BuildBoxFilled(Box);
+  _BuildBox(Box, False, TBox.Create(0, 0, DrawInfo.Width - 1, DrawInfo.Height - 1));
 end;
 
 generic procedure DoDrawBoxFilledEx<_T>(Box: TBox; Transparency: Single; DrawInfo: TDrawInfo);
@@ -239,13 +245,39 @@ type
 var
   Color: _T;
 
-  procedure _Pixel(const X, Y: Integer); inline;
+  procedure DoPixel(const X, Y: Integer); inline;
   begin
     if (UInt32(X) < UInt32(DrawInfo.Width)) and (UInt32(Y) < UInt32(DrawInfo.Height)) then
       PType(DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X * SizeOf(_T)))^ := Color;
   end;
 
-  {$i shapebuilder_circle.inc}
+  procedure DoRow(Y: Integer; X1, X2: Integer);
+  var
+    Ptr: PByte;
+    Upper: PtrUInt;
+  begin
+    if (UInt32(Y) >= UInt32(DrawInfo.Height)) then
+      Exit;
+    if (X1 < 0) then
+      X1 := 0;
+    if (X2 >= DrawInfo.Width) then
+      X2 := DrawInfo.Width - 1;
+    if (X1 > X2) then   // empty, or entirely off-screen (clamping both ends would leave an edge pixel)
+      Exit;
+
+    Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
+    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
+    while (PtrUInt(Ptr) <= Upper) do
+    begin
+      PType(Ptr)^ := Color;
+
+      Inc(Ptr, SizeOf(_T));
+    end;
+  end;
+
+  {$define _Pixel := DoPixel}
+  {$define _Row := DoRow}
+  {$i shapebuilders/shapebuilder_ellipseedge.inc}
 
 begin
   Color := Default(_T);
@@ -253,7 +285,7 @@ begin
   Color.G := DrawInfo.Color.G;
   Color.B := DrawInfo.Color.B;
 
-  _BuildCircle(Center.X, Center.Y, Radius);
+  _BuildEllipseEdge(Center.X, Center.Y, Radius, Radius, 1, TBox.Create(0, 0, DrawInfo.Width - 1, DrawInfo.Height - 1));
 end;
 
 generic procedure DoDrawCircleFilled<_T>(Center: TPoint; Radius: Integer; DrawInfo: TDrawInfo);
@@ -262,31 +294,32 @@ type
 var
   Color: _T;
 
-  procedure _Row(Y: Integer; X1, X2: Integer);
+  procedure DoRow(Y: Integer; X1, X2: Integer);
   var
     Ptr: PByte;
     Upper: PtrUInt;
   begin
-    if (UInt32(Y) < UInt32(DrawInfo.Height)) then
+    if (UInt32(Y) >= UInt32(DrawInfo.Height)) then
+      Exit;
+    if (X1 < 0) then
+      X1 := 0;
+    if (X2 >= DrawInfo.Width) then
+      X2 := DrawInfo.Width - 1;
+    if (X1 > X2) then   // empty, or entirely off-screen (clamping both ends would leave an edge pixel)
+      Exit;
+
+    Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
+    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
+    while (PtrUInt(Ptr) <= Upper) do   // was "<": dropped the rightmost pixel of every row
     begin
-      X1 := EnsureRange(X1, 0, DrawInfo.Width - 1);
-      X2 := EnsureRange(X2, 0, DrawInfo.Width - 1);
+      PType(Ptr)^ := Color;
 
-      if ((X2 - X1) + 1 > 0) then
-      begin
-        Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
-        Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
-        while (PtrUInt(Ptr) < Upper) do
-        begin
-          PType(Ptr)^ := Color;
-
-          Inc(Ptr, SizeOf(_T));
-        end;
-      end;
+      Inc(Ptr, SizeOf(_T));
     end;
   end;
 
-  {$i shapebuilder_circlefilled.inc}
+  {$define _Row := DoRow}
+  {$i shapebuilders/shapebuilder_ellipse.inc}
 
 begin
   Color := Default(_T);
@@ -294,7 +327,7 @@ begin
   Color.G := DrawInfo.Color.G;
   Color.B := DrawInfo.Color.B;
 
-  _BuildCircleFilled(Center.X, Center.Y, Radius);
+  _BuildEllipse(Center.X, Center.Y, Radius, Radius, False, TBox.Create(0, 0, DrawInfo.Width - 1, DrawInfo.Height - 1));
 end;
 
 generic procedure DoDrawPolygonFilled<_T>(Poly: TPointArray; DrawInfo: TDrawInfo);
@@ -303,31 +336,32 @@ type
 var
   Color: _T;
 
-  procedure _Row(Y: Integer; X1, X2: Integer);
+  procedure DoRow(Y: Integer; X1, X2: Integer);
   var
     Ptr: PByte;
     Upper: PtrUInt;
   begin
-    if (UInt32(Y) < UInt32(DrawInfo.Height)) then
+    if (UInt32(Y) >= UInt32(DrawInfo.Height)) then
+      Exit;
+    if (X1 < 0) then
+      X1 := 0;
+    if (X2 >= DrawInfo.Width) then
+      X2 := DrawInfo.Width - 1;
+    if (X1 > X2) then   // empty, or entirely off-screen (clamping both ends would leave an edge pixel)
+      Exit;
+
+    Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
+    Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
+    while (PtrUInt(Ptr) <= Upper) do
     begin
-      X1 := EnsureRange(X1, 0, DrawInfo.Width - 1);
-      X2 := EnsureRange(X2, 0, DrawInfo.Width - 1);
+      PType(Ptr)^ := Color;
 
-      if ((X2 - X1) + 1 > 0) then
-      begin
-        Ptr := DrawInfo.Data + (Y * DrawInfo.BytesPerLine + X1 * SizeOf(_T));
-        Upper := PtrUInt(Ptr) + ((X2 - X1) * SizeOf(_T));
-        while (PtrUInt(Ptr) <= Upper) do
-        begin
-          PType(Ptr)^ := Color;
-
-          Inc(Ptr, SizeOf(_T));
-        end;
-      end;
+      Inc(Ptr, SizeOf(_T));
     end;
   end;
 
-  {$i shapebuilder_polygonfilled.inc}
+  {$define _Row := DoRow}
+  {$i shapebuilders/shapebuilder_polygon.inc}
 
 begin
   Color := Default(_T);
@@ -335,7 +369,7 @@ begin
   Color.G := DrawInfo.Color.G;
   Color.B := DrawInfo.Color.B;
 
-  _BuildPolygonFilled(Poly, TRect.Create(0,0,DrawInfo.Width-1, DrawInfo.Height-1), DrawInfo.Offset);
+  _BuildPolygon(Poly.Offset(DrawInfo.Offset), False, TBox.Create(0, 0, DrawInfo.Width - 1, DrawInfo.Height - 1));
 end;
 
 generic procedure DoDrawHeatmap<_T>(Mat: TSingleMatrix; DrawInfo: TDrawInfo);
