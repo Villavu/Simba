@@ -28,7 +28,7 @@ type
     procedure DrawConnectors(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
     procedure DrawLines(ACanvas: TSimbaImageBoxCanvas; Box: TBox; Flags: EPaintShapeFlags); overload;
     procedure DrawLines(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags); overload;
-    procedure DrawLinesGap(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
+    procedure DrawPath(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
   public
     FShapeBox: TSimbaShapeBox;
     FDragStart: TPoint;
@@ -367,21 +367,38 @@ begin
     ACanvas.DrawLine(Points[I], Points[I+1], Color);
 end;
 
-procedure TSimbaShapeBoxShape.DrawLinesGap(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
+procedure TSimbaShapeBoxShape.DrawPath(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
 var
   I: Integer;
   Color: TColor;
+  Mid: TPoint;
+  DirX, DirY, Len: Double;
 begin
   if (Length(Points) <= 1) then
     Exit;
 
   if (EPaintShapeFlag.SELECTED in Flags) or (EPaintShapeFlag.SELECTING in Flags) then
-    Color := clRed
+    Color := $0090FF   // orange
   else
-    Color := clPurple;
+    Color := $C8C820;  // teal
 
   for I := 0 to High(Points) - 1 do
-    ACanvas.DrawLineGap(Points[I], Points[I+1], 3, Color);
+  begin
+    ACanvas.DrawLine(Points[I], Points[I+1], Color);
+
+    DirX := Points[I+1].X - Points[I].X;
+    DirY := Points[I+1].Y - Points[I].Y;
+    Len := Sqrt(Sqr(DirX) + Sqr(DirY));
+    if (Len < 20) then
+      Continue;
+    DirX := DirX / Len;
+    DirY := DirY / Len;
+    Mid := TPoint.Create(Round((Points[I].X + Points[I+1].X) / 2 + DirX * 4), Round((Points[I].Y + Points[I+1].Y) / 2 + DirY * 4));
+    ACanvas.DrawLine(Mid, TPoint.Create(Round(Mid.X - DirX * 9 - DirY * 5), Round(Mid.Y - DirY * 9 + DirX * 5)), Color);
+    ACanvas.DrawLine(Mid, TPoint.Create(Round(Mid.X - DirX * 9 + DirY * 5), Round(Mid.Y - DirY * 9 - DirX * 5)), Color);
+  end;
+  for I := 0 to High(Points) do
+    ACanvas.DrawCircleFilled(Points[I], 2, Color);
 end;
 
 constructor TSimbaShapeBoxShape_Point.Create(ShapeBox: TSimbaShapeBox);
@@ -498,7 +515,7 @@ end;
 
 procedure TSimbaShapeBoxShape_Path.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint);
 begin
-  DrawLinesGap(ACanvas, FPoly, Flags);
+  DrawPath(ACanvas, FPoly, Flags);
   DrawConnectors(ACanvas, FPoly, Flags);
 end;
 
