@@ -274,21 +274,25 @@ class function TPointArrayHelper.CreateFromLine(Start, Stop: TPoint): TPointArra
 var
   Buffer: TPointBuffer;
 
-  procedure Create;
-
-    procedure _Pixel(const X, Y: Integer); inline;
-    begin
-      Buffer.Add(X, Y);
-    end;
-
-    {$i shapebuilder_line.inc}
-
+  procedure AddPixel(const X, Y: Integer); inline;
   begin
-    _BuildLine(Start, Stop);
+    Buffer.Add(X, Y);
   end;
 
+  procedure AddRow(const Y: Integer; const X1, X2: Integer);
+  var
+    X: Integer;
+  begin
+    for X := X1 to X2 do
+      Buffer.Add(X, Y);
+  end;
+
+  {$define _Pixel := AddPixel}
+  {$define _Row := AddRow}
+  {$i shapebuilders/shapebuilder_line.inc}
+
 begin
-  Create();
+  _BuildLine(Start, Stop, 1, TBox.Create(Min(Start.X, Stop.X), Min(Start.Y, Stop.Y), Max(Start.X, Stop.X), Max(Start.Y, Stop.Y)));
 
   Result := Buffer.ToArray(False);
 end;
@@ -299,20 +303,12 @@ var
 
   procedure Create;
 
-    procedure _Pixel(const X, Y: Integer); inline;
+    procedure AddPixel(const X, Y: Integer); inline;
     begin
       Buffer.Add(X, Y);
     end;
 
-    {$i shapebuilder_circle.inc}
-
-  begin
-    _BuildCircle(Center.X, Center.Y, Radius);
-  end;
-
-  procedure CreateFilled;
-
-    procedure _Row(const Y: Integer; const X1, X2: Integer);
+    procedure AddRow(const Y: Integer; const X1, X2: Integer);
     var
       X: Integer;
     begin
@@ -320,12 +316,31 @@ var
         Buffer.Add(X, Y);
     end;
 
-    {$i shapebuilder_circlefilled.inc}
+    {$define _Pixel := AddPixel}
+    {$define _Row := AddRow}
+    {$i shapebuilders/shapebuilder_ellipseedge.inc}
+
+  begin
+    _BuildEllipseEdge(Center.X, Center.Y, Radius, Radius, 1, TBox.Create(Center.X - Radius, Center.Y - Radius, Center.X + Radius, Center.Y + Radius));
+  end;
+
+  procedure CreateFilled;
+
+    procedure AddRow(const Y: Integer; const X1, X2: Integer);
+    var
+      X: Integer;
+    begin
+      for X := X1 to X2 do
+        Buffer.Add(X, Y);
+    end;
+
+    {$define _Row := AddRow}
+    {$i shapebuilders/shapebuilder_ellipse.inc}
 
   begin
     Buffer.Init((Radius * Radius * 7) div 2);
 
-    _BuildCircleFilled(Center.X, Center.Y, Radius);
+    _BuildEllipse(Center.X, Center.Y, Radius, Radius, False, TBox.Create(Center.X - Radius, Center.Y - Radius, Center.X + Radius, Center.Y + Radius));
   end;
 
 begin
@@ -343,20 +358,12 @@ var
 
   procedure Create;
 
-    procedure _Pixel(const X, Y: Integer); inline;
+    procedure AddPixel(const X, Y: Integer); inline;
     begin
       Buffer.Add(X, Y);
     end;
 
-    {$i shapebuilder_ellipse.inc}
-
-  begin
-    _BuildEllipse(Center.X, Center.Y, RadiusX, RadiusY);
-  end;
-
-  procedure CreateFilled;
-
-    procedure _Row(const Y: Integer; const X1, X2: Integer);
+    procedure AddRow(const Y: Integer; const X1, X2: Integer);
     var
       X: Integer;
     begin
@@ -364,12 +371,31 @@ var
         Buffer.Add(X, Y);
     end;
 
-    {$i shapebuilder_ellipsefilled.inc}
+    {$define _Pixel := AddPixel}
+    {$define _Row := AddRow}
+    {$i shapebuilders/shapebuilder_ellipseedge.inc}
+
+  begin
+    _BuildEllipseEdge(Center.X, Center.Y, RadiusX, RadiusY, 1, TBox.Create(Center.X - RadiusX, Center.Y - RadiusY, Center.X + RadiusX, Center.Y + RadiusY));
+  end;
+
+  procedure CreateFilled;
+
+    procedure AddRow(const Y: Integer; const X1, X2: Integer);
+    var
+      X: Integer;
+    begin
+      for X := X1 to X2 do
+        Buffer.Add(X, Y);
+    end;
+
+    {$define _Row := AddRow}
+    {$i shapebuilders/shapebuilder_ellipse.inc}
 
   begin
     Buffer.Init((RadiusX * RadiusY * 7) div 2);
 
-    _BuildEllipseFilled(Center.X, Center.Y, RadiusX, RadiusY);
+    _BuildEllipse(Center.X, Center.Y, RadiusX, RadiusY, False, TBox.Create(Center.X - RadiusX, Center.Y - RadiusY, Center.X + RadiusX, Center.Y + RadiusY));
   end;
 
 begin
@@ -385,12 +411,12 @@ class function TPointArrayHelper.CreateFromBox(Box: TBox; Filled: Boolean): TPoi
 var
   Buffer: TPointBuffer;
 
-  procedure _Pixel(const X, Y: Integer); inline;
+  procedure AddPixel(const X, Y: Integer); inline;
   begin
     Buffer.Add(X, Y);
   end;
 
-  procedure _Row(const Y: Integer; const X1, X2: Integer); inline;
+  procedure AddRow(const Y: Integer; const X1, X2: Integer); inline;
   var
     X: Integer;
   begin
@@ -400,22 +426,25 @@ var
 
   procedure CreateFilled;
 
-    {$i shapebuilder_boxfilled.inc}
+    {$define _Row := AddRow}
+    {$i shapebuilders/shapebuilder_box.inc}
 
   begin
     Buffer.Init(Box.Area);
 
-    _BuildBoxFilled(Box);
+    _BuildBox(Box, False, Box);
   end;
 
   procedure Create;
 
-    {$i shapebuilder_boxedge.inc}
+    {$define _Pixel := AddPixel}
+    {$define _Row := AddRow}
+    {$i shapebuilders/shapebuilder_boxedge.inc}
 
   begin
     Buffer.Init((Box.Width * 2) + (Box.Height * 2));
 
-    _BuildBoxEdge(Box);
+    _BuildBoxEdge(Box, 1, Box);
   end;
 
 begin
@@ -438,7 +467,7 @@ class function TPointArrayHelper.CreateFromPolygon(Poly: TPointArray; Filled: Bo
   var
     Buffer: TPointBuffer;
 
-    procedure _Row(const Y: Integer; const X1, X2: Integer);
+    procedure AddRow(const Y: Integer; const X1, X2: Integer);
     var
       X: Integer;
     begin
@@ -446,12 +475,13 @@ class function TPointArrayHelper.CreateFromPolygon(Poly: TPointArray; Filled: Bo
         Buffer.Add(X, Y);
     end;
 
-    {$i shapebuilder_polygonfilled.inc}
+    {$define _Row := AddRow}
+    {$i shapebuilders/shapebuilder_polygon.inc}
 
   begin
     Buffer.Init(Poly.Bounds.Area div 2);
 
-    _BuildPolygonFilled(Poly, TRect(Poly.Bounds), TPoint.ZERO);
+    _BuildPolygon(Poly, False, Poly.Bounds);
 
     Result := Buffer.ToArray(False);
   end;
