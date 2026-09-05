@@ -334,27 +334,36 @@ begin
   Result := True;
 end;
 
+// winding-number test
 class function TSimbaGeometry.PointInPolygon(const P: TPoint; const Polygon: TPointArray): Boolean;
 var
-  I, J: Integer;
+  I, StartX, StartY, EndX, EndY, Winding: Integer;
 begin
-  Result := False;
-
+  Winding := 0;
   if (Length(Polygon) >= 3) then
   begin
-    J := Length(Polygon) - 1;
-    for I := 0 to J do
+    StartX := Polygon[High(Polygon)].X;
+    StartY := Polygon[High(Polygon)].Y;
+    for I := 0 to High(Polygon) do
     begin
-      if ((Polygon[I].Y <= P.Y) and (P.Y < Polygon[J].Y)) or    // an upward crossing
-         ((Polygon[J].Y <= P.Y) and (P.Y < Polygon[I].Y)) then  // a downward crossing
+      EndX := Polygon[I].X;
+      EndY := Polygon[I].Y;
+      // the cross product below is which side of the edge the point lies on
+      if (StartY <= P.Y) and (P.Y < EndY) then // edge going down, point to its left: +1
       begin
-        (* compute the edge-ray intersect at the x-coordinate *)
-        if (P.X - Polygon[I].X < ((Polygon[J].X - Polygon[I].X) * (P.Y - Polygon[I].Y) / (Polygon[J].Y - Polygon[I].Y))) then
-          Result := not Result;
+        if (Int64(P.X) - StartX) * (Int64(EndY) - StartY) < (Int64(EndX) - StartX) * (Int64(P.Y) - StartY) then
+          Inc(Winding);
+      end
+      else if (EndY <= P.Y) and (P.Y < StartY) then // edge going up, point to its right: -1
+      begin
+        if (Int64(P.X) - StartX) * (Int64(EndY) - StartY) > (Int64(EndX) - StartX) * (Int64(P.Y) - StartY) then
+          Dec(Winding);
       end;
-      J := I;
+      StartX := EndX;
+      StartY := EndY;
     end;
   end;
+  Result := (Winding <> 0);
 end;
 
 end.
