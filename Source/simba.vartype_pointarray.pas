@@ -7,7 +7,7 @@
 {
  Jarl Holta - https://github.com/slackydev/SimbaExt
 
-  - CreateFromSimplePolygon
+  - CreateFromPolygon (regular polygon)
   - ConvexHull
   - ConcaveHull
   - ConvexityDefects
@@ -49,8 +49,8 @@ type
     class function CreateFromCircle(Center: TPoint; Radius: Integer; Filled: Boolean): TPointArray; static;
     class function CreateFromEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Filled: Boolean): TPointArray; static;
     class function CreateFromBox(Box: TBox; Filled: Boolean): TPointArray; static;
-    class function CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static;
-    class function CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static;
+    class function CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static; overload;
+    class function CreateFromPolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static; overload;
     class function CreateFromAxes(X, Y: TIntegerArray): TPointArray; static;
 
     function IndexOf(P: TPoint): Integer;
@@ -493,7 +493,7 @@ begin
   end;
 end;
 
-class function TPointArrayHelper.CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray;
+class function TPointArrayHelper.CreateFromPolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray;
 var
   i: Integer;
   dx,dy,ptx,pty,SinR,CosR: Double;
