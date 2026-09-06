@@ -133,8 +133,11 @@ begin
 
   if (FBackBuffer <> nil) then
     FreeAndNil(FBackBuffer);
-  if (FImageBox <> nil) and (FImageBox.Background <> nil) then
-    FImageBox.Background.Free();
+  // The box holds the front buffer with BackgroundOwner=False. Freeing it here
+  // would leave FImageBox.Background dangling, so hand ownership back and let the
+  // box free it in its own destructor instead.
+  if (FImageBox <> nil) then
+    FImageBox.BackgroundOwner := True;
   if (FUpdating <> nil) then
     FreeAndNil(FUpdating);
 
@@ -216,7 +219,7 @@ begin
         ELazPixelFormat.BGRA: BGRA();
         ELazPixelFormat.ARGB: ARGB();
         else
-          SimbaException('Not supported');
+          SimbaException('Pixel format not supported: %d', [Ord(FImageBox.PixelFormat)]);
       end;
     finally
       FBackBuffer.EndUpdate();
@@ -263,11 +266,13 @@ begin
   if (FMaxWidth = AWidth) and (FMaxHeight = AHeight) then
     Exit;
 
+  // SetSize clamps against these whether docked or not, so they must always update
+  FMaxWidth := AWidth;
+  FMaxHeight := AHeight;
+
+  // shrinking the live dock host only makes sense while actually docked
   if (HostDockSite is TSimbaAnchorDockHostSite) then
   begin
-    FMaxWidth := AWidth;
-    FMaxHeight := AHeight;
-
     if (HostDockSite.Width > FMaxWidth) then
       HostDockSite.Width := FMaxWidth;
     if (HostDockSite.Height > FMaxHeight) then
