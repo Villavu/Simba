@@ -92,7 +92,7 @@ function SumChannelsMax(const R, G, B: TSingleMatrix; out maxVal: Double): TSing
 function SubtractScalar(const m: TSingleMatrix; const s: Double): TSingleMatrix;
 function MultiplyElements(const A, B: TSingleMatrix): TSingleMatrix;   // elementwise A.*B into a fresh result
 function Sum(const Matrix: TSingleMatrix): Single;                     // sum of all elements
-procedure NormalizeMasked(var Res: TSingleMatrix; const energy: TSingleMatrix; const maxEnergy, constFac: Double; const degenVal, loClamp, hiClamp: Single);
+procedure NormalizeMasked(var Res: TSingleMatrix; const energy: TSingleMatrix; maxEnergy, constFac: Double; degenVal, loClamp, hiClamp: Single);
 
 implementation
 
@@ -502,145 +502,41 @@ begin
       Result[Y, X] := m[Y, X] - s;
 end;
 
+// Res := clamp(Res / sqrt(constFac * energy)), or degenVal where the energy is
+// below maxEnergy * 1e-4 or the product is not positive.
+procedure NormalizeMasked(var Res: TSingleMatrix; const energy: TSingleMatrix; maxEnergy, constFac: Double; degenVal, loClamp, hiClamp: Single);
 {$IFDEF FFT_ASM}
-procedure NormalizeMasked(var Res: TSingleMatrix; const energy: TSingleMatrix; const maxEnergy, constFac: Double; const degenVal, loClamp, hiClamp: Single);
-var
-  h, n, y: Integer;
-  thr: Double;
-  consts: array[0..7] of Single;
-  constsPtr: PSingle;
-  resRows, enRows: Pointer;
-begin
-  n := Res.Width;              // row width in elements
-  h := Res.Height - 1;         // last row index
-  thr := maxEnergy * 1e-4;
-  consts[0] := constFac; consts[1] := thr;     consts[2] := degenVal;
-  consts[3] := loClamp;  consts[4] := hiClamp; consts[7] := 1.0;
-  constsPtr := @consts[0];
-  resRows := Pointer(Res);     // &Res[0]    -> contiguous array of row pointers
-  enRows  := Pointer(energy);  // &energy[0] -> contiguous array of row pointers
-  asm
-    mov      eax, h
-    test     eax, eax
-    js       @@done                          // h < 0 (empty) -> no rows
-    xor      eax, eax
-    mov      y, eax                           // y := 0
-  @@row:
-    mov      r11d, y                          // r11 = y (zero-extended; y >= 0)
-    mov      r10, resRows
-    mov      rax, [r10+r11*8]                 // rax = @Res[y][0]     (row to normalise)
-    mov      r10, enRows
-    mov      rdx, [r10+r11*8]                 // rdx = @energy[y][0]
-    mov      r9,  constsPtr
-    mov      r8d, n
-    mov      ecx, r8d
-    shr      ecx, 2                         // 4-lane vectors
-    and      r8d, 3
-    test     ecx, ecx
-    jz       @@rem
-  @@loop4:
-    movups   xmm0, [rdx]                    // e
-    movss    xmm1, [r9]
-    shufps   xmm1, xmm1, 0                  // cf
-    mulps    xmm1, xmm0                     // arg = cf*e
-    movups   xmm2, [rax]                    // r
-    movss    xmm5, [r9+4]
-    shufps   xmm5, xmm5, 0                  // thr
-    movaps   xmm4, xmm0
-    cmpps    xmm4, xmm5, 2                  // e <= thr
-    xorps    xmm3, xmm3
-    movaps   xmm5, xmm1
-    cmpps    xmm5, xmm3, 2                  // arg <= 0
-    orps     xmm4, xmm5                     // degenerate mask (xmm4)
-    movss    xmm5, [r9+28]
-    shufps   xmm5, xmm5, 0                  // 1.0
-    movaps   xmm3, xmm4
-    andps    xmm5, xmm3                     // mask & 1.0
-    andnps   xmm3, xmm1                     // ~mask & arg
-    orps     xmm5, xmm3                     // argSafe (>0)
-    sqrtps   xmm5, xmm5
-    divps    xmm2, xmm5                     // v = r/sqrt(argSafe)
-    movss    xmm5, [r9+12]
-    shufps   xmm5, xmm5, 0                  // lo
-    maxps    xmm2, xmm5
-    movss    xmm5, [r9+16]
-    shufps   xmm5, xmm5, 0                  // hi
-    minps    xmm2, xmm5
-    movss    xmm5, [r9+8]
-    shufps   xmm5, xmm5, 0                  // degen
-    andps    xmm5, xmm4                     // degen & mask
-    andnps   xmm4, xmm2                     // ~mask & v
-    orps     xmm5, xmm4                     // result
-    movups   [rax], xmm5
-    add      rdx, 16
-    add      rax, 16
-    dec      ecx
-    jnz      @@loop4
-  @@rem:
-    test     r8d, r8d
-    jz       @@rownext
-  @@rloop:
-    movss    xmm0, [rdx]
-    movss    xmm1, [r9]
-    mulss    xmm1, xmm0                     // arg
-    movss    xmm2, [rax]
-    movss    xmm4, [r9+4]
-    ucomiss  xmm0, xmm4
-    jbe      @@rdeg                         // e <= thr
-    xorps    xmm4, xmm4
-    ucomiss  xmm1, xmm4
-    jbe      @@rdeg                         // arg <= 0
-    sqrtss   xmm3, xmm1
-    divss    xmm2, xmm3
-    movss    xmm4, [r9+12]
-    maxss    xmm2, xmm4
-    movss    xmm4, [r9+16]
-    minss    xmm2, xmm4
-    movss    [rax], xmm2
-    jmp      @@rnext
-  @@rdeg:
-    movss    xmm3, [r9+8]
-    movss    [rax], xmm3
-  @@rnext:
-    add      rdx, 4
-    add      rax, 4
-    dec      r8d
-    jnz      @@rloop
-  @@rownext:
-    mov      eax, y
-    inc      eax
-    mov      y, eax
-    cmp      eax, h
-    jle      @@row                          // for y := 0 to h
-  @@done:
-  end;
-end;
+  {$I asm/normalizemasked_x86_64.inc}
 {$ELSE}
-procedure NormalizeMasked(var Res: TSingleMatrix; const energy: TSingleMatrix; const maxEnergy, constFac: Double; const degenVal, loClamp, hiClamp: Single);
 var
   x, y, w, h: Integer;
-  thr, arg: Double;
-  v: Single;
+  thr, cf, arg, v: Single;
+  r, e: PSingle;
 begin
   w := Res.Width - 1;
   h := Res.Height - 1;
   thr := maxEnergy * 1e-4;
+  cf := constFac;
   for y := 0 to h do
+  begin
+    r := @Res[y][0];
+    e := @energy[y][0];
     for x := 0 to w do
     begin
-      arg := constFac * energy[y, x];
-      if (energy[y, x] <= thr) or (arg <= 0) then
-        Res[y, x] := degenVal
+      arg := cf * e[x];
+      if (e[x] <= thr) or (arg <= 0) then
+        r[x] := degenVal
       else
       begin
-        v := Res[y, x] / Sqrt(arg);
+        v := r[x] / Sqrt(arg);
         if v < loClamp then
           v := loClamp
         else if v > hiClamp then
           v := hiClamp;
-        Res[y, x] := v;
+        r[x] := v;
       end;
     end;
+  end;
 end;
 {$ENDIF}
 
