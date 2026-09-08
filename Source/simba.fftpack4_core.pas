@@ -126,65 +126,111 @@ procedure passf3(const ido, l1: Int32; const cc, ch, wa1,wa2: PSingle; const isi
 const
   taui: Single = 0.866025403784439;
 var
-  i,k,ac,ah,d1,d2: Int32;
+  k: Int32;
+  i, n, p1, p2, d1, d2: PtrInt;
   ci2,ci3,di2,di3,cr2,cr3: Single;
   dr2,dr3: Single;
   ti2,tr2: Single;
-  staui,swai,taur: Single;
+  staui,taur,wr,wi: Single;
+  x,h: PSingle;
 begin
   staui := isign * taui; // fold the constant sign once instead of per element
-  swai  := isign;        // signed twiddle factor as float (avoids int->float per element)
-  taur  := -0.5;         // keep in XMM register; FPC re-loads proc consts from memory each use
-  d1 := l1 * ido;       // FPC does not hoist l1*ido / 2*l1*ido out of the inner loops
-  d2 := 2 * d1;
+  taur  := -0.5;         // keep in a register; FPC re-loads proc consts from memory each use
+  p1 := ido;
+  p2 := 2*ido;
+  d1 := l1*p1;
+  d2 := l1*p2;
   if ido=2 then
   begin
-    for k:=1 to l1 do
+    x := cc;
+    h := ch;
+    for k:=0 to l1-1 do
     begin
-      ac  := (3*k-2) * ido;
-      ah  := (k-1) * ido;
-      tr2 := cc[ac] + cc[ac+ido];
-      cr2 := cc[ac-ido] + taur*tr2;
-      ch[ah] := cc[ac-ido] + tr2;
-      ti2 := cc[ac+1] + cc[ac+ido+1];
-      ci2 := cc[ac-ido+1] + taur*ti2;
-      ch[ah+1] := cc[ac-ido+1]+ti2;
-      cr3 := staui * (cc[ac]-cc[ac+ido]);
-      ci3 := staui * (cc[ac+1]-cc[ac+ido+1]);
-      ch[ah+d1]   := cr2 - ci3;
-      ch[ah+d2]   := cr2 + ci3;
-      ch[ah+d1+1] := ci2 + cr3;
-      ch[ah+d2+1] := ci2 - cr3;
+      tr2 := x[2] + x[4];
+      cr2 := x[0] + taur*tr2;
+      h[0] := x[0] + tr2;
+      ti2 := x[3] + x[5];
+      ci2 := x[1] + taur*ti2;
+      h[1] := x[1] + ti2;
+      cr3 := staui * (x[2]-x[4]);
+      ci3 := staui * (x[3]-x[5]);
+      h[d1]   := cr2 - ci3;
+      h[d2]   := cr2 + ci3;
+      h[d1+1] := ci2 + cr3;
+      h[d2+1] := ci2 - cr3;
+      Inc(x, 6);
+      Inc(h, 2);
     end;
   end else
   begin
-    for k:=1 to l1 do
-    begin
-      i := 0;
-      while i<ido-1 do
+    n := ido div 2;
+    // the sign of isign folded into the twiddle adds: exact, and no multiply for it
+    if isign = 1 then
+      for k:=0 to l1-1 do
       begin
-        ac  := i + (3*k-2) * ido;
-        ah  := i + (k-1) * ido;
-        tr2 := cc[ac] + cc[ac+ido];
-        cr2 := cc[ac-ido] + taur*tr2;
-        ch[ah] := cc[ac-ido] + tr2;
-        ti2 := cc[ac+1] + cc[ac+ido+1];
-        ci2 := cc[ac-ido+1] + taur*ti2;
-        ch[ah+1] := cc[ac-ido+1] + ti2;
-        cr3 := staui * (cc[ac]-cc[ac+ido]);
-        ci3 := staui * (cc[ac+1]-cc[ac+ido+1]);
-        dr2 := cr2 - ci3;
-        dr3 := cr2 + ci3;
-        di2 := ci2 + cr3;
-        di3 := ci2 - cr3;
-        ch[ah+d1+1] := wa1[i]*di2 + swai*wa1[i+1]*dr2;
-        ch[ah+d1]   := wa1[i]*dr2 - swai*wa1[i+1]*di2;
-        ch[ah+d2+1] := wa2[i]*di3 + swai*wa2[i+1]*dr3;
-        ch[ah+d2]   := wa2[i]*dr3 - swai*wa2[i+1]*di3;
-
-        Inc(i, 2);
+        x := cc + 3*k*p1;
+        h := ch + k*p1;
+        i := 0;
+        while i < n do
+        begin
+          tr2 := x[p1] + x[p2];
+          cr2 := x[0] + taur*tr2;
+          h[0] := x[0] + tr2;
+          ti2 := x[p1+1] + x[p2+1];
+          ci2 := x[1] + taur*ti2;
+          h[1] := x[1] + ti2;
+          cr3 := staui * (x[p1]-x[p2]);
+          ci3 := staui * (x[p1+1]-x[p2+1]);
+          dr2 := cr2 - ci3;
+          dr3 := cr2 + ci3;
+          di2 := ci2 + cr3;
+          di3 := ci2 - cr3;
+          wr := wa1[2*i];
+          wi := wa1[2*i+1];
+          h[d1+1] := wr*di2 + wi*dr2;
+          h[d1]   := wr*dr2 - wi*di2;
+          wr := wa2[2*i];
+          wi := wa2[2*i+1];
+          h[d2+1] := wr*di3 + wi*dr3;
+          h[d2]   := wr*dr3 - wi*di3;
+          Inc(i);
+          Inc(x, 2);
+          Inc(h, 2);
+        end;
+      end
+    else
+      for k:=0 to l1-1 do
+      begin
+        x := cc + 3*k*p1;
+        h := ch + k*p1;
+        i := 0;
+        while i < n do
+        begin
+          tr2 := x[p1] + x[p2];
+          cr2 := x[0] + taur*tr2;
+          h[0] := x[0] + tr2;
+          ti2 := x[p1+1] + x[p2+1];
+          ci2 := x[1] + taur*ti2;
+          h[1] := x[1] + ti2;
+          cr3 := staui * (x[p1]-x[p2]);
+          ci3 := staui * (x[p1+1]-x[p2+1]);
+          dr2 := cr2 - ci3;
+          dr3 := cr2 + ci3;
+          di2 := ci2 + cr3;
+          di3 := ci2 - cr3;
+          wr := wa1[2*i];
+          wi := wa1[2*i+1];
+          h[d1+1] := wr*di2 - wi*dr2;
+          h[d1]   := wr*dr2 + wi*di2;
+          wr := wa2[2*i];
+          wi := wa2[2*i+1];
+          h[d2+1] := wr*di3 - wi*dr3;
+          h[d2]   := wr*dr3 + wi*di3;
+          Inc(i);
+          Inc(x, 2);
+          Inc(h, 2);
+        end;
       end;
-    end;
   end;
 end; (* passf3 *)
 
@@ -192,10 +238,12 @@ end; (* passf3 *)
 // isign = +1 for backward transform and -1 for forward transforms
 procedure passf4(const o1, l1: Int32; const cc, ch, wa1, wa2, wa3: PSingle; const isign: Int32);
 var
-  i,k,o2,o3,d1,d2,d3: Int32;
+  k: Int32;
+  i, n, p1, p2, p3, d1, d2, d3: PtrInt;   // pointer sized: no sign extension per use
   ci2,ci3,ci4,cr2,cr3,cr4: Single;
   ti1,ti2,ti3,ti4,tr1,tr2,tr3,tr4: Single;
-  ic,ih,ac,ah: PSingle;
+  wr, wi: Single;
+  ac,ah: PSingle;
 begin
   if o1=2 then
   begin
@@ -220,57 +268,73 @@ begin
       ah[d2+1] := ti2 - ti3;
       if isign = 1 then
       begin
-        ah[d1]   := tr1 + tr4;  ah[d1+1] := ti1 + ti4;
-        ah[d3]   := tr1 - tr4;  ah[d3+1] := ti1 - ti4;
+        ah[d1]   := tr1 + tr4;
+        ah[d1+1] := ti1 + ti4;
+        ah[d3]   := tr1 - tr4;
+        ah[d3+1] := ti1 - ti4;
       end else
       begin
-        ah[d1]   := tr1 - tr4;  ah[d1+1] := ti1 - ti4;
-        ah[d3]   := tr1 + tr4;  ah[d3+1] := ti1 + ti4;
+        ah[d1]   := tr1 - tr4;
+        ah[d1+1] := ti1 - ti4;
+        ah[d3]   := tr1 + tr4;
+        ah[d3+1] := ti1 + ti4;
       end;
       Inc(ac, 8);
       Inc(ah, 2);
     end;
   end else
   begin
-    d1 := l1*o1;
-    o2 := 2*o1; d2 := l1*o2;
-    o3 := 3*o1; d3 := l1*o3;
-    // isign is constant for the whole call; hoist the branch out of the hot
-    // inner loop (loop unswitching) so each variant is straight-line code.
+    p1 := o1;
+    p2 := 2*o1;
+    p3 := 3*o1;
+    d1 := l1*p1;
+    d2 := l1*p2;
+    d3 := l1*p3;
+    n  := o1 div 2;                         // complex per row
+    // isign is constant for the whole call; each variant is straight-line code.
+    // Each twiddle pair is read once, just before its use, and every output is
+    // stored as soon as it is complete, to keep few values live at a time.
     if isign = 1 then
       for k:=0 to l1-1 do
       begin
-        i  := 0;
         ac := cc + (k*4*o1);
         ah := ch + (k*o1);
-        while i < o1-1 do
+        i  := 0;
+        while i < n do
         begin
-          ic  := ac+1;
-          ih  := ah+1;
-          ti1 := ic[0]  - ic[o2];
-          ti2 := ic[0]  + ic[o2];
-          ti3 := ic[o1] + ic[o3];
-          tr4 := ic[o3] - ic[o1];
-          tr1 := ac[0]  - ac[o2];
-          tr2 := ac[0]  + ac[o2];
-          ti4 := ac[o1] - ac[o3];
-          tr3 := ac[o1] + ac[o3];
+          tr1 := ac[0]  - ac[p2];
+          tr2 := ac[0]  + ac[p2];
+          ti1 := ac[1]  - ac[p2+1];
+          ti2 := ac[1]  + ac[p2+1];
+          tr3 := ac[p1] + ac[p3];
+          ti4 := ac[p1] - ac[p3];
+          ti3 := ac[p1+1] + ac[p3+1];
+          tr4 := ac[p3+1] - ac[p1+1];
 
           ah[0] := tr2 + tr3;
           ah[1] := ti2 + ti3;
           cr3   := tr2 - tr3;
           ci3   := ti2 - ti3;
+          wr := wa2[2*i];
+          wi := wa2[2*i+1];
+          ah[d2]   := wr*cr3 - wi*ci3;
+          ah[d2+1] := wr*ci3 + wi*cr3;
 
-          cr2 := tr1 + tr4;  ci2 := ti1 + ti4;
-          cr4 := tr1 - tr4;  ci4 := ti1 - ti4;
-          ah[d1] := wa1[i]*cr2 - wa1[i+1]*ci2;
-          ih[d1] := wa1[i]*ci2 + wa1[i+1]*cr2;
-          ah[d2] := wa2[i]*cr3 - wa2[i+1]*ci3;
-          ih[d2] := wa2[i]*ci3 + wa2[i+1]*cr3;
-          ah[d3] := wa3[i]*cr4 - wa3[i+1]*ci4;
-          ih[d3] := wa3[i]*ci4 + wa3[i+1]*cr4;
+          cr2 := tr1 + tr4;
+          ci2 := ti1 + ti4;
+          wr := wa1[2*i];
+          wi := wa1[2*i+1];
+          ah[d1]   := wr*cr2 - wi*ci2;
+          ah[d1+1] := wr*ci2 + wi*cr2;
 
-          Inc(i, 2);
+          cr4 := tr1 - tr4;
+          ci4 := ti1 - ti4;
+          wr := wa3[2*i];
+          wi := wa3[2*i+1];
+          ah[d3]   := wr*cr4 - wi*ci4;
+          ah[d3+1] := wr*ci4 + wi*cr4;
+
+          Inc(i);
           Inc(ac, 2);
           Inc(ah, 2);
         end;
@@ -278,37 +342,44 @@ begin
     else
       for k:=0 to l1-1 do
       begin
-        i  := 0;
         ac := cc + (k*4*o1);
         ah := ch + (k*o1);
-        while i < o1-1 do
+        i  := 0;
+        while i < n do
         begin
-          ic  := ac+1;
-          ih  := ah+1;
-          ti1 := ic[0]  - ic[o2];
-          ti2 := ic[0]  + ic[o2];
-          ti3 := ic[o1] + ic[o3];
-          tr4 := ic[o3] - ic[o1];
-          tr1 := ac[0]  - ac[o2];
-          tr2 := ac[0]  + ac[o2];
-          ti4 := ac[o1] - ac[o3];
-          tr3 := ac[o1] + ac[o3];
+          tr1 := ac[0]  - ac[p2];
+          tr2 := ac[0]  + ac[p2];
+          ti1 := ac[1]  - ac[p2+1];
+          ti2 := ac[1]  + ac[p2+1];
+          tr3 := ac[p1] + ac[p3];
+          ti4 := ac[p1] - ac[p3];
+          ti3 := ac[p1+1] + ac[p3+1];
+          tr4 := ac[p3+1] - ac[p1+1];
 
           ah[0] := tr2 + tr3;
           ah[1] := ti2 + ti3;
           cr3   := tr2 - tr3;
           ci3   := ti2 - ti3;
+          wr := wa2[2*i];
+          wi := wa2[2*i+1];
+          ah[d2]   := wr*cr3 + wi*ci3;
+          ah[d2+1] := wr*ci3 - wi*cr3;
 
-          cr2 := tr1 - tr4;  ci2 := ti1 - ti4;
-          cr4 := tr1 + tr4;  ci4 := ti1 + ti4;
-          ah[d1] := wa1[i]*cr2 + wa1[i+1]*ci2;
-          ih[d1] := wa1[i]*ci2 - wa1[i+1]*cr2;
-          ah[d2] := wa2[i]*cr3 + wa2[i+1]*ci3;
-          ih[d2] := wa2[i]*ci3 - wa2[i+1]*cr3;
-          ah[d3] := wa3[i]*cr4 + wa3[i+1]*ci4;
-          ih[d3] := wa3[i]*ci4 - wa3[i+1]*cr4;
+          cr2 := tr1 - tr4;
+          ci2 := ti1 - ti4;
+          wr := wa1[2*i];
+          wi := wa1[2*i+1];
+          ah[d1]   := wr*cr2 + wi*ci2;
+          ah[d1+1] := wr*ci2 - wi*cr2;
 
-          Inc(i, 2);
+          cr4 := tr1 + tr4;
+          ci4 := ti1 + ti4;
+          wr := wa3[2*i];
+          wi := wa3[2*i+1];
+          ah[d3]   := wr*cr4 + wi*ci4;
+          ah[d3+1] := wr*ci4 - wi*cr4;
+
+          Inc(i);
           Inc(ac, 2);
           Inc(ah, 2);
         end;
@@ -328,98 +399,175 @@ const
   tr12: Single =-0.809016994374947;
   ti12: Single = 0.587785252292473;
 var
-  i,k,ac,ah,ido2,ido3,ido4,idl,idl2,idl3,idl4: Int32;
+  k: Int32;
+  i, n, p1, p2, p3, p4, d1, d2, d3, d4: PtrInt;
   ci2,ci3,ci4,ci5: Single;
   di2,di3,di4,di5: Single;
   cr2,cr3,cr5,cr4: Single;
   ti2,ti3,ti4,ti5: Single;
   dr2,dr3,dr4,dr5: Single;
   tr2,tr3,tr4,tr5: Single;
+  sgn,wr,wi: Single;
+  z,h: PSingle;
 begin
-  idl := l1*ido;
-  ido2 := 2*ido;  idl2 := l1*ido2;
-  ido3 := 3*ido;  idl3 := l1*ido3;
-  ido4 := 4*ido;  idl4 := l1*ido4;
+  p1 := ido;
+  p2 := 2*ido;
+  p3 := 3*ido;
+  p4 := 4*ido;
+  d1 := l1*p1;
+  d2 := l1*p2;
+  d3 := l1*p3;
+  d4 := l1*p4;
+  sgn := isign; // once, not an int to float conversion per product
   if ido=2 then
   begin
-    for k:=1 to l1 do
+    z := cc;
+    h := ch;
+    for k:=0 to l1-1 do
     begin
-      ac  := (5*k-4)*ido+1;
-      ti5 := cc[ac] - cc[ac+ido3];
-      ti2 := cc[ac] + cc[ac+ido3];
-      ti4 := cc[ac+ido] - cc[ac+ido2];
-      ti3 := cc[ac+ido] + cc[ac+ido2];
-      tr5 := cc[ac-1] - cc[ac+ido3-1];
-      tr2 := cc[ac-1] + cc[ac+ido3-1];
-      tr4 := cc[ac+ido-1] - cc[ac+ido2-1];
-      tr3 := cc[ac+ido-1] + cc[ac+ido2-1];
-      ah  := (k-1)*ido;
-      ch[ah  ] := cc[ac-ido-1] + tr2 + tr3;
-      ch[ah+1] := cc[ac-ido  ] + ti2 + ti3;
-      cr2 := cc[ac-ido-1] + tr11*tr2 + tr12*tr3;
-      ci2 := cc[ac-ido] + tr11*ti2 + tr12*ti3;
-      cr3 := cc[ac-ido-1] + tr12*tr2 + tr11*tr3;
-      ci3 := cc[ac-ido] + tr12*ti2 + tr11*ti3;
-      cr5 := isign * (ti11*tr5 + ti12*tr4);
-      ci5 := isign * (ti11*ti5 + ti12*ti4);
-      cr4 := isign * (ti12*tr5 - ti11*tr4);
-      ci4 := isign * (ti12*ti5 - ti11*ti4);
-      ch[ah+idl]    := cr2 - ci5;
-      ch[ah+idl4]   := cr2 + ci5;
-      ch[ah+idl+1]  := ci2 + cr5;
-      ch[ah+idl2+1] := ci3 + cr4;
-      ch[ah+idl2]   := cr3 - ci4;
-      ch[ah+idl3]   := cr3 + ci4;
-      ch[ah+idl3+1] := ci3 - cr4;
-      ch[ah+idl4+1] := ci2 - cr5;
+      ti5 := z[3] - z[9];
+      ti2 := z[3] + z[9];
+      ti4 := z[5] - z[7];
+      ti3 := z[5] + z[7];
+      tr5 := z[2] - z[8];
+      tr2 := z[2] + z[8];
+      tr4 := z[4] - z[6];
+      tr3 := z[4] + z[6];
+      h[0] := z[0] + tr2 + tr3;
+      h[1] := z[1] + ti2 + ti3;
+      cr2 := z[0] + tr11*tr2 + tr12*tr3;
+      ci2 := z[1] + tr11*ti2 + tr12*ti3;
+      cr3 := z[0] + tr12*tr2 + tr11*tr3;
+      ci3 := z[1] + tr12*ti2 + tr11*ti3;
+      cr5 := sgn * (ti11*tr5 + ti12*tr4);
+      ci5 := sgn * (ti11*ti5 + ti12*ti4);
+      cr4 := sgn * (ti12*tr5 - ti11*tr4);
+      ci4 := sgn * (ti12*ti5 - ti11*ti4);
+      h[d1]   := cr2 - ci5;
+      h[d4]   := cr2 + ci5;
+      h[d1+1] := ci2 + cr5;
+      h[d2+1] := ci3 + cr4;
+      h[d2]   := cr3 - ci4;
+      h[d3]   := cr3 + ci4;
+      h[d3+1] := ci3 - cr4;
+      h[d4+1] := ci2 - cr5;
+      Inc(z, 10);
+      Inc(h, 2);
     end;
   end else
   begin
-    for k:=1 to l1 do
-    begin
-      i := 0;
-      while i < ido-1 do
+    n := ido div 2;
+    // the sign of isign folded into the twiddle adds: exact, and no multiply for it
+    if isign = 1 then
+      for k:=0 to l1-1 do
       begin
-        ac  := i+1+(k*5-4)*ido;
-        ti5 := cc[ac] - cc[ac+ido3];
-        ti2 := cc[ac] + cc[ac+ido3];
-        ti4 := cc[ac+ido] - cc[ac+ido2];
-        ti3 := cc[ac+ido] + cc[ac+ido2];
-        tr5 := cc[ac-1] - cc[ac+ido3-1];
-        tr2 := cc[ac-1] + cc[ac+ido3-1];
-        tr4 := cc[ac+ido-1] - cc[ac+ido2-1];
-        tr3 := cc[ac+ido-1] + cc[ac+ido2-1];
-        ah  := i+(k-1)*ido;
-        ch[ah  ] := cc[ac-ido-1] + tr2 + tr3;
-        ch[ah+1] := cc[ac-ido  ] + ti2 + ti3;
-        cr2 := cc[ac-ido-1] + tr11*tr2 + tr12*tr3;
-        ci2 := cc[ac-ido] + tr11*ti2 + tr12*ti3;
-        cr3 := cc[ac-ido-1] + tr12*tr2 + tr11*tr3;
-        ci3 := cc[ac-ido] + tr12*ti2 + tr11*ti3;
-        cr5 := isign * (ti11*tr5 + ti12*tr4);
-        ci5 := isign * (ti11*ti5 + ti12*ti4);
-        cr4 := isign * (ti12*tr5 - ti11*tr4);
-        ci4 := isign * (ti12*ti5 - ti11*ti4);
-        dr3 := cr3 - ci4;
-        dr4 := cr3 + ci4;
-        di3 := ci3 + cr4;
-        di4 := ci3 - cr4;
-        dr5 := cr2 + ci5;
-        dr2 := cr2 - ci5;
-        di5 := ci2 - cr5;
-        di2 := ci2 + cr5;
-        ch[ah+idl]    := wa1[i]*dr2 - isign*wa1[i+1]*di2;
-        ch[ah+idl+1]  := wa1[i]*di2 + isign*wa1[i+1]*dr2;
-        ch[ah+idl2]   := wa2[i]*dr3 - isign*wa2[i+1]*di3;
-        ch[ah+idl2+1] := wa2[i]*di3 + isign*wa2[i+1]*dr3;
-        ch[ah+idl3]   := wa3[i]*dr4 - isign*wa3[i+1]*di4;
-        ch[ah+idl3+1] := wa3[i]*di4 + isign*wa3[i+1]*dr4;
-        ch[ah+idl4]   := wa4[i]*dr5 - isign*wa4[i+1]*di5;
-        ch[ah+idl4+1] := wa4[i]*di5 + isign*wa4[i+1]*dr5;
-      
-        Inc(i, 2);
+        z := cc + 5*k*p1;
+        h := ch + k*p1;
+        i := 0;
+        while i < n do
+        begin
+          ti5 := z[p1+1] - z[p4+1];
+          ti2 := z[p1+1] + z[p4+1];
+          ti4 := z[p2+1] - z[p3+1];
+          ti3 := z[p2+1] + z[p3+1];
+          tr5 := z[p1] - z[p4];
+          tr2 := z[p1] + z[p4];
+          tr4 := z[p2] - z[p3];
+          tr3 := z[p2] + z[p3];
+          h[0] := z[0] + tr2 + tr3;
+          h[1] := z[1] + ti2 + ti3;
+          cr2 := z[0] + tr11*tr2 + tr12*tr3;
+          ci2 := z[1] + tr11*ti2 + tr12*ti3;
+          cr3 := z[0] + tr12*tr2 + tr11*tr3;
+          ci3 := z[1] + tr12*ti2 + tr11*ti3;
+          cr5 := ti11*tr5 + ti12*tr4;
+          ci5 := ti11*ti5 + ti12*ti4;
+          cr4 := ti12*tr5 - ti11*tr4;
+          ci4 := ti12*ti5 - ti11*ti4;
+          dr3 := cr3 - ci4;
+          dr4 := cr3 + ci4;
+          di3 := ci3 + cr4;
+          di4 := ci3 - cr4;
+          dr5 := cr2 + ci5;
+          dr2 := cr2 - ci5;
+          di5 := ci2 - cr5;
+          di2 := ci2 + cr5;
+          wr := wa1[2*i];
+          wi := wa1[2*i+1];
+          h[d1]   := wr*dr2 - wi*di2;
+          h[d1+1] := wr*di2 + wi*dr2;
+          wr := wa2[2*i];
+          wi := wa2[2*i+1];
+          h[d2]   := wr*dr3 - wi*di3;
+          h[d2+1] := wr*di3 + wi*dr3;
+          wr := wa3[2*i];
+          wi := wa3[2*i+1];
+          h[d3]   := wr*dr4 - wi*di4;
+          h[d3+1] := wr*di4 + wi*dr4;
+          wr := wa4[2*i];
+          wi := wa4[2*i+1];
+          h[d4]   := wr*dr5 - wi*di5;
+          h[d4+1] := wr*di5 + wi*dr5;
+          Inc(i);
+          Inc(z, 2);
+          Inc(h, 2);
+        end;
+      end
+    else
+      for k:=0 to l1-1 do
+      begin
+        z := cc + 5*k*p1;
+        h := ch + k*p1;
+        i := 0;
+        while i < n do
+        begin
+          ti5 := z[p1+1] - z[p4+1];
+          ti2 := z[p1+1] + z[p4+1];
+          ti4 := z[p2+1] - z[p3+1];
+          ti3 := z[p2+1] + z[p3+1];
+          tr5 := z[p1] - z[p4];
+          tr2 := z[p1] + z[p4];
+          tr4 := z[p2] - z[p3];
+          tr3 := z[p2] + z[p3];
+          h[0] := z[0] + tr2 + tr3;
+          h[1] := z[1] + ti2 + ti3;
+          cr2 := z[0] + tr11*tr2 + tr12*tr3;
+          ci2 := z[1] + tr11*ti2 + tr12*ti3;
+          cr3 := z[0] + tr12*tr2 + tr11*tr3;
+          ci3 := z[1] + tr12*ti2 + tr11*ti3;
+          cr5 := -(ti11*tr5 + ti12*tr4);
+          ci5 := -(ti11*ti5 + ti12*ti4);
+          cr4 := -(ti12*tr5 - ti11*tr4);
+          ci4 := -(ti12*ti5 - ti11*ti4);
+          dr3 := cr3 - ci4;
+          dr4 := cr3 + ci4;
+          di3 := ci3 + cr4;
+          di4 := ci3 - cr4;
+          dr5 := cr2 + ci5;
+          dr2 := cr2 - ci5;
+          di5 := ci2 - cr5;
+          di2 := ci2 + cr5;
+          wr := wa1[2*i];
+          wi := wa1[2*i+1];
+          h[d1]   := wr*dr2 + wi*di2;
+          h[d1+1] := wr*di2 - wi*dr2;
+          wr := wa2[2*i];
+          wi := wa2[2*i+1];
+          h[d2]   := wr*dr3 + wi*di3;
+          h[d2+1] := wr*di3 - wi*dr3;
+          wr := wa3[2*i];
+          wi := wa3[2*i+1];
+          h[d3]   := wr*dr4 + wi*di4;
+          h[d3+1] := wr*di4 - wi*dr4;
+          wr := wa4[2*i];
+          wi := wa4[2*i+1];
+          h[d4]   := wr*dr5 + wi*di5;
+          h[d4+1] := wr*di5 - wi*dr5;
+          Inc(i);
+          Inc(z, 2);
+          Inc(h, 2);
+        end;
       end;
-    end;
   end;
 end; (* passf5 *)
 
