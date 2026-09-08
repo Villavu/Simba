@@ -1,7 +1,4 @@
-// x86-64 SSE alpha blend of one pixel: dst = (dst*(255-a) + src*a) / 255 per channel, with
-// the /255 as the exact (t*32897) shr 23 (pmulhuw + psrlw). Where dst.A = 0 the source is
-// copied, matching the scalar path. `Color` is a PColorBGRA (pointer arg -> value in the register).
-// Bit-identical to the scalar blend for opaque or fully-transparent destinations.
+// x86-64 SSE alpha blend of one pixel: dst = (dst*(255-a) + src*a) / 255 per channel
 assembler; nostackframe;
 asm
 {$IFDEF UNIX}
@@ -9,7 +6,7 @@ asm
   mov    rdx, rsi                 // Color (pointer)
 {$ENDIF}
   mov    eax, [rcx]               // dst pixel (single load, reused below)
-  test   eax, $FF000000          // dst.A (top byte) == 0?
+  test   eax, $FF000000           // dst.A (top byte) == 0?
   jz     @copy
   movd   xmm0, eax                // dst pixel (from the register, no second load)
   movd   xmm1, [rdx]              // src color

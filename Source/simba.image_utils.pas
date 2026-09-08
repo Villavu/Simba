@@ -11,7 +11,11 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.image;
+  simba.base;
+
+const
+  ALPHA_OPAQUE      = Byte(255);
+  ALPHA_TRANSPARENT = Byte(0);
 
 type
   TSimbaIntegralImageF = record
@@ -27,23 +31,18 @@ type
     function Query(const Left, Top, Right, Bottom: Integer): Double; overload;
   end;
 
-// https://sashamaps.net/docs/resources/20-colors/
-const
-  DISTINCT_COLORS: TColorArray = (
-    $0000FF, $4BB43C, $19E1FF, $D86343, $3182F5, $B41E91, $F4D442,
-    $E632F0, $45EFBF, $D4BEFA, $909946, $FFBEDC, $24639A, $C8FAFF,
-    $000080, $C3FFAA, $008080, $B1D8FF, $750000, $A9A9A9
-  );
-
-  ALPHA_OPAQUE      = Byte(255);
-  ALPHA_TRANSPARENT = Byte(0);
-
-procedure BlendPixel(const Pixel: PColorBGRA; const Color: PColorBGRA); {$IF NOT DEFINED(IMAGE_ASM)}inline;{$ENDIF}
-
-function GetDistinctColor(const Index: Integer): Integer;
-function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
-
+// Data[0..Count-1] := Value
 procedure FillData(const Data: PColorBGRA; const Count: SizeInt; constref Value: TColorBGRA);
+// Color over Pixel by Color's alpha.
+// A transparent Pixel just takes Color.
+procedure BlendPixel(const Pixel: PColorBGRA; const Color: PColorBGRA); {$IF NOT DEFINED(IMAGE_ASM)}inline;{$ENDIF}
+// Src over Dest for Count pixels, each by its own alpha: an opaque pixel is
+// copied, a transparent one skipped, anything between is blended.
+procedure BlendData(Dest, Src: PColorBGRA; Count: SizeInt);
+// Table of 24 distinct colors - wraps past the end.
+function GetDistinctColor(const Index: Integer): Integer;
+// The bounds of a W x H image rotated by Angle (radians) about its centre.
+function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
 
 implementation
 
@@ -112,6 +111,15 @@ begin
   Query(Left, Top, Right, Bottom, Result, _);
 end;
 
+procedure FillData(const Data: PColorBGRA; const Count: SizeInt; constref Value: TColorBGRA);
+{$IF DEFINED(IMAGE_ASM)}
+  {$I asm/filldata_x86_64.inc}
+{$ELSE}
+begin
+  FillDWord(Data^, Count, UInt32(Value));
+end;
+{$ENDIF}
+
 procedure BlendPixel(const Pixel: PColorBGRA; const Color: PColorBGRA);
 {$IF DEFINED(IMAGE_ASM)}
   {$I asm/blendpixel_x86_64.inc}
@@ -134,7 +142,78 @@ begin
 end;
 {$ENDIF}
 
+procedure BlendData(Dest, Src: PColorBGRA; Count: SizeInt);
+{$IF DEFINED(IMAGE_ASM)}
+  {$I asm/blenddata_x86_64.inc}
+{$ELSE}
+const
+  ALPHA_PAIR = UInt64($FF000000FF000000);
+var
+  SrcEnd, BlockEnd: PColorBGRA;
+  Pair: PUInt64;
+begin
+  SrcEnd := Src + Count;
+
+  // whole blocks of eight
+  while (Src + 8 <= SrcEnd) do
+  begin
+    Pair := PUInt64(Src);
+
+    // no alpha anywhere in the block: nothing to draw
+    if (((Pair[0] or Pair[1] or Pair[2] or Pair[3]) and ALPHA_PAIR) = 0) then
+    begin
+      Inc(Src, 8);
+      Inc(Dest, 8);
+      Continue;
+    end;
+
+    // every alpha 255: a straight copy, as four qwords
+    if (((Pair[0] and Pair[1] and Pair[2] and Pair[3]) and ALPHA_PAIR) = ALPHA_PAIR) then
+    begin
+      PUInt64(Dest)[0] := Pair[0];
+      PUInt64(Dest)[1] := Pair[1];
+      PUInt64(Dest)[2] := Pair[2];
+      PUInt64(Dest)[3] := Pair[3];
+      Inc(Src, 8);
+      Inc(Dest, 8);
+      Continue;
+    end;
+
+    // a soft pixel somewhere in the block: pixel by pixel
+    BlockEnd := Src + 8;
+    while (Src < BlockEnd) do
+    begin
+      if (Src^.A = ALPHA_OPAQUE) then
+        Dest^ := Src^
+      else if (Src^.A <> ALPHA_TRANSPARENT) then
+        BlendPixel(Dest, Src);
+
+      Inc(Src);
+      Inc(Dest);
+    end;
+  end;
+
+  // the last 0..7 pixels
+  while (Src < SrcEnd) do
+  begin
+    if (Src^.A = ALPHA_OPAQUE) then
+      Dest^ := Src^
+    else if (Src^.A <> ALPHA_TRANSPARENT) then
+      BlendPixel(Dest, Src);
+
+    Inc(Src);
+    Inc(Dest);
+  end;
+end;
+{$ENDIF}
+
 function GetDistinctColor(const Index: Integer): Integer;
+const
+  DISTINCT_COLORS: TColorArray = (
+    $0000FF, $FF3714, $00EB00, $FFC300, $055F64, $C36EFF, $AFE600, $00C3FF,
+    $AF5046, $7896FF, $FF00FF, $55D7AA, $4B00D7, $2D8200, $AA199B, $FFAACD,
+    $0A7DFA, $73C8EB, $5F379B, $5AD200, $FF6987, $FF9B37, $0082B9, $E1009B
+  );
 begin
   Result := DISTINCT_COLORS[Index mod Length(DISTINCT_COLORS)];
 end;
@@ -152,15 +231,6 @@ begin
 
   Result := B.Bounds();
 end;
-
-procedure FillData(const Data: PColorBGRA; const Count: SizeInt; constref Value: TColorBGRA);
-{$IF DEFINED(IMAGE_ASM)}
-  {$I asm/filldata_x86_64.inc}
-{$ELSE}
-begin
-  FillDWord(Data^, Count, UInt32(Value));
-end;
-{$ENDIF}
 
 end.
 

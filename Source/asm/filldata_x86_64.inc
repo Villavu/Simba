@@ -1,7 +1,5 @@
-// x86-64 fill for a row of pixels (pure asm). Small/medium fills use cached movdqu stores
-// (fast, and keeps the pixels in cache for the draw that usually follows); fills of 4 MB or
-// more use aligned non-temporal (movntdq) stores - ~3x faster for the large image-clear case.
-// `const Value` is passed by reference. All registers touched are volatile, hence nostackframe.
+// x86-64 fill for a row of pixels (pure asm). Small/medium fills use cached movdqu stores.
+// fills of 4 MB or more use aligned non-temporal (movntdq) stores.
 assembler; nostackframe;
 asm
 {$IFDEF UNIX}
