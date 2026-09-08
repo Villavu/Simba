@@ -1,3 +1,4 @@
+// x86-64 AVX2 fftpack complex passes (radix 2, 3, 4, 5), four complex per step
 procedure passf2_avx2(const ido, l1: Int32; const cc,chp,wa1: PSingle; const isign: Int32);
 begin
   asm
@@ -25,6 +26,28 @@ begin
     mov      rdx, chp
     mov      rsi, wa1
     mov      ebx, l1
+    test     ebx, ebx
+    jz       @@done
+    cmp      r8, 8
+    jne      @@k                    // rows of one complex: the last pass, twiddles all 1, the
+    cmp      ebx, 4                 // two inputs of a butterfly consecutive. Four butterflies
+    jl       @@k                    // at a time, gathered so each output row stores whole.
+  @@one4:
+    vmovups   ymm0, [rax]           // A0k A1k | A0k+1 A1k+1
+    vmovups   ymm1, [rax+32]        // k+2, k+3
+    vunpcklpd ymm2, ymm0, ymm1      // A0k A0k+2 | A0k+1 A0k+3
+    vunpckhpd ymm3, ymm0, ymm1      // A1k A1k+2 | A1k+1 A1k+3
+    vpermpd   ymm2, ymm2, $d8       // A0 of k..k+3
+    vpermpd   ymm3, ymm3, $d8       // A1
+    vaddps    ymm0, ymm2, ymm3      // out0 = A0+A1
+    vmovups   [rdx], ymm0
+    vsubps    ymm2, ymm2, ymm3      // out1 = A0-A1
+    vmovups   [rdx+r10], ymm2
+    add      rax, 64
+    add      rdx, 32
+    sub      ebx, 4
+    cmp      ebx, 4
+    jge      @@one4
     test     ebx, ebx
     jz       @@done
   @@k:
@@ -127,6 +150,30 @@ begin
     mov      ebx, l1
     test     ebx, ebx
     jz       @@done
+    cmp      r8, 8
+    jne      @@k                    // rows of one complex: the last pass, twiddles all 1
+  @@one:
+    vmovq     xmm1, [rax+8]         // X1
+    vmovq     xmm2, [rax+16]        // X2
+    vaddps    xmm0, xmm1, xmm2      // T2
+    vsubps    xmm1, xmm1, xmm2      // Xd
+    vmulps    xmm1, xmm1, xmm6      // C3 = staui*Xd
+    vmovq     xmm2, [rax]           // X0
+    vaddps    xmm3, xmm2, xmm0      // out0
+    vmovq     [rdx], xmm3
+    vmulps    xmm0, xmm0, xmm4      // T2*taur
+    vaddps    xmm0, xmm0, xmm2      // C2
+    vshufps   xmm1, xmm1, xmm1, $b1
+    vxorps    xmm1, xmm1, xmm7      // iC3
+    vaddps    xmm3, xmm0, xmm1      // out1 = D2
+    vmovq     [rdx+r10], xmm3
+    vsubps    xmm0, xmm0, xmm1      // out2 = D3
+    vmovq     [rdx+r10*2], xmm0
+    add      rax, 24
+    add      rdx, 8
+    dec      ebx
+    jnz      @@one
+    jmp      @@done
   @@k:
     mov      rcx, rsi
     mov      r12d, r13d
@@ -253,6 +300,44 @@ begin
     mov      ebx, l1
     test     ebx, ebx
     jz       @@done
+    cmp      r8, 8
+    jne      @@k                    // rows of one complex: the last pass. Its twiddles are all
+    cmp      ebx, 4                 // 1, and the four inputs of a butterfly are consecutive, so
+    jl       @@k                    // take four butterflies, transpose, and do them vertically.
+  @@one4:
+    vmovups   ymm0, [rax]           // butterfly k:   A0 A1 A2 A3
+    vmovups   ymm1, [rax+32]        // k+1
+    vmovups   ymm2, [rax+64]        // k+2
+    vmovups   ymm3, [rax+96]        // k+3
+    vunpcklpd ymm4, ymm0, ymm1      // A0k A0k+1 | A2k A2k+1
+    vunpckhpd ymm5, ymm0, ymm1      // A1k A1k+1 | A3k A3k+1
+    vunpcklpd ymm6, ymm2, ymm3
+    vunpckhpd ymm8, ymm2, ymm3
+    vperm2f128 ymm0, ymm4, ymm6, $20  // A0 of k..k+3
+    vperm2f128 ymm2, ymm4, ymm6, $31  // A2
+    vperm2f128 ymm1, ymm5, ymm8, $20  // A1
+    vperm2f128 ymm3, ymm5, ymm8, $31  // A3
+    vaddps    ymm4, ymm0, ymm2      // T2
+    vsubps    ymm0, ymm0, ymm2      // T1
+    vaddps    ymm5, ymm1, ymm3      // T3
+    vsubps    ymm1, ymm1, ymm3      // TD
+    vpermilps ymm1, ymm1, $b1
+    vxorps    ymm1, ymm1, ymm7      // iD_eff
+    vaddps    ymm6, ymm4, ymm5      // out0 = T2+T3
+    vmovups   [rdx], ymm6
+    vsubps    ymm4, ymm4, ymm5      // out2 = T2-T3
+    vmovups   [rdx+r10*2], ymm4
+    vaddps    ymm6, ymm0, ymm1      // out1 = T1+iD_eff
+    vmovups   [rdx+r10], ymm6
+    vsubps    ymm0, ymm0, ymm1      // out3 = T1-iD_eff
+    vmovups   [rdx+r11], ymm0
+    add      rax, 128
+    add      rdx, 32
+    sub      ebx, 4
+    cmp      ebx, 4
+    jge      @@one4
+    test     ebx, ebx
+    jz       @@done                 // the last 0..3 butterflies go through the row loop below
   @@k:
     mov      rcx, rsi               // wa = wa1
     mov      r12d, r13d
@@ -365,7 +450,7 @@ begin
   @@done:
     vzeroupper
   end ['rax','rbx','rcx','rdx','rsi','r8','r9','r10','r11','r12','r13','r14','r15',
-       'xmm0','xmm1','xmm2','xmm3','xmm4','xmm5','xmm6','xmm7'];
+       'xmm0','xmm1','xmm2','xmm3','xmm4','xmm5','xmm6','xmm7','xmm8'];
 end;
 
 procedure passf5_avx2(const ido, l1: Int32; const cc,chp,wa1,wa2,wa3,wa4: PSingle; const isign: Int32);
@@ -420,6 +505,52 @@ begin
     mov      ebx, l1
     test     ebx, ebx
     jz       @@done
+    cmp      r8, 8
+    jne      @@k                    // rows of one complex: the last pass, twiddles all 1
+  @@one:
+    vmovq     xmm0, [rax+8]         // Z1
+    vmovq     xmm1, [rax+32]        // Z4
+    vaddps    xmm2, xmm0, xmm1
+    vsubps    xmm0, xmm0, xmm1
+    vmovq     xmm1, [rax+16]        // Z2
+    vmovq     xmm3, [rax+24]        // Z3
+    vaddps    xmm4, xmm1, xmm3
+    vsubps    xmm1, xmm1, xmm3
+    vmovq     xmm3, [rax]           // Z0
+    vaddps    xmm5, xmm3, xmm2
+    vaddps    xmm5, xmm5, xmm4
+    vmovq     [rdx], xmm5           // out0
+    vmulps    xmm5, xmm2, xmm7
+    vaddps    xmm5, xmm5, xmm3
+    vmulps    xmm6, xmm4, xmm8
+    vaddps    xmm5, xmm5, xmm6      // C2
+    vmulps    xmm6, xmm2, xmm8
+    vaddps    xmm6, xmm6, xmm3
+    vmulps    xmm2, xmm4, xmm7
+    vaddps    xmm6, xmm6, xmm2      // C3
+    vmulps    xmm2, xmm0, xmm9
+    vmulps    xmm3, xmm1, xmm10
+    vaddps    xmm2, xmm2, xmm3      // C5
+    vmulps    xmm0, xmm0, xmm10
+    vmulps    xmm1, xmm1, xmm9
+    vsubps    xmm0, xmm0, xmm1      // C4
+    vshufps   xmm1, xmm2, xmm2, $b1
+    vxorps    xmm1, xmm1, xmm11
+    vaddps    xmm3, xmm5, xmm1      // D2
+    vmovq     [rdx+r10], xmm3       // out1
+    vsubps    xmm5, xmm5, xmm1      // D5
+    vmovq     [rdx+r10*4], xmm5     // out4
+    vshufps   xmm1, xmm0, xmm0, $b1
+    vxorps    xmm1, xmm1, xmm11
+    vaddps    xmm4, xmm6, xmm1      // D3
+    vmovq     [rdx+r10*2], xmm4     // out2
+    vsubps    xmm6, xmm6, xmm1      // D4
+    vmovq     [rdx+r11], xmm6       // out3
+    add      rax, 40
+    add      rdx, 8
+    dec      ebx
+    jnz      @@one
+    jmp      @@done
   @@k:
     mov      rcx, rsi
     mov      r12d, r13d
