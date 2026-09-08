@@ -39,6 +39,9 @@ procedure BlendPixel(const Pixel: PColorBGRA; const Color: PColorBGRA); {$IF NOT
 // Src over Dest for Count pixels, each by its own alpha: an opaque pixel is
 // copied, a transparent one skipped, anything between is blended.
 procedure BlendData(Dest, Src: PColorBGRA; Count: SizeInt);
+// As BlendData, but every source alpha is first scaled by Alpha/255 - a whole
+// image opacity. Alpha = 255 is exactly BlendData.
+procedure BlendDataAlpha(Dest, Src: PColorBGRA; Count: SizeInt; Alpha: Byte);
 // Table of 24 distinct colors - wraps past the end.
 function GetDistinctColor(const Index: Integer): Integer;
 // The bounds of a W x H image rotated by Angle (radians) about its centre.
@@ -200,6 +203,37 @@ begin
       Dest^ := Src^
     else if (Src^.A <> ALPHA_TRANSPARENT) then
       BlendPixel(Dest, Src);
+
+    Inc(Src);
+    Inc(Dest);
+  end;
+end;
+{$ENDIF}
+
+procedure BlendDataAlpha(Dest, Src: PColorBGRA; Count: SizeInt; Alpha: Byte);
+{$IF DEFINED(IMAGE_ASM)}
+  {$I asm/blenddataalpha_x86_64.inc}
+{$ELSE}
+var
+  SrcEnd: PColorBGRA;
+  Faded: TColorBGRA;
+begin
+  // opaque means no fade at all: the plain path, with its block fast paths
+  if (Alpha = ALPHA_OPAQUE) then
+  begin
+    BlendData(Dest, Src, Count);
+    Exit;
+  end;
+
+  SrcEnd := Src + Count;
+  while (Src < SrcEnd) do
+  begin
+    if (Src^.A <> ALPHA_TRANSPARENT) then
+    begin
+      Faded := Src^;
+      Faded.A := (Faded.A * Alpha) div 255;
+      BlendPixel(Dest, @Faded);
+    end;
 
     Inc(Src);
     Inc(Dest);
