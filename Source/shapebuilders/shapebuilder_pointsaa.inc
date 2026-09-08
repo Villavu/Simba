@@ -10,10 +10,11 @@ var
 begin
   Assert(Thickness > 0);
 
-  Grow      := Max(Feather, 0) * (Thickness * 0.5 + 0.5);
+  Grow := Max(Feather, 0) * Thickness * 0.5;
   RampWidth := 1 + Grow;
-
   Radius := (Thickness + 2 * Grow) * 0.5 + 0.5;
+  if (Radius < 1.25) then
+    Radius := 1.25;
   if (Radius > 16384) then
     Radius := 16384;
   RadiusSq := Sqr(Radius);
@@ -24,11 +25,30 @@ begin
   else
     CoreSq := Sqr(CoreSq);
 
-  if (Radius <= 1) then
+  if (Radius = 1.25) and (RampWidth = 1) then
   begin
+    Size := Round((Radius - 1) * AlphaScale);
     for I := 0 to High(Points) do
-      if Clip.Contains(Points[I]) then
-        _Pixel(Points[I].X, Points[I].Y, 255);
+    begin
+      X := Points[I].X;
+      Y := Points[I].Y;
+      if (Y >= Clip.Y1) and (Y <= Clip.Y2) then
+      begin
+        if (X >= Clip.X1) and (X <= Clip.X2) then
+          _Pixel(X, Y, 255);
+        if (X > Clip.X1) and (X - 1 <= Clip.X2) then
+          _Pixel(X - 1, Y, Size);
+        if (X + 1 >= Clip.X1) and (X < Clip.X2) then
+          _Pixel(X + 1, Y, Size);
+      end;
+      if (X >= Clip.X1) and (X <= Clip.X2) then
+      begin
+        if (Y > Clip.Y1) and (Y - 1 <= Clip.Y2) then
+          _Pixel(X, Y - 1, Size);
+        if (Y + 1 >= Clip.Y1) and (Y < Clip.Y2) then
+          _Pixel(X, Y + 1, Size);
+      end;
+    end;
   end else
   begin
     Size := Trunc(Radius);
