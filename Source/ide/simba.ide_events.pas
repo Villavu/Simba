@@ -28,6 +28,10 @@ type
     // General use for timer execute every 750ms. Data=nil
     TIMER_750,
 
+    // The application went idle / left idle (message queue). Data=nil
+    APP_IDLE,
+    APP_NOT_IDLE,
+
     // "file" menu, Data=TMenuItem
     ACTION_NEW,
     ACTION_OPEN,
@@ -175,6 +179,8 @@ type
     FTimer: TTimer;
 
     procedure DoTimer(Sender: TObject);
+    procedure DoAppIdle(Sender: TObject; var Done: Boolean);
+    procedure DoAppIdleEnd(Sender: TObject);
   public
     procedure Post(Event: ESimbaEvent; Data: Pointer);
     procedure Register(Owner: TComponent; Callback: TSimbaEventCallback; Events: array of ESimbaEvent); overload;
@@ -191,6 +197,7 @@ var
 implementation
 
 uses
+  Forms,
   simba.initializations;
 
 type
@@ -219,6 +226,16 @@ end;
 procedure TSimbaEvents.DoTimer(Sender: TObject);
 begin
   SimbaEvents.Post(ESimbaEvent.TIMER_750, nil);
+end;
+
+procedure TSimbaEvents.DoAppIdle(Sender: TObject; var Done: Boolean);
+begin
+  Post(ESimbaEvent.APP_IDLE, nil);
+end;
+
+procedure TSimbaEvents.DoAppIdleEnd(Sender: TObject);
+begin
+  Post(ESimbaEvent.APP_NOT_IDLE, nil);
 end;
 
 procedure TSimbaEvents.Post(Event: ESimbaEvent; Data: Pointer);
@@ -280,12 +297,18 @@ begin
   FTimer.OnTimer := @DoTimer;
   FTimer.Interval := 750;
   FTimer.Enabled := True;
+
+  Application.AddOnIdleHandler(@DoAppIdle);
+  Application.AddOnIdleEndHandler(@DoAppIdleEnd);
 end;
 
 destructor TSimbaEvents.Destroy;
 var
   Event: ESimbaEvent;
 begin
+  Application.RemoveOnIdleHandler(@DoAppIdle);
+  Application.RemoveOnIdleEndHandler(@DoAppIdleEnd);
+
   FreeAndNil(FTimer);
   for Event in ESimbaEvent do
     FreeAndNil(FCallbacks[Event]);
