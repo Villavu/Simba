@@ -615,7 +615,7 @@ end;
 
 function TSimbaNativeInterface_Darwin.HighResolutionTime: Double;
 begin
-  Result := mach_absolute_time * (timeInfo.numer / (1000000.0 * timeInfo.denom));
+  Result := mach_absolute_time * (timeInfo.numer / (timeInfo.denom * Double(1000000)));
 end;
 
 function TSimbaNativeInterface_Darwin.UnixTime: Int64;
