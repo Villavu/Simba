@@ -1,3 +1,4 @@
+// x86-64 SSE2 horizontal resample (pmaddwd, int16 Q14 weights).
 begin
   asm
     push   rsi
@@ -17,27 +18,53 @@ begin
     mov    r8d, RowCount
     test   r8d, r8d
     jle    @@hdone
+    mov    r15d, OutDim
+    test   r15d, r15d
+    jle    @@hdone
     mov    r12, Src
     mov    r13, Dst
     mov    r14d, SrcStride
-    mov    r15d, OutDim
+    mov    edx, KSize
+    add    edx, edx                      // the weight row stride, in bytes
   @@hrow:
-    mov    r10, Starts                   // reset per row (per-column tables)
+    mov    r10, Starts                   // per-column tables, from the top each row
     mov    rbx, Counts
     mov    r11, KK
-    xor    r9d, r9d                       // xx = 0
+    xor    r9d, r9d                      // xx = 0
   @@hxx:
-    cmp    r9d, r15d
-    jge    @@hrowend
     mov    eax, dword ptr [r10]          // xmin
     mov    ecx, dword ptr [rbx]          // count
     lea    rsi, [r12 + rax*4]            // P = srcrow + xmin
     mov    rdi, r11                       // K
     pxor   xmm0, xmm0
-  @@hpair:
+    sub    ecx, 4
+    jl     @@hrest
+  @@hquad:                                // four source pixels: two pairs
+    movd   xmm1, dword ptr [rsi]
+    movd   xmm2, dword ptr [rsi+4]
+    punpcklbw xmm1, xmm2
+    punpcklbw xmm1, xmm3
+    movd   xmm2, dword ptr [rdi]
+    pshufd xmm2, xmm2, 0
+    pmaddwd xmm1, xmm2
+    paddd  xmm0, xmm1
+    movd   xmm1, dword ptr [rsi+8]
+    movd   xmm2, dword ptr [rsi+12]
+    punpcklbw xmm1, xmm2
+    punpcklbw xmm1, xmm3
+    movd   xmm2, dword ptr [rdi+4]
+    pshufd xmm2, xmm2, 0
+    pmaddwd xmm1, xmm2
+    paddd  xmm0, xmm1
+    add    rsi, 16
+    add    rdi, 8
+    sub    ecx, 4
+    jge    @@hquad
+  @@hrest:
+    add    ecx, 4                         // 0..3 left
     cmp    ecx, 2
     jl     @@htail
-    movd   xmm1, dword ptr [rsi]
+    movd   xmm1, dword ptr [rsi]          // a pair
     movd   xmm2, dword ptr [rsi+4]
     punpcklbw xmm1, xmm2
     punpcklbw xmm1, xmm3
@@ -48,11 +75,10 @@ begin
     add    rsi, 8
     add    rdi, 4
     sub    ecx, 2
-    jmp    @@hpair
   @@htail:
     test   ecx, ecx
     jz     @@hstore
-    movd   xmm1, dword ptr [rsi]
+    movd   xmm1, dword ptr [rsi]          // one
     punpcklbw xmm1, xmm1
     punpcklbw xmm1, xmm3
     movd   xmm2, dword ptr [rdi]
@@ -68,11 +94,10 @@ begin
     movd   dword ptr [r13 + r9*4], xmm0
     add    r10, 4                         // Starts++
     add    rbx, 4                         // Counts++
-    mov    edx, KSize
-    lea    r11, [r11 + rdx*2]
+    add    r11, rdx                       // KK += KSize
     inc    r9d
-    jmp    @@hxx
-  @@hrowend:
+    cmp    r9d, r15d
+    jl     @@hxx
     lea    r12, [r12 + r14*4]            // srcrow += SrcStride
     lea    r13, [r13 + r15*4]            // dstrow += OutDim
     dec    r8d
