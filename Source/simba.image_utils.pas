@@ -35,9 +35,6 @@ const
     $000080, $C3FFAA, $008080, $B1D8FF, $750000, $A9A9A9
   );
 
-  ALPHA_OPAQUE      = Byte(255);
-  ALPHA_TRANSPARENT = Byte(0);
-
 procedure BlendPixel(const Data: PColorBGRA; const DataW, DataH: Integer; const X,Y: Integer; constref Color: TColorBGRA); overload; inline;
 procedure BlendPixel(const Pixel: PColorBGRA; constref Color: TColorBGRA); overload;
 

@@ -36,7 +36,8 @@ uses
   simba.colormath_distance_unrolled,
   simba.vartype_pointarray,
   simba.vartype_box,
-  simba.vartype_matrix;
+  simba.vartype_matrix,
+  simba.colormath_conversion;
 
 const
   BitmapColorSize = SizeOf(TColorHSL) + SizeOf(Boolean);
@@ -63,13 +64,18 @@ begin
     begin
       DestFix := Dest + 1; // temp fix, https://gitlab.com/freepascal.org/fpc/source/-/commit/851af5033fb80d4e19c4a7b5c44d50a36f456374
       case ColorSpace of
-        EColorSpace.RGB:    PColorRGB(DestFix)^ := Source^.ToRGB();
-        EColorSpace.HSV:    PColorHSV(DestFix)^ := Source^.ToHSV();
-        EColorSpace.HSL:    PColorHSL(DestFix)^ := Source^.ToHSL();
-        EColorSpace.XYZ:    PColorXYZ(DestFix)^ := Source^.ToXYZ();
-        EColorSpace.LCH:    PColorLCH(DestFix)^ := Source^.ToLCH();
-        EColorSpace.LAB:    PColorLAB(DestFix)^ := Source^.ToLAB();
-        EColorSpace.DeltaE: PColorLAB(DestFix)^ := Source^.ToLAB();
+        EColorSpace.RGB:
+          begin
+            PColorRGB(DestFix)^.R := Source^.R;
+            PColorRGB(DestFix)^.G := Source^.G;
+            PColorRGB(DestFix)^.B := Source^.B;
+          end;
+        EColorSpace.HSV:    PColorHSV(DestFix)^ := TSimbaColorConversion.RGBToHSV(Source^.R, Source^.G, Source^.B);
+        EColorSpace.HSL:    PColorHSL(DestFix)^ := TSimbaColorConversion.RGBToHSL(Source^.R, Source^.G, Source^.B);
+        EColorSpace.XYZ:    PColorXYZ(DestFix)^ := TSimbaColorConversion.RGBToXYZ(Source^.R, Source^.G, Source^.B);
+        EColorSpace.LCH:    PColorLCH(DestFix)^ := TSimbaColorConversion.RGBToLCH(Source^.R, Source^.G, Source^.B);
+        EColorSpace.LAB,
+        EColorSpace.DeltaE: PColorLAB(DestFix)^ := TSimbaColorConversion.RGBToLAB(Source^.R, Source^.G, Source^.B);
       end;
     end;
 

@@ -102,8 +102,8 @@ type
     function G: Byte; inline;
     function B: Byte; inline;
 
-    function ToBGRA: TColorBGRA;
-    function ToRGB: TColorRGB;
+    function ToBGRA(const Alpha: Byte = ALPHA_TRANSPARENT): TColorBGRA; inline;
+    function ToRGB: TColorRGB; inline;
     function ToXYZ: TColorXYZ;
     function ToLAB: TColorLAB;
     function ToLCH: TColorLCH;
@@ -117,20 +117,14 @@ type
     function ToLCH: TColorLCH;
     function ToHSV: TColorHSV;
     function ToHSL: TColorHSL;
-    function ToColor: TColor;
+    function ToColor: TColor; inline;
   end;
 
   TColorBGRA_Helper = record helper for TColorBGRA
     function Equals(const Other: TColorBGRA): Boolean; inline;
     function EqualsIgnoreAlpha(const Other: TColorBGRA): Boolean; inline;
 
-    function ToRGB: TColorRGB;
-    function ToXYZ: TColorXYZ;
-    function ToLAB: TColorLAB;
-    function ToLCH: TColorLCH;
-    function ToHSV: TColorHSV;
-    function ToHSL: TColorHSL;
-    function ToColor: TColor;
+    function ToColor: TColor; inline;
   end;
 
   TColorHSL_Helper = record helper for TColorHSL
@@ -184,12 +178,12 @@ end;
 
 function ColorToRGB(const Color: TColor): TColorRGB;
 begin
-  Result := TSimbaColorConversion.ColorToRGB(Color);
+  Result := Color.ToRGB();
 end;
 
 function ColorToBGRA(const Color: TColor): TColorBGRA;
 begin
-  Result := TSimbaColorConversion.ColorToBGRA(Color);
+  Result := Color.ToBGRA();
 end;
 
 (*
@@ -206,9 +200,9 @@ end;
 *)
 function ColorToGray(const Color: TColor): Byte;
 begin
-  Result := (29  * (Color shr R_BIT and $FF) +
-             150 * (Color shr G_BIT and $FF) +
-             76  * (Color shr B_BIT and $FF) + 255) shr 8;
+  Result := Round(RED_TO_GREY[Color shr R_BIT and $FF] +
+                  GREEN_TO_GREY[Color shr G_BIT and $FF] +
+                  BLUE_TO_GREY[Color shr B_BIT and $FF]);
 end;
 
 function ColorToHSL(const Color: TColor): TColorHSL;
@@ -238,87 +232,57 @@ end;
 
 function TColorHSV_Helper.ToRGB: TColorRGB;
 begin
-  Result := TSimbaColorConversion.HSVToRGB(Self);
+  Result := TSimbaColorConversion.HSVToRGB(H, S, V);
 end;
 
 function TColorHSV_Helper.ToColor: TColor;
 begin
-  Result := TSimbaColorConversion.HSVToRGB(Self).ToColor();
+  Result := TSimbaColorConversion.HSVToRGB(H, S, V).ToColor();
 end;
 
 function TColorLAB_Helper.ToRGB: TColorRGB;
 begin
-  Result := TSimbaColorConversion.LABToRGB(Self);
+  Result := TSimbaColorConversion.LABToRGB(L, A, B);
 end;
 
 function TColorLAB_Helper.ToColor: TColor;
 begin
-  Result := TSimbaColorConversion.LABToRGB(Self).ToColor();
+  Result := TSimbaColorConversion.LABToRGB(L, A, B).ToColor();
 end;
 
 function TColorLCH_Helper.ToRGB: TColorRGB;
 begin
-  Result := TSimbaColorConversion.LCHToRGB(Self);
+  Result := TSimbaColorConversion.LCHToRGB(L, C, H);
 end;
 
 function TColorLCH_Helper.ToColor: TColor;
 begin
-  Result := TSimbaColorConversion.LCHToRGB(Self).ToColor();
+  Result := TSimbaColorConversion.LCHToRGB(L, C, H).ToColor();
 end;
 
 function TColorXYZ_Helper.ToRGB: TColorRGB;
 begin
-  Result := TSimbaColorConversion.XYZToRGB(Self);
+  Result := TSimbaColorConversion.XYZToRGB(X, Y, Z);
 end;
 
 function TColorXYZ_Helper.ToColor: TColor;
 begin
-  Result := TSimbaColorConversion.XYZToRGB(Self).ToColor();
+  Result := TSimbaColorConversion.XYZToRGB(X, Y, Z).ToColor();
 end;
 
 function TColorHSL_Helper.ToRGB: TColorRGB;
 begin
-  Result := TSimbaColorConversion.HSLToRGB(Self);
+  Result := TSimbaColorConversion.HSLToRGB(H, S, L);
 end;
 
 function TColorHSL_Helper.ToColor: TColor;
 begin
-  Result := TSimbaColorConversion.HSLToRGB(Self).ToColor();
-end;
-
-function TColorBGRA_Helper.ToRGB: TColorRGB;
-begin
-  Result := TSimbaColorConversion.BGRAToRGB(Self);
-end;
-
-function TColorBGRA_Helper.ToXYZ: TColorXYZ;
-begin
-  Result := TSimbaColorConversion.RGBToXYZ(ToRGB());
-end;
-
-function TColorBGRA_Helper.ToLAB: TColorLAB;
-begin
-  Result := TSimbaColorConversion.RGBToLAB(ToRGB());
-end;
-
-function TColorBGRA_Helper.ToLCH: TColorLCH;
-begin
-  Result := TSimbaColorConversion.RGBToLCH(ToRGB());
-end;
-
-function TColorBGRA_Helper.ToHSV: TColorHSV;
-begin
-  Result := TSimbaColorConversion.RGBToHSV(ToRGB());
-end;
-
-function TColorBGRA_Helper.ToHSL: TColorHSL;
-begin
-  Result := TSimbaColorConversion.RGBToHSL(ToRGB());
+  Result := TSimbaColorConversion.HSLToRGB(H, S, L).ToColor();
 end;
 
 function TColorBGRA_Helper.ToColor: TColor;
 begin
-  Result := TSimbaColorConversion.BGRAToColor(Self);
+  Result := TColor(R or G shl G_BIT or B shl B_BIT);
 end;
 
 function TColorBGRA_Helper.Equals(const Other: TColorBGRA): Boolean;
@@ -333,32 +297,32 @@ end;
 
 function TColorRGB_Helper.ToXYZ: TColorXYZ;
 begin
-  Result := TSimbaColorConversion.RGBToXYZ(Self);
+  Result := TSimbaColorConversion.RGBToXYZ(R, G, B);
 end;
 
 function TColorRGB_Helper.ToLAB: TColorLAB;
 begin
-  Result := TSimbaColorConversion.RGBToLAB(Self);
+  Result := TSimbaColorConversion.RGBToLAB(R, G, B);
 end;
 
 function TColorRGB_Helper.ToLCH: TColorLCH;
 begin
-  Result := TSimbaColorConversion.RGBToLCH(Self);
+  Result := TSimbaColorConversion.RGBToLCH(R, G, B);
 end;
 
 function TColorRGB_Helper.ToHSV: TColorHSV;
 begin
-  Result := TSimbaColorConversion.RGBToHSV(Self);
+  Result := TSimbaColorConversion.RGBToHSV(R, G, B);
 end;
 
 function TColorRGB_Helper.ToHSL: TColorHSL;
 begin
-  Result := TSimbaColorConversion.RGBToHSL(Self);
+  Result := TSimbaColorConversion.RGBToHSL(R, G, B);
 end;
 
 function TColorRGB_Helper.ToColor: TColor;
 begin
-  Result := TSimbaColorConversion.RGBToColor(Self);
+  Result := TColor(R or G shl G_BIT or B shl B_BIT);
 end;
 
 function TColorHelper.R: Byte;
@@ -376,39 +340,44 @@ begin
   Result := Self shr B_BIT and $FF;
 end;
 
-function TColorHelper.ToBGRA: TColorBGRA;
+function TColorHelper.ToBGRA(const Alpha: Byte): TColorBGRA;
 begin
-  Result := TSimbaColorConversion.ColorToBGRA(Self);
+  Result.R := (Self and R_MASK) shr R_BIT;
+  Result.G := (Self and G_MASK) shr G_BIT;
+  Result.B := (Self and B_MASK) shr B_BIT;
+  Result.A := Alpha;
 end;
 
 function TColorHelper.ToRGB: TColorRGB;
 begin
-  Result := TSimbaColorConversion.ColorToRGB(Self);
+  Result.R := Self shr R_BIT and $FF;
+  Result.G := Self shr G_BIT and $FF;
+  Result.B := Self shr B_BIT and $FF;
 end;
 
 function TColorHelper.ToXYZ: TColorXYZ;
 begin
-  Result := TSimbaColorConversion.RGBToXYZ(ToRGB());
+  Result := TSimbaColorConversion.RGBToXYZ(R, G, B);
 end;
 
 function TColorHelper.ToLAB: TColorLAB;
 begin
-  Result := TSimbaColorConversion.RGBToLAB(ToRGB());
+  Result := TSimbaColorConversion.RGBToLAB(R, G, B);
 end;
 
 function TColorHelper.ToLCH: TColorLCH;
 begin
-  Result := TSimbaColorConversion.RGBToLCH(ToRGB());
+  Result := TSimbaColorConversion.RGBToLCH(R, G, B);
 end;
 
 function TColorHelper.ToHSV: TColorHSV;
 begin
-  Result := TSimbaColorConversion.RGBToHSV(ToRGB());
+  Result := TSimbaColorConversion.RGBToHSV(R, G, B);
 end;
 
 function TColorHelper.ToHSL: TColorHSL;
 begin
-  Result := TSimbaColorConversion.RGBToHSL(ToRGB());
+  Result := TSimbaColorConversion.RGBToHSL(R, G, B);
 end;
 
 function ColorToStr(Color: TColor): String;

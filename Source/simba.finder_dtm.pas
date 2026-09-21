@@ -45,7 +45,7 @@ type
   TSearchPoint = record
     X, Y: Integer;
     AreaSize: Integer;
-    Color: TColorRGB;
+    Color: TColorBGRA;
     Tol: Single;
   end;
   TSearchPoints = array of TSearchPoint;
@@ -61,7 +61,7 @@ begin
       Result[I].X := X;
       Result[I].Y := Y;
       Result[I].AreaSize := AreaSize;
-      Result[I].Color := TColor(Color).ToRGB();
+      Result[I].Color := TColor(Color).ToBGRA();
       Result[I].Tol := Tolerance;
     end;
 end;
@@ -105,7 +105,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X].ToRGB(), DefaultMultipliers) <= SearchPoint.Tol then
+                if DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X], DefaultMultipliers) <= SearchPoint.Tol then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);
@@ -219,7 +219,7 @@ var
               begin
                 Checked.SetBit(Index);
 
-                if DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X].ToRGB(), DefaultMultipliers) <= SearchPoint.Tol then
+                if DistanceRGB(SearchPoint.Color, Buffer[Y * BufferWidth + X], DefaultMultipliers) <= SearchPoint.Tol then
                 begin
                   Checked.SetBit(Index);
                   Hit.SetBit(Index);

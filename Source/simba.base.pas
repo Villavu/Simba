@@ -211,6 +211,11 @@ type
     1: (AsInteger: UInt32);
   end;
 
+const
+  ALPHA_OPAQUE      = Byte(255);
+  ALPHA_TRANSPARENT = Byte(0);
+
+type
   TColorArray = array of TColor;
   PColorArray = ^TColorArray;
 
