@@ -13,8 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.externalcanvas,
-  lpcompiler;
+  simba.base;
 
 type
   TMainThreadMethod = procedure(Data: Pointer); cdecl;
@@ -61,7 +60,8 @@ var
 implementation
 
 uses
-  lpvartypes, lpvartypes_record, lpvartypes_array;
+  lpcompiler, lpvartypes, lpvartypes_record, lpvartypes_array,
+  simba.canvas_external;
 
 // Sync wrapper which includes a data parameter
 type

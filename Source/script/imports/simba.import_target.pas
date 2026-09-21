@@ -13,9 +13,9 @@ procedure ImportTarget(Script: TSimbaScript);
 implementation
 
 uses
-  lptypes, lpvartypes,  ffi,
+  lptypes, ffi,
   simba.colormath, simba.dtm, simba.misc,
-  simba.target, simba.externalcanvas,
+  simba.target, simba.canvas_external,
   simba.vartype_quad, simba.vartype_string;
 
 type
