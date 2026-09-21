@@ -88,7 +88,9 @@ TPolygon.Contains
 ```
 function TPolygon.Contains(p: TPoint): Boolean;
 ```
-Is the point in the polygon?
+Is the point inside the polygon?
+
+Uses the standard winding-number ray cast with the nonzero rule.
 *)
 procedure _LapePolygon_Contains(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
