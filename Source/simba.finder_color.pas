@@ -50,7 +50,6 @@ function GetBrightnessOnTarget(Target: TSimbaTarget; Algo: EBrightnessAlgo; Boun
 implementation
 
 uses
-  simba.colormath_conversion,
   simba.colormath_distance,
   simba.colormath_distance_unrolled,
   simba.vartype_pointarray,
@@ -441,7 +440,7 @@ begin
 
   if Target.GetImageData(B, Data, DataWidth) then
   try
-    Result := TSimbaColorConversion.BGRAToColor(Data^);
+    Result := Data^.ToColor;
   finally
     Target.FreeImageData(Data);
   end;
@@ -460,7 +459,7 @@ begin
     Y := Points[I].Y + Offset.Y;
     if (X >= 0) and (Y >= 0) and (X < SearchWidth) and (Y < SearchHeight) then
     begin
-      Result[Count] := TSimbaColorConversion.BGRAToColor(Buffer[Y * BufferWidth + X]);
+      Result[Count] := Buffer[Y * BufferWidth + X].ToColor;
       Inc(Count);
     end;
   end;
@@ -500,7 +499,7 @@ begin
 
     for X := 0 to SearchWidth do
     begin
-      Result[Y, X] := TSimbaColorConversion.BGRAToColor(Ptr^);
+      Result[Y, X] := Ptr^.ToColor;
       Inc(Ptr);
     end;
 
@@ -533,9 +532,9 @@ begin
   for Y := 0 to H do
     for X := 0 to W do
     begin
-      First  := TSimbaColorConversion.BGRAToColor(Buffer[Y * BufferWidth + X]);
-      Second := TSimbaColorConversion.BGRAToColor(Buffer[Y * BufferWidth + (X+1)]);
-      Third  := TSimbaColorConversion.BGRAToColor(Buffer[(Y+1) * BufferWidth + X]);
+      First  := Buffer[Y * BufferWidth + X].ToColor;
+      Second := Buffer[Y * BufferWidth + (X+1)].ToColor;
+      Third  := Buffer[(Y+1) * BufferWidth + X].ToColor;
 
       if (not SimilarColors(First, Second, MinDiff, ColorSpace, Multipliers)) or
          (not SimilarColors(First, Third, MinDiff, ColorSpace, Multipliers)) then

@@ -40,7 +40,7 @@ implementation
 
 uses
   Math,
-  simba.image_utils, simba.vartype_matrix, simba.colormath_conversion, simba.colormath_distance;
+  simba.image_utils, simba.vartype_matrix, simba.colormath_distance;
 
 function SimbaImage_GreyScale(Image: TSimbaImage): TSimbaImage;
 var
@@ -839,8 +839,8 @@ begin
   if not Image.DataRange(Ptr, Upper) then
     Exit;
 
-  Old := TSimbaColorConversion.ColorToBGRA(OldColor);
-  New := TSimbaColorConversion.ColorToBGRA(NewColor, ALPHA_OPAQUE);
+  Old := OldColor.ToBGRA();
+  New := NewColor.ToBGRA(ALPHA_OPAQUE);
   while (Ptr <= Upper) do
   begin
     if SimilarRGB(Old, Ptr^, Tol) then
@@ -866,7 +866,7 @@ begin
   if Invert then
     Swap(Hit, Miss);
 
-  Col := TSimbaColorConversion.ColorToBGRA(Color);
+  Col := Color.ToBGRA();
   while (Ptr <= Upper) do
   begin
     if SimilarRGB(Col, Ptr^, Tol) then
@@ -900,7 +900,7 @@ begin
 
   SetLength(Cols, Length(Colors));
   for I := 0 to High(Colors) do
-    Cols[I] := TSimbaColorConversion.ColorToBGRA(Colors[I]);
+    Cols[I] := Colors[I].ToBGRA();
 
   while (Ptr <= Upper) do
   begin

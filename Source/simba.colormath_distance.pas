@@ -17,7 +17,8 @@ uses
   Classes, SysUtils,
   simba.base, simba.colormath;
 
-function DistanceRGB(const Color1, Color2: TColorRGB; const mul: TChannelMultipliers): Single; inline;
+function DistanceRGB(const Color1, Color2: TColorRGB; const mul: TChannelMultipliers): Single; inline; overload;
+function DistanceRGB(const Color1, Color2: TColorBGRA; const mul: TChannelMultipliers): Single; inline; overload;
 function DistanceHSV(const Color1, Color2: TColorHSV; const mul: TChannelMultipliers): Single; inline;
 function DistanceHSL(const Color1, Color2: TColorHSL; const mul: TChannelMultipliers): Single; inline;
 function DistanceXYZ(const Color1, Color2: TColorXYZ; const mul: TChannelMultipliers): Single; inline;
@@ -45,6 +46,13 @@ implementation
 
 // ----| RGB |-----------------------------------------------------------------
 function DistanceRGB(const Color1, Color2: TColorRGB; const mul: TChannelMultipliers): Single;
+begin
+  Result := Sqrt(Sqr((Color1.R-Color2.R) * mul[0])
+               + Sqr((Color1.G-Color2.G) * mul[1])
+               + Sqr((Color1.B-Color2.B) * mul[2]));
+end;
+
+function DistanceRGB(const Color1, Color2: TColorBGRA; const mul: TChannelMultipliers): Single;
 begin
   Result := Sqrt(Sqr((Color1.R-Color2.R) * mul[0])
                + Sqr((Color1.G-Color2.G) * mul[1])

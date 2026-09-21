@@ -273,7 +273,6 @@ uses
   simba.image_draw,
   simba.image_drawmatrix,
   simba.colormath_distance,
-  simba.colormath_conversion,
   simba.zip,
   simba.container_point,
   simba.threading;
@@ -342,7 +341,7 @@ begin
 
   for Y := 0 to H do
     for X := 0 to W do
-      Result[Y, X] := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
+      Result[Y, X] := FData[Y * FWidth + X].ToColor;
 end;
 
 function TSimbaImage.ToMatrix(Box: TBox): TIntegerMatrix;
@@ -356,7 +355,7 @@ begin
 
   for Y := Box.Y1 to Box.Y2 do
     for X := Box.X1 to Box.X2 do
-      Result[Y-Box.Y1, X-Box.X1] := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
+      Result[Y-Box.Y1, X-Box.X1] := FData[Y * FWidth + X].ToColor;
 end;
 
 procedure TSimbaImage.FromZip(ZipFile, ZipEntry: String);
@@ -689,7 +688,7 @@ var
   X, Y: Integer;
   Buffer: TPointBuffer;
 begin
-  Col := TSimbaColorConversion.ColorToBGRA(Color);
+  Col := Color.ToBGRA();
 
   if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
     Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
@@ -1127,7 +1126,7 @@ end;
 
 procedure TSimbaImage.Fill(Color: TColor);
 begin
-  FillData(FData, FWidth * FHeight, TSimbaColorConversion.ColorToBGRA(Color, ALPHA_OPAQUE))
+  FillData(FData, FWidth * FHeight, Color.ToBGRA(ALPHA_OPAQUE))
 end;
 
 procedure TSimbaImage.FillWithAlpha(Value: Byte);
@@ -1254,7 +1253,7 @@ var
 begin
   SetLength(Result, FHeight * FWidth);
   for I := 0 to High(Result) do
-    Result[I] := TSimbaColorConversion.BGRAToColor(FData[I]);
+    Result[I] := FData[I].ToColor;
 end;
 
 function TSimbaImage.GetColors(Box: TBox): TColorArray;
@@ -1269,7 +1268,7 @@ begin
   for Y := Box.Y1 to Box.Y2 do
     for X := Box.X1 to Box.X2 do
     begin
-      Result[Count] := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
+      Result[Count] := FData[Y * FWidth + X].ToColor;
       Inc(Count);
     end;
 end;
@@ -1281,7 +1280,7 @@ begin
   SetLength(Result, Length(Points));
   for I := 0 to High(Points) do
     if InImage(Points[I].X, Points[I].Y) then
-      Result[I] := TSimbaColorConversion.BGRAToColor(FData[Points[I].Y * FWidth + Points[I].X])
+      Result[I] := FData[Points[I].Y * FWidth + Points[I].X].ToColor
     else
       RaiseOutOfImageException(Points[I].X, Points[I].Y);
 end;
@@ -1517,11 +1516,14 @@ begin
 end;
 
 function TSimbaImage.GetDrawColorAsBGRA: TColorBGRA;
+var
+  Color: TColor;
 begin
-  if (FDrawColor = -1) then
-    Result := TSimbaColorConversion.ColorToBGRA(GetDistinctColor(0), FDrawAlpha)
-  else
-    Result := TSimbaColorConversion.ColorToBGRA(FDrawColor, FDrawAlpha);
+  Color := FDrawColor;
+  if (Color = -1) then
+    Color := GetDistinctColor(0);
+
+  Result := Color.ToBGRA(FDrawAlpha);
 end;
 
 procedure TSimbaImage.SetFontAntialiasing(Value: Boolean);
@@ -1709,7 +1711,7 @@ begin
       if (X < 0) or (Y < 0) or (X >= FWidth) or (Y >= FHeight) then
         RaiseOutOfImageException(X, Y);
 
-      Result[I] := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
+      Result[I] := FData[Y * FWidth + X].ToColor;
     end;
 end;
 
@@ -1718,7 +1720,7 @@ var
   BGRA: TColorBGRA;
   I: Integer;
 begin
-  BGRA := TSimbaColorConversion.ColorToBGRA(Color, ALPHA_OPAQUE);
+  BGRA := Color.ToBGRA(ALPHA_OPAQUE);
 
   for I := 0 to High(Points) do
     with Points[I] do
@@ -1743,7 +1745,7 @@ begin
       if (X < 0) or (Y < 0) or (X >= FWidth) or (Y >= FHeight) then
         RaiseOutOfImageException(X, Y);
 
-      FData[Y * FWidth + X] := TSimbaColorConversion.ColorToBGRA(Colors[I], ALPHA_OPAQUE);
+      FData[Y * FWidth + X] := Colors[I].ToBGRA(ALPHA_OPAQUE);
     end;
 end;
 
@@ -1878,7 +1880,7 @@ begin
   if (X < 0) or (Y < 0) or (X >= FWidth) or (Y >= FHeight) then
     RaiseOutOfImageException(X, Y);
 
-  Result := TSimbaColorConversion.BGRAToColor(FData[Y * FWidth + X]);
+  Result := FData[Y * FWidth + X].ToColor;
 end;
 
 function TSimbaImage.GetAlpha(const X, Y: Integer): Byte;
@@ -1894,7 +1896,7 @@ begin
   if (X < 0) or (Y < 0) or (X >= FWidth) or (Y >= FHeight) then
     RaiseOutOfImageException(X, Y);
 
-  FData[Y * FWidth + X] := TSimbaColorConversion.ColorToBGRA(Color, ALPHA_OPAQUE);
+  FData[Y * FWidth + X] := Color.ToBGRA(ALPHA_OPAQUE);
 end;
 
 procedure TSimbaImage.SetAlpha(const X, Y: Integer; const Value: Byte);
