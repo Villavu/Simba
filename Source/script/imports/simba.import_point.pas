@@ -290,21 +290,22 @@ TPointArray.CreateFromPolygon
 function TPointArray.CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static;
 ```
 *)
-procedure _LapeTPACreateFromPolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTPACreateFromPolygon1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := TPointArray.CreateFromPolygon(PPointArray(Params^[0])^, PBoolean(Params^[1])^);
 end;
 
 (*
-TPointArray.CreateFromSimplePolygon
------------------------------------
+TPointArray.CreateFromPolygon
+-----------------------------
 ```
-function TPointArray.CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static;
+function TPointArray.CreateFromPolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static;
 ```
+A regular polygon with `Sides` sides of the given `Size` around `Center`.
 *)
-procedure _LapeTPACreateFromSimplePolygon(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTPACreateFromPolygon2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPointArray(Result)^ := TPointArray.CreateFromSimplePolygon(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
+  PPointArray(Result)^ := TPointArray.CreateFromPolygon(PPoint(Params^[0])^, PInteger(Params^[1])^, PInteger(Params^[2])^, PBoolean(Params^[3])^);
 end;
 
 (*
@@ -1527,8 +1528,8 @@ begin
     addGlobalFunc('function TPointArray.CreateFromEllipse(Center: TPoint; RadiusX, RadiusY: Integer; Filled: Boolean): TPointArray; static;', @_LapeTPACreateFromEllipse);
     addGlobalFunc('function TPointArray.CreateFromCircle(Center: TPoint; Radius: Integer; Filled: Boolean): TPointArray; static;', @_LapeTPACreateFromCircle);
     addGlobalFunc('function TPointArray.CreateFromLine(Start, Stop: TPoint): TPointArray; static', @_LapeTPACreateFromLine);
-    addGlobalFunc('function TPointArray.CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static', @_LapeTPACreateFromPolygon);
-    addGlobalFunc('function TPointArray.CreateFromSimplePolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static', @_LapeTPACreateFromSimplePolygon);
+    addGlobalFunc('function TPointArray.CreateFromPolygon(Poly: TPointArray; Filled: Boolean): TPointArray; static; overload;', @_LapeTPACreateFromPolygon1);
+    addGlobalFunc('function TPointArray.CreateFromPolygon(Center: TPoint; Sides: Integer; Size: Integer; Filled: Boolean): TPointArray; static; overload;', @_LapeTPACreateFromPolygon2);
     addGlobalFunc('function TPointArray.CreateFromAxes(X, Y: TIntegerArray): TPointArray; static', @_LapeTPACreateFromAxes);
 
     addGlobalFunc('function TPointArray.ExcludePie(StartDegree, EndDegree, MinRadius, MaxRadius: Single; Center: TPoint): TPointArray;', @_LapeTPAExcludePie);
