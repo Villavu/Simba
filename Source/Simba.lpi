@@ -228,9 +228,9 @@
             <Filename Value="../Simba_windows_i386"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
+            <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -278,9 +278,9 @@
             <Filename Value="../Simba_windows_x86_64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
+            <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -328,8 +328,8 @@
             <Filename Value="../Simba_linux_x86_64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
+            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -376,8 +376,8 @@
             <Filename Value="../Simba_linux_aarch64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
+            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -423,8 +423,8 @@
             <Filename Value="../Simba_macos_x86_64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
+            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -471,8 +471,8 @@
             <Filename Value="../Simba_macos_aarch64"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
+            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -847,7 +847,7 @@
         <IsPartOfProject Value="True"/>
       </Unit65>
       <Unit66>
-        <Filename Value="simba.component_splitter.pas"/>
+        <Filename Value="component/simba.component_splitter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit66>
       <Unit67>
@@ -881,7 +881,7 @@
         <IsPartOfProject Value="True"/>
       </Unit72>
       <Unit73>
-        <Filename Value="simba.component_divider.pas"/>
+        <Filename Value="component/simba.component_divider.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit73>
       <Unit74>
@@ -893,7 +893,7 @@
         <IsPartOfProject Value="True"/>
       </Unit75>
       <Unit76>
-        <Filename Value="simba.component_images.pas"/>
+        <Filename Value="component/simba.component_images.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit76>
       <Unit77>
@@ -909,7 +909,7 @@
         <IsPartOfProject Value="True"/>
       </Unit79>
       <Unit80>
-        <Filename Value="simba.component_debugimg.pas"/>
+        <Filename Value="component/simba.component_debugimg.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit80>
       <Unit81>
@@ -957,7 +957,7 @@
         <IsPartOfProject Value="True"/>
       </Unit91>
       <Unit92>
-        <Filename Value="simba.component_listbox.pas"/>
+        <Filename Value="component/simba.component_listbox.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit92>
       <Unit93>
@@ -998,9 +998,9 @@
       <Filename Value="../Simba"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
+      <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
       <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+      <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
