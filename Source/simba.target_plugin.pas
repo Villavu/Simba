@@ -13,7 +13,7 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.externalcanvas;
+  simba.base, simba.canvas_external;
 
 type
   PSimbaPluginTarget = ^TSimbaPluginTarget;

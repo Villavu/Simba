@@ -11,7 +11,7 @@ interface
 
 uses
   Classes, SysUtils, syncobjs,
-  simba.base, simba.baseclass, simba.image, simba.externalcanvas,
+  simba.base, simba.baseclass, simba.image, simba.canvas_external,
   simba.target_eios, simba.target_plugin,
   simba.colormath, simba.dtm,
   simba.vartype_quad
