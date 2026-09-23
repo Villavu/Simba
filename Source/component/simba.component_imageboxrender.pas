@@ -351,8 +351,9 @@ function TSimbaImageBoxRenderer.RenderZoomedOut(Dest: TCanvas; Background: TSimb
 var
   W, H: Integer;
 begin
-  W := (R.Right - R.Left) div Ratio;
-  H := (R.Bottom - R.Top) div Ratio;
+  // Rounded up, so a partial block at the image's edge still gets its canvas pixel
+  W := (R.Right - R.Left + Ratio - 1) div Ratio;
+  H := (R.Bottom - R.Top + Ratio - 1) div Ratio;
   if (W < 1) or (H < 1) then
     Exit(TPoint.Create(0, 0));
 

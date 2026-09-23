@@ -1,0 +1,167 @@
+{
+  Image box layers.
+  A layer is a transparent canvas the size of the image that keeps its pixels
+  between paints.
+}
+
+var
+  Form: TLazForm;
+  ImgBox: TImageBox;
+  PointsLayer, ShapesLayer, TextLayer: TImageBoxLayer;
+  Points: TPointArray;
+  Antialiasing: Boolean;
+
+procedure DrawShapes;
+begin
+  PointsLayer.Clear();
+  PointsLayer.DrawAntialiasing := Antialiasing;
+  PointsLayer.DrawColor := Colors.RED;
+  PointsLayer.DrawTPA(Points);
+
+  ShapesLayer.Clear();
+  ShapesLayer.DrawAntialiasing := Antialiasing;
+  ShapesLayer.DrawThickness := 3;
+  ShapesLayer.DrawColor := Colors.BLUE;
+  ShapesLayer.DrawAlpha := 100; // translucent: the points show through
+  ShapesLayer.DrawFilled := True;
+  ShapesLayer.DrawBox([120, 80, 420, 260]);
+  ShapesLayer.DrawFilled := False;
+  ShapesLayer.DrawAlpha := 255;
+  ShapesLayer.DrawColor := Colors.LIME;
+  ShapesLayer.DrawCircle([520, 200], 90);
+  ShapesLayer.DrawColor := Colors.ORANGE;
+  ShapesLayer.DrawPolygon(TPointArray.CreateFromPolygon([300, 420], 6, 100, False).ConvexHull());
+  ShapesLayer.DrawColor := Colors.YELLOW;
+  ShapesLayer.DrawLine([60, 500], [700, 340]);
+
+  TextLayer.Clear();
+  TextLayer.FontSize := 18;
+  TextLayer.FontAntialiasing := Antialiasing;
+  TextLayer.DrawColor := Colors.WHITE;
+  TextLayer.DrawText('Shapes layer, priority 1', [130, 40]);
+  TextLayer.DrawText('Text layer, priority 2', [130, 530]);
+
+  ImgBox.Invalidate(); // drawing on a layer does not repaint by itself
+end;
+
+// The paint event still draws every frame, on top of all the layers.
+procedure ImgBoxPaint(Sender: TImageBox; Canvas: TCanvas; R: TLazRect);
+begin
+  Canvas.DrawColor := Colors.YELLOW;
+  Canvas.DrawCircle(Sender.MouseXY, 12);
+end;
+
+procedure ImgBoxMouseMove(Sender: TImageBox; Shift: ELazShiftStates; X, Y: Integer);
+begin
+  Sender.Repaint();
+end;
+
+procedure TogglePoints(Sender: TLazObject);
+begin
+  PointsLayer.Visible := TLazCheckBox(Sender).Checked;
+end;
+
+procedure ToggleShapes(Sender: TLazObject);
+begin
+  ShapesLayer.Visible := TLazCheckBox(Sender).Checked;
+end;
+
+procedure ToggleText(Sender: TLazObject);
+begin
+  TextLayer.Visible := TLazCheckBox(Sender).Checked;
+end;
+
+procedure ToggleAntialiasing(Sender: TLazObject);
+begin
+  Antialiasing := TLazCheckBox(Sender).Checked;
+  DrawShapes();
+end;
+
+procedure SwapOrder(Sender: TLazObject);
+var
+  P: Integer;
+begin
+  P := PointsLayer.Priority;
+  PointsLayer.Priority := ShapesLayer.Priority;
+  ShapesLayer.Priority := P;
+end;
+
+function NewCheckBox(Parent: TLazPanel; Caption: String; OnChange: TLazNotifyEvent): TLazCheckBox;
+begin
+  Result := TLazCheckBox.Create(Parent);
+  Result.Parent := Parent;
+  Result.Align := ELazAlign.Top;
+  Result.Caption := Caption;
+  Result.Checked := True;
+  Result.OnChange := OnChange;
+  Result.BorderSpacing.Around := 6;
+end;
+
+procedure ShowMyForm;
+var
+  Img: TImage;
+  Panel: TLazPanel;
+  Button: TLazButton;
+  X, Y, I: Integer;
+begin
+  // a checkerboard to draw over
+  Img := new TImage(800, 600);
+  for Y := 0 to Img.Height - 1 do
+    for X := 0 to Img.Width - 1 do
+      if ((X div 50) + (Y div 50)) mod 2 = 0 then
+        Img.Pixel[X, Y] := $303030
+      else
+        Img.Pixel[X, Y] := $505050;
+
+  Form := TLazForm.Create();
+  Form.Caption := 'ImageBox layers';
+  Form.Width := 1000;
+  Form.Height := 660;
+  Form.Position := ELazFormPosition.ScreenCenter;
+
+  Panel := TLazPanel.Create(Form);
+  Panel.Parent := Form;
+  Panel.Align := ELazAlign.Right;
+  Panel.Width := 180;
+
+  ImgBox := TImageBox.Create(Form);
+  ImgBox.Parent := Form;
+  ImgBox.Align := ELazAlign.Client;
+  ImgBox.Background := Img;
+  ImgBox.OnImgPaint := @ImgBoxPaint;
+  ImgBox.OnImgMouseMove := @ImgBoxMouseMove;
+
+  // Layers are owned by the box: it frees whatever is left when it closes.
+  PointsLayer := TImageBoxLayer.Create(ImgBox);
+  PointsLayer.Priority := 0;
+  ShapesLayer := TImageBoxLayer.Create(ImgBox);
+  ShapesLayer.Priority := 1;
+  TextLayer := TImageBoxLayer.Create(ImgBox);
+  TextLayer.Priority := 2;
+
+  // Something expensive: lots of points. Drawn when the layers are, never per paint.
+  for I := 1 to 30000 do
+    Points += [Random(Img.Width), Random(Img.Height)];
+
+  Antialiasing := True;
+  DrawShapes();
+
+  NewCheckBox(Panel, 'Points layer', @TogglePoints);
+  NewCheckBox(Panel, 'Shapes layer', @ToggleShapes);
+  NewCheckBox(Panel, 'Text layer', @ToggleText);
+  NewCheckBox(Panel, 'Antialiasing', @ToggleAntialiasing);
+
+  Button := TLazButton.Create(Panel);
+  Button.Parent := Panel;
+  Button.Align := ELazAlign.Top;
+  Button.Caption := 'Swap points/shapes order';
+  Button.OnClick := @SwapOrder;
+  Button.BorderSpacing.Around := 6;
+  Button.AutoSize := True;
+
+  Form.ShowModal();
+end;
+
+begin
+  ShowMyForm();
+end.
