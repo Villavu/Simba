@@ -5,45 +5,24 @@ unit simba.import_imagebox;
 interface
 
 uses
-  Classes, SysUtils, Controls, ExtCtrls, Graphics,
-  simba.base, simba.script, simba.script_objectutil;
+  Classes, SysUtils,
+  simba.base, simba.script;
 
 procedure ImportSimbaImageBox(Script: TSimbaScript);
 
 implementation
 
 uses
-  lptypes, ffi,
+  Controls, ExtCtrls, lptypes, ffi,
+  simba.script_objectutil,
   simba.component_imagebox,
-  simba.component_imageboxcanvas,
-  simba.image_textdrawer,
-  simba.dtm,
-  simba.colormath,
-  simba.target,
-  simba.vartype_quad;
+  simba.image;
 
 type
   PComponent = ^TComponent;
   PPanel = ^TPanel;
-  PBitmap = ^TBitmap;
   PSimbaImageBox = ^TSimbaImageBox;
-  PSimbaImageBoxCanvas = ^TSimbaImageBoxCanvas;
-  PQuad = ^TQuad;
-
-procedure _LapeImageBox_FindDTM(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindDTM(PDTM(Params^[1])^);
-end;
-
-procedure _LapeImageBox_FindColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PSimbaImageBox(Params^[0])^.FindColor(PColorTolerance(Params^[1])^);
-end;
-
-procedure _LapeImageBox_MatchColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSingleMatrix(Result)^ := PSimbaImageBox(Params^[0])^.MatchColor(PColorTolerance(Params^[1])^);
-end;
+  PSimbaImageBoxLayer = ^TSimbaImageBoxLayer;
 
 procedure _LapeImageBox_MoveTo(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -55,24 +34,9 @@ begin
   PBoolean(Result)^ := PSimbaImageBox(Params^[0])^.IsPointVisible(PPoint(Params^[1])^);
 end;
 
-procedure _LapeImageBox_MouseX(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PSimbaImageBox(Params^[0])^.MouseX;
-end;
-
-procedure _LapeImageBox_MouseY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PSimbaImageBox(Params^[0])^.MouseY;
-end;
-
 procedure _LapeImageBox_MouseXY(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PSimbaImageBox(Params^[0])^.MouseXY;
-end;
-
-procedure _LapeImageBox_SetImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBox(Params^[0])^.SetImage(PLapeObjectImage(Params^[1])^^, False);
 end;
 
 procedure _LapeImageBox_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -92,7 +56,24 @@ end;
 
 procedure _LapeImageBox_Background_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBitmap(Result)^ := PSimbaImageBox(Params^[0])^.Background;
+  // the box's own image, not the script's to free
+  PLapeObject(Result)^ := LapeObjectAlloc(PSimbaImageBox(Params^[0])^.Background, False);
+end;
+
+procedure _LapeImageBox_Background_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+var
+  Box: TSimbaImageBox;
+  Img: TSimbaImage;
+begin
+  if (PLapeObjectImage(Params^[1])^ = nil) then
+    SimbaException('TImageBox.Background cannot be nil');
+
+  Box := PSimbaImageBox(Params^[0])^;
+  Img := PLapeObjectImage(Params^[1])^^;
+
+  // copied into the box's own image, so a Background a script is holding stays live
+  Box.Background.FromData(Img.Data, Img.Width, Img.Width, Img.Height);
+  Box.BackgroundChanged();
 end;
 
 procedure _LapeImageBox_Zoom_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -105,14 +86,35 @@ begin
   PSimbaImageBox(Params^[0])^.Zoom := PInteger(Params^[1])^;
 end;
 
-procedure _LapeImageBox_AllowZoom_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBox_MinZoom_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImageBox(Params^[0])^.AllowZoom;
+  PInteger(Result)^ := PSimbaImageBox(Params^[0])^.MinZoom;
 end;
 
-procedure _LapeImageBox_AllowZoom_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBox_MinZoom_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBox(Params^[0])^.AllowZoom := PBoolean(Params^[1])^;
+  PSimbaImageBox(Params^[0])^.MinZoom := PInteger(Params^[1])^;
+end;
+
+procedure _LapeImageBox_MaxZoom_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PInteger(Result)^ := PSimbaImageBox(Params^[0])^.MaxZoom;
+end;
+
+procedure _LapeImageBox_MaxZoom_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBox(Params^[0])^.MaxZoom := PInteger(Params^[1])^;
+end;
+
+
+procedure _LapeImageBox_AllowUserZoom_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := PSimbaImageBox(Params^[0])^.AllowUserZoom;
+end;
+
+procedure _LapeImageBox_AllowUserZoom_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBox(Params^[0])^.AllowUserZoom := PBoolean(Params^[1])^;
 end;
 
 procedure _LapeImageBox_OnImgPaint_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -250,204 +252,68 @@ begin
   PSimbaImageBox(Params^[0])^.OnImgKeyUp := TImageBoxKeyEvent(Params^[1]^);
 end;
 
-procedure _LapeImageBoxCanvas_FontName_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+
+procedure _LapeImageBoxLayer_Create(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PString(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontName;
+  PSimbaImageBoxLayer(Result)^ := TSimbaImageBoxLayer.Create(PSimbaImageBox(Params^[0])^);
 end;
 
-procedure _LapeImageBoxCanvas_FontName_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBoxLayer_Free(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBoxCanvas(Params^[0])^.FontName := PString(Params^[1])^;
+  PSimbaImageBoxLayer(Params^[0])^.Free();
 end;
 
-procedure _LapeImageBoxCanvas_FontSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBoxLayer_Visible_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingle(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontSize;
+  PBoolean(Result)^ := PSimbaImageBoxLayer(Params^[0])^.Visible;
 end;
 
-procedure _LapeImageBoxCanvas_FontSize_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBoxLayer_Visible_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBoxCanvas(Params^[0])^.FontSize := PSingle(Params^[1])^;
+  PSimbaImageBoxLayer(Params^[0])^.Visible := PBoolean(Params^[1])^;
 end;
 
-procedure _LapeImageBoxCanvas_FontAntialiasing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBoxLayer_Opacity_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontAntialiasing;
+  PByte(Result)^ := PSimbaImageBoxLayer(Params^[0])^.Opacity;
 end;
 
-procedure _LapeImageBoxCanvas_FontAntialiasing_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBoxLayer_Opacity_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBoxCanvas(Params^[0])^.FontAntialiasing := PBoolean(Params^[1])^;
+  PSimbaImageBoxLayer(Params^[0])^.Opacity := PByte(Params^[1])^;
 end;
 
-procedure _LapeImageBoxCanvas_FontBold_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBoxLayer_Priority_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontBold;
+  PInteger(Result)^ := PSimbaImageBoxLayer(Params^[0])^.Priority;
 end;
 
-procedure _LapeImageBoxCanvas_FontBold_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBoxLayer_Priority_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBoxCanvas(Params^[0])^.FontBold := PBoolean(Params^[1])^;
+  PSimbaImageBoxLayer(Params^[0])^.Priority := PInteger(Params^[1])^;
 end;
 
-procedure _LapeImageBoxCanvas_FontItalic_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBox_LayerCount_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PBoolean(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.FontItalic;
+  PInteger(Result)^ := PSimbaImageBox(Params^[0])^.LayerCount;
 end;
 
-procedure _LapeImageBoxCanvas_FontItalic_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImageBox_Layers_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSimbaImageBoxCanvas(Params^[0])^.FontItalic := PBoolean(Params^[1])^;
-end;
-
-procedure _LapeImageBoxCanvas_TextWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.TextWidth(PString(Params^[1])^);
-end;
-
-procedure _LapeImageBoxCanvas_TextHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.TextHeight(PString(Params^[1])^);
-end;
-
-procedure _LapeImageBoxCanvas_TextSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPoint(Result)^ := PSimbaImageBoxCanvas(Params^[0])^.TextSize(PString(Params^[1])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawText(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawText(PString(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawTextEx(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, EImageTextAlign(Params^[3]^), PColor(Params^[4])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawLine(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^, PColor(Params^[3])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawLineGap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawLineGap(PPoint(Params^[1])^, PPoint(Params^[2])^, PInteger(Params^[3])^, PColor(Params^[4])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawCross(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawCrossArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawBox(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawBox(PBox(Params^[1])^, PColor(Params^[2])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawBoxFilled1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawBoxFilled(PBox(Params^[1])^, PColor(Params^[2])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawBoxFilled2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawBoxFilled(PBox(Params^[1])^, PColor(Params^[2])^, PSingle(Params^[3])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawCircle(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawCircleFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawCircleFilled(PPoint(Params^[1])^, PInteger(Params^[2])^, PColor(Params^[3])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawPoly(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawPoly(PPointArray(Params^[1])^, PBoolean(Params^[2])^, PColor(Params^[3])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawPolyFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawPolyFilled(PPointArray(Params^[1])^, PColor(Params^[2])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawQuad(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawQuad(PQuad(Params^[1])^, PColor(Params^[2])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawQuadFilled(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawQuadFilled(PQuad(Params^[1])^, PColor(Params^[2])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawPoint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawPoint(PPoint(Params^[1])^, PColor(Params^[2])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawPoints(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawPoints(PPointArray(Params^[1])^, PColor(Params^[2])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawHeatmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawHeatmap(PSingleMatrix(Params^[1])^);
-end;
-
-procedure _LapeImageBoxCanvas_DrawImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSimbaImageBoxCanvas(Params^[0])^.DrawImage(PLapeObjectImage(Params^[1])^^, PPoint(Params^[2])^);
+  PSimbaImageBoxLayer(Result)^ := PSimbaImageBox(Params^[0])^.Layers[PInteger(Params^[1])^];
 end;
 
 procedure ImportSimbaImageBox(Script: TSimbaScript);
 begin
   with Script.Compiler do
   begin
-    addGlobalType('type TBaseClass', 'TImageBoxCanvas');
 
-    addProperty('TImageBoxCanvas', 'FontName', 'String', @_LapeImageBoxCanvas_FontName_Read, @_LapeImageBoxCanvas_FontName_Write);
-    addProperty('TImageBoxCanvas', 'FontSize', 'Single', @_LapeImageBoxCanvas_FontSize_Read, @_LapeImageBoxCanvas_FontSize_Write);
-    addProperty('TImageBoxCanvas', 'FontAntialiasing', 'Boolean', @_LapeImageBoxCanvas_FontAntialiasing_Read, @_LapeImageBoxCanvas_FontAntialiasing_Write);
-    addProperty('TImageBoxCanvas', 'FontBold', 'Boolean', @_LapeImageBoxCanvas_FontBold_Read, @_LapeImageBoxCanvas_FontBold_Write);
-    addProperty('TImageBoxCanvas', 'FontItalic', 'Boolean', @_LapeImageBoxCanvas_FontItalic_Read, @_LapeImageBoxCanvas_FontItalic_Write);
 
-    addGlobalFunc('function TImageBoxCanvas.TextWidth(Text: String): Integer;', @_LapeImageBoxCanvas_TextWidth);
-    addGlobalFunc('function TImageBoxCanvas.TextHeight(Text: String): Integer;', @_LapeImageBoxCanvas_TextHeight);
-    addGlobalFunc('function TImageBoxCanvas.TextSize(Text: String): TPoint;', @_LapeImageBoxCanvas_TextSize);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawText(Text: String; Position: TPoint; Color: TColor); overload', @_LapeImageBoxCanvas_DrawText);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawText(Text: String; Box: TBox; Alignments: EImageTextAlign; Color: TColor); overload', @_LapeImageBoxCanvas_DrawTextEx);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawLine(Start, Stop: TPoint; Color: TColor);', @_LapeImageBoxCanvas_DrawLine);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawLineGap(Start, Stop: TPoint; GapSize: Integer; Color: TColor);', @_LapeImageBoxCanvas_DrawLineGap);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawCross(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeImageBoxCanvas_DrawCross);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawCrossArray(Centers: TPointArray; Radius: Integer; Color: TColor);', @_LapeImageBoxCanvas_DrawCrossArray);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawBox(Box: TBox; Color: TColor);', @_LapeImageBoxCanvas_DrawBox);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawBoxFilled(Box: TBox; Color: TColor); overload;', @_LapeImageBoxCanvas_DrawBoxFilled1);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawBoxFilled(Box: TBox; Color: TColor; Transparency: Single); overload;', @_LapeImageBoxCanvas_DrawBoxFilled2);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawCircle(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeImageBoxCanvas_DrawCircle);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawCircleFilled(Center: TPoint; Radius: Integer; Color: TColor);', @_LapeImageBoxCanvas_DrawCircleFilled);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawPoly(Poly: TPointArray; Connect: Boolean; Color: TColor);', @_LapeImageBoxCanvas_DrawPoly);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawPolyFilled(Poly: TPointArray; Color: TColor);', @_LapeImageBoxCanvas_DrawPolyFilled);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawQuad(Quad: TQuad; Color: TColor);', @_LapeImageBoxCanvas_DrawQuad);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawQuadFilled(Quad: TQuad; Color: TColor);', @_LapeImageBoxCanvas_DrawQuadFilled);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawPoint(Point: TPoint; Color: TColor);', @_LapeImageBoxCanvas_DrawPoint);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawPoints(TPA: TPointArray; Color: TColor);', @_LapeImageBoxCanvas_DrawPoints);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawHeatmap(Mat: TSingleMatrix);', @_LapeImageBoxCanvas_DrawHeatmap);
-    addGlobalFunc('procedure TImageBoxCanvas.DrawImage(Image: TImage; Point: TPoint);', @_LapeImageBoxCanvas_DrawImage);
+
 
     addClass('TImageBox', 'TLazCustomControl', TCustomControl);
 
-    addGlobalType('procedure(Sender: TImageBox; Canvas: TImageBoxCanvas; R: TLazRect) of object', 'TImageBoxPaintEvent', FFI_DEFAULT_ABI);
+    addGlobalType('procedure(Sender: TImageBox; Canvas: TCanvas; R: TLazRect) of object', 'TImageBoxPaintEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TImageBox) of object', 'TImageBoxEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TImageBox; X, Y: Integer) of object', 'TImageBoxClickEvent', FFI_DEFAULT_ABI);
     addGlobalType('procedure(Sender: TImageBox; var Key: UInt16; Shift: ELazShiftStates) of object', 'TImageBoxKeyEvent', FFI_DEFAULT_ABI);
@@ -469,18 +335,24 @@ begin
     addProperty('TImageBox', 'ShowScrollBars', 'Boolean', @_LapeImageBox_ShowScrollBars_Read, @_LapeImageBox_ShowScrollBars_Write);
     addProperty('TImageBox', 'ShowStatusBar', 'Boolean', @_LapeImageBox_ShowStatusBar_Read, @_LapeImageBox_ShowStatusBar_Write);
     addProperty('TImageBox', 'AllowMoving', 'Boolean', @_LapeImageBox_AllowMoving_Read, @_LapeImageBox_AllowMoving_Write);
-    addProperty('TImageBox', 'AllowZoom', 'Boolean', @_LapeImageBox_AllowZoom_Read, @_LapeImageBox_AllowZoom_Write);
+    addProperty('TImageBox', 'AllowUserZoom', 'Boolean', @_LapeImageBox_AllowUserZoom_Read, @_LapeImageBox_AllowUserZoom_Write);
     addProperty('TImageBox', 'Status', 'String', @_LapeImageBox_Status_Read, @_LapeImageBox_Status_Write);
-    addProperty('TImageBox', 'Background', 'TLazBitmap', @_LapeImageBox_Background_Read);
+    addProperty('TImageBox', 'Background', 'TImage', @_LapeImageBox_Background_Read, @_LapeImageBox_Background_Write);
+
+    addGlobalType('type TCanvas', 'TImageBoxLayer');
+    addGlobalFunc('function TImageBoxLayer.Create(ImageBox: TImageBox): TImageBoxLayer; static;', @_LapeImageBoxLayer_Create);
+    addGlobalFunc('procedure TImageBoxLayer.Free;', @_LapeImageBoxLayer_Free);
+    addProperty('TImageBoxLayer', 'Visible', 'Boolean', @_LapeImageBoxLayer_Visible_Read, @_LapeImageBoxLayer_Visible_Write);
+    addProperty('TImageBoxLayer', 'Priority', 'Integer', @_LapeImageBoxLayer_Priority_Read, @_LapeImageBoxLayer_Priority_Write);
+    addProperty('TImageBoxLayer', 'Opacity', 'Byte', @_LapeImageBoxLayer_Opacity_Read, @_LapeImageBoxLayer_Opacity_Write);
+
+    addProperty('TImageBox', 'LayerCount', 'Integer', @_LapeImageBox_LayerCount_Read);
+    addPropertyIndexed('TImageBox', 'Layers', 'Index: Integer', 'TImageBoxLayer', @_LapeImageBox_Layers_Read);
     addProperty('TImageBox', 'Zoom', 'Integer', @_LapeImageBox_Zoom_Read, @_LapeImageBox_Zoom_Write);
-    addProperty('TImageBox', 'MouseX', 'Integer', @_LapeImageBox_MouseX);
-    addProperty('TImageBox', 'MouseY', 'Integer', @_LapeImageBox_MouseY);
+    addProperty('TImageBox', 'MinZoom', 'Integer', @_LapeImageBox_MinZoom_Read, @_LapeImageBox_MinZoom_Write);
+    addProperty('TImageBox', 'MaxZoom', 'Integer', @_LapeImageBox_MaxZoom_Read, @_LapeImageBox_MaxZoom_Write);
     addProperty('TImageBox', 'MouseXY', 'TPoint', @_LapeImageBox_MouseXY);
 
-    addGlobalFunc('function TImageBox.FindDTM(DTM: TDTM): TPointArray', @_LapeImageBox_FindDTM);
-    addGlobalFunc('function TImageBox.FindColor(ColorTolerance: TColorTolerance): TPointArray', @_LapeImageBox_FindColor);
-    addGlobalFunc('function TImageBox.MatchColor(ColorTolerance: TColorTolerance): TSingleMatrix', @_LapeImageBox_MatchColor);
-    addGlobalFunc('procedure TImageBox.SetImage(Image: TImage)', @_LapeImageBox_SetImage);
     addGlobalFunc('procedure TImageBox.MoveTo(ImageXY: TPoint);', @_LapeImageBox_MoveTo);
     addGlobalFunc('function TImageBox.IsPointVisible(ImageXY: TPoint): Boolean;', @_LapeImageBox_IsPointVisible);
 
