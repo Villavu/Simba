@@ -1,5 +1,32 @@
 {$assertions on}
 
+// green at the main point and blue 28 right and 28 down, searched either side of 0 degrees:
+// only unrotated matches, so -20..20 must wrap to 340..380 and have its middle searched
+procedure TestMiddleAngle;
+var
+  Img: TImage;
+  DTM: TDTM;
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+  X, Y: Integer;
+begin
+  Img := new TImage(100, 80);
+  Img.Fill($101010); // dark grey
+  for Y := 40 to 44 do
+    for X := 60 to 64 do
+      Img.Pixel[X, Y] := $00FF00; // green
+  Img.Pixel[90, 70] := $FF0000; // blue
+  Target.SetImage(Img);
+
+  DTM := [];
+  DTM.AddPoint(0, 0, $00FF00, 0, 0); // green
+  DTM.AddPoint(28, 28, $FF0000, 0, 0); // blue
+  TPA := Target.FindDTMRotatedEx(DTM, -20, 20, 10, Degrees, -1);
+  Assert(Length(TPA) = 1);
+  Assert(TPA[0] = TPoint.Create(62, 42));
+  Assert(Round(Degrees[0]) mod 360 = 0);
+end;
+
 var
   TreePoints: TPointArray := [
     TPoint.Create(63,11),
@@ -42,8 +69,8 @@ begin
   Degs := Degs.Unique().Sorted();
   Assert(Degs.Length = 3);
   Assert(Degs[0] = 89);
-  Assert(Degs[1] = 91);
-  Assert(Degs[2] = 92);
+  Assert(Degs[1] = 90);
+  Assert(Degs[2] = 91);
 
   // find all, area
   TPA := Target.FindDTMRotatedEx(DTM, 89,91,1, degs, -1, [56,5,95,28]);
@@ -56,6 +83,8 @@ begin
   Degs := Degs.Unique().Sorted();
   Assert(Degs.Length = 3);
   Assert(Degs[0] = 89);
-  Assert(Degs[1] = 91);
-  Assert(Degs[2] = 92);
-end;
+  Assert(Degs[1] = 90);
+  Assert(Degs[2] = 91);
+
+  TestMiddleAngle();
+end.

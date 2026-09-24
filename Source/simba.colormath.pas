@@ -82,6 +82,9 @@ type
     Tolerance: Single;
     ColorSpace: EColorSpace;
     Multipliers: TChannelMultipliers;
+
+    class function Create(AColor: TColor; ATolerance: Single): TColorTolerance; static; overload;
+    class function Create(AColor: TColor; ATolerance: Single; AColorSpace: EColorSpace; AMultipliers: TChannelMultipliers): TColorTolerance; static; overload;
   end;
 
 const
@@ -170,6 +173,19 @@ implementation
 uses
   TypInfo,
   simba.colormath_conversion;
+
+class function TColorTolerance.Create(AColor: TColor; ATolerance: Single): TColorTolerance;
+begin
+  Result := TColorTolerance.Create(AColor, ATolerance, DefaultColorSpace, DefaultMultipliers);
+end;
+
+class function TColorTolerance.Create(AColor: TColor; ATolerance: Single; AColorSpace: EColorSpace; AMultipliers: TChannelMultipliers): TColorTolerance;
+begin
+  Result.Color := AColor;
+  Result.Tolerance := ATolerance;
+  Result.ColorSpace := AColorSpace;
+  Result.Multipliers := AMultipliers;
+end;
 
 function EColorSpaceHelper.AsString: String;
 begin

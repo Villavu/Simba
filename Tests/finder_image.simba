@@ -1,5 +1,33 @@
 {$assertions on}
 
+// a green 5x5 box and one blue pixel on dark grey
+procedure TestSimpleScene;
+var
+  Img, Needle: TImage;
+  Match: Single;
+  X, Y: Integer;
+begin
+  Img := new TImage(100, 80);
+  Img.Fill($101010); // dark grey
+  for Y := 40 to 44 do
+    for X := 60 to 64 do
+      Img.Pixel[X, Y] := $00FF00; // green
+  Img.Pixel[90, 70] := $FF0000; // blue
+  Target.SetImage(Img.Copy());
+
+  // the green box with a pixel of background round it
+  Needle := Img.Copy([59, 39, 65, 45]);
+  Assert(Target.FindImage(Needle, 0) = TPoint.Create(59, 39));
+  Assert(Length(Target.FindImageEx(Needle, 0)) = 1);
+  Assert(Target.FindImage(Needle, 0, [0, 0, 50, 50]) = TPoint.Create(-1, -1));
+  Assert(Target.FindTemplate(Needle, Match) = TPoint.Create(59, 39));
+  Assert(Match > 0.99);
+
+  // a needle touching the bottom right edge
+  Needle := Img.Copy([88, 68, 99, 79]);
+  Assert(Target.FindImage(Needle, 0) = TPoint.Create(88, 68));
+end;
+
 var
   TreePoints: TPointArray := [
     TPoint.Create(19, 4),
@@ -27,7 +55,6 @@ begin
 
   // find all, entire client
   TPA := Target.FindImageEx(templ, 0, -1);
-  WriteLn TPA.Length;
   Assert(TPA.Length = 8);
   Assert(TPA[0] = TreePoints[0]);
   Assert(TPA[1] = TreePoints[1]);
@@ -44,22 +71,22 @@ begin
   Assert(TPA[0] = TreePoints[3]);
   Assert(TPA[1] = TreePoints[4]);
 
-  // find one
+  // find one: the first in row order
   P := Target.FindImage(templ, 0);
-  Assert(TreePoints.Contains(P));
+  Assert(P = TreePoints[0]);
 
   // find one, area
   P := Target.FindImage(templ, 0, [24, 37, 45, 71]);
-  Assert(TreePoints.Contains(P));
+  Assert(P = TreePoints[3]);
 
 
   // test tolerance
+  // Brightness makes every pixel opaque: put back the template's transparent ones
   templBrightnessed := templ.Brightness(25);
-  //for y:=0 to templ.Height - 1 do
-  //  for x:=0 to templ.Width - 1 do
-  //    templBrightnessed.Alpha[x,y] := templ.Alpha[x,y];
+  for y:=0 to templ.Height - 1 do
+    for x:=0 to templ.Width - 1 do
+      templBrightnessed.Alpha[x,y] := templ.Alpha[x,y];
 
-  Halt;
 
   // find all with tolerance, entire client
   TPA := Target.FindImageEx(templBrightnessed, 10, -1);
@@ -78,4 +105,5 @@ begin
   TPA := Target.FindImageEx(templBrightnessed, 5);
   Assert(TPA.Length = 0);
 
+  TestSimpleScene();
 end.

@@ -230,7 +230,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win32"/>
-            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <OtherUnitFiles Value="$(ProjPath);component;finders;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -280,7 +280,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
             <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <OtherUnitFiles Value="$(ProjPath);component;finders;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -329,7 +329,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <OtherUnitFiles Value="$(ProjPath);component;finders;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -377,7 +377,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <OtherUnitFiles Value="$(ProjPath);component;finders;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -424,7 +424,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <OtherUnitFiles Value="$(ProjPath);component;finders;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -472,7 +472,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
-            <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+            <OtherUnitFiles Value="$(ProjPath);component;finders;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
             <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -548,7 +548,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="100">
+    <Units Count="101">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -675,11 +675,11 @@
         <IsPartOfProject Value="True"/>
       </Unit22>
       <Unit23>
-        <Filename Value="simba.finder_color.pas"/>
+        <Filename Value="finders/simba.finder_color.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit23>
       <Unit24>
-        <Filename Value="simba.finder_image.pas"/>
+        <Filename Value="finders/simba.finder_image.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit24>
       <Unit25>
@@ -719,7 +719,7 @@
         <IsPartOfProject Value="True"/>
       </Unit33>
       <Unit34>
-        <Filename Value="simba.finder_dtm.pas"/>
+        <Filename Value="finders/simba.finder_dtm.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit34>
       <Unit35>
@@ -990,6 +990,10 @@
         <ComponentName Value="EditorMinimapFrame"/>
         <ResourceBaseClass Value="Frame"/>
       </Unit99>
+      <Unit100>
+        <Filename Value="finders/simba.finder_pixels.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit100>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -1000,7 +1004,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);$(ProjPath);$(LazarusDir)/components/synedit;../Third-Party/lape;asm"/>
       <Libraries Value="../Third-Party/lape/extensions/ffi/bin/win64"/>
-      <OtherUnitFiles Value="$(ProjPath);component;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
+      <OtherUnitFiles Value="$(ProjPath);component;finders;compress;../Third-Party;../Third-Party/lape;../Third-Party/lape/extensions/ffi;script/imports;script/imports/lcl;script;ide;ide/codetools"/>
       <UnitOutputDirectory Value="$(ProjPath)../build/$(BuildMode)/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Parsing>
