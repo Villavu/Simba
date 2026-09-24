@@ -1,61 +1,197 @@
 {$assertions on}
 
-var
-  TreePoints: TPointArray := [
-    TPoint.Create(63,11),
-    TPoint.Create(23,23),
-    TPoint.Create(79,23),
-    TPoint.Create(91,23),
-    TPoint.Create(55,31),
-    TPoint.Create(35,35),
-    TPoint.Create(11,55),
-    TPoint.Create(19,63)
-  ];
+// the DTM at 0, 45, 90, 180 and 270 degrees (AT_*), two near misses, and decoys
+const
+  IMAGE = 'IMG:AgAAAHgAAABkAAAAAAAAAF0AAIAA//////////8ACGg77/w9//gRDYCgGCREDkWvFv/Y1mAYLnUDQzH0uJviZRLmlXtrCHwLJyLr04/BlJpeG5vumVMBvtIrM8zDJNJ3LC++62p1G6pt1zrOkQemiZzgOdQS/CaHahKYREAyZ0h0Zlwqs5K46NSUj7qL2hloh6bJDgXBMhIM47ouO1Pzj6EHEWLNq6yj2Jp+HaJ1WTzwmVc/AwThFDPRXvF/q7QwzkR+noH6NAugP1BHbk5HFlsYnYMWCCJ/GtMHK4flhR9dDhzR3cQ/jNbTnbOrQXH1P8l1GMOjibfIjYVsGeV6X7EuHZJe6Ckbgz0QwM7JddEdCSo0QkK0BPBB6q5WDqVwL7pWurYg19+Tja0M3bPygzJzp9ujKfLO8cZgd/P4B82HHOH0Fr/DX4kej8NohxIpszX5hfPA0wtQjYbvVot5mUzfsMLszQHBy198SvG02JjcaxaYoRLf8cUsqKDk5W90ZdYX30xMXTPexP0c1Ko=';
 
-var
-  dtm: TDTM;
-  img, imgRotated: TImage;
-  TPA: TPointArray;
-  degs: TDoubleArray;
+  AT_0:    TPoint = [5, 15];
+  AT_45:   TPoint = [60, 35];
+  AT_90:   TPoint = [12, 60];
+  AT_180:  TPoint = [100, 30];
+  AT_270:  TPoint = [60, 85];
+  NO_RED:  TPoint = [90, 70];
+  RED_OFF: TPoint = [30, 45];
+
+// green, blue 20 right, red 10 below
+function MakeDTM(RedTolerance: Single): TDTM;
 begin
-  dtm.FromString('DTM:eJxjY2Bg2MLFwLARiLcD8TYg3gTEO4BYnZmBQQWKtYFYC4g1gDhAj5tB34AdTMMwiE8qAAD40Aht');
-
-  img := new TImage();
-  img.FromString('IMG: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');
-  imgRotated := img.Rotate(EImageRotateAlgo.NEAREST_NEIGHBOUR, DegToRad(270), False);
-
-  Target.SetImage(imgRotated);
-
-  // Find all, entire client
-  TPA := Target.FindDTMRotatedEx(DTM, 89,91,1, degs, -1);
-  TPA := TPA.Unique();
-  Assert(TPA.Length = 8);
-  Assert(TPA[0] = TreePoints[0]);
-  Assert(TPA[1] = TreePoints[1]);
-  Assert(TPA[2] = TreePoints[2]);
-  Assert(TPA[3] = TreePoints[3]);
-  Assert(TPA[4] = TreePoints[4]);
-  Assert(TPA[5] = TreePoints[5]);
-  Assert(TPA[6] = TreePoints[6]);
-  Assert(TPA[7] = TreePoints[7]);
-
-  Degs := Degs.Unique().Sorted();
-  Assert(Degs.Length = 3);
-  Assert(Degs[0] = 89);
-  Assert(Degs[1] = 91);
-  Assert(Degs[2] = 92);
-
-  // find all, area
-  TPA := Target.FindDTMRotatedEx(DTM, 89,91,1, degs, -1, [56,5,95,28]);
-  TPA := TPA.Unique();
-  Assert(TPA.Length = 3);
-  Assert(TPA[0] = TreePoints[0]);
-  Assert(TPA[1] = TreePoints[2]);
-  Assert(TPA[2] = TreePoints[3]);
-
-  Degs := Degs.Unique().Sorted();
-  Assert(Degs.Length = 3);
-  Assert(Degs[0] = 89);
-  Assert(Degs[1] = 91);
-  Assert(Degs[2] = 92);
+  Result.AddPoint(5, 15, $00FF00, 0, 0);
+  Result.AddPoint(25, 15, $FF0000, 0, 0);
+  Result.AddPoint(5, 25, $0000FF, RedTolerance, 0);
 end;
+
+function Found(TPA: TPointArray; Degrees: TDoubleArray; P: TPoint; Deg: Double): Boolean;
+var
+  I: Integer;
+begin
+  for I := 0 to High(TPA) do
+    if (TPA[I] = P) and (Abs(Degrees[I] - Deg) < 0.001) then
+      Exit(True);
+  Result := False;
+end;
+
+// all 5 at their angles, AT_0 as 0 not 360
+procedure TestEveryAngle;
+var
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+begin
+  TPA := Target.FindDTMRotatedEx(MakeDTM(0), 0, 360, 45, Degrees, -1);
+  Assert(Length(TPA) = 5);
+  Assert(Length(Degrees) = 5);
+  Assert(Found(TPA, Degrees, AT_0, 0));
+  Assert(Found(TPA, Degrees, AT_45, 45));
+  Assert(Found(TPA, Degrees, AT_90, 90));
+  Assert(Found(TPA, Degrees, AT_180, 180));
+  Assert(Found(TPA, Degrees, AT_270, 270));
+end;
+
+// in the caller's range: AT_180 as -180
+procedure TestCallerRange;
+var
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+begin
+  TPA := Target.FindDTMRotatedEx(MakeDTM(0), -180, 180, 45, Degrees, -1);
+  Assert(Length(TPA) = 5);
+  Assert(Found(TPA, Degrees, AT_0, 0));
+  Assert(Found(TPA, Degrees, AT_45, 45));
+  Assert(Found(TPA, Degrees, AT_90, 90));
+  Assert(Found(TPA, Degrees, AT_180, -180));
+  Assert(Found(TPA, Degrees, AT_270, -90));
+end;
+
+// only P, at Deg
+procedure CheckAlone(Deg: Integer; P: TPoint);
+var
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+begin
+  TPA := Target.FindDTMRotatedEx(MakeDTM(0), Deg, Deg, 1, Degrees, -1);
+  Assert(TPA.Equals([P]));
+  Assert(Length(Degrees) = 1);
+  Assert(Degrees[0] = Deg);
+end;
+
+procedure TestEachAngle;
+begin
+  CheckAlone(0, AT_0);
+  CheckAlone(45, AT_45);
+  CheckAlone(90, AT_90);
+  CheckAlone(180, AT_180);
+  CheckAlone(270, AT_270);
+end;
+
+// under half a pixel apart: AT_90 at all three
+procedure TestNearAngles;
+var
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+begin
+  TPA := Target.FindDTMRotatedEx(MakeDTM(0), 89, 91, 1, Degrees, -1);
+  Assert(TPA.Equals([AT_90, AT_90, AT_90]));
+  Assert(Found(TPA, Degrees, AT_90, 89));
+  Assert(Found(TPA, Degrees, AT_90, 90));
+  Assert(Found(TPA, Degrees, AT_90, 91));
+end;
+
+// wraps: AT_0 as 0
+procedure TestAroundZero;
+var
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+begin
+  TPA := Target.FindDTMRotatedEx(MakeDTM(0), -20, 20, 10, Degrees, -1);
+  Assert(TPA.Equals([AT_0]));
+  Assert(Length(Degrees) = 1);
+  Assert(Abs(Degrees[0]) < 0.001);
+end;
+
+// rounded below 0.1 is still 0.1, not 360.1
+procedure TestFractionalStep;
+var
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+  D: Double;
+begin
+  TPA := Target.FindDTMRotatedEx(MakeDTM(0), 0.1, 0.7, 0.1, Degrees, -1);
+  Assert(TPA.Equals([AT_0, AT_0, AT_0, AT_0, AT_0, AT_0, AT_0]));
+  Assert(Length(Degrees) = 7);
+  for D in Degrees do
+    Assert((D > 0.099) and (D < 0.701));
+end;
+
+// only DTMs wholly inside
+procedure TestBounds;
+var
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+begin
+  TPA := Target.FindDTMRotatedEx(MakeDTM(0), 0, 360, 45, Degrees, -1, [55, 15, 119, 99]);
+  Assert(Length(TPA) = 2);
+  Assert(Found(TPA, Degrees, AT_180, 180));
+  Assert(Found(TPA, Degrees, AT_270, 270));
+end;
+
+// middle angle first: AT_180, then AT_270
+procedure TestMaxToFind;
+var
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+begin
+  TPA := Target.FindDTMRotatedEx(MakeDTM(0), 0, 360, 45, Degrees, 2);
+  Assert(TPA.Equals([AT_180, AT_270]));
+  Assert(Length(Degrees) = 2);
+  Assert(Degrees[0] = 180);
+  Assert(Degrees[1] = 270);
+
+  Assert(Target.FindDTMRotated(MakeDTM(0), 0, 360, 45, Degrees) = AT_180);
+  Assert(Length(Degrees) = 1);
+  Assert(Degrees[0] = 180);
+end;
+
+// RED_OFF's red is 3.4 away
+procedure TestTolerance;
+var
+  TPA: TPointArray;
+  Degrees: TDoubleArray;
+begin
+  TPA := Target.FindDTMRotatedEx(MakeDTM(3), 0, 0, 1, Degrees, -1);
+  Assert(TPA.Equals([AT_0]));
+
+  TPA := Target.FindDTMRotatedEx(MakeDTM(4), 0, 0, 1, Degrees, -1);
+  Assert(Length(TPA) = 2);
+  Assert(TPA.Contains(AT_0));
+  Assert(TPA.Contains(RED_OFF));
+end;
+
+// no white in the image
+procedure TestNotFound;
+var
+  DTM: TDTM;
+  Degrees: TDoubleArray;
+begin
+  DTM.AddPoint(0, 0, $00FF00, 0, 0);
+  DTM.AddPoint(20, 0, $FFFFFF, 0, 0);
+  Assert(Target.FindDTMRotated(DTM, 0, 360, 45, Degrees) = TPoint.Create(-1, -1));
+  Assert(Length(Degrees) = 0);
+end;
+
+var
+  Img: TImage;
+begin
+  Img := new TImage();
+  Img.FromString(IMAGE);
+  Target.SetImage(Img);
+
+  TestEveryAngle();
+  TestCallerRange();
+  TestEachAngle();
+  TestNearAngles();
+  TestAroundZero();
+  TestFractionalStep();
+  TestBounds();
+  TestMaxToFind();
+  TestTolerance();
+  TestNotFound();
+end.

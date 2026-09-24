@@ -1,0 +1,64 @@
+{$assertions on}
+
+// a 50x50 very dark yellow image with a green box over 10..15
+procedure TestBrightness;
+var
+  img: TImage;
+begin
+  img := new TImage(50,50);
+
+  img.Fill($F0F); // very dark yellow
+  img.DrawColor := $FF00F; // green
+  img.DrawBoxFilled([10,10,15,15]);
+
+  Target.SetImage(img);
+
+  // entire target
+  Assert(Target.GetBrightness(EBrightnessAlgo.MEAN) = 14);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MIN) = 13);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MAX) = 147);
+
+  // just the green
+  Assert(Target.GetBrightness(EBrightnessAlgo.MEAN, [10,10,15,15]) = 147);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MIN, [10,10,15,15]) = 147);
+  Assert(Target.GetBrightness(EBrightnessAlgo.MAX, [10,10,15,15]) = 147);
+end;
+
+// a red 10x10 box and one blue pixel on dark grey
+var
+  Img: TImage;
+  TPA: TPointArray;
+  Cols: TColorArray;
+  IntMat: TIntegerMatrix;
+  B: TBox;
+  X, Y: Integer;
+begin
+  Img := new TImage(100, 80);
+  Img.Fill($101010); // dark grey
+  for Y := 10 to 19 do
+    for X := 10 to 19 do
+      Img.Pixel[X, Y] := $0000FF; // red
+  Img.Pixel[90, 70] := $FF0000; // blue
+  Target.SetImage(Img);
+
+  Assert(Target.GetColor([15, 15]) = $0000FF); // red
+  Assert(Target.GetColor([0, 0]) = $101010); // dark grey
+  Assert(Target.GetColor([-5, -5]) = -1);
+
+  // points outside the target are left out, and do not shift the others
+  Cols := Target.GetColors([[-1, 5], [15, 15], [0, 0], [90, 70], [150, 10]]);
+  Assert(Length(Cols) = 3);
+  Assert((Cols[0] = $0000FF) and (Cols[1] = $101010) and (Cols[2] = $FF0000)); // red, dark grey, blue
+
+  IntMat := Target.GetColorsMatrix([10, 10, 12, 11]);
+  Assert((Length(IntMat) = 2) and (Length(IntMat[0]) = 3));
+  Assert(IntMat[1][2] = $0000FF); // red
+
+  // the red box's border, in a box round it: 39 pixels differ from the one to their right or below
+  TPA := Target.FindEdges(1, [5, 5, 25, 25]);
+  B := TPA.Bounds;
+  Assert(Length(TPA) = 39);
+  Assert((B.X1 = 9) and (B.Y1 = 9) and (B.X2 = 19) and (B.Y2 = 19));
+
+  TestBrightness();
+end.

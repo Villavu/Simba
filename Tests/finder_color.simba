@@ -1,5 +1,59 @@
 {$assertions on}
 
+// a red 10x10 box and a green 5x5 box on dark grey
+procedure TestSimpleScene;
+var
+  Img: TImage;
+  TPA: TPointArray;
+  Mat: TSingleMatrix;
+  B: TBox;
+  X, Y, Count: Integer;
+begin
+  Img := new TImage(100, 80);
+  Img.Fill($101010); // dark grey
+  for Y := 10 to 19 do
+    for X := 10 to 19 do
+      Img.Pixel[X, Y] := $0000FF; // red
+  for Y := 40 to 44 do
+    for X := 60 to 64 do
+      Img.Pixel[X, Y] := $00FF00; // green
+  Target.SetImage(Img);
+
+  TPA := Target.FindColor($0000FF, 0); // red
+  B := TPA.Bounds;
+  Assert(Length(TPA) = 100);
+  Assert((B.X1 = 10) and (B.Y1 = 10) and (B.X2 = 19) and (B.Y2 = 19));
+
+  // a box over part of the red one: the points come back in target coordinates
+  TPA := Target.FindColor($0000FF, 0, [15, 15, 50, 50]); // red
+  B := TPA.Bounds;
+  Assert(Length(TPA) = 25);
+  Assert((B.X1 = 15) and (B.Y1 = 15) and (B.X2 = 19) and (B.Y2 = 19));
+
+  // 15 off in red is 3.4% of the largest RGB distance
+  Assert(Target.CountColor($0000F0, 3) = 0);
+  Assert(Target.CountColor($0000F0, 4) = 100);
+  Assert(Target.CountColor(ColorTolerance($0000FF, 1, EColorSpace.HSL, [1, 1, 1])) = 100); // red
+
+  Assert(Target.CountColor($00FF00, 0) = 25); // green
+  Assert(Target.HasColor($00FF00, 0, 25)); // green
+  Assert(not Target.HasColor($00FF00, 0, 26)); // green
+
+  Mat := Target.MatchColor($0000FF, EColorSpace.RGB, [1, 1, 1], [8, 8, 21, 21]); // red
+  Assert((Length(Mat) = 14) and (Length(Mat[0]) = 14));
+  Assert(Mat[2][2] = 0); // (10, 10) is red
+  Assert((Mat[0][0] > 0) and (Mat[0][0] <= 100)); // (8, 8) is not
+
+  // the numbers the finders compare with a tolerance
+  Count := 0;
+  for Y := 0 to High(Mat) do
+    for X := 0 to High(Mat[Y]) do
+      if (Mat[Y][X] <= 4) then
+        Inc(Count);
+  Assert(Count = Target.CountColor($0000FF, 4, [8, 8, 21, 21])); // red
+
+end;
+
 // Very simple CountColor "test"
 const
   TESTS := [
@@ -39,4 +93,6 @@ begin
   Target.SetImage(img);
   for i := 0 to High(TESTS) do
     Assert(pass(Target.CountColor(TESTS[i]), TEST_RESULTS[i]));
+
+  TestSimpleScene();
 end.

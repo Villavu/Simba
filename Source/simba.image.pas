@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Graphics,
   simba.base, simba.baseclass, simba.image_textdrawer, simba.colormath,
-  simba.vartype_polygon, simba.vartype_quad;
+  simba.vartype_polygon, simba.vartype_quad, simba.dtm;
 
 type
   {$PUSH}
@@ -250,9 +250,14 @@ type
     function ToLazBitmap: TBitmap;
     procedure FromLazBitmap(LazBitmap: TBitmap);
 
-    // Basic finders, use Target.SetTarget(img) for all
-    function FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
+    // Bounds [-1,-1,-1,-1] is the whole image
+    function FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray; overload;
+    function FindColor(Color: TColorTolerance; Bounds: TBox): TPointArray; overload;
     function FindImage(Image: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;
+    // every match
+    function FindDTM(DTM: TDTM; Bounds: TBox): TPointArray;
+    // each pixel's distance from Color: 0 an exact match, 100 as far as the colour space goes
+    function MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
     function FindAlpha(Value: Byte): TPointArray;
   end;
 
@@ -275,7 +280,10 @@ uses
   simba.colormath_distance,
   simba.zip,
   simba.container_point,
-  simba.threading;
+  simba.threading,
+  simba.finder_color,
+  simba.finder_image,
+  simba.finder_dtm;
 
 function TSimbaImage.Copy: TSimbaImage;
 begin
@@ -682,95 +690,68 @@ begin
 end;
 
 function TSimbaImage.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
-var
-  Col: TColorBGRA;
-  Ptr: PColorBGRA;
-  X, Y: Integer;
-  Buffer: TPointBuffer;
 begin
-  Col := Color.ToBGRA();
+  Result := FindColor(TColorTolerance.Create(Color, Tolerance, EColorSpace.RGB, DefaultMultipliers), Bounds);
+end;
+
+function TSimbaImage.FindColor(Color: TColorTolerance; Bounds: TBox): TPointArray;
+begin
+  Result := [];
 
   if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
     Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
   else
-    Bounds := Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
 
-  for Y := Bounds.Y1 to Bounds.Y2 do
-  begin
-    Ptr := @FData[Y * FWidth + Bounds.X1];
-    for X := Bounds.X1 to Bounds.X2 do
-    begin
-      if SimilarRGB(Col, Ptr^, Tolerance) then
-        Buffer.Add(X, Y);
+  if (Bounds.Width > 0) and (Bounds.Height > 0) then
+    Result := SimbaFinder_FindColors(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft,
+                                     Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+end;
 
-      Inc(Ptr);
-    end;
-  end;
+function TSimbaImage.FindDTM(DTM: TDTM; Bounds: TBox): TPointArray;
+begin
+  Result := [];
 
-  Result := Buffer.ToArray(False);
+  if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
+    Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
+  else
+    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
+
+  if (Bounds.Width > 0) and (Bounds.Height > 0) then
+    Result := SimbaFinder_FindDTM(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, DTM, -1);
+end;
+
+function TSimbaImage.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
+begin
+  Result := [];
+
+  if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
+    Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
+  else
+    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
+
+  if (Bounds.Width > 0) and (Bounds.Height > 0) then
+    Result := SimbaFinder_MatchColors(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, ColorSpace, Color, Multipliers);
 end;
 
 function TSimbaImage.FindImage(Image: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;
-
-  function Match(const Ptr: TColorBGRA; const ImagePtr: TColorBGRA): Boolean; inline;
-  begin
-    Result := (ImagePtr.A = ALPHA_TRANSPARENT) or SimilarRGB(Ptr, ImagePtr, Tolerance);
-  end;
-
-  function Hit(Ptr: PColorBGRA): Boolean;
-  var
-    X, Y: Integer;
-    ImagePtr: PColorBGRA;
-  begin
-    ImagePtr := Image.Data;
-
-    for Y := 0 to Image.Height - 1 do
-    begin
-      for X := 0 to Image.Width - 1 do
-      begin
-        if (not Match(Ptr^, ImagePtr^)) then
-          Exit(False);
-        Inc(ImagePtr);
-        Inc(Ptr);
-      end;
-
-      Inc(Ptr, FWidth - Image.Width);
-    end;
-
-    Result := True;
-  end;
-
 var
-  Ptr: PColorBGRA;
-  X, Y: Integer;
+  TPA: TPointArray;
 begin
+  Result := TPoint.Create(-1, -1);
+
   if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
     Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
   else
-    Bounds := Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
 
-  Bounds.X2 -= Image.Width;
-  Bounds.Y2 -= Image.Height;
-
-  for Y := Bounds.Y1 to Bounds.Y2 do
+  if (Bounds.Width > 0) and (Bounds.Height > 0) then
   begin
-    Ptr := @FData[Y * FWidth + Bounds.X1];
-    for X := Bounds.X1 to Bounds.X2 do
-    begin
-      if Hit(Ptr) then
-      begin
-        Result.X := X;
-        Result.Y := Y;
-
-        Exit;
-      end;
-
-      Inc(Ptr);
-    end;
+    TPA := SimbaFinder_FindImage(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft,
+                                 Image, EColorSpace.RGB, Tolerance, DefaultMultipliers, 1);
+    if (Length(TPA) > 0) then
+      Result := TPA[0];
   end;
-
-  Result.X := -1;
-  Result.Y := -1;
 end;
 
 function TSimbaImage.FindAlpha(Value: Byte): TPointArray;

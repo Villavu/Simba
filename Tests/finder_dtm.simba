@@ -45,21 +45,21 @@ begin
   Assert(TPA[1] = TreePoints[1]);
   Assert(TPA[2] = TreePoints[2]);
 
-  // find one, entire client
+  // find one, entire client: the first in row order
   P := Target.FindDTM(DTM);
-  Assert(TreePoints.Contains(P));
+  Assert(P = TreePoints[0]);
 
   // find one, area
   P := Target.FindDTM(DTM, [25,38,83,95]);
-  Assert(TreePoints.Contains(P));
+  Assert(P = TreePoints[3]);
 
-  // Add a point
-  DTM.AddPoint(-3,0,Colors.BLACK,0,0);
+  // Add a point, 3 left of the main one
+  DTM.AddPoint(DTM.Points[0].X - 3, DTM.Points[0].Y, Colors.BLACK, 0, 0);
 
   // Does not match though
   Assert(Target.FindDTMEx(DTM).Length = 0);
 
   // Add tolerance
-  DTM.Points[DTM.PointCount - 1].Tolerance := 45;
+  DTM.Points[DTM.PointCount - 1].Tolerance := 10.2;
   Assert(Target.FindDTMEx(DTM).Length = 8);
-end;
+end.

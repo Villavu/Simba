@@ -2,14 +2,10 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
-  --------------------------------------------------------------------------
-  The simple Image finder.
 }
 unit simba.finder_image;
 
 {$i simba.inc}
-
-{.$DEFINE SIMBA_BENCHMARKS}
 
 interface
 
@@ -17,25 +13,25 @@ uses
   Classes, SysUtils,
   simba.base,
   simba.colormath,
-  simba.target,
   simba.image;
 
-function FindImageOnTarget(Target: TSimbaTarget; Image: TSimbaImage; Bounds: TBox;
-                           Formula: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1): TPointArray;
+function SimbaFinder_FindImage(Data: PColorBGRA; PixelsPerRow, AWidth, AHeight: Integer; Offset: TPoint;
+                               Image: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers;
+                               MaxToFind: Integer = -1): TPointArray;
 
-function FindTemplateOnTarget(Target: TSimbaTarget; Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
+function SimbaFinder_FindTemplate(Data: PColorBGRA; PixelsPerRow, AWidth, AHeight: Integer; Offset: TPoint;
+                                  Templ: TSimbaImage; out Match: Single): TPoint;
 
 implementation
 
 uses
   simba.container_point,
+  simba.finder_pixels,
   simba.matchtemplate,
-  simba.threading,
   simba.multiprocessing,
   simba.colormath_distance,
   simba.colormath_distance_unrolled,
   simba.vartype_pointarray,
-  simba.vartype_box,
   simba.vartype_matrix,
   simba.colormath_conversion;
 
@@ -46,17 +42,17 @@ const
 // and "transparent" (aka ignore) colors.
 function ConvertBitmapColors(Image: TSimbaImage; ColorSpace: EColorSpace): PByte;
 var
-  I: Integer;
-  Source: PColorBGRA;
+  Source, SourceEnd: PColorBGRA;
   Dest, DestFix: PByte;
 begin
   // packed record Transparent: Boolean; Color: TColorXXX; end;
   Result := GetMem((Image.Width * Image.Height) * BitmapColorSize);
 
   Source := Image.Data;
+  SourceEnd := Source + (Image.Width * Image.Height);
   Dest := Result;
 
-  for I := 0 to (Image.Width * Image.Height) - 1 do
+  while (Source < SourceEnd) do
   begin
     PBoolean(Dest)^ := Source^.A = 0;
 
@@ -84,9 +80,9 @@ begin
   end;
 end;
 
-function FindImageOnBuffer(var Limit: TLimit; Image: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer): TPointArray;
+function FindImageSlice(SliceFound: PInt32; SliceIndex, MaxToFind: Integer; Image: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer): TPointArray;
 var
-  BitmapColors: PByte;
+  BitmapColors, BitmapEnd: PByte;
 
   CompareFunc: TColorDistanceFunc;
   MaxDistance: Single;
@@ -103,14 +99,15 @@ var
 
   function Hit(BufferPtr: PColorBGRA): Boolean;
   var
-    X, Y: Integer;
     BitmapPtr: PByte;
+    RowEnd: PColorBGRA;
   begin
     BitmapPtr := BitmapColors;
 
-    for Y := 0 to Image.Height - 1 do
+    while (BitmapPtr < BitmapEnd) do
     begin
-      for X := 0 to Image.Width - 1 do
+      RowEnd := BufferPtr + Image.Width;
+      while (BufferPtr < RowEnd) do
       begin
         if (not IsTransparent(BitmapPtr)) and (not Match(BufferPtr^, BitmapPtr)) then
           Exit(False);
@@ -123,6 +120,16 @@ var
     end;
 
     Result := True;
+  end;
+
+  function Enough: Boolean;
+  var
+    I, Found: Integer;
+  begin
+    Found := 0;
+    for I := 0 to SliceIndex do
+      Found += SliceFound[I];
+    Result := Found >= MaxToFind;
   end;
 
 var
@@ -177,6 +184,7 @@ begin
   end;
 
   BitmapColors := ConvertBitmapColors(Image, ColorSpace);
+  BitmapEnd := BitmapColors + (Image.Width * Image.Height) * BitmapColorSize;
 
   try
     Dec(SearchWidth, Image.Width);
@@ -190,16 +198,15 @@ begin
       begin
         if Hit(RowPtr) then
         begin
-          PointBuffer.Add(X, Y);
+          PointBuffer.Add(X + OffsetX, Y + OffsetY);
 
-          Limit.Inc();
+          Inc(SliceFound[SliceIndex]);
         end;
 
         Inc(RowPtr);
       end;
 
-      // Check if we reached the limit every row.
-      if Limit.Reached() then
+      if (MaxToFind > 0) and Enough() then
         Break;
     end;
 
@@ -209,79 +216,53 @@ begin
   end;
 end;
 
-function FindImageOnTarget(Target: TSimbaTarget; Image: TSimbaImage;
-  Bounds: TBox; Formula: EColorSpace; Tolerance: Single;
-  Multipliers: TChannelMultipliers; MaxToFind: Integer): TPointArray;
+function SimbaFinder_FindImage(Data: PColorBGRA; PixelsPerRow, AWidth, AHeight: Integer; Offset: TPoint;
+                               Image: TSimbaImage; ColorSpace: EColorSpace; Tolerance: Single; Multipliers: TChannelMultipliers;
+                               MaxToFind: Integer): TPointArray;
 var
-  Buffer: PColorBGRA;
-  BufferWidth: Integer;
-
   SliceResults: T2DPointArray;
+  SliceFound: array of Int32;
 
-  Limit: TLimit;
-
+  // a slice covers the rows a match can start on, plus the image's height below them
   procedure Execute(const Index, Lo, Hi: Integer);
-  var
-    TPA: TPointArray;
   begin
-    TPA := FindImageOnBuffer(
-      Limit,
-      Image, Formula, Tolerance, Multipliers,
-      @Buffer[Lo * BufferWidth], BufferWidth, Bounds.Width, (Hi - Lo) + Image.Height
+    SliceResults[Index] := FindImageSlice(
+      @SliceFound[0], Index, MaxToFind,
+      Image, ColorSpace, Tolerance, Multipliers,
+      @Data[Lo * PixelsPerRow], PixelsPerRow, AWidth, (Hi - Lo) + Image.Height, Offset.X, Offset.Y + Lo
     );
-
-    SliceResults[Index] := TPA.Offset(Bounds.X1, Bounds.Y1 + Lo);
   end;
 
-{$IFDEF SIMBA_BENCHMARKS}
-var
-  T: Double;
-  ThreadsUsed: Integer;
-{$ENDIF}
 begin
   Result := [];
+  if (Data = nil) or (Image = nil) or (Image.Width < 1) or (Image.Height < 1) or (Image.Width > AWidth) or (Image.Height > AHeight) then
+    Exit;
 
-  Limit := TLimit.Create(MaxToFind);
+  SetLength(SliceResults, SimbaMultiprocessing.ThreadsForArea(AWidth, AHeight)); // Cannot exceed this
+  SetLength(SliceFound, Length(SliceResults));
+  SimbaMultiprocessing.Run(Length(SliceResults), 0, AHeight - Image.Height, @Execute);
 
-  if Target.GetImageData(Bounds, Buffer, BufferWidth) then
-  try
-    SetLength(SliceResults, SimbaMultiprocessing.ThreadsForArea(Bounds.Width, Bounds.Height)); // Cannot exceed this
-    {$IFDEF SIMBA_BENCHMARKS}
-    T := HighResolutionTime();
-    ThreadsUsed :=
-    {$ENDIF}
-    SimbaMultiprocessing.Run(Length(SliceResults), 0, Bounds.Height - Image.Height, @Execute);
-
-    Result := SliceResults.Merge();
-    if (MaxToFind > -1) and (Length(Result) > MaxToFind) then
-      SetLength(Result, MaxToFind);
-
-    {$IFDEF SIMBA_BENCHMARKS}
-    DebugLn('FindImage: ColorSpace=%s Width=%d Height=%d ThreadsUsed=%d Time=%f', [Formula.AsString(), Bounds.Width, Bounds.Height, ThreadsUsed, HighResolutionTime() - T]);
-    {$ENDIF}
-  finally
-    Target.FreeImageData(Buffer);
-  end;
+  Result := SliceResults.Merge();
+  if (MaxToFind > -1) and (Length(Result) > MaxToFind) then
+    SetLength(Result, MaxToFind);
 end;
 
-function FindTemplateOnTarget(Target: TSimbaTarget; Templ: TSimbaImage; out Match: Single; Bounds: TBox): TPoint;
+function SimbaFinder_FindTemplate(Data: PColorBGRA; PixelsPerRow, AWidth, AHeight: Integer; Offset: TPoint;
+                                  Templ: TSimbaImage; out Match: Single): TPoint;
 var
-  Image: TSimbaImage;
   Mat: TSingleMatrix;
   Best: TPoint;
 begin
   Match := 0;
+  Result := TPoint.Create(-1, -1);
+  if (Data = nil) or (Templ = nil) or (Templ.Width < 1) or (Templ.Height < 1) or (Templ.Width > AWidth) or (Templ.Height > AHeight) then
+    Exit;
 
-  if Target.GetImageDataAsImage(Bounds, Image) then
-  try
-    Mat := MatchTemplate(Image.ToMatrix(), Templ.ToMatrix(), TM_CCOEFF_NORMED);
+  Mat := MatchTemplate(SimbaFinder_GetColorsMatrix(Data, PixelsPerRow, AWidth, AHeight), Templ.ToMatrix(), TM_CCOEFF_NORMED);
 
-    Best := Mat.ArgMax;
-    Match := Mat[Best.Y, Best.X];
-    Result := Best + Bounds.TopLeft;
-  finally
-    Image.Free();
-  end;
+  Best := Mat.ArgMax;
+  Match := Mat[Best.Y, Best.X];
+  Result := Best + Offset;
 end;
 
 end.

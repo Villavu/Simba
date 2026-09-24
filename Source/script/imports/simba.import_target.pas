@@ -844,6 +844,7 @@ TTarget.MatchColor
 ```
 function TTarget.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
 ```
+How far each pixel is from `Color`, from 0 (an exact match) up to 100
 *)
 procedure _LapeTarget_MatchColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -1125,7 +1126,7 @@ Return the brightness of the area within the target.
 `Algo` can be either of:
  - `EBrightnessAlgo.MIN`
  - `EBrightnessAlgo.MAX`
- - `EBrightnessAlgo.MODE`
+ - `EBrightnessAlgo.MEAN`
 *)
 procedure _LapeFinder_GetBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
