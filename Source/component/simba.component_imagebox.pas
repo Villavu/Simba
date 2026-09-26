@@ -44,11 +44,13 @@ type
     FPixels: TSimbaImage;
     FVisible: Boolean;
     FPriority: Integer;
+    FOpacity: Byte;
 
     procedure Resize(W, H: Integer);
     procedure InsertByPriority;
     procedure SetVisible(Value: Boolean);
     procedure SetPriority(Value: Integer);
+    procedure SetOpacity(Value: Byte);
   public
     constructor Create(Box: TSimbaImageBox); reintroduce;
     destructor Destroy; override;
@@ -56,6 +58,7 @@ type
     property Visible: Boolean read FVisible write SetVisible;
     // paint order: lower first so a higher priority paints on top
     property Priority: Integer read FPriority write SetPriority;
+    property Opacity: Byte read FOpacity write SetOpacity;
   end;
   TSimbaImageBoxLayerList = specialize TSimbaObjectList<TSimbaImageBoxLayer>;
 
@@ -79,8 +82,6 @@ type
     FImageWidth: Integer;
     FImageHeight: Integer;
     FLayers: TSimbaImageBoxLayerList;
-    FVisibleLayers: TSimbaImageArray;
-    FVisibleLayersChanged: Boolean; // a layer was added, freed, shown, hidden or reordered
     FMousePos: TPoint; // in image space
 
     FZoom: Integer;
@@ -169,7 +170,7 @@ type
 
     function GetLayer(Index: Integer): TSimbaImageBoxLayer;
     function GetLayerCount: Integer;
-    function GetVisibleLayers: TSimbaImageArray;
+    function GetVisibleLayers: TSimbaImageBoxRenderLayers;
 
     function GetShowStatusBar: Boolean;
     function GetShowScrollbars: Boolean;
@@ -264,7 +265,6 @@ begin
     Dec(I);
   end;
   FBox.FLayers[I] := Self;
-  FBox.FVisibleLayersChanged := True;
 end;
 
 procedure TSimbaImageBoxLayer.SetVisible(Value: Boolean);
@@ -273,7 +273,15 @@ begin
     Exit;
 
   FVisible := Value;
-  FBox.FVisibleLayersChanged := True;
+  FBox.Invalidate();
+end;
+
+procedure TSimbaImageBoxLayer.SetOpacity(Value: Byte);
+begin
+  if (FOpacity = Value) then
+    Exit;
+
+  FOpacity := Value;
   FBox.Invalidate();
 end;
 
@@ -296,6 +304,7 @@ begin
 
   FBox := Box;
   FVisible := True;
+  FOpacity := ALPHA_OPAQUE;
 
   FPixels := TSimbaImage.Create();
   DefaultPixel := Default(TColorBGRA); // transparent black, so a cleared layer shows what is under it
@@ -309,7 +318,6 @@ begin
   if (FBox <> nil) then
   begin
     FBox.FLayers.Delete(Self);
-    FBox.FVisibleLayersChanged := True;
     FBox.Invalidate();
   end;
 
@@ -492,7 +500,7 @@ end;
 procedure TSimbaImageBox.Paint;
 var
   Overlay: TSimbaImageBoxOverlayEvent;
-  LayerPixels: TSimbaImageArray;
+  LayerPixels: TSimbaImageBoxRenderLayers;
   Drawn: TPoint;
   Started, Finished: Double;
 begin
@@ -799,34 +807,27 @@ begin
   Result := FLayers.Count;
 end;
 
-function TSimbaImageBox.GetVisibleLayers: TSimbaImageArray;
+function TSimbaImageBox.GetVisibleLayers: TSimbaImageBoxRenderLayers;
 var
   Layer: TSimbaImageBoxLayer;
   I, Count: Integer;
 begin
+  SetLength(Result, FLayers.Count);
+  Count := 0;
   for I := 0 to FLayers.Count - 1 do
   begin
     Layer := FLayers[I];
     if (Layer.Width <> FBackground.Width) or (Layer.Height <> FBackground.Height) then
       Layer.Resize(FBackground.Width, FBackground.Height);
+
+    if Layer.Visible and (Layer.Opacity > ALPHA_TRANSPARENT) then
+    begin
+      Result[Count].Pixels := Layer.FPixels;
+      Result[Count].Opacity := Layer.Opacity;
+      Inc(Count);
+    end;
   end;
-
-  if FVisibleLayersChanged then
-  begin
-    FVisibleLayersChanged := False;
-
-    SetLength(FVisibleLayers, FLayers.Count);
-    Count := 0;
-    for I := 0 to FLayers.Count - 1 do
-      if FLayers[I].Visible then
-      begin
-        FVisibleLayers[Count] := FLayers[I].FPixels;
-        Inc(Count);
-      end;
-    SetLength(FVisibleLayers, Count);
-  end;
-
-  Result := FVisibleLayers;
+  SetLength(Result, Count);
 end;
 
 function TSimbaImageBox.GetShowStatusBar: Boolean;

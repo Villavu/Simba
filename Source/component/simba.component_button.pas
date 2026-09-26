@@ -149,6 +149,12 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
+  // Buttons the same width, ChildSizing.ControlsPerLine (2) to a row.
+  TSimbaButtonGrid = class(TCustomControl)
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
   TSimbaLabeledToggleButtonGroup = class(TCustomControl)
   protected
     FLabel: TLabel;
@@ -290,6 +296,20 @@ begin
   AutoSize := True;
   Color := SimbaComponentTheme.ColorBackground;
   BevelOuter := bvNone;
+end;
+
+constructor TSimbaButtonGrid.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  AutoSize := True;
+  ParentColor := True;
+  ChildSizing.Layout := cclLeftToRightThenTopToBottom;
+  ChildSizing.ControlsPerLine := 2;
+  ChildSizing.EnlargeHorizontal := crsSameSize;
+  ChildSizing.ShrinkHorizontal := crsScaleChilds;
+  ChildSizing.HorizontalSpacing := 5;
+  ChildSizing.VerticalSpacing := 5;
 end;
 
 procedure TSimbaLabeledToggleButtonGroup.SetLabelMeasure(Value: String);

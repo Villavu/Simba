@@ -12,7 +12,7 @@ interface
 uses
   Classes, SysUtils, Graphics,
   simba.base, simba.baseclass, simba.image_textdrawer, simba.colormath,
-  simba.vartype_polygon, simba.vartype_quad;
+  simba.vartype_polygon, simba.vartype_quad, simba.dtm;
 
 type
   {$PUSH}
@@ -250,8 +250,14 @@ type
     function ToLazBitmap: TBitmap;
     procedure FromLazBitmap(LazBitmap: TBitmap);
 
-    function FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
+    // Bounds [-1,-1,-1,-1] is the whole image
+    function FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray; overload;
+    function FindColor(Color: TColorTolerance; Bounds: TBox): TPointArray; overload;
     function FindImage(Image: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;
+    // every match
+    function FindDTM(DTM: TDTM; Bounds: TBox): TPointArray;
+    // each pixel's distance from Color: 0 an exact match, 100 as far as the colour space goes
+    function MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
     function FindAlpha(Value: Byte): TPointArray;
   end;
 
@@ -276,7 +282,8 @@ uses
   simba.container_point,
   simba.threading,
   simba.finder_color,
-  simba.finder_image;
+  simba.finder_image,
+  simba.finder_dtm;
 
 function TSimbaImage.Copy: TSimbaImage;
 begin
@@ -684,6 +691,11 @@ end;
 
 function TSimbaImage.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
 begin
+  Result := FindColor(TColorTolerance.Create(Color, Tolerance, EColorSpace.RGB, DefaultMultipliers), Bounds);
+end;
+
+function TSimbaImage.FindColor(Color: TColorTolerance; Bounds: TBox): TPointArray;
+begin
   Result := [];
 
   if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
@@ -693,7 +705,33 @@ begin
 
   if (Bounds.Width > 0) and (Bounds.Height > 0) then
     Result := SimbaFinder_FindColors(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft,
-                                     EColorSpace.RGB, Color, Tolerance, DefaultMultipliers);
+                                     Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
+end;
+
+function TSimbaImage.FindDTM(DTM: TDTM; Bounds: TBox): TPointArray;
+begin
+  Result := [];
+
+  if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
+    Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
+  else
+    Bounds := Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+
+  if (Bounds.Width > 0) and (Bounds.Height > 0) then
+    Result := SimbaFinder_FindDTM(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, DTM, -1);
+end;
+
+function TSimbaImage.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
+begin
+  Result := [];
+
+  if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
+    Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
+  else
+    Bounds := Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+
+  if (Bounds.Width > 0) and (Bounds.Height > 0) then
+    Result := SimbaFinder_MatchColors(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, ColorSpace, Color, Multipliers);
 end;
 
 function TSimbaImage.FindImage(Image: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;

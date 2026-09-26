@@ -12,14 +12,14 @@ unit simba.toolform;
 interface
 
 uses
-  Classes, SysUtils, Controls, ComCtrls, ExtCtrls, Forms, Menus, Graphics,
+  Classes, SysUtils, Controls, ExtCtrls, Forms, Menus,
   simba.base,
   simba.image,
-  simba.colormath,
   simba.component_imagebox,
-  simba.component_imageboxcanvas,
+  simba.canvas,
   simba.component_imageboxzoom,
   simba.component_button,
+  simba.component_divider,
   simba.component_menubar;
 
 type
@@ -30,45 +30,72 @@ type
   private const
     DEF_WIDTH = 1000;
     DEF_HEIGHT = 650;
+    RECENT_IMAGE_COUNT = 5;
   protected
     FMenuBar: TSimbaMenuBar;
-    FImageMenu: TPopupMenu;
-    FDrawColorMenu: TMenuItem;
-    FDrawColor: TColor;
+    FRecentImagesMenu: TMenuItem;
+    FSidePanelFrame: TPanel;
     FSidePanel: TPanel;
-    FButtonPanel: TPanel;
+    FSidePanelPercent: Single; // its share of the form's width, kept as the form resizes
+    FDivider: TSimbaDivider;
+    FButtonPanel: TSimbaButtonGrid;
     FImageBox: TSimbaImageBox;
     FImageBoxZoom: TSimbaImageBoxZoomPanel;
+    FTopLayer: TSimbaImageBoxLayer;
     FImageSupplier: TImageSupplier;
     FImageSupplierLape: TImageSupplierLape;
+    FUpdateImageOnFirstShow: Boolean;
 
     procedure DoClose(var CloseAction: TCloseAction); override;
     procedure DoFirstShow; override;
+    procedure DoOnResize; override;
+    procedure DoSidePanelResizing(Sender: TObject; var NewSize: Integer; var Accept: Boolean); virtual;
+    procedure DoSidePanelFrameResize(Sender: TObject); virtual;
+    procedure DoSidePanelMoved(Sender: TObject); virtual;
 
+    procedure DoImageMenuPopup(Sender: TObject); virtual;
     procedure DoLoadImageClick(Sender: TObject); virtual;
-    procedure DoDrawColorChange(Sender: TObject); virtual;
+    procedure DoRecentImageClick(Sender: TObject); virtual;
+    procedure DoUpdateImageClick(Sender: TObject); virtual;
     procedure DoFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); virtual;
-    procedure DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect); virtual;
+    procedure DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaCanvas; R: TRect); virtual;
     procedure DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer); virtual;
     procedure DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); virtual;
     procedure DoImgMouseUp(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); virtual;
 
-    procedure DoImageUpdated; virtual;
+    procedure UpdateImage(); virtual;
+    // put first in Recent Images, which every tool form shares
+    procedure LoadImage(FileName: String); virtual;
+    // the image box it is built round: a descendant can make its own
+    function CreateImageBox: TSimbaImageBox; virtual;
 
-    procedure UpdateImage();
-
-    function GetUserPanel: TPanel;
-    procedure SetImage(Image: TSimbaImage);
+    function GetShowButtonDivider: Boolean; virtual;
+    procedure SetShowButtonDivider(Value: Boolean); virtual;
+    function GetShowZoom: Boolean; virtual;
+    procedure SetShowZoom(Value: Boolean); virtual;
+    function GetTopLayer: TSimbaImageBoxLayer; virtual;
+    // every image change comes through here; nil leaves the image as it is
+    procedure SetImage(Value: TSimbaImage); virtual;
   public
     FreeOnClose: Boolean;
 
     constructor Create(ImageSupplier: TImageSupplier); virtual; reintroduce;
     constructor CreateLape(ImageSupplier: TImageSupplierLape); virtual; reintroduce;
 
-    function addButton(ACaption: String; AOnClick: TNotifyEvent): TSimbaButton;
+    function addButton(ACaption: String; AOnClick: TNotifyEvent): TSimbaButton; virtual;
+    // a menu on the menu bar, for its items
+    function addMenu(ACaption: String; AOnPopup: TNotifyEvent = nil): TMenuItem; virtual;
+    // made and added to AParent; a caption of '-' is a line
+    function addMenuItem(AParent: TMenuItem; ACaption: String; AOnClick: TNotifyEvent = nil; AShortCut: TShortCut = scNone): TMenuItem; virtual;
+    // the Image menu with Load Image, Recent Images and Update Image (F5), for a form's own image items after
+    function addImageMenu: TMenuItem; virtual;
 
-    property DrawColor: TColor read FDrawColor write FDrawColor;
-    property UserPanel: TPanel read GetUserPanel;
+    // the line over the buttons at the bottom of the side panel
+    property ShowButtonDivider: Boolean read GetShowButtonDivider write SetShowButtonDivider;
+    // the magnifier at the top of the side panel
+    property ShowZoom: Boolean read GetShowZoom write SetShowZoom;
+    // a layer over the image and every other layer, made the first time it is asked for
+    property TopLayer: TSimbaImageBoxLayer read GetTopLayer;
     property Image: TSimbaImage write SetImage;
     property ImageBox: TSimbaImageBox read FImageBox;
   end;
@@ -76,16 +103,45 @@ type
 implementation
 
 uses
-  LCLType, Dialogs,
-  simba.component_edit, simba.component_splitter,
-  simba.env,
-  simba.component_divider,
+  LCLType, Dialogs, LazFileUtils,
+  simba.component_splitter,
   simba.component_theme,
-  simba.threading;
+  simba.settings;
 
-function TSimbaToolForm.GetUserPanel: TPanel;
+function TSimbaToolForm.GetShowButtonDivider: Boolean;
 begin
-  Result := FImageBox.UserPanel;
+  Result := FDivider.Visible;
+end;
+
+procedure TSimbaToolForm.SetShowButtonDivider(Value: Boolean);
+begin
+  FDivider.Visible := Value;
+end;
+
+function TSimbaToolForm.GetShowZoom: Boolean;
+begin
+  Result := FImageBoxZoom.Visible;
+end;
+
+procedure TSimbaToolForm.SetShowZoom(Value: Boolean);
+begin
+  FImageBoxZoom.Visible := Value;
+end;
+
+function TSimbaToolForm.GetTopLayer: TSimbaImageBoxLayer;
+begin
+  if (FTopLayer = nil) then
+  begin
+    FTopLayer := TSimbaImageBoxLayer.Create(FImageBox);
+    FTopLayer.Priority := High(Integer);
+  end;
+
+  Result := FTopLayer;
+end;
+
+function TSimbaToolForm.CreateImageBox: TSimbaImageBox;
+begin
+  Result := TSimbaImageBox.Create(Self);
 end;
 
 procedure TSimbaToolForm.DoClose(var CloseAction: TCloseAction);
@@ -97,10 +153,70 @@ begin
 end;
 
 procedure TSimbaToolForm.DoFirstShow;
+var
+  Area: TRect;
 begin
   inherited DoFirstShow();
 
-  UpdateImage();
+  Area := Screen.MonitorFromRect(BoundsRect).WorkareaRect;
+  if (Width > Area.Width) or (Height > Area.Height) then
+    WindowState := wsMaximized;
+
+  if FUpdateImageOnFirstShow then
+    UpdateImage();
+end;
+
+// Like docking's ScaleOnResize: the side panel keeps its share of the width as the form resizes.
+procedure TSimbaToolForm.DoOnResize;
+begin
+  inherited DoOnResize();
+
+  if (FSidePanelFrame <> nil) and (FImageBox <> nil) then
+    FSidePanelFrame.Width := Min(Round(ClientWidth * FSidePanelPercent), ClientWidth - FImageBox.Constraints.MinWidth);
+end;
+
+// Lock resizing of all components while dragging to prevent tons of updates
+procedure TSimbaToolForm.DoSidePanelResizing(Sender: TObject; var NewSize: Integer; var Accept: Boolean);
+begin
+  if (FSidePanel.Constraints.MaxWidth = 0) then
+  begin
+    FSidePanel.Constraints.MinWidth := FSidePanel.Width;
+    FSidePanel.Constraints.MaxWidth := FSidePanel.Width;
+  end;
+end;
+
+procedure TSimbaToolForm.DoSidePanelFrameResize(Sender: TObject);
+begin
+  FSidePanelFrame.Update();
+end;
+
+procedure TSimbaToolForm.DoSidePanelMoved(Sender: TObject);
+begin
+  FSidePanelPercent := FSidePanelFrame.Width / ClientWidth;
+
+  // let go of the update locking
+  FSidePanel.Constraints.MaxWidth := 0;
+  FSidePanel.Constraints.MinWidth := 0;
+end;
+
+procedure TSimbaToolForm.DoImageMenuPopup(Sender: TObject);
+var
+  Files: TStringList;
+  I: Integer;
+begin
+  FRecentImagesMenu.Clear();
+
+  Files := TStringList.Create();
+  try
+    Files.Text := SimbaSettings.General.RecentImages.Value;
+    for I := 0 to Files.Count - 1 do
+      if FileExists(Files[I]) then
+        addMenuItem(FRecentImagesMenu, ShortDisplayFilename(Files[I]), @DoRecentImageClick).Hint := Files[I];
+  finally
+    Files.Free();
+  end;
+
+  FRecentImagesMenu.Enabled := (FRecentImagesMenu.Count > 0);
 end;
 
 procedure TSimbaToolForm.DoLoadImageClick(Sender: TObject);
@@ -109,28 +225,20 @@ begin
   try
     InitialDir := Application.Location;
     if Execute() and FileExists(FileName) then
-      FImageBox.SetImage(TSimbaImage.Create(FileName));
+      LoadImage(FileName);
   finally
     Free();
   end;
 end;
 
-procedure TSimbaToolForm.DoDrawColorChange(Sender: TObject);
-var
-  I: Integer;
+procedure TSimbaToolForm.DoRecentImageClick(Sender: TObject);
 begin
-  for I := 0 to FDrawColorMenu.Count - 1 do
-    FDrawColorMenu.Items[I].Checked := FDrawColorMenu.Items[I] = Sender;
+  LoadImage(TMenuItem(Sender).Hint);
+end;
 
-  case TMenuItem(Sender).Caption of
-    'Red':    FDrawColor := clRed;
-    'Green':  FDrawColor := clGreen;
-    'Blue':   FDrawColor := clBlue;
-    'Yellow': FDrawColor := clYellow;
-    'Aqua':   FDrawColor := clAqua;
-  end;
-
-  FImageBox.Repaint();
+procedure TSimbaToolForm.DoUpdateImageClick(Sender: TObject);
+begin
+  UpdateImage();
 end;
 
 procedure TSimbaToolForm.DoFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -142,19 +250,20 @@ begin
   end;
 end;
 
-procedure TSimbaToolForm.SetImage(Image: TSimbaImage);
+procedure TSimbaToolForm.SetImage(Value: TSimbaImage);
 begin
-  FImageBox.SetImage(Image);
+  if (Value <> nil) then
+    FImageBox.Background := Value;
 end;
 
-procedure TSimbaToolForm.DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
+procedure TSimbaToolForm.DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaCanvas; R: TRect);
 begin
 end;
 
 procedure TSimbaToolForm.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 begin
-  if FImageBox.MouseInClient then
-    FImageBoxZoom.Move(FImageBox.Background.Canvas, X ,Y);
+  if FImageBoxZoom.Visible and FImageBox.MouseInClient then
+    FImageBoxZoom.Move(FImageBox.Background, X, Y);
 end;
 
 procedure TSimbaToolForm.DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -163,69 +272,52 @@ end;
 
 procedure TSimbaToolForm.DoImgMouseUp(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-
 end;
 
+// no image to give keeps the one shown
 procedure TSimbaToolForm.UpdateImage();
-
-  procedure SetImageNormal;
-  begin
-    FImageBox.SetImage(FImageSupplier());
-  end;
-
-  procedure SetImageFromLape;
-  var
-    LapeObject: TByteArray;
-  begin
-    LapeObject := FImageSupplierLape();
-
-    FImageBox.SetImage(
-      PSimbaImage(LapeObject)^,
-      PSizeInt(LapeObject)[-2] <= 1 // If has no image references, we need to free it
-    );
-  end;
-
+var
+  LapeObject: TByteArray;
 begin
   if Assigned(FImageSupplierLape) then
-    SetImageFromLape()
+  begin
+    LapeObject := FImageSupplierLape();
+    if (LapeObject <> nil) then
+      SetImage(PSimbaImage(LapeObject)^.Copy());
+  end
   else if Assigned(FImageSupplier) then
-    SetImageNormal();
-
-  DoImageUpdated();
+    SetImage(FImageSupplier());
 end;
 
-procedure TSimbaToolForm.DoImageUpdated;
+procedure TSimbaToolForm.LoadImage(FileName: String);
+var
+  Files: TStringList;
 begin
+  SetImage(TSimbaImage.Create(FileName));
+
+  Files := TStringList.Create();
+  try
+    Files.Text := SimbaSettings.General.RecentImages.Value;
+    if (Files.IndexOf(FileName) > -1) then
+      Files.Delete(Files.IndexOf(FileName));
+    Files.Insert(0, FileName);
+    while (Files.Count > RECENT_IMAGE_COUNT) do
+      Files.Delete(Files.Count - 1);
+    SimbaSettings.General.RecentImages.Value := Files.Text;
+  finally
+    Files.Free();
+  end;
 end;
 
 constructor TSimbaToolForm.Create(ImageSupplier: TImageSupplier);
-
-  function CreateImageMenu: TPopupMenu;
-  begin
-    FDrawColorMenu := NewItem('Draw Color', scNone, False, True, nil, 0, '');
-    FDrawColorMenu.Add(NewItem('Red', scNone, True, True, @DoDrawColorChange, 0, ''));
-    FDrawColorMenu.Add(NewItem('Green', scNone, False, True, @DoDrawColorChange, 0, ''));
-    FDrawColorMenu.Add(NewItem('Blue', scNone, False, True, @DoDrawColorChange, 0, ''));
-    FDrawColorMenu.Add(NewItem('Yellow', scNone, False, True, @DoDrawColorChange, 0, ''));
-    FDrawColorMenu.Add(NewItem('Aqua', scNone, False, True, @DoDrawColorChange, 0, ''));
-
-    FImageMenu := TPopupMenu.Create(Self);
-    FImageMenu.Items.Add(NewItem('Load Image', scNone, False, True, @DoLoadImageClick, 0, ''));
-    FImageMenu.Items.Add(NewItem('Update Image', ShortCut(VK_F5, []), False, True, nil, 0, ''));
-    FImageMenu.Items.Add(NewLine());
-    FImageMenu.Items.Add(FDrawColorMenu);
-
-    Result := FImageMenu;
-  end;
-
 begin
   inherited CreateNew(nil);
 
   FImageSupplier := ImageSupplier;
-  FDrawColor := clRed;
+  FUpdateImageOnFirstShow := True;
 
-  Width := Min(Scale96ToScreen(DEF_WIDTH), Monitor.WorkareaRect.Width - 200);
-  Height := Min(Scale96ToScreen(DEF_HEIGHT), Monitor.WorkareaRect.Height - 100);
+  Width := Scale96ToScreen(DEF_WIDTH);
+  Height := Scale96ToScreen(DEF_HEIGHT);
   Position := poScreenCenter;
   KeyPreview := True;
   OnKeyDown := @DoFormKeyDown;
@@ -235,25 +327,38 @@ begin
   FMenuBar := TSimbaMenuBar.Create(Self);
   FMenuBar.Parent := Self;
   FMenuBar.Align := alTop;
-  FMenuBar.AddMenu('Image', CreateImageMenu());
+  FMenuBar.Visible := False; // until a menu is added
+
+  FSidePanelFrame := TPanel.Create(Self);
+  FSidePanelFrame.Parent := Self;
+  FSidePanelFrame.Align := alRight;
+  FSidePanelFrame.BevelOuter := bvNone;
+  FSidePanelFrame.BevelInner := bvNone;
+  FSidePanelFrame.Color := SimbaComponentTheme.ColorFrame;
+  FSidePanelFrame.Constraints.MinWidth := Scale96ToScreen(150); // only so dragging cannot lose it
+  FSidePanelFrame.OnResize := @DoSidePanelFrameResize;
+  FSidePanelPercent := 0.3;
+  FSidePanelFrame.Width := Round(ClientWidth * FSidePanelPercent);
 
   FSidePanel := TPanel.Create(Self);
-  FSidePanel.Parent := Self;
-  FSidePanel.Align := alRight;
+  FSidePanel.Parent := FSidePanelFrame;
+  FSidePanel.Align := alClient;
   FSidePanel.BevelOuter := bvNone;
   FSidePanel.BevelInner := bvNone;
   FSidePanel.Color := SimbaComponentTheme.ColorFrame;
-  FSidePanel.Constraints.MinWidth := 500;
 
   with TSimbaSplitter.Create(Self) do
   begin
     Parent := Self;
     Align := alRight;
+    OnCanResize := @DoSidePanelResizing;
+    OnMoved := @DoSidePanelMoved;
   end;
 
-  FImageBox := TSimbaImageBox.Create(Self);
+  FImageBox := CreateImageBox();
   FImageBox.Parent := Self;
   FImageBox.Align := alClient;
+  FImageBox.Constraints.MinWidth := Scale96ToScreen(200);
   FImageBox.OnImgMouseMove := @DoImgMouseMove;
   FImageBox.OnImgMouseDown := @DoImgMouseDown;
   FImageBox.OnImgMouseUp := @DoImgMouseUp;
@@ -267,27 +372,18 @@ begin
   FImageBoxZoom.Font.Color := SimbaComponentTheme.ColorFont;
   FImageBoxZoom.FrameColor := SimbaComponentTheme.ColorScrollBarActive;
 
-  with TSimbaDivider.Create(FSidePanel) do
-  begin
-    Parent := FSidePanel;
-    Align := alBottom;
-    BorderSpacing.Top := 8;
-    BorderSpacing.Bottom := 8;
-    BorderSpacing.Left := 5;
-    BorderSpacing.Right := 5;
-  end;
+  FDivider := TSimbaDivider.Create(FSidePanel);
+  FDivider.Parent := FSidePanel;
+  FDivider.Align := alBottom;
+  FDivider.BorderSpacing.Top := 8;
+  FDivider.BorderSpacing.Bottom := 8;
+  FDivider.BorderSpacing.Left := 5;
+  FDivider.BorderSpacing.Right := 5;
 
-  FButtonPanel := TPanel.Create(FSidePanel);
+  FButtonPanel := TSimbaButtonGrid.Create(FSidePanel);
   FButtonPanel.Parent := FSidePanel;
   FButtonPanel.Align := alBottom;
-  FButtonPanel.AutoSize := True;
   FButtonPanel.BorderSpacing.Around := 5;
-  FButtonPanel.ChildSizing.EnlargeHorizontal := crsSameSize;
-  FButtonPanel.ChildSizing.Layout := cclLeftToRightThenTopToBottom;
-  FButtonPanel.ChildSizing.ControlsPerLine := 2;
-  FButtonPanel.ChildSizing.VerticalSpacing := 5;
-  FButtonPanel.ChildSizing.HorizontalSpacing := 5;
-  FButtonPanel.BevelOuter := bvNone;
 end;
 
 constructor TSimbaToolForm.CreateLape(ImageSupplier: TImageSupplierLape);
@@ -303,6 +399,32 @@ begin
   Result.Parent := FButtonPanel;
   Result.Caption := ACaption;
   Result.OnClick := AOnClick;
+end;
+
+function TSimbaToolForm.addMenu(ACaption: String; AOnPopup: TNotifyEvent): TMenuItem;
+var
+  Popup: TPopupMenu;
+begin
+  Popup := TPopupMenu.Create(Self);
+  Popup.OnPopup := AOnPopup;
+  FMenuBar.AddMenu(ACaption, Popup);
+  FMenuBar.Visible := True;
+
+  Result := Popup.Items;
+end;
+
+function TSimbaToolForm.addMenuItem(AParent: TMenuItem; ACaption: String; AOnClick: TNotifyEvent; AShortCut: TShortCut): TMenuItem;
+begin
+  Result := NewItem(ACaption, AShortCut, False, True, AOnClick, 0, '');
+  AParent.Add(Result);
+end;
+
+function TSimbaToolForm.addImageMenu: TMenuItem;
+begin
+  Result := addMenu('Image', @DoImageMenuPopup);
+  addMenuItem(Result, 'Load Image', @DoLoadImageClick);
+  FRecentImagesMenu := addMenuItem(Result, 'Recent Images');
+  addMenuItem(Result, 'Update Image', @DoUpdateImageClick, ShortCut(VK_F5, [])); // the key itself is DoFormKeyDown's
 end;
 
 end.

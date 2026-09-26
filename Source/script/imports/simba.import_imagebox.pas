@@ -273,6 +273,16 @@ begin
   PSimbaImageBoxLayer(Params^[0])^.Visible := PBoolean(Params^[1])^;
 end;
 
+procedure _LapeImageBoxLayer_Opacity_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByte(Result)^ := PSimbaImageBoxLayer(Params^[0])^.Opacity;
+end;
+
+procedure _LapeImageBoxLayer_Opacity_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PSimbaImageBoxLayer(Params^[0])^.Opacity := PByte(Params^[1])^;
+end;
+
 procedure _LapeImageBoxLayer_Priority_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaImageBoxLayer(Params^[0])^.Priority;
@@ -334,6 +344,7 @@ begin
     addGlobalFunc('procedure TImageBoxLayer.Free;', @_LapeImageBoxLayer_Free);
     addProperty('TImageBoxLayer', 'Visible', 'Boolean', @_LapeImageBoxLayer_Visible_Read, @_LapeImageBoxLayer_Visible_Write);
     addProperty('TImageBoxLayer', 'Priority', 'Integer', @_LapeImageBoxLayer_Priority_Read, @_LapeImageBoxLayer_Priority_Write);
+    addProperty('TImageBoxLayer', 'Opacity', 'Byte', @_LapeImageBoxLayer_Opacity_Read, @_LapeImageBoxLayer_Opacity_Write);
 
     addProperty('TImageBox', 'LayerCount', 'Integer', @_LapeImageBox_LayerCount_Read);
     addPropertyIndexed('TImageBox', 'Layers', 'Index: Integer', 'TImageBoxLayer', @_LapeImageBox_Layers_Read);

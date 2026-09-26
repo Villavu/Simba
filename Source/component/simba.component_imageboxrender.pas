@@ -12,18 +12,6 @@
     RenderNormal     1:1
     RenderZoomedIn   one image pixel covers Ratio screen pixels
     RenderZoomedOut  Ratio image pixels collapse into one screen pixel
-
-  Layers are transparent images the size of the background, composited over it
-  in order before the overlay draws: pixels that persist across paints, so an
-  expensive drawing is done once and only its visible part is paid for per
-  frame.
-
-  Every buffer is a TSimbaImage, so the whole pipeline is BGRA on every
-  platform and nothing here knows about widgetset pixel formats. Every resize
-  is done here in software; Blit is always a same size copy, and it is the one
-  platform specific step: the base implements it portably by way of an LCL
-  bitmap, and each native renderer overrides it to upload the BGRA buffer
-  directly, calling inherited when it cannot handle the surface.
 }
 unit simba.component_imageboxrender;
 
@@ -42,6 +30,12 @@ const
 type
   TSimbaImageBoxOverlayEvent = procedure(ACanvas: TSimbaCanvas; R: TRect) of object;
 
+  TSimbaImageBoxRenderLayer = record
+    Pixels: TSimbaImage;
+    Opacity: Byte;
+  end;
+  TSimbaImageBoxRenderLayers = array of TSimbaImageBoxRenderLayer;
+
   TSimbaImageBoxRenderer = class
   protected
     FCanvas: TSimbaCanvas;
@@ -59,18 +53,18 @@ type
     function Blit(Dest: TCanvas; Src: TSimbaImage; SrcX, SrcY, W, H: Integer): Boolean; virtual;
 
     // composites every layer, bottom to top, over what is in the canvas
-    procedure BlendLayers(const Layers: TSimbaImageArray; SrcX, SrcY, Ratio, W, H: Integer);
+    procedure BlendLayers(const Layers: TSimbaImageBoxRenderLayers; SrcX, SrcY, Ratio, W, H: Integer);
 
-    function RenderNormal(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageArray; R: TRect; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
-    function RenderZoomedIn(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageArray; R: TRect; Ratio: Integer; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
-    function RenderZoomedOut(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageArray; R: TRect; Ratio: Integer; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
+    function RenderNormal(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageBoxRenderLayers; R: TRect; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
+    function RenderZoomedIn(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageBoxRenderLayers; R: TRect; Ratio: Integer; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
+    function RenderZoomedOut(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageBoxRenderLayers; R: TRect; Ratio: Integer; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
   public
     constructor Create;
     destructor Destroy; override;
 
     // Draws Background[ImageRect] onto Dest at 0, 0 and returns the size actually
     // drawn, so the caller can clear whatever the image does not reach.
-    function Render(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageArray; const ImageRect: TRect;
+    function Render(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageBoxRenderLayers; const ImageRect: TRect;
                     Ratio: Integer; ZoomIn: Boolean;
                     Overlay: TSimbaImageBoxOverlayEvent): TPoint;
 
@@ -183,41 +177,50 @@ begin
   end;
 end;
 
-procedure BlendLayer(Layer: TSimbaImage; SrcX, SrcY, Ratio: Integer; Dest: TSimbaImage; DestW, DestH: Integer);
+procedure BlendLayer(const Layer: TSimbaImageBoxRenderLayer; SrcX, SrcY, Ratio: Integer; Dest: TSimbaImage; DestW, DestH: Integer);
 var
   SrcRow, DestRow, DestRowEnd, SrcPtr, DestPtr, DestEnd: PColorBGRA;
+  Pixel: TColorBGRA;
 begin
-  SrcRow     := Layer.PixelPtr[SrcX, SrcY];
+  SrcRow     := Layer.Pixels.PixelPtr[SrcX, SrcY];
   DestRow    := Dest.Data;
   DestRowEnd := DestRow + (DestH * Dest.Width);
 
   while (DestRow < DestRowEnd) do
   begin
     if (Ratio = 1) then
-      BlendData(DestRow, SrcRow, DestW)
-    else
+    begin
+      if (Layer.Opacity = ALPHA_OPAQUE) then
+        BlendData(DestRow, SrcRow, DestW)
+      else
+        BlendDataAlpha(DestRow, SrcRow, DestW, Layer.Opacity);
+    end else
     begin
       SrcPtr  := SrcRow;
       DestPtr := DestRow;
       DestEnd := DestRow + DestW;
       while (DestPtr < DestEnd) do
       begin
-        if (SrcPtr^.A = ALPHA_OPAQUE) then
-          DestPtr^ := SrcPtr^
-        else if (SrcPtr^.A <> ALPHA_TRANSPARENT) then
-          BlendPixel(DestPtr, SrcPtr);
+        Pixel := SrcPtr^;
+        if (Layer.Opacity <> ALPHA_OPAQUE) then
+          Pixel.A := Pixel.A * Layer.Opacity div 255;
+
+        if (Pixel.A = ALPHA_OPAQUE) then
+          DestPtr^ := Pixel
+        else if (Pixel.A <> ALPHA_TRANSPARENT) then
+          BlendPixel(DestPtr, @Pixel);
 
         Inc(SrcPtr, Ratio);
         Inc(DestPtr);
       end;
     end;
 
-    Inc(SrcRow, Layer.Width * Ratio);
+    Inc(SrcRow, Layer.Pixels.Width * Ratio);
     Inc(DestRow, Dest.Width);
   end;
 end;
 
-procedure TSimbaImageBoxRenderer.BlendLayers(const Layers: TSimbaImageArray; SrcX, SrcY, Ratio, W, H: Integer);
+procedure TSimbaImageBoxRenderer.BlendLayers(const Layers: TSimbaImageBoxRenderLayers; SrcX, SrcY, Ratio, W, H: Integer);
 var
   I: Integer;
 begin
@@ -286,7 +289,7 @@ begin
   FCanvas.SetData(nil, 0, 0, 0);
 end;
 
-function TSimbaImageBoxRenderer.RenderNormal(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageArray; R: TRect; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
+function TSimbaImageBoxRenderer.RenderNormal(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageBoxRenderLayers; R: TRect; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
 var
   W, H: Integer;
 begin
@@ -315,7 +318,7 @@ begin
     Blit(Dest, Background, R.Left, R.Top, W, H);
 end;
 
-function TSimbaImageBoxRenderer.RenderZoomedIn(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageArray; R: TRect; Ratio: Integer; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
+function TSimbaImageBoxRenderer.RenderZoomedIn(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageBoxRenderLayers; R: TRect; Ratio: Integer; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
 var
   W, H: Integer;
 begin
@@ -347,7 +350,7 @@ begin
   Blit(Dest, FScaleImage, 0, 0, Result.X, Result.Y);
 end;
 
-function TSimbaImageBoxRenderer.RenderZoomedOut(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageArray; R: TRect; Ratio: Integer; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
+function TSimbaImageBoxRenderer.RenderZoomedOut(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageBoxRenderLayers; R: TRect; Ratio: Integer; Overlay: TSimbaImageBoxOverlayEvent): TPoint;
 var
   W, H: Integer;
 begin
@@ -384,7 +387,7 @@ begin
   end;
 end;
 
-function TSimbaImageBoxRenderer.Render(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageArray; const ImageRect: TRect;
+function TSimbaImageBoxRenderer.Render(Dest: TCanvas; Background: TSimbaImage; const Layers: TSimbaImageBoxRenderLayers; const ImageRect: TRect;
                                       Ratio: Integer; ZoomIn: Boolean;
                                       Overlay: TSimbaImageBoxOverlayEvent): TPoint;
 var
