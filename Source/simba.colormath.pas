@@ -168,6 +168,9 @@ function ColorToLCH(const Color: TColor): TColorLCH;
 function ColorToStr(Color: TColor): String;
 function StrToColor(Str: String): TColor;
 
+// whichever of Candidates is furthest from the mean of Colors
+function GetContrastingColor(Colors, Candidates: TColorArray): TColor;
+
 implementation
 
 uses
@@ -404,6 +407,40 @@ end;
 function StrToColor(Str: String): TColor;
 begin
   Result := StrToIntDef(Str, 0);
+end;
+
+function GetContrastingColor(Colors, Candidates: TColorArray): TColor;
+var
+  Color, Candidate: TColor;
+  SumR, SumG, SumB: Int64;
+  Dist, BestDist: Double;
+begin
+  Result := clNone;
+  if (Length(Candidates) > 0) then
+    Result := Candidates[0];
+  if (Length(Colors) = 0) then
+    Exit;
+
+  SumR := 0;
+  SumG := 0;
+  SumB := 0;
+  for Color in Colors do
+  begin
+    SumR += Color.R;
+    SumG += Color.G;
+    SumB += Color.B;
+  end;
+
+  BestDist := -1;
+  for Candidate in Candidates do
+  begin
+    Dist := Sqr(Candidate.R - SumR / Length(Colors)) + Sqr(Candidate.G - SumG / Length(Colors)) + Sqr(Candidate.B - SumB / Length(Colors));
+    if (Dist > BestDist) then
+    begin
+      BestDist := Dist;
+      Result := Candidate;
+    end;
+  end;
 end;
 
 end.
