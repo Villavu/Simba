@@ -40,7 +40,7 @@ function ColorDistance(const Color1, Color2: TColor): Single; overload;
 function SimilarColors(const Color1, Color2: TColor; const Tolerance: Single; ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Boolean; overload;
 function SimilarColors(const Color1, Color2: TColor; const Tolerance: Single): Boolean; overload;
 
-function SimilarRGB(const Color1, Color2: TColorBGRA; const Tol: Single): Boolean;
+function SimilarRGB(const Color1, Color2: TColorBGRA; const Tol: Single): Boolean; inline;
 
 implementation
 
@@ -251,19 +251,19 @@ begin
   Result := ColorDistance(Color1, Color2) <= Tolerance;
 end;
 
-const
-  DEFAULT_DISTANCE_RGB_MAX: Single = 0;
-
+// The distance is a Single, as the finders' 0..100 distances are: in Double the largest came to
+// just over 100 (DEFAULT_DISTANCE_RGB_MAX is rounded down), so a tolerance of 100 missed it.
 function SimilarRGB(const Color1, Color2: TColorBGRA; const Tol: Single): Boolean;
+const
+  MAX_DIST = Single(Sqrt(3 * 255 * 255)); // DistanceRGB_Max(DefaultMultipliers)
 begin
+  // Sqrt in Single: the same bits as in Double for every sum, and quicker. One expression: through a
+  // variable, FPC made each call's Sqrt wait on the previous call's result
   if (Tol > 0) then
-    Result := (Sqrt(Sqr(Color1.B - Color2.B) + Sqr(Color1.G - Color2.G) + Sqr(Color1.R - Color2.R)) / DEFAULT_DISTANCE_RGB_MAX * 100) <= Tol
+    Result := Sqrt(Single(Sqr(Color1.B - Color2.B) + Sqr(Color1.G - Color2.G) + Sqr(Color1.R - Color2.R))) / MAX_DIST * 100 <= Tol
   else
-    Result := (Color1.B = Color2.B) and (Color1.G = Color2.G) and (Color1.R = Color2.R);
+    Result := Color1.EqualsIgnoreAlpha(Color2);
 end;
-
-initialization
-  DEFAULT_DISTANCE_RGB_MAX := DistanceRGB_Max(DefaultMultipliers);
 
 end.
 

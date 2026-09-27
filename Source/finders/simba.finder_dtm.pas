@@ -45,9 +45,10 @@ begin
   for I := 0 to DTM.PointCount - 1 do
     with DTM.Points[I] do
     begin
-      Result[I].X := X;
-      Result[I].Y := Y;
-      Result[I].AreaSize := AreaSize;
+      // normalize from the main point
+      Result[I].X := X - DTM.Points[0].X;
+      Result[I].Y := Y - DTM.Points[0].Y;
+      Result[I].AreaSize := Max(AreaSize, 0); // a negative area would never match
       Result[I].Color := TColor(Color).ToBGRA();
       Result[I].Tol := Tolerance;
     end;
@@ -55,7 +56,7 @@ end;
 
 function Matches(const Point: TSearchPoint; const Pixel: TColorBGRA): Boolean; inline;
 begin
-  Result := DistanceRGB(Point.Color, Pixel, DefaultMultipliers) <= Point.Tol;
+  Result := SimilarRGB(Point.Color, Pixel, Point.Tol);
 end;
 
 // whether any pixel of the buffer within Point's area of (X, Y) matches it
@@ -87,28 +88,28 @@ begin
   Result := False;
 end;
 
+// Where the main point can be with every point inside the buffer; X1 > X2 when the DTM does not fit.
+// Points are from the main point, which is Points[0].
+function MainPointArea(const Points: TPointArray; SearchWidth, SearchHeight: Integer): TBox;
+var
+  I: Integer;
+begin
+  Result := TBox.Create(0, 0, SearchWidth - 1, SearchHeight - 1);
+  for I := 1 to High(Points) do
+  begin
+    Result.X1 := Max(Result.X1, -Points[I].X);
+    Result.Y1 := Max(Result.Y1, -Points[I].Y);
+    Result.X2 := Min(Result.X2, SearchWidth - 1 - Points[I].X);
+    Result.Y2 := Min(Result.Y2, SearchHeight - 1 - Points[I].Y);
+  end;
+end;
+
 function SearchDTM(var Limit: TLimit; DTM: TDTM; Buffer: PColorBGRA; BufferWidth: Integer; SearchWidth, SearchHeight: Integer; OffsetX, OffsetY: Integer): TPointArray;
 var
   SearchPoints: TSearchPoints;
-
-  function DTMBounds(DTM: TDTM): TBox;
-  var
-    I: Integer;
-  begin
-    Result := TBox.Create(0, 0, 0, 0);
-
-    for I := 1 to DTM.PointCount - 1 do
-    begin
-      if (DTM.Points[I].X < Result.X1) then Result.X1 := DTM.Points[I].X;
-      if (DTM.Points[I].X > Result.X2) then Result.X2 := DTM.Points[I].X;
-      if (DTM.Points[I].Y < Result.Y1) then Result.Y1 := DTM.Points[I].Y;
-      if (DTM.Points[I].Y > Result.Y2) then Result.Y2 := DTM.Points[I].Y;
-    end;
-  end;
-
-var
+  Offsets: TPointArray;
   I, H, X, Y: Integer;
-  MainPointArea: TBox;
+  Area: TBox;
   PointBuffer: TPointBuffer;
 label
   Next;
@@ -116,22 +117,19 @@ begin
   if (not DTM.Valid()) then
     Exit(nil);
 
-  MainPointArea := DTMBounds(DTM);
-  MainPointArea.X1 := Abs(MainPointArea.X1);
-  MainPointArea.Y1 := Abs(MainPointArea.Y1);
-  MainPointArea.X2 := SearchWidth - MainPointArea.X2;
-  MainPointArea.Y2 := SearchHeight - MainPointArea.Y2;
-
-  // DTM can't fit in search area
-  if (MainPointArea.X1 >= MainPointArea.X2) or (MainPointArea.Y1 >= MainPointArea.Y2) then
-    Exit(nil);
-
   SearchPoints := GetSearchPoints(DTM);
   H := High(SearchPoints);
 
-  for Y := MainPointArea.Y1 to MainPointArea.Y2 do
+  SetLength(Offsets, Length(SearchPoints));
+  for I := 0 to H do
+    Offsets[I] := TPoint.Create(SearchPoints[I].X, SearchPoints[I].Y);
+  Area := MainPointArea(Offsets, SearchWidth, SearchHeight);
+  if (Area.X1 > Area.X2) or (Area.Y1 > Area.Y2) then
+    Exit(nil);
+
+  for Y := Area.Y1 to Area.Y2 do
   begin
-    for X := MainPointArea.X1 to MainPointArea.X2 do
+    for X := Area.X1 to Area.X2 do
     begin
       for I := 0 to H do
         if not FindPoint(SearchPoints[I], X + SearchPoints[I].X, Y + SearchPoints[I].Y, Buffer, BufferWidth, SearchWidth, SearchHeight) then
@@ -166,9 +164,9 @@ var
   begin
     if not RowSearched[Y] then
     begin
-      SetLength(RowCandidates[Y], SearchWidth + 1);
+      SetLength(RowCandidates[Y], SearchWidth);
       Count := 0;
-      for X := 0 to SearchWidth do
+      for X := 0 to SearchWidth - 1 do
         if FindPoint(SearchPoints[0], X, Y, Buffer, BufferWidth, SearchWidth, SearchHeight) then
         begin
           RowCandidates[Y][Count] := X;
@@ -181,12 +179,11 @@ var
     Result := RowCandidates[Y];
   end;
 
-  procedure RotateDTMPoints(var RotatedPoints: TPointArray; const A: Double; out Bounds: TBox); inline;
+  // round the main point, which stays at 0, 0
+  procedure RotateDTMPoints(var RotatedPoints: TPointArray; const A: Double); inline;
   var
     I, X, Y: Integer;
   begin
-    Bounds := TBox.Create(0, 0, 0, 0);
-
     for I := 1 to H do
     begin
       X := SearchPoints[I].X;
@@ -194,11 +191,6 @@ var
 
       RotatedPoints[I].X := Round(Cos(A) * X - Sin(A) * Y);
       RotatedPoints[I].Y := Round(Sin(A) * X + Cos(A) * Y);
-
-      if (RotatedPoints[I].X < Bounds.X1) then Bounds.X1 := RotatedPoints[I].X;
-      if (RotatedPoints[I].X > Bounds.X2) then Bounds.X2 := RotatedPoints[I].X;
-      if (RotatedPoints[I].Y < Bounds.Y1) then Bounds.Y1 := RotatedPoints[I].Y;
-      if (RotatedPoints[I].Y > Bounds.Y2) then Bounds.Y2 := RotatedPoints[I].Y;
     end;
   end;
 
@@ -207,13 +199,12 @@ type
   TMatchBuffer = specialize TSimbaArrayBuffer<TMatch>;
 var
   I, X, Y: Integer;
-  MainPointArea: TBox;
+  Area: TBox;
   Match: TMatch;
   MatchBuffer: TMatchBuffer;
   RotatedPoints: TPointArray;
-  MiddleAngle, SearchDegree: Double;
+  MiddleAngle, SearchDegree, CallerStart: Double;
   AngleIndex, AngleCount: Integer;
-  DTMBounds: TBox;
 label
   Next;
 begin
@@ -223,11 +214,11 @@ begin
   SearchPoints := GetSearchPoints(DTM);
   H := High(SearchPoints);
 
-  SetLength(RotatedPoints, Length(SearchPoints));
-  // MainPointArea can reach one past the buffer's right and bottom
-  SetLength(RowCandidates, SearchHeight + 1);
-  SetLength(RowSearched, SearchHeight + 1);
+  SetLength(RotatedPoints, Length(SearchPoints)); // [0] is the main point: 0, 0
+  SetLength(RowCandidates, SearchHeight);
+  SetLength(RowSearched, SearchHeight);
 
+  CallerStart := StartDegrees;
   if (EndDegrees - StartDegrees >= 360) then
   begin
     StartDegrees := DegNormalize(StartDegrees);
@@ -257,20 +248,21 @@ begin
     else
       SearchDegree := MiddleAngle - Step * (AngleIndex div 2);
 
-    RotateDTMPoints(RotatedPoints, DegToRad(SearchDegree), DTMBounds);
+    RotateDTMPoints(RotatedPoints, DegToRad(SearchDegree));
 
-    MainPointArea.X1 := Abs(DTMBounds.X1);
-    MainPointArea.Y1 := Abs(DTMBounds.Y1);
-    MainPointArea.X2 := SearchWidth - DTMBounds.X2;
-    MainPointArea.Y2 := SearchHeight - DTMBounds.Y2;
-    if (MainPointArea.X1 >= MainPointArea.X2) or (MainPointArea.Y1 >= MainPointArea.Y2) then
+    Area := MainPointArea(RotatedPoints, SearchWidth, SearchHeight);
+    if (Area.X1 > Area.X2) or (Area.Y1 > Area.Y2) then
       Continue;
 
-    for Y := MainPointArea.Y1 to MainPointArea.Y2 do
+    // a full circle's end is its start: 0..360 finds 0, not 360. Max: rounding can put the first
+    // angle a hair below the start, which DegNormalize would make 360
+    Match.Deg := CallerStart + DegNormalize(Max(SearchDegree, StartDegrees) - StartDegrees);
+
+    for Y := Area.Y1 to Area.Y2 do
     begin
       for X in Candidates(Y) do
       begin
-        if (X < MainPointArea.X1) or (X > MainPointArea.X2) then
+        if (X < Area.X1) or (X > Area.X2) then
           Continue;
 
         for I := 1 to H do
@@ -279,7 +271,6 @@ begin
 
         Match.X := X + OffsetX;
         Match.Y := Y + OffsetY;
-        Match.Deg := SearchDegree;
         MatchBuffer.Add(Match);
 
         Limit.Inc();

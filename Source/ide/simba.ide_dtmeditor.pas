@@ -495,9 +495,11 @@ var
   Value: String;
   DTM: TDTM;
   I: Integer;
+  Bounds: TBox;
+  Center: TPoint;
 begin
   Value := '';
-  if not InputQuery('Load DTM', 'Enter DTM String (DTM will be normalized - Use offset to move)', Value) then
+  if not InputQuery('Load DTM', 'Enter DTM String', Value) then
     Exit;
 
   // in case more than the string itself was pasted
@@ -516,6 +518,20 @@ begin
   begin
     ShowMessage('Invalid DTM String: ' + Value);
     Exit;
+  end;
+
+  // center the dtm if its not on the image
+  Bounds := TBox.Create(DTM.Points[0].X, DTM.Points[0].Y, DTM.Points[0].X, DTM.Points[0].Y);
+  for I := 1 to DTM.PointCount - 1 do
+    Bounds := Bounds.Combine(TBox.Create(DTM.Points[I].X, DTM.Points[I].Y, DTM.Points[I].X, DTM.Points[I].Y));
+  if not (FImageBox.Background.InImage(Bounds.X1, Bounds.Y1) and FImageBox.Background.InImage(Bounds.X2, Bounds.Y2)) then
+  begin
+    Center := Bounds.Center;
+    for I := 0 to DTM.PointCount - 1 do
+    begin
+      DTM.Points[I].X := DTM.Points[I].X - Center.X + FImageBox.Background.Width div 2;
+      DTM.Points[I].Y := DTM.Points[I].Y - Center.Y + FImageBox.Background.Height div 2;
+    end;
   end;
 
   FDragging := nil;
