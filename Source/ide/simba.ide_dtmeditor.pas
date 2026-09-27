@@ -193,7 +193,7 @@ begin
           Exit;
         end;
 
-        TPA := FImageBox.Background.FindColor(TColorTolerance.Create(Selected.Point.Color, Selected.Point.Tolerance), TBox.Create(-1, -1, -1, -1));
+        TPA := FImageBox.Background.FindColor(TColorTolerance.Create(Selected.Point.Color, Selected.Point.Tolerance, EColorSpace.RGB, DefaultMultipliers), TBox.Create(-1, -1, -1, -1));
       end;
   end;
 
@@ -231,7 +231,8 @@ var
 begin
   FDrawColor := Value;
   for I := 0 to FDrawColorMenu.Count - 1 do
-    FDrawColorMenu.Items[I].Checked := (FDrawColorMenu.Items[I].Tag = Value);
+    if not FDrawColorMenu.Items[I].IsLine then // its Tag is 0, which is black
+      FDrawColorMenu.Items[I].Checked := (FDrawColorMenu.Items[I].Tag = Value);
 
   if (FTopLayer <> nil) then
     Search(FSearch);
@@ -303,6 +304,10 @@ end;
 procedure TSimbaDTMEditor.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
 begin
   inherited DoImgMouseMove(Sender, Shift, X, Y);
+
+  // the button came up where the box could not see it (the mouse was captured away)
+  if (FDragging <> nil) and (not (ssLeft in Shift)) then
+    FDragging := nil;
 
   if (FDragging <> nil) then
   begin
@@ -379,7 +384,13 @@ end;
 
 procedure TSimbaDTMEditor.DoPrintDTMClick(Sender: TObject);
 begin
-  DebugLn('DTM := TDTM.CreateFromString(' + #39 + MakeDTM().ToString() + #39 + ');');
+  if (FPointTree.TopLevelCount < 2) then
+  begin
+    FImageBox.Status := 'A DTM needs at least two points';
+    Exit;
+  end;
+
+  DebugLn('DTM.FromString(' + #39 + MakeDTM().ToString() + #39 + ');');
   DebugLn(DEBUG_FOCUS);
 end;
 
@@ -409,6 +420,10 @@ begin
     FEditSize.Edit.Clear();
   end;
 
+  // a colour search is for the selected point
+  if (FSearch = EDTMEditorSearch.FIND_COLOR) then
+    Search(FSearch);
+
   FImageBox.Invalidate();
 end;
 
@@ -434,9 +449,9 @@ begin
     if (Sender = FEditColor.Edit) then
       Node.Point.Color := StrToInt(Value)
     else if (Sender = FEditTol.Edit) then
-      Node.Point.Tolerance := StrToFloat(Value)
+      Node.Point.Tolerance := Max(StrToFloat(Value), 0)
     else if (Sender = FEditSize.Edit) then
-      Node.Point.AreaSize := StrToInt(Value)
+      Node.Point.AreaSize := Max(StrToInt(Value), 0)
     else if (Sender = FEditX.Edit) then
       Node.Point.X := StrToInt(Value)
     else if (Sender = FEditY.Edit) then
@@ -456,6 +471,7 @@ end;
 
 procedure TSimbaDTMEditor.DoClearClick(Sender: TObject);
 begin
+  FDragging := nil;
   FPointTree.Clear();
   DoPointSelectionChange(nil);
   PointsChanged();
@@ -465,6 +481,7 @@ procedure TSimbaDTMEditor.DoDeleteSelectedClick(Sender: TObject);
 begin
   if (FPointTree.Selected <> nil) then
   begin
+    FDragging := nil;
     FPointTree.DeleteSelection();
     FPointTree.Selected := nil;
     DoPointSelectionChange(nil);
@@ -501,6 +518,7 @@ begin
     Exit;
   end;
 
+  FDragging := nil;
   FPointTree.BeginUpdate();
   try
     FPointTree.Clear();

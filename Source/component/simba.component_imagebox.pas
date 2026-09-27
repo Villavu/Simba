@@ -285,11 +285,9 @@ begin
   FBox.Invalidate();
 end;
 
+// the same priority again still moves it on top of its equals
 procedure TSimbaImageBoxLayer.SetPriority(Value: Integer);
 begin
-  if (FPriority = Value) then
-    Exit;
-
   FPriority := Value;
   InsertByPriority();
   FBox.Invalidate();

@@ -701,7 +701,7 @@ begin
   if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
     Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
   else
-    Bounds := Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
 
   if (Bounds.Width > 0) and (Bounds.Height > 0) then
     Result := SimbaFinder_FindColors(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft,
@@ -715,7 +715,7 @@ begin
   if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
     Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
   else
-    Bounds := Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
 
   if (Bounds.Width > 0) and (Bounds.Height > 0) then
     Result := SimbaFinder_FindDTM(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, DTM, -1);
@@ -728,7 +728,7 @@ begin
   if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
     Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
   else
-    Bounds := Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
 
   if (Bounds.Width > 0) and (Bounds.Height > 0) then
     Result := SimbaFinder_MatchColors(@FData[Bounds.Y1 * FWidth + Bounds.X1], FWidth, Bounds.Width, Bounds.Height, ColorSpace, Color, Multipliers);
@@ -743,7 +743,7 @@ begin
   if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
     Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
   else
-    Bounds := Bounds.Clip(TBox.Create(0, 0, FWidth-1, FHeight-1));
+    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
 
   if (Bounds.Width > 0) and (Bounds.Height > 0) then
   begin

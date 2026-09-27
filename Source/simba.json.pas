@@ -473,7 +473,8 @@ begin
   else
     Stream := TFileStream.Create(FileName, fmCreate);
   try
-    Stream.Size := Stream.Write(Text[1], Length(Text));
+    Stream.WriteBuffer(Text[1], Length(Text));
+    Stream.Size := Length(Text); // truncates
   finally
     Stream.Free();
   end;
@@ -539,7 +540,8 @@ begin
     Stream := TFileStream.Create(FileName, fmCreate);
 
   try
-    Stream.Write(Text[1], Length(Text));
+    Stream.WriteBuffer(Text[1], Length(Text));
+    Stream.Size := Length(Text); // truncates
   finally
     Stream.Free();
   end;

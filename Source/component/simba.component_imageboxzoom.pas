@@ -61,6 +61,7 @@ type
     procedure SetFrameColor(AValue: TColor);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     property OnGetText: TTextEvent read FOnGetText write FOnGetText;
     property OnGetTextMeasure: TTextMeasureEvent read FOnGetTextMeasure write FOnGetTextMeasure;
@@ -245,6 +246,13 @@ begin
   FLabel.Parent := Self;
   FLabel.AnchorToNeighbour(akLeft, 10, FZoom);
   FLabel.AnchorVerticalCenterTo(Self);
+end;
+
+destructor TSimbaImageBoxZoomPanel.Destroy;
+begin
+  Application.RemoveAsyncCalls(Self);
+
+  inherited Destroy();
 end;
 
 procedure TSimbaImageBoxZoomPanel.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);

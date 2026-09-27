@@ -300,7 +300,8 @@ var
 begin
   FDrawColor := Value;
   for I := 0 to FDrawColorMenu.Count - 1 do
-    FDrawColorMenu.Items[I].Checked := (FDrawColorMenu.Items[I].Tag = Value);
+    if not FDrawColorMenu.Items[I].IsLine then // its Tag is 0, which is black
+      FDrawColorMenu.Items[I].Checked := (FDrawColorMenu.Items[I].Tag = Value);
 
   if (FTopLayer <> nil) then
     Search(FSearch);
@@ -372,9 +373,11 @@ begin
   FColorList.DeleteSelection();
 end;
 
+// with no colours to work it out from, a best colour typed in stays
 procedure TSimbaACA.DoColorSpaceChange(Sender: TObject);
 begin
-  CalcBestColor();
+  if (FColorList.TopLevelCount > 0) then
+    CalcBestColor();
   Search(FSearch);
 end;
 

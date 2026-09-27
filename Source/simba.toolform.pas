@@ -252,8 +252,14 @@ end;
 
 procedure TSimbaToolForm.SetImage(Value: TSimbaImage);
 begin
-  if (Value <> nil) then
-    FImageBox.Background := Value;
+  if (Value = nil) then
+    Exit;
+
+  FUpdateImageOnFirstShow := False; // an image given before the first show is the one shown
+  FImageBox.Background := Value;
+  // the magnifier still has the old image, just freed, for a repaint it has queued
+  if FImageBoxZoom.Visible then
+    FImageBoxZoom.Move(Value, FImageBox.MouseXY.X, FImageBox.MouseXY.Y);
 end;
 
 procedure TSimbaToolForm.DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaCanvas; R: TRect);
@@ -297,6 +303,7 @@ begin
 
   Files := TStringList.Create();
   try
+    Files.CaseSensitive := FileNameCaseSensitive;
     Files.Text := SimbaSettings.General.RecentImages.Value;
     if (Files.IndexOf(FileName) > -1) then
       Files.Delete(Files.IndexOf(FileName));
