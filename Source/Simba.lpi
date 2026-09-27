@@ -623,9 +623,6 @@
       <Unit11>
         <Filename Value="ide/simba.form_shapebox.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaShapeBoxForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit11>
       <Unit12>
         <Filename Value="ide/simba.form_package.pas"/>

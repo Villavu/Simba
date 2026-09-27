@@ -10,1560 +10,1372 @@ unit simba.component_shapebox;
 interface
 
 uses
-  Classes, SysUtils, Controls, Graphics, ComCtrls, StdCtrls, ExtCtrls, Dialogs, fgl, Menus,
-  simba.base, simba.component_imagebox, simba.component_imageboxcanvas, simba.component_splitter;
+  Classes, SysUtils, Controls, Graphics,
+  simba.base, simba.canvas,
+  simba.component_imagebox;
 
 type
-  TSimbaShapeBox = class;
-
-  {$PUSH}
-  {$SCOPEDENUMS ON}
-  EPaintShapeFlag  = (SELECTING, SELECTED);
-  EPaintShapeFlags = set of EPaintShapeFlag;
-  {$POP}
-
-  TSimbaShapeBoxShapeClass = class of TSimbaShapeBoxShape;
-  TSimbaShapeBoxShape = class
-  protected
-    procedure DrawConnectors(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
-    procedure DrawLines(ACanvas: TSimbaImageBoxCanvas; Box: TBox; Flags: EPaintShapeFlags); overload;
-    procedure DrawLines(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags); overload;
-    procedure DrawLinesGap(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
-  public
-    FShapeBox: TSimbaShapeBox;
-    FDragStart: TPoint;
-    FName: String;
-    FUserData: Pointer;
-    FShapeType: String;
-
-    constructor Create(ShapeBox: TSimbaShapeBox); virtual;
-    destructor Destroy; override;
-
-    procedure SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint); virtual; abstract;
-    procedure SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint); virtual; abstract;
-
-    procedure Offset(X, Y: Integer); virtual; abstract;
-    function Center: TPoint; virtual; abstract;
-    function DistToEdge(P: TPoint): Integer; virtual; abstract;
-    function Contains(P: TPoint; ExpandMod: Integer = 0): Boolean; virtual; abstract;
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); virtual; abstract;
-
-    function BeginDrag(MousePoint: TPoint): Boolean; virtual; abstract;
-    function CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean; virtual; abstract;
-    procedure Drag(MousePoint: TPoint); virtual; abstract;
-    function NeedPaint(PaintArea: TRect): Boolean; virtual; abstract;
-
-    function ToStr: String; virtual; abstract;
-    procedure FromStr(Str: String); virtual; abstract;
-
-    function CreateCopy: TSimbaShapeBoxShape; virtual;
-  end;
-
-  TSimbaShapeBoxShape_Point = class(TSimbaShapeBoxShape)
-  public
-    FPoint: TPoint;
-
-    constructor Create(ShapeBox: TSimbaShapeBox); override;
-
-    procedure SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint); override;
-    procedure SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint); override;
-
-    procedure Offset(X, Y: Integer); override;
-    function Center: TPoint; override;
-    function DistToEdge(P: TPoint): Integer; override;
-    function Contains(P: TPoint; ExpandMod: Integer = 0): Boolean; override;
-
-    function BeginDrag(MousePoint: TPoint): Boolean; override;
-
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
-
-    function CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean; override;
-    procedure Drag(MousePoint: TPoint); override;
-    function NeedPaint(PaintArea: TRect): Boolean; override;
-
-    function GetPoint: TPoint;
-
-    function ToStr: String; override;
-    procedure FromStr(Str: String); override;
-
-    function CreateCopy: TSimbaShapeBoxShape; override;
-  end;
-
-  TSimbaShapeBoxShape_Box = class(TSimbaShapeBoxShape)
-  protected
-  type
-    EDragPart = (NONE, TL, TR, BL, BR, DCENTER);
-  public
-    FDraggingCorner: EDragPart;
-    FBox: TBox;
-
-    constructor Create(ShapeBox: TSimbaShapeBox); override;
-
-    procedure SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint); override;
-    procedure SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint); override;
-
-    procedure Offset(X, Y: Integer); override;
-    function Center: TPoint; override;
-    function DistToEdge(P: TPoint): Integer; override;
-    function Contains(P: TPoint; ExpandMod: Integer = 0): Boolean; override;
-    function GetDragPart(MousePoint: TPoint): EDragPart;
-
-    function BeginDrag(MousePoint: TPoint): Boolean; override;
-
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
-
-    function CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean; override;
-    procedure Drag(MousePoint: TPoint); override;
-    function NeedPaint(PaintArea: TRect): Boolean; override;
-
-    function GetBox: TBox;
-
-    function ToStr: String; override;
-    procedure FromStr(Str: String); override;
-
-    function CreateCopy: TSimbaShapeBoxShape; override;
-  end;
-
-  TSimbaShapeBoxShape_Poly = class(TSimbaShapeBoxShape)
-  protected
-    procedure BuildContainsCache;
-  public
-    FPoly: TPointArray;
-    FContainsCache: TPointArray;
-    FDraggingPoly: TPointArray;
-    FDraggingIndex: Integer;
-
-    procedure SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint); override;
-    procedure SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint); override;
-
-    procedure Offset(X, Y: Integer); override;
-    function Center: TPoint; override;
-    function GetDragIndex(MousePoint: TPoint): Integer;
-    function DistToEdge(P: TPoint): Integer; override;
-    function Contains(P: TPoint; ExpandMod: Integer = 0): Boolean; override;
-
-    function BeginDrag(MousePoint: TPoint): Boolean; override;
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
-
-    function CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean; override;
-    procedure Drag(MousePoint: TPoint); override;
-    function NeedPaint(PaintArea: TRect): Boolean; override;
-
-    function GetPoly: TPointArray;
-
-    function ToStr: String; override;
-    procedure FromStr(Str: String); override;
-
-    function CreateCopy: TSimbaShapeBoxShape; override;
-  end;
-
-  TSimbaShapeBoxShape_Path = class(TSimbaShapeBoxShape_Poly)
-  public
-    function DistToEdge(P: TPoint): Integer; override;
-    function Contains(P: TPoint; ExpandMod: Integer=0): Boolean; override;
-    procedure Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint); override;
-  end;
-
-  PShapeBoxShape = ^TShapeBoxShape;
-  TShapeBoxShape = record
-    Name: String;
-    Index: Integer;
-    UserData: Pointer;
-
-    IsBox: Boolean;
-    IsPoint: Boolean;
-    IsPoly: Boolean;
-    IsPath: Boolean;
-
-    Box: TBox;
-    Point: TPoint;
-    Path: TPointArray;
-    Poly: TPointArray;
-  end;
-
-  PSimbaShapeBox = ^TSimbaShapeBox;
+  {$push}
+  {$scopedenums on}
+  EShapeBoxKind = (POINT, BOX, CIRCLE, POLY, PATH); // in the order of their buttons
+  {$pop}
 
   TSimbaShapeBox = class(TSimbaImageBox)
   protected type
-    TShapeList = specialize TFPGObjectList<TSimbaShapeBoxShape>;
+    TShape = record
+      Kind: EShapeBoxKind;
+      Name: String; // its kind's name while unnamed
+      Points: TPointArray;
+
+      // no points yet, and named after its kind
+      class function Create(AKind: EShapeBoxKind): TShape; static;
+
+      // as saved, and the name of a shape not named yet
+      function KindName: String;
+      // the status bar's while it is placed
+      function PlaceHint: String;
+      function ListText: String;
+      function Describe: String;
+      // Name := [value]; for a script
+      function ToCode: String;
+      function Copy: TShape;
+      function Radius: Integer;
+      function ToStr: String;
+      // False for a value that is not numbers
+      function FromStr(Str: String): Boolean;
+
+      function Bounds: TBox;
+      function Handles: TPointArray;
+      function HandleAt(P: TPoint): Integer;
+      // how far P is from the outline, -1 when P is neither on nor in the shape
+      function HitDistance(P: TPoint): Double;
+      function GrabCursor(P: TPoint): TCursor;
+      procedure Drag(Handle: Integer; From: TPointArray; Start, P: TPoint);
+      procedure Move(DX, DY: Integer);
+      function PlaceClick(P: TPoint): Boolean;
+      function CanFinish: Boolean;
+      // takes out a Poly's or Path's point under P while it is placed; False for none
+      function DeleteHandleAt(P: TPoint): Boolean;
+
+      procedure Paint(ACanvas: TSimbaCanvas; Highlighted: Boolean);
+    end;
+    TShapeArray = array of TShape;
+
+    // what undo puts back
+    TState = record
+      Shapes: TShapeArray;
+      Selected: Integer;
+    end;
+    TStateArray = array of TState;
   protected
-    FShapes: TShapeList;
+    FShapes: TShapeArray;
+    FSelectedIndex: Integer;
+    FPlacingIndex: Integer; // already in FShapes, -1 when nothing is placed
 
-    FSelecting: TSimbaShapeBoxShape;
-    FDragging: TSimbaShapeBoxShape;
-    FUpdating: Integer;
+    FDragIndex: Integer;
+    FDragHandle: Integer;
+    FDragStart: TPoint;
+    FDragFrom: TPointArray;
+    FDragSaved: Boolean;
 
-    FPanel: TPanel;
-    FSplitter: TSimbaSplitter;
-    FListBox: TListBox;
-    FListPopup: TPopupMenu;
+    FUndo: TStateArray;
+    FRedo: TStateArray;
+    FNudging: Boolean;
 
-    FNewButton: TButton;
-    FNewPopup: TPopupMenu;
-    FClearButton: TButton;
-    FPrintButton: TButton;
-
-    FUserDataSize: Integer;
-    FQueryName: Boolean;
     FOnSelectionChange: TNotifyEvent;
+    FOnShapesChange: TNotifyEvent;
 
     function CheckIndex(Index: Integer): Boolean;
+    procedure RangeCheck(Index: Integer);
+    function AddShape(const Shape: TShape): Integer;
+    procedure RemoveShape(Index: Integer);
+    // every shape replaced, nothing selected, placed or dragged
+    procedure SetShapes(const Shapes: TShapeArray);
+    procedure SelectionChanged;
+    procedure ShapesChanged;
+    procedure RepaintNow;
+    procedure SetPlacingIndex(Index: Integer);
+    procedure StopPlacing(Keep: Boolean);
+    function ShapeAt(P: TPoint): Integer;
 
-    procedure InternalAddShape(Shape: TSimbaShapeBoxShape; IsSelecting: Boolean = False);
-    procedure InternalDeleteShape(Index: Integer);
-    procedure InternalNameShape(Index: Integer; AName: String);
-    procedure InternalStartDragging(Shape: TSimbaShapeBoxShape);
-    procedure InternalSetSelecting(Shape: TSimbaShapeBoxShape);
-    procedure InternalClear;
+    function TakeState: TState;
+    procedure PushUndo(const State: TState);
+    procedure RestoreState(const State: TState);
 
-    function GetShape(Index: Integer): TShapeBoxShape;
     function GetCount: Integer;
-    function GetShapeAt(P: TPoint): TSimbaShapeBoxShape;
-
-    function GetSelectedShape: TShapeBoxShape;
-    function GetSelectedIndex: Integer;
+    function GetShapeName(Index: Integer): String;
+    procedure SetShapeName(Index: Integer; Value: String);
     procedure SetSelectedIndex(Value: Integer);
 
     procedure ImgKeyDown(var Key: Word; Shift: TShiftState); override;
     procedure ImgMouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure ImgMouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure ImgMouseMove(Shift: TShiftState; X, Y: Integer); override;
-    procedure ImgPaintArea(ACanvas: TSimbaImageBoxCanvas; R: TRect); override;
-
-    procedure DoSelectionChanged(Sender: TObject; User: Boolean);
-    procedure DoListMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure DoShapeAddButtonClick(Sender: TObject);
-    procedure DoShapeDelete(Sender: TObject);
-    procedure DoShapeDeleteAllClick(Sender: TObject);
-    procedure DoShapeName(Sender: TObject);
-    procedure DoShapePrint(Sender: TObject);
-    procedure DoShapeDuplicate(Sender: TObject);
-    procedure DoPrintShapesClick(Sender: TObject);
-    procedure DoPanelVisibleChanged(Sender: TObject);
-
-    procedure DoAddPointClick(Sender: TObject);
-    procedure DoAddBoxClick(Sender: TObject);
-    procedure DoAddPathClick(Sender: TObject);
-    procedure DoAddPolyClick(Sender: TObject);
+    procedure ImgPaintArea(ACanvas: TSimbaCanvas; R: TRect); override;
   public
-    constructor Create(AOwner: TComponent; AUserDataSize: Integer = 0); reintroduce;
-    destructor Destroy; override;
+    constructor Create(AOwner: TComponent); override;
 
-    procedure BeginUpdate;
-    procedure EndUpdate;
+    // a shape of AKind's KindName, for a host's buttons
+    class function KindName(AKind: EShapeBoxKind): String; static;
 
-    procedure PrintShapes;
+    // starts placing a shape of AKind, or puts down the one of AKind being placed
+    procedure Place(AKind: EShapeBoxKind);
 
-    procedure SaveToFile(FileName: String);
-    procedure LoadFromFile(FileName: String);
+    procedure Undo;
+    procedure Redo;
+    procedure UndoKeyDown(var Key: UInt16; Shift: TShiftState);
 
-    function CopyShape(Index: Integer): Integer;
+    procedure Print(Index: Integer); overload;
+    procedure Print; overload;
 
-    procedure DeleteShape(Index: Integer);
-    procedure DeleteAllShapes;
+    // With HistoryFileName, the undo and redo steps too, for a host that keeps them between sessions:
+    // a history only loads onto the shapes it was saved with.
+    procedure Save(FileName: String; HistoryFileName: String = '');
+    procedure Load(FileName: String; HistoryFileName: String = '');
+
+    // Each an undo step. An index out of range does nothing, as does
+    // copying the shape being placed; deleting it stops placing it.
+    function Copy(Index: Integer): Integer;
+    procedure Delete(Index: Integer);
+    procedure Clear;
 
     function HasSelection: Boolean;
     procedure MakeSelectionVisible;
 
-    procedure ManualAddPoint(Point: TPoint; AName: String = ''); overload;
-    procedure ManualAddPoint(Point: TPoint; AName: String; constref UserData); overload;
-    procedure ManualAddBox(Box: TBox; AName: String = '');
-    procedure ManualAddBox(Box: TBox; AName: String; constref UserData); overload;
-    procedure ManualAddPoly(Poly: TPointArray; AName: String = '');
-    procedure ManualAddPoly(Poly: TPointArray; AName: String; constref UserData); overload;
-    procedure ManualAddPath(Path: TPointArray; AName: String = '');
-    procedure ManualAddPath(Path: TPointArray; AName: String; constref UserData); overload;
+    // Kind "name", or Kind "" while it is named after its kind
+    function ListText(Index: Integer): String;
+    // loc=, size=, radius= or points=
+    function Describe(Index: Integer): String;
 
     property OnSelectionChange: TNotifyEvent read FOnSelectionChange write FOnSelectionChange;
-    property QueryName: Boolean read FQueryName write FQueryName;
-    property Panel: TPanel read FPanel;
-    property ListBox: TListBox read FListBox;
-
-    property NewButton: TButton read FNewButton;
-    property ClearButton: TButton read FClearButton;
-    property PrintButton: TButton read FPrintButton;
+    // a shape added, deleted, changed or renamed
+    property OnShapesChange: TNotifyEvent read FOnShapesChange write FOnShapesChange;
 
     property Count: Integer read GetCount;
-    property Shape[Index: Integer]: TShapeBoxShape read GetShape;
+    property SelectedIndex: Integer read FSelectedIndex write SetSelectedIndex;
 
-    property SelectedIndex: Integer read GetSelectedIndex write SetSelectedIndex;
-    property SelectedShape: TShapeBoxShape read GetSelectedShape;
+    // Setting it empty names it after its kind again, and a new name is an undo step.
+    // Name is the component's.
+    property ShapeName[Index: Integer]: String read GetShapeName write SetShapeName;
   end;
 
 implementation
 
 uses
-  LCLType, simba.geometry, simba.vartype_pointarray,
-  simba.vartype_box, simba.vartype_string, simba.vartype_point, simba.vartype_polygon,
-  simba.dialog, simba.json;
+  LCLType,
+  simba.image, simba.geometry, simba.vartype_pointarray, simba.vartype_box, simba.vartype_string, simba.vartype_point,
+  simba.json;
 
 const
-  CLOSE_DISTANCE = 4;
+  CLOSE_DISTANCE = 5;  // image pixels from a point or an edge that still count as on it
+  HANDLE_RADIUS  = 3;  // the square on each point
+  MARKER_RADIUS  = 6;  // the ring round a point shape
+  MARKER_SIZE    = 16; // how far its crosshair reaches
+  LINE_WIDTH     = 2;
 
-constructor TSimbaShapeBoxShape.Create(ShapeBox: TSimbaShapeBox);
+// a Box's points: the corners of the box between A and B, top left first and clockwise
+function BoxCorners(A, B: TPoint): TPointArray;
 begin
-  inherited Create();
-
-  FShapeBox := ShapeBox;
-  FShapeType := String(ClassName).After('_');
-  FName := FShapeType;
-  FUserData := AllocMem(ShapeBox.FUserDataSize);
+  Result := TBox.Create(Min(A.X, B.X), Min(A.Y, B.Y), Max(A.X, B.X), Max(A.Y, B.Y)).Corners();
 end;
 
-destructor TSimbaShapeBoxShape.Destroy;
-begin
-  if (FUserData <> nil) then
-    FreeMemAndNil(FUserData);
-
-  inherited Destroy();
-end;
-
-function TSimbaShapeBoxShape.CreateCopy: TSimbaShapeBoxShape;
-begin
-  Result := TSimbaShapeBoxShapeClass(Self.ClassType).Create(FShapeBox);
-  Result.FName := FName;
-end;
-
-procedure TSimbaShapeBoxShape.DrawConnectors(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
+// how far P is from the nearest line between the points, a Poly's last joined back to its first
+function LinesDistance(P: TPoint; Points: TPointArray; Closed: Boolean): Double;
 var
-  Color: TColor;
+  I: Integer;
+begin
+  if (Length(Points) = 1) then
+    Exit(P.DistanceTo(Points[0]));
+
+  Result := TSimbaGeometry.DistToLine(P, Points[0], Points[1]);
+  for I := 2 to High(Points) do
+    Result := Min(Result, TSimbaGeometry.DistToLine(P, Points[I - 1], Points[I]));
+  if Closed and (Length(Points) >= 3) then
+    Result := Min(Result, TSimbaGeometry.DistToLine(P, Points[High(Points)], Points[0]));
+end;
+
+function LineColor(Selected: Boolean): TColor;
+begin
+  if Selected then
+    Result := clRed
+  else
+    Result := $F070E0; // light violet
+end;
+
+procedure DrawHandles(ACanvas: TSimbaCanvas; Points: TPointArray; Selected: Boolean);
+var
   P: TPoint;
 begin
-  if (EPaintShapeFlag.SELECTED in Flags) or (EPaintShapeFlag.SELECTING in Flags) then
-    Color := clYellow
+  if Selected then
+    ACanvas.DrawColor := clYellow
   else
-    Color := clLime;
+    ACanvas.DrawColor := clLime;
 
+  ACanvas.DrawFilled := True;
   for P in Points do
-    ACanvas.DrawBoxFilled(TBox.Create(P.X - 2, P.Y - 2, P.X + 2, P.Y + 2), Color, 0.65);
+    ACanvas.DrawBox(TBox.Create(P.X - HANDLE_RADIUS, P.Y - HANDLE_RADIUS, P.X + HANDLE_RADIUS, P.Y + HANDLE_RADIUS));
+  ACanvas.DrawFilled := False;
 end;
 
-procedure TSimbaShapeBoxShape.DrawLines(ACanvas: TSimbaImageBoxCanvas; Box: TBox; Flags: EPaintShapeFlags);
-var
-  Color: TColor;
+procedure DrawMarker(ACanvas: TSimbaCanvas; P: TPoint; Selected: Boolean);
+const
+  GAP = MARKER_RADIUS + 3;
 begin
-  if (EPaintShapeFlag.SELECTED in Flags) or (EPaintShapeFlag.SELECTING in Flags) then
-    Color := clRed
-  else
-    Color := clPurple;
-
-  ACanvas.DrawBox(Box, Color);
+  ACanvas.DrawColor := LineColor(Selected);
+  ACanvas.DrawCircle(P, MARKER_RADIUS);
+  ACanvas.DrawLine(TPoint.Create(P.X - MARKER_SIZE, P.Y), TPoint.Create(P.X - GAP, P.Y));
+  ACanvas.DrawLine(TPoint.Create(P.X + GAP, P.Y), TPoint.Create(P.X + MARKER_SIZE, P.Y));
+  ACanvas.DrawLine(TPoint.Create(P.X, P.Y - MARKER_SIZE), TPoint.Create(P.X, P.Y - GAP));
+  ACanvas.DrawLine(TPoint.Create(P.X, P.Y + GAP), TPoint.Create(P.X, P.Y + MARKER_SIZE));
 end;
 
-procedure TSimbaShapeBoxShape.DrawLines(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
+procedure DrawPathLines(ACanvas: TSimbaCanvas; Points: TPointArray; Selected: Boolean);
 var
   I: Integer;
-  Color: TColor;
+  Mid: TPoint;
+  DirX, DirY, Len: Double;
 begin
-  if (Length(Points) <= 1) then
-    Exit;
-
-  if (EPaintShapeFlag.SELECTED in Flags) or (EPaintShapeFlag.SELECTING in Flags) then
-    Color := clRed
+  if Selected then
+    ACanvas.DrawColor := $0090FF // orange
   else
-    Color := clPurple;
+    ACanvas.DrawColor := $C8C820; // teal
 
   for I := 0 to High(Points) - 1 do
-    ACanvas.DrawLine(Points[I], Points[I+1], Color);
+  begin
+    ACanvas.DrawLine(Points[I], Points[I + 1]);
+
+    DirX := Points[I + 1].X - Points[I].X;
+    DirY := Points[I + 1].Y - Points[I].Y;
+    Len := Sqrt(Sqr(DirX) + Sqr(DirY));
+    if (Len >= 28) then
+    begin
+      DirX := DirX / Len;
+      DirY := DirY / Len;
+      Mid := TPoint.Create(Round((Points[I].X + Points[I + 1].X) / 2 + DirX * 6), Round((Points[I].Y + Points[I + 1].Y) / 2 + DirY * 6));
+      ACanvas.DrawLine(Mid, TPoint.Create(Round(Mid.X - DirX * 12 - DirY * 7), Round(Mid.Y - DirY * 12 + DirX * 7)));
+      ACanvas.DrawLine(Mid, TPoint.Create(Round(Mid.X - DirX * 12 + DirY * 7), Round(Mid.Y - DirY * 12 - DirX * 7)));
+    end;
+  end;
 end;
 
-procedure TSimbaShapeBoxShape.DrawLinesGap(ACanvas: TSimbaImageBoxCanvas; Points: TPointArray; Flags: EPaintShapeFlags);
-var
-  I: Integer;
-  Color: TColor;
+class function TSimbaShapeBox.TShape.Create(AKind: EShapeBoxKind): TShape;
 begin
-  if (Length(Points) <= 1) then
+  Result := Default(TShape);
+  Result.Kind := AKind;
+  Result.Name := Result.KindName();
+end;
+
+function TSimbaShapeBox.TShape.KindName: String;
+begin
+  case Kind of
+    EShapeBoxKind.POINT:  Result := 'Point';
+    EShapeBoxKind.BOX:    Result := 'Box';
+    EShapeBoxKind.CIRCLE: Result := 'Circle';
+    EShapeBoxKind.POLY:   Result := 'Poly';
+    EShapeBoxKind.PATH:   Result := 'Path';
+  end;
+end;
+
+function TSimbaShapeBox.TShape.PlaceHint: String;
+begin
+  case Kind of
+    EShapeBoxKind.POINT:  Result := 'Point: click to place it, Esc to cancel';
+    EShapeBoxKind.BOX:    Result := 'Box: click one corner then the opposite one, Esc to cancel';
+    EShapeBoxKind.CIRCLE: Result := 'Circle: click the centre then a point on the edge, Esc to cancel';
+    EShapeBoxKind.POLY:   Result := 'Polygon: click to add points, Enter or the first point to finish, Esc to cancel';
+    EShapeBoxKind.PATH:   Result := 'Path: click to add points, Enter to finish, Esc to cancel';
+  end;
+end;
+
+function TSimbaShapeBox.TShape.ListText: String;
+begin
+  if (Name = KindName()) then
+    Result := KindName() + ' ""'
+  else
+    Result := KindName() + ' "' + Name + '"';
+end;
+
+function TSimbaShapeBox.TShape.Describe: String;
+var
+  B: TBox;
+begin
+  Result := '';
+  if (Length(Points) = 0) then
     Exit;
 
-  if (EPaintShapeFlag.SELECTED in Flags) or (EPaintShapeFlag.SELECTING in Flags) then
-    Color := clRed
-  else
-    Color := clPurple;
+  case Kind of
+    EShapeBoxKind.POINT:
+      Result := Format('loc=%d,%d', [Points[0].X, Points[0].Y]);
 
-  for I := 0 to High(Points) - 1 do
-    ACanvas.DrawLineGap(Points[I], Points[I+1], 3, Color);
-end;
-
-constructor TSimbaShapeBoxShape_Point.Create(ShapeBox: TSimbaShapeBox);
-begin
-  inherited Create(ShapeBox);
-
-  FPoint := TPoint.Create(-1, -1);
-end;
-
-procedure TSimbaShapeBoxShape_Point.SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint);
-begin
-  FPoint := MousePoint;
-
-  Sender.InternalSetSelecting(nil);
-end;
-
-procedure TSimbaShapeBoxShape_Point.SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint);
-begin
-
-end;
-
-procedure TSimbaShapeBoxShape_Point.Offset(X, Y: Integer);
-begin
-  FPoint := FPoint.Offset(X, Y);
-end;
-
-function TSimbaShapeBoxShape_Point.Center: TPoint;
-begin
-  Result := FPoint;
-end;
-
-function TSimbaShapeBoxShape_Point.DistToEdge(P: TPoint): Integer;
-begin
-  Result := Round(P.DistanceTo(FPoint));
-end;
-
-function TSimbaShapeBoxShape_Point.Contains(P: TPoint; ExpandMod: Integer): Boolean;
-begin
-  Result := DistToEdge(P) <= CLOSE_DISTANCE;
-end;
-
-function TSimbaShapeBoxShape_Point.BeginDrag(MousePoint: TPoint): Boolean;
-begin
-  Result := DistToEdge(MousePoint) <= CLOSE_DISTANCE;
-end;
-
-procedure TSimbaShapeBoxShape_Point.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint);
-begin
-  if (EPaintShapeFlag.SELECTING in Flags) then
-    FPoint := MousePoint;
-
-  DrawLines(ACanvas, [TPoint.Create(Center.X - 15, Center.Y), TPoint.Create(Center.X + 15, Center.Y)], Flags);
-  DrawLines(ACanvas, [TPoint.Create(Center.X, Center.Y - 15), TPoint.Create(Center.X, Center.Y + 15)], Flags);
-  DrawConnectors(ACanvas, [FPoint], Flags);
-end;
-
-function TSimbaShapeBoxShape_Point.CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean;
-begin
-  Result := DistToEdge(MousePoint) <= CLOSE_DISTANCE;
-  if Result then
-    ACursor := crHandPoint;
-end;
-
-procedure TSimbaShapeBoxShape_Point.Drag(MousePoint: TPoint);
-begin
-  FPoint := MousePoint;
-end;
-
-function TSimbaShapeBoxShape_Point.NeedPaint(PaintArea: TRect): Boolean;
-begin
-  Result := PaintArea.Contains(FPoint);
-end;
-
-function TSimbaShapeBoxShape_Point.GetPoint: TPoint;
-begin
-  Result := FPoint;
-end;
-
-function TSimbaShapeBoxShape_Point.ToStr: String;
-begin
-  Result := IntToStr(FPoint.X) + ',' + IntToStr(FPoint.Y);
-end;
-
-procedure TSimbaShapeBoxShape_Point.FromStr(Str: String);
-begin
-  SScanf(Str, '%d,%d', [@FPoint.X, @FPoint.Y]);
-end;
-
-function TSimbaShapeBoxShape_Point.CreateCopy: TSimbaShapeBoxShape;
-begin
-  Result := inherited CreateCopy();
-
-  TSimbaShapeBoxShape_Point(Result).FPoint := FPoint;
-end;
-
-function TSimbaShapeBoxShape_Path.DistToEdge(P: TPoint): Integer;
-var
-  i: Integer;
-  d: Integer;
-begin
-  Result := $FFFFFF;
-  for i:=1 to High(FPoly) do
-  begin
-    d := Round(TSimbaGeometry.DistToLine(P, FPoly[I-1], FPoly[I]));
-    if (d < Result) then
-      Result := d;
-  end;
-end;
-
-function TSimbaShapeBoxShape_Path.Contains(P: TPoint; ExpandMod: Integer): Boolean;
-begin
-  Result := DistToEdge(P) <= CLOSE_DISTANCE;
-end;
-
-procedure TSimbaShapeBoxShape_Path.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint);
-begin
-  DrawLinesGap(ACanvas, FPoly, Flags);
-  DrawConnectors(ACanvas, FPoly, Flags);
-end;
-
-procedure TSimbaShapeBoxShape_Poly.BuildContainsCache;
-begin
-  FContainsCache := FPoly.ConvexHull().Expand(CLOSE_DISTANCE);
-end;
-
-procedure TSimbaShapeBoxShape_Poly.SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint);
-begin
-  if (Length(FPoly) = 0) or (MousePoint.DistanceTo(FPoly[0]) > CLOSE_DISTANCE) then
-  begin
-    FPoly := FPoly + [MousePoint];
-
-    BuildContainsCache();
-  end else
-    Sender.InternalSetSelecting(nil);
-end;
-
-procedure TSimbaShapeBoxShape_Poly.SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint);
-var
-  Index: Integer;
-begin
-  case Key of
-    VK_RETURN:
+    EShapeBoxKind.BOX:
       begin
-        Sender.InternalSetSelecting(nil);
-
-        Key := 0;
+        B := Bounds();
+        Result := Format('size=%dx%d, loc=%d,%d', [B.Width, B.Height, B.X1, B.Y1]);
       end;
 
-    VK_DELETE:
-      begin
-        Index := GetDragIndex(MousePoint);
-        if (Index > -1) and (Index < Length(FPoly)) then
-          Delete(FPoly, 1, 1);
+    EShapeBoxKind.CIRCLE:
+      Result := Format('radius=%d, loc=%d,%d', [Radius, Points[0].X, Points[0].Y]);
 
-        Key := 0;
-      end;
+    EShapeBoxKind.POLY,
+    EShapeBoxKind.PATH:
+      Result := Format('points=%d', [Length(Points)]);
   end;
 end;
 
-procedure TSimbaShapeBoxShape_Poly.Offset(X, Y: Integer);
+function TSimbaShapeBox.TShape.ToCode: String;
 begin
-  FPoly := FPoly.Offset(X, Y);
+  Result := Name + ' := [' + ToStr() + '];';
 end;
 
-function TSimbaShapeBoxShape_Poly.Center: TPoint;
+function TSimbaShapeBox.TShape.Copy: TShape;
 begin
-  Result := FPoly.Mean();
+  Result := Self;
+  Result.Points := System.Copy(Points);
 end;
 
-function TSimbaShapeBoxShape_Poly.GetDragIndex(MousePoint: TPoint): Integer;
-var
-  I: Integer;
+// a Circle's: from its centre to the point on its edge
+function TSimbaShapeBox.TShape.Radius: Integer;
 begin
-  Result := -1;
-  for I := 0 to High(FPoly) do
-    if (MousePoint.DistanceTo(FPoly[I]) <= CLOSE_DISTANCE) then
-      Exit(I);
-
-  if Contains(MousePoint) then
-    Exit(High(Integer));
-end;
-
-function TSimbaShapeBoxShape_Poly.DistToEdge(P: TPoint): Integer;
-var
-  I,d: Integer;
-begin
-  Result := $FFFFFF;
-  for I := 0 to High(FPoly) do
-  begin
-    d := Round(P.DistanceTo(FPoly[I]));
-    if (d < Result) then
-      Result := d;
-  end;
-end;
-
-function TSimbaShapeBoxShape_Poly.Contains(P: TPoint; ExpandMod: Integer): Boolean;
-begin
-  if (Length(FContainsCache) = 0) then
-    BuildContainsCache();
-
-  Result := TSimbaGeometry.PointInPolygon(P, FContainsCache);
-end;
-
-function TSimbaShapeBoxShape_Poly.BeginDrag(MousePoint: TPoint): Boolean;
-begin
-  FDraggingIndex := GetDragIndex(MousePoint);
-  FDraggingPoly := Copy(FPoly);
-
-  Result := FDraggingIndex > -1;
-  if Result then
-    FDragStart := MousePoint;
-end;
-
-procedure TSimbaShapeBoxShape_Poly.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint);
-begin
-  if EPaintShapeFlag.SELECTING in Flags then
-    DrawLines(ACanvas, FPoly + [MousePoint, FPoly[0]], Flags)
+  if (Length(Points) >= 2) then
+    Result := Round(Points[1].DistanceTo(Points[0]))
   else
-    DrawLines(ACanvas, FPoly + [FPoly[0], FPoly[0]], Flags);
-
-  DrawConnectors(ACanvas, FPoly, Flags);
+    Result := 0;
 end;
 
-function TSimbaShapeBoxShape_Poly.CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean;
+function TSimbaShapeBox.TShape.ToStr: String;
 var
-  Index: Integer;
-begin
-  Index := GetDragIndex(MousePoint);
-
-  Result := Index > -1;
-  if Result then
-  begin
-    if Index = High(Integer) then
-      ACursor := crSizeAll
-    else
-      ACursor := crHandPoint;
-  end;
-end;
-
-procedure TSimbaShapeBoxShape_Poly.Drag(MousePoint: TPoint);
-var
-  I: Integer;
-begin
-  FContainsCache := [];
-
-  if FDraggingIndex = High(Integer) then
-  begin
-    FPoly := Copy(FDraggingPoly);
-    for I := 0 to High(FPoly) do
-      FPoly[I] += MousePoint-FDragStart;
-  end
-  else
-    FPoly[FDraggingIndex] := MousePoint;
-end;
-
-function TSimbaShapeBoxShape_Poly.NeedPaint(PaintArea: TRect): Boolean;
-var
-  P: TPoint;
-begin
-  if (Length(FPoly) = 0) then
-    Exit(False);
-
-  for P in FPoly do
-    if PaintArea.Contains(P) then
-      Exit(True);
-
-  Result := False;
-end;
-
-function TSimbaShapeBoxShape_Poly.GetPoly: TPointArray;
-begin
-  Result := Copy(FPoly);
-end;
-
-function TSimbaShapeBoxShape_Poly.ToStr: String;
-var
+  B: TBox;
   I: Integer;
 begin
   Result := '';
-  for I := 0 to High(FPoly) do
-    Result := Result + '[' + IntToStr(FPoly[I].X) + ',' + IntToStr(FPoly[I].Y) + '], ';
-  Result := Result.Trim([' ', ',']);
-end;
-
-procedure TSimbaShapeBoxShape_Poly.FromStr(Str: String);
-var
-  Elements: TStringArray;
-  I: Integer;
-begin
-  Elements := Str.BetweenAll('[', ']');
-
-  SetLength(FPoly, Length(Elements));
-  for I := 0 to High(Elements) do
-    SScanf(Elements[I], '%d,%d', [@FPoly[I].X, @FPoly[I].Y]);
-end;
-
-function TSimbaShapeBoxShape_Poly.CreateCopy: TSimbaShapeBoxShape;
-begin
-  Result := inherited CreateCopy();
-
-  TSimbaShapeBoxShape_Poly(Result).FPoly := Copy(FPoly);
-end;
-
-function TSimbaShapeBoxShape_Box.GetBox: TBox;
-begin
-  Result := FBox.Normalize();
-end;
-
-function TSimbaShapeBoxShape_Box.ToStr: String;
-begin
-  Result := IntToStr(FBox.X1) + ',' + IntToStr(FBox.Y1) + ',' + IntToStr(FBox.X2) + ',' + IntToStr(FBox.Y2);
-end;
-
-procedure TSimbaShapeBoxShape_Box.FromStr(Str: String);
-begin
-  SScanf(Str, '%d,%d,%d,%d', [@FBox.X1, @FBox.Y1, @FBox.X2, @FBox.Y2]);
-end;
-
-function TSimbaShapeBoxShape_Box.CreateCopy: TSimbaShapeBoxShape;
-begin
-  Result := inherited CreateCopy();
-
-  TSimbaShapeBoxShape_Box(Result).FBox := FBox;
-end;
-
-constructor TSimbaShapeBoxShape_Box.Create(ShapeBox: TSimbaShapeBox);
-begin
-  inherited Create(ShapeBox);
-
-  FBox.X1 := -1;
-  FBox.Y1  := -1;
-end;
-
-procedure TSimbaShapeBoxShape_Box.SelectingMouseDown(Sender: TSimbaShapeBox; Button: TMouseButton; Shift: TShiftState; MousePoint: TPoint);
-begin
-  if (FBox.X1 = -1) and (FBox.Y1 = -1) then
-  begin
-    FBox.X1 := MousePoint.X;
-    FBox.Y1 := MousePoint.Y;
-  end
-  else
-  begin
-    FBox.X2 := MousePoint.X;
-    FBox.Y2 := MousePoint.Y;
-    FBox := FBox.Normalize();
-
-    Sender.InternalSetSelecting(nil);
-  end;
-end;
-
-procedure TSimbaShapeBoxShape_Box.SelectingKeyDown(Sender: TSimbaShapeBox; var Key: Word; Shift: TShiftState; MousePoint: TPoint);
-begin
-end;
-
-procedure TSimbaShapeBoxShape_Box.Offset(X, Y: Integer);
-begin
-  FBox := FBox.Offset(TPoint.Create(X, Y));
-end;
-
-function TSimbaShapeBoxShape_Box.Center: TPoint;
-begin
-  Result := FBox.Center;
-end;
-
-function TSimbaShapeBoxShape_Box.DistToEdge(P: TPoint): Integer;
-var
-  Edge: TPoint;
-  B: TBox;
-begin
-  Edge := P;
-
-  B := TBox.Create(FBox.X1, FBox.Y1, FBox.X2, FBox.Y2);
-  if Min(Abs(B.Y1 - P.Y), Abs(P.Y - B.Y2)) > Min(Abs(B.X1 - P.X), Abs(P.X - B.X2)) then
-  begin
-    Edge.X := B.X1;
-    if (P.X - B.X1 > B.X2 - P.X) then
-      Edge.X := B.X2;
-  end else
-  begin
-    Edge.Y := B.Y1;
-    if (P.Y - B.Y1 > B.Y2 - P.Y) then
-      Edge.Y := B.Y2;
-  end;
-
-  Result := Round(Edge.DistanceTo(P));
-end;
-
-function TSimbaShapeBoxShape_Box.Contains(P: TPoint; ExpandMod: Integer): Boolean;
-begin
-  FBox.Normalize();
-
-  Result := FBox.Expand(ExpandMod).Contains(P);
-end;
-
-function TSimbaShapeBoxShape_Box.GetDragPart(MousePoint: TPoint): EDragPart;
-begin
-  if TPoint.Create(FBox.X1, FBox.Y1).DistanceTo(MousePoint) <= CLOSE_DISTANCE then
-    Result := TL
-  else
-  if TPoint.Create(FBox.X2, FBox.Y1).DistanceTo(MousePoint) <= CLOSE_DISTANCE then
-    Result := TR
-  else
-  if TPoint.Create(FBox.X1, FBox.Y2).DistanceTo(MousePoint) <= CLOSE_DISTANCE then
-    Result := BL
-  else
-  if TPoint.Create(FBox.X2, FBox.Y2).DistanceTo(MousePoint) <= CLOSE_DISTANCE then
-    Result := BR
-  else
-  if FBox.Contains(MousePoint) then
-    Result := DCENTER
-  else
-    Result := NONE;
-end;
-
-function TSimbaShapeBoxShape_Box.BeginDrag(MousePoint: TPoint): Boolean;
-begin
-  FDraggingCorner := GetDragPart(MousePoint);
-
-  Result := FDraggingCorner <> NONE;
-  if Result then
-    FDragStart := MousePoint - TPoint.Create(FBox.X1, FBox.Y1);
-end;
-
-procedure TSimbaShapeBoxShape_Box.Paint(Sender: TSimbaShapeBox; ACanvas: TSimbaImageBoxCanvas; Flags: EPaintShapeFlags; MousePoint: TPoint);
-begin
-  if (FBox.X1 = -1) and (FBox.Y1 = -1) then
+  if (Length(Points) = 0) then
     Exit;
 
-  if (EPaintShapeFlag.SELECTING in Flags) then
-  begin
-    FBox.X2 := MousePoint.X;
-    FBox.Y2 := MousePoint.Y;
-  end;
+  case Kind of
+    EShapeBoxKind.POINT:
+      Result := Format('%d,%d', [Points[0].X, Points[0].Y]);
 
-  DrawLines(ACanvas, FBox, Flags);
-  DrawConnectors(ACanvas, FBox.Corners, Flags);
+    EShapeBoxKind.BOX:
+      begin
+        B := Bounds();
+        Result := Format('%d,%d,%d,%d', [B.X1, B.Y1, B.X2, B.Y2]);
+      end;
+
+    EShapeBoxKind.CIRCLE:
+      Result := Format('%d,%d,%d', [Points[0].X, Points[0].Y, Radius]);
+
+    EShapeBoxKind.POLY,
+    EShapeBoxKind.PATH:
+      for I := 0 to High(Points) do
+      begin
+        if (I > 0) then
+          Result := Result + ', ';
+        Result := Result + Format('[%d,%d]', [Points[I].X, Points[I].Y]);
+      end;
+  end;
 end;
 
-function TSimbaShapeBoxShape_Box.CanDrag(MousePoint: TPoint; out ACursor: TCursor): Boolean;
+function TSimbaShapeBox.TShape.FromStr(Str: String): Boolean;
+var
+  B: TBox;
+  C: TPoint;
+  R, I: Integer;
+  Elements: TStringArray;
 begin
   Result := True;
 
-  case GetDragPart(MousePoint) of
-    TL:      ACursor := crSizeNWSE;
-    TR:      ACursor := crSizeNESW;
-    BL:      ACursor := crSizeNESW;
-    BR:      ACursor := crSizeNWSE;
-    DCENTER: ACursor := crSizeAll;
+  try
+    case Kind of
+      EShapeBoxKind.POINT:
+        begin
+          SetLength(Points, 1);
+          SScanf(Str, '%d,%d', [@Points[0].X, @Points[0].Y]);
+        end;
+
+      EShapeBoxKind.BOX:
+        begin
+          B := Default(TBox);
+          SScanf(Str, '%d,%d,%d,%d', [@B.X1, @B.Y1, @B.X2, @B.Y2]);
+          Points := BoxCorners(B.TopLeft, B.BottomRight);
+        end;
+
+      EShapeBoxKind.CIRCLE:
+        begin
+          C := Default(TPoint);
+          R := 0;
+          SScanf(Str, '%d,%d,%d', [@C.X, @C.Y, @R]);
+          Points := [C, C.Offset(R, 0)];
+        end;
+
+      EShapeBoxKind.POLY,
+      EShapeBoxKind.PATH:
+        begin
+          Elements := Str.BetweenAll('[', ']');
+          SetLength(Points, Length(Elements));
+          for I := 0 to High(Elements) do
+            SScanf(Elements[I], '%d,%d', [@Points[I].X, @Points[I].Y]);
+        end;
+    end;
+  except
+    on EConvertError do
+      Result := False;
+  end;
+end;
+
+function TSimbaShapeBox.TShape.Bounds: TBox;
+begin
+  if (Kind = EShapeBoxKind.CIRCLE) and (Length(Points) > 0) then
+    Result := TBox.Create(Points[0], Radius, Radius)
+  else
+    Result := Points.Bounds();
+end;
+
+function TSimbaShapeBox.TShape.Handles: TPointArray;
+begin
+  if (Kind = EShapeBoxKind.CIRCLE) then
+    Result := [Points[0].Offset(0, -Radius), Points[0].Offset(Radius, 0), Points[0].Offset(0, Radius), Points[0].Offset(-Radius, 0)]
+  else
+    Result := Points;
+end;
+
+function TSimbaShapeBox.TShape.HandleAt(P: TPoint): Integer;
+var
+  H: TPointArray;
+  I: Integer;
+begin
+  Result := -1;
+
+  // on the ring, but not so near the centre that a small circle could not be moved
+  if (Kind = EShapeBoxKind.CIRCLE) then
+  begin
+    if (Abs(P.DistanceTo(Points[0]) - Radius) <= CLOSE_DISTANCE) and (P.DistanceTo(Points[0]) > CLOSE_DISTANCE) then
+      Result := 0;
+    Exit;
+  end;
+
+  H := Handles();
+  for I := 0 to High(H) do
+    if (P.DistanceTo(H[I]) <= CLOSE_DISTANCE) then
+      Exit(I);
+end;
+
+function TSimbaShapeBox.TShape.HitDistance(P: TPoint): Double;
+var
+  B: TBox;
+  DX, DY: Integer;
+  Hit: Boolean;
+begin
+  Result := -1;
+  if (Length(Points) = 0) then
+    Exit;
+
+  Hit := False;
+  case Kind of
+    EShapeBoxKind.POINT:
+      begin
+        Result := P.DistanceTo(Points[0]);
+        Hit := Result <= MARKER_SIZE; // anywhere on its marker, the crosshair's arms too
+      end;
+
+    EShapeBoxKind.BOX:
+      begin
+        B := Bounds();
+        Hit := B.Expand(CLOSE_DISTANCE).Contains(P);
+        if B.Contains(P) then
+          Result := Min(Min(P.X - B.X1, B.X2 - P.X), Min(P.Y - B.Y1, B.Y2 - P.Y))
+        else
+        begin
+          DX := Max(Max(B.X1 - P.X, P.X - B.X2), 0);
+          DY := Max(Max(B.Y1 - P.Y, P.Y - B.Y2), 0);
+          Result := Sqrt(Sqr(Double(DX)) + Sqr(Double(DY)));
+        end;
+      end;
+
+    EShapeBoxKind.CIRCLE:
+      begin
+        Result := Abs(P.DistanceTo(Points[0]) - Radius);
+        Hit := P.DistanceTo(Points[0]) <= Radius + CLOSE_DISTANCE;
+      end;
+
+    EShapeBoxKind.POLY:
+      begin
+        Result := LinesDistance(P, Points, True);
+        Hit := (Result <= CLOSE_DISTANCE) or TSimbaGeometry.PointInPolygon(P, Points);
+      end;
+
+    EShapeBoxKind.PATH:
+      begin
+        Result := LinesDistance(P, Points, False);
+        Hit := Result <= CLOSE_DISTANCE;
+      end;
+  end;
+
+  if not Hit then
+    Result := -1;
+end;
+
+function TSimbaShapeBox.TShape.GrabCursor(P: TPoint): TCursor;
+var
+  Handle, DX, DY: Integer;
+begin
+  Handle := HandleAt(P);
+  if (Handle = -1) then
+    Exit(crSizeAll);
+
+  case Kind of
+    EShapeBoxKind.BOX:
+      if Odd(Handle) then // the top right or bottom left
+        Result := crSizeNESW
+      else
+        Result := crSizeNWSE;
+
+    EShapeBoxKind.CIRCLE:
+      begin
+        // pointing the way the ring would go
+        DX := P.X - Points[0].X;
+        DY := P.Y - Points[0].Y;
+        if (Abs(DX) > 2 * Abs(DY)) then
+          Result := crSizeWE
+        else
+        if (Abs(DY) > 2 * Abs(DX)) then
+          Result := crSizeNS
+        else
+        if ((DX > 0) = (DY > 0)) then
+          Result := crSizeNWSE
+        else
+          Result := crSizeNESW;
+      end;
+    else
+      Result := crHandPoint;
+  end;
+end;
+
+procedure TSimbaShapeBox.TShape.Drag(Handle: Integer; From: TPointArray; Start, P: TPoint);
+begin
+  if (Handle = -1) then
+    Points := From.Offset(P.X - Start.X, P.Y - Start.Y)
+  else
+    case Kind of
+      EShapeBoxKind.BOX:
+        Points := BoxCorners(From[(Handle + 2) mod 4], P); // the corner across stays put
+      EShapeBoxKind.CIRCLE:
+        Points[1] := P;
+      else
+        Points[Handle] := P;
+    end;
+end;
+
+procedure TSimbaShapeBox.TShape.Move(DX, DY: Integer);
+begin
+  Points := Points.Offset(DX, DY);
+end;
+
+function TSimbaShapeBox.TShape.PlaceClick(P: TPoint): Boolean;
+begin
+  // a Poly also finishes on a click back on its first point
+  if (Kind = EShapeBoxKind.POLY) and CanFinish() and (P.DistanceTo(Points[0]) <= CLOSE_DISTANCE) then
+    Exit(True);
+
+  Points := Points + [P];
+  case Kind of
+    EShapeBoxKind.POINT:
+      Result := True;
+    EShapeBoxKind.BOX:
+      begin
+        Result := (Length(Points) = 2);
+        if Result then
+          Points := BoxCorners(Points[0], Points[1]);
+      end;
+    EShapeBoxKind.CIRCLE:
+      begin
+        // the centre, then a point on the ring
+        Result := (Length(Points) = 2);
+      end;
     else
       Result := False;
   end;
 end;
 
-procedure TSimbaShapeBoxShape_Box.Drag(MousePoint: TPoint);
+function TSimbaShapeBox.TShape.CanFinish: Boolean;
 begin
-  case FDraggingCorner of
-    DCENTER:
-        begin
-          FBox := FBox.Offset(TPoint.Create(
-            (MousePoint.X - FDragStart.X) - FBox.X1,
-            (MousePoint.Y - FDragStart.Y) - FBox.Y1
-          ));
-        end;
-    TL: begin
-          FBox.X1 := MousePoint.X;
-          FBox.Y1 := MousePoint.Y;
-        end;
-    TR: begin
-          FBox.X2 := MousePoint.X;
-          FBox.Y1 := MousePoint.Y;
-        end;
-    BL: begin
-          FBox.X1 := MousePoint.X;
-          FBox.Y2 := MousePoint.Y;
-        end;
-    BR: begin
-          FBox.X2 := MousePoint.X;
-          FBox.Y2 := MousePoint.Y;
-        end;
+  case Kind of
+    EShapeBoxKind.POLY:
+      Result := Length(Points) >= 3;
+    EShapeBoxKind.PATH:
+      Result := Length(Points) >= 2;
+    else
+      Result := False;
   end;
 end;
 
-function TSimbaShapeBoxShape_Box.NeedPaint(PaintArea: TRect): Boolean;
+function TSimbaShapeBox.TShape.DeleteHandleAt(P: TPoint): Boolean;
+var
+  Index: Integer;
 begin
-  Result := InRange(FBox.Y1, PaintArea.Top,  PaintArea.Bottom) or
-            InRange(FBox.Y2, PaintArea.Top,  PaintArea.Bottom) or
-            InRange(FBox.X1, PaintArea.Left, PaintArea.Right)  or
-            InRange(FBox.X2, PaintArea.Left, PaintArea.Right);
+  Result := False;
+  if not (Kind in [EShapeBoxKind.POLY, EShapeBoxKind.PATH]) then
+    Exit;
+
+  Index := HandleAt(P);
+  Result := (Index > -1);
+  if Result then
+    System.Delete(Points, Index, 1);
 end;
 
-procedure TSimbaShapeBox.DoSelectionChanged(Sender: TObject; User: Boolean);
+procedure TSimbaShapeBox.TShape.Paint(ACanvas: TSimbaCanvas; Highlighted: Boolean);
 begin
-  if (FUpdating = 0) then
-  begin
-    if User then
-      MakeSelectionVisible();
+  if (Length(Points) = 0) then
+    Exit;
 
-    if Assigned(FOnSelectionChange) then
-      FOnSelectionChange(Self);
-
-    Paint();
+  case Kind of
+    EShapeBoxKind.POINT:
+      DrawMarker(ACanvas, Points[0], Highlighted);
+    EShapeBoxKind.BOX:
+      begin
+        ACanvas.DrawColor := LineColor(Highlighted);
+        ACanvas.DrawBox(Bounds());
+      end;
+    EShapeBoxKind.CIRCLE:
+      begin
+        ACanvas.DrawColor := LineColor(Highlighted);
+        ACanvas.DrawCircle(Points[0], Radius);
+      end;
+    EShapeBoxKind.POLY:
+      begin
+        ACanvas.DrawColor := LineColor(Highlighted);
+        if (Length(Points) >= 3) then
+          ACanvas.DrawPolygon(Points)
+        else
+        if (Length(Points) = 2) then
+          ACanvas.DrawLine(Points[0], Points[1]);
+      end;
+    EShapeBoxKind.PATH:
+      DrawPathLines(ACanvas, Points, Highlighted);
   end;
+
+  if (Kind <> EShapeBoxKind.POINT) then
+    DrawHandles(ACanvas, Handles(), Highlighted);
 end;
 
-procedure TSimbaShapeBox.DoListMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  if (Button = mbRight) then
-    FListBox.ItemIndex := FListBox.GetIndexAtY(Y);
-end;
-
-procedure TSimbaShapeBox.DoShapeAddButtonClick(Sender: TObject);
-begin
-  FNewPopup.PopUp();
-end;
-
-procedure TSimbaShapeBox.DoShapeDelete(Sender: TObject);
-begin
-  InternalDeleteShape(FListBox.ItemIndex);
-
-  Paint();
-end;
-
-procedure TSimbaShapeBox.DoShapeDeleteAllClick(Sender: TObject);
-begin
-  if ShowQuestionDialog('Simba', 'Delete all shapes?', []) = ESimbaDialogButton.YES then
-  begin
-    FShapes.Clear();
-    FListBox.Clear();
-
-    Paint();
-  end;
-end;
-
-procedure TSimbaShapeBox.DoShapeName(Sender: TObject);
-var
-  Value: String = '';
-begin
-  if (FListBox.ItemIndex > -1) then
-    if InputQuery('Shape name', 'Enter shape name', Value) then
-      InternalNameShape(FListBox.ItemIndex, Value);
-end;
-
-procedure TSimbaShapeBox.DoShapePrint(Sender: TObject);
-begin
-  if CheckIndex(FListBox.ItemIndex) then
-  begin
-    DebugLn(FShapes[FListBox.ItemIndex].ToStr);
-    DebugLn(DEBUG_FOCUS);
-  end;
-end;
-
-procedure TSimbaShapeBox.DoShapeDuplicate(Sender: TObject);
-begin
-  CopyShape(FListBox.ItemIndex);
-end;
-
-procedure TSimbaShapeBox.DoPrintShapesClick(Sender: TObject);
-begin
-  PrintShapes();
-end;
-
-procedure TSimbaShapeBox.DoPanelVisibleChanged(Sender: TObject);
-begin
-  FSplitter.Visible := FPanel.Visible;
-end;
-
-procedure TSimbaShapeBox.DoAddPointClick(Sender: TObject);
-var
-  ShapeName: String = '';
-  NewShape: TSimbaShapeBoxShape;
-begin
-  NewShape := nil;
-  if FQueryName and (not InputQuery('Simba', 'Enter name', ShapeName)) then
-    Exit;
-
-  NewShape := TSimbaShapeBoxShape_Point.Create(Self);
-  if FQueryName then
-    NewShape.FName := ShapeName;
-  InternalAddShape(NewShape, True);
-
-  StatusBar.PanelText[3] := 'Selecting point: Click to set';
-end;
-
-procedure TSimbaShapeBox.DoAddBoxClick(Sender: TObject);
-var
-  ShapeName: String = '';
-  NewShape: TSimbaShapeBoxShape;
-begin
-  NewShape := nil;
-  if FQueryName and (not InputQuery('Simba', 'Enter name', ShapeName)) then
-    Exit;
-
-  NewShape := TSimbaShapeBoxShape_Box.Create(Self);
-  if FQueryName then
-    NewShape.FName := ShapeName;
-  InternalAddShape(NewShape, True);
-
-  StatusBar.PanelText[3] := 'Selecting box: Click to set top left then again for bottom left';
-end;
-
-procedure TSimbaShapeBox.DoAddPathClick(Sender: TObject);
-var
-  ShapeName: String = '';
-  NewShape: TSimbaShapeBoxShape;
-begin
-  NewShape := nil;
-  if FQueryName and (not InputQuery('Simba', 'Enter name', ShapeName)) then
-    Exit;
-
-  NewShape := TSimbaShapeBoxShape_Path.Create(Self);
-  if FQueryName then
-    NewShape.FName := ShapeName;
-  InternalAddShape(NewShape, True);
-
-  StatusBar.PanelText[3] := 'Selecting path: Click to set points and press ENTER to finish';
-end;
-
-procedure TSimbaShapeBox.DoAddPolyClick(Sender: TObject);
-var
-  ShapeName: String = '';
-  NewShape: TSimbaShapeBoxShape;
-begin
-  NewShape := nil;
-  if FQueryName and (not InputQuery('Simba', 'Enter name', ShapeName)) then
-    Exit;
-
-  NewShape := TSimbaShapeBoxShape_Poly.Create(Self);
-  if FQueryName then
-    NewShape.FName := ShapeName;
-  InternalAddShape(NewShape, True);
-
-  StatusBar.PanelText[3] := 'Selecting polygon: Click to set points and press ENTER to finish';
-end;
-
-function TSimbaShapeBox.GetShapeAt(P: TPoint): TSimbaShapeBoxShape;
+function ShapesToJSON(const Shapes: TSimbaShapeBox.TShapeArray): TSimbaJSONItem;
 var
   I: Integer;
-  Dist, BestDist: Integer;
+  Item: TSimbaJSONItem;
 begin
-  Result := nil;
-
-  BestDist := Integer.MaxValue;
-  for I := FShapes.Count - 1 downto 0 do
+  Result := NewJSONArray();
+  for I := 0 to High(Shapes) do
   begin
-    Dist := FShapes[I].DistToEdge(P);
-
-    if FShapes[I].Contains(P, CLOSE_DISTANCE) and (Dist < BestDist) then
-    begin
-      BestDist := Dist;
-      Result   := FShapes[I];
-    end;
+    Item := NewJSONObject();
+    Item.AddString('shape', Shapes[I].KindName());
+    Item.AddString('name', Shapes[I].Name);
+    Item.AddString('value', Shapes[I].ToStr());
+    Result.Add('', Item);
   end;
 end;
 
-function TSimbaShapeBox.GetShape(Index: Integer): TShapeBoxShape;
+function JSONToShapes(Json: TSimbaJSONItem): TSimbaShapeBox.TShapeArray;
+var
+  I: Integer;
+  Item: TSimbaJSONItem;
+  Kind: EShapeBoxKind;
+  Shape: TSimbaShapeBox.TShape;
+  ShapeVal, NameVal, ValueVal: String;
 begin
-  Result := Default(TShapeBoxShape);
+  if (Json = nil) or (Json.Typ <> EJSONItemType.ARR) then
+    SimbaException('Not a shapes file');
 
-  if CheckIndex(Index) then
+  Result := [];
+  for I := 0 to Json.Count - 1 do
   begin
-    Result.Index    := Index;
+    Item := Json.ItemsByIndex[I];
+    if (Item.Typ <> EJSONItemType.OBJ) then
+      Continue;
 
-    Result.Name     := FShapes[Index].FName;
-    Result.UserData := FShapes[Index].FUserData;
+    if Item.GetString('shape', ShapeVal) and Item.GetString('name', NameVal) and Item.GetString('value', ValueVal) then
+      for Kind in EShapeBoxKind do
+      begin
+        Shape := TSimbaShapeBox.TShape.Create(Kind);
+        if (Shape.KindName() <> ShapeVal) then
+          Continue;
 
-    Result.IsPoint := (FShapes[Index].ClassType = TSimbaShapeBoxShape_Point);
-    Result.IsBox   := (FShapes[Index].ClassType = TSimbaShapeBoxShape_Box);
-    Result.IsPath  := (FShapes[Index].ClassType = TSimbaShapeBoxShape_Path);
-    Result.IsPoly  := (FShapes[Index].ClassType = TSimbaShapeBoxShape_Poly);
-
-         if Result.IsPoint then Result.Point := TSimbaShapeBoxShape_Point(FShapes[Index]).GetPoint()
-    else if Result.IsPoly  then Result.Poly  := TSimbaShapeBoxShape_Poly(FShapes[Index]).GetPoly()
-    else if Result.IsPath  then Result.Path  := TSimbaShapeBoxShape_Path(FShapes[Index]).GetPoly()
-    else if Result.IsBox   then Result.Box   := TSimbaShapeBoxShape_Box(FShapes[Index]).GetBox();
+        if (NameVal <> '') then
+          Shape.Name := NameVal;
+        if Shape.FromStr(ValueVal) then
+          Result := Result + [Shape];
+        Break;
+      end;
   end;
-end;
-
-function TSimbaShapeBox.GetCount: Integer;
-begin
-  Result := FListBox.Count;
-end;
-
-function TSimbaShapeBox.GetSelectedIndex: Integer;
-begin
-  Result := FListBox.ItemIndex;
-end;
-
-procedure TSimbaShapeBox.SetSelectedIndex(Value: Integer);
-begin
-  FListBox.ItemIndex := Value;
 end;
 
 function TSimbaShapeBox.CheckIndex(Index: Integer): Boolean;
 begin
-  Result := (Index >= 0) and (Index < FListBox.Count);
+  Result := (Index >= 0) and (Index < Length(FShapes));
 end;
 
-procedure TSimbaShapeBox.InternalAddShape(Shape: TSimbaShapeBoxShape; IsSelecting: Boolean);
+procedure TSimbaShapeBox.RangeCheck(Index: Integer);
 begin
-  FShapes.Add(Shape);
-  FListBox.ItemIndex := FListBox.Items.Add(Shape.FName);
-  if IsSelecting then
-    InternalSetSelecting(Shape);
+  if not CheckIndex(Index) then
+    SimbaException('TSimbaShapeBox: Index %d is out of range (Count = %d)', [Index, Length(FShapes)]);
 end;
 
-procedure TSimbaShapeBox.InternalDeleteShape(Index: Integer);
+function TSimbaShapeBox.AddShape(const Shape: TShape): Integer;
 begin
-  if CheckIndex(Index) then
-  begin
-    FShapes.Delete(Index);
-    FListBox.Items.Delete(Index);
-  end;
+  Result := Length(FShapes);
+  SetLength(FShapes, Result + 1);
+  FShapes[Result] := Shape;
+  ShapesChanged();
+
+  SelectedIndex := Result;
 end;
 
-procedure TSimbaShapeBox.InternalNameShape(Index: Integer; AName: String);
-begin
-  if CheckIndex(Index) then
-  begin
-    FShapes[Index].FName := AName;
-    FListBox.Items[Index] := AName;
-  end;
-end;
-
-procedure TSimbaShapeBox.InternalStartDragging(Shape: TSimbaShapeBoxShape);
-begin
-  FDragging := Shape;
-  FListBox.ItemIndex := FShapes.IndexOf(Shape);
-end;
-
-procedure TSimbaShapeBox.InternalSetSelecting(Shape: TSimbaShapeBoxShape);
-begin
-  FSelecting := Shape;
-  if (FSelecting = nil) then
-    StatusBar.PanelText[3] := '';
-
-  Paint();
-end;
-
-procedure TSimbaShapeBox.InternalClear;
-begin
-  FShapes.Clear();
-  FListBox.Items.Clear();
-end;
-
-function TSimbaShapeBox.GetSelectedShape: TShapeBoxShape;
-begin
-  Result := GetShape(SelectedIndex);
-end;
-
-procedure TSimbaShapeBox.ImgMouseDown(Button: TMouseButton; Shift: TShiftState;
-  X, Y: Integer);
+procedure TSimbaShapeBox.RemoveShape(Index: Integer);
 var
-  ShapeAtMouse: TSimbaShapeBoxShape;
+  Deselect: Boolean;
 begin
-  inherited;
+  if (Index = FPlacingIndex) then
+    SetPlacingIndex(-1)
+  else
+  if (Index < FPlacingIndex) then
+    Dec(FPlacingIndex);
 
-  if (Button <> mbLeft) then
-    Exit;
+  if (Index = FDragIndex) then
+    FDragIndex := -1
+  else
+  if (Index < FDragIndex) then
+    Dec(FDragIndex);
 
-  if (FSelecting = nil) then
+  Deselect := (Index = FSelectedIndex);
+  if Deselect then
+    FSelectedIndex := -1
+  else
+  if (Index < FSelectedIndex) then
+    Dec(FSelectedIndex);
+
+  System.Delete(FShapes, Index, 1);
+  ShapesChanged();
+  if Deselect then
+    SelectionChanged();
+end;
+
+procedure TSimbaShapeBox.SetShapes(const Shapes: TShapeArray);
+var
+  Deselect: Boolean;
+begin
+  SetPlacingIndex(-1);
+  FDragIndex := -1;
+  Deselect := (FSelectedIndex > -1);
+  FSelectedIndex := -1;
+
+  FShapes := Shapes;
+  ShapesChanged();
+  if Deselect then
+    SelectionChanged();
+end;
+
+procedure TSimbaShapeBox.SelectionChanged;
+begin
+  FNudging := False;
+  Invalidate();
+
+  if Assigned(FOnSelectionChange) then
+    FOnSelectionChange(Self);
+end;
+
+procedure TSimbaShapeBox.ShapesChanged;
+begin
+  Invalidate();
+
+  if Assigned(FOnShapesChange) then
+    FOnShapesChange(Self);
+end;
+
+procedure TSimbaShapeBox.RepaintNow;
+begin
+  Invalidate();
+  Update();
+end;
+
+procedure TSimbaShapeBox.SetPlacingIndex(Index: Integer);
+begin
+  if (Index > -1) then
+    Status := FShapes[Index].PlaceHint()
+  else
+  if (FPlacingIndex > -1) then
+    Status := '';
+  FPlacingIndex := Index;
+end;
+
+procedure TSimbaShapeBox.StopPlacing(Keep: Boolean);
+var
+  Placed: Integer;
+begin
+  Placed := FPlacingIndex;
+  if Keep and (Placed > -1) then
+    PushUndo(TakeState()); // without the placed shape: as things were before it
+  SetPlacingIndex(-1);
+
+  if (Placed > -1) and (not Keep) then
+    RemoveShape(Placed);
+
+  ShapesChanged();
+end;
+
+function TSimbaShapeBox.ShapeAt(P: TPoint): Integer;
+var
+  I: Integer;
+  Dist, BestDist: Double;
+begin
+  Result := -1;
+  BestDist := 0;
+
+  for I := High(FShapes) downto 0 do
   begin
-    ShapeAtMouse := Self.GetShapeAt(MouseXY);
-    if (ShapeAtMouse <> nil) and ShapeAtMouse.BeginDrag(MouseXY) then
+    Dist := FShapes[I].HitDistance(P);
+    if (Dist >= 0) and ((Result = -1) or (Dist < BestDist)) then
     begin
-      InternalStartDragging(ShapeAtMouse);
-      Exit;
+      BestDist := Dist;
+      Result := I;
     end;
   end;
-
-  if (FSelecting <> nil) then
-    FSelecting.SelectingMouseDown(Self, Button, Shift, MouseXY);
 end;
 
-procedure TSimbaShapeBox.ImgMouseUp(Button: TMouseButton; Shift: TShiftState;
-  X, Y: Integer);
-begin
-  inherited;
+procedure TSimbaShapeBox.ImgPaintArea(ACanvas: TSimbaCanvas; R: TRect);
 
-  FDragging := nil;
-end;
-
-procedure TSimbaShapeBox.ImgMouseMove(Shift: TShiftState; X, Y: Integer);
-var
-  ShapeAtMouse: TSimbaShapeBoxShape;
-  NewCursor: TCursor;
-begin
-  inherited;
-
-  if (FSelecting = nil) then
+  procedure PaintShape(Index: Integer; Highlighted: Boolean);
+  var
+    B: TBox;
+    Preview: TShape;
   begin
-    if (FDragging = nil) then
+    if (Index = FPlacingIndex) then
     begin
-      ShapeAtMouse := Self.GetShapeAt(MouseXY);
-      if (ShapeAtMouse <> nil) and ShapeAtMouse.CanDrag(MouseXY, NewCursor) then
-      begin
-        Cursor := NewCursor;
-        Exit;
-      end;
+      Preview := FShapes[Index];
+      if (MouseInClient and Preview.PlaceClick(MouseXY)) or (Preview.Kind in [EShapeBoxKind.POLY, EShapeBoxKind.PATH]) then
+        Preview.Paint(ACanvas, True);
     end else
     begin
-      FDragging.Drag(MouseXY);
-      Paint();
-      Exit;
+      B := FShapes[Index].Bounds().Expand(MARKER_SIZE + LINE_WIDTH);
+      if (B.X2 >= R.Left) and (B.X1 < R.Right) and (B.Y2 >= R.Top) and (B.Y1 < R.Bottom) then
+        FShapes[Index].Paint(ACanvas, Highlighted);
     end;
-  end else
-    Paint();
+  end;
 
-  Cursor := crDefault;
+var
+  SavedState: TSimbaCanvasState;
+  I: Integer;
+begin
+  inherited ImgPaintArea(ACanvas, R);
+
+  // put back whatever the host had set
+  SavedState := ACanvas.State;
+  ACanvas.DrawAntialiasing := True;
+  ACanvas.DrawAlpha := ALPHA_OPAQUE;
+  ACanvas.DrawFilled := False;
+  ACanvas.DrawThickness := LINE_WIDTH;
+
+  // the selected shape last, on top of the rest
+  for I := 0 to High(FShapes) do
+    if (I <> FSelectedIndex) then
+      PaintShape(I, False);
+  if (FSelectedIndex > -1) then
+    PaintShape(FSelectedIndex, True);
+
+  ACanvas.State := SavedState;
+end;
+
+function TSimbaShapeBox.TakeState: TState;
+var
+  I, N: Integer;
+begin
+  Result.Selected := FSelectedIndex;
+  if (FPlacingIndex > -1) then
+  begin
+    if (Result.Selected = FPlacingIndex) then
+      Result.Selected := -1
+    else
+    if (Result.Selected > FPlacingIndex) then
+      Dec(Result.Selected);
+  end;
+
+  SetLength(Result.Shapes, Length(FShapes));
+  N := 0;
+  for I := 0 to High(FShapes) do
+    if (I <> FPlacingIndex) then
+    begin
+      Result.Shapes[N] := FShapes[I].Copy();
+      Inc(N);
+    end;
+  SetLength(Result.Shapes, N);
+end;
+
+procedure TSimbaShapeBox.PushUndo(const State: TState);
+const
+  UNDO_LIMIT = 100;
+begin
+  FUndo := FUndo + [State];
+  if (Length(FUndo) > UNDO_LIMIT) then
+    System.Delete(FUndo, 0, 1);
+  FRedo := [];
+  FNudging := False;
+end;
+
+procedure TSimbaShapeBox.RestoreState(const State: TState);
+begin
+  SetShapes(State.Shapes);
+  SelectedIndex := State.Selected;
+  FNudging := False;
+end;
+
+procedure TSimbaShapeBox.Undo;
+var
+  State: TState;
+begin
+  if (FPlacingIndex > -1) then
+    StopPlacing(False)
+  else
+  if (Length(FUndo) > 0) then
+  begin
+    State := FUndo[High(FUndo)];
+    SetLength(FUndo, High(FUndo));
+
+    FRedo := FRedo + [TakeState()];
+    RestoreState(State);
+  end;
+end;
+
+procedure TSimbaShapeBox.Redo;
+var
+  State: TState;
+begin
+  if (Length(FRedo) = 0) then
+    Exit;
+  if (FPlacingIndex > -1) then
+    StopPlacing(False);
+
+  State := FRedo[High(FRedo)];
+  SetLength(FRedo, High(FRedo));
+
+  FUndo := FUndo + [TakeState()];
+  RestoreState(State);
+end;
+
+procedure TSimbaShapeBox.UndoKeyDown(var Key: UInt16; Shift: TShiftState);
+var
+  Ctrl: Boolean;
+begin
+  Ctrl := (ssCtrl in Shift) or (ssMeta in Shift);
+  if Ctrl and (Key = VK_Z) and not (ssShift in Shift) then
+    Undo()
+  else
+  if Ctrl and ((Key = VK_Y) or ((Key = VK_Z) and (ssShift in Shift))) then
+    Redo()
+  else
+    Exit;
+
+  Key := 0;
+end;
+
+function TSimbaShapeBox.GetCount: Integer;
+begin
+  Result := Length(FShapes);
+end;
+
+function TSimbaShapeBox.GetShapeName(Index: Integer): String;
+begin
+  RangeCheck(Index);
+
+  Result := FShapes[Index].Name;
+end;
+
+procedure TSimbaShapeBox.SetShapeName(Index: Integer; Value: String);
+begin
+  RangeCheck(Index);
+
+  if (Value = '') then
+    Value := FShapes[Index].KindName();
+  if (Value = FShapes[Index].Name) then
+    Exit;
+
+  if (Index <> FPlacingIndex) then
+    PushUndo(TakeState());
+  FShapes[Index].Name := Value;
+  ShapesChanged();
+end;
+
+procedure TSimbaShapeBox.SetSelectedIndex(Value: Integer);
+begin
+  if not CheckIndex(Value) then
+    Value := -1;
+
+  if (Value <> FSelectedIndex) then
+  begin
+    FSelectedIndex := Value;
+    SelectionChanged();
+  end;
 end;
 
 procedure TSimbaShapeBox.ImgKeyDown(var Key: Word; Shift: TShiftState);
 begin
-  inherited;
+  inherited ImgKeyDown(Key, Shift);
 
-  if (FSelecting <> nil) then
+  UndoKeyDown(Key, Shift);
+  if (Key = 0) then
+    Exit;
+
+  if (FPlacingIndex > -1) then
   begin
-    FSelecting.SelectingKeyDown(Self, Key, Shift, MouseXY);
+    if (Key = VK_ESCAPE) then
+      StopPlacing(False)
+    else
+    if (Key = VK_RETURN) and FShapes[FPlacingIndex].CanFinish() then
+      StopPlacing(True)
+    else
+    if (Key = VK_DELETE) and FShapes[FPlacingIndex].DeleteHandleAt(MouseXY) then
+      ShapesChanged();
 
     Key := 0;
-  end
-  else
-  if HasSelection() then
-  begin
-    case Key of
-      VK_LEFT:  FShapes[FListBox.ItemIndex].Offset(-1, 0);
-      VK_RIGHT: FShapes[FListBox.ItemIndex].Offset(1, 0);
-      VK_UP:    FShapes[FListBox.ItemIndex].Offset(0, -1);
-      VK_DOWN:  FShapes[FListBox.ItemIndex].Offset(0, 1);
-      else
-        Exit;
-    end;
-
-    Key := 0;
+    Exit;
   end;
 
-  if (Key = 0) then // Something happened
-    Paint();
-end;
+  if HasSelection() and (FDragIndex = -1) and (Key in [VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN]) then
+  begin
+    if not FNudging then
+      PushUndo(TakeState());
+    FNudging := True;
 
-procedure TSimbaShapeBox.ImgPaintArea(ACanvas: TSimbaImageBoxCanvas; R: TRect);
-var
-  _SelectedShape, _SelectingShape: TSimbaShapeBoxShape;
-  Flags: EPaintShapeFlags;
-  I: Integer;
-begin
-  _SelectingShape := FSelecting;
-  if CheckIndex(FListBox.ItemIndex) then
-    _SelectedShape := FShapes[FListBox.ItemIndex]
-  else
-    _SelectedShape := nil;
-
-  for I := 0 to FShapes.Count - 1 do
-    if FShapes[I].NeedPaint(R) then
-    begin
-      Flags := [];
-      if (FShapes[I] = _SelectingShape) then Flags := Flags + [EPaintShapeFlag.SELECTING];
-      if (FShapes[I] = _SelectedShape)  then Flags := Flags + [EPaintShapeFlag.SELECTED];
-
-      FShapes[I].Paint(Self, ACanvas, Flags, MouseXY);
+    case Key of
+      VK_LEFT:  FShapes[FSelectedIndex].Move(-1, 0);
+      VK_RIGHT: FShapes[FSelectedIndex].Move(1, 0);
+      VK_UP:    FShapes[FSelectedIndex].Move(0, -1);
+      VK_DOWN:  FShapes[FSelectedIndex].Move(0, 1);
     end;
 
-  inherited;
+    Key := 0;
+    ShapesChanged();
+  end;
 end;
 
-procedure TSimbaShapeBox.ManualAddPoint(Point: TPoint; AName: String);
+procedure TSimbaShapeBox.ImgMouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  NewShape: TSimbaShapeBoxShape_Point;
+  P: TPoint;
+  Index: Integer;
 begin
-  NewShape := TSimbaShapeBoxShape_Point.Create(Self);
-  NewShape.FPoint := Point;
-  if (AName <> '') then
-    NewShape.FName := AName;
+  inherited ImgMouseDown(Button, Shift, X, Y);
 
-  InternalAddShape(NewShape);
+  if (Button <> mbLeft) then
+    Exit;
+  P := TPoint.Create(X, Y);
+  FNudging := False;
+
+  if (FPlacingIndex > -1) then
+  begin
+    if FShapes[FPlacingIndex].PlaceClick(P) then
+      StopPlacing(True)
+    else
+      ShapesChanged();
+    Exit;
+  end;
+
+  Index := ShapeAt(P);
+  if (Index > -1) then
+  begin
+    FDragIndex := Index;
+    FDragHandle := FShapes[Index].HandleAt(P);
+    FDragStart := P;
+    FDragFrom := System.Copy(FShapes[Index].Points);
+    FDragSaved := False;
+    SelectedIndex := Index;
+  end;
 end;
 
-procedure TSimbaShapeBox.ManualAddPoint(Point: TPoint; AName: String; constref UserData);
+procedure TSimbaShapeBox.ImgMouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  ManualAddPoint(Point, AName);
-  if (FUserDataSize > 0) then
-    Move(UserData, FShapes.Last.FUserData^, FUserDataSize);
+  inherited ImgMouseUp(Button, Shift, X, Y);
+
+  if (Button = mbLeft) then
+    FDragIndex := -1;
 end;
 
-procedure TSimbaShapeBox.ManualAddBox(Box: TBox; AName: String);
+procedure TSimbaShapeBox.ImgMouseMove(Shift: TShiftState; X, Y: Integer);
 var
-  NewShape: TSimbaShapeBoxShape_Box;
+  Index: Integer;
 begin
-  NewShape := TSimbaShapeBoxShape_Box.Create(Self);
-  NewShape.FBox := Box;
-  if (AName <> '') then
-    NewShape.FName := AName;
+  inherited ImgMouseMove(Shift, X, Y);
 
-  InternalAddShape(NewShape);
+  if (FDragIndex > -1) and (not (ssLeft in Shift)) then
+    FDragIndex := -1;
+
+  if (FDragIndex > -1) then
+  begin
+    // a click that does not move only selects: no undo step
+    if (not FDragSaved) and (X = FDragStart.X) and (Y = FDragStart.Y) then
+      Exit;
+    if not FDragSaved then
+    begin
+      PushUndo(TakeState());
+      FDragSaved := True;
+    end;
+    FShapes[FDragIndex].Drag(FDragHandle, FDragFrom, FDragStart, TPoint.Create(X, Y));
+    ShapesChanged();
+    RepaintNow();
+  end else
+  if (FPlacingIndex > -1) then
+  begin
+    Cursor := crDefault;
+    RepaintNow();
+  end else
+  begin
+    Index := ShapeAt(TPoint.Create(X, Y));
+    if (Index > -1) then
+      Cursor := FShapes[Index].GrabCursor(TPoint.Create(X, Y))
+    else
+      Cursor := crDefault;
+  end;
 end;
 
-procedure TSimbaShapeBox.ManualAddBox(Box: TBox; AName: String; constref UserData);
+constructor TSimbaShapeBox.Create(AOwner: TComponent);
 begin
-  ManualAddBox(Box, AName);
-  if (FUserDataSize > 0) then
-    Move(UserData, FShapes.Last.FUserData^, FUserDataSize);
+  inherited Create(AOwner);
+
+  Background := TSimbaImage.Create(1500, 1500); // black, until it is given an image
+  FSelectedIndex := -1;
+  FPlacingIndex := -1;
+  FDragIndex := -1;
 end;
 
-procedure TSimbaShapeBox.ManualAddPoly(Poly: TPointArray; AName: String);
+class function TSimbaShapeBox.KindName(AKind: EShapeBoxKind): String;
 var
-  NewShape: TSimbaShapeBoxShape_Poly;
+  Shape: TShape;
 begin
-  NewShape := TSimbaShapeBoxShape_Poly.Create(Self);
-  NewShape.FPoly := Poly;
-  if (AName <> '') then
-    NewShape.FName := AName;
+  Shape := TShape.Create(AKind);
 
-  InternalAddShape(NewShape);
+  Result := Shape.KindName();
 end;
 
-procedure TSimbaShapeBox.ManualAddPoly(Poly: TPointArray; AName: String; constref UserData);
-begin
-  ManualAddPoly(Poly, AName);
-  if (FUserDataSize > 0) then
-    Move(UserData, FShapes.Last.FUserData^, FUserDataSize);
-end;
-
-procedure TSimbaShapeBox.ManualAddPath(Path: TPointArray; AName: String);
+procedure TSimbaShapeBox.Place(AKind: EShapeBoxKind);
 var
-  NewShape: TSimbaShapeBoxShape_Path;
+  SameKind: Boolean;
 begin
-  NewShape := TSimbaShapeBoxShape_Path.Create(Self);
-  NewShape.FPoly := Path;
-  if (AName <> '') then
-    NewShape.FName := AName;
+  if (FPlacingIndex > -1) then
+  begin
+    SameKind := (FShapes[FPlacingIndex].Kind = AKind);
+    StopPlacing(FShapes[FPlacingIndex].CanFinish());
+    if SameKind then
+      Exit;
+  end;
 
-  InternalAddShape(NewShape);
+  SetPlacingIndex(AddShape(TShape.Create(AKind)));
 end;
 
-procedure TSimbaShapeBox.ManualAddPath(Path: TPointArray; AName: String; constref UserData);
+procedure TSimbaShapeBox.Print(Index: Integer);
 begin
-  ManualAddPath(Path, AName);
-  if (FUserDataSize > 0) then
-    Move(UserData, FShapes.Last.FUserData^, FUserDataSize);
-end;
+  if (not CheckIndex(Index)) or (Index = FPlacingIndex) then
+    Exit;
 
-procedure TSimbaShapeBox.PrintShapes;
-var
-  I: Integer;
-begin
-  for I := 0 to FShapes.Count - 1 do
-    DebugLn(FShapes[I].FName + ' := [' + FShapes[I].ToStr() + '];');
+  DebugLn(FShapes[Index].ToCode());
   DebugLn(DEBUG_FOCUS);
 end;
 
-procedure TSimbaShapeBox.SaveToFile(FileName: String);
+procedure TSimbaShapeBox.Print;
 var
-  I: Integer;
-  Json, JsonObject: TSimbaJSONItem;
+  Shape: TShape;
 begin
-  if (FShapes.Count = 0) then
+  for Shape in TakeState().Shapes do
+    DebugLn(Shape.ToCode());
+  DebugLn(DEBUG_FOCUS);
+end;
+
+procedure TSimbaShapeBox.Save(FileName: String; HistoryFileName: String);
+
+  function StatesToJSON(const States: TStateArray): TSimbaJSONItem;
+  var
+    I: Integer;
+    Step: TSimbaJSONItem;
+  begin
+    Result := NewJSONArray();
+    for I := 0 to High(States) do
+    begin
+      Step := NewJSONObject();
+      Step.AddInt('selected', States[I].Selected);
+      Step.AddArray('shapes', ShapesToJSON(States[I].Shapes));
+      Result.Add('', Step);
+    end;
+  end;
+
+var
+  Json: TSimbaJSONItem;
+begin
+  Json := ShapesToJSON(TakeState().Shapes);
+  try
+    try
+      SaveJSON(Json, FileName);
+    except
+      on E: Exception do
+        DebugLn('TSimbaShapeBox.Save: %s', [E.Message]);
+    end;
+  finally
+    Json.Free();
+  end;
+
+  if (HistoryFileName = '') then
     Exit;
 
-  Json := NewJSONArray();
+  Json := NewJSONObject();
   try
-    for I := 0 to FShapes.Count - 1 do
-    begin
-      JsonObject := NewJSONObject();
-      JsonObject.AddString('shape', FShapes[i].FShapeType);
-      JsonObject.AddString('name',  FShapes[i].FName);
-      JsonObject.AddString('value', FShapes[i].ToStr());
+    try
+      Json.AddArray('shapes', ShapesToJSON(TakeState().Shapes));
+      Json.AddArray('undo', StatesToJSON(FUndo));
+      Json.AddArray('redo', StatesToJSON(FRedo));
 
-      Json.Add('', JsonObject);
+      SaveJSON(Json, HistoryFileName);
+    except
+      on E: Exception do
+        DebugLn('TSimbaShapeBox.Save: %s', [E.Message]);
     end;
-
-    SaveJSON(Json, FileName);
-  except
-    on E: Exception do
-      DebugLn('TSimbaShapeBox.SaveToFile: %s', [E.Message]);
+  finally
+    Json.Free();
   end;
-  Json.Free();
 end;
 
-procedure TSimbaShapeBox.LoadFromFile(FileName: String);
-var
-  I: Integer;
-  NewShape: TSimbaShapeBoxShape;
-  ShapeClass: TSimbaShapeBoxShapeClass;
-  Json: TSimbaJSONItem;
-  ShapeVal, NameVal, ValueVal: String;
-begin
-  BeginUpdate();
-  InternalClear();
+procedure TSimbaShapeBox.Load(FileName: String; HistoryFileName: String);
 
-  Json := nil;
-  if FileExists(FileName) then
-  try
-    Json := LoadJSON(FileName);
+  function StatesFromJSON(Json: TSimbaJSONItem): TStateArray;
+  var
+    I: Integer;
+    Selected: Int64;
+    Shapes: TSimbaJSONItem;
+    State: TState;
+  begin
+    Result := [];
     for I := 0 to Json.Count - 1 do
-    begin
-      if Json.ItemsByIndex[i].GetString('shape', ShapeVal) and
-         Json.ItemsByIndex[i].GetString('name', NameVal)   and
-         Json.ItemsByIndex[i].GetString('value', ValueVal) then
+      if Json.ItemsByIndex[I].GetInt('selected', Selected) and Json.ItemsByIndex[I].GetArray('shapes', Shapes) then
       begin
-        if (ShapeVal = 'Box')   then ShapeClass := TSimbaShapeBoxShape_Box   else
-        if (ShapeVal = 'Point') then ShapeClass := TSimbaShapeBoxShape_Point else
-        if (ShapeVal = 'Path')  then ShapeClass := TSimbaShapeBoxShape_Path  else
-        if (ShapeVal = 'Poly')  then ShapeClass := TSimbaShapeBoxShape_Poly  else
-                                     ShapeClass := nil;
+        State.Selected := Selected;
+        State.Shapes := JSONToShapes(Shapes);
+        Result := Result + [State];
+      end;
+  end;
 
-        NewShape := ShapeClass.Create(Self);
-        NewShape.FromStr(ValueVal);
-        NewShape.FName := NameVal;
-
-        InternalAddShape(NewShape);
+var
+  Json, Current, Saved, Steps: TSimbaJSONItem;
+  Shapes: TShapeArray;
+begin
+  Shapes := [];
+  if FileExists(FileName) then
+  begin
+    Json := nil;
+    try
+      try
+        Json := LoadJSON(FileName);
+        Shapes := JSONToShapes(Json);
+      finally
+        Json.Free();
+      end;
+    except
+      on E: Exception do
+      begin
+        DebugLn('TSimbaShapeBox.Load: %s', [E.Message]);
+        Exit;
       end;
     end;
-  except
-    on E: Exception do
-      DebugLn('TSimbaShapeBox.LoadFromFile: %s', [E.Message]);
   end;
-  if (Json <> nil) then
-    Json.Free();
 
-  EndUpdate();
+  FUndo := [];
+  FRedo := [];
+  SetShapes(Shapes);
+
+  if (HistoryFileName = '') or (not FileExists(HistoryFileName)) then
+    Exit;
+
+  Json := nil;
+  Current := ShapesToJSON(TakeState().Shapes);
+  try
+    try
+      Json := LoadJSON(HistoryFileName);
+      if Json.GetArray('shapes', Saved) and (Saved.Format() = Current.Format()) then
+      begin
+        if Json.GetArray('undo', Steps) then
+          FUndo := StatesFromJSON(Steps);
+        if Json.GetArray('redo', Steps) then
+          FRedo := StatesFromJSON(Steps);
+      end;
+    except
+      on E: Exception do
+      begin
+        FUndo := [];
+        FRedo := [];
+        DebugLn('TSimbaShapeBox.Load: %s', [E.Message]);
+      end;
+    end;
+  finally
+    Json.Free();
+    Current.Free();
+  end;
 end;
 
-function TSimbaShapeBox.CopyShape(Index: Integer): Integer;
-var
-  NewName: String;
+function TSimbaShapeBox.Copy(Index: Integer): Integer;
 begin
   Result := -1;
+  if (not CheckIndex(Index)) or (Index = FPlacingIndex) then
+    Exit;
 
-  if CheckIndex(Index) then
+  PushUndo(TakeState());
+  Result := AddShape(FShapes[Index].Copy());
+end;
+
+procedure TSimbaShapeBox.Delete(Index: Integer);
+begin
+  if not CheckIndex(Index) then
+    Exit;
+
+  if (Index = FPlacingIndex) then
+    StopPlacing(False)
+  else
   begin
-    NewName := FShapes[Index].FName;
-    if FQueryName and (not InputQuery('Simba', 'Enter name', NewName)) then
-      Exit;
-    InternalAddShape(FShapes[Index].CreateCopy());
-    if FQueryName then
-      InternalNameShape(FListBox.ItemIndex, NewName);
-
-    if (FUserDataSize > 0) then
-      Move(FShapes[Index].FUserData^, FShapes[FListBox.ItemIndex].FUserData^, FUserDataSize);
-
-    Result := FListBox.ItemIndex;
+    PushUndo(TakeState());
+    RemoveShape(Index);
   end;
 end;
 
-procedure TSimbaShapeBox.DeleteShape(Index: Integer);
+procedure TSimbaShapeBox.Clear;
 begin
-  InternalDeleteShape(Index);
-end;
+  if (FPlacingIndex > -1) then
+    StopPlacing(False);
+  if (Length(FShapes) = 0) then
+    Exit;
 
-procedure TSimbaShapeBox.DeleteAllShapes;
-begin
-  InternalClear();
+  PushUndo(TakeState());
+  SetShapes([]);
 end;
 
 function TSimbaShapeBox.HasSelection: Boolean;
 begin
-  Result := CheckIndex(FListBox.ItemIndex);
+  Result := (FSelectedIndex > -1);
 end;
 
 procedure TSimbaShapeBox.MakeSelectionVisible;
 var
   P: TPoint;
 begin
-  if CheckIndex(FListBox.ItemIndex) then
+  if HasSelection() and (Length(FShapes[FSelectedIndex].Points) > 0) then
   begin
-    P := FShapes[FListBox.ItemIndex].Center();
+    P := FShapes[FSelectedIndex].Bounds().Center;
     if not IsPointVisible(P) then
       MoveTo(P);
   end;
 end;
 
-constructor TSimbaShapeBox.Create(AOwner: TComponent; AUserDataSize: Integer);
-
-  function NewMenuItem(AText: String; AOnClick: TNotifyEvent): TMenuItem;
-  begin
-    Result := TMenuItem.Create(Self);
-    Result.Caption := AText;
-    Result.OnClick := AOnClick;
-  end;
-
+function TSimbaShapeBox.ListText(Index: Integer): String;
 begin
-  inherited Create(AOwner);
+  RangeCheck(Index);
 
-  FUserDataSize := AUserDataSize;
-  FShapes := TShapeList.Create();
-
-  FPanel := TPanel.Create(Self);
-  FPanel.Parent := Self;
-  FPanel.Align := alLeft;
-  FPanel.BevelOuter := bvNone;
-  FPanel.AddHandlerOnVisibleChanged(@DoPanelVisibleChanged);
-
-  FSplitter := TSimbaSplitter.Create(Self);
-  FSplitter.Parent := Self;
-  FSplitter.Align := alLeft;
-
-  with TBitmap.Create() do
-  try
-    Font := Self.Font;
-
-    FPanel.Width := Round(Canvas.TextWidth('Delete All Shapes') * 1.5);
-  finally
-    Free();
-  end;
-
-  FListPopup := TPopupMenu.Create(Self);
-  FListPopup.Items.Add(NewMenuItem('Delete', @DoShapeDelete));
-  FListPopup.Items.Add(NewMenuItem('Duplicate', @DoShapeDuplicate));
-  FListPopup.Items.Add(NewMenuItem('Name', @DoShapeName));
-  FListPopup.Items.Add(NewMenuItem('Print', @DoShapePrint));
-
-  FListBox := TListBox.Create(FPanel);
-  FListBox.Parent := FPanel;
-  FListBox.BorderSpacing.Around := 5;
-  FListBox.Align := alClient;
-  FListBox.OnSelectionChange := @DoSelectionChanged;
-  FListBox.OnMouseDown := @DoListMouseDown;
-  FListBox.PopupMenu := FListPopup;
-
-  FNewPopup := TPopupMenu.Create(Self);
-  FNewPopup.Parent := FPanel;
-  FNewPopup.Items.Add(NewMenuItem('Point', @DoAddPointClick));
-  FNewPopup.Items.Add(NewMenuItem('Box', @DoAddBoxClick));
-  FNewPopup.Items.Add(NewMenuItem('Poly', @DoAddPolyClick));
-  FNewPopup.Items.Add(NewMenuItem('Path', @DoAddPathClick));
-
-  FNewButton := TButton.Create(FPanel);
-  with FNewButton do
-  begin
-    Parent := FPanel;
-    Align := alTop;
-    Caption := 'New Shape';
-    OnClick := @DoShapeAddButtonClick;
-    AutoSize := True;
-    BorderSpacing.Around := 5;
-    PopupMenu := FNewPopup;
-  end;
-
-  FClearButton := TButton.Create(FPanel);
-  with FClearButton do
-  begin
-    Parent := FPanel;
-    Align := alBottom;
-    Caption := 'Clear Shapes';
-    OnClick := @DoShapeDeleteAllClick;
-    AutoSize := True;
-    BorderSpacing.Around := 5;
-  end;
-
-  FPrintButton := TButton.Create(FPanel);
-  with FPrintButton do
-  begin
-    Parent := FPanel;
-    Align := alBottom;
-    Caption := 'Print Shapes';
-    OnClick := @DoPrintShapesClick;
-    AutoSize := True;
-    BorderSpacing.Around := 5;
-  end;
+  Result := FShapes[Index].ListText();
 end;
 
-destructor TSimbaShapeBox.Destroy;
+function TSimbaShapeBox.Describe(Index: Integer): String;
 begin
-  if (FShapes <> nil) then
-    FreeAndNil(FShapes);
+  RangeCheck(Index);
 
-  inherited Destroy();
-end;
-
-procedure TSimbaShapeBox.BeginUpdate;
-begin
-  Inc(FUpdating);
-end;
-
-procedure TSimbaShapeBox.EndUpdate;
-begin
-  if (FUpdating > 0) then
-  begin
-    Dec(FUpdating);
-    if (FUpdating = 0) then
-      DoSelectionChanged(Self, True);
-  end;
+  Result := FShapes[Index].Describe();
 end;
 
 end.
-

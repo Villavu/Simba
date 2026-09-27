@@ -43,7 +43,7 @@ uses
   // Simba classes
   simba.import_canvas,
   simba.import_image, simba.import_externalcanvas, simba.import_dtm, simba.import_matchtemplate,
-  simba.import_json, simba.import_imagebox, simba.import_shapebox,
+  simba.import_json, simba.import_imagebox,
 
   // LCL
   simba.import_lcl_system, simba.import_lcl_graphics, simba.import_lcl_controls,
@@ -95,7 +95,6 @@ begin
   ImportPixelOCR(Script);
 
   ImportSimbaImageBox(Script);
-  ImportSimbaShapeBox(Script);
 
   ImportDateTime(Script);
   ImportTiming(Script);
