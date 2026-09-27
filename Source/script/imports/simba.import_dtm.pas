@@ -22,6 +22,8 @@ DTM
 DTM related methods
 
 ![dtm](../../images/dtm.png)
+
+The first point is the main one: a match is where it is, and the other points are placed from it.
 *)
 
 (*
@@ -76,12 +78,12 @@ end;
 TDTM.AddPoint
 --------------
 ```
-procedure TDTM.AddPoint(X, Y, Color, Tolerance, AreaSize: Integer);
+procedure TDTM.AddPoint(X, Y, Color: Integer; Tolerance: Single; AreaSize: Integer);
 ```
 *)
 procedure _LapeDTM_AddPoint2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDTM(Params^[0])^.AddPoint(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^, PInteger(Params^[5])^);
+  PDTM(Params^[0])^.AddPoint(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PSingle(Params^[4])^, PInteger(Params^[5])^);
 end;
 
 (*
@@ -102,6 +104,7 @@ TDTM.FromString
 ```
 procedure TDTM.FromString(Str: String);
 ```
+Raises for a string that is not a DTM, and the DTM is left as it was.
 *)
 procedure _LapeDTM_FromString(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -117,19 +120,7 @@ procedure TDTM.MovePoint(AFrom, ATo: Integer);
 *)
 procedure _LapeDTM_MovePoint(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PDTM(Params^[0])^.MovePoint(PInteger(Params^[1])^, PInteger(Params^[1])^);
-end;
-
-(*
-TDTM.Normalize
----------------
-```
-procedure TDTM.Normalize;
-```
-*)
-procedure _LapeDTM_Normalize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  PDTM(Params^[0])^.Normalize();
+  PDTM(Params^[0])^.MovePoint(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 procedure ImportDTM(Script: TSimbaScript);
@@ -155,12 +146,10 @@ begin
     addGlobalFunc('function TDTM.ToString: String', @_LapeDTM_ToString);
     addGlobalFunc('function TDTM.PointCount: Integer', @_LapeDTM_PointCount);
     addGlobalFunc('procedure TDTM.AddPoint(Point: TDTMPoint); overload', @_LapeDTM_AddPoint1);
-    addGlobalFunc('procedure TDTM.AddPoint(X, Y, Color, Tolerance, AreaSize: Integer); overload', @_LapeDTM_AddPoint2);
+    addGlobalFunc('procedure TDTM.AddPoint(X, Y, Color: Integer; Tolerance: Single; AreaSize: Integer); overload', @_LapeDTM_AddPoint2);
     addGlobalFunc('procedure TDTM.DeletePoints', @_LapeDTM_DeletePoints);
     addGlobalFunc('procedure TDTM.DeletePoint(Index: Integer);', @_LapeDTM_DeletePoint);
     addGlobalFunc('procedure TDTM.MovePoint(AFrom, ATo: Integer);', @_LapeDTM_MovePoint);
-    addGlobalFunc('procedure TDTM.Normalize;', @_LapeDTM_Normalize);
-    addGlobalFunc('function TDTM.Valid: Boolean;', @_LapeDTM_Normalize);
 
     DumpSection := '';
   end;
