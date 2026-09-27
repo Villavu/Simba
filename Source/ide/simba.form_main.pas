@@ -53,6 +53,8 @@ uses
   simba.ide_associate,
   simba.ide_debugimage,
   simba.ide_dtmeditor,
+  simba.form_shapebox,
+  simba.toolform,
   simba.ide_controller,
   simba.form_functionlist,
   simba.form_scripttabs,
@@ -178,6 +180,7 @@ begin
     ESimbaEvent.ACTION_ASSOCIATE,
     ESimbaEvent.ACTION_ACA,
     ESimbaEvent.ACTION_DTM_EDITOR,
+    ESimbaEvent.ACTION_SHAPE_BOX,
     ESimbaEvent.ACTION_QUIT
   ]);
 
@@ -194,8 +197,14 @@ begin
 end;
 
 procedure TSimbaMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+var
+  I: Integer;
 begin
   CanClose := SimbaScriptTabsForm.CloseAllTabs();
+  if CanClose then
+    for I := Screen.FormCount - 1 downto 0 do
+      if (Screen.Forms[I] is TSimbaToolForm) then
+        Screen.Forms[I].Close();
 end;
 
 procedure TSimbaMainForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
@@ -225,6 +234,24 @@ procedure TSimbaMainForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
   procedure DoDTMEditor;
   begin
     with TSimbaDTMEditor.Create(@DoGetTargetImage) do
+    begin
+      FreeOnClose := True;
+      ShowOnTop();
+    end;
+  end;
+
+  procedure DoShapeBox;
+  var
+    I: Integer;
+  begin
+    for I := 0 to Screen.FormCount - 1 do
+      if (Screen.Forms[I] is TSimbaShapeBoxForm) then
+      begin
+        Screen.Forms[I].ShowOnTop();
+        Exit;
+      end;
+
+    with TSimbaShapeBoxForm.Create(@DoGetTargetImage) do
     begin
       FreeOnClose := True;
       ShowOnTop();
@@ -272,6 +299,7 @@ begin
     ESimbaEvent.ACTION_ASSOCIATE:      DoAssociate();
     ESimbaEvent.ACTION_ACA:            DoACA();
     ESimbaEvent.ACTION_DTM_EDITOR:     DoDTMEditor();
+    ESimbaEvent.ACTION_SHAPE_BOX:      DoShapeBox();
     ESimbaEvent.ACTION_QUIT:           DoQuit();
   end;
 end;

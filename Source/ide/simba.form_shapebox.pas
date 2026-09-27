@@ -10,103 +10,288 @@ unit simba.form_shapebox;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Menus,
+  Classes, SysUtils, Controls, Forms, Menus, ComCtrls, Graphics,
   simba.base,
-  simba.ide_events,
-  simba.component_shapebox;
+  simba.toolform,
+  simba.component_imagebox,
+  simba.component_shapebox,
+  simba.component_treeview,
+  simba.component_button;
 
 type
-  TSimbaShapeBoxForm = class(TForm)
-    MainMenu1: TMainMenu;
-    MenuItem1: TMenuItem;
-    MenuItem2: TMenuItem;
-    MenuItem3: TMenuItem;
-    MenuItem4: TMenuItem;
-    MenuItemLoadTargetImage: TMenuItem;
-    MenuItemLoadImage: TMenuItem;
-    OpenDialog: TOpenDialog;
+  TSimbaShapeBoxForm = class(TSimbaToolForm)
+  protected
+    FShapeBox: TSimbaShapeBox;
+    FList: TSimbaTreeView;
+    FSyncing: Boolean;
 
-    procedure FormCreate(Sender: TObject);
-    procedure FormHide(Sender: TObject);
-    procedure FormShow(Sender: TObject);
-    procedure MenuItem3Click(Sender: TObject);
-    procedure MenuItem4Click(Sender: TObject);
-    procedure MenuItemLoadTargetImageClick(Sender: TObject);
-    procedure MenuItemLoadImageClick(Sender: TObject);
+    function CreateImageBox: TSimbaImageBox; override;
 
-    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+    // the list, in step with the shape box
+    procedure DoShapesChange(Sender: TObject);
+    procedure DoListSelectionChange(Sender: TObject);
+    procedure DoPaintNode(ACanvas: TCanvas; Node: TTreeNode);
+    procedure DoKindClick(Sender: TObject);
+
+    procedure DoDeleteClick(Sender: TObject);
+    procedure DoDuplicateClick(Sender: TObject);
+    procedure DoNameClick(Sender: TObject);
+    procedure DoPrintClick(Sender: TObject);
+    procedure DoClearShapesClick(Sender: TObject);
+    procedure DoPrintShapesClick(Sender: TObject);
+
+    procedure DoLoadShapesClick(Sender: TObject);
+    procedure DoSaveShapesClick(Sender: TObject);
+    procedure DoUndoClick(Sender: TObject);
+    procedure DoRedoClick(Sender: TObject);
+
+    procedure DoFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); override;
+    procedure DoFirstShow; override;
+    procedure DoClose(var CloseAction: TCloseAction); override;
   public
-    ShapeBox: TSimbaShapeBox;
+    constructor Create(ImageSupplier: TImageSupplier); override;
   end;
-
-var
-  SimbaShapeBoxForm: TSimbaShapeBoxForm;
 
 implementation
 
 uses
-  simba.env,
-  simba.image,
-  simba.ide_controller;
+  Dialogs, LCLType,
+  simba.env, simba.dialog, simba.component_theme;
 
-procedure TSimbaShapeBoxForm.FormCreate(Sender: TObject);
+function TSimbaShapeBoxForm.CreateImageBox: TSimbaImageBox;
 begin
-  ShapeBox := TSimbaShapeBox.Create(Self);
-  ShapeBox.Parent := Self;
-  ShapeBox.Align := alClient;
+  FShapeBox := TSimbaShapeBox.Create(Self);
 
-  Width  := Scale96ToScreen(800);
-  Height := Scale96ToScreen(600);
-
-  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_SHAPE_BOX]);
+  Result := FShapeBox;
 end;
 
-procedure TSimbaShapeBoxForm.FormHide(Sender: TObject);
+procedure TSimbaShapeBoxForm.DoShapesChange(Sender: TObject);
+var
+  I: Integer;
 begin
-  ShapeBox.PrintShapes();
-  ShapeBox.SaveToFile(SimbaEnv.DataPath + 'shapes.json');
+  FSyncing := True;
+  FList.BeginUpdate();
+  try
+    while (FList.TopLevelCount > FShapeBox.Count) do
+      FList.Items.Delete(FList.TopLevelItem[FList.TopLevelCount - 1]);
+    while (FList.TopLevelCount < FShapeBox.Count) do
+      FList.AddNode('');
+    for I := 0 to FShapeBox.Count - 1 do
+      if (FList.TopLevelItem[I].Text <> FShapeBox.ListText(I)) then
+        FList.TopLevelItem[I].Text := FShapeBox.ListText(I);
+
+    if FShapeBox.HasSelection() then
+      FList.Selected := FList.TopLevelItem[FShapeBox.SelectedIndex]
+    else
+      FList.Selected := nil;
+  finally
+    FList.EndUpdate();
+    FSyncing := False;
+  end;
+  FList.Invalidate();
 end;
 
-procedure TSimbaShapeBoxForm.FormShow(Sender: TObject);
+// the user picked a shape: it is brought into view
+procedure TSimbaShapeBoxForm.DoListSelectionChange(Sender: TObject);
 begin
-  if (ShapeBox.Background.Width = 0) and (ShapeBox.Background.Height = 0) then
-    ShapeBox.SetImage(TSimbaImage.Create(1500, 1500));
+  if FSyncing then
+    Exit;
 
-  ShapeBox.LoadFromFile(SimbaEnv.DataPath + 'shapes.json');
+  if (FList.Selected <> nil) then
+    FShapeBox.SelectedIndex := FList.Selected.Index
+  else
+    FShapeBox.SelectedIndex := -1;
+  FShapeBox.MakeSelectionVisible();
 end;
 
-procedure TSimbaShapeBoxForm.MenuItem3Click(Sender: TObject);
+// the description, dimmer, after the kind and name the tree drew
+procedure TSimbaShapeBoxForm.DoPaintNode(ACanvas: TCanvas; Node: TTreeNode);
+var
+  Str: String;
+  R: TRect;
+  OldColor: TColor;
+  OldStyle: TBrushStyle;
 begin
-  if OpenDialog.Execute() then
-    ShapeBox.LoadFromFile(OpenDialog.FileName);
+  if (Node.Index >= FShapeBox.Count) then
+    Exit;
+
+  Str := FShapeBox.Describe(Node.Index);
+
+  OldColor := ACanvas.Font.Color;
+  OldStyle := ACanvas.Brush.Style;
+  ACanvas.Font.Color := SimbaComponentTheme.ColorLine;
+  ACanvas.Brush.Style := bsClear;
+
+  R := Node.DisplayRect(True);
+  ACanvas.TextOut(R.Right + ACanvas.TextWidth(' '), R.Top + (R.Height - ACanvas.TextHeight(Str)) div 2, Str);
+
+  ACanvas.Font.Color := OldColor;
+  ACanvas.Brush.Style := OldStyle;
 end;
 
-procedure TSimbaShapeBoxForm.MenuItem4Click(Sender: TObject);
+// the keys that place it (Esc, Enter, Delete) go to the shape box straight away
+procedure TSimbaShapeBoxForm.DoKindClick(Sender: TObject);
 begin
-  if OpenDialog.Execute() then
-    ShapeBox.SaveToFile(OpenDialog.FileName);
+  FShapeBox.Place(EShapeBoxKind(TSimbaButton(Sender).Tag));
+  if FShapeBox.CanSetFocus() then
+    FShapeBox.SetFocus();
 end;
 
-procedure TSimbaShapeBoxForm.MenuItemLoadTargetImageClick(Sender: TObject);
+procedure TSimbaShapeBoxForm.DoDeleteClick(Sender: TObject);
 begin
-  ShapeBox.SetImage(SimbaController.GetTargetImage());
+  FShapeBox.Delete(FShapeBox.SelectedIndex);
 end;
 
-procedure TSimbaShapeBoxForm.MenuItemLoadImageClick(Sender: TObject);
+procedure TSimbaShapeBoxForm.DoDuplicateClick(Sender: TObject);
 begin
-  if OpenDialog.Execute() then
-    ShapeBox.SetImage(TSimbaImage.Create(OpenDialog.FileName));
+  FShapeBox.Copy(FShapeBox.SelectedIndex);
 end;
 
-procedure TSimbaShapeBoxForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+procedure TSimbaShapeBoxForm.DoNameClick(Sender: TObject);
+var
+  NewName: String;
 begin
-  case Event of
-    ESimbaEvent.ACTION_SHAPE_BOX:
-      ShowOnTop();
+  if not FShapeBox.HasSelection() then
+    Exit;
+
+  NewName := FShapeBox.ShapeName[FShapeBox.SelectedIndex];
+  if InputQuery('Shape name', 'Enter shape name', NewName) then
+    FShapeBox.ShapeName[FShapeBox.SelectedIndex] := NewName;
+end;
+
+procedure TSimbaShapeBoxForm.DoPrintClick(Sender: TObject);
+begin
+  FShapeBox.Print(FShapeBox.SelectedIndex);
+end;
+
+procedure TSimbaShapeBoxForm.DoClearShapesClick(Sender: TObject);
+begin
+  if (FShapeBox.Count > 0) and (ShowQuestionDialog('Simba', 'Delete all shapes?', []) = ESimbaDialogButton.YES) then
+    FShapeBox.Clear();
+end;
+
+procedure TSimbaShapeBoxForm.DoPrintShapesClick(Sender: TObject);
+begin
+  FShapeBox.Print();
+end;
+
+procedure TSimbaShapeBoxForm.DoLoadShapesClick(Sender: TObject);
+begin
+  with TOpenDialog.Create(Self) do
+  try
+    if Execute() and FileExists(FileName) then
+      FShapeBox.Load(FileName);
+  finally
+    Free();
   end;
 end;
 
-{$R *.lfm}
+procedure TSimbaShapeBoxForm.DoSaveShapesClick(Sender: TObject);
+begin
+  with TSaveDialog.Create(Self) do
+  try
+    Options := Options + [ofOverwritePrompt];
+    DefaultExt := 'json';
+    if Execute() then
+      FShapeBox.Save(FileName);
+  finally
+    Free();
+  end;
+end;
+
+procedure TSimbaShapeBoxForm.DoUndoClick(Sender: TObject);
+begin
+  FShapeBox.Undo();
+end;
+
+procedure TSimbaShapeBoxForm.DoRedoClick(Sender: TObject);
+begin
+  FShapeBox.Redo();
+end;
+
+// undo and redo whether the image or the list has the focus
+procedure TSimbaShapeBoxForm.DoFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  inherited DoFormKeyDown(Sender, Key, Shift);
+
+  FShapeBox.UndoKeyDown(Key, Shift);
+end;
+
+procedure TSimbaShapeBoxForm.DoFirstShow;
+begin
+  inherited DoFirstShow();
+
+  FShapeBox.Load(SimbaEnv.DataPath + 'shapes.json', SimbaEnv.DataPath + 'shapes_history.json');
+end;
+
+procedure TSimbaShapeBoxForm.DoClose(var CloseAction: TCloseAction);
+begin
+  FShapeBox.Print();
+  FShapeBox.Save(SimbaEnv.DataPath + 'shapes.json', SimbaEnv.DataPath + 'shapes_history.json');
+
+  inherited DoClose(CloseAction);
+end;
+
+constructor TSimbaShapeBoxForm.Create(ImageSupplier: TImageSupplier);
+var
+  Items: TMenuItem;
+  ListMenu: TPopupMenu;
+  Buttons: TSimbaButtonGrid;
+  K: EShapeBoxKind;
+begin
+  inherited Create(ImageSupplier);
+
+  Caption := 'Shape Box';
+  FUpdateImageOnFirstShow := False; // the shape box's own black image, until Update Image
+  ShowButtonDivider := False;
+  ShowZoom := False;
+
+  addImageMenu();
+
+  // the keys themselves are DoFormKeyDown's
+  Items := addMenu('Shapes');
+  addMenuItem(Items, 'Load Shapes', @DoLoadShapesClick);
+  addMenuItem(Items, 'Save Shapes', @DoSaveShapesClick);
+  addMenuItem(Items, '-');
+  addMenuItem(Items, 'Undo', @DoUndoClick, ShortCut(VK_Z, [ssCtrl]));
+  addMenuItem(Items, 'Redo', @DoRedoClick, ShortCut(VK_Y, [ssCtrl]));
+
+  FShapeBox.OnShapesChange := @DoShapesChange;
+  FShapeBox.OnSelectionChange := @DoShapesChange;
+
+  Buttons := TSimbaButtonGrid.Create(Self);
+  Buttons.Parent := FSidePanel;
+  Buttons.Align := alTop;
+  Buttons.BorderSpacing.Around := 5;
+  Buttons.ChildSizing.ControlsPerLine := Ord(High(EShapeBoxKind)) + 1;
+
+  for K in EShapeBoxKind do
+    with TSimbaButton.Create(Self) do
+    begin
+      Parent := Buttons;
+      Caption := TSimbaShapeBox.KindName(K);
+      XPadding := 4;
+      Tag := Ord(K);
+      OnClick := @DoKindClick;
+    end;
+
+  ListMenu := TPopupMenu.Create(Self);
+  addMenuItem(ListMenu.Items, 'Delete', @DoDeleteClick);
+  addMenuItem(ListMenu.Items, 'Duplicate', @DoDuplicateClick);
+  addMenuItem(ListMenu.Items, 'Name', @DoNameClick);
+  addMenuItem(ListMenu.Items, 'Print', @DoPrintClick);
+
+  FList := TSimbaTreeView.Create(Self);
+  FList.Parent := FSidePanel;
+  FList.Align := alClient;
+  FList.FilterVisible := False;
+  FList.HideRoot();
+  FList.OnSelectionChange := @DoListSelectionChange;
+  FList.OnPaintNode := @DoPaintNode;
+  FList.PopupMenu := ListMenu;
+
+  addButton('Clear Shapes', @DoClearShapesClick);
+  addButton('Print Shapes', @DoPrintShapesClick);
+end;
 
 end.
-

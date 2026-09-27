@@ -17,7 +17,7 @@ uses
   simba.base,
   simba.form_main, simba.form_about, simba.form_imagestring,
   simba.form_filebrowser,
-  simba.form_notes, simba.form_settings, simba.form_openexample, simba.form_shapebox,
+  simba.form_notes, simba.form_settings, simba.form_openexample,
   simba.form_backups, simba.form_findinfiles, simba.form_downloadsimba, simba.form_package,
   simba.form_colorpickhistory,
   simba.plugin_dump, simba.script_runner,
@@ -144,7 +144,6 @@ begin
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
     Application.CreateForm(TSimbaImageStringForm, SimbaImageStringForm);
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
-    Application.CreateForm(TSimbaShapeBoxForm, SimbaShapeBoxForm);
     Application.CreateForm(TSimbaBackupsForm, SimbaBackupsForm);
     Application.CreateForm(TSimbaDownloadSimbaForm, SimbaDownloadSimbaForm);
     Application.CreateForm(TSimbaPackageForm, SimbaPackageForm);
