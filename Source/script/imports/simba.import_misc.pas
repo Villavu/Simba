@@ -494,9 +494,10 @@ begin
   PACAForm(Result)^ := TSimbaACA.CreateLape(TImageSupplierLape(Params^[0]^));
 end;
 
+// the image box's, for a script's own controls
 procedure _LapeACAForm_UserPanel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PPanel(Result)^ := PACAForm(Params^[0])^.UserPanel;
+  PPanel(Result)^ := PACAForm(Params^[0])^.ImageBox.UserPanel;
 end;
 
 procedure _LapeACAForm_ImageBox_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -504,9 +505,13 @@ begin
   PSimbaImageBox(Result)^ := PACAForm(Params^[0])^.ImageBox;
 end;
 
+// a copy: the box owns what it is given, and the script still has its image
 procedure _LapeACAForm_Image_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PACAForm(Params^[0])^.Image := PLapeObjectImage(Params^[1])^^;
+  if (PLapeObjectImage(Params^[1])^ = nil) then
+    SimbaException('TACAForm.Image cannot be nil');
+
+  PACAForm(Params^[0])^.Image := PLapeObjectImage(Params^[1])^^.Copy();
 end;
 
 procedure _LapeACAForm_BestColor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -532,6 +537,16 @@ end;
 procedure _LapeACAForm_DrawColor_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PACAForm(Params^[0])^.DrawColor := PColor(Params^[1])^;
+end;
+
+procedure _LapeACAForm_DrawAlpha_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PByte(Result)^ := PACAForm(Params^[0])^.DrawAlpha;
+end;
+
+procedure _LapeACAForm_DrawAlpha_Write(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  PACAForm(Params^[0])^.DrawAlpha := PByte(Params^[1])^;
 end;
 
 procedure _LapeACAForm_FindColor(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
@@ -630,6 +645,7 @@ begin
     addProperty('TACAForm', 'ImageBox', 'TImageBox', @_LapeACAForm_ImageBox_Read);
     addProperty('TACAForm', 'Image', 'TImage', nil, @_LapeACAForm_Image_Write);
     addProperty('TACAForm', 'DrawColor', 'TColor', @_LapeACAForm_DrawColor_Read, @_LapeACAForm_DrawColor_Write);
+    addProperty('TACAForm', 'DrawAlpha', 'Byte', @_LapeACAForm_DrawAlpha_Read, @_LapeACAForm_DrawAlpha_Write);
     addGlobalFunc('procedure TACAForm.FindColor;', @_LapeACAForm_FindColor);
     addGlobalFunc('procedure TACAForm.MatchColor;', @_LapeACAForm_MatchColor);
     addGlobalFunc('procedure TACAForm.ClearImage;', @_LapeACAForm_ClearImage);

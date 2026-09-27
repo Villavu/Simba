@@ -15,13 +15,17 @@ uses
   simba.image,
   simba.colormath,
   simba.component_imagebox,
-  simba.component_imageboxcanvas,
   simba.component_treeview,
   simba.component_edit,
   simba.component_button,
   simba.toolform;
 
 type
+  {$push}
+  {$scopedenums on}
+  EACASearch = (NONE, FIND_COLOR, MATCH_COLOR);
+  {$pop}
+
   TSimbaACA = class(TSimbaToolForm)
   protected
     FColorList: TSimbaTreeView;
@@ -37,16 +41,29 @@ type
     FButtonClearImg: TSimbaButton;
     FButtonUpdateImg: TSimbaButton;
 
-    FDebugTPA: TPointArray;
-    FDebugMat: TSingleMatrix;
+    FSearch: EACASearch;
+    FDrawColor: TColor;
+    FDrawAlpha: Byte;
+    FDrawColorMenu: TMenuItem;
+    FDrawAlphaMenu: TMenuItem;
 
     procedure FillLoadDeleteColorMenus(LoadItem, DeleteItem: TMenuItem);
 
     function GetColorSpace: EColorSpace;
     procedure CalcBestColor;
+    procedure AddColor(NewColor: TColor);
+    procedure AddColors(Str: String);
+    function HasBestColor: Boolean;
+    // Value's results for the best colour, over the image in place of the last search's.
+    // Search(FSearch) does the last one again: for a new image, best colour or draw colour.
+    procedure Search(Value: EACASearch);
+    procedure SetDrawColor(Value: TColor);
+    procedure SetDrawAlpha(Value: Byte);
+    procedure DoDrawMenuClick(Sender: TObject);
+    procedure DoClearImageClick(Sender: TObject);
 
+    procedure SetImage(Value: TSimbaImage); override;
     procedure DoFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); override;
-    procedure DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect); override;
     procedure DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure DoPaintNode(ACanvas: TCanvas; Node: TTreeNode);
     procedure DoListModify(Sender: TObject);
@@ -55,9 +72,7 @@ type
     procedure DoColorSpaceChange(Sender: TObject);
 
     procedure DoFindColorClick(Sender: TObject);
-    procedure DoClearImageClick(Sender: TObject);
     procedure DoMatchColorClick(Sender: TObject);
-    procedure DoUpdateImgClick(Sender: TObject);
     procedure DoLoadHSLCircleClick(Sender: TObject);
 
     procedure DoDeleteSelectedClick(Sender: TObject);
@@ -70,7 +85,6 @@ type
     procedure DoCopyBestColorClick(Sender: TObject);
     procedure DoColorMenuPopup(Sender: TObject);
 
-    procedure AddColor(NewColor: TColor);
     function GetBest: TColorTolerance;
     function GetColors: TColorArray;
     procedure SetColors(Colors: TColorArray);
@@ -79,6 +93,8 @@ type
 
     property Colors: TColorArray read GetColors write SetColors;
     property BestColor: TColorTolerance read GetBest;
+    property DrawColor: TColor read FDrawColor write SetDrawColor;
+    property DrawAlpha: Byte read FDrawAlpha write SetDrawAlpha;
 
     property ButtonFindColor: TSimbaButton read FButtonFindColor;
     property ButtonMatchColor: TSimbaButton read FButtonMatchColor;
@@ -89,14 +105,14 @@ type
 implementation
 
 uses
-  IniFiles, Clipbrd, LCLType, TypInfo, LCLIntf, Dialogs, ExtCtrls,
+  IniFiles, Clipbrd, LCLType, TypInfo, Dialogs, ExtCtrls,
   simba.env,
   simba.colormath_aca,
   simba.vartype_matrix,
   simba.vartype_string,
+  simba.vartype_box,
   simba.array_algorithm,
-  simba.component_theme,
-  simba.dialog;
+  simba.component_theme;
 
 type
   TColorNode = class(TTreeNode)
@@ -125,8 +141,8 @@ begin
     ReadSections(Sections);
     for I := 0 to Sections.Count - 1 do
     begin
-      LoadItem.Add(NewItem(Sections[I], scNone, False, True, @DoLoadColorsClick, 0, ''));
-      DeleteItem.Add(NewItem(Sections[I], scNone, False, True, @DoDeleteColorsClick, 0, ''));
+      addMenuItem(LoadItem, Sections[I], @DoLoadColorsClick);
+      addMenuItem(DeleteItem, Sections[I], @DoDeleteColorsClick);
     end;
   finally
     Free();
@@ -161,7 +177,7 @@ begin
     'HSV':    Result := EColorSpace.HSV;
     'HSL':    Result := EColorSpace.HSL;
     'XYZ':    Result := EColorSpace.XYZ;
-    'LAB':    Result := EcolorSpace.LAB;
+    'LAB':    Result := EColorSpace.LAB;
     'LCH':    Result := EColorSpace.LCH;
     'DeltaE': Result := EColorSpace.DELTAE;
     else
@@ -172,20 +188,16 @@ end;
 procedure TSimbaACA.CalcBestColor;
 var
   Best: TBestColor;
-  FormatSettingsDot: TFormatSettings;
 begin
-  if (FColorList.Items.Count > 0) then
+  if (FColorList.TopLevelCount > 0) then
   begin
     Best := GetBestColor(GetColorSpace(), GetColors());
 
-    FormatSettingsDot := FormatSettings;
-    FormatSettingsDot.DecimalSeparator := '.';
-
     FEditColor.Edit.Text  := ColorToStr(Best.Color);
-    FEditTol.Edit.Text    := Format('%.3f', [Best.Tolerance], FormatSettingsDot);
-    FEditMulti1.Edit.Text := Format('%.3f', [Best.Mods[0]], FormatSettingsDot);
-    FEditMulti2.Edit.Text := Format('%.3f', [Best.Mods[1]], FormatSettingsDot);
-    FEditMulti3.Edit.Text := Format('%.3f', [Best.Mods[2]], FormatSettingsDot);
+    FEditTol.Edit.Text    := Format('%.3f', [Best.Tolerance]);
+    FEditMulti1.Edit.Text := Format('%.3f', [Best.Mods[0]]);
+    FEditMulti2.Edit.Text := Format('%.3f', [Best.Mods[1]]);
+    FEditMulti3.Edit.Text := Format('%.3f', [Best.Mods[2]]);
   end else
   begin
     FEditColor.Edit.Clear();
@@ -196,81 +208,157 @@ begin
   end;
 end;
 
+procedure TSimbaACA.AddColor(NewColor: TColor);
+var
+  I: Integer;
+begin
+  for I := 0 to FColorList.TopLevelCount - 1 do
+    if (TColorNode(FColorList.TopLevelItem[I]).Color = NewColor) then
+      Exit;
+
+  // in an update, so OnModify waits for the colour
+  FColorList.BeginUpdate();
+  TColorNode(FColorList.AddNode(ColorToStr(NewColor))).Color := NewColor;
+  FColorList.EndUpdate();
+end;
+
+// every number in Str that is a colour
+procedure TSimbaACA.AddColors(Str: String);
+var
+  Number: String;
+  Value: Int64;
+begin
+  FColorList.BeginUpdate();
+  try
+    for Number in Str.ExtractNumbers() do
+    begin
+      Value := Number.ToInt(-1);
+      if (Value >= 0) and (Value <= $FFFFFF) then
+        AddColor(Value);
+    end;
+  finally
+    FColorList.EndUpdate();
+  end;
+end;
+
+// the edits can be typed in, with or without colours in the list
+function TSimbaACA.HasBestColor: Boolean;
+begin
+  Result := FEditColor.Edit.Text <> '';
+end;
+
+procedure TSimbaACA.Search(Value: EACASearch);
+var
+  Best: TColorTolerance;
+  TPA: TPointArray;
+begin
+  FSearch := Value;
+
+  TopLayer.Clear();
+  TopLayer.Opacity := FDrawAlpha;
+  FImageBox.Status := '';
+
+  if HasBestColor() then
+  begin
+    Best := BestColor;
+
+    case FSearch of
+      EACASearch.FIND_COLOR:
+        begin
+          TPA := FImageBox.Background.FindColor(Best, TBox.Create(-1, -1, -1, -1));
+          if (FDrawColor = clNone) then
+            TopLayer.DrawColor := GetContrastingColor(FImageBox.Background.GetPixels(TPA), [clRed, clLime, clBlue, clYellow, clAqua, clFuchsia])
+          else
+            TopLayer.DrawColor := FDrawColor;
+          TopLayer.DrawTPA(TPA);
+
+          FImageBox.Status := Format('Found %.0n matches', [Double(Length(TPA))]);
+        end;
+
+      EACASearch.MATCH_COLOR:
+        begin
+          TopLayer.DrawHeatmap(FImageBox.Background.MatchColor(Best.Color, Best.ColorSpace, Best.Multipliers, TBox.Create(-1, -1, -1, -1)).NormMinMax(1, 0)); // the closest matches hottest
+        end;
+    end;
+  end;
+
+  FImageBox.Invalidate();
+end;
+
+// the item's Tag is the colour or the alpha, by which menu it is in
+procedure TSimbaACA.DoDrawMenuClick(Sender: TObject);
+begin
+  if (TMenuItem(Sender).Parent = FDrawColorMenu) then
+    SetDrawColor(TMenuItem(Sender).Tag)
+  else
+    SetDrawAlpha(TMenuItem(Sender).Tag);
+end;
+
+procedure TSimbaACA.SetDrawColor(Value: TColor);
+var
+  I: Integer;
+begin
+  FDrawColor := Value;
+  for I := 0 to FDrawColorMenu.Count - 1 do
+    FDrawColorMenu.Items[I].Checked := (FDrawColorMenu.Items[I].Tag = Value);
+
+  if (FTopLayer <> nil) then
+    Search(FSearch);
+end;
+
+procedure TSimbaACA.SetDrawAlpha(Value: Byte);
+var
+  I: Integer;
+begin
+  FDrawAlpha := Value;
+  for I := 0 to FDrawAlphaMenu.Count - 1 do
+    FDrawAlphaMenu.Items[I].Checked := (FDrawAlphaMenu.Items[I].Tag = Value);
+
+  if (FTopLayer <> nil) then
+    FTopLayer.Opacity := Value;
+end;
+
+procedure TSimbaACA.DoClearImageClick(Sender: TObject);
+begin
+  Search(EACASearch.NONE);
+end;
+
+procedure TSimbaACA.SetImage(Value: TSimbaImage);
+begin
+  inherited SetImage(Value);
+
+  Search(FSearch);
+end;
+
+// Ctrl+V and Ctrl+C are the colour list's, unless an edit has the focus
 procedure TSimbaACA.DoFormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = VK_V) and (Shift = [ssCtrl]) then
+  if (Shift = [ssCtrl]) and (Key in [VK_C, VK_V]) and (not (ActiveControl is TSimbaEdit)) then
   begin
+    if (Key = VK_V) then
+      DoAddFromClipboardClick(nil)
+    else
+      DoCopyBestColorClick(nil);
     Key := 0;
-    DoAddFromClipboardClick(nil);
-  end
-  else if (Key = VK_C) and (Shift = [ssCtrl]) and (not (ActiveControl is TSimbaEdit)) then
-  begin
-    Key := 0;
-    DoCopyBestColorClick(nil);
   end else
     inherited DoFormKeyDown(Sender, Key, Shift);
 end;
 
-procedure TSimbaACA.DoImgPaintArea(Sender: TSimbaImageBox; ACanvas: TSimbaImageBoxCanvas; R: TRect);
-begin
-  inherited DoImgPaintArea(Sender, ACanvas, R);
-
-  if (Length(FDebugTPA) > 0) then
-    ACanvas.DrawPoints(FDebugTPA, FDrawColor)
-  else if (Length(FDebugMat) > 0) then
-    ACanvas.DrawHeatmap(FDebugMat);
-end;
-
 procedure TSimbaACA.DoImgMouseDown(Sender: TSimbaImageBox; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-  if (Button = mbLeft) then
-    AddColor(FImageBox.Background.Canvas.Pixels[X, Y]);
+  if (Button = mbLeft) and FImageBox.Background.InImage(X, Y) then
+    AddColor(FImageBox.Background.Pixel[X, Y]);
 end;
 
-// stolen from colorpickerhistory
 procedure TSimbaACA.DoPaintNode(ACanvas: TCanvas; Node: TTreeNode);
-var
-  BaseRect, ColorRect: TRect;
-  S: TTextStyle;
 begin
-  if (Node.Level <> 0) then
-    Exit;
-
-  BaseRect := Node.DisplayRect(True);
-
-  ColorRect := BaseRect;
-  ColorRect.Top += 5;
-  ColorRect.Bottom -= 5;
-  ColorRect.Left += 5;
-  ColorRect.Right := BaseRect.Left + Round(ColorRect.Height * 1.5);
-
-  ACanvas.FillRect(BaseRect);
-
-  BaseRect.Left := ColorRect.Right + 5;
-  BaseRect.Right += ColorRect.Width + 8;
-
-  if Node.Selected then
-  begin
-    ACanvas.Brush.Color := SimbaComponentTheme.ColorActive;
-    ACanvas.FillRect(BaseRect);
-  end;
-
-  ACanvas.Brush.Color := TColorNode(Node).Color;
-  ACanvas.Pen.Color := SimbaComponentTheme.ColorFont;
-  ACanvas.Pen.Width := 1;
-  ACanvas.Rectangle(ColorRect);
-
-  S := ACanvas.TextStyle;
-  S.Layout := tlCenter;
-  S.Clipping := False;
-
-  ACanvas.TextRect(BaseRect, BaseRect.Left, BaseRect.Top, Node.Text, S);
+  PaintColorNode(ACanvas, Node, TColorNode(Node).Color);
 end;
 
 procedure TSimbaACA.DoListModify(Sender: TObject);
 begin
   CalcBestColor();
-  FButtonClearImg.Click();
+  Search(FSearch);
 end;
 
 procedure TSimbaACA.DoListSelectionChange(Sender: TObject);
@@ -279,7 +367,7 @@ begin
     FImageBoxZoom.Fill(TColorNode(FColorList.Selected).Color);
 end;
 
-procedure TSimbaACA.DoListDeleteKey(Sender: TObject; var Key: Word;Shift: TShiftState);
+procedure TSimbaACA.DoListDeleteKey(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   FColorList.DeleteSelection();
 end;
@@ -287,83 +375,40 @@ end;
 procedure TSimbaACA.DoColorSpaceChange(Sender: TObject);
 begin
   CalcBestColor();
-  if (Length(FDebugTPA) > 0) then
-    FButtonFindColor.Click()
-  else if (Length(FDebugMat) > 0) then
-    FButtonMatchColor.Click();
+  Search(FSearch);
 end;
 
 procedure TSimbaACA.DoFindColorClick(Sender: TObject);
 begin
-  FDebugMat := [];
-  FDebugTPA := FImageBox.FindColor(BestColor);
-
-  FImageBox.Status := Format('Found %.0n matches', [Double(Length(FDebugTPA))]);
-  FImageBox.RePaint();
-end;
-
-procedure TSimbaACA.DoClearImageClick(Sender: TObject);
-begin
-  if (Length(FDebugTPA) > 0) or (FDebugMat.Area > 0) then
-  begin
-    FDebugTPA := [];
-    FDebugMat := [];
-    FImageBox.Repaint();
-  end;
+  Search(EACASearch.FIND_COLOR);
 end;
 
 procedure TSimbaACA.DoMatchColorClick(Sender: TObject);
 begin
-  FDebugTPA := [];
-  FDebugMat := FImageBox.MatchColor(BestColor).NormMinMax(0, 1);
-  FImageBox.Repaint();
+  Search(EACASearch.MATCH_COLOR);
 end;
 
-procedure TSimbaACA.DoUpdateImgClick(Sender: TObject);
-
-  procedure SetImageNormal;
-  begin
-    FImageBox.SetImage(FImageSupplier());
-  end;
-
-  procedure SetImageFromLape;
-  var
-    LapeObject: TByteArray;
-  begin
-    LapeObject := FImageSupplierLape();
-
-    FImageBox.SetImage(
-      PSimbaImage(LapeObject)^,
-      PSizeInt(LapeObject)[-2] <= 1 // If has no image references, we need to free it
-    );
-  end;
-
-begin
-  if Assigned(FImageSupplierLape) then
-    SetImageFromLape()
-  else if Assigned(FImageSupplier) then
-    SetImageNormal();
-
-  if (Length(FDebugTPA) > 0) then
-    FButtonFindColor.Click()
-  else if (Length(FDebugMat) > 0) then
-    FButtonMatchColor.Click();
-end;
-
+// a radius past MAX_RADIUS is MAX_RADIUS: bigger only takes longer to draw
 procedure TSimbaACA.DoLoadHSLCircleClick(Sender: TObject);
+const
+  MAX_RADIUS = 1000;
 var
   Value: String;
+  Radius: Integer;
   Img: TSimbaImage;
 begin
-  if InputQuery('Simba - ACA', 'HSL Circle Radius?', Value) and Value.IsNumeric then
-  begin
-    FButtonClearImg.Click();
+  Value := '50';
+  if not InputQuery('Simba - ACA', Format('HSL Circle Radius (1 to %d)?', [MAX_RADIUS]), Value) then
+    Exit;
+  Radius := StrToIntDef(Value, 0);
+  if (Radius < 1) then
+    Exit;
+  Radius := Min(Radius, MAX_RADIUS);
 
-    Img := TSimbaImage.Create(Value.ToInt()*2, Value.ToInt()*2);
-    Img.DrawHSLCircle(Img.Center, Value.ToInt());
+  Img := TSimbaImage.Create(Radius * 2, Radius * 2);
+  Img.DrawHSLCircle(Img.Center, Radius);
 
-    FImageBox.SetImage(Img);
-  end;
+  SetImage(Img);
 end;
 
 procedure TSimbaACA.DoDeleteSelectedClick(Sender: TObject);
@@ -372,24 +417,8 @@ begin
 end;
 
 procedure TSimbaACA.DoAddFromClipboardClick(Sender: TObject);
-var
-  Str: String;
-  Numbers: TStringArray;
 begin
-  try
-    Str := Clipboard.AsText;
-    Numbers := Str.ExtractNumbers();
-
-    FColorList.Items.BeginUpdate();
-    try
-      for Str in Numbers do
-        if Str.IsInteger and (Str.ToInt >= 0) and (Str.ToInt <= $FFFFFFFF) then
-          AddColor(StrToColor(Str));
-    finally
-      FColorList.Items.EndUpdate();
-    end;
-  except
-  end;
+  AddColors(Clipboard.AsText);
 end;
 
 procedure TSimbaACA.DoClearColorsClick(Sender: TObject);
@@ -402,35 +431,41 @@ var
   Col: TColor;
   ColorName, ColorsString: String;
 begin
-  if InputQuery('Auto Color Aid', 'Save under what name?', ColorName) then
-    with GetColorsINI() do
-    try
-      ColorsString := '';
-      for Col in GetColors() do
-        ColorsString := ColorsString + ColorToStr(Col) + ',';
-      WriteString(ColorName, 'Colors', ColorsString);
-    finally
-      Free();
-    end;
-end;
+  ColorName := '';
+  if (not InputQuery('Auto Color Aid', 'Save under what name?', ColorName)) or (ColorName = '') then
+    Exit;
 
-procedure TSimbaACA.DoLoadColorsClick(Sender: TObject);
-var
-  Str: String;
-begin
-  FColorList.BeginUpdate();
-  FColorList.Clear();
+  ColorsString := '';
+  for Col in GetColors() do
+    ColorsString := ColorsString + ColorToStr(Col) + ',';
 
   with GetColorsINI() do
   try
-    for Str in ReadString(TMenuItem(Sender).Caption, 'Colors', '').ExtractNumbers() do
-      if Str.IsInteger and (Str.ToInt >= 0) and (Str.ToInt <= $FFFFFFFF) then
-        AddColor(StrToColor(Str));
+    WriteString(ColorName, 'Colors', ColorsString);
+  finally
+    Free();
+  end;
+end;
+
+// the colours saved under the item's caption, in place of the list
+procedure TSimbaACA.DoLoadColorsClick(Sender: TObject);
+var
+  ColorsString: String;
+begin
+  with GetColorsINI() do
+  try
+    ColorsString := ReadString(TMenuItem(Sender).Caption, 'Colors', '');
   finally
     Free();
   end;
 
-  FColorList.EndUpdate();
+  FColorList.BeginUpdate();
+  try
+    FColorList.Clear();
+    AddColors(ColorsString);
+  finally
+    FColorList.EndUpdate();
+  end;
 end;
 
 procedure TSimbaACA.DoDeleteColorsClick(Sender: TObject);
@@ -441,8 +476,6 @@ begin
   finally
     Free();
   end;
-
-  FColorList.PopupMenu.Close();
 end;
 
 procedure TSimbaACA.DoColorListPopup(Sender: TObject);
@@ -455,6 +488,9 @@ end;
 
 procedure TSimbaACA.DoCopyBestColorClick(Sender: TObject);
 begin
+  if not HasBestColor() then
+    Exit;
+
   Clipboard.AsText := Format('[%s, %s, %s, [%s, %s, %s]]', [
     ColorToStr(StrToColor(FEditColor.Edit.Text)),
     FEditTol.Edit.Text,
@@ -473,45 +509,93 @@ begin
   );
 end;
 
-constructor TSimbaACA.Create(ImageSupplier: TImageSupplier);
+function TSimbaACA.GetBest: TColorTolerance;
+begin
+  Result.ColorSpace := GetColorSpace();
+  Result.Color := StrToColor(FEditColor.Edit.Text);
+  Result.Tolerance := StrToFloatDef(FEditTol.Edit.Text, 0);
+  Result.Multipliers[0] := StrToFloatDef(FEditMulti1.Edit.Text, 0);
+  Result.Multipliers[1] := StrToFloatDef(FEditMulti2.Edit.Text, 0);
+  Result.Multipliers[2] := StrToFloatDef(FEditMulti3.Edit.Text, 0);
+end;
 
-  function CreateColorMenu: TPopupMenu;
+constructor TSimbaACA.Create(ImageSupplier: TImageSupplier);
+var
+  SubSidePanel: TPanel;
+  Items: TMenuItem;
+
+  procedure AddDrawItem(AParent: TMenuItem; ACaption: String; Value, Current: PtrInt);
+  var
+    Item: TMenuItem;
   begin
-    Result := TPopupMenu.Create(Self);
-    Result.OnPopup := @DoColorMenuPopup;
-    Result.Items.Add(NewItem('Clear Color List', scNone, False, True, @DoClearColorsClick, 0, ''));
-    Result.Items.Add(NewItem('Add Colors From Clipboard', ShortCut(VK_V, [ssCtrl]), False, True, @DoAddFromClipboardClick, 0, ''));
-    Result.Items.Add(NewLine());
-    Result.Items.Add(NewItem('Load Colors', scNone, False, True, nil, 0, ''));
-    Result.Items.Add(NewItem('Save Colors ...', scNone, False, True, @DoSaveColorsClick, 0, ''));
-    Result.Items.Add(NewItem('Delete Colors', scNone, False, True, @DoDeleteColorsClick, 0, ''));
-    Result.Items.Add(NewLine());
-    Result.Items.Add(NewItem('Copy Best Color', ShortCut(VK_C, [ssCtrl]), False, True, @DoCopyBestColorClick, 0, ''));
+    Item := addMenuItem(AParent, ACaption, @DoDrawMenuClick);
+    Item.Checked := (Value = Current);
+    Item.Tag := Value;
   end;
 
   function CreateListPopupMenu: TPopupMenu;
   begin
     Result := TPopupMenu.Create(Self);
     Result.OnPopup := @DoColorListPopup;
-    Result.Items.Add(NewItem('Delete Selected', scNone, False, True, @DoDeleteSelectedClick, 0, ''));
-    Result.Items.Add(NewLine);
-    Result.Items.Add(NewItem('Clear', scNone, False, True, @DoClearColorsClick, 0, ''));
-    Result.Items.Add(NewItem('Add From Clipboard', scNone, False, True, @DoAddFromClipboardClick, 0, ''));
-    Result.Items.Add(NewLine);
-    Result.Items.Add(NewItem('Save ...', scNone, False, True, @DoSaveColorsClick, 0, ''));
-    Result.Items.Add(NewItem('Load', scNone, False, True, nil, 0, ''));
-    Result.Items.Add(NewItem('Delete', scNone, False, True, @DoDeleteColorsClick, 0, ''));
+    addMenuItem(Result.Items, 'Delete Selected', @DoDeleteSelectedClick);
+    addMenuItem(Result.Items, '-');
+    addMenuItem(Result.Items, 'Clear', @DoClearColorsClick);
+    addMenuItem(Result.Items, 'Add From Clipboard', @DoAddFromClipboardClick);
+    addMenuItem(Result.Items, '-');
+    addMenuItem(Result.Items, 'Save ...', @DoSaveColorsClick);
+    addMenuItem(Result.Items, 'Load');
+    addMenuItem(Result.Items, 'Delete');
   end;
 
-var
-  SubSidePanel: TPanel;
+  // made top to bottom
+  function NewEdit(ACaption: String): TSimbaLabeledEdit;
+  begin
+    Result := TSimbaLabeledEdit.Create(SubSidePanel);
+    Result.Parent := SubSidePanel;
+    Result.Align := alBottom;
+    Result.Caption := ACaption;
+    Result.LabelMeasure := 'Best Multiplier[0]';
+    Result.BorderSpacing.Top := 4;
+    Result.Color := SimbaComponentTheme.ColorFrame;
+  end;
+
 begin
   inherited Create(ImageSupplier);
 
   Caption := 'Auto Color Aid';
 
-  FMenuBar.AddMenu('Colors', CreateColorMenu());
-  FImageMenu.Items.Insert(2, NewItem('Load HSL Circle', scNone, False, True, @DoLoadHSLCircleClick, 0, ''));
+  FDrawColor := clNone;
+  FDrawAlpha := ALPHA_OPAQUE;
+
+  Items := addImageMenu();
+  addMenuItem(Items, 'Load HSL Circle', @DoLoadHSLCircleClick);
+  addMenuItem(Items, '-');
+
+  FDrawColorMenu := addMenuItem(Items, 'Draw Color');
+  AddDrawItem(FDrawColorMenu, 'Auto', clNone, FDrawColor);
+  addMenuItem(FDrawColorMenu, '-');
+  AddDrawItem(FDrawColorMenu, 'Red', clRed, FDrawColor);
+  AddDrawItem(FDrawColorMenu, 'Green', clGreen, FDrawColor);
+  AddDrawItem(FDrawColorMenu, 'Blue', clBlue, FDrawColor);
+  AddDrawItem(FDrawColorMenu, 'Yellow', clYellow, FDrawColor);
+  AddDrawItem(FDrawColorMenu, 'Aqua', clAqua, FDrawColor);
+
+  FDrawAlphaMenu := addMenuItem(Items, 'Draw Alpha');
+  AddDrawItem(FDrawAlphaMenu, '100%', 255, FDrawAlpha);
+  AddDrawItem(FDrawAlphaMenu, '75%', 191, FDrawAlpha);
+  AddDrawItem(FDrawAlphaMenu, '50%', 128, FDrawAlpha);
+  AddDrawItem(FDrawAlphaMenu, '25%', 64, FDrawAlpha);
+
+  // the items that hold saved colour lists are filled when the menu opens
+  Items := addMenu('Colors', @DoColorMenuPopup);
+  addMenuItem(Items, 'Clear Color List', @DoClearColorsClick);
+  addMenuItem(Items, 'Add Colors From Clipboard', @DoAddFromClipboardClick, ShortCut(VK_V, [ssCtrl]));
+  addMenuItem(Items, '-');
+  addMenuItem(Items, 'Load Colors');
+  addMenuItem(Items, 'Save Colors ...', @DoSaveColorsClick);
+  addMenuItem(Items, 'Delete Colors');
+  addMenuItem(Items, '-');
+  addMenuItem(Items, 'Copy Best Color', @DoCopyBestColorClick, ShortCut(VK_C, [ssCtrl]));
 
   SubSidePanel := TPanel.Create(Self);
   SubSidePanel.Parent := FSidePanel;
@@ -533,94 +617,28 @@ begin
   FColorList.HideRoot();
 
   FColorSpaces := TSimbaLabeledToggleButtonGroup.Create(SubSidePanel);
-  with FColorSpaces do
-  begin
-    Parent := SubSidePanel;
-    Align := alBottom;
-    Color := SimbaComponentTheme.ColorFrame;
+  FColorSpaces.Parent := SubSidePanel;
+  FColorSpaces.Align := alBottom;
+  FColorSpaces.Color := SimbaComponentTheme.ColorFrame;
+  FColorSpaces.Caption := 'Color Space';
+  FColorSpaces.ToggleButtons.Add('RGB').MeasureText := 'DeltaE';
+  FColorSpaces.ToggleButtons.Add('HSL').MeasureText := 'DeltaE';
+  FColorSpaces.ToggleButtons.Add('HSV').MeasureText := 'DeltaE';
+  FColorSpaces.ToggleButtons.Add('LCH').MeasureText := 'DeltaE';
+  FColorSpaces.ToggleButtons.Add('DeltaE').MeasureText := 'DeltaE';
+  // XYZ and LAB are not offered yet
+  FColorSpaces.ToggleButtons.OnChange := @DoColorSpaceChange;
 
-    ToggleButtons.Add('RGB').MeasureText := 'DeltaE';
-    ToggleButtons.Add('HSL').MeasureText := 'DeltaE';
-    ToggleButtons.Add('HSV').MeasureText := 'DeltaE';
-    ToggleButtons.Add('LCH').MeasureText := 'DeltaE';
-    ToggleButtons.Add('DeltaE').MeasureText := 'DeltaE';
-    //ToggleButtons.Add('XYZ'); not implemented properly yet
-    //ToggleButtons.Add('LAB'); ...
-
-    Caption := 'Color Space';
-
-    ToggleButtons.OnChange := @DoColorSpaceChange;
-  end;
-
-  FEditMulti3 := TSimbaLabeledEdit.Create(SubSidePanel);
-  FEditMulti3.Parent := SubSidePanel;
-  FEditMulti3.Align := alBottom;
-  FEditMulti3.Caption := 'Best Multiplier[2]';
-  FEditMulti3.LabelMeasure := 'Best Multiplier[2]';
-  FEditMulti3.BorderSpacing.Top := 4;
-  FEditMulti3.Color := SimbaComponentTheme.ColorFrame;
-
-  FEditMulti2 := TSimbaLabeledEdit.Create(SubSidePanel);
-  FEditMulti2.Parent := SubSidePanel;
-  FEditMulti2.Align := alBottom;
-  FEditMulti2.Caption := 'Best Multiplier[1]';
-  FEditMulti2.LabelMeasure := 'Best Multiplier[1]';
-  FEditMulti2.BorderSpacing.Top := 4;
-  FEditMulti2.Color := SimbaComponentTheme.ColorFrame;
-
-  FEditMulti1 := TSimbaLabeledEdit.Create(SubSidePanel);
-  FEditMulti1.Parent := SubSidePanel;
-  FEditMulti1.Align := alBottom;
-  FEditMulti1.Caption := 'Best Multiplier[0]';
-  FEditMulti1.LabelMeasure := 'Best Multiplier[0]';
-  FEditMulti1.BorderSpacing.Top := 4;
-  FEditMulti1.Color := SimbaComponentTheme.ColorFrame;
-
-  FEditTol := TSimbaLabeledEdit.Create(SubSidePanel);
-  FEditTol.Parent := SubSidePanel;
-  FEditTol.Align := alBottom;
-  FEditTol.Caption := 'Best Tolerance';
-  FEditTol.LabelMeasure := 'Best Multiplier[0]';
-  FEditTol.BorderSpacing.Top := 4;
-  FEditTol.Color := SimbaComponentTheme.ColorFrame;
-
-  FEditColor := TSimbaLabeledEdit.Create(SubSidePanel);
-  FEditColor.Parent := SubSidePanel;
-  FEditColor.Align := alBottom;
-  FEditColor.Caption := 'Best Color';
-  FEditColor.LabelMeasure := 'Best Multiplier[0]';
-  FEditColor.BorderSpacing.Top := 4;
-  FEditColor.Color := SimbaComponentTheme.ColorFrame;
+  FEditColor := NewEdit('Best Color');
+  FEditTol := NewEdit('Best Tolerance');
+  FEditMulti1 := NewEdit('Best Multiplier[0]');
+  FEditMulti2 := NewEdit('Best Multiplier[1]');
+  FEditMulti3 := NewEdit('Best Multiplier[2]');
 
   FButtonFindColor  := addButton('Find Color', @DoFindColorClick);
   FButtonMatchColor := addButton('Match Color', @DoMatchColorClick);
-  FButtonUpdateImg  := addButton('Update Image', @DoUpdateImgClick);
+  FButtonUpdateImg  := addButton('Update Image', @DoUpdateImageClick);
   FButtonClearImg   := addButton('Clear Image', @DoClearImageClick);
-end;
-
-procedure TSimbaACA.AddColor(NewColor: TColor);
-var
-  I: Integer;
-begin
-  // check duplicate
-  for I := 0 to FColorList.TopLevelCount - 1 do
-    if (TColorNode(FColorList.TopLevelItem[I]).Color = NewColor)then
-      Exit;
-
-  // Wrap with begin/endupdate so modify event doesnt fire before .Color is assigned
-  FColorList.BeginUpdate();
-  TColorNode(FColorList.AddNode(ColorToStr(NewColor))).Color := NewColor;
-  FColorList.EndUpdate();
-end;
-
-function TSimbaACA.GetBest: TColorTolerance;
-begin
-  Result.ColorSpace := GetColorSpace();
-  Result.Color := String(FEditColor.Edit.Text).ToInt(0);
-  Result.Tolerance := String(FEditTol.Edit.Text).ToFloat(0);
-  Result.Multipliers[0] := String(FEditMulti1.Edit.Text).ToFloat(0);
-  Result.Multipliers[1] := String(FEditMulti2.Edit.Text).ToFloat(0);
-  Result.Multipliers[2] := String(FEditMulti3.Edit.Text).ToFloat(0);
 end;
 
 end.

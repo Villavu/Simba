@@ -194,6 +194,9 @@ type
     function MaxRight: Integer;
   end;
 
+// For an OnPaintNode: a swatch of Color in front of the node's text.
+procedure PaintColorNode(ACanvas: TCanvas; Node: TTreeNode; Color: TColor);
+
 implementation
 
 uses
@@ -905,6 +908,41 @@ begin
   inherited EndUpdate();
   if Assigned(OnEndUpdate) and (not IsUpdating) then
     OnEndUpdate(Self);
+end;
+
+procedure PaintColorNode(ACanvas: TCanvas; Node: TTreeNode; Color: TColor);
+var
+  R, Swatch: TRect;
+  Style: TTextStyle;
+begin
+  R := Node.DisplayRect(True);
+
+  Swatch := R;
+  Swatch.Top += 5;
+  Swatch.Bottom -= 5;
+  Swatch.Left += 5;
+  Swatch.Right := R.Left + Round(Swatch.Height * 1.5);
+
+  // the tree drew the text where the swatch goes
+  ACanvas.FillRect(R);
+
+  R.Left := Swatch.Right + 5;
+  R.Right += Swatch.Width + 8;
+  if Node.Selected then
+  begin
+    ACanvas.Brush.Color := SimbaComponentTheme.ColorActive;
+    ACanvas.FillRect(R);
+  end;
+
+  ACanvas.Brush.Color := Color;
+  ACanvas.Pen.Color := SimbaComponentTheme.ColorFont;
+  ACanvas.Pen.Width := 1;
+  ACanvas.Rectangle(Swatch);
+
+  Style := ACanvas.TextStyle;
+  Style.Layout := tlCenter;
+  Style.Clipping := False;
+  ACanvas.TextRect(R, R.Left, R.Top, Node.Text, Style);
 end;
 
 end.
