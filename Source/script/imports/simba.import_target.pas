@@ -1035,7 +1035,7 @@ end;
 TTarget.FindDTMEx
 -----------------
 ```
-function TTarget.FindDTMEx(DTM: TDTM; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+function TTarget.FindDTMEx(DTM: TDTM; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 ```
 *)
 procedure _LapeTarget_FindDTMEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1059,7 +1059,7 @@ end;
 TTarget.FindDTMRotatedEx
 ------------------------
 ```
-function TTarget.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+function TTarget.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 ```
 *)
 procedure _LapeTarget_FindDTMRotatedEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -1266,7 +1266,7 @@ begin
 
     addProperty('TTarget', 'Info', 'TTargetInfo', @_LapeTarget_Info_Read);
     addProperty('TTarget', 'Options', 'TTargetOptions', @_LapeTarget_Options_Read);
-    addProperty('TTarget', 'CustomClientArea', 'Boolean', @_LapeTarget_SetCustomClientArea, @_LapeTarget_GetCustomClientArea);
+    addProperty('TTarget', 'CustomClientArea', 'TBox', @_LapeTarget_GetCustomClientArea, @_LapeTarget_SetCustomClientArea);
     addProperty('TTarget', 'Bounds', 'TBox', @_LapeTarget_Bounds);
     addProperty('TTarget', 'Width', 'Integer', @_LapeTarget_Width);
     addProperty('TTarget', 'Height', 'Integer', @_LapeTarget_Height);

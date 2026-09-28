@@ -1446,11 +1446,14 @@ function TSimbaTarget.GetImageData(var ABounds: TBox; out Data: PColorBGRA; out 
 
   function GetFrozenData: Boolean;
   begin
-    // constrain to our frozen bounds
-     if (ABounds.X1 = -1) and (ABounds.Y1 = -1) and (ABounds.X2 = -1) and (ABounds.Y2 = -1) then
-       ABounds := FFrozenImage.Bounds
-     else
-       ABounds := ABounds.Clip(FFrozenImage.Bounds);
+    // constrain to our frozen bounds: each side, so a box outside them has no width
+    if (ABounds.X1 = -1) and (ABounds.Y1 = -1) and (ABounds.X2 = -1) and (ABounds.Y2 = -1) then
+      ABounds := FFrozenImage.Bounds
+    else
+      ABounds := TBox.Create(
+        Max(ABounds.X1, FFrozenImage.Bounds.X1), Max(ABounds.Y1, FFrozenImage.Bounds.Y1),
+        Min(ABounds.X2, FFrozenImage.Bounds.X2), Min(ABounds.Y2, FFrozenImage.Bounds.Y2)
+      );
 
     Result := (ABounds.Width > 0) and (ABounds.Height > 0);
     if Result then
@@ -1487,8 +1490,8 @@ end;
 
 procedure TSimbaTarget.FreeImageData(var Data: PColorBGRA);
 begin
-  // never free frozen data
-  if IsImageFrozen() and (Data = @FFrozenImage.Data[0]) then
+  // never free frozen data, which a box inside the frozen bounds points into the middle of
+  if IsImageFrozen() and (Data >= @FFrozenImage.Data[0]) and (Data <= @FFrozenImage.Data[High(FFrozenImage.Data)]) then
     Exit;
   // Only free window since rest of targets are references to buffers or image data.
   if (FTargetKind in [ESimbaTargetKind.WINDOW]) then
@@ -1500,21 +1503,28 @@ begin
   Result := Length(FFrozenImage.Data) > 0;
 end;
 
+// Copied a row at a time into a new buffer: Data's rows can be wider than the box, and it can
+// point into the image frozen now, freezing again.
 procedure TSimbaTarget.FreezeImage(ABounds: TBox);
 var
   Data: PColorBGRA;
-  DataWidth: Integer;
+  DataWidth, Y: Integer;
+  Frozen: array of TColorBGRA;
 begin
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    FFrozenImage.Bounds := ABounds;
-    FFrozenImage.DataWidth := DataWidth;
+  if not GetImageData(ABounds, Data, DataWidth) then
+    Exit;
 
-    SetLength(FFrozenImage.Data, DataWidth * ABounds.Height);
-    Move(Data^, FFrozenImage.Data[0], Length(FFrozenImage.Data) * SizeOf(TColorBGRA));
+  try
+    SetLength(Frozen, ABounds.Width * ABounds.Height);
+    for Y := 0 to ABounds.Height - 1 do
+      Move(Data[Y * DataWidth], Frozen[Y * ABounds.Width], ABounds.Width * SizeOf(TColorBGRA));
   finally
     FreeImageData(Data);
   end;
+
+  FFrozenImage.Bounds := ABounds;
+  FFrozenImage.DataWidth := ABounds.Width;
+  FFrozenImage.Data := Frozen;
 end;
 
 procedure TSimbaTarget.UnFreezeImage;
