@@ -10,17 +10,18 @@ unit simba.ide_colorpicker;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, ExtCtrls,
-  simba.base,
+  Classes, SysUtils, Forms, Controls, Graphics,
+  simba.base, simba.image,
   simba.ide_events,
-  simba.component_imageboxzoom;
+  simba.component_imageboxrender;
 
 type
   TSimbaColorPicker = class(TComponent)
   private
     FForm: TForm;
     FHint: THintWindow;
-    FImage: TImage;
+    FRenderer: TSimbaImageBoxRenderer; // blits FDesktopImage straight to the form, no LCL copy
+    FDesktopImage: TSimbaImage; // the frozen desktop, the picker's only full sized buffer
     FPicked: Boolean;
     FImageX, FImageY: Integer;
     FPoint: TPoint;
@@ -32,8 +33,9 @@ type
     procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
     procedure DoFormClosed(Sender: TObject; var CloseAction: TCloseAction);
     procedure DoHintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure DoImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
-    procedure DoImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure DoFormPaint(Sender: TObject);
+    procedure DoFormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure DoFormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   public
     constructor Create; reintroduce;
     destructor Destroy; override;
@@ -49,10 +51,10 @@ uses
   LCLType,
   simba.initializations,
   simba.dialog,
-  simba.image,
   simba.colormath,
   simba.vartype_windowhandle,
   simba.vartype_box,
+  simba.component_imageboxzoom,
   simba.component_theme,
   simba.ide_controller;
 
@@ -130,9 +132,16 @@ begin
   end;
 
   FHint.Close();
-  FImage.Picture.Clear(); // Free up mem
 
   CloseAction := caHide;
+end;
+
+procedure TSimbaColorPicker.DoFormPaint(Sender: TObject);
+begin
+  // the frozen desktop goes straight from its BGRA buffer onto the form at 1:1,
+  // no layers and no overlay, so nothing here keeps a second full sized copy of it
+  if (FDesktopImage <> nil) then
+    FRenderer.Render(FForm.Canvas, FDesktopImage, [], TRect.Create(0, 0, FForm.ClientWidth, FForm.ClientHeight), 1, False, nil);
 end;
 
 procedure TSimbaColorPicker.DoHintKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -154,23 +163,24 @@ begin
   Key := VK_UNKNOWN;
 end;
 
-procedure TSimbaColorPicker.DoImageMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaColorPicker.DoFormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
   FImageX := X;
   FImageY := Y;
 
   FPoint := FWindowSelection.GetRelativeCursorPos();
-  FColor := FImage.Picture.Bitmap.Canvas.Pixels[X, Y];
-  with FImage.ClientToScreen(TPoint.Create(X + 25, Y - (FHint.Height div 2))) do
+  if FDesktopImage.InImage(X, Y) then
+    FColor := FDesktopImage.Pixel[X, Y];
+  with FForm.ClientToScreen(TPoint.Create(X + 25, Y - (FHint.Height div 2))) do
   begin
     FHint.Left := X;
     FHint.Top := Y;
   end;
 
-  TSimbaColorPickerHint(FHint).Zoom.Move(TImage(Sender).Canvas, X, Y);
+  TSimbaColorPickerHint(FHint).Zoom.Move(FDesktopImage, X, Y);
 end;
 
-procedure TSimbaColorPicker.DoImageMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TSimbaColorPicker.DoFormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   FPicked := True;
 
@@ -181,23 +191,19 @@ procedure TSimbaColorPicker.Pick;
 var
   DesktopWindow: TWindowHandle;
   DesktopBounds: TBox;
-  DesktopImage: TSimbaImage;
 begin
-  DesktopImage := nil;
-
   try
     if (FForm = nil) then // only create form when actually needed
     begin
       FForm := TForm.CreateNew(nil);
       FForm.BorderStyle := bsNone;
+      FForm.Cursor := crCross;
       FForm.OnClose := @DoFormClosed;
+      FForm.OnPaint := @DoFormPaint;
+      FForm.OnMouseUp := @DoFormMouseUp;
+      FForm.OnMouseMove := @DoFormMouseMove;
 
-      FImage := TImage.Create(FForm);
-      FImage.Parent := FForm;
-      FImage.Align := alClient;
-      FImage.Cursor := crCross;
-      FImage.OnMouseUp := @DoImageMouseUp;
-      FImage.OnMouseMove := @DoImageMouseMove;
+      FRenderer := CreateImageBoxRenderer();
 
       FHint := TSimbaColorPickerHint.Create(FForm);
       FHint.OnKeyDown := @DoHintKeyDown;
@@ -205,7 +211,7 @@ begin
 
     DesktopWindow := GetDesktopWindow();
     DesktopBounds := DesktopWindow.GetBounds();
-    DesktopImage := SimbaController.GetDesktopImage();
+    FDesktopImage := SimbaController.GetDesktopImage();
 
     FWindowSelection := SimbaController.WindowSelection.EnsureValid();
 
@@ -214,7 +220,7 @@ begin
     FForm.Width := DesktopBounds.Width;
     FForm.Height := DesktopBounds.Height;
 
-    FImage.Picture.Bitmap := DesktopImage.ToLazBitmap();
+    FForm.Invalidate(); // the form blits FDesktopImage the next time it paints
 
     FForm.ShowOnTop();
     FHint.Show();
@@ -235,8 +241,8 @@ begin
     end;
   end;
 
-  if (DesktopImage <> nil) then
-    FreeAndNil(DesktopImage);
+  if (FDesktopImage <> nil) then
+    FreeAndNil(FDesktopImage);
 end;
 
 constructor TSimbaColorPicker.Create();
@@ -250,6 +256,7 @@ destructor TSimbaColorPicker.Destroy;
 begin
   if (FForm <> nil) then
     FreeAndNil(FForm);
+  FreeAndNil(FRenderer);
 
   inherited Destroy();
 end;
