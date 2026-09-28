@@ -202,7 +202,7 @@ begin
         B := Clip8(SumB);
         G := Clip8(SumG);
         R := Clip8(SumR);
-        A := 255;
+        A := ALPHA_OPAQUE;
       end;
     end;
 
@@ -251,7 +251,7 @@ begin
         B := Clip8(SumB);
         G := Clip8(SumG);
         R := Clip8(SumR);
-        A := 255;
+        A := ALPHA_OPAQUE;
       end;
     end;
 
@@ -280,7 +280,7 @@ begin
   begin
     for Y := 0 to NewHeight - 1 do
       for X := 0 to NewWidth - 1 do
-        Result.Data[Y * NewWidth + X] := Image.Data[((Y * InputHeight) div NewHeight) * InputWidth + (X * InputWidth) div NewWidth];
+        Result.Data[Y * NewWidth + X].AsInteger := Image.Data[((Y * InputHeight) div NewHeight) * InputWidth + (X * InputWidth) div NewWidth].AsInteger or $FF000000; // opaque
     Exit;
   end;
 
@@ -300,17 +300,18 @@ type
 
 procedure ResampleHorizontalMasked(Src: PColorBGRA; Mask: PByte; Dst: PMaskAccum; Starts, Counts: PInteger; KK: PInt16; OutDim, RowCount, KSize, SrcStride: Integer);
 var
-  OutX, Row, Tap, TapCount, Weight, AB, AG, AR, ACov: Integer;
-  SrcRow, SrcPtr: PColorBGRA;
+  OutX, TapCount, Weight, AB, AG, AR, ACov: Integer;
+  SrcRow, SrcPtr, SrcRowEnd: PColorBGRA;
   MaskRow, MaskPtr: PByte;
   DstRow: PMaskAccum;
-  WeightPtr: PInt16;
+  WeightPtr, WeightEnd: PInt16;
 begin
   SrcRow := Src;
   MaskRow := Mask;
   DstRow := Dst;
+  SrcRowEnd := Src + Int64(RowCount * SrcStride);
 
-  for Row := 0 to RowCount - 1 do
+  while (SrcRow < SrcRowEnd) do
   begin
     for OutX := 0 to OutDim - 1 do
     begin
@@ -323,7 +324,8 @@ begin
       AR := 0;
       ACov := 0;
 
-      for Tap := 1 to TapCount do
+      WeightEnd := WeightPtr + TapCount;
+      while (WeightPtr < WeightEnd) do
       begin
         if (MaskPtr^ = 0) then // 0 = kept
         begin
@@ -356,11 +358,11 @@ end;
 
 procedure ResampleVerticalMasked(Src: PMaskAccum; Dst: PColorBGRA; Starts, Counts: PInteger; KK: PInt16; OutDim, RowCount, KSize: Integer);
 var
-  OutX, Row, Tap, TapCount, Weight: Integer;
+  OutX, Row, TapCount, Weight: Integer;
   SumB, SumG, SumR, SumCov, Bias: Int64;
   SrcRowStart, SrcPtr: PMaskAccum;
   DstRow: PColorBGRA;
-  WeightRow, WeightPtr: PInt16;
+  WeightRow, WeightPtr, WeightEnd: PInt16;
 begin
   DstRow := Dst;
 
@@ -379,7 +381,8 @@ begin
       SumR := 0;
       SumCov := 0;
 
-      for Tap := 1 to TapCount do
+      WeightEnd := WeightRow + TapCount;
+      while (WeightPtr < WeightEnd) do
       begin
         Weight := WeightPtr^;
         SumB   := SumB   + Int64(Weight) * SrcPtr^.B;
@@ -398,14 +401,14 @@ begin
           B := 0;
           G := 0;
           R := 0;
-          A := 255;
+          A := ALPHA_OPAQUE;
         end else
         begin
           Bias := SumCov div 2;
           B := EnsureRange((SumB + Bias) div SumCov, 0, 255);
           G := EnsureRange((SumG + Bias) div SumCov, 0, 255);
           R := EnsureRange((SumR + Bias) div SumCov, 0, 255);
-          A := 255;
+          A := ALPHA_OPAQUE;
         end;
       end;
     end;
@@ -443,7 +446,7 @@ begin
       begin
         SrcIdx := ((Y * InputHeight) div NewHeight) * InputWidth + (X * InputWidth) div NewWidth;
         if (IgnorePtr[SrcIdx] = 0) then // 0 = kept; ignored source pixels expand to nothing
-          DstPtr[Y * NewWidth + X] := SrcPtr[SrcIdx];
+          DstPtr[Y * NewWidth + X].AsInteger := SrcPtr[SrcIdx].AsInteger or $FF000000; // opaque, like the kernels
       end;
     Exit;
   end;
