@@ -12,7 +12,6 @@ interface
 uses
   Classes, SysUtils,
   simba.base,
-  simba.baseclass,
   simba.script;
 
 type
@@ -22,6 +21,7 @@ type
     FCompileOnly: Boolean;
 
     procedure DoApplicationTerminate(Sender: TObject);
+    procedure DoFreeForms;
     procedure DoInputThread;
     procedure DoError(E: Exception);
 
@@ -37,9 +37,17 @@ implementation
 uses
   Forms,
   lpmessages,
+  simba.baseclass,
   simba.fs,
   simba.datetime,
+  simba.threading,
   simba.script_communication;
+
+procedure TSimbaScriptRunner.DoFreeForms;
+begin
+  while (Screen.FormCount > 0) do
+    Screen.Forms[Screen.FormCount - 1].Free();
+end;
 
 procedure TSimbaScriptRunner.DoApplicationTerminate(Sender: TObject);
 begin
@@ -109,6 +117,9 @@ begin
 
     PrintUnfinishedThreads();
     PrintUnfreedThreads();
+
+    // Free forms - else this would print unfreed things which actually are managed.
+    RunInMainThread(@DoFreeForms);
     PrintUnfreedObjects();
   finally
     FScript.Free(); // Free the script in thread so it hopefully doesn't nuke the process
