@@ -251,6 +251,7 @@ procedure TSimbaACA.Search(Value: EACASearch);
 var
   Best: TColorTolerance;
   TPA: TPointArray;
+  Matches: TSingleMatrix;
 begin
   FSearch := Value;
 
@@ -277,7 +278,9 @@ begin
 
       EACASearch.MATCH_COLOR:
         begin
-          TopLayer.DrawHeatmap(FImageBox.Background.MatchColor(Best.Color, Best.ColorSpace, Best.Multipliers, TBox.Create(-1, -1, -1, -1)).NormMinMax(1, 0)); // the closest matches hottest
+          Matches := FImageBox.Background.MatchColor(Best.Color, Best.ColorSpace, Best.Multipliers, TBox.Create(-1, -1, -1, -1)); 
+          Matches.NormMinMax(1, 0);
+          TopLayer.DrawHeatmap(Matches);
         end;
     end;
   end;

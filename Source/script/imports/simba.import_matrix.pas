@@ -13,7 +13,7 @@ procedure ImportMatrix(Script: TSimbaScript);
 implementation
 
 uses
-  lptypes, lpvartypes,
+  lptypes,
   simba.vartype_matrix;
 
 (*
@@ -483,12 +483,12 @@ end;
 TSingleMatrix.NormMinMax
 ------------------------
 ```
-function TSingleMatrix.NormMinMax(Alpha, Beta: Single): TSingleMatrix;
+procedure TSingleMatrix.NormMinMax(Alpha, Beta: Single);
 ```
 *)
-procedure _LapeSingleMatrix_NormMinMax(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeSingleMatrix_NormMinMax(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  PSingleMatrix(Result)^ := PSingleMatrix(Params^[0])^.NormMinMax(PSingle(Params^[1])^, PSingle(Params^[2])^);
+  PSingleMatrix(Params^[0])^.NormMinMax(PSingle(Params^[1])^, PSingle(Params^[2])^);
 end;
 
 (*
@@ -673,7 +673,7 @@ begin
     addGlobalFunc('function TSingleMatrix.ToIntegerMatrix: TIntegerMatrix;', @_LapeSingleMatrix_ToIntegerMatrix);
     addGlobalFunc('procedure TSingleMatrix.MeanStdev(out Mean, Stdev: Double);', @_LapeSingleMatrix_MeanStdev);
     addGlobalFunc('procedure TSingleMatrix.MinMax(out MinValue, MaxValue: Single);', @_LapeSingleMatrix_MinMax);
-    addGlobalFunc('function TSingleMatrix.NormMinMax(Alpha, Beta: Single): TSingleMatrix;', @_LapeSingleMatrix_NormMinMax);
+    addGlobalFunc('procedure TSingleMatrix.NormMinMax(Alpha, Beta: Single);', @_LapeSingleMatrix_NormMinMax);
     addGlobalFunc('function TSingleMatrix.Indices(Value: Single; Comparator: EComparator): TPointArray;', @_LapeSingleMatrix_Indices);
     addGlobalFunc('function TSingleMatrix.ArgMulti(Count: Integer; HiLo: Boolean): TPointArray;', @_LapeSingleMatrix_ArgMulti);
     addGlobalFunc('procedure TSingleMatrix.Smoothen(Block: Integer);', @_LapeSingleMatrix_Smoothen);

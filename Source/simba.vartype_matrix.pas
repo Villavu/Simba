@@ -103,7 +103,7 @@ type
     procedure MeanStdev(out MeanValue, Stdev: Double);
     procedure MinMax(out MinValue, MaxValue: Single);
 
-    function NormMinMax(Alpha, Beta: Single): TSingleMatrix;
+    procedure NormMinMax(Alpha, Beta: Single); // scales Self in place to Alpha..Beta
     function Indices(Value: Single;  Comparator: EComparator): TPointArray;
     function ArgMulti(Count: Integer;  HiLo: Boolean): TPointArray;
     procedure Smoothen(Block: Integer);
@@ -132,7 +132,7 @@ implementation
 
 uses
   Math,
-  simba.math, simba.container_point, simba.container_heaparray, simba.vartype_pointarray, simba.vartype_box;
+  simba.math, simba.container_point, simba.container_heaparray, simba.vartype_pointarray;
 
 function TIntegerMatrixHelper.GetWidth: Integer;
 begin
@@ -665,27 +665,25 @@ begin
   end;
 end;
 
-function TSingleMatrixHelper.NormMinMax(Alpha, Beta: Single): TSingleMatrix;
+procedure TSingleMatrixHelper.NormMinMax(Alpha, Beta: Single);
 var
   Lo, Hi, OldRange, NewRange: Single;
   X, Y, W, H: Integer;
 begin
-  Result.SetSize(Self.Width, Self.Height);
+  if not Self.GetSizeMinusOne(W, H) then
+    Exit;
 
-  if Self.GetSizeMinusOne(W, H) then
-  begin
-    Self.MinMax(Lo, Hi);
+  Self.MinMax(Lo, Hi);
 
-    OldRange := Hi - Lo;
-    NewRange := Beta - Alpha;
-    if IsZero(OldRange) then
-      Exit;
+  OldRange := Hi - Lo;
+  NewRange := Beta - Alpha;
 
-    for Y := 0 to H do
-      for X := 0 to W do
-        if IsNumber(Self[Y, X]) then
-          Result[Y, X] := (Self[Y, X] - Lo) / OldRange * NewRange + Alpha;
-  end;
+  for Y := 0 to H do
+    for X := 0 to W do
+      if IsNumber(Self[Y, X]) and (not IsZero(OldRange)) then
+        Self[Y, X] := (Self[Y, X] - Lo) / OldRange * NewRange + Alpha
+      else
+        Self[Y, X] := 0;
 end;
 
 function TSingleMatrixHelper.Indices(Value: Single; Comparator: EComparator): TPointArray;
