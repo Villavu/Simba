@@ -56,7 +56,7 @@ type
 implementation
 
 uses
-  simba.containers, simba.threading;
+  simba.containers;
 
 type
   TTrackedObjects = specialize TSimbaThreadsafeObjectList<TSimbaBaseClass>;
@@ -216,12 +216,8 @@ initialization
   TrackedThreads := TTrackedThreads.Create();
 
 finalization
-  if (TrackedObjects <> nil) then
-  begin
-    while (TrackedObjects.Count > 0) do
-      TrackedObjects.First.Free();
-    FreeAndNil(TrackedObjects);
-  end;
+  // Dont free the objects, this is only for tracking leaks.
+  FreeAndNil(TrackedObjects);
 
   if (TrackedThreads <> nil) then
   begin
