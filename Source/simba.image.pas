@@ -1366,39 +1366,8 @@ begin
 end;
 
 function TSimbaImage.Mirror(Style: EImageMirrorStyle): TSimbaImage;
-var
-  X, Y: Integer;
 begin
-  case Style of
-    EImageMirrorStyle.WIDTH:
-      begin
-        Result := TSimbaImage.Create(FWidth, FHeight);
-
-        for Y := FHeight - 1 downto 0 do
-          for X := FWidth - 1 downto 0 do
-            Result.FData[Y*FWidth+X] := FData[Y*FWidth+FWidth-1-X];
-      end;
-
-    EImageMirrorStyle.HEIGHT:
-      begin
-        Result := TSimbaImage.Create(FWidth, FHeight);
-
-        for Y := FHeight - 1 downto 0 do
-          Move(FData[Y*FWidth], Result.FData[(FHeight-1-Y) * FWidth], FWidth * SizeOf(TColorBGRA));
-      end;
-
-    EImageMirrorStyle.LINE:
-      begin
-        Result := TSimbaImage.Create(FHeight, FWidth);
-
-        for Y := FHeight - 1 downto 0 do
-          for X := FWidth - 1 downto 0 do
-            Result.FData[X*FHeight+Y] := FData[Y*FWidth+X];
-      end;
-
-    else
-      Result := nil;
-  end;
+  Result := SimbaImage_Mirror(Self, Style);
 end;
 
 function TSimbaImage.Blend(Points: TPointArray; Radius: Integer): TSimbaImage;
