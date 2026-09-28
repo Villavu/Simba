@@ -60,6 +60,25 @@ This enum is scoped so use like `EImageResizeAlgo.BILINEAR`
 *)
 
 (*
+EImageThresholdAlgo
+-------------------
+```
+enum(MEAN, WOLF, GAUSSIAN)
+```
+How `TImage.Threshold` picks each pixel's threshold from the window around it. All three adapt to the image, so uneven lighting, shadows and gradients are handled:
+
+- `MEAN`: The window's average. The pixel is compared as the average of itself and its 8 neighbours, so grain and noise don't turn into speckles.
+- `WOLF`: The window's average, lowered where the window has little contrast compared to the rest of the image. The cleanest background, but faint text and thin lines can drop out. The slowest of the three.
+- `GAUSSIAN`: A Gaussian weighted average of the window, the nearer pixels counting more. The fastest, and good for text and game UI. Large solid dark areas come out as outlines.
+
+![threshold comparison](../../images/threshold_algos.png)
+
+```{note}
+This enum is scoped so use like `EImageThresholdAlgo.GAUSSIAN`
+```
+*)
+
+(*
 TImage.Construct
 ----------------
 ```
@@ -1188,22 +1207,6 @@ begin
 end;
 
 (*
-TImage.Enhance
---------------
-```
-function TImage.Enhance(Enchantment: Byte; C: Single): TImage;
-```
-
-Enhances colors in the image by a given value.
- - `Enhancement`: How much to substraact or add to the color.
- - `C`: Based on the "mid"-value (127) if color is below then it gets weakened else enchanced.
-*)
-procedure _LapeImage_Enhance(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Enhance(PByte(Params^[1])^, PSingle(Params^[2])^);
-end;
-
-(*
 TImage.GreyScale
 ----------------
 ```
@@ -1240,18 +1243,6 @@ begin
 end;
 
 (*
-TImage.Posterize
-----------------
-```
-function TImage.Posterize(Value: Integer): TImage;
-```
-*)
-procedure _LapeImage_Posterize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Posterize(PInteger(Params^[1])^);
-end;
-
-(*
 TImage.Convolute
 ----------------
 ```
@@ -1272,53 +1263,37 @@ end;
 TImage.Threshold
 ----------------
 ```
-function TImage.Threshold(Invert: Boolean = False; C: Integer = 0): TImage;
+function TImage.Threshold(Algo: EImageThresholdAlgo; Invert: Boolean = False; Radius: Integer = 10): TImage;
+function TImage.Threshold(Algo: EImageThresholdAlgo; Invert: Boolean; Radius: Integer; C: Single): TImage;
 ```
 
-Otsu threshold algorithm.
+Returns a black and white image: white where a pixel's grey value is at or above its threshold, black elsewhere (the other way round with `Invert`). `Algo` picks how the threshold is found, see `EImageThresholdAlgo`.
 
-Invert = Invert output
-C = Constant value to add to computed threshold
-*)
-procedure _LapeImage_Threshold(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+- `Radius`: The window is the square of `2 * Radius + 1` pixels around each pixel, for `GAUSSIAN` it sets the size of the Gaussian. Use a window a few times larger than the text or objects you want to keep.
+- `C`: For `MEAN` and `GAUSSIAN` it is subtracted from the threshold, in grey levels, so larger values turn more pixels white. For `WOLF` it is its `k` weight, typically 0.2 to 0.5.
+
+Without `C` each algorithm uses a value that suits most images: 10 for `MEAN` and `GAUSSIAN`, 0.25 for `WOLF`.
+
+Example:
+
+```
+var
+  img: TImage;
 begin
-  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Threshold(PBoolean(Params^[1])^, PInteger(Params^[2])^);
+  img := new TImage('page.png');
+  img := img.Threshold(EImageThresholdAlgo.GAUSSIAN); // the default Radius and C
+  img.Show();
+end;
+```
+*)
+procedure _LapeImage_Threshold1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Threshold(EImageThresholdAlgo(Params^[1]^), PBoolean(Params^[2])^, PInteger(Params^[3])^);
 end;
 
-(*
-TImage.ThresholdAdaptive
-----------'-------------
-```
-function TImage.ThresholdAdaptive(Invert: Boolean = False; Radius: Integer = 25; C: Integer = 0): TImage;
-```
-
-Adapative thresholding using local average.
-
-Invert = Invert output
-Radius = Window size, must be odd (default = 25)
-C      = Constant value to add to computed threshold
-*)
-procedure _LapeImage_ThresholdAdaptive(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeImage_Threshold2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.ThresholdAdaptive(PBoolean(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
-end;
-
-(*
-TImage.ThresholdAdaptiveSauvola
--------------------------------
-```
-function TImage.ThresholdAdaptiveSauvola(Invert: Boolean = False; Radius: Integer = 25; C: Single = 0.2): TImage;
-```
-
-Sauvola binarization algorithm.
-
-Invert = Invert output
-Radius = Window size, must be odd (default = 25)
-C      = Constant value (default = 0.2). Typical values are between 0.2 and 0.5.
-*)
-procedure _LapeImage_ThresholdAdaptiveSauvola(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.ThresholdAdaptiveSauvola(PBoolean(Params^[1])^, PInteger(Params^[2])^, PSingle(Params^[3])^);
+  PLapeObjectImage(Result)^^ := PLapeObjectImage(Params^[0])^^.Threshold(EImageThresholdAlgo(Params^[1]^), PBoolean(Params^[2])^, PInteger(Params^[3])^, PSingle(Params^[4])^);
 end;
 
 (*
@@ -1698,6 +1673,7 @@ begin
     addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR, LANCZOS, BOX, HAMMING, BICUBIC)', 'EImageResizeAlgo');
     addGlobalType('enum(NEAREST_NEIGHBOUR, BILINEAR)', 'EImageRotateAlgo');
     addGlobalType('enum(BOX, GAUSS)', 'EImageBlurAlgo');
+    addGlobalType('enum(MEAN, WOLF, GAUSSIAN)', 'EImageThresholdAlgo');
     addGlobalType('set of enum(LEFT, CENTER, RIGHT, JUSTIFY, TOP, VERTICAL_CENTER, BASE_LINE, BOTTOM)', 'EImageTextAlign');
 
     addGlobalFunc('function TImage.Construct: TImage; static; overload;', @_LapeImage_Construct1);
@@ -1813,15 +1789,12 @@ begin
     addGlobalFunc('procedure TImage.DrawHSLCircle(ACenter: TPoint; Radius: Integer)', @_LapeImage_DrawHSLCircle);
 
     addGlobalFunc('function TImage.Sobel: TImage', @_LapeImage_Sobel);
-    addGlobalFunc('function TImage.Enhance(Enchantment: Byte; C: Single): TImage', @_LapeImage_Enhance);
     addGlobalFunc('function TImage.GreyScale: TImage', @_LapeImage_GreyScale);
     addGlobalFunc('function TImage.Brightness(Value: Integer): TImage', @_LapeImage_Brightness);
     addGlobalFunc('function TImage.Invert: TImage', @_LapeImage_Invert);
-    addGlobalFunc('function TImage.Posterize(Value: Integer): TImage', @_LapeImage_Posterize);
     addGlobalFunc('function TImage.Convolute(Matrix: TDoubleMatrix): TImage', @_LapeImage_Convolute);
-    addGlobalFunc('function TImage.Threshold(Invert: Boolean = False; C: Integer = 0): TImage', @_LapeImage_Threshold);
-    addGlobalFunc('function TImage.ThresholdAdaptive(Invert: Boolean = False; Radius: Integer = 25; C: Integer = 0): TImage', @_LapeImage_ThresholdAdaptive);
-    addGlobalFunc('function TImage.ThresholdAdaptiveSauvola(Invert: Boolean = False; Radius: Integer = 25; C: Single = 0.2): TImage', @_LapeImage_ThresholdAdaptiveSauvola);
+    addGlobalFunc('function TImage.Threshold(Algo: EImageThresholdAlgo; Invert: Boolean = False; Radius: Integer = 10): TImage; overload', @_LapeImage_Threshold1);
+    addGlobalFunc('function TImage.Threshold(Algo: EImageThresholdAlgo; Invert: Boolean; Radius: Integer; C: Single): TImage; overload', @_LapeImage_Threshold2);
     addGlobalFunc('function TImage.Blend(Points: TPointArray; Radius: Integer): TImage; overload', @_LapeImage_Blend1);
     addGlobalFunc('function TImage.Blend(Points: TPointArray; Radius: Integer; IgnorePoints: TPointArray): TImage; overload', @_LapeImage_Blend2);
     addGlobalFunc('function TImage.Blur(Algo: EImageBlurAlgo; Radius: Single): TImage;', @_LapeImage_Blur);

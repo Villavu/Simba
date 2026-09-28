@@ -22,6 +22,7 @@ type
   EImageResizeAlgo   = (NEAREST_NEIGHBOUR, BILINEAR, LANCZOS, BOX, HAMMING, BICUBIC);
   EImageRotateAlgo   = (NEAREST_NEIGHBOUR, BILINEAR);
   EImageBlurAlgo     = (BOX, GAUSS);
+  EImageThresholdAlgo = (MEAN, WOLF, GAUSSIAN);
   {$POP}
 
   TDetachedImageData = record
@@ -210,14 +211,11 @@ type
     // Filters
     function Convolute(Matrix: TDoubleMatrix): TSimbaImage;
     function Sobel: TSimbaImage;
-    function Enhance(Enchantment: Byte; C: Single): TSimbaImage;
     function GreyScale: TSimbaImage;
     function Brightness(Value: Integer): TSimbaImage;
     function Invert: TSimbaImage;
-    function Posterize(Value: Integer): TSimbaImage;
-    function Threshold(Inv: Boolean; C: Integer): TSimbaImage;
-    function ThresholdAdaptive(Inv: Boolean; Radius: Integer; C: Integer): TSimbaImage;
-    function ThresholdAdaptiveSauvola(Inv: Boolean; Radius: Integer; C: Single): TSimbaImage;
+    function Threshold(Algo: EImageThresholdAlgo; Inv: Boolean = False; Radius: Integer = 10): TSimbaImage; overload;
+    function Threshold(Algo: EImageThresholdAlgo; Inv: Boolean; Radius: Integer; C: Single): TSimbaImage; overload;
     function Blend(Points: TPointArray; Radius: Integer): TSimbaImage; overload;
     function Blend(Points: TPointArray; Radius: Integer; IgnorePoints: TPointArray): TSimbaImage; overload;
     function Blur(Algo: EImageBlurAlgo; Radius: Single): TSimbaImage;
@@ -1100,11 +1098,6 @@ begin
   Result := SimbaImage_Sobel(Self);
 end;
 
-function TSimbaImage.Enhance(Enchantment: Byte; C: Single): TSimbaImage;
-begin
-  Result := SimbaImage_Enhance(Self, Enchantment, C);
-end;
-
 procedure TSimbaImage.Fill(Color: TColor);
 begin
   FillData(FData, FWidth * FHeight, Color.ToBGRA(ALPHA_OPAQUE))
@@ -1301,24 +1294,28 @@ begin
   Result := SimbaImage_Invert(Self);
 end;
 
-function TSimbaImage.Posterize(Value: Integer): TSimbaImage;
+function TSimbaImage.Threshold(Algo: EImageThresholdAlgo; Inv: Boolean; Radius: Integer): TSimbaImage;
 begin
-  Result := SimbaImage_Posterize(Self, Value);
+  Result := nil;
+  case Algo of // each takes the C or K it is normally used with
+    EImageThresholdAlgo.MEAN:     Result := SimbaImage_ThresholdMean(Self, Inv, Radius);
+    EImageThresholdAlgo.WOLF:     Result := SimbaImage_ThresholdWolf(Self, Inv, Radius);
+    EImageThresholdAlgo.GAUSSIAN: Result := SimbaImage_ThresholdGaussian(Self, Inv, Radius);
+    else
+      SimbaException('TImage.Threshold: Unknown algorithm (%d)', [Ord(Algo)]);
+  end;
 end;
 
-function TSimbaImage.Threshold(Inv: Boolean; C: Integer): TSimbaImage;
+function TSimbaImage.Threshold(Algo: EImageThresholdAlgo; Inv: Boolean; Radius: Integer; C: Single): TSimbaImage;
 begin
-  Result := SimbaImage_Threshold(Self, Inv, C);
-end;
-
-function TSimbaImage.ThresholdAdaptive(Inv: Boolean; Radius: Integer; C: Integer): TSimbaImage;
-begin
-  Result := SimbaImage_ThresholdAdaptive(Self, Inv, Radius, C);
-end;
-
-function TSimbaImage.ThresholdAdaptiveSauvola(Inv: Boolean; Radius: Integer; C: Single): TSimbaImage;
-begin
-  Result := SimbaImage_ThresholdAdaptiveSauvola(Self, Inv, Radius, C);
+  Result := nil;
+  case Algo of
+    EImageThresholdAlgo.MEAN:     Result := SimbaImage_ThresholdMean(Self, Inv, Radius, C);
+    EImageThresholdAlgo.WOLF:     Result := SimbaImage_ThresholdWolf(Self, Inv, Radius, C);
+    EImageThresholdAlgo.GAUSSIAN: Result := SimbaImage_ThresholdGaussian(Self, Inv, Radius, C);
+    else
+      SimbaException('TImage.Threshold: Unknown algorithm (%d)', [Ord(Algo)]);
+  end;
 end;
 
 function TSimbaImage.Convolute(Matrix: TDoubleMatrix): TSimbaImage;
