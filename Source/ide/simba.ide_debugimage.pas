@@ -141,7 +141,7 @@ begin
   FMatrix.SetSize(Params.Width, Params.Height);
   for Y := 0 to Params.Height - 1 do
     Stream.Read(FMatrix[Y, 0], Params.Width * SizeOf(Single));
-  FMatrix := FMatrix.NormMinMax(0, 1);
+  FMatrix.NormMinMax(0, 1); // in place: no fresh matrix per frame
 
   try
     if (FBackBuffer = nil) then
