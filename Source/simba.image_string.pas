@@ -8,7 +8,7 @@
   A string is "IMG:" + base64(header + name + LZMA-compressed BGRA pixels).
   Version 1 stored a PNG which is still supported for reading
 }
-unit simba.image_stringconv;
+unit simba.image_string;
 
 {$I simba.inc}
 
@@ -28,7 +28,8 @@ uses
   FPReadPNG,
   simba.encoding,
   simba.compress,
-  simba.image_lazbridge,
+  simba.image_file,
+  simba.image_utils,
   simba.vartype_string;
 
 const
@@ -61,56 +62,19 @@ begin
   end;
 end;
 
-function SplitBGRA(Src: PByte; PixelCount: SizeInt): TByteArray;
+// the four channels one after another, each PixelCount bytes
+function SplitBGRA(Src: PColorBGRA; PixelCount: SizeInt): TByteArray;
 var
-  I: SizeInt;
-  ptrB, ptrG, ptrR, ptrA: PByte;
+  Planes: PByte;
 begin
   SetLength(Result, PixelCount * 4);
-
-  ptrB := Pointer(Result);
-  ptrG := ptrB + PixelCount;
-  ptrR := ptrG + PixelCount;
-  ptrA := ptrR + PixelCount;
-
-  for I := 1 to PixelCount do
-  begin
-    ptrB^ := Src[0];
-    ptrG^ := Src[1];
-    ptrR^ := Src[2];
-    ptrA^ := Src[3];
-
-    Inc(ptrB);
-    Inc(ptrG);
-    Inc(ptrR);
-    Inc(ptrA);
-    Inc(Src, 4);
-  end;
+  Planes := PByte(Result);
+  SplitChannels(Src, PixelCount, Planes, Planes + PixelCount, Planes + PixelCount * 2, Planes + PixelCount * 3);
 end;
 
-procedure UnsplitBGRA(Src, Dst: PByte; PixelCount: SizeInt);
-var
-  I: SizeInt;
-  ptrB, ptrG, ptrR, ptrA: PByte;
+procedure UnsplitBGRA(Planes: PByte; Dest: PColorBGRA; PixelCount: SizeInt);
 begin
-  ptrB := Src;
-  ptrG := ptrB + PixelCount;
-  ptrR := ptrG + PixelCount;
-  ptrA := ptrR + PixelCount;
-
-  for I := 1 to PixelCount do
-  begin
-    Dst[0] := ptrB^;
-    Dst[1] := ptrG^;
-    Dst[2] := ptrR^;
-    Dst[3] := ptrA^;
-
-    Inc(ptrB);
-    Inc(ptrG);
-    Inc(ptrR);
-    Inc(ptrA);
-    Inc(Dst, 4);
-  end;
+  MergeChannels(Dest, PixelCount, Planes, Planes + PixelCount, Planes + PixelCount * 2, Planes + PixelCount * 3, 0);
 end;
 
 procedure SimbaImage_FromString(Image: TSimbaImage; Str: String);
@@ -142,7 +106,7 @@ begin
 
           DecompressedData := DecompressStream(ESimbaCompressAlgo.LZMA, Stream);
           if (Header.Version = VERSION_LZMA_SPLIT) then
-            UnsplitBGRA(@DecompressedData[0], PByte(Image.Data), Header.Width * Header.Height)
+            UnsplitBGRA(PByte(DecompressedData), Image.Data, Header.Width * Header.Height)
           else
             Move(DecompressedData[0], Image.Data^, (Header.Width * Header.Height) * SizeOf(TColorBGRA));
         end;
@@ -152,7 +116,7 @@ begin
           Stream.Position := 0;
           Stream.Read(HeaderLegacy, SizeOf(THeaderLegacy));
           Image.Name := HeaderLegacy.Name;
-          SimbaImage_FromFPImageReader(Image, TFPReaderPNG, Stream);
+          SimbaImage_LoadFPImage(Image, TFPReaderPNG, Stream);
         end;
     else
       SimbaException('TImage.FromString: Unsupported version (%d)', [Header.Version]);
@@ -169,12 +133,12 @@ var
   Header: THeader;
   PixelCount, DataSize: SizeInt;
 begin
-  PixelCount := Image.Width * Image.Height;
+  PixelCount := Image.PixelCount;
   DataSize   := PixelCount * SizeOf(TColorBGRA);
 
   // pick the smaller output, and store in version field
   Interleaved := CompressData(ESimbaCompressAlgo.LZMA, PByte(Image.Data), DataSize);
-  Split       := CompressBytes(ESimbaCompressAlgo.LZMA, SplitBGRA(PByte(Image.Data), PixelCount));
+  Split       := CompressBytes(ESimbaCompressAlgo.LZMA, SplitBGRA(Image.Data, PixelCount));
 
   if (Length(Split) < Length(Interleaved)) then
   begin
