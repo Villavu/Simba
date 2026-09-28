@@ -72,7 +72,7 @@ function DistanceHSV(const Color1, Color2: TColorHSV; const mul: TChannelMultipl
 var
   deltaH: Single;
 begin
-  if (Color1.S < 1.0e-10) or (Color2.S < 1.0e-10) then // no saturation = gray (hue has no value here)
+  if (Color1.S < Single(1.0e-10)) or (Color2.S < Single(1.0e-10)) then // no saturation = gray (hue has no value here)
     deltaH := 0
   else begin
     deltaH := Abs(Color1.H - Color2.H);
@@ -95,7 +95,7 @@ function DistanceHSL(const Color1, Color2: TColorHSL; const mul: TChannelMultipl
 var
   deltaH: Single;
 begin
-  if (Color1.S < 1.0e-10) or (Color2.S < 1.0e-10) then // no saturation = gray (hue has no value here)
+  if (Color1.S < Single(1.0e-10)) or (Color2.S < Single(1.0e-10)) then // no saturation = gray (hue has no value here)
     deltaH := 0
   else begin
     deltaH := Abs(Color1.H - Color2.H);
@@ -143,11 +143,7 @@ function DistanceLCH(const Color1, Color2: TColorLCH; const mul: TChannelMultipl
 var
   deltaH: Single;
 begin
-  deltaH := Abs(Color1.H - Color2.H);
-  if deltaH >= 180 then deltaH := 360 - deltaH;
-  deltaH *= Max(Color1.C, Color2.C) / 100;
-
-  if (Color1.C < 0.4) or (Color2.C < 0.4) then // no chromaticity = gray (hue has no value here)
+  if (Color1.C < Single(0.4)) or (Color2.C < Single(0.4)) then // no chromaticity = gray (hue has no value here)
     deltaH := 0
   else begin
     deltaH := Abs(Color1.H - Color2.H);
@@ -165,6 +161,7 @@ end;
 
 
 // ----| DeltaE |--------------------------------------------------------------
+// CIE94, as DistanceDeltaE_UnRolled
 function DistanceDeltaE(const Color1, Color2: TColorLAB; const mul: TChannelMultipliers): Single;
 var
   xc1,xc2,xdl,xdc,xde,xdh,xsc,xsh: Single;
@@ -173,15 +170,17 @@ begin
   xc2 := Sqrt(Sqr(Color2.a) + Sqr(Color2.b));
   xdl := Color2.L - Color1.L;
   xdc := xc2 - xc1;
-  xde := Sqrt(Sqr(Color1.L - Color2.L) + Sqr(Color1.a - Color2.A) + Sqr(Color1.b - Color2.B));
 
-  if Sqrt(xDE) > Sqrt(Abs(xDL)) + Sqrt(Abs(xDC))  then
-     xDH := Sqrt(Sqr(xDE) - Sqr(xDL) - Sqr(xDC))
+  // xde and xdh squared: the hue difference is what the lightness and chroma leave of deltaE
+  xde := Sqr(Color1.L - Color2.L) + Sqr(Color1.a - Color2.A) + Sqr(Color1.b - Color2.B);
+  xdh := xde - Sqr(xdl) - Sqr(xdc);
+  if (xdh > 0) then
+    xdh := Sqrt(xdh)
   else
-     xDH := 0;
+    xdh := 0;
 
-  xSC := 1 + (0.045 * (xC1+xC2)/2);
-  xSH := 1 + (0.015 * (xC1+xC2)/2);
+  xSC := 1 + (Single(0.045) * (xC1+xC2)/2);
+  xSH := 1 + (Single(0.015) * (xC1+xC2)/2);
 
   xDC /= xSC;
   xDH /= xSH;
@@ -191,7 +190,6 @@ end;
 function DistanceDeltaE_Max(const mul: TChannelMultipliers): Single;
 var
   Color1,Color2: TColorLAB;
-  xc1,xc2,xdl,xdc,xde,xdh,xsc,xsh: Single;
 begin
   Color1.L := 0;
   Color1.A := -92;
@@ -201,24 +199,7 @@ begin
   Color2.A := 92;
   Color2.B := 92;
 
-  xc1 := Sqrt(Sqr(Color1.a) + Sqr(Color1.b));
-  xc2 := Sqrt(Sqr(Color2.a) + Sqr(Color2.b));
-  xdl := Color2.L - Color1.L;
-  xdc := xc2 - xc1;
-  xde := Sqrt(Sqr(Color1.L - Color2.L) + Sqr(Color1.a - Color2.A) + Sqr(Color1.b - Color2.B));
-
-  if Sqrt(xDE) > Sqrt(Abs(xDL)) + Sqrt(Abs(xDC))  then
-     xDH := Sqrt(Sqr(xDE) - Sqr(xDL) - Sqr(xDC))
-  else
-     xDH := 0;
-
-  xSC := 1 + (0.045 * (xC1+xC2)/2);
-  xSH := 1 + (0.015 * (xC1+xC2)/2);
-
-  xDC /= xSC;
-  xDH /= xSH;
-
-  Result := Sqrt(Sqr(xDL * mul[0]) + Sqr(xDC * mul[1]) + Sqr(xDH * mul[2]));
+  Result := DistanceDeltaE(Color1, Color2, mul);
 end;
 
 function ColorDistance(const Color1, Color2: TColor; const ColorSpace: EColorSpace; const Multipliers: TChannelMultipliers): Single;
