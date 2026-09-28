@@ -12,7 +12,7 @@ unit simba.image_lazbridge;
 interface
 
 uses
-  Classes, SysUtils, Graphics, GraphType, IntfGraphics, FPImage,
+  Classes, SysUtils, Graphics, GraphType,
   simba.base, simba.image, simba.colormath;
 
 {$scopedenums on}
@@ -29,15 +29,13 @@ procedure LazImage_FromSimbaImage(LazImage: TBitmap; SimbaImage: TSimbaImage);
 function LazImage_ToSimbaImage(LazImage: TBitmap): TSimbaImage;
 function LazImage_PixelFormat(LazImage: TBitmap): ELazPixelFormat;
 
-procedure SimbaImage_ToFPImageWriter(SimbaImage: TSimbaImage; WriterClass: TFPCustomImageWriterClass; Stream: TStream);
-procedure SimbaImage_FromFPImageReader(SimbaImage: TSimbaImage; ReaderClass: TFPCustomImageReaderClass; Stream: TStream);
 function SimbaImage_ToRawImage(SimbaImage: TSimbaImage): TRawImage;
 function SimbaImage_ToLazImage(SimbaImage: TSimbaImage): TBitmap;
 
 implementation
 
 uses
-  TypInfo, FPWritePNG;
+  TypInfo;
 
 procedure LazImage_CopyRow_BGR(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGR);
 begin
@@ -278,54 +276,6 @@ begin
         'BlueShift: '    + IntToStr(BlueShift)    + ', Prec: ' + IntToStr(BluePrec)      + ', ' +
         'AlphaShift: '   + IntToStr(AlphaShift)   + ', Prec: ' + IntToStr(AlphaPrec)
       );
-  end;
-end;
-
-procedure SimbaImage_ToFPImageWriter(SimbaImage: TSimbaImage; WriterClass: TFPCustomImageWriterClass; Stream: TStream);
-var
-  Img: TLazIntfImage;
-  Writer: TFPCustomImageWriter;
-begin
-  Img := nil;
-  Writer := nil;
-  try
-    Writer := WriterClass.Create();
-    if (Writer is TFPWriterPNG) then
-    begin
-      TFPWriterPNG(Writer).WordSized := False;
-      TFPWriterPNG(Writer).UseAlpha := True;
-    end;
-
-    Img := TLazIntfImage.Create(SimbaImage_ToRawImage(SimbaImage), False);
-
-    Writer.ImageWrite(Stream, Img);
-  finally
-    if Assigned(Img) then
-      Img.Free();
-  end;
-end;
-
-procedure SimbaImage_FromFPImageReader(SimbaImage: TSimbaImage; ReaderClass: TFPCustomImageReaderClass; Stream: TStream);
-var
-  Img: TLazIntfImage;
-  Reader: TFPCustomImageReader;
-  Desc: TRawImageDescription;
-begin
-  Desc.Init_BPP32_B8G8R8A8_BIO_TTB(0, 0);
-
-  Img := nil;
-  Reader := nil;
-  try
-    Reader := ReaderClass.Create();
-    Img := TLazIntfImage.Create(0, 0);
-    Img.DataDescription := Desc;
-
-    Reader.ImageRead(Stream, Img);
-
-    SimbaImage.FromData(Img.Width, Img.Height, PColorBGRA(Img.PixelData), Img.Width);
-  finally
-    Img.Free();
-    Reader.Free();
   end;
 end;
 

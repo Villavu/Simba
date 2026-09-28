@@ -548,7 +548,7 @@
         <PackageName Value="LCL"/>
       </Item5>
     </RequiredPackages>
-    <Units Count="101">
+    <Units Count="102">
       <Unit0>
         <Filename Value="Simba.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -991,6 +991,10 @@
         <Filename Value="finders/simba.finder_pixels.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit100>
+      <Unit101>
+        <Filename Value="simba.image_file.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit101>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
