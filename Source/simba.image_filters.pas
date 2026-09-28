@@ -3,9 +3,7 @@
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
   --------------------------------------------------------------------------
-  Blur derived from the Python Imaging Library (Pillow),
-  src/libImaging/BoxBlur.c, used under the HPND License:
-
+  BoxBlur derived from the Python Imaging Library (Pillow) used under the HPND License:
   Copyright (c) 1997-2011 by Secret Labs AB
   Copyright (c) 1995-2011 by Fredrik Lundh and contributors
   Copyright (c) 2010 by Jeffrey A. Clark and contributors
@@ -18,450 +16,344 @@ interface
 
 uses
   Classes, SysUtils,
-  simba.base, simba.image, simba.colormath;
+  simba.base,
+  simba.image,
+  simba.colormath;
 
+// Each pixel replaced by its grey value (Opaque).
 function SimbaImage_GreyScale(Image: TSimbaImage): TSimbaImage;
-function SimbaImage_Brightness(Image: TSimbaImage; Value: Integer): TSimbaImage;
-function SimbaImage_Invert(Image: TSimbaImage): TSimbaImage;
-function SimbaImage_Posterize(Image: TSimbaImage; Value: Integer): TSimbaImage;
-function SimbaImage_Sobel(Image: TSimbaImage): TSimbaImage;
-function SimbaImage_Enhance(Image: TSimbaImage; Enchantment: Byte; C: Single): TSimbaImage;
-function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Single): TSimbaImage;
-function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Single): TSimbaImage;
-function SimbaImage_Threshold(Image: TSimbaImage; Invert: Boolean; C: Integer): TSimbaImage;
-function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Integer): TSimbaImage;
-function SimbaImage_ThresholdAdaptiveSauvola(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Single): TSimbaImage;
 
-procedure SimbaImage_ReplaceColor(Image: TSimbaImage; OldColor, NewColor: TColor; Tol: Single = 0);
-procedure SimbaImage_ReplaceColorBinary(Image: TSimbaImage; Invert: Boolean; Color: TColor; Tol: Single = 0);
-procedure SimbaImage_ReplaceColorBinary(Image: TSimbaImage; Invert: Boolean; Colors: TColorArray; Tol: Single = 0);
+// Value added to each channel clamped to 0..255 (Opaque).
+function SimbaImage_Brightness(Image: TSimbaImage; Value: Integer): TSimbaImage;
+
+// bitwise NOT on every channel (Opaque).
+function SimbaImage_Invert(Image: TSimbaImage): TSimbaImage;
+
+// Edge strength: the 3x3 Sobel gradient of the grey values, as grey (Opaque).
+function SimbaImage_Sobel(Image: TSimbaImage): TSimbaImage;
+
+// Each pixel the Matrix weighted sum of the pixels around it, reading the nearest pixel off the edges. Opaque.
+function SimbaImage_Convolute(Image: TSimbaImage; Matrix: TDoubleMatrix): TSimbaImage;
+
+// Box blur of the given radius (Opaque).
+function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Single): TSimbaImage;
+
+// Gaussian blur of the given radius, three box passes. Alpha is dropped.
+function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Single): TSimbaImage;
+
+// the window's mean, minus C.
+function SimbaImage_ThresholdMean(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Single = 10): TSimbaImage;
+
+// Wolf-Jolion threshold, K is how hard it pulls.
+function SimbaImage_ThresholdWolf(Image: TSimbaImage; Invert: Boolean; Radius: Integer; K: Single = 0.25): TSimbaImage;
+
+// the window's Gaussian weighted mean, minus C.
+function SimbaImage_ThresholdGaussian(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Single = 10): TSimbaImage;
+
+// Each point in Points replaced by the average colour of the pixels within Radius of it.
+// Neither Points no IgnorePoints are ever sampled from.
+function SimbaImage_BlendFromSurrounding(Image: TSimbaImage; const Points: TPointArray; Radius: Integer; const IgnorePoints: TPointArray): TSimbaImage;
+
+// In place: pixels within Tolerance of OldColor become NewColor, keeping their alpha.
+procedure SimbaImage_ReplaceColor(Image: TSimbaImage; OldColor, NewColor: TColor; Tolerance: Single = 0);
+
+// In place: every pixel becomes white when it is within Tolerance of any of Colors and black when it is not.
+procedure SimbaImage_ReplaceColorBinary(Image: TSimbaImage; Invert: Boolean; Colors: TColorArray; Tolerance: Single = 0);
 
 implementation
 
 uses
   Math,
-  simba.image_utils, simba.vartype_matrix, simba.colormath_distance;
+  simba.colormath_distance,
+  simba.image_utils,
+  simba.vartype_box,
+  simba.vartype_matrix,
+  simba.vartype_pointarray;
+
+const
+  BINARY_COLORS: array[Boolean] of UInt32 = ($FF000000, $FFFFFFFF); // black & white with alpha=255
 
 function SimbaImage_GreyScale(Image: TSimbaImage): TSimbaImage;
 var
-  I: Integer;
-  Src, Dst: PColorBGRA;
-  Lum: Byte;
+  Src, Upper, Dest: PColorBGRA;
+  Grey: Byte;
 begin
   Result := TSimbaImage.Create(Image.Width, Image.Height);
+  if not Image.DataRange(Src, Upper) then
+    Exit;
 
-  Src := Image.Data;
-  Dst := Result.Data;
-
-  for I := (Image.Height * Image.Width - 1) downto 0 do
+  Dest := Result.Data;
+  while (Src <= Upper) do
   begin
-    Lum := Round(Src^.R * 0.299 + Src^.G * 0.587 + Src^.B * 0.114);
+    Grey := PixelToGrey(Src^);
 
-    Dst^.R := Lum;
-    Dst^.G := Lum;
-    Dst^.B := Lum;
-    Dst^.A := ALPHA_OPAQUE;
+    // no alpha here: Result came from Create, which is opaque
+    Dest^.R := Grey;
+    Dest^.G := Grey;
+    Dest^.B := Grey;
 
     Inc(Src);
-    Inc(Dst);
+    Inc(Dest);
   end;
 end;
 
 function SimbaImage_Brightness(Image: TSimbaImage; Value: Integer): TSimbaImage;
 var
-  I: Integer;
-  Src, Dst: PColorBGRA;
+  Src, Upper, Dest: PColorBGRA;
 begin
   Result := TSimbaImage.Create(Image.Width, Image.Height);
+  if not Image.DataRange(Src, Upper) then
+    Exit;
 
-  Src := Image.Data;
-  Dst := Result.Data;
-
-  for I := (Image.Height * Image.Width - 1) downto 0 do
+  Dest := Result.Data;
+  while (Src <= Upper) do
   begin
-    Dst^.R := EnsureRange(Src^.R + Value, 0, 255);
-    Dst^.G := EnsureRange(Src^.G + Value, 0, 255);
-    Dst^.B := EnsureRange(Src^.B + Value, 0, 255);
-    Dst^.A := ALPHA_OPAQUE;
+    Dest^.R := EnsureRange(Src^.R + Value, 0, 255);
+    Dest^.G := EnsureRange(Src^.G + Value, 0, 255);
+    Dest^.B := EnsureRange(Src^.B + Value, 0, 255);
 
     Inc(Src);
-    Inc(Dst);
+    Inc(Dest);
   end;
 end;
 
 function SimbaImage_Invert(Image: TSimbaImage): TSimbaImage;
 var
-  I: Integer;
-  Src, Dst: PColorBGRA;
+  Src, Upper, Dest: PColorBGRA;
 begin
   Result := TSimbaImage.Create(Image.Width, Image.Height);
+  if not Image.DataRange(Src, Upper) then
+    Exit;
 
-  Src := Image.Data;
-  Dst := Result.Data;
-
-  for I := (Image.Height * Image.Width - 1) downto 0 do
+  Dest := Result.Data;
+  while (Src <= Upper) do
   begin
-    Dst^.R := not Src^.R;
-    Dst^.G := not Src^.G;
-    Dst^.B := not Src^.B;
-    Dst^.A := ALPHA_OPAQUE;
+    PUInt32(Dest)^ := (not PUInt32(Src)^) or $FF000000; // untouch alpha
 
     Inc(Src);
-    Inc(Dst);
-  end;
-end;
-
-function SimbaImage_Posterize(Image: TSimbaImage; Value: Integer): TSimbaImage;
-var
-  I: Integer;
-  Src, Dst: PColorBGRA;
-begin
-  if not InRange(Value, 1, 255) then
-    SimbaException('TSimbaImage.Posterize: Value(%d) out of range[1..255]', [Value]);
-
-  Result := TSimbaImage.Create(Image.Width, Image.Height);
-
-  Src := Image.Data;
-  Dst := Result.Data;
-
-  for I := (Image.Height * Image.Width - 1) downto 0 do
-  begin
-    Dst^.A := ALPHA_OPAQUE;
-    Dst^.R := Min(Round(Src^.R / Value) * Value, 255);
-    Dst^.G := Min(Round(Src^.G / Value) * Value, 255);
-    Dst^.B := Min(Round(Src^.B / Value) * Value, 255);
-
-    Inc(Src);
-    Inc(Dst);
+    Inc(Dest);
   end;
 end;
 
 function SimbaImage_Sobel(Image: TSimbaImage): TSimbaImage;
 var
-  x,y,xx,yy,W,H,gx,gy,SrcWidth: Integer;
-  opx,opy: TIntegerMatrix;
-  Grey: TByteMatrix;
-  Ptr, DstPtr: PColorBGRA;
+  X, Y, Width, Height, LeftCol, RightCol, TopRow, BottomRow: Integer;
+  Grey: TByteArray;
+  Src, Upper, Dest: PColorBGRA;
+  Above, Middle, Below: PByte;
+  Magnitude: Byte;
 begin
-  Grey := Image.ToGreyMatrix;
   Result := TSimbaImage.Create(Image.Width, Image.Height);
-  DstPtr := Result.Data;
-  SrcWidth := Image.Width;
+  if not Image.DataRange(Src, Upper) then
+    Exit;
 
-  SetLength(opx, 3,3);
-  opx[0][0] := -1; opx[0][1] := 0; opx[0][2] := 1;
-  opx[1][0] := -2; opx[1][1] := 0; opx[1][2] := 2;
-  opx[2][0] := -1; opx[2][1] := 0; opx[2][2] := 1;
+  Width := Image.Width;
+  Height := Image.Height;
 
-  SetLength(opy, 3,3);
-  opy[0][0] := -1; opy[0][1] := -2; opy[0][2] := -1;
-  opy[1][0] :=  0; opy[1][1] :=  0; opy[1][2] := 0;
-  opy[2][0] :=  1; opy[2][1] :=  2; opy[2][2] := 1;
+  SetLength(Grey, Image.PixelCount);
+  GreyData(Image.Data, @Grey[0], Image.PixelCount);
 
-  W := Image.Width - 2;
-  H := Image.Height - 2;
-  for y:=1 to H do
-    for x:=1 to W do
+  for Y := 1 to Height - 2 do
+  begin
+    Above := @Grey[(Y - 1) * Width];
+    Middle := @Grey[Y * Width];
+    Below := @Grey[(Y + 1) * Width];
+    Dest := Result.PixelPtr[1, Y];
+
+    // Difference across the window, weighted towards its middle:
+    //   RightCol - LeftCol = [ -1 0 +1 ]   BottomRow - TopRow = [ -1 -2 -1 ]
+    //                        [ -2 0 +2 ]                        [  0  0  0 ]
+    //                        [ -1 0 +1 ]                        [ +1 +2 +1 ]
+    for X := 1 to Width - 2 do
     begin
-      gx := 0;
-      gy := 0;
-      for yy:=0 to 2 do
-        for xx:=0 to 2 do
-        begin
-          gx := gx + (opx[yy][xx] * Grey[y + yy - 1][x + xx - 1]);
-          gy := gy + (opy[yy][xx] * Grey[y + yy - 1][x + xx - 1]);
-        end;
+      LeftCol   := Above[X - 1] + 2 * Middle[X - 1] + Below[X - 1];
+      RightCol  := Above[X + 1] + 2 * Middle[X + 1] + Below[X + 1];
+      TopRow    := Above[X - 1] + 2 * Above[X]      + Above[X + 1];
+      BottomRow := Below[X - 1] + 2 * Below[X]      + Below[X + 1];
+      Magnitude := EnsureRange(Trunc(Sqrt(Sqr(RightCol - LeftCol) + Sqr(BottomRow - TopRow))), 0, 255);
 
-      Ptr := @DstPtr[Y * SrcWidth + X];
-      Ptr^.B := Byte(EnsureRange(Trunc(Sqrt(gx*gx + gy*gy)), 0, 255));
-      Ptr^.G := Ptr^.B;
-      Ptr^.R := Ptr^.B;
+      Dest^.B := Magnitude;
+      Dest^.G := Magnitude;
+      Dest^.R := Magnitude;
+
+      Inc(Dest);
     end;
+  end;
 end;
 
-function SimbaImage_Enhance(Image: TSimbaImage; Enchantment: Byte; C: Single): TSimbaImage;
+function SimbaImage_Convolute(Image: TSimbaImage; Matrix: TDoubleMatrix): TSimbaImage;
 var
-  W,H,x,y,R,G,B,SrcWidth,Idx:Integer;
-  mid: Single;
-  SrcPtr, DstPtr: PColorBGRA;
+  X, Y, MatY, MatX: Integer;
+  MatWidth, MatHeight, MatMidX, MatMidY, Width, Height: Integer;
+  SumR, SumG, SumB, Weight: Double;
+  SrcRow, Dest: PColorBGRA;
+  MatRow: PDouble;
 begin
-  Result := TSimbaImage.Create(Image.Width, Image.Height);
-  SrcPtr := Image.Data;
-  DstPtr := Result.Data;
-  SrcWidth := Image.Width;
-  Mid := 127 * C;
-  W := Image.Width - 1;
-  H := Image.Height - 1;
-  for y:=0 to H do
-    for x:=0 to W do
+  if not Matrix.GetSize(MatWidth, MatHeight) then
+    SimbaException('TImage.Convolute: The matrix is empty');
+
+  Width := Image.Width;
+  Height := Image.Height;
+  Result := TSimbaImage.Create(Width, Height);
+
+  MatMidX := MatWidth div 2;
+  MatMidY := MatHeight div 2;
+
+  Dest := Result.Data;
+  for Y := 0 to Height - 1 do
+    for X := 0 to Width - 1 do
     begin
-      Idx := Y * SrcWidth + X;
-      R := SrcPtr[Idx].R;
-      G := SrcPtr[Idx].G;
-      B := SrcPtr[Idx].B;
+      SumR := 0;
+      SumG := 0;
+      SumB := 0;
 
-      if R > mid then
+      for MatY := 0 to MatHeight - 1 do
       begin
-        R := R + Enchantment;
-        if (R > 255) then R := 255;
-      end else
-      begin
-        R := R - Enchantment;
-        if (R < 0) then R := 0;
+        MatRow := @Matrix[MatY, 0];
+        SrcRow := Image.Data + Int64(EnsureRange(Y + MatY - MatMidY, 0, Height - 1) * Width);
+
+        for MatX := 0 to MatWidth - 1 do
+        begin
+          Weight := MatRow[MatX];
+
+          with SrcRow[EnsureRange(X + MatX - MatMidX, 0, Width - 1)] do
+          begin
+            SumR += Weight * R;
+            SumG += Weight * G;
+            SumB += Weight * B;
+          end;
+        end;
       end;
 
-      if G > mid then
+      with Dest^ do
       begin
-        G := G + Enchantment;
-        if (G > 255) then G:=255;
-      end else
-      begin
-        G := G - Enchantment;
-        if (G < 0) then G:=0;
+        R := EnsureRange(Round(SumR), 0, 255);
+        G := EnsureRange(Round(SumG), 0, 255);
+        B := EnsureRange(Round(SumB), 0, 255);
       end;
 
-      if B > mid then
-      begin
-        B := B + Enchantment;
-        if (B > 255) then B:=255;
-      end else
-      begin
-        B := B - Enchantment;
-        if (B < 0) then B:=0;
-      end;
-
-      DstPtr[Idx].R := R;
-      DstPtr[Idx].G := G;
-      DstPtr[Idx].B := B;
+      Inc(Dest);
     end;
 end;
 
 // Box blur Pillow style (BoxBlur.c)
 function SimbaImage_BlurBox(Image: TSimbaImage; Radius: Single): TSimbaImage;
 
-  procedure LineBoxBlur(OutP, InP: PByte; LastX, Rad, EdgeA, EdgeB: Integer; ww, fw: UInt32);
+  // One row. The window is carried along as a running sum, so each pixel costs one add and one subtract:
+  // the weights split it into the whole pixels inside the window and the two fractional ones just outside.
+  procedure LineBoxBlur(Dest, Source: PByte; LastX, WindowRadius: Integer; InsideWeight, OutsideWeight: UInt32);
   var
-    X: Integer;
-    a0,a1,a2,a3, i0,i1,i2,i3, l0,l1,l2,l3, s0,s1,s2,s3: UInt32;
-    pAdd, pSub, pFar, pOut, pLast: PByte;
+    X, CoveredPixels: Integer;
+    SumB, SumG, SumR: UInt32;
+    Entering, Leaving, Outside, LastPixel, EnteringEnd: PByte;
   begin
-    i0 := InP[0];
-    i1 := InP[1];
-    i2 := InP[2];
-    i3 := InP[3];
+    LastPixel := Source + LastX * 4;
 
-    pLast := InP + LastX * 4;
-    l0 := pLast[0];
-    l1 := pLast[1];
-    l2 := pLast[2];
-    l3 := pLast[3];
+    // the window one step before the row starts: the first pixel repeated off the left, then the row up to it
+    SumB := Source[0] * UInt32(WindowRadius + 1);
+    SumG := Source[1] * UInt32(WindowRadius + 1);
+    SumR := Source[2] * UInt32(WindowRadius + 1);
 
-    a0 := i0 * UInt32(Rad + 1);
-    a1 := i1 * UInt32(Rad + 1);
-    a2 := i2 * UInt32(Rad + 1);
-    a3 := i3 * UInt32(Rad + 1);
-
-    pAdd := InP;
-    for X := 0 to EdgeA - 2 do
+    CoveredPixels := Min(WindowRadius, LastX + 1); // a window wider than the row is the last pixel repeated off the right
+    Entering := Source;
+    EnteringEnd := Source + CoveredPixels * 4;
+    while (Entering < EnteringEnd) do
     begin
-      a0 += pAdd[0];
-      a1 += pAdd[1];
-      a2 += pAdd[2];
-      a3 += pAdd[3];
-      Inc(pAdd, 4);
+      SumB += Entering[0];
+      SumG += Entering[1];
+      SumR += Entering[2];
+      Inc(Entering, 4);
     end;
+    SumB += LastPixel[0] * UInt32(WindowRadius - CoveredPixels);
+    SumG += LastPixel[1] * UInt32(WindowRadius - CoveredPixels);
+    SumR += LastPixel[2] * UInt32(WindowRadius - CoveredPixels);
 
-    a0 += l0 * UInt32(Rad - EdgeA + 1);
-    a1 += l1 * UInt32(Rad - EdgeA + 1);
-    a2 += l2 * UInt32(Rad - EdgeA + 1);
-    a3 += l3 * UInt32(Rad - EdgeA + 1);
-
-    if (EdgeA <= EdgeB) then
+    Entering := Source + Min(WindowRadius, LastX) * 4;     // entering the window
+    Leaving := Source;                                     // leaving it, and the outside pixel on the left
+    Outside := Source + Min(WindowRadius + 1, LastX) * 4;  // the outside pixel on the right
+    for X := 0 to LastX do
     begin
-      pAdd := InP + Rad * 4;
-      pFar := InP + (Rad + 1) * 4;
-      pOut := OutP;
+      SumB := SumB + Entering[0] - Leaving[0];
+      SumG := SumG + Entering[1] - Leaving[1];
+      SumR := SumR + Entering[2] - Leaving[2];
+      // each of these is Round(Sum / Size)
+      Dest[0] := UInt32(SumB * InsideWeight + (Leaving[0] + Outside[0]) * OutsideWeight + (1 shl 23)) shr 24;
+      Dest[1] := UInt32(SumG * InsideWeight + (Leaving[1] + Outside[1]) * OutsideWeight + (1 shl 23)) shr 24;
+      Dest[2] := UInt32(SumR * InsideWeight + (Leaving[2] + Outside[2]) * OutsideWeight + (1 shl 23)) shr 24;
 
-      for X := 0 to EdgeA - 1 do
-      begin
-        a0 := a0 + pAdd[0] - i0;
-        a1 := a1 + pAdd[1] - i1;
-        a2 := a2 + pAdd[2] - i2;
-        a3 := a3 + pAdd[3] - i3;
-        pOut[0] := UInt32(a0 * ww + (i0 + pFar[0]) * fw + (1 shl 23)) shr 24;
-        pOut[1] := UInt32(a1 * ww + (i1 + pFar[1]) * fw + (1 shl 23)) shr 24;
-        pOut[2] := UInt32(a2 * ww + (i2 + pFar[2]) * fw + (1 shl 23)) shr 24;
-        pOut[3] := UInt32(a3 * ww + (i3 + pFar[3]) * fw + (1 shl 23)) shr 24;
-        Inc(pAdd, 4);
-        Inc(pFar, 4);
-        Inc(pOut, 4);
-      end;
-
-      pAdd := InP + (EdgeA + Rad) * 4;
-      pSub := InP + (EdgeA - Rad - 1) * 4;
-      pFar := InP + (EdgeA + Rad + 1) * 4;
-      pOut := OutP + EdgeA * 4;
-
-      for X := EdgeA to EdgeB - 1 do
-      begin
-        s0 := pSub[0];
-        s1 := pSub[1];
-        s2 := pSub[2];
-        s3 := pSub[3];
-        a0 := a0 + pAdd[0] - s0;
-        a1 := a1 + pAdd[1] - s1;
-        a2 := a2 + pAdd[2] - s2;
-        a3 := a3 + pAdd[3] - s3;
-        pOut[0] := UInt32(a0 * ww + (s0 + pFar[0]) * fw + (1 shl 23)) shr 24;
-        pOut[1] := UInt32(a1 * ww + (s1 + pFar[1]) * fw + (1 shl 23)) shr 24;
-        pOut[2] := UInt32(a2 * ww + (s2 + pFar[2]) * fw + (1 shl 23)) shr 24;
-        pOut[3] := UInt32(a3 * ww + (s3 + pFar[3]) * fw + (1 shl 23)) shr 24;
-        Inc(pAdd, 4);
-        Inc(pSub, 4);
-        Inc(pFar, 4);
-        Inc(pOut, 4);
-      end;
-
-      pSub := InP + (EdgeB - Rad - 1) * 4;
-      pOut := OutP + EdgeB * 4;
-      for X := EdgeB to LastX do
-      begin
-        s0 := pSub[0];
-        s1 := pSub[1];
-        s2 := pSub[2];
-        s3 := pSub[3];
-        a0 := a0 + l0 - s0;
-        a1 := a1 + l1 - s1;
-        a2 := a2 + l2 - s2;
-        a3 := a3 + l3 - s3;
-        pOut[0] := UInt32(a0 * ww + (s0 + l0) * fw + (1 shl 23)) shr 24;
-        pOut[1] := UInt32(a1 * ww + (s1 + l1) * fw + (1 shl 23)) shr 24;
-        pOut[2] := UInt32(a2 * ww + (s2 + l2) * fw + (1 shl 23)) shr 24;
-        pOut[3] := UInt32(a3 * ww + (s3 + l3) * fw + (1 shl 23)) shr 24;
-        Inc(pSub, 4);
-        Inc(pOut, 4);
-      end;
-    end else
-    begin
-      pAdd := InP + Rad * 4;
-      pFar := InP + (Rad + 1) * 4;
-      pOut := OutP;
-      for X := 0 to EdgeB - 1 do
-      begin
-        a0 := a0 + pAdd[0] - i0;
-        a1 := a1 + pAdd[1] - i1;
-        a2 := a2 + pAdd[2] - i2;
-        a3 := a3 + pAdd[3] - i3;
-        pOut[0] := UInt32(a0 * ww + (i0 + pFar[0]) * fw + (1 shl 23)) shr 24;
-        pOut[1] := UInt32(a1 * ww + (i1 + pFar[1]) * fw + (1 shl 23)) shr 24;
-        pOut[2] := UInt32(a2 * ww + (i2 + pFar[2]) * fw + (1 shl 23)) shr 24;
-        pOut[3] := UInt32(a3 * ww + (i3 + pFar[3]) * fw + (1 shl 23)) shr 24;
-        Inc(pAdd, 4);
-        Inc(pFar, 4);
-        Inc(pOut, 4);
-      end;
-
-      pOut := OutP + EdgeB * 4;
-      for X := EdgeB to EdgeA - 1 do
-      begin
-        a0 := a0 + l0 - i0;
-        a1 := a1 + l1 - i1;
-        a2 := a2 + l2 - i2;
-        a3 := a3 + l3 - i3;
-        pOut[0] := UInt32(a0 * ww + (i0 + l0) * fw + (1 shl 23)) shr 24;
-        pOut[1] := UInt32(a1 * ww + (i1 + l1) * fw + (1 shl 23)) shr 24;
-        pOut[2] := UInt32(a2 * ww + (i2 + l2) * fw + (1 shl 23)) shr 24;
-        pOut[3] := UInt32(a3 * ww + (i3 + l3) * fw + (1 shl 23)) shr 24;
-        Inc(pOut, 4);
-      end;
-
-      pSub := InP + (EdgeA - Rad - 1) * 4;
-      pOut := OutP + EdgeA * 4;
-      for X := EdgeA to LastX do
-      begin
-        s0 := pSub[0];
-        s1 := pSub[1];
-        s2 := pSub[2];
-        s3 := pSub[3];
-        a0 := a0 + l0 - s0;
-        a1 := a1 + l1 - s1;
-        a2 := a2 + l2 - s2;
-        a3 := a3 + l3 - s3;
-        pOut[0] := UInt32(a0 * ww + (s0 + l0) * fw + (1 shl 23)) shr 24;
-        pOut[1] := UInt32(a1 * ww + (s1 + l1) * fw + (1 shl 23)) shr 24;
-        pOut[2] := UInt32(a2 * ww + (s2 + l2) * fw + (1 shl 23)) shr 24;
-        pOut[3] := UInt32(a3 * ww + (s3 + l3) * fw + (1 shl 23)) shr 24;
-        Inc(pSub, 4);
-        Inc(pOut, 4);
-      end;
+      if (Entering < LastPixel) then
+        Inc(Entering, 4);
+      if (Outside < LastPixel) then
+        Inc(Outside, 4);
+      if (X > WindowRadius) then
+        Inc(Leaving, 4);
+      Inc(Dest, 4);
     end;
   end;
 
-  procedure HorizBoxBlur(Src, Dst: PColorBGRA; Width, Height, Rad: Integer; ww, fw: UInt32);
-  var
-    Y, EdgeA, EdgeB: Integer;
-    InRow, OutRow: PColorBGRA;
+  // LineBoxBlur down every row. The vertical pass is this again, on the transposed image.
+  procedure HorizBoxBlur(Source, Dest: PColorBGRA; Width, Height, WindowRadius: Integer; InsideWeight, OutsideWeight: UInt32);
   begin
-    EdgeA := Min(Rad + 1, Width);
-    EdgeB := Max(Width - Rad - 1, 0);
-    for Y := 0 to Height - 1 do
+    while (Height > 0) do
     begin
-      InRow := Src + Y * Width;
-      OutRow := Dst + Y * Width;
-      LineBoxBlur(PByte(OutRow), PByte(InRow), Width - 1, Rad, EdgeA, EdgeB, ww, fw);
+      LineBoxBlur(PByte(Dest), PByte(Source), Width - 1, WindowRadius, InsideWeight, OutsideWeight);
+
+      Inc(Source, Width);
+      Inc(Dest, Width);
+      Dec(Height);
     end;
   end;
 
-  // Cache-blocked (tiled) transpose, after TransposeComplexBlocked in simba.fftpack4.
-  procedure Transpose(Src, Dst: PColorBGRA; Width, Height: Integer);
+  // Cache-blocked (tiled) transpose
+  procedure Transpose(Source, Dest: PColorBGRA; Width, Height: Integer);
   const
-    B = 8;
+    BLOCK = 8;
   var
     X, Y, XEnd, YEnd: Integer;
-    SrcRow, DstCol, Cur, CurDest, SrcRowEnd, CurEnd: PColorBGRA;
+    SourceRow, SourceRowEnd, DestColumn, SourcePixel, SourcePixelEnd, DestPixel: PColorBGRA;
   begin
     Y := 0;
     while (Y < Height) do
     begin
-      YEnd := Y + B;
+      YEnd := Y + BLOCK;
       if (YEnd > Height) then
         YEnd := Height;
 
       X := 0;
       while (X < Width) do
       begin
-        XEnd := X + B;
+        XEnd := X + BLOCK;
         if (XEnd > Width) then
           XEnd := Width;
 
-        SrcRow := @Src[Y * Width + X];
-        SrcRowEnd := @Src[YEnd * Width + X];
-        DstCol := @Dst[X * Height + Y];
-        while (PtrUInt(SrcRow) < PtrUInt(SrcRowEnd)) do
+        SourceRow := @Source[Y * Width + X];
+        SourceRowEnd := @Source[YEnd * Width + X];
+        DestColumn := @Dest[X * Height + Y];
+        while (PtrUInt(SourceRow) < PtrUInt(SourceRowEnd)) do
         begin
-          Cur := SrcRow;
-          CurDest := DstCol;
-          CurEnd := @SrcRow[XEnd - X];
-          while (PtrUInt(Cur) < PtrUInt(CurEnd)) do
+          SourcePixel := SourceRow;
+          DestPixel := DestColumn;
+          SourcePixelEnd := @SourceRow[XEnd - X];
+          while (PtrUInt(SourcePixel) < PtrUInt(SourcePixelEnd)) do
           begin
-            CurDest^ := Cur^;
-            Inc(Cur);
-            Inc(CurDest, Height);
+            PUInt32(DestPixel)^ := PUInt32(SourcePixel)^ or $FF000000; // leave alpha alone
+            Inc(SourcePixel);
+            Inc(DestPixel, Height);
           end;
-          Inc(SrcRow, Width);
-          Inc(DstCol);
+          Inc(SourceRow, Width);
+          Inc(DestColumn);
         end;
 
-        X := X + B;
+        X := X + BLOCK;
       end;
 
-      Y := Y + B;
+      Y := Y + BLOCK;
     end;
   end;
 
 var
-  W, H, Rad: Integer;
-  ww, fw: UInt32;
+  Width, Height, WindowRadius: Integer;
+  InsideWeight, OutsideWeight: UInt32;
   Scratch: array of TColorBGRA;
 begin
   if (Radius < 0) then
@@ -471,450 +363,599 @@ begin
   if (Result.Width = 0) or (Result.Height = 0) then
     Exit;
 
-  W := Image.Width;
-  H := Image.Height;
-  Rad := Trunc(Radius);                         // integer part = window half-width
-  ww := Trunc((1 shl 24) / (2 * Radius + 1));   // float radius: fractional part handled by fw
-  fw := ((1 shl 24) - (2 * Rad + 1) * ww) div 2;
+  Width := Image.Width;
+  Height := Image.Height;
+  WindowRadius := Trunc(Radius);
+  InsideWeight := Trunc((1 shl 24) / (2 * Radius + 1));
+  OutsideWeight := ((1 shl 24) - (2 * WindowRadius + 1) * InsideWeight) div 2;
 
-  SetLength(Scratch, W * H);
-  HorizBoxBlur(Image.Data,   @Scratch[0], W, H, Rad, ww, fw); // horizontal
-  Transpose(@Scratch[0],     Result.Data, W, H);              // -> H x W
-  HorizBoxBlur(Result.Data,  @Scratch[0], H, W, Rad, ww, fw); // horizontal on transposed (= vertical)
-  Transpose(@Scratch[0],     Result.Data, H, W);              // -> W x H
+  SetLength(Scratch, Width * Height);
+  HorizBoxBlur(Image.Data,  @Scratch[0], Width, Height, WindowRadius, InsideWeight, OutsideWeight); // horizontal
+  Transpose(@Scratch[0],    Result.Data, Width, Height);                                            // -> Height x Width
+  HorizBoxBlur(Result.Data, @Scratch[0], Height, Width, WindowRadius, InsideWeight, OutsideWeight); // horizontal on transposed (= vertical)
+  Transpose(@Scratch[0],    Result.Data, Height, Width);                                            // -> Width x Height
 end;
 
 // 3-box approximation of a Gaussian blur (Ivan Kutski @ https://blog.ivank.net/fastest-gaussian-blur.html)
-procedure GaussBlurApprox(var Src, Dst: TByteArray; Width, Height: Integer; Radius: Single);
+procedure GaussBlurApprox(var Data: TByteArray; Width, Height: Integer; Sigma: Single);
 
-  procedure BlurRows(const Source: TByteArray; var Target: TByteArray; Width, Height, Radius: Integer);
+  // A row at a time, keeping the window's running sum. Where the window hangs off an end it repeats that
+  // end's value, which is why the row is walked in three parts.
+  procedure BlurRows(const Source: TByteArray; var Dest: TByteArray; Width, Height, Radius: Integer);
   var
-    Row, k, FirstVal, LastVal, Sum: Integer;
-    Recip: Integer;
-    RowStart, SubPtr, AddPtr, OutPtr: PByte;
+    Row, Offset, FirstValue, LastValue, Sum, Recip: Integer;
+    RowStart, Leaving, Entering, DestPtr, SegmentEnd: PByte;
   begin
     if (Radius > (Width - 1) div 2) then
       Radius := (Width - 1) div 2;
-    Recip := ((1 shl 22) + Radius) div (2 * Radius + 1); // Q22 reciprocal of the window size
+    if (Radius > 8224) then
+      Radius := 8224;
+    // each store below is (Sum + Size div 2) div Size, for a window Size of 2 * Radius + 1
+    Recip := ((1 shl 22) + Radius) div (2 * Radius + 1); // + Radius rounds it; 22 bits is all Int32 holds
 
     for Row := 0 to Height - 1 do
     begin
-      RowStart := @Source[Row * Width];
-      OutPtr   := @Target[Row * Width];
-      FirstVal := RowStart^;
-      LastVal  := (RowStart + Width - 1)^;
-      SubPtr   := RowStart;
-      AddPtr   := RowStart + Radius;
+      RowStart   := @Source[Row * Width];
+      DestPtr    := @Dest[Row * Width];
+      FirstValue := RowStart^;
+      LastValue  := (RowStart + Width - 1)^;
+      Leaving    := RowStart;
+      Entering   := RowStart + Radius;
 
-      Sum := (Radius + 1) * FirstVal;
-      for k := 0 to Radius - 1 do
-        Sum := Sum + (RowStart + k)^;
+      Sum := (Radius + 1) * FirstValue;
+      for Offset := 0 to Radius - 1 do
+        Sum := Sum + (RowStart + Offset)^;
 
-      for k := 0 to Radius do                         // left edge: window hangs off the start
+      SegmentEnd := DestPtr + (Radius + 1);              // left edge: window hangs off the start
+      while (DestPtr < SegmentEnd) do
       begin
-        Sum := Sum + AddPtr^ - FirstVal;
-        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
-        Inc(AddPtr); Inc(OutPtr);
+        Sum := Sum + Entering^ - FirstValue;
+        DestPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
+
+        Inc(Entering);
+        Inc(DestPtr);
       end;
-      for k := Radius + 1 to Width - Radius - 1 do     // window fully inside the row
+
+      SegmentEnd := DestPtr + (Width - 2 * Radius - 1);  // window fully inside the row
+      while (DestPtr < SegmentEnd) do
       begin
-        Sum := Sum + AddPtr^ - SubPtr^;
-        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
-        Inc(SubPtr); Inc(AddPtr); Inc(OutPtr);
+        Sum := Sum + Entering^ - Leaving^;
+        DestPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
+
+        Inc(Leaving);
+        Inc(Entering);
+        Inc(DestPtr);
       end;
-      for k := Width - Radius to Width - 1 do          // right edge: window hangs off the end
+
+      SegmentEnd := DestPtr + Radius;                    // right edge: window hangs off the end
+      while (DestPtr < SegmentEnd) do
       begin
-        Sum := Sum + LastVal - SubPtr^;
-        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
-        Inc(SubPtr); Inc(OutPtr);
+        Sum := Sum + LastValue - Leaving^;
+        DestPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
+
+        Inc(Leaving);
+        Inc(DestPtr);
       end;
     end;
   end;
 
-  procedure BlurCols(const Source: TByteArray; var Target: TByteArray; Width, Height, Radius: Integer);
+  // A row at a time, keeping every column's running sum
+  procedure BlurCols(const Source: TByteArray; var Dest: TByteArray; Width, Height, Radius: Integer);
   var
-    Col, k, FirstVal, LastVal, Sum: Integer;
-    Recip: Integer;
-    ColStart, SubPtr, AddPtr, OutPtr: PByte;
+    Sums: TIntegerArray;
+    Row, Offset, Recip: Integer;
+    SrcRow, EnteringRow, LeavingRow, DestRow: PByte;
+    Sum, SumEnd: PInteger;
   begin
     if (Radius > (Height - 1) div 2) then
       Radius := (Height - 1) div 2;
-    Recip := ((1 shl 22) + Radius) div (2 * Radius + 1); // Q22 reciprocal of the window size
+    if (Radius > 8224) then
+      Radius := 8224;
+    // each store below is (Sum + Size div 2) div Size, for a window Size of 2 * Radius + 1
+    Recip := ((1 shl 22) + Radius) div (2 * Radius + 1); // + Radius rounds it
 
-    for Col := 0 to Width - 1 do
+    SetLength(Sums, Width);
+    Sum := @Sums[0];
+    SumEnd := Sum + Width;
+
+    SrcRow := @Source[0];
+    while (Sum < SumEnd) do
     begin
-      ColStart := @Source[Col];
-      OutPtr   := @Target[Col];
-      FirstVal := ColStart^;
-      LastVal  := (ColStart + Width * (Height - 1))^;
-      SubPtr   := ColStart;
-      AddPtr   := ColStart + Radius * Width;
-
-      Sum := (Radius + 1) * FirstVal;
-      for k := 0 to Radius - 1 do
-        Sum := Sum + (ColStart + k * Width)^;
-
-      for k := 0 to Radius do
+      Sum^ := (Radius + 1) * SrcRow^;
+      Inc(Sum);
+      Inc(SrcRow);
+    end;
+    for Offset := 0 to Radius - 1 do
+    begin
+      Sum := @Sums[0];
+      SrcRow := @Source[Offset * Width];
+      while (Sum < SumEnd) do
       begin
-        Sum := Sum + AddPtr^ - FirstVal;
-        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
-        Inc(AddPtr, Width); Inc(OutPtr, Width);
+        Sum^ := Sum^ + SrcRow^;
+        Inc(Sum);
+        Inc(SrcRow);
       end;
-      for k := Radius + 1 to Height - Radius - 1 do
+    end;
+
+    for Row := 0 to Height - 1 do
+    begin
+      if (Row + Radius <= Height - 1) then
+        EnteringRow := @Source[(Row + Radius) * Width]
+      else
+        EnteringRow := @Source[(Height - 1) * Width];
+      if (Row <= Radius) then
+        LeavingRow := @Source[0]
+      else
+        LeavingRow := @Source[(Row - Radius - 1) * Width];
+      DestRow := @Dest[Row * Width];
+
+      Sum := @Sums[0];
+      while (Sum < SumEnd) do
       begin
-        Sum := Sum + AddPtr^ - SubPtr^;
-        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
-        Inc(SubPtr, Width); Inc(AddPtr, Width); Inc(OutPtr, Width);
-      end;
-      for k := Height - Radius to Height - 1 do
-      begin
-        Sum := Sum + LastVal - SubPtr^;
-        OutPtr^ := (Sum * Recip + (1 shl 21)) shr 22;
-        Inc(SubPtr, Width); Inc(OutPtr, Width);
+        Sum^ := Sum^ + EnteringRow^ - LeavingRow^;
+        DestRow^ := (Sum^ * Recip + (1 shl 21)) shr 22;
+
+        Inc(Sum);
+        Inc(EnteringRow);
+        Inc(LeavingRow);
+        Inc(DestRow);
       end;
     end;
   end;
 
-  procedure BoxBlur(var Buffer, Scratch: TByteArray; Width, Height, Radius: Integer);
-  begin
-    BlurRows(Buffer, Scratch, Width, Height, Radius);
-    BlurCols(Scratch, Buffer, Width, Height, Radius);
-  end;
-
-  // The three box-blur widths (odd) whose repetition approximates a Gaussian of the given sigma:
-  // the first LoCount boxes use width Lower, the rest use Lower + 2. Three boxes is the standard
-  // sweet spot -- already Gaussian to the eye, more passes barely change it. (Ivan Kutskir)
   function BoxesForGauss(Sigma: Double): TIntegerArray;
   var
-    Lower, LoCount, AllWide, PerBox: Integer;
-    Target: Double;
+    NarrowWidth, NarrowCount: Integer;
+    WideVariance, VariancePerBox: Int64;
+    WantedVariance: Double;
   begin
-    Lower := Floor(Sqrt(4 * Sigma * Sigma + 1)); // ideal box width for 3 boxes, forced odd
-    if (Lower mod 2 = 0) then
-      Dec(Lower);
+    NarrowWidth := Floor(Sqrt(4 * Sigma * Sigma + 1)); // ideal box width for 3 boxes, forced odd
+    if (NarrowWidth mod 2 = 0) then
+      Dec(NarrowWidth);
 
-    Target  := 12 * Sigma * Sigma;
-    AllWide := 3 * (Lower + 1) * (Lower + 3);
-    PerBox  := 4 * (Lower + 1);
-    LoCount := Round((AllWide - Target) / PerBox);
+    WantedVariance := 12 * Sigma * Sigma;
+    WideVariance   := Int64(3 * (NarrowWidth + 1) * (NarrowWidth + 3));
+    VariancePerBox := 4 * (NarrowWidth + 1);
+    NarrowCount    := Round((WideVariance - WantedVariance) / VariancePerBox);
 
     Result := [
-      IfThen(LoCount > 0, Lower, Lower + 2),
-      IfThen(LoCount > 1, Lower, Lower + 2),
-      IfThen(LoCount > 2, Lower, Lower + 2)
+      IfThen(NarrowCount > 0, NarrowWidth, NarrowWidth + 2),
+      IfThen(NarrowCount > 1, NarrowWidth, NarrowWidth + 2),
+      IfThen(NarrowCount > 2, NarrowWidth, NarrowWidth + 2)
     ];
   end;
 
 var
   Scratch: TByteArray;
   Boxes: TIntegerArray;
+  I: Integer;
 begin
   if (Width <= 0) or (Height <= 0) then
     Exit;
 
-  Move(Src[0], Dst[0], Width * Height); // work in Dst; Src stays as the untouched input
   SetLength(Scratch, Width * Height);
-  Boxes := BoxesForGauss(Radius);
+  if (Sigma > Max(Width, Height)) then
+    Sigma := Max(Width, Height);
+  Boxes := BoxesForGauss(Sigma);
 
-  BoxBlur(Dst, Scratch, Width, Height, (Boxes[0] - 1) div 2);
-  BoxBlur(Dst, Scratch, Width, Height, (Boxes[1] - 1) div 2);
-  BoxBlur(Dst, Scratch, Width, Height, (Boxes[2] - 1) div 2);
+  for I := 0 to 2 do
+  begin
+    BlurRows(Data, Scratch, Width, Height, (Boxes[I] - 1) div 2);
+    BlurCols(Scratch, Data, Width, Height, (Boxes[I] - 1) div 2);
+  end;
 end;
 
 function SimbaImage_BlurGauss(Image: TSimbaImage; Radius: Single): TSimbaImage;
 var
-  inR, inG, inB: TByteArray;
-  outR, outG, outB: TByteArray;
+  Blue, Green, Red: TByteArray;
 begin
-  Result := TSimbaImage.Create(Image.Width, Image.Height);
-  if (Result.Width = 0) or (Result.Height = 0) then
-    Exit;
-
-  Image.SplitChannels(inB, inG, inR);
-
-  SetLength(outR, Length(inR));
-  SetLength(outG, Length(inG));
-  SetLength(outB, Length(inB));
-
-  GaussBlurApprox(inR, outR, Image.Width, Image.Height, radius);
-  GaussBlurApprox(inG, outG, Image.Width, Image.Height, radius);
-  GaussBlurApprox(inB, outB, Image.Width, Image.Height, radius);
-
-  Result.FromChannels(outB, outG, outR, Result.Width, Result.Height);
-end;
-
-// https://github.com/galfar/imaginglib/blob/master/Extensions/ImagingBinary.pas#L79
-function SimbaImage_Threshold(Image: TSimbaImage; Invert: Boolean; C: Integer): TSimbaImage;
-var
-  Histogram: array[Byte] of Single;
-  Level, Max, Min, I, J, NumPixels: Integer;
-  Mean, Variance: Single;
-  Mu, Omega, LevelMean, LargestMu: Single;
-  Ptr, Upper: PColorBGRA;
-begin
-  Result := Image.GreyScale();
-  if not Result.DataRange(Ptr, Upper) then
-    Exit;
-
-  FillByte(Histogram, SizeOf(Histogram), 0);
-  Min := 255;
-  Max := 0;
-  Level := 0;
-  NumPixels := Result.Width * Result.Height;
-
-  // Compute histogram and determine min and max pixel values
-  while (Ptr <= Upper) do
-  begin
-    Histogram[Ptr^.R] := Histogram[Ptr^.R] + 1.0;
-    if (Ptr^.R < Min) then
-      Min := Ptr^.R;
-    if (Ptr^.R > Max) then
-      Max := Ptr^.R;
-    Inc(Ptr);
-  end;
-
-  // Normalize histogram
-  for I := 0 to 255 do
-    Histogram[I] := Histogram[I] / NumPixels;
-
-  // Compute image mean and variance
-  Mean := 0.0;
-  Variance := 0.0;
-  for I := 0 to 255 do
-    Mean := Mean + (I + 1) * Histogram[I];
-  for I := 0 to 255 do
-    Variance := Variance + Sqr(I + 1 - Mean) * Histogram[I];
-
-  // Now finally compute threshold level
-  LargestMu := 0;
-
-  for I := 0 to 255 do
-  begin
-    Omega := 0.0;
-    LevelMean := 0.0;
-
-    for J := 0 to I - 1 do
-    begin
-      Omega := Omega + Histogram[J];
-      LevelMean := LevelMean + (J + 1) * Histogram[J];
-    end;
-
-    Mu := Sqr(Mean * Omega - LevelMean);
-    Omega := Omega * (1.0 - Omega);
-
-    if Omega > 0.0 then
-      Mu := Mu / Omega
-    else
-      Mu := 0;
-
-    if Mu > LargestMu then
-    begin
-      LargestMu := Mu;
-      Level := I;
-    end;
-  end;
-
-  Level := Level - C;
-
-  // Do thresholding using computed level
-  Ptr := Result.Data;
-  while (Ptr <= Upper) do
-  begin
-    if (Invert and (Ptr^.R <= Level)) or ((not Invert) and (Ptr^.R >= Level)) then
-      Ptr^.AsInteger := $FFFFFFFF
-    else
-      Ptr^.AsInteger := $FF000000;
-
-    Inc(Ptr);
-  end;
-end;
-
-function SimbaImage_ThresholdAdaptive(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Integer): TSimbaImage;
-var
-  Mat: TByteMatrix;
-  Integral: TSimbaIntegralImageF;
-  X, Y, W, H, Left, Right, Top, Bottom, Count: Integer;
-  Threshold: Double;
-begin
-  if (Radius <= 1) or (not Odd(Radius)) then
-    SimbaException('ThresholdAdaptive: Radius(%d) must be odd and not negative (1,3,5 etc).', [Radius]);
-  Radius := Radius div 2;
+  if (Radius < 0) then
+    SimbaException('Blur radius must be >= 0');
 
   Result := TSimbaImage.Create(Image.Width, Image.Height);
   if (Result.Width = 0) or (Result.Height = 0) then
     Exit;
 
-  Mat := Image.ToGreyMatrix();
-  Integral := TSimbaIntegralImageF.Create(Mat);
+  Image.ToChannels(Blue, Green, Red);
 
-  W := Image.Width - 1;
-  H := Image.Height - 1;
-  for Y := 0 to H do
-    for X := 0 to W do
-    begin
-      Left   := Max(X-Radius, 0);
-      Right  := Min(X+Radius, W);
-      Top    := Max(Y-Radius, 0);
-      Bottom := Min(Y+Radius, H);
+  GaussBlurApprox(Red, Image.Width, Image.Height, Radius);
+  GaussBlurApprox(Green, Image.Width, Image.Height, Radius);
+  GaussBlurApprox(Blue, Image.Width, Image.Height, Radius);
 
-      Count := (Bottom - Top + 1) * (Right - Left + 1);
-      Threshold := (Integral.Query(Left, Top, Right, Bottom) / Count) - C;
-
-      if (Invert and (Mat[Y, X] <= Threshold)) or ((not Invert) and (Mat[Y, X] >= Threshold)) then
-        Result.Data[Y * Image.Width + X].AsInteger := $FFFFFFFF;
-    end;
+  Result.FromChannels(Blue, Green, Red, Result.Width, Result.Height);
 end;
 
-{
-  Sauvola binarization computes a local threshold based on
-  the local average and square average.  It takes two constants:
-  the window size for the measurment at each pixel and a
-  parameter that determines the amount of normalized local
-  standard deviation to subtract from the local average value.
+type
+  // a column's window: its left and right columns in the integral image, and its width
+  TThresholdColumn = record
+    Left, Right: Integer;
+    Width: Double;
+  end;
 
-  Invert = Invert output
-  Radius = Window size (default = 25)
-  C      = Constant value (default = 0.2). Typical values are between 0.2 and 0.5.
-}
-function SimbaImage_ThresholdAdaptiveSauvola(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Single): TSimbaImage;
+function SimbaImage_ThresholdMean(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Single): TSimbaImage;
 var
-  Mat: TByteMatrix;
-  Integral: TSimbaIntegralImageF;
-  X, Y, W, H: Integer;
-  Left, Right, Top, Bottom: Integer;
-  Count: Integer;
-  Sum, SumSquares: Double;
-  Mean, Stdev, Threshold: Double;
+  Width, Height, Stride, X, Y, Top, Bottom: Integer;
+  Src, Dest, DestEnd: PColorBGRA;
+  Sums: TDoubleArray;
+  SumRow, SumTop, SumBottom, SmoothTop, SmoothBottom: PDouble;
+  Columns, SmoothColumns: array of TThresholdColumn;
+  Column, SmoothColumn: ^TThresholdColumn;
+  RowSum, WindowRows, SmoothRows, Threshold, Smoothed: Double;
 begin
-  if (Radius <= 1) or (not Odd(Radius)) then
-    SimbaException('ThresholdAdaptive: Radius(%d) must be odd and not negative (1,3,5 etc).', [Radius]);
-  Radius := Radius div 2;
+  if (Radius < 1) then
+    SimbaException('TImage.Threshold: Radius(%d) must be at least 1', [Radius]);
 
   Result := TSimbaImage.Create(Image.Width, Image.Height);
   if (Result.Width = 0) or (Result.Height = 0) then
     Exit;
 
-  Mat := Image.ToGreyMatrix();
-  Mat.GetSize(W, H);
+  Width := Image.Width;
+  Height := Image.Height;
+  Stride := Width + 1;
+  Radius := Min(Radius, Max(Width, Height));
 
-  Dec(W);
-  Dec(H);
-
-  Integral := TSimbaIntegralImageF.Create(Mat);
-
-  for Y := 0 to H do
-    for X := 0 to W do
-    begin
-      Left   := Max(X-Radius, 0);
-      Right  := Min(X+Radius, W);
-      Top    := Max(Y-Radius, 0);
-      Bottom := Min(Y+Radius, H);
-      Count := (Bottom - Top + 1) * (Right - Left + 1);
-
-      //Sum := 0;
-      //SumSquares := 0;
-      //
-      //for y := top to bottom do
-      //  for x := left to right do
-      //  begin
-      //    Sum += mat[y,x];
-      //    SumSquares += mat[y,x]*mat[y,x];
-      //  end;
-
-      Integral.Query(Left, Top, Right, Bottom, Sum, SumSquares);
-      Mean := Sum / Count;
-      Stdev := Sqrt((SumSquares / Count) - Sqr(Mean));
-      Threshold := Mean * (1.0 + C * ((Stdev / 128.0) - 1.0));
-
-      if (Invert and (Mat[Y, X] <= Threshold)) or ((not Invert) and (Mat[Y, X] >= Threshold)) then
-        Result.Data[Y * Image.Width + X].AsInteger := $FFFFFFFF;
-    end;
-end;
-
-procedure SimbaImage_ReplaceColor(Image: TSimbaImage; OldColor, NewColor: TColor; Tol: Single);
-var
-  Old, New: TColorBGRA;
-  Ptr, Upper: PColorBGRA;
-begin
-  if not Image.DataRange(Ptr, Upper) then
-    Exit;
-
-  Old := OldColor.ToBGRA();
-  New := NewColor.ToBGRA(ALPHA_OPAQUE);
-  while (Ptr <= Upper) do
+  SetLength(Sums, Stride * (Height + 1));
+  for Y := 0 to Height - 1 do
   begin
-    if SimilarRGB(Old, Ptr^, Tol) then
-      Ptr^ := New;
-    Inc(Ptr);
+    Src := Image.PixelPtr[0, Y];
+    SumRow := @Sums[(Y + 1) * Stride + 1];
+    RowSum := 0;
+    for X := 0 to Width - 1 do
+    begin
+      RowSum := RowSum + PixelToGrey(Src[X]);
+      SumRow[X] := SumRow[X - Stride] + RowSum;
+    end;
+  end;
+
+  // every column's window edges and width, the same for every row
+  SetLength(Columns, Width);
+  SetLength(SmoothColumns, Width);
+  for X := 0 to Width - 1 do
+  begin
+    Columns[X].Left := Max(X - Radius, 0);
+    Columns[X].Right := Min(X + Radius, Width - 1) + 1;
+    Columns[X].Width := Columns[X].Right - Columns[X].Left;
+    SmoothColumns[X].Left := Max(X - 1, 0);
+    SmoothColumns[X].Right := Min(X + 1, Width - 1) + 1;
+    SmoothColumns[X].Width := SmoothColumns[X].Right - SmoothColumns[X].Left;
+  end;
+
+  for Y := 0 to Height - 1 do
+  begin
+    Top := Max(Y - Radius, 0);
+    Bottom := Min(Y + Radius, Height - 1) + 1;
+    WindowRows := Bottom - Top;
+    SumTop := @Sums[Top * Stride];
+    SumBottom := @Sums[Bottom * Stride];
+
+    // the pixel's own 3x3 rows
+    Top := Max(Y - 1, 0);
+    Bottom := Min(Y + 1, Height - 1) + 1;
+    SmoothRows := Bottom - Top;
+    SmoothTop := @Sums[Top * Stride];
+    SmoothBottom := @Sums[Bottom * Stride];
+
+    Dest := Result.PixelPtr[0, Y];
+    DestEnd := Dest + Width;
+    Column := @Columns[0];
+    SmoothColumn := @SmoothColumns[0];
+    while (Dest < DestEnd) do
+    begin
+      Threshold := (SumBottom[Column^.Right] - SumTop[Column^.Right] - SumBottom[Column^.Left] + SumTop[Column^.Left]) / (WindowRows * Column^.Width) - C;
+      Smoothed := (SmoothBottom[SmoothColumn^.Right] - SmoothTop[SmoothColumn^.Right] - SmoothBottom[SmoothColumn^.Left] + SmoothTop[SmoothColumn^.Left]) / (SmoothRows * SmoothColumn^.Width);
+
+      if Invert then
+        Dest^.AsInteger := BINARY_COLORS[Smoothed <= Threshold]
+      else
+        Dest^.AsInteger := BINARY_COLORS[Smoothed >= Threshold];
+
+      Inc(Dest);
+      Inc(Column);
+      Inc(SmoothColumn);
+    end;
   end;
 end;
 
-procedure SimbaImage_ReplaceColorBinary(Image: TSimbaImage; Invert: Boolean; Color: TColor; Tol: Single);
-const
-  BLACK: TColorBGRA = (B:0; G:0; R:0; A: ALPHA_OPAQUE);
-  WHITE: TColorBGRA = (B:255; G:255; R:255; A: ALPHA_OPAQUE);
+// Wolf-Jolion: mean - K * (1 - deviation / the image's largest deviation) * (mean - the darkest grey)
+function SimbaImage_ThresholdWolf(Image: TSimbaImage; Invert: Boolean; Radius: Integer; K: Single): TSimbaImage;
 var
-  Col: TColorBGRA;
-  Ptr, Upper: PColorBGRA;
-  Hit, Miss: TColorBGRA;
+  Width, Height, Stride, X, Y, Top, Bottom: Integer;
+  MinGrey: Byte;
+  Src, Dest, DestEnd: PColorBGRA;
+  Grey: TByteArray;
+  GreyRow: PByte;
+  Sums, SqrSums: TDoubleArray;
+  SumRow, SqrSumRow, SumTop, SumBottom, SqrSumTop, SqrSumBottom: PDouble;
+  Columns: array of TThresholdColumn;
+  Column, ColumnEnd: ^TThresholdColumn;
+  RowSum, SqrRowSum, WindowRows, WindowPixels, Mean, Variance, Deviation, MaxVariance, InvMaxDeviation, Threshold: Double;
 begin
-  if not Image.DataRange(Ptr, Upper) then
+  if (Radius < 1) then
+    SimbaException('TImage.Threshold: Radius(%d) must be at least 1', [Radius]);
+
+  Result := TSimbaImage.Create(Image.Width, Image.Height);
+  if (Result.Width = 0) or (Result.Height = 0) then
     Exit;
 
-  Hit := WHITE;
-  Miss := BLACK;
+  Width := Image.Width;
+  Height := Image.Height;
+  Stride := Width + 1;
+  Radius := Min(Radius, Max(Width, Height));
+
+  SetLength(Grey, Width * Height);
+  SetLength(Sums, Stride * (Height + 1));
+  SetLength(SqrSums, Stride * (Height + 1));
+  MinGrey := 255;
+  for Y := 0 to Height - 1 do
+  begin
+    Src := Image.PixelPtr[0, Y];
+    GreyRow := @Grey[Y * Width];
+    SumRow := @Sums[(Y + 1) * Stride + 1];
+    SqrSumRow := @SqrSums[(Y + 1) * Stride + 1];
+    RowSum := 0;
+    SqrRowSum := 0;
+    for X := 0 to Width - 1 do
+    begin
+      GreyRow[X] := PixelToGrey(Src[X]);
+      MinGrey := Min(MinGrey, GreyRow[X]);
+      RowSum := RowSum + GreyRow[X];
+      SqrRowSum := SqrRowSum + Sqr(Int32(GreyRow[X]));
+      SumRow[X] := SumRow[X - Stride] + RowSum;
+      SqrSumRow[X] := SqrSumRow[X - Stride] + SqrRowSum;
+    end;
+  end;
+
+  SetLength(Columns, Width);
+  for X := 0 to Width - 1 do
+  begin
+    Columns[X].Left := Max(X - Radius, 0);
+    Columns[X].Right := Min(X + Radius, Width - 1) + 1;
+    Columns[X].Width := Columns[X].Right - Columns[X].Left;
+  end;
+
+  // the threshold scales by the largest window deviation in the image, so measure that first
+  MaxVariance := 0;
+  for Y := 0 to Height - 1 do
+  begin
+    Top := Max(Y - Radius, 0);
+    Bottom := Min(Y + Radius, Height - 1) + 1;
+    WindowRows := Bottom - Top;
+    SumTop := @Sums[Top * Stride];
+    SumBottom := @Sums[Bottom * Stride];
+    SqrSumTop := @SqrSums[Top * Stride];
+    SqrSumBottom := @SqrSums[Bottom * Stride];
+
+    Column := @Columns[0];
+    ColumnEnd := Column + Width;
+    while (Column < ColumnEnd) do
+    begin
+      WindowPixels := WindowRows * Column^.Width;
+      Mean := (SumBottom[Column^.Right] - SumTop[Column^.Right] - SumBottom[Column^.Left] + SumTop[Column^.Left]) / WindowPixels;
+      Variance := (SqrSumBottom[Column^.Right] - SqrSumTop[Column^.Right] - SqrSumBottom[Column^.Left] + SqrSumTop[Column^.Left])
+                  / WindowPixels - Sqr(Mean);
+      MaxVariance := Max(MaxVariance, Variance);
+
+      Inc(Column);
+    end;
+  end;
+  InvMaxDeviation := 0;
+  if (MaxVariance > 0) then
+    InvMaxDeviation := 1 / Sqrt(MaxVariance);
+
+  for Y := 0 to Height - 1 do
+  begin
+    Top := Max(Y - Radius, 0);
+    Bottom := Min(Y + Radius, Height - 1) + 1;
+    WindowRows := Bottom - Top;
+    SumTop := @Sums[Top * Stride];
+    SumBottom := @Sums[Bottom * Stride];
+    SqrSumTop := @SqrSums[Top * Stride];
+    SqrSumBottom := @SqrSums[Bottom * Stride];
+
+    Dest := Result.PixelPtr[0, Y];
+    DestEnd := Dest + Width;
+    GreyRow := @Grey[Y * Width];
+    Column := @Columns[0];
+    while (Dest < DestEnd) do
+    begin
+      WindowPixels := WindowRows * Column^.Width;
+      Mean := (SumBottom[Column^.Right] - SumTop[Column^.Right] - SumBottom[Column^.Left] + SumTop[Column^.Left]) / WindowPixels;
+      Variance := (SqrSumBottom[Column^.Right] - SqrSumTop[Column^.Right] - SqrSumBottom[Column^.Left] + SqrSumTop[Column^.Left])
+                  / WindowPixels - Sqr(Mean);
+      if (Variance > 0) then
+        Deviation := Sqrt(Variance)
+      else
+        Deviation := 0;
+      Threshold := Mean - K * (1 - Deviation * InvMaxDeviation) * (Mean - MinGrey);
+
+      if Invert then
+        Dest^.AsInteger := BINARY_COLORS[GreyRow^ <= Threshold]
+      else
+        Dest^.AsInteger := BINARY_COLORS[GreyRow^ >= Threshold];
+
+      Inc(Dest);
+      Inc(GreyRow);
+      Inc(Column);
+    end;
+  end;
+end;
+
+// The threshold is the Gaussian blur of the grey values minus C
+function SimbaImage_ThresholdGaussian(Image: TSimbaImage; Invert: Boolean; Radius: Integer; C: Single): TSimbaImage;
+var
+  MinDifference: Integer;
+  Src, Upper, Dest: PColorBGRA;
+  Grey, Blurred: TByteArray;
+  GreyPtr, GreyEnd, BlurPtr: PByte;
+begin
+  if (Radius < 1) then
+    SimbaException('TImage.Threshold: Radius(%d) must be at least 1', [Radius]);
+
+  Result := TSimbaImage.Create(Image.Width, Image.Height);
+  if not Image.DataRange(Src, Upper) then
+    Exit;
+
+  SetLength(Grey, Image.PixelCount);
+  GreyData(Image.Data, @Grey[0], Length(Grey));
+
+  Blurred := Copy(Grey);
+  GaussBlurApprox(Blurred, Image.Width, Image.Height, 0.3 * Radius + 0.5); // OpenCV's sigma for a (2 * Radius + 1) window
+
   if Invert then
-    Swap(Hit, Miss);
+    MinDifference := Floor(EnsureRange(-C, -256, 256)) + 1
+  else
+    MinDifference := Ceil(EnsureRange(-C, -256, 256));
 
-  Col := Color.ToBGRA();
+  Dest := Result.Data;
+  GreyPtr := @Grey[0];
+  GreyEnd := GreyPtr + Length(Grey);
+  BlurPtr := @Blurred[0];
+  while (GreyPtr < GreyEnd) do
+  begin
+    Dest^.AsInteger := BINARY_COLORS[(Integer(GreyPtr^) - BlurPtr^ >= MinDifference) xor Invert];
+
+    Inc(GreyPtr);
+    Inc(BlurPtr);
+    Inc(Dest);
+  end;
+end;
+
+procedure SimbaImage_ReplaceColor(Image: TSimbaImage; OldColor, NewColor: TColor; Tolerance: Single);
+var
+  OldBGRA: TColorBGRA;
+  NewRGB: UInt32;
+  Ptr, Upper: PColorBGRA;
+begin
+  if not Image.DataRange(Ptr, Upper) then
+    Exit;
+
+  OldBGRA := OldColor.ToBGRA();
+  NewRGB := NewColor.ToBGRA().AsInteger and $00FFFFFF;
   while (Ptr <= Upper) do
   begin
-    if SimilarRGB(Col, Ptr^, Tol) then
-      Ptr^ := Hit
-    else
-      Ptr^ := Miss;
+    if SimilarRGB(OldBGRA, Ptr^, Tolerance) then
+      Ptr^.AsInteger := NewRGB or (Ptr^.AsInteger and $FF000000);
 
     Inc(Ptr);
   end;
 end;
 
-procedure SimbaImage_ReplaceColorBinary(Image: TSimbaImage; Invert: Boolean; Colors: TColorArray; Tol: Single);
-const
-  BLACK: TColorBGRA = (B:0; G:0; R:0; A: ALPHA_OPAQUE);
-  WHITE: TColorBGRA = (B:255; G:255; R:255; A: ALPHA_OPAQUE);
-var
-  Cols: array of TColorBGRA;
-  I: Integer;
-  Ptr, Upper: PColorBGRA;
-  Hit, Miss: TColorBGRA;
+procedure SimbaImage_ReplaceColorBinary(Image: TSimbaImage; Invert: Boolean; Colors: TColorArray; Tolerance: Single);
 label
   Next;
+var
+  SearchColors: array of TColorBGRA;
+  I: Integer;
+  Ptr, Upper: PColorBGRA;
+  Hit, Miss: UInt32;
 begin
   if not Image.DataRange(Ptr, Upper) then
     Exit;
 
-  Hit := WHITE;
-  Miss := BLACK;
-  if Invert then
-    Swap(Hit, Miss);
+  Hit := BINARY_COLORS[not Invert] and $00FFFFFF; // mask out alpha changes
+  Miss := BINARY_COLORS[Invert] and $00FFFFFF;
 
-  SetLength(Cols, Length(Colors));
+  SetLength(SearchColors, Length(Colors));
   for I := 0 to High(Colors) do
-    Cols[I] := Colors[I].ToBGRA();
+    SearchColors[I] := Colors[I].ToBGRA();
 
   while (Ptr <= Upper) do
   begin
-    for I := 0 to High(Cols) do
-      if SimilarRGB(Cols[I], Ptr^, Tol) then
+    for I := 0 to High(SearchColors) do
+      if SimilarRGB(SearchColors[I], Ptr^, Tolerance) then
       begin
-        Ptr^ := Hit;
+        Ptr^.AsInteger := Hit or (Ptr^.AsInteger and $FF000000);
         goto Next;
       end;
-    Ptr^ := Miss;
+    Ptr^.AsInteger := Miss or (Ptr^.AsInteger and $FF000000);
     Next:
-
     Inc(Ptr);
   end;
+end;
+
+function SimbaImage_BlendFromSurrounding(Image: TSimbaImage; const Points: TPointArray; Radius: Integer; const IgnorePoints: TPointArray): TSimbaImage;
+var
+  P: TPoint;
+  Cols, Rows, Count, Width, Height, MaskWidth, WindowWidth: Integer;
+  ImageBox, Window, MaskBox: TBox;
+  SumR, SumG, SumB: UInt64;
+  Skip: TBooleanArray;
+  SrcData, SrcPtr: PColorBGRA;
+  SkipPtr: PBoolean;
+begin
+  Result := Image.Copy();
+  Result.Canvas.FillWithAlpha(ALPHA_OPAQUE);
+
+  Width := Image.Width;
+  Height := Image.Height;
+  SrcData := Image.Data;
+  if (Length(Points) = 0) or (Width < 1) or (Height < 1) then
+    Exit;
+  Radius := Min(Max(Radius, 0), Max(Width, Height));
+
+  ImageBox := TBox.Create(0, 0, Width - 1, Height - 1);
+  MaskBox := Points.Bounds;
+  if (MaskBox.X2 < 0) or (MaskBox.Y2 < 0) or (MaskBox.X1 >= Width) or (MaskBox.Y1 >= Height) then
+    Exit;
+
+  MaskBox := MaskBox.Clip(ImageBox).Expand(Radius, ImageBox);
+  MaskWidth := MaskBox.Width;
+  SetLength(Skip, Int64(MaskWidth * MaskBox.Height));
+  for P in IgnorePoints do
+    if MaskBox.Contains(P) then
+      Skip[(P.Y - MaskBox.Y1) * MaskWidth + (P.X - MaskBox.X1)] := True;
+  for P in Points do
+    if MaskBox.Contains(P) then
+      Skip[(P.Y - MaskBox.Y1) * MaskWidth + (P.X - MaskBox.X1)] := True;
+
+  for P in Points do
+    if ImageBox.Contains(P) then
+    begin
+      Window.X1 := Max(P.X - Radius, 0);
+      Window.Y1 := Max(P.Y - Radius, 0);
+      Window.X2 := Min(P.X + Radius, Width - 1);
+      Window.Y2 := Min(P.Y + Radius, Height - 1);
+
+      Count := 0;
+      SumR := 0;
+      SumG := 0;
+      SumB := 0;
+
+      WindowWidth := Window.Width;
+      SrcPtr := @SrcData[Int64(Window.Y1 * Width + Window.X1)];
+      SkipPtr := @Skip[Int64((Window.Y1 - MaskBox.Y1) * MaskWidth + (Window.X1 - MaskBox.X1))];
+      Rows := Window.Height;
+      while (Rows > 0) do
+      begin
+        Cols := WindowWidth;
+        while (Cols > 0) do
+        begin
+          if not SkipPtr^ then
+          begin
+            Inc(SumR, SrcPtr^.R);
+            Inc(SumG, SrcPtr^.G);
+            Inc(SumB, SrcPtr^.B);
+            Inc(Count);
+          end;
+
+          Inc(SkipPtr);
+          Inc(SrcPtr);
+          Dec(Cols);
+        end;
+
+        Inc(SrcPtr, Width - WindowWidth);
+        Inc(SkipPtr, MaskWidth - WindowWidth);
+        Dec(Rows);
+      end;
+
+      if (Count > 0) then
+        with Result.Data[P.Y * Width + P.X] do
+        begin
+          R := (SumR + Count div 2) div Count;
+          G := (SumG + Count div 2) div Count;
+          B := (SumB + Count div 2) div Count;
+        end;
+    end;
 end;
 
 end.
