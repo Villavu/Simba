@@ -161,6 +161,7 @@ uses
   simba.form_scripttabs,
   simba.env,
   simba.threading,
+  simba.ipc_process,
   simba.ide_scriptcommunication,
   simba.ide_editor_popupmenu,
   simba.dialog,
@@ -234,7 +235,6 @@ begin
 
   FStartTime := GetTickCount64();
 
-  FProcess.Parameters.Add('--simbacommunication=%s', [TSimbaScriptInstanceCommunication.Create(Self).ClientID]);
   if SimbaSettings.Compiler.ShowHints.Value then
     FProcess.Parameters.Add('--hints');
 
@@ -307,7 +307,7 @@ begin
   FOutputBox := SimbaController.FindOutputListForTab(FTab.UID);
   FState := ESimbaScriptState.RUNNING;
 
-  FProcess := TProcess.Create(Self);
+  FProcess := TSimbaIPCProcess.Create(Self, TSimbaScriptInstanceCommunication);
   FProcess.PipeBufferSize := 16 * 1024;
   FProcess.CurrentDirectory := Application.Location;
   FProcess.Options := FProcess.Options + [poUsePipes, poStderrToOutPut, poDetached];
