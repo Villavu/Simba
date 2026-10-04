@@ -11,12 +11,14 @@ interface
 
 uses
   classes, sysutils,
-  simba.base, simba.image, simba.process, simba.ide_ipc;
+  simba.base, simba.image, simba.process, simba.ipc;
 
 type
-  TSimbaScriptCommunication = class(TSimbaIPCClient)
+  TSimbaScriptCommunication = class(TSimbaIPCConnection)
+  protected
+    procedure HandleIncoming; override;
   public
-    function GetScript(out Name: String): String;
+    function GetScript(out Title: String): String;
 
     function GetSimbaTargetWindow: TWindowHandle;
     function GetSimbaTargetPID: TProcessID;
@@ -43,233 +45,193 @@ implementation
 uses
   simba.vartype_matrix;
 
-function TSimbaScriptCommunication.GetScript(out Name: String): String;
+// Simba sends the script nothing
+procedure TSimbaScriptCommunication.HandleIncoming;
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.SCRIPT));
+  raise Exception.Create('Unknown message');
+end;
 
+function TSimbaScriptCommunication.GetScript(out Title: String): String;
+begin
+  Outgoing.BeginMessage('GetScript', 0);
   try
-    Invoke();
+    Outgoing.Send();
 
-    Name := FResult.ReadAnsiString();
-    Result := FResult.ReadAnsiString();
+    Outgoing.ReadString(Title);
+    Outgoing.ReadString(Result);
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 function TSimbaScriptCommunication.GetSimbaTargetWindow: TWindowHandle;
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW));
-
+  Outgoing.BeginMessage('GetSimbaTargetWindow', 0);
   try
-    Invoke();
+    Outgoing.Send();
 
-    FResult.Read(Result, SizeOf(TWindowHandle));
+    Outgoing.ReadData(Result, SizeOf(TWindowHandle));
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 function TSimbaScriptCommunication.GetSimbaTargetPID: TProcessID;
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_TARGET_PID));
-
+  Outgoing.BeginMessage('GetSimbaTargetPID', 0);
   try
-    Invoke();
+    Outgoing.Send();
 
-    FResult.Read(Result, SizeOf(TProcessID));
+    Outgoing.ReadData(Result, SizeOf(TProcessID));
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 function TSimbaScriptCommunication.GetSimbaPID: TProcessID;
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_PID));
-
+  Outgoing.BeginMessage('GetSimbaPID', 0);
   try
-    Invoke();
+    Outgoing.Send();
 
-    FResult.Read(Result, SizeOf(TProcessID));
+    Outgoing.ReadData(Result, SizeOf(TProcessID));
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 procedure TSimbaScriptCommunication.ScriptError(Message: String; Line, Column: Integer; FileName: String);
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.SCRIPT_ERROR));
-
+  Outgoing.BeginMessage('ScriptError', SizeOf(Int32) + Length(Message) + SizeOf(Int32) + Length(FileName) + 2 * SizeOf(Int32));
   try
-    FParams.WriteAnsiString(Message);
-    FParams.WriteAnsiString(FileName);
-    FParams.Write(Line, SizeOf(Integer));
-    FParams.Write(Column, SizeOf(Integer));
-
-    Invoke();
+    Outgoing.WriteString(Message);
+    Outgoing.WriteString(FileName);
+    Outgoing.WriteInteger(Line);
+    Outgoing.WriteInteger(Column);
+    Outgoing.Send();
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 procedure TSimbaScriptCommunication.ScriptStateChanged(State: ESimbaScriptState);
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE));
-
+  Outgoing.BeginMessage('ScriptStateChanged', SizeOf(ESimbaScriptState));
   try
-    FParams.Write(State, SizeOf(ESimbaScriptState));
-
-    Invoke();
+    Outgoing.WriteData(State, SizeOf(ESimbaScriptState));
+    Outgoing.Send();
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 procedure TSimbaScriptCommunication.ShowTrayNotification(Title, Message: String; Timeout: Integer);
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.TRAY_NOTIFICATION));
-
+  Outgoing.BeginMessage('ShowTrayNotification', SizeOf(Int32) + Length(Title) + SizeOf(Int32) + Length(Message) + SizeOf(Int32));
   try
-    FParams.WriteAnsiString(Title);
-    FParams.WriteAnsiString(Message);
-    FParams.Write(Timeout, SizeOf(Integer));
-
-    Invoke();
+    Outgoing.WriteString(Title);
+    Outgoing.WriteString(Message);
+    Outgoing.WriteInteger(Timeout);
+    Outgoing.Send();
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 procedure TSimbaScriptCommunication.SetSimbaTitle(S: String);
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.SIMBA_TITLE));
-
+  Outgoing.BeginMessage('SetSimbaTitle', SizeOf(Int32) + Length(S));
   try
-    FParams.WriteAnsiString(S);
-
-    Invoke();
+    Outgoing.WriteString(S);
+    Outgoing.Send();
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 procedure TSimbaScriptCommunication.DebugImage_SetMaxSize(Width, Height: Integer);
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE));
-
+  Outgoing.BeginMessage('DebugImage_SetMaxSize', 2 * SizeOf(Int32));
   try
-    FParams.Write(Width, SizeOf(Integer));
-    FParams.Write(Height, SizeOf(Integer));
-
-    Invoke();
+    Outgoing.WriteInteger(Width);
+    Outgoing.WriteInteger(Height);
+    Outgoing.Send();
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 procedure TSimbaScriptCommunication.DebugImage_Update(Image: TSimbaImage; Resize, EnsureVisible: Boolean);
-var
-  Header: TSimbaIPCHeader;
 begin
   if (Image = nil) or (Image.Width = 0) or (Image.Height = 0) then
     Exit;
 
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE));
+  Outgoing.BeginMessage('DebugImage_Update', 2 * SizeOf(Int32) + 2 * SizeOf(Boolean) + Int64(Image.Width) * Image.Height * SizeOf(TColorBGRA));
   try
-    Header.Size      := 0;
-    Header.MessageID := FMessageID;
-
-    FOutputStream.Write(Header, SizeOf(TSimbaIPCHeader));
-    FOutputStream.Write(Image.Width, SizeOf(Integer));
-    FOutputStream.Write(Image.Height, SizeOf(Integer));
-    FOutputStream.Write(Resize, SizeOf(Boolean));
-    FOutputStream.Write(EnsureVisible, SizeOf(Boolean));
-    FOutputStream.Write(Image.Data^, (Image.Width * Image.Height) * SizeOf(TColorBGRA));
-
-    // Read result
-    FInputStream.Read(Header, SizeOf(TSimbaIPCHeader));
-    if (Header.Size > 0) then
-    begin
-      FResult.CopyFrom(FInputStream, Header.Size);
-      FResult.Position := 0;
-    end;
+    Outgoing.WriteInteger(Image.Width);
+    Outgoing.WriteInteger(Image.Height);
+    Outgoing.WriteBoolean(Resize);
+    Outgoing.WriteBoolean(EnsureVisible);
+    Outgoing.WriteData(Image.Data^, Int64(Image.Width) * Image.Height * SizeOf(TColorBGRA));
+    Outgoing.Send();
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 procedure TSimbaScriptCommunication.DebugImage_Hide;
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_HIDE));
-
-  try
-    Invoke();
-  finally
-    EndInvoke();
-  end;
+  Outgoing.SendMessage('DebugImage_Hide');
 end;
 
 procedure TSimbaScriptCommunication.DebugImage_Display(Width, Height: Integer);
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY));
-
+  Outgoing.BeginMessage('DebugImage_Display', 2 * SizeOf(Int32));
   try
-    FParams.Write(Width, SizeOf(Integer));
-    FParams.Write(Height, SizeOf(Integer));
-
-    Invoke();
+    Outgoing.WriteInteger(Width);
+    Outgoing.WriteInteger(Height);
+    Outgoing.Send();
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 procedure TSimbaScriptCommunication.DebugImage_Display(X, Y, Width, Height: Integer);
 begin
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY_XY));
-
+  Outgoing.BeginMessage('DebugImage_DisplayXY', 4 * SizeOf(Int32));
   try
-    FParams.Write(X, SizeOf(Integer));
-    FParams.Write(Y, SizeOf(Integer));
-    FParams.Write(Width, SizeOf(Integer));
-    FParams.Write(Height, SizeOf(Integer));
-
-    Invoke();
+    Outgoing.WriteInteger(X);
+    Outgoing.WriteInteger(Y);
+    Outgoing.WriteInteger(Width);
+    Outgoing.WriteInteger(Height);
+    Outgoing.Send();
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 
 procedure TSimbaScriptCommunication.DebugMatrix_Update(Mat: TSingleMatrix; ColorMapType: Integer; Resize, EnsureVisible: Boolean);
 var
-  Header: TSimbaIPCHeader;
   Width, Height, Y: Integer;
 begin
   if not Mat.GetSize(Width, Height) then
     Exit;
+  for Y := 0 to Height - 1 do
+    if (Length(Mat[Y]) <> Width) then
+      SimbaException('DebugMatrix: every row must be the same length');
 
-  BeginInvoke(Integer(ESimbaCommunicationMessage.DEBUGMATRIX_UPDATE));
+  Outgoing.BeginMessage('DebugMatrix_Update', 3 * SizeOf(Int32) + 2 * SizeOf(Boolean) + Int64(Width) * Height * SizeOf(Single));
   try
-    Header.Size      := 0;
-    Header.MessageID := FMessageID;
-
-    FOutputStream.Write(Header, SizeOf(TSimbaIPCHeader));
-    FOutputStream.Write(Width, SizeOf(Integer));
-    FOutputStream.Write(Height, SizeOf(Integer));
-    FOutputStream.Write(Resize, SizeOf(Boolean));
-    FOutputStream.Write(EnsureVisible, SizeOf(Boolean));
-    FOutputStream.Write(ColorMapType, SizeOf(Integer));
+    Outgoing.WriteInteger(Width);
+    Outgoing.WriteInteger(Height);
+    Outgoing.WriteInteger(ColorMapType);
+    Outgoing.WriteBoolean(Resize);
+    Outgoing.WriteBoolean(EnsureVisible);
     for Y := 0 to Height - 1 do
-      FOutputStream.Write(Mat[Y, 0], Width * SizeOf(Single));
-
-    // Read result
-    FInputStream.Read(Header, SizeOf(TSimbaIPCHeader));
-    if (Header.Size > 0) then
-    begin
-      FResult.CopyFrom(FInputStream, Header.Size);
-      FResult.Position := 0;
-    end;
+      Outgoing.WriteData(Mat[Y, 0], Width * SizeOf(Single));
+    Outgoing.Send();
   finally
-    EndInvoke();
+    Outgoing.EndMessage();
   end;
 end;
 

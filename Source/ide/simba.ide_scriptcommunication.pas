@@ -13,18 +13,15 @@ unit simba.ide_scriptcommunication;
 interface
 
 uses
-  Classes, SysUtils, Forms, ExtCtrls, Graphics,
-  simba.base, simba.ide_ipc, simba.ide_tab;
+  Classes, SysUtils,
+  simba.base, simba.ipc, simba.ide_tab;
 
 type
-  TSimbaScriptInstanceCommunication = class(TSimbaIPCServer)
+  TSimbaScriptInstanceCommunication = class(TSimbaIPCConnection)
   protected
     FRunner: TSimbaScriptTabRunner;
-    FMethods: array[ESimbaCommunicationMessage] of TProcedureOfObject;
-    FParams: TMemoryStream;
-    FResult: TMemoryStream;
 
-    procedure OnMessage(MessageID: Integer; Params, Result: TMemoryStream); override;
+    procedure HandleIncoming; override;
 
     procedure GetScript;
     procedure SetSimbaTitle;
@@ -46,7 +43,8 @@ type
 
     procedure DebugMatrix_Update;
   public
-    constructor Create(Runner: TSimbaScriptTabRunner); reintroduce;
+    // AOwner is its TSimbaIPCProcess, which its TSimbaScriptTabRunner owns
+    constructor Create(AOwner: TComponent); override;
   end;
 
 implementation
@@ -54,40 +52,64 @@ implementation
 uses
   simba.ide_controller,
   simba.ide_debugimage,
+  simba.image,
+  simba.process,
   simba.threading,
-  simba.process;
+  simba.vartype_matrix;
 
-procedure TSimbaScriptInstanceCommunication.OnMessage(MessageID: Integer; Params, Result: TMemoryStream);
-var
-  Message: ESimbaCommunicationMessage absolute MessageID;
+procedure TSimbaScriptInstanceCommunication.HandleIncoming;
 begin
-  FParams := Params;
-  FResult := Result;
-
-  FMethods[Message]();
+  case Incoming.Key of
+    'GetScript':             GetScript();
+    'SetSimbaTitle':         SetSimbaTitle();
+    'ShowTrayNotification':  ShowTrayNotification();
+    'GetSimbaPID':           GetSimbaPID();
+    'GetSimbaTargetWindow':  GetSimbaTargetWindow();
+    'GetSimbaTargetPID':     GetSimbaTargetPID();
+    'ScriptStateChanged':    ScriptStateChanged();
+    'ScriptError':           ScriptError();
+    'DebugImage_SetMaxSize': DebugImage_SetMaxSize();
+    'DebugImage_Update':     DebugImage_Update();
+    'DebugImage_Hide':       DebugImage_Hide();
+    'DebugImage_Display':    DebugImage_Display();
+    'DebugImage_DisplayXY':  DebugImage_DisplayXY();
+    'DebugMatrix_Update':    DebugMatrix_Update();
+    else
+      raise Exception.Create('Unknown message');
+  end;
 end;
 
 procedure TSimbaScriptInstanceCommunication.GetScript;
+var
+  Title, Script: String;
 begin
-  FResult.WriteAnsiString(FRunner.ScriptTitle);
-  FResult.WriteAnsiString(FRunner.Script);
+  Title := FRunner.ScriptTitle;
+  Script := FRunner.Script;
+
+  Incoming.BeginResponse(SizeOf(Int32) + Length(Title) + SizeOf(Int32) + Length(Script));
+  Incoming.WriteString(Title);
+  Incoming.WriteString(Script);
 end;
 
 procedure TSimbaScriptInstanceCommunication.SetSimbaTitle;
+var
+  Title: String;
 
   procedure Execute;
   begin
-    SimbaController.SetWindowTitle(FParams.ReadAnsiString());
+    SimbaController.SetWindowTitle(Title);
   end;
 
 begin
+  Incoming.ReadString(Title);
+
   RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.ShowTrayNotification;
 var
   Title, Message: String;
-  Timeout: Integer;
+  Timeout: Int32;
 
   procedure Execute;
   begin
@@ -95,30 +117,44 @@ var
   end;
 
 begin
-  Title := FParams.ReadAnsiString;
-  Message := FParams.ReadAnsiString;
-
-  FParams.Read(Timeout, SizeOf(Integer));
+  Incoming.ReadString(Title);
+  Incoming.ReadString(Message);
+  Incoming.ReadInteger(Timeout);
 
   RunInMainThread(@Execute);
 end;
 
 // Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaPID;
+var
+  PID: TProcessID;
 begin
-  FResult.Write(GetProcessID(), SizeOf(TProcessID));
+  PID := GetProcessID();
+
+  Incoming.BeginResponse(SizeOf(TProcessID));
+  Incoming.WriteData(PID, SizeOf(TProcessID));
 end;
 
 // Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetWindow;
+var
+  Window: TWindowHandle;
 begin
-  FResult.Write(SimbaController.WindowSelection, SizeOf(TWindowHandle));
+  Window := SimbaController.WindowSelection;
+
+  Incoming.BeginResponse(SizeOf(TWindowHandle));
+  Incoming.WriteData(Window, SizeOf(TWindowHandle));
 end;
 
 // Threadsafe
 procedure TSimbaScriptInstanceCommunication.GetSimbaTargetPID;
+var
+  PID: TProcessID;
 begin
-  FResult.Write(SimbaController.ProcessSelection, SizeOf(TProcessID));
+  PID := SimbaController.ProcessSelection;
+
+  Incoming.BeginResponse(SizeOf(TProcessID));
+  Incoming.WriteData(PID, SizeOf(TProcessID));
 end;
 
 procedure TSimbaScriptInstanceCommunication.ScriptStateChanged;
@@ -131,7 +167,7 @@ var
   end;
 
 begin
-  FParams.Read(State, SizeOf(ESimbaScriptState));
+  Incoming.ReadData(State, SizeOf(ESimbaScriptState));
 
   RunInMainThread(@Execute);
 end;
@@ -139,7 +175,7 @@ end;
 procedure TSimbaScriptInstanceCommunication.ScriptError;
 var
   Message, FileName: String;
-  Line, Column: Integer;
+  Line, Column: Int32;
 
   procedure Execute;
   begin
@@ -147,109 +183,97 @@ var
   end;
 
 begin
-  Message  := FParams.ReadAnsiString();
-  FileName := FParams.ReadAnsiString();
-
-  FParams.Read(Line, SizeOf(Integer));
-  FParams.Read(Column, SizeOf(Integer));
+  Incoming.ReadString(Message);
+  Incoming.ReadString(FileName);
+  Incoming.ReadInteger(Line);
+  Incoming.ReadInteger(Column);
 
   RunInMainThread(@Execute);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_SetMaxSize;
 var
-  Width, Height: Integer;
-
-  procedure Execute;
-  begin
-    SimbaDebugImageForm.SetMaxSize(Width, Height);
-  end;
-
+  Width, Height: Int32;
 begin
-  FParams.Read(Width, SizeOf(Integer));
-  FParams.Read(Height, SizeOf(Integer));
+  Incoming.ReadInteger(Width);
+  Incoming.ReadInteger(Height);
 
-  RunInMainThread(@Execute);
+  SimbaDebugImageForm.SetMaxSize(Width, Height);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
+var
+  Width, Height: Int32;
+  Resize, EnsureVisible: Boolean;
+  Img: TSimbaImage;
 begin
-  SimbaDebugImageForm.UpdateFromStream(FInputStream);
+  Incoming.ReadInteger(Width);
+  Incoming.ReadInteger(Height);
+  Incoming.ReadBoolean(Resize);
+  Incoming.ReadBoolean(EnsureVisible);
+
+  Img := SimbaDebugImageForm.NewFrame(Width, Height);
+  try
+    Incoming.ReadData(Img.Data^, Int64(Width) * Height * SizeOf(TColorBGRA));
+  except
+    Img.Free();
+    raise;
+  end;
+
+  SimbaDebugImageForm.ShowImage(Img, Resize, EnsureVisible);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Hide;
-
-  procedure Execute;
-  begin
-    SimbaDebugImageForm.Close();
-  end;
-
 begin
-  RunInMainThread(@Execute);
+  SimbaDebugImageForm.Close();
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Display;
 var
-  Width, Height: Integer;
-
-  procedure Execute;
-  begin
-    SimbaDebugImageForm.SetSize(Width, Height, True);
-  end;
-
+  Width, Height: Int32;
 begin
-  FParams.Read(Width, SizeOf(Integer));
-  FParams.Read(Height, SizeOf(Integer));
+  Incoming.ReadInteger(Width);
+  Incoming.ReadInteger(Height);
 
-  RunInMainThread(@Execute);
+  SimbaDebugImageForm.Display(Width, Height);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_DisplayXY;
 var
-  X, Y, Width, Height: Integer;
-
-  procedure Execute;
-  begin
-    SimbaDebugImageForm.Left := X;
-    SimbaDebugImageForm.Top  := Y;
-    SimbaDebugImageForm.SetSize(Width, Height, True);
-  end;
-
+  X, Y, Width, Height: Int32;
 begin
-  FParams.Read(X, SizeOf(Integer));
-  FParams.Read(Y, SizeOf(Integer));
-  FParams.Read(Width, SizeOf(Integer));
-  FParams.Read(Height, SizeOf(Integer));
+  Incoming.ReadInteger(X);
+  Incoming.ReadInteger(Y);
+  Incoming.ReadInteger(Width);
+  Incoming.ReadInteger(Height);
 
-  RunInMainThread(@Execute);
+  SimbaDebugImageForm.Display(X, Y, Width, Height);
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugMatrix_Update;
+var
+  Width, Height, ColorMapType, Y: Int32;
+  Resize, EnsureVisible: Boolean;
+  Matrix: TSingleMatrix;
 begin
-  SimbaDebugMatrixForm.UpdateFromStream(FInputStream);
+  Incoming.ReadInteger(Width);
+  Incoming.ReadInteger(Height);
+  Incoming.ReadInteger(ColorMapType);
+  Incoming.ReadBoolean(Resize);
+  Incoming.ReadBoolean(EnsureVisible);
+
+  Matrix.SetSize(Width, Height);
+  for Y := 0 to Height - 1 do
+    Incoming.ReadData(Matrix[Y, 0], Width * SizeOf(Single));
+
+  SimbaDebugMatrixForm.ShowMatrix(Matrix, ColorMapType, Resize, EnsureVisible);
 end;
 
-constructor TSimbaScriptInstanceCommunication.Create(Runner: TSimbaScriptTabRunner);
+constructor TSimbaScriptInstanceCommunication.Create(AOwner: TComponent);
 begin
-  inherited Create(Runner);
+  inherited Create(AOwner);
 
-  FRunner := Runner;
-
-  FMethods[ESimbaCommunicationMessage.SCRIPT]                := @GetScript;
-  FMethods[ESimbaCommunicationMessage.SIMBA_TITLE]           := @SetSimbaTitle;
-  FMethods[ESimbaCommunicationMessage.SIMBA_PID]             := @GetSimbaPID;
-  FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_PID]      := @GetSimbaTargetPID;
-  FMethods[ESimbaCommunicationMessage.SIMBA_TARGET_WINDOW]   := @GetSimbaTargetWindow;
-  FMethods[ESimbaCommunicationMessage.SCRIPT_ERROR]          := @ScriptError;
-  FMethods[ESimbaCommunicationMessage.SCRIPT_STATE_CHANGE]   := @ScriptStateChanged;
-  FMethods[ESimbaCommunicationMessage.TRAY_NOTIFICATION]     := @ShowTrayNotification;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_MAXSIZE]    := @DebugImage_SetMaxSize;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_UPDATE]     := @DebugImage_Update;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_HIDE]       := @DebugImage_Hide;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY]    := @DebugImage_Display;
-  FMethods[ESimbaCommunicationMessage.DEBUGIMAGE_DISPLAY_XY] := @DebugImage_DisplayXY;
-
-  FMethods[ESimbaCommunicationMessage.DEBUGMATRIX_UPDATE]    := @DebugMatrix_Update;
+  FRunner := AOwner.Owner as TSimbaScriptTabRunner;
 end;
 
 end.

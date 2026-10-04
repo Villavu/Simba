@@ -97,18 +97,18 @@ begin
 
   if (not Application.HasOption('open')) and (Application.HasOption('run') or Application.HasOption('compile')) then
   begin
-    if Application.HasOption('simbacommunication') then
+    if Application.HasOption('ipc') then
       SimbaProcessType := ESimbaProcessType.SCRIPT_WITH_COMMUNICATION
     else
       SimbaProcessType := ESimbaProcessType.SCRIPT;
 
-    SimbaOutputControlCodes := Application.HasOption('simbacommunication') or Application.HasOption('keep-formatting');
+    SimbaOutputControlCodes := Application.HasOption('ipc') or Application.HasOption('keep-formatting');
 
     // Script will be sent though communication
     if (Application.Params[Application.ParamCount] = '--run') or (Application.Params[Application.ParamCount] = '--compile') then
     begin
       TSimbaScriptRunner.Create(
-        Application.GetOptionValue('simbacommunication'),
+        Application.GetOptionValue('ipc'),
         Application.GetOptionValue('target'),
         Application.HasOption('compile'),
         Application.HasOption('hints')
@@ -124,7 +124,7 @@ begin
 
       TSimbaScriptRunner.Create(
         Application.Params[Application.ParamCount],
-        Application.GetOptionValue('simbacommunication'),
+        Application.GetOptionValue('ipc'),
         Application.GetOptionValue('target'),
         Application.HasOption('compile'),
         Application.HasOption('hints')
