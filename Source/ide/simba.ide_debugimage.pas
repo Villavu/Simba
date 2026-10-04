@@ -2,6 +2,9 @@
   Author: Raymond van Venetië and Merlijn Wajer
   Project: Simba (https://github.com/MerlijnWajer/Simba)
   License: GNU General Public License (https://www.gnu.org/licenses/gpl-3.0)
+  --------------------------------------------------------------------------
+  The debug image and debug matrix windows, which running scripts send
+  frames to from simba.ide_scriptcommunication.
 }
 unit simba.ide_debugimage;
 
@@ -10,31 +13,56 @@ unit simba.ide_debugimage;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, Forms, syncobjs,
   simba.base,
+  simba.image,
   simba.ide_events,
-  simba.component_debugimg,
   simba.component_imagebox;
 
 type
-  TSimbaDebugImage = class(TSimbaDebugImageForm)
+  TSimbaDebugImage = class(TForm)
   protected
-    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+    FImageBox: TSimbaImageBox;
+    FMaxWidth, FMaxHeight: Integer;
+    FLock: TCriticalSection;
+    FBackBuffer: TSimbaImage;
+    FBackBufferResize: Boolean;
+    FBackBufferEnsureVisible: Boolean;
+    FSwapBufferQueued: Boolean;
+
+    function HostForm: TCustomForm;
+    procedure DoViewEvent(Event: ESimbaEvent; Data: Pointer);
+    procedure DoSwapBuffers;
+    procedure DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer); virtual;
   public
-    constructor Create(TheOwner: TComponent); override;
+    constructor Create(AOwner: TComponent; ViewEvent: ESimbaEvent); reintroduce;
+    destructor Destroy; override;
+
+    procedure BeginUpdate(AWidth, AHeight: Integer);
+    procedure EndUpdate(AResize, AEnsureVisible: Boolean);
+
+    procedure Display(AWidth, AHeight: Integer; AResize: Boolean = True; AEnsureVisible: Boolean = True); overload;
+    procedure Display(X, Y, AWidth, AHeight: Integer); overload;
+    // the largest the actual image part gets
+    procedure SetMaxSize(AWidth, AHeight: Integer);
+    procedure Close;
+
+    property BackBuffer: TSimbaImage read FBackBuffer;
   end;
 
-  TSimbaDebugMatrix = class(TSimbaDebugImageForm)
+  TSimbaDebugMatrix = class(TSimbaDebugImage)
   protected
     FMatrix: TSingleMatrix;
 
-    procedure DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-    procedure DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
-    procedure DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
-  public
-    procedure UpdateFromStream(Stream: TStream); override;
+    // False outside the matrix, and while it is not that of the image shown
+    function GetValue(X, Y: Integer; out Value: Single): Boolean;
 
-    constructor Create(TheOwner: TComponent); override;
+    procedure DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
+    procedure DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer); override;
+  public
+    constructor Create(AOwner: TComponent; ViewEvent: ESimbaEvent); reintroduce;
+
+    property Matrix: TSingleMatrix read FMatrix write FMatrix;
   end;
 
 var
@@ -44,146 +72,251 @@ var
 implementation
 
 uses
-  Forms,
-  Menus,
-  AnchorDocking,
-  Graphics,
+  Controls, Math,
   simba.ide_docking,
   simba.initializations,
-  simba.vartype_matrix,
-  simba.image_lazbridge,
-  simba.image_drawmatrix,
+  simba.threading,
   simba.colormath,
-  simba.threading;
+  simba.vartype_matrix;
 
-procedure TSimbaDebugImage.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
+function TSimbaDebugImage.HostForm: TCustomForm;
+begin
+  if (HostDockSite is TSimbaAnchorDockHostSite) then
+    Result := TSimbaAnchorDockHostSite(HostDockSite)
+  else
+    Result := Self;
+end;
 
-  procedure DoViewDebugImage(Item: TMenuItem);
+procedure TSimbaDebugImage.DoViewEvent(Event: ESimbaEvent; Data: Pointer);
+begin
+  SimbaDocking.Show(Self);
+end;
+
+procedure TSimbaDebugImage.DoSwapBuffers;
+var
+  DoResize, DoEnsureVisible: Boolean;
+begin
+  FLock.Enter();
+  try
+    FSwapBufferQueued := False;
+
+    FBackBuffer := FImageBox.SwapBackground(FBackBuffer);
+
+    DoResize := FBackBufferResize;
+    DoEnsureVisible := FBackBufferEnsureVisible;
+
+    FBackBufferResize := False;
+    FBackBufferEnsureVisible := False;
+  finally
+    FLock.Leave();
+  end;
+
+  Display(FImageBox.Background.Width, FImageBox.Background.Height, DoResize, DoEnsureVisible);
+end;
+
+procedure TSimbaDebugImage.DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
+begin
+  if (X >= 0) and (X < FImageBox.Background.Width) and (Y >= 0) and (Y < FImageBox.Background.Height) then
   begin
-    SimbaDocking.Show(Self);
-  end;
-
-begin
-  case Event of
-    ESimbaEvent.ACTION_VIEW_DEBUGIMAGE: DoViewDebugImage(TMenuItem(Data));
-  end;
-end;
-
-constructor TSimbaDebugImage.Create(TheOwner: TComponent);
-begin
-  inherited Create(TheOwner);
-
-  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_VIEW_DEBUGIMAGE]);
-end;
-
-procedure TSimbaDebugMatrix.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer);
-
-  procedure DoViewDebugMatrix(Item: TMenuItem);
-  begin
-    SimbaDocking.Show(Self);
-  end;
-
-begin
-  case Event of
-    ESimbaEvent.ACTION_VIEW_DEBUGMATRIX: DoViewDebugMatrix(TMenuItem(Data));
-  end;
-end;
-
-procedure TSimbaDebugMatrix.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
-begin
-  if (X >= 0) and (X < FMatrix.Width) and (Y >= 0) and (Y < FMatrix.Height) then
-    ImageBox.Status := Format('Matrix[%d,%d] := %.5f', [Y, X, FMatrix[Y,X]]);
-end;
-
-procedure TSimbaDebugMatrix.DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
-begin
-  if (X >= 0) and (X < FMatrix.Width) and (Y >= 0) and (Y < FMatrix.Height) then
-  begin
-    DebugLn('Matrix[%d,%d] := %.5f', [Y, X, FMatrix[Y,X]]);
+    DebugLn('Pixels[%d,%d] := %s', [X, Y, ColorToStr(FImageBox.Background.Pixel[X, Y])]);
     DebugLn(DEBUG_FOCUS);
   end;
 end;
 
-generic procedure DrawMatrix<PPixelType>(Matrix: TSingleMatrix; ColorMapType, Width, Height: Integer; Dest: PByte; DestBytesPerLine: Integer);
-var
-  X, Y: Integer;
-  Ptr: PPixelType;
+constructor TSimbaDebugImage.Create(AOwner: TComponent; ViewEvent: ESimbaEvent);
 begin
-  Dec(Height);
-  Dec(Width);
-  for Y := 0 to Height do
-  begin
-    Ptr := PPixelType(Dest);
-    for X := 0 to Width do
-    begin
-      GetMatrixColor(Matrix[Y, X], ColorMapType, Ptr^.R, Ptr^.G, Ptr^.B);
-      Inc(Ptr);
-    end;
-    Inc(Dest, DestBytesPerLine);
-  end;
-end;
+  inherited Create(AOwner);
 
-procedure TSimbaDebugMatrix.UpdateFromStream(Stream: TStream);
-type
-  TParams = packed record
-    Width, Height: Integer;
-    Resize: Boolean;
-    EnsureVisible: Boolean;
-    ColorMapType: Integer;
-  end;
-var
-  Params: TParams;
-  Y: Integer;
-begin
-  FUpdating.Enter();
+  FMaxWidth := 1500;
+  FMaxHeight := 1000;
 
-  Stream.Read(Params, SizeOf(TParams));
-  FMatrix.SetSize(Params.Width, Params.Height);
-  for Y := 0 to Params.Height - 1 do
-    Stream.Read(FMatrix[Y, 0], Params.Width * SizeOf(Single));
-  FMatrix.NormMinMax(0, 1); // in place: no fresh matrix per frame
-
-  try
-    if (FBackBuffer = nil) then
-      FBackBuffer := TBitmap.Create();
-    FBackBuffer.BeginUpdate();
-    try
-      FBackBuffer.SetSize(Params.Width, Params.Height);
-      case FImageBox.PixelFormat of
-        ELazPixelFormat.BGR:  specialize DrawMatrix<PColorBGR>(FMatrix,  Params.ColorMapType, Params.Width, Params.Height, FBackBuffer.RawImage.Data, FBackBuffer.RawImage.Description.BytesPerLine);
-        ELazPixelFormat.BGRA: specialize DrawMatrix<PColorBGRA>(FMatrix, Params.ColorMapType, Params.Width, Params.Height, FBackBuffer.RawImage.Data, FBackBuffer.RawImage.Description.BytesPerLine);
-        ELazPixelFormat.ARGB: specialize DrawMatrix<PColorARGB>(FMatrix, Params.ColorMapType, Params.Width, Params.Height, FBackBuffer.RawImage.Data, FBackBuffer.RawImage.Description.BytesPerLine);
-        else
-          SimbaException('Pixel format supported: %d', [Ord(FImageBox.PixelFormat)]);
-      end;
-    finally
-      FBackBuffer.EndUpdate();
-    end;
-
-    SwapBuffers(Params.Resize, Params.EnsureVisible);
-  finally
-    FUpdating.Leave();
-  end;
-end;
-
-constructor TSimbaDebugMatrix.Create(TheOwner: TComponent);
-begin
-  inherited Create(TheOwner);
-
-  FImageBox.OnImgMouseMove := @DoImgMouseMove;
+  FImageBox := TSimbaImageBox.Create(Self);
+  FImageBox.Parent := Self;
+  FImageBox.Align := alClient;
   FImageBox.OnImgDoubleClick := @DoImgDoubleClick;
 
-  SimbaEvents.Register(Self, @DoSimbaEvent, [ESimbaEvent.ACTION_VIEW_DEBUGMATRIX]);
+  FLock := TCriticalSection.Create();
+  FBackBuffer := TSimbaImage.Create();
+
+  SimbaEvents.Register(Self, @DoViewEvent, [ViewEvent]);
+end;
+
+destructor TSimbaDebugImage.Destroy;
+begin
+  TThread.RemoveQueuedEvents(@DoSwapBuffers);
+
+  FreeAndNil(FBackBuffer);
+  FreeAndNil(FLock);
+
+  inherited Destroy();
+end;
+
+procedure TSimbaDebugImage.BeginUpdate(AWidth, AHeight: Integer);
+begin
+  FLock.Enter();
+  try
+    FBackBuffer.SetSize(AWidth, AHeight);
+  except
+    FLock.Leave();
+    raise;
+  end;
+end;
+
+procedure TSimbaDebugImage.EndUpdate(AResize, AEnsureVisible: Boolean);
+begin
+  FBackBufferResize := FBackBufferResize or AResize;
+  FBackBufferEnsureVisible := FBackBufferEnsureVisible or AEnsureVisible;
+
+  // ensure we only queue one at a time
+  if not FSwapBufferQueued then
+  begin
+    FSwapBufferQueued := True;
+
+    TThread.Queue(nil, @DoSwapBuffers);
+  end;
+
+  FLock.Leave();
+end;
+
+procedure TSimbaDebugImage.Display(AWidth, AHeight: Integer; AResize: Boolean; AEnsureVisible: Boolean);
+
+  procedure Fit;
+  var
+    Form: TCustomForm;
+    ViewWidth, ViewHeight: Integer;
+    NewWidth, NewHeight: Integer;
+  begin
+    Form := HostForm();
+    if (not AResize) or (Form.WindowState <> wsNormal) then
+      Exit;
+
+    if Form.Showing then
+    begin
+      ViewWidth := FImageBox.ViewWidth;
+      ViewHeight := FImageBox.ViewHeight;
+    end else
+    begin
+      ViewWidth := Form.Width;
+      ViewHeight := Form.Height;
+    end;
+
+    // at least the image, at most the max size
+    NewWidth := Min(Max(ViewWidth, AWidth), FMaxWidth);
+    NewHeight := Min(Max(ViewHeight, AHeight), FMaxHeight);
+
+    Form.SetBounds(
+      Form.Left,
+      Form.Top,
+      Form.Width + (NewWidth - ViewWidth),
+      Form.Height + (NewHeight - ViewHeight)
+    );
+  end;
+
+  procedure Execute;
+  begin
+    Fit();
+
+    if AEnsureVisible then
+    begin
+      SimbaDocking.Show(Self);
+
+      Fit();
+    end;
+  end;
+
+begin
+  RunInMainThread(@Execute);
+end;
+
+procedure TSimbaDebugImage.Display(X, Y, AWidth, AHeight: Integer);
+
+  procedure Execute;
+  begin
+    Display(AWidth, AHeight);
+
+    HostForm().Left := X;
+    HostForm().Top := Y;
+  end;
+
+begin
+  RunInMainThread(@Execute);
+end;
+
+procedure TSimbaDebugImage.SetMaxSize(AWidth, AHeight: Integer);
+
+  procedure Execute;
+  begin
+    FMaxWidth := AWidth;
+    FMaxHeight := AHeight;
+
+    Display(0, 0, True, False);
+  end;
+
+begin
+  RunInMainThread(@Execute);
+end;
+
+procedure TSimbaDebugImage.Close;
+
+  procedure Execute;
+  begin
+    HostForm().Close();
+  end;
+
+begin
+  RunInMainThread(@Execute);
+end;
+
+function TSimbaDebugMatrix.GetValue(X, Y: Integer; out Value: Single): Boolean;
+begin
+  Value := 0;
+  Result := False;
+
+  // not while the next frame is being written
+  if not FLock.TryEnter() then
+    Exit;
+  try
+    // nor until it is swapped in
+    Result := (not FSwapBufferQueued) and (X >= 0) and (X < FMatrix.Width) and (Y >= 0) and (Y < FMatrix.Height);
+    if Result then
+      Value := FMatrix[Y, X];
+  finally
+    FLock.Leave();
+  end;
+end;
+
+procedure TSimbaDebugMatrix.DoImgMouseMove(Sender: TSimbaImageBox; Shift: TShiftState; X, Y: Integer);
+var
+  Value: Single;
+begin
+  if GetValue(X, Y, Value) then
+    FImageBox.Status := Format('Matrix[%d,%d] := %.4f', [Y, X, Value]);
+end;
+
+procedure TSimbaDebugMatrix.DoImgDoubleClick(Sender: TSimbaImageBox; X, Y: Integer);
+var
+  Value: Single;
+begin
+  if GetValue(X, Y, Value) then
+  begin
+    DebugLn('Matrix[%d,%d] := %.4f', [Y, X, Value]);
+    DebugLn(DEBUG_FOCUS);
+  end;
+end;
+
+constructor TSimbaDebugMatrix.Create(AOwner: TComponent; ViewEvent: ESimbaEvent);
+begin
+  inherited Create(AOwner, ViewEvent);
+
+  FImageBox.OnImgMouseMove := @DoImgMouseMove;
 end;
 
 procedure DoCreate;
 begin
-  SimbaDebugImageForm := TSimbaDebugImage.Create(Application);
-  SimbaDebugImageForm.Name := 'SimbaDebugImage';
+  SimbaDebugImageForm := TSimbaDebugImage.Create(Application, ESimbaEvent.ACTION_VIEW_DEBUGIMAGE);
   SimbaDebugImageForm.Caption := 'Debug Image';
 
-  SimbaDebugMatrixForm := TSimbaDebugMatrix.Create(Application);
-  SimbaDebugMatrixForm.Name := 'SimbaDebugMatrix';
+  SimbaDebugMatrixForm := TSimbaDebugMatrix.Create(Application, ESimbaEvent.ACTION_VIEW_DEBUGMATRIX);
   SimbaDebugMatrixForm.Caption := 'Debug Matrix';
 end;
 
@@ -198,4 +331,3 @@ initialization
   SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'DebugImage');
 
 end.
-

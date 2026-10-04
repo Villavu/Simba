@@ -92,7 +92,8 @@ var
   X, Y, Width, Height: Integer;
   Value: Single;
 begin
-  Matrix.GetSizeMinusOne(Width, Height);
+  if not Matrix.GetSizeMinusOne(Width, Height) then
+    Exit;
 
   for Y := 0 to Height do
     for X := 0 to Width do

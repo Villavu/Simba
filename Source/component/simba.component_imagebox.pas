@@ -151,8 +151,6 @@ type
     function ScrollToImage(V: Integer): Integer;
     function SnapScroll(V: Integer): Integer;
 
-    function ViewWidth: Integer;
-    function ViewHeight: Integer;
     function VisibleTopX: Integer;
     function VisibleTopY: Integer;
     function VisibleImageRect: TRect;
@@ -194,11 +192,18 @@ type
     // Invalidates the image only, not the scrollbars or status bar.
     procedure Invalidate; override;
 
+    // The part of the control the image is drawn in: all but the scroll bars and
+    // status bar.
+    function ViewWidth: Integer;
+    function ViewHeight: Integer;
+
     function ScreenToImage(ScreenXY: TPoint): TPoint;
     function IsPointVisible(ImageXY: TPoint): Boolean;
     procedure MoveTo(ImageXY: TPoint);
 
     procedure BackgroundChanged;
+    // Background := AValue, but hands the old image back instead of freeing it.
+    function SwapBackground(AValue: TSimbaImage): TSimbaImage;
 
     property ShowStatusBar: Boolean read GetShowStatusBar write SetShowStatusBar;
     property ShowScrollbars: Boolean read GetShowScrollbars write SetShowScrollbars;
@@ -276,20 +281,20 @@ begin
   FBox.Invalidate();
 end;
 
+// the same priority again still moves it on top of its equals
+procedure TSimbaImageBoxLayer.SetPriority(Value: Integer);
+begin
+  FPriority := Value;
+  InsertByPriority();
+  FBox.Invalidate();
+end;
+
 procedure TSimbaImageBoxLayer.SetOpacity(Value: Byte);
 begin
   if (FOpacity = Value) then
     Exit;
 
   FOpacity := Value;
-  FBox.Invalidate();
-end;
-
-// the same priority again still moves it on top of its equals
-procedure TSimbaImageBoxLayer.SetPriority(Value: Integer);
-begin
-  FPriority := Value;
-  InsertByPriority();
   FBox.Invalidate();
 end;
 
@@ -689,26 +694,6 @@ begin
     Dec(Result, Result mod ZoomRatio());
 end;
 
-function TSimbaImageBox.ViewWidth: Integer;
-begin
-  Result := ClientWidth;
-  if FVertScroll.Visible then
-    Dec(Result, FVertScroll.Width);
-  if (Result < 0) then
-    Result := 0;
-end;
-
-function TSimbaImageBox.ViewHeight: Integer;
-begin
-  Result := ClientHeight;
-  if FStatusBarPanel.Visible then
-    Dec(Result, FStatusBarPanel.Height);
-  if FHorzScroll.Visible then
-    Dec(Result, FHorzScroll.Height);
-  if (Result < 0) then
-    Result := 0;
-end;
-
 function TSimbaImageBox.VisibleTopX: Integer;
 begin
   Result := SnapScroll(FHorzScroll.Position);
@@ -883,15 +868,8 @@ end;
 
 procedure TSimbaImageBox.SetBackground(AValue: TSimbaImage);
 begin
-  if (AValue = FBackground) then
-    Exit;
-  if (AValue = nil) then
-    SimbaException('TSimbaImageBox.Background cannot be nil');
-
-  FBackground.Free();
-  FBackground := AValue;
-
-  BackgroundChanged();
+  if (AValue <> FBackground) then
+    SwapBackground(AValue).Free();
 end;
 
 procedure TSimbaImageBox.SetZoom(Level: Integer);
@@ -1026,6 +1004,26 @@ begin
   InvalidateRect(Handle, @R, False);
 end;
 
+function TSimbaImageBox.ViewWidth: Integer;
+begin
+  Result := ClientWidth;
+  if FVertScroll.Visible then
+    Dec(Result, FVertScroll.Width);
+  if (Result < 0) then
+    Result := 0;
+end;
+
+function TSimbaImageBox.ViewHeight: Integer;
+begin
+  Result := ClientHeight;
+  if FStatusBarPanel.Visible then
+    Dec(Result, FStatusBarPanel.Height);
+  if FHorzScroll.Visible then
+    Dec(Result, FHorzScroll.Height);
+  if (Result < 0) then
+    Result := 0;
+end;
+
 function TSimbaImageBox.ScreenToImage(ScreenXY: TPoint): TPoint;
 begin
   Result.X := ScrollToImage(VisibleTopX + ScreenXY.X);
@@ -1063,6 +1061,17 @@ begin
 
   BackgroundResized();
   Invalidate();
+end;
+
+function TSimbaImageBox.SwapBackground(AValue: TSimbaImage): TSimbaImage;
+begin
+  if (AValue = nil) then
+    SimbaException('TSimbaImageBox.Background cannot be nil');
+
+  Result := FBackground;
+  FBackground := AValue;
+
+  BackgroundChanged();
 end;
 
 end.
