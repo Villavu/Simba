@@ -51,6 +51,7 @@ type
     function IsProcess64Bit(PID: SizeUInt): Boolean; override;
     function IsProcessRunning(PID: SizeUInt): Boolean; override;
     procedure TerminateProcess(PID: SizeUInt); override;
+    procedure SetHandleInheritable(Handle: THandle; Value: Boolean); override;
 
     function GetWindows: TWindowHandleArray; override;
     function GetWindowChildren(Window: TWindowHandle; Recursive: Boolean): TWindowHandleArray; override;
@@ -631,6 +632,18 @@ begin
   Windows.TerminateProcess(Handle, 0);
 
   CloseHandle(Handle);
+end;
+
+procedure TSimbaNativeInterface_Windows.SetHandleInheritable(Handle: THandle; Value: Boolean);
+var
+  Flags: UInt32;
+begin
+  Flags := 0;
+  if Value then
+    Flags := HANDLE_FLAG_INHERIT;
+
+  if not SetHandleInformation(Handle, HANDLE_FLAG_INHERIT, Flags) then
+    SimbaException('Unable to set handle inheritance');
 end;
 
 type

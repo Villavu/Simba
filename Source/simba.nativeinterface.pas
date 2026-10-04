@@ -40,6 +40,7 @@ type
     function IsProcess64Bit(PID: SizeUInt): Boolean; virtual; abstract;
     function IsProcessRunning(PID: SizeUInt): Boolean; virtual; abstract;
     procedure TerminateProcess(PID: SizeUInt); virtual; abstract;
+    procedure SetHandleInheritable(Handle: THandle; Value: Boolean); virtual; abstract;
 
     function IsWindowActive(Window: TWindowHandle): Boolean; virtual; abstract;
     function IsWindowValid(Window: TWindowHandle): Boolean; virtual; abstract;
