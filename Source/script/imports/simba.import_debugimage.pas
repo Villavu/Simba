@@ -14,7 +14,8 @@ implementation
 
 uses
   lptypes,
-  simba.script_objectutil;
+  simba.script_objectutil,
+  simba.script_communication;
 
 (*
 Debug Image
@@ -35,7 +36,7 @@ procedure Show(Matrix: TIntegerMatrix);
 Show
 ----
 ```
-procedure Show(Matrix: TSingleMatrix; ColorMapID: Integer = 0);
+procedure Show(Matrix: TSingleMatrix; ColorMapType: Integer = 0; EnsureVisible: Boolean = True);
 ```
 *)
 
@@ -59,6 +60,22 @@ procedure Show(Box: TBox; Filled: Boolean = False);
 Show
 ----
 ```
+procedure Show(TPA: TPointArray);
+```
+*)
+
+(*
+Show
+----
+```
+procedure Show(ATPA: T2DPointArray);
+```
+*)
+
+(*
+Show
+----
+```
 procedure Show(Quads: TQuadArray; Filled: Boolean = False);
 ```
 *)
@@ -68,22 +85,6 @@ Show
 ----
 ```
 procedure Show(Quad: TQuad; Filled: Boolean = False);
-```
-*)
-
-(*
-Show
-----
-```
-procedure Show(TPA: TPointArray; Color: Integer = $0000FF);
-```
-*)
-
-(*
-Show
-----
-```
-procedure Show(ATPA: T2DPointArray);
 ```
 *)
 
@@ -107,22 +108,6 @@ procedure ShowOnTarget(Box: TBox; Filled: Boolean = False);
 ShowOnTarget
 ------------
 ```
-procedure ShowOnTarget(Quads: TQuadArray; Filled: Boolean = False);
-```
-*)
-
-(*
-ShowOnTarget
-------------
-```
-procedure ShowOnTarget(Quad: TQuad; Filled: Boolean = False);
-```
-*)
-
-(*
-ShowOnTarget
-------------
-```
 procedure ShowOnTarget(TPA: TPointArray);
 ```
 *)
@@ -135,39 +120,27 @@ procedure ShowOnTarget(ATPA: T2DPointArray);
 ```
 *)
 
-
 (*
-DebugImageMaxSize
------------------
+ShowOnTarget
+------------
 ```
-procedure DebugImageMaxSize(MaxWidth, MaxHeight: Integer);
+procedure ShowOnTarget(Quads: TQuadArray; Filled: Boolean = False);
 ```
 *)
-procedure _LapeDebugImage_MaxSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  with TSimbaScript(Params^[0]) do
-  begin
-    if (SimbaCommunication = nil) then
-      SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_SetMaxSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
-  end;
-end;
 
 (*
-DebugImageShow
---------------
+ShowOnTarget
+------------
 ```
-procedure DebugImageShow(Image: TImage; EnsureVisible: Boolean = True);
+procedure ShowOnTarget(Quad: TQuad; Filled: Boolean = False);
 ```
 *)
-procedure _LapeDebugImage_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+
+function Communication(const Params: PParamArray): TSimbaScriptCommunication;
 begin
-  with TSimbaScript(Params^[0]) do
-  begin
-    if (SimbaCommunication = nil) then
-      SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_Update(PLapeObjectImage(Params^[1])^^, True, PBoolean(Params^[2])^);
-  end;
+  Result := TSimbaScript(Params^[0]).SimbaCommunication;
+  if (Result = nil) then
+    SimbaException('DebugImage requires Simba communication');
 end;
 
 (*
@@ -179,63 +152,19 @@ procedure DebugImageUpdate(Image: TImage);
 *)
 procedure _LapeDebugImage_Update(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  with TSimbaScript(Params^[0]) do
-  begin
-    if (SimbaCommunication = nil) then
-      SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_Update(PLapeObjectImage(Params^[1])^^, False, False);
-  end;
+  Communication(Params).DebugImage_Update(PLapeObjectImage(Params^[1])^^, False, False);
 end;
 
 (*
-DebugMatrixUpdate
------------------
+DebugImageShow
+--------------
 ```
-procedure DebugMatrixUpdate(Mat: TSingleMatrix; ColorMapID: Integer = 0);
-```
-*)
-procedure _LapeDebugMatrix_Update(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  with TSimbaScript(Params^[0]) do
-  begin
-    if (SimbaCommunication = nil) then
-      SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugMatrix_Update(TSingleMatrix(Params^[1]^), PInteger(Params^[2])^, False, False);
-  end;
-end;
-
-(*
-DebugMatrixShow
----------------
-```
-procedure DebugMatrixShow(Mat: TSingleMatrix; ColorMapID: Integer = 0; EnsureVisible: Boolean = True);
+procedure DebugImageShow(Image: TImage; EnsureVisible: Boolean = True);
 ```
 *)
-procedure _LapeDebugMatrix_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeDebugImage_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  with TSimbaScript(Params^[0]) do
-  begin
-    if (SimbaCommunication = nil) then
-      SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugMatrix_Update(TSingleMatrix(Params^[1]^), PInteger(Params^[2])^, True, PBoolean(Params^[3])^);
-  end;
-end;
-
-(*
-DebugImageClose
----------------
-```
-procedure DebugImageClose;
-```
-*)
-procedure _LapeDebugImage_Close(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
-begin
-  with TSimbaScript(Params^[0]) do
-  begin
-    if (SimbaCommunication = nil) then
-      SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_Hide();
-  end;
+  Communication(Params).DebugImage_Update(PLapeObjectImage(Params^[1])^^, True, PBoolean(Params^[2])^);
 end;
 
 (*
@@ -247,29 +176,67 @@ procedure DebugImageDisplay(Width, Height: Integer);
 *)
 procedure _LapeDebugImage_Display1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  with TSimbaScript(Params^[0]) do
-  begin
-    if (SimbaCommunication = nil) then
-      SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_Display(PInteger(Params^[1])^, PInteger(Params^[2])^);
-  end;
+  Communication(Params).DebugImage_Display(PInteger(Params^[1])^, PInteger(Params^[2])^);
 end;
 
 (*
 DebugImageDisplay
 -----------------
 ```
-procedure DebugImageDisplay(X, Y,Width, Height: Integer);
+procedure DebugImageDisplay(X, Y, Width, Height: Integer);
 ```
 *)
 procedure _LapeDebugImage_Display2(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  with TSimbaScript(Params^[0]) do
-  begin
-    if (SimbaCommunication = nil) then
-      SimbaException('DebugImage requires Simba communication');
-    SimbaCommunication.DebugImage_Display(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
-  end;
+  Communication(Params).DebugImage_Display(PInteger(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^, PInteger(Params^[4])^);
+end;
+
+(*
+DebugImageSetMaxSize
+--------------------
+```
+procedure DebugImageSetMaxSize(MaxWidth, MaxHeight: Integer);
+```
+*)
+procedure _LapeDebugImage_SetMaxSize(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Communication(Params).DebugImage_SetMaxSize(PInteger(Params^[1])^, PInteger(Params^[2])^);
+end;
+
+(*
+DebugImageClose
+---------------
+```
+procedure DebugImageClose;
+```
+*)
+procedure _LapeDebugImage_Close(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Communication(Params).DebugImage_Close();
+end;
+
+(*
+DebugMatrixUpdate
+-----------------
+```
+procedure DebugMatrixUpdate(Matrix: TSingleMatrix; ColorMapType: Integer = 0);
+```
+*)
+procedure _LapeDebugMatrix_Update(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Communication(Params).DebugMatrix_Update(TSingleMatrix(Params^[1]^), PInteger(Params^[2])^, False, False);
+end;
+
+(*
+DebugMatrixShow
+---------------
+```
+procedure DebugMatrixShow(Matrix: TSingleMatrix; ColorMapType: Integer = 0; EnsureVisible: Boolean = True);
+```
+*)
+procedure _LapeDebugMatrix_Show(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
+begin
+  Communication(Params).DebugMatrix_Update(TSingleMatrix(Params^[1]^), PInteger(Params^[2])^, True, PBoolean(Params^[3])^);
 end;
 
 procedure ImportDebugImage(Script: TSimbaScript);
@@ -278,12 +245,12 @@ begin
   begin
     DumpSection := 'Debug Image';
 
-    addGlobalMethod('procedure DebugImageSetMaxSize(MaxWidth, MaxHeight: Integer);', @_LapeDebugImage_MaxSize, Script);
-    addGlobalMethod('procedure DebugImageDisplay(Width, Height: Integer); overload', @_LapeDebugImage_Display1, Script);
-    addGlobalMethod('procedure DebugImageDisplay(X, Y, Width, Height: Integer); overload', @_LapeDebugImage_Display2, Script);
-    addGlobalMethod('procedure DebugImageClose', @_LapeDebugImage_Close, Script);
     addGlobalMethod('procedure DebugImageUpdate(Image: TImage)', @_LapeDebugImage_Update, Script);
     addGlobalMethod('procedure DebugImageShow(Image: TImage; EnsureVisible: Boolean = True)', @_LapeDebugImage_Show, Script);
+    addGlobalMethod('procedure DebugImageDisplay(Width, Height: Integer); overload', @_LapeDebugImage_Display1, Script);
+    addGlobalMethod('procedure DebugImageDisplay(X, Y, Width, Height: Integer); overload', @_LapeDebugImage_Display2, Script);
+    addGlobalMethod('procedure DebugImageSetMaxSize(MaxWidth, MaxHeight: Integer);', @_LapeDebugImage_SetMaxSize, Script);
+    addGlobalMethod('procedure DebugImageClose', @_LapeDebugImage_Close, Script);
 
     addGlobalMethod('procedure DebugMatrixUpdate(Matrix: TSingleMatrix; ColorMapType: Integer = 0)', @_LapeDebugMatrix_Update, Script);
     addGlobalMethod('procedure DebugMatrixShow(Matrix: TSingleMatrix; ColorMapType: Integer = 0; EnsureVisible: Boolean = True)', @_LapeDebugMatrix_Show, Script);

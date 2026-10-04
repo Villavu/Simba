@@ -35,11 +35,11 @@ type
     procedure ScriptStateChanged;
     procedure ScriptError;
 
-    procedure DebugImage_SetMaxSize;
     procedure DebugImage_Update;
-    procedure DebugImage_Hide;
     procedure DebugImage_Display;
     procedure DebugImage_DisplayXY;
+    procedure DebugImage_SetMaxSize;
+    procedure DebugImage_Close;
 
     procedure DebugMatrix_Update;
   public
@@ -52,7 +52,6 @@ implementation
 uses
   simba.ide_controller,
   simba.ide_debugimage,
-  simba.image,
   simba.process,
   simba.threading,
   simba.vartype_matrix;
@@ -68,11 +67,11 @@ begin
     'GetSimbaTargetPID':     GetSimbaTargetPID();
     'ScriptStateChanged':    ScriptStateChanged();
     'ScriptError':           ScriptError();
-    'DebugImage_SetMaxSize': DebugImage_SetMaxSize();
     'DebugImage_Update':     DebugImage_Update();
-    'DebugImage_Hide':       DebugImage_Hide();
     'DebugImage_Display':    DebugImage_Display();
     'DebugImage_DisplayXY':  DebugImage_DisplayXY();
+    'DebugImage_SetMaxSize': DebugImage_SetMaxSize();
+    'DebugImage_Close':      DebugImage_Close();
     'DebugMatrix_Update':    DebugMatrix_Update();
     else
       raise Exception.Create('Unknown message');
@@ -191,41 +190,22 @@ begin
   RunInMainThread(@Execute);
 end;
 
-procedure TSimbaScriptInstanceCommunication.DebugImage_SetMaxSize;
-var
-  Width, Height: Int32;
-begin
-  Incoming.ReadInteger(Width);
-  Incoming.ReadInteger(Height);
-
-  SimbaDebugImageForm.SetMaxSize(Width, Height);
-end;
-
 procedure TSimbaScriptInstanceCommunication.DebugImage_Update;
 var
   Width, Height: Int32;
   Resize, EnsureVisible: Boolean;
-  Img: TSimbaImage;
 begin
   Incoming.ReadInteger(Width);
   Incoming.ReadInteger(Height);
   Incoming.ReadBoolean(Resize);
   Incoming.ReadBoolean(EnsureVisible);
 
-  Img := SimbaDebugImageForm.NewFrame(Width, Height);
+  SimbaDebugImageForm.BeginUpdate(Width, Height);
   try
-    Incoming.ReadData(Img.Data^, Int64(Width) * Height * SizeOf(TColorBGRA));
-  except
-    Img.Free();
-    raise;
+    Incoming.ReadData(SimbaDebugImageForm.BackBuffer.Data^, Int64(Width * Height * SizeOf(TColorBGRA)));
+  finally
+    SimbaDebugImageForm.EndUpdate(Resize, EnsureVisible);
   end;
-
-  SimbaDebugImageForm.ShowImage(Img, Resize, EnsureVisible);
-end;
-
-procedure TSimbaScriptInstanceCommunication.DebugImage_Hide;
-begin
-  SimbaDebugImageForm.Close();
 end;
 
 procedure TSimbaScriptInstanceCommunication.DebugImage_Display;
@@ -250,15 +230,29 @@ begin
   SimbaDebugImageForm.Display(X, Y, Width, Height);
 end;
 
+procedure TSimbaScriptInstanceCommunication.DebugImage_SetMaxSize;
+var
+  Width, Height: Int32;
+begin
+  Incoming.ReadInteger(Width);
+  Incoming.ReadInteger(Height);
+
+  SimbaDebugImageForm.SetMaxSize(Width, Height);
+end;
+
+procedure TSimbaScriptInstanceCommunication.DebugImage_Close;
+begin
+  SimbaDebugImageForm.Close();
+end;
+
 procedure TSimbaScriptInstanceCommunication.DebugMatrix_Update;
 var
-  Width, Height, ColorMapType, Y: Int32;
+  Width, Height, Y: Int32;
   Resize, EnsureVisible: Boolean;
   Matrix: TSingleMatrix;
 begin
   Incoming.ReadInteger(Width);
   Incoming.ReadInteger(Height);
-  Incoming.ReadInteger(ColorMapType);
   Incoming.ReadBoolean(Resize);
   Incoming.ReadBoolean(EnsureVisible);
 
@@ -266,7 +260,14 @@ begin
   for Y := 0 to Height - 1 do
     Incoming.ReadData(Matrix[Y, 0], Width * SizeOf(Single));
 
-  SimbaDebugMatrixForm.ShowMatrix(Matrix, ColorMapType, Resize, EnsureVisible);
+  SimbaDebugMatrixForm.BeginUpdate(Width, Height);
+  try
+    SimbaDebugMatrixForm.Matrix := Matrix;
+
+    Incoming.ReadData(SimbaDebugMatrixForm.BackBuffer.Data^, Int64(Width * Height * SizeOf(TColorBGRA)));
+  finally
+    SimbaDebugMatrixForm.EndUpdate(Resize, EnsureVisible);
+  end;
 end;
 
 constructor TSimbaScriptInstanceCommunication.Create(AOwner: TComponent);

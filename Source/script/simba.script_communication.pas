@@ -19,23 +19,22 @@ type
     procedure HandleIncoming; override;
   public
     function GetScript(out Title: String): String;
-
-    function GetSimbaTargetWindow: TWindowHandle;
-    function GetSimbaTargetPID: TProcessID;
-    function GetSimbaPID: TProcessID;
-
-    procedure ScriptError(Message: String; Line, Column: Integer; FileName: String);
-    procedure ScriptStateChanged(State: ESimbaScriptState);
+    procedure SetSimbaTitle(S: String);
 
     procedure ShowTrayNotification(Title, Message: String; Timeout: Integer);
 
-    procedure SetSimbaTitle(S: String);
+    function GetSimbaPID: TProcessID;
+    function GetSimbaTargetWindow: TWindowHandle;
+    function GetSimbaTargetPID: TProcessID;
 
-    procedure DebugImage_SetMaxSize(Width, Height: Integer);
+    procedure ScriptStateChanged(State: ESimbaScriptState);
+    procedure ScriptError(Message: String; Line, Column: Integer; FileName: String);
+
     procedure DebugImage_Update(Image: TSimbaImage; Resize, EnsureVisible: Boolean);
-    procedure DebugImage_Hide;
     procedure DebugImage_Display(Width, Height: Integer); overload;
     procedure DebugImage_Display(X, Y, Width, Height: Integer); overload;
+    procedure DebugImage_SetMaxSize(Width, Height: Integer);
+    procedure DebugImage_Close;
 
     procedure DebugMatrix_Update(Mat: TSingleMatrix; ColorMapType: Integer; Resize, EnsureVisible: Boolean);
   end;
@@ -59,6 +58,42 @@ begin
 
     Outgoing.ReadString(Title);
     Outgoing.ReadString(Result);
+  finally
+    Outgoing.EndMessage();
+  end;
+end;
+
+procedure TSimbaScriptCommunication.SetSimbaTitle(S: String);
+begin
+  Outgoing.BeginMessage('SetSimbaTitle', SizeOf(Int32) + Length(S));
+  try
+    Outgoing.WriteString(S);
+    Outgoing.Send();
+  finally
+    Outgoing.EndMessage();
+  end;
+end;
+
+procedure TSimbaScriptCommunication.ShowTrayNotification(Title, Message: String; Timeout: Integer);
+begin
+  Outgoing.BeginMessage('ShowTrayNotification', SizeOf(Int32) + Length(Title) + SizeOf(Int32) + Length(Message) + SizeOf(Int32));
+  try
+    Outgoing.WriteString(Title);
+    Outgoing.WriteString(Message);
+    Outgoing.WriteInteger(Timeout);
+    Outgoing.Send();
+  finally
+    Outgoing.EndMessage();
+  end;
+end;
+
+function TSimbaScriptCommunication.GetSimbaPID: TProcessID;
+begin
+  Outgoing.BeginMessage('GetSimbaPID', 0);
+  try
+    Outgoing.Send();
+
+    Outgoing.ReadData(Result, SizeOf(TProcessID));
   finally
     Outgoing.EndMessage();
   end;
@@ -88,13 +123,12 @@ begin
   end;
 end;
 
-function TSimbaScriptCommunication.GetSimbaPID: TProcessID;
+procedure TSimbaScriptCommunication.ScriptStateChanged(State: ESimbaScriptState);
 begin
-  Outgoing.BeginMessage('GetSimbaPID', 0);
+  Outgoing.BeginMessage('ScriptStateChanged', SizeOf(ESimbaScriptState));
   try
+    Outgoing.WriteData(State, SizeOf(ESimbaScriptState));
     Outgoing.Send();
-
-    Outgoing.ReadData(Result, SizeOf(TProcessID));
   finally
     Outgoing.EndMessage();
   end;
@@ -114,74 +148,22 @@ begin
   end;
 end;
 
-procedure TSimbaScriptCommunication.ScriptStateChanged(State: ESimbaScriptState);
-begin
-  Outgoing.BeginMessage('ScriptStateChanged', SizeOf(ESimbaScriptState));
-  try
-    Outgoing.WriteData(State, SizeOf(ESimbaScriptState));
-    Outgoing.Send();
-  finally
-    Outgoing.EndMessage();
-  end;
-end;
-
-procedure TSimbaScriptCommunication.ShowTrayNotification(Title, Message: String; Timeout: Integer);
-begin
-  Outgoing.BeginMessage('ShowTrayNotification', SizeOf(Int32) + Length(Title) + SizeOf(Int32) + Length(Message) + SizeOf(Int32));
-  try
-    Outgoing.WriteString(Title);
-    Outgoing.WriteString(Message);
-    Outgoing.WriteInteger(Timeout);
-    Outgoing.Send();
-  finally
-    Outgoing.EndMessage();
-  end;
-end;
-
-procedure TSimbaScriptCommunication.SetSimbaTitle(S: String);
-begin
-  Outgoing.BeginMessage('SetSimbaTitle', SizeOf(Int32) + Length(S));
-  try
-    Outgoing.WriteString(S);
-    Outgoing.Send();
-  finally
-    Outgoing.EndMessage();
-  end;
-end;
-
-procedure TSimbaScriptCommunication.DebugImage_SetMaxSize(Width, Height: Integer);
-begin
-  Outgoing.BeginMessage('DebugImage_SetMaxSize', 2 * SizeOf(Int32));
-  try
-    Outgoing.WriteInteger(Width);
-    Outgoing.WriteInteger(Height);
-    Outgoing.Send();
-  finally
-    Outgoing.EndMessage();
-  end;
-end;
-
 procedure TSimbaScriptCommunication.DebugImage_Update(Image: TSimbaImage; Resize, EnsureVisible: Boolean);
 begin
   if (Image = nil) or (Image.Width = 0) or (Image.Height = 0) then
     Exit;
 
-  Outgoing.BeginMessage('DebugImage_Update', 2 * SizeOf(Int32) + 2 * SizeOf(Boolean) + Int64(Image.Width) * Image.Height * SizeOf(TColorBGRA));
+  Outgoing.BeginMessage('DebugImage_Update', 2 * SizeOf(Int32) + 2 * SizeOf(Boolean) + Int64(Image.Width * Image.Height * SizeOf(TColorBGRA)));
   try
     Outgoing.WriteInteger(Image.Width);
     Outgoing.WriteInteger(Image.Height);
     Outgoing.WriteBoolean(Resize);
     Outgoing.WriteBoolean(EnsureVisible);
-    Outgoing.WriteData(Image.Data^, Int64(Image.Width) * Image.Height * SizeOf(TColorBGRA));
+    Outgoing.WriteData(Image.Data^, Int64(Image.Width * Image.Height * SizeOf(TColorBGRA)));
     Outgoing.Send();
   finally
     Outgoing.EndMessage();
   end;
-end;
-
-procedure TSimbaScriptCommunication.DebugImage_Hide;
-begin
-  Outgoing.SendMessage('DebugImage_Hide');
 end;
 
 procedure TSimbaScriptCommunication.DebugImage_Display(Width, Height: Integer);
@@ -210,9 +192,27 @@ begin
   end;
 end;
 
+procedure TSimbaScriptCommunication.DebugImage_SetMaxSize(Width, Height: Integer);
+begin
+  Outgoing.BeginMessage('DebugImage_SetMaxSize', 2 * SizeOf(Int32));
+  try
+    Outgoing.WriteInteger(Width);
+    Outgoing.WriteInteger(Height);
+    Outgoing.Send();
+  finally
+    Outgoing.EndMessage();
+  end;
+end;
+
+procedure TSimbaScriptCommunication.DebugImage_Close;
+begin
+  Outgoing.SendMessage('DebugImage_Close');
+end;
+
 procedure TSimbaScriptCommunication.DebugMatrix_Update(Mat: TSingleMatrix; ColorMapType: Integer; Resize, EnsureVisible: Boolean);
 var
   Width, Height, Y: Integer;
+  Image: TSimbaImage;
 begin
   if not Mat.GetSize(Width, Height) then
     Exit;
@@ -220,18 +220,26 @@ begin
     if (Length(Mat[Y]) <> Width) then
       SimbaException('DebugMatrix: every row must be the same length');
 
-  Outgoing.BeginMessage('DebugMatrix_Update', 3 * SizeOf(Int32) + 2 * SizeOf(Boolean) + Int64(Width) * Height * SizeOf(Single));
+  // drawn here: Simba shows the image, and the values under the mouse
+  Image := TSimbaImage.Create();
   try
-    Outgoing.WriteInteger(Width);
-    Outgoing.WriteInteger(Height);
-    Outgoing.WriteInteger(ColorMapType);
-    Outgoing.WriteBoolean(Resize);
-    Outgoing.WriteBoolean(EnsureVisible);
-    for Y := 0 to Height - 1 do
-      Outgoing.WriteData(Mat[Y, 0], Width * SizeOf(Single));
-    Outgoing.Send();
+    Image.FromMatrix(Mat, ColorMapType);
+
+    Outgoing.BeginMessage('DebugMatrix_Update', 2 * SizeOf(Int32) + 2 * SizeOf(Boolean) + Int64(Width * Height * (SizeOf(Single) + SizeOf(TColorBGRA))));
+    try
+      Outgoing.WriteInteger(Width);
+      Outgoing.WriteInteger(Height);
+      Outgoing.WriteBoolean(Resize);
+      Outgoing.WriteBoolean(EnsureVisible);
+      for Y := 0 to Height - 1 do
+        Outgoing.WriteData(Mat[Y, 0], Width * SizeOf(Single));
+      Outgoing.WriteData(Image.Data^, Int64(Width * Height * SizeOf(TColorBGRA)));
+      Outgoing.Send();
+    finally
+      Outgoing.EndMessage();
+    end;
   finally
-    Outgoing.EndMessage();
+    Image.Free();
   end;
 end;
 
