@@ -16,6 +16,8 @@ uses
 type
   TSimbaNativeInterface_Linux = class(TSimbaNativeInterface)
   public
+    constructor Create;
+
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
     procedure SetWindowBounds(Window: TWindowHandle; Bounds: TBox); override;
@@ -42,6 +44,7 @@ type
     function IsProcess64Bit(PID: SizeUInt): Boolean; override;
     function IsProcessRunning(PID: SizeUInt): Boolean; override;
     procedure TerminateProcess(PID: SizeUInt); override;
+    procedure SetHandleInheritable(Handle: THandle; Value: Boolean); override;
 
     function GetWindows: TWindowHandleArray; override;
     function GetWindowChildren(Window: TWindowHandle; Recursive: Boolean): TWindowHandleArray; override;
@@ -291,6 +294,14 @@ end;
 function HasWindowProperty(Window: TWindow; Prop: TAtom): Boolean;
 begin
   Result := GetWindowProperty(Window, Prop) > 0;
+end;
+
+constructor TSimbaNativeInterface_Linux.Create;
+begin
+  inherited Create();
+
+  // a write to a closed pipe fails, rather than killing the process
+  FpSignal(SIGPIPE, SignalHandler(SIG_IGN));
 end;
 
 function TSimbaNativeInterface_Linux.GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean;
@@ -602,6 +613,20 @@ end;
 procedure TSimbaNativeInterface_Linux.TerminateProcess(PID: SizeUInt);
 begin
   fpkill(PID, SIGKILL);
+end;
+
+procedure TSimbaNativeInterface_Linux.SetHandleInheritable(Handle: System.THandle; Value: Boolean); // LCLType has its own THandle
+const
+  FD_CLOEXEC = 1;
+var
+  Flags: Int32;
+begin
+  Flags := FD_CLOEXEC;
+  if Value then
+    Flags := 0;
+
+  if (fpFcntl(Handle, F_SETFD, Flags) < 0) then
+    SimbaException('Unable to set handle inheritance');
 end;
 
 function TSimbaNativeInterface_Linux.GetWindows: TWindowHandleArray;

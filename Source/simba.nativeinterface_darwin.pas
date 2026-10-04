@@ -33,6 +33,8 @@ type
 
     procedure BuildKeyMap;
   public
+    constructor Create;
+
     function GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean; override;
     function GetWindowBounds(Window: TWindowHandle): TBox; override; overload;
     procedure SetWindowBounds(Window: TWindowHandle; Bounds: TBox); override;
@@ -59,6 +61,7 @@ type
     function IsProcess64Bit(PID: SizeUInt): Boolean; override;
     function IsProcessRunning(PID: SizeUInt): Boolean; override;
     procedure TerminateProcess(PID: SizeUInt); override;
+    procedure SetHandleInheritable(Handle: THandle; Value: Boolean); override;
 
     function GetWindows: TWindowHandleArray; override;
     function GetWindowChildren(Window: TWindowHandle; Recursive: Boolean): TWindowHandleArray; override;
@@ -288,6 +291,14 @@ begin
   else
     Result := $FFFF;
   end;
+end;
+
+constructor TSimbaNativeInterface_Darwin.Create;
+begin
+  inherited Create();
+
+  // a write to a closed pipe fails, rather than killing the process
+  FpSignal(SIGPIPE, SignalHandler(SIG_IGN));
 end;
 
 function TSimbaNativeInterface_Darwin.GetWindowBounds(Window: TWindowHandle; out Bounds: TBox): Boolean;
@@ -611,6 +622,18 @@ end;
 procedure TSimbaNativeInterface_Darwin.TerminateProcess(PID: SizeUInt);
 begin
   fpkill(PID, SIGKILL);
+end;
+
+procedure TSimbaNativeInterface_Darwin.SetHandleInheritable(Handle: System.THandle; Value: Boolean); // LCLType has its own THandle
+var
+  Flags: Int32;
+begin
+  Flags := FD_CLOEXEC;
+  if Value then
+    Flags := 0;
+
+  if (fpFcntl(Handle, F_SETFD, Flags) < 0) then
+    SimbaException('Unable to set handle inheritance');
 end;
 
 function TSimbaNativeInterface_Darwin.HighResolutionTime: Double;
