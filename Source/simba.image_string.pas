@@ -5,7 +5,8 @@
   --------------------------------------------------------------------------
   Save/Load images from/to a base64 string.
 
-  A string is "IMG:" + base64(header + name + LZMA-compressed BGRA pixels).
+  A string is "IMG:" + base64(header + name + LZMA-compressed pixels).
+  The pixels are BGRA, or a bit a pixel when the image has two colors.
   Version 1 stored a PNG which is still supported for reading
 }
 unit simba.image_string;
@@ -26,6 +27,7 @@ implementation
 
 uses
   FPReadPNG,
+  simba.math,
   simba.encoding,
   simba.compress,
   simba.image_file,
@@ -38,6 +40,7 @@ const
   VERSION_PNG        = 1; // legacy: header with fixed name String[128] then PNG data
   VERSION_LZMA       = 2; // header + LZMA(interleaved BGRA)
   VERSION_LZMA_SPLIT = 3; // header + LZMA(channel-split BGRA)
+  VERSION_LZMA_BITS  = 4; // header + LZMA(two colors + a bit a pixel)
 
 type
   THeaderLegacy = packed record
@@ -65,16 +68,67 @@ end;
 // the four channels one after another, each PixelCount bytes
 function SplitBGRA(Src: PColorBGRA; PixelCount: SizeInt): TByteArray;
 var
-  Planes: PByte;
+  Channels: PByte;
 begin
   SetLength(Result, PixelCount * 4);
-  Planes := PByte(Result);
-  SplitChannels(Src, PixelCount, Planes, Planes + PixelCount, Planes + PixelCount * 2, Planes + PixelCount * 3);
+  Channels := PByte(Result);
+  SplitChannels(Src, PixelCount, Channels, Channels + PixelCount, Channels + PixelCount * 2, Channels + PixelCount * 3);
 end;
 
-procedure UnsplitBGRA(Planes: PByte; Dest: PColorBGRA; PixelCount: SizeInt);
+procedure UnsplitBGRA(Channels: PByte; Dest: PColorBGRA; PixelCount: SizeInt);
 begin
-  MergeChannels(Dest, PixelCount, Planes, Planes + PixelCount, Planes + PixelCount * 2, Planes + PixelCount * 3, 0);
+  MergeChannels(Dest, PixelCount, Channels, Channels + PixelCount, Channels + PixelCount * 2, Channels + PixelCount * 3, 0);
+end;
+
+// The two colors of an isDualColor image, then a bit a pixel with each row starting on a byte.
+// A set bit is the second color.
+procedure PackBits(Src: PColorBGRA; Width, Height: Integer; Color1, Color2: TColorBGRA; out Bits: TByteArray);
+var
+  Row: PByte;
+  X, Y, RowBytes: Integer;
+begin
+  RowBytes := (Width + 7) div 8;
+  SetLength(Bits, 2 * SizeOf(TColorBGRA) + RowBytes * Height);
+
+  PColorBGRA(Bits)[0] := Color1;
+  PColorBGRA(Bits)[1] := Color2;
+
+  Row := PByte(Bits) + 2 * SizeOf(TColorBGRA);
+  for Y := 0 to Height - 1 do
+  begin
+    for X := 0 to Width - 1 do
+    begin
+      if (Src^.AsInteger <> Color1.AsInteger) then
+        SetBit(Row, X);
+
+      Inc(Src);
+    end;
+
+    Inc(Row, RowBytes);
+  end;
+end;
+
+procedure UnpackBits(Bits: PByte; Dest: PColorBGRA; Width, Height: Integer);
+var
+  Colors: PColorBGRA;
+  X, Y: Integer;
+begin
+  Colors := PColorBGRA(Bits);
+  Inc(Bits, 2 * SizeOf(TColorBGRA));
+
+  for Y := 0 to Height - 1 do
+  begin
+    for X := 0 to Width - 1 do
+    begin
+      if IsBitSet(Bits, X) then
+        Dest^ := Colors[1]
+      else
+        Dest^ := Colors[0];
+      Inc(Dest);
+    end;
+
+    Inc(Bits, (Width + 7) div 8);
+  end;
 end;
 
 procedure SimbaImage_FromString(Image: TSimbaImage; Str: String);
@@ -99,16 +153,18 @@ begin
 
     case Header.Version of
       VERSION_LZMA,
-      VERSION_LZMA_SPLIT:
+      VERSION_LZMA_SPLIT,
+      VERSION_LZMA_BITS:
         begin
           Image.Name := ReadName(Stream, Header.NameLen);
           Image.SetSize(Header.Width, Header.Height);
 
           DecompressedData := DecompressStream(ESimbaCompressAlgo.LZMA, Stream);
-          if (Header.Version = VERSION_LZMA_SPLIT) then
-            UnsplitBGRA(PByte(DecompressedData), Image.Data, Header.Width * Header.Height)
-          else
-            Move(DecompressedData[0], Image.Data^, (Header.Width * Header.Height) * SizeOf(TColorBGRA));
+          case Header.Version of
+            VERSION_LZMA:       Move(DecompressedData[0], Image.Data^, (Header.Width * Header.Height) * SizeOf(TColorBGRA));
+            VERSION_LZMA_SPLIT: UnsplitBGRA(PByte(DecompressedData), Image.Data, Header.Width * Header.Height);
+            VERSION_LZMA_BITS:  UnpackBits(PByte(DecompressedData), Image.Data, Header.Width, Header.Height);
+          end;
         end;
 
       VERSION_PNG:
@@ -128,7 +184,8 @@ end;
 
 function SimbaImage_ToString(Image: TSimbaImage): String;
 var
-  Interleaved, Split, CompressedData: TByteArray;
+  Interleaved, Split, Bits, CompressedData: TByteArray;
+  Color1, Color2: TColorBGRA;
   Buffer: TBytesStream;
   Header: THeader;
   PixelCount, DataSize: SizeInt;
@@ -136,18 +193,28 @@ begin
   PixelCount := Image.PixelCount;
   DataSize   := PixelCount * SizeOf(TColorBGRA);
 
-  // pick the smaller output, and store in version field
-  Interleaved := CompressData(ESimbaCompressAlgo.LZMA, PByte(Image.Data), DataSize);
-  Split       := CompressBytes(ESimbaCompressAlgo.LZMA, SplitBGRA(Image.Data, PixelCount));
-
-  if (Length(Split) < Length(Interleaved)) then
+  if Image.isDualColor(Color1, Color2) then
   begin
-    Header.Version := VERSION_LZMA_SPLIT;
-    CompressedData := Split;
+    // two colors: nothing else is as small
+    PackBits(Image.Data, Image.Width, Image.Height, Color1, Color2, Bits);
+
+    Header.Version := VERSION_LZMA_BITS;
+    CompressedData := CompressBytes(ESimbaCompressAlgo.LZMA, Bits);
   end else
   begin
-    Header.Version := VERSION_LZMA;
-    CompressedData := Interleaved;
+    // pick the smaller output, and store in version field
+    Interleaved := CompressData(ESimbaCompressAlgo.LZMA, PByte(Image.Data), DataSize);
+    Split       := CompressBytes(ESimbaCompressAlgo.LZMA, SplitBGRA(Image.Data, PixelCount));
+
+    if (Length(Split) < Length(Interleaved)) then
+    begin
+      Header.Version := VERSION_LZMA_SPLIT;
+      CompressedData := Split;
+    end else
+    begin
+      Header.Version := VERSION_LZMA;
+      CompressedData := Interleaved;
+    end;
   end;
 
   Header.Width   := Image.Width;

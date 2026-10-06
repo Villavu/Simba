@@ -71,6 +71,11 @@ function FloorClamp(const V: Single; const Lo, Hi: Integer): Integer; inline;
 // Trunc(V) held to [Lo, Hi]
 function TruncClamp(const V: Single; const Lo, Hi: Integer): Integer; inline;
 
+// Bit `Index` of the bytes at Data. Bit 0 is the lowest bit of the first byte.
+function IsBitSet(const Data: PByte; const Index: SizeInt): Boolean; inline;
+procedure SetBit(const Data: PByte; const Index: SizeInt); inline;
+procedure ClearBit(const Data: PByte; const Index: SizeInt); inline;
+
 implementation
 
 uses
@@ -243,6 +248,21 @@ begin
     Result := Hi
   else
     Result := Trunc(V);
+end;
+
+function IsBitSet(const Data: PByte; const Index: SizeInt): Boolean;
+begin
+  Result := (Data[Index shr 3] and (1 shl (Index and 7))) <> 0;
+end;
+
+procedure SetBit(const Data: PByte; const Index: SizeInt);
+begin
+  Data[Index shr 3] := Data[Index shr 3] or (1 shl (Index and 7));
+end;
+
+procedure ClearBit(const Data: PByte; const Index: SizeInt);
+begin
+  Data[Index shr 3] := Data[Index shr 3] and not (1 shl (Index and 7));
 end;
 
 end.
