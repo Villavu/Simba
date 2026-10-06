@@ -385,10 +385,10 @@ begin
       while (WeightPtr < WeightEnd) do
       begin
         Weight := WeightPtr^;
-        SumB   := SumB   + Int64(Weight) * SrcPtr^.B;
-        SumG   := SumG   + Int64(Weight) * SrcPtr^.G;
-        SumR   := SumR   + Int64(Weight) * SrcPtr^.R;
-        SumCov := SumCov + Int64(Weight) * SrcPtr^.Coverage;
+        SumB   := SumB   + Int64(Weight * SrcPtr^.B);
+        SumG   := SumG   + Int64(Weight * SrcPtr^.G);
+        SumR   := SumR   + Int64(Weight * SrcPtr^.R);
+        SumCov := SumCov + Int64(Weight * SrcPtr^.Coverage);
 
         Inc(SrcPtr, OutDim);
         Inc(WeightPtr);

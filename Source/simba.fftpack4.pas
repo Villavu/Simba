@@ -450,7 +450,7 @@ var
   n: Integer;
 begin
   EnsureSetup();
-  n := ThreadsForArea(Int64(Eng.W) * Eng.H);
+  n := ThreadsForArea(Int64(Eng.W * Eng.H));
   if FFT_THREADING_DEBUG then
     DebugLn('[FFT Threading]: Using %d/%d threads', [n, FBuiltThreads]);
   Run(Eng.H - 1, @Eng.RowFwd, n);
@@ -463,7 +463,7 @@ var
   n: Integer;
 begin
   EnsureSetup();
-  n := ThreadsForArea(Int64(Eng.W) * Eng.H);
+  n := ThreadsForArea(Int64(Eng.W * Eng.H));
   if FFT_THREADING_DEBUG then
     DebugLn('[FFT Threading]: Using %d/%d threads', [n, FBuiltThreads]);
   Run(Eng.W - 1, @Eng.ColInv, n);
@@ -593,7 +593,7 @@ begin
 
   Prepare(m.Width, m.Height);
   Move(m.Data[0], Work[0], n * SizeOf(TComplex));
-  if ShouldParallelFFT(Int64(W) * H) and ThreadPool.Acquire() then // big enough + got the workers
+  if ShouldParallelFFT(Int64(W * H)) and ThreadPool.Acquire() then // big enough + got the workers
     try
       ThreadPool.RunForward(Self);
     finally
@@ -602,7 +602,7 @@ begin
   else
   begin
     if FFT_THREADING_DEBUG and FFT_THREADING then
-      if ShouldParallelFFT(Int64(W) * H) then
+      if ShouldParallelFFT(Int64(W * H)) then
         DebugLn('[FFT Threading]: Pool not available')
       else
         DebugLn('[FFT Threading]: Area < FFT_THREADING_MIN_AREA');
@@ -625,7 +625,7 @@ begin
 
   Prepare(m.Height, m.Width);
   Move(m.Data[0], Work[0], n * SizeOf(TComplex));
-  if ShouldParallelFFT(Int64(W) * H) and ThreadPool.Acquire() then // big enough + got the workers
+  if ShouldParallelFFT(Int64(W * H)) and ThreadPool.Acquire() then // big enough + got the workers
     try
       ThreadPool.RunInverse(Self);
     finally
@@ -634,7 +634,7 @@ begin
   else
   begin
     if FFT_THREADING_DEBUG and FFT_THREADING then
-      if ShouldParallelFFT(Int64(W) * H) then
+      if ShouldParallelFFT(Int64(W * H)) then
         DebugLn('[FFT Threading]: Pool not available')
       else
         DebugLn('[FFT Threading]: Area < FFT_THREADING_MIN_AREA');

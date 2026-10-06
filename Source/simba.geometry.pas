@@ -99,7 +99,7 @@ begin
   Nearest.Y := P1.Y;
   dx := P2.X - P1.X;
   dy := P2.Y - P1.Y;
-  d := Int64(dx)*dx + Int64(dy)*dy;
+  d := Int64(dx*dx + dy*dy);
   if (d = 0) then
     Exit(Hypot(P.X-P1.X, P.Y-P1.Y));
   f := ((P.X - P1.X) * (dx) + (P.Y - P1.Y) * (dy)) / d;
@@ -123,7 +123,7 @@ var
 begin
   dx := P2.X - P1.X;
   dy := P2.Y - P1.Y;
-  d := Int64(dx)*dx + Int64(dy)*dy;
+  d := Int64(dx*dx + dy*dy);
   if (d = 0) then
     Exit(Hypot(P.X-P1.X, P.Y-P1.Y));
   f := ((P.X - P1.X) * (dx) + (P.Y - P1.Y) * (dy)) / d;
@@ -242,14 +242,14 @@ begin
 
   cx := P1.X - Q1.X;
   cy := P1.Y - Q1.Y;
-  d  := (Int64(by) * cx) - (Int64(bx) * cy);
-  f  := (Int64(ay) * bx) - (Int64(ax) * by);
+  d  := Int64(by * cx - bx * cy);
+  f  := Int64(ay * bx - ax * by);
 
   if ((f > 0) and ((d < 0) or (d > f))) or
      ((f <= 0) and ((d > 0) or (d < f))) then
     Exit(False);
 
-  e := (Int64(ax) * cy) - (Int64(ay) * cx);
+  e := Int64(ax * cy - ay * cx);
 
   if ((f > 0) and ((e < 0) or (e > f))) or
      ((f <= 0) and ((e > 0) or (e < f))) then
@@ -318,14 +318,14 @@ begin
 
   cx := P1.X - Q1.X;
   cy := P1.Y - Q1.Y;
-  d  := (Int64(by) * cx) - (Int64(bx) * cy);
-  f  := (Int64(ay) * bx) - (Int64(ax) * by);
+  d  := Int64(by * cx - bx * cy);
+  f  := Int64(ay * bx - ax * by);
 
   if ((f > 0) and ((d < 0) or (d > f))) or
      ((f <= 0) and ((d > 0) or (d < f))) then
     Exit(False);
 
-  e := (Int64(ax) * cy) - (Int64(ay) * cx);
+  e := Int64(ax * cy - ay * cx);
 
   if ((f > 0) and ((e < 0) or (e > f))) or
      ((f <= 0) and ((e > 0) or (e < f))) then

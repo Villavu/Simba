@@ -169,7 +169,7 @@ end;
 
 function TBoxHelper.GetArea: Int64;
 begin
-  Result := (Width * Height);
+  Result := Int64(Width * Height);
 end;
 
 function TBoxHelper.Expand(SizeMod: Integer): TBox;
@@ -557,7 +557,7 @@ begin
     Blocks[I] := Block(0, 0, Self[I].Width - 1, Self[I].Height - 1, I);
     Weights[I] := Blocks[I].H;
 
-    Area += Int64(Blocks[I].W) * Blocks[I].H;
+    Area += Int64(Blocks[I].W * Blocks[I].H);
     MaxWidth := Max(MaxWidth, Blocks[I].W);
   end;
 

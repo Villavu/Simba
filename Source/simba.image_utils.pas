@@ -15,6 +15,8 @@ uses
 
 // Data[0..Count-1] := Value
 procedure FillData(const Data: PColorBGRA; const Count: SizeInt; constref Value: TColorBGRA);
+// Dest[0..Count-1] := Src[0..Count-1]. The two may overlap.
+procedure MoveData(Dest, Src: PColorBGRA; Count: SizeInt);
 // Width x Height pixels from Src to Dest, whose rows are the given bytes apart. A negative BytesPerRow walks up.
 procedure CopyRows(Dest: PColorBGRA; DestBytesPerRow: SizeInt; Src: PColorBGRA; SrcBytesPerRow: SizeInt; Width, Height: Integer);
 // Color blended over each of Data[0..Count-1].
@@ -57,24 +59,30 @@ begin
 end;
 {$ENDIF}
 
+procedure MoveData(Dest, Src: PColorBGRA; Count: SizeInt);
+{$IF DEFINED(IMAGE_ASM)}
+  {$I asm/movedata_x86_64.inc}
+{$ELSE}
+begin
+  Move(Src^, Dest^, Count * SizeOf(TColorBGRA));
+end;
+{$ENDIF}
+
 procedure CopyRows(Dest: PColorBGRA; DestBytesPerRow: SizeInt; Src: PColorBGRA; SrcBytesPerRow: SizeInt; Width, Height: Integer);
-var
-  RowBytes: SizeInt;
 begin
   if (Width <= 0) or (Height <= 0) then
     Exit;
 
   // rows back to back in both: one block
-  RowBytes := Width * SizeOf(TColorBGRA);
-  if (DestBytesPerRow = RowBytes) and (SrcBytesPerRow = RowBytes) then
+  if (DestBytesPerRow = Width * SizeOf(TColorBGRA)) and (SrcBytesPerRow = DestBytesPerRow) then
   begin
-    Move(Src^, Dest^, RowBytes * Height);
+    MoveData(Dest, Src, SizeInt(Width * Height));
     Exit;
   end;
 
   while (Height > 0) do
   begin
-    Move(Src^, Dest^, RowBytes);
+    MoveData(Dest, Src, Width);
     Src := PColorBGRA(PByte(Src) + SrcBytesPerRow);
     Dest := PColorBGRA(PByte(Dest) + DestBytesPerRow);
     Dec(Height);

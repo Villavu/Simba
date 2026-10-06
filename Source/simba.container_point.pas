@@ -240,7 +240,7 @@ begin
 
   // hash when a scanline would be too big to allocate or too sparse to be worth it
   Result := (W < 1) or (H < 1) or (Space > MAX_SPACE) or
-            (Int64(PointCount) * SPACE_PER_POINT < Space);
+            (Int64(PointCount * SPACE_PER_POINT) < Space);
 end;
 
 procedure TPointBuffer.Grow(const Len: Integer);
@@ -460,7 +460,7 @@ begin
   FBounds := ABounds;
   FWidth := (ABounds.X2 - ABounds.X1) + 1;
   FHeight := (ABounds.Y2 - ABounds.Y1) + 1;
-  Space := Int64(FWidth) * FHeight;
+  Space := Int64(FWidth * FHeight);
 
   FBits := nil;
   if (Space > 0) then
@@ -660,7 +660,7 @@ begin
   FBounds := ABounds;
   FWidth := (ABounds.X2 - ABounds.X1) + 1;
   FHeight := (ABounds.Y2 - ABounds.Y1) + 1;
-  Space := Int64(FWidth) * FHeight;
+  Space := Int64(FWidth * FHeight);
 
   FCells := nil;
   if (Space > 0) then

@@ -161,7 +161,7 @@ begin
 
           DecompressedData := DecompressStream(ESimbaCompressAlgo.LZMA, Stream);
           case Header.Version of
-            VERSION_LZMA:       Move(DecompressedData[0], Image.Data^, (Header.Width * Header.Height) * SizeOf(TColorBGRA));
+            VERSION_LZMA:       MoveData(Image.Data, PColorBGRA(DecompressedData), Header.Width * Header.Height);
             VERSION_LZMA_SPLIT: UnsplitBGRA(PByte(DecompressedData), Image.Data, Header.Width * Header.Height);
             VERSION_LZMA_BITS:  UnpackBits(PByte(DecompressedData), Image.Data, Header.Width, Header.Height);
           end;

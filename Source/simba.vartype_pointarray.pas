@@ -1874,7 +1874,7 @@ begin
 
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
-    Weights[i] := Int64(Self[i].Y) * Width + Self[i].X;
+    Weights[i] := Int64(Self[i].Y * Width + Self[i].X);
 
   Result := Self.Sort(Weights, LowToHigh);
 end;
@@ -1888,7 +1888,7 @@ begin
 
   SetLength(Weights, Length(Self));
   for I := 0 to High(Self) do
-    Weights[i] := Int64(Self[i].X) * Height + Self[i].Y;
+    Weights[i] := Int64(Self[i].X * Height + Self[i].Y);
 
   Result := Self.Sort(Weights, LowToHigh);
 end;
@@ -2065,7 +2065,7 @@ var
   begin
     Result := QueueTail;
     RowY := CenterY - RadiusY;                        // first row
-    RowStartBit := Int64(RowY) * BitStride;           // rows advance additively
+    RowStartBit := Int64(RowY * BitStride);           // rows advance additively
     for DeltaY := -RadiusY to RadiusY do
     begin
       HalfSpan := RowSpans[Abs(DeltaY)];              // row half-width
@@ -2153,18 +2153,18 @@ begin
     MinY := Y1;
 
     ChunksPerRow := (Width + 2 * RadiusX + 63) shr 6;
-    GridChunks   := Int64(ChunksPerRow) * (Int64(Height) + 2 * RadiusY);          // UInt64s allocated
+    GridChunks   := Int64(ChunksPerRow * (Height + 2 * RadiusY));          // UInt64s allocated
     GridArea     := (Int64(Width) + 2 * RadiusX) * (Int64(Height) + 2 * RadiusY); // grid cells (density)
 
     // fall back to Split when too sparse for the grid to win (>640 cells/point), or the grid would
     // exceed ~128mb (16M eight-byte chunks). All Int64 so a huge point count or bbox can't overflow the test.
-    if (GridArea > Int64(High(Self)) * 640) or (GridChunks > 16 * 1024 * 1024) then
+    if (GridArea > Int64(High(Self) * 640)) or (GridChunks > 16 * 1024 * 1024) then
     begin
       Result := Split(DistX, DistY);
       Exit;
     end;
 
-    BitStride := Int64(ChunksPerRow) * 64;
+    BitStride := Int64(ChunksPerRow * 64);
     SetLength(GridBits, GridChunks);
   end;
   SetLength(Queue, Length(Self));
@@ -2174,7 +2174,7 @@ begin
   // rasterize: 1 bit/point
   for Index := 0 to High(Self) do
   begin
-    PixelBit := Int64(Self[Index].Y - MinY + RadiusY) * BitStride + (Self[Index].X - MinX + RadiusX);
+    PixelBit := Int64((Self[Index].Y - MinY + RadiusY) * BitStride + (Self[Index].X - MinX + RadiusX));
     GridBits[PixelBit shr 6] := GridBits[PixelBit shr 6] or (OneBit shl (PixelBit and 63));
   end;
 
@@ -2185,7 +2185,7 @@ begin
   begin
     CenterX := Self[Index].X - MinX + RadiusX;
     CenterY := Self[Index].Y - MinY + RadiusY;
-    PixelBit := Int64(CenterY) * BitStride + CenterX;
+    PixelBit := Int64(CenterY * BitStride + CenterX);
     if (GridBits[PixelBit shr 6] and (OneBit shl (PixelBit and 63))) = 0 then  // already taken
       Continue;
 
