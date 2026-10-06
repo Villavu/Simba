@@ -153,13 +153,13 @@ begin
   if (Image = nil) or (Image.Width = 0) or (Image.Height = 0) then
     Exit;
 
-  Outgoing.BeginMessage('DebugImage_Update', 2 * SizeOf(Int32) + 2 * SizeOf(Boolean) + Int64(Image.Width * Image.Height * SizeOf(TColorBGRA)));
+  Outgoing.BeginMessage('DebugImage_Update', 2 * SizeOf(Int32) + 2 * SizeOf(Boolean) + Int64(Image.PixelCount * SizeOf(TColorBGRA)));
   try
     Outgoing.WriteInteger(Image.Width);
     Outgoing.WriteInteger(Image.Height);
     Outgoing.WriteBoolean(Resize);
     Outgoing.WriteBoolean(EnsureVisible);
-    Outgoing.WriteData(Image.Data^, Int64(Image.Width * Image.Height * SizeOf(TColorBGRA)));
+    Outgoing.WriteData(Image.Data^, Int64(Image.PixelCount * SizeOf(TColorBGRA)));
     Outgoing.Send();
   finally
     Outgoing.EndMessage();

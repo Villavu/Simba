@@ -49,8 +49,8 @@ begin
   img := world.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, world.Width*5, world.Height*5);
   templ := img.Copy([1000,2500,1100,2600]).Blur(EImageBlurAlgo.BOX, 5);
   templWithMask := templ.Copy();
-  templWithMask.DrawColor := 0;
-  templWithMask.DrawCircleInverted(templ.Center, 50);
+  templWithMask.Canvas.DrawColor := 0;
+  templWithMask.Canvas.DrawCircleInverted(templ.Center, 50);
 
   WriteLn('img: ', img.Width, 'x', img.Height);
   WriteLn('templ: ', templ.Width, 'x', templ.Height);

@@ -64,7 +64,8 @@ type
 implementation
 
 uses
-  MultiMon, DwmApi;
+  MultiMon, DwmApi,
+  simba.image_utils;
 
 const
   FRAME_POOL_BUFFERS     = 2;
@@ -383,8 +384,8 @@ end;
   (top-down TColorBGRA). Pixels outside the source surface are zero-filled. }
 function TWGCCapture.CropFromSource(const S: TWGCSource; srcX, srcY, AWidth, AHeight: Integer; var Data: PColorBGRA): Boolean;
 var
-  srcRowY, x0, x1, iy, iyStart, iyEnd: Integer;
-  copyBytes, dstColOff, bufBytes: PtrUInt;
+  x0, x1, iyStart, iyEnd: Integer;
+  bufBytes: PtrUInt;
   mapped: TD3D11MappedSubresource;
   srcPtr: PByte;
 begin
@@ -411,14 +412,8 @@ begin
       Exit;
 
     try
-      copyBytes := PtrUInt(x1 - x0) * SizeOf(TColorBGRA);
-      dstColOff := PtrUInt(x0 - srcX);
-      for iy := iyStart to iyEnd do
-      begin
-        srcRowY := srcY + iy;
-        srcPtr := PByte(mapped.pData) + PtrUInt(srcRowY) * PtrUInt(mapped.RowPitch) + PtrUInt(x0) * SizeOf(TColorBGRA);
-        Move(srcPtr^, (Data + PtrUInt(iy) * PtrUInt(AWidth) + dstColOff)^, copyBytes);
-      end;
+      srcPtr := PByte(mapped.pData) + PtrUInt(srcY + iyStart) * PtrUInt(mapped.RowPitch) + PtrUInt(x0) * SizeOf(TColorBGRA);
+      CopyRows(Data + PtrUInt(iyStart) * PtrUInt(AWidth) + PtrUInt(x0 - srcX), AWidth * SizeOf(TColorBGRA), PColorBGRA(srcPtr), mapped.RowPitch, x1 - x0, iyEnd - iyStart + 1);
     finally
       FContext.Unmap(S.Staging, 0);
     end;
@@ -512,7 +507,7 @@ end;
   or any sub-region of it. }
 function TWGCCapture.BlitMonitors(Dest: PColorBGRA; dstW, dstH, originVX, originVY: Integer): Boolean;
 var
-  i, y, dstX, dstY, srcX0, srcY0, ddx, ddy, copyW, copyH: Integer;
+  i, dstX, dstY, srcX0, srcY0, ddx, ddy, copyW, copyH: Integer;
   mapped: TD3D11MappedSubresource;
   srcPtr: PByte;
 begin
@@ -532,11 +527,8 @@ begin
         Exit;
 
       try
-        for y := 0 to copyH - 1 do
-        begin
-          srcPtr := PByte(mapped.pData) + PtrUInt(srcY0 + y) * PtrUInt(mapped.RowPitch) + PtrUInt(srcX0) * SizeOf(TColorBGRA);
-          Move(srcPtr^, (Dest + PtrUInt(ddy + y) * PtrUInt(dstW) + PtrUInt(ddx))^, PtrUInt(copyW) * SizeOf(TColorBGRA));
-        end;
+        srcPtr := PByte(mapped.pData) + PtrUInt(srcY0) * PtrUInt(mapped.RowPitch) + PtrUInt(srcX0) * SizeOf(TColorBGRA);
+        CopyRows(Dest + PtrUInt(ddy) * PtrUInt(dstW) + PtrUInt(ddx), dstW * SizeOf(TColorBGRA), PColorBGRA(srcPtr), mapped.RowPitch, copyW, copyH);
       finally
         FContext.Unmap(FSources[i].Staging, 0);
       end;

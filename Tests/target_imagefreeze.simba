@@ -19,8 +19,8 @@ begin
 
   // test area
   img.Fill(0);
-  img.DrawColor := Colors.RED;
-  img.DrawBox([10,10,35,45]);
+  img.Canvas.DrawColor := Colors.RED;
+  img.Canvas.DrawBox([10,10,35,45]);
 
   Target.FreezeImage([15,15,40,50]);
   img.Clear(); // clear image but target is frozen

@@ -138,7 +138,7 @@ begin
   Result := TSimbaImage.Create(Boxes.Merge.Width, Boxes.Merge.Height);
   for I := 0 to High(ShapeImages) do
   begin
-    Result.DrawImage(ShapeImages[I], Boxes[I].Center - ShapeImages[I].Center);
+    Result.Canvas.DrawImage(ShapeImages[I], Boxes[I].Center - ShapeImages[I].Center);
 
     ShapeImages[I].Free();
   end;

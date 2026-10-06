@@ -109,13 +109,13 @@ function IsSimilar(const Image: TSimbaImage; const X, Y: Integer; const Color2: 
 const
   MAX_DISTANCE_RGB = Single(441.672955930064); // Sqrt(Sqr(255) + Sqr(255) + Sqr(255))
 begin
-  with Image.Data[Y * Image.Width + X] do
+  with Image.PixelPtr[X, Y]^ do
     Result := (Sqrt(Sqr(R-Color2.R) + Sqr(G-Color2.G) + Sqr(B-Color2.B)) / MAX_DISTANCE_RGB * 100) <= Tol;
 end;
 
 function IsShadow(const Image: TSimbaImage; const X, Y: Integer; const Tol: Single): Boolean; inline;
 begin
-  with Image.Data[Y * Image.Width + X] do
+  with Image.PixelPtr[X, Y]^ do
     Result := (R <= Tol) and (G <= Tol) and (B <= Tol + 5); // allow a little more in the blue channel only
 end;
 

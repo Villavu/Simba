@@ -137,6 +137,7 @@ var
   DecompressedData: TByteArray;
   Header: THeader;
   HeaderLegacy: THeaderLegacy;
+  DataSize: SizeInt;
 begin
   if not Str.StartsWith(HeaderPrefix, True) then
     SimbaException('TImage.FromString: Invalid string. Must start with "IMG:"');
@@ -161,8 +162,8 @@ begin
 
           DecompressedData := DecompressStream(ESimbaCompressAlgo.LZMA, Stream);
           case Header.Version of
-            VERSION_LZMA:       MoveData(Image.Data, PColorBGRA(DecompressedData), Header.Width * Header.Height);
-            VERSION_LZMA_SPLIT: UnsplitBGRA(PByte(DecompressedData), Image.Data, Header.Width * Header.Height);
+            VERSION_LZMA:       MoveData(Image.Data, PColorBGRA(DecompressedData), Image.PixelCount);
+            VERSION_LZMA_SPLIT: UnsplitBGRA(PByte(DecompressedData), Image.Data, Image.PixelCount);
             VERSION_LZMA_BITS:  UnpackBits(PByte(DecompressedData), Image.Data, Header.Width, Header.Height);
           end;
         end;
