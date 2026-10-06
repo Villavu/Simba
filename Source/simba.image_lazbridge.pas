@@ -12,7 +12,7 @@ unit simba.image_lazbridge;
 interface
 
 uses
-  Classes, SysUtils, Graphics, GraphType, IntfGraphics, FPImage,
+  Classes, SysUtils, Graphics, GraphType,
   simba.base, simba.image, simba.colormath;
 
 {$scopedenums on}
@@ -22,22 +22,21 @@ type
 
 procedure LazImage_CopyRow_BGR(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGR); inline;
 procedure LazImage_CopyRow_ARGB(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorARGB); inline;
-procedure LazImage_CopyRow_BGRA(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGRA); inline;
 
-procedure LazImage_FromData(LazImage: TBitmap; Data: PColorBGRA; Width, Height: Integer);
+// SourceBytesPerLine=0 means packed
+procedure LazImage_FromData(LazImage: TBitmap; Data: PColorBGRA; Width, Height: Integer; SourceBytesPerLine: SizeInt = 0);
 procedure LazImage_FromSimbaImage(LazImage: TBitmap; SimbaImage: TSimbaImage);
 function LazImage_ToSimbaImage(LazImage: TBitmap): TSimbaImage;
 function LazImage_PixelFormat(LazImage: TBitmap): ELazPixelFormat;
 
-procedure SimbaImage_ToFPImageWriter(SimbaImage: TSimbaImage; WriterClass: TFPCustomImageWriterClass; Stream: TStream);
-procedure SimbaImage_FromFPImageReader(SimbaImage: TSimbaImage; ReaderClass: TFPCustomImageReaderClass; Stream: TStream);
 function SimbaImage_ToRawImage(SimbaImage: TSimbaImage): TRawImage;
 function SimbaImage_ToLazImage(SimbaImage: TSimbaImage): TBitmap;
 
 implementation
 
 uses
-  TypInfo, FPWritePNG;
+  TypInfo,
+  simba.image_utils;
 
 procedure LazImage_CopyRow_BGR(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGR);
 begin
@@ -61,33 +60,17 @@ begin
   end;
 end;
 
-procedure LazImage_CopyRow_BGRA(Source: PColorBGRA; SourceUpper: PtrUInt; Dest: PColorBGRA);
-begin
-  Move(Source^, Dest^, SourceUpper - PtrUInt(Source)); // same formats, copy whole row
-end;
-
-procedure LazImage_FromData(LazImage: TBitmap; Data: PColorBGRA; Width, Height: Integer);
+procedure LazImage_FromData(LazImage: TBitmap; Data: PColorBGRA; Width, Height: Integer; SourceBytesPerLine: SizeInt);
 var
   Source, Dest: PByte;
-  SourceBytesPerLine, DestBytesPerLine: Integer;
+  DestBytesPerLine, RowBytes: Integer;
   SourceUpper: PtrUInt;
-
-  procedure BGRA;
-  begin
-    while (PtrUInt(Source) < SourceUpper) do
-    begin
-      LazImage_CopyRow_BGRA(PColorBGRA(Source), PtrUInt(Source + SourceBytesPerLine), PColorBGRA(Dest));
-
-      Inc(Source, SourceBytesPerLine);
-      Inc(Dest, DestBytesPerLine);
-    end;
-  end;
 
   procedure BGR;
   begin
     while (PtrUInt(Source) < SourceUpper) do
     begin
-      LazImage_CopyRow_BGR(PColorBGRA(Source), PtrUInt(Source + SourceBytesPerLine), PColorBGR(Dest));
+      LazImage_CopyRow_BGR(PColorBGRA(Source), PtrUInt(Source + RowBytes), PColorBGR(Dest));
 
       Inc(Source, SourceBytesPerLine);
       Inc(Dest, DestBytesPerLine);
@@ -98,7 +81,7 @@ var
   begin
     while (PtrUInt(Source) < SourceUpper) do
     begin
-      LazImage_CopyRow_ARGB(PColorBGRA(Source), PtrUInt(Source + SourceBytesPerLine), PColorARGB(Dest));
+      LazImage_CopyRow_ARGB(PColorBGRA(Source), PtrUInt(Source + RowBytes), PColorARGB(Dest));
 
       Inc(Source, SourceBytesPerLine);
       Inc(Dest, DestBytesPerLine);
@@ -106,6 +89,9 @@ var
   end;
 
 begin
+  if (SourceBytesPerLine <= 0) then
+    SourceBytesPerLine := SizeInt(Width * SizeOf(TColorBGRA));
+
   LazImage.BeginUpdate();
   LazImage.SetSize(Width, Height);
 
@@ -113,12 +99,12 @@ begin
   DestBytesPerLine := LazImage.RawImage.Description.BytesPerLine;
 
   Source := PByte(Data);
-  SourceBytesPerLine := Width * SizeOf(TColorBGRA);
+  RowBytes := Width * SizeOf(TColorBGRA);
   SourceUpper := PtrUInt(Source + (SourceBytesPerLine * Height));
 
   case LazImage_PixelFormat(LazImage) of
     ELazPixelFormat.BGR:  BGR();
-    ELazPixelFormat.BGRA: BGRA();
+    ELazPixelFormat.BGRA: CopyRows(PColorBGRA(Dest), DestBytesPerLine, Data, SourceBytesPerLine, Width, Height);
     ELazPixelFormat.ARGB: ARGB();
     else
       SimbaException('not supported');
@@ -154,16 +140,6 @@ function LazImage_ToSimbaImage(LazImage: TBitmap): TSimbaImage;
     end;
   end;
 
-  procedure BGRA(SourcePtr, DestPtr: PByte; const DestUpper: PtrUInt; const SourceRowSize, DestRowSize: Integer);
-  begin
-    while (PtrUInt(DestPtr) < DestUpper) do
-    begin
-      Move(SourcePtr^, DestPtr^, DestRowSize); // same formats, can copy entire row
-      Inc(SourcePtr, SourceRowSize);
-      Inc(DestPtr, DestRowSize);
-    end;
-  end;
-
   procedure ARGB(SourcePtr, DestPtr: PByte; const DestUpper: PtrUInt; const SourceRowSize, DestRowSize: Integer);
   var
     Ptr: PByte;
@@ -192,7 +168,7 @@ begin
   Result.SetSize(LazImage.Width, LazImage.Height);
 
   Dest := PByte(Result.Data);
-  DestUpper := PtrUInt(@Result.Data[Result.Width * Result.Height]);
+  DestUpper := PtrUInt(@Result.Data[Result.PixelCount]);
   DestRowSize := LazImage.Width * SizeOf(TColorBGRA);
 
   Source := LazImage.RawImage.Data;
@@ -200,11 +176,15 @@ begin
 
   case LazImage_PixelFormat(LazImage) of
     ELazPixelFormat.BGR:  BGR(Source, Dest, DestUpper, SourceRowSize, DestRowSize);
-    ELazPixelFormat.BGRA: BGRA(Source, Dest, DestUpper, SourceRowSize, DestRowSize);
+    ELazPixelFormat.BGRA: CopyRows(Result.Data, Result.BytesPerRow, PColorBGRA(Source), SourceRowSize, Result.Width, Result.Height);
     ELazPixelFormat.ARGB: ARGB(Source, Dest, DestUpper, SourceRowSize, DestRowSize);
     else
       SimbaException('Not supported');
   end;
+
+  // 32 bits a pixel with no alpha declared: the fourth byte is padding, often zero, and never alpha
+  if (LazImage.RawImage.Description.BitsPerPixel = 32) and (LazImage.RawImage.Description.AlphaPrec = 0) then
+    Result.Canvas.FillWithAlpha(ALPHA_OPAQUE);
 end;
 
 function LazImage_PixelFormat(LazImage: TBitmap): ELazPixelFormat;
@@ -212,8 +192,8 @@ function LazImage_PixelFormat(LazImage: TBitmap): ELazPixelFormat;
   function isRGBA: Boolean;
   begin
     with LazImage.RawImage.Description do
-      Result := ((BitsPerPixel = 32) and (Depth = 32) and (RedShift = 0) and (GreenShift = 8) and (BlueShift = 16) and (AlphaShift = 24)) or
-                ((BitsPerPixel = 32) and (Depth = 24) and (RedShift = 0) and (GreenShift = 8) and (BlueShift = 16) and (AlphaShift in [0,24])); // 32bit but alpha not used
+      Result := ((BitsPerPixel = 32) and (Depth = 32) and (ByteOrder = riboLSBFirst) and (RedShift = 0) and (GreenShift = 8) and (BlueShift = 16) and (AlphaShift = 24)) or
+                ((BitsPerPixel = 32) and (Depth = 24) and (ByteOrder = riboLSBFirst) and (RedShift = 0) and (GreenShift = 8) and (BlueShift = 16) and (AlphaShift in [0,24])); // 32bit but alpha not used
   end;
 
   function isBGRA: Boolean;
@@ -269,63 +249,15 @@ begin
     else if isRGB()  then Result := ELazPixelFormat.RGB
     else
       SimbaException(
-        'LazImage_PixelFormat: Pixel format not supported.'                              +
+        'LazImage_PixelFormat: Pixel format not supported. '                             +
         'ByteOrder: '    + GetEnumName(TypeInfo(TRawImageByteOrder), Integer(ByteOrder)) + ', ' +
         'Depth: '        + IntToStr(Depth)                                               + ', ' +
         'BitsPerPixel: ' + IntToStr(BitsPerPixel)                                        + ', ' +
-        'RedShit: '      + IntToStr(RedShift)     + ', Prec: ' + IntToStr(RedPrec)       + ', ' +
-        'GreenShit: '    + IntToStr(GreenShift)   + ', Prec: ' + IntToStr(GreenPrec)     + ', ' +
+        'RedShift: '     + IntToStr(RedShift)     + ', Prec: ' + IntToStr(RedPrec)       + ', ' +
+        'GreenShift: '   + IntToStr(GreenShift)   + ', Prec: ' + IntToStr(GreenPrec)     + ', ' +
         'BlueShift: '    + IntToStr(BlueShift)    + ', Prec: ' + IntToStr(BluePrec)      + ', ' +
         'AlphaShift: '   + IntToStr(AlphaShift)   + ', Prec: ' + IntToStr(AlphaPrec)
       );
-  end;
-end;
-
-procedure SimbaImage_ToFPImageWriter(SimbaImage: TSimbaImage; WriterClass: TFPCustomImageWriterClass; Stream: TStream);
-var
-  Img: TLazIntfImage;
-  Writer: TFPCustomImageWriter;
-begin
-  Img := nil;
-  Writer := nil;
-  try
-    Writer := WriterClass.Create();
-    if (Writer is TFPWriterPNG) then
-    begin
-      TFPWriterPNG(Writer).WordSized := False;
-      TFPWriterPNG(Writer).UseAlpha := True;
-    end;
-
-    Img := TLazIntfImage.Create(SimbaImage_ToRawImage(SimbaImage), False);
-
-    Writer.ImageWrite(Stream, Img);
-  finally
-    if Assigned(Img) then
-      Img.Free();
-  end;
-end;
-
-procedure SimbaImage_FromFPImageReader(SimbaImage: TSimbaImage; ReaderClass: TFPCustomImageReaderClass; Stream: TStream);
-var
-  Img: TLazIntfImage;
-  Reader: TFPCustomImageReader;
-  Desc: TRawImageDescription;
-begin
-  Desc.Init_BPP32_B8G8R8A8_BIO_TTB(0, 0);
-
-  Img := nil;
-  Reader := nil;
-  try
-    Reader := ReaderClass.Create();
-    Img := TLazIntfImage.Create(0, 0);
-    Img.DataDescription := Desc;
-
-    Reader.ImageRead(Stream, Img);
-
-    SimbaImage.FromData(Img.Width, Img.Height, PColorBGRA(Img.PixelData), Img.Width);
-  finally
-    Img.Free();
-    Reader.Free();
   end;
 end;
 

@@ -1180,8 +1180,8 @@ var
 begin
   if GetImageData(ABounds, Data, DataWidth) then
   try
-    Result := TSimbaImage.CreateFromData(ABounds.Width, ABounds.Height, Data, DataWidth);
-    Result.FillWithAlpha(ALPHA_OPAQUE);
+    Result := TSimbaImage.CreateFromData(Data, DataWidth, ABounds.Width, ABounds.Height);
+    Result.Canvas.FillWithAlpha(ALPHA_OPAQUE);
   finally
     FreeImageData(Data);
   end
@@ -1429,14 +1429,12 @@ function TSimbaTarget.GetImageDataAsImage(var ABounds: TBox; out Image: TSimbaIm
 var
   Data: PColorBGRA = nil;
   DataWidth: Integer;
-  Y: Integer;
 begin
   Result := GetImageData(ABounds, Data, DataWidth);
   if Result then
   begin
     Image := TSimbaImage.Create(ABounds.Width, ABounds.Height);
-    for Y := 0 to Image.Height - 1 do
-      Move(Data[Y * DataWidth], Image.Data[Y * Image.Width], Image.Width * SizeOf(TColorBGRA));
+    CopyRows(Image.Data, Image.BytesPerRow, Data, DataWidth * SizeOf(TColorBGRA), Image.Width, Image.Height);
 
     FreeImageData(Data);
   end;
@@ -1508,7 +1506,7 @@ end;
 procedure TSimbaTarget.FreezeImage(ABounds: TBox);
 var
   Data: PColorBGRA;
-  DataWidth, Y: Integer;
+  DataWidth: Integer;
   Frozen: array of TColorBGRA;
 begin
   if not GetImageData(ABounds, Data, DataWidth) then
@@ -1516,8 +1514,7 @@ begin
 
   try
     SetLength(Frozen, ABounds.Width * ABounds.Height);
-    for Y := 0 to ABounds.Height - 1 do
-      Move(Data[Y * DataWidth], Frozen[Y * ABounds.Width], ABounds.Width * SizeOf(TColorBGRA));
+    CopyRows(PColorBGRA(Frozen), ABounds.Width * SizeOf(TColorBGRA), Data, DataWidth * SizeOf(TColorBGRA), ABounds.Width, ABounds.Height);
   finally
     FreeImageData(Data);
   end;

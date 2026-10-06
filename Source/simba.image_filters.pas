@@ -949,7 +949,7 @@ begin
       end;
 
       if (Count > 0) then
-        with Result.Data[P.Y * Width + P.X] do
+        with Result.PixelPtr[P.X, P.Y]^ do
         begin
           R := (SumR + Count div 2) div Count;
           G := (SumG + Count div 2) div Count;

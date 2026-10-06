@@ -25,13 +25,15 @@ begin
   end;
 
   img := new TImage(1500, 800);
-  img.DrawColor := $404040;
-  img.DrawLineAA(Start, Dest);
-  img.DrawColor := $FF;
-  img.DrawCross(Start, 10);
-  img.DrawColor := $FF;
-  img.DrawCross(Dest, 10);
-  img.DrawColor := -1;
-  img.DrawATPA(Paths);
+  img.Canvas.DrawColor := $404040;
+  img.Canvas.DrawAntialiasing := True;
+  img.Canvas.DrawLine(Start, Dest);
+  img.Canvas.DrawAntialiasing := False;
+  img.Canvas.DrawColor := $FF;
+  img.Canvas.DrawCross(Start, 10);
+  img.Canvas.DrawColor := $FF;
+  img.Canvas.DrawCross(Dest, 10);
+  img.Canvas.DrawColor := -1;
+  img.Canvas.DrawATPA(Paths);
   img.Show();
 end;

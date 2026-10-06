@@ -57,11 +57,13 @@ procedure TestIgnorePoints;
     for Algo := Low(EImageResizeAlgo) to High(EImageResizeAlgo) do // incl. NEAREST_NEIGHBOUR
     begin
       Img := Load(Str);
-      Img.DrawColor := Colors.CYAN;
-      Img.DrawBoxFilled([40, 40, 60, 60]);
+      Img.Canvas.DrawColor := Colors.CYAN;
+      Img.Canvas.DrawFilled := True;
+      Img.Canvas.DrawBox([40, 40, 60, 60]);
+      Img.Canvas.DrawFilled := False;
 
       // resize and make sure nothing close to cyan was used in the blend
-      Assert(Img.Resize(Algo, NewWidth, NewHeight, Ignore).FindColor(Img.DrawColor, 25).Length = 0);
+      Assert(Img.Resize(Algo, NewWidth, NewHeight, Ignore).FindColor(Img.Canvas.DrawColor, 25).Length = 0);
     end;
   end;
 

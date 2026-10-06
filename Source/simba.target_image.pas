@@ -36,7 +36,7 @@ var
 begin
   Result := True;
 
-  Data := @Image.Data[Y * Image.Width + X];
+  Data := Image.PixelPtr[X, Y];
   DataWidth := Image.Width;
 end;
 

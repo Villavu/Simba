@@ -3,8 +3,8 @@
 function genImage(w, h: Integer; col: TColor): TImage;
 begin
   Result := new TImage(w, h);
-  Result.DrawColor := col;
-  Result.DrawBox([w div 6, h div 5, w div 2, h div 2]);
+  Result.Canvas.DrawColor := col;
+  Result.Canvas.DrawBox([w div 6, h div 5, w div 2, h div 2]);
 end;
 
 function genPattern(w, h: Integer): TImage;

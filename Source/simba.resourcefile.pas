@@ -441,12 +441,12 @@ var
 begin
   // Width, Height then pixel data.
   // TODO: impl metadata stuff and store width/height there
-  Size := SizeOf(Int32)*2 + ((Image.Width * Image.Height) * SizeOf(TColorBGRA));
+  Size := SizeOf(Int32)*2 + (Image.PixelCount * SizeOf(TColorBGRA));
   Data := GetMem(Size);
   try
     Move(Image.Width,  Data[0], SizeOf(Int32));
     Move(Image.Height, Data[SizeOf(Int32)], SizeOf(Int32));
-    MoveData(PColorBGRA(@Data[SizeOf(Int32)*2]), Image.Data, Image.Width * Image.Height);
+    MoveData(PColorBGRA(@Data[SizeOf(Int32)*2]), Image.Data, Image.PixelCount);
 
     Add(AName, Data, Size, True);
   finally
@@ -710,7 +710,7 @@ begin
       if (AWidth < 0) or (AHeight < 0) or (Int64(AWidth * AHeight) <> Pixels) then
         SimbaException('Resource "%s" declares a %dx%d image but carries %d pixels', [Name, AWidth, AHeight, Pixels]);
 
-      Result := TSimbaImage.CreateFromData(AWidth, AHeight, PColorBGRA(PByte(Data) + SizeOf(Int32) * 2), AWidth);
+      Result := TSimbaImage.CreateFromData(PColorBGRA(PByte(Data) + SizeOf(Int32) * 2), AWidth, AWidth, AHeight);
     end;
 end;
 

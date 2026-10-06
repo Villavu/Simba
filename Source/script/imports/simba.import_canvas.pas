@@ -234,6 +234,25 @@ begin
   PSimbaCanvas(Params^[0])^.FontUnderline := PBoolean(Params^[1])^;
 end;
 
+procedure _LapeCanvas_Fonts(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PStringArray(Result)^ := TSimbaCanvas.FontNames();
+end;
+
+(*
+TCanvas.LoadFonts
+-----------------
+```
+function TCanvas.LoadFonts(Dir: String): Boolean; static;
+```
+
+Loads all ".ttf" fonts in the given directory.
+*)
+procedure _LapeCanvas_LoadFonts(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PBoolean(Result)^ := TSimbaCanvas.LoadFontsInDir(PString(Params^[0])^);
+end;
+
 procedure _LapeCanvas_TextWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaCanvas(Params^[0])^.TextWidth(PString(Params^[1])^);
@@ -445,6 +464,8 @@ begin
     addProperty('TCanvas', 'FontBold', 'Boolean', @_LapeCanvas_FontBold_Read, @_LapeCanvas_FontBold_Write);
     addProperty('TCanvas', 'FontItalic', 'Boolean', @_LapeCanvas_FontItalic_Read, @_LapeCanvas_FontItalic_Write);
     addProperty('TCanvas', 'FontUnderline', 'Boolean', @_LapeCanvas_FontUnderline_Read, @_LapeCanvas_FontUnderline_Write);
+    addGlobalFunc('function TCanvas.Fonts: TStringArray; static;', @_LapeCanvas_Fonts);
+    addGlobalFunc('function TCanvas.LoadFonts(Dir: String): Boolean; static;', @_LapeCanvas_LoadFonts);
     addGlobalFunc('function TCanvas.TextWidth(Text: String): Integer;', @_LapeCanvas_TextWidth);
     addGlobalFunc('function TCanvas.TextHeight(Text: String): Integer;', @_LapeCanvas_TextHeight);
     addGlobalFunc('function TCanvas.TextSize(Text: String): TPoint;', @_LapeCanvas_TextSize);

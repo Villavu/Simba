@@ -289,7 +289,8 @@ begin
       'begin',
       '  with Boxes.Merge() do',
       '    img := new TImage(X1+Width, Y1+Height);',
-      '  img.DrawBoxArray(Boxes, Filled);',
+      '  img.Canvas.DrawFilled := Filled;',
+      '  img.Canvas.DrawBoxArray(Boxes);',
       '  img.Show();',
       'end;'
     ]);
@@ -307,7 +308,7 @@ begin
       'begin',
       '  with TPA.Bounds() do',
       '    img := new TImage(X1+Width, Y1+Height);',
-      '  img.DrawTPA(TPA);',
+      '  img.Canvas.DrawTPA(TPA);',
       '  img.Show();',
       'end;'
     ]);
@@ -318,7 +319,7 @@ begin
       'begin',
       '  with ATPA.Bounds() do',
       '    img := new TImage(X1+Width, Y1+Height);',
-      '  img.DrawATPA(ATPA);',
+      '  img.Canvas.DrawATPA(ATPA);',
       '  img.Show();',
       'end;'
     ]);
@@ -329,7 +330,8 @@ begin
       'begin',
       '  with Quads.Merge().Bounds do',
       '    img := new TImage(X1+Width, Y1+Height);',
-      '  img.DrawQuadArray(Quads, Filled);',
+      '  img.Canvas.DrawFilled := Filled;',
+      '  img.Canvas.DrawQuadArray(Quads);',
       '  img.Show();',
       'end;'
     ]);
@@ -346,7 +348,8 @@ begin
       'var img: TImage;',
       'begin',
       '  img := Target.GetImage();',
-      '  img.DrawBoxArray(Boxes, Filled);',
+      '  img.Canvas.DrawFilled := Filled;',
+      '  img.Canvas.DrawBoxArray(Boxes);',
       '  img.Show();',
       'end;'
     ]);
@@ -363,7 +366,7 @@ begin
       'var img: TImage;',
       'begin',
       '  img := Target.GetImage();',
-      '  img.DrawTPA(TPA);',
+      '  img.Canvas.DrawTPA(TPA);',
       '  img.Show();',
       'end;'
     ]);
@@ -373,7 +376,7 @@ begin
       'var img: TImage;',
       'begin',
       '  img := Target.GetImage();',
-      '  img.DrawATPA(ATPA);',
+      '  img.Canvas.DrawATPA(ATPA);',
       '  img.Show();',
       'end;'
     ]);
@@ -383,7 +386,8 @@ begin
       'var img: TImage;',
       'begin',
       '  img := Target.GetImage();',
-      '  img.DrawQuadArray(Quads, Filled);',
+      '  img.Canvas.DrawFilled := Filled;',
+      '  img.Canvas.DrawQuadArray(Quads);',
       '  img.Show();',
       'end;'
     ]);

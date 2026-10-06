@@ -8,8 +8,10 @@ begin
   img := new TImage(50,50);
 
   img.Fill($F0F); // very dark yellow
-  img.DrawColor := $FF00F; // green
-  img.DrawBoxFilled([10,10,15,15]);
+  img.Canvas.DrawColor := $FF00F; // green
+  img.Canvas.DrawFilled := True;
+  img.Canvas.DrawBox([10,10,15,15]);
+  img.Canvas.DrawFilled := False;
 
   Target.SetImage(img);
 

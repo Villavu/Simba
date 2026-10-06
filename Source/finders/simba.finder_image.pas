@@ -46,15 +46,15 @@ var
   Dest, DestFix: PByte;
 begin
   // packed record Transparent: Boolean; Color: TColorXXX; end;
-  Result := GetMem((Image.Width * Image.Height) * BitmapColorSize);
+  Result := GetMem(Image.PixelCount * BitmapColorSize);
 
   Source := Image.Data;
-  SourceEnd := Source + (Image.Width * Image.Height);
+  SourceEnd := Source + Image.PixelCount;
   Dest := Result;
 
   while (Source < SourceEnd) do
   begin
-    PBoolean(Dest)^ := Source^.A = 0;
+    PBoolean(Dest)^ := Source^.A = ALPHA_TRANSPARENT;
 
     if not PBoolean(Dest)^ then
     begin
@@ -184,7 +184,7 @@ begin
   end;
 
   BitmapColors := ConvertBitmapColors(Image, ColorSpace);
-  BitmapEnd := BitmapColors + (Image.Width * Image.Height) * BitmapColorSize;
+  BitmapEnd := BitmapColors + Image.PixelCount * BitmapColorSize;
 
   try
     Dec(SearchWidth, Image.Width);

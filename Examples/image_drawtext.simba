@@ -5,22 +5,22 @@ begin
   myImage := new TImage(500,1000);
   myImage.Fill(Colors.DARK_GRAY);
 
-  myImage.FontAntialiasing := True;
-  myImage.FontSize := 20;
+  myImage.Canvas.FontAntialiasing := True;
+  myImage.Canvas.FontSize := 20;
 
-  myImage.DrawColor := Colors.BLACK;
-  myImage.DrawTextLines(TImage.Fonts, [10,10]);
+  myImage.Canvas.DrawColor := Colors.BLACK;
+  myImage.Canvas.DrawTextLines(TCanvas.Fonts, [10,10]);
 
   myBox := [225,25,450,240];
-  myImage.DrawColor := Colors.RED;
-  myImage.DrawBox(myBox);
-  myImage.DrawColor := Colors.BLACK;
-  myImage.DrawText(TDateTime.CreateFromSystem.ToString('c'), myBox, [EImageTextAlign.CENTER, EImageTextAlign.VERTICAL_CENTER]);
+  myImage.Canvas.DrawColor := Colors.RED;
+  myImage.Canvas.DrawBox(myBox);
+  myImage.Canvas.DrawColor := Colors.BLACK;
+  myImage.Canvas.DrawText(TDateTime.CreateFromSystem.ToString('c'), myBox, [ECanvasTextAlign.CENTER]);
 
-  myImage.FontBold := True;
-  myImage.FontSize := 50;
-  myImage.DrawColor := Colors.NAVY;
-  myImage.DrawText(IntToStr(Random(10000)), [225, 300]);
+  myImage.Canvas.FontBold := True;
+  myImage.Canvas.FontSize := 50;
+  myImage.Canvas.DrawColor := Colors.NAVY;
+  myImage.Canvas.DrawText(IntToStr(Random(10000)), [225, 300]);
 
   myImage.Show();
 end.

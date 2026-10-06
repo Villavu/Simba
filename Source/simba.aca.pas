@@ -105,7 +105,7 @@ type
 implementation
 
 uses
-  IniFiles, Clipbrd, LCLType, TypInfo, Dialogs, ExtCtrls,
+  IniFiles, Clipbrd, LCLType, TypInfo, Dialogs, ExtCtrls, Math,
   simba.env,
   simba.colormath_aca,
   simba.vartype_matrix,
@@ -123,6 +123,43 @@ type
 function GetColorsINI: TINIFile;
 begin
   Result := TINIFile.Create(SimbaEnv.DataPath + 'aca.ini');
+end;
+
+// Fills a disc with an HSL colour wheel (hue by angle, saturation by radius) at lightness 50.
+procedure DrawHSLCircle(Img: TSimbaImage; Center: TPoint; Radius: Integer);
+
+  // One channel at lightness 50. Hue in turns, Sat 0..1
+  function Channel(Hue, Sat: Single): Byte;
+  begin
+    Hue := Hue - Floor(Hue);
+    if (Hue < 1/6) then
+      Result := Round(127.5 + Sat * 127.5 * (12 * Hue - 1))
+    else if (Hue < 1/2) then
+      Result := Round(127.5 + Sat * 127.5)
+    else if (Hue < 2/3) then
+      Result := Round(127.5 + Sat * 127.5 * (7 - 12 * Hue))
+    else
+      Result := Round(127.5 - Sat * 127.5);
+  end;
+
+var
+  Hue, Sat: Single;
+  X, Y: Integer;
+begin
+  for Y := Max(Center.Y - Radius, 0) to Min(Center.Y + Radius, Img.Height - 1) do
+    for X := Max(Center.X - Radius, 0) to Min(Center.X + Radius, Img.Width - 1) do
+    begin
+      Hue := ArcTan2(Y - Center.Y, X - Center.X) / (2 * PI);
+      Sat := Hypot(Center.X - X, Center.Y - Y) / Radius;
+      if (Sat < 1) then
+        with Img.PixelPtr[X, Y]^ do
+        begin
+          R := Channel(Hue + 1/3, Sat);
+          G := Channel(Hue, Sat);
+          B := Channel(Hue - 1/3, Sat);
+          A := ALPHA_OPAQUE;
+        end;
+    end;
 end;
 
 procedure TSimbaACA.FillLoadDeleteColorMenus(LoadItem, DeleteItem: TMenuItem);
@@ -278,7 +315,7 @@ begin
 
       EACASearch.MATCH_COLOR:
         begin
-          Matches := FImageBox.Background.MatchColor(Best.Color, Best.ColorSpace, Best.Multipliers, TBox.Create(-1, -1, -1, -1)); 
+          Matches := FImageBox.Background.MatchColor(Best.Color, Best.ColorSpace, Best.Multipliers, TBox.Create(-1, -1, -1, -1));
           Matches.NormMinMax(1, 0);
           TopLayer.DrawHeatmap(Matches);
         end;
@@ -412,7 +449,7 @@ begin
   Radius := Min(Radius, MAX_RADIUS);
 
   Img := TSimbaImage.Create(Radius * 2, Radius * 2);
-  Img.DrawHSLCircle(Img.Center, Radius);
+  DrawHSLCircle(Img, Img.Center, Radius);
 
   SetImage(Img);
 end;
