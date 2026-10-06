@@ -551,7 +551,10 @@ begin
 
   if (Caption <> '') then
   begin
-    Canvas.Font.Color := SimbaComponentTheme.ColorFont;
+    if Enabled then
+      Canvas.Font.Color := SimbaComponentTheme.ColorFont
+    else
+      Canvas.Font.Color := SimbaComponentTheme.ColorLine;
 
     R := ClientRect;
     if HasImage then
@@ -624,8 +627,11 @@ begin
 
   ImageList := SimbaImages;
   ImageIndex := SimbaImages.TICK;
+  ImageSpacing := 0;
 
-  YPadding := 3;
+  // as tall as the tick
+  XPadding := 4;
+  YPadding := 0;
 end;
 
 procedure TSimbaLabeledButton.TextChanged;

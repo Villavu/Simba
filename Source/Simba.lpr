@@ -142,7 +142,6 @@ begin
     Application.CreateForm(TSimbaFileBrowserForm, SimbaFileBrowserForm);
     Application.CreateForm(TSimbaAboutForm, SimbaAboutForm);
     Application.CreateForm(TSimbaSettingsForm, SimbaSettingsForm);
-    Application.CreateForm(TSimbaImageStringForm, SimbaImageStringForm);
     Application.CreateForm(TSimbaOpenExampleForm, SimbaOpenExampleForm);
     Application.CreateForm(TSimbaBackupsForm, SimbaBackupsForm);
     Application.CreateForm(TSimbaDownloadSimbaForm, SimbaDownloadSimbaForm);

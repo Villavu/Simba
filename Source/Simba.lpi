@@ -615,9 +615,6 @@
       <Unit7>
         <Filename Value="ide/simba.form_imagestring.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="SimbaImageStringForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
       </Unit7>
       <Unit8>
         <Filename Value="ide/simba.form_notes.pas"/>
