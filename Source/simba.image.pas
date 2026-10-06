@@ -125,6 +125,7 @@ type
     procedure Offset(X, Y: Integer);
 
     function isBinary: Boolean;
+    function isDualColor(out Color1, Color2: TColorBGRA): Boolean;
 
     function GetPixels(Points: TPointArray): TColorArray;
     procedure SetPixels(Points: TPointArray; Color: TColor); overload;
@@ -233,6 +234,7 @@ type
     // Load & Save
     procedure FromZip(ZipFile, ZipEntry: String);
     procedure FromStream(Stream: TStream; FileName: String);
+    procedure FromResource(ResourceName: String);
     procedure FromString(Str: String);
     procedure FromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     procedure Load(FileName: String); overload;
@@ -271,6 +273,7 @@ uses
   simba.vartype_box,
   simba.image_utils,
   simba.image_lazbridge,
+  simba.image_file,
   simba.image_resizerotate,
   simba.image_resample,
   simba.image_stringconv,
@@ -397,6 +400,11 @@ begin
     SimbaException('TSimbaImage.FromStream: Unknown image format "%s"', [FileName]);
 
   SimbaImage_FromFPImageReader(Self, ReaderClass, Stream);
+end;
+
+procedure TSimbaImage.FromResource(ResourceName: String);
+begin
+  SimbaImage_LoadResource(Self, ResourceName);
 end;
 
 procedure TSimbaImage.FromString(Str: String);
@@ -1836,6 +1844,33 @@ begin
   begin
     while (Ptr <= Upper) and (((Ptr^.R = 0) and (Ptr^.G = 0) and (Ptr^.B = 0)) or ((Ptr^.R = 255) and (Ptr^.G = 255) and (Ptr^.B = 255))) do
       Inc(Ptr);
+    Result := Ptr > Upper;
+  end else
+    Result := False;
+end;
+
+function TSimbaImage.isDualColor(out Color1, Color2: TColorBGRA): Boolean;
+var
+  Ptr, Upper: PColorBGRA;
+begin
+  Color1 := Default(TColorBGRA);
+  Color2 := Default(TColorBGRA);
+
+  if DataRange(Ptr, Upper) then
+  begin
+    Color1 := Ptr^;
+    Color2 := Ptr^;
+    while (Ptr <= Upper) and (Ptr^.AsInteger = Color1.AsInteger) do
+      Inc(Ptr);
+
+    // the first pixel that differs is the second color
+    if (Ptr <= Upper) then
+    begin
+      Color2 := Ptr^;
+      while (Ptr <= Upper) and ((Ptr^.AsInteger = Color1.AsInteger) or (Ptr^.AsInteger = Color2.AsInteger)) do
+        Inc(Ptr);
+    end;
+
     Result := Ptr > Upper;
   end else
     Result := False;

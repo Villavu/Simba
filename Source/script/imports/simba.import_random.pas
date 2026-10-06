@@ -115,7 +115,7 @@ end;
 RandomShapes
 ------------
 ```
-function RandomShapes(Amount: Integer; ShapesPerRow: Integer = 0; RandScale: Single = 0.5; RandRotate: Single = 0.1): TSimbaImage;
+function RandomShapes(Amount: Integer; ShapesPerRow: Integer = 5; RandScale: Single = 0.5; RandRotate: Single = 0.05): TImage;
 ```
 
 Generates an image with x <amount> of random shapes.

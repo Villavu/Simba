@@ -470,7 +470,7 @@ constructor TSimbaMainMenuBar.Create;
     addLine(FToolsMenu);
     addItem(FToolsMenu, SimbaImages.SIMBA, 'Associate Scripts', scNone, ESimbaEvent.ACTION_ASSOCIATE);
     addLine(FToolsMenu);
-    addItem(FToolsMenu, -1, 'Image To String', scNone, ESimbaEvent.ACTION_IMG_TO_STRING); // todo: remove usage of form designer
+    addItem(FToolsMenu, -1, 'Image To String', scNone, ESimbaEvent.ACTION_IMG_TO_STRING);
     addItem(FToolsMenu, SimbaImages.COLORS, 'ACA', scNone, ESimbaEvent.ACTION_ACA);
     addItem(FToolsMenu, -1, 'DTM Editor', scNone, ESimbaEvent.ACTION_DTM_EDITOR);
     addItem(FToolsMenu, SimbaImages.SHAPES, 'Shape Box', scNone, ESimbaEvent.ACTION_SHAPE_BOX);
