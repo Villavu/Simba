@@ -232,6 +232,7 @@ type
     // Load & Save
     procedure FromZip(ZipFile, ZipEntry: String);
     procedure FromStream(Stream: TStream; FileName: String);
+    procedure FromResource(ResourceName: String);
     procedure FromString(Str: String);
     procedure FromData(AWidth, AHeight: Integer; AData: PColorBGRA; ADataWidth: Integer);
     procedure Load(FileName: String); overload;
@@ -384,6 +385,11 @@ end;
 procedure TSimbaImage.FromStream(Stream: TStream; FileName: String);
 begin
   SimbaImage_LoadStream(Self, Stream, FileName);
+end;
+
+procedure TSimbaImage.FromResource(ResourceName: String);
+begin
+  SimbaImage_LoadResource(Self, ResourceName);
 end;
 
 procedure TSimbaImage.FromString(Str: String);

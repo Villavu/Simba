@@ -17,7 +17,7 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="193">
+      <Resources Count="213">
         <Resource_0 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
         <Resource_1 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
         <Resource_2 FileName="..\Examples\static_method.simba" Type="RCDATA" ResourceName="EXAMPLE_STATIC_METHOD"/>
@@ -211,6 +211,26 @@
         <Resource_190 FileName="..\Images\window.png" Type="RCDATA" ResourceName="WINDOW"/>
         <Resource_191 FileName="..\Images\window_150.png" Type="RCDATA" ResourceName="WINDOW_150"/>
         <Resource_192 FileName="..\Images\window_200.png" Type="RCDATA" ResourceName="WINDOW_200"/>
+        <Resource_193 FileName="..\Images\shapes\star_four.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_0"/>
+        <Resource_194 FileName="..\Images\shapes\star_five.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_1"/>
+        <Resource_195 FileName="..\Images\shapes\flower_pointed.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_2"/>
+        <Resource_196 FileName="..\Images\shapes\square.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_3"/>
+        <Resource_197 FileName="..\Images\shapes\triangle.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_4"/>
+        <Resource_198 FileName="..\Images\shapes\car.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_5"/>
+        <Resource_199 FileName="..\Images\shapes\club.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_6"/>
+        <Resource_200 FileName="..\Images\shapes\target.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_7"/>
+        <Resource_201 FileName="..\Images\shapes\gear.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_8"/>
+        <Resource_202 FileName="..\Images\shapes\giraffe.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_9"/>
+        <Resource_203 FileName="..\Images\shapes\arrow_double.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_10"/>
+        <Resource_204 FileName="..\Images\shapes\tree.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_11"/>
+        <Resource_205 FileName="..\Images\shapes\arrow_circular.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_12"/>
+        <Resource_206 FileName="..\Images\shapes\flower_round.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_13"/>
+        <Resource_207 FileName="..\Images\shapes\dome.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_14"/>
+        <Resource_208 FileName="..\Images\shapes\thought_bubble.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_15"/>
+        <Resource_209 FileName="..\Images\shapes\rocket.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_16"/>
+        <Resource_210 FileName="..\Images\shapes\submarine.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_17"/>
+        <Resource_211 FileName="..\Images\shapes\phone.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_18"/>
+        <Resource_212 FileName="..\Images\shapes\elephant.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_19"/>
       </Resources>
     </General>
     <VersionInfo>

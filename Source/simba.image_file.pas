@@ -25,6 +25,8 @@ procedure SimbaImage_LoadArea(Image: TSimbaImage; FileName: String; X1, Y1, X2, 
 procedure SimbaImage_LoadStream(Image: TSimbaImage; Stream: TStream; FileName: String);
 // Unzip a single (image) entry out of ZipFile.
 procedure SimbaImage_LoadZip(Image: TSimbaImage; ZipFile, ZipEntry: String);
+// The image in the RCDATA resource Name, in whichever format it holds.
+procedure SimbaImage_LoadResource(Image: TSimbaImage; Name: String);
 
 // X1,Y1,X2,Y2 of an uncompressed 24 or 32 bit bitmap
 function SimbaImage_LoadBitmapArea(Image: TSimbaImage; Stream: TStream; X1, Y1, X2, Y2: Integer): Boolean;
@@ -35,7 +37,7 @@ procedure SimbaImage_SaveFPImage(Image: TSimbaImage; WriterClass: TFPCustomImage
 implementation
 
 uses
-  Math, GraphType, IntfGraphics, FPReadBMP, FPWritePNG, BMPcomn,
+  LCLType, Math, GraphType, IntfGraphics, FPReadBMP, FPWritePNG, BMPcomn,
   simba.vartype_box,
   simba.image_lazbridge,
   simba.image_utils,
@@ -106,6 +108,24 @@ begin
   Stream := ZipExtractEntryToStream(ZipFile, ZipEntry);
   try
     SimbaImage_LoadStream(Image, Stream, ZipEntry);
+  finally
+    Stream.Free();
+  end;
+end;
+
+procedure SimbaImage_LoadResource(Image: TSimbaImage; Name: String);
+var
+  Stream: TResourceStream;
+  ReaderClass: TFPCustomImageReaderClass;
+begin
+  Stream := TResourceStream.Create(HINSTANCE, Name, RT_RCDATA);
+  try
+    // a resource has no file name to tell the format by
+    ReaderClass := TFPCustomImage.FindReaderFromStream(Stream);
+    if (ReaderClass = nil) then
+      SimbaException('TImage.FromResource: Unknown image format in "%s"', [Name]);
+
+    SimbaImage_LoadFPImage(Image, ReaderClass, Stream);
   finally
     Stream.Free();
   end;
