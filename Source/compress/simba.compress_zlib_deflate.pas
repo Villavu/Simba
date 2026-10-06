@@ -751,7 +751,7 @@ begin
       Bits := Tree[N].Len;
       if (Extra <> nil) and (N >= ExtraBase) then
         Inc(Bits, Extra[N - ExtraBase]);
-      Inc(Result, Int64(Tree[N].Freq) * Bits);
+      Inc(Result, Int64(Tree[N].Freq * Bits));
     end;
 end;
 
@@ -766,12 +766,12 @@ begin
       Bits := StaticLitLen[N];
       if (N >= 257) then
         Inc(Bits, LEN_EXTRA[N - 257]);
-      Inc(Result, Int64(LitTree[N].Freq) * Bits);
+      Inc(Result, Int64(LitTree[N].Freq * Bits));
     end;
 
   for N := 0 to DIST_CODES - 1 do
     if (DistTree[N].Freq <> 0) then
-      Inc(Result, Int64(DistTree[N].Freq) * (5 + DIST_EXTRA[N]));
+      Inc(Result, Int64(DistTree[N].Freq * (5 + DIST_EXTRA[N])));
 end;
 
 procedure TDeflateState.CompressSymbols(const LitCodes, DistCodes: array of TTreeNode);

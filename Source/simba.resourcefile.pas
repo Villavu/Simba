@@ -134,6 +134,7 @@ uses
   simba.compress_synlz,
   simba.crc,
   simba.fs,
+  simba.image_utils,
   simba.vartype_ordarray;
 
 procedure Preprocess(var Data: TByteArray; IsImage: Boolean; out Method: UInt8);
@@ -445,7 +446,7 @@ begin
   try
     Move(Image.Width,  Data[0], SizeOf(Int32));
     Move(Image.Height, Data[SizeOf(Int32)], SizeOf(Int32));
-    Move(Image.Data^,  Data[SizeOf(Int32)*2], (Image.Width * Image.Height) * SizeOf(TColorBGRA));
+    MoveData(PColorBGRA(@Data[SizeOf(Int32)*2]), Image.Data, Image.Width * Image.Height);
 
     Add(AName, Data, Size, True);
   finally
@@ -706,7 +707,7 @@ begin
       AHeight := PInteger(PByte(Data) + SizeOf(Int32))^;
       Pixels  := Int64(Length(Data) - SizeOf(Int32) * 2) div SizeOf(TColorBGRA);
 
-      if (AWidth < 0) or (AHeight < 0) or (Int64(AWidth) * AHeight <> Pixels) then
+      if (AWidth < 0) or (AHeight < 0) or (Int64(AWidth * AHeight) <> Pixels) then
         SimbaException('Resource "%s" declares a %dx%d image but carries %d pixels', [Name, AWidth, AHeight, Pixels]);
 
       Result := TSimbaImage.CreateFromData(AWidth, AHeight, PColorBGRA(PByte(Data) + SizeOf(Int32) * 2), AWidth);

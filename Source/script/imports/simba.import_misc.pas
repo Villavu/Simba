@@ -324,7 +324,7 @@ begin
   begin
     if (SimbaCommunication = nil) then
       SimbaException('GetSimbaPID requires Simba communication');
-    PProcessID(Result)^ := SimbaCommunication.GetSimbaTargetPID();
+    PProcessID(Result)^ := SimbaCommunication.GetSimbaPID();
   end;
 end;
 

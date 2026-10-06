@@ -167,7 +167,7 @@ begin
     DestEnd := DestRow + (Dest.Width * Ratio);
     while (DestPtr < DestEnd) do
     begin
-      Move(DestRow^, DestPtr^, SrcW * Ratio * SizeOf(TColorBGRA));
+      MoveData(DestPtr, DestRow, SrcW * Ratio);
 
       Inc(DestPtr, Dest.Width);
     end;

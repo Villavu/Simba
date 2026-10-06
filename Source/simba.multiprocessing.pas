@@ -147,7 +147,7 @@ begin
   end;
 
   Cap  := WantThreads();
-  Area := Int64(Width) * Height;
+  Area := Int64(Width * Height);
 
   if (FINDER_THREADING_MIN_AREA < 1) then   // area gate disabled -> whole pool
     ByArea := Cap
