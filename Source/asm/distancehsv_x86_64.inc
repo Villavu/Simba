@@ -6,9 +6,16 @@ asm
   mov      rcx, rdi
 {$ENDIF}
   sub rsp, 56
-  movaps [rsp], xmm6
-  movaps [rsp+16], xmm7
-  movaps [rsp+32], xmm8
+  movups [rsp], xmm6
+  movups [rsp+16], xmm7
+  movups [rsp+32], xmm8
+{$IFDEF WINDOWS} // for the unwinder, so a fault in here is still an exception
+  .seh_stackalloc 56
+  .seh_savexmm xmm6, 0
+  .seh_savexmm xmm7, 16
+  .seh_savexmm xmm8, 32
+  .seh_endprologue
+{$ENDIF}
   pxor xmm0, xmm0
   pxor xmm1, xmm1
   pxor xmm3, xmm3
@@ -89,11 +96,11 @@ asm
   subss xmm1, xmm4
   movss xmm0, [rax+8]
   mulss xmm1, [r8+4]
-  movaps xmm6, [rsp]
+  movups xmm6, [rsp]
   subss xmm0, xmm2
   mulss xmm0, [r8+8]
-  movaps xmm7, [rsp+16]
-  movaps xmm8, [rsp+32]
+  movups xmm7, [rsp+16]
+  movups xmm8, [rsp+32]
   mulss xmm3, xmm3
   mulss xmm1, xmm1
   mulss xmm0, xmm0
