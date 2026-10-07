@@ -3,7 +3,7 @@
 var
   Form: TLazForm;
 
-// Called when the mouse the mouse is pressed on the form
+// Called when the mouse is pressed on the form
 procedure FormMouseDown(Sender: TLazObject; Button: ELazMouseButton; Shift: ELazShiftStates; X, Y: Integer);
 begin
   WriteLn('FormMouseDown: ', Button, ', ', Shift, ' at ', X, ', ', Y);
@@ -13,7 +13,7 @@ begin
     WriteLn('Control is pressed too!');
 end;
 
-// Called when the mouse the mouse is released on the form
+// Called when the mouse is released on the form
 procedure FormMouseUp(Sender: TLazObject; Button: ELazMouseButton; Shift: ELazShiftStates; X, Y: Integer);
 begin
   WriteLn('FormMouseUp: ', Button, ', ', Shift, ' at ', X, ', ', Y);
@@ -111,7 +111,7 @@ begin
   Button.Font.Size := 12;
   Button.OnClick := @DoButtonClick;
 
-  // Create a panel add a label and listbox in it, which are auto positioned&sized with SetAlign
+  // Create a panel add a label and listbox in it, which are auto positioned&sized with Align
   Panel := TLazPanel.Create(Form);
   Panel.Parent := Form;
   Panel.SetBounds(25,25,250,250);

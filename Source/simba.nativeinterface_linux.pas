@@ -615,7 +615,7 @@ begin
   fpkill(PID, SIGKILL);
 end;
 
-procedure TSimbaNativeInterface_Linux.SetHandleInheritable(Handle: THandle; Value: Boolean);
+procedure TSimbaNativeInterface_Linux.SetHandleInheritable(Handle: System.THandle; Value: Boolean); // LCLType has its own THandle
 const
   FD_CLOEXEC = 1;
 var

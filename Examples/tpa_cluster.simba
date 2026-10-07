@@ -8,7 +8,7 @@ begin
 
   // Cluster by 10 distance, if a point is not within 10 distance of any other
   // points in a group, add it to a new group.
-  ATPA := TPA.Cluster(20);
+  ATPA := TPA.Cluster(10);
 
   Show(ATPA);
 end;

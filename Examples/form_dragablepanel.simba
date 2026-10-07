@@ -1,6 +1,3 @@
-var
-  Form: TLazForm;
-
 procedure ShowMyForm;
 var
   Form: TLazForm;

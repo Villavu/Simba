@@ -1,0 +1,85 @@
+// A DTM is a set of points, each a color at an offset from the first point.
+// It is found where every point matches.
+var
+  Scene, Img: TImage;
+  DTM: TDTM;
+  P: TDTMPoint;
+  TPA: TPointArray;
+  Match: TPoint;
+
+procedure DrawDot(X, Y: Integer; Color: TColor);
+begin
+  Scene.Canvas.DrawColor := Color;
+  Scene.Canvas.DrawCircle([X, Y], 6);
+end;
+
+begin
+  // X, Y (from the first point), Color, Tolerance, AreaSize
+  DTM.AddPoint(0, 0, Colors.RED, 0, 0);
+  DTM.AddPoint(40, 0, Colors.LIME, 0, 0);
+  DTM.AddPoint(20, 40, Colors.BLUE, 0, 0);
+
+  // The image to search: dots of three colors
+  Scene := new TImage(400, 200);
+  Scene.Canvas.DrawFilled := True;
+  Scene.Canvas.DrawAntialiasing := True;
+
+  DrawDot(60, 50, Colors.RED);
+  DrawDot(100, 140, Colors.LIME);
+  DrawDot(330, 60, Colors.BLUE);
+  DrawDot(350, 150, Colors.RED);
+
+  // and the three that are laid out as the DTM says
+  DrawDot(200, 80, Colors.RED);
+  DrawDot(240, 80, Colors.LIME);
+  DrawDot(220, 120, Colors.BLUE);
+
+  // Finders search the target. Here that is our image rather than the screen.
+  Target.SetImage(Scene);
+
+  // Where the first point is, or [-1,-1] if the DTM was not found
+  WriteLn('First match: ', Target.FindDTM(DTM));
+
+  // Every match. The dots are bigger than one pixel, so there are many.
+  TPA := Target.FindDTMEx(DTM);
+  Match := TPA.Mean();
+  WriteLn(Length(TPA), ' matches, around ', Match);
+
+  // Show the DTM and the image side by side, each under a header
+  Img := new TImage(600, 240);
+  Img.Canvas.FontSize := 20;
+  Img.Canvas.FontAntialiasing := True;
+  Img.Canvas.DrawColor := Colors.WHITE;
+  Img.Canvas.DrawText('DTM', [10, 8]);
+  Img.Canvas.DrawText('Image', [210, 8]);
+  Img.Canvas.DrawImage(Scene, [200, 40]);
+
+  // Dividers
+  Img.Canvas.DrawColor := Colors.GRAY;
+  Img.Canvas.DrawLine([0, 40], [599, 40]);
+  Img.Canvas.DrawLine([200, 0], [200, 239]);
+
+  // The DTM on the left: a line from the first (main) point to each of the others
+  Img.Canvas.DrawAntialiasing := True;
+  for P in DTM.Points do
+    Img.Canvas.DrawLine([80, 120], [80 + P.X, 120 + P.Y]);
+
+  for P in DTM.Points do
+  begin
+    // The point itself
+    Img.Canvas.DrawFilled := True;
+    Img.Canvas.DrawColor := P.Color;
+    Img.Canvas.DrawCircle([80 + P.X, 120 + P.Y], 6);
+
+    // and where it matched in the image, ringed
+    Img.Canvas.DrawFilled := False;
+    Img.Canvas.DrawColor := Colors.WHITE;
+    Img.Canvas.DrawCircle([200 + Match.X + P.X, 40 + Match.Y + P.Y], 11);
+  end;
+
+  // The main point, highlighted
+  Img.Canvas.DrawThickness := 2;
+  Img.Canvas.DrawCircle([80, 120], 8);
+
+  Img.Show();
+end.

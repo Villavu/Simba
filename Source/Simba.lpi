@@ -17,7 +17,7 @@
         <TextDesc Value=""/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="214">
+      <Resources Count="230">
         <Resource_0 FileName="..\Images\tick.png" Type="RCDATA" ResourceName="TICK"/>
         <Resource_1 FileName="..\Images\tick_150.png" Type="RCDATA" ResourceName="TICK_150"/>
         <Resource_2 FileName="..\Images\tick_200.png" Type="RCDATA" ResourceName="TICK_200"/>
@@ -209,29 +209,45 @@
         <Resource_188 FileName="..\Images\shapes\submarine.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_17"/>
         <Resource_189 FileName="..\Images\shapes\phone.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_18"/>
         <Resource_190 FileName="..\Images\shapes\elephant.png" Type="RCDATA" ResourceName="RANDOM_SHAPE_19"/>
-        <Resource_191 FileName="..\Examples\array.simba" Type="RCDATA" ResourceName="EXAMPLE_ARRAY"/>
-        <Resource_192 FileName="..\Examples\function.simba" Type="RCDATA" ResourceName="EXAMPLE_FUNCTION"/>
-        <Resource_193 FileName="..\Examples\static_method.simba" Type="RCDATA" ResourceName="EXAMPLE_STATIC_METHOD"/>
-        <Resource_194 FileName="..\Examples\loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LOOP"/>
+        <Resource_191 FileName="..\Examples\lang_array.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_ARRAY"/>
+        <Resource_192 FileName="..\Examples\lang_func.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_FUNC"/>
+        <Resource_193 FileName="..\Examples\lang_method_static.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_METHOD_STATIC"/>
+        <Resource_194 FileName="..\Examples\lang_loop.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_LOOP"/>
         <Resource_195 FileName="..\Examples\stopwatch.simba" Type="RCDATA" ResourceName="EXAMPLE_STOPWATCH"/>
         <Resource_196 FileName="..\Examples\image.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE"/>
         <Resource_197 FileName="..\Examples\image_drawtext.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE_DRAW_TEXT"/>
-        <Resource_198 FileName="..\Examples\cluster_points.simba" Type="RCDATA" ResourceName="EXAMPLE_CLUSTER_POINTS"/>
+        <Resource_198 FileName="..\Examples\tpa_cluster.simba" Type="RCDATA" ResourceName="EXAMPLE_TPA_CLUSTER"/>
         <Resource_199 FileName="..\Examples\form.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM"/>
         <Resource_200 FileName="..\Examples\form_dragablepanel.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_DRAGABLE_PANEL"/>
         <Resource_201 FileName="..\Examples\form_imagebox.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_IMAGEBOX"/>
-        <Resource_202 FileName="..\Examples\irc.simba" Type="RCDATA" ResourceName="EXAMPLE_IRC"/>
-        <Resource_203 FileName="..\Examples\asyncmouse.simba" Type="RCDATA" ResourceName="EXAMPLE_ASYNCMOUSE"/>
+        <Resource_202 FileName="..\Examples\web_socket.simba" Type="RCDATA" ResourceName="EXAMPLE_WEB_SOCKET"/>
+        <Resource_203 FileName="..\Examples\mouse_async.simba" Type="RCDATA" ResourceName="EXAMPLE_MOUSE_ASYNC"/>
         <Resource_204 FileName="..\Examples\mouse_path.simba" Type="RCDATA" ResourceName="EXAMPLE_MOUSE_PATH"/>
-        <Resource_205 FileName="..\Examples\randomleft.simba" Type="RCDATA" ResourceName="EXAMPLE_RANDOM_LEFT"/>
-        <Resource_206 FileName="..\Examples\method-property.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD_PROPERTY"/>
-        <Resource_207 FileName="..\Examples\method-property-index.simba" Type="RCDATA" ResourceName="EXAMPLE_METHOD_PROPERTY_INDEX"/>
+        <Resource_205 FileName="..\Examples\random_weighted.simba" Type="RCDATA" ResourceName="EXAMPLE_RANDOM_WEIGHTED"/>
+        <Resource_206 FileName="..\Examples\lang_method_property.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_METHOD_PROPERTY"/>
+        <Resource_207 FileName="..\Examples\lang_method_property_index.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_METHOD_PROPERTY_INDEX"/>
         <Resource_208 FileName="..\Examples\json_read.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON_READ"/>
         <Resource_209 FileName="..\Examples\json_write.simba" Type="RCDATA" ResourceName="EXAMPLE_JSON_WRITE"/>
         <Resource_210 FileName="..\Examples\form_aca.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_ACA"/>
-        <Resource_211 FileName="..\Examples\writeln-colors.simba" Type="RCDATA" ResourceName="EXAMPLE_WRITELN-COLORS"/>
+        <Resource_211 FileName="..\Examples\lang_writeln_colors.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_WRITELN_COLORS"/>
         <Resource_212 FileName="..\Examples\marker.simba" Type="RCDATA" ResourceName="EXAMPLE_MARKER"/>
         <Resource_213 FileName="..\Examples\form_imagebox_layers.simba" Type="RCDATA" ResourceName="EXAMPLE_FORM_IMAGEBOX_LAYERS"/>
+        <Resource_214 FileName="..\Examples\image_drawing.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE_DRAWING"/>
+        <Resource_215 FileName="..\Examples\lang_record.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_RECORD"/>
+        <Resource_216 FileName="..\Examples\lang_method.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_METHOD"/>
+        <Resource_217 FileName="..\Examples\lang_try_except.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_TRY_EXCEPT"/>
+        <Resource_218 FileName="..\Examples\lang_string.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_STRING"/>
+        <Resource_219 FileName="..\Examples\file.simba" Type="RCDATA" ResourceName="EXAMPLE_FILE"/>
+        <Resource_220 FileName="..\Examples\thread.simba" Type="RCDATA" ResourceName="EXAMPLE_THREAD"/>
+        <Resource_221 FileName="..\Examples\web_http.simba" Type="RCDATA" ResourceName="EXAMPLE_WEB_HTTP"/>
+        <Resource_222 FileName="..\Examples\target.simba" Type="RCDATA" ResourceName="EXAMPLE_TARGET"/>
+        <Resource_223 FileName="..\Examples\find_color.simba" Type="RCDATA" ResourceName="EXAMPLE_FIND_COLOR"/>
+        <Resource_224 FileName="..\Examples\find_image.simba" Type="RCDATA" ResourceName="EXAMPLE_FIND_IMAGE"/>
+        <Resource_225 FileName="..\Examples\find_template.simba" Type="RCDATA" ResourceName="EXAMPLE_FIND_TEMPLATE"/>
+        <Resource_226 FileName="..\Examples\find_dtm.simba" Type="RCDATA" ResourceName="EXAMPLE_FIND_DTM"/>
+        <Resource_227 FileName="..\Examples\image_string.simba" Type="RCDATA" ResourceName="EXAMPLE_IMAGE_STRING"/>
+        <Resource_228 FileName="..\Examples\lang_writeln.simba" Type="RCDATA" ResourceName="EXAMPLE_LANG_WRITELN"/>
+        <Resource_229 FileName="..\Examples\random.simba" Type="RCDATA" ResourceName="EXAMPLE_RANDOM"/>
       </Resources>
     </General>
     <VersionInfo>

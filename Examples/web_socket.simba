@@ -1,5 +1,5 @@
 // Very simple irc "bot" to test TInternetSocket
-// Joins rizon server, and replys the date and time when !date is said
+// Joins rizon server, and replies the date and time when !date is said
 
 const
   NICK_TO_USE := 'SimbaIRCBot' + ToString(Random(999));
@@ -10,7 +10,7 @@ begin
   Sock.WriteString(Str + #13#10);
 end;
 
-function rx(Sock: TInternetSocket): Boolean;
+procedure rx(Sock: TInternetSocket);
 var
   Line: String;
 begin
@@ -19,11 +19,7 @@ begin
     WriteLn(Line);
 
     if (Line.StartsWith('PING')) then
-    begin
       tx(Sock, Line.Replace('PING', 'PONG'));
-
-      Result := True;
-    end;
 
     if ('End of /MOTD command' in Line) then
       tx(Sock, 'JOIN ' + CHANNEL_TO_JOIN);
@@ -49,6 +45,4 @@ begin
 
     Sleep(500);
   end;
-
-  Sock.Free();
 end.

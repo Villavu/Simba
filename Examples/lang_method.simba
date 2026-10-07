@@ -1,0 +1,35 @@
+type
+  TPerson = record
+    Name: String;
+    Age: Integer;
+  end;
+
+// A method belongs to a type. `Self` is the variable it was called on.
+function TPerson.Describe: String;
+begin
+  Result := Self.Name + ' is ' + ToString(Self.Age);
+end;
+
+// A method can change `Self`
+procedure TPerson.Birthday;
+begin
+  Self.Age := Self.Age + 1;
+end;
+
+// Methods can be added to any type, including the built in ones
+function Integer.IsEven: Boolean;
+begin
+  Result := Self mod 2 = 0;
+end;
+
+var
+  Person: TPerson;
+  Number: Integer;
+begin
+  Person := ['Alice', 30];
+  Person.Birthday();
+  WriteLn(Person.Describe());
+
+  Number := 4;
+  WriteLn(Number, ' is even: ', Number.IsEven());
+end.

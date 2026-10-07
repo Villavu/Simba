@@ -1,0 +1,60 @@
+// A procedure does something
+procedure SayHello;
+begin
+  WriteLn('Hello');
+end;
+
+// A function also gives a value back, in Result
+function Multiply(Number, By: Integer): Integer;
+begin
+  Result := Number * By;
+end;
+
+// A default value makes the parameter optional
+function Greet(Name: String = 'World'): String;
+begin
+  Result := 'Hello ' + Name;
+end;
+
+// var: the caller's variable is changed
+procedure AddOne(var Number: Integer);
+begin
+  Number := Number + 1;
+end;
+
+// out: like var, for handing back more than one result
+function Divide(A, B: Integer; out Remainder: Integer): Integer;
+begin
+  Result := A div B;
+  Remainder := A mod B;
+end;
+
+// overload: the same name with different parameters
+function Describe(Value: Integer): String; overload;
+begin
+  Result := 'the number ' + ToString(Value);
+end;
+
+function Describe(Value: String): String; overload;
+begin
+  Result := 'the text ' + Value;
+end;
+
+var
+  Number, Remainder: Integer;
+begin
+  SayHello();
+  WriteLn('10 x 10 = ', Multiply(10, 10));
+
+  WriteLn(Greet());
+  WriteLn(Greet('Simba'));
+
+  Number := 1;
+  AddOne(Number);
+  WriteLn('Number is now ', Number);
+
+  WriteLn('17 / 5 = ', Divide(17, 5, Remainder), ' remainder ', Remainder);
+
+  WriteLn(Describe(5));
+  WriteLn(Describe('five'));
+end.

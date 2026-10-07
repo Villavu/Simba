@@ -1,0 +1,41 @@
+// except runs only when something in the try block raised an error
+procedure TryExcept;
+begin
+  try
+    WriteLn(StrToInt('abc'));
+    WriteLn('This line is skipped');
+  except
+    WriteLn('Error: ', GetExceptionMessage());
+  end;
+end;
+
+// finally always runs, error or not. Use it to clean up.
+procedure TryFinally;
+begin
+  try
+    WriteLn('Working...');
+  finally
+    WriteLn('Finally always runs');
+  end;
+end;
+
+// raise makes an error of your own
+procedure CheckAge(Age: Integer);
+begin
+  if (Age < 0) then
+    raise 'Age cannot be negative';
+
+  WriteLn('Age is ', Age);
+end;
+
+begin
+  TryExcept();
+  TryFinally();
+
+  try
+    CheckAge(30);
+    CheckAge(-1);
+  except
+    WriteLn('Error: ', GetExceptionMessage());
+  end;
+end.

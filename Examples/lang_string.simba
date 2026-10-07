@@ -1,0 +1,26 @@
+var
+  Text, Part: String;
+begin
+  Text := 'Hello World';
+
+  WriteLn(Text.Length);                    // 11
+  WriteLn(Text[1]);                        // H, the first character is at 1
+  WriteLn(Text.ToUpper());                 // HELLO WORLD
+  WriteLn(Text.Contains('World'));         // True
+  WriteLn(Text.IndexOf('World'));          // 7
+  WriteLn(Text.Replace('World', 'Simba')); // Hello Simba
+  WriteLn(Text.Before(' '));               // Hello
+  WriteLn(Text.After(' '));                // World
+  WriteLn(Text.CopyRange(1, 5));           // Hello
+  WriteLn('  spaces  '.Trim());            // spaces
+
+  // Split into parts, and join them back
+  for Part in 'apple,banana,cherry'.Split(',') do
+    WriteLn(Part);
+  WriteLn(' + '.Join(['apple', 'banana', 'cherry']));
+
+  // To and from numbers
+  WriteLn('42'.ToInt() + 1);                        // 43
+  WriteLn(ToString(42) + '!');                      // 42!
+  WriteLn(Format('%d apples cost %.2f', [3, 1.5])); // 3 apples cost 1.50
+end.

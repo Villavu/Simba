@@ -1,0 +1,98 @@
+var
+  Scene, Templ, Heat, Img: TImage;
+  Matrix: TSingleMatrix;
+  P: TPoint;
+  Match: Single;
+  X, Y: Integer;
+
+// The outline of a star, stretched, skewed and turned by the given amounts
+function Star(Center: TPoint; StretchX, StretchY, Skew, Degrees: Double): TPointArray;
+var
+  I: Integer;
+  Radius, Angle, X, Y: Double;
+begin
+  for I := 0 to 9 do
+  begin
+    if (I mod 2 = 0) then
+      Radius := 48
+    else
+      Radius := 20;
+
+    Angle := (I * 36 + Degrees) * PI / 180;
+    Y := -Radius * Cos(Angle) * StretchY;
+    X := Radius * Sin(Angle) * StretchX + Y * Skew;
+    Result += [Center.X + Round(X), Center.Y + Round(Y)];
+  end;
+end;
+
+begin
+  Scene := new TImage(600, 360);
+  Scene.Canvas.DrawAntialiasing := True;
+  Scene.Canvas.DrawFilled := True;
+
+  // The image to search. The top row is one shape in three colors. The color
+  // is matched too: yellow has two of white's three channels, red only one.
+  Scene.Canvas.DrawColor := Colors.WHITE;
+  Scene.Canvas.DrawPolygon(Star([100, 100], 1, 1, 0, 0));
+  Scene.Canvas.DrawColor := Colors.YELLOW;
+  Scene.Canvas.DrawPolygon(Star([300, 100], 1, 1, 0, 0));
+  Scene.Canvas.DrawColor := Colors.RED;
+  Scene.Canvas.DrawPolygon(Star([500, 100], 1, 1, 0, 0));
+
+  // The bottom row is white with the shape changed a little: stretched,
+  // skewed, and turned
+  Scene.Canvas.DrawColor := Colors.WHITE;
+  Scene.Canvas.DrawPolygon(Star([100, 260], 1.4, 1, 0, 0));
+  Scene.Canvas.DrawPolygon(Star([300, 260], 1, 1, 0.38, 0));
+  Scene.Canvas.DrawPolygon(Star([500, 260], 1, 1, 0, 12));
+
+  // Soften the edges
+  Scene := Scene.Blur(EImageBlurAlgo.GAUSS, 1.2);
+
+  // The template to look for: the first star cut out, 120 by 120
+  Templ := Scene.Copy([40, 40, 159, 159]);
+
+  // Finders search the target. Here that is our image rather than the screen.
+  Target.SetImage(Scene);
+
+  // FindTemplate returns the best place, and how good a match it is (1 is perfect)
+  P := Target.FindTemplate(Templ, Match);
+  WriteLn('Best match ', Round(Match, 2), ' at ', P);
+
+  // That is the highest value in this matrix: the match at every position.
+  // The other stars are the weaker peaks.
+  Matrix := MatchTemplate(Scene.ToMatrix(), Templ.ToMatrix(), TM_CCOEFF_NORMED);
+  Heat := new TImage();
+  Heat.FromMatrix(Matrix);
+
+  // Show all three side by side, each under a header
+  Img := new TImage(1400, 400);
+  Img.Canvas.FontSize := 20;
+  Img.Canvas.FontAntialiasing := True;
+  Img.Canvas.DrawColor := Colors.WHITE;
+  Img.Canvas.DrawText('Template', [10, 8]);
+  Img.Canvas.DrawText('Image', [210, 8]);
+  Img.Canvas.DrawText('Matrix: red is the best match, blue the worst', [810, 8]);
+
+  // The matrix is moved by half the template's size so each peak is over its star
+  Img.Canvas.DrawImage(Templ, [40, 80]);
+  Img.Canvas.DrawImage(Scene, [200, 40]);
+  Img.Canvas.DrawImage(Heat, [800 + Templ.Width div 2, 40 + Templ.Height div 2]);
+
+  // Dividers
+  Img.Canvas.DrawColor := Colors.GRAY;
+  Img.Canvas.DrawLine([0, 40], [1399, 40]);
+  Img.Canvas.DrawLine([200, 0], [200, 399]);
+  Img.Canvas.DrawLine([800, 0], [800, 399]);
+
+  // The best match in each star's part of the image, written above it
+  Img.Canvas.DrawColor := Colors.WHITE;
+  for Y in [0, 160] do
+    for X in [0, 200, 400] do
+    begin
+      Target.FindTemplate(Templ, Match, [X, Y, X + 199, Y + 199]);
+      Img.Canvas.DrawText(Format('%.2f', [Match]), [240 + X, 52 + Y]);
+    end;
+
+  Img.Show();
+end.

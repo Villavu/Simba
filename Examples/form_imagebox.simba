@@ -1,14 +1,16 @@
-// Simple form example doing random things.
+// An image box, with things drawn over the image in its paint event.
 
 procedure ImgBoxPaint(Sender: TImageBox; Canvas: TCanvas; R: TLazRect);
 begin
+  Canvas.DrawAntialiasing := True;
   Canvas.DrawColor := Colors.YELLOW;
   Canvas.DrawFilled := True;
   Canvas.DrawCircle(Sender.MouseXY, 5);
+  Canvas.DrawAntialiasing := False;
   Canvas.DrawFilled := False;
 
-  // if 300,300 is visible in the paint rect
-  if (300 >= R.Left) and (300 >= R.Top) and (300 <= R.Right) and (300 <= R.Bottom) then
+  // if any of the box is visible in the paint rect
+  if (350 >= R.Left) and (350 >= R.Top) and (300 <= R.Right) and (300 <= R.Bottom) then
   begin
     Canvas.DrawColor := Colors.LIME;
     Canvas.DrawFilled := True;

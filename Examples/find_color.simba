@@ -1,0 +1,36 @@
+var
+  Img: TImage;
+  TPA, Group: TPointArray;
+begin
+  // Something to search: three circles
+  Img := new TImage(420, 160);
+  Img.Canvas.DrawAntialiasing := True;
+  Img.Canvas.DrawFilled := True;
+  Img.Canvas.DrawColor := Colors.RED;
+  Img.Canvas.DrawCircle([80, 80], 50);
+  Img.Canvas.DrawColor := Colors.DARK_RED;
+  Img.Canvas.DrawCircle([210, 80], 50);
+  Img.Canvas.DrawColor := Colors.LIME;
+  Img.Canvas.DrawCircle([340, 80], 50);
+  Img.Canvas.DrawAntialiasing := False;
+  Img.Canvas.DrawFilled := False;
+
+  // Finders search the target. Here that is our image rather than the screen.
+  Target.SetImage(Img);
+
+  // Tolerance 0 only matches the exact color
+  WriteLn('Red, tolerance 0: ', Target.CountColor(Colors.RED, 0), ' pixels');
+
+  // A higher tolerance (up to 100) also matches similar colors
+  WriteLn('Red, tolerance 30: ', Target.CountColor(Colors.RED, 30), ' pixels');
+
+  // FindColor returns the points. Cluster splits them into one group per circle.
+  TPA := Target.FindColor(Colors.RED, 30);
+
+  Img.Canvas.DrawColor := Colors.WHITE;
+  for Group in TPA.Cluster(5) do
+    Img.Canvas.DrawBox(Group.Bounds());
+
+  Img.Show();
+end.
+

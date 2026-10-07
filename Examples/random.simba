@@ -1,0 +1,17 @@
+var
+  Fruits: TStringArray = ['apple', 'banana', 'cherry'];
+  I: Integer;
+begin
+  WriteLn(Random());         // A decimal from 0 up to, but not including, 1
+  WriteLn(Random(10));       // A whole number from 0 to 9
+  WriteLn(Random(5, 10));    // A whole number from 5 to 10
+  WriteLn(Random(1.5, 2.5)); // A decimal from 1.5 to 2.5
+
+  // A random item of an array
+  WriteLn(Fruits[Random(Length(Fruits))]);
+
+  // The numbers differ on every run. Setting the seed gives the same ones each time.
+  RandSeed := 123;
+  for I := 1 to 3 do
+    WriteLn(Random(100));
+end.

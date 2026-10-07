@@ -624,7 +624,7 @@ begin
   fpkill(PID, SIGKILL);
 end;
 
-procedure TSimbaNativeInterface_Darwin.SetHandleInheritable(Handle: THandle; Value: Boolean);
+procedure TSimbaNativeInterface_Darwin.SetHandleInheritable(Handle: System.THandle; Value: Boolean); // LCLType has its own THandle
 var
   Flags: Int32;
 begin

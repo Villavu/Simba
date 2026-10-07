@@ -18,7 +18,7 @@ begin
     img.Pixel[Random(100), Random(100)] := Random($FFFFFF);
 
   AcaForm.Image := img;
-  // can also maniplate the imagebox with some zooming
+  // can also manipulate the imagebox with some zooming
   AcaForm.ImageBox.Zoom := 800;
 end;
 

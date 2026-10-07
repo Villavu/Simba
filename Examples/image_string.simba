@@ -1,0 +1,26 @@
+var
+  Img, Other: TImage;
+  Str, FileName: String;
+begin
+  Img := new TImage(50, 50);
+  Img.Canvas.DrawFilled := True;
+  Img.Canvas.DrawColor := Colors.RED;
+  Img.Canvas.DrawCircle([25, 25], 20);
+
+  // An image as text, to paste into a script
+  Str := Img.ToString();
+  WriteLn(Str);
+
+  Other := new TImage();
+  Other.FromString(Str);
+  WriteLn('From the string: ', Other.Equals(Img));
+
+  // or as a file
+  FileName := PathJoin([GetTempDir(), 'simba_example.png']);
+  Img.Save(FileName, True); // True to replace the file if it exists
+
+  Other := new TImage(FileName);
+  WriteLn('From the file: ', Other.Equals(Img));
+
+  FileDelete(FileName);
+end.

@@ -16,7 +16,7 @@ begin
   json := new TJSONParser();
   json.Parse(SOME_JSON);
 
-  // if you the structure ...
+  // if you know the structure ...
   if json.GetString('streetAddress', street) then
     WriteLn(street);
   if json.GetInt('postalCode', postal) then

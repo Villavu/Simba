@@ -1,0 +1,32 @@
+var
+  Numbers: TIntegerArray;
+  Position: TPoint;
+begin
+  // WriteLn prints a line to the output box
+  WriteLn('Hello World');
+
+  // It takes any number of values, of any type, and prints them one after another
+  WriteLn('One plus one is ', 1 + 1);
+  WriteLn(1.5, ' ', True, ' ', 'text');
+
+  // Arrays and records are printed whole
+  Numbers := [1, 2, 3];
+  Position := [10, 20];
+  WriteLn(Numbers);
+  WriteLn(Position);
+
+  // Write does not end the line
+  Write('Loading');
+  Write('.');
+  Write('.');
+  WriteLn('. done');
+
+  // An empty line
+  WriteLn();
+
+  // Format gives control over how numbers look
+  WriteLn(Format('%d apples cost %.2f', [3, 1.5]));
+
+  // The brackets can be left off for a single value
+  WriteLn 'No brackets';
+end.
