@@ -5,10 +5,10 @@ asm
 {$IFDEF UNIX}
   cmp    cl, 255
   je     @toplain                 // no fade: the plain blend, args already in place
+  movzx  r9d, cl                  // Alpha, before rcx is taken for Dest
   mov    r8, rdx                  // Count
   mov    rdx, rsi                 // Src
   mov    rcx, rdi                 // Dest
-  movzx  r9d, cl                  // Alpha
 {$ELSE}
   cmp    r9b, 255
   je     @toplain                 // no fade: the plain blend, args already in place
@@ -27,6 +27,19 @@ asm
   movdqu [rsp+96], xmm12
   movdqu [rsp+112], xmm13
   movdqu [rsp+128], xmm14
+{$IFDEF WINDOWS} // for the unwinder, so a fault in here is still an exception
+  .seh_stackalloc 160
+  .seh_savexmm xmm6, 0
+  .seh_savexmm xmm7, 16
+  .seh_savexmm xmm8, 32
+  .seh_savexmm xmm9, 48
+  .seh_savexmm xmm10, 64
+  .seh_savexmm xmm11, 80
+  .seh_savexmm xmm12, 96
+  .seh_savexmm xmm13, 112
+  .seh_savexmm xmm14, 128
+  .seh_endprologue
+{$ENDIF}
 
   pxor   xmm7, xmm7               // zero
   pcmpeqb xmm6, xmm6

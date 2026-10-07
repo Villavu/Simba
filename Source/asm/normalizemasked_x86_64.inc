@@ -31,6 +31,17 @@ asm
   movdqu   [rsp+64], xmm10
   movdqu   [rsp+80], xmm11
   movdqu   [rsp+96], xmm12
+{$IFDEF WINDOWS} // for the unwinder, so a fault in here is still an exception
+  .seh_stackalloc 112
+  .seh_savexmm xmm6, 0
+  .seh_savexmm xmm7, 16
+  .seh_savexmm xmm8, 32
+  .seh_savexmm xmm9, 48
+  .seh_savexmm xmm10, 64
+  .seh_savexmm xmm11, 80
+  .seh_savexmm xmm12, 96
+  .seh_endprologue
+{$ENDIF}
 
 {$IFDEF UNIX}
   movaps   xmm12, xmm4                    // hiClamp   (the sysv registers, put where the

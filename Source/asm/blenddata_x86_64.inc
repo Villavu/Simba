@@ -16,6 +16,14 @@ asm
   movdqu [rsp+16], xmm7
   movdqu [rsp+32], xmm8
   movdqu [rsp+48], xmm9
+{$IFDEF WINDOWS} // for the unwinder, so a fault in here is still an exception
+  .seh_stackalloc 80
+  .seh_savexmm xmm6, 0
+  .seh_savexmm xmm7, 16
+  .seh_savexmm xmm8, 32
+  .seh_savexmm xmm9, 48
+  .seh_endprologue
+{$ENDIF}
   mov    rax, r8
   and    eax, 7
   mov    [rsp+64], rax            // the tail
@@ -65,10 +73,8 @@ asm
   jmp    @next16
 
 @mixed16:
-  xor    r10d, r10d               // the first block of eight ...
-  call   @block
-  mov    r10d, 32                 // ... and the second
-  call   @block
+  mov    r10d, 64                 // all sixteen, four at a time
+  jmp    @fours
 
 @next16:
   add    rdx, 64
@@ -80,8 +86,9 @@ asm
 @last:
   test   r8, r8
   jz     @tail
-  xor    r10d, r10d
-  call   @block
+  mov    r10d, 32                 // a last block of eight, four at a time
+  jmp    @fours
+@lastdone:
   add    rdx, 32
   add    rcx, 32
 
@@ -130,8 +137,13 @@ asm
   add    rsp, 80
   jmp    @done
 
-@block:
-  movdqu xmm0, [rdx+r10]
+  // Src[0..r10) over Dest[0..r10), r10 in bytes, four pixels at a time. Jumps only: rsp never
+  // moves, so the unwind information above holds here too.
+  // Clobbers xmm0-xmm4, eax, r9, r11.
+@fours:
+  xor    r9d, r9d
+@four:
+  movdqu xmm0, [rdx+r9]
   movdqa xmm4, xmm0
   pcmpeqb xmm4, xmm7
   pmovmskb eax, xmm4              // bytes that are 0
@@ -141,33 +153,15 @@ asm
   shl    r11d, 16
   or     eax, r11d
   and    eax, $88888888           // the alpha bytes
-  mov    r9, r10
-  call   @half
-  lea    r9, [r10+16]
-  movdqu xmm0, [rdx+r9]
-  movdqa xmm4, xmm0
-  pcmpeqb xmm4, xmm7
-  pmovmskb eax, xmm4
-  movdqa xmm4, xmm0
-  pcmpeqb xmm4, xmm8
-  pmovmskb r11d, xmm4
-  shl    r11d, 16
-  or     eax, r11d
-  and    eax, $88888888
-  jmp    @half                    // its ret is ours
-
-  // Src[r9] over Dest[r9], four pixels: xmm0 holds them, eax their masks.
-  // Clobbers xmm0-xmm4, eax, r11.
-@half:
   cmp    eax, $00008888
-  je     @halfdone                // all transparent
+  je     @fournext                // all transparent
   cmp    eax, $88880000
-  je     @halfcopy                // all opaque
+  je     @fourcopy                // all opaque
   mov    r11d, eax
   shr    r11d, 16
   or     r11d, eax
   cmp    r11d, $8888              // every alpha 0 or 255: no blending to do,
-  je     @halfselect              // the opaque pixels are copied and the rest kept
+  je     @fourselect              // the opaque pixels are copied and the rest kept
 
   movdqu xmm1, [rcx+r9]           // four dst pixels
   movdqa xmm2, xmm0
@@ -211,9 +205,9 @@ asm
   pandn  xmm4, xmm0               // ... else the blend
   por    xmm4, xmm2
   movdqu [rcx+r9], xmm4
-  ret
+  jmp    @fournext
 
-@halfselect:
+@fourselect:
   movdqu xmm1, [rcx+r9]
   movdqa xmm4, xmm0
   psrld  xmm4, 24
@@ -224,12 +218,17 @@ asm
   pandn  xmm4, xmm1               // ... else keep dst
   por    xmm4, xmm0
   movdqu [rcx+r9], xmm4
-  ret
+  jmp    @fournext
 
-@halfcopy:
+@fourcopy:
   movdqu [rcx+r9], xmm0
-@halfdone:
-  ret
+@fournext:
+  add    r9, 16
+  cmp    r9, r10
+  jb     @four
+  cmp    r10d, 64
+  je     @next16                  // back into the sixteen loop
+  jmp    @lastdone
 
 @done:
 end;
