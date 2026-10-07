@@ -1,0 +1,17 @@
+const
+  URL = 'https://example.com';
+
+var
+  Client: THTTPClient;
+  Page: String;
+begin
+  // The quick way: the page as a string
+  Page := URLFetch(URL);
+  WriteLn('Title: ', Page.Between('<title>', '</title>'));
+
+  // THTTPClient also has the response status, and Post, GetJson, GetFile...
+  Client := new THTTPClient();
+  Page := Client.Get(URL);
+  WriteLn('Status: ', Client.ResponseStatus);
+  WriteLn('Length: ', Page.Length, ' characters');
+end.

@@ -5,7 +5,7 @@ type
     x,y,z: Integer;
   end;
 
-// A static method behave completely like regular procedures or functions
+// Static methods behave completely like regular procedures or functions
 // They do not have a `Self` variable.
 // Their use is mainly to include the method in the namespace of the type.
 procedure TSomeType.Test; static;
@@ -18,7 +18,7 @@ begin
   TSomeType.Test();
 end;
 
-// Can also be called on a variable, but `Self` still wont exist.
+// Can also be called on a variable, but `Self` still won't exist.
 // It is suggested not to call it this way.
 var
   TestVar: TSomeType;

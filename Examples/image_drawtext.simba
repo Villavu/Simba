@@ -2,14 +2,14 @@ var
   myImage: TImage;
   myBox: TBox;
 begin
-  myImage := new TImage(500,1000);
+  myImage := new TImage(500,500);
   myImage.Fill(Colors.DARK_GRAY);
 
   myImage.Canvas.FontAntialiasing := True;
   myImage.Canvas.FontSize := 20;
 
   myImage.Canvas.DrawColor := Colors.BLACK;
-  myImage.Canvas.DrawTextLines(TCanvas.Fonts, [10,10]);
+  myImage.Canvas.DrawTextLines(Copy(TCanvas.Fonts, 0, 20), [10,10]); // the first 20 font names
 
   myBox := [225,25,450,240];
   myImage.Canvas.DrawColor := Colors.RED;

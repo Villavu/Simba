@@ -1,0 +1,21 @@
+var
+  Scene, Shape: TImage;
+  P: TPoint;
+begin
+  // Something to search: a picture of random shapes
+  Scene := RandomShapes(10);
+
+  // Cut the largest shape out of it
+  Shape := Scene.Copy(Scene.FindColor(Colors.WHITE, 0).Cluster(5).Largest().Bounds());
+
+  // Finders search the target. Here that is our picture rather than the screen.
+  Target.SetImage(Scene);
+
+  // The top left of where the image was found, or [-1,-1] if it was not
+  P := Target.FindImage(Shape, 0);
+  WriteLn('Found at ', P);
+
+  Scene.Canvas.DrawColor := Colors.RED;
+  Scene.Canvas.DrawBox([P.X, P.Y, P.X + Shape.Width - 1, P.Y + Shape.Height - 1]);
+  Scene.Show();
+end.

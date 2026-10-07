@@ -31,7 +31,6 @@ begin
   img.Canvas.DrawAntialiasing := False;
   img.Canvas.DrawColor := $FF;
   img.Canvas.DrawCross(Start, 10);
-  img.Canvas.DrawColor := $FF;
   img.Canvas.DrawCross(Dest, 10);
   img.Canvas.DrawColor := -1;
   img.Canvas.DrawATPA(Paths);

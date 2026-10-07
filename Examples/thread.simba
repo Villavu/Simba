@@ -1,0 +1,46 @@
+// A thread runs a procedure at the same time as the rest of the script.
+
+var
+  Lock: TLock;
+
+// Only one thread at a time can be inside a lock, so the lines do not mix
+procedure Print(Text: String);
+begin
+  Lock.Enter();
+  try
+    WriteLn(Text);
+  finally
+    Lock.Leave();
+  end;
+end;
+
+procedure Worker;
+var
+  I: Integer;
+begin
+  for I := 1 to 5 do
+  begin
+    Print('Worker: ' + ToString(I));
+    Sleep(100);
+  end;
+end;
+
+var
+  Thread: TThread;
+  I: Integer;
+begin
+  Lock := TLock.Create();
+  Thread := TThread.Create(@Worker); // Starts running straight away
+
+  for I := 1 to 3 do
+  begin
+    Print('Main: ' + ToString(I));
+    Sleep(150);
+  end;
+
+  Thread.WaitForTerminate(); // Wait here until Worker has finished
+  Thread.Free();
+  Lock.Free();
+
+  WriteLn('Done');
+end.

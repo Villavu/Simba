@@ -1,0 +1,26 @@
+type
+  TPerson = record
+    Name: String;
+    Age: Integer;
+  end;
+
+var
+  Person, Other: TPerson;
+begin
+  Person.Name := 'Alice';
+  Person.Age := 30;
+  WriteLn(Person.Name, ' is ', Person.Age);
+
+  // All fields at once, in the order they are declared
+  Other := ['Bob', 25];
+  WriteLn(Other.Name, ' is ', Other.Age);
+
+  // Assigning copies the record
+  Other := Person;
+  Other.Age := 31;
+  WriteLn(Person.Age, ' and ', Other.Age);
+
+  // `with` saves repeating the variable name
+  with Person do
+    WriteLn(Name, ' is ', Age);
+end.

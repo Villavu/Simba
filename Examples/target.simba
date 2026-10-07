@@ -1,0 +1,26 @@
+// The target is what finders read and what the mouse and keyboard act on.
+var
+  Img: TImage;
+begin
+  // To begin with it is the whole desktop
+  WriteLn('Desktop: ', Target.Width, 'x', Target.Height);
+
+  // A window. Positions are then relative to the window's top left.
+  Target.SetWindow(GetActiveWindow());
+  WriteLn('Window "', GetActiveWindow().GetTitle(), '": ', Target.Width, 'x', Target.Height);
+
+  // An image. There is nothing to click, but every finder works.
+  Img := new TImage(200, 100);
+  Img.Fill(Colors.RED);
+  Target.SetImage(Img);
+  WriteLn('Image: ', Target.Width, 'x', Target.Height, ', ', Target.CountColor(Colors.RED, 0), ' red pixels');
+
+  // and back to the desktop
+  Target.SetDesktop();
+
+  // Freezing keeps one capture, so several finders see the same moment
+  Target.FreezeImage();
+  WriteLn('Color at 0,0: $', IntToHex(Target.GetColor([0, 0]), 6));
+  WriteLn('Color at 100,100: $', IntToHex(Target.GetColor([100, 100]), 6));
+  Target.UnFreezeImage();
+end.

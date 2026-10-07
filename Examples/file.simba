@@ -1,0 +1,26 @@
+var
+  FileName, Line: String;
+begin
+  FileName := PathJoin([GetTempDir(), 'simba_example.txt']);
+
+  FileWrite(FileName, 'First line' + LINE_SEP); // Replaces whatever the file held
+  FileAppend(FileName, 'Second line' + LINE_SEP);
+
+  WriteLn('Exists: ', FileExists(FileName));
+  WriteLn('Size: ', FileSize(FileName), ' bytes');
+
+  // The whole file as one string
+  WriteLn(FileRead(FileName));
+
+  // or a line at a time
+  for Line in FileReadLines(FileName) do
+    WriteLn('Line: ', Line);
+
+  // Parts of a path
+  WriteLn(PathExtractName(FileName));
+  WriteLn(PathExtractExt(FileName));
+  WriteLn(PathExtractDir(FileName));
+
+  FileDelete(FileName);
+  WriteLn('Exists: ', FileExists(FileName));
+end.

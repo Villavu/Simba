@@ -36,6 +36,43 @@ begin
   WriteLn('ForLoop_Continue finished');
 end;
 
+procedure ForInLoop;
+var
+  Number: Integer;
+begin
+  WriteLn('ForInLoop:');
+  for Number in [10, 20, 30] do // Each item of the array in turn
+    WriteLn(Number);
+  WriteLn('ForInLoop finished');
+end;
+
+procedure WhileLoop;
+var
+  Counter: Integer;
+begin
+  WriteLn('WhileLoop:');
+  Counter := 0;
+  while (Counter < 3) do // Checked before each loop
+  begin
+    WriteLn(Counter);
+    Counter := Counter + 1;
+  end;
+  WriteLn('WhileLoop finished');
+end;
+
+procedure RepeatLoop;
+var
+  Counter: Integer;
+begin
+  WriteLn('RepeatLoop:');
+  Counter := 0;
+  repeat
+    WriteLn(Counter);
+    Counter := Counter + 1;
+  until (Counter = 3); // Checked after each loop, so it runs at least once
+  WriteLn('RepeatLoop finished');
+end;
+
 begin
   WriteLn('-------------------------------');
   ForLoop();
@@ -43,5 +80,11 @@ begin
   ForLoop_Break();
   WriteLn('-------------------------------');
   ForLoop_Continue();
+  WriteLn('-------------------------------');
+  ForInLoop();
+  WriteLn('-------------------------------');
+  WhileLoop();
+  WriteLn('-------------------------------');
+  RepeatLoop();
   WriteLn('-------------------------------');
 end.

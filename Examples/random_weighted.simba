@@ -1,0 +1,47 @@
+// The weighted random functions favor one part of their range.
+// This draws how often each value comes up, for each of them.
+var
+  Img: TImage;
+
+// A value from 0 to 1 from one of the functions
+function Sample(Kind: Integer): Double;
+begin
+  case Kind of
+    0: Result := RandomLeft(0.0, 1.0);      // mostly near the low end
+    1: Result := RandomRight(0.0, 1.0);     // mostly near the high end
+    2: Result := RandomMean(0.0, 1.0);      // mostly near the middle
+    3: Result := RandomMode(0.8, 0.0, 1.0); // mostly near the first value
+  end;
+end;
+
+// Sorts 50000 values into 50 bars and draws them at X
+procedure DrawBars(Kind: Integer; Title: String; X: Integer);
+var
+  Counts: TIntegerArray;
+  I: Integer;
+begin
+  SetLength(Counts, 50);
+  for I := 1 to 50000 do
+    Counts[Min(Trunc(Sample(Kind) * 50), 49)] += 1;
+
+  Img.Canvas.DrawColor := Colors.WHITE;
+  Img.Canvas.DrawText(Title, [X, 8]);
+
+  Img.Canvas.DrawColor := $EF8D5B;
+  for I := 0 to 49 do
+    Img.Canvas.DrawBox([X + I * 4, 160 - Counts[I] * 120 div Counts.Max(), X + I * 4 + 2, 160]);
+end;
+
+begin
+  Img := new TImage(880, 170);
+  Img.Canvas.DrawFilled := True;
+  Img.Canvas.FontSize := 16;
+  Img.Canvas.FontAntialiasing := True;
+
+  DrawBars(0, 'RandomLeft', 10);
+  DrawBars(1, 'RandomRight', 230);
+  DrawBars(2, 'RandomMean', 450);
+  DrawBars(3, 'RandomMode(0.8, ...)', 670);
+
+  Img.Show();
+end.

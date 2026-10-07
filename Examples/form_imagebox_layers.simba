@@ -47,6 +47,7 @@ end;
 // The paint event still draws every frame, on top of all the layers.
 procedure ImgBoxPaint(Sender: TImageBox; Canvas: TCanvas; R: TLazRect);
 begin
+  Canvas.DrawAntialiasing := Antialiasing;
   Canvas.DrawColor := Colors.YELLOW;
   Canvas.DrawCircle(Sender.MouseXY, 12);
 end;
