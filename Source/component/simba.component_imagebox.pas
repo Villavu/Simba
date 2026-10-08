@@ -133,7 +133,7 @@ type
     procedure Click; override;
     procedure DblClick; override;
     procedure Paint; override;
-    procedure Resize; override;
+    procedure DoOnResize; override;
 
     procedure DoScrollChange(Sender: TObject);
     procedure DoStatusBarResize(Sender: TObject);
@@ -539,9 +539,9 @@ begin
   FDebug.LastFrameTime := Finished - Started;
 end;
 
-procedure TSimbaImageBox.Resize;
+procedure TSimbaImageBox.DoOnResize;
 begin
-  inherited Resize();
+  inherited DoOnResize();
 
   UpdateScrollBars();
   Repaint();

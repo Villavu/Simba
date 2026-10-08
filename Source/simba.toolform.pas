@@ -12,7 +12,7 @@ unit simba.toolform;
 interface
 
 uses
-  Classes, SysUtils, Controls, ExtCtrls, Forms, Menus,
+  Classes, SysUtils, Controls, ExtCtrls, Forms, Menus, LMessages,
   simba.base,
   simba.image,
   simba.component_imagebox,
@@ -28,8 +28,8 @@ type
 
   TSimbaToolForm = class(TForm)
   private const
-    DEF_WIDTH = 1000;
-    DEF_HEIGHT = 650;
+    DEF_WIDTH = 850;
+    DEF_HEIGHT = 550;
     RECENT_IMAGE_COUNT = 5;
   protected
     FMenuBar: TSimbaMenuBar;
@@ -37,6 +37,7 @@ type
     FSidePanelFrame: TPanel;
     FSidePanel: TPanel;
     FSidePanelPercent: Single; // its share of the form's width, kept as the form resizes
+    FSidePanelLocked: Boolean; // its width is held while the window is dragged
     FDivider: TSimbaDivider;
     FButtonPanel: TSimbaButtonGrid;
     FImageBox: TSimbaImageBox;
@@ -46,12 +47,16 @@ type
     FImageSupplierLape: TImageSupplierLape;
     FUpdateImageOnFirstShow: Boolean;
 
+    procedure WMSize(var Message: TLMSize); message LM_SIZE;
+
     procedure DoClose(var CloseAction: TCloseAction); override;
     procedure DoFirstShow; override;
     procedure DoOnResize; override;
     procedure DoSidePanelResizing(Sender: TObject; var NewSize: Integer; var Accept: Boolean); virtual;
     procedure DoSidePanelFrameResize(Sender: TObject); virtual;
     procedure DoSidePanelMoved(Sender: TObject); virtual;
+    procedure SidePanelShare(AClientWidth: Integer); virtual;
+    procedure DoIdle(Sender: TObject; var Done: Boolean); virtual;
 
     procedure DoImageMenuPopup(Sender: TObject); virtual;
     procedure DoLoadImageClick(Sender: TObject); virtual;
@@ -81,6 +86,7 @@ type
 
     constructor Create(ImageSupplier: TImageSupplier); virtual; reintroduce;
     constructor CreateLape(ImageSupplier: TImageSupplierLape); virtual; reintroduce;
+    destructor Destroy; override;
 
     function addButton(ACaption: String; AOnClick: TNotifyEvent): TSimbaButton; virtual;
     // a menu on the menu bar, for its items
@@ -167,12 +173,55 @@ begin
 end;
 
 // Like docking's ScaleOnResize: the side panel keeps its share of the width as the form resizes.
+// But while dragging, lock it for performance
+procedure TSimbaToolForm.SidePanelShare(AClientWidth: Integer);
+begin
+  if Showing and (FSidePanel.Constraints.MaxWidth = 0) then
+  begin
+    FSidePanel.Constraints.MinWidth := FSidePanel.Width;
+    FSidePanel.Constraints.MaxWidth := FSidePanel.Width;
+    FSidePanelLocked := True;
+  end;
+
+  FSidePanelFrame.Width := Min(Round(AClientWidth * FSidePanelPercent), AClientWidth - FImageBox.Constraints.MinWidth);
+end;
+
+// Nothing is waiting, so the resizing has stopped or paused so unlock the side panel
+procedure TSimbaToolForm.DoIdle(Sender: TObject; var Done: Boolean);
+begin
+  if FSidePanelLocked then
+  begin
+    FSidePanelLocked := False;
+    FSidePanel.Constraints.MaxWidth := 0;
+    FSidePanel.Constraints.MinWidth := 0;
+  end;
+end;
+
 procedure TSimbaToolForm.DoOnResize;
 begin
   inherited DoOnResize();
 
   if (FSidePanelFrame <> nil) and (FImageBox <> nil) then
-    FSidePanelFrame.Width := Min(Round(ClientWidth * FSidePanelPercent), ClientWidth - FImageBox.Constraints.MinWidth);
+    SidePanelShare(ClientWidth);
+end;
+
+// The side panel takes its share before the form lays out, so there is one layout for both
+procedure TSimbaToolForm.WMSize(var Message: TLMSize);
+begin
+  if (FSidePanelFrame = nil) or (FImageBox = nil) or (Message.Width <= 0) then
+  begin
+    inherited WMSize(Message);
+    Exit;
+  end;
+
+  DisableAutoSizing();
+  try
+    SidePanelShare(Message.Width);
+
+    inherited WMSize(Message);
+  finally
+    EnableAutoSizing();
+  end;
 end;
 
 // Lock resizing of all components while dragging to prevent tons of updates
@@ -320,6 +369,8 @@ constructor TSimbaToolForm.Create(ImageSupplier: TImageSupplier);
 begin
   inherited CreateNew(nil);
 
+  Application.AddOnIdleHandler(@DoIdle);
+
   FImageSupplier := ImageSupplier;
   FUpdateImageOnFirstShow := True;
 
@@ -390,6 +441,7 @@ begin
   FButtonPanel := TSimbaButtonGrid.Create(FSidePanel);
   FButtonPanel.Parent := FSidePanel;
   FButtonPanel.Align := alBottom;
+  FButtonPanel.Top := FDivider.BoundsRect.Bottom + 1; // under the divider: with no buttons yet it has no height to put it there
   FButtonPanel.BorderSpacing.Around := 5;
 end;
 
@@ -398,6 +450,13 @@ begin
   Create(nil);
 
   FImageSupplierLape := ImageSupplier;
+end;
+
+destructor TSimbaToolForm.Destroy;
+begin
+  Application.RemoveOnIdleHandler(@DoIdle);
+
+  inherited Destroy();
 end;
 
 function TSimbaToolForm.addButton(ACaption: String; AOnClick: TNotifyEvent): TSimbaButton;
