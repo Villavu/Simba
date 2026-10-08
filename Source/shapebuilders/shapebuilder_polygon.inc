@@ -11,8 +11,8 @@ procedure _BuildPolygon(const APoints: TPointArray; const Inverted: Boolean; con
 var
   Top, Dir, TopX: TIntegerArray;
   Height, Run: array of Int64;
-  Crossings, Dirs: TIntegerArray;
-  EdgeCount, N, I, Prev, Insert, Count, Y, YMin, YMax, ScanY1, ScanY2, X, Cursor, Wind: Integer;
+  Crossings, Dirs, DirsAbove: TIntegerArray;
+  EdgeCount, N, I, Prev, Insert, Count, Y, YMin, YMax, ScanY1, ScanY2, X, Cursor, Wind, WindAbove: Integer;
 begin
   N := Length(APoints);
   if (N < 3) then
@@ -63,6 +63,7 @@ begin
   ScanY2 := Min(Clip.Y2, YMax);
   SetLength(Crossings, EdgeCount);
   SetLength(Dirs, EdgeCount);
+  SetLength(DirsAbove, EdgeCount);
 
   if Inverted then
   begin
@@ -76,7 +77,7 @@ begin
   begin
     Count := 0;
     for I := 0 to EdgeCount - 1 do
-      if (Y >= Top[I]) and (Y < Top[I] + Height[I]) then
+      if (Y >= Top[I]) and (Y <= Top[I] + Height[I]) then
       begin
         X := RoundHalfUp(Max(Min(TopX[I] + (Int64(Y) - Top[I]) * Run[I] / Height[I], Clip.X2 + 1.0), Clip.X1 - 1.0));   // held to Clip: a crossing can pass the Integer limits
         Insert := Count;
@@ -84,14 +85,17 @@ begin
         begin
           Crossings[Insert] := Crossings[Insert - 1];
           Dirs[Insert] := Dirs[Insert - 1];
+          DirsAbove[Insert] := DirsAbove[Insert - 1];
           Dec(Insert);
         end;
         Crossings[Insert] := X;
-        Dirs[Insert] := Dir[I];
+        Dirs[Insert] := Dir[I] * Ord(Y < Top[I] + Height[I]);
+        DirsAbove[Insert] := Dir[I] * Ord(Y > Top[I]);
         Inc(Count);
       end;
 
     Wind := 0;
+    WindAbove := 0;
     X := Clip.X1; // the span's start: always set again below, where the winding leaves zero
     if (not Inverted) then
       Cursor := Low(Integer)
@@ -99,14 +103,15 @@ begin
       Cursor := Clip.X1;
     for I := 0 to Count - 1 do
     begin
-      if (Wind = 0) then
+      if (Wind = 0) and (WindAbove = 0) then
       begin
         X := Crossings[I];
         if Inverted and (X > Cursor) then
           _Row(Y, Cursor, X - 1);
       end;
       Wind := Wind + Dirs[I];
-      if (Wind = 0) then
+      WindAbove := WindAbove + DirsAbove[I];
+      if (Wind = 0) and (WindAbove = 0) then
       begin
         if (not Inverted) then
         begin
@@ -119,7 +124,7 @@ begin
           Cursor := Max(Cursor, Crossings[I] + 1);
       end;
     end;
-    Assert(Wind = 0);
+    Assert((Wind = 0) and (WindAbove = 0));
     if Inverted and (Cursor <= Clip.X2) then
       _Row(Y, Cursor, Clip.X2);
   end;

@@ -23,46 +23,38 @@ uses
   Math,
   simba.image_utils, simba.vartype_box, simba.vartype_pointarray, simba.geometry;
 
-// The bounds of a W x H image rotated by Angle (radians) about its centre.
-function GetRotatedSize(W, H: Integer; Angle: Single): TBox;
+// The size that holds every pixel of a W x H image rotated by Angle (radians) about its centre.
+// Measured between pixel centres, so a quarter turn of W x H is exactly H x W.
+function GetRotatedSize(W, H: Integer; Angle: Single): TPoint;
 var
-  B: TPointArray;
+  CosAngle, SinAngle: Double;
 begin
-  B := [
-    TSimbaGeometry.RotatePoint(Point(0, H), Angle, W div 2, H div 2),
-    TSimbaGeometry.RotatePoint(Point(W, H), Angle, W div 2, H div 2),
-    TSimbaGeometry.RotatePoint(Point(W, 0), Angle, W div 2, H div 2),
-    TSimbaGeometry.RotatePoint(Point(0, 0), Angle, W div 2, H div 2)
-  ];
+  SinCos(Double(Angle), SinAngle, CosAngle);
 
-  Result := B.Bounds();
+  Result.X := Round(Abs(CosAngle) * (W - 1) + Abs(SinAngle) * (H - 1)) + 1;
+  Result.Y := Round(Abs(SinAngle) * (W - 1) + Abs(CosAngle) * (H - 1)) + 1;
 end;
 
 function SimbaImage_RotateNN(Image: TSimbaImage; Radians: Single; Expand: Boolean): TSimbaImage;
 var
-  CosAngle, SinAngle: Single;
+  CosAngle, SinAngle: Double;
   SrcWidth, SrcHeight: Integer;
-  NewBounds: TBox;
 
-  // Rotate into an (OutW x OutH) result. (OffX,OffY) is the output canvas's top-left in source space -
-  // (0,0) for no-expand, NewBounds.X1/Y1 for expand
-  procedure Sample(OutW, OutH, OffX, OffY: Integer);
+  // Rotate into an (OutW x OutH) result: the centre of the result is the centre of the source
+  procedure Sample(OutW, OutH: Integer);
   var
     Y, OldX, OldY: Integer;
-    MidX, MidY, sX, sY: Double; // source position; increments by (Cos,Sin) per output column
+    sX, sY: Double; // source position; increments by (Cos,Sin) per output column
     SrcPtr, DstPtr, DstPixel, RowEnd: PColorBGRA;
   begin
     Result.SetSize(OutW, OutH);
     SrcPtr := Image.Data;
     DstPtr := Result.Data;
 
-    MidX := (SrcWidth - 1) / 2;
-    MidY := (SrcHeight - 1) / 2;
-
     for Y := 0 to OutH - 1 do
     begin
-      sX := MidX + CosAngle * (OffX - MidX) - SinAngle * (OffY + Y - MidY); // source X,Y at output X=0
-      sY := MidY + SinAngle * (OffX - MidX) + CosAngle * (OffY + Y - MidY);
+      sX := (SrcWidth - 1) / 2 - CosAngle * ((OutW - 1) / 2) - SinAngle * (Y - (OutH - 1) / 2); // source X,Y at output X=0
+      sY := (SrcHeight - 1) / 2 - SinAngle * ((OutW - 1) / 2) + CosAngle * (Y - (OutH - 1) / 2);
       DstPixel := DstPtr + Y * OutW;
       RowEnd := DstPixel + OutW;
       while (DstPixel < RowEnd) do
@@ -82,31 +74,26 @@ var
 begin
   Result := TSimbaImage.Create();
 
-  SinCos(Radians, SinAngle, CosAngle);
+  SinCos(Double(Radians), SinAngle, CosAngle);
   SrcWidth := Image.Width;
   SrcHeight := Image.Height;
 
   if Expand then
-  begin
-    NewBounds := GetRotatedSize(SrcWidth, SrcHeight, Radians);
-    Sample(NewBounds.Width - 1, NewBounds.Height - 1, NewBounds.X1, NewBounds.Y1);
-  end
+    Sample(GetRotatedSize(SrcWidth, SrcHeight, Radians).X, GetRotatedSize(SrcWidth, SrcHeight, Radians).Y)
   else
-    Sample(SrcWidth, SrcHeight, 0, 0);
+    Sample(SrcWidth, SrcHeight);
 end;
 
 function SimbaImage_RotateBilinear(Image: TSimbaImage; Radians: Single; Expand: Boolean): TSimbaImage;
 var
-  CosAngle, SinAngle: Single;
+  CosAngle, SinAngle: Double;
   SrcWidth, SrcHeight: Integer;
-  NewBounds: TBox;
 
-  // Rotate into an (OutW x OutH) result. (OffX,OffY) is the output canvas's top-left in source space -
-  // (0,0) for no-expand, NewBounds.X1/Y1 for expand
-  procedure Sample(OutW, OutH, OffX, OffY: Integer);
+  // Rotate into an (OutW x OutH) result: the centre of the result is the centre of the source
+  procedure Sample(OutW, OutH: Integer);
   var
     Y, fX, fY, cX, cY: Integer;
-    MidX, MidY, sX, sY, OldX, OldY, dX, dY, dxMinus1, dyMinus1: Double;
+    sX, sY, OldX, OldY, dX, dY, dxMinus1, dyMinus1: Double;
     p0, p1, p2, p3: TColorBGRA;
     topR, topG, topB, BtmR, btmG, btmB: Double;
     SrcPtr, DstPtr, DstPixel, RowEnd: PColorBGRA;
@@ -115,30 +102,35 @@ var
     SrcPtr := Image.Data;
     DstPtr := Result.Data;
 
-    MidX := (OutW - 1) / 2;
-    MidY := (OutH - 1) / 2;
-
     for Y := 0 to OutH - 1 do
     begin
-      sX := MidX - CosAngle * MidX - SinAngle * (Y - MidY);
-      sY := MidY - SinAngle * MidX + CosAngle * (Y - MidY);
+      sX := (SrcWidth - 1) / 2 - CosAngle * ((OutW - 1) / 2) - SinAngle * (Y - (OutH - 1) / 2);
+      sY := (SrcHeight - 1) / 2 - SinAngle * ((OutW - 1) / 2) + CosAngle * (Y - (OutH - 1) / 2);
       DstPixel := DstPtr + Y * OutW;
       RowEnd := DstPixel + OutW;
       while (DstPixel < RowEnd) do
       begin
-        OldX := sX;
-        OldY := sY;
-
-        fX := Trunc(OldX) + OffX;
-        fY := Trunc(OldY) + OffY;
-        cX := Ceil(OldX)  + OffX;
-        cY := Ceil(OldY)  + OffY;
-
-        if (fX >= 0) and (cX >= 0) and (fX < SrcWidth) and (cX < SrcWidth) and
-           (fY >= 0) and (cY >= 0) and (fY < SrcHeight) and (cY < SrcHeight) then
+        // within half a pixel of the image, like nearest neighbour: the edge pixels repeat
+        if (sX >= -0.5) and (sX <= SrcWidth - 0.5) and (sY >= -0.5) and (sY <= SrcHeight - 0.5) then
         begin
-          dx := OldX - (fX - OffX);
-          dy := OldY - (fY - OffY);
+          OldX := sX;
+          if (OldX < 0) then
+            OldX := 0
+          else if (OldX > SrcWidth - 1) then
+            OldX := SrcWidth - 1;
+          OldY := sY;
+          if (OldY < 0) then
+            OldY := 0
+          else if (OldY > SrcHeight - 1) then
+            OldY := SrcHeight - 1;
+
+          fX := Trunc(OldX);
+          fY := Trunc(OldY);
+          cX := Ceil(OldX);
+          cY := Ceil(OldY);
+
+          dx := OldX - fX;
+          dy := OldY - fY;
           dxMinus1 := 1 - dx;
           dyMinus1 := 1 - dy;
 
@@ -173,17 +165,14 @@ var
 begin
   Result := TSimbaImage.Create();
 
-  SinCos(Radians, SinAngle, CosAngle);
+  SinCos(Double(Radians), SinAngle, CosAngle);
   SrcWidth := Image.Width;
   SrcHeight := Image.Height;
 
   if Expand then
-  begin
-    NewBounds := GetRotatedSize(SrcWidth, SrcHeight, Radians);
-    Sample(NewBounds.Width - 1, NewBounds.Height - 1, NewBounds.X1, NewBounds.Y1);
-  end
+    Sample(GetRotatedSize(SrcWidth, SrcHeight, Radians).X, GetRotatedSize(SrcWidth, SrcHeight, Radians).Y)
   else
-    Sample(SrcWidth, SrcHeight, 0, 0);
+    Sample(SrcWidth, SrcHeight);
 end;
 
 function SimbaImage_Mirror(Image: TSimbaImage; Style: EImageMirrorStyle): TSimbaImage;
