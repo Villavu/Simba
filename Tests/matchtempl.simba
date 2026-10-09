@@ -4,80 +4,177 @@ begin
 end.
 {$ENDIF}{$ENDIF} // rest of file wont even be parsed
 
+const
+  // three parts of the world, each used as a template
+  SAMPLES: TBoxArray = [[245, 802, 308, 865], [130, 139, 193, 202], [471, 888, 534, 951]];
+
 var
   fails: Integer;
 
-type
-  TMatchTemplateFunc = function(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
-
-procedure CheckMatches(prefix: String; fn: TMatchTemplateFunc; formula: ETMFormula; addMask: Integer; img: TImage; templs: TImageArray; expectedPeaks: TPointArray; expectedMatches: TSingleArray);
-var
-  i:Integer;
-  mat: TSingleMatrix;
-  templ: TImage;
+// The best place of a match is within Slack pixels of Expected, with a value from Lo to Hi
+procedure Check(Name: String; Mat: TSingleMatrix; Best, Expected: TPoint; Slack: Integer; Lo, Hi: Single);
 begin
-  for i := 0 to High(templs) do
+  if (Abs(Best.X - Expected.X) > Slack) or (Abs(Best.Y - Expected.Y) > Slack) then
   begin
-    templ := templs[i];
-    if (addMask > 0) then
-    begin
-      templ := templ.Copy();
-      templ.Canvas.DrawColor := 0;
-      templ.Canvas.DrawCircleInverted(templ.Center, addMask);
-      //templ.Show();
-      //Halt;
-    end;
-
-    mat := fn(img.ToMatrix, templ.ToMatrix, formula);
-    //WriteLn(mat.ArgMax);
-    //WriteLn(FormatFloat('0.000', mat[mat.ArgMax.Y,mat.ArgMax.X]));
-    //Continue;
-
-    if (mat.ArgMax <> expectedPeaks[i]) then
-    begin
-      WriteLn(prefix, ' Test[',i,'] ArgMax: ', mat.ArgMax, ' <> ', expectedPeaks[i]);
-      Inc(fails);
-    end;
-    if (Abs(mat[mat.ArgMax.Y, mat.ArgMax.X] - expectedMatches[i]) > 0.001) then
-    begin
-      WriteLn(prefix, ' Test[',i,'] Match: ', mat[mat.ArgMax.Y, mat.ArgMax.X], ' <> ', expectedMatches[i]);
-      Inc(fails);
-    end;
+    WriteLn(Name, ' at ', Best, ', expected ', Expected);
+    Inc(fails);
   end;
+  if (Mat[Best.Y, Best.X] < Lo) or (Mat[Best.Y, Best.X] > Hi) then
+  begin
+    WriteLn(Name, ' match ', Mat[Best.Y, Best.X], ', expected ', Lo, '..', Hi);
+    Inc(fails);
+  end;
+end;
+
+// Everything outside of a circle is black, which is not matched
+function Masked(Templ: TImage; Radius: Integer): TImage;
+begin
+  Result := Templ.Copy();
+  Result.Canvas.DrawColor := 0;
+  Result.Canvas.DrawCircleInverted(Result.Center, Radius);
+end;
+
+// A template cut from the image is found where it was cut, as good as a match can be
+procedure TestExact(World: TImage);
+var
+  Image: TIntegerMatrix;
+  Templ: TImage;
+  Mat: TSingleMatrix;
+  I: Integer;
+begin
+  Image := World.ToMatrix;
+
+  for I := 0 to High(SAMPLES) do
+  begin
+    Templ := World.Copy(SAMPLES[I]);
+
+    Mat := MatchTemplate(Image, Templ.ToMatrix, TM_CCOEFF_NORMED);
+    Check('Exact CCOEFF ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft, 0, 0.999, 1.001);
+    Mat := MatchTemplate(Image, Templ.ToMatrix, TM_CCORR_NORMED);
+    Check('Exact CCORR ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft, 0, 0.999, 1.001);
+    Mat := MatchTemplate(Image, Templ.ToMatrix, TM_SQDIFF_NORMED); // the lowest is the best
+    Check('Exact SQDIFF ' + ToStr(I), Mat, Mat.ArgMin, SAMPLES[I].TopLeft, 0, -0.001, 0.001);
+
+    Templ := Masked(Templ, 28);
+
+    Mat := MatchTemplateMask(Image, Templ.ToMatrix, TM_CCOEFF_NORMED);
+    Check('Exact mask CCOEFF ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft, 0, 0.999, 1.001);
+    Mat := MatchTemplateMask(Image, Templ.ToMatrix, TM_CCORR_NORMED);
+    Check('Exact mask CCORR ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft, 0, 0.999, 1.001);
+    Mat := MatchTemplateMask(Image, Templ.ToMatrix, TM_SQDIFF_NORMED);
+    Check('Exact mask SQDIFF ' + ToStr(I), Mat, Mat.ArgMin, SAMPLES[I].TopLeft, 0, -0.001, 0.001);
+  end;
+end;
+
+// A template that is a little different is still found where it was cut, with a high match
+procedure TestChanged(World: TImage);
+var
+  Image: TIntegerMatrix;
+  Templ, Changed: TImage;
+  Mat: TSingleMatrix;
+  I: Integer;
+begin
+  Image := World.ToMatrix;
+
+  for I := 0 to High(SAMPLES) do
+  begin
+    Templ := World.Copy(SAMPLES[I]);
+
+    // brighter and darker: CCOEFF takes the mean off, so it hardly changes
+    Changed := Templ.Brightness(30);
+    Mat := MatchTemplate(Image, Changed.ToMatrix, TM_CCOEFF_NORMED);
+    Check('Brighter CCOEFF ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft, 0, 0.98, 1.001);
+    Mat := MatchTemplate(Image, Changed.ToMatrix, TM_CCORR_NORMED);
+    Check('Brighter CCORR ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft, 0, 0.98, 1.001);
+    Mat := MatchTemplate(Image, Changed.ToMatrix, TM_SQDIFF_NORMED);
+    Check('Brighter SQDIFF ' + ToStr(I), Mat, Mat.ArgMin, SAMPLES[I].TopLeft, 0, 0, 0.15);
+
+    Changed := Templ.Brightness(-30);
+    Mat := MatchTemplate(Image, Changed.ToMatrix, TM_CCOEFF_NORMED);
+    Check('Darker CCOEFF ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft, 0, 0.97, 1.001);
+
+    // a little out of focus
+    Changed := Templ.Blur(EImageBlurAlgo.GAUSS, 1);
+    Mat := MatchTemplate(Image, Changed.ToMatrix, TM_CCOEFF_NORMED);
+    Check('Blurred CCOEFF ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft, 0, 0.70, 1.001);
+
+    // turned 2 degrees about its middle, then cut 10 pixels in on every side to lose the black corners
+    Changed := Templ.Rotate(EImageRotateAlgo.BILINEAR, 2 * PI / 180, False).Copy([10, 10, 53, 53]);
+    Mat := MatchTemplate(Image, Changed.ToMatrix, TM_CCOEFF_NORMED);
+    Check('Turned CCOEFF ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft + [10, 10], 1, 0.75, 1.001);
+
+    // turned and brighter
+    Changed := Changed.Brightness(15);
+    Mat := MatchTemplate(Image, Changed.ToMatrix, TM_CCOEFF_NORMED);
+    Check('Turned and brighter CCOEFF ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft + [10, 10], 1, 0.75, 1.001);
+
+    // turned 4 degrees: a much lower match, but the place is still right
+    Changed := Templ.Rotate(EImageRotateAlgo.BILINEAR, 4 * PI / 180, False).Copy([10, 10, 53, 53]);
+    Mat := MatchTemplate(Image, Changed.ToMatrix, TM_CCOEFF_NORMED);
+    Check('Turned more CCOEFF ' + ToStr(I), Mat, Mat.ArgMax, SAMPLES[I].TopLeft + [10, 10], 1, 0.45, 1.001);
+  end;
+end;
+
+// A cache and threading change how a match is made, not what it finds
+procedure TestCacheAndThreading(World: TImage);
+var
+  Image, Templ: TIntegerMatrix;
+  Cache: TMatchTemplateCache;
+  Mat: TSingleMatrix;
+begin
+  Image := World.ToMatrix;
+  Templ := World.Copy(SAMPLES[0]).ToMatrix;
+
+  MatchTemplate(Image, Templ, TM_CCOEFF_NORMED, Cache); // fills the cache
+  Mat := MatchTemplate(Image, Templ, TM_CCOEFF_NORMED, Cache);
+  Check('Cached', Mat, Mat.ArgMax, SAMPLES[0].TopLeft, 0, 0.999, 1.001);
+
+  FFT_THREADING := not FFT_THREADING;
+  Mat := MatchTemplate(Image, Templ, TM_CCOEFF_NORMED);
+  Check('Threading changed', Mat, Mat.ArgMax, SAMPLES[0].TopLeft, 0, 0.999, 1.001);
+  Mat := MatchTemplate(Image, Templ, TM_CCOEFF_NORMED, Cache);
+  Check('Threading changed, cached', Mat, Mat.ArgMax, SAMPLES[0].TopLeft, 0, 0.999, 1.001);
+  FFT_THREADING := not FFT_THREADING;
+end;
+
+// Just ensure giant matching still works
+procedure TestGiant(World: TImage);
+var
+  Image: TIntegerMatrix;
+  bigImage, bigTempl, hugeTempl: TImage;
+  Mat: TSingleMatrix;
+begin
+  bigImage := World.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, World.Width*4, World.Height*4);
+  bigTempl := bigImage.Copy([800,2500,950,2650]).Blur(EImageBlurAlgo.BOX,5);
+  hugeTempl := bigImage.Copy([1000,2000,2000,3000]).Blur(EImageBlurAlgo.BOX,5);
+  Image := bigImage.ToMatrix;
+
+  Mat := MatchTemplate(Image, bigTempl.ToMatrix, TM_CCOEFF_NORMED);
+  Check('Giant 0', Mat, Mat.ArgMax, [800, 2500], 0, 0.887, 0.889);
+  Mat := MatchTemplate(Image, hugeTempl.ToMatrix, TM_CCOEFF_NORMED);
+  Check('Giant 1', Mat, Mat.ArgMax, [1000, 2000], 0, 0.785, 0.787);
+
+  Mat := MatchTemplateMask(Image, Masked(bigTempl, 90).ToMatrix, TM_CCOEFF_NORMED);
+  Check('Giant mask 0', Mat, Mat.ArgMax, [800, 2500], 0, 0.884, 0.886);
+  Mat := MatchTemplateMask(Image, Masked(hugeTempl, 90).ToMatrix, TM_CCOEFF_NORMED);
+  Check('Giant mask 1', Mat, Mat.ArgMax, [1000, 2000], 0, 0.697, 0.699);
 end;
 
 var
   world: TImage;
-  test1, test2, test3: TImage;
-  bigImage, bigTempl, hugeTempl: TImage;
   t: Double;
 begin
-  world := new TImage(); world.FromZip('Tests/images.zip', 'world.png');
-  test1 := new TImage(); test1.FromZip('Tests/images.zip', 'mm1.png');
-  test2 := new TImage(); test2.FromZip('Tests/images.zip', 'mm2.png');
-  test3 := new TImage(); test3.FromZip('Tests/images.zip', 'mm3.png');
-
-  bigImage := world.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, world.Width*4, world.Height*4);
-  bigTempl := bigImage.Copy([800,2500,950,2650]).Blur(EImageBlurAlgo.BOX,5);
-  hugeTempl := bigImage.Copy([1000,2000,2000,3000]).Blur(EImageBlurAlgo.BOX,5);
+  world := new TImage();
+  world.FromZip('Tests/resources.zip', 'world.png');
 
   t := PerformanceTime();
 
-  CheckMatches('Test1', @MatchTemplate, TM_CCOEFF_NORMED, 0, world, [test1,test2,test3], [[245, 802], [130, 139], [471, 888]], [0.511, 0.468, 0.467]);
-  CheckMatches('Test2', @MatchTemplate, TM_CCORR_NORMED, 0, world, [test1,test2,test3], [[455,895] ,[1,180], [556,903]], [0.970, 0.940, 0.993]);
-  CheckMatches('Test3', @MatchTemplate, TM_SQDIFF_NORMED, 0, world, [test1,test2,test3], [[448,0], [483,10], [31,0]], [1.00,1.00,1.00]);
-
-  CheckMatches('Test4', @MatchTemplateMask, TM_CCOEFF_NORMED, 30, world, [test1, test2, test3], [[245, 802], [130, 139], [471, 888]], [0.508, 0.47, 0.503]);
-  CheckMatches('Test5', @MatchTemplateMask, TM_CCORR_NORMED, 30, world, [test1, test2, test3], [[443,894], [1,180], [554,902]], [0.971, 0.939, 0.992]);
-  CheckMatches('Test6', @MatchTemplateMask, TM_SQDIFF_NORMED, 26, world, [test1, test2, test3], [[481,13], [485,10], [473,18]], [1.604, 1.127, 2.466]);
-
-  // Just ensure giant matching still works
-  CheckMatches('Test7', @MatchTemplate, TM_CCOEFF_NORMED, 0, bigImage, [bigTempl, hugeTempl], [[800,2500],[1000,2000]], [0.888, 0.786]);
-  CheckMatches('Test8', @MatchTemplateMask, TM_CCOEFF_NORMED, 90, bigImage, [bigTempl, hugeTempl], [[800,2500],[1000,2000]], [0.885, 0.698]);
+  TestExact(world);
+  TestChanged(world);
+  TestCacheAndThreading(world);
+  TestGiant(world);
 
   WriteLn('Tests took ', Round(PerformanceTime()-t), ' ms');
   if (fails > 0) then
     raise "Failed";
 end;
-
-

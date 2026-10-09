@@ -33,7 +33,11 @@ begin
   Assert(not FileExists(TESTFILE));
 
   Assert(FileCopy(TESTFILE_RENAMED, TESTFILE_COPY));
-  Assert(FileCopy(TESTFILE_RENAMED, TESTFILE_COPY));
+  Assert(FileCopy(TESTFILE_RENAMED, TESTFILE_COPY)); // again: an existing file is overwritten
   Assert(FileExists(TESTFILE_COPY));
   Assert(FileExists(TESTFILE_RENAMED));
+  Assert(FileSize(TESTFILE_COPY) = FileSize(TESTFILE_RENAMED));
+
+  Assert(FileDelete(TESTFILE_COPY));
+  Assert(FileDelete(TESTFILE_RENAMED));
 end.

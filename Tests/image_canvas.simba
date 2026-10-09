@@ -1,0 +1,401 @@
+{$assertions on}
+
+// TImage.Canvas: every draw is checked by finding what it drew on a 50x40 image
+
+const
+  RED = $0000FF;
+
+var
+  img: TImage;
+
+function Drawn: TPointArray;
+begin
+  Result := img.FindColor(RED, 0);
+end;
+
+procedure TestState;
+var
+  State: TCanvasState;
+begin
+  Assert(img.Canvas.Width = 50);
+  Assert(img.Canvas.Height = 40);
+
+  State := img.Canvas.State;
+  Assert(State.DrawAlpha = 255);
+  Assert(State.DrawThickness = 1);
+  Assert(not State.DrawFilled);
+  Assert(not State.DrawAntialiasing);
+
+  img.Canvas.DrawColor := RED;
+  img.Canvas.DrawAlpha := 10;
+  img.Canvas.DrawThickness := 5;
+  img.Canvas.DrawFilled := True;
+  img.Canvas.DrawAntialiasing := True;
+
+  // the state is every draw option at once
+  img.Canvas.State := State;
+  Assert(img.Canvas.DrawAlpha = 255);
+  Assert(img.Canvas.DrawThickness = 1);
+  Assert(not img.Canvas.DrawFilled);
+  Assert(not img.Canvas.DrawAntialiasing);
+
+  img.Canvas.DrawColor := RED;
+end;
+
+// the canvas and its image are the same pixels
+procedure TestPixels;
+begin
+  img.Canvas.Pixel[0,0] := RED;
+  Assert(img.Pixel[0,0] = RED);
+  Assert(img.Canvas.Pixel[0,0] = RED);
+  Assert(img.Canvas.Alpha[0,0] = 255);
+
+  img.Canvas.SetPixels([[1,1],[2,2]], RED);
+  Assert(Drawn().Equals([[0,0],[1,1],[2,2]]));
+
+  img.Canvas.Fill($00FF00);
+  Assert(img.Pixel[3,3] = $00FF00);
+  img.Canvas.Clear([0,0,1,1]);
+  Assert(img.Pixel[1,1] = 0);
+  Assert(img.Pixel[2,2] = $00FF00);
+  img.Canvas.ClearInverted([0,0,1,1]);
+  Assert(img.Pixel[2,2] = 0);
+
+  // Clear writes the default pixel
+  img.Canvas.DefaultPixel := TColorBGRA([1,2,3,4]);
+  img.Canvas.Clear();
+  Assert(img.Pixel[10,10] = $010203);
+  Assert(img.Alpha[10,10] = 4);
+  img.Canvas.DefaultPixel := TColorBGRA([0,0,0,255]);
+  img.Canvas.Clear();
+  Assert(img.Pixel[10,10] = 0);
+  Assert(img.Alpha[10,10] = 255);
+end;
+
+procedure TestBox;
+begin
+  img.Clear();
+  img.Canvas.DrawBox([10,10,20,20]);
+  Assert(Drawn().Length = 40); // the edge of 11x11
+  Assert(Drawn().Bounds = [10,10,20,20]);
+  Assert(img.Pixel[15,15] = 0);
+
+  img.Canvas.DrawFilled := True;
+  img.Canvas.DrawBox([10,10,20,20]);
+  Assert(Drawn().Length = 11*11);
+
+  // off the image: only the part on it is drawn
+  img.Clear();
+  img.Canvas.DrawBox([-10,-10,5,5]);
+  Assert(Drawn().Length = 6*6);
+  Assert(Drawn().Bounds = [0,0,5,5]);
+
+  // inverted: everything but the box
+  img.Clear();
+  img.Canvas.DrawBoxInverted([10,10,20,20]);
+  Assert(Drawn().Length = 50*40 - 11*11);
+  Assert(img.FindColor(0, 0).Bounds = [10,10,20,20]);
+
+  img.Canvas.DrawFilled := False;
+
+  // thickness grows the edge both ways
+  img.Clear();
+  img.Canvas.DrawThickness := 3;
+  img.Canvas.DrawBox([10,10,20,20]);
+  Assert(Drawn().Bounds = [9,9,21,21]);
+  Assert(Drawn().Length = 13*13 - 7*7);
+  img.Canvas.DrawThickness := 1;
+end;
+
+procedure TestCircle;
+var
+  Filled: Integer;
+begin
+  img.Clear();
+  img.Canvas.DrawCircle([25,20], 10);
+  Assert(Drawn().Bounds = [15,10,35,30]);
+  Assert(img.Pixel[25,20] = 0);
+  Assert(img.Pixel[25,10] = RED);
+
+  img.Canvas.DrawFilled := True;
+  img.Canvas.DrawCircle(TCircle.Create(25, 20, 10));
+  Filled := Drawn().Length;
+  Assert(Drawn().Bounds = [15,10,35,30]);
+  Assert(img.Pixel[25,20] = RED);
+  Assert(img.Pixel[15,10] = 0); // the corner of its bounds
+  Assert((Filled > 300) and (Filled < 21*21)); // about pi * r * r
+
+  // inverted is the rest of the image
+  img.Clear();
+  img.Canvas.DrawCircleInverted([25,20], 10);
+  Assert(Drawn().Length = 50*40 - Filled);
+  Assert(img.Pixel[25,20] = 0);
+
+  img.Clear();
+  img.Canvas.DrawEllipse([25,20], 12, 6);
+  Assert(Drawn().Bounds = [13,14,37,26]);
+
+  img.Clear();
+  img.Canvas.DrawEllipseInverted([25,20], 12, 6);
+  Assert(img.FindColor(0, 0).Bounds = [13,14,37,26]);
+
+  img.Canvas.DrawFilled := False;
+end;
+
+procedure TestLine;
+begin
+  img.Clear();
+  img.Canvas.DrawLine([5,5], [30,5]);
+  Assert(Drawn().Length = 26);
+  Assert(Drawn().Bounds = [5,5,30,5]);
+
+  img.Clear();
+  img.Canvas.DrawLine([20,20], [5,5]);
+  Assert(Drawn().Length = 16); // one pixel a step
+  Assert(Drawn().Bounds = [5,5,20,20]);
+
+  img.Clear();
+  img.Canvas.DrawLine([-100,5], [100,5]);
+  Assert(Drawn().Length = 50);
+
+  img.Clear();
+  img.Canvas.DrawThickness := 3;
+  img.Canvas.DrawLine([5,10], [30,10]);
+  Assert(Drawn().Bounds.Y1 = 9);
+  Assert(Drawn().Bounds.Y2 = 11);
+  Assert(Drawn().Length >= 26*3);
+  img.Canvas.DrawThickness := 1;
+
+  img.Clear();
+  img.Canvas.DrawCross([25,20], 5);
+  Assert(Drawn().Bounds = [21,16,29,24]);
+  Assert(img.Pixel[25,20] = RED);
+  Assert(img.Pixel[25,17] = 0); // diagonals
+
+  img.Clear();
+  img.Canvas.DrawCrosshairs([25,20], 5);
+  Assert(Drawn().Length = 21);
+  Assert(Drawn().Bounds = [20,15,30,25]);
+end;
+
+procedure TestPoints;
+begin
+  // points off the image are skipped
+  img.Clear();
+  img.Canvas.DrawTPA([[1,1],[2,2],[100,100],[-1,-1]]);
+  Assert(Drawn().Equals([[1,1],[2,2]]));
+
+  // DrawATPA: a color for each array
+  img.Clear();
+  img.Canvas.DrawATPA([[[1,1],[2,2]], [[5,5]]]);
+  Assert(img.Pixel[1,1] <> 0);
+  Assert(img.Pixel[1,1] = img.Pixel[2,2]);
+  Assert(img.Pixel[5,5] <> 0);
+  Assert(img.Canvas.DrawColor = RED);
+end;
+
+procedure TestPolygon;
+var
+  Edge: Integer;
+begin
+  img.Clear();
+  img.Canvas.DrawPolygon([[5,5],[30,5],[30,30]]);
+  Edge := Drawn().Length;
+  Assert(Drawn().Bounds = [5,5,30,30]);
+  Assert(img.Pixel[5,5] = RED);
+  Assert(img.Pixel[30,30] = RED);
+  Assert(img.Pixel[25,10] = 0); // inside
+
+  img.Canvas.DrawFilled := True;
+  img.Canvas.DrawPolygon([[5,5],[30,5],[30,30]]);
+  Assert(Drawn().Length > Edge);
+  Assert(Drawn().Bounds = [5,5,30,30]);
+  Assert(img.Pixel[25,10] = RED);
+  Assert(img.Pixel[30,30] = RED); // the lowest point is filled too
+  Assert(img.Pixel[10,25] = 0); // the other half of its bounds
+
+  img.Clear();
+  img.Canvas.DrawPolygonInverted([[5,5],[30,5],[30,30]]);
+  Assert(img.Pixel[25,10] = 0);
+  Assert(img.Pixel[10,25] = RED);
+  Assert(img.Pixel[49,39] = RED);
+
+  img.Clear();
+  // a quad of a box fills what the box fills
+  img.Canvas.DrawQuad(TQuad.CreateFromBox([10,10,20,20]));
+  Assert(Drawn().Length = 11*11);
+  Assert(Drawn().Bounds = [10,10,20,20]);
+
+  img.Clear();
+  img.Canvas.DrawQuadInverted(TQuad.CreateFromBox([10,10,20,20]));
+  Assert(Drawn().Length = 50*40 - 11*11);
+  Assert(img.FindColor(0, 0).Bounds = [10,10,20,20]);
+
+  img.Canvas.DrawFilled := False;
+end;
+
+// the array draws: every shape in DrawColor
+procedure TestArrays;
+begin
+  img.Clear();
+  img.Canvas.DrawBoxArray([[1,1,3,3], [10,10,12,12]]);
+  Assert(Drawn().Length = 8 + 8);
+
+  img.Clear();
+  img.Canvas.DrawCircleArray([[10,10], [30,20]], 5);
+  Assert(Drawn().Bounds = [5,5,35,25]);
+
+  img.Clear();
+  img.Canvas.DrawCrossArray([[10,10], [30,20]], 3);
+  Assert(img.Pixel[10,10] = RED);
+  Assert(img.Pixel[30,20] = RED);
+
+  img.Clear();
+  img.Canvas.DrawQuadArray([TQuad.CreateFromBox([1,1,5,5]), TQuad.CreateFromBox([20,20,25,25])]);
+  Assert(img.Pixel[1,1] = RED);
+  Assert(img.Pixel[20,20] = RED);
+
+  img.Clear();
+  img.Canvas.DrawPolygonArray([[[1,1],[8,1],[8,8]], [[20,20],[28,20],[28,28]]]);
+  Assert(img.Pixel[8,8] = RED);
+  Assert(img.Pixel[28,28] = RED);
+end;
+
+// DrawAlpha blends over what is there, the image stays opaque
+procedure TestAlpha;
+begin
+  img.Clear();
+  img.Canvas.DrawFilled := True;
+  img.Canvas.DrawAlpha := 128;
+  img.Canvas.DrawBox([10,10,20,20]);
+  Assert(img.Pixel[15,15] = 128);
+  Assert(img.Alpha[15,15] = 255);
+  Assert(img.Pixel[5,5] = 0);
+
+  // again: closer to the color
+  img.Canvas.DrawBox([10,10,20,20]);
+  Assert(img.Pixel[15,15] = 191);
+
+  img.Canvas.DrawAlpha := 0;
+  img.Canvas.DrawBox([0,0,49,39]);
+  Assert(img.Pixel[15,15] = 191);
+  Assert(img.Pixel[5,5] = 0);
+
+  img.Canvas.DrawAlpha := 255;
+  img.Canvas.DrawFilled := False;
+end;
+
+// antialiasing: shades on the edge, the inside is solid
+procedure TestAntialiasing;
+begin
+  img.Clear();
+  img.Canvas.DrawFilled := True;
+  img.Canvas.DrawAntialiasing := True;
+  img.Canvas.DrawCircle([25,20], 10);
+
+  Assert(img.Pixel[25,20] = RED);
+  Assert(img.Pixel[5,5] = 0);
+  Assert(Length(img.ToColors().Unique()) > 2);
+  Assert(Length(img.FindColor(0, 0)) + Drawn().Length < 50*40);
+
+  img.Canvas.DrawAntialiasing := False;
+  img.Canvas.DrawFilled := False;
+end;
+
+procedure TestImage;
+var
+  Other: TImage;
+begin
+  Other := new TImage(10,10);
+  Other.Fill(RED);
+
+  img.Clear();
+  img.Canvas.DrawImage(Other, [20,15]);
+  Assert(Drawn().Length = 10*10);
+  Assert(Drawn().Bounds = [20,15,29,24]);
+
+  // off the image on either side
+  img.Clear();
+  img.Canvas.DrawImage(Other, [45,35]);
+  Assert(Drawn().Bounds = [45,35,49,39]);
+  img.Clear();
+  img.Canvas.DrawImage(Other, [-5,-5]);
+  Assert(Drawn().Bounds = [0,0,4,4]);
+  img.Clear();
+  img.Canvas.DrawImage(Other, [100,100]);
+  Assert(Drawn().Length = 0);
+
+  // transparent pixels are not drawn
+  Other.FillWithAlpha(0);
+  Other.Alpha[5,5] := 255;
+  img.Clear();
+  img.Canvas.DrawImage(Other, [20,15]);
+  Assert(Drawn().Equals([[25,20]]));
+
+  // DrawAlpha blends the whole image
+  Other.Fill($FFFFFF);
+  img.Fill(RED);
+  img.Canvas.DrawAlpha := 255 div 2;
+  img.Canvas.DrawImage(Other, [20,15]);
+  Assert(img.Pixel[25,20] = GetBestColor(EColorSpace.RGB, [RED, $FFFFFF]).Color);
+  Assert(img.Pixel[5,5] = RED);
+  img.Canvas.DrawAlpha := 255;
+end;
+
+procedure TestText;
+var
+  Size: TPoint;
+begin
+  Assert(Length(TCanvas.Fonts()) > 0);
+
+  img.Canvas.FontSize := 20;
+  Size := img.Canvas.TextSize('Hello');
+  Assert((Size.X > 0) and (Size.Y > 0));
+  Assert(img.Canvas.TextWidth('Hello') = Size.X);
+  Assert(img.Canvas.TextHeight('Hello') = Size.Y);
+  Assert(img.Canvas.TextSize('HelloHello').X = Size.X * 2);
+  Assert(img.Canvas.TextSize('HelloHello').Y = Size.Y);
+
+  img.Canvas.FontSize := 10;
+  Assert(img.Canvas.TextWidth('Hello') < Size.X);
+  Assert(img.Canvas.TextHeight('Hello') < Size.Y);
+
+  // without antialiasing text is DrawColor only, inside its size
+  img.Clear();
+  img.Canvas.FontAntialiasing := False;
+  Size := img.Canvas.TextSize('Hi');
+  img.Canvas.DrawText('Hi', [5,5]);
+  Assert(Drawn().Length > 0);
+  Assert(Length(img.ToColors().Unique()) = 2);
+  Assert(Drawn().Bounds.X1 >= 5);
+  Assert(Drawn().Bounds.Y1 >= 5);
+  Assert(Drawn().Bounds.X2 < 5 + Size.X);
+  Assert(Drawn().Bounds.Y2 < 5 + Size.Y);
+
+  // aligned in a box: the right half of the image
+  img.Clear();
+  img.Canvas.DrawText('Hi', [0,0,49,39], [ECanvasTextAlign.RIGHT, ECanvasTextAlign.BOTTOM]);
+  Assert(Drawn().Bounds.X1 >= 49 - Size.X);
+  Assert(Drawn().Bounds.Y1 >= 39 - Size.Y);
+
+  img.Clear();
+  img.Canvas.DrawTextLines(['Hi', 'Hi'], [0,0]);
+  Assert(Drawn().Bounds.Y2 >= Size.Y);
+end;
+
+begin
+  img := new TImage(50,40);
+
+  TestState();
+  TestPixels();
+  TestBox();
+  TestCircle();
+  TestLine();
+  TestPoints();
+  TestPolygon();
+  TestArrays();
+  TestAlpha();
+  TestAntialiasing();
+  TestImage();
+  TestText();
+end.

@@ -8,6 +8,9 @@ type
   TMatchTemplateFunc = function(Image, Template: TIntegerMatrix; Formula: ETMFormula): TSingleMatrix;
   TMatchTemplateCacheFunc = function(Image, Template: TIntegerMatrix; Formula: ETMFormula; var cache: TMatchTemplateCache): TSingleMatrix;
 
+var
+  world: TImage;
+
 procedure bench(prefix: String; img, templ: TIntegerMatrix; fn: TMatchTemplateFunc; fnc: TMatchTemplateCacheFunc);
 var
   t: Double;
@@ -37,36 +40,38 @@ begin
   WriteLn(prefix, ' (+cache,+threading): ', Round(PerformanceTime()-t), 'ms');
 end;
 
+// The world at Width x Height, matched with a template cut from its middle: TemplPercent of its size
+procedure Test(Width, Height, TemplPercent: Integer);
 var
-  world: TImage;
   img, templ, templWithMask: TImage;
-  t: Double;
-  cache: TMatchTemplateCache;
+  TemplWidth, TemplHeight, X, Y: Integer;
 begin
-  world := new TImage();
-  world.FromZip('Tests/images.zip', 'world.png');
+  img := world.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, Width, Height);
 
-  img := world.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, world.Width*5, world.Height*5);
-  templ := img.Copy([1000,2500,1100,2600]).Blur(EImageBlurAlgo.BOX, 5);
+  TemplWidth := Width * TemplPercent div 100;
+  TemplHeight := Height * TemplPercent div 100;
+  X := (Width - TemplWidth) div 2;
+  Y := (Height - TemplHeight) div 2;
+  templ := img.Copy([X, Y, X + TemplWidth - 1, Y + TemplHeight - 1]).Blur(EImageBlurAlgo.BOX, 5);
+
+  // everything outside of a circle is black, which is not matched
   templWithMask := templ.Copy();
   templWithMask.Canvas.DrawColor := 0;
-  templWithMask.Canvas.DrawCircleInverted(templ.Center, 50);
+  templWithMask.Canvas.DrawCircleInverted(templ.Center, Min(TemplWidth, TemplHeight) div 2);
 
   WriteLn('img: ', img.Width, 'x', img.Height);
   WriteLn('templ: ', templ.Width, 'x', templ.Height);
 
   bench('MatchTemplate', img.ToMatrix(), templ.ToMatrix(), @MatchTemplate, @MatchTemplate);
-  bench('MatchTemplateMask', img.ToMatrix(), templ.ToMatrix(), @MatchTemplateMask, @MatchTemplateMask);
-
-  img := img.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, img.Width div 8, img.Height div 8);
-  templ := templ.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, templ.Width div 3, templ.Height div 3);
-  templWithMask := templWithMask.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, templ.Width div 3, templ.Height div 3);
-
-  WriteLn('img: ', img.Width, 'x', img.Height);
-  WriteLn('templ: ', templ.Width, 'x', templ.Height);
-
-  bench('MatchTemplate', img.ToMatrix(), templ.ToMatrix(), @MatchTemplate, @MatchTemplate);
-  bench('MatchTemplateMask', img.ToMatrix(), templ.ToMatrix(), @MatchTemplateMask, @MatchTemplateMask);
+  bench('MatchTemplateMask', img.ToMatrix(), templWithMask.ToMatrix(), @MatchTemplateMask, @MatchTemplateMask);
 end;
 
+begin
+  world := new TImage();
+  world.FromZip('Tests/resources.zip', 'world.png');
 
+  Test(2500, 2500, 5);
+  Test(2500, 2500, 10);
+  Test(312, 312, 5);
+  Test(312, 312, 10);
+end;

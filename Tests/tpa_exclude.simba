@@ -31,15 +31,5 @@ begin
   Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
   Assert(ExcludedTPA.Length = 806);
 
-  // Points
-  ExcludedTPA := TestTPA.ExcludePoints(TPointArray.CreateFromBox([11,11,39,39],True));
-  Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
-  Assert(ExcludedTPA.Length = 120);
-
-  ExcludedTPA := TestTPA.ExcludePoints(TPointArray.CreateFromBox([11,11,100,100],True));
-  Assert(ExcludedTPA.Bounds() = TestTPA.Bounds());
-  Assert(ExcludedTPA.Length = 61);
-
-  ExcludedTPA := TestTPA.ExcludePoints(TPointArray.CreateFromBox([1,1,100,100],True));
-  Assert(ExcludedTPA.Length = 0);
+  // ExcludePoints: see tpa_excludepoints.simba
 end.

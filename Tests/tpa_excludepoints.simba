@@ -15,6 +15,12 @@ begin
   Assert(TPointArray([Point(1, 1), Point(1, 1), Point(2, 2), Point(1, 1)]).ExcludePoints([Point(2, 2)]).Equals([Point(1, 1), Point(1, 1), Point(1, 1)]), 'self dups kept');
   Assert(TPointArray([Point(1, 1), Point(2, 2), Point(1, 1)]).ExcludePoints([Point(1, 1)]).Equals([Point(2, 2)]), 'all occurrences removed');
   Assert(TPointArray([Point(-50, -50), Point(2, 2)]).ExcludePoints([Point(2, 2), Point(3, 3)]).Equals([Point(-50, -50)]), 'outside bounds kept');
+
+  // a filled box less its inside is its edge
+  A := TPointArray.CreateFromBox([10,10,40,40], True);
+  Assert(A.ExcludePoints(TPointArray.CreateFromBox([11,11,39,39], True)).Length = 120, 'dense');
+  Assert(A.ExcludePoints(TPointArray.CreateFromBox([11,11,100,100], True)).Length = 61, 'dense, larger other');
+  Assert(A.ExcludePoints(TPointArray.CreateFromBox([1,1,100,100], True)).Length = 0, 'dense, all removed');
 end;
 
 procedure Hashing;

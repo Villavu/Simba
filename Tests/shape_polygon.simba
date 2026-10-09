@@ -73,7 +73,7 @@ begin
 
   Assert(Same(
       TPointArray.CreateFromPolygon([[10,10],[100,10],[100,100],[10,100]], True),
-      TPointArray.CreateFromBox(TBox.Create(10, 10, 100, 99), True)),
+      TPointArray.CreateFromBox(TBox.Create(10, 10, 100, 100), True)),
          'square: same region as CreateFromBox'
   );
 

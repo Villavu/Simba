@@ -1,14 +1,14 @@
 {$assertions on}
 
-function MaxValues(Mat: TIntegerMatrix; count: Integer): TPointArray;
+// The Count highest values of a matrix, lowest first
+function MaxValues(Mat: TIntegerMatrix; Count: Integer): TPointArray;
 var
   X,Y,I: Integer;
   Heap: THeap<Single>;
-  Errored: Boolean;
 begin
   for Y := 0 to Mat.Height - 1 do
     for X := 0 to Mat.Width - 1 do
-      if (Heap.Count < Count) or (mat[Y, X] > Heap.Peek.Value) then
+      if (Heap.Count < Count) or (Mat[Y, X] > Heap.Peek.Value) then
       begin
         if (Heap.Count = Count) then
           Heap.Pop;
@@ -22,9 +22,18 @@ begin
     Result[I].Y := Heap.Items[I].Index div Mat.Width;
     Result[I].X := Heap.Items[I].Index mod Mat.Width;
   end;
+end;
 
-  Assert(Heap.Count = 3);
-  Heap.Pop;
+// Pop and Peek on an empty heap raise
+procedure TestEmpty;
+var
+  Heap: THeap<Single>;
+  Errored: Boolean;
+begin
+  Heap.Push(1, 0);
+  Heap.Push(2, 1);
+  Assert(Heap.Count = 2);
+  Assert(Heap.Peek.Value = 1);
   Heap.Pop;
   Heap.Pop;
   Assert(Heap.Count = 0);
@@ -41,7 +50,7 @@ begin
     Heap.Peek;
     Errored := False;
   except
-    Errored := TRue;
+    Errored := True;
   end;
   Assert(Errored);
 end;
@@ -57,4 +66,6 @@ begin
   Mat[6,6] := 200;
 
   Assert(ToString(Mat.GetValues(MaxValues(Mat, 3))) = '[50, 100, 200]');
+
+  TestEmpty();
 end.

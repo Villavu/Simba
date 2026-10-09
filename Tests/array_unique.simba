@@ -19,7 +19,6 @@ begin
   Assert(ToString(Unique(Doubles)) = '[1, 2, 3, 0]');
   Assert(ToString(Unique(Ints)) = '[1, 2, 3, 0]');
   Assert(ToString(Unique(Int64s)) = '[1, 2, 3, 0]');
-  Assert(ToString(Unique(Int64s)) = '[1, 2, 3, 0]');
   Assert(ToString(Unique(Strings)) = '[1, 2, 3, 0, abc]');
   Assert(ToString(Unique(Cols)) = '[1, 2, 3, 0, 2147483647, -2147483648]');
 end.

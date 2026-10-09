@@ -2,7 +2,7 @@
 
 // the DTM at 0, 45, 90, 180 and 270 degrees (AT_*), two near misses, and decoys
 const
-  IMAGE = 'IMG:AgAAAHgAAABkAAAAAAAAAF0AAIAA//////////8ACGg77/w9//gRDYCgGCREDkWvFv/Y1mAYLnUDQzH0uJviZRLmlXtrCHwLJyLr04/BlJpeG5vumVMBvtIrM8zDJNJ3LC++62p1G6pt1zrOkQemiZzgOdQS/CaHahKYREAyZ0h0Zlwqs5K46NSUj7qL2hloh6bJDgXBMhIM47ouO1Pzj6EHEWLNq6yj2Jp+HaJ1WTzwmVc/AwThFDPRXvF/q7QwzkR+noH6NAugP1BHbk5HFlsYnYMWCCJ/GtMHK4flhR9dDhzR3cQ/jNbTnbOrQXH1P8l1GMOjibfIjYVsGeV6X7EuHZJe6Ckbgz0QwM7JddEdCSo0QkK0BPBB6q5WDqVwL7pWurYg19+Tja0M3bPygzJzp9ujKfLO8cZgd/P4B82HHOH0Fr/DX4kej8NohxIpszX5hfPA0wtQjYbvVot5mUzfsMLszQHBy198SvG02JjcaxaYoRLf8cUsqKDk5W90ZdYX30xMXTPexP0c1Ko=';
+  IMAGE = 'dtm_rotated.png'; // in Tests/resources.zip
 
   AT_0:    TPoint = [5, 15];
   AT_45:   TPoint = [60, 35];
@@ -181,7 +181,7 @@ var
   Img: TImage;
 begin
   Img := new TImage();
-  Img.FromString(IMAGE);
+  Img.FromZip('Tests/resources.zip', IMAGE);
   Target.SetImage(Img);
 
   TestEveryAngle();

@@ -46,18 +46,6 @@ begin
   Assert(img.Alpha[0,0]=123);
 
   img.FillWithAlpha(0);
-  Assert(img.Alpha[50,50]=0);
-end;
-
-procedure TestAlphaSetting;
-var
-  img: TImage;
-begin
-  img := new TImage(100,100);
-  img.Alpha[0,0] := 123;
-  Assert(img.Alpha[0,0]=123);
-
-  img.FillWithAlpha(0);
   Assert(img.Alpha[0,0]=0);
   Assert(img.Alpha[50,50]=0);
 end;
@@ -91,27 +79,283 @@ begin
   Assert(img.FindColor(Colors.WHITE, 0, [30,30,50,50]).Bounds = [30,30,40,40]);
 end;
 
-procedure TestAlphaDraw;
+// SetSize keeps what fits, new pixels are black and opaque
+procedure TestSize;
 var
-  test: TImage;
+  img: TImage;
 begin
-  test := new TImage(50,50);
-  test.Fill($FFFFFF);
+  img := new TImage(4,3);
+  img.Pixel[1,1] := $0000FF;
+  img.Pixel[3,2] := $00FF00;
 
-  img.Clear();
-  img.Fill($FF);
-  img.Canvas.DrawAlpha := 255 div 2;
-  img.Canvas.DrawImage(test, [25,25]);
+  Assert(img.Center = [2,1]);
+  Assert(img.InImage(3,2));
+  Assert(not img.InImage(4,2));
+  Assert(not img.InImage(-1,0));
+  Assert(ToString(img.ToColors()) = '[0, 0, 0, 0, 0, 255, 0, 0, 0, 0, 0, 65280]');
+  Assert(ToString(img.ToColors([1,1,3,2])) = '[255, 0, 0, 0, 0, 65280]');
+  Assert(ToString(img.GetPixels([[1,1],[3,2],[0,0]])) = '[255, 65280, 0]');
 
-  Assert(img.Pixel[50,50] = GetBestColor(EColorSpace.RGB, [$FF, $FFFFFF]).Color);
+  img.SetSize(6,5);
+  Assert(img.Pixel[1,1] = $0000FF);
+  Assert(img.Pixel[3,2] = $00FF00);
+  Assert(img.Pixel[5,4] = 0);
+  Assert(img.Alpha[5,4] = 255);
 
-  // just check no alpha too
-  img.Clear();
-  img.Fill($FF);
-  img.Canvas.DrawAlpha := 255;
-  img.Canvas.DrawImage(test, [25,25]);
+  img.SetSize(2,2);
+  Assert(ToString(img.ToColors()) = '[0, 0, 0, 255]');
 
-  Assert(img.Pixel[50,50] = $FFFFFF);
+  img.SetSize(0,0);
+  Assert(img.Width = 0);
+  Assert(img.Height = 0);
+end;
+
+procedure TestCopyCrop;
+var
+  img, part: TImage;
+begin
+  img := new TImage(4,3);
+  img.Pixel[1,1] := $0000FF;
+
+  // a copy has its own pixels
+  part := img.Copy([1,1,3,2]);
+  Assert(part.Width = 3);
+  Assert(part.Height = 2);
+  Assert(part.Pixel[0,0] = $0000FF);
+  part.Pixel[0,0] := 0;
+  Assert(img.Pixel[1,1] = $0000FF);
+  Assert(img.Copy().Equals(img));
+
+  // Pad: a border on every side
+  img.Pad(2);
+  Assert(img.Width = 8);
+  Assert(img.Height = 7);
+  Assert(img.FindColor($0000FF, 0).Equals([[3,3]]));
+  Assert(img.Alpha[0,0] = 255);
+
+  // Offset: moved in place, what leaves the image is lost
+  img.Offset(1,1);
+  Assert(img.Width = 8);
+  Assert(img.FindColor($0000FF, 0).Equals([[4,4]]));
+  img.Offset(-10,0);
+  Assert(img.FindColor($0000FF, 0).Length = 0);
+
+  img.Pixel[1,1] := $0000FF;
+  img.Crop([1,1,3,2]);
+  Assert(img.Width = 3);
+  Assert(img.Height = 2);
+  Assert(img.Pixel[0,0] = $0000FF);
+end;
+
+procedure TestClear;
+var
+  img: TImage;
+begin
+  img := new TImage(5,5);
+  img.Fill($0000FF);
+  img.Clear([1,1,2,2]);
+  Assert(img.FindColor(0, 0).Equals([[1,1],[2,1],[1,2],[2,2]]));
+  Assert(img.Alpha[1,1] = 255);
+
+  img.Fill($0000FF);
+  img.ClearInverted([1,1,2,2]);
+  Assert(img.FindColor($0000FF, 0).Equals([[1,1],[2,1],[1,2],[2,2]]));
+end;
+
+procedure TestReplaceColor;
+var
+  img: TImage;
+begin
+  img := new TImage(3,2);
+  img.Pixel[0,0] := $0000FF;
+  img.Pixel[2,1] := $00FF00;
+
+  img.ReplaceColor($0000FF, $123456);
+  Assert(ToString(img.ToColors()) = '[1193046, 0, 0, 0, 0, 65280]');
+
+  // tolerance: close colors too
+  img.Pixel[1,0] := $123457;
+  img.ReplaceColor($123456, $FFFFFF, 1);
+  Assert(img.Pixel[0,0] = $FFFFFF);
+  Assert(img.Pixel[1,0] = $FFFFFF);
+  Assert(img.Pixel[2,1] = $00FF00);
+
+  // binary: the color is white, the rest black
+  img.ReplaceColorBinary(False, $FFFFFF);
+  Assert(ToString(img.ToColors()) = '[16777215, 16777215, 0, 0, 0, 0]');
+  img.ReplaceColorBinary(True, $FFFFFF);
+  Assert(ToString(img.ToColors()) = '[0, 0, 16777215, 16777215, 16777215, 16777215]');
+  img.ReplaceColorBinary(False, [$FFFFFF, $000000]);
+  Assert(img.FindColor($FFFFFF, 0).Length = 3*2);
+end;
+
+procedure TestChannels;
+var
+  img, img2: TImage;
+  B,G,R,A: TByteArray;
+begin
+  img := new TImage(3,2);
+  img.Pixel[0,0] := $010203;
+  img.Alpha[0,0] := 9;
+
+  img.ToChannels(B,G,R);
+  Assert(ToString(B) = '[1, 0, 0, 0, 0, 0]');
+  Assert(ToString(G) = '[2, 0, 0, 0, 0, 0]');
+  Assert(ToString(R) = '[3, 0, 0, 0, 0, 0]');
+  img.ToChannels(B,G,R,A);
+  Assert(ToString(A) = '[9, 255, 255, 255, 255, 255]');
+
+  img2 := new TImage();
+  img2.FromChannels(B,G,R,A,3,2);
+  Assert(img2.Width = 3);
+  Assert(img2.Height = 2);
+  Assert(img2.Pixel[0,0] = $010203);
+  Assert(img2.Alpha[0,0] = 9);
+
+  // without an alpha channel: opaque
+  img2.FromChannels(B,G,R,3,2);
+  Assert(img2.Pixel[0,0] = $010203);
+  Assert(img2.Alpha[0,0] = 255);
+end;
+
+procedure TestMatrix;
+var
+  img, img2: TImage;
+begin
+  img := new TImage(3,2);
+  img.Pixel[0,0] := $010203;
+
+  Assert(ToString(img.ToMatrix()) = '[[66051, 0, 0], [0, 0, 0]]');
+  Assert(ToString(img.ToMatrix([0,0,1,0])) = '[[66051, 0]]');
+  Assert(ToString(img.ToGreyMatrix()) = '[[2, 0, 0], [0, 0, 0]]');
+
+  img2 := new TImage();
+  img2.FromMatrix(img.ToMatrix());
+  Assert(img2.Equals(img));
+  Assert(img2.Alpha[0,0] = 255);
+end;
+
+procedure TestTransform;
+var
+  img, img2: TImage;
+begin
+  img := new TImage(3,2);
+  img.Pixel[0,0] := $0000FF;
+  img.Pixel[2,1] := $00FF00;
+
+  Assert(ToString(img.Mirror(EImageMirrorStyle.WIDTH).ToColors()) = '[0, 0, 255, 65280, 0, 0]');
+  Assert(ToString(img.Mirror(EImageMirrorStyle.HEIGHT).ToColors()) = '[0, 0, 65280, 255, 0, 0]');
+
+  // LINE: rows become columns
+  img2 := img.Mirror(EImageMirrorStyle.LINE);
+  Assert(img2.Width = 2);
+  Assert(img2.Height = 3);
+  Assert(ToString(img2.ToColors()) = '[255, 0, 0, 0, 0, 65280]');
+
+  // half a turn is both mirrors
+  img2 := img.Rotate(EImageRotateAlgo.NEAREST_NEIGHBOUR, PI, False);
+  Assert(img2.Equals(img.Mirror(EImageMirrorStyle.WIDTH).Mirror(EImageMirrorStyle.HEIGHT)));
+
+  // a quarter turn is exact with either algorithm: 3x2 becomes 2x3, nothing lost
+  img2 := img.Rotate(EImageRotateAlgo.NEAREST_NEIGHBOUR, PI/2, True);
+  Assert(img2.Width = 2);
+  Assert(img2.Height = 3);
+  Assert(ToString(img2.ToColors()) = '[0, 65280, 0, 0, 255, 0]');
+  Assert(img.Rotate(EImageRotateAlgo.BILINEAR, PI/2, True).Equals(img2));
+  Assert(img.Rotate(EImageRotateAlgo.BILINEAR, PI, False).Equals(img.Rotate(EImageRotateAlgo.NEAREST_NEIGHBOUR, PI, False)));
+  Assert(img.Rotate(EImageRotateAlgo.BILINEAR, 2*PI, True).Equals(img));
+  Assert(img2.Rotate(EImageRotateAlgo.NEAREST_NEIGHBOUR, -PI/2, True).Equals(img));
+
+  // Expand makes room for the corners
+  img2 := new TImage(31,31);
+  img2.Fill($FFFFFF);
+  Assert(img2.Rotate(EImageRotateAlgo.NEAREST_NEIGHBOUR, PI/4, False).Width = 31);
+  Assert(img2.Rotate(EImageRotateAlgo.NEAREST_NEIGHBOUR, PI/4, True).Width = 43);
+  Assert(img2.Rotate(EImageRotateAlgo.NEAREST_NEIGHBOUR, PI/4, True).Height = 43);
+  Assert(img2.Rotate(EImageRotateAlgo.BILINEAR, PI/4, True).FindColor($FFFFFF, 0).Bounds = [0,0,42,42]);
+
+  // twice the size: every pixel is four
+  img2 := img.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, 2.0);
+  Assert(img2.Width = 6);
+  Assert(img2.Height = 4);
+  Assert(img2.FindColor($0000FF, 0).Equals([[0,0],[1,0],[0,1],[1,1]]));
+  Assert(img2.FindColor($00FF00, 0).Equals([[4,2],[5,2],[4,3],[5,3]]));
+  Assert(img.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, 6, 4).Equals(img2));
+
+  // the filters return a new image, opaque
+  Assert(ToString(img.Invert().ToColors()) = '[16776960, 16777215, 16777215, 16777215, 16777215, 16711935]');
+  Assert(img.Invert().Invert().Equals(img));
+  Assert(img.Invert().Alpha[0,0] = 255);
+  Assert(img.Pixel[0,0] = $0000FF);
+  Assert(ToString(img.Brightness(10).ToColors()) = '[658175, 657930, 657930, 657930, 657930, 720650]');
+  img2 := img.GreyScale();
+  Assert((img2.Pixel[0,0] and $FF) = (img2.Pixel[0,0] shr 16)); // grey: every channel the same
+  Assert(img2.Pixel[0,0] <> 0);
+  Assert(img2.Pixel[1,0] = 0);
+end;
+
+procedure TestCompare;
+var
+  img, img2: TImage;
+begin
+  img := new TImage(31,31);
+  img.Pixel[3,10] := $0000FF;
+  img.Pixel[30,30] := $00FF00;
+
+  Assert(img.Equals(img.Copy()));
+  Assert(Abs(img.Compare(img.Copy()) - 1) < 0.001);
+  Assert(Abs(img.Compare(img.Invert()) + 1) < 0.001);
+  Assert(Abs(img.Compare(img.Mirror(EImageMirrorStyle.WIDTH))) < 0.01);
+
+  img2 := img.Copy();
+  img2.Pixel[0,0] := 1;
+  Assert(not img.Equals(img2));
+  Assert(not img.Equals(new TImage(31,30)));
+
+  // Equals is the colors only
+  img2 := img.Copy();
+  img2.Alpha[0,0] := 3;
+  Assert(img.Equals(img2));
+end;
+
+procedure TestSaveLoad;
+var
+  img, img2: TImage;
+  FileName: String;
+  Raised: Boolean;
+begin
+  img := new TImage(5,4);
+  img.Pixel[1,1] := $0000FF;
+  img.Pixel[4,3] := $00FF00;
+  img.Alpha[0,0] := 3;
+
+  // png keeps alpha
+  FileName := SimbaEnv.TempPath + 'test_image.png';
+  Assert(img.Save(FileName, True));
+  img2 := new TImage(FileName);
+  Assert(img2.Equals(img));
+  Assert(img2.Alpha[0,0] = 3);
+  Assert(img2.Alpha[1,1] = 255);
+
+  img2.Load(FileName, [1,1,3,2]);
+  Assert(img2.Width = 3);
+  Assert(img2.Height = 2);
+  Assert(img2.Pixel[0,0] = $0000FF);
+
+  // an existing file is not overwritten unless asked
+  try
+    img.Save(FileName);
+  except
+    Raised := True;
+  end;
+  Assert(Raised);
+  FileDelete(FileName);
+
+  FileName := SimbaEnv.TempPath + 'test_image.bmp';
+  Assert(img.Save(FileName, True));
+  img2.Load(FileName);
+  Assert(img2.Equals(img));
+  FileDelete(FileName);
 end;
 
 procedure TestDifference;
@@ -119,7 +363,7 @@ var
   img1, img2: TImage;
 begin
   img1 := new TImage;
-  img1.FromString('IMG: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');
+  img1.FromZip('Tests/resources.zip', 'sunset_150.png');
   img2 := img1.Copy();
 
   img2.Canvas.DrawColor := Colors.BLACK;
@@ -134,10 +378,10 @@ begin
   img2 := img1.Mirror(EImageMirrorStyle.WIDTH);
 
   // The more tolerance, the less difference there should be.
-  Assert(img1.PixelDifference(img2, 1).Length = 7780);
-  Assert(img1.PixelDifference(img2, 5).Length = 7264);
-  Assert(img1.PixelDifference(img2, 40).Length = 1332);
-  Assert(img1.PixelDifference(img2, 50).Length = 0);
+  Assert(img1.PixelDifference(img2, 1).Length = 10402);
+  Assert(img1.PixelDifference(img2, 5).Length = 9948);
+  Assert(img1.PixelDifference(img2, 40).Length = 716);
+  Assert(img1.PixelDifference(img2, 60).Length = 0);
 end;
 
 procedure TestToString;
@@ -169,11 +413,13 @@ procedure TestFindImage;
 var
   img,img2,templ: TImage;
 begin
+  // a 62x50 part of the trees
   img := new TImage();
-  img.FromString('IMG:AgAAAD4AAAAyAAAAAAAAAF0AAIAA//////////8AYTHVADJ37Rtz/7umbTVACWdt1z+9t84JciQqALFkNgug3tK/irRkX7F1WQMb2d6I36kgOzZLcbsE0wI7OsB/34+A7vflMsQ5vrrsbE1wy9WSnW/2ywe8VymKQSp4KJjt4uBOPpCHRbNYzlg73aBpnBj0t5o7YDCoe2keb9chnRbBc4lI7h8nFSuqXqf9xFILw6Y7JEW9WB3bSHIOegFhYGR/KarbHqiFpzgaJuEhKYN2ouHe/UisPJXW7xQAVjlMkuLcUpnlokXJdKl4GM6frjzc4zzoSSI404YRQsFnJzx2G1EO8j8K3msrh8aUguByoBCQNj2IIAg5WOhNdbtYlr1qARr2himI5DDOfDj7DvwBp+UBEmTLzVdVru5qqL67yXY2nwP2w0cN1oOxY9oUQZ+gn2ecVNyfrpLxqFEIbeTecygcBh894iyjWSqoS9LNv/DoGc1Uz4yet7cXsqd+q3La+0fuN0nnkxmoqQzLxM6eLF5Rgv7HpSyws+UG9lOc7nZh0/KdzOuDZ+AmtxVv0qBt569ajN9BKXyfdg71AusUwfuA2rV+xoopbK7o0VVGiabZIavLPvMCae9G97I/Xe4gdf+pL2mX/mNt8c87GEkkkh5x2l7OKKO2bm2Xqq4E6um9Z4ZKLiGQ0EAd/yApSflowS1uVLEF17/87rx133dUY7KOEN2Bvh5yE2DV1VkzPuUvKUiDU6b/i4985YnvnjYJ0JaN4iukv7P0CN7Ht8wuqRSxA9PBPaAS3N3vLqBLuwjMC/NhoA5/Eb5Ate6f2e0GHvThfHGaMusUglJ4XLXsKYPhrbaipVszdZ+jLktxM1VNRMRqvR6x96NVahluw3NiM6IQAocRrR9EEa/Zw5R/kiJb5qi/UIQj6ezW+WFkvkWlcF4lfHFUvpBQWI7Re+zUIAdoYMQ4st0rhFTw8yn6R1vB359ROu278iYSM6Lp7LLp1Re0XyOImNsw0TEtInCVVgnX0duXom/dg0aw2Xsmav/A2OroOqXQPYB3b9PvfBpen+kYUL6U0nJHB0KjxZ7o4rYJssq1dmX957Gg');
+  img.FromZip('Tests/resources.zip', 'trees.png');
+  img := img.Copy([19, 3, 80, 52]);
 
   templ := new TImage();
-  templ.FromString('IMG:AgAAAAkAAAAJAAAAAAAAAF0AAIAA//////////8AAGiAJG5yQn5r6vuIrDAzTUBCMLoLZfyEl9bTTCsYE/cpUnEIpsj8FYZwKWBY7TteqwkhBZlEgjqyZi+MT4TA98yeCsUCb//9uAAA');
+  templ.FromZip('Tests/resources.zip', 'tree.png');
 
   Assert(img.FindImage(templ, 0) = [53, 2]); // the first of three, in the last column
   Assert(img.FindImage(templ, 0, [31,27,60,39]) = [49,30]);
@@ -233,8 +479,15 @@ begin
 
   TestPixels();
   TestColors();
-  TestAlphaSetting();
-  TestAlphaDraw();
+  TestSize();
+  TestCopyCrop();
+  TestClear();
+  TestReplaceColor();
+  TestChannels();
+  TestMatrix();
+  TestTransform();
+  TestCompare();
+  TestSaveLoad();
   TestDifference();
   TestToString();
   TestFindImage();

@@ -2,36 +2,32 @@
 var
   img: TImage;
 
+// changes the target while GetPixelDifference is waiting
 procedure DoModifyTarget;
 begin
-  Sleep(1500);
+  Sleep(200);
 
   img.Pixel[2,2] := $FF;
   img.Pixel[15,15] := $FFF;
   img.Pixel[12,18] := $FFFF;
 end;
 
-var t: TThread;
+function Difference(Bounds: TBox): TPointArray;
+var
+  t: TThread;
 begin
-  // test entire target
   img := new TImage(50,50);
   img.Fill($FFFFFF);
 
   Target.SetImage(img);
 
   t := TThread.Create(@DoModifyTarget);
-  Assert(Target.GetPixelDifference(3000).Equals([[2,2], [15,15], [12,18]]));
+  Result := Target.GetPixelDifference(600, Bounds);
   t.WaitForTerminate();
   t.Free();
+end;
 
-  // test difference in area [10,10,20,20]
-  img := new TImage(50,50);
-  img.Fill($FFFFFF);
-
-  Target.SetImage(img);
-
-  t := TThread.Create(@DoModifyTarget);
-  Assert(Target.GetPixelDifference(3000, [10,10,20,20]).Equals([[15,15], [12,18]]));
-  t.WaitForTerminate();
-  t.Free();
+begin
+  Assert(Difference([-1,-1,-1,-1]).Equals([[2,2], [15,15], [12,18]])); // entire target
+  Assert(Difference([10,10,20,20]).Equals([[15,15], [12,18]]));
 end.

@@ -1062,7 +1062,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="7">
+    <Exceptions Count="8">
       <Item1>
         <Name Value="ESyntaxError"/>
       </Item1>
@@ -1084,6 +1084,9 @@
       <Item7>
         <Name Value="EFreeType"/>
       </Item7>
+      <Item8>
+        <Name Value="ESimbaIPCClosed"/>
+      </Item8>
     </Exceptions>
   </Debugging>
 </CONFIG>

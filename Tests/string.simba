@@ -6,7 +6,8 @@ begin
   Assert(not 'abc123'.IsNumeric);
 
   Assert('123'.IsInteger);
-  Assert(not 'abc123'.IsNumeric);
+  Assert(not 'abc123'.IsInteger);
+  Assert(not '1.5'.IsInteger);
 
   Assert('123'.IsFloat);
   Assert('123.456'.IsFloat);

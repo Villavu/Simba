@@ -2,11 +2,12 @@
 
 const
   ZipFile = SimbaEnv.TempPath + 'test.zip';
+  ZipFileWithNames = SimbaEnv.TempPath + 'testwithfilenames.zip';
   OutputDir = SimbaEnv.TempPath + 'testzip';
 
 procedure Clean;
 begin
-  DirDelete(SimbaEnv.TempPath + 'testzip', True);
+  DirDelete(OutputDir, True);
 end;
 
 procedure TestCreateZip;
@@ -17,7 +18,7 @@ begin
   FileWrite(SimbaEnv.TempPath + 'file2.txt', 'abc');
   FileWrite(SimbaEnv.TempPath + 'file3.txt', 'xyz');
 
-  ZipFiles(SimbaEnv.TempPath + 'test.zip', [SimbaEnv.TempPath + 'file1.txt', SimbaEnv.TempPath + 'file2.txt', SimbaEnv.TempPath + 'file3.txt']);
+  ZipFiles(ZipFile, [SimbaEnv.TempPath + 'file1.txt', SimbaEnv.TempPath + 'file2.txt', SimbaEnv.TempPath + 'file3.txt']);
 
   Entries := Sorted(ZipReadEntries(ZipFile));
   Assert(Length(Entries) = 3);
@@ -26,16 +27,13 @@ begin
   Assert(Entries[2] = 'file3.txt');
 end;
 
+// after TestCreateZip: uses its files
 procedure TestCreateZipWithFileNames;
 var
   Entries: TStringArray;
 begin
-  FileWrite(SimbaEnv.TempPath + 'file1.txt', 'Hello World');
-  FileWrite(SimbaEnv.TempPath + 'file2.txt', 'abc');
-  FileWrite(SimbaEnv.TempPath + 'file3.txt', 'xyz');
-
   ZipFiles(
-    SimbaEnv.TempPath + 'testwithfilenames.zip', [
+    ZipFileWithNames, [
       SimbaEnv.TempPath + 'file1.txt',
       SimbaEnv.TempPath + 'file2.txt',
       SimbaEnv.TempPath + 'file3.txt'
@@ -47,7 +45,7 @@ begin
     ]
   );
 
-  Entries := Sorted(ZipReadEntries(SimbaEnv.TempPath + 'testwithfilenames.zip'));
+  Entries := Sorted(ZipReadEntries(ZipFileWithNames));
   Assert(Length(Entries) = 3);
   Assert(Entries[0] = 'file3.txt');
   Assert(Entries[1] = 'files/file1.txt');
@@ -82,7 +80,8 @@ begin
   Assert(PathExtractName(Files[0]) = 'file1.txt');
 end;
 
-procedure TestExtractEntires;
+// an entry that is not in the zip is skipped
+procedure TestExtractEntries;
 var
   Files: TStringArray;
 begin
@@ -102,5 +101,12 @@ begin
   TestCreateZipWithFileNames();
   TestExtract();
   TestExtractEntry();
-  TestExtractEntires();
+  TestExtractEntries();
+
+  Clean();
+  FileDelete(ZipFile);
+  FileDelete(ZipFileWithNames);
+  FileDelete(SimbaEnv.TempPath + 'file1.txt');
+  FileDelete(SimbaEnv.TempPath + 'file2.txt');
+  FileDelete(SimbaEnv.TempPath + 'file3.txt');
 end.

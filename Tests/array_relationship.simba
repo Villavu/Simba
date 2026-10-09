@@ -2,19 +2,42 @@
 
 // Test our native overrides
 
-procedure TestIntegerArray;
+// Same length and every item of a is in b: order is not part of the contract
 
-  function Success(a,b: TIntegerArray): Boolean;
-  var i: Int32;
-  begin
-    if (Length(a) <> Length(b)) then
+function Success(a,b: TIntegerArray): Boolean; overload;
+var i: Int32;
+begin
+  if (Length(a) <> Length(b)) then
+    Exit(False);
+  for i:=0 to High(a) do
+    if not Contains(a[i], b) then
       Exit(False);
-    for i:=0 to High(a) do
-      if not Contains(a[i], b) then
-        Exit(False);
-    Result := True;
-  end;
+  Result := True;
+end;
 
+function Success(a,b: TInt64Array): Boolean; overload;
+var i: Int32;
+begin
+  if (Length(a) <> Length(b)) then
+    Exit(False);
+  for i:=0 to High(a) do
+    if not Contains(a[i], b) then
+      Exit(False);
+  Result := True;
+end;
+
+function Success(a,b: TBoxArray): Boolean; overload;
+var i: Int32;
+begin
+  if (Length(a) <> Length(b)) then
+    Exit(False);
+  for i:=0 to High(a) do
+    if not Contains(a[i], b) then
+      Exit(False);
+  Result := True;
+end;
+
+procedure TestIntegerArray;
 var
   a,b: TIntegerArray;
 begin
@@ -33,18 +56,6 @@ end;
 
 
 procedure TestInt64Array;
-
-  function Success(a,b: TInt64Array): Boolean;
-  var i: Int32;
-  begin
-    if (Length(a) <> Length(b)) then
-      Exit(False);
-    for i:=0 to High(a) do
-      if not Contains(a[i], b) then
-        Exit(False);
-    Result := True;
-  end;
-
 var
   a,b: TInt64Array;
 begin
@@ -62,18 +73,6 @@ begin
 end;
 
 procedure TestBoxArray;
-
-  function Success(a,b: TBoxArray): Boolean;
-  var i: Int32;
-  begin
-    if (Length(a) <> Length(b)) then
-      Exit(False);
-    for i:=0 to High(a) do
-      if not Contains(a[i], b) then
-        Exit(False);
-    Result := True;
-  end;
-
 var
   a,b: TBoxArray;
 begin
@@ -94,18 +93,6 @@ end;
 
 
 procedure TestDuplicates;
-
-  function Success(a,b: TIntegerArray): Boolean;
-  var i: Int32;
-  begin
-    if (Length(a) <> Length(b)) then
-      Exit(False);
-    for i:=0 to High(a) do
-      if not Contains(a[i], b) then
-        Exit(False);
-    Result := True;
-  end;
-
 var
   a,b: TIntegerArray;
 begin
