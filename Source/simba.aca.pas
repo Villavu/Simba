@@ -173,18 +173,21 @@ begin
   DeleteItem.Clear();
 
   Sections := TStringList.Create();
-  with GetColorsINI() do
   try
-    ReadSections(Sections);
-    for I := 0 to Sections.Count - 1 do
-    begin
-      addMenuItem(LoadItem, Sections[I], @DoLoadColorsClick);
-      addMenuItem(DeleteItem, Sections[I], @DoDeleteColorsClick);
+    with GetColorsINI() do
+    try
+      ReadSections(Sections);
+      for I := 0 to Sections.Count - 1 do
+      begin
+        addMenuItem(LoadItem, Sections[I], @DoLoadColorsClick);
+        addMenuItem(DeleteItem, Sections[I], @DoDeleteColorsClick);
+      end;
+    finally
+      Free();
     end;
   finally
-    Free();
+    Sections.Free();
   end;
-  Sections.Free();
 end;
 
 function TSimbaACA.GetColors: TColorArray;

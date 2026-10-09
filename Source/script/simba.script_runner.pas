@@ -62,9 +62,12 @@ var
   State: ESimbaScriptState;
 begin
   Stream := THandleStream.Create(StdInputHandle);
-  while Stream.Read(State{%H-}, SizeOf(ESimbaScriptState)) = SizeOf(ESimbaScriptState) do
-    FScript.State := State;
-  Stream.Free();
+  try
+    while Stream.Read(State{%H-}, SizeOf(ESimbaScriptState)) = SizeOf(ESimbaScriptState) do
+      FScript.State := State;
+  finally
+    Stream.Free();
+  end;
 end;
 
 procedure TSimbaScriptRunner.DoError(E: Exception);

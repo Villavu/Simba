@@ -407,6 +407,8 @@ end;
 
 constructor TInternetSocketServer.Create(AHost: String; APort: Integer);
 begin
+  inherited Create();
+
   FServer := TInetServer.Create(AHost, APort, TSocketHandler.Create());
   FServer.MaxConnections := -1;
   FServer.OnConnect := @DoConnection;

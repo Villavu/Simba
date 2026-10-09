@@ -211,28 +211,30 @@ var
 
 begin
   Cache := TStringList.Create();
-  if FileExists(FReleasesCache) then
-    Cache.LoadFromFile(FReleasesCache);
+  try
+    if FileExists(FReleasesCache) then
+      Cache.LoadFromFile(FReleasesCache);
 
-  RemoteVersion := ReadRSSUpdated(FReleasesRSS);
+    RemoteVersion := ReadRSSUpdated(FReleasesRSS);
 
-  if IsCacheUpdated() then
-    Result := ParseReleasesAPI(Cache.Text)
-  else
-  begin
-    Cache.Clear();
-    Cache.Add('//' + RemoteVersion);
-    Cache.Add(Download());
-    Cache.SaveToFile(FReleasesCache);
+    if IsCacheUpdated() then
+      Result := ParseReleasesAPI(Cache.Text)
+    else
+    begin
+      Cache.Clear();
+      Cache.Add('//' + RemoteVersion);
+      Cache.Add(Download());
+      Cache.SaveToFile(FReleasesCache);
 
-    Result := ParseReleasesAPI(Cache.Text);
+      Result := ParseReleasesAPI(Cache.Text);
 
-    {$IFDEF DebugRateLimit}
-    DebugRateLimit();
-    {$ENDIF}
+      {$IFDEF DebugRateLimit}
+      DebugRateLimit();
+      {$ENDIF}
+    end;
+  finally
+    Cache.Free();
   end;
-
-  Cache.Free();
 end;
 
 function TSimbaPackageEndpoint_Github.GetBranches: TSimbaPackageVersions;
@@ -244,11 +246,13 @@ begin
   if FileExists(FBranchesCache) then
   begin
     Cache := TStringList.Create();
-    Cache.LoadFromFile(FBranchesCache);
+    try
+      Cache.LoadFromFile(FBranchesCache);
 
-    Result := ParseBranchesAPI(Cache.Text);
-
-    Cache.Free();
+      Result := ParseBranchesAPI(Cache.Text);
+    finally
+      Cache.Free();
+    end;
   end;
 end;
 
@@ -293,9 +297,12 @@ var
   Cache: TStringList;
 begin
   Cache := TStringList.Create();
-  Cache.Add(Download());
-  Cache.SaveToFile(FBranchesCache);
-  Cache.Free();
+  try
+    Cache.Add(Download());
+    Cache.SaveToFile(FBranchesCache);
+  finally
+    Cache.Free();
+  end;
 
   {$IFDEF DebugRateLimit}
   DebugRateLimit();

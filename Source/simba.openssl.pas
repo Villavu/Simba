@@ -41,11 +41,15 @@ function ExtractLib(Stream: TStream; FileName: String): String;
 var
   OutputStream: TFileStream;
 begin
-  OutputStream := TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite);
   try
-    Gz.Decompress(Stream, OutputStream);
+    OutputStream := TFileStream.Create(FileName, fmCreate or fmOpenWrite or fmShareDenyWrite);
+    try
+      Gz.Decompress(Stream, OutputStream);
+    finally
+      OutputStream.Free();
+    end;
   finally
-    OutputStream.Free();
+    Stream.Free();
   end;
 
   Result := TSimbaFile.FileHash(FileName);

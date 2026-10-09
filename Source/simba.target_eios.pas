@@ -80,6 +80,8 @@ type
  end;
 
 function LoadEIOS(FileName, Args: String): TEIOSTarget;
+// Gives the target back to the plugin
+procedure ReleaseEIOS(var Target: TEIOSTarget);
 
 function EIOSTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
 procedure EIOSTarget_GetDimensions(Target: Pointer; out Width, Height: Integer);
@@ -153,6 +155,14 @@ begin
     if Assigned(GetImageBuffer) then
       ImageBuffer := GetImageBuffer(Target);
   end;
+end;
+
+procedure ReleaseEIOS(var Target: TEIOSTarget);
+begin
+  if Assigned(Target.ReleaseTarget) and (Target.Target <> nil) then
+    Target.ReleaseTarget(Target.Target);
+
+  Target := Default(TEIOSTarget);
 end;
 
 function EIOSTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; out Data: PColorBGRA; out DataWidth: Integer): Boolean;

@@ -2181,6 +2181,7 @@ begin
 
   FHash.Clear();
   FManagedItems.Clear(True);
+  FSymbolTable.Clear(); // else every run appends to it, with pointers to the declarations just freed
 
   FRoot.Items.Clear();
   FStack.Clear();

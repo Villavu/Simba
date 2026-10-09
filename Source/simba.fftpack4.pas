@@ -208,22 +208,28 @@ begin
 end;
 
 type
-  TFFTPass = procedure(const Lo, Hi: Integer) of object;
-
-  // a 2D-FFT engine with its own scratch buffers (Work/Spec) + twiddle tables (PlanW/PlanH) the FFT2/IFFT2 ops.
-  TFFT2D = record
-  private
-    Work, Spec: TComplexArray;
-    W, H: Integer;
+  // twiddle tables, cfftf/cfftb also use them as scratch so each thread in a pass needs its own
+  TFFTPlans = record
     PlanW, PlanH: TComplexArray;
     PlanWdim, PlanHdim: Integer;
     procedure EnsureW(len: Integer); // build only when the length changes
     procedure EnsureH(len: Integer); // ..
+  end;
+
+  TFFTPass = procedure(const Lo, Hi: Integer; var Plans: TFFTPlans) of object;
+
+  // a 2D-FFT engine with its own scratch buffers (Work/Spec) + plans for the FFT2/IFFT2 ops.
+  PFFT2D = ^TFFT2D;
+  TFFT2D = record
+  private
+    Work, Spec: TComplexArray;
+    W, H: Integer;
+    Plans: TFFTPlans;
     procedure Prepare(AW, AH: Integer);
-    procedure RowFwd(const Lo, Hi: Integer); // the four 1-D passes (forward/inverse x rows/cols)
-    procedure ColFwd(const Lo, Hi: Integer);
-    procedure ColInv(const Lo, Hi: Integer);
-    procedure RowInv(const Lo, Hi: Integer);
+    procedure RowFwd(const Lo, Hi: Integer; var APlans: TFFTPlans); // the four 1-D passes (forward/inverse x rows/cols)
+    procedure ColFwd(const Lo, Hi: Integer; var APlans: TFFTPlans);
+    procedure ColInv(const Lo, Hi: Integer; var APlans: TFFTPlans);
+    procedure RowInv(const Lo, Hi: Integer; var APlans: TFFTPlans);
     procedure TransposeForward;
     procedure TransposeInverse;
     procedure RunForward;
@@ -237,6 +243,7 @@ type
   public
     Wake, Done: TSimpleEvent;
     Pass: TFFTPass;
+    Plans: TFFTPlans;
     Lo, Hi: Integer;
     constructor Create;
     destructor Destroy; override;
@@ -250,14 +257,19 @@ type
     FAcquireLock: TCriticalSection; // held by the ONE transform currently using the workers
     FReady: Boolean;
     FBuiltThreads: Integer;         // worker count the live pool was built for (tracks FFT_MAX_THREADS)
+    FEngines: array of PFFT2D;      // idle engines, a transform takes one for its duration
+    FEngineLock: TCriticalSection;
 
     function WantWorkers: Integer; inline; // FFT_MAX_THREADS clamped to the available cores
     function ThreadsForArea(const Area: Int64): Integer; // scale worker count with transform size
     procedure EnsureSetup;
-    procedure Run(const Hi: Integer; const Pass: TFFTPass; const MaxN: Integer); // split [0,Hi] across up to MaxN (caller + workers)
+    procedure Run(const Hi: Integer; const Pass: TFFTPass; const MaxN: Integer; var Plans: TFFTPlans); // split [0,Hi] across up to MaxN (caller + workers)
   public
     constructor Create;
     destructor Destroy; override;
+
+    function GetEngine: PFFT2D;
+    procedure PutEngine(Eng: PFFT2D);
 
     function Acquire: Boolean;
     procedure Leave;
@@ -268,10 +280,6 @@ type
 
 var
   ThreadPool: TFFTThreadPool;
-
-threadvar
-  FFTEngine: TFFT2D; // Each thread's own FFT engine (scratch buffers + plan)
-                     // reused across that thread's FFT2/IFFT2 calls.
 
 constructor TFFTWorker.Create;
 begin
@@ -301,7 +309,7 @@ begin
       Break;
     Wake.ResetEvent();
     try
-      Pass(Lo, Hi);
+      Pass(Lo, Hi, Plans);
     except
       on E: Exception do
         DebugLn('[FFT Threading]: Pass(%d..%d) exception: %s', [Lo, Hi, E.Message]);
@@ -316,6 +324,7 @@ begin
 
   FLock := TCriticalSection.Create();
   FAcquireLock := TCriticalSection.Create();
+  FEngineLock := TCriticalSection.Create();
 end;
 
 destructor TFFTThreadPool.Destroy;
@@ -325,10 +334,47 @@ begin
   for i := 0 to High(FWorkers) do
     FWorkers[i].Free();
   FWorkers := nil;
+  for i := 0 to High(FEngines) do
+    Dispose(FEngines[i]);
+  FEngines := nil;
+  FEngineLock.Free();
   FAcquireLock.Free();
   FLock.Free();
 
   inherited Destroy();
+end;
+
+function TFFTThreadPool.GetEngine: PFFT2D;
+begin
+  Result := nil;
+
+  FEngineLock.Acquire();
+  try
+    if (Length(FEngines) > 0) then
+    begin
+      Result := FEngines[High(FEngines)];
+      SetLength(FEngines, Length(FEngines) - 1);
+    end;
+  finally
+    FEngineLock.Release();
+  end;
+
+  if (Result = nil) then
+  begin
+    New(Result);
+    Result^ := Default(TFFT2D);
+  end;
+end;
+
+procedure TFFTThreadPool.PutEngine(Eng: PFFT2D);
+begin
+  FEngineLock.Acquire();
+  try
+    SetLength(FEngines, Length(FEngines) + 1);
+    FEngines[High(FEngines)] := Eng;
+  finally
+    FEngineLock.Release();
+  end;
 end;
 
 function TFFTThreadPool.Acquire: Boolean;
@@ -394,7 +440,7 @@ begin
   end;
 end;
 
-procedure TFFTThreadPool.Run(const Hi: Integer; const Pass: TFFTPass; const MaxN: Integer);
+procedure TFFTThreadPool.Run(const Hi: Integer; const Pass: TFFTPass; const MaxN: Integer; var Plans: TFFTPlans);
 var
   total, n, per, i, clo, chi, started: Integer;
 begin
@@ -412,7 +458,7 @@ begin
 
   if (n <= 1) then // pool has only the caller -> run the whole range directly
   begin
-    Pass(0, Hi);
+    Pass(0, Hi, Plans);
     Exit;
   end;
 
@@ -440,9 +486,13 @@ begin
   if (chi > Hi) then
     chi := Hi;
 
-  Pass(0, chi); // caller runs chunk 0
-  for i := 0 to started - 1 do
-    FWorkers[i].Done.WaitFor(INFINITE);
+  try
+    Pass(0, chi, Plans); // caller runs chunk 0
+  finally
+    // even if our chunk raised: the workers are still on these buffers
+    for i := 0 to started - 1 do
+      FWorkers[i].Done.WaitFor(INFINITE);
+  end;
 end;
 
 procedure TFFTThreadPool.RunForward(var Eng: TFFT2D);
@@ -453,9 +503,9 @@ begin
   n := ThreadsForArea(Int64(Eng.W * Eng.H));
   if FFT_THREADING_DEBUG then
     DebugLn('[FFT Threading]: Using %d/%d threads', [n, FBuiltThreads]);
-  Run(Eng.H - 1, @Eng.RowFwd, n);
+  Run(Eng.H - 1, @Eng.RowFwd, n, Eng.Plans);
   Eng.TransposeForward;
-  Run(Eng.W - 1, @Eng.ColFwd, n);
+  Run(Eng.W - 1, @Eng.ColFwd, n, Eng.Plans);
 end;
 
 procedure TFFTThreadPool.RunInverse(var Eng: TFFT2D);
@@ -466,12 +516,12 @@ begin
   n := ThreadsForArea(Int64(Eng.W * Eng.H));
   if FFT_THREADING_DEBUG then
     DebugLn('[FFT Threading]: Using %d/%d threads', [n, FBuiltThreads]);
-  Run(Eng.W - 1, @Eng.ColInv, n);
+  Run(Eng.W - 1, @Eng.ColInv, n, Eng.Plans);
   Eng.TransposeInverse;
-  Run(Eng.H - 1, @Eng.RowInv, n);
+  Run(Eng.H - 1, @Eng.RowInv, n, Eng.Plans);
 end;
 
-procedure TFFT2D.EnsureW(len: Integer);
+procedure TFFTPlans.EnsureW(len: Integer);
 begin
   if (PlanWdim <> len) then
   begin
@@ -480,7 +530,7 @@ begin
   end;
 end;
 
-procedure TFFT2D.EnsureH(len: Integer);
+procedure TFFTPlans.EnsureH(len: Integer);
 begin
   if (PlanHdim <> len) then
   begin
@@ -504,53 +554,53 @@ begin
   end;
 end;
 
-procedure TFFT2D.RowFwd(const Lo, Hi: Integer);
+procedure TFFT2D.RowFwd(const Lo, Hi: Integer; var APlans: TFFTPlans);
 var
   y: Integer;
 begin
-  FFTEngine.EnsureW(Self.W);
+  APlans.EnsureW(Self.W);
   for y := Lo to Hi do
-    cfftf(Self.W, PSingle(@Self.Work[y * Self.W]), AlignPlan(FFTEngine.PlanW));
+    cfftf(Self.W, PSingle(@Self.Work[y * Self.W]), AlignPlan(APlans.PlanW));
 end;
 
-procedure TFFT2D.ColFwd(const Lo, Hi: Integer);
+procedure TFFT2D.ColFwd(const Lo, Hi: Integer; var APlans: TFFTPlans);
 var
   y: Integer;
 begin
-  FFTEngine.EnsureH(Self.H);
+  APlans.EnsureH(Self.H);
   for y := Lo to Hi do
-    cfftf(Self.H, PSingle(@Self.Spec[y * Self.H]), AlignPlan(FFTEngine.PlanH));
+    cfftf(Self.H, PSingle(@Self.Spec[y * Self.H]), AlignPlan(APlans.PlanH));
 end;
 
-procedure TFFT2D.ColInv(const Lo, Hi: Integer);
+procedure TFFT2D.ColInv(const Lo, Hi: Integer; var APlans: TFFTPlans);
 var
   y, i: Integer;
   pr: PSingle;
   f: Single;
 begin
-  FFTEngine.EnsureH(Self.H);
+  APlans.EnsureH(Self.H);
   f := 1.0 / Self.H;
   for y := Lo to Hi do
   begin
     pr := PSingle(@Self.Work[y * Self.H]);
-    cfftb(Self.H, pr, AlignPlan(FFTEngine.PlanH));
+    cfftb(Self.H, pr, AlignPlan(APlans.PlanH));
     for i := 0 to 2 * Self.H - 1 do
       pr[i] *= f;
   end;
 end;
 
-procedure TFFT2D.RowInv(const Lo, Hi: Integer);
+procedure TFFT2D.RowInv(const Lo, Hi: Integer; var APlans: TFFTPlans);
 var
   y, i: Integer;
   pr: PSingle;
   f: Single;
 begin
-  FFTEngine.EnsureW(Self.W);
+  APlans.EnsureW(Self.W);
   f := 1.0 / Self.W;
   for y := Lo to Hi do
   begin
     pr := PSingle(@Self.Spec[y * Self.W]);
-    cfftb(Self.W, pr, AlignPlan(FFTEngine.PlanW));
+    cfftb(Self.W, pr, AlignPlan(APlans.PlanW));
     for i := 0 to 2 * Self.W - 1 do
       pr[i] *= f;
   end;
@@ -568,16 +618,16 @@ end;
 
 procedure TFFT2D.RunForward;
 begin
-  RowFwd(0, H - 1);
+  RowFwd(0, H - 1, Plans);
   TransposeForward();
-  ColFwd(0, W - 1);
+  ColFwd(0, W - 1, Plans);
 end;
 
 procedure TFFT2D.RunInverse;
 begin
-  ColInv(0, W - 1);
+  ColInv(0, W - 1, Plans);
   TransposeInverse();
-  RowInv(0, H - 1);
+  RowInv(0, H - 1, Plans);
 end;
 
 // 2D FFT, leaving the spectrum stored TRANSPOSED (skips the final transpose-back) so
@@ -646,13 +696,27 @@ begin
 end;
 
 function FFT2(const m: TComplexMatrix): TComplexMatrix;
+var
+  Eng: PFFT2D;
 begin
-  Result := FFTEngine.FFT2(m);
+  Eng := ThreadPool.GetEngine();
+  try
+    Result := Eng^.FFT2(m);
+  finally
+    ThreadPool.PutEngine(Eng);
+  end;
 end;
 
 function IFFT2(const m: TComplexMatrix): TComplexMatrix;
+var
+  Eng: PFFT2D;
 begin
-  Result := FFTEngine.IFFT2(m);
+  Eng := ThreadPool.GetEngine();
+  try
+    Result := Eng^.IFFT2(m);
+  finally
+    ThreadPool.PutEngine(Eng);
+  end;
 end;
 
 initialization

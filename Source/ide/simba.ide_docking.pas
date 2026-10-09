@@ -925,11 +925,12 @@ begin
   if (Layout <> '') then
   begin
     Stream := TStringStream.Create(Layout);
-    Config := TXMLConfigStorage.Create(Stream);
+    Config := nil;
 
     BeginLayoutBuild();
     try
       try
+        Config := TXMLConfigStorage.Create(Stream); // parses: a corrupt layout raises here
         if (Config.GetValue('SimbaLayoutVersion', 0) = SimbaLayoutVersion) then
         begin
           LoadRestoredBounds(Config);

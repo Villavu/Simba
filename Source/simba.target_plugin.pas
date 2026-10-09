@@ -45,6 +45,8 @@ type
 
 function LoadPluginTarget(FileName, Args: String): TSimbaPluginTarget; overload;
 function LoadPluginTarget(FileName, Args: String; out DebugImage: TSimbaExternalCanvas): TSimbaPluginTarget; overload;
+// Stops the debug image thread and gives the target back to the plugin
+procedure ReleasePluginTarget(var Target: TSimbaPluginTarget);
 
 procedure PluginTarget_GetDimensions(Target: Pointer; out W, H: Integer);
 function PluginTarget_GetImageData(Target: Pointer; X, Y, Width, Height: Integer; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
@@ -85,7 +87,7 @@ type
 
 procedure TUpdateDebugImageThread.Execute;
 var
-  CurrentWidth, CurrentHeight, NewWidth, NewHeight: Integer;
+  CurrentWidth, CurrentHeight, NewWidth, NewHeight, I: Integer;
 begin
   CurrentWidth := 0;
   CurrentHeight := 0;
@@ -102,18 +104,21 @@ begin
       FImg.Resize(CurrentWidth, CurrentHeight);
     end;
 
-    Sleep(1000);
+    // a second, in steps: ReleasePluginTarget waits for us
+    for I := 1 to 10 do
+      if (not Terminated) then
+        Sleep(100);
   end;
 end;
 
 constructor TUpdateDebugImageThread.Create(Target: TSimbaPluginTarget; Img: TSimbaExternalCanvas);
 begin
-  inherited Create(False, 512*512);
-
-  FreeOnTerminate := True;
+  inherited Create(True, 512*512);
 
   FTarget := Target;
   FImg := Img;
+
+  Start();
 end;
 
 procedure CheckExported(const MethodName: String; const Method: Pointer); inline;
@@ -178,6 +183,21 @@ begin
     if Assigned(DebugImage) and DebugImage.AutoResize then
       DebugImageThread := TUpdateDebugImageThread.Create(Result, DebugImage);
   end;
+end;
+
+procedure ReleasePluginTarget(var Target: TSimbaPluginTarget);
+begin
+  if (Target.DebugImageThread <> nil) then
+  begin
+    Target.DebugImageThread.Terminate();
+    Target.DebugImageThread.WaitFor();
+    Target.DebugImageThread.Free();
+  end;
+
+  if Assigned(Target.Release) and (Target.Target <> nil) then
+    Target.Release(Target.Target);
+
+  Target := Default(TSimbaPluginTarget);
 end;
 
 procedure PluginTarget_GetDimensions(Target: Pointer; out W, H: Integer);

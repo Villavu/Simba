@@ -65,22 +65,27 @@ begin
   Result := TStringList.Create();
   Result.LineBreak := #0;
 
-  if FileExists(DumpFileName) then
-    Result.LoadFromFile(DumpFileName)
-  else
-  begin
-    try
-      if not RunProcessTimeout(Application.ExeName, Commands + [DumpFileName], 5000, Output) then
-        SimbaException('Timed out');
+  try
+    if FileExists(DumpFileName) then
+      Result.LoadFromFile(DumpFileName)
+    else
+    begin
+      try
+        if not RunProcessTimeout(Application.ExeName, Commands + [DumpFileName], 5000, Output) then
+          SimbaException('Timed out');
 
-      Result.LoadFromFile(DumpFileName);
-    except
-      on E: Exception do
-        if (Output <> '') then
-          SimbaException(E.Message + ': ' + Output)
-        else
-          SimbaException(E.Message);
+        Result.LoadFromFile(DumpFileName);
+      except
+        on E: Exception do
+          if (Output <> '') then
+            SimbaException(E.Message + ': ' + Output)
+          else
+            SimbaException(E.Message);
+      end;
     end;
+  except
+    Result.Free();
+    raise;
   end;
 end;
 

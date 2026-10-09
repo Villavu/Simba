@@ -152,9 +152,8 @@ begin
             Exit;
 
           Plugin := TSimbaScriptPlugin.Create(Argument, [ExtractFileDir(Sender.Tokenizer.FileName)]);
-          Plugin.Import(FCompiler);
-
           FPlugins.Add(Plugin);
+          Plugin.Import(FCompiler);
         end;
     end;
   except

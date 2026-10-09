@@ -214,8 +214,8 @@ end;
 
 procedure _LapeJSONItem_Add(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
-  SetLapeObjectManage(Params^[2], False);
   PLapeObjectJSON(Params^[0])^^.Add(PString(Params^[1])^, PLapeObjectJSON(Params^[2])^^);
+  SetLapeObjectManage(Params^[2], False);
 end;
 
 procedure _LapeJSONItem_AddInt(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -245,14 +245,14 @@ end;
 
 procedure _LapeJSONItem_AddArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SetLapeObjectManage(Params^[2], False);
   PLapeObjectJSON(Params^[0])^^.AddArray(PString(Params^[1])^, PLapeObjectJSON(Params^[2])^^);
+  SetLapeObjectManage(Params^[2], False);
 end;
 
 procedure _LapeJSONItem_AddObject(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
-  SetLapeObjectManage(Params^[2], False);
   PLapeObjectJSON(Params^[0])^^.AddObject(PString(Params^[1])^, PLapeObjectJSON(Params^[2])^^);
+  SetLapeObjectManage(Params^[2], False);
 end;
 
 procedure _LapeJSONItem_Has1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV

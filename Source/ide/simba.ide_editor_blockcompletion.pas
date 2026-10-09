@@ -154,32 +154,36 @@ begin
 
   NodeList := TSynFreePascalSyn(Editor.Highlighter).FoldNodeInfo[Y];
   NodeList.AddReference;
-  NodeList.ActionFilter := [sfaMarkup];
+  try
+    NodeList.ActionFilter := [sfaMarkup];
 
-  TmpNode := NodeList[i];
-  while not (sfaInvalid in TmpNode.FoldAction) and (TmpNode.LogXEnd < LogCaret.X-1) do
-  begin
-    Inc(I);
-    TmpNode := NodeList[I];
-  end;
-  if (TmpNode.LogXStart > LogCaret.X - 1) or (sfaInvalid in TmpNode.FoldAction) then
-    Exit;
-
-  if TmpNode.FoldAction * [sfaOpenFold, sfaOneLineOpen] <> [] then
-  begin
-    StartNode := TmpNode;
-    CloseNode := FindEndNode(StartNode, Y, i);
-    if (sfaInvalid in CloseNode.FoldAction) then
+    TmpNode := NodeList[i];
+    while not (sfaInvalid in TmpNode.FoldAction) and (TmpNode.LogXEnd < LogCaret.X-1) do
+    begin
+      Inc(I);
+      TmpNode := NodeList[I];
+    end;
+    if (TmpNode.LogXStart > LogCaret.X - 1) or (sfaInvalid in TmpNode.FoldAction) then
       Exit;
 
-    {
-    Writeln(StartNode.NestLvlStart);
-    Writeln(StartNode.NestLvlEnd);
-    Writeln(CloseNode.NestLvlStart);
-    Writeln(CloseNode.NestLvlEnd);
-    }
+    if TmpNode.FoldAction * [sfaOpenFold, sfaOneLineOpen] <> [] then
+    begin
+      StartNode := TmpNode;
+      CloseNode := FindEndNode(StartNode, Y, i);
+      if (sfaInvalid in CloseNode.FoldAction) then
+        Exit;
 
-    Result := CloseNode.LogXStart = StartNode.LogXStart;
+      {
+      Writeln(StartNode.NestLvlStart);
+      Writeln(StartNode.NestLvlEnd);
+      Writeln(CloseNode.NestLvlStart);
+      Writeln(CloseNode.NestLvlEnd);
+      }
+
+      Result := CloseNode.LogXStart = StartNode.LogXStart;
+    end;
+  finally
+    NodeList.ReleaseReference; // pairs AddReference: else the list is orphaned on every call
   end;
 end;
 

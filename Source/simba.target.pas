@@ -743,6 +743,7 @@ begin
   FreeAndNil(FEventManager);
   FreeAndNil(FOptions);
   FreeAndNil(FInputLock);
+  FreeAndNil(FImageLock);
   {$IFDEF USE_WGCAPTURE}
   FreeAndNil(FWindowsCapture);
   {$ENDIF}
@@ -777,8 +778,12 @@ end;
 
 procedure TSimbaTarget.ChangeTarget(Kind: ESimbaTargetKind);
 begin
-  if (FTargetKind = ESimbaTargetKind.IMAGE) and (FTargetImage <> nil) then
-    FreeAndNil(FTargetImage);
+  // let go of the old target
+  case FTargetKind of
+    ESimbaTargetKind.IMAGE:  FreeAndNil(FTargetImage);
+    ESimbaTargetKind.EIOS:   ReleaseEIOS(FTargetEIOS);
+    ESimbaTargetKind.PLUGIN: ReleasePluginTarget(FTargetPlugin);
+  end;
 
   FTargetMethods := Default(TSimbaTargetMethods);
   FTargetKind := Kind;
@@ -1127,10 +1132,10 @@ var
 begin
   Result := GetImageData(ABounds, Data, DataWidth);
   if Result then
-  begin
+  try
     Image := TSimbaImage.Create(ABounds.Width, ABounds.Height);
     CopyRows(Image.Data, Image.BytesPerRow, Data, DataWidth * SizeOf(TColorBGRA), Image.Width, Image.Height);
-
+  finally
     FreeImageData(Data);
   end;
 end;
@@ -1172,6 +1177,8 @@ begin
       begin
         Result := ValidateBounds(ABounds) and FWindowsCapture.Capture(FTargetWindow, ABounds.X1, ABounds.Y1, ABounds.Width, ABounds.Height, Data);
         DataWidth := ABounds.Width;
+        if (not Result) and (Data <> nil) then // a capture that failed after allocating
+          FreeMemAndNil(Data);
       end else
       {$ENDIF}
         Result := ValidateBounds(ABounds) and FTargetMethods.GetImageData(FTarget, ABounds.X1, ABounds.Y1, ABounds.Width, ABounds.Height, Data, DataWidth);

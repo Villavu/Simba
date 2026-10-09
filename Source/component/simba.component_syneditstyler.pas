@@ -392,30 +392,33 @@ var
   INI: TINIFile;
   I: Integer;
 begin
-  INI := TINIFile.Create(Stream);
-  for I := 0 to High(FAttributes) do
-    with TSynAttributeProtectedAccess(FAttributes[I]) do
-    begin
-      Background := INI.ReadInteger(StoredName, 'Background', Background);
-      Foreground := INI.ReadInteger(StoredName, 'Foreground', Foreground);
-      IntegerStyle := INI.ReadInteger(StoredName, 'Style', IntegerStyle);
-      IntegerStyleMask := INI.ReadInteger(StoredName, 'StyleMask', IntegerStyleMask);
-      FrameColor := INI.ReadInteger(StoredName, 'Frame', FrameColor);
-
-      if (FAttributes[I] is TSynSelectedColor) then
+  INI := nil;
+  try
+    INI := TINIFile.Create(Stream);
+    for I := 0 to High(FAttributes) do
+      with TSynAttributeProtectedAccess(FAttributes[I]) do
       begin
-        if INI.ValueExists(StoredName, 'BackAlpha') then
-          TSynSelectedColor(FAttributes[I]).BackAlpha := INI.ReadInteger(StoredName, 'BackAlpha', 0);
-        if INI.ValueExists(StoredName, 'ForeAlpha') then
-          TSynSelectedColor(FAttributes[I]).ForeAlpha := INI.ReadInteger(StoredName, 'ForeAlpha', 0);
+        Background := INI.ReadInteger(StoredName, 'Background', Background);
+        Foreground := INI.ReadInteger(StoredName, 'Foreground', Foreground);
+        IntegerStyle := INI.ReadInteger(StoredName, 'Style', IntegerStyle);
+        IntegerStyleMask := INI.ReadInteger(StoredName, 'StyleMask', IntegerStyleMask);
+        FrameColor := INI.ReadInteger(StoredName, 'Frame', FrameColor);
+
+        if (FAttributes[I] is TSynSelectedColor) then
+        begin
+          if INI.ValueExists(StoredName, 'BackAlpha') then
+            TSynSelectedColor(FAttributes[I]).BackAlpha := INI.ReadInteger(StoredName, 'BackAlpha', 0);
+          if INI.ValueExists(StoredName, 'ForeAlpha') then
+            TSynSelectedColor(FAttributes[I]).ForeAlpha := INI.ReadInteger(StoredName, 'ForeAlpha', 0);
+        end;
+
+        Changed();
       end;
-
-      Changed();
-    end;
-
-  INI.Free();
-  if ManageStream then
-    Stream.Free();
+  finally
+    INI.Free();
+    if ManageStream then
+      Stream.Free();
+  end;
 end;
 
 procedure TSimbaSynEditStyler.LoadFromFile(FileName: String);

@@ -164,6 +164,9 @@ var
   Source, Dest: PByte;
   SourceRowSize, DestRowSize, DestUpper: PtrUInt;
 begin
+  if not (LazImage_PixelFormat(LazImage) in [ELazPixelFormat.BGR, ELazPixelFormat.BGRA, ELazPixelFormat.ARGB]) then // before Result is made: nothing to free
+    SimbaException('Not supported');
+
   Result := TSimbaImage.Create();
   Result.SetSize(LazImage.Width, LazImage.Height);
 
@@ -178,8 +181,6 @@ begin
     ELazPixelFormat.BGR:  BGR(Source, Dest, DestUpper, SourceRowSize, DestRowSize);
     ELazPixelFormat.BGRA: CopyRows(Result.Data, Result.BytesPerRow, PColorBGRA(Source), SourceRowSize, Result.Width, Result.Height);
     ELazPixelFormat.ARGB: ARGB(Source, Dest, DestUpper, SourceRowSize, DestRowSize);
-    else
-      SimbaException('Not supported');
   end;
 
   // 32 bits a pixel with no alpha declared: the fourth byte is padding, often zero, and never alpha
@@ -272,8 +273,12 @@ end;
 function SimbaImage_ToLazImage(SimbaImage: TSimbaImage): TBitmap;
 begin
   Result := TBitmap.Create();
-
-  LazImage_FromData(Result, SimbaImage.Data, SimbaImage.Width, SimbaImage.Height);
+  try
+    LazImage_FromData(Result, SimbaImage.Data, SimbaImage.Width, SimbaImage.Height);
+  except
+    Result.Free();
+    raise;
+  end;
 end;
 
 end.

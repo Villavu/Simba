@@ -578,8 +578,6 @@ end;
 
 initialization
   SimbaInitialization_Add(ESimbaInit.IDE_BEFORE_CREATE, @DoCreate, 'MinimapFloatPoller');
-
-finalization
   SimbaInitialization_Add(ESimbaInit.IDE_DESTROY, @DoDestroy, 'MinimapFloatPoller');
 
 end.

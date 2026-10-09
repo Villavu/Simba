@@ -314,10 +314,15 @@ var
   Proc: TProcess;
 begin
   Proc := TProcess.Create(nil);
-  Proc.Options := Proc.Options + [poStderrToOutPut{, poNoConsole}];
-  Proc.Executable := Executable;
-  Proc.Parameters.AddStrings(Params);
-  Proc.Execute();
+  try
+    Proc.Options := Proc.Options + [poStderrToOutPut{, poNoConsole}];
+    Proc.Executable := Executable;
+    Proc.Parameters.AddStrings(Params);
+    Proc.Execute();
+  except
+    Proc.Free();
+    raise;
+  end;
 
   Result := TRunningProcess.Create(Proc);
 end;
@@ -327,12 +332,17 @@ var
   Proc: TProcess;
 begin
   Proc := TProcess.Create(nil);
-  Proc.Options := Proc.Options + [poStderrToOutPut{, poNoConsole}];
-  Proc.Executable := Executable;
-  Proc.CurrentDirectory := Cwd;
-  Proc.Environment.AddStrings(Env);
-  Proc.Parameters.AddStrings(Params);
-  Proc.Execute();
+  try
+    Proc.Options := Proc.Options + [poStderrToOutPut{, poNoConsole}];
+    Proc.Executable := Executable;
+    Proc.CurrentDirectory := Cwd;
+    Proc.Environment.AddStrings(Env);
+    Proc.Parameters.AddStrings(Params);
+    Proc.Execute();
+  except
+    Proc.Free();
+    raise;
+  end;
 
   Result := TRunningProcess.Create(Proc);
 end;
@@ -342,10 +352,15 @@ var
   Proc: TProcess;
 begin
   Proc := TProcess.Create(nil);
-  Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes{, poNoConsole}];
-  Proc.Executable := Executable;
-  Proc.Parameters.AddStrings(Params);
-  Proc.Execute();
+  try
+    Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes{, poNoConsole}];
+    Proc.Executable := Executable;
+    Proc.Parameters.AddStrings(Params);
+    Proc.Execute();
+  except
+    Proc.Free();
+    raise;
+  end;
 
   Result := TRunningProcessPiped.Create(Proc);
 end;
@@ -355,12 +370,17 @@ var
   Proc: TProcess;
 begin
   Proc := TProcess.Create(nil);
-  Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes{, poNoConsole}];
-  Proc.Executable := Executable;
-  Proc.CurrentDirectory := Cwd;
-  Proc.Environment.AddStrings(Env);
-  Proc.Parameters.AddStrings(Params);
-  Proc.Execute();
+  try
+    Proc.Options := Proc.Options + [poStderrToOutPut, poUsePipes{, poNoConsole}];
+    Proc.Executable := Executable;
+    Proc.CurrentDirectory := Cwd;
+    Proc.Environment.AddStrings(Env);
+    Proc.Parameters.AddStrings(Params);
+    Proc.Execute();
+  except
+    Proc.Free();
+    raise;
+  end;
 
   Result := TRunningProcessPiped.Create(Proc);
 end;

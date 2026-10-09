@@ -85,21 +85,23 @@ begin
   FOutputPath := CleanAndExpandDirectory(FOutputPath);
 
   UnZipper := TUnZipper.Create();
-  UnZipper.OutputPath := FOutputPath;
-  UnZipper.OnOpenInputStream := @DoCreateInputStream;
-  UnZipper.OnCreateStream := @DoCreateStream;
-  UnZipper.OnProgressEx := @DoProgress;
-  UnZipper.OnStartFile := @DoStartFile;
-  UnZipper.Flat := FFlat;
-  UnZipper.Examine();
+  try
+    UnZipper.OutputPath := FOutputPath;
+    UnZipper.OnOpenInputStream := @DoCreateInputStream;
+    UnZipper.OnCreateStream := @DoCreateStream;
+    UnZipper.OnProgressEx := @DoProgress;
+    UnZipper.OnStartFile := @DoStartFile;
+    UnZipper.Flat := FFlat;
+    UnZipper.Examine();
 
-  FDirectoryZipped := (UnZipper.Entries.Count > 1) and UnZipper.Entries[0].IsDirectory() and UnZipper.Entries[1].ArchiveFileName.StartsWith(UnZipper.Entries[0].ArchiveFileName);
+    FDirectoryZipped := (UnZipper.Entries.Count > 1) and UnZipper.Entries[0].IsDirectory() and UnZipper.Entries[1].ArchiveFileName.StartsWith(UnZipper.Entries[0].ArchiveFileName);
 
-  UnZipper.UnZipAllFiles();
-  if Assigned(FExtractingFinished) then
-    FExtractingFinished(Self);
-
-  UnZipper.Free();
+    UnZipper.UnZipAllFiles();
+    if Assigned(FExtractingFinished) then
+      FExtractingFinished(Self);
+  finally
+    UnZipper.Free();
+  end;
 end;
 
 constructor TSimbaZipExtractor.Create;
@@ -329,18 +331,21 @@ procedure TZipAppender.Add(FileName, FileContents: String);
 var
   I: Integer;
 begin
-  if Assigned(FUnZip) then
-    FUnZip.UnZipAllFiles();
+  try
+    if Assigned(FUnZip) then
+      FUnZip.UnZipAllFiles();
 
-  FZip.Entries.AddFileEntry(TStringStream.Create(FileContents), IfThen(FileName = '', FZip.Entries.Count.ToString(), FileName));
-  FZip.ZipAllFiles();
-
-  for I := 0 to FZip.Entries.Count - 1 do
-    if (FZip.Entries[I].Stream <> nil) then
-    begin
-      FZip.Entries[I].Stream.Free();
-      FZip.Entries[I].Stream := nil;
-    end;
+    FZip.Entries.AddFileEntry(TStringStream.Create(FileContents), IfThen(FileName = '', FZip.Entries.Count.ToString(), FileName));
+    FZip.ZipAllFiles();
+  finally
+    // the entries do not own their streams
+    for I := 0 to FZip.Entries.Count - 1 do
+      if (FZip.Entries[I].Stream <> nil) then
+      begin
+        FZip.Entries[I].Stream.Free();
+        FZip.Entries[I].Stream := nil;
+      end;
+  end;
 end;
 
 function ZipAppend(FileName: String; Entry, FileContents: String): Boolean;
@@ -445,6 +450,7 @@ end;
 
 procedure TSimpleZipExtractStream.DoDoneStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
 begin
+  Stream.Free(); // two entries of the same name: keep the last
   Stream := TMemoryStream(AStream);
   Stream.Position := 0;
 

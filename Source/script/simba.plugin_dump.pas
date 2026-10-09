@@ -26,7 +26,11 @@ uses
 function DumpPlugin(Plugin: String): TStringList;
 begin
   with TSimbaScriptPlugin.Create(Plugin) do
+  try
     Result := Dump();
+  finally
+    Free();
+  end;
 end;
 
 // Calls above but in another Simba process so it's "safe"

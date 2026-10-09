@@ -82,12 +82,14 @@ var
   Sync: TSync;
 begin
   Sync := TSync.Create();
-  Sync.Data := Data;
-  Sync.Method := Method;
+  try
+    Sync.Data := Data;
+    Sync.Method := Method;
 
-  TThread.Synchronize(TThread.CurrentThread, @Sync.Execute);
-
-  Sync.Free();
+    TThread.Synchronize(TThread.CurrentThread, @Sync.Execute);
+  finally
+    Sync.Free();
+  end;
 end;
 
 procedure _RaiseException(Message: PChar); cdecl;

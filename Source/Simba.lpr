@@ -87,7 +87,11 @@ begin
   if Application.HasOption('dumpplugin') then
   begin
     with DumpPlugin(Application.GetOptionValue('dumpplugin')) do
+    try
       SaveToFile(Application.Params[Application.ParamCount]);
+    finally
+      Free();
+    end;
 
     Halt();
   end;

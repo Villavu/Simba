@@ -145,7 +145,7 @@ begin
       specialize MoveElement<TSimbaPackage>(Packages, I, 0);
 
   FListBox.Items.BeginUpdate();
-  FListBox.Items.Clear();
+  FListBox.Clear(); // not Items.Clear: that leaves the old packages unfreed
   for I := 0 to High(Packages) do
     FListBox.Add(Packages[I]);
   FListBox.Items.EndUpdate();

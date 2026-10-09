@@ -21,6 +21,8 @@ type
   protected type
     TManagedImportClosure = class(TLapeDeclaration)
       Closure: TImportClosure;
+
+      destructor Destroy; override;
     end;
   protected
     FDumpSection: String;
@@ -668,15 +670,21 @@ begin
     DumpCode(DumpSection, Decl);
 end;
 
+destructor TScriptCompiler.TManagedImportClosure.Destroy;
+begin
+  Closure.Free();
+
+  inherited Destroy();
+end;
+
 function TScriptCompiler.addGlobalFunc(Header: lpString; Value: Pointer; ABI: TFFIABI): TLapeGlobalVar;
 var
   Closure: TManagedImportClosure;
 begin
-  Closure := TManagedImportClosure.Create();
+  Closure := TManagedImportClosure(addManagedDecl(TManagedImportClosure.Create())); // managed first: freed even if the wrapper raises
   Closure.Closure := LapeImportWrapper(Value, Self, Header, ABI);
 
-  with TManagedImportClosure(addManagedDecl(Closure)) do
-    Result := addGlobalFunc(Header, Closure.Func);
+  Result := addGlobalFunc(Header, Closure.Closure.Func);
 end;
 
 function TScriptCompiler.addGlobalType(Str: lpString; AName: lpString; ABI: TFFIABI): TLapeType;

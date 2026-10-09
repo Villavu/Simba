@@ -95,19 +95,22 @@ var
 begin
   try
     Log := TStringList.Create();
-    Log.Add('Simba %d encountered an unhandled exception.', [SIMBA_VERSION]);
-    Log.Add('Simba commit: %s', [SIMBA_COMMIT]);
-    Log.Add('');
-    Log.Add('Exception: %s', [E.Message]);
-    Log.Add('Exception class: %s', [E.ClassName]);
-    Log.Add('');
+    try
+      Log.Add('Simba %d encountered an unhandled exception.', [SIMBA_VERSION]);
+      Log.Add('Simba commit: %s', [SIMBA_COMMIT]);
+      Log.Add('');
+      Log.Add('Exception: %s', [E.Message]);
+      Log.Add('Exception class: %s', [E.ClassName]);
+      Log.Add('');
 
-    DumpStack(Log);
+      DumpStack(Log);
 
-    FileName := SimbaEnv.DataPath + FormatDateTime('dd-mm_hh-mm-ss', Now()) + '.crash';
+      FileName := SimbaEnv.DataPath + FormatDateTime('dd-mm_hh-mm-ss', Now()) + '.crash';
 
-    Log.SaveToFile(FileName);
-    Log.Free();
+      Log.SaveToFile(FileName);
+    finally
+      Log.Free();
+    end;
 
     Message := '%s'                                                     + LineEnding +
                ''                                                       + LineEnding +

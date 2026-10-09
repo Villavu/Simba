@@ -25,42 +25,46 @@ var
   assoc: TFileAssociation;
 begin
   assoc := TFileAssociation.Create(nil);
-  assoc.ApplicationName := 'Simba';
+  try
+    assoc.ApplicationName := 'Simba';
 
-  // Requires admin
-  assoc.RegisterForAllUsers := False;
+    // Requires admin
+    assoc.RegisterForAllUsers := False;
 
-  assoc.Extension := '.simba';
-  assoc.ExtensionName := 'Simba';
-  assoc.ExtensionIcon := '"' + Application.ExeName + '",0';
+    assoc.Extension := '.simba';
+    assoc.ExtensionName := 'Simba';
+    assoc.ExtensionIcon := '"' + Application.ExeName + '",0';
 
-  assoc.WriteFileAssociationClass();
-  assoc.WriteFileAssociation();
-  assoc.WriteDefaultPrograms();
-  assoc.WriteDefaultProgramsAddExt();
+    assoc.WriteFileAssociationClass();
+    assoc.WriteFileAssociation();
+    assoc.WriteDefaultPrograms();
+    assoc.WriteDefaultProgramsAddExt();
 
-  assoc.ActionName := 'Open';
-  assoc.ActionText := 'Open';
-  assoc.ActionIcon := '"' + Application.ExeName + '",0';
-  assoc.Action := '"' + Application.ExeName + '" --open "%1"';
+    assoc.ActionName := 'Open';
+    assoc.ActionText := 'Open';
+    assoc.ActionIcon := '"' + Application.ExeName + '",0';
+    assoc.Action := '"' + Application.ExeName + '" --open "%1"';
 
-  assoc.WriteFileAssociationClassCommand();
+    assoc.WriteFileAssociationClassCommand();
 
-  assoc.ActionName := 'Open and Run';
-  assoc.ActionText := 'Open and Run';
-  assoc.ActionIcon := '"' + Application.ExeName + '",0';
-  assoc.Action := '"' + Application.ExeName + '" --open --run "%1"';
+    assoc.ActionName := 'Open and Run';
+    assoc.ActionText := 'Open and Run';
+    assoc.ActionIcon := '"' + Application.ExeName + '",0';
+    assoc.Action := '"' + Application.ExeName + '" --open --run "%1"';
 
-  assoc.WriteFileAssociationClassCommand();
+    assoc.WriteFileAssociationClassCommand();
 
-  assoc.ActionName := 'Run';
-  assoc.ActionText := 'Run';
-  assoc.ActionIcon := '"' + Application.ExeName + '",0';
-  assoc.Action := '"' + Application.ExeName + '" --run "%1"';
+    assoc.ActionName := 'Run';
+    assoc.ActionText := 'Run';
+    assoc.ActionIcon := '"' + Application.ExeName + '",0';
+    assoc.Action := '"' + Application.ExeName + '" --run "%1"';
 
-  assoc.WriteFileAssociationClassCommand();
+    assoc.WriteFileAssociationClassCommand();
 
-  assoc.ClearIconCache();
+    assoc.ClearIconCache();
+  finally
+    assoc.Free();
+  end;
 end;
 {$ELSE}
 procedure Associate;

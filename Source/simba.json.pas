@@ -239,6 +239,10 @@ begin
   CheckIsObject();
   if (Index < 0) or (Index >= TJSONObject(Self).Count) then
     SimbaException('Index %d is out of range', [Index]);
+  // checked before anything is taken out: Add raising half way would lose and leak the rest
+  I := TJSONObject(Self).IndexOfName(AValue);
+  if (I > -1) and (I <> Index) then
+    SimbaException('Key "%s" already exists', [AValue]);
 
   // not ideal since FPC doesn't provide access to FHashList but should be fine
   // no new objects are made, just rehashing

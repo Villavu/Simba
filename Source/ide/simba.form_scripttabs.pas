@@ -711,17 +711,21 @@ var
 begin
   with TOpenDialog.Create(Self) do
   try
-    Options := [ofEnableSizing, ofAllowMultiSelect, ofFileMustExist];
-    InitialDir := ExtractFileDir(ActiveTab.ScriptFileName);
-    if (InitialDir = '') then
-      InitialDir := SimbaEnv.ScriptsPath;
+    try
+      Options := [ofEnableSizing, ofAllowMultiSelect, ofFileMustExist];
+      InitialDir := ExtractFileDir(ActiveTab.ScriptFileName);
+      if (InitialDir = '') then
+        InitialDir := SimbaEnv.ScriptsPath;
 
-    if Execute() then
-      for I := 0 to Files.Count - 1 do
-        Open(Files[I], True);
-  except
-    on E: Exception do
-      ShowMessage('Opening file exception: ' + E.Message);
+      if Execute() then
+        for I := 0 to Files.Count - 1 do
+          Open(Files[I], True);
+    except
+      on E: Exception do
+        ShowMessage('Opening file exception: ' + E.Message);
+    end;
+  finally
+    Free();
   end;
 end;
 

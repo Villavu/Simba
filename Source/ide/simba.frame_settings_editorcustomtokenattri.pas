@@ -31,8 +31,10 @@ type
     FChanging: Boolean;
 
     procedure Modify(Index: Integer; NewToken, NewAttri: String);
+    // the list box does not own its item objects
+    procedure ClearItems;
   public
-    constructor Create(TheOwner: TComponent); override;
+    destructor Destroy; override;
 
     procedure Load;
     procedure Save;
@@ -64,6 +66,7 @@ begin
   begin
     FChanging := True;
 
+    ListBox.Items.Objects[ListBox.ItemIndex].Free();
     ListBox.Items.Delete(ListBox.ItemIndex);
     ListBox.ItemIndex := -1;
 
@@ -122,12 +125,20 @@ begin
   end;
 end;
 
-constructor TEditorCustomTokenAttriFrame.Create(TheOwner: TComponent);
+procedure TEditorCustomTokenAttriFrame.ClearItems;
+var
+  I: Integer;
 begin
-  inherited Create(TheOwner);
+  for I := 0 to ListBox.Items.Count - 1 do
+    ListBox.Items.Objects[I].Free();
+  ListBox.Items.Clear();
+end;
 
-  if (ListBox.Items is TStringList) then
-    TStringList(ListBox.Items).OwnsObjects := True;
+destructor TEditorCustomTokenAttriFrame.Destroy;
+begin
+  ClearItems();
+
+  inherited Destroy();
 end;
 
 procedure TEditorCustomTokenAttriFrame.Load;
@@ -145,7 +156,7 @@ begin
     end;
   end;
 
-  ListBox.Items.Clear();
+  ClearItems();
   EditToken.Enabled := False;
   EditToken.Text := '';
   ComboAttributes.Enabled := False;
