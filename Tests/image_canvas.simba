@@ -52,6 +52,7 @@ begin
 
   img.Canvas.SetPixels([[1,1],[2,2]], RED);
   Assert(Drawn().Equals([[0,0],[1,1],[2,2]]));
+  Assert(ToString(img.Canvas.GetPixels([[0,0],[1,1],[3,3]])) = '[255, 255, 0]');
 
   img.Canvas.Fill($00FF00);
   Assert(img.Pixel[3,3] = $00FF00);

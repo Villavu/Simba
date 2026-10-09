@@ -30,6 +30,27 @@ type
   PQuadArray = ^TQuadArray;
 
 (*
+Canvas
+======
+TCanvas draws on pixels: shapes, text and images. Every `TImage` has one as `TImage.Canvas`.
+
+How a shape is drawn is set with the `Draw` properties, not per call.
+
+```
+var
+  img: TImage;
+begin
+  img := new TImage(100, 100);
+  img.Canvas.DrawColor := Colors.RED;
+  img.Canvas.DrawFilled := True;
+  img.Canvas.DrawCircle([50, 50], 20);
+end;
+```
+
+Anything drawn off the canvas is clipped.
+*)
+
+(*
 TCanvas.DefaultPixel
 --------------------
 ```
@@ -37,7 +58,7 @@ property TCanvas.DefaultPixel: TColorBGRA;
 property TCanvas.DefaultPixel(Value: TColorBGRA);
 ```
 
-What Clear writes, and where a colour given without one takes its alpha. Opaque black by default.
+What Clear writes. Opaque black by default.
 *)
 procedure _LapeCanvas_DefaultPixel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
@@ -49,16 +70,40 @@ begin
   PSimbaCanvas(Params^[0])^.DefaultPixel := PColorBGRA(Params^[1])^;
 end;
 
+(*
+TCanvas.Width
+-------------
+```
+property TCanvas.Width: Integer;
+```
+*)
 procedure _LapeCanvas_Width_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaCanvas(Params^[0])^.Width;
 end;
 
+(*
+TCanvas.Height
+--------------
+```
+property TCanvas.Height: Integer;
+```
+*)
 procedure _LapeCanvas_Height_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaCanvas(Params^[0])^.Height;
 end;
 
+(*
+TCanvas.Pixel
+-------------
+```
+property TCanvas.Pixel(X, Y: Integer): TColor;
+property TCanvas.Pixel(X, Y: Integer; Color: TColor);
+```
+
+The color at a point. A TColor has no alpha, so it is written opaque. Out of bounds raises.
+*)
 procedure _LapeCanvas_Pixel_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColor(Result)^ := PSimbaCanvas(Params^[0])^.Pixel[PInteger(Params^[1])^, PInteger(Params^[2])^];
@@ -69,6 +114,16 @@ begin
   PSimbaCanvas(Params^[0])^.Pixel[PInteger(Params^[1])^, PInteger(Params^[2])^] := PColor(Params^[3])^;
 end;
 
+(*
+TCanvas.Alpha
+-------------
+```
+property TCanvas.Alpha(X, Y: Integer): Byte;
+property TCanvas.Alpha(X, Y: Integer; Value: Byte);
+```
+
+The alpha at a point: 0 is transparent, 255 opaque. Out of bounds raises.
+*)
 procedure _LapeCanvas_Alpha_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PByte(Result)^ := PSimbaCanvas(Params^[0])^.Alpha[PInteger(Params^[1])^, PInteger(Params^[2])^];
@@ -79,6 +134,30 @@ begin
   PSimbaCanvas(Params^[0])^.Alpha[PInteger(Params^[1])^, PInteger(Params^[2])^] := PByte(Params^[3])^;
 end;
 
+(*
+TCanvas.GetPixels
+-----------------
+```
+function TCanvas.GetPixels(Points: TPointArray): TColorArray;
+```
+
+The color at each point. A point out of bounds raises.
+*)
+procedure _LapeCanvas_GetPixels(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+begin
+  PColorArray(Result)^ := PSimbaCanvas(Params^[0])^.GetPixels(PPointArray(Params^[1])^);
+end;
+
+(*
+TCanvas.SetPixels
+-----------------
+```
+procedure TCanvas.SetPixels(Points: TPointArray; Color: TColor);
+procedure TCanvas.SetPixels(Points: TPointArray; Colors: TColorArray);
+```
+
+Sets each point to a color, or to its own color. Written opaque. A point out of bounds raises.
+*)
 procedure _LapeCanvas_SetPixels1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.SetPixels(PPointArray(Params^[1])^, PColor(Params^[2])^);
@@ -89,16 +168,44 @@ begin
   PSimbaCanvas(Params^[0])^.SetPixels(PPointArray(Params^[1])^, PColorArray(Params^[2])^);
 end;
 
+(*
+TCanvas.Fill
+------------
+```
+procedure TCanvas.Fill(Color: TColor);
+```
+
+Every pixel becomes the color, opaque.
+*)
 procedure _LapeCanvas_Fill(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.Fill(PColor(Params^[1])^);
 end;
 
+(*
+TCanvas.FillWithAlpha
+---------------------
+```
+procedure TCanvas.FillWithAlpha(Value: Byte);
+```
+
+Sets the alpha of every pixel. The colors are kept.
+*)
 procedure _LapeCanvas_FillWithAlpha(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.FillWithAlpha(PByte(Params^[1])^);
 end;
 
+(*
+TCanvas.Clear
+-------------
+```
+procedure TCanvas.Clear;
+procedure TCanvas.Clear(Box: TBox);
+```
+
+Writes `DefaultPixel` to every pixel, or to a box.
+*)
 procedure _LapeCanvas_Clear1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.Clear();
@@ -109,11 +216,30 @@ begin
   PSimbaCanvas(Params^[0])^.Clear(PBox(Params^[1])^);
 end;
 
+(*
+TCanvas.ClearInverted
+---------------------
+```
+procedure TCanvas.ClearInverted(Box: TBox);
+```
+
+Writes `DefaultPixel` to everything but the box.
+*)
 procedure _LapeCanvas_ClearInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.ClearInverted(PBox(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawColor
+-----------------
+```
+property TCanvas.DrawColor: TColor;
+property TCanvas.DrawColor(Value: TColor);
+```
+
+The color every draw uses. It is `-1` by default, and with that the array draws (`DrawATPA`, `DrawBoxArray` ...) give each item a color of its own.
+*)
 procedure _LapeCanvas_DrawColor_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PColor(Result)^ := PSimbaCanvas(Params^[0])^.DrawColor;
@@ -124,6 +250,16 @@ begin
   PSimbaCanvas(Params^[0])^.DrawColor := PColor(Params^[1])^;
 end;
 
+(*
+TCanvas.DrawAlpha
+-----------------
+```
+property TCanvas.DrawAlpha: Byte;
+property TCanvas.DrawAlpha(Value: Byte);
+```
+
+How much a draw covers what is under it: 255 (the default) replaces it, anything lower blends, 0 draws nothing.
+*)
 procedure _LapeCanvas_DrawAlpha_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PByte(Result)^ := PSimbaCanvas(Params^[0])^.DrawAlpha;
@@ -134,6 +270,16 @@ begin
   PSimbaCanvas(Params^[0])^.DrawAlpha := PByte(Params^[1])^;
 end;
 
+(*
+TCanvas.DrawThickness
+---------------------
+```
+property TCanvas.DrawThickness: Single;
+property TCanvas.DrawThickness(Value: Single);
+```
+
+The width in pixels of lines, points and the edges of shapes. 1 by default.
+*)
 procedure _LapeCanvas_DrawThickness_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSingle(Result)^ := PSimbaCanvas(Params^[0])^.DrawThickness;
@@ -144,6 +290,16 @@ begin
   PSimbaCanvas(Params^[0])^.DrawThickness := PSingle(Params^[1])^;
 end;
 
+(*
+TCanvas.DrawAntialiasing
+------------------------
+```
+property TCanvas.DrawAntialiasing: Boolean;
+property TCanvas.DrawAntialiasing(Value: Boolean);
+```
+
+Smooths the edges of what is drawn. Off by default.
+*)
 procedure _LapeCanvas_DrawAntialiasing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaCanvas(Params^[0])^.DrawAntialiasing;
@@ -154,6 +310,16 @@ begin
   PSimbaCanvas(Params^[0])^.DrawAntialiasing := PBoolean(Params^[1])^;
 end;
 
+(*
+TCanvas.DrawFilled
+------------------
+```
+property TCanvas.DrawFilled: Boolean;
+property TCanvas.DrawFilled(Value: Boolean);
+```
+
+Shapes are drawn filled rather than as an edge. Off by default.
+*)
 procedure _LapeCanvas_DrawFilled_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaCanvas(Params^[0])^.DrawFilled;
@@ -164,6 +330,16 @@ begin
   PSimbaCanvas(Params^[0])^.DrawFilled := PBoolean(Params^[1])^;
 end;
 
+(*
+TCanvas.DrawFeather
+-------------------
+```
+property TCanvas.DrawFeather: Single;
+property TCanvas.DrawFeather(Value: Single);
+```
+
+The width in pixels of the soft edge when `DrawAntialiasing` is on. 1 by default.
+*)
 procedure _LapeCanvas_DrawFeather_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSingle(Result)^ := PSimbaCanvas(Params^[0])^.DrawFeather;
@@ -174,6 +350,16 @@ begin
   PSimbaCanvas(Params^[0])^.DrawFeather := PSingle(Params^[1])^;
 end;
 
+(*
+TCanvas.FontName
+----------------
+```
+property TCanvas.FontName: String;
+property TCanvas.FontName(Value: String);
+```
+
+The font text is drawn with: one of `TCanvas.Fonts`.
+*)
 procedure _LapeCanvas_FontName_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PString(Result)^ := PSimbaCanvas(Params^[0])^.FontName;
@@ -184,6 +370,16 @@ begin
   PSimbaCanvas(Params^[0])^.FontName := PString(Params^[1])^;
 end;
 
+(*
+TCanvas.FontSize
+----------------
+```
+property TCanvas.FontSize: Single;
+property TCanvas.FontSize(Value: Single);
+```
+
+20 by default.
+*)
 procedure _LapeCanvas_FontSize_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PSingle(Result)^ := PSimbaCanvas(Params^[0])^.FontSize;
@@ -194,6 +390,16 @@ begin
   PSimbaCanvas(Params^[0])^.FontSize := PSingle(Params^[1])^;
 end;
 
+(*
+TCanvas.FontAntialiasing
+------------------------
+```
+property TCanvas.FontAntialiasing: Boolean;
+property TCanvas.FontAntialiasing(Value: Boolean);
+```
+
+Smooths the edges of text. Off by default: text is then `DrawColor` only.
+*)
 procedure _LapeCanvas_FontAntialiasing_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaCanvas(Params^[0])^.FontAntialiasing;
@@ -204,6 +410,14 @@ begin
   PSimbaCanvas(Params^[0])^.FontAntialiasing := PBoolean(Params^[1])^;
 end;
 
+(*
+TCanvas.FontBold
+----------------
+```
+property TCanvas.FontBold: Boolean;
+property TCanvas.FontBold(Value: Boolean);
+```
+*)
 procedure _LapeCanvas_FontBold_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaCanvas(Params^[0])^.FontBold;
@@ -214,6 +428,14 @@ begin
   PSimbaCanvas(Params^[0])^.FontBold := PBoolean(Params^[1])^;
 end;
 
+(*
+TCanvas.FontItalic
+------------------
+```
+property TCanvas.FontItalic: Boolean;
+property TCanvas.FontItalic(Value: Boolean);
+```
+*)
 procedure _LapeCanvas_FontItalic_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaCanvas(Params^[0])^.FontItalic;
@@ -224,6 +446,14 @@ begin
   PSimbaCanvas(Params^[0])^.FontItalic := PBoolean(Params^[1])^;
 end;
 
+(*
+TCanvas.FontUnderline
+---------------------
+```
+property TCanvas.FontUnderline: Boolean;
+property TCanvas.FontUnderline(Value: Boolean);
+```
+*)
 procedure _LapeCanvas_FontUnderline_Read(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PBoolean(Result)^ := PSimbaCanvas(Params^[0])^.FontUnderline;
@@ -234,6 +464,15 @@ begin
   PSimbaCanvas(Params^[0])^.FontUnderline := PBoolean(Params^[1])^;
 end;
 
+(*
+TCanvas.Fonts
+-------------
+```
+function TCanvas.Fonts: TStringArray; static;
+```
+
+The name of every loaded font.
+*)
 procedure _LapeCanvas_Fonts(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PStringArray(Result)^ := TSimbaCanvas.FontNames();
@@ -253,21 +492,64 @@ begin
   PBoolean(Result)^ := TSimbaCanvas.LoadFontsInDir(PString(Params^[0])^);
 end;
 
+(*
+TCanvas.TextWidth
+-----------------
+```
+function TCanvas.TextWidth(Text: String): Integer;
+```
+
+The width in pixels of the text, in the current font.
+*)
 procedure _LapeCanvas_TextWidth(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaCanvas(Params^[0])^.TextWidth(PString(Params^[1])^);
 end;
 
+(*
+TCanvas.TextHeight
+------------------
+```
+function TCanvas.TextHeight(Text: String): Integer;
+```
+
+The height in pixels of the text, in the current font.
+*)
 procedure _LapeCanvas_TextHeight(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PInteger(Result)^ := PSimbaCanvas(Params^[0])^.TextHeight(PString(Params^[1])^);
 end;
 
+(*
+TCanvas.TextSize
+----------------
+```
+function TCanvas.TextSize(Text: String): TPoint;
+```
+
+The width (X) and height (Y) in pixels of the text, in the current font.
+*)
 procedure _LapeCanvas_TextSize(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPoint(Result)^ := PSimbaCanvas(Params^[0])^.TextSize(PString(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawText
+----------------
+```
+procedure TCanvas.DrawText(Text: String; Position: TPoint);
+procedure TCanvas.DrawText(Text: String; Box: TBox; Alignments: ECanvasTextAlign);
+```
+
+Draws text with its top left at a position, or aligned in a box.
+
+Alignments is a set of `LEFT, CENTER, RIGHT, TOP, BOTTOM`. CENTER centres on whichever axis the others leave free.
+
+```
+img.Canvas.DrawText('Hello', [0, 0, 99, 99], [ECanvasTextAlign.RIGHT, ECanvasTextAlign.BOTTOM]);
+```
+*)
 procedure _LapeCanvas_DrawText1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawText(PString(Params^[1])^, PPoint(Params^[2])^);
@@ -278,76 +560,211 @@ begin
   PSimbaCanvas(Params^[0])^.DrawText(PString(Params^[1])^, PBox(Params^[2])^, ECanvasTextAligns(Params^[3]^));
 end;
 
+(*
+TCanvas.DrawTextLines
+---------------------
+```
+procedure TCanvas.DrawTextLines(Text: TStringArray; Position: TPoint);
+```
+
+Draws each string on a line of its own, down from the position.
+*)
 procedure _LapeCanvas_DrawTextLines(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawTextLines(PStringArray(Params^[1])^, PPoint(Params^[2])^);
 end;
 
+(*
+TCanvas.DrawHeatmap
+-------------------
+```
+procedure TCanvas.DrawHeatmap(Mat: TSingleMatrix);
+```
+
+Draws a matrix as colors, from the top left. The values must be normalized to 0..1.
+*)
 procedure _LapeCanvas_DrawHeatmap(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawHeatmap(PSingleMatrix(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawATPA
+----------------
+```
+procedure TCanvas.DrawATPA(ATPA: T2DPointArray);
+```
+
+Draws every point array. With a `DrawColor` of `-1` each array gets a color of its own.
+*)
 procedure _LapeCanvas_DrawATPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawATPA(P2DPointArray(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawTPA
+---------------
+```
+procedure TCanvas.DrawTPA(TPA: TPointArray);
+```
+
+Draws every point. Points off the canvas are skipped.
+*)
 procedure _LapeCanvas_DrawTPA(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawTPA(PPointArray(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawLine
+----------------
+```
+procedure TCanvas.DrawLine(Start, Stop: TPoint);
+```
+*)
 procedure _LapeCanvas_DrawLine(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawLine(PPoint(Params^[1])^, PPoint(Params^[2])^);
 end;
 
+(*
+TCanvas.DrawCrosshairs
+----------------------
+```
+procedure TCanvas.DrawCrosshairs(ACenter: TPoint; Size: Integer);
+```
+
+A `+`: a line Size pixels each way from the center, across and down.
+*)
 procedure _LapeCanvas_DrawCrosshairs(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawCrosshairs(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+(*
+TCanvas.DrawCross
+-----------------
+```
+procedure TCanvas.DrawCross(ACenter: TPoint; Radius: Integer);
+```
+
+An `x`: two diagonals that reach Radius pixels from the center.
+*)
 procedure _LapeCanvas_DrawCross(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawCross(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+(*
+TCanvas.DrawBox
+---------------
+```
+procedure TCanvas.DrawBox(B: TBox);
+```
+
+The edge of the box, or all of it with `DrawFilled`.
+*)
 procedure _LapeCanvas_DrawBox(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawBox(PBox(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawBoxInverted
+-----------------------
+```
+procedure TCanvas.DrawBoxInverted(B: TBox);
+```
+
+Fills everything but the box.
+*)
 procedure _LapeCanvas_DrawBoxInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawBoxInverted(PBox(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawPolygon
+-------------------
+```
+procedure TCanvas.DrawPolygon(Points: TPolygon);
+```
+
+The edge of the polygon, or all of it with `DrawFilled`.
+*)
 procedure _LapeCanvas_DrawPolygon(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawPolygon(PPolygon(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawPolygonInverted
+---------------------------
+```
+procedure TCanvas.DrawPolygonInverted(Points: TPolygon);
+```
+
+Fills everything but the polygon.
+*)
 procedure _LapeCanvas_DrawPolygonInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawPolygonInverted(PPolygon(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawQuad
+----------------
+```
+procedure TCanvas.DrawQuad(Quad: TQuad);
+```
+
+The edge of the quad, or all of it with `DrawFilled`.
+*)
 procedure _LapeCanvas_DrawQuad(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawQuad(PQuad(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawQuadInverted
+------------------------
+```
+procedure TCanvas.DrawQuadInverted(Quad: TQuad);
+```
+
+Fills everything but the quad.
+*)
 procedure _LapeCanvas_DrawQuadInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawQuadInverted(PQuad(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawCircle
+------------------
+```
+procedure TCanvas.DrawCircle(Center: TPoint; Radius: Integer);
+procedure TCanvas.DrawCircle(Circle: TCircle);
+```
+
+The edge of the circle, or all of it with `DrawFilled`.
+*)
 procedure _LapeCanvas_DrawCircle1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawCircle(PPoint(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+(*
+TCanvas.DrawCircleInverted
+--------------------------
+```
+procedure TCanvas.DrawCircleInverted(Center: TPoint; Radius: Integer);
+procedure TCanvas.DrawCircleInverted(Circle: TCircle);
+```
+
+Fills everything but the circle.
+*)
 procedure _LapeCanvas_DrawCircleInverted1(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawCircleInverted(PPoint(Params^[1])^, PInteger(Params^[2])^);
@@ -365,40 +782,104 @@ begin
     PSimbaCanvas(Params^[0])^.DrawCircleInverted(TPoint.Create(X, Y), Radius);
 end;
 
+(*
+TCanvas.DrawEllipse
+-------------------
+```
+procedure TCanvas.DrawEllipse(ACenter: TPoint; XRadius, YRadius: Integer);
+```
+
+The edge of the ellipse, or all of it with `DrawFilled`.
+*)
 procedure _LapeCanvas_DrawEllipse(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawEllipse(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
+(*
+TCanvas.DrawEllipseInverted
+---------------------------
+```
+procedure TCanvas.DrawEllipseInverted(ACenter: TPoint; XRadius, YRadius: Integer);
+```
+
+Fills everything but the ellipse.
+*)
 procedure _LapeCanvas_DrawEllipseInverted(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawEllipseInverted(PPoint(Params^[1])^, PInteger(Params^[2])^, PInteger(Params^[3])^);
 end;
 
+(*
+TCanvas.DrawQuadArray
+---------------------
+```
+procedure TCanvas.DrawQuadArray(Quads: TQuadArray);
+```
+
+Draws every quad. With a `DrawColor` of `-1` each gets a color of its own.
+*)
 procedure _LapeCanvas_DrawQuadArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawQuadArray(PQuadArray(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawBoxArray
+--------------------
+```
+procedure TCanvas.DrawBoxArray(Boxes: TBoxArray);
+```
+
+Draws every box. With a `DrawColor` of `-1` each gets a color of its own.
+*)
 procedure _LapeCanvas_DrawBoxArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawBoxArray(PBoxArray(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawPolygonArray
+------------------------
+```
+procedure TCanvas.DrawPolygonArray(Polygons: TPolygonArray);
+```
+
+Draws every polygon. With a `DrawColor` of `-1` each gets a color of its own.
+*)
 procedure _LapeCanvas_DrawPolygonArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawPolygonArray(PPolygonArray(Params^[1])^);
 end;
 
+(*
+TCanvas.DrawCircleArray
+-----------------------
+```
+procedure TCanvas.DrawCircleArray(Centers: TPointArray; Radius: Integer);
+```
+
+Draws a circle at every center. With a `DrawColor` of `-1` each gets a color of its own.
+*)
 procedure _LapeCanvas_DrawCircleArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawCircleArray(PPointArray(Params^[1])^, PInteger(Params^[2])^);
 end;
 
+(*
+TCanvas.DrawCrossArray
+----------------------
+```
+procedure TCanvas.DrawCrossArray(Points: TPointArray; Radius: Integer);
+```
+
+Draws a cross at every point. With a `DrawColor` of `-1` each gets a color of its own.
+*)
 procedure _LapeCanvas_DrawCrossArray(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 begin
   PSimbaCanvas(Params^[0])^.DrawCrossArray(PPointArray(Params^[1])^, PInteger(Params^[2])^);
 end;
+
 (*
 TCanvas.State
 -------------
@@ -443,6 +924,7 @@ begin
     addProperty('TCanvas', 'Height', 'Integer', @_LapeCanvas_Height_Read);
     addPropertyIndexed('TCanvas', 'Pixel', 'X, Y: Integer', 'TColor', @_LapeCanvas_Pixel_Read, @_LapeCanvas_Pixel_Write);
     addPropertyIndexed('TCanvas', 'Alpha', 'X, Y: Integer', 'Byte', @_LapeCanvas_Alpha_Read, @_LapeCanvas_Alpha_Write);
+    addGlobalFunc('function TCanvas.GetPixels(Points: TPointArray): TColorArray;', @_LapeCanvas_GetPixels);
     addGlobalFunc('procedure TCanvas.SetPixels(Points: TPointArray; Color: TColor); overload', @_LapeCanvas_SetPixels1);
     addGlobalFunc('procedure TCanvas.SetPixels(Points: TPointArray; Colors: TColorArray); overload', @_LapeCanvas_SetPixels2);
     addGlobalFunc('procedure TCanvas.Fill(Color: TColor);', @_LapeCanvas_Fill);

@@ -185,8 +185,8 @@ begin
 end;
 
 (*
-TImage.GetPixel
----------------
+TImage.Pixel
+------------
 ```
 property TImage.Pixel(X, Y: Integer): TColor;
 property TImage.Pixel(X, Y: Integer; Color: TColor);
@@ -572,7 +572,7 @@ end;
 TImage.Rotate
 -------------
 ```
-function TImage.Rotate(Algo: EImageRotateAlgo; Radians: Single; Expand: Boolean): TSimbaImage;
+function TImage.Rotate(Algo: EImageRotateAlgo; Radians: Single; Expand: Boolean): TImage;
 ```
 *)
 procedure _LapeImage_Rotate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
@@ -735,8 +735,9 @@ end;
 TImage.Blur
 -----------
 ```
-function TImage.Blur(Algo: EImageBlurAlgo; Radius: Single): TSimbaImage;
-``
+function TImage.Blur(Algo: EImageBlurAlgo; Radius: Single): TImage;
+```
+
 Algo can be either `EImageBlurAlgo.BOX` or `EImageBlurAlgo.GAUSS`.
 
 ```{note}
@@ -978,8 +979,8 @@ begin
 end;
 
 (*
-TImage.GetLoadedImages
-----------------------
+GetLoadedImages
+---------------
 ```
 function GetLoadedImages: TImageArray;
 ```
@@ -1012,6 +1013,15 @@ procedure TImage.Show(EnsureVisible: Boolean = True);
 Show a image on the debug image.
 *)
 
+(*
+TCanvas.DrawImage
+-----------------
+```
+procedure TCanvas.DrawImage(Image: TImage; Position: TPoint);
+```
+
+Draws an image with its top left at the position. Transparent pixels of the image are not drawn, and `DrawAlpha` blends all of it.
+*)
 procedure _LapeCanvas_DrawImage(const Params: PParamArray); LAPE_WRAPPER_CALLING_CONV
 var
   Img: TSimbaImage;
