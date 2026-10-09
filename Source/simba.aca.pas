@@ -303,7 +303,7 @@ begin
     case FSearch of
       EACASearch.FIND_COLOR:
         begin
-          TPA := FImageBox.Background.FindColor(Best, TBox.Create(-1, -1, -1, -1));
+          TPA := FImageBox.Background.Finder.FindColor(Best, TBox.Create(-1, -1, -1, -1));
           if (FDrawColor = clNone) then
             TopLayer.DrawColor := GetContrastingColor(FImageBox.Background.GetPixels(TPA), [clRed, clLime, clBlue, clYellow, clAqua, clFuchsia])
           else
@@ -315,7 +315,7 @@ begin
 
       EACASearch.MATCH_COLOR:
         begin
-          Matches := FImageBox.Background.MatchColor(Best.Color, Best.ColorSpace, Best.Multipliers, TBox.Create(-1, -1, -1, -1));
+          Matches := FImageBox.Background.Finder.MatchColor(Best.Color, Best.ColorSpace, Best.Multipliers, TBox.Create(-1, -1, -1, -1));
           Matches.NormMinMax(1, 0);
           TopLayer.DrawHeatmap(Matches);
         end;

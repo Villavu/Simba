@@ -978,30 +978,6 @@ begin
 end;
 
 (*
-TImage.FindColor
-----------------
-```
-function TImage.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
-```
-*)
-procedure _LapeImage_FindColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PLapeObjectImage(Params^[0])^^.FindColor(PColor(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
-end;
-
-(*
-TImage.FindImage
-----------------
-```
-function TImage.FindImage(Image: TImage; Tolerance: Single; Bounds: TBox): TPoint;
-```
-*)
-procedure _LapeImage_FindImage(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPoint(Result)^ := PLapeObjectImage(Params^[0])^^.FindImage(PLapeObjectImage(Params^[1])^^, PSingle(Params^[2])^, PBox(Params^[3])^);
-end;
-
-(*
 TImage.GetLoadedImages
 ----------------------
 ```
@@ -1180,9 +1156,6 @@ begin
 
     addGlobalFunc('function TImage.ToLazBitmap: TLazBitmap;', @_LapeImage_ToLazBitmap);
     addGlobalFunc('procedure TImage.FromLazBitmap(LazBitmap: TLazBitmap);', @_LapeImage_FromLazBitmap);
-
-    addGlobalFunc('function TImage.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;', @_LapeImage_FindColor);
-    addGlobalFunc('function TImage.FindImage(Image: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;', @_LapeImage_FindImage);
 
     DumpSection := '';
 

@@ -181,7 +181,7 @@ begin
           Exit;
         end;
 
-        TPA := FImageBox.Background.FindDTM(MakeDTM(), TBox.Create(-1, -1, -1, -1));
+        TPA := FImageBox.Background.Finder.FindDTMEx(MakeDTM(), -1, TBox.Create(-1, -1, -1, -1));
       end;
 
     EDTMEditorSearch.FIND_COLOR:
@@ -193,7 +193,7 @@ begin
           Exit;
         end;
 
-        TPA := FImageBox.Background.FindColor(TColorTolerance.Create(Selected.Point.Color, Selected.Point.Tolerance, EColorSpace.RGB, DefaultMultipliers), TBox.Create(-1, -1, -1, -1));
+        TPA := FImageBox.Background.Finder.FindColor(TColorTolerance.Create(Selected.Point.Color, Selected.Point.Tolerance, EColorSpace.RGB, DefaultMultipliers), TBox.Create(-1, -1, -1, -1));
       end;
   end;
 

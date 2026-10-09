@@ -123,8 +123,8 @@ begin
   // an image over the same memory sees it all
   img := new TImage();
   img.SetExternalData(mem, W, H);
-  Assert(img.FindColor($7F7F7F, 0).Bounds() = [0,0,4,4]);
-  Assert(img.FindColor($7F7F7F, 0).Length = 5*5);
+  Assert(img.Finder.FindColor($7F7F7F, 0).Bounds() = [0,0,4,4]);
+  Assert(img.Finder.FindColor($7F7F7F, 0).Length = 5*5);
 
   Canvas.Free();
 end;

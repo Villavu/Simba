@@ -17,6 +17,7 @@ uses
   simba.target,
   simba.target_asyncmovemouse,
   simba.image,
+  simba.finder,
   simba.httpclient,
   simba.json,
   simba.resourcefile;
@@ -41,6 +42,7 @@ type
 
   PLapeObjectHTTPClient = ^PSimbaHTTPClient;
   PLapeObjectImage = ^PSimbaImage;
+  PLapeObjectFinder = ^PSimbaFinder;
   PLapeObjectTarget = ^PSimbaTarget;
   PLapeObjectJSON = ^PSimbaJSONItem;
   PLapeObjectResourceWriter = ^PSimbaResourceWriter;

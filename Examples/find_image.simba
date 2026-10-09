@@ -6,7 +6,7 @@ begin
   Scene := RandomShapes(10);
 
   // Cut the largest shape out of it
-  Shape := Scene.Copy(Scene.FindColor(Colors.WHITE, 0).Cluster(5).Largest().Bounds());
+  Shape := Scene.Copy(Scene.Finder.FindColor(Colors.WHITE, 0).Cluster(5).Largest().Bounds());
 
   // Finders search the target. Here that is our picture rather than the screen.
   Target.SetImage(Scene);

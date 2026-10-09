@@ -11,9 +11,8 @@ interface
 
 uses
   Classes, SysUtils, syncobjs,
-  simba.base, simba.baseclass, simba.image, simba.canvas_external,
+  simba.base, simba.baseclass, simba.image, simba.finder, simba.canvas_external,
   simba.target_eios, simba.target_plugin,
-  simba.colormath, simba.dtm,
   simba.vartype_quad
   {$IFDEF USE_WGCAPTURE},
   simba.wgcapture,
@@ -24,7 +23,6 @@ type
   {$PUSH}
   {$SCOPEDENUMS ON}
   ESimbaTargetKind = (NONE, IMAGE, WINDOW, EIOS, PLUGIN);
-  ESimbaTargetBrightnessAlgo = (MEAN, MIN, MAX);
   {$POP}
 
 const
@@ -134,8 +132,9 @@ type
     EIOSTarget: Pointer;
   end;
 
+  // The finders are TSimbaFinder's, over the pixels GetImageData captures
   PSimbaTarget = ^TSimbaTarget;
-  TSimbaTarget = class(TSimbaBaseClass)
+  TSimbaTarget = class(TSimbaFinder)
   private
     FTargetKind: ESimbaTargetKind;
     FTargetImage: TSimbaImage;
@@ -206,8 +205,8 @@ type
     procedure SetPlugin(FileName, Args: String; out DebugImage: TSimbaExternalCanvas); overload;
 
     function GetImageDataAsImage(var ABounds: TBox; out Image: TSimbaImage): Boolean;
-    function GetImageData(var ABounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
-    procedure FreeImageData(var Data: PColorBGRA);
+    function GetImageData(var ABounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean; override;
+    procedure FreeImageData(var Data: PColorBGRA); override;
 
     function IsImageFrozen: Boolean;
     procedure FreezeImage(ABounds: TBox);
@@ -255,45 +254,9 @@ type
     function KeyPressed(Key: EKeyCode): Boolean;
     function KeyCodeFromChar(C: Char): EKeyCode;
 
-    // Finder - color
-    function MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TSingleMatrix;
-
-    function FindColor(Color: TColor; Tolerance: Single; ABounds: TBox): TPointArray; overload;
-    function FindColor(Color: TColorTolerance; ABounds: TBox): TPointArray; overload;
-
-    function CountColor(Color: TColor; Tolerance: Single; ABounds: TBox): Integer; overload;
-    function CountColor(Color: TColorTolerance; ABounds: TBox): Integer; overload;
-
-    function HasColor(Color: TColor; Tolerance: Single; MinCount: Integer; ABounds: TBox): Boolean; overload;
-    function HasColor(Color: TColorTolerance; MinCount: Integer; ABounds: TBox): Boolean; overload;
-
-    function GetColor(P: TPoint): TColor;
-    function GetColors(Points: TPointArray): TColorArray;
-    function GetColorsMatrix(ABounds: TBox): TIntegerMatrix;
-
-    // Finder - image
-    function FindImage(Image: TSimbaImage; Tolerance: Single; ABounds: TBox): TPoint; overload;
-    function FindImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPoint; overload;
-    function FindImageEx(Image: TSimbaImage; Tolerance: Single; MaxToFind: Integer; ABounds: TBox): TPointArray; overload;
-    function FindImageEx(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; ABounds: TBox): TPointArray; overload;
-
-    // Finder - template
-    function FindTemplate(Templ: TSimbaImage; out Match: Single; ABounds: TBox): TPoint;
-
-    // Finder - dtm
-    function FindDTM(DTM: TDTM; ABounds: TBox): TPoint;
-    function FindDTMEx(DTM: TDTM; MaxToFind: Integer; ABounds: TBox): TPointArray;
-    function FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; ABounds: TBox): TPoint;
-    function FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; ABounds: TBox): TPointArray;
-
-    // Finder - other
-    function FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPointArray; overload;
-    function FindEdges(MinDiff: Single; ABounds: TBox): TPointArray; overload;
-
+    // the pixels that change over WaitTime
     function GetPixelDifference(WaitTime: Integer; Tolerance: Single; ABounds: TBox): TPointArray; overload;
     function GetPixelDifference(WaitTime: Integer; ABounds: TBox): TPointArray; overload;
-
-    function GetBrightness(Algo: ESimbaTargetBrightnessAlgo; ABounds: TBox): Integer;
 
     {$IFDEF USE_WGCAPTURE}
     property WGCEnabled: Boolean read GetWGCEnabled write SetWGCEnabled;
@@ -307,9 +270,7 @@ implementation
 uses
   Forms,
   simba.nativeinterface, simba.vartype_box, simba.target_movemouse, simba.random,
-  simba.target_window, simba.target_image, simba.image_utils,
-  simba.vartype_pointarray,
-  simba.finder_color, simba.finder_pixels, simba.finder_image, simba.finder_dtm;
+  simba.target_window, simba.target_image, simba.image_utils;
 
 function TSimbaTargetEventManager.Add(Event: ETargetEvent; Method: TSimbaTargetEvent; UserData: Pointer; UserDataSize: Integer): Integer;
 
@@ -720,237 +681,6 @@ begin
   end;
 end;
 
-function TSimbaTarget.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TSingleMatrix;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := [];
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_MatchColors(Data, DataWidth, ABounds.Width, ABounds.Height, ColorSpace, Color, Multipliers);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.FindColor(Color: TColor; Tolerance: Single; ABounds: TBox): TPointArray;
-begin
-  Result := FindColor(TColorTolerance.Create(Color, Tolerance), ABounds);
-end;
-
-function TSimbaTarget.FindColor(Color: TColorTolerance; ABounds: TBox): TPointArray;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := [];
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_FindColors(Data, DataWidth, ABounds.Width, ABounds.Height, ABounds.TopLeft, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.CountColor(Color: TColor; Tolerance: Single; ABounds: TBox): Integer;
-begin
-  Result := CountColor(TColorTolerance.Create(Color, Tolerance), ABounds);
-end;
-
-function TSimbaTarget.CountColor(Color: TColorTolerance; ABounds: TBox): Integer;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := 0;
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_CountColors(Data, DataWidth, ABounds.Width, ABounds.Height, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer; ABounds: TBox): Boolean;
-begin
-  Result := HasColor(TColorTolerance.Create(Color, Tolerance), MinCount, ABounds);
-end;
-
-function TSimbaTarget.HasColor(Color: TColorTolerance; MinCount: Integer; ABounds: TBox): Boolean;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := False;
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_CountColors(Data, DataWidth, ABounds.Width, ABounds.Height, Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers, MinCount) >= MinCount;
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.GetColor(P: TPoint): TColor;
-var
-  B: TBox;
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := -1;
-
-  B := TBox.Create(P.X, P.Y, P.X, P.Y);
-  if GetImageData(B, Data, DataWidth) then
-  try
-    Result := Data^.ToColor();
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.GetColors(Points: TPointArray): TColorArray;
-var
-  B: TBox;
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := [];
-  if (Length(Points) = 0) then
-    Exit;
-
-  B := Points.Bounds;
-  if GetImageData(B, Data, DataWidth) then
-  try
-    Result := SimbaFinder_GetColors(Data, DataWidth, B.Width, B.Height, B.TopLeft, Points);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.GetColorsMatrix(ABounds: TBox): TIntegerMatrix;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := [];
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_GetColorsMatrix(Data, DataWidth, ABounds.Width, ABounds.Height);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.FindImageEx(Image: TSimbaImage; Tolerance: Single; MaxToFind: Integer; ABounds: TBox): TPointArray;
-begin
-  Result := FindImageEx(Image, Tolerance, DefaultColorSpace, DefaultMultipliers, MaxToFind, ABounds);
-end;
-
-function TSimbaTarget.FindImageEx(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer; ABounds: TBox): TPointArray;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := [];
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_FindImage(Data, DataWidth, ABounds.Width, ABounds.Height, ABounds.TopLeft, Image, ColorSpace, Tolerance, Multipliers, MaxToFind);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.FindImage(Image: TSimbaImage; Tolerance: Single; ABounds: TBox): TPoint;
-begin
-  Result := FindImage(Image, Tolerance, DefaultColorSpace, DefaultMultipliers, ABounds);
-end;
-
-function TSimbaTarget.FindImage(Image: TSimbaImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPoint;
-var
-  TPA: TPointArray;
-begin
-  TPA := FindImageEx(Image, Tolerance, ColorSpace, Multipliers, 1, ABounds);
-  if (Length(TPA) > 0) then
-    Result := TPA[0]
-  else
-    Result := TPoint.Create(-1, -1);
-end;
-
-function TSimbaTarget.FindTemplate(Templ: TSimbaImage; out Match: Single; ABounds: TBox): TPoint;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := TPoint.Create(-1, -1);
-  Match := 0;
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_FindTemplate(Data, DataWidth, ABounds.Width, ABounds.Height, ABounds.TopLeft, Templ, Match);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.FindDTMEx(DTM: TDTM; MaxToFind: Integer; ABounds: TBox): TPointArray;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := [];
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_FindDTM(Data, DataWidth, ABounds.Width, ABounds.Height, ABounds.TopLeft, DTM, MaxToFind);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer; ABounds: TBox): TPointArray;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := [];
-  FoundDegrees := [];
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_FindDTMRotated(Data, DataWidth, ABounds.Width, ABounds.Height, ABounds.TopLeft, DTM, StartDegrees, EndDegrees, Step, FoundDegrees, MaxToFind);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.FindDTM(DTM: TDTM; ABounds: TBox): TPoint;
-var
-  TPA: TPointArray;
-begin
-  TPA := FindDTMEx(DTM, 1, ABounds);
-  if (Length(TPA) > 0) then
-    Result := TPA[0]
-  else
-    Result := TPoint.Create(-1, -1);
-end;
-
-function TSimbaTarget.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; ABounds: TBox): TPoint;
-var
-  TPA: TPointArray;
-begin
-  TPA := FindDTMRotatedEx(DTM, StartDegrees, EndDegrees, Step, FoundDegrees, 1, ABounds);
-  if (Length(TPA) > 0) then
-    Result := TPA[0]
-  else
-    Result := TPoint.Create(-1, -1);
-end;
-
 function TSimbaTarget.GetPixelDifference(WaitTime: Integer; Tolerance: Single; ABounds: TBox): TPointArray;
 var
   ImgBefore, ImgAfter: TSimbaImage;
@@ -980,21 +710,6 @@ end;
 function TSimbaTarget.GetPixelDifference(WaitTime: Integer; ABounds: TBox): TPointArray;
 begin
   Result := GetPixelDifference(WaitTime, 0, ABounds);
-end;
-
-function TSimbaTarget.GetBrightness(Algo: ESimbaTargetBrightnessAlgo; ABounds: TBox): Integer;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := 0;
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_GetBrightness(Data, DataWidth, ABounds.Width, ABounds.Height, EBrightnessAlgo(Algo));
-  finally
-    FreeImageData(Data);
-  end;
 end;
 
 constructor TSimbaTarget.Create;
@@ -1033,26 +748,6 @@ begin
   {$ENDIF}
 
   inherited Destroy();
-end;
-
-function TSimbaTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; ABounds: TBox): TPointArray;
-var
-  Data: PColorBGRA;
-  DataWidth: Integer;
-begin
-  Result := [];
-
-  if GetImageData(ABounds, Data, DataWidth) then
-  try
-    Result := SimbaFinder_FindEdges(Data, DataWidth, ABounds.Width, ABounds.Height, ABounds.TopLeft, MinDiff, ColorSpace, Multipliers);
-  finally
-    FreeImageData(Data);
-  end;
-end;
-
-function TSimbaTarget.FindEdges(MinDiff: Single; ABounds: TBox): TPointArray;
-begin
-  Result := FindEdges(MinDiff, DefaultColorSpace, DefaultMultipliers, ABounds);
 end;
 
 procedure TSimbaTarget.CheckMethod(Method: Pointer; AName: String);

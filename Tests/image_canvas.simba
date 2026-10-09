@@ -10,7 +10,7 @@ var
 
 function Drawn: TPointArray;
 begin
-  Result := img.FindColor(RED, 0);
+  Result := img.Finder.FindColor(RED, 0);
 end;
 
 procedure TestState;
@@ -94,7 +94,7 @@ begin
   img.Clear();
   img.Canvas.DrawBoxInverted([10,10,20,20]);
   Assert(Drawn().Length = 50*40 - 11*11);
-  Assert(img.FindColor(0, 0).Bounds = [10,10,20,20]);
+  Assert(img.Finder.FindColor(0, 0).Bounds = [10,10,20,20]);
 
   img.Canvas.DrawFilled := False;
 
@@ -137,7 +137,7 @@ begin
 
   img.Clear();
   img.Canvas.DrawEllipseInverted([25,20], 12, 6);
-  Assert(img.FindColor(0, 0).Bounds = [13,14,37,26]);
+  Assert(img.Finder.FindColor(0, 0).Bounds = [13,14,37,26]);
 
   img.Canvas.DrawFilled := False;
 end;
@@ -229,7 +229,7 @@ begin
   img.Clear();
   img.Canvas.DrawQuadInverted(TQuad.CreateFromBox([10,10,20,20]));
   Assert(Drawn().Length = 50*40 - 11*11);
-  Assert(img.FindColor(0, 0).Bounds = [10,10,20,20]);
+  Assert(img.Finder.FindColor(0, 0).Bounds = [10,10,20,20]);
 
   img.Canvas.DrawFilled := False;
 end;
@@ -296,7 +296,7 @@ begin
   Assert(img.Pixel[25,20] = RED);
   Assert(img.Pixel[5,5] = 0);
   Assert(Length(img.ToColors().Unique()) > 2);
-  Assert(Length(img.FindColor(0, 0)) + Drawn().Length < 50*40);
+  Assert(Length(img.Finder.FindColor(0, 0)) + Drawn().Length < 50*40);
 
   img.Canvas.DrawAntialiasing := False;
   img.Canvas.DrawFilled := False;

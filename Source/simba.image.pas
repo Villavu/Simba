@@ -15,7 +15,7 @@ uses
   simba.baseclass,
   simba.canvas,
   simba.colormath,
-  simba.dtm;
+  simba.finder;
 
 type
   {$PUSH}
@@ -37,6 +37,16 @@ type
     procedure DrawImage(Image: TSimbaImage; Location: TPoint); overload;
   end;
 
+  TSimbaImageFinder = class(TSimbaFinder)
+  protected
+    FImage: TSimbaImage;
+  public
+    constructor Create(Image: TSimbaImage); reintroduce;
+
+    function GetImageData(var ABounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean; override;
+    procedure FreeImageData(var Data: PColorBGRA); override;
+  end;
+
   TSimbaImage = class(TSimbaBaseClass)
   protected
     FWidth: Integer;
@@ -47,6 +57,7 @@ type
     FDataOwner: Boolean;
 
     FCanvas: TSimbaImageCanvas;
+    FFinder: TSimbaImageFinder;
 
     // The only way FData / FWidth / FHeight / FDataOwner change
     procedure UpdateData(NewData: PColorBGRA; NewWidth, NewHeight: Integer; IsDataOwner: Boolean = True); virtual;
@@ -82,6 +93,8 @@ type
 
     // everything drawing related
     property Canvas: TSimbaImageCanvas read FCanvas;
+    // everything that finds: colors, images, dtms
+    property Finder: TSimbaImageFinder read FFinder;
 
     // The address of pixel (X, Y) in Data. Not bounds checked.
     property PixelPtr[X, Y: Integer]: PColorBGRA read GetPixelPtr;
@@ -164,15 +177,6 @@ type
     function Compare(Other: TSimbaImage): Single;
     function PixelDifference(Other: TSimbaImage; Tolerance: Single; AOffset: TPoint): TPointArray; overload;
     function PixelDifference(Other: TSimbaImage; Tolerance: Single): TPointArray; overload;
-
-    // Bounds [-1,-1,-1,-1] is the whole image
-    function FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray; overload;
-    function FindColor(Color: TColorTolerance; Bounds: TBox): TPointArray; overload;
-    function FindImage(Image: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;
-    // every match
-    function FindDTM(DTM: TDTM; Bounds: TBox): TPointArray;
-    // each pixel's distance from Color: 0 an exact match, 100 as far as the colour space goes
-    function MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
   end;
 
 implementation
@@ -191,10 +195,7 @@ uses
   simba.image_filters,
   simba.image_drawmatrix,
   simba.colormath_distance,
-  simba.container_point,
-  simba.finder_color,
-  simba.finder_image,
-  simba.finder_dtm;
+  simba.container_point;
 
 const
   // The most pixel data one image may hold
@@ -289,6 +290,7 @@ begin
 
   FDataOwner := True;
   FCanvas := TSimbaImageCanvas.Create();
+  FFinder := TSimbaImageFinder.Create(Self);
 
   UpdateData(nil, 0, 0);
 end;
@@ -325,6 +327,7 @@ destructor TSimbaImage.Destroy;
 begin
   UpdateData(nil, 0, 0);
   FreeAndNil(FCanvas);
+  FreeAndNil(FFinder);
 
   inherited Destroy();
 end;
@@ -957,69 +960,34 @@ begin
   Result := PixelDifference(Other, Tolerance, TPoint.ZERO);
 end;
 
-function TSimbaImage.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox): TPointArray;
+constructor TSimbaImageFinder.Create(Image: TSimbaImage);
 begin
-  Result := FindColor(TColorTolerance.Create(Color, Tolerance, EColorSpace.RGB, DefaultMultipliers), Bounds);
+  inherited Create();
+
+  FImage := Image;
 end;
 
-function TSimbaImage.FindColor(Color: TColorTolerance; Bounds: TBox): TPointArray;
+function TSimbaImageFinder.GetImageData(var ABounds: TBox; out Data: PColorBGRA; out DataWidth: Integer): Boolean;
 begin
-  Result := [];
+  Data := nil;
+  DataWidth := 0;
 
-  if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
-    Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
+  if (ABounds.X1 = -1) and (ABounds.Y1 = -1) and (ABounds.X2 = -1) and (ABounds.Y2 = -1) then
+    ABounds := TBox.Create(0, 0, FImage.Width - 1, FImage.Height - 1)
   else
-    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
+    ABounds := TBox.Create(Max(ABounds.X1, 0), Max(ABounds.Y1, 0), Min(ABounds.X2, FImage.Width - 1), Min(ABounds.Y2, FImage.Height - 1)); // outside the image: no width
 
-  if (Bounds.Width > 0) and (Bounds.Height > 0) then
-    Result := SimbaFinder_FindColors(PixelPtr[Bounds.X1, Bounds.Y1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft,
-                                     Color.ColorSpace, Color.Color, Color.Tolerance, Color.Multipliers);
-end;
-
-function TSimbaImage.FindDTM(DTM: TDTM; Bounds: TBox): TPointArray;
-begin
-  Result := [];
-
-  if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
-    Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
-  else
-    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
-
-  if (Bounds.Width > 0) and (Bounds.Height > 0) then
-    Result := SimbaFinder_FindDTM(PixelPtr[Bounds.X1, Bounds.Y1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft, DTM, -1);
-end;
-
-function TSimbaImage.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
-begin
-  Result := [];
-
-  if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
-    Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
-  else
-    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
-
-  if (Bounds.Width > 0) and (Bounds.Height > 0) then
-    Result := SimbaFinder_MatchColors(PixelPtr[Bounds.X1, Bounds.Y1], FWidth, Bounds.Width, Bounds.Height, ColorSpace, Color, Multipliers);
-end;
-
-function TSimbaImage.FindImage(Image: TSimbaImage; Tolerance: Single; Bounds: TBox): TPoint;
-var
-  TPA: TPointArray;
-begin
-  Result := TPoint.Create(-1, -1);
-
-  if (Bounds.X1 = -1) and (Bounds.Y1 = -1) and (Bounds.X2 = -1) and (Bounds.Y2 = -1) then
-    Bounds := TBox.Create(0, 0, FWidth-1, FHeight-1)
-  else
-    Bounds := TBox.Create(Max(Bounds.X1, 0), Max(Bounds.Y1, 0), Min(Bounds.X2, FWidth-1), Min(Bounds.Y2, FHeight-1)); // outside the image: no width
-
-  if (Bounds.Width > 0) and (Bounds.Height > 0) then
+  Result := (ABounds.Width > 0) and (ABounds.Height > 0);
+  if Result then
   begin
-    TPA := SimbaFinder_FindImage(PixelPtr[Bounds.X1, Bounds.Y1], FWidth, Bounds.Width, Bounds.Height, Bounds.TopLeft,
-                                 Image, EColorSpace.RGB, Tolerance, DefaultMultipliers, 1);
-    if (Length(TPA) > 0) then
-      Result := TPA[0];
+    Data := FImage.PixelPtr[ABounds.X1, ABounds.Y1];
+    DataWidth := FImage.Width;
   end;
+end;
+
+procedure TSimbaImageFinder.FreeImageData(var Data: PColorBGRA);
+begin
+  { nothing: it is the image's }
 end;
 
 end.

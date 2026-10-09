@@ -42,7 +42,7 @@ uses
 
   // Simba classes
   simba.import_canvas,
-  simba.import_image, simba.import_externalcanvas, simba.import_dtm, simba.import_matchtemplate,
+  simba.import_image, simba.import_finder, simba.import_externalcanvas, simba.import_dtm, simba.import_matchtemplate,
   simba.import_json, simba.import_imagebox,
 
   // LCL
@@ -89,6 +89,7 @@ begin
   ImportDTM(Script);
   ImportSimbaCanvas(Script);
   ImportSimbaImage(Script);
+  ImportFinder(Script); // before ImportTarget: a TTarget is a TFinder
   ImportExternalCanvas(Script);
   ImportMatchTemplate(Script);
   ImportJSON(Script);

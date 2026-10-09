@@ -63,7 +63,7 @@ procedure TestIgnorePoints;
       Img.Canvas.DrawFilled := False;
 
       // resize and make sure nothing close to cyan was used in the blend
-      Assert(Img.Resize(Algo, NewWidth, NewHeight, Ignore).FindColor(Img.Canvas.DrawColor, 25).Length = 0);
+      Assert(Img.Resize(Algo, NewWidth, NewHeight, Ignore).Finder.FindColor(Img.Canvas.DrawColor, 25).Length = 0);
     end;
   end;
 

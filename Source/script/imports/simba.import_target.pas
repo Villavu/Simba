@@ -31,6 +31,8 @@ type
 Target
 ======
 Target related methods.
+
+A TTarget is a `TFinder`: `FindColor`, `FindImage`, `FindDTM` and the rest are documented there and are all on `Target`.
 *)
 
 (*
@@ -839,298 +841,23 @@ begin
 end;
 
 (*
-TTarget.MatchColor
-------------------
-```
-function TTarget.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox): TSingleMatrix;
-```
-How far each pixel is from `Color`, from 0 (an exact match) up to 100
-*)
-procedure _LapeTarget_MatchColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PSingleMatrix(Result)^ := PLapeObjectTarget(Params^[0])^^.MatchColor(PColor(Params^[1])^, PColorSpace(Params^[2])^, PChannelMultipliers(Params^[3])^, PBox(Params^[4])^);
-end;
-
-(*
-TTarget.FindColor
------------------
-```
-function TTarget.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
-```
-*)
-procedure _LapeTarget_FindColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.FindColor(PColor(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
-end;
-
-(*
-TTarget.FindColor
------------------
-```
-function TTarget.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
-```
-*)
-procedure _LapeTarget_FindColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.FindColor(PColorTolerance(Params^[1])^, PBox(Params^[2])^);
-end;
-
-(*
-TTarget.CountColor
-------------------
-```
-function TTarget.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer;
-```
-*)
-procedure _LapeTarget_CountColor1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PLapeObjectTarget(Params^[0])^^.CountColor(PColor(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
-end;
-
-(*
-TTarget.CountColor
-------------------
-```
-function TTarget.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer;
-```
-*)
-procedure _LapeTarget_CountColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PLapeObjectTarget(Params^[0])^^.CountColor(PColorTolerance(Params^[1])^, PBox(Params^[2])^);
-end;
-
-(*
-TTarget.HasColor
-----------------
-```
-function TTarget.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean;
-```
-*)
-procedure _LapeTarget_HasColor2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PLapeObjectTarget(Params^[0])^^.HasColor(PColor(Params^[1])^, PSingle(Params^[2])^, PInteger(Params^[3])^, PBox(Params^[4])^);
-end;
-
-(*
-TTarget.HasColor
-----------------
-```
-function TTarget.HasColor(Color: TColorTolerance; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload;
-```
-*)
-procedure _LapeTarget_HasColor3(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PBoolean(Result)^ := PLapeObjectTarget(Params^[0])^^.HasColor(PColorTolerance(Params^[1])^, PInteger(Params^[2])^, PBox(Params^[3])^);
-end;
-
-(*
-TTarget.GetColor
-----------------
-```
-function TTarget.GetColor(P: TPoint): TColor;
-```
-*)
-procedure _LapeTarget_GetColor(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PColor(Result)^ := PLapeObjectTarget(Params^[0])^^.GetColor(PPoint(Params^[1])^);
-end;
-
-(*
-TTarget.GetColors
------------------
-```
-function TTarget.GetColors(Points: TPointArray): TColorArray;
-```
-*)
-procedure _LapeTarget_GetColors(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PColorArray(Result)^ := PLapeObjectTarget(Params^[0])^^.GetColors(PPointArray(Params^[1])^);
-end;
-
-(*
-TTarget.GetColorsMatrix
------------------------
-```
-function TTarget.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix;
-```
-*)
-procedure _LapeTarget_GetColorsMatrix(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PIntegerMatrix(Result)^ := PLapeObjectTarget(Params^[0])^^.GetColorsMatrix(PBox(Params^[1])^);
-end;
-
-(*
-TTarget.FindImage
------------------
-```
-function TTarget.FindImage(Image: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
-```
-*)
-procedure _LapeTarget_FindImage1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPoint(Result)^ := PLapeObjectTarget(Params^[0])^^.FindImage(PLapeObjectImage(Params^[1])^^, PSingle(Params^[2])^, PBox(Params^[3])^);
-end;
-
-(*
-TTarget.FindImage
------------------
-```
-function TTarget.FindImage(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
-```
-*)
-procedure _LapeTarget_FindImage2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPoint(Result)^ := PLapeObjectTarget(Params^[0])^^.FindImage(PLapeObjectImage(Params^[1])^^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^, PBox(Params^[5])^);
-end;
-
-(*
-TTarget.FindImageEx
--------------------
-```
-function TTarget.FindImageEx(Image: TImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
-```
-*)
-procedure _LapeTarget_FindImageEx1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.FindImageEx(PLapeObjectImage(Params^[1])^^, PSingle(Params^[2])^, PInteger(Params^[3])^, PBox(Params^[4])^);
-end;
-
-(*
-TTarget.FindImageEx
--------------------
-```
-function TTarget.FindImageEx(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
-```
-*)
-procedure _LapeTarget_FindImageEx2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.FindImageEx(PLapeObjectImage(Params^[1])^^, PSingle(Params^[2])^, PColorSpace(Params^[3])^, PChannelMultipliers(Params^[4])^, PInteger(Params^[5])^, PBox(Params^[6])^);
-end;
-
-(*
-TTarget.FindTemplate
---------------------
-```
-function TTarget.FindTemplate(Image: TImage; out Match: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
-```
-*)
-procedure _LapeTarget_FindTemplate(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPoint(Result)^ := PLapeObjectTarget(Params^[0])^^.FindTemplate(PLapeObjectImage(Params^[1])^^, PSingle(Params^[2])^, PBox(Params^[3])^);
-end;
-
-(*
-TTarget.FindDTM
----------------
-```
-function TTarget.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
-```
-*)
-procedure _LapeTarget_FindDTM(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPoint(Result)^ := PLapeObjectTarget(Params^[0])^^.FindDTM(PDTM(Params^[1])^, PBox(Params^[2])^);
-end;
-
-(*
-TTarget.FindDTMEx
------------------
-```
-function TTarget.FindDTMEx(DTM: TDTM; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
-```
-*)
-procedure _LapeTarget_FindDTMEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.FindDTMEx(PDTM(Params^[1])^, PInteger(Params^[2])^, PBox(Params^[3])^);
-end;
-
-(*
-TTarget.FindDTMRotated
-----------------------
-```
-function TTarget.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint;
-```
-*)
-procedure _LapeTarget_FindDTMRotated(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPoint(Result)^ := PLapeObjectTarget(Params^[0])^^.FindDTMRotated(PDTM(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^, PDoubleArray(Params^[5])^, PBox(Params^[6])^);
-end;
-
-(*
-TTarget.FindDTMRotatedEx
-------------------------
-```
-function TTarget.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
-```
-*)
-procedure _LapeTarget_FindDTMRotatedEx(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.FindDTMRotatedEx(PDTM(Params^[1])^, PDouble(Params^[2])^, PDouble(Params^[3])^, PDouble(Params^[4])^, PDoubleArray(Params^[5])^, PInteger(Params^[6])^, PBox(Params^[7])^);
-end;
-
-(*
-TTarget.FindEdges
------------------
-```
-function TTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
-```
-*)
-procedure _LapeFinder_FindEdges1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.FindEdges(PSingle(Params^[1])^, PColorSpace(Params^[2])^, PChannelMultipliers(Params^[3])^, PBox(Params^[4])^);
-end;
-
-(*
-TTarget.FindEdges
------------------
-```
-function TTarget.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
-```
-*)
-procedure _LapeFinder_FindEdges2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.FindEdges(PSingle(Params^[1])^, PBox(Params^[2])^);
-end;
-
-(*
 TTarget.GetPixelDifference
 --------------------------
 ```
 function TTarget.GetPixelDifference(WaitTime: Integer; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
+function TTarget.GetPixelDifference(WaitTime: Integer; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
 ```
+
+The pixels that changed over `WaitTime` milliseconds.
 *)
-procedure _LapeFinder_GetPixelDifference1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_GetPixelDifference1(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.GetPixelDifference(PInteger(Params^[1])^, PBox(Params^[2])^);
 end;
 
-(*
-TTarget.GetPixelDifference
---------------------------
-```
-function TTarget.GetPixelDifference(WaitTime, Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray;
-```
-*)
-procedure _LapeFinder_GetPixelDifference2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
+procedure _LapeTarget_GetPixelDifference2(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
 begin
   PPointArray(Result)^ := PLapeObjectTarget(Params^[0])^^.GetPixelDifference(PInteger(Params^[1])^, PSingle(Params^[2])^, PBox(Params^[3])^);
-end;
-
-(*
-TTarget.GetBrightness
----------------------
-```
-function TTarget.GetBrightness(Algo: EBrightnessAlgo; Bounds: TBox = [-1,-1,-1,-1]): Integer;
-```
-Return the brightness of the area within the target.
-
-`Algo` can be either of:
- - `EBrightnessAlgo.MIN`
- - `EBrightnessAlgo.MAX`
- - `EBrightnessAlgo.MEAN`
-*)
-procedure _LapeFinder_GetBrightness(const Params: PParamArray; const Result: Pointer); LAPE_WRAPPER_CALLING_CONV
-begin
-  PInteger(Result)^ := PLapeObjectTarget(Params^[0])^^.GetBrightness(ESimbaTargetBrightnessAlgo(Params^[1]^), PBox(Params^[2])^);
 end;
 
 {$IFDEF USE_WGCAPTURE}
@@ -1161,7 +888,7 @@ begin
   begin
     DumpSection := 'Target';
 
-    LapeObjectImport(Script.Compiler, 'TTarget');
+    addGlobalType('type TFinder', 'TTarget'); // a TFinder: every finder is on it
     with addGlobalVar('TTarget', '[]', 'Target') do
       Used := duTrue;
 
@@ -1169,7 +896,6 @@ begin
     addGlobalType(specialize GetEnumDecl<ETargetEvent>(True, False), 'ETargetEvent');
     addGlobalType(specialize GetEnumDecl<EMouseButton>(True, False), 'EMouseButton');
     addGlobalType(specialize GetEnumDecl<EKeyCode>(True, True), 'EKeyCode');
-    addGlobalType(specialize GetEnumDecl<ESimbaTargetBrightnessAlgo>(True, True), 'EBrightnessAlgo');
 
     addGlobalType('type Pointer', 'TTargetOptions');
     addProperty('TTargetOptions', 'ForceFocus', 'Boolean', @_LapeTargetOptions_ForceFocus_Read, @_LapeTargetOptions_ForceFocus_Write);
@@ -1295,40 +1021,9 @@ begin
     addGlobalFunc('function TTarget.KeyPressed(Key: EKeyCode): Boolean', @_LapeTarget_KeyPressed);
     addGlobalFunc('function TTarget.KeyCodeFromChar(C: Char): EKeyCode', @_LapeTarget_KeyCodeFromChar);
 
-    // FINDER
-    addGlobalFunc('function TTarget.MatchColor(Color: TColor; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TSingleMatrix;', @_LapeTarget_MatchColor);
-
-    addGlobalFunc('function TTarget.FindColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeTarget_FindColor1);
-    addGlobalFunc('function TTarget.FindColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeTarget_FindColor3);
-
-    addGlobalFunc('function TTarget.CountColor(Color: TColor; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeTarget_CountColor1);
-    addGlobalFunc('function TTarget.CountColor(Color: TColorTolerance; Bounds: TBox = [-1,-1,-1,-1]): Integer; overload;', @_LapeTarget_CountColor3);
-
-    addGlobalFunc('function TTarget.HasColor(Color: TColor; Tolerance: Single; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload', @_LapeTarget_HasColor2);
-    addGlobalFunc('function TTarget.HasColor(Color: TColorTolerance; MinCount: Integer = 1; Bounds: TBox = [-1,-1,-1,-1]): Boolean; overload;', @_LapeTarget_HasColor3);
-
-    addGlobalFunc('function TTarget.GetColor(P: TPoint): TColor', @_LapeTarget_GetColor);
-    addGlobalFunc('function TTarget.GetColors(Points: TPointArray): TColorArray', @_LapeTarget_GetColors);
-    addGlobalFunc('function TTarget.GetColorsMatrix(Bounds: TBox = [-1,-1,-1,-1]): TIntegerMatrix', @_LapeTarget_GetColorsMatrix);
-
-    addGlobalFunc('function TTarget.FindImageEx(Image: TImage; Tolerance: Single; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeTarget_FindImageEx1);
-    addGlobalFunc('function TTarget.FindImageEx(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload', @_LapeTarget_FindImageEx2);
-    addGlobalFunc('function TTarget.FindImage(Image: TImage; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeTarget_FindImage1);
-    addGlobalFunc('function TTarget.FindImage(Image: TImage; Tolerance: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPoint; overload', @_LapeTarget_FindImage2);
-    addGlobalFunc('function TTarget.FindTemplate(Templ: TImage; out Match: Single; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeTarget_FindTemplate);
-
-    addGlobalFunc('function TTarget.FindDTM(DTM: TDTM; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeTarget_FindDTM);
-    addGlobalFunc('function TTarget.FindDTMEx(DTM: TDTM; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeTarget_FindDTMEx);
-    addGlobalFunc('function TTarget.FindDTMRotated(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; Bounds: TBox = [-1,-1,-1,-1]): TPoint', @_LapeTarget_FindDTMRotated);
-    addGlobalFunc('function TTarget.FindDTMRotatedEx(DTM: TDTM; StartDegrees, EndDegrees: Double; Step: Double; out FoundDegrees: TDoubleArray; MaxToFind: Integer = -1; Bounds: TBox = [-1,-1,-1,-1]): TPointArray', @_LapeTarget_FindDTMRotatedEx);
-
-    addGlobalFunc('function TTarget.GetPixelDifference(WaitTime: Integer; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeFinder_GetPixelDifference1);
-    addGlobalFunc('function TTarget.GetPixelDifference(WaitTime: Integer; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeFinder_GetPixelDifference2);
-
-    addGlobalFunc('function TTarget.FindEdges(MinDiff: Single; ColorSpace: EColorSpace; Multipliers: TChannelMultipliers; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeFinder_FindEdges1);
-    addGlobalFunc('function TTarget.FindEdges(MinDiff: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeFinder_FindEdges2);
-
-    addGlobalFunc('function TTarget.GetBrightness(Algo: EBrightnessAlgo; Bounds: TBox = [-1,-1,-1,-1]): Integer;', @_LapeFinder_GetBrightness);
+    // the finders are TFinder's
+    addGlobalFunc('function TTarget.GetPixelDifference(WaitTime: Integer; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeTarget_GetPixelDifference1);
+    addGlobalFunc('function TTarget.GetPixelDifference(WaitTime: Integer; Tolerance: Single; Bounds: TBox = [-1,-1,-1,-1]): TPointArray; overload;', @_LapeTarget_GetPixelDifference2);
 
     {$IFDEF USE_WGCAPTURE}
     addProperty('TTarget', 'WGCEnabled', 'Boolean', @_LapeTarget_WGCEnabled_Read, @_LapeTarget_WGCEnabled_Write);

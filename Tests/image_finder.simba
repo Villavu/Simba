@@ -1,0 +1,62 @@
+{$assertions on}
+
+// TImage.Finder: the finders of Target, over an image's own pixels
+
+var
+  img, templ: TImage;
+  finder: TFinder;
+  dtm: TDTM;
+  match, targetMatch: Single;
+  degrees, targetDegrees: TDoubleArray;
+begin
+  img := new TImage();
+  img.FromZip('Tests/resources.zip', 'trees.png');
+  templ := new TImage();
+  templ.FromZip('Tests/resources.zip', 'dead_tree.png');
+  dtm.FromString('DTM:eJxjY2Bg2MLFwLARiLcD8TYg3gTEO4BYnZmBQQWKtYFYC4g1gDhAj5tB34AdTMMwiE8qAAD40Aht');
+
+  // a few known answers
+  Assert(img.Finder.FindImageEx(templ, 0).Length = 8);
+  Assert(img.Finder.FindImage(templ, 0) = [19, 4]);
+  Assert(img.Finder.FindImage(templ, 0, [24, 37, 45, 71]) = [27, 40]);
+  Assert(img.Finder.FindDTMEx(dtm).Length = 8);
+  Assert(img.Finder.FindDTM(dtm) = [23, 8]);
+  Assert(img.Finder.GetColor([0, 0]) = img.Pixel[0, 0]);
+  Assert(img.Finder.GetColor([-1, 0]) = -1);
+  Assert(img.Finder.GetColor([img.Width, 0]) = -1);
+  Assert(img.Finder.GetColorsMatrix([0, 0, 9, 4]).Width = 10);
+  Assert(img.Finder.GetColorsMatrix([0, 0, 9, 4]).Height = 5);
+  Assert(img.Finder.FindColor(img.Pixel[5, 5], 0, [5, 5, 5, 5]).Equals([[5, 5]]));
+  Assert(img.Finder.FindColor(img.Pixel[5, 5], 0, [500, 500, 600, 600]).Length = 0); // off the image
+  Assert(img.Finder.HasColor(img.Pixel[5, 5], 0));
+  Assert(not img.Finder.HasColor(img.Pixel[5, 5], 0, img.Width * img.Height + 1));
+
+  // it is the image's pixels: it sees what is drawn later
+  finder := img.Finder;
+  Assert(finder.CountColor($FF00FF, 0) = 0);
+  img.Pixel[3, 3] := $FF00FF;
+  Assert(finder.FindColor($FF00FF, 0).Equals([[3, 3]]));
+  img.Pixel[3, 3] := img.Pixel[3, 4];
+
+  // the same as a target of the image
+  Target.SetImage(img);
+
+  Assert(img.Finder.FindColor($2B4A2B, 10).Equals(Target.FindColor($2B4A2B, 10)));
+  Assert(img.Finder.FindColor($2B4A2B, 10, [10, 10, 60, 50]).Equals(Target.FindColor($2B4A2B, 10, [10, 10, 60, 50])));
+  Assert(img.Finder.FindColor(ColorTolerance($2B4A2B, 5, EColorSpace.HSL, [1, 1, 1])).Equals(Target.FindColor(ColorTolerance($2B4A2B, 5, EColorSpace.HSL, [1, 1, 1]))));
+  Assert(img.Finder.CountColor($2B4A2B, 10) = Target.CountColor($2B4A2B, 10));
+  Assert(img.Finder.CountColor($2B4A2B, 10) > 0);
+  Assert(img.Finder.GetColors([[1, 1], [50, 60]]).Equals(Target.GetColors([[1, 1], [50, 60]])));
+  Assert(img.Finder.FindImageEx(templ, 0).Equals(Target.FindImageEx(templ, 0)));
+  Assert(img.Finder.FindDTMEx(dtm).Equals(Target.FindDTMEx(dtm)));
+  Assert(img.Finder.FindDTMRotatedEx(dtm, -10, 10, 5, degrees).Equals(Target.FindDTMRotatedEx(dtm, -10, 10, 5, targetDegrees)));
+  Assert(degrees.Equals(targetDegrees));
+  Assert(img.Finder.FindEdges(10).Equals(Target.FindEdges(10)));
+  Assert(img.Finder.FindEdges(10).Length > 0);
+  Assert(img.Finder.GetBrightness(EBrightnessAlgo.MEAN) = Target.GetBrightness(EBrightnessAlgo.MEAN));
+  Assert(img.Finder.MatchColor($2B4A2B, EColorSpace.RGB, [1, 1, 1])[10, 10] = Target.MatchColor($2B4A2B, EColorSpace.RGB, [1, 1, 1])[10, 10]);
+  Assert(img.Finder.FindTemplate(img.Copy([20, 20, 40, 40]), match) = Target.FindTemplate(img.Copy([20, 20, 40, 40]), targetMatch));
+  Assert(img.Finder.FindTemplate(img.Copy([20, 20, 40, 40]), match) = [20, 20]);
+  Assert(match > 0.99);
+  Assert(match = targetMatch);
+end.
