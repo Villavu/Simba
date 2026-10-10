@@ -31,7 +31,6 @@ type
     function IndexAtXY(X, Y: Integer): Integer;
 
     procedure DoTrackTimer(Sender: TObject);
-    procedure DoChangePopupMenu(Data: PtrInt);
     procedure ClearPopupIndex(Data: PtrInt);
 
     procedure CalculateSizes;
@@ -84,9 +83,11 @@ end;
 
 procedure TSimbaMenuBar.SetHotIndex(Index: Integer);
 begin
+  if (Index = -1) and (FPopupIndex > -1) then
+    Index := FPopupIndex;
+  if (FHotIndex = Index) then // set on every key press and mouse move
+    Exit;
   FHotIndex := Index;
-  if (FHotIndex = -1) and (FPopupIndex > -1) then
-    FHotIndex := FPopupIndex;
 
   Invalidate();
 end;
@@ -133,14 +134,9 @@ begin
         SendMessage(GetCapture(), LM_CANCELMODE, 0, 0);
       ReleaseCapture();
 
-      Application.QueueAsyncCall(@DoChangePopupMenu, NewIndex);
+      Application.QueueAsyncCall(@PopupDelayed, NewIndex);
     end;
   end;
-end;
-
-procedure TSimbaMenuBar.DoChangePopupMenu(Data: PtrInt);
-begin
-  Popup(Data);
 end;
 
 procedure TSimbaMenuBar.ClearPopupIndex(Data: PtrInt);

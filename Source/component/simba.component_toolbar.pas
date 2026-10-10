@@ -70,8 +70,6 @@ type
 
   TSimbaDropToolButton = class(TSimbaToolButton)
   protected
-    FMouseInDropdownArrow: Boolean;
-
     function ScaleToToolbarSize(Value: Integer): Integer;
 
     procedure CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean); override;
@@ -85,7 +83,7 @@ type
 function TSimbaDropToolButton.ScaleToToolbarSize(Value: Integer): Integer;
 begin
   if (FToolbar.FButtonSize > 24) then
-    Result := Round(Value * 2)
+    Result := Value * 2
   else
   if (FToolBar.FButtonSize > 16) then
     Result := Round(Value * 1.5)
@@ -117,14 +115,9 @@ begin
 end;
 
 procedure TSimbaToolButton.CalculatePreferredSize(var PreferredWidth, PreferredHeight: Integer; WithThemeSpace: Boolean);
-var
-  I: Integer;
 begin
   PreferredWidth  := Round(FToolbar.FButtonSize * 1.5);
   PreferredHeight := Round(FToolbar.FButtonSize * 1.5);
-
-  for I := 0 to ControlCount - 1 do
-    PreferredWidth := PreferredWidth + Controls[I].Width;
 end;
 
 constructor TSimbaToolButton.Create(AOwner: TComponent);

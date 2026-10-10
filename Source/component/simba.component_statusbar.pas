@@ -225,7 +225,7 @@ begin
   for I := 0 to Index do
   begin
     if (FPanelWidths[I] = 0) then
-      Result.Right := BoundsRect.Right
+      Result.Right := Width
     else
       Result.Right := Result.Left + FPanelWidths[I];
 

@@ -42,7 +42,7 @@ type
 
 procedure TShowDeclarationForm.DoOpenDeclaration(Sender: TObject);
 begin
-  FForm.Close();
+  FForm.ModalResult := mrOk;
 end;
 
 procedure TShowDeclarationForm.DoPaintItem(Sender: TObject; C: TCanvas; AIndex: integer; const ARect: TRect);
@@ -97,9 +97,7 @@ end;
 
 function TShowDeclarationForm.Execute: TDeclaration;
 begin
-  FForm.ShowModal();
-
-  if (FListBox.ItemIndex >= 0) and (FListBox.ItemIndex < Length(FDecls)) then
+  if (FForm.ShowModal() = mrOk) and (FListBox.ItemIndex >= 0) and (FListBox.ItemIndex < Length(FDecls)) then
     Result := FDecls[FListBox.ItemIndex]
   else
     Result := nil;

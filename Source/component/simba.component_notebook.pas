@@ -26,19 +26,12 @@ type
     FNotebook: TNotebook;
     FPageClass: TSimbaPageClass;
 
-    function IndexOf(Page: TSimbaPage): Integer;
-
-    procedure ShowControl(AControl: TControl); override;
-
     function GetActivePage: TSimbaPage;
     function GetPageCount: Integer;
     function GetPage(Index: Integer): TSimbaPage;
-    function GetPageIndex: Integer;
-    procedure SetPageIndex(Value: Integer);
     procedure SetActivePage(Page: TSimbaPage);
   public
     property ActivePage: TSimbaPage read GetActivePage write SetActivePage;
-    property PageIndex: Integer read GetPageIndex write SetPageIndex;
     property PageCount: Integer read GetPageCount;
     property Page[Index: Integer]: TSimbaPage read GetPage;
 
@@ -54,19 +47,6 @@ begin
   Parent := nil; // out of the notebook first, else it processes messages with a stale page index
 
   inherited Destroy();
-end;
-
-function TSimbaNotebook.IndexOf(Page: TSimbaPage): Integer;
-begin
-  Result := FNotebook.IndexOf(Page);
-end;
-
-procedure TSimbaNotebook.ShowControl(AControl: TControl);
-begin
-  if (AControl is TSimbaPage) then
-    FNotebook.ShowControl(AControl)
-  else
-    inherited ShowControl(AControl);
 end;
 
 function TSimbaNotebook.GetActivePage: TSimbaPage;
@@ -85,16 +65,6 @@ end;
 function TSimbaNotebook.GetPage(Index: Integer): TSimbaPage;
 begin
   Result := TSimbaPage(FNotebook.Page[Index]);
-end;
-
-function TSimbaNotebook.GetPageIndex: Integer;
-begin
-  Result := FNotebook.PageIndex;
-end;
-
-procedure TSimbaNotebook.SetPageIndex(Value: Integer);
-begin
-  FNotebook.PageIndex := Value;
 end;
 
 procedure TSimbaNotebook.SetActivePage(Page: TSimbaPage);

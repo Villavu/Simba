@@ -21,11 +21,7 @@ type
     OK,
     CLOSE,
     CLEAR_FILTER,
-    SELECT_DIR,
-    SELECT_FILE,
-    TIME,
-    CALC,
-    CALENDER
+    SELECT_DIR
   );
   {$pop}
 
@@ -95,18 +91,6 @@ type
     constructor Create(AOwner: TComponent); override;
   end;
 
-  TSimbaLabeledButton = class(TCustomControl)
-  protected
-    FLabel: TLabel;
-    FButton: TSimbaButton;
-
-    procedure TextChanged; override;
-  public
-    constructor Create(AOwner: TComponent); override;
-
-    property Button: TSimbaButton read FButton;
-  end;
-
   TSimbaTransparentButton = class(TSimbaButton)
   public
     procedure Paint; override;
@@ -122,18 +106,6 @@ type
     constructor Create(AOwner: TComponent); override;
 
     property CheckButton: TSimbaCheckButton read FCheckButton;
-  end;
-
-  TSimbaCheckButtonGroup = class(TCustomControl)
-  protected
-    function GetSelected(Index: Integer): Boolean;
-    procedure SetSelected(Index: Integer; Value: Boolean);
-  public
-    constructor Create(AOwner: TComponent); override;
-
-    function Add(ACaption: String): Integer;
-
-    property Checked[Index: Integer]: Boolean read GetSelected write SetSelected;
   end;
 
   TSimbaToggleButtonGroup = class(TFlowPanel)
@@ -159,15 +131,12 @@ type
   protected
     FLabel: TLabel;
     FToggleButtons: TSimbaToggleButtonGroup;
-    FLabelMeasure: String;
 
     procedure TextChanged; override;
-    procedure SetLabelMeasure(Value: String);
   public
     constructor Create(AOwner: TComponent); override;
 
     property ToggleButtons: TSimbaToggleButtonGroup read FToggleButtons;
-    property LabelMeasure: String read FLabelMeasure write SetLabelMeasure;
   end;
 
 implementation
@@ -221,39 +190,6 @@ begin
   FCheckButton.BorderSpacing.Bottom := 5;
   FCheckButton.BorderSpacing.Right := 5;
   FCheckButton.BorderSpacing.Left := 8;
-end;
-
-procedure TSimbaCheckButtonGroup.SetSelected(Index: Integer; Value: Boolean);
-begin
-  if (Controls[Index] is TSimbaLabeledCheckButton) then
-    TSimbaLabeledCheckButton(Controls[Index]).CheckButton.Down := Value;
-end;
-
-function TSimbaCheckButtonGroup.GetSelected(Index: Integer): Boolean;
-begin
-  if (Controls[Index] is TSimbaLabeledCheckButton) then
-    Result := TSimbaLabeledCheckButton(Controls[Index]).CheckButton.Down
-  else
-    Result := False;
-end;
-
-constructor TSimbaCheckButtonGroup.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  AutoSize := True;
-end;
-
-function TSimbaCheckButtonGroup.Add(ACaption: String): Integer;
-var
-  CheckButton: TSimbaLabeledCheckButton;
-begin
-  CheckButton := TSimbaLabeledCheckButton.Create(Self);
-  CheckButton.Parent := Self;
-  CheckButton.Caption := ACaption;
-  CheckButton.Align := alBottom;
-
-  Result := GetControlIndex(CheckButton);
 end;
 
 function TSimbaToggleButtonGroup.GetSelectedText: String;
@@ -310,27 +246,6 @@ begin
   ChildSizing.ShrinkHorizontal := crsScaleChilds;
   ChildSizing.HorizontalSpacing := 5;
   ChildSizing.VerticalSpacing := 5;
-end;
-
-procedure TSimbaLabeledToggleButtonGroup.SetLabelMeasure(Value: String);
-begin
-  if (FLabelMeasure = Value) then
-    Exit;
-  FLabelMeasure := Value;
-
-  if (FLabelMeasure <> '') then
-  begin
-    FToggleButtons.AnchorSide[akLeft].Control := nil;
-
-    with TBitmap.Create() do
-    try
-      Canvas.Font := FLabel.Font;
-      FToggleButtons.Left := FLabel.Left + Canvas.TextWidth(FLabelMeasure) + (FLabel.BorderSpacing.Right * 2);
-    finally
-      Free();
-    end;
-  end else
-    FToggleButtons.AnchorSide[akLeft].Control := FLabel;
 end;
 
 procedure TSimbaLabeledToggleButtonGroup.TextChanged;
@@ -590,17 +505,13 @@ procedure TSimbaButton.SetImage(Img: ESimbaButtonImage);
 begin
   FImageList := LCLGlyphs;
   case Img of
+    ESimbaButtonImage.NONE:         ImageIndex := -1;
     ESimbaButtonImage.OK:           ImageIndex := LCLGlyphs.GetImageIndex('btn_ok');
     ESimbaButtonImage.CLOSE:        ImageIndex := LCLGlyphs.GetImageIndex('btn_cancel');
     ESimbaButtonImage.CLEAR_FILTER: ImageIndex := LCLGlyphs.GetImageIndex('btnfiltercancel');
     ESimbaButtonImage.SELECT_DIR:   ImageIndex := LCLGlyphs.GetImageIndex('btnseldir');
-    ESimbaButtonImage.SELECT_FILE:  ImageIndex := LCLGlyphs.GetImageIndex('btnselfile');
-    ESimbaButtonImage.TIME:         ImageIndex := LCLGlyphs.GetImageIndex('btntime');
-    ESimbaButtonImage.CALC:         ImageIndex := LCLGlyphs.GetImageIndex('btncalculator');
-    ESimbaButtonImage.CALENDER:     ImageIndex := LCLGlyphs.GetImageIndex('btncalendar');
   end;
-
-  AdjustSize();
+  FImage := Img; // after: SetImageIndex resets it
 end;
 
 procedure TSimbaButton.SetImageIndex(Index: Integer);
@@ -608,7 +519,9 @@ begin
   FImageIndex := Index;
   FImage := ESimbaButtonImage.NONE;
 
+  InvalidatePreferredSize();
   AdjustSize();
+  Invalidate();
 end;
 
 procedure TSimbaToggleButton.Click;
@@ -632,34 +545,6 @@ begin
   // as tall as the tick
   XPadding := 4;
   YPadding := 0;
-end;
-
-procedure TSimbaLabeledButton.TextChanged;
-begin
-  inherited TextChanged();
-
-  if Assigned(FLabel) then
-    FLabel.Caption := Text;
-end;
-
-constructor TSimbaLabeledButton.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  ControlStyle := ControlStyle + [csOpaque];
-  Color := SimbaComponentTheme.ColorBackground;
-  AutoSize := True;
-
-  FButton := TSimbaButton.Create(Self);
-  FButton.AutoSize := True;
-  FButton.Parent := Self;
-  FButton.Align := alLeft;
-
-  FLabel := TLabel.Create(Self);
-  FLabel.Parent := Self;
-  FLabel.AutoSize := True;
-  FLabel.Align := alClient;
-  FLabel.Layout := tlCenter;
 end;
 
 end.

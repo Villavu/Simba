@@ -333,7 +333,7 @@ begin
   if (AControl is TSimbaTab) and ContainsControl(AControl) then
   begin
     for I := 0 to ControlCount - 1 do
-      if (Controls[I] is TSimbaTab) and Controls[I].Visible then
+      if (Controls[I] is TSimbaTab) and Controls[I].Visible and (Controls[I] <> AControl) then // not the one shown already: hiding it drops focus and relayouts
         Controls[I].Visible := False;
     AControl.Visible := True;
 
@@ -362,8 +362,7 @@ end;
 
 procedure TSimbaTabControl.CallTabChanged(Data: PtrInt);
 begin
-  if Assigned(FTabs) then
-    DoTabChanged(FTabs);
+  DoTabChanged(FTabs);
 end;
 
 procedure TSimbaTabControl.DoTabMoved(Sender: TObject; AIndexFrom, AIndexTo: Integer);
@@ -525,7 +524,7 @@ begin
 
   NeedChangeEvent := FTabs.TabCount = 0;
 
-  FTabs.AddTab(FTabs.TabCount, IfThen(Title <> '', Title, FDefaultTitle), Result).TabPopupMenu := PopupMenu;
+  FTabs.AddTab(FTabs.TabCount, IfThen(Title <> '', Title, FDefaultTitle), Result);
   FTabs.TabIndex := FTabs.TabCount - 1;
 
   if NeedChangeEvent and Assigned(FTabChangeEvent) then

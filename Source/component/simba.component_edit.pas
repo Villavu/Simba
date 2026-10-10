@@ -23,7 +23,7 @@ type
   protected
   type
     {$SCOPEDENUMS ON}
-    EPaintCache = (TEXT, CARET_VISIBLE, SEL_START, SEL_END);
+    EPaintCache = (TEXT, SEL_START, SEL_END);
     {$SCOPEDENUMS OFF}
   public
     FTextWidthCache: array[EPaintCache] of record
@@ -70,8 +70,11 @@ type
     function GetAvailableWidth: Integer;
     function GetSelectedText: String;
 
-    procedure AddCharAtCursor(C: Char);
-    procedure AddStringAtCursor(Str: String; ADeleteSelection: Boolean = False);
+    // FCaretX and the selection are byte offsets into Text, always on the start of a UTF-8 character
+    function PrevCaretPos: Integer;
+    function NextCaretPos: Integer;
+
+    procedure AddStringAtCursor(Str: String);
     procedure DeleteCharAtCursor;
     procedure DeleteSelection;
 
@@ -87,11 +90,9 @@ type
     procedure Paint; override;
 
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
-    procedure KeyPress(var Key: Char); override;
     procedure UTF8KeyPress(var UTF8Key: TUTF8Char); override;
 
     procedure SetCaretPos(Pos: Integer);
-    procedure SetColor(Value: TColor); override;
     procedure SetColorBorder(Value: TColor);
     procedure SetColorSelection(Value: TColor);
     procedure SetColorBorderActive(Value: TColor);
@@ -151,7 +152,7 @@ type
 implementation
 
 uses
-  Math, Clipbrd,
+  Math, Clipbrd, LazUTF8,
   simba.component_theme,
   simba.misc;
 
@@ -178,7 +179,10 @@ var
   I: Integer;
 begin
   for I := 0 to FList.Count - 1 do
+  begin
+    Inc(TSimbaEdit(FList[I]).FCaretFlash);
     TSimbaEdit(FList[I]).Invalidate();
+  end;
 end;
 
 constructor TCaretFlasher.Create;
@@ -265,6 +269,7 @@ begin
   inherited;
 
   CaretFlasher.Add(Self);
+  FCaretFlash := 1;
   Invalidate();
 end;
 
@@ -293,6 +298,7 @@ begin
   FSelecting := False;
   FSelectingStartX := 0;
   FSelectingEndX   := Length(Text);
+  FCaretX := FSelectingEndX;
 
   Invalidate();
 end;
@@ -304,7 +310,7 @@ var
 begin
   ClearSelection();
 
-  if (Text <> '') and (FCaretX >= 1) and (FCaretX <= Length(Text)) then
+  if (Text <> '') and (FCaretX <= Length(Text)) then
   begin
     Str := Text;
 
@@ -316,7 +322,7 @@ begin
         Break;
       end;
     EndX := Length(Str);
-    for I := FCaretX to Length(Str) do
+    for I := FCaretX + 1 to Length(Str) do // the caret sits after Str[FCaretX]
       if (Str[I] <= #32) then
       begin
         EndX := I-1;
@@ -350,21 +356,26 @@ end;
 
 function TSimbaEdit.CharIndexAtXY(X, Y: Integer): Integer;
 var
-  I, Test: Integer;
+  I, Len, Test: Integer;
   W: Integer;
+  Str: String;
 begin
-  Result := Length(Text);
+  Str := Text;
+  Result := Length(Str);
 
   Test := FDrawOffsetX;
-  for I := 1 to Length(Text) do
+  I := 1;
+  while (I <= Length(Str)) do
   begin
-    W := Canvas.TextWidth(Text[I]);
+    Len := UTF8CodepointSize(@Str[I]);
+    W := Canvas.TextWidth(Copy(Str, I, Len));
     Test += W;
     if ((Test-(W div 2)) >= X) then
     begin
       Result := I-1;
       Exit;
     end;
+    I += Len;
   end;
 end;
 
@@ -394,34 +405,39 @@ begin
     Result := Copy(Text, FSelectingStartX + 1, FSelectingEndX - FSelectingStartX);
 end;
 
-procedure TSimbaEdit.AddCharAtCursor(C: Char);
-var
-  NewText: String;
+function TSimbaEdit.PrevCaretPos: Integer;
 begin
-  if (Ord(C) < 32) then
-    Exit;
-
-  if HasSelection then
-    DeleteSelection();
-
-  Inc(FCaretX);
-  NewText := Text;
-  Insert(C, NewText, FCaretX);
-  Text := NewText;
-
-  if Assigned(FOnUserChange) then
-    FOnUserChange(Self);
+  if (FCaretX > 0) then
+    Result := UTF8FindNearestCharStart(PChar(Text), Length(Text), FCaretX - 1)
+  else
+    Result := 0;
 end;
 
-procedure TSimbaEdit.AddStringAtCursor(Str: String; ADeleteSelection: Boolean);
+function TSimbaEdit.NextCaretPos: Integer;
+begin
+  if (FCaretX < Length(Text)) then
+    Result := FCaretX + UTF8CodepointSize(@Text[FCaretX + 1])
+  else
+    Result := Length(Text);
+end;
+
+// Replaces the selection if there is one. Text is assigned once, so OnChange fires once
+procedure TSimbaEdit.AddStringAtCursor(Str: String);
 var
   NewText: String;
 begin
-  if ADeleteSelection then
-    DeleteSelection();
+  if (Str.IndexOfAny([#13, #10]) > -1) then // one line: up to the first line break
+    SetLength(Str, Str.IndexOfAny([#13, #10]));
+  if (Str = '') and (not HasSelection()) then
+    Exit;
 
   NewText := Text;
-
+  if HasSelection() then
+  begin
+    FCaretX := Min(FSelectingStartX, FSelectingEndX);
+    Delete(NewText, FCaretX + 1, GetSelectionLen());
+    ClearSelection();
+  end;
   Insert(Str, NewText, FCaretX + 1);
   Inc(FCaretX, Length(Str));
 
@@ -439,8 +455,8 @@ begin
   begin
     NewText := Text;
 
-    Delete(NewText, FCaretX, 1);
-    Dec(FCaretX);
+    Delete(NewText, PrevCaretPos() + 1, FCaretX - PrevCaretPos());
+    FCaretX := PrevCaretPos();
 
     Text := NewText;
 
@@ -457,15 +473,11 @@ begin
   begin
     NewText := Text;
 
-    if (FSelectingStartX > FSelectingEndX) then
-      Delete(NewText, FSelectingEndX + 1, GetSelectionLen())
-    else
-      Delete(NewText, FSelectingStartX + 1, GetSelectionLen());
-
-    if (FSelectingEndX > FSelectingStartX) then
-      SetCaretPos(FCaretX - GetSelectionLen());
-    Text := NewText;
+    FCaretX := Min(FSelectingStartX, FSelectingEndX);
+    Delete(NewText, FCaretX + 1, GetSelectionLen());
     ClearSelection();
+
+    Text := NewText;
 
     if Assigned(FOnUserChange) then
       FOnUserChange(Self);
@@ -480,9 +492,7 @@ begin
   begin
     SetCaretPos(CharIndexAtXY(X, Y));
 
-    FSelectingEndX := CharIndexAtXY(X, Y);
-
-    Invalidate();
+    FSelectingEndX := FCaretX;
   end;
 end;
 
@@ -511,7 +521,7 @@ procedure TSimbaEdit.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Int
 begin
   inherited MouseUp(Button, Shift, X, Y);
 
-  if (not (ssDouble in Shift)) then
+  if FSelecting then // only a drag: a double click's release must not undo its word selection
   begin
     FSelecting := False;
     FSelectingEndX := CharIndexAtXY(X, Y);
@@ -547,6 +557,7 @@ begin
     FCaretX := Length(Text)
   else
     FCaretX := Pos;
+  FCaretFlash := 1; // shown while it moves
 
   Invalidate();
 end;
@@ -569,6 +580,13 @@ procedure TSimbaEdit.TextChanged;
 begin
   inherited TextChanged();
 
+  // Text can be assigned from outside: the caret and selection were for the old text
+  if (FCaretX > Length(Text)) then
+    FCaretX := Length(Text);
+  if (Max(FSelectingStartX, FSelectingEndX) > Length(Text)) then
+    ClearSelection();
+  FCaretFlash := 1;
+
   if Assigned(FOnChange) then
     FOnChange(Self);
 
@@ -576,12 +594,6 @@ begin
 end;
 
 procedure TSimbaEdit.Paint;
-
-  function IsCaretVisible: Boolean;
-  begin
-    Result := InRange(FDrawOffsetX + GetTextWidthCache(EPaintCache.CARET_VISIBLE, Copy(Text, 1, FCaretX)), 0, Width);
-  end;
-
 var
   Style: TTextStyle;
   OldFontStyles: TFontStyles;
@@ -602,7 +614,7 @@ begin
   begin
     TextWidth := GetTextWidthCache(EPaintCache.TEXT, Copy(Text, 1, FCaretX));
 
-    if (not IsCaretVisible()) then
+    if (not InRange(FDrawOffsetX + TextWidth, 0, Width)) then // caret not visible
     begin
       if (TextWidth > Width) then
         FDrawOffsetX := -(TextWidth - GetAvailableWidth()) + (BorderWidth*2)
@@ -616,23 +628,8 @@ begin
     // Selection
     if HasSelection() then
     begin
-      if (FSelectingStartX > FSelectingEndX) then
-      begin
-        X1 := FSelectingEndX;
-        X2 := FSelectingStartX;
-      end else
-      if (FSelectingStartX < FSelectingEndX) then
-      begin
-        X1 := FSelectingStartX;
-        X2 := FSelectingEndX;
-      end else
-      begin
-        X1 := FSelectingStartX;
-        X2 := FSelectingStartX + 1;
-      end;
-
-      X1 := FDrawOffsetX + GetTextWidthCache(EPaintCache.SEL_START, Copy(Text, 1, FSelectingStartX));
-      X2 := FDrawOffsetX + GetTextWidthCache(EPaintCache.SEL_END,   Copy(Text, 1, FSelectingEndX));
+      X1 := FDrawOffsetX + GetTextWidthCache(EPaintCache.SEL_START, Copy(Text, 1, Min(FSelectingStartX, FSelectingEndX)));
+      X2 := FDrawOffsetX + GetTextWidthCache(EPaintCache.SEL_END,   Copy(Text, 1, Max(FSelectingStartX, FSelectingEndX)));
 
       Canvas.Brush.Color := FColorSelection;
       Canvas.FillRect(X1, BorderWidth, X2, Height - BorderWidth);
@@ -659,7 +656,6 @@ begin
 
   if Focused then // flash caret and active border
   begin
-    Inc(FCaretFlash);
     if Odd(FCaretFlash) then
       Canvas.Pen.Color := clWhite
     else
@@ -684,7 +680,7 @@ procedure TSimbaEdit.KeyDown(var Key: Word; Shift: TShiftState);
 begin
   inherited KeyDown(Key, Shift);
 
-  if (ssCtrl in Shift) then
+  if (Shift * [ssCtrl, ssAlt] = [ssCtrl]) then // not AltGr, which is Ctrl+Alt and types characters
     case Key of
       VK_A:
         begin
@@ -695,14 +691,15 @@ begin
 
       VK_V:
         begin
-          AddStringAtCursor(Clipboard.AsText, True);
+          AddStringAtCursor(Clipboard.AsText);
 
           Key := 0;
         end;
 
       VK_C:
         begin
-          Clipboard.AsText := GetSelectedText();
+          if HasSelection() then // else the clipboard would be emptied
+            Clipboard.AsText := GetSelectedText();
 
           Key := 0;
         end;
@@ -721,55 +718,46 @@ begin
 
     VK_LEFT:
       begin
-        SetCaretPos(FCaretX-1);
+        ClearSelection();
+        SetCaretPos(PrevCaretPos());
 
         Key := 0;
       end;
 
     VK_RIGHT:
       begin
-        SetCaretPos(FCaretX+1);
+        ClearSelection();
+        SetCaretPos(NextCaretPos());
 
         Key := 0;
       end;
 
     VK_DELETE:
       begin
-        DeleteSelection();
+        if HasSelection() then
+          DeleteSelection()
+        else
+        if (FCaretX < Length(Text)) then
+        begin
+          FCaretX := NextCaretPos();
+          DeleteCharAtCursor();
+        end;
 
         Key := 0;
       end;
   end;
 end;
 
-procedure TSimbaEdit.KeyPress(var Key: Char);
-begin
-  inherited KeyPress(Key);
-
-  // Only consume printable characters - let control keys (Tab, Escape, ...) fall through
-  if (Key >= #32) then
-  begin
-    AddCharAtCursor(Key);
-    Key := #0;
-  end;
-end;
-
+// Only printable characters are consumed: control keys (Tab, Escape, ...) fall through
 procedure TSimbaEdit.UTF8KeyPress(var UTF8Key: TUTF8Char);
 begin
   inherited UTF8KeyPress(UTF8Key);
 
   if (UTF8Key <> '') and (UTF8Key[1] >= #32) then
   begin
-    AddCharAtCursor(UTF8Decode(UTF8Key)[1]);
+    AddStringAtCursor(UTF8Key);
     UTF8Key := '';
   end;
-end;
-
-procedure TSimbaEdit.SetColor(Value: TColor);
-begin
-  inherited SetColor(Value);
-
-  Invalidate();
 end;
 
 procedure TSimbaEdit.SetColorBorder(Value: TColor);

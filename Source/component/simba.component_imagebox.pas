@@ -1016,8 +1016,7 @@ end;
 function TSimbaImageBox.ViewHeight: Integer;
 begin
   Result := ClientHeight;
-  if FStatusBarPanel.Visible then
-    Dec(Result, FStatusBarPanel.Height);
+  Dec(Result, FStatusBarPanel.Height);
   if FHorzScroll.Visible then
     Dec(Result, FHorzScroll.Height);
   if (Result < 0) then

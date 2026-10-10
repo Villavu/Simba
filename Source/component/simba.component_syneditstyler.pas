@@ -247,6 +247,9 @@ begin
 
   with TSynEditProtectedAccess(FEditor) do
   begin
+    if not (FScreenCaret.Painter is TSynEditScreenCaretPainterInternal) then // the system caret has no colour
+      Exit;
+
     if (Foreground = Color) then
       TSynEditScreenCaretPainterInternal(FScreenCaret.Painter).Color := Foreground
     else

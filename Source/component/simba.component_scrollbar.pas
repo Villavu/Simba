@@ -10,7 +10,7 @@ unit simba.component_scrollbar;
 interface
 
 uses
-  Classes, SysUtils, Controls, ComCtrls, StdCtrls,
+  Classes, SysUtils,
   ATScrollBar, simba.base, simba.settings;
 
 type
@@ -19,8 +19,6 @@ type
     procedure DoSettingChange_ScrollBarSize(Setting: TSimbaSetting);
     procedure DoSettingChange_ScrollBarArrowSize(Setting: TSimbaSetting);
   public
-    procedure Assign(Source: TPersistent); override;
-
     constructor Create(AOwner: TComponent); override;
   end;
 
@@ -38,24 +36,6 @@ begin
   Theme^.ArrowSize := Setting.Value;
 
   Update();
-end;
-
-procedure TSimbaScrollBar.Assign(Source: TPersistent);
-var
-  From: TScrollBar absolute Source;
-begin
-  if (Source is TScrollBar) then
-  begin
-    Min := From.Min;
-    Max := From.Max + 1;
-    SmallChange := From.SmallChange;
-    LargeChange := From.LargeChange;
-    PageSize := From.PageSize;
-    Position := From.Position;
-
-    Update();
-  end else
-    inherited Assign(Source);
 end;
 
 constructor TSimbaScrollBar.Create(AOwner: TComponent);

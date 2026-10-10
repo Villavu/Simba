@@ -22,9 +22,6 @@ type
 
     function GetScrollBarArrowSize: Integer;
     function GetScrollBarSize: Integer;
-
-    procedure SetScrollBarArrowSize(Value: Integer);
-    procedure SetScrollBarSize(Value: Integer);
   public
     ColorBackground: TColor;
     ColorFrame: TColor;
@@ -35,8 +32,8 @@ type
     ColorFont: TColor;
     ColorLine: TColor;
 
-    property ScrollBarSize: Integer read GetScrollBarSize write SetScrollBarSize;
-    property ScrollBarArrowSize: Integer read GetScrollBarArrowSize write SetScrollBarArrowSize;
+    property ScrollBarSize: Integer read GetScrollBarSize;
+    property ScrollBarArrowSize: Integer read GetScrollBarArrowSize;
 
     constructor Create;
   end;
@@ -69,7 +66,7 @@ begin
     Exit;
 
   // DWMWA_CAPTION_COLOR (Sadly need windows 11)
-  if (Win32BuildNumber >= 22000) and (Sender is TCustomForm) and Assigned(DwmSetWindowAttribute) then
+  if (Win32BuildNumber >= 22000) and Assigned(DwmSetWindowAttribute) then
     DwmSetWindowAttribute(TCustomForm(Sender).Handle, DWMWA_CAPTION_COLOR, @ColorFrame, SizeOf(TColor));
 end;
 {$ENDIF}
@@ -82,16 +79,6 @@ end;
 function TSimbaComponentTheme.GetScrollBarSize: Integer;
 begin
   Result := ATScrollbarTheme.InitialSize;
-end;
-
-procedure TSimbaComponentTheme.SetScrollBarArrowSize(Value: Integer);
-begin
-  ATScrollbarTheme.ArrowSize := Value;
-end;
-
-procedure TSimbaComponentTheme.SetScrollBarSize(Value: Integer);
-begin
-  ATScrollbarTheme.InitialSize := Value;
 end;
 
 constructor TSimbaComponentTheme.Create;

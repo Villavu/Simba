@@ -45,29 +45,11 @@ uses
 
 type
   TButtonPanelButton = class(TSimbaButton)
-  protected
-    function GetIndex: Integer; virtual;
-    procedure SetIndex(AValue: Integer); virtual;
   public
     ButtonPanel: TSimbaButtonPanel;
 
     procedure Click; override;
-    property Index: Integer read GetIndex write SetIndex;
   end;
-
-function TButtonPanelButton.GetIndex: Integer;
-begin
-  if (Parent is TFlowPanel) then
-    Result := TFlowPanel(Parent).GetControlIndex(Self)
-  else
-    Result := -1;
-end;
-
-procedure TButtonPanelButton.SetIndex(AValue: Integer);
-begin
-  if (Parent is TFlowPanel) then
-    TFlowPanel(Parent).SetControlIndex(Self, AValue);
-end;
 
 procedure TButtonPanelButton.Click;
 var
@@ -80,7 +62,7 @@ begin
     if (Self = ButtonPanel.FButtonOk) then
     begin
       Form.ModalResult := mrOk;
-      if ButtonPanel.CloseOnOk then
+      if ButtonPanel.CloseOnOk and (not (fsModal in Form.FormState)) then // a modal form closes from ModalResult, and Close would make it mrCancel
         Form.Close();
     end
     else if (Self = ButtonPanel.FButtonCancel) then
@@ -92,7 +74,8 @@ begin
     else if (Self = ButtonPanel.FButtonClose) then
     begin
       Form.ModalResult := mrClose;
-      Form.Close();
+      if (not (fsModal in Form.FormState)) then
+        Form.Close();
     end;
   end;
 

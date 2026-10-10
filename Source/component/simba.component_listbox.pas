@@ -17,31 +17,25 @@ type
   TSimbaListBox = class(TCustomControl)
   public type
     TPaintItemEvent = procedure(Sender: TObject; C: TCanvas; AIndex: Integer; const ARect: TRect) of object;
-    TSelectionChangeEvent = procedure(Sender: TObject; ItemIndex: Integer) of object;
   protected
     FListComponent: TATListbox;
     FColumns: TStringArray;
     FPaintItemEvent: TPaintItemEvent;
-    FSelectionChangeEvent: TSelectionChangeEvent;
 
     procedure DoDblClick(Sender: TObject);
     procedure DoPaintItem(Sender: TObject; C: TCanvas; AIndex: integer; const ARect: TRect);
-    procedure DoSelectionChange(Sender: TObject);
 
     function GetItemHeight: Integer;
     function GetItemIndex: Integer;
-    procedure SetItemIndex(Value: Integer);
   public
     constructor Create(AOwner: TComponent); override;
 
     procedure SetColumns(Titles: TStringArray);
     procedure SetColumnWidths(Widths: TIntegerArray);
     procedure AddRow(Row: TStringArray);
-    procedure Add(S: String);
 
     property OnPaintItem: TPaintItemEvent read FPaintItemEvent write FPaintItemEvent;
-    property OnSelectionChange: TSelectionChangeEvent read FSelectionChangeEvent write FSelectionChangeEvent;
-    property ItemIndex: Integer read GetItemIndex write SetItemIndex;
+    property ItemIndex: Integer read GetItemIndex;
     property ItemHeight: Integer read GetItemHeight;
     property OnDblClick;
   end;
@@ -49,9 +43,7 @@ type
 implementation
 
 uses
-  Forms,
-  simba.component_theme,
-  simba.initializations;
+  simba.component_theme;
 
 function TSimbaListBox.GetItemHeight: Integer;
 begin
@@ -71,20 +63,9 @@ begin
     FPaintItemEvent(Self, C, AIndex, ARect);
 end;
 
-procedure TSimbaListBox.DoSelectionChange(Sender: TObject);
-begin
-  if Assigned(FSelectionChangeEvent) then
-    FSelectionChangeEvent(Self, FListComponent.ItemIndex);
-end;
-
 function TSimbaListBox.GetItemIndex: Integer;
 begin
   Result := FListComponent.ItemIndex;
-end;
-
-procedure TSimbaListBox.SetItemIndex(Value: Integer);
-begin
-  FListComponent.ItemIndex := Value;
 end;
 
 constructor TSimbaListBox.Create(AOwner: TComponent);
@@ -106,7 +87,6 @@ begin
   FListComponent.ColorSeparators := SimbaComponentTheme.ColorLine;
   FListComponent.OnDblClick := @DoDblClick;
   FListComponent.OnDrawItem := @DoPaintItem;
-  FListComponent.OnChangedSel := @DoSelectionChange;
 end;
 
 procedure TSimbaListBox.SetColumns(Titles: TStringArray);
@@ -161,11 +141,6 @@ begin
   end;
 
   FListComponent.Items.Add(NewRow);
-end;
-
-procedure TSimbaListBox.Add(S: String);
-begin
-  FListComponent.Items.Add(S);
 end;
 
 end.

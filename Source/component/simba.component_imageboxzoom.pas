@@ -280,7 +280,7 @@ begin
     end;
   end;
 
-  PreferredWidth := (FZoom.BorderSpacing.Around * 2) + FZoom.Width + FMeasuredWidth + FLabel.BorderSpacing.Right;
+  PreferredWidth := FZoom.Width + FMeasuredWidth;
 end;
 
 procedure TSimbaImageBoxZoomPanel.DoUpdate(Data: PtrInt);

@@ -68,7 +68,6 @@ type
     TYPE_DECL: Integer;
     VARIABLE: Integer;
     ENUM: Integer;
-    CONSTANT: Integer;
     EYE: Integer;
     WRITE_BUG: Integer;
     GITHUB: Integer;
@@ -189,7 +188,6 @@ begin
   SimbaImages.TYPE_DECL := Add('TYPE');
   SimbaImages.VARIABLE  := Add('VARIABLE');
   SimbaImages.ENUM      := Add('ENUM');
-  SimbaImages.CONSTANT  := Add('CONSTANT');
 
   SimbaImages.EYE       := Add('EYE');
   SimbaImages.WRITE_BUG := Add('BUG_WRITE');
