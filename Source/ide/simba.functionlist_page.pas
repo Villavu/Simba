@@ -34,10 +34,6 @@ type
     FPluginsNode: TTreeNode;
     FSimbaNode: TTreeNode;
 
-    FScriptNodeState: TTreeNodeExpandedState;
-    FIncludesNodeState: TTreeNodeExpandedState;
-    FPluginsNodeState: TTreeNodeExpandedState;
-
     procedure AddSimbaNode;
     procedure AddDecl(ParentNode: TTreeNode; Decl: TDeclaration);
     procedure AddIncludes(Parsers: TCodeParserList; ParentNode: TTreeNode);
@@ -59,11 +55,13 @@ type
     property TabID: Int64 read FTabID write FTabID;
     property TreeView: TSimbaTreeView read FTreeView;
     property SimbaNode: TTreeNode read FSimbaNode;
-    property IncludesNode: TTreeNode read FIncludesNode;
-    property PluginsNode: TTreeNode read FPluginsNode;
-    property ScriptNode: TTreeNode read FScriptNode;
 
-    procedure Fill;
+    // An update, all on the main thread: BeginUpdate gives an insight holding the tab's script (nil when up to date),
+    // which is run, on any thread, and handed to EndUpdate.
+    function BeginUpdate: TCodeinsight;
+    procedure EndUpdate(Insight: TCodeinsight);
+
+    procedure CollapseAll;
   end;
 
   TDeclNode = class(TTreeNode)
@@ -92,12 +90,10 @@ type
 implementation
 
 uses
-  AnchorDocking,
   simba.functionlistpage_contextmenu,
   simba.ide_controller,
   simba.vartype_string,
   simba.fs,
-  simba.threading,
   simba.component_images;
 
 procedure TSimbaFunctionListPage.AddDecl(ParentNode: TTreeNode; Decl: TDeclaration);
@@ -107,14 +103,11 @@ var
 begin
   if (Decl.Name = '') then
     Exit;
-  if ParentNode.HasAsParent(FSimbaNode) and ((Decl is TDeclaration_Method) and ((Decl.Name[1] = '_') or TDeclaration_Method(Decl).isOverride or TDeclaration_Method(Decl).isOperator)) then
+  if (FSimbaNode <> nil) and ParentNode.HasAsParent(FSimbaNode) and ((Decl is TDeclaration_Method) and ((Decl.Name[1] = '_') or TDeclaration_Method(Decl).isOverride or TDeclaration_Method(Decl).isOperator)) then
     Exit;
 
-  Node := TDeclNode(FTreeView.AddNodeWithClass(TDeclNode, ParentNode, Decl.Name, -1));
+  Node := TDeclNode(FTreeView.AddNodeWithClass(TDeclNode, ParentNode, Decl.FullName, DeclarationImage(Decl)));
   Node.Decl := Decl;
-  Node.Text := Decl.FullName;
-  Node.ImageIndex := DeclarationImage(Decl);
-  Node.SelectedIndex := Node.ImageIndex;
 
   if (Decl is TDeclaration_TypeRecord) or (Decl is TDeclaration_TypeEnum) then
     for I := 0 to Decl.Items.Count - 1 do
@@ -151,14 +144,6 @@ begin
 end;
 
 procedure TSimbaFunctionListPage.AddIncludes(Parsers: TCodeParserList; ParentNode: TTreeNode);
-
-  function ShortenFileName(FileName: String): String;
-  begin
-    if TSimbaPath.PathIsInDir(FileName, Application.Location) then
-      Result := TSimbaPath.PathExtractRelative(Application.Location, FileName)
-    else
-      Result := FileName;
-  end;
 
   // If node doesn't exist in parsers or is outdated
   function NeedRemove(Node: TTreeNode): Boolean;
@@ -289,6 +274,7 @@ end;
 procedure TSimbaFunctionListPage.DoCustomOrderChange(Setting: TSimbaSetting);
 var
   Order: TStringArray;
+  Node: TTreeNode;
   I: Integer;
 begin
   if (FSimbaNode = nil) then
@@ -296,29 +282,29 @@ begin
 
   Order := String(Setting.Value).Split(',');
   for I := 0 to High(Order) do
-    if (FSimbaNode.FindNode(Order[I]) <> nil) and (I < FSimbaNode.Count) then
-      FSimbaNode.FindNode(Order[I]).Index := I;
+  begin
+    Node := FSimbaNode.FindNode(Order[I]);
+    if (Node <> nil) and (I < FSimbaNode.Count) then
+      Node.Index := I;
+  end;
 end;
 
 procedure TSimbaFunctionListPage.DoSelectionChanged(Sender: TObject);
 begin
-  if FTreeView.Items.IsUpdating or (not (FTreeView.Selected is TDeclNode)) then
-    Exit;
-  SimbaEvents.Post(ESimbaEvent.FUNCTIONLIST_SELECTION_CHANGE, TDeclNode(FTreeView.Selected).Decl);
+  if (FTreeView.Selected is TDeclNode) then
+    SimbaEvents.Post(ESimbaEvent.FUNCTIONLIST_SELECTION_CHANGE, TDeclNode(FTreeView.Selected).Decl);
 end;
 
 procedure TSimbaFunctionListPage.DoNodeDoubleClick(Sender: TObject);
 begin
-  if FTreeView.Items.IsUpdating then
-    Exit;
-
   if (FTreeView.Selected is TDeclNode) then
     SimbaController.ShowDecl(TDeclNode(FTreeView.Selected).Decl);
 end;
 
 function TSimbaFunctionListPage.DoGetNodeHint(Node: TTreeNode): String;
 begin
-  if FTreeView.Items.IsUpdating or (not SimbaSettings.FunctionList.ShowMouseoverHint.Value) then
+  Result := '';
+  if (not SimbaSettings.FunctionList.ShowMouseoverHint.Value) then
     Exit;
 
   if (Node is TDeclNode) then
@@ -335,10 +321,8 @@ begin
   begin
     if (Node is TFileNode) then
       Result := TFileNode(Node).FileName
-    else if (Node is TParserNode) then
-      Result := TParserNode(Node).Parser.Lexer.FileName
     else
-      Result := '';
+      Result := TParserNode(Node).Parser.Lexer.FileName;
 
     if TSimbaPath.PathIsInDir(Result, Application.Location) then
       Result := TSimbaPath.PathExtractRelative(Application.Location, Result);
@@ -360,58 +344,37 @@ procedure TSimbaFunctionListPage.DoDragDrop(Sender, Source: TObject; X, Y: Integ
   end;
 
 var
-  Node: TSimbaSectionNode;
   I: Integer;
 begin
-  if FTreeView.Items.IsUpdating then
+  if (FSimbaNode = nil) or (not (FTreeView.Selected is TSimbaSectionNode)) then
     Exit;
 
-  if (FSimbaNode = nil) then
-    Exit;
-
-  Node := TSimbaSectionNode(FTreeView.Selected);
-  if (Node is TSimbaSectionNode) then
-  begin
-    for I := FSimbaNode.Count - 1 downto 0 do
-      if (Y > FSimbaNode[I].DisplayRect(True).Top) then
-      begin
-        FTreeView.Selected.MoveTo(FSimbaNode[I], naInsert);
-        SaveCustomOrder();
-        Break;
-      end;
-  end;
+  for I := FSimbaNode.Count - 1 downto 0 do
+    if (Y > FSimbaNode[I].DisplayRect(True).Top) then
+    begin
+      FTreeView.Selected.MoveTo(FSimbaNode[I], naInsert);
+      SaveCustomOrder();
+      Break;
+    end;
 end;
 
 procedure TSimbaFunctionListPage.DoDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 begin
-  if FTreeView.Items.IsUpdating then
-    Exit;
-
   Accept := (FTreeView.Selected is TSimbaSectionNode);
 end;
 
 procedure TSimbaFunctionListPage.DoAfterFilter(Sender: TObject);
 begin
   if (FTreeView.Filter = '') then
-  begin
-    FTreeView.BeginUpdate();
-    FTreeView.FullCollapse();
+    CollapseAll();
 
-    FScriptNode.Expanded := True;
-    FIncludesNode.Expanded := True;
-    FPluginsNode.Expanded := True;
-    if (FSimbaNode <> nil) then
-      FSimbaNode.Expanded := True;
-
-    FTreeView.EndUpdate();
-  end;
+  // the filter decides what is visible by the text alone: hide the hidden sections again
+  DoHiddenSimbaSectionsChange(SimbaSettings.FunctionList.HiddenSimbaSections);
 end;
 
 constructor TSimbaFunctionListPage.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-
-  FCodeInsight := TCodeinsight.Create();
 
   FTreeView := TSimbaTreeView.Create(Self);
   FTreeView.Parent := Self;
@@ -429,92 +392,88 @@ begin
   FIncludesNode := FTreeView.AddNode('Includes', SimbaImages.SECTION);
   FPluginsNode  := FTreeView.AddNode('Plugins', SimbaImages.SECTION);
 
-  FScriptNodeState   := TTreeNodeExpandedState.Create(TTreeNode(nil));
-  FIncludesNodeState := TTreeNodeExpandedState.Create(TTreeNode(nil));
-  FPluginsNodeState  := TTreeNodeExpandedState.Create(TTreeNode(nil));
-
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.FunctionList.HiddenSimbaSections, @DoHiddenSimbaSectionsChange);
   SimbaSettings.RegisterChangeHandler(Self, SimbaSettings.FunctionList.CustomOrder, @DoCustomOrderChange);
 end;
 
 destructor TSimbaFunctionListPage.Destroy;
 begin
-  if (FScriptNodeState <> nil) then
-    FreeAndNil(FScriptNodeState);
-  if (FIncludesNodeState <> nil) then
-    FreeAndNil(FIncludesNodeState);
-  if (FPluginsNodeState <> nil) then
-    FreeAndNil(FPluginsNodeState);
   if (FCodeInsight <> nil) then
     FreeAndNil(FCodeInsight);
 
   inherited Destroy();
 end;
 
-procedure TSimbaFunctionListPage.Fill;
+function TSimbaFunctionListPage.BeginUpdate: TCodeinsight;
 var
-  Script, ScriptFileName: String;
-  ExpandScriptNode: Boolean;
-
-  procedure BeginUpdate;
-  var
-    Tab: TSimbaScriptTab;
-  begin
-    Tab := SimbaController.FindTab(FTabID);
-
-    if (Tab <> nil) then
-    begin
-      Script := Tab.Script;
-      ScriptFileName := Tab.ScriptFileName;
-      ExpandScriptNode := (FScriptNode.Count = 0) or FScriptNode.Expanded;
-
-      FScriptNodeState.CreateChildNodes(FScriptNode);
-      FIncludesNodeState.CreateChildNodes(FIncludesNode);
-      FPluginsNodeState.CreateChildNodes(FPluginsNode);
-
-      FTreeView.BeginUpdate();
-    end;
-  end;
-
-  procedure EndUpdate;
-  var
-    I: Integer;
-  begin
-    FScriptNode.DeleteChildren();
-    for I := 0 to FCodeinsight.ScriptParser.Items.Count - 1 do
-      AddDecl(FScriptNode, FCodeinsight.ScriptParser.Items[I]);
-    FScriptNode.Expanded := ExpandScriptNode;
-
-    AddIncludes(FCodeInsight.IncludeParsers, FIncludesNode);
-    AddIncludes(FCodeInsight.PluginParsers, FPluginsNode);
-    if (FSimbaNode = nil) then
-      AddSimbaNode();
-
-    FScriptNodeState.Apply(FScriptNode);
-    FIncludesNodeState.Apply(FIncludesNode);
-    FPluginsNodeState.Apply(FPluginsNode);
-
-    FTreeView.EndUpdate();
-
-    FNeedUpdate := False;
-  end;
-
+  Tab: TSimbaScriptTab;
 begin
+  Result := nil;
   if (not FNeedUpdate) then
     Exit;
 
-  RunInMainThread(@BeginUpdate);
-
-  if FTreeView.Items.IsUpdating then
-  try
+  Tab := SimbaController.FindTab(FTabID);
+  if (Tab <> nil) then
+  begin
     {$IFDEF DEBUG}
     DebugLn('Need Update');
     {$ENDIF}
-    FCodeInsight.SetScript(Script, ScriptFileName);
-    FCodeInsight.Run();
-  finally
-    RunInMainThread(@EndUpdate);
+    FNeedUpdate := False; // with the script taken: an edit made while it is parsed asks for another update
+
+    Result := TCodeinsight.Create();
+    Result.SetScript(Tab.Script, Tab.ScriptFileName);
   end;
+end;
+
+// The nodes go from the old insight's declarations to the new one's in one go:
+// no node is ever left pointing at a declaration that has been freed.
+procedure TSimbaFunctionListPage.EndUpdate(Insight: TCodeinsight);
+var
+  Expanded: TTreeNodeExpandedState;
+  ExpandScriptNode: Boolean;
+  I: Integer;
+begin
+  ExpandScriptNode := (FScriptNode.Count = 0) or FScriptNode.Expanded;
+  Expanded := TTreeNodeExpandedState.Create(FScriptNode); // the first section: it and those after it are taken
+
+  FTreeView.BeginUpdate();
+  try
+    FScriptNode.DeleteChildren();
+    if (FCodeInsight <> nil) then
+      FreeAndNil(FCodeInsight);
+    FCodeInsight := Insight;
+
+    for I := 0 to FCodeInsight.ScriptParser.Items.Count - 1 do
+      AddDecl(FScriptNode, FCodeInsight.ScriptParser.Items[I]);
+
+    AddIncludes(FCodeInsight.IncludeParsers, FIncludesNode);
+    AddIncludes(FCodeInsight.PluginParsers, FPluginsNode);
+    AddSimbaNode();
+
+    Expanded.Apply(FScriptNode);
+    FScriptNode.Expanded := ExpandScriptNode; // after Apply: that collapses it when it was empty before, as an empty node is never expanded
+
+    if (FTreeView.Filter <> '') then
+      FTreeView.UpdateFilter(); // the new nodes are not filtered yet. Done when the update ends
+  finally
+    FTreeView.EndUpdate();
+
+    Expanded.Free();
+  end;
+end;
+
+procedure TSimbaFunctionListPage.CollapseAll;
+begin
+  FTreeView.BeginUpdate();
+  FTreeView.FullCollapse();
+
+  FScriptNode.Expanded := True;
+  FIncludesNode.Expanded := True;
+  FPluginsNode.Expanded := True;
+  if (FSimbaNode <> nil) then
+    FSimbaNode.Expanded := True;
+
+  FTreeView.EndUpdate();
 end;
 
 procedure TParserNode.SetParser(Value: TCodeParser);

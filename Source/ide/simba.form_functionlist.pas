@@ -12,7 +12,6 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, ExtCtrls,
   simba.base,
-  simba.containers,
   simba.component_notebook,
   simba.functionlist_page,
   simba.ide_events,
@@ -20,13 +19,11 @@ uses
 
 type
   TSimbaFunctionListForm = class(TForm)
-  protected type
-    TFunctionListPageList = specialize TSimbaList<TSimbaFunctionListPage>;
   protected
     FUpdateThread: TThread;
     FIsIdle: Boolean;
     FNotebook: TSimbaNotebook;
-    FPendingRemoves: TFunctionListPageList;
+    FClosedPages: array of TSimbaFunctionListPage; // main thread only
 
     function PageForTab(Tab: TSimbaScriptTab): TSimbaFunctionListPage;
 
@@ -49,6 +46,7 @@ uses
   AnchorDocking, Menus,
   simba.initializations,
   simba.ide_docking,
+  simba.ide_codetools_insight,
   simba.threading;
 
 function TSimbaFunctionListForm.PageForTab(Tab: TSimbaScriptTab): TSimbaFunctionListPage;
@@ -63,24 +61,49 @@ begin
 end;
 
 procedure TSimbaFunctionListForm.DoUpdateThread;
+var
+  Page: TSimbaFunctionListPage;
+  Insight: TCodeinsight;
+
+  procedure BeginUpdate;
+  var
+    I: Integer;
+  begin
+    for I := 0 to High(FClosedPages) do
+      FClosedPages[I].Free();
+    FClosedPages := nil;
+
+    Insight := nil;
+
+    Page := TSimbaFunctionListPage(FNotebook.ActivePage);
+    if (Page <> nil) then
+      Insight := Page.BeginUpdate();
+  end;
+
+  procedure EndUpdate;
+  begin
+    Page.EndUpdate(Insight);
+  end;
+
 begin
-  try
-    while not TThread.CurrentThread.CheckTerminated do
-    begin
-      if FIsIdle then
-      begin
-        if (FNotebook.ActivePage <> nil) then
-          TSimbaFunctionListPage(FNotebook.ActivePage).Fill();
+  while (not TThread.CurrentThread.CheckTerminated) do
+  begin
+    if FIsIdle then
+    try
+      RunInMainThread(@BeginUpdate);
 
-        while (FPendingRemoves.Count > 0) do
-          RunInMainThread(@FPendingRemoves.Pop.Free);
+      if (Insight <> nil) then
+      try
+        Insight.Run();
+      finally
+        RunInMainThread(@EndUpdate);
       end;
-
-      Sleep(350);
+    except
+      on E: Exception do
+        DebugLn('[TSimbaFunctionListForm.DoUpdateThread]: ' + E.Message);
     end;
-  except
-    on E: Exception do
-      DebugLn('[TSimbaFunctionListForm.DoUpdateThread]: ' + E.Message);
+
+    Sleep(350);
   end;
 end;
 
@@ -123,8 +146,6 @@ begin
   FNotebook := TSimbaNotebook.Create(Self, TSimbaFunctionListPage);
   FNotebook.Parent := Self;
   FNotebook.Align := alClient;
-
-  FPendingRemoves := TFunctionListPageList.Create();
 end;
 
 destructor TSimbaFunctionListForm.Destroy;
@@ -135,10 +156,6 @@ begin
     FUpdateThread.WaitFor();
     FreeAndNil(FUpdateThread);
   end;
-
-  while (FPendingRemoves.Count > 0) do
-    FPendingRemoves.Pop.Free();
-  FreeAndNil(FPendingRemoves);
 
   inherited Destroy();
 end;
@@ -171,7 +188,7 @@ procedure TSimbaFunctionListForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer)
   begin
     Page := PageForTab(Tab);
     if (Page <> nil) then
-      FPendingRemoves.Add(Page);
+      FClosedPages += [Page]; // freed by the update thread
   end;
 
   procedure DoTabAdd(Tab: TSimbaScriptTab);
@@ -196,6 +213,9 @@ procedure TSimbaFunctionListForm.DoSimbaEvent(Event: ESimbaEvent; Data: Pointer)
   var
     Splitter: TAnchorDockSplitter;
   begin
+    if (FNotebook.ActivePage = nil) then
+      Exit;
+
     if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akRight, Splitter) and (Splitter = TObject(Data))) then
       Splitter.SetSplitterPosition((Splitter.GetSplitterPosition() - Width) + TSimbaFunctionListPage(FNotebook.ActivePage).TreeView.MaxRight)
     else if (GetDockSplitter(DockMaster.GetAnchorSite(Self), akLeft, Splitter) and (Splitter = TObject(Data))) then

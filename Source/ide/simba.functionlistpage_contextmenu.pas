@@ -21,7 +21,6 @@ type
     FHideShowSection: TMenuItem;
     FOpenSimbaDoc: TMenuItem;
     FTooltip: TMenuItem;
-    FCollapseAll: TMenuItem;
     FShowAll: TMenuItem;
     FHideAll: TMenuItem;
 
@@ -33,7 +32,7 @@ type
     procedure DoShowAllClick(Sender: TObject);
     procedure DoHideAllClick(Sender: TObject);
   public
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(APage: TSimbaFunctionListPage); reintroduce;
   end;
 
 implementation
@@ -46,18 +45,14 @@ uses
 procedure TFunctionListPage_ContextMenu.DoOpenSimbaDocClick(Sender: TObject);
 var
   Node: TTreeNode;
-  Section: String;
 begin
-  Section := '';
-
+  // the section the selection is in, at any depth
   Node := FPage.TreeView.Selected;
-  if (Node is TSimbaSectionNode) then
-    Section := Node.Text
-  else if (Node is TDeclNode) and (Node.Parent is TSimbaSectionNode) then
-    Section := Node.Parent.Text;
+  while (Node <> nil) and (not (Node is TSimbaSectionNode)) do
+    Node := Node.Parent;
 
-  if (Section <> '') then
-    SimbaNativeInterface.OpenURL(SIMBA_DOCS_URL + 'api/' + Section)
+  if (Node <> nil) then
+    SimbaNativeInterface.OpenURL(SIMBA_DOCS_URL + 'api/' + Node.Text)
   else
     SimbaNativeInterface.OpenURL(SIMBA_DOCS_URL);
 end;
@@ -67,23 +62,20 @@ var
   I: Integer;
   NewItem: TMenuItem;
   Hidden: String;
+  InSimba: Boolean;
 begin
-  if (FPage.SimbaNode = nil) then
-    Exit;
+  FTooltip.Checked := SimbaSettings.FunctionList.ShowMouseoverHint.Value; // every page has a menu: another may have changed it
 
-  if (FPage.TreeView.Selected = nil) or (not FPage.TreeView.Selected.HasAsParent(FPage.SimbaNode)) then
-  begin
-    FOpenSimbaDoc.Enabled := False;
-    FHideShowSection.Enabled := False;
-    FShowAll.Enabled := False;
-    FHideAll.Enabled := False;
-  end else
-  begin
-    FOpenSimbaDoc.Enabled := True;
-    FHideShowSection.Enabled := True;
-    FShowAll.Enabled := True;
-    FHideAll.Enabled := True;
+  InSimba := (FPage.SimbaNode <> nil) and (FPage.TreeView.Selected <> nil) and
+             ((FPage.TreeView.Selected = FPage.SimbaNode) or FPage.TreeView.Selected.HasAsParent(FPage.SimbaNode));
 
+  FOpenSimbaDoc.Enabled := InSimba;
+  FHideShowSection.Enabled := InSimba;
+  FShowAll.Enabled := InSimba;
+  FHideAll.Enabled := InSimba;
+
+  if InSimba then
+  begin
     Hidden := SimbaSettings.FunctionList.HiddenSimbaSections.Value;
 
     FHideShowSection.Clear();
@@ -120,13 +112,7 @@ end;
 
 procedure TFunctionListPage_ContextMenu.DoCollapseAllClick(Sender: TObject);
 begin
-  FPage.TreeView.FullCollapse();
-
-  FPage.ScriptNode.Expanded := True;
-  FPage.IncludesNode.Expanded := True;
-  FPage.PluginsNode.Expanded := True;
-  if (FPage.SimbaNode <> nil) then
-    FPage.SimbaNode.Expanded := True;
+  FPage.CollapseAll();
 end;
 
 procedure TFunctionListPage_ContextMenu.DoShowAllClick(Sender: TObject);
@@ -139,9 +125,6 @@ var
   Hidden: String;
   I: Integer;
 begin
-  if (FPage.SimbaNode = nil) then
-    Exit;
-
   Hidden := '';
   for I := 0 to FPage.SimbaNode.Count - 1 do
     Hidden := Hidden + '[' + FPage.SimbaNode.Items[I].Text + ']';
@@ -149,40 +132,28 @@ begin
   SimbaSettings.FunctionList.HiddenSimbaSections.Value := Hidden;
 end;
 
-constructor TFunctionListPage_ContextMenu.Create(AOwner: TComponent);
+constructor TFunctionListPage_ContextMenu.Create(APage: TSimbaFunctionListPage);
 
-  procedure AddLine;
-  begin
-    Items.Add(NewLine());
-  end;
-
-  function Add(ACaption: String; AOnClick: TNotifyEvent; Checkable: Boolean = False; Checked: Boolean = False; ImageIndex: Integer = -1): TMenuItem;
+  function Add(ACaption: String; AOnClick: TNotifyEvent): TMenuItem;
   begin
     Result := TMenuItem.Create(Self);
     Result.Caption := ACaption;
     Result.OnClick := AOnClick;
-    Result.ImageIndex := ImageIndex;
-    if Checkable then
-    begin
-      Result.AutoCheck := Checkable;
-      Result.ShowAlwaysCheckable := Checkable;
-      Result.Checked := Checked;
-    end;
 
     Items.Add(Result);
   end;
 
 begin
-  inherited Create(AOwner);
+  inherited Create(APage);
 
-  Assert(AOwner is TSimbaFunctionListPage);
+  FPage := APage;
 
-  FPage := AOwner as TSimbaFunctionListPage;
-
-  FTooltip := Add('Show Mouse-over tooltip', @DoMouseOverTooltipClick, True, SimbaSettings.FunctionList.ShowMouseoverHint.Value);
-  FCollapseAll := Add('Collapse all', @DoCollapseAllClick);
-  AddLine();
-  FOpenSimbaDoc := Add('Open Simba Documentation', @DoOpenSimbaDocClick, False, False);
+  FTooltip := Add('Show tooltip', @DoMouseOverTooltipClick);
+  FTooltip.AutoCheck := True;
+  FTooltip.ShowAlwaysCheckable := True;
+  Add('Collapse all', @DoCollapseAllClick);
+  Items.AddSeparator();
+  FOpenSimbaDoc := Add('Open Simba Documentation', @DoOpenSimbaDocClick);
   FHideShowSection := Add('Hide/Show Section', nil);
   FShowAll := Add('Show all', @DoShowAllClick);
   FHideAll := Add('Hide all', @DoHideAllClick);

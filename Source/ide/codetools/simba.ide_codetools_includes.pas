@@ -168,7 +168,7 @@ end;
 
 function TCodetoolsInclude.IncRef: TCodeParser;
 begin
-  Inc(FRefCount);
+  InterlockedIncrement(FRefCount); // atomic: function list nodes change it without the cache lock
   Result := Self;
 
   {$IFDEF PARSER_CACHE_DEBUG}
@@ -178,7 +178,7 @@ end;
 
 function TCodetoolsInclude.DecRef: TCodeParser;
 begin
-  Dec(FRefCount);
+  InterlockedDecrement(FRefCount);
   Result := Self;
 
   {$IFDEF PARSER_CACHE_DEBUG}

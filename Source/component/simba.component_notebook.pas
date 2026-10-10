@@ -16,7 +16,10 @@ uses
 
 type
   TSimbaPageClass = class of TSimbaPage;
-  TSimbaPage = class(TPage);
+  TSimbaPage = class(TPage)
+  public
+    destructor Destroy; override;
+  end;
 
   TSimbaNotebook = class(TCustomControl)
   protected
@@ -46,6 +49,13 @@ type
 
 implementation
 
+destructor TSimbaPage.Destroy;
+begin
+  Parent := nil; // out of the notebook first, else it processes messages with a stale page index
+
+  inherited Destroy();
+end;
+
 function TSimbaNotebook.IndexOf(Page: TSimbaPage): Integer;
 begin
   Result := FNotebook.IndexOf(Page);
@@ -61,7 +71,10 @@ end;
 
 function TSimbaNotebook.GetActivePage: TSimbaPage;
 begin
-  Result := TSimbaPage(FNotebook.ActivePageComponent);
+  if (FNotebook.PageIndex > -1) then
+    Result := TSimbaPage(FNotebook.ActivePageComponent)
+  else
+    Result := nil;
 end;
 
 function TSimbaNotebook.GetPageCount: Integer;
@@ -86,7 +99,8 @@ end;
 
 procedure TSimbaNotebook.SetActivePage(Page: TSimbaPage);
 begin
-  FNotebook.ShowControl(Page);
+  if (Page <> nil) then
+    FNotebook.ShowControl(Page);
 end;
 
 function TSimbaNotebook.AddPage: TSimbaPage;
