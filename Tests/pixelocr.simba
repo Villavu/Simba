@@ -1,0 +1,619 @@
+{$assertions on}
+
+// Fonts and images are in Tests/resources.zip: fonts/ and ocr*.png
+
+const
+  ZIP = 'Tests/resources.zip';
+  LINE = 'The quick brown fox jumps over 13 dogs!'; // no characters that look the same as another
+
+var
+  ocr: TPixelOCR;
+  img: TImage;
+  FontBold12: TPixelFont;
+  FontBold12Shadow: TPixelFont;
+  FontPlain11: TPixelFont;
+  FontPlain12: TPixelFont;
+  FontQuill8: TPixelFont;
+
+procedure Load(Name: String);
+begin
+  img.FromZip(ZIP, 'ocr' + Name + '.png');
+end;
+
+procedure Test_Recognize;
+begin
+  Load('_test');
+  img.ReplaceColorBinary(False, [$1F98FF,$0000FF]);
+
+  Assert(ocr.Recognize(img, FontBold12, [0,0,img.Width-1,img.Height-1]) = 'Showing items: hello');
+  Assert(ocr.Recognize(img, FontBold12, [30,24]) = 'Showing items: hello');
+  Assert(Length(ocr.Matches) = 1);
+  Assert(ocr.Matches[0].Text = 'Showing items: hello');
+  Assert(ocr.Matches[0].Hits = 1182);
+  Assert(ocr.Matches[0].Bounds = [31,26,161,39]);
+
+  // only the columns of the box
+  Assert(ocr.Recognize(img, FontBold12, [85,0,img.Width-1,img.Height-1]) = 'items: hello');
+  Assert(ocr.Recognize(img, FontBold12, [0,0,84,img.Height-1]) = 'Showing');
+end;
+
+// a read can start off the image, and a box can be bigger than it
+procedure Test_OffImage;
+begin
+  Load('_test');
+  img.ReplaceColorBinary(False, [$1F98FF,$0000FF]);
+
+  Assert(ocr.Recognize(img, FontBold12, [-100000,24]) = 'Showing items: hello');
+  Assert(ocr.Recognize(img, FontBold12, [Low(Integer),24]) = 'Showing items: hello');
+  Assert(ocr.Recognize(img, FontBold12, [img.Width,24]) = '');
+  Assert(ocr.Recognize(img, FontBold12, [30,-500]) = '');
+  Assert(ocr.Recognize(img, FontBold12, [30,High(Integer)-3]) = '');
+  Assert(ocr.Recognize(img, FontBold12, [-50,-50,10000,10000]) = 'Showing items: hello');
+
+  // rows off the image in colour
+  Load('_test');
+  Assert(ocr.Recognize(img, FontBold12, [30,-500]) = '');
+  Assert(ocr.Recognize(img, FontBold12, [30,High(Integer)-3]) = '');
+end;
+
+// nothing to read: an image with no text, black and white or in colour, or too small for any
+procedure Test_NoText;
+var
+  Font: TPixelFont;
+  Color, Size: Integer;
+begin
+  for Font in [FontBold12, FontBold12Shadow] do
+  begin
+    for Color in [0,$336699] do
+    begin
+      img := new TImage(200, 40);
+      img.Fill(Color);
+
+      Assert(ocr.Recognize(img, Font) = '');
+      Assert(Length(ocr.Matches) = 1);
+      Assert(ocr.Matches[0].Hits = 0);
+      Assert(ocr.Recognize(img, Font, [0,0]) = '');
+      Assert(Length(ocr.RecognizeLines(img, Font)) = 0);
+      Assert(Length(ocr.Matches) = 0);
+      Assert(ocr.Locate(img, Font, 'hello') = 0);
+      Assert(Length(ocr.Matches) = 0);
+    end;
+
+    for Size := 0 to 3 do
+    begin
+      img := new TImage(Size, Size);
+
+      Assert(ocr.Recognize(img, Font) = '');
+      Assert(ocr.Recognize(img, Font, [0,0]) = '');
+      Assert(Length(ocr.RecognizeLines(img, Font)) = 0);
+      Assert(ocr.Locate(img, Font, 'hello') = 0);
+    end;
+
+    // a row just above an image with columns but no rows
+    img := new TImage(5, 0);
+    Assert(ocr.Recognize(img, Font, [0,-1]) = '');
+  end;
+end;
+
+// a character with no shadow needs a pixel of image on every side of it, one with a shadow does not
+procedure Test_Edge;
+begin
+  Load('_test');
+  img.ReplaceColorBinary(False, [$1F98FF,$0000FF]);
+
+  Assert(ocr.Recognize(img.Copy([30,25,162,40]), FontBold12) = 'Showing items: hello');
+  Assert(ocr.Recognize(img.Copy([31,26,161,39]), FontBold12) <> 'Showing items: hello');
+
+  // the same in colour
+  Load('_ml4');
+  Assert(ocr.Recognize(img.Copy([1,25,96,40]), FontPlain12) = 'Remaining XP: 63');
+  Assert(ocr.Recognize(img.Copy([2,26,95,39]), FontPlain12) <> 'Remaining XP: 63');
+
+  Load('4');
+  Assert(ocr.Recognize(img.Copy([83,20,142,30]), FontBold12Shadow) = '1,843,117');
+end;
+
+// a character joined to a bar of its own colour is still read
+procedure Test_Bar;
+var
+  X, Y: Integer;
+begin
+  Load('_test');
+  img.ReplaceColorBinary(False, [$1F98FF,$0000FF]);
+
+  // down the whole image: the column left of the h, and the two of its stem
+  for Y := 0 to img.Height - 1 do
+    for X := 131 to 133 do
+      img.Pixel[X,Y] := $FFFFFF;
+
+  Assert(ocr.Recognize(img, FontBold12, [30,24]) = 'Showing items: hello');
+end;
+
+procedure Test_Options;
+begin
+  Load('_test');
+  img.ReplaceColorBinary(False, [$1F98FF,$0000FF]);
+
+  ocr.MaxLen := 7;
+  Assert(ocr.Recognize(img, FontBold12, [30,24]) = 'Showing');
+  ocr.MaxLen := 0;
+
+  ocr.MaxWalk := 3; // the gap between two words is wider
+  Assert(ocr.Recognize(img, FontBold12, [30,24]) = 'Showing');
+  Assert(ocr.Recognize(img.Copy([30,25,162,40]), FontBold12, [-500,-1]) = 'Showing'); // columns left of the image are not walked
+
+  // lines are read whole
+  ocr.MaxLen := 3;
+  Assert(ToString(ocr.RecognizeLines(img, FontBold12)) = '[Showing items: hello]');
+  ocr := [];
+
+  ocr.Whitelist := ['a'..'z']; // the others are read, and left out
+  Assert(ocr.Recognize(img, FontBold12, [30,24]) = 'howing items hello');
+  ocr := [];
+end;
+
+// SpaceWidth is how many empty columns read as a space: here the gaps in a word are 2 columns, between words 6
+procedure Test_SpaceWidth;
+begin
+  Load('_test');
+  img.ReplaceColorBinary(False, [$1F98FF,$0000FF]);
+
+  Assert(ocr.Recognize(img, TPixelOCR.LoadFont(ZIP, 'fonts/Bold 12', 2), [30,24]) = 'S h o w i n g i t e m s : h e l l o');
+  Assert(ocr.Recognize(img, TPixelOCR.LoadFont(ZIP, 'fonts/Bold 12', 6), [30,24]) = 'Showing items: hello');
+  Assert(ocr.Recognize(img, TPixelOCR.LoadFont(ZIP, 'fonts/Bold 12', 7), [30,24]) = 'Showingitems:hello');
+end;
+
+procedure Test_MultiLine1;
+begin
+  Load('_ml1');
+  img.ReplaceColorBinary(False, [$000000,$000080]);
+
+  Assert(ToString(ocr.RecognizeLines(img, FontQuill8)) = '[Select an Option, I''d like to access my bank account, please., I''d like to check my PIN settings., I''d like to collect items., What is this place?]');
+  Assert(Length(ocr.Matches) = 5);
+  Assert(ocr.Matches[4].Text = 'What is this place?');
+  Assert(ocr.Matches[4].Bounds = [127,91,248,106]);
+
+  // only the lines that start in the rows of the box: these two start at the rows 51 and 71
+  Assert(ToString(ocr.RecognizeLines(img, FontQuill8, [0,40,img.Width-1,70])) = '[I''d like to check my PIN settings.]');
+  Assert(ToString(ocr.RecognizeLines(img, FontQuill8, [0,51,img.Width-1,71])) = '[I''d like to check my PIN settings., I''d like to collect items.]');
+  Assert(ToString(ocr.RecognizeLines(img, FontQuill8, [0,52,img.Width-1,71])) = '[I''d like to collect items.]');
+
+  Assert(ocr.Recognize(img, FontQuill8, [0,68,img.Width-1,70]) = '');
+  Assert(ocr.Recognize(img, FontQuill8, [0,68,img.Width-1,71]) = 'I''d like to collect items.');
+end;
+
+procedure Test_MultiLine2;
+begin
+  Load('_ml2');
+  img.ReplaceColorBinary(False, $000000, 1);
+
+  Assert(ToString(ocr.RecognizeLines(img, FontPlain12)) = '[Blighted super, restore(4)]');
+end;
+
+// Plain 11 has the same image for l and I: an l is read as I
+procedure Test_MultiLine3;
+begin
+  Load('_ml3');
+  img.ReplaceColorBinary(False, $009933, 5);
+  Assert(ToString(ocr.RecognizeLines(img, FontPlain11)) = '[Leather Boots:, Adamant KiteshieId:, Adamant HeIm:, EmeraId:, Rune Longsword:]');
+
+  Load('_ml3');
+  img.ReplaceColorBinary(False, $00CC33, 5);
+  Assert(ToString(ocr.RecognizeLines(img, FontPlain11)) = '[0, 5, 1, 30, 15, 8]');
+end;
+
+procedure Test_MultiLine4;
+begin
+  Load('_ml4');
+  img.ReplaceColorBinary(False, $000000, 1);
+  Assert(ToString(ocr.RecognizeLines(img, FontPlain12)) = '[Fishing XP: 20, Next level at: 83, Remaining XP: 63]');
+
+  // the same in colour: each character one colour, the pixels round it another
+  Load('_ml4');
+  Assert(ocr.Recognize(img, FontPlain12) = 'Remaining XP: 63');
+  Assert(ToString(ocr.RecognizeLines(img, FontPlain12)) = '[Fishing XP: 20, Next level at: 83, Remaining XP: 63]');
+end;
+
+procedure Test_MultiLine5;
+begin
+  Load('_ml5');
+  img.ReplaceColorBinary(False, $2F4D4D);
+
+  Assert(ToString(ocr.RecognizeLines(img, FontPlain12)) = '[Ahrim, Dharok, Guthan, Karil, Torag, Verac, Rewards potential: 0%]');
+end;
+
+procedure Test_MultiLine6;
+begin
+  Load('_ml6');
+  img.ReplaceColorBinary(False, $000000, 1);
+
+  Assert(ToString(ocr.RecognizeLines(img, FontQuill8)) = '[Al Kharid PvP Arena., Castle Wars Arena., Ferox Enclave., Nowhere.]');
+end;
+
+// a row of dashes close under a word reads as more than the word, but it is not text and does not hide it
+procedure Test_LinesRule;
+begin
+  img := new TImage(180, 36);
+  img.Canvas.DrawColor := Colors.WHITE;
+  img.Canvas.DrawTPA(TPixelOCR.TextToTPA(FontBold12, 'Total', [20,8]));
+  img.Canvas.DrawTPA(TPixelOCR.TextToTPA(FontBold12, '- - - - - - - - - - - -', [20,20]));
+
+  Assert(ToString(ocr.RecognizeLines(img, FontBold12)) = '[Total]');
+end;
+
+procedure Test_UpText;
+var
+  Expected: TStringArray;
+
+  procedure Row(Y: Integer; Text: String);
+  begin
+    Assert(ocr.Recognize(img, FontBold12Shadow, [0,Y]) = Text);
+    Expected += [Text];
+  end;
+
+begin
+  ocr.Tolerance := 25;
+  ocr.ShadowTolerance := 65;
+  ocr.Whitelist := ['a'..'z', 'A'..'Z', '0'..'9', '-', '>', '(', ')', '/'];
+
+  Load('_uptext');
+
+  Row(0, 'Chop down Yew tree / 2 more options');
+  Row(20, 'Talk-to Grand Exchange Clerk / 98 more options');
+  Row(39, 'Bank Bank booth / 3 more options');
+  Row(58, 'Remove Chaotic handegg / 1 more options');
+  Row(76, 'Use Body rune -> King Roald / 1 more options');
+  Row(95, 'Pray-at Altar / 2 more options');
+  Row(114, 'Attack Grizzly bear (level-21) / 2 more options');
+  Row(133, 'Use Gold bar -> BAYRAKTAR22 (level-109) / 2 more options');
+  Row(149, 'Lookup-entity Wiki -> Grand Exchange booth');
+  Row(168, 'Talk-to Grand Exchange Clerk / 10 more options');
+  Row(187, 'Use Super strength(3) (Members) -> 23 Steal 155 (level-82)');
+  Row(206, 'Take Green dhide vambraces / 2 more options');
+  Row(225, 'Use Super strength(3) (Members) -> Hanging banner / 2 more');
+  Row(244, 'Use Body rune -> Fireplace');
+  Row(262, 'Talk-to Cook / 2 more options');
+  Row(281, 'Use Body rune -> Spider (level-1)');
+  Row(300, 'Use Gold bar -> Barrel / 1 more options');
+  Row(318, 'Use Body rune -> Cooking Pots / 1 more options');
+  Row(336, 'Take Mind rune / 2 more options');
+  Row(352, 'Withdraw-1 Gold bracelet (Members) / 8 more options');
+  Row(371, 'Talk-to Banker tutor / 8 more options');
+  Row(390, 'Use Gold bar -> Super strength(3) (Members)');
+  Row(408, 'Use Berserker ring (i) (Members) -> Rm s (level-126) / 1 more options');
+  Row(428, 'Talk-to Saradominist recruiter / 3 more options');
+  Row(448, 'Withdraw-1 Clue geode (hard) (Members) / 8 more options');
+  Row(467, 'Talk-to Spirit tree / 3 more options');
+
+  // and all of them as lines
+  Assert(ToString(ocr.RecognizeLines(img, FontBold12Shadow)) = ToString(Expected));
+
+  ocr := [];
+end;
+
+procedure Test_Locate;
+begin
+  Load('_test');
+  img.ReplaceColorBinary(False, [$1F98FF,$0000FF]);
+
+  Assert(ocr.Locate(img, FontBold12, 'Showing') = 1);
+  Assert(Length(ocr.Matches) = 1);
+  Assert(ocr.Matches[0].Text = 'Showing');
+  Assert(ocr.Matches[0].Hits = 100);
+  Assert(ocr.Matches[0].Bounds = [31,26,81,39]);
+
+  // not there: no match
+  Assert(ocr.Locate(img, FontBold12, 'Zebra') = 0);
+  Assert(Length(ocr.Matches) = 0);
+
+  // a stray pixel in the text's box: the match is lower by its share of the box
+  img.Pixel[45,26] := $FFFFFF;
+  Assert(Round(ocr.Locate(img, FontBold12, 'Showing') * 1000000) = 998198);
+  Assert(ocr.Matches[0].Bounds = [31,26,81,39]);
+
+  // text of several words
+  Load('_ml1');
+  img.ReplaceColorBinary(False, [$000000,$000080]);
+  Assert(ocr.Locate(img, FontQuill8, 'What is this place?') = 1);
+  Assert(ocr.Matches[0].Bounds = [127,91,248,106]);
+
+  Load('_test');
+  Assert(ocr.Locate(img, FontBold12, 'items') = 1);
+  Assert(Length(ocr.Matches) = 1);
+  Assert(ocr.Matches[0].Text = 'items');
+  Assert(ocr.Matches[0].Hits = 100);
+  Assert(ocr.Matches[0].Bounds = [88,27,121,35]);
+
+  // not there, in colour: a low match
+  Assert(ocr.Locate(img, FontBold12, 'Zebra') < 0.5);
+end;
+
+procedure Test_Orange;
+begin
+  Load('1');
+  img.ReplaceColorBinary(False, $1F98FF);
+  Assert(ocr.Recognize(img, FontBold12) = 'Master volume - 100%');
+end;
+
+// ocr2 is Plain 11, ocr3 is Plain 12, ocr4 is Bold 12 with a shadow: the same number, white
+procedure Test_Number;
+begin
+  Load('2');
+  img.ReplaceColorBinary(False, $FFFFFF);
+  Assert(ocr.Recognize(img, FontPlain11) = '1,843,117');
+
+  Load('3');
+  img.ReplaceColorBinary(False, $FFFFFF);
+  Assert(ocr.Recognize(img, FontPlain12) = '1,843,117');
+
+  Load('4');
+  Assert(ocr.Recognize(img, FontBold12Shadow) = '1,843,117'); // by its shadow
+
+  img.ReplaceColorBinary(False, $FFFFFF);
+  Assert(ocr.Recognize(img, FontBold12) = '1,843,117'); // by its background
+  Assert(ocr.Recognize(img, FontBold12Shadow) = '1,843,117'); // by its shadow, which is black
+
+  Load('4');
+  img.ReplaceColorBinary(False, [$FFFFFF,$000000]);
+  Assert(ocr.Recognize(img, FontBold12Shadow) <> '1,843,117'); // not with the shadow white too
+end;
+
+// Plain 11 has the same image for l and I, and for 0 and O
+procedure Test_SimilarGlyphs;
+begin
+  Assert(ToString(TPixelOCR.GetSimilarGlyphs(FontPlain11, 'l')) = '[I]');
+  Assert(ToString(TPixelOCR.GetSimilarGlyphs(FontPlain11, 'I')) = '[l]');
+  Assert(ToString(TPixelOCR.GetSimilarGlyphs(FontPlain11, 'O')) = '[0]');
+  Assert(Length(TPixelOCR.GetSimilarGlyphs(FontBold12, 'l')) = 0);
+
+  Assert(ToString(TPixelOCR.GetSimilarGlyphs(FontBold12, '.', 0.4)) = '[:]');
+  Assert(ToString(TPixelOCR.GetSimilarGlyphs(FontPlain12, 'O', 0.7)) = '[Q, 0]'); // the most alike first
+  Assert(Length(TPixelOCR.GetSimilarGlyphs(FontBold12, ' ', 0)) = 0);
+end;
+
+// row 0 is the top of the text and column 0 the left edge of its first character's image: h has an empty column left of it
+procedure Test_TextToTPA;
+var
+  Font: TPixelFont;
+  Small, Big: TImage;
+begin
+  Assert(TPixelOCR.TextToTPA(FontBold12, 'h').Bounds = [1,0,6,9]);
+  Assert(TPixelOCR.TextToTPA(FontBold12, 'h', [10,20]).Bounds = [11,20,16,29]);
+  Assert(TPixelOCR.TextToTPA(FontBold12, 'h', [10,20], 2).Bounds = [12,20,23,39]);
+
+  // a scale of 3 is the same picture with each pixel a square of 3
+  for Font in [FontBold12, FontBold12Shadow, FontPlain11, FontPlain12, FontQuill8] do
+  begin
+    Small := new TImage(400, 30);
+    Small.Canvas.DrawColor := Colors.WHITE;
+    Small.Canvas.DrawTPA(TPixelOCR.TextToTPA(Font, LINE, [3,3]));
+    Big := new TImage(1200, 90);
+    Big.Canvas.DrawColor := Colors.WHITE;
+    Big.Canvas.DrawTPA(TPixelOCR.TextToTPA(Font, LINE, [9,9], 3));
+    Assert(Length(Big.Finder.FindColor(Colors.WHITE, 0)) = 9 * Length(Small.Finder.FindColor(Colors.WHITE, 0)));
+    Assert(Big.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, 400, 30).Equals(Small));
+  end;
+
+  // a scale under 1 is 1
+  Assert(ToString(TPixelOCR.TextToTPA(FontBold12, 'h', [0,0], 0)) = ToString(TPixelOCR.TextToTPA(FontBold12, 'h')));
+end;
+
+// drawn text is the font's own pixels, so it reads back and is located exactly
+procedure Test_DrawText;
+var
+  Font: TPixelFont;
+  Small, Big: TImage;
+begin
+  for Font in [FontBold12, FontBold12Shadow, FontPlain11, FontPlain12, FontQuill8] do
+  begin
+    Small := new TImage(400, 30);
+    Small.Canvas.DrawColor := Colors.WHITE;
+    Small.Canvas.DrawText(Font, LINE, [3,3]);
+    Assert(ocr.Recognize(Small, Font) = LINE);
+    Assert(ocr.Locate(Small, Font, LINE) = 1);
+
+    // a scale of 3 is the same picture with each pixel a square of 3
+    Big := new TImage(1200, 90);
+    Big.Canvas.DrawColor := Colors.WHITE;
+    Big.Canvas.DrawText(Font, LINE, [9,9], 3);
+    Assert(Length(Big.Finder.FindColor(Colors.WHITE, 0)) = 9 * Length(Small.Finder.FindColor(Colors.WHITE, 0)));
+    Assert(Big.Resize(EImageResizeAlgo.NEAREST_NEIGHBOUR, 400, 30).Equals(Small));
+  end;
+
+  // Position is the top left of the character's image: h has an empty column left of it and two rows above
+  Small := new TImage(40, 20);
+  Small.Canvas.DrawColor := Colors.WHITE;
+  Small.Canvas.DrawText(FontBold12, 'h', [10,4]);
+  Assert(Small.Finder.FindColor(Colors.WHITE, 0).Bounds = [11,6,16,15]);
+
+  // a scale under 1 is 1
+  Big := new TImage(40, 20);
+  Big.Canvas.DrawColor := Colors.WHITE;
+  Big.Canvas.DrawText(FontBold12, 'h', [10,4], 0);
+  Assert(Big.Equals(Small));
+
+  // what is off the canvas is not drawn
+  Big := new TImage(60, 40);
+  Big.Canvas.DrawColor := Colors.WHITE;
+  Big.Canvas.DrawText(FontBold12, 'hh', [7,6], 2);
+  Small := new TImage(40, 20);
+  Small.Canvas.DrawColor := Colors.WHITE;
+  Small.Canvas.DrawText(FontBold12, 'hh', [-3,-4], 2);
+  Assert(Small.Equals(Big.Copy([10,10,49,29])));
+
+  // spaces draw nothing
+  Small := new TImage(40, 20);
+  Small.Canvas.DrawText(FontBold12, '   ', [10,4]);
+  Small.Canvas.DrawText(FontBold12, '', [10,4]);
+  Assert(Length(Small.Finder.FindColor(0, 0)) = 40 * 20);
+
+  // DrawAlpha blends it
+  Small.Canvas.DrawColor := Colors.WHITE;
+  Small.Canvas.DrawAlpha := 128;
+  Small.Canvas.DrawText(FontBold12, 'h', [10,4]);
+  Assert(Small.Pixel[11,6] <> 0);
+  Assert(Small.Pixel[11,6] <> Colors.WHITE);
+
+  // a shadow is drawn black: the text is read by it
+  Small := new TImage(400, 30);
+  Small.Fill($606060);
+  Small.Canvas.DrawColor := Colors.YELLOW;
+  Small.Canvas.DrawText(FontBold12Shadow, LINE, [3,3]);
+  Assert(ocr.Recognize(Small, FontBold12Shadow) = LINE);
+  Assert(Length(Small.Finder.FindColor(0, 0)) > 0);
+  Assert(Length(Small.Finder.FindColor(Colors.YELLOW, 0)) = Length(TPixelOCR.TextToTPA(FontBold12Shadow, LINE)));
+end;
+
+// a box drawn tight round a line reads it, with tall letters or not, and not the lines above it
+procedure Test_TightBox;
+var
+  Lines: TStringArray;
+  All, One: TImage;
+  Box: TBox;
+  I: Integer;
+begin
+  Lines := ['Hello there', 'Second', 'one more'];
+
+  All := new TImage(200, 60);
+  All.Canvas.DrawColor := Colors.WHITE;
+  for I := 0 to High(Lines) do
+    All.Canvas.DrawText(FontBold12, Lines[I], [10,5+I*14]);
+
+  for I := 0 to High(Lines) do
+  begin
+    // the pixels of this line, and one more on every side
+    One := new TImage(200, 60);
+    One.Canvas.DrawColor := Colors.WHITE;
+    One.Canvas.DrawText(FontBold12, Lines[I], [10,5+I*14]);
+    Box := One.Finder.FindColor(Colors.WHITE, 0).Bounds.Expand(1);
+
+    Assert(ocr.Recognize(All, FontBold12, Box) = Lines[I]);
+  end;
+
+  Assert(ToString(ocr.RecognizeLines(All, FontBold12, Box)) = '[one more]');
+end;
+
+// a font is the same from the zip, from its images and from a directory
+procedure Test_LoadFont;
+var
+  Images: TImageArray;
+  Dir: String;
+  I: Integer;
+begin
+  Assert(Length(FontQuill8.Glyphs) = 95);
+  Assert(FontBold12Shadow.IsShadow);
+  Assert(not FontBold12.IsShadow);
+
+  SetLength(Images, 256);
+  for I := 32 to 126 do
+  begin
+    Images[I] := new TImage();
+    Images[I].FromZip(ZIP, 'fonts/Quill 8/' + ToString(I) + '.bmp');
+  end;
+  Assert(ToString(TPixelOCR.LoadFont(Images, 4)) = ToString(FontQuill8));
+
+  Dir := SimbaEnv.TempPath + 'test_pixelocr';
+  DirCreate(Dir);
+  for I := 32 to 126 do
+    Images[I].Save(Dir + '/' + ToString(I) + '.bmp', True);
+  Assert(ToString(TPixelOCR.LoadFont(Dir, 4)) = ToString(FontQuill8));
+  DirDelete(Dir, False);
+end;
+
+procedure Test_Errors;
+var
+  Images: TImageArray;
+  Empty: TPixelFont;
+  Msg: String;
+  I: Integer;
+begin
+  // a font's characters all have a shadow, or none do
+  SetLength(Images, 256);
+  for I := 32 to 126 do
+  begin
+    Images[I] := new TImage();
+    Images[I].FromZip(ZIP, 'fonts/Bold 12 Shadow/' + ToString(I) + '.bmp');
+  end;
+  Images[65].FromZip(ZIP, 'fonts/Bold 12/65.bmp');
+
+  try
+    TPixelOCR.LoadFont(Images, 4);
+  except
+    Msg := GetExceptionMessage();
+  end;
+  Assert(Msg = 'TPixelOCR.LoadFont: Character "A" has no shadow, other characters of the font do');
+
+  Load('_test');
+
+  Msg := '';
+  try
+    ocr.Recognize(img, Empty);
+  except
+    Msg := GetExceptionMessage();
+  end;
+  Assert(Msg = 'Font is empty');
+
+  // a character the font does not have
+  Msg := '';
+  try
+    ocr.Locate(img, FontBold12, 'a' + Char(200));
+  except
+    Msg := GetExceptionMessage();
+  end;
+  Assert(Msg.Contains('does not exist in the font'));
+
+  Msg := '';
+  try
+    img.Canvas.DrawText(FontBold12, 'a' + Char(200), [0,0]);
+  except
+    Msg := GetExceptionMessage();
+  end;
+  Assert(Msg.Contains('does not exist in the font'));
+
+  // a font with no characters is not loaded
+  Msg := '';
+  try
+    TPixelOCR.LoadFont(ZIP, 'fonts/No such font', 4);
+  except
+    Msg := GetExceptionMessage();
+  end;
+  Assert(Msg = 'TPixelOCR.LoadFont: Font is empty');
+end;
+
+begin
+  img := new TImage();
+
+  FontBold12       := TPixelOCR.LoadFont(ZIP, 'fonts/Bold 12', 4);
+  FontBold12Shadow := TPixelOCR.LoadFont(ZIP, 'fonts/Bold 12 Shadow', 4);
+  FontPlain11      := TPixelOCR.LoadFont(ZIP, 'fonts/Plain 11', 4);
+  FontPlain12      := TPixelOCR.LoadFont(ZIP, 'fonts/Plain 12', 4);
+  FontQuill8       := TPixelOCR.LoadFont(ZIP, 'fonts/Quill 8', 4);
+
+  Test_Recognize();
+  Test_OffImage();
+  Test_NoText();
+  Test_Edge();
+  Test_Bar();
+  Test_Options();
+  Test_SpaceWidth();
+
+  Test_MultiLine1();
+  Test_MultiLine2();
+  Test_MultiLine3();
+  Test_MultiLine4();
+  Test_MultiLine5();
+  Test_MultiLine6();
+  Test_LinesRule();
+
+  Test_UpText();
+
+  Test_Locate();
+  Test_Orange();
+  Test_Number();
+  Test_SimilarGlyphs();
+  Test_TextToTPA();
+  Test_DrawText();
+  Test_TightBox();
+  Test_LoadFont();
+  Test_Errors();
+end;

@@ -702,7 +702,7 @@ ZipExtract
 ```
 function ZipExtract(ZipFile, DestDir: String; Entries: TStringArray): Integer;
 ```
-Extract entries (select files) from a zipfile.
+Extract entries (select files) from a zipfile. Returns how many were extracted: an entry that is not in the zip is skipped.
 
 Example:
 ```
@@ -874,7 +874,7 @@ begin
     addGlobalFunc('function INIFileSections(FileName: String): TStringArray', @_LapeINIFileSections);
 
     addGlobalFunc('function ZipExtract(ZipFile, DestDir: String): Boolean; overload', @_LapeZipExtract1);
-    addGlobalFunc('function ZipExtract(ZipFile, DestDir: String; Entries: TStringArray): Boolean; overload', @_LapeZipExtract2);
+    addGlobalFunc('function ZipExtract(ZipFile, DestDir: String; Entries: TStringArray): Integer; overload', @_LapeZipExtract2);
     addGlobalFunc('function ZipFiles(ZipFile: String; Files: TStringArray): Boolean; overload', @_LapeZipFiles1);
     addGlobalFunc('function ZipFiles(ZipFile: String; Files, Names: TStringArray): Boolean; overload', @_LapeZipFiles2);
     addGlobalFunc('function ZipDirectory(ZipFile, Dir: String): Boolean', @_LapeZipDirectory);

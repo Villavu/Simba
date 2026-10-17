@@ -937,7 +937,7 @@ begin
 
     addGlobalFunc('procedure URLOpenInBrowser(URL: String)', @_LapeURLOpenInBrowser);
     addGlobalFunc('function URLFetch(URL: String): String', @_LapeURLFetch);
-    addGlobalFunc('procedure URLFetchToFile(URL, FileName: String)', @_LapeURLFetchToFile);
+    addGlobalFunc('function URLFetchToFile(URL, FileName: String): Boolean', @_LapeURLFetchToFile);
 
     addGlobalFunc('function URLEncode(S: String): String', @_LapeURLEncode);
     addGlobalFunc('function URLDecode(S: String): String', @_LapeURLDecode);

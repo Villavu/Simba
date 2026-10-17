@@ -56,6 +56,8 @@ function ZipAppend(FileName: String; Entry, FileContents: String): Boolean;
 
 function ZipExtractEntries(FileName, OutputDir: String; Entries: TStringArray): Integer;
 function ZipExtractEntryToStream(FileName: String; Entry: String): TMemoryStream;
+// One pass over the zip. A stream for each of Entries, in that order: the caller frees them.
+function ZipExtractEntriesToStreams(FileName: String; Entries: TStringArray): specialize TArray<TMemoryStream>;
 function ZipExtract(ZipFileName, OutputDir: String): Boolean;
 
 function ZipHasEntryCrc(ZipFileName: String; Crc32: UInt32): Boolean;
@@ -488,6 +490,86 @@ begin
       SimbaException('Entry "%s" not found', [Entry]);
   end else
     SimbaException('Zip "%s" not found', [FileName]);
+end;
+
+type
+  TZipExtractStreams = class(TUnZipper)
+  protected
+    procedure DoCreateStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+    procedure DoDoneStream(Sender : TObject; var AStream : TStream; AItem : TFullZipFileEntry);
+  public
+    Names: TStringArray;
+    Streams: specialize TArray<TMemoryStream>;
+  end;
+
+procedure TZipExtractStreams.DoCreateStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+begin
+  AStream := TMemoryStream.Create();
+end;
+
+procedure TZipExtractStreams.DoDoneStream(Sender: TObject; var AStream: TStream; AItem: TFullZipFileEntry);
+var
+  I: Integer;
+begin
+  for I := 0 to High(Names) do
+    if (Names[I] = AItem.ArchiveFileName) and (Streams[I] = nil) then
+    begin
+      Streams[I] := TMemoryStream(AStream);
+      Streams[I].Position := 0;
+
+      AStream := nil;
+      Exit;
+    end;
+
+  FreeAndNil(AStream);
+end;
+
+function ZipExtractEntriesToStreams(FileName: String; Entries: TStringArray): specialize TArray<TMemoryStream>;
+
+  procedure FreeStreams;
+  var
+    J: Integer;
+  begin
+    for J := 0 to High(Result) do
+      FreeAndNil(Result[J]);
+  end;
+
+var
+  UnZipper: TZipExtractStreams;
+  I: Integer;
+begin
+  if not FileExists(FileName) then
+    SimbaException('Zip "%s" not found', [FileName]);
+
+  SetLength(Result, Length(Entries));
+  if (Length(Entries) = 0) then // an empty list would extract everything
+    Exit;
+
+  UnZipper := TZipExtractStreams.Create();
+  try
+    UnZipper.OnCreateStream := @UnZipper.DoCreateStream;
+    UnZipper.OnDoneStream := @UnZipper.DoDoneStream;
+    UnZipper.Names := Entries;
+    UnZipper.Streams := Result;
+    for I := 0 to High(Entries) do
+      UnZipper.Files.Add(Entries[I]);
+    UnZipper.FileName := FileName;
+    try
+      UnZipper.UnZipAllFiles();
+    except
+      FreeStreams();
+      raise;
+    end;
+  finally
+    UnZipper.Free();
+  end;
+
+  for I := 0 to High(Entries) do
+    if (Result[I] = nil) then
+    begin
+      FreeStreams();
+      SimbaException('Entry "%s" not found', [Entries[I]]);
+    end;
 end;
 
 // ZipExtract

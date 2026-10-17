@@ -396,7 +396,7 @@ begin
     addGlobalFunc('operator / (Left: TVector3; Right: Single): TVector3;', @_LapeVector3_DIV_Single);
     addGlobalFunc('operator / (Left: Single; Right: TVector3): TVector3;', @_LapeSingle_DIV_Vector3);
 
-    addGlobalFunc('function TVector2Array.Create(Points: TPointArray): TVector2Array; static;', @_LapeVector2Array_ToPoints);
+    addGlobalFunc('function TVector2Array.Create(Points: TPointArray): TVector2Array; static;', @_LapeVector2Array_Create);
     addGlobalFunc('function TVector2Array.ToPoints: TPointArray;', @_LapeVector2Array_ToPoints);
     addGlobalFunc('function TVector2Array.Offset(Vec: TVector2): TVector2Array;', @_LapeVector2Array_Offset);
     addGlobalFunc('function TVector2Array.Mean: TVector2;', @_LapeVector2Array_Mean);
